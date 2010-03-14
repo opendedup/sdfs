@@ -160,6 +160,7 @@ public class Config {
 		if (Main.chunkStoreLocal) {
 			log.info("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
+			Main.chunkStoreMetaData = localChunkStore.getAttribute("chunk-store-metadata");
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
 					.getAttribute("pre-allocate"));

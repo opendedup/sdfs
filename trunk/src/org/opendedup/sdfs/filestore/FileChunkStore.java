@@ -18,23 +18,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.collections.map.LRUMap;
+import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.StringUtils;
-
 
 /**
  * 
  * @author Sam Silverberg This chunk store saves chunks into a single contiguous
  *         file. It performs well on most file systems. This chunkstore is used
  *         by default. The chunkstore is called by the hashstore to save or
- *         retrieve deduped chunks. Chunk block is as follows: [mark of deletion
- *         (1 byte)|hash lenth(2 bytes)|hash(32 bytes)|date added (8 bytes)|date
- *         last accessed (8 bytes)| chunk len (4 bytes)|chunk]
+ *         retrieve deduped chunks. Chunk block meta data is as follows: [mark
+ *         of deletion (1 byte)|hash lenth(2 bytes)|hash(32 bytes)|date added (8
+ *         bytes)|date last accessed (8 bytes)| chunk len (4 bytes)|chunk
+ *         position (8 bytes)]
  */
 public class FileChunkStore implements AbstractChunkStore {
 	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
-	private static final int pageSize = 1 + 2 + 32 + 8 + 8 + 4
-			+ Main.chunkStorePageSize;
+	private static final int pageSize = Main.chunkStorePageSize;
+	private static final int metaPageSize = 1 + 2 + 32 + 8 + 8 + 4 + 8;
 	private static final int readAheadPages = Main.chunkStoreReadAheadPages;
 	private static final int MAX_ENTRIES = 100;
 	private String name;
@@ -44,6 +45,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile posRaf = null;
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
+	private File meta_location = null;
 	private static long bytesRead = 0;
 	private static long bytesWritten = 0;
 	private transient static Logger log = Logger.getLogger("sdfs");
@@ -66,6 +68,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			}
 			this.name = name;
 			f = new File(chunk_location + File.separator + name + ".chk");
+			meta_location = new File(Main.chunkStoreMetaData + File.separator
+					+ "chunkstore_" + name + ".metadata");
 			p = f.toPath();
 			File posFile = new File(chunk_location + File.separator + name
 					+ ".pos");
@@ -196,7 +200,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		reservePositionlock.unlock();
 		return pos;
 	}
-	
+
 	private static ReentrantLock writelock = new ReentrantLock();
 
 	// private ReentrantLock writeChunklock = new ReentrantLock();
@@ -211,21 +215,21 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		try {
-			
+
 			long time = System.currentTimeMillis();
-			//writelock.lock();
+			// writelock.lock();
+			/*
+			ByteBuffer mbuf = ByteBuffer.allocateDirect(metaPageSize);
+			mbuf.put((byte) 0);
+			mbuf.putShort((short) hash.length);
+			mbuf.put(hash);
+			mbuf.put(new byte[32 - hash.length]);
+			mbuf.putLong(time);
+			mbuf.putLong(time);
+			mbuf.putInt(Main.chunkStorePageSize);
+			mbuf.putLong(start);
+			*/
 			ByteBuffer buf = ByteBuffer.allocateDirect(pageSize);
-			buf.put((byte) 0);
-			buf.putShort((short) hash.length);
-			buf.put(hash);
-			buf.put(new byte[32 - hash.length]);
-			buf.putLong(time);
-			buf.putLong(time);
-			buf.putInt(Main.chunkStorePageSize);
-			if (chunk.length > Main.chunkStorePageSize)
-				throw new IOException("Unable to write chunk, size" + " ["
-						+ chunk.length + "] > page size of ["
-						+ Main.chunkStorePageSize + "]");
 			buf.put(chunk);
 			buf.position(0);
 			if (cache.containsKey(Long.toString(start))) {
@@ -238,20 +242,22 @@ public class FileChunkStore implements AbstractChunkStore {
 			ch.write(buf);
 			ch.close();
 			raf.close();
+
+			raf = new RandomAccessFile(this.meta_location, "rw");
+			ch = raf.getChannel();
+			ch.position((start / pageSize) * metaPageSize);
+			ch.write(new ChunkMetaData((short)hash.length,hash,pageSize,start).getBytes());
+			ch.close();
+			raf.close();
 			ch = null;
 			buf = null;
 			raf = null;
-			// chunkDataWriter.seek(start);
-			// chunkDataWriter.write(chunk);
 			bytesWritten = bytesWritten + chunk.length;
-			// writeChunklock.unlock();
 		} catch (Exception e) {
-			// writeChunklock.unlock();
 			log.log(Level.SEVERE, "unable to write data at position " + start,
 					e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
-			//writelock.unlock();
 		}
 	}
 
@@ -270,13 +276,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			byte[] chunk = null;
 			if (buf != null) {
 				try {
-					buf.position(51);
-					int sz = buf.getInt();
-					if (sz != Main.chunkStorePageSize)
-						throw new IOException("Error size [" + sz
-								+ "] does not equal page size ["
-								+ Main.chunkStorePageSize + "]");
-					chunk = new byte[sz];
+					buf.position(0);
+					chunk = new byte[pageSize];
 					buf.get(chunk);
 				} catch (Exception e) {
 					buf = null;
@@ -304,13 +305,8 @@ public class FileChunkStore implements AbstractChunkStore {
 					} catch (Exception e) {
 					}
 					if (position == start) {
-						buf.position(51);
-						int sz = buf.getInt();
-						if (sz != Main.chunkStorePageSize)
-							throw new IOException("Error size [" + sz
-									+ "] does not equal page size ["
-									+ Main.chunkStorePageSize + "]");
-						chunk = new byte[sz];
+						buf.position(0);
+						chunk = new byte[pageSize];
 						buf.get(chunk);
 					}
 					buf.position(0);
@@ -340,8 +336,22 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#expandFile(long)
 	 */
-	public void expandFile(long length) throws IOException {
-		this.chunkDataWriter.setLength(length);
+	public synchronized void expandFile(long length) throws IOException {
+		if (this.chunkDataWriter.length() < length) {
+			log.info("########### Pre-Allocating Chunkstore to size " + length + " ###################");
+			log.info("########### Pre-Allocation may take a while ####################################");
+			byte[] FREE = new byte[32768*4];
+			Arrays.fill(FREE, (byte) 0);
+			this.chunkDataWriter.seek(0);
+			long written = 0;
+			while (written < length) {
+				this.chunkDataWriter.write(FREE);
+				written = written + FREE.length;
+			}
+			log.info("############ Pre-Allocated Chunkstore to size " + length + "####################");
+		}
+		this.chunkDataWriter.seek(0);
+
 	}
 
 	@Override
@@ -363,8 +373,8 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	private void fireChunkMovedEvent(byte[] hash, long oldLocation,
 			long newLocation, int length) {
-		ChunkEvent evt = new ChunkEvent(hash, oldLocation,
-				newLocation, length, this);
+		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
+				this);
 		Iterator<AbstractChunkStoreListener> iter = this.listeners.iterator();
 		while (iter.hasNext()) {
 			iter.next().chunkMovedEvent(evt);
@@ -392,7 +402,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void claimChunk(byte[] hash, long start, int len) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
