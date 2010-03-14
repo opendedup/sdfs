@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  *
  */
 public class ChunkMetaData {
-	private static final int rawDL = 1+2+32+8+8+4+8;
+	public static final int RAWDL = 1+2+32+8+8+4+8;
 	private boolean mDelete = false;
 	private short hashLen = 0;
 	private byte [] hash = null;
@@ -50,7 +50,7 @@ public class ChunkMetaData {
 	}
 	
 	public ByteBuffer getBytes() {
-		ByteBuffer buf = ByteBuffer.allocateDirect(rawDL);
+		ByteBuffer buf = ByteBuffer.allocateDirect(RAWDL);
 		if(!this.mDelete)
 			buf.put((byte)0);
 		else

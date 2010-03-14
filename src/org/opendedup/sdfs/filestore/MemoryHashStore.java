@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
 
 import org.opendedup.collections.AFByteArrayLongMap;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
 import org.opendedup.util.StringUtils;
 
 
@@ -36,13 +38,14 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 
 	// A lookup table for the specific hash store based on the first byte of the
 	// hash.
-	private static HashMap<String, MemoryHashStore> hashStores = new HashMap<String, MemoryHashStore>();
+	private static ArrayList<MemoryHashStore> hashStores = new ArrayList<MemoryHashStore>();
 	private static long entries;
 	AFByteArrayLongMap bdb = null;
 	// the name of the hash store. This is usually associate with the first byte
 	// of all possible hashes. There should
 	// be 256 total hash stores.
 	private String name;
+	private int hash_id = 0;
 	// Lock for hash queries
 	private ReentrantLock hashlock = new ReentrantLock();
 
@@ -52,8 +55,9 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	// Instanciates a FileChunk store that is shared for all instances of
 	// hashstores.
 	private static AbstractChunkStore fileStore = new FileChunkStore("chunks");
-
+	private static ChunkStoreGCScheduler gcSched = new ChunkStoreGCScheduler();
 	private static Logger log = Logger.getLogger("sdfs");
+	private boolean closed = true;
 
 	/**
 	 * Instantiates the TC hash store.
@@ -62,8 +66,8 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 *            the name of the hash store.
 	 * @throws IOException
 	 */
-	public MemoryHashStore(String name) throws IOException {
-		this.name = name;
+	public MemoryHashStore(int hash_id) throws IOException {
+		this.name = "sdfs-"+hash_id;
 		try {
 			this.connectDB();
 		} catch (Exception e) {
@@ -74,8 +78,9 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 		entries = entries + rows;
 		log.info(this.getName() + " Row Count : " + rows);
 		log.info("Total Entries " + entries);
-		hashStores.put(this.name, this);
+		hashStores.add(hash_id, this);
 		log.info("Added " + this.name);
+		this.closed = false;
 	}
 
 	/**
@@ -122,15 +127,14 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 *         the hash already exists in the db.
 	 * @throws IOException
 	 */
-	public static boolean addHash(String storeName, byte[] hash, long start,
+	public static boolean addHash(int storeID, byte[] hash, long start,
 			int len, byte[] data, boolean compressed) throws IOException {
-		MemoryHashStore store = hashStores.get(storeName);
+		MemoryHashStore store = hashStores.get(storeID);
 		if (store == null) {
 			clock.lock();
-			store = hashStores.get(storeName);
+			store = hashStores.get(storeID);
 			if (store == null) {
-				store = new MemoryHashStore(storeName);
-				hashStores.put(storeName, store);
+				store = new MemoryHashStore(storeID);
 			}
 			clock.unlock();
 		}
@@ -150,15 +154,14 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 * @return returns true if the hash already exists.
 	 * @throws IOException
 	 */
-	public static boolean hashExists(String storeName, byte[] hash)
+	public static boolean hashExists(int storeID, byte[] hash)
 			throws IOException {
-		MemoryHashStore store = hashStores.get(storeName);
+		MemoryHashStore store = hashStores.get(storeID);
 		if (store == null) {
 			clock.lock();
-			store = hashStores.get(storeName);
+			store = hashStores.get(storeID);
 			if (store == null) {
-				store = new MemoryHashStore(storeName);
-				hashStores.put(storeName, store);
+				store = new MemoryHashStore(storeID);
 			}
 			clock.unlock();
 		}
@@ -178,19 +181,19 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 * @return returns true if the hash was claimed
 	 * @throws IOException
 	 */
-	public static boolean claimHash(String storeName, byte[] hash)
+	public static synchronized boolean claimAllHashes()
 			throws IOException {
-		MemoryHashStore store = hashStores.get(storeName);
-		if (store == null) {
-			clock.lock();
-			store = hashStores.get(storeName);
-			if (store == null) {
-				store = new MemoryHashStore(storeName);
-				hashStores.put(storeName, store);
+		log.info("Claiming Hashes for garbage collection ...");
+		Iterator<MemoryHashStore> iter = hashStores.iterator();
+		boolean success = true;
+		while(iter.hasNext()) {
+			MemoryHashStore hs = iter.next();
+			if(!hs.claimHashes()) {
+				log.warning("Hash " + hs.getName() + " was not completed successfully.");
+				success = false;
 			}
-			clock.unlock();
 		}
-		return store.claimHash(hash);
+		return success;
 	}
 
 	/**
@@ -204,15 +207,14 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 * @return a hashchunk or null if the hash is not in the database.
 	 * @throws IOException
 	 */
-	public static HashChunk getHashChunk(String storeName, byte[] hash)
+	public static HashChunk getHashChunk(int storeID, byte[] hash)
 			throws IOException {
-		MemoryHashStore store = hashStores.get(storeName);
+		MemoryHashStore store = hashStores.get(storeID);
 		if (store == null) {
 			clock.lock();
-			store = hashStores.get(storeName);
+			store = hashStores.get(storeID);
 			if (store == null) {
-				store = new MemoryHashStore(storeName);
-				hashStores.put(storeName, store);
+				store = new MemoryHashStore(storeID);
 			}
 			clock.unlock();
 		}
@@ -257,11 +259,23 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 *            the md5 or sha hash to claim
 	 * @return returns true if the hash was claimed
 	 */
-	public boolean claimHash(byte[] hash) {
+	private synchronized boolean claimHashes() {
 		try {
-			// hashlock.lock();
-			// TODO: Need to fix this
-
+			this.bdb.iterInit();
+			byte [] key = new byte[Main.hashLength];
+			long claims = 0; 
+			long start = System.currentTimeMillis();
+			while(!this.isClosed()) {
+				key = this.bdb.nextClaimedKey(true);
+				if(key == null) {
+					long duration = (System.currentTimeMillis()-start)/1000;
+					log.info("claimed [" + claims + "] hashes in [" + duration + "] seconds");
+					return true;
+				}
+				claims++;
+				long pos = this.bdb.get(key);
+				this.chunkStore.claimChunk(key, pos);
+			}
 			return true;
 		} catch (Exception e) {
 			
@@ -310,7 +324,7 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 
 	public static long evictAll(long age) {
 		long i = 0;
-		Iterator<MemoryHashStore> iter = hashStores.values().iterator();
+		Iterator<MemoryHashStore> iter = hashStores.iterator();
 		while (iter.hasNext()) {
 			/*
 			 * i = i + iter.next().evict(age);
@@ -361,6 +375,7 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 * 
 	 */
 	public void close() {
+		this.closed = true;
 		try {
 			bdb.close();
 			bdb = null;
@@ -368,12 +383,17 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 			
 		}
 	}
+	
+	public boolean isClosed(){
+		return this.closed;
+	}
 
 	/**
 	 * closes all HashStores
 	 */
 	public static void closeAll() {
-		Iterator<MemoryHashStore> iter = hashStores.values().iterator();
+		gcSched.stopSchedules();
+		Iterator<MemoryHashStore> iter = hashStores.iterator();
 		while (iter.hasNext()) {
 			try {
 				iter.next().close();
@@ -381,23 +401,23 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 
 			}
 		}
+		
 	}
 
 	@Override
-	public void chunkMovedEvent(ChunkEvent e) {
-		try {
+	public void chunkMovedEvent(ChunkEvent e) throws IOException {
 			bdb.update(e.getHash(), e.getNewLocation());
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
 	}
 
 	@Override
-	public void chunkRemovedEvent(ChunkEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void chunkRemovedEvent(ChunkEvent e) throws IOException {
+			bdb.remove(e.getHash());
+	}
+
+	@Override
+	public int getID() {
+		return this.hash_id;
 	}
 
 }

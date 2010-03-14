@@ -115,24 +115,6 @@ public class HashClient {
 			else
 				hcmd.exists = true;
 		}
-		if (cmd.getCmdID() == NetworkCMDS.CLAIM_HASH) {
-			ClaimHashCmd hcmd = (ClaimHashCmd) cmd;
-			buf.put(NetworkCMDS.CLAIM_HASH);
-			buf.put(hcmd.getHash());
-			InetSocketAddress addr = new InetSocketAddress(
-					server.getHostName(), server.getPort());
-			DatagramPacket packet = new DatagramPacket(buf.array(), b.length,
-					addr);
-			socket.send(packet);
-			packet = new DatagramPacket(new byte[2], 2, addr);
-			socket.receive(packet);
-			buf = ByteBuffer.wrap(packet.getData());
-			short exists = buf.getShort();
-			if (exists == 0)
-				hcmd.exists = false;
-			else
-				hcmd.exists = true;
-		}
 		b = null;
 	}
 
@@ -189,21 +171,6 @@ public class HashClient {
 
 	public boolean hashExists(byte[] hash) throws IOException {
 		HashExistsCmd cmd = new HashExistsCmd(hash);
-		if (server.isUseUDP()) {
-			try {
-				this.executeUDPCmd(cmd);
-			} catch (IOException e) {
-				System.out.println("trying tcp");
-				this.executeCmd(cmd);
-			}
-		} else {
-			this.executeCmd(cmd);
-		}
-		return cmd.exists();
-	}
-
-	public boolean claimHash(byte[] hash) throws IOException {
-		ClaimHashCmd cmd = new ClaimHashCmd(hash);
 		if (server.isUseUDP()) {
 			try {
 				this.executeUDPCmd(cmd);

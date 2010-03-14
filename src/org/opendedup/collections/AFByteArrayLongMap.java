@@ -94,7 +94,7 @@ public class AFByteArrayLongMap implements AbstractMap {
 		return null;
 	}
 	
-	public byte[] nextClaimedKey() {
+	public byte[] nextClaimedKey(boolean clearClaim) {
 		this.hashlock.lock();
 		try {
 			byte[] key = new byte[FREE.length];
@@ -106,8 +106,13 @@ public class AFByteArrayLongMap implements AbstractMap {
 				this.iterPos = this.keys.position();
 				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 					claims.position(cp/FREE.length);
-					if(claims.get() == 1)
+					if(claims.get() == 1) {
+						if(clearClaim) {
+							claims.position(cp/FREE.length);
+							claims.put((byte)0);
+						}
 						return key;
+					}
 				}
 			}
 		} catch (Exception e) {
