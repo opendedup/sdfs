@@ -35,8 +35,7 @@ public class HashChunkService {
 	public static boolean writeChunk(byte[] hash, byte[] aContents, int position,int len,boolean compressed) throws IOException{
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
-		String db = "z" + getHashRoute(hash);
-		boolean written = MemoryHashStore.addHash(db, hash, 0, position,aContents,compressed);
+		boolean written = MemoryHashStore.addHash(getHashRoute(hash), hash, 0, position,aContents,compressed);
 		if(written) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -52,35 +51,25 @@ public class HashChunkService {
 	}
 	
 	public static boolean hashExists(byte[] hash) throws IOException {
-		String db = "z" + getHashRoute(hash);
-		return MemoryHashStore.hashExists(db, hash);
-	}
-	
-	public static boolean claimHash(byte[] hash) throws IOException {
-		String db = "z" + getHashRoute(hash);
-		return MemoryHashStore.claimHash(db, hash);
+		return MemoryHashStore.hashExists(getHashRoute(hash), hash);
 	}
 	
 	public static HashChunk fetchChunk(byte[] hash) throws IOException {
-		
-		String db = "z" + getHashRoute(hash);
-		HashChunk hashChunk = MemoryHashStore.getHashChunk(db, hash);
+		HashChunk hashChunk = MemoryHashStore.getHashChunk(getHashRoute(hash), hash);
 		byte [] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;
 		return hashChunk;
 	}
 	
-	private static byte getHashRoute(byte[] hash) {
-		byte hashRoute = (byte)(hash[0]/(byte)16);
+	public static byte getHashRoute(byte[] hash) {
+		byte hashRoute = (byte)(hash[1]/(byte)16);
 		if(hashRoute < 0) {
 			hashRoute += 1;
 			hashRoute *= -1;
 		}
 		return hashRoute;
 	}
-	
-	
 	
 	public static void commitChunks() {
 		//H2HashStore.commitTransactions();

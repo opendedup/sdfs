@@ -2,6 +2,7 @@ package org.opendedup.sdfs.network;
 
 import java.io.*;
 
+
 import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,7 +12,6 @@ import java.util.logging.Logger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.StringUtils;
 
 
@@ -83,23 +83,6 @@ class ClientThread extends Thread {
 							
 						}
 
-					}
-					if (cmd == NetworkCMDS.CLAIM_HASH) {
-						byte[] hash = new byte[is.readShort()];
-						is.readFully(hash);
-						boolean exists = HashChunkService.claimHash(hash);
-						try {
-							writelock.lock();
-							os.writeBoolean(exists);
-							os.flush();
-							writelock.unlock();
-						} catch (IOException e) {
-							if(writelock.isLocked())
-								writelock.unlock();
-							throw new IOException(e.toString());
-						} finally {
-							
-						}
 					}
 					if (cmd == NetworkCMDS.WRITE_HASH_CMD
 							|| cmd == NetworkCMDS.WRITE_COMPRESSED_CMD) {

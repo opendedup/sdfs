@@ -167,7 +167,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 
 	@Override
-	public void claimChunk(byte[] hash, long start, int len) throws IOException {
+	public void claimChunk(byte[] hash, long start) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}

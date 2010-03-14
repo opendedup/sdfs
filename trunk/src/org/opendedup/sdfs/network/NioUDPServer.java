@@ -103,8 +103,6 @@ public class NioUDPServer implements Runnable {
 									if(cmd == NetworkCMDS.HASH_EXISTS_CMD)
 										exists = HashChunkService
 											.hashExists(hash);
-									if(cmd == NetworkCMDS.CLAIM_HASH)
-										exists = HashChunkService.claimHash(hash);
 									// boolean exists = true;
 									if (exists)
 										resp.putShort((short) 1);

@@ -19,7 +19,7 @@ public class NetworkCMDS {
 	/** Close the client thread used for this TCP connection */
 	public static final byte QUIT_CMD = 3;
 	/** Claim that the client is still using the hash in question */
-	public static final byte CLAIM_HASH = 4;
+	//public static final byte CLAIM_HASH = 4;
 	/** Fetch a chunk and request that it is compressed before transmitting to the client.
 	 * The data will be compressed by the chunk store before it is sent to the client. */
 	public static final byte FETCH_COMPRESSED_CMD=5;

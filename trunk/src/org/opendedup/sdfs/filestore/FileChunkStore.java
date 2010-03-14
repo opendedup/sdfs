@@ -1,7 +1,9 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -20,6 +22,7 @@ import java.util.logging.Logger;
 import org.apache.commons.collections.map.LRUMap;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -200,10 +203,27 @@ public class FileChunkStore implements AbstractChunkStore {
 		reservePositionlock.unlock();
 		return pos;
 	}
-
-	private static ReentrantLock writelock = new ReentrantLock();
-
-	// private ReentrantLock writeChunklock = new ReentrantLock();
+	
+	
+	public void claimChunk(byte [] hash,long pos) throws IOException {
+		RandomAccessFile raf = new RandomAccessFile(this.meta_location, "rw");
+		FileChannel ch = raf.getChannel();
+		raf.seek((pos / pageSize) * metaPageSize);
+		byte [] raw = new byte[ChunkMetaData.RAWDL];
+		raf.read(raw);
+		ChunkMetaData cm = new ChunkMetaData(raw);
+		cm.setmDelete(false);
+		cm.setLastClaimed(System.currentTimeMillis());
+		ch.position((pos / pageSize) * metaPageSize);
+		ch.write(cm.getBytes());
+		ch.close();
+		raf.close();
+		ch = null;
+		raf = null;
+		raw = null;
+		cm = null;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -216,19 +236,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		try {
 
-			long time = System.currentTimeMillis();
-			// writelock.lock();
-			/*
-			ByteBuffer mbuf = ByteBuffer.allocateDirect(metaPageSize);
-			mbuf.put((byte) 0);
-			mbuf.putShort((short) hash.length);
-			mbuf.put(hash);
-			mbuf.put(new byte[32 - hash.length]);
-			mbuf.putLong(time);
-			mbuf.putLong(time);
-			mbuf.putInt(Main.chunkStorePageSize);
-			mbuf.putLong(start);
-			*/
 			ByteBuffer buf = ByteBuffer.allocateDirect(pageSize);
 			buf.put(chunk);
 			buf.position(0);
@@ -368,17 +375,21 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
-		this.listeners.add(listener);
+		this.listeners.add(listener.getID(), listener);
 	}
 
 	private void fireChunkMovedEvent(byte[] hash, long oldLocation,
-			long newLocation, int length) {
+			long newLocation, int length) throws IOException {
 		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
 				this);
-		Iterator<AbstractChunkStoreListener> iter = this.listeners.iterator();
-		while (iter.hasNext()) {
-			iter.next().chunkMovedEvent(evt);
-		}
+		this.listeners.get(HashChunkService.getHashRoute(hash)).chunkMovedEvent(evt);
+	}
+	
+	private void fireChunkRemovedEvent(byte[] hash, long oldLocation,
+			long newLocation, int length) throws IOException {
+		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
+				this);
+		this.listeners.get(HashChunkService.getHashRoute(hash)).chunkMovedEvent(evt);
 	}
 
 	public void close() throws IOException {
@@ -397,12 +408,6 @@ public class FileChunkStore implements AbstractChunkStore {
 
 			}
 		}
-	}
-
-	@Override
-	public void claimChunk(byte[] hash, long start, int len) throws IOException {
-		// TODO Auto-generated method stub
-
 	}
 
 }
