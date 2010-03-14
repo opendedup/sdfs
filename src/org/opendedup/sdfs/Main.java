@@ -14,6 +14,8 @@ public class Main {
 	//public static String target = "/opt/dedup";
 	/** The location where the actual blocks of deduplicated data will be located. This is used for the chunk store. */
 	public static String chunkStore = "/opt/dedup/chunks";
+	/** The location where the actual blocks of deduplicated data will be located. This is used for the chunk store. */
+	public static String chunkStoreMetaData = "/opt/dedup/jdb";
 	/** The location where database of deduped hashes will be stores and written to. This is used for the chunk store. */
 	public static String hashDBStore = "/opt/dedup/jdb";
 	/** The location where dedup file maps will be stored. Dedup file maps are database files and
@@ -74,7 +76,6 @@ public class Main {
 	
 	public static String internalMountPath = "/media";
 	public static String vmdkMountPath = "/media/vmmount";
-	public static String internalMountOptions= "rw,bg,hard,nointr,rsize=32768,wsize=32768,tcp,vers=3,timeo=600,noac,nolock";
 	public static String scriptsDir = "/opt/dedup/scripts/";
 	public static String vmdkMountOptions= "rw";
 	public static int defaultOffset = 2048;

@@ -245,21 +245,6 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 * @return returns true if the hash already exists.
 	 */
 	public boolean hashExists(byte[] hash) {
-		// boolean exists = false;
-		/*
-		 * try { long pos = this.bdb.get(hash);
-		 * 
-		 * if (pos != null) { //ByteBuffer buf = ByteBuffer.wrap(raw); long time
-		 * = System.currentTimeMillis(); PersistantDedupChunk pdc =
-		 * PersistantDedupChunk.parseFrom(raw); PersistantDedupChunk _pdc =
-		 * PersistantDedupChunk.newBuilder()
-		 * .setStart(pdc.getStart()).setCompressed(
-		 * pdc.getCompressed()).setLength(pdc.getLength())
-		 * .setAdded(pdc.getAdded()).setLastClaimed(time).build(); byte[] b =
-		 * _pdc.toByteArray(); bdb.put(hash, b); raw = null; exists = true; } }
-		 * catch (Exception e) { log.log(Level.SEVERE,
-		 * "error while checking if hash exists", e); } finally { }
-		 */
 		return this.bdb.containsKey(hash);
 	}
 
@@ -335,21 +320,6 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	}
 
 	public long evict(long age) {
-		/*
-		 * log.info("evicting records older than " + new Date(age)); long i = 0;
-		 * if (bdb.) { byte[] hash = bdb.iternext();
-		 * 
-		 * while (hash != null) { byte[] raw = this.bdb.get(hash); try {
-		 * PersistantDedupChunk pdc = PersistantDedupChunk .parseFrom(raw); if
-		 * (pdc.getLastClaimed() < age) { try { this.bdb.out(hash);
-		 * chunkStore.deleteChunk(hash, pdc.getStart(), pdc .getLength()); i++;
-		 * } catch (Exception e) { log.log(Level.SEVERE,
-		 * "Unable to remove chuck [" + StringUtils.getHexString(hash) + "]"); }
-		 * } } catch (InvalidProtocolBufferException e) { // TODO Auto-generated
-		 * catch block e.printStackTrace(); } } log.info("evicted " + i +
-		 * " records from database " + this.getName()); long size = bdb.rnum() *
-		 * 2; bdb.optimize(size, -1, -1, HDB.TLARGE); } return i;
-		 */
 		return 0;
 	}
 
@@ -392,10 +362,8 @@ public class MemoryHashStore implements  AbstractChunkStoreListener {
 	 */
 	public void close() {
 		try {
-			// hashlock.lock();
 			bdb.close();
 			bdb = null;
-			// hashlock.unlock();
 		} catch (Exception e) {
 			
 		}

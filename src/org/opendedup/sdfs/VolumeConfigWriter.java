@@ -50,8 +50,9 @@ public class VolumeConfigWriter {
 	String volume_capacity = null;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
+	String chunk_store_meta_location = null;
 	String chunk_store_hashdb_location = null;
-	boolean chunk_store_pre_allocate = true;
+	boolean chunk_store_pre_allocate = false;
 	Short chunk_read_ahead_pages = 4;
 
 	public void parseCmdLine(String[] args) throws Exception {
@@ -79,8 +80,11 @@ public class VolumeConfigWriter {
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
+		this.chunk_store_meta_location = this.base_path + File.separator
+		+ "chunkstore" + File.separator + "metadata";
 		this.chunk_store_hashdb_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "hdb";
+		
 		if (cmd.hasOption("meta-db-store")) {
 			this.meta_file_store = cmd.getOptionValue("base-path");
 		}
@@ -146,6 +150,10 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-data-location")) {
 			this.chunk_store_data_location = cmd
 					.getOptionValue("chunk-store-data-location");
+		}
+		if (cmd.hasOption("chunk-store-metadata-location")) {
+			this.chunk_store_meta_location = cmd
+					.getOptionValue("chunk-store-metadata-location");
 		}
 		if (cmd.hasOption("chunk-store-hashdb-location")) {
 			this.chunk_store_hashdb_location = cmd
@@ -231,6 +239,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("read-ahead-pages", Short
 				.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
+		cs.setAttribute("chunk-store-metadata", this.chunk_store_meta_location);
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		root.appendChild(cs);
 		try {
@@ -386,7 +395,7 @@ public class VolumeConfigWriter {
 				.addOption(OptionBuilder
 						.withLongOpt("chunk-store-local")
 						.withDescription(
-								"enables or disableslocal chunk store. The chunk store can be "
+								"enables or disables local chunk store. The chunk store can be "
 										+ "local(true or remote(false) provided you supply the routing config file "
 										+ "and there is a storageHub listening on the remote server(s) when you "
 										+ "mount the SDFS volume."
@@ -399,6 +408,13 @@ public class VolumeConfigWriter {
 								+ File.separator + "chunkstore"
 								+ File.separator + "chunks").hasArg()
 				.withArgName("PATH").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-metadata-location").withDescription(
+						"The directory where extended data about chunks will be stored."
+								+ " \nDefaults to: \n --base-path + "
+								+ File.separator + "chunkstore"
+								+ File.separator + "metadata").hasArg()
+				.withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt(
 				"chunk-store-hashdb-location").withDescription(
 				"The directory where hash database for chunk locations will be stored."
@@ -408,7 +424,7 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("chunk-store-pre-allocate")
 				.withDescription(
 						"Pre-allocate the chunk store if true."
-								+ " \nDefaults to: \n true").hasArg()
+								+ " \nDefaults to: \n false").hasArg()
 				.withArgName("true|false").create());
 		options.addOption(OptionBuilder.withLongOpt("chunk-read-ahead-pages")
 				.withDescription(
