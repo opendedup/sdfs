@@ -2,11 +2,11 @@ package org.opendedup.sdfs.servers;
 
 import java.util.logging.Logger;
 
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.FileChunkStore;
-import org.opendedup.sdfs.filestore.MemoryHashStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 
 
@@ -48,7 +48,7 @@ public class SDFSService {
 			FileChunkStore.closeAll();
 			System.out
 					.println("Shutting down HashStore");
-			MemoryHashStore.closeAll();
+			HashChunkService.close();
 		}
 		System.out.println("SDFS is Shut Down");
 	}

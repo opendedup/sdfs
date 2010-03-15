@@ -48,7 +48,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile posRaf = null;
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
-	private File meta_location = null;
 	private static long bytesRead = 0;
 	private static long bytesWritten = 0;
 	private transient static Logger log = Logger.getLogger("sdfs");
@@ -71,8 +70,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			}
 			this.name = name;
 			f = new File(chunk_location + File.separator + name + ".chk");
-			meta_location = new File(Main.chunkStoreMetaData + File.separator
-					+ "chunkstore_" + name + ".metadata");
 			p = f.toPath();
 			File posFile = new File(chunk_location + File.separator + name
 					+ ".pos");
@@ -206,6 +203,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	
 	
 	public void claimChunk(byte [] hash,long pos) throws IOException {
+	/*
 		RandomAccessFile raf = new RandomAccessFile(this.meta_location, "rw");
 		FileChannel ch = raf.getChannel();
 		raf.seek((pos / pageSize) * metaPageSize);
@@ -222,6 +220,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf = null;
 		raw = null;
 		cm = null;
+		*/
 	}
 	
 	/*
@@ -247,13 +246,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			FileChannel ch = raf.getChannel();
 			ch.position(start);
 			ch.write(buf);
-			ch.close();
-			raf.close();
-
-			raf = new RandomAccessFile(this.meta_location, "rw");
-			ch = raf.getChannel();
-			ch.position((start / pageSize) * metaPageSize);
-			ch.write(new ChunkMetaData((short)hash.length,hash,pageSize,start).getBytes());
 			ch.close();
 			raf.close();
 			ch = null;

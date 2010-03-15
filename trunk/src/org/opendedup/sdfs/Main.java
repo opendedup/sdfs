@@ -14,8 +14,6 @@ public class Main {
 	//public static String target = "/opt/dedup";
 	/** The location where the actual blocks of deduplicated data will be located. This is used for the chunk store. */
 	public static String chunkStore = "/opt/dedup/chunks";
-	/** The location where the actual blocks of deduplicated data will be located. This is used for the chunk store. */
-	public static String chunkStoreMetaData = "/opt/dedup/jdb";
 	/** The location where database of deduped hashes will be stores and written to. This is used for the chunk store. */
 	public static String hashDBStore = "/opt/dedup/jdb";
 	/** The location where dedup file maps will be stored. Dedup file maps are database files and
