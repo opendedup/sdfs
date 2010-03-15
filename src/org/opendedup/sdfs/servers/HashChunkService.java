@@ -4,10 +4,12 @@ import java.io.IOException;
 
 
 
+
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.filestore.MemoryHashStore;
+import org.opendedup.sdfs.filestore.HashStore;
 
 
 
@@ -22,11 +24,22 @@ public class HashChunkService {
 	private static double kBytesFetched;
 	private static int unComittedChunks;
 	private static int MAX_UNCOMITTEDCHUNKS=100;
+	private static HashStore hs = null;
+	private static Logger log = Logger.getLogger("sdfs");
 	/**
 	 * @return the chunksFetched
 	 */
 	public static long getChunksFetched() {
 		return chunksFetched;
+	}
+	
+	static {
+		try{
+			hs = new HashStore();
+		}catch(Exception e) {
+			log.log(Level.SEVERE,"unable to start hashstore", e);
+			System.exit(-1);
+		}
 	}
 	
 
@@ -35,7 +48,7 @@ public class HashChunkService {
 	public static boolean writeChunk(byte[] hash, byte[] aContents, int position,int len,boolean compressed) throws IOException{
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
-		boolean written = MemoryHashStore.addHash(getHashRoute(hash), hash, 0, position,aContents,compressed);
+		boolean written = hs.addHashChunk(new HashChunk(hash, 0, len, aContents,compressed));
 		if(written) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -51,11 +64,11 @@ public class HashChunkService {
 	}
 	
 	public static boolean hashExists(byte[] hash) throws IOException {
-		return MemoryHashStore.hashExists(getHashRoute(hash), hash);
+		return hs.hashExists(hash);
 	}
 	
 	public static HashChunk fetchChunk(byte[] hash) throws IOException {
-		HashChunk hashChunk = MemoryHashStore.getHashChunk(getHashRoute(hash), hash);
+		HashChunk hashChunk =hs.getHashChunk(hash);
 		byte [] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;
@@ -94,6 +107,10 @@ public class HashChunkService {
 
 	public static long getDupsFound() {
 		return dupsFound;
+	}
+	
+	public static void close() {
+		hs.close();
 	}
 
 }
