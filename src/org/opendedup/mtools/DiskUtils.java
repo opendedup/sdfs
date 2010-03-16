@@ -15,13 +15,9 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.VMDKData;
 import org.opendedup.util.VMDKParser;
 
-
 public class DiskUtils {
 	private static Logger log = Logger.getLogger("sdfs");
 	public static HashMap<String, VMDKMountPoint> mountedVMDKs = new HashMap<String, VMDKMountPoint>();
-
-
-	
 
 	public static ArrayList<Partition> getPartitions(String fileName,
 			long cylinders) throws IOException {
@@ -171,7 +167,8 @@ public class DiskUtils {
 		}
 	}
 
-	public static String mountVMDK(String vmdkPath,String mountPath) throws IOException {
+	public static String mountVMDK(String vmdkPath, String mountPath)
+			throws IOException {
 		log.info("mounting " + vmdkPath + " to " + mountPath);
 		File internalFile = new File(vmdkPath);
 		VMDKData data = VMDKParser.parseVMDKFile(internalFile.getPath());

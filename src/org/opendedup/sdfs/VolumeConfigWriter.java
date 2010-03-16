@@ -81,10 +81,10 @@ public class VolumeConfigWriter {
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
 		this.chunk_store_meta_location = this.base_path + File.separator
-		+ "chunkstore" + File.separator + "metadata";
+				+ "chunkstore" + File.separator + "metadata";
 		this.chunk_store_hashdb_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "hdb";
-		
+
 		if (cmd.hasOption("meta-db-store")) {
 			this.meta_file_store = cmd.getOptionValue("base-path");
 		}
@@ -408,12 +408,11 @@ public class VolumeConfigWriter {
 								+ File.separator + "chunkstore"
 								+ File.separator + "chunks").hasArg()
 				.withArgName("PATH").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("chunk-store-metadata-location").withDescription(
-						"The directory where extended data about chunks will be stored."
-								+ " \nDefaults to: \n --base-path + "
-								+ File.separator + "chunkstore"
-								+ File.separator + "metadata").hasArg()
+		options.addOption(OptionBuilder.withLongOpt(
+				"chunk-store-metadata-location").withDescription(
+				"The directory where extended data about chunks will be stored."
+						+ " \nDefaults to: \n --base-path + " + File.separator
+						+ "chunkstore" + File.separator + "metadata").hasArg()
 				.withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt(
 				"chunk-store-hashdb-location").withDescription(
@@ -438,7 +437,7 @@ public class VolumeConfigWriter {
 		try {
 			System.out.println("Attempting to create volume ...");
 			File f = new File("/etc/sdfs");
-			if(!f.exists())
+			if (!f.exists())
 				f.mkdirs();
 			VolumeConfigWriter wr = new VolumeConfigWriter();
 			wr.parseCmdLine(args);

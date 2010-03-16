@@ -28,265 +28,241 @@ import java.util.zip.ZipFile;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+public class ZipFilesystem implements Filesystem1 {
+	private static final Log log = LogFactory.getLog(ZipFilesystem.class);
 
-public class ZipFilesystem implements Filesystem1
-{
-   private static final Log log = LogFactory.getLog(ZipFilesystem.class);
+	private static final int blockSize = 512;
 
-   private static final int blockSize = 512;
+	private ZipFile zipFile;
+	private long zipFileTime;
+	private ZipEntry rootEntry;
+	private Tree tree;
+	private FuseStatfs statfs;
 
+	private ZipFileDataReader zipFileDataReader;
 
-   private ZipFile zipFile;
-   private long zipFileTime;
-   private ZipEntry rootEntry;
-   private Tree tree;
-   private FuseStatfs statfs;
+	public ZipFilesystem(File file) throws IOException {
+		log.info("extracting zip file structure...");
+		zipFile = new ZipFile(file, ZipFile.OPEN_READ);
+		zipFileTime = file.lastModified();
+		rootEntry = new ZipEntry("") {
+			public boolean isDirectory() {
+				return true;
+			}
+		};
+		rootEntry.setTime(zipFileTime);
+		rootEntry.setSize(0);
 
-   private ZipFileDataReader zipFileDataReader;
+		zipFileDataReader = new ZipFileDataReader(zipFile);
 
+		tree = new Tree();
+		tree.addNode(rootEntry.getName(), rootEntry);
 
-   public ZipFilesystem(File file) throws IOException
-   {
-      log.info("extracting zip file structure...");
-      zipFile = new ZipFile(file, ZipFile.OPEN_READ);
-      zipFileTime = file.lastModified();
-      rootEntry = new ZipEntry("")
-      {
-         public boolean isDirectory()
-         {
-            return true;
-         }
-      };
-      rootEntry.setTime(zipFileTime);
-      rootEntry.setSize(0);
+		int files = 0;
+		int dirs = 0;
+		int blocks = 0;
 
-      zipFileDataReader = new ZipFileDataReader(zipFile);
+		for (Enumeration<?> e = zipFile.entries(); e.hasMoreElements();) {
+			ZipEntry entry = (ZipEntry) e.nextElement();
+			tree.addNode(entry.getName(), entry);
 
-      tree = new Tree();
-      tree.addNode(rootEntry.getName(), rootEntry);
+			if (entry.isDirectory())
+				dirs++;
+			else
+				files++;
 
-      int files = 0;
-      int dirs = 0;
-      int blocks = 0;
+			blocks += (entry.getSize() + blockSize - 1) / blockSize;
+		}
 
-      for (Enumeration<?> e = zipFile.entries(); e.hasMoreElements();)
-      {
-         ZipEntry entry = (ZipEntry) e.nextElement();
-         tree.addNode(entry.getName(), entry);
+		statfs = new FuseStatfs();
+		statfs.blocks = blocks;
+		statfs.blockSize = blockSize;
+		statfs.blocksFree = 0;
+		statfs.files = files + dirs;
+		statfs.filesFree = 0;
+		statfs.namelen = 2048;
 
-         if (entry.isDirectory())
-            dirs++;
-         else
-            files++;
+		log.info("zip file structure extracted: " + files + " files, " + dirs
+				+ " directories, " + blocks + " blocks (" + blockSize
+				+ " byte/block).");
+	}
 
-         blocks += (entry.getSize() + blockSize - 1) / blockSize;
-      }
+	public void chmod(String path, int mode) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-      statfs = new FuseStatfs();
-      statfs.blocks = blocks;
-      statfs.blockSize = blockSize;
-      statfs.blocksFree = 0;
-      statfs.files = files + dirs;
-      statfs.filesFree = 0;
-      statfs.namelen = 2048;
+	public void chown(String path, int uid, int gid) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-      log.info("zip file structure extracted: " + files + " files, " + dirs + " directories, " + blocks + " blocks (" + blockSize + " byte/block).");
-   }
+	public FuseStat getattr(String path) throws FuseException {
+		Node node = tree.lookupNode(path);
+		ZipEntry entry = null;
+		if (node == null || (entry = (ZipEntry) node.getValue()) == null)
+			throw new FuseException("No Such Entry")
+					.initErrno(FuseException.ENOENT);
 
+		FuseStat stat = new FuseStat();
 
-   public void chmod(String path, int mode) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+		stat.mode = entry.isDirectory() ? FuseFtype.TYPE_DIR | 0755
+				: FuseFtype.TYPE_FILE | 0644;
+		stat.nlink = 1;
+		stat.uid = 0;
+		stat.gid = 0;
+		stat.size = entry.getSize();
+		stat.atime = stat.mtime = stat.ctime = (int) (entry.getTime() / 1000L);
+		stat.blocks = (int) ((stat.size + 511L) / 512L);
 
-   public void chown(String path, int uid, int gid) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+		return stat;
+	}
 
-   public FuseStat getattr(String path) throws FuseException
-   {
-      Node node = tree.lookupNode(path);
-      ZipEntry entry = null;
-      if (node == null || (entry = (ZipEntry)node.getValue()) == null)
-         throw new FuseException("No Such Entry").initErrno(FuseException.ENOENT);
+	public FuseDirEnt[] getdir(String path) throws FuseException {
+		Node node = tree.lookupNode(path);
+		ZipEntry entry = null;
+		if (node == null || (entry = (ZipEntry) node.getValue()) == null)
+			throw new FuseException("No Such Entry")
+					.initErrno(FuseException.ENOENT);
 
-      FuseStat stat = new FuseStat();
+		if (!entry.isDirectory())
+			throw new FuseException("Not A Directory")
+					.initErrno(FuseException.ENOTDIR);
 
-      stat.mode = entry.isDirectory() ? FuseFtype.TYPE_DIR | 0755 : FuseFtype.TYPE_FILE | 0644;
-      stat.nlink = 1;
-      stat.uid = 0;
-      stat.gid = 0;
-      stat.size = entry.getSize();
-      stat.atime = stat.mtime = stat.ctime = (int) (entry.getTime() / 1000L);
-      stat.blocks = (int) ((stat.size + 511L) / 512L);
+		Collection<?> children = node.getChildren();
+		FuseDirEnt[] dirEntries = new FuseDirEnt[children.size()];
 
-      return stat;
-   }
+		int i = 0;
+		for (Iterator<?> iter = children.iterator(); iter.hasNext(); i++) {
+			Node childNode = (Node) iter.next();
+			ZipEntry zipEntry = (ZipEntry) childNode.getValue();
+			FuseDirEnt dirEntry = new FuseDirEnt();
+			dirEntries[i] = dirEntry;
+			dirEntry.name = childNode.getName();
+			dirEntry.mode = zipEntry.isDirectory() ? FuseFtype.TYPE_DIR
+					: FuseFtype.TYPE_FILE;
+		}
 
-   public FuseDirEnt[] getdir(String path) throws FuseException
-   {
-      Node node = tree.lookupNode(path);
-      ZipEntry entry = null;
-      if (node == null || (entry = (ZipEntry)node.getValue()) == null)
-         throw new FuseException("No Such Entry").initErrno(FuseException.ENOENT);
+		return dirEntries;
+	}
 
-      if (!entry.isDirectory())
-         throw new FuseException("Not A Directory").initErrno(FuseException.ENOTDIR);
+	public void link(String from, String to) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-      Collection<?> children = node.getChildren();
-      FuseDirEnt[] dirEntries = new FuseDirEnt[children.size()];
+	public void mkdir(String path, int mode) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-      int i = 0;
-      for (Iterator<?> iter = children.iterator(); iter.hasNext(); i++)
-      {
-         Node childNode = (Node)iter.next();
-         ZipEntry zipEntry = (ZipEntry)childNode.getValue();
-         FuseDirEnt dirEntry = new FuseDirEnt();
-         dirEntries[i] = dirEntry;
-         dirEntry.name = childNode.getName();
-         dirEntry.mode = zipEntry.isDirectory()? FuseFtype.TYPE_DIR : FuseFtype.TYPE_FILE;
-      }
+	public void mknod(String path, int mode, int rdev) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-      return dirEntries;
-   }
+	public void open(String path, int flags) throws FuseException {
+		ZipEntry entry = getFileZipEntry(path);
 
-   public void link(String from, String to) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+		if (flags == O_WRONLY || flags == O_RDWR)
+			throw new FuseException("Read Only")
+					.initErrno(FuseException.EACCES);
+	}
 
-   public void mkdir(String path, int mode) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void rename(String from, String to) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-   public void mknod(String path, int mode, int rdev) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void rmdir(String path) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-   public void open(String path, int flags) throws FuseException
-   {
-      ZipEntry entry = getFileZipEntry(path);
+	public FuseStatfs statfs() throws FuseException {
+		return statfs;
+	}
 
-      if (flags == O_WRONLY || flags == O_RDWR)
-         throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void symlink(String from, String to) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-   public void rename(String from, String to) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void truncate(String path, long size) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-   public void rmdir(String path) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void unlink(String path) throws FuseException {
+		throw new FuseException("Read Only").initErrno(FuseException.EACCES);
+	}
 
-   public FuseStatfs statfs() throws FuseException
-   {
-      return statfs;
-   }
+	public void utime(String path, int atime, int mtime) throws FuseException {
+		// noop
+	}
 
-   public void symlink(String from, String to) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public String readlink(String path) throws FuseException {
+		throw new FuseException("Not a link").initErrno(FuseException.ENOENT);
+	}
 
-   public void truncate(String path, long size) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void write(String path, ByteBuffer buf, long offset)
+			throws FuseException {
+		// noop
+	}
 
-   public void unlink(String path) throws FuseException
-   {
-      throw new FuseException("Read Only").initErrno(FuseException.EACCES);
-   }
+	public void read(String path, ByteBuffer buf, long offset)
+			throws FuseException {
+		ZipEntry zipEntry = getFileZipEntry(path);
+		ZipEntryDataReader reader = zipFileDataReader.getZipEntryDataReader(
+				zipEntry, offset, buf.capacity());
 
-   public void utime(String path, int atime, int mtime) throws FuseException
-   {
-      // noop
-   }
+		reader.read(buf, offset);
+	}
 
-   public String readlink(String path) throws FuseException
-   {
-      throw new FuseException("Not a link").initErrno(FuseException.ENOENT);
-   }
+	public void release(String path, int flags) throws FuseException {
+		ZipEntry zipEntry = getFileZipEntry(path);
+		zipFileDataReader.releaseZipEntryDataReader(zipEntry);
+	}
 
-   public void write(String path, ByteBuffer buf, long offset) throws FuseException
-   {
-      // noop
-   }
+	//
+	// private methods
 
-   public void read(String path, ByteBuffer buf, long offset) throws FuseException
-   {
-      ZipEntry zipEntry = getFileZipEntry(path);
-      ZipEntryDataReader reader = zipFileDataReader.getZipEntryDataReader(zipEntry, offset, buf.capacity());
+	private ZipEntry getFileZipEntry(String path) throws FuseException {
+		Node node = tree.lookupNode(path);
+		ZipEntry entry;
+		if (node == null || (entry = (ZipEntry) node.getValue()) == null)
+			throw new FuseException("No Such Entry")
+					.initErrno(FuseException.ENOENT);
 
-      reader.read(buf, offset);
-   }
+		if (entry.isDirectory())
+			throw new FuseException("Not A File")
+					.initErrno(FuseException.ENOENT);
 
-   public void release(String path, int flags) throws FuseException
-   {
-      ZipEntry zipEntry = getFileZipEntry(path);
-      zipFileDataReader.releaseZipEntryDataReader(zipEntry);
-   }
+		return entry;
+	}
 
+	private ZipEntry getDirectoryZipEntry(String path) throws FuseException {
+		Node node = tree.lookupNode(path);
+		ZipEntry entry;
+		if (node == null || (entry = (ZipEntry) node.getValue()) == null)
+			throw new FuseException("No Such Entry")
+					.initErrno(FuseException.ENOENT);
 
-   //
-   // private methods
+		if (!entry.isDirectory())
+			throw new FuseException("Not A Directory")
+					.initErrno(FuseException.ENOENT);
 
-   private ZipEntry getFileZipEntry(String path) throws FuseException
-   {
-      Node node = tree.lookupNode(path);
-      ZipEntry entry;
-      if (node == null || (entry = (ZipEntry)node.getValue()) == null)
-         throw new FuseException("No Such Entry").initErrno(FuseException.ENOENT);
+		return entry;
+	}
 
-      if (entry.isDirectory())
-         throw new FuseException("Not A File").initErrno(FuseException.ENOENT);
+	//
+	// Java entry point
 
-      return entry;
-   }
+	public static void main(String[] args) {
+		if (args.length < 1) {
+			System.out.println("Must specify ZIP file");
+			System.exit(-1);
+		}
 
-   private ZipEntry getDirectoryZipEntry(String path) throws FuseException
-   {
-      Node node = tree.lookupNode(path);
-      ZipEntry entry;
-      if (node == null || (entry = (ZipEntry)node.getValue()) == null)
-         throw new FuseException("No Such Entry").initErrno(FuseException.ENOENT);
+		String fuseArgs[] = new String[args.length - 1];
+		System.arraycopy(args, 0, fuseArgs, 0, fuseArgs.length);
+		File zipFile = new File(args[args.length - 1]);
 
-      if (!entry.isDirectory())
-         throw new FuseException("Not A Directory").initErrno(FuseException.ENOENT);
-
-      return entry;
-   }
-
-
-
-   //
-   // Java entry point
-
-   public static void main(String[] args)
-   {
-      if (args.length < 1)
-      {
-         System.out.println("Must specify ZIP file");
-         System.exit(-1);
-      }
-
-      String fuseArgs[] = new String[args.length - 1];
-      System.arraycopy(args, 0, fuseArgs, 0, fuseArgs.length);
-      File zipFile = new File(args[args.length - 1]);
-
-      try
-      {
-         FuseMount.mount(fuseArgs, new ZipFilesystem(zipFile));
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
+		try {
+			FuseMount.mount(fuseArgs, new ZipFilesystem(zipFile));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

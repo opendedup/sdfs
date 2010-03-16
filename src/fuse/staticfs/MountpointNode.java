@@ -12,25 +12,20 @@ package fuse.staticfs;
 import fuse.compat.Filesystem1;
 import fuse.compat.FuseStat;
 
+public class MountpointNode extends Node {
+	private Filesystem1 filesystem;
 
-public class MountpointNode extends Node
-{
-   private Filesystem1 filesystem;
+	public MountpointNode(String name, Filesystem1 filesystem) {
+		super(name);
 
-   public MountpointNode(String name, Filesystem1 filesystem)
-   {
-      super(name);
+		this.filesystem = filesystem;
+	}
 
-      this.filesystem = filesystem;
-   }
+	protected FuseStat createStat() {
+		return null;
+	}
 
-   protected FuseStat createStat()
-   {
-      return null;
-   }
-
-   public Filesystem1 getFilesystem()
-   {
-      return filesystem;
-   }
+	public Filesystem1 getFilesystem() {
+		return filesystem;
+	}
 }

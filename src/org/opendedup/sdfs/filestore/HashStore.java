@@ -128,7 +128,7 @@ public class HashStore {
 	 * @param hash
 	 *            the md5 or sha hash to lookup
 	 * @return returns true if the hash already exists.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public boolean hashExists(byte[] hash) throws IOException {
 		return this.bdb.containsKey(hash);
@@ -146,7 +146,7 @@ public class HashStore {
 			directory.mkdirs();
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
-		long entries = ((Main.chunkStoreAllocationSize / (long)Main.chunkStorePageSize)) + 8000;
+		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
 		bdb = new CSByteArrayLongMap(entries, (short) Main.hashLength, dbf
 				.getPath());
 	}
@@ -173,14 +173,12 @@ public class HashStore {
 		return hs;
 	}
 
-	public static long evictAll(long age) {
-		long i = 0;
-		
-		return i;
+	public void processHashClaims() throws IOException {
+		this.bdb.claimRecords();
 	}
 
-	public long evict(long age) {
-		return 0;
+	public void evictChunks(long time) throws IOException {
+		this.bdb.removeRecords(time);
 	}
 
 	/**

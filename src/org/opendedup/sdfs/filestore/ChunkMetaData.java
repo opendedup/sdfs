@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
  */
 public class ChunkMetaData {
 	public static final int RAWDL = 1 + 2 + 32 + 8 + 8 + 8 + 4 + 8;
+	public static final int CLAIMED_OFFSET = 1 + 2 + 32 + 8;
 	private boolean mDelete = false;
 	private short hashLen = 0;
 	private byte[] hash = null;
@@ -21,12 +22,11 @@ public class ChunkMetaData {
 	private int cLen = 0;
 	private long cPos = 0;
 
-	
 	public ChunkMetaData(long cPos) {
 		this.cPos = cPos;
 		this.mDelete = true;
 	}
-	
+
 	public ChunkMetaData(byte[] rawData) {
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		byte del = buf.get();
@@ -51,7 +51,7 @@ public class ChunkMetaData {
 		this.lastClaimed = tm;
 		this.numClaimed = 1;
 		this.mDelete = false;
-		this.hashLen = (short)hash.length;
+		this.hashLen = (short) hash.length;
 		this.hash = hash;
 		this.cLen = chunkLen;
 		this.cPos = chunkPos;

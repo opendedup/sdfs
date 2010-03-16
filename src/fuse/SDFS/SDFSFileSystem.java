@@ -77,26 +77,26 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int flush(String path, Object fh) throws FuseException {
-		DedupFileChannel ch = (DedupFileChannel)fh;
+		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
 		} catch (IOException e) {
 			log.error("unable to sync file", e);
 			throw new FuseException("symlink not supported")
-			.initErrno(FuseException.ENOSYS);
+					.initErrno(FuseException.ENOSYS);
 		}
 		return 0;
 	}
 
 	public int fsync(String path, Object fh, boolean isDatasync)
 			throws FuseException {
-		DedupFileChannel ch = (DedupFileChannel)fh;
+		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
 		} catch (IOException e) {
 			log.error("unable to sync file", e);
 			throw new FuseException("symlink not supported")
-			.initErrno(FuseException.ENOSYS);
+					.initErrno(FuseException.ENOSYS);
 		}
 		return 0;
 	}
@@ -111,16 +111,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		if (mf.isDirectory()) {
 			int fileLength = mf.list().length;
 			getattrSetter.set(mf.getGUID().hashCode(),
-					FuseFtypeConstants.TYPE_DIR | mf.getPermissions(), 1, mf.getOwner_id(),mf.getGroup_id(), 0,
-					fileLength * NAME_LENGTH, (fileLength * NAME_LENGTH
+					FuseFtypeConstants.TYPE_DIR | mf.getPermissions(), 1, mf
+							.getOwner_id(), mf.getGroup_id(), 0, fileLength
+							* NAME_LENGTH, (fileLength * NAME_LENGTH
 							+ BLOCK_SIZE - 1)
 							/ BLOCK_SIZE, atime, atime, ctime);
 		} else {
 			long fileLength = mf.length();
 			getattrSetter.set(mf.getGUID().hashCode(),
-					FuseFtypeConstants.TYPE_FILE | mf.getPermissions(), 1,  mf.getOwner_id(),mf.getGroup_id(), 0,
-					fileLength, (fileLength + BLOCK_SIZE - 1) / BLOCK_SIZE,
-					atime, atime, ctime);
+					FuseFtypeConstants.TYPE_FILE | mf.getPermissions(), 1, mf
+							.getOwner_id(), mf.getGroup_id(), 0, fileLength,
+					(fileLength + BLOCK_SIZE - 1) / BLOCK_SIZE, atime, atime,
+					ctime);
 		}
 		return 0;
 	}
@@ -170,7 +172,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		 * log.info("opening "+path+" with flags "+ flags +" and openSetter " +
 		 * openSetter.isDirectIO() + openSetter.isKeepCache());
 		 */
-		
+
 		openSetter.setFh(this.getFileChannel(path));
 		return 0;
 	}
@@ -181,11 +183,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// buf.capacity());
 		byte[] b = new byte[buf.capacity()];
 		try {
-			DedupFileChannel ch = (DedupFileChannel)fh;
+			DedupFileChannel ch = (DedupFileChannel) fh;
 			int read = ch.read(b, 0, b.length, offset);
-			if(read == -1)
+			if (read == -1)
 				read = 0;
-			buf.put(b,0,read);
+			buf.put(b, 0, read);
 		} catch (IOException e) {
 			log.error("unable to read file " + path, e);
 			throw new FuseException("error opening " + path)
@@ -202,7 +204,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int release(String path, Object fh, int flags) throws FuseException {
 		// log.info("closing " + path + " with flags " + flags);
-		DedupFileChannel ch = (DedupFileChannel)fh;
+		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.close();
 		} catch (IOException e) {
@@ -234,12 +236,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
 		// statfsSetter.set(blockSize, blocks, blocksFree, blocksAvail, files,
 		// filesFree, namelen)
-		int blocks  = (int)Main.volume.getTotalBlocks();
-		
-		int used = (int)Main.volume.getUsedBlocks();
-		statfsSetter.set(Main.volume.getBlockSize(), blocks,blocks-used,blocks-used,
-				(int) MetaFileStore.getEntries(), 0,
-				NAME_LENGTH);
+		int blocks = (int) Main.volume.getTotalBlocks();
+
+		int used = (int) Main.volume.getUsedBlocks();
+		statfsSetter
+				.set(Main.volume.getBlockSize(), blocks, blocks - used, blocks
+						- used, (int) MetaFileStore.getEntries(), 0,
+						NAME_LENGTH);
 		return 0;
 	}
 
@@ -266,9 +269,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int unlink(String path) throws FuseException {
 		File f = this.resolvePath(path);
 		try {
-		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-		mf.delete();
-		}catch(Exception e) {
+			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+			mf.delete();
+		} catch (Exception e) {
 			log.error("unable to file file " + path, e);
 			throw new FuseException("error deleting " + path)
 					.initErrno(FuseException.EACCES);
@@ -287,7 +290,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		 * log.info("writing data to  " +path + " at " + offset +
 		 * " and length of " + buf.capacity());
 		 */
-		DedupFileChannel ch = (DedupFileChannel)fh;
+		DedupFileChannel ch = (DedupFileChannel) fh;
 		byte[] b = new byte[buf.capacity()];
 		buf.get(b);
 		try {
@@ -305,9 +308,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		if (!f.exists()) {
 			throw new FuseException("No such node")
 					.initErrno(FuseException.ENOENT);
-			
+
 		}
-			return f;
+		return f;
 	}
 
 	private DedupFileChannel getFileChannel(String path) throws FuseException {
@@ -321,8 +324,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					.initErrno(FuseException.EACCES);
 		}
 	}
-
-	
 
 	public int getxattr(String path, String name, ByteBuffer dst)
 			throws FuseException, BufferOverflowException {
@@ -369,5 +370,3 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 }
-
-

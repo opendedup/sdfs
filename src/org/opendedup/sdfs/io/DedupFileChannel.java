@@ -8,18 +8,18 @@ import java.util.logging.Logger;
 
 import org.opendedup.sdfs.Main;
 
-
 /**
  * 
- * @author annesam
- *	This is class that is used as an IO interface between the user based file system, such as Fuse, and the Dedup engine. The
- * dedup engine is comprised of the SDFS client and the chunk store service. The DedupFileChannel is loosely based off of the
- * java FileChannel class.
+ * @author annesam This is class that is used as an IO interface between the
+ *         user based file system, such as Fuse, and the Dedup engine. The dedup
+ *         engine is comprised of the SDFS client and the chunk store service.
+ *         The DedupFileChannel is loosely based off of the java FileChannel
+ *         class.
  */
 public class DedupFileChannel {
-	//The dedup file associated with this file channel
+	// The dedup file associated with this file channel
 	private DedupFile df;
-	//The MetaDataDedupFile associated with this file channel.
+	// The MetaDataDedupFile associated with this file channel.
 	private MetaDataDedupFile mf;
 	private static Logger log = Logger.getLogger(DedupFileChannel.class
 			.getName());
@@ -30,18 +30,19 @@ public class DedupFileChannel {
 
 	/**
 	 * Instantiates the DedupFileChannel
-	 * @param file the MetaDataDedupFile that the filechannel will be opened for
+	 * 
+	 * @param file
+	 *            the MetaDataDedupFile that the filechannel will be opened for
 	 * @throws IOException
 	 */
 
-	
-	protected DedupFileChannel(MetaDataDedupFile file) throws IOException{
+	protected DedupFileChannel(MetaDataDedupFile file) throws IOException {
 		df = file.getDedupFile();
 		mf = file;
-		if(Main.safeSync) {
+		if (Main.safeSync) {
 			mf.sync();
 			df.sync();
-		}	
+		}
 		log.log(Level.FINER, "Initializing Cached File " + mf.getPath());
 	}
 
@@ -56,7 +57,8 @@ public class DedupFileChannel {
 	/**
 	 * Truncate or grow the file
 	 * 
-	 * @param siz the size of the file channel
+	 * @param siz
+	 *            the size of the file channel
 	 * @exception IOException
 	 */
 	public synchronized void truncateFile(long siz) throws IOException {
@@ -64,16 +66,17 @@ public class DedupFileChannel {
 		if (siz < mf.length()) {
 			WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz);
 			int endPos = (int) (siz - writeBuffer.getFilePosition());
-			DedupChunk nextDk = df.getHash(writeBuffer.getEndPosition() + 1,false);
+			DedupChunk nextDk = df.getHash(writeBuffer.getEndPosition() + 1,
+					false);
 			while (nextDk != null) {
 				log.finest("Removing chunk at position "
 						+ nextDk.getFilePosition());
 				df.removeHash(nextDk.getFilePosition());
 				nextDk = df.getHash(nextDk.getFilePosition()
-						+ nextDk.getLength() + 1,true);
+						+ nextDk.getLength() + 1, true);
 			}
 			writeBuffer.truncate(endPos);
-			//df.writeCache(writeBuffer,true);
+			// df.writeCache(writeBuffer,true);
 		}
 		mf.setLastAccessed(System.currentTimeMillis());
 		mf.setLength(siz, true);
@@ -98,7 +101,8 @@ public class DedupFileChannel {
 
 	/**
 	 * 
-	 * @param pos sets the current position of the file
+	 * @param pos
+	 *            sets the current position of the file
 	 */
 	public void position(long pos) {
 		this.currentPosition = pos;
@@ -138,10 +142,12 @@ public class DedupFileChannel {
 
 	/**
 	 * Forces data to be synced to disk
-	 * @param metaData true will sync data
+	 * 
+	 * @param metaData
+	 *            true will sync data
 	 * @throws IOException
 	 */
-	public void force(boolean metaData) throws IOException{
+	public void force(boolean metaData) throws IOException {
 		// FixMe Does not persist chunks. This may be an issue.
 		// this.writeCache();
 		if (metaData) {
@@ -152,19 +158,25 @@ public class DedupFileChannel {
 
 	/**
 	 * 
-	 * @param lastModified sets the last time the data was modified for the underlying  file
+	 * @param lastModified
+	 *            sets the last time the data was modified for the underlying
+	 *            file
 	 */
 	public void setLastModified(long lastModified) {
 		mf.setLastModified(lastModified, true);
 	}
 
-	
 	/**
 	 * writes data to the DedupFile
-	 * @param bbuf the bytes to write
-	 * @param len the length of data to write
-	 * @param pos the position within the file to write the data to
-	 * @param offset the offset within the bbuf to start the write from 
+	 * 
+	 * @param bbuf
+	 *            the bytes to write
+	 * @param len
+	 *            the length of data to write
+	 * @param pos
+	 *            the position within the file to write the data to
+	 * @param offset
+	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
 	public void writeFile(byte[] bbuf, int len, int pos, long offset)
@@ -177,51 +189,49 @@ public class DedupFileChannel {
 			int write = 0;
 			while (bytesLeft > 0) {
 				// Check to see if we need a new Write buffer
-				WritableCacheBuffer writeBuffer = df
-						.getWriteBuffer(_cp);
-					// Find out where to write to in the buffer
-					int startPos = (int) (_cp - writeBuffer.getFilePosition());
-					if (startPos < 0)
-						log.severe("Error " + _cp + " "
-								+ writeBuffer.getFilePosition());
-					// Find out how many total bytes there are left to write in
-					// this
-					// loop
-					int endPos = startPos + bytesLeft;
-					// If the writebuffer can fit what is left, write it and
-					// quit.
-					if ((endPos) <= writeBuffer.capacity()) {
-						byte[] b = new byte[bytesLeft];
-						buf.get(b);
-						writeBuffer.write(b, startPos);
-						write = write + bytesLeft;
-						_cp = _cp + bytesLeft;
-						bytesLeft = 0;
-					} else {
-						int _len = writeBuffer.capacity() - startPos;
-						byte[] b = new byte[_len];
-						buf.get(b);
-						writeBuffer.write(b, startPos);
-						_cp = _cp + _len;
-						bytesLeft = bytesLeft - _len;
-						write = write + _len;
-					}
-					this.currentPosition = _cp;
-					if (_cp > mf.length()) {
-						mf.setLength(_cp, false);
-						mf.setLastModified(System.currentTimeMillis(), false);
-					}
+				WritableCacheBuffer writeBuffer = df.getWriteBuffer(_cp);
+				// Find out where to write to in the buffer
+				int startPos = (int) (_cp - writeBuffer.getFilePosition());
+				if (startPos < 0)
+					log.severe("Error " + _cp + " "
+							+ writeBuffer.getFilePosition());
+				// Find out how many total bytes there are left to write in
+				// this
+				// loop
+				int endPos = startPos + bytesLeft;
+				// If the writebuffer can fit what is left, write it and
+				// quit.
+				if ((endPos) <= writeBuffer.capacity()) {
+					byte[] b = new byte[bytesLeft];
+					buf.get(b);
+					writeBuffer.write(b, startPos);
+					write = write + bytesLeft;
+					_cp = _cp + bytesLeft;
+					bytesLeft = 0;
+				} else {
+					int _len = writeBuffer.capacity() - startPos;
+					byte[] b = new byte[_len];
+					buf.get(b);
+					writeBuffer.write(b, startPos);
+					_cp = _cp + _len;
+					bytesLeft = bytesLeft - _len;
+					write = write + _len;
+				}
+				this.currentPosition = _cp;
+				if (_cp > mf.length()) {
+					mf.setLength(_cp, false);
+					mf.setLastModified(System.currentTimeMillis(), false);
+				}
 			}
-		}catch(BufferClosedException e) {
+		} catch (BufferClosedException e) {
 			log.info("############ buffer already closed #################");
-			writeFile(bbuf, len,pos,offset);
-		}
-		catch (Exception e) {
+			writeFile(bbuf, len, pos, offset);
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.log(Level.SEVERE, "error while writing to " + this.mf.getPath()
 					+ " " + e.toString(), e);
-			// TODO : fix rollback 
-			//df.rollBack();
+			// TODO : fix rollback
+			// df.rollBack();
 			this.close();
 			throw new IOException("error while writing to " + this.mf.getPath()
 					+ " " + e.toString());
@@ -230,9 +240,13 @@ public class DedupFileChannel {
 
 	/**
 	 * writes data to the DedupFile at the current file position
-	 * @param bbuf the bytes to write
-	 * @param len the length of data to write
-	 * @param offset the offset within the bbuf to start the write from 
+	 * 
+	 * @param bbuf
+	 *            the bytes to write
+	 * @param len
+	 *            the length of data to write
+	 * @param offset
+	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
 	public void writeFile(byte[] buf, int len, int pos)
@@ -242,9 +256,13 @@ public class DedupFileChannel {
 
 	/**
 	 * Reads data from the DedupFile at the current file position
-	 * @param bbuf the byte array to copy the data to.
-	 * @param bufPos the position within the array to copy the data too.
-	 * @param siz the mount of data to copy to the bbuf.
+	 * 
+	 * @param bbuf
+	 *            the byte array to copy the data to.
+	 * @param bufPos
+	 *            the position within the array to copy the data too.
+	 * @param siz
+	 *            the mount of data to copy to the bbuf.
 	 * @return the bytes read
 	 * @throws IOException
 	 */
@@ -254,30 +272,35 @@ public class DedupFileChannel {
 
 	/**
 	 * Closes the byte array
+	 * 
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
 		try {
-		if (this.writtenTo && Main.safeSync) {
-			df.writeCache();
-			mf.sync();
-			df.sync();
-		}
-		}catch(Exception e) {
-			
-		}finally {
+			if (this.writtenTo && Main.safeSync) {
+				df.writeCache();
+				mf.sync();
+				df.sync();
+			}
+		} catch (Exception e) {
+
+		} finally {
 			df.unRegisterChannel(this);
 		}
-		
+
 	}
-	
-	
+
 	/**
 	 * Reads data from the DedupFile
-	 * @param bbuf the byte array to copy the data to.
-	 * @param bufPos the position within the array to copy the data too.
-	 * @param siz the mount of data to copy to the bbuf.
-	 * @param filePos the position within the file to read the data from
+	 * 
+	 * @param bbuf
+	 *            the byte array to copy the data to.
+	 * @param bufPos
+	 *            the position within the array to copy the data too.
+	 * @param siz
+	 *            the mount of data to copy to the bbuf.
+	 * @param filePos
+	 *            the position within the file to read the data from
 	 * @return the bytes read
 	 * @throws IOException
 	 */
@@ -324,7 +347,7 @@ public class DedupFileChannel {
 						read = read + _len;
 					}
 				}
-				
+
 				catch (IOException e) {
 					log.log(Level.SEVERE, "Error while reading buffer ", e);
 					log.severe("Error Reading Buffer " + readBuffer.getHash()
@@ -345,9 +368,6 @@ public class DedupFileChannel {
 		return read;
 
 	}
-
-
-
 
 	/**
 	 * Seek to the specified file position.
@@ -400,7 +420,6 @@ public class DedupFileChannel {
 		return false;
 	}
 
-	
 	/**
 	 * 
 	 * @return the MetaDataDedupFile for this DedupFileChannel
@@ -412,9 +431,13 @@ public class DedupFileChannel {
 
 	/**
 	 * Tries to lock a file at a specific position
-	 * @param position the position to lock the file at.
-	 * @param size the size of the data to be locked
-	 * @param shared if the lock is shared or not
+	 * 
+	 * @param position
+	 *            the position to lock the file at.
+	 * @param size
+	 *            the size of the data to be locked
+	 * @param shared
+	 *            if the lock is shared or not
 	 * @return true if it is locked
 	 * @throws IOException
 	 */
@@ -425,6 +448,7 @@ public class DedupFileChannel {
 
 	/**
 	 * Tries to lock a file exclusively
+	 * 
 	 * @return true if the file is locked
 	 * @throws IOException
 	 */
@@ -434,7 +458,9 @@ public class DedupFileChannel {
 
 	/**
 	 * Removes an existing lock on a file
-	 * @param lock the lock on the file
+	 * 
+	 * @param lock
+	 *            the lock on the file
 	 */
 	public void removeLock(DedupFileLock lock) {
 		lock.release();

@@ -13,7 +13,6 @@ import java.util.logging.*;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
 
-
 /**
  * 
  * @author annesam WritableCacheBuffer is used to store written data for later
@@ -39,9 +38,10 @@ public class WritableCacheBuffer extends DedupChunk {
 	boolean rafInit = false;
 	static {
 		try {
-			defaultHash = HashFunctions.getSHAHashBytes(new byte[Main.CHUNK_LENGTH]);
-		}catch(Exception e) {
-			log.log(Level.SEVERE,"error initializing WritableCacheBuffer",e);
+			defaultHash = HashFunctions
+					.getSHAHashBytes(new byte[Main.CHUNK_LENGTH]);
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "error initializing WritableCacheBuffer", e);
 		}
 	}
 
@@ -127,21 +127,22 @@ public class WritableCacheBuffer extends DedupChunk {
 	}
 
 	public boolean sync() throws IOException {
-		if(Main.safeSync) {
+		if (Main.safeSync) {
 			try {
 				lock.lock();
-			
-			raf = new RandomAccessFile(blockFile, "rw");
-			raf.getChannel().force(false);
-			raf.close();
-			raf = null;
-			lock.unlock();
-			return true;
-			
-			}catch(Exception e) {
-				if(lock.isLocked())
+
+				raf = new RandomAccessFile(blockFile, "rw");
+				raf.getChannel().force(false);
+				raf.close();
+				raf = null;
+				lock.unlock();
+				return true;
+
+			} catch (Exception e) {
+				if (lock.isLocked())
 					lock.unlock();
-				log.log(Level.WARNING, "unable to sync " + this.blockFile.getPath(),e);
+				log.log(Level.WARNING, "unable to sync "
+						+ this.blockFile.getPath(), e);
 				throw new IOException(e.toString());
 			}
 		}

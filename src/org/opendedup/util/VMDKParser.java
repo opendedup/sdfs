@@ -18,7 +18,6 @@ import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.VMDKData;
 
-
 public class VMDKParser {
 	static long gb = 1024 * 1024 * 1024;
 	static long twogb = 2 * 1024 * 1024 * 1024;
@@ -28,10 +27,11 @@ public class VMDKParser {
 			long size) throws IOException, BufferClosedException {
 		path = path + File.separator + fileName;
 		File f = new File(path);
-		if(!f.exists())
+		if (!f.exists())
 			f.mkdirs();
 		else {
-			throw new IOException("Cannot create vmdk at path " + path + "because path aleady exists");
+			throw new IOException("Cannot create vmdk at path " + path
+					+ "because path aleady exists");
 		}
 		long blockL = size / 512;
 		int heads = 255;
@@ -50,7 +50,7 @@ public class VMDKParser {
 		sb.append("# Disk DescriptorFile \n");
 		sb.append("version=1 \n");
 		sb.append("encoding=\"UTF-8\"\n");
-		sb.append("CID="+RandomGUID.getVMDKCID()+"\n");
+		sb.append("CID=" + RandomGUID.getVMDKCID() + "\n");
 		sb.append("parentCID=ffffffff\n");
 		sb.append("createType=\"vmfs\"\n");
 		sb.append("# Extent description\n");
@@ -85,8 +85,8 @@ public class VMDKParser {
 
 	}
 
-	public static VMDKData parserVMDKFile(byte[] b) throws NumberFormatException,
-			IOException {
+	public static VMDKData parserVMDKFile(byte[] b)
+			throws NumberFormatException, IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(b);
 		BufferedReader br = new BufferedReader(new InputStreamReader(bis));
 		String line;
@@ -118,13 +118,16 @@ public class VMDKParser {
 				data.setUuid(vals[1].trim().replaceAll("\"", ""));
 			}
 			if (vals[0].trim().equalsIgnoreCase("ddb.geometry.cylinders")) {
-				data.setCylinders(Long.parseLong(vals[1].trim().replaceAll("\"", "")));
+				data.setCylinders(Long.parseLong(vals[1].trim().replaceAll(
+						"\"", "")));
 			}
 			if (vals[0].trim().equalsIgnoreCase("ddb.geometry.heads")) {
-				data.setHeads(Integer.parseInt(vals[1].trim().replaceAll("\"", "")));
+				data.setHeads(Integer.parseInt(vals[1].trim().replaceAll("\"",
+						"")));
 			}
 			if (vals[0].trim().equalsIgnoreCase("ddb.geometry.sectors")) {
-				data.setSectors(Integer.parseInt(vals[1].trim().replaceAll("\"", "")));
+				data.setSectors(Integer.parseInt(vals[1].trim().replaceAll(
+						"\"", "")));
 			}
 			if (vals[0].trim().equalsIgnoreCase("ddb.adapterType")) {
 				data.setAdapterType(vals[1].trim().replaceAll("\"", ""));
@@ -132,22 +135,24 @@ public class VMDKParser {
 			linesRead++;
 
 		}
-		if(data.getUuid() == null) 
+		if (data.getUuid() == null)
 			return null;
-		else	
+		else
 			return data;
 	}
+
 	public static VMDKData parseVMDKFile(String path) throws IOException {
 		FileInputStream fileinputstream = new FileInputStream(path);
 
-        int numberBytes = fileinputstream.available();
-        byte bytearray[] = new byte[numberBytes];
-        fileinputstream.read(bytearray);
-        return parserVMDKFile(bytearray);
+		int numberBytes = fileinputstream.available();
+		byte bytearray[] = new byte[numberBytes];
+		fileinputstream.read(bytearray);
+		return parserVMDKFile(bytearray);
 	}
-	
+
 	public static void main(String[] args) throws IOException {
-		System.out.println(parseVMDKFile("/media/vmware/vmfs/Win2k8-3/Win2k8-3.vmdk"));
+		System.out
+				.println(parseVMDKFile("/media/vmware/vmfs/Win2k8-3/Win2k8-3.vmdk"));
 	}
 
 }

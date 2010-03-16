@@ -4,11 +4,11 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.util.CloneMagic;
 import org.opendedup.util.RandomGUID;
 
-
-public class VMDKData implements java.io.Serializable, Cloneable{
+public class VMDKData implements java.io.Serializable, Cloneable {
 	/**
-	 * class maps to VMDK data for a specific MetaDataDedupFile. VMDK data is read in stream and stored in this object for later
-	 * use such as for growing, shrinking, or mounting VMDKs 
+	 * class maps to VMDK data for a specific MetaDataDedupFile. VMDK data is
+	 * read in stream and stored in this object for later use such as for
+	 * growing, shrinking, or mounting VMDKs
 	 */
 	private static final long serialVersionUID = 3865840902295774858L;
 	String version;
@@ -27,11 +27,11 @@ public class VMDKData implements java.io.Serializable, Cloneable{
 	String adapterType;
 	int sectors;
 	String toolsVersion;
-	
+
 	public VMDKData() {
-		
+
 	}
-	
+
 	public String getVersion() {
 		return version;
 	}
@@ -159,33 +159,31 @@ public class VMDKData implements java.io.Serializable, Cloneable{
 	public void setToolsVersion(String toolsVersion) {
 		this.toolsVersion = toolsVersion;
 	}
-	
+
 	@Override
 	public VMDKData clone() {
-		return (VMDKData)CloneMagic.clone(this);
+		return (VMDKData) CloneMagic.clone(this);
 	}
-	
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("# Disk DescriptorFile \n");
-		sb.append("version="+this.version+"\n");
-		sb.append("encoding=\""+this.encoding+"\"\n");
-		sb.append("CID="+this.cid+"\n");
-		sb.append("parentCID="+this.parentCID+"\n");
-		sb.append("createType=\""+this.createType+"\"\n");
+		sb.append("version=" + this.version + "\n");
+		sb.append("encoding=\"" + this.encoding + "\"\n");
+		sb.append("CID=" + this.cid + "\n");
+		sb.append("parentCID=" + this.parentCID + "\n");
+		sb.append("createType=\"" + this.createType + "\"\n");
 		sb.append("# Extent description\n");
-		sb.append(this.access +" " + this.blocks + " \"" + this.vmfsType + "\" \"" + this.diskFile +"\" 0\n");
+		sb.append(this.access + " " + this.blocks + " \"" + this.vmfsType
+				+ "\" \"" + this.diskFile + "\" 0\n");
 		sb.append("# The Disk Data Base\n");
-		sb.append("ddb.virtualHWVersion = \""+ this.virtualHWVersion +"\"\n");
+		sb.append("ddb.virtualHWVersion = \"" + this.virtualHWVersion + "\"\n");
 		sb.append("ddb.uuid = \"" + this.uuid + "\"\n");
 		sb.append("ddb.geometry.cylinders = \"" + this.cylinders + "\"\n");
 		sb.append("ddb.geometry.heads = \"" + this.heads + "\"\n");
 		sb.append("ddb.geometry.sectors = \"" + this.sectors + "\"\n");
-		sb.append("ddb.adapterType = \""+this.adapterType +"\"\n");
+		sb.append("ddb.adapterType = \"" + this.adapterType + "\"\n");
 		return sb.toString();
 	}
-	
-
-	
 
 }

@@ -37,10 +37,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private long freeValue = -1;
 	private String fileName;
 	private ArrayList<ChunkMetaData> kBuf = new ArrayList<ChunkMetaData>();
-	private ByteArrayLongMap[] maps = new ByteArrayLongMap[32];
+	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
 	private boolean closed = true;
 	int kSz = 0;
-	private int iterPos = 0;
+	long ram = 0;
 	private static final int kBufMaxSize = 1000;
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
@@ -70,8 +70,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 				m = maps[hashRoute];
 				if (m == null) {
 					int sz = (int) (size / 16);
-					log.info("Will allocate [" + (sz * (24 + 8))
-							+ "] bytes of ram  for [" + sz + "] entries");
+					ram = ram + (sz * (24 + 8));
+
 					m = new ByteArrayLongMap(sz, (short) FREE.length);
 					maps[hashRoute] = m;
 				}
@@ -83,7 +83,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 				hashlock.unlock();
 			}
 		}
+
 		return m;
+	}
+
+	public long getAllocatedRam() {
+		return this.ram;
 	}
 
 	public boolean isClosed() {
@@ -99,41 +104,34 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.size;
 	}
 
-	public void iterInit() {
-		this.hashlock.lock();
-		try {
-			this.iterPos = 0;
-		} catch (Exception e) {
-		} finally {
-			this.hashlock.unlock();
+	public synchronized void claimRecords() throws IOException {
+		RandomAccessFile _fs = new RandomAccessFile(this.fileName, "rw");
+		long startTime = System.currentTimeMillis();
+		int z = 0;
+		for (int i = 0; i < maps.length; i++) {
+			maps[i].iterInit();
+			long val = 0;
+
+			while (val != -1 && !this.closed) {
+				val = maps[i].nextClaimedValue(true);
+				if (val != -1) {
+					long pos = ((val / (long) Main.chunkStorePageSize) * (long) ChunkMetaData.RAWDL)
+							+ ChunkMetaData.CLAIMED_OFFSET;
+					z++;
+					_fs.seek(pos);
+					this.hashlock.lock();
+					try {
+						_fs.writeLong(val);
+					} catch (Exception e) {
+					} finally {
+						this.hashlock.unlock();
+					}
+				}
+			}
 		}
+		log.info("processed [" + (z) + "] records in ["
+				+ (System.currentTimeMillis() - startTime) + "] ms");
 	}
-
-	/*
-	 * public byte[] nextKey() { this.hashlock.lock(); try { byte[] key = new
-	 * byte[FREE.length];
-	 * 
-	 * while (iterPos < this.keys.capacity()) { this.keys.position(iterPos);
-	 * this.keys.get(key); this.iterPos = this.keys.position(); if
-	 * (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) return key; }
-	 * } catch (Exception e) { log.log(Level.WARNING,
-	 * "error while iterating through keys", e); } finally {
-	 * this.hashlock.unlock(); } return null; }
-	 */
-
-	/*
-	 * public byte[] nextClaimedKey(boolean clearClaim) { this.hashlock.lock();
-	 * try { byte[] key = new byte[FREE.length];
-	 * 
-	 * while (iterPos < this.keys.capacity()) { this.keys.position(iterPos);
-	 * this.keys.get(key); int cp = this.iterPos; this.iterPos =
-	 * this.keys.position(); if (!Arrays.equals(key, FREE) &&
-	 * !Arrays.equals(key, REMOVED)) { claims.position(cp / FREE.length); if
-	 * (claims.get() == 1) { if (clearClaim) { claims.position(cp /
-	 * FREE.length); claims.putInt(0); } return key; } } } } catch (Exception e)
-	 * { log.log(Level.WARNING, "error while iterating through keys", e); }
-	 * finally { this.hashlock.unlock(); } return null; }
-	 */
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -190,10 +188,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 			}
 		}
 		log.info("loaded [" + kSz + "] into the hashtable " + this.fileName);
-
-		// values = new long[this.size][this.size];
-		// Arrays.fill( keys, FREE );
-		// Arrays.fill(values, blank);
 		return size;
 	}
 
@@ -211,6 +205,32 @@ public class CSByteArrayLongMap implements AbstractMap {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		return this.getMap(key).containsKey(key);
+	}
+
+	public void removeRecords(long time) throws IOException {
+		for (int i = 0; i < size; i++) {
+			byte[] raw = new byte[ChunkMetaData.RAWDL];
+			try {
+				kRaf.read(raw);
+				if (!Arrays.equals(raw, BLANKCM)) {
+					ChunkMetaData cm = new ChunkMetaData(raw);
+					boolean foundFree = Arrays.equals(cm.getHash(), FREE);
+					boolean foundReserved = Arrays
+							.equals(cm.getHash(), REMOVED);
+					if (cm.getLastClaimed() < time && !foundFree
+							&& !foundReserved) {
+						cm.setmDelete(true);
+						if (this.remove(cm)) {
+							kSz++;
+						}
+					}
+				}
+			} catch (BufferUnderflowException e) {
+
+			}
+
+		}
+		log.info("Removed [" + kSz + "] records");
 	}
 
 	public boolean put(ChunkMetaData cm) throws IOException {
@@ -262,8 +282,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 		boolean added = this.getMap(cm.getHash()).put(cm.getHash(),
 				cm.getcPos());
 		if (added && persist) {
-			this.kBuf.add(cm);
-		} 
+			this.hashlock.lock();
+			try {
+				this.kBuf.add(cm);
+			} catch (Exception e) {
+			} finally {
+				this.hashlock.unlock();
+			}
+		}
 		return added;
 	}
 
@@ -323,23 +349,29 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	}
 
-	public boolean remove(byte[] key) throws IOException {
+	public boolean remove(ChunkMetaData cm) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		return false;
-		/*
-		 * this.flushFullBuffer(); try { this.hashlock.lock(); int pos =
-		 * this.index(key); if (pos == -1) { return false; } else {
-		 * keys.position(pos); keys.put(this.REMOVED); pos = (pos / FREE.length)
-		 * * 8; this.values.position(pos); long rPos = this.values.getLong();
-		 * this.values.position(pos); this.values.putLong(-1); pos = (pos /
-		 * 8)*4; this.claims.position(pos); this.claims.put((byte) 0);
-		 * ChunkMetaData cm = new ChunkMetaData(rPos); this.kBuf.add(cm); return
-		 * true; } } catch (Exception e) { log.log(Level.SEVERE,
-		 * "error getting record", e); return false; } finally {
-		 * this.hashlock.unlock(); }
-		 */
+		this.flushFullBuffer();
+		try {
+			if (!this.getMap(cm.getHash()).remove(cm.getHash())) {
+				return false;
+			} else {
+				cm.setmDelete(true);
+				this.hashlock.lock();
+				try {
+					this.kBuf.add(cm);
+				} catch (Exception e) {
+				} finally {
+					this.hashlock.unlock();
+				}
+				return true;
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "error getting record", e);
+			return false;
+		}
 	}
 
 	private synchronized void flushFullBuffer() throws IOException {
@@ -373,26 +405,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} catch (Exception e) {
 		}
 	}
-
-	/*
-	 * public static void main(String[] args) throws Exception { for (int l = 0;
-	 * l < 1; l++) { CSByteArrayLongMap b = new CSByteArrayLongMap(16777216 * 6,
-	 * (short) 16, "/opt/ddb/test-" + l); long start =
-	 * System.currentTimeMillis(); Random rnd = new Random(); byte[] hash =
-	 * null; long val = -33; byte[] hash1 = null; long val1 = -33; for (int i =
-	 * 0; i < 11000000; i++) { byte[] z = new byte[64]; rnd.nextBytes(z); hash =
-	 * HashFunctions.getMD5ByteHash(z); val = rnd.nextLong(); if (val < 0) val
-	 * *= -1; if (i == 55379) { val1 = val; hash1 = hash; } boolean k =
-	 * b.put(hash, val); if (k == false)
-	 * System.out.println("Unable to add this " + k);
-	 * 
-	 * } long end = System.currentTimeMillis(); System.out.println("Took " +
-	 * (end - start) / 1000 + " s " + val1); System.out.println("Took " +
-	 * (System.currentTimeMillis() - end) / 1000 + " ms at pos " +
-	 * b.get(hash1)); end = System.currentTimeMillis(); b.sync();
-	 * System.out.println("Sync Took " + (System.currentTimeMillis() - end)); }
-	 * }
-	 */
 
 	@Override
 	public byte[] get(long pos) throws IOException {

@@ -18,25 +18,24 @@ import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
-
 /**
  * 
  * @author Sam Silverberg
  * 
- * The MetaFileStore is a static class used to get, update, create, or clone MetaDataDedup files. MetaDataDedupFile(s) are
- * serialized to a JDBM database with a key of the uuid for the MetaDataDedupFile.
+ *         The MetaFileStore is a static class used to get, update, create, or
+ *         clone MetaDataDedup files. MetaDataDedupFile(s) are serialized to a
+ *         JDBM database with a key of the uuid for the MetaDataDedupFile.
  * 
- *
+ * 
  */
 public class MetaFileStore {
-	
 
 	// private static String dbURL =
 	// "jdbc:derby:myDB;create=true;user=me;password=mine";
 	private static RecordManager recman;
 	// CacheRecordManager recman;
 	private static BTree<String, MetaDataDedupFile> mftable;
-	//A quick lookup table for path to MetaDataDedupFile
+	// A quick lookup table for path to MetaDataDedupFile
 	private static transient LRUMap pathMap = new LRUMap(100);
 	private static Logger log = Logger.getLogger("sdfs");
 
@@ -91,6 +90,7 @@ public class MetaFileStore {
 
 	/**
 	 * caches a file to the pathmap
+	 * 
 	 * @param mf
 	 */
 	private static void cacheMF(MetaDataDedupFile mf) {
@@ -99,7 +99,9 @@ public class MetaFileStore {
 
 	/**
 	 * Removes a cached file from the pathmap
-	 * @param path the path of the MetaDataDedupFile
+	 * 
+	 * @param path
+	 *            the path of the MetaDataDedupFile
 	 */
 	public static void removedCachedMF(String path) {
 		pathMap.remove(path);
@@ -107,7 +109,8 @@ public class MetaFileStore {
 
 	/**
 	 * 
-	 * @param path the path to the MetaDataDedupFile
+	 * @param path
+	 *            the path to the MetaDataDedupFile
 	 * @return the MetaDataDedupFile
 	 */
 	public static synchronized MetaDataDedupFile getMF(String path) {
@@ -125,8 +128,10 @@ public class MetaFileStore {
 
 	/**
 	 * 
-	 * @param parent path for the parent
-	 * @param child the child file
+	 * @param parent
+	 *            path for the parent
+	 * @param child
+	 *            the child file
 	 * @return the MetaDataDedupFile associated with this path.
 	 */
 	public static MetaDataDedupFile getMF(File parent, String child) {
@@ -136,9 +141,13 @@ public class MetaFileStore {
 
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
-	 * @param origionalPath the path of the source
-	 * @param snapPath the path of the destination
-	 * @param overwrite whether or not to overwrite the destination if it exists
+	 * 
+	 * @param origionalPath
+	 *            the path of the source
+	 * @param snapPath
+	 *            the path of the destination
+	 * @param overwrite
+	 *            whether or not to overwrite the destination if it exists
 	 * @return the destination file.
 	 * @throws IOException
 	 */
@@ -153,6 +162,7 @@ public class MetaFileStore {
 
 	/**
 	 * Commits data to the jdbm database
+	 * 
 	 * @return true if committed
 	 */
 	public static boolean commit() {
@@ -168,28 +178,33 @@ public class MetaFileStore {
 
 	/**
 	 * Removes a file from the jdbm db
-	 * @param guid the guid for the MetaDataDedupFile
+	 * 
+	 * @param guid
+	 *            the guid for the MetaDataDedupFile
 	 */
 	public static void removeDedupFile(String path) {
 		MetaDataDedupFile mf = null;
 		try {
 			mf = getMF(path);
 			log.info("Removing " + mf.getGUID());
-			
+
 			mftable.remove(mf.getGUID());
 			commit();
 			pathMap.remove(mf.getPath());
 		} catch (Exception e) {
-			if(mf != null)
-				log.log(Level.WARNING, "unable to remove " + path,e);
-			if(mf == null)
-				log.log(Level.WARNING, "unable to remove  because ["+path+"] is null");
+			if (mf != null)
+				log.log(Level.WARNING, "unable to remove " + path, e);
+			if (mf == null)
+				log.log(Level.WARNING, "unable to remove  because [" + path
+						+ "] is null");
 		}
 	}
 
 	/**
 	 * Adds a MetaDataDedupFile to the jdbm database
-	 * @param mf the MetaDataDedupFile
+	 * 
+	 * @param mf
+	 *            the MetaDataDedupFile
 	 * @return true if committed
 	 */
 	public static boolean setMetaFile(MetaDataDedupFile mf) {
@@ -205,7 +220,9 @@ public class MetaFileStore {
 
 	/**
 	 * Gets a file by the guid
-	 * @param guid the guid of the MetaDataDedupFile
+	 * 
+	 * @param guid
+	 *            the guid of the MetaDataDedupFile
 	 * @return the MetaDataDedupFile if it exists, otherwise it returns null.
 	 */
 	public static MetaDataDedupFile getMetaFile(String guid) {

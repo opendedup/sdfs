@@ -2,13 +2,11 @@ package org.opendedup.sdfs.servers;
 
 import java.util.logging.Logger;
 
-
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-
 
 public class SDFSService {
 	String configFile;
@@ -26,6 +24,8 @@ public class SDFSService {
 	public void start() throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
 		Config.parserRoutingFile(this.routingFile);
+		if (Main.chunkStoreLocal)
+			HashChunkService.init();
 	}
 
 	public void stop() {
@@ -40,14 +40,12 @@ public class SDFSService {
 		try {
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
-			
+
 		}
 		if (Main.chunkStoreLocal) {
-			System.out
-					.println("Shutting down ChunkStore");
+			System.out.println("Shutting down ChunkStore");
 			FileChunkStore.closeAll();
-			System.out
-					.println("Shutting down HashStore");
+			System.out.println("Shutting down HashStore");
 			HashChunkService.close();
 		}
 		System.out.println("SDFS is Shut Down");

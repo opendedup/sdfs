@@ -14,7 +14,6 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.VMDKParser;
 
-
 import fuse.XattrLister;
 
 public class SDFSCmds {
@@ -27,23 +26,21 @@ public class SDFSCmds {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 
-	public static final String[] cmds = { 
-		"user.cmd.dedupAll",	
-		"user.cmd.optimize",
-			"user.cmd.snapshot",
-			"user.cmd.vmdk.make", "user.cmd.ids.clearstatus",
-			"user.cmd.nextid", "user.cmd.ids.status", "user.cmd.file.flush",
-			"user.cmd.flush.all", "user.sdfs.file.isopen",
-			"user.sdfs.ActualBytesWritten", "user.sdfs.VirtualBytesWritten",
-			"user.sdfs.BytesRead",  
-			"user.sdfs.DuplicateData","user.sdfs.UniqueData","user.sdfs.VMDK", "user.sdfs.fileGUID",
-			"user.sdfs.dfGUID", "user.sdfs.dedupAll"
+	public static final String[] cmds = { "user.cmd.dedupAll",
+			"user.cmd.optimize", "user.cmd.snapshot", "user.cmd.vmdk.make",
+			"user.cmd.ids.clearstatus", "user.cmd.nextid",
+			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
+			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
+			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
+			"user.sdfs.DuplicateData", "user.sdfs.UniqueData",
+			"user.sdfs.VMDK", "user.sdfs.fileGUID", "user.sdfs.dfGUID",
+			"user.sdfs.dedupAll"
 
 	};
 	public static final String[] cmdDes = {
-		"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>",
-		"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>",
-		"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>",
+			"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>",
+			"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>",
+			"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>",
 			"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
 					+ "The command must be executed on a directory. e.g."
 					+ "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
@@ -54,7 +51,7 @@ public class SDFSCmds {
 			"Flush write cache for specificed file <unique-command-id>",
 			"Flush write cache for all files",
 			"checks if the file is open <unique-command-id>", "", "", "", "",
-			"", "", "", "" ,"","",""};
+			"", "", "", "", "", "", "" };
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
 	private LRUMap cmdStatus = new LRUMap(100);
 
@@ -80,7 +77,7 @@ public class SDFSCmds {
 		MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
 		File f = new File(internalPath);
 		if (!f.isDirectory()) {
-			if(command.equalsIgnoreCase("user.sdfs.dedupAll")) {
+			if (command.equalsIgnoreCase("user.sdfs.dedupAll")) {
 				return Boolean.toString(mf.isDedup());
 			}
 			if (command.equalsIgnoreCase("user.sdfs.file.isopen")) {
@@ -100,7 +97,8 @@ public class SDFSCmds {
 				return Long.toString(mf.getIOMonitor().getDuplicateBlocks());
 			}
 			if (command.equalsIgnoreCase("user.sdfs.UniqueData")) {
-				return Long.toString(mf.length() - mf.getIOMonitor().getDuplicateBlocks());
+				return Long.toString(mf.length()
+						- mf.getIOMonitor().getDuplicateBlocks());
 			}
 			if (command.equalsIgnoreCase("user.sdfs.VMDK")) {
 				return Boolean.toString(mf.isVmdk());
@@ -251,8 +249,8 @@ public class SDFSCmds {
 			return errorMsg + " because: " + e.toString();
 		}
 	}
-	
-	private String optimize(String srcPath,long length) {
+
+	private String optimize(String srcPath, long length) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
 			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize(length);
@@ -260,27 +258,26 @@ public class SDFSCmds {
 					+ "] of length [" + length + "]";
 		} catch (IOException e) {
 			log.error("ERROR Optimize Failed: unable to optimize Source ["
-					+ srcPath + "] " + "length [" + length
-					+ "] because :" + e.toString(), e);
+					+ srcPath + "] " + "length [" + length + "] because :"
+					+ e.toString(), e);
 			return "ERROR Optimize Failed: unable to optimize Source ["
-			+ srcPath + "] " + "length [" + length
-			+ "] because :" + e.toString();
+					+ srcPath + "] " + "length [" + length + "] because :"
+					+ e.toString();
 		}
 	}
-	
-	private String dedup(String srcPath,boolean dedup) {
+
+	private String dedup(String srcPath, boolean dedup) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
 			MetaFileStore.getMF(f.getPath()).setDedup(dedup);
-			return "SUCCESS Dedup Success: set dedup to [" + srcPath
-					+ "]  [" + dedup + "]";
+			return "SUCCESS Dedup Success: set dedup to [" + srcPath + "]  ["
+					+ dedup + "]";
 		} catch (Exception e) {
 			log.error("ERROR Dedup Failed: unable to set dedup Source ["
-					+ srcPath + "] " + "length [" + dedup
-					+ "] because :" + e.toString(), e);
-			return "ERROR Dedup Failed: unable to set dedup Source ["
-			+ srcPath + "] " + "length [" + dedup
-			+ "]  because :" + e.toString();
+					+ srcPath + "] " + "length [" + dedup + "] because :"
+					+ e.toString(), e);
+			return "ERROR Dedup Failed: unable to set dedup Source [" + srcPath
+					+ "] " + "length [" + dedup + "]  because :" + e.toString();
 		}
 	}
 
@@ -295,8 +292,7 @@ public class SDFSCmds {
 			return "ERROR Snapshot Failed: destination [" + dstPath
 					+ "] already exists";
 		try {
-			MetaFileStore.snapshot(f.getPath(), nf
-					.getPath(), false);
+			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
 		} catch (IOException e) {

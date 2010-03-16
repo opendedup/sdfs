@@ -5,15 +5,15 @@ import java.util.Random;
 
 import org.opendedup.sdfs.Main;
 
-
-
 public class RandomFile {
-	public static void writeRandomFile(String fileName, double size) throws IOException {
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(fileName));
+	public static void writeRandomFile(String fileName, double size)
+			throws IOException {
+		BufferedOutputStream out = new BufferedOutputStream(
+				new FileOutputStream(fileName));
 		long currentpos = 0;
 		Random r = new Random();
-		while(currentpos < size) {
-			byte [] rndB = new byte[Main.CHUNK_LENGTH];
+		while (currentpos < size) {
+			byte[] rndB = new byte[Main.CHUNK_LENGTH];
 			r.nextBytes(rndB);
 			out.write(rndB);
 			currentpos = currentpos + rndB.length;
@@ -22,10 +22,10 @@ public class RandomFile {
 		out.flush();
 		out.close();
 	}
-	
-	public static void main (String [] args) throws IOException {
-		long size = 200*1024L*1024L*1024L;
-		writeRandomFile("/home/annesam/rnd.bin",size);
+
+	public static void main(String[] args) throws IOException {
+		long size = 200 * 1024L * 1024L * 1024L;
+		writeRandomFile("/home/annesam/rnd.bin", size);
 	}
 
 }

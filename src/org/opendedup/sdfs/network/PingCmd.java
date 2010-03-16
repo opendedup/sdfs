@@ -5,19 +5,20 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PingCmd implements IOCmd {
-	
+
 	private short response;
-	
+
 	public PingCmd() {
 	}
 
-	public void executeCmd(DataInputStream is, DataOutputStream os) throws IOException {
+	public void executeCmd(DataInputStream is, DataOutputStream os)
+			throws IOException {
 		os.writeInt(NetworkCMDS.PING_CMD);
 		os.flush();
 		response = is.readShort();
 	}
-	
-	public  short getResponse() {
+
+	public short getResponse() {
 		return this.response;
 	}
 
@@ -25,8 +26,5 @@ public class PingCmd implements IOCmd {
 		// TODO Auto-generated method stub
 		return NetworkCMDS.PING_CMD;
 	}
-	
-	
-	
 
 }

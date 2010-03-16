@@ -16,21 +16,21 @@ public class HashExistsCmd implements IOCmd {
 
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
-			os.write(NetworkCMDS.HASH_EXISTS_CMD);
-			os.writeShort(hash.length);
-			os.write(hash);
-			os.flush();
-			this.exists = is.readBoolean();
+		os.write(NetworkCMDS.HASH_EXISTS_CMD);
+		os.writeShort(hash.length);
+		os.write(hash);
+		os.flush();
+		this.exists = is.readBoolean();
 	}
-	
-	public byte [] getHash() {
+
+	public byte[] getHash() {
 		return this.hash;
 	}
 
 	public boolean exists() {
 		return this.exists;
 	}
-	
+
 	public byte getCmdID() {
 		return NetworkCMDS.HASH_EXISTS_CMD;
 	}

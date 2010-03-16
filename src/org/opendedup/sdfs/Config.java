@@ -27,7 +27,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
 public class Config {
 	private static Logger log = Logger.getLogger("sdfs");
 
@@ -160,7 +159,8 @@ public class Config {
 		if (Main.chunkStoreLocal) {
 			log.info("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
-			//Main.chunkStoreMetaData = localChunkStore.getAttribute("chunk-store-metadata");
+			// Main.chunkStoreMetaData =
+			// localChunkStore.getAttribute("chunk-store-metadata");
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
 					.getAttribute("pre-allocate"));
@@ -212,7 +212,7 @@ public class Config {
 
 	public static synchronized void parserRoutingFile(String fileName)
 			throws IOException {
-		if(Main.chunkStoreLocal)
+		if (Main.chunkStoreLocal)
 			return;
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

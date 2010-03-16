@@ -5,8 +5,8 @@ public class HCServer {
 	int port;
 	boolean useUDP;
 	boolean compress;
-	
-	public HCServer(String hostName,int port, boolean useUDP,boolean compress) {
+
+	public HCServer(String hostName, int port, boolean useUDP, boolean compress) {
 		this.hostName = hostName;
 		this.port = port;
 		this.useUDP = useUDP;

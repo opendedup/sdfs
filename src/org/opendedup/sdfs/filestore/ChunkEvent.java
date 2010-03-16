@@ -1,26 +1,27 @@
 package org.opendedup.sdfs.filestore;
 
 public class ChunkEvent {
-	private byte [] hash;
+	private byte[] hash;
 	private long oldLocation;
 	private long newLocation;
 	private int length;
 	private AbstractChunkStore source;
-	
-	public ChunkEvent(byte []hash,long oldLocation, long newLocation,int length, AbstractChunkStore source) {
+
+	public ChunkEvent(byte[] hash, long oldLocation, long newLocation,
+			int length, AbstractChunkStore source) {
 		this.setHash(hash);
 		this.setOldLocation(oldLocation);
 		this.setNewLocation(newLocation);
 		this.setLength(length);
 		this.setSource(source);
-		
+
 	}
 
-	private void setHash(byte [] hash) {
+	private void setHash(byte[] hash) {
 		this.hash = hash;
 	}
 
-	public byte [] getHash() {
+	public byte[] getHash() {
 		return hash;
 	}
 
@@ -55,6 +56,5 @@ public class ChunkEvent {
 	public AbstractChunkStore getSource() {
 		return source;
 	}
-	
-	
+
 }

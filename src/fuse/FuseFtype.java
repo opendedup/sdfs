@@ -11,16 +11,14 @@ package fuse;
 
 import fuse.util.Struct;
 
+public class FuseFtype extends Struct implements FuseFtypeConstants {
+	public int mode;
 
-public class FuseFtype extends Struct implements FuseFtypeConstants
-{
-   public int mode;
+	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
+		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ")
+				.append("mode=").append(Integer.toOctalString(mode)).append(
+						"(OCT)");
 
-
-   protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed)
-   {
-      buff.append(super.appendAttributes(buff, isPrefixed)? ", " : " ").append("mode=").append(Integer.toOctalString(mode)).append("(OCT)");
-
-      return true;
-   }
+		return true;
+	}
 }

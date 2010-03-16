@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
-
 public class PoolThread extends Thread {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
@@ -22,19 +21,19 @@ public class PoolThread extends Thread {
 		while (!isStopped()) {
 			try {
 				WritableCacheBuffer runnable = null;
-					runnable = taskQueue.poll();
+				runnable = taskQueue.poll();
 				if (runnable == null)
 					Thread.sleep(1);
 				else {
 					try {
 						runnable.close();
-						
+
 					} catch (Exception e) {
 						e.printStackTrace();
-					} 
+					}
 				}
 			} catch (Exception e) {
-				log.log(Level.SEVERE,"unable to execute thread",e);
+				log.log(Level.SEVERE, "unable to execute thread", e);
 				// log or otherwise report exception,
 				// but keep pool thread alive.
 			}

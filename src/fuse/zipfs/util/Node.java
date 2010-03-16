@@ -14,64 +14,52 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+public class Node {
+	private String name;
+	private Node parent;
+	private Object value;
+	private Map<String, Node> children;
 
-public class Node
-{
-   private String name;
-   private Node parent;
-   private Object value;
-   private Map<String, Node> children;
+	public String getName() {
+		return name;
+	}
 
-   public String getName()
-   {
-      return name;
-   }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-   public void setName(String name)
-   {
-      this.name = name;
-   }
+	public Node getParent() {
+		return parent;
+	}
 
-   public Node getParent()
-   {
-      return parent;
-   }
+	public void setParent(Node parent) {
+		this.parent = parent;
+	}
 
-   public void setParent(Node parent)
-   {
-      this.parent = parent;
-   }
+	public Object getValue() {
+		return value;
+	}
 
-   public Object getValue()
-   {
-      return value;
-   }
+	public void setValue(Object value) {
+		this.value = value;
+	}
 
-   public void setValue(Object value)
-   {
-      this.value = value;
-   }
+	public boolean isLeafNode() {
+		return children == null || children.size() == 0;
+	}
 
-   public boolean isLeafNode()
-   {
-      return children == null || children.size() == 0;
-   }
+	public void addChild(Node node) {
+		if (children == null)
+			children = new HashMap<String, Node>();
 
-   public void addChild(Node node)
-   {
-      if (children == null)
-         children = new HashMap<String, Node>();
+		children.put(node.getName(), node);
+	}
 
-      children.put(node.getName(), node);
-   }
+	public Node getChild(String name) {
+		return (children == null) ? null : (Node) children.get(name);
+	}
 
-   public Node getChild(String name)
-   {
-      return (children == null)? null : (Node)children.get(name);
-   }
-
-   public Collection<?> getChildren()
-   {
-      return (children == null)? Collections.EMPTY_LIST : children.values();
-   }
+	public Collection<?> getChildren() {
+		return (children == null) ? Collections.EMPTY_LIST : children.values();
+	}
 }

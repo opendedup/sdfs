@@ -1,13 +1,15 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 /**
  * 
  * @author Sam Silverberg
- *	
- * The NullChunkStore does not write data do a filesystem at all. It can be used for testing. 
  * 
- *
+ *         The NullChunkStore does not write data do a filesystem at all. It can
+ *         be used for testing.
+ * 
+ * 
  */
 
 public class NullChunkStore implements AbstractChunkStore {
@@ -76,19 +78,19 @@ public class NullChunkStore implements AbstractChunkStore {
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void claimChunk(byte[] hash, long start) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

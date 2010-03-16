@@ -3,7 +3,7 @@ package org.opendedup.mtools;
 public class VMDKMountPoint {
 	String loopBack;
 	String mountPoint;
-	
+
 	public VMDKMountPoint(String loopBack, String mountPoint) {
 		this.loopBack = loopBack;
 		this.mountPoint = mountPoint;
@@ -24,6 +24,5 @@ public class VMDKMountPoint {
 	public void setMountPoint(String mountPoint) {
 		this.mountPoint = mountPoint;
 	}
-	
 
 }

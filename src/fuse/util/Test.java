@@ -113,8 +113,9 @@ public class Test {
 		return b.toString();
 
 	}
-	
-	public static void setPermissions(String path, int permissions) throws IOException {
+
+	public static void setPermissions(String path, int permissions)
+			throws IOException {
 		HashSet<PosixFilePermission> set = new HashSet<PosixFilePermission>();
 		char[] smak = parseFilePermissions(permissions).toCharArray();
 		if (smak[0] == 'r')

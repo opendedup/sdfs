@@ -7,7 +7,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class ChunkClaimJob implements Job {
+public class RemoveChunksJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext ctx) throws JobExecutionException {

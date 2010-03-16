@@ -13,23 +13,22 @@ import fuse.FuseException;
 
 import java.nio.ByteBuffer;
 
+public abstract class FileNode extends Node {
+	public FileNode(String name) {
+		super(name);
+	}
 
-public abstract class FileNode extends Node
-{
-   public FileNode(String name)
-   {
-      super(name);
-   }
-   
-   public abstract void open(int flags) throws FuseException;
+	public abstract void open(int flags) throws FuseException;
 
-   public abstract void release(int flags) throws FuseException;
+	public abstract void release(int flags) throws FuseException;
 
-   public abstract void read(ByteBuffer buff, long offset) throws FuseException;
+	public abstract void read(ByteBuffer buff, long offset)
+			throws FuseException;
 
-   public abstract void write(ByteBuffer buff, long offset) throws FuseException;
+	public abstract void write(ByteBuffer buff, long offset)
+			throws FuseException;
 
-   public abstract void truncate(long size) throws FuseException;
+	public abstract void truncate(long size) throws FuseException;
 
-   public abstract void utime(int atime, int mtime) throws FuseException;
+	public abstract void utime(int atime, int mtime) throws FuseException;
 }

@@ -1,22 +1,22 @@
 package org.opendedup.sdfs.monitor;
 
-
 import java.io.*;
-import java.text.DecimalFormat; 
+import java.text.DecimalFormat;
 
 import org.opendedup.sdfs.servers.*;
 
 public class IOMeter implements Runnable {
-	
+
 	private long sleeptime = 15;
 	String fileName;
 	private boolean stopped = false;
 	DecimalFormat df = new DecimalFormat("###.##");
 	DecimalFormat dfp = new DecimalFormat("##.##%");
+
 	public IOMeter(String fileName) {
 		this.fileName = fileName;
 	}
-	
+
 	public void run() {
 		BufferedOutputStream out = null;
 		double lastMBRead = 0;
@@ -26,24 +26,30 @@ public class IOMeter implements Runnable {
 			String column = "reading (MB/s),writing (MB/s),duplicates found,chunks written,dedup rate\r\n";
 			out.write(column.getBytes());
 			out.flush();
-		while(!stopped) {
-			try{
-				Thread.sleep(sleeptime*1000);
-				double difMBRead = (HashChunkService.getKBytesRead() - lastMBRead)/1024;
-				double difMBWrite =  (HashChunkService.getKBytesWrite() - lastMBWrite)/1024;
-				double dedupRate = ((double)HashChunkService.getDupsFound()/((double)HashChunkService.getDupsFound() + (double)HashChunkService.getChunksWritten()));
-				lastMBWrite = HashChunkService.getKBytesWrite();
-				lastMBRead = HashChunkService.getKBytesRead();
-				String csvStr = df.format((difMBRead)/sleeptime) + "," + df.format((difMBWrite)/sleeptime)  + "," +
-				HashChunkService.getDupsFound() + "," + HashChunkService.getChunksWritten() + "," + dfp.format(dedupRate) + "\r\n";
-				out.write(csvStr.getBytes());
-				out.flush();
-			}catch(Exception e) {
-				e.printStackTrace();
+			while (!stopped) {
+				try {
+					Thread.sleep(sleeptime * 1000);
+					double difMBRead = (HashChunkService.getKBytesRead() - lastMBRead) / 1024;
+					double difMBWrite = (HashChunkService.getKBytesWrite() - lastMBWrite) / 1024;
+					double dedupRate = ((double) HashChunkService
+							.getDupsFound() / ((double) HashChunkService
+							.getDupsFound() + (double) HashChunkService
+							.getChunksWritten()));
+					lastMBWrite = HashChunkService.getKBytesWrite();
+					lastMBRead = HashChunkService.getKBytesRead();
+					String csvStr = df.format((difMBRead) / sleeptime) + ","
+							+ df.format((difMBWrite) / sleeptime) + ","
+							+ HashChunkService.getDupsFound() + ","
+							+ HashChunkService.getChunksWritten() + ","
+							+ dfp.format(dedupRate) + "\r\n";
+					out.write(csvStr.getBytes());
+					out.flush();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
-			
-		}
-		}catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
@@ -53,9 +59,9 @@ public class IOMeter implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
-	
+
 	public void stop() {
 		this.stopped = true;
 	}

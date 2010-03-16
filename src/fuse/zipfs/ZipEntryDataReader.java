@@ -20,115 +20,97 @@ import java.util.zip.ZipFile;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+public class ZipEntryDataReader {
+	private static final Log log = LogFactory.getLog(ZipEntryDataReader.class);
 
-public class ZipEntryDataReader
-{
-   private static final Log log = LogFactory.getLog(ZipEntryDataReader.class);
+	private static final int bufferSize = 8192;
 
-   private static final int bufferSize = 8192;
+	private ZipFile zipFile;
+	private ZipEntry zipEntry;
+	private BufferedInputStream zipStream;
+	private long zipPos;
+	private long zipMarkPos;
 
-   private ZipFile zipFile;
-   private ZipEntry zipEntry;
-   private BufferedInputStream zipStream;
-   private long zipPos;
-   private long zipMarkPos;
+	public ZipEntryDataReader(ZipFile zipFile, ZipEntry zipEntry) {
+		this.zipFile = zipFile;
+		this.zipEntry = zipEntry;
+	}
 
-   public ZipEntryDataReader(ZipFile zipFile, ZipEntry zipEntry)
-   {
-      this.zipFile = zipFile;
-      this.zipEntry = zipEntry;
-   }
+	public synchronized void read(ByteBuffer bb, long offset)
+			throws FuseException {
+		BufferedInputStream in = getZipStream(offset, bb.capacity());
 
-   public synchronized void read(ByteBuffer bb, long offset) throws FuseException
-   {
-      BufferedInputStream in = getZipStream(offset, bb.capacity());
+		// EOF?
+		if (in == null)
+			return;
 
-      // EOF?
-      if (in == null)
-         return;
+		byte[] buff = new byte[bb.capacity()];
+		int nread;
+		try {
+			nread = in.read(buff);
+		} catch (IOException e) {
+			throw new FuseException("IO error", e).initErrno(FuseException.EIO);
+		}
 
-      byte[] buff = new byte[bb.capacity()];
-      int nread;
-      try
-      {
-         nread = in.read(buff);
-      }
-      catch (IOException e)
-      {
-         throw new FuseException("IO error", e).initErrno(FuseException.EIO);
-      }
+		if (nread > 0) {
+			zipPos += nread;
+			bb.put(buff, 0, nread);
+		}
 
-      if (nread > 0)
-      {
-         zipPos += nread;
-         bb.put(buff, 0, nread);
-      }
+		if (log.isDebugEnabled())
+			log.debug("read " + bb.position() + "/" + bb.capacity()
+					+ " requested bytes");
+	}
 
-      if (log.isDebugEnabled())
-         log.debug("read " + bb.position() + "/" + bb.capacity() + " requested bytes");
-   }
+	private BufferedInputStream getZipStream(long offset, int length)
+			throws FuseException {
+		try {
+			while (true) {
+				if (zipStream == null) {
+					zipStream = new BufferedInputStream(zipFile
+							.getInputStream(zipEntry), bufferSize);
+					zipPos = 0;
+					zipStream.mark(bufferSize);
+					zipMarkPos = 0;
+				}
 
+				if (offset == zipPos) {
+					zipStream.mark(bufferSize);
+					zipMarkPos = zipPos;
 
-   private BufferedInputStream getZipStream(long offset, int length) throws FuseException
-   {
-      try
-      {
-         while (true)
-         {
-            if (zipStream == null)
-            {
-               zipStream = new BufferedInputStream(zipFile.getInputStream(zipEntry), bufferSize);
-               zipPos = 0;
-               zipStream.mark(bufferSize);
-               zipMarkPos = 0;
-            }
+					return zipStream;
+				}
 
-            if (offset == zipPos)
-            {
-               zipStream.mark(bufferSize);
-               zipMarkPos = zipPos;
+				while (offset > zipPos) {
+					zipStream.mark(bufferSize);
+					zipMarkPos = zipPos;
 
-               return zipStream;
-            }
+					long nSkiped = zipStream.skip(offset - zipPos);
+					if (nSkiped == 0)
+						return null; // premature EOF
 
-            while (offset > zipPos)
-            {
-               zipStream.mark(bufferSize);
-               zipMarkPos = zipPos;
+					zipPos += nSkiped;
+				}
 
-               long nSkiped = zipStream.skip(offset - zipPos);
-               if (nSkiped == 0)
-                  return null; // premature EOF
+				if (offset == zipPos)
+					return zipStream;
 
-               zipPos += nSkiped;
-            }
+				if (offset >= zipMarkPos) {
+					try {
+						zipStream.reset();
+						zipPos = zipMarkPos;
+						continue;
+					} catch (IOException e) {
+						// mark has been invalidated - can't go back
+					}
+				}
 
-            if (offset == zipPos)
-               return zipStream;
-
-            if (offset >= zipMarkPos)
-            {
-               try
-               {
-                  zipStream.reset();
-                  zipPos = zipMarkPos;
-                  continue;
-               }
-               catch (IOException e)
-               {
-                  // mark has been invalidated - can't go back
-               }
-            }
-
-            // can't go back so much - reopen stream
-            zipStream.close();
-            zipStream = null;
-         }
-      }
-      catch (IOException e)
-      {
-         throw new FuseException("IO error", e).initErrno(FuseException.EIO);
-      }
-   }
+				// can't go back so much - reopen stream
+				zipStream.close();
+				zipStream = null;
+			}
+		} catch (IOException e) {
+			throw new FuseException("IO error", e).initErrno(FuseException.EIO);
+		}
+	}
 }
-
