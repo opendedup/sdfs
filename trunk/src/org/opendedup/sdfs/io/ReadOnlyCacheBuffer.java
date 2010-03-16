@@ -12,7 +12,6 @@ import java.nio.file.StandardOpenOption;
 
 import org.opendedup.sdfs.Main;
 
-
 public class ReadOnlyCacheBuffer extends DedupChunk {
 
 	byte[] fileContents = null;
@@ -40,7 +39,7 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 			blockFile = null;
 			sb = null;
 		}
-		if(this.fileContents == null) {
+		if (this.fileContents == null) {
 			this.fileContents = dk.getChunk();
 		}
 	}
@@ -57,8 +56,8 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 	}
 
 	public byte[] getChunk() throws IOException {
-			return fileContents;
-		
+		return fileContents;
+
 	}
 
 }

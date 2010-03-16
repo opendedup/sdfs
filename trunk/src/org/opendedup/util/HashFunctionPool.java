@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.sdfs.servers.HCServer;
 
-
 public class HashFunctionPool {
 
 	private int poolSize;
@@ -26,8 +25,7 @@ public class HashFunctionPool {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	public HashFunctionPool(int size)
-			{
+	public HashFunctionPool(int size) {
 		this.poolSize = size;
 		this.populatePool();
 	}
@@ -40,7 +38,8 @@ public class HashFunctionPool {
 			} catch (Exception e) {
 				plock.unlock();
 				e.printStackTrace();
-				log.log(Level.SEVERE,"unable to instancial Hash Function pool",e);
+				log.log(Level.SEVERE,
+						"unable to instancial Hash Function pool", e);
 
 			} finally {
 				if (plock.isLocked())
@@ -50,7 +49,7 @@ public class HashFunctionPool {
 	}
 
 	public void activateObject(MessageDigest hc) {
-		
+
 	}
 
 	public boolean validateObject(MessageDigest hc) {
@@ -123,9 +122,11 @@ public class HashFunctionPool {
 		}
 	}
 
-	public MessageDigest makeObject() throws NoSuchAlgorithmException, NoSuchProviderException {
-		MessageDigest hc = MessageDigest.getInstance("Tiger","BC");
-		log.info("Pool Size is " + (this.passiveObjects.size() + this.activeObjects.size()));
+	public MessageDigest makeObject() throws NoSuchAlgorithmException,
+			NoSuchProviderException {
+		MessageDigest hc = MessageDigest.getInstance("Tiger", "BC");
+		log.info("Pool Size is "
+				+ (this.passiveObjects.size() + this.activeObjects.size()));
 		return hc;
 	}
 

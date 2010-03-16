@@ -9,36 +9,24 @@
 
 package fuse.util;
 
+public abstract class Struct implements Cloneable {
+	public Object clone() {
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			// will not happen
+			throw new RuntimeException(e);
+		}
+	}
 
-public abstract class Struct implements Cloneable
-{
-   public Object clone()
-   {
-      try
-      {
-         return super.clone();
-      }
-      catch (CloneNotSupportedException e)
-      {
-         // will not happen
-         throw new RuntimeException(e);
-      }
-   }
+	public String toString() {
+		StringBuilder sb = new StringBuilder(getClass().getName());
 
-   public String toString()
-   {
-      StringBuilder sb = new StringBuilder(getClass().getName());
+		return sb.append("[ ").append(appendAttributes(sb, false) ? ", " : "")
+				.append("hashCode=").append(hashCode()).append(" ]").toString();
+	}
 
-      return sb
-         .append("[ ")
-         .append(appendAttributes(sb, false)? ", " : "")
-         .append("hashCode=").append(hashCode())
-         .append(" ]")
-         .toString();
-   }
-
-   protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed)
-   {
-      return isPrefixed;
-   }
+	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
+		return isPrefixed;
+	}
 }

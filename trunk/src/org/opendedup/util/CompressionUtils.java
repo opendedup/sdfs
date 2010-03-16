@@ -38,8 +38,6 @@ public class CompressionUtils {
 		byte[] compressedData = bos.toByteArray();
 		return compressedData;
 	}
-	
-	
 
 	public static byte[] decompressZLIB(byte[] input) throws IOException {
 		Inflater decompressor = new Inflater();
@@ -64,18 +62,17 @@ public class CompressionUtils {
 		return decompressedData;
 
 	}
-	
-	public static void main(String [] args) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		String test = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 		/*
-		byte [] tstByte = test.getBytes();
-		System.out.println("Uncompress lenght=" + tstByte.length);
-		byte [] compByte = compress(tstByte);
-		System.out.println("compress lenght=" + compByte.length);
-		byte [] decompByte = decompress(compByte);
-		System.out.println("decompress lenght=" + decompByte.length);
-		String tstOut = new String(decompByte);
-		System.out.println(tstOut + " = " + test);
-		*/
+		 * byte [] tstByte = test.getBytes();
+		 * System.out.println("Uncompress lenght=" + tstByte.length); byte []
+		 * compByte = compress(tstByte); System.out.println("compress lenght=" +
+		 * compByte.length); byte [] decompByte = decompress(compByte);
+		 * System.out.println("decompress lenght=" + decompByte.length); String
+		 * tstOut = new String(decompByte); System.out.println(tstOut + " = " +
+		 * test);
+		 */
 	}
 }

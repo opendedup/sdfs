@@ -32,7 +32,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
 public class HCServiceProxy {
 
 	private static final long KBYTE = 1024L;
@@ -47,8 +46,8 @@ public class HCServiceProxy {
 	// LRUMap(Main.systemReadCacheSize);
 	private static int writePoolPos = 0;
 	private static ReentrantLock readlock = new ReentrantLock();
-	//private static boolean initialized = false;
 
+	// private static boolean initialized = false;
 
 	public static long getChunksFetched() {
 		return -1;
@@ -78,7 +77,8 @@ public class HCServiceProxy {
 			doop = HashChunkService.hashExists(hash);
 			if (!doop && sendChunk) {
 				try {
-					doop = HashChunkService.writeChunk(hash, aContents, 0, Main.CHUNK_LENGTH, false);
+					doop = HashChunkService.writeChunk(hash, aContents, 0,
+							Main.CHUNK_LENGTH, false);
 
 				} catch (Exception e) {
 					throw new IOException(e);

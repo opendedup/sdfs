@@ -12,8 +12,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.servers.HashChunkService;
 
-
-
 public class NetworkHCServer {
 
 	// Declaration section:
@@ -34,56 +32,59 @@ public class NetworkHCServer {
 			System.out.println("Usage: NetworkHCServer <configFile>");
 		} else {
 			ShutdownHook shutdownHook = new ShutdownHook();
-	        Runtime.getRuntime().addShutdownHook(shutdownHook);
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
 			Config.parseHubStoreConfigFile(args[0]);
-		// Initialization section:
-		// Try to open a server socket on port port_number (default 2222)
-		// Note that we can't choose a port less than 1023 if we are not
-		// privileged users (root)
+			// Initialization section:
+			// Try to open a server socket on port port_number (default 2222)
+			// Note that we can't choose a port less than 1023 if we are not
+			// privileged users (root)
 
-		try {
-			InetSocketAddress addr = new InetSocketAddress(Main.serverHostName,Main.serverPort);
-			if(Main.useUDP) {
-				NioUDPServer udpServer = new NioUDPServer();
-			}
-			serverSocket = new ServerSocket();
-			serverSocket.bind(addr);
-			log.info("listening on " + addr.toString());
-			//HashFunctions.insertRecorts(8000000);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println(e);
-		}
-
-		// Create a socket object from the ServerSocket to listen and accept
-		// connections.
-		// Open input and output streams for this socket will be created in
-		// client's thread since every client is served by the server in
-		// an individual thread
-
-		while (true) {
 			try {
-				clientSocket = serverSocket.accept();
-				clientSocket.setKeepAlive(true);
-				clientSocket.setTcpNoDelay(true);
-				new ClientThread(clientSocket).start();
-				
-			} catch (IOException e) {
+				InetSocketAddress addr = new InetSocketAddress(
+						Main.serverHostName, Main.serverPort);
+				if (Main.useUDP) {
+					NioUDPServer udpServer = new NioUDPServer();
+				}
+				serverSocket = new ServerSocket();
+				serverSocket.bind(addr);
+				log.info("listening on " + addr.toString());
+				// HashFunctions.insertRecorts(8000000);
+			} catch (Exception e) {
+				e.printStackTrace();
 				System.out.println(e);
 			}
-		}
+
+			// Create a socket object from the ServerSocket to listen and accept
+			// connections.
+			// Open input and output streams for this socket will be created in
+			// client's thread since every client is served by the server in
+			// an individual thread
+
+			while (true) {
+				try {
+					clientSocket = serverSocket.accept();
+					clientSocket.setKeepAlive(true);
+					clientSocket.setTcpNoDelay(true);
+					new ClientThread(clientSocket).start();
+
+				} catch (IOException e) {
+					System.out.println(e);
+				}
+			}
 		}
 	}
-	
-	
+
 }
 
 class ShutdownHook extends Thread {
-    public void run() {
-        System.out.println("###################### Shutting down StorageHub #################################");
-        System.out.println("###################### Shutting down ChunkStore #################################");
-        FileChunkStore.closeAll();
-        System.out.println("###################### Shutting down HashStore #################################");
-        HashChunkService.close();
-    }
+	public void run() {
+		System.out
+				.println("###################### Shutting down StorageHub #################################");
+		System.out
+				.println("###################### Shutting down ChunkStore #################################");
+		FileChunkStore.closeAll();
+		System.out
+				.println("###################### Shutting down HashStore #################################");
+		HashChunkService.close();
+	}
 }

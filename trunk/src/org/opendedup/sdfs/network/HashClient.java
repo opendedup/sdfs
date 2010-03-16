@@ -11,7 +11,6 @@ import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServer;
 
-
 public class HashClient {
 
 	private Socket clientSocket = null;
@@ -86,7 +85,7 @@ public class HashClient {
 				throw new IOException("unable to execute command");
 			}
 		} finally {
-			if(lock.isLocked())
+			if (lock.isLocked())
 				lock.unlock();
 		}
 	}
@@ -158,16 +157,12 @@ public class HashClient {
 
 		return cmd.wasWritten();
 	}
-	
-	
 
 	public byte[] fetchChunk(byte[] hash) throws IOException {
 		FetchChunkCmd cmd = new FetchChunkCmd(hash, server.isCompress());
 		this.executeCmd(cmd);
 		return cmd.getChunk();
 	}
-	
-	
 
 	public boolean hashExists(byte[] hash) throws IOException {
 		HashExistsCmd cmd = new HashExistsCmd(hash);

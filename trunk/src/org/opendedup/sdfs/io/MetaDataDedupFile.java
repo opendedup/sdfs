@@ -2,7 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,9 +20,9 @@ import org.opendedup.sdfs.monitor.IOMonitor;
 
 /**
  * 
- * @author annesam
- *	Stores Meta-Data about a dedupFile. This class is modeled from the java.io.File class. Meta-Data files are stored
- *  within the MetaDataFileStore @see com.annesam.filestore.MetaDataFileStore
+ * @author annesam Stores Meta-Data about a dedupFile. This class is modeled
+ *         from the java.io.File class. Meta-Data files are stored within the
+ *         MetaDataFileStore @see com.annesam.filestore.MetaDataFileStore
  */
 public class MetaDataDedupFile implements java.io.Serializable {
 
@@ -56,9 +55,9 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	private int permissions;
 	private int owner_id;
 	private int group_id;
-	private HashMap<String,String> extendedAttrs = new HashMap<String,String>();
+	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
-	
+
 	/**
 	 * 
 	 * @return true if all chunks within the file will be deduped.
@@ -69,10 +68,12 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param dedup if true all chunks will be deduped, Otherwise chunks will be deduped opportunistically.
+	 * @param dedup
+	 *            if true all chunks will be deduped, Otherwise chunks will be
+	 *            deduped opportunistically.
 	 */
 	public void setDedup(boolean dedupNow) {
-		if(!this.dedup && dedupNow) {
+		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
 				this.getDedupFile().optimize(this.length);
@@ -86,40 +87,44 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * adds a posix extended attribute
-	 * @param name the name of the attribute
-	 * @param value the value of the attribute
+	 * 
+	 * @param name
+	 *            the name of the attribute
+	 * @param value
+	 *            the value of the attribute
 	 */
-	public void addXAttribute(String name,String value) {
+	public void addXAttribute(String name, String value) {
 		extendedAttrs.put(name, value);
 	}
-	
+
 	/**
 	 * returns an extended attribute for a give name
-	 * @param name 
+	 * 
+	 * @param name
 	 * @return the extended attribute
 	 */
 	public String getXAttribute(String name) {
-		if(this.extendedAttrs.containsKey(name))
+		if (this.extendedAttrs.containsKey(name))
 			return extendedAttrs.get(name);
 		else
 			return "-1";
 	}
-	
+
 	/**
 	 * 
 	 * @return list of all extended attribute names
 	 */
-	public String [] getXAttersNames() {
-		String [] keys = new String [this.extendedAttrs.size()];
+	public String[] getXAttersNames() {
+		String[] keys = new String[this.extendedAttrs.size()];
 		Iterator<String> iter = this.extendedAttrs.keySet().iterator();
 		int i = 0;
-		while(iter.hasNext()) {
+		while (iter.hasNext()) {
 			keys[i] = iter.next();
 			i++;
 		}
 		return keys;
 	}
-	
+
 	/**
 	 * 
 	 * @return posix permissions e.g. 0777
@@ -130,7 +135,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param permissions sets permissions
+	 * @param permissions
+	 *            sets permissions
 	 */
 	public void setPermissions(int permissions) {
 		this.permissions = permissions;
@@ -146,7 +152,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param owner_id sets the file owner id
+	 * @param owner_id
+	 *            sets the file owner id
 	 */
 	public void setOwner_id(int owner_id) {
 		this.owner_id = owner_id;
@@ -162,7 +169,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param group_id sets the group owner id
+	 * @param group_id
+	 *            sets the group owner id
 	 */
 	public void setGroup_id(int group_id) {
 		this.group_id = group_id;
@@ -170,7 +178,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param data sets the VMDK specific data for this file
+	 * @param data
+	 *            sets the VMDK specific data for this file
 	 */
 	public void setVmdkData(VMDKData data) {
 		this.vmdkData = data;
@@ -194,7 +203,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param vmdk flags this file as a vmdk if true
+	 * @param vmdk
+	 *            flags this file as a vmdk if true
 	 */
 	public void setVmdk(boolean vmdk) {
 		this.vmdk = vmdk;
@@ -205,7 +215,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @return returns the IOMonitor for this file. IOMonitors monitor reads,writes, and dedup rate.
+	 * @return returns the IOMonitor for this file. IOMonitors monitor
+	 *         reads,writes, and dedup rate.
 	 */
 	public IOMonitor getIOMonitor() {
 		if (monitor == null)
@@ -215,17 +226,19 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param path the path to the dedup file.
+	 * @param path
+	 *            the path to the dedup file.
 	 */
 	public MetaDataDedupFile(String path) {
 		init(path);
 	}
 
-	
 	/**
 	 * 
-	 * @param parent parent folder
-	 * @param child the file name
+	 * @param parent
+	 *            parent folder
+	 * @param child
+	 *            the file name
 	 */
 	public MetaDataDedupFile(String parent, String child) {
 		String pth = parent + File.separator + child;
@@ -234,8 +247,10 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param parent the parent folder
-	 * @param child the file name
+	 * @param parent
+	 *            the parent folder
+	 * @param child
+	 *            the file name
 	 */
 	public MetaDataDedupFile(File parent, String child) {
 		String pth = parent.getAbsolutePath() + File.separator + child;
@@ -244,20 +259,20 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @return the DedupFile associated with this file. It will create one if it does not already exist.
+	 * @return the DedupFile associated with this file. It will create one if it
+	 *         does not already exist.
 	 * @throws IOException
 	 */
-	
-	
+
 	public synchronized DedupFile getDedupFile() throws IOException {
 		if (this.dfGuid == null) {
 			DedupFile df = DedupFileStore.getDedupFile(this);
 			this.dfGuid = df.getGUID();
-			log.info("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
+			log.info("No DF EXISTS .... Set dedup file for " + this.getPath()
+					+ " to " + this.dfGuid);
 			this.sync();
 			return df;
-		}
-		else {
+		} else {
 			return DedupFileStore.getDedupFile(this);
 		}
 	}
@@ -272,8 +287,12 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * Clones a file and the underlying DedupFile
-	 * @param snaptoPath the path to clone to
-	 * @param overwrite if true, it will overwrite the destination file if it alreay exists
+	 * 
+	 * @param snaptoPath
+	 *            the path to clone to
+	 * @param overwrite
+	 *            if true, it will overwrite the destination file if it alreay
+	 *            exists
 	 * @return the new clone
 	 * @throws IOException
 	 */
@@ -329,7 +348,9 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * initiates the MetaDataDedupFile
-	 * @param path the path to the file
+	 * 
+	 * @param path
+	 *            the path to the file
 	 */
 	private void init(String path) {
 		this.lastAccessed = System.currentTimeMillis();
@@ -359,8 +380,10 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	}
 
 	/**
-	 * Writes the stub for this file to disk. Stubs are pointers written to a file system that map to virtual filesystem directory
-	 * and file structure. The stub only contains the guid associated with the file in question.
+	 * Writes the stub for this file to disk. Stubs are pointers written to a
+	 * file system that map to virtual filesystem directory and file structure.
+	 * The stub only contains the guid associated with the file in question.
+	 * 
 	 * @return true if written
 	 */
 	private boolean writeStub() {
@@ -391,6 +414,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * Reads the guid from the stub file
+	 * 
 	 * @return the guid associated with the file.
 	 * @throws IOException
 	 */
@@ -404,6 +428,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * Serializes the file to the MetaFileStore
+	 * 
 	 * @return true if serialized
 	 */
 	private boolean unmarshal() {
@@ -445,8 +470,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 				this.group_id = df.getGroup_id();
 				this.monitor = df.getIOMonitor();
 				df = null;
-			}
-			else{
+			} else {
 				log.severe("unable to find metafile for " + this.path);
 			}
 		} catch (IOException e) {
@@ -468,7 +492,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 * @return time when file was last modified
 	 */
 	public long lastModified() {
-		if(this.isDirectory())
+		if (this.isDirectory())
 			return new File(this.path).lastModified();
 		return lastModified;
 	}
@@ -491,7 +515,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param hidden true if hidden
+	 * @param hidden
+	 *            true if hidden
 	 */
 	public void setHidden(boolean hidden) {
 		this.hidden = hidden;
@@ -500,7 +525,9 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param removeMeta if true removes the file, otherwise it will remove just the cached object from the MetaFileStore.
+	 * @param removeMeta
+	 *            if true removes the file, otherwise it will remove just the
+	 *            cached object from the MetaFileStore.
 	 * @return true if done
 	 */
 	public synchronized boolean delete(boolean removeMeta) {
@@ -517,7 +544,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Main.volume.updateCurrentSize(-1*this.length());
+		Main.volume.updateCurrentSize(-1 * this.length());
 		File f = new File(this.path);
 		return f.delete();
 	}
@@ -529,10 +556,11 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	public boolean delete() {
 		return this.delete(true);
 	}
-	
+
 	/**
 	 * 
-	 * @param df the DedupFile that will be referenced within this file
+	 * @param df
+	 *            the DedupFile that will be referenced within this file
 	 */
 	protected void setDedupFile(DedupFile df) {
 		this.dfGuid = df.getGUID();
@@ -564,7 +592,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @return the children as MetaDataDedupFiles or null if it is not a directory
+	 * @return the children as MetaDataDedupFiles or null if it is not a
+	 *         directory
 	 */
 	public MetaDataDedupFile[] listFiles() {
 		File f = new File(this.path);
@@ -600,8 +629,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		} else {
 			try {
 				dest.delete();
-			}catch(Exception e) {
-				
+			} catch (Exception e) {
+
 			}
 			boolean rename = f.renameTo(new File(dest.getPath()));
 			if (rename) {
@@ -756,7 +785,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param filePath the path to the file
+	 * @param filePath
+	 *            the path to the file
 	 * @return true if the file exists
 	 */
 	public static boolean exists(String filePath) {
@@ -778,7 +808,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	public void sync() {
 		this.unmarshal();
 	}
-	
+
 	/**
 	 * 
 	 * @param lastAccessed

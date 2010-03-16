@@ -9,78 +9,60 @@
 
 package fuse.zipfs.util;
 
+public class Tree {
+	Node rootNode;
 
-public class Tree
-{
-   Node rootNode;
+	public Tree() {
+		rootNode = new Node();
+		rootNode.setName("$ROOT");
+		rootNode.setParent(rootNode);
+	}
 
-   public Tree()
-   {
-      rootNode = new Node();
-      rootNode.setName("$ROOT");
-      rootNode.setParent(rootNode);
-   }
+	public void addNode(String path, Object value) {
+		Node node = rootNode;
+		String[] pathParts = path.split("/");
 
-   public void addNode(String path, Object value)
-   {
-      Node node = rootNode;
-      String[] pathParts = path.split("/");
+		for (int i = 0; i < pathParts.length; i++) {
+			String pathPart = pathParts[i];
+			if (pathPart.equals("") || pathPart.equals(".")) {
+				// the same node
+			} else if (pathPart.equals("..")) {
+				// parent node
+				node = node.getParent();
+			} else {
+				Node childNode = node.getChild(pathPart);
+				if (childNode == null) {
+					childNode = new Node();
+					childNode.setName(pathPart);
+					childNode.setParent(node);
+					node.addChild(childNode);
+				}
+				node = childNode;
+			}
+		}
 
-      for (int i = 0; i < pathParts.length; i++)
-      {
-         String pathPart = pathParts[i];
-         if (pathPart.equals("") || pathPart.equals("."))
-         {
-            // the same node
-         }
-         else if (pathPart.equals(".."))
-         {
-            // parent node
-            node = node.getParent();
-         }
-         else
-         {
-            Node childNode = node.getChild(pathPart);
-            if (childNode == null)
-            {
-               childNode = new Node();
-               childNode.setName(pathPart);
-               childNode.setParent(node);
-               node.addChild(childNode);
-            }
-            node = childNode;
-         }
-      }
+		node.setValue(value);
+	}
 
-      node.setValue(value);
-   }
+	public Node lookupNode(String path) {
+		Node node = rootNode;
+		String[] pathParts = path.split("/");
 
-   public Node lookupNode(String path)
-   {
-      Node node = rootNode;
-      String[] pathParts = path.split("/");
+		for (int i = 0; i < pathParts.length; i++) {
+			String pathPart = pathParts[i];
+			if (pathPart.equals("") || pathPart.equals(".")) {
+				// the same node
+			} else if (pathPart.equals("..")) {
+				// parent node
+				node = node.getParent();
+			} else {
+				node = node.getChild(pathPart);
+				if (node == null)
+					break;
+			}
+		}
 
-      for (int i = 0; i < pathParts.length; i++)
-      {
-         String pathPart = pathParts[i];
-         if (pathPart.equals("") || pathPart.equals("."))
-         {
-            // the same node
-         }
-         else if (pathPart.equals(".."))
-         {
-            // parent node
-            node = node.getParent();
-         }
-         else
-         {
-            node = node.getChild(pathPart);
-            if (node == null)
-               break;
-         }
-      }
-
-      return node;
-   }
+		return node;
+	}
 
 }

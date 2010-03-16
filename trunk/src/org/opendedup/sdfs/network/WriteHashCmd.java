@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import org.opendedup.util.CompressionUtils;
 
-
 public class WriteHashCmd implements IOCmd {
 	byte[] hash;
 	byte[] aContents;
@@ -15,30 +14,21 @@ public class WriteHashCmd implements IOCmd {
 	boolean written = false;
 	boolean compress = false;
 
-	public WriteHashCmd(byte [] hash, byte[] aContents, int len, boolean compress) throws IOException {
+	public WriteHashCmd(byte[] hash, byte[] aContents, int len, boolean compress)
+			throws IOException {
 		this.hash = hash;
 		this.compress = compress;
 		if (compress) {
 			throw new IOException("not implemented");
 			/*
-			try {
-				byte[] compB = CompressionUtils.compress(aContents);
-				if (compB.length <= aContents.length) {
-					this.aContents = compB;
-					this.len = this.aContents.length;
-				} else {
-					this.compress = false;
-					this.aContents = aContents;
-					this.len = len;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				this.aContents = aContents;
-				this.len = len;
-				this.compress = false;
-			}
-			*/
+			 * try { byte[] compB = CompressionUtils.compress(aContents); if
+			 * (compB.length <= aContents.length) { this.aContents = compB;
+			 * this.len = this.aContents.length; } else { this.compress = false;
+			 * this.aContents = aContents; this.len = len; } } catch
+			 * (IOException e) { // TODO Auto-generated catch block
+			 * e.printStackTrace(); this.aContents = aContents; this.len = len;
+			 * this.compress = false; }
+			 */
 		} else {
 			this.aContents = aContents;
 			this.len = len;

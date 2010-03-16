@@ -9,25 +9,20 @@
 
 package fuse.staticfs;
 
+public class ReadOnlySymlinkNode extends SymlinkNode {
+	private String target;
 
-public class ReadOnlySymlinkNode extends SymlinkNode
-{
-   private String target;
+	public ReadOnlySymlinkNode(String name, String target) {
+		super(name);
 
-   public ReadOnlySymlinkNode(String name, String target)
-   {
-      super(name);
-      
-      this.target = target;
-   }
+		this.target = target;
+	}
 
-   public synchronized String getTarget()
-   {
-      return target;
-   }
+	public synchronized String getTarget() {
+		return target;
+	}
 
-   public synchronized void setTarget(String target)
-   {
-      this.target = target;
-   }
+	public synchronized void setTarget(String target) {
+		this.target = target;
+	}
 }

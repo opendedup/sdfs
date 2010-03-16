@@ -11,55 +11,45 @@ package fuse.staticfs;
 
 import fuse.compat.FuseStat;
 
+public abstract class Node {
+	private String name;
+	private FuseStat stat;
+	private DirectoryNode parent;
 
-public abstract class Node
-{
-   private String name;
-   private FuseStat stat;
-   private DirectoryNode parent;
+	public Node(String name) {
+		this.name = name;
+		stat = createStat();
+	}
 
+	// to be implemented by subclasses
 
-   public Node(String name)
-   {
-      this.name = name;
-      stat = createStat();
-   }
+	protected abstract FuseStat createStat();
 
-   // to be implemented by subclasses
+	// public API
 
-   protected abstract FuseStat createStat();
+	public synchronized String getName() {
+		return name;
+	}
 
-   // public API
+	public synchronized void setName(String name) {
+		this.name = name;
+	}
 
-   public synchronized String getName()
-   {
-      return name;
-   }
+	public synchronized FuseStat getStat() {
+		return stat;
+	}
 
-   public synchronized void setName(String name)
-   {
-      this.name = name;
-   }
+	public synchronized void setStat(FuseStat stat) {
+		this.stat = stat;
+	}
 
-   public synchronized FuseStat getStat()
-   {
-      return stat;
-   }
+	public synchronized DirectoryNode getParent() {
+		return parent;
+	}
 
-   public synchronized void setStat(FuseStat stat)
-   {
-      this.stat = stat;
-   }
+	// just for fuse.staticfs internal usage
 
-   public synchronized DirectoryNode getParent()
-   {
-      return parent;
-   }
-
-   // just for fuse.staticfs internal usage
-
-   synchronized void setParent(DirectoryNode parent)
-   {
-      this.parent = parent;
-   }
+	synchronized void setParent(DirectoryNode parent) {
+		this.parent = parent;
+	}
 }

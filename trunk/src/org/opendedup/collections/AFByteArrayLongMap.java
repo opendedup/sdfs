@@ -19,7 +19,6 @@ import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
-
 public class AFByteArrayLongMap implements AbstractMap {
 	ByteBuffer values = null;
 	ByteBuffer keys = null;
@@ -93,7 +92,7 @@ public class AFByteArrayLongMap implements AbstractMap {
 		}
 		return null;
 	}
-	
+
 	public byte[] nextClaimedKey(boolean clearClaim) {
 		this.hashlock.lock();
 		try {
@@ -102,14 +101,14 @@ public class AFByteArrayLongMap implements AbstractMap {
 			while (iterPos < this.keys.capacity()) {
 				this.keys.position(iterPos);
 				this.keys.get(key);
-				int cp = this.iterPos; 
+				int cp = this.iterPos;
 				this.iterPos = this.keys.position();
 				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					claims.position(cp/FREE.length);
-					if(claims.get() == 1) {
-						if(clearClaim) {
-							claims.position(cp/FREE.length);
-							claims.put((byte)0);
+					claims.position(cp / FREE.length);
+					if (claims.get() == 1) {
+						if (clearClaim) {
+							claims.position(cp / FREE.length);
+							claims.put((byte) 0);
 						}
 						return key;
 					}
@@ -154,7 +153,7 @@ public class AFByteArrayLongMap implements AbstractMap {
 				keys.put(FREE);
 				kBuf.put(FREE);
 				values.putLong(-1);
-				this.claims.put((byte)0);
+				this.claims.put((byte) 0);
 				kBuf.putLong(-1);
 			}
 			this.flushBuffer(true);
@@ -205,9 +204,9 @@ public class AFByteArrayLongMap implements AbstractMap {
 		try {
 			this.hashlock.lock();
 			int idx = index(key);
-			if(idx >= 0) {
-				this.claims.position(idx/FREE.length);
-				this.claims.put((byte)0);
+			if (idx >= 0) {
+				this.claims.position(idx / FREE.length);
+				this.claims.put((byte) 0);
 				return true;
 			}
 			return false;

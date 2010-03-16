@@ -19,9 +19,10 @@ class ShutdownHook extends Thread {
 		System.out.println("All Data Flushed");
 		System.out.println("SDFS Shut Down Cleanly");
 		try {
-		Process p = Runtime.getRuntime().exec("umount " + mountPoint);
-		p.waitFor();
-		}catch(Exception e) {}
-		
+			Process p = Runtime.getRuntime().exec("umount " + mountPoint);
+			p.waitFor();
+		} catch (Exception e) {
+		}
+
 	}
 }

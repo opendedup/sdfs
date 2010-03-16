@@ -200,29 +200,20 @@ public class FileChunkStore implements AbstractChunkStore {
 		reservePositionlock.unlock();
 		return pos;
 	}
-	
-	
-	public void claimChunk(byte [] hash,long pos) throws IOException {
-	/*
-		RandomAccessFile raf = new RandomAccessFile(this.meta_location, "rw");
-		FileChannel ch = raf.getChannel();
-		raf.seek((pos / pageSize) * metaPageSize);
-		byte [] raw = new byte[ChunkMetaData.RAWDL];
-		raf.read(raw);
-		ChunkMetaData cm = new ChunkMetaData(raw);
-		cm.setmDelete(false);
-		cm.setLastClaimed(System.currentTimeMillis());
-		ch.position((pos / pageSize) * metaPageSize);
-		ch.write(cm.getBytes());
-		ch.close();
-		raf.close();
-		ch = null;
-		raf = null;
-		raw = null;
-		cm = null;
-		*/
+
+	public void claimChunk(byte[] hash, long pos) throws IOException {
+		/*
+		 * RandomAccessFile raf = new RandomAccessFile(this.meta_location,
+		 * "rw"); FileChannel ch = raf.getChannel(); raf.seek((pos / pageSize) *
+		 * metaPageSize); byte [] raw = new byte[ChunkMetaData.RAWDL];
+		 * raf.read(raw); ChunkMetaData cm = new ChunkMetaData(raw);
+		 * cm.setmDelete(false); cm.setLastClaimed(System.currentTimeMillis());
+		 * ch.position((pos / pageSize) * metaPageSize);
+		 * ch.write(cm.getBytes()); ch.close(); raf.close(); ch = null; raf =
+		 * null; raw = null; cm = null;
+		 */
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -337,9 +328,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	public synchronized void expandFile(long length) throws IOException {
 		if (this.chunkDataWriter.length() < length) {
-			log.info("########### Pre-Allocating Chunkstore to size " + length + " ###################");
-			log.info("########### Pre-Allocation may take a while ####################################");
-			byte[] FREE = new byte[32768*4];
+			log.info("########### Pre-Allocating Chunkstore to size " + length
+					+ " ###################");
+			log
+					.info("########### Pre-Allocation may take a while ####################################");
+			byte[] FREE = new byte[32768 * 4];
 			Arrays.fill(FREE, (byte) 0);
 			this.chunkDataWriter.seek(0);
 			long written = 0;
@@ -347,7 +340,8 @@ public class FileChunkStore implements AbstractChunkStore {
 				this.chunkDataWriter.write(FREE);
 				written = written + FREE.length;
 			}
-			log.info("############ Pre-Allocated Chunkstore to size " + length + "####################");
+			log.info("############ Pre-Allocated Chunkstore to size " + length
+					+ "####################");
 		}
 		this.chunkDataWriter.seek(0);
 
@@ -374,14 +368,16 @@ public class FileChunkStore implements AbstractChunkStore {
 			long newLocation, int length) throws IOException {
 		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
 				this);
-		this.listeners.get(HashChunkService.getHashRoute(hash)).chunkMovedEvent(evt);
+		this.listeners.get(HashChunkService.getHashRoute(hash))
+				.chunkMovedEvent(evt);
 	}
-	
+
 	private void fireChunkRemovedEvent(byte[] hash, long oldLocation,
 			long newLocation, int length) throws IOException {
 		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
 				this);
-		this.listeners.get(HashChunkService.getHashRoute(hash)).chunkMovedEvent(evt);
+		this.listeners.get(HashChunkService.getHashRoute(hash))
+				.chunkMovedEvent(evt);
 	}
 
 	public void close() throws IOException {

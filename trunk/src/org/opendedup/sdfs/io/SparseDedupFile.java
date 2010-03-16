@@ -2,7 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.Security;
@@ -39,7 +38,8 @@ public class SparseDedupFile implements DedupFile {
 	private transient String chunkStorePath = null;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
-	private static HashFunctionPool hashPool = new HashFunctionPool(Main.writeThreads +1);
+	private static HashFunctionPool hashPool = new HashFunctionPool(
+			Main.writeThreads + 1);
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
@@ -120,8 +120,7 @@ public class SparseDedupFile implements DedupFile {
 			for (int i = 0; i < numChks; i++) {
 				int pos = i * Main.CHUNK_LENGTH;
 				SparseDataChunk chunk = new SparseDataChunk(true,
-						Main.blankHash, false, System
-								.currentTimeMillis());
+						Main.blankHash, false, System.currentTimeMillis());
 				bdb.put(pos, chunk.getBytes());
 			}
 			mf.setLength(len, true);
@@ -194,9 +193,9 @@ public class SparseDedupFile implements DedupFile {
 			byte[] hash = null;
 			try {
 				hash = hc.digest(writeBuffer.getChunk());
-			}catch(Exception e) {
+			} catch (Exception e) {
 				throw new IOException(e);
-			}finally {
+			} finally {
 				hashPool.returnObject(hc);
 			}
 
@@ -271,22 +270,16 @@ public class SparseDedupFile implements DedupFile {
 			long filePosition = writeBuffer.getFilePosition();
 			SparseDataChunk chunk = null;
 			if (mf.isDedup() || doop) {
-				chunk = new SparseDataChunk(doop, hash,
-						false, System.currentTimeMillis());
+				chunk = new SparseDataChunk(doop, hash, false, System
+						.currentTimeMillis());
 				/*
-				if(!mf.isDedup()) {
-					try {
-						chunkStore.lockCollection();
-						chunkStore.remove(filePosition, false);
-					}catch(Exception e) {}
-					finally {
-						chunkStore.unlockCollection();
-					}
-				}
-				*/
+				 * if(!mf.isDedup()) { try { chunkStore.lockCollection();
+				 * chunkStore.remove(filePosition, false); }catch(Exception e)
+				 * {} finally { chunkStore.unlockCollection(); } }
+				 */
 			} else {
-				chunk = new SparseDataChunk(doop, hash,
-						true, System.currentTimeMillis());
+				chunk = new SparseDataChunk(doop, hash, true, System
+						.currentTimeMillis());
 				this.chunkStore.put(filePosition, writeBuffer.getChunk());
 			}
 			bdb.put(filePosition, chunk.getBytes());
@@ -579,7 +572,8 @@ public class SparseDedupFile implements DedupFile {
 				}
 				this.chunkStore = new LargeLongByteArrayMap(dbc.getPath(),
 						(long) -1, Main.CHUNK_LENGTH);
-				this.bdb = new LongByteArrayMap(1+Main.hashLength+1+8, this.databasePath);
+				this.bdb = new LongByteArrayMap(1 + Main.hashLength + 1 + 8,
+						this.databasePath);
 				// bdb.tune(1000000, -1, -1, 0);
 				DedupFileStore.addOpenDedupFile(this);
 			} catch (Exception except) {
@@ -620,7 +614,8 @@ public class SparseDedupFile implements DedupFile {
 							chunk, Main.CHUNK_LENGTH, Main.CHUNK_LENGTH, mf
 									.isDedup());
 
-					DedupChunk ck = new DedupChunk(pck.getHash(), chunk, l, Main.CHUNK_LENGTH);
+					DedupChunk ck = new DedupChunk(pck.getHash(), chunk, l,
+							Main.CHUNK_LENGTH);
 					writeBuffer = new WritableCacheBuffer(ck, this);
 					this.updateMap(writeBuffer, writeBuffer.getHash(), doop);
 					ck = null;
@@ -714,11 +709,12 @@ public class SparseDedupFile implements DedupFile {
 				// ByteString data = pck.getData();
 				boolean dataEmpty = !pck.isLocalData();
 				if (dataEmpty) {
-					ck = new DedupChunk(pck.getHash(), place, Main.CHUNK_LENGTH,
-							false);
+					ck = new DedupChunk(pck.getHash(), place,
+							Main.CHUNK_LENGTH, false);
 				} else {
 					byte dk[] = chunkStore.get(place);
-					ck = new DedupChunk(pck.getHash(), dk, place, Main.CHUNK_LENGTH);
+					ck = new DedupChunk(pck.getHash(), dk, place,
+							Main.CHUNK_LENGTH);
 				}
 				pck = null;
 

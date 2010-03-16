@@ -2,7 +2,6 @@ package org.opendedup.sdfs.network;
 
 import java.io.*;
 
-
 import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,12 +13,12 @@ import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.StringUtils;
 
-
-
 /**
- * @author Sam Silverberg
- * This is the network class that is used within the Chunk store to service all client requests and responses. It is threaded and
- *  is spawned by @see com.annesam.sdfs.network.NetworkHCServer when a new TCP connect in accepted.  
+ * @author Sam Silverberg This is the network class that is used within the
+ *         Chunk store to service all client requests and responses. It is
+ *         threaded and is spawned by @see
+ *         com.annesam.sdfs.network.NetworkHCServer when a new TCP connect in
+ *         accepted.
  */
 
 class ClientThread extends Thread {
@@ -49,7 +48,7 @@ class ClientThread extends Thread {
 		try {
 			// is = new DataInputStream(clientSocket.getInputStream());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					clientSocket.getInputStream()), 32768 *2);
+					clientSocket.getInputStream()), 32768 * 2);
 			DataInputStream is = new DataInputStream(new BufferedInputStream(
 					clientSocket.getInputStream(), 32768 * 2));
 			os = new DataOutputStream(new BufferedOutputStream(clientSocket
@@ -76,11 +75,11 @@ class ClientThread extends Thread {
 							os.flush();
 							writelock.unlock();
 						} catch (IOException e) {
-							if(writelock.isLocked())
+							if (writelock.isLocked())
 								writelock.unlock();
 							throw new IOException(e.toString());
 						} finally {
-							
+
 						}
 
 					}
@@ -105,11 +104,11 @@ class ClientThread extends Thread {
 							os.flush();
 							writelock.unlock();
 						} catch (IOException e) {
-							if(writelock.isLocked())
+							if (writelock.isLocked())
 								writelock.unlock();
 							throw new IOException(e.toString());
 						} finally {
-							
+
 						}
 					}
 					if (cmd == NetworkCMDS.FETCH_CMD
@@ -122,43 +121,33 @@ class ClientThread extends Thread {
 							if (cmd == NetworkCMDS.FETCH_COMPRESSED_CMD
 									&& !dChunk.isCompressed()) {
 								/*
-								byte[] cChunk = CompressionUtils
-										.compress(dChunk.getData());
-								try {
-									writelock.lock();
-									os.writeInt(cChunk.length);
-									os.write(cChunk);
-									os.flush();
-									writelock.unlock();
-								} catch (IOException e) {
-									if(writelock.isLocked())
-										writelock.unlock();
-									throw new IOException(e.toString());
-								} finally {
-									
-								}
-								*/
+								 * byte[] cChunk = CompressionUtils
+								 * .compress(dChunk.getData()); try {
+								 * writelock.lock(); os.writeInt(cChunk.length);
+								 * os.write(cChunk); os.flush();
+								 * writelock.unlock(); } catch (IOException e) {
+								 * if(writelock.isLocked()) writelock.unlock();
+								 * throw new IOException(e.toString()); }
+								 * finally {
+								 * 
+								 * }
+								 */
 								throw new Exception("not implemented");
 							} else if (cmd == NetworkCMDS.FETCH_CMD
 									&& dChunk.isCompressed()) {
 								/*
-								byte[] cChunk = CompressionUtils
-										.decompress(dChunk.getData());
-								
-								try {
-									writelock.lock();
-									os.writeInt(cChunk.length);
-									os.write(cChunk);
-									os.flush();
-									writelock.unlock();
-								} catch (IOException e) {
-									if(writelock.isLocked())
-										writelock.unlock();
-									throw new IOException(e.toString());
-								} finally {
-									
-								}
-								*/
+								 * byte[] cChunk = CompressionUtils
+								 * .decompress(dChunk.getData());
+								 * 
+								 * try { writelock.lock();
+								 * os.writeInt(cChunk.length); os.write(cChunk);
+								 * os.flush(); writelock.unlock(); } catch
+								 * (IOException e) { if(writelock.isLocked())
+								 * writelock.unlock(); throw new
+								 * IOException(e.toString()); } finally {
+								 * 
+								 * }
+								 */
 								throw new IOException("Not implemented");
 							} else {
 								try {
@@ -168,26 +157,28 @@ class ClientThread extends Thread {
 									os.flush();
 									writelock.unlock();
 								} catch (IOException e) {
-									if(writelock.isLocked())
+									if (writelock.isLocked())
 										writelock.unlock();
 									throw new IOException(e.toString());
 								} finally {
-									
+
 								}
 							}
 						} catch (NullPointerException e) {
-							log.warning("chunk " + StringUtils.getHexString(hash) + " does not exist");
+							log.warning("chunk "
+									+ StringUtils.getHexString(hash)
+									+ " does not exist");
 							try {
 								writelock.lock();
 								os.writeInt(-1);
 								os.flush();
 								writelock.unlock();
 							} catch (IOException e1) {
-								if(writelock.isLocked())
+								if (writelock.isLocked())
 									writelock.unlock();
 								throw new IOException(e1.toString());
 							} finally {
-								
+
 							}
 						}
 					}
@@ -198,16 +189,16 @@ class ClientThread extends Thread {
 							os.flush();
 							writelock.unlock();
 						} catch (IOException e) {
-							if(writelock.isLocked())
+							if (writelock.isLocked())
 								writelock.unlock();
 							throw new IOException(e.toString());
 						} finally {
-							
+
 						}
 					}
-					
+
 				} catch (Exception e) {
-					log.log(Level.FINEST,"unable to write data", e);
+					log.log(Level.FINEST, "unable to write data", e);
 					try {
 						reader.close();
 					} catch (Exception e1) {

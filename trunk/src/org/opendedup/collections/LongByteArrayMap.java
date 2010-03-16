@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 
-
 public class LongByteArrayMap implements AbstractMap {
 
 	private static Logger log = Logger.getLogger("sdfs");
@@ -44,15 +43,15 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public long nextKey() throws IOException {
-		long pos = (long)iterPos* (long)Main.CHUNK_LENGTH;
-		long fLen = ((this.bdbf.length()*(long)Main.CHUNK_LENGTH)/arrayLength);
-		if(iterPos == 0)
-			log.info("fLen = " + fLen );
+		long pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
+		long fLen = ((this.bdbf.length() * (long) Main.CHUNK_LENGTH) / arrayLength);
+		if (iterPos == 0)
+			log.info("fLen = " + fLen);
 		while (pos <= fLen) {
 			try {
 				try {
 					this.hashlock.lock();
-					pos = (long)iterPos* (long)Main.CHUNK_LENGTH;
+					pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
 					iterPos++;
 				} catch (Exception e1) {
 				} finally {
@@ -69,9 +68,9 @@ public class LongByteArrayMap implements AbstractMap {
 			}
 
 		}
-		if(pos == fLen)
-			log.info("length end " +pos);
-		
+		if (pos == fLen)
+			log.info("length end " + pos);
+
 		return -1;
 	}
 

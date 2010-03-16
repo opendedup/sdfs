@@ -57,7 +57,8 @@ public class FileUtils {
 				smak[8] = 'x';
 
 		}
-		UserPrincipalLookupService look = FileSystems.getDefault().getUserPrincipalLookupService();
+		UserPrincipalLookupService look = FileSystems.getDefault()
+				.getUserPrincipalLookupService();
 		System.out.println(look.lookupPrincipalByName("0").getName());
 		System.out.println(String.copyValueOf(smak));
 		System.out.println(parseFilePermissions(700));
@@ -118,8 +119,9 @@ public class FileUtils {
 		return b.toString();
 
 	}
-	
-	public static void setPermissions(String path, int permissions) throws IOException {
+
+	public static void setPermissions(String path, int permissions)
+			throws IOException {
 		HashSet<PosixFilePermission> set = new HashSet<PosixFilePermission>();
 		char[] smak = parseFilePermissions(permissions).toCharArray();
 		if (smak[0] == 'r')
@@ -161,6 +163,5 @@ public class FileUtils {
 				+ parseFilePermissions(mode.substring(6, 9));
 		return Integer.parseInt(mm);
 	}
-	
 
 }

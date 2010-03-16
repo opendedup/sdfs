@@ -11,27 +11,27 @@ import java.util.logging.Logger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
 
-
 /**
  * 
  * @author Sam Silverberg
  * 
- * This is a UDP server class that can be used to serve client requests within the chunk server. 
- * It servers a similar function to @see com.annesam.sdfs.network.ClientThread . In some cases in 
- * may improve client performance to enable this function on the server. The UDP server will service :
+ *         This is a UDP server class that can be used to serve client requests
+ *         within the chunk server. It servers a similar function to @see
+ *         com.annesam.sdfs.network.ClientThread . In some cases in may improve
+ *         client performance to enable this function on the server. The UDP
+ *         server will service :
  * 
- * 	- HASH_EXISTS requests
- * 	- CLAIM_HASH requests
+ *         - HASH_EXISTS requests - CLAIM_HASH requests
  * 
- * To enable the UDP server within the chunk store the config option use-udp="true must be set.
- *
- *
+ *         To enable the UDP server within the chunk store the config option
+ *         use-udp="true must be set.
+ * 
+ * 
  */
 
 public class NioUDPServer implements Runnable {
 
 	int datagramSize = 36;
-	
 
 	private boolean closed = false;
 	private transient static Logger log = Logger.getLogger("sdfs");
@@ -100,9 +100,9 @@ public class NioUDPServer implements Runnable {
 									byte[] hash = new byte[16];
 									buf.clear();
 									boolean exists = false;
-									if(cmd == NetworkCMDS.HASH_EXISTS_CMD)
+									if (cmd == NetworkCMDS.HASH_EXISTS_CMD)
 										exists = HashChunkService
-											.hashExists(hash);
+												.hashExists(hash);
 									// boolean exists = true;
 									if (exists)
 										resp.putShort((short) 1);

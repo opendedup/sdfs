@@ -17,39 +17,31 @@ import fuse.staticfs.StaticFilesystem;
 import java.io.File;
 import java.io.IOException;
 
+public class MultiZipFilesystem extends StaticFilesystem {
+	public MultiZipFilesystem(String args[], int offset) throws IOException {
+		super(new DirectoryNode("$ROOT"));
 
-public class MultiZipFilesystem extends StaticFilesystem
-{
-   public MultiZipFilesystem(String args[], int offset) throws IOException
-   {
-      super(new DirectoryNode("$ROOT"));
+		DirectoryNode rootNode = getRootNode();
+		for (int i = offset; i < args.length; i++) {
+			File zipFile = new File(args[i]);
+			rootNode.addChild(new MountpointNode(zipFile.getName(),
+					new ZipFilesystem(zipFile)));
+		}
+	}
 
-      DirectoryNode rootNode = getRootNode();
-      for (int i = offset; i < args.length; i++)
-      {
-         File zipFile = new File(args[i]);
-         rootNode.addChild(new MountpointNode(zipFile.getName(), new ZipFilesystem(zipFile)));
-      }
-   }
+	public static void main(String[] args) {
+		if (args.length < 2) {
+			System.out
+					.println("Usage: MultiZipFilesystem mountpoint zipfile1 [zipfile2 ...]");
+			System.exit(-1);
+		}
 
+		String fuseArgs[] = new String[] { args[0] };
 
-   public static void main(String[] args)
-   {
-      if (args.length < 2)
-      {
-         System.out.println("Usage: MultiZipFilesystem mountpoint zipfile1 [zipfile2 ...]");
-         System.exit(-1);
-      }
-
-      String fuseArgs[] = new String[] { args[0] };
-
-      try
-      {
-         FuseMount.mount(fuseArgs, new MultiZipFilesystem(args, 1));
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
+		try {
+			FuseMount.mount(fuseArgs, new MultiZipFilesystem(args, 1));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

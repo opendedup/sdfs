@@ -14,12 +14,11 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	private long fileSize = 0;
 	private int arraySize = 0;
-	//RandomAccessFile bdbf = null;
+	// RandomAccessFile bdbf = null;
 	String fileName;
 	boolean closed = true;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private static Logger log = Logger.getLogger("sdfs");
-	
 
 	public LargeLongByteArrayMap(String fileName, long initialSize,
 			int arraySize) throws IOException {
@@ -48,11 +47,11 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		bdbf.close();
 		bdbf = null;
 	}
-	
+
 	public void lockCollection() {
 		this.hashlock.lock();
 	}
-	
+
 	public void unlockCollection() {
 		this.hashlock.unlock();
 	}
@@ -65,7 +64,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		RandomAccessFile bdbf = null;
 		try {
 			bdbf = new RandomAccessFile(fileName, "rw");
-		}catch (Exception e) {
+		} catch (Exception e) {
 		}
 		try {
 			bdbf.getFD().sync();
@@ -81,11 +80,11 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	public byte[] get(long pos) throws IOException {
 		return this.get(pos, true);
 	}
-	
-	public byte[] get(long pos,boolean checkForLock) throws IOException {
-		if(checkForLock) {
-		this.hashlock.lock();
-		this.hashlock.unlock();
+
+	public byte[] get(long pos, boolean checkForLock) throws IOException {
+		if (checkForLock) {
+			this.hashlock.lock();
+			this.hashlock.unlock();
 		}
 		byte[] b = new byte[this.arraySize];
 		RandomAccessFile rf = new RandomAccessFile(this.fileName, "rw");
@@ -111,15 +110,15 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		rf.close();
 		rf = null;
 	}
-	
+
 	public void remove(long pos) throws IOException {
 		this.remove(pos, true);
 	}
 
 	public void remove(long pos, boolean checkForLock) throws IOException {
-		if(checkForLock) {
-		this.hashlock.lock();
-		this.hashlock.unlock();
+		if (checkForLock) {
+			this.hashlock.lock();
+			this.hashlock.unlock();
 		}
 		RandomAccessFile rf = new RandomAccessFile(this.fileName, "rw");
 		rf.seek(pos);
@@ -144,7 +143,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		bdbf.close();
 		bdbf = null;
 	}
-	
+
 	public void copy(String destFilePath) throws IOException {
 		this.hashlock.lock();
 		try {
@@ -163,7 +162,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			this.hashlock.unlock();
 		}
 	}
-	
+
 	public void move(String destFilePath) throws IOException {
 		this.hashlock.lock();
 		try {
@@ -186,13 +185,13 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	public void optimize() throws IOException {
 		this.hashlock.lock();
 		try {
-			log.info("optimizing file [" + this.fileName +"]");
+			log.info("optimizing file [" + this.fileName + "]");
 			File f = new File(this.fileName + ".new");
 			f.delete();
 			RandomAccessFile rf = new RandomAccessFile(this.fileName, "rw");
 			RandomAccessFile nrf = new RandomAccessFile(this.fileName + ".new",
 					"rw");
-			
+
 			nrf.setLength(rf.length());
 			byte[] FREE = new byte[arraySize];
 			Arrays.fill(FREE, (byte) 0);
@@ -206,12 +205,12 @@ public class LargeLongByteArrayMap implements AbstractMap {
 						nrf.seek(pos);
 						nrf.write(b);
 						mData = mData + b.length;
-					} 
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 			rf.close();
 			rf = null;
 			nrf.close();
@@ -220,7 +219,8 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			orig.delete();
 			File newF = new File(this.fileName + ".new");
 			newF.renameTo(orig);
-			log.info("optimizing file [" + this.fileName +"] migrated [" + mData + "] bytes of data to new file");
+			log.info("optimizing file [" + this.fileName + "] migrated ["
+					+ mData + "] bytes of data to new file");
 		} catch (IOException e) {
 			throw e;
 		} finally {

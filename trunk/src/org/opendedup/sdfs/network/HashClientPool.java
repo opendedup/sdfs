@@ -6,7 +6,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.servers.HCServer;
 
-
 public class HashClientPool {
 
 	private int port;

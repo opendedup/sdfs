@@ -21,7 +21,6 @@ import java.util.zip.Adler32;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.sdfs.servers.HashChunkService;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -57,7 +56,7 @@ public class HashFunctions {
 
 		try {
 			Security.addProvider(new BouncyCastleProvider());
-			algorithm = MessageDigest.getInstance("Tiger","BC");
+			algorithm = MessageDigest.getInstance("Tiger", "BC");
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -349,26 +348,18 @@ public class HashFunctions {
 	public static byte[] getTigerHashBytes(byte[] input)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException,
 			NoSuchProviderException {
-		
+
 		algorithm.reset();
 		return algorithm.digest(input);
 	}
 
 	/*
-	public static String getMD5Hash(byte[] input) {
-		MD5 md5 = new MD5();
-		md5.Update(input);
-		return md5.asHex();
-	}
-
-	public static byte[] getMD5ByteHash(byte[] input) {
-		MD5 md5 = new MD5();
-		md5.Update(input);
-		byte[] b = md5.Final();
-		md5 = null;
-		return b;
-	}
-	*/
+	 * public static String getMD5Hash(byte[] input) { MD5 md5 = new MD5();
+	 * md5.Update(input); return md5.asHex(); }
+	 * 
+	 * public static byte[] getMD5ByteHash(byte[] input) { MD5 md5 = new MD5();
+	 * md5.Update(input); byte[] b = md5.Final(); md5 = null; return b; }
+	 */
 
 	public static String getMD5Hash(byte[] input) {
 		try {
