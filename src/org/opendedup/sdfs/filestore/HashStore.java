@@ -188,9 +188,11 @@ public class HashStore {
 	 *            the chunk to persist
 	 * @return true returns true if the data was written. Data will not be
 	 *         written if the hash already exists in the db.
+	 * @throws IOException 
 	 */
-	public boolean addHashChunk(HashChunk chunk) {
+	public boolean addHashChunk(HashChunk chunk) throws IOException {
 		boolean written = false;
+		if(!bdb.containsKey(chunk.getName())){
 		try {
 			//long start = chunkStore.reserveWritePosition(chunk.getLen());
 			ChunkData cm = new ChunkData(chunk.getName(),
@@ -201,6 +203,7 @@ public class HashStore {
 			} else {
 
 			}
+		
 		} catch (Exception e) {
 			if (hashlock.isLocked())
 				hashlock.unlock();
@@ -209,6 +212,7 @@ public class HashStore {
 					+ StringUtils.getHexString(chunk.getName()), e);
 		} finally {
 
+		}
 		}
 		return written;
 	}

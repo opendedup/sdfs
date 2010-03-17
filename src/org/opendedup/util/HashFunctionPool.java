@@ -125,8 +125,6 @@ public class HashFunctionPool {
 	public MessageDigest makeObject() throws NoSuchAlgorithmException,
 			NoSuchProviderException {
 		MessageDigest hc = MessageDigest.getInstance("Tiger", "BC");
-		log.info("Pool Size is "
-				+ (this.passiveObjects.size() + this.activeObjects.size()));
 		return hc;
 	}
 

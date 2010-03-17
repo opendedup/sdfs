@@ -193,9 +193,9 @@ public class MetaFileStore {
 			pathMap.remove(mf.getPath());
 		} catch (Exception e) {
 			if (mf != null)
-				log.log(Level.WARNING, "unable to remove " + path, e);
+				log.log(Level.FINEST, "unable to remove " + path, e);
 			if (mf == null)
-				log.log(Level.WARNING, "unable to remove  because [" + path
+				log.log(Level.FINEST, "unable to remove  because [" + path
 						+ "] is null");
 		}
 	}

@@ -25,8 +25,8 @@ public class SDFSGCScheduler {
 			sched = schedFact.getScheduler();
 			sched.start();
 			JobDetail ccjobDetail = new JobDetail("fdisk", null, FDISKJob.class);
-			Trigger cctrigger = TriggerUtils.makeMinutelyTrigger();
-			cctrigger.setStartTime(TriggerUtils.getEvenMinuteDate(new Date())); 
+			Trigger cctrigger = TriggerUtils.makeHourlyTrigger(4);
+			cctrigger.setStartTime(TriggerUtils.getEvenHourDate(new Date())); 
 			cctrigger.setName("fdiskTrigger");
 			sched.scheduleJob(ccjobDetail, cctrigger);
 			log.info("Garbage Collection Jobs Scheduled");
