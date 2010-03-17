@@ -189,7 +189,7 @@ public class ByteArrayLongMap {
 	 */
 	protected int index(byte[] key) {
 		ByteBuffer buf = ByteBuffer.wrap(key);
-		buf.getInt();
+		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
 		int stepSize = hashFunc2(hash);
@@ -235,9 +235,8 @@ public class ByteArrayLongMap {
 	 *         minus 1: -index -1.
 	 */
 	protected int insertionIndex(byte[] key) {
-
 		ByteBuffer buf = ByteBuffer.wrap(key);
-		buf.getInt();
+		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
 		int stepSize = hashFunc2(hash);

@@ -473,12 +473,11 @@ public class SparseDedupFile implements DedupFile {
 				this.chunkStore.close();
 			} catch (Exception e) {
 			}
-			;
-
 			mf.setDedupFile(this);
 			mf.sync();
 		} catch (Exception e) {
-			log.log(Level.WARNING, "Unable to close database " + this.GUID, e);
+			e.printStackTrace();
+			//log.log(Level.WARNING, "Unable to close database " + this.GUID, e);
 		} finally {
 			DedupFileStore.removeOpenDedupFile(mf);
 			bdb = null;

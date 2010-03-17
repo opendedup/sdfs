@@ -3,7 +3,9 @@ package org.opendedup.sdfs.filestore;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.HashFunctions;
 
 /**
  * 
@@ -27,6 +29,15 @@ public class ChunkData {
 	private long cPos = 0;
 	private byte[] chunk = null;
 	private static AbstractChunkStore fileStore = new FileChunkStore("chunks");
+	private static byte [] blankHash = null;;
+
+	static {
+		try {
+			blankHash = HashFunctions.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public ChunkData(long cPos) {
 		this.cPos = cPos;
@@ -138,7 +149,15 @@ public class ChunkData {
 	}
 
 	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
-		return fileStore.getChunk(hash, pos, Main.chunkStorePageSize);
+		try {
+			return fileStore.getChunk(hash, pos, Main.chunkStorePageSize);
+		} catch(IOException e) {
+			if(Arrays.areEqual(hash, blankHash))
+				return new byte[Main.chunkStorePageSize];
+			else
+				throw e;
+		}
+		
 	}
 
 	public byte[] getData() throws IOException {

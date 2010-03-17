@@ -70,7 +70,7 @@ public class DedupFileStore {
 				try {
 					df = new SparseDedupFile(mf);
 
-					log.info("creating new dedup file for " + mf.getPath());
+					log.finer("creating new dedup file for " + mf.getPath());
 				} catch (Exception e) {
 
 				}
@@ -104,7 +104,7 @@ public class DedupFileStore {
 			if (!openFile.containsKey(df.getGUID())) {
 				log.info("adding dedupfile");
 				openFile.put(df.getGUID(), df);
-				log.info("dedupfile cache size is " + openFile.size());
+				log.finer("dedupfile cache size is " + openFile.size());
 			}
 		} else {
 			throw new IOException("DedupFileStore is closed");

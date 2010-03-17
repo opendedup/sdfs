@@ -304,11 +304,14 @@ public class HashFunctions {
 
 	public static void main(String[] args) throws Exception {
 		long start = System.currentTimeMillis();
+		byte [] z = new byte[4096];
+		byte[] hash = HashFunctions.getTigerHashBytes(z);
+		System.out.println(StringUtils.getHexString(hash));
 		Random rnd = new Random();
 		for (int i = 0; i < 8000000; i++) {
 			byte[] b = new byte[64];
 			rnd.nextBytes(b);
-			byte[] hash = HashFunctions.getTigerHashBytes(b);
+			hash = HashFunctions.getTigerHashBytes(b);
 		}
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");
@@ -348,7 +351,6 @@ public class HashFunctions {
 	public static byte[] getTigerHashBytes(byte[] input)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException,
 			NoSuchProviderException {
-
 		algorithm.reset();
 		return algorithm.digest(input);
 	}

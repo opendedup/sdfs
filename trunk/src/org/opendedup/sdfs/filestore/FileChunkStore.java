@@ -23,6 +23,7 @@ import org.apache.commons.collections.map.LRUMap;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -57,7 +58,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private static transient LRUMap cache = new LRUMap(MAX_ENTRIES);
 	private byte[] FREE = new byte[Main.chunkStorePageSize];
 	private long farthestWrite = 0;
-
+	
 	/**
 	 * 
 	 * @param name
