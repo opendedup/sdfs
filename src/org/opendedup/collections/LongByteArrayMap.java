@@ -91,7 +91,6 @@ public class LongByteArrayMap implements AbstractMap {
 			} finally {
 				this.hashlock.unlock();
 			}
-
 		}
 		return null;
 

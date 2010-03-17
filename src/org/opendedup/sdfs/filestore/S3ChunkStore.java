@@ -160,4 +160,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public boolean moveChunk(byte[] hash, long origLoc, long newLoc)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

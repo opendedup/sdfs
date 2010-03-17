@@ -38,7 +38,6 @@ import org.opendedup.util.StringUtils;
 public class FileChunkStore implements AbstractChunkStore {
 	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
-	private static final int metaPageSize = 1 + 2 + 32 + 8 + 8 + 4 + 8;
 	private static final int readAheadPages = Main.chunkStoreReadAheadPages;
 	private static final int MAX_ENTRIES = 100;
 	private String name;
@@ -56,6 +55,8 @@ public class FileChunkStore implements AbstractChunkStore {
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
 	private static transient LRUMap cache = new LRUMap(MAX_ENTRIES);
+	private byte[] FREE = new byte[Main.chunkStorePageSize];
+	private long farthestWrite = 0;
 
 	/**
 	 * 
@@ -64,6 +65,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	public FileChunkStore(String name) {
 		log.info("Opening Chunk Store");
+		Arrays.fill(FREE, (byte) 0);
 		try {
 			if (!chunk_location.exists()) {
 				chunk_location.mkdirs();
@@ -83,6 +85,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			if (!newPos) {
 				posRaf.seek(0);
 				this.currentLength = posRaf.readLong();
+				this.farthestWrite = this.currentLength;
 			} else {
 				posRaf.seek(0);
 				posRaf.writeLong(currentLength);
@@ -200,6 +203,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		reservePositionlock.unlock();
 		return pos;
 	}
+	
 
 	public void claimChunk(byte[] hash, long pos) throws IOException {
 		/*
@@ -214,6 +218,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		 */
 	}
 
+	private ReentrantLock furthestPositionlock = new ReentrantLock();
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -236,13 +241,23 @@ public class FileChunkStore implements AbstractChunkStore {
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			FileChannel ch = raf.getChannel();
 			ch.position(start);
+			
 			ch.write(buf);
+			furthestPositionlock.lock();
+			try {
+			if(ch.position() > this.farthestWrite) {
+				this.farthestWrite = ch.position();
+			}
+			}catch(Exception e) {}finally {
+				this.furthestPositionlock.unlock();
+			}
 			ch.close();
 			raf.close();
 			ch = null;
 			buf = null;
 			raf = null;
 			bytesWritten = bytesWritten + chunk.length;
+			
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "unable to write data at position " + start,
 					e);
@@ -356,7 +371,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf.seek(start);
 		raf.write(0);
 		raf.close();
-
 	}
 
 	@Override
@@ -395,6 +409,35 @@ public class FileChunkStore implements AbstractChunkStore {
 			} catch (IOException e) {
 
 			}
+		}
+	}
+
+	@Override
+	public boolean moveChunk(byte[] hash, long origLoc, long newLoc)
+			throws IOException {
+		if (this.closed)
+			throw new IOException("ChunkStore is closed");
+		byte[] buf = new byte[Main.chunkStorePageSize];
+		RandomAccessFile raf = new RandomAccessFile(f, "rw");
+		try {
+			raf.seek(origLoc);
+			raf.read(buf);
+			if (Main.preAllocateChunkStore && Arrays.areEqual(FREE, buf))
+				return false;
+			raf.seek(newLoc);
+			raf.write(buf);
+			if (!Main.preAllocateChunkStore
+					&& (origLoc + Main.chunkStorePageSize) == raf.length())
+				raf.setLength(origLoc);
+			return true;
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "could not move data from [" + origLoc
+					+ "] to [" + newLoc + "]", e);
+			return false;
+		} finally {
+			raf.close();
+			raf = null;
+			buf = null;
 		}
 	}
 

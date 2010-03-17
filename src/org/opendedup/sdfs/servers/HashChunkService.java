@@ -89,7 +89,7 @@ public class HashChunkService {
 	}
 
 	public static void removeStailHashes() throws IOException {
-		hs.evictChunks(System.currentTimeMillis() - (120 * 1000));
+		hs.evictChunks(System.currentTimeMillis() - (2*24*60*60*1000));
 	}
 
 	public static void commitChunks() {
