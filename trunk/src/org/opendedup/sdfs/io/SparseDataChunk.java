@@ -11,13 +11,14 @@ public class SparseDataChunk {
 	private byte[] hash;
 	private boolean localData = false;
 	private long timeAdded = 0;
+	public static final int RAWDL = 1 + Main.hashLength + 1 + 8;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
-		if (rawData.length != 1 + Main.hashLength + 1 + 8)
+		if (rawData.length != RAWDL)
 			throw new IOException(
 					"possible data corruption: byte array length "
 							+ rawData.length + " does not equal "
-							+ (1 + Main.hashLength + 1 + 8));
+							+ RAWDL);
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		byte b = buf.get();
 		if (b == 0)
@@ -51,7 +52,7 @@ public class SparseDataChunk {
 	}
 
 	public byte[] getBytes() {
-		ByteBuffer buf = ByteBuffer.wrap(new byte[1 + Main.hashLength + 1 + 8]);
+		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
 		if (doop)
 			buf.put((byte) 1);
 		else

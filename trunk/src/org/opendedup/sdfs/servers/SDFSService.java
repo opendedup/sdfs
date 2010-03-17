@@ -7,11 +7,13 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 
 public class SDFSService {
 	String configFile;
 	String routingFile;
 	private static Logger log = Logger.getLogger("sdfs");
+	private SDFSGCScheduler gc = null;
 
 	public SDFSService(String configFile, String routingFile) {
 
@@ -26,10 +28,13 @@ public class SDFSService {
 		Config.parserRoutingFile(this.routingFile);
 		if (Main.chunkStoreLocal)
 			HashChunkService.init();
+		gc = new SDFSGCScheduler();
 	}
 
 	public void stop() {
 		System.out.println("Shutting Down SDFS");
+		System.out.println("Stopping FDISK scheduler");
+		gc.stopSchedules();
 		System.out.println("Flushing and Closing Write Caches");
 		DedupFileStore.close();
 		System.out.println("Write Caches Flushed and Closed");

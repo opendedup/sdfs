@@ -1,6 +1,9 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.opendedup.sdfs.Main;
 
 /**
  * 
@@ -10,7 +13,8 @@ import java.nio.ByteBuffer;
  *         (4 bytes)|chunk position (8 bytes)]
  * 
  */
-public class ChunkMetaData {
+
+public class ChunkData {
 	public static final int RAWDL = 1 + 2 + 32 + 8 + 8 + 8 + 4 + 8;
 	public static final int CLAIMED_OFFSET = 1 + 2 + 32 + 8;
 	private boolean mDelete = false;
@@ -21,13 +25,15 @@ public class ChunkMetaData {
 	private long numClaimed = 0;
 	private int cLen = 0;
 	private long cPos = 0;
+	private byte[] chunk = null;
+	private static AbstractChunkStore fileStore = new FileChunkStore("chunks");
 
-	public ChunkMetaData(long cPos) {
+	public ChunkData(long cPos) {
 		this.cPos = cPos;
 		this.mDelete = true;
 	}
 
-	public ChunkMetaData(byte[] rawData) {
+	public ChunkData(byte[] rawData) {
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		byte del = buf.get();
 		if (del == 0)
@@ -45,7 +51,7 @@ public class ChunkMetaData {
 		cPos = buf.getLong();
 	}
 
-	public ChunkMetaData(byte[] hash, int chunkLen, long chunkPos) {
+	public ChunkData(byte[] hash, int chunkLen, byte[] chunk) {
 		long tm = System.currentTimeMillis();
 		this.added = tm;
 		this.lastClaimed = tm;
@@ -54,10 +60,11 @@ public class ChunkMetaData {
 		this.hashLen = (short) hash.length;
 		this.hash = hash;
 		this.cLen = chunkLen;
-		this.cPos = chunkPos;
+		this.cPos = -1;
+		this.chunk = chunk;
 	}
 
-	public ByteBuffer getBytes() {
+	public ByteBuffer getMetaDataBytes() {
 		ByteBuffer buf = ByteBuffer.allocateDirect(RAWDL);
 		if (this.mDelete) {
 			buf.put(new byte[RAWDL]);
@@ -75,6 +82,17 @@ public class ChunkMetaData {
 			buf.putLong(cPos);
 			buf.position(0);
 			return buf;
+		}
+	}
+
+	public void persistData() throws IOException {
+		if (cPos == -1) {
+			this.cPos = fileStore.reserveWritePosition(cLen);
+
+			fileStore.writeChunk(hash, chunk, cLen, cPos);
+		} else if (this.mDelete) {
+			byte[] b = new byte[cLen];
+			fileStore.writeChunk(hash, b, cLen, cPos);
 		}
 	}
 
@@ -116,6 +134,17 @@ public class ChunkMetaData {
 
 	public byte[] getHash() {
 		return hash;
+	}
+
+	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
+		return fileStore.getChunk(hash, pos, Main.chunkStorePageSize);
+	}
+
+	public byte[] getData() throws IOException {
+		if (this.chunk == null) {
+			return fileStore.getChunk(hash, this.cPos, this.cLen);
+		} else
+			return chunk;
 	}
 
 	public long getAdded() {

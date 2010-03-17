@@ -121,5 +121,7 @@ public interface AbstractChunkStore {
 
 	public abstract void addChunkStoreListener(
 			AbstractChunkStoreListener listener);
+	
+	public abstract boolean moveChunk(byte [] hash, long origLoc, long newLoc) throws IOException;
 
 }

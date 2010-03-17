@@ -49,10 +49,10 @@ public class HashStore {
 
 	private static ReentrantLock clock = new ReentrantLock();
 	// The chunk store used to store the actual deduped data;
-	private AbstractChunkStore chunkStore = null;
+	//private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of
 	// hashstores.
-	private static AbstractChunkStore fileStore = new FileChunkStore("chunks");
+	
 	// private static ChunkStoreGCScheduler gcSched = new
 	// ChunkStoreGCScheduler();
 	private static Logger log = Logger.getLogger("sdfs");
@@ -72,7 +72,7 @@ public class HashStore {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.initChunkStore();
+		//this.initChunkStore();
 		long rows = this.getRowCount();
 		entries = entries + rows;
 		log.info(this.getName() + " Row Count : " + rows);
@@ -97,12 +97,13 @@ public class HashStore {
 	 * 
 	 * @throws IOException
 	 */
+	/*
 	private void initChunkStore() throws IOException {
 		if (Main.AWSChunkStore)
 			chunkStore = new S3ChunkStore(this.getName());
 		else
 			chunkStore = fileStore;
-	}
+	}*/
 
 	/**
 	 * returns the name of the TCHashStore
@@ -161,9 +162,8 @@ public class HashStore {
 	public HashChunk getHashChunk(byte[] hash) throws IOException {
 		HashChunk hs = null;
 		try {
-			long pos = this.bdb.get(hash);
-			byte[] data = chunkStore.getChunk(hash, pos, -1);
-			hs = new HashChunk(hash, pos, data.length, data, false);
+			byte[] data = bdb.getData(hash);
+			hs = new HashChunk(hash, 0, data.length, data, false);
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "unable to get hash "
 					+ StringUtils.getHexString(hash), e);
@@ -192,12 +192,10 @@ public class HashStore {
 	public boolean addHashChunk(HashChunk chunk) {
 		boolean written = false;
 		try {
-			long start = chunkStore.reserveWritePosition(chunk.getLen());
-			ChunkMetaData cm = new ChunkMetaData(chunk.getName(),
-					Main.chunkStorePageSize, start);
+			//long start = chunkStore.reserveWritePosition(chunk.getLen());
+			ChunkData cm = new ChunkData(chunk.getName(),
+					Main.chunkStorePageSize, chunk.getData());
 			if (bdb.put(cm)) {
-				chunkStore.writeChunk(chunk.getName(), chunk.getData(), chunk
-						.getLen(), start);
 				entries++;
 				written = true;
 			} else {

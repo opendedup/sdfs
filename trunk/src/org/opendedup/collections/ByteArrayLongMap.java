@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.opendedup.sdfs.filestore.ChunkMetaData;
+import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
@@ -159,7 +159,7 @@ public class ByteArrayLongMap {
 				this.values.position(pos);
 				this.values.position(pos);
 				this.values.putLong(-1);
-				pos = (pos / 8) * 4;
+				pos = (pos / 8);
 				this.claims.position(pos);
 				this.claims.put((byte) 0);
 				return true;
