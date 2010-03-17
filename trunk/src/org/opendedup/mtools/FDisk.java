@@ -71,6 +71,7 @@ public class FDisk {
 					+ mapFile.getPath() + "]", e);
 		} finally {
 			mp.close();
+			mp = null;
 		}
 		this.files++;
 	}
