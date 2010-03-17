@@ -85,15 +85,16 @@ public class ChunkData {
 		}
 	}
 
-	public void persistData() throws IOException {
+	public void persistData(boolean clear) throws IOException {
 		if (cPos == -1) {
 			this.cPos = fileStore.reserveWritePosition(cLen);
-
-			fileStore.writeChunk(hash, chunk, cLen, cPos);
-		} else if (this.mDelete) {
-			byte[] b = new byte[cLen];
-			fileStore.writeChunk(hash, b, cLen, cPos);
-		}
+		} 
+		if (this.mDelete) {
+			chunk = new byte[cLen];
+		} 
+		fileStore.writeChunk(hash, chunk, cLen, cPos);
+		if(clear)
+			this.chunk = null;
 	}
 
 	public boolean ismDelete() {

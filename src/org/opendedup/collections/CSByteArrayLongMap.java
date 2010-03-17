@@ -39,11 +39,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private String fileName;
 	private ArrayList<ChunkData> kBuf = new ArrayList<ChunkData>();
 	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
+	private boolean removingChunks = false;
+
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
 	private static final int kBufMaxSize = 1000;
-	ByteBuffer freeSlots = ByteBuffer.allocateDirect(8*1000000);
+	ByteBuffer freeSlots = ByteBuffer.allocateDirect(8 * 1000000);
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
 			throws IOException {
@@ -147,9 +149,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		log.info("processed [" + (z) + "] records in ["
 				+ (System.currentTimeMillis() - startTime) + "] ms");
 	}
-	
-	
-	
+
 	/**
 	 * initializes the Object set of this hash table.
 	 * 
@@ -169,26 +169,29 @@ public class CSByteArrayLongMap implements AbstractMap {
 		kRaf = new RandomAccessFile(fileName, "rw");
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = kRaf.getChannel();
+
+		this.freeSlots.clear();
+		log.info("Populating free slots");
+		while (this.freeSlots.position() < this.freeSlots.capacity()) {
+			this.freeSlots.putLong(-1);
+		}
+		log.info("Populated free slots");
 		if (exists) {
 			log.info("This looks an existing hashtable will repopulate with ["
 					+ size + "] entries.");
 			kRaf.seek(0);
-			this.freeSlots.clear();
-			log.info("Populating free slots");
-			while(this.freeSlots.position() < this.freeSlots.capacity()) {
-				this.freeSlots.putLong(-1);
-			}
-			log.info("Populated free slots");
-			this.freeSlots.flip();
-			while(kFc.position() < kRaf.length()) {
+			this.freeSlots.position(0);
+			while (kFc.position() < kRaf.length()) {
 				byte[] raw = new byte[ChunkData.RAWDL];
 				try {
 					kRaf.read(raw);
-					if(Arrays.equals(raw,BLANKCM) && (this.freeSlots.position() < this.freeSlots.capacity())) {
-						log.info("found free slot at " + (kFc.position() - raw.length));
+					if (Arrays.equals(raw, BLANKCM)
+							&& (this.freeSlots.position() < this.freeSlots
+									.capacity())) {
+						log.info("found free slot at "
+								+ (kFc.position() - raw.length));
 						this.freeSlots.putLong(kFc.position() - raw.length);
-					}
-					else {
+					} else {
 						ChunkData cm = new ChunkData(raw);
 						boolean foundFree = Arrays.equals(cm.getHash(), FREE);
 						boolean foundReserved = Arrays.equals(cm.getHash(),
@@ -214,6 +217,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 				}
 			}
+			this.freeSlots.position(0);
 		}
 		log.info("loaded [" + kSz + "] into the hashtable " + this.fileName);
 		return size;
@@ -235,48 +239,79 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public void removeRecords(long time) throws IOException {
-		RandomAccessFile _fs = new RandomAccessFile(this.fileName, "rw");
-		long rem = 0;
-		for (int i = 0; i < size; i++) {
-			byte[] raw = new byte[ChunkData.RAWDL];
-			try {
-				this.iolock.lock();
-				try {
-					_fs.read(raw);
-				} catch (Exception e) {
-				} finally {
-					this.iolock.unlock();
+		this.freeSlotLock.lock();
+		try {
+			this.removingChunks = true;
+		} catch (Exception e) {
+		} finally {
+			this.freeSlotLock.unlock();
+		}
+		ByteBuffer _oldSlots = freeSlots;
+		freeSlots = ByteBuffer.allocateDirect(8 * 1000000);
+		_oldSlots.position(0);
+		try {
+			while (_oldSlots.position() < _oldSlots.capacity()) {
+				long pos = _oldSlots.getLong();
+				if (pos != -1) {
+					freeSlots.putLong(pos);
 				}
-				if (!Arrays.equals(raw, BLANKCM)) {
-					try {
-						ChunkData cm = new ChunkData(raw);
+			}
+		} catch (Exception e) {
+			log.log(Level.WARNING,
+					"unable to populate freeSlots with old slots", e);
+		}
 
-						boolean foundFree = Arrays.equals(cm.getHash(), FREE);
-						boolean foundReserved = Arrays.equals(cm.getHash(),
-								REMOVED);
-						if (cm.getLastClaimed() < time && !foundFree
-								&& !foundReserved) {
-							cm.setmDelete(true);
-							if (this.remove(cm)) {
-								rem++;
-							}
-						}
-					} catch (Exception e1) {
-						log.log(Level.WARNING, "unable to access record at "
-								+ _fs.getChannel().position(), e1);
+		try {
+			RandomAccessFile _fs = new RandomAccessFile(this.fileName, "rw");
+			long rem = 0;
+			for (int i = 0; i < size; i++) {
+				byte[] raw = new byte[ChunkData.RAWDL];
+				try {
+					this.iolock.lock();
+					try {
+						_fs.read(raw);
+					} catch (Exception e) {
+					} finally {
+						this.iolock.unlock();
 					}
+					if (!Arrays.equals(raw, BLANKCM)) {
+						try {
+							ChunkData cm = new ChunkData(raw);
+							boolean foundFree = Arrays.equals(cm.getHash(),
+									FREE);
+							boolean foundReserved = Arrays.equals(cm.getHash(),
+									REMOVED);
+							if (cm.getLastClaimed() < time && !foundFree
+									&& !foundReserved) {
+								cm.setmDelete(true);
+								if(this.freeSlots.position() < this.freeSlots.capacity()) {
+									this.freeSlots.putLong(cm.getcPos());
+								}
+								if (this.remove(cm)) {
+									rem++;
+								}
+							}
+						} catch (Exception e1) {
+							log.log(Level.WARNING,
+									"unable to access record at "
+											+ _fs.getChannel().position(), e1);
+						}
+					}
+				} catch (BufferUnderflowException e) {
+
 				}
-			} catch (BufferUnderflowException e) {
 
 			}
 
-		}
-		try {
 			_fs.close();
 			_fs = null;
+			log.info("Removed [" + rem + "] records. Free slots [" + (this.freeSlots.position()/8) + "]");
 		} catch (Exception e) {
+		} finally {
+			this.freeSlots.position(0);
+			this.flushBuffer(true);
+			this.removingChunks = false;
 		}
-		log.info("Removed [" + rem + "] records");
 	}
 
 	public boolean put(ChunkData cm) throws IOException {
@@ -319,15 +354,40 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return added;
 	}
 
+	private ReentrantLock freeSlotLock = new ReentrantLock();
+
+	private long getFreeSlot() {
+		if (this.removingChunks)
+			return -1;
+		freeSlotLock.lock();
+		try {
+			int sPos = this.freeSlots.position();
+			if (this.freeSlots.position() < this.freeSlots.capacity()) {
+				long pos = this.freeSlots.getLong();
+				if (pos != -1) {
+					this.freeSlots.position(sPos);
+					this.freeSlots.putLong(-1);
+				}
+				return pos;
+			}
+		} catch (Exception e) {
+
+		} finally {
+			this.freeSlotLock.unlock();
+		}
+		return -1;
+	}
+
 	private boolean put(ChunkData cm, boolean persist) throws IOException {
 		if (kSz >= this.size)
 			throw new IOException("maximum sized reached");
+		boolean added = false;
 		if (persist)
 			this.flushFullBuffer();
-		cm.persistData();
-		boolean added = this.getMap(cm.getHash()).put(cm.getHash(),
-				cm.getcPos());
-		if (added && persist) {
+		if (persist) {
+			cm.setcPos(this.getFreeSlot());
+			cm.persistData(true);
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 			this.arlock.lock();
 			try {
 				this.kBuf.add(cm);
@@ -335,7 +395,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 			} finally {
 				this.arlock.unlock();
 			}
+		} else {
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 		}
+
 		return added;
 	}
 
@@ -364,17 +427,17 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.getMap(key).get(key);
 
 	}
-	
-	public byte [] getData(byte[] key) throws IOException {
+
+	public byte[] getData(byte[] key) throws IOException {
 		long ps = this.get(key);
-		if(ps != -1) {
+		if (ps != -1) {
 			return ChunkData.getChunk(key, ps);
-		}
-		else
+		} else {
+			log.info("found none!!!!!0");
 			return null;
+		}
 
 	}
-	
 
 	private synchronized void flushBuffer(boolean lock) throws IOException {
 		ArrayList<ChunkData> oldkBuf = null;
@@ -402,6 +465,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				} finally {
 					this.iolock.unlock();
 				}
+				cm = null;
 			}
 			// log.info("write "+b+" at " + pos + " pos " + cm.getcPos() +
 			// " len " + Main.chunkStorePageSize + " mdlen " +
@@ -440,13 +504,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private synchronized void flushFullBuffer() throws IOException {
 		boolean flush = false;
 		try {
-			//this.hashlock.lock();
+			// this.hashlock.lock();
 			if (kBuf.size() >= kBufMaxSize) {
 				flush = true;
 			}
 		} catch (Exception e) {
 		} finally {
-			//this.hashlock.unlock();
+			// this.hashlock.unlock();
 		}
 		if (flush) {
 			this.flushBuffer(true);
