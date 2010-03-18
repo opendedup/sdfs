@@ -39,7 +39,7 @@ public class VolumeConfigWriter {
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
 	short chunk_size = 128;
-	int max_file_write_buffers = 50;
+	int max_file_write_buffers = 8;
 	int file_read_cache = 5;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
