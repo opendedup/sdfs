@@ -273,7 +273,7 @@ public class ByteArrayLongMap {
 					index += (stepSize * FREE.length); // add the step
 					index %= (size * FREE.length); // for wraparound
 					if (w > 1000) {
-						System.out.println("been searching at index " + index
+						log.finest("been searching at index " + index
 								+ " for " + w);
 					}
 					cur = new byte[FREE.length];

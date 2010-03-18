@@ -2,9 +2,9 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
@@ -20,7 +19,6 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.HashFunctionPool;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
@@ -44,32 +42,36 @@ public class SparseDedupFile implements DedupFile {
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
 			Main.writeThreads + 1, Main.writeThreads);
-	private ReentrantLock lock = new ReentrantLock();
+	private ReentrantLock flushingLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
+	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
 	private transient ConcurrentLinkedHashMap<Long, WritableCacheBuffer> writeBuffers = ConcurrentLinkedHashMap
 			.create(
 					ConcurrentLinkedHashMap.EvictionPolicy.LRU,
-					Main.maxWriteBuffers + 1,
+					maxWriteBuffers + 1,
 					Main.writeThreads,
 					new ConcurrentLinkedHashMap.EvictionListener<Long, WritableCacheBuffer>() {
 						// This method is called just after a new entry has been
 						// added
 						public void onEviction(Long key,
 								WritableCacheBuffer writeBuffer) {
-							try {
-								if (writeBuffer != null) {
-									lock.lock();
+
+							if (writeBuffer != null) {
+								flushingLock.lock();
+								try {
 									flushingBuffers.put(key, writeBuffer);
-									lock.unlock();
-									pool.execute(writeBuffer);
+								} catch (Exception e) {
+
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} finally {
+									flushingLock.unlock();
 								}
-							} catch (Exception e) {
-								if (lock.isLocked())
-									lock.unlock();
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+
+								pool.execute(writeBuffer);
 							}
+
 						}
 					});
 
@@ -82,7 +84,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
-		log.info("dedup file opened for " + mf.getPath());
+		log.finer("dedup file opened for " + mf.getPath());
 		this.mf = mf;
 		this.init();
 	}
@@ -176,11 +178,7 @@ public class SparseDedupFile implements DedupFile {
 		Object[] buffers = this.writeBuffers.values().toArray();
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-			try {
-				this.writeCache(buf, true);
-			} catch (IOException e) {
-
-			}
+				buf.persist();
 		}
 	}
 
@@ -188,7 +186,9 @@ public class SparseDedupFile implements DedupFile {
 			boolean removeWhenWritten) throws IOException {
 		if (this.isClosed())
 			this.initDB();
+		
 		if (writeBuffer != null && writeBuffer.isDirty()) {
+			
 			MessageDigest hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
@@ -198,7 +198,6 @@ public class SparseDedupFile implements DedupFile {
 			} finally {
 				hashPool.returnObject(hc);
 			}
-
 			boolean doop = HCServiceProxy.writeChunk(hash, writeBuffer
 					.getChunk(), writeBuffer.getLength(), writeBuffer
 					.capacity(), mf.isDedup());
@@ -220,7 +219,7 @@ public class SparseDedupFile implements DedupFile {
 					if (data != null) {
 						mf.setVmdk(true);
 						mf.setVmdkData(data);
-						log.info(data.toString());
+						log.finer(data.toString());
 					}
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to parse vmdk header for  "
@@ -244,10 +243,19 @@ public class SparseDedupFile implements DedupFile {
 						+ writeBuffer.getFilePosition() + " because "
 						+ e.toString());
 			} finally {
-				WritableCacheBuffer buf = this.flushingBuffers
-						.remove(writeBuffer.getFilePosition());
+
+				WritableCacheBuffer buf = null;
+				this.flushingLock.lock();
+				try {
+					buf = this.flushingBuffers.remove(writeBuffer
+							.getFilePosition());
+				} catch (Exception e) {
+				} finally {
+					this.flushingLock.unlock();
+				}
 				if (buf != null)
 					buf.destroy();
+
 			}
 
 			if (removeWhenWritten) {
@@ -272,11 +280,6 @@ public class SparseDedupFile implements DedupFile {
 			if (mf.isDedup() || doop) {
 				chunk = new SparseDataChunk(doop, hash, false, System
 						.currentTimeMillis());
-				/*
-				 * if(!mf.isDedup()) { try { chunkStore.lockCollection();
-				 * chunkStore.remove(filePosition, false); }catch(Exception e)
-				 * {} finally { chunkStore.unlockCollection(); } }
-				 */
 			} else {
 				chunk = new SparseDataChunk(doop, hash, true, System
 						.currentTimeMillis());
@@ -284,12 +287,10 @@ public class SparseDedupFile implements DedupFile {
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
-			updatelock.unlock();
 			log.log(Level.SEVERE, "upable to write " + hash, e);
 			throw new IOException(e.toString());
 		} finally {
-			if (updatelock.isLocked())
-				updatelock.unlock();
+			updatelock.unlock();
 		}
 
 	}
@@ -311,7 +312,13 @@ public class SparseDedupFile implements DedupFile {
 			if (writeBuffer != null && writeBuffer.isClosed()) {
 				writeBuffer.open();
 			} else if (writeBuffer == null) {
-				writeBuffer = this.flushingBuffers.remove(chunkPos);
+				this.flushingLock.lock();
+				try {
+					writeBuffer = this.flushingBuffers.remove(chunkPos);
+				} catch (Exception e) {
+				} finally {
+					this.flushingLock.unlock();
+				}
 				if (writeBuffer != null) {
 					this.writeBuffers.put(chunkPos, writeBuffer);
 					writeBuffer.open();
@@ -358,7 +365,13 @@ public class SparseDedupFile implements DedupFile {
 		long chunkPos = this.getChuckPosition(position);
 		DedupChunk readBuffer = this.writeBuffers.get(chunkPos);
 		if (readBuffer == null) {
-			readBuffer = this.flushingBuffers.get(chunkPos);
+			this.flushingLock.lock();
+			try {
+				readBuffer = this.flushingBuffers.get(chunkPos);
+			} catch (Exception e) {
+			} finally {
+				this.flushingLock.unlock();
+			}
 		}
 		if (readBuffer == null) {
 			DedupChunk ck = this.getHash(position, true);
@@ -427,7 +440,6 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getChannel()
 	 */
 	public DedupFileChannel getChannel() throws IOException {
-
 		DedupFileChannel channel = new DedupFileChannel(mf);
 		this.buffers.add(channel);
 		return channel;
@@ -477,7 +489,8 @@ public class SparseDedupFile implements DedupFile {
 			mf.sync();
 		} catch (Exception e) {
 			e.printStackTrace();
-			//log.log(Level.WARNING, "Unable to close database " + this.GUID, e);
+			// log.log(Level.WARNING, "Unable to close database " + this.GUID,
+			// e);
 		} finally {
 			DedupFileStore.removeOpenDedupFile(mf);
 			bdb = null;
@@ -600,7 +613,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("bdb is null");
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		log.info("checking for dups");
+		log.finer("checking for dups");
 		long doops = 0;
 		long records = 0;
 		while (l > -1) {
@@ -631,7 +644,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 
 		}
-		log.info("Checked [" + records + "] blocks found [" + doops
+		log.finer("Checked [" + records + "] blocks found [" + doops
 				+ "] new duplicate blocks");
 	}
 
@@ -640,7 +653,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("bdb is null");
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		log.info("checking for dups");
+		log.finer("checking for dups");
 		long doops = 0;
 		long records = 0;
 		long localRec = 0;
@@ -675,7 +688,7 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.chunkStore.unlockCollection();
 		}
-		log.info("Checked [" + records + "] blocks found [" + doops
+		log.finer("Checked [" + records + "] blocks found [" + doops
 				+ "] new duplicate blocks from [" + localRec
 				+ "] local records last key was [" + pos + "]");
 	}

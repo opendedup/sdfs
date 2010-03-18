@@ -224,7 +224,6 @@ public class DedupFileChannel {
 				}
 			}
 		} catch (BufferClosedException e) {
-			log.info("############ buffer already closed #################");
 			writeFile(bbuf, len, pos, offset);
 		} catch (Exception e) {
 			e.printStackTrace();

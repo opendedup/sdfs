@@ -268,7 +268,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		if (this.dfGuid == null) {
 			DedupFile df = DedupFileStore.getDedupFile(this);
 			this.dfGuid = df.getGUID();
-			log.info("No DF EXISTS .... Set dedup file for " + this.getPath()
+			log.finer("No DF EXISTS .... Set dedup file for " + this.getPath()
 					+ " to " + this.dfGuid);
 			this.sync();
 			return df;
@@ -358,7 +358,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		this.name = path.substring(path.lastIndexOf(File.separator) + 1).trim();
 		File f = new File(path);
 		if (!f.exists()) {
-			log.info("Creating new MetaFile for " + this.path);
+			log.finer("Creating new MetaFile for " + this.path);
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
 			this.owner_id = Main.defaultOwner;
@@ -532,7 +532,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 */
 	public synchronized boolean delete(boolean removeMeta) {
 		try {
-			log.info("deleting " + this.path);
+			log.finer("deleting " + this.path);
 			MetaFileStore.removedCachedMF(this.path);
 			if (removeMeta) {
 				MetaFileStore.removeDedupFile(this.getPath());

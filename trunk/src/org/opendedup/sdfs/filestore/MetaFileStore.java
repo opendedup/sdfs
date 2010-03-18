@@ -65,12 +65,12 @@ public class MetaFileStore {
 			if (recid != 0) {
 				log.info("Reloading existing meta file store");
 				mftable = BTree.load(recman, recid);
-				System.out.println("Entries " + mftable.entryCount());
+				log.fine("Entries " + mftable.entryCount());
 			} else {
-				log.info("Creating meta file store");
+				log.fine("Creating meta file store");
 				mftable = BTree.createInstance(recman, new StringComparator(),
 						new DefaultSerializer(), new DefaultSerializer());
-				log.info("Entries " + mftable.entryCount());
+				log.info("Total File Entries [" + mftable.entryCount() + "]");
 				mftable
 						.setKeyCompressionProvider(new LeadingValueCompressionProvider());
 				recman.setNamedObject("metaFile", mftable.getRecid());
@@ -186,7 +186,7 @@ public class MetaFileStore {
 		MetaDataDedupFile mf = null;
 		try {
 			mf = getMF(path);
-			log.info("Removing " + mf.getGUID());
+			log.finer("Removing " + mf.getGUID());
 
 			mftable.remove(mf.getGUID());
 			commit();
