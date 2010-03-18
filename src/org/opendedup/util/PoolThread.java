@@ -27,7 +27,6 @@ public class PoolThread extends Thread {
 				else {
 					try {
 						runnable.close();
-
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

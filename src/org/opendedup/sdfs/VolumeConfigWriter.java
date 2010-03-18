@@ -341,9 +341,9 @@ public class VolumeConfigWriter {
 				.addOption(OptionBuilder
 						.withLongOpt("io-max-file-write-buffers")
 						.withDescription(
-								"The number of memory buffers to have available for reading and writing per file. Each buffer in the size"
-										+ " of io-chunk-size. \n Defaults to: \n 50")
-						.hasArg().withArgName("NUMBER").create());
+								"The amount of memory to have available for reading and writing per file. Each buffer in the size"
+										+ " of io-chunk-size. \n Defaults to: \n 16")
+						.hasArg().withArgName("SIZE in MB").create());
 		options
 				.addOption(OptionBuilder
 						.withLongOpt("io-file-read-cache")

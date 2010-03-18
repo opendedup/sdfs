@@ -171,16 +171,19 @@ public class CSByteArrayLongMap implements AbstractMap {
 		kFc = kRaf.getChannel();
 
 		this.freeSlots.clear();
-		log.info("Populating free slots");
+		log.finer("Populating free slots");
 		while (this.freeSlots.position() < this.freeSlots.capacity()) {
 			this.freeSlots.putLong(-1);
 		}
-		log.info("Populated free slots");
+		log.finer("Populated free slots");
+		int freeSl = 0;
 		if (exists) {
 			log.info("This looks an existing hashtable will repopulate with ["
 					+ size + "] entries.");
+			log.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
 			this.freeSlots.position(0);
+			
 			while (kFc.position() < kRaf.length()) {
 				byte[] raw = new byte[ChunkData.RAWDL];
 				try {
@@ -194,6 +197,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
 						this.freeSlots.putLong((currentPos / raw.length)
 								* Main.chunkStorePageSize);
+						freeSl++;
 					} else {
 						ChunkData cm = new ChunkData(raw);
 						boolean foundFree = Arrays.equals(cm.getHash(), FREE);
@@ -222,7 +226,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 			}
 			this.freeSlots.position(0);
 		}
-		log.info("loaded [" + kSz + "] into the hashtable " + this.fileName);
+		log.info("##################### Finished Loading Hash Database #####################");
+		log.info("loaded [" + kSz + "] into the hashtable [" + this.fileName + "] free slots available are [" + freeSl + "]");
 		return size;
 	}
 

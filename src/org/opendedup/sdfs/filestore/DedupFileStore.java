@@ -37,7 +37,7 @@ public class DedupFileStore {
 					Main.writeThreads,
 					new ConcurrentLinkedHashMap.EvictionListener<String, DedupFile>() {
 						public void onEviction(String key, DedupFile df) {
-							log.info("removing " + df.getMetaFile().getPath()
+							log.finer("removing " + df.getMetaFile().getPath()
 									+ "from cache");
 							df.close();
 						}
@@ -102,7 +102,7 @@ public class DedupFileStore {
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
 			if (!openFile.containsKey(df.getGUID())) {
-				log.info("adding dedupfile");
+				log.finer("adding dedupfile");
 				openFile.put(df.getGUID(), df);
 				log.finer("dedupfile cache size is " + openFile.size());
 			}
@@ -187,7 +187,7 @@ public class DedupFileStore {
 	 * Flushes the write buffers for all open files.
 	 */
 	public static void flushAllFiles() {
-		log.info("flushing write caches of size " + openFile.size());
+		log.finer("flushing write caches of size " + openFile.size());
 		Object[] dfs = getArray();
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
@@ -197,6 +197,6 @@ public class DedupFileStore {
 
 			}
 		}
-		log.info("write caches flushed");
+		log.finer("write caches flushed");
 	}
 }

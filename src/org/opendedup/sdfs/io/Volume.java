@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -103,6 +104,10 @@ public class Volume implements java.io.Serializable {
 
 	public long getUsedBlocks() {
 		return (this.currentSize / this.blockSize);
+	}
+	
+	public long getNumberOfFiles() {
+		return MetaFileStore.getEntries();
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException {
