@@ -149,7 +149,6 @@ public class ByteArrayLongMap {
 			byte claimed = this.claims.get();
 			if (pos == -1) {
 				return false;
-
 			} else if (claimed == 1) {
 				return false;
 			} else {

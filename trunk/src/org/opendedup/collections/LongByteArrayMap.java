@@ -27,9 +27,21 @@ public class LongByteArrayMap implements AbstractMap {
 	private boolean closed = true;
 	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
+	public String fileParams = "rw";
 
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
+		this.arrayLength = arrayLength;
+		this.filePath = filePath;
+		FREE = new byte[arrayLength];
+		Arrays.fill(FREE, (byte) 0);
+		this.openFile();
+		new SyncThread(this);
+	}
+
+	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
+			throws IOException {
+		this.fileParams = fileParams;
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
 		FREE = new byte[arrayLength];
@@ -115,12 +127,18 @@ public class LongByteArrayMap implements AbstractMap {
 				if (!f.getParentFile().exists()) {
 					f.getParentFile().mkdirs();
 				}
-				this.bdbf = new RandomAccessFile(filePath, "rw");
+				this.bdbf = new RandomAccessFile(filePath, this.fileParams);
+				log.info("opening [" + this.filePath + "]");
 				if (!fileExists)
 					this.bdbf.setLength(1048576);
 				// initiall allocate 1 megabyte
-				this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0,
-						this.bdbf.length());
+				if (this.fileParams.equalsIgnoreCase("r")) {
+					this.bdb = bdbf.getChannel().map(MapMode.READ_ONLY, 0,
+							this.bdbf.length());
+				} else {
+					this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0,
+							this.bdbf.length());
+				}
 				this.bdb.load();
 				this.closed = false;
 			} catch (IOException e) {

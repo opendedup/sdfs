@@ -41,9 +41,11 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private long resValue = -1;
 	private long freeValue = -1;
 	private String fileName;
-	private List<ChunkData> kBuf = Collections.synchronizedList(new ArrayList<ChunkData>());
+	private List<ChunkData> kBuf = Collections
+			.synchronizedList(new ArrayList<ChunkData>());
 	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
 	private boolean removingChunks = false;
+	private String fileParams = "rw";
 
 	private boolean closed = true;
 	int kSz = 0;
@@ -53,6 +55,21 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
 			throws IOException {
+		this.size = maxSize;
+		this.fileName = fileName;
+		FREE = new byte[arraySize];
+		REMOVED = new byte[arraySize];
+		Arrays.fill(FREE, (byte) 0);
+		Arrays.fill(BLANKCM, (byte) 0);
+		Arrays.fill(REMOVED, (byte) 1);
+		this.setUp();
+		this.closed = false;
+		new SyncThread(this);
+	}
+
+	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName,
+			String fileParams) throws IOException {
+		this.fileParams = fileParams;
 		this.size = maxSize;
 		this.fileName = fileName;
 		FREE = new byte[arraySize];
@@ -115,9 +132,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public synchronized void claimRecords() throws IOException {
-		if(this.isClosed())
+		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
-		RandomAccessFile _fs = new RandomAccessFile(this.fileName, "rw");
+		RandomAccessFile _fs = new RandomAccessFile(this.fileName, this.fileParams);
 		long startTime = System.currentTimeMillis();
 		int z = 0;
 		for (int i = 0; i < maps.length; i++) {
@@ -172,7 +189,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					+ Integer.MAX_VALUE + " proposed fileSize would be "
 					+ fileSize + " try "
 					+ "reducing the number of entries or the key size");
-		kRaf = new RandomAccessFile(fileName, "rw");
+		kRaf = new RandomAccessFile(fileName, this.fileParams);
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = kRaf.getChannel();
 
@@ -216,24 +233,17 @@ public class CSByteArrayLongMap implements AbstractMap {
 						ChunkData cm = new ChunkData(raw);
 						boolean corrupt = false;
 						/*
-						try {
-							byte[] chkHash = HashFunctions.getTigerHashBytes(cm
-									.getData());
-							if (!Arrays.equals(chkHash, cm.getHash())) {
-								corrupt = true;
-								log.severe("corrupt data found at "
-										+ cm.getcPos());
-								cm.setmDelete(true);
-								this.flushFullBuffer();
-								this.kBuf.add(cm);
-								this.freeSlots
-										.putLong((currentPos / raw.length)
-												* Main.chunkStorePageSize);
-							}
-						} catch (Exception e) {
-							log.severe("Error while checking and hashing data");
-							throw new IOException(e);
-						} */
+						 * try { byte[] chkHash =
+						 * HashFunctions.getTigerHashBytes(cm .getData()); if
+						 * (!Arrays.equals(chkHash, cm.getHash())) { corrupt =
+						 * true; log.severe("corrupt data found at " +
+						 * cm.getcPos()); cm.setmDelete(true);
+						 * this.flushFullBuffer(); this.kBuf.add(cm);
+						 * this.freeSlots .putLong((currentPos / raw.length)
+						 * Main.chunkStorePageSize); } } catch (Exception e) {
+						 * log.severe("Error while checking and hashing data");
+						 * throw new IOException(e); }
+						 */
 						if (!corrupt) {
 							boolean foundFree = Arrays.equals(cm.getHash(),
 									FREE);
@@ -285,7 +295,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public void removeRecords(long time) throws IOException {
-		if(this.isClosed())
+		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		this.freeSlotLock.lock();
 		try {
@@ -310,7 +320,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 
 		try {
-			RandomAccessFile _fs = new RandomAccessFile(this.fileName, "rw");
+			RandomAccessFile _fs = new RandomAccessFile(this.fileName, fileParams);
 			long rem = 0;
 			for (int i = 0; i < size; i++) {
 				byte[] raw = new byte[ChunkData.RAWDL];
@@ -454,7 +464,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	private boolean put(ChunkData cm, boolean persist) throws IOException {
-		if(this.isClosed())
+		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		if (kSz >= this.size)
 			throw new IOException("maximum sized reached");
@@ -511,7 +521,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public byte[] getData(byte[] key) throws IOException {
-		if(this.isClosed())
+		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long ps = this.get(key);
 		if (ps != -1) {
@@ -530,7 +540,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			if (lock)
 				this.arlock.lock();
 			oldkBuf = kBuf;
-			if(this.isClosed())
+			if (this.isClosed())
 				kBuf = null;
 			else {
 				kBuf = Collections.synchronizedList(new ArrayList<ChunkData>());
