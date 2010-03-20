@@ -64,7 +64,9 @@ public class DedupFileStore {
 	 */
 	public static synchronized DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
+		
 		if (!closing) {
+			log.info("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
 			DedupFile df = null;
 			if (mf.getDfGuid() == null) {
 				try {

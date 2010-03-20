@@ -1,9 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,6 +18,7 @@ import org.opendedup.collections.AFByteArrayLongMap;
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
+import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -57,6 +62,20 @@ public class HashStore {
 	// ChunkStoreGCScheduler();
 	private static Logger log = Logger.getLogger("sdfs");
 	private boolean closed = true;
+	private static byte [] blankHash = null;
+	private static byte [] blankData = null;
+	static {
+		blankData = new byte [Main.chunkStorePageSize];
+		try {
+			blankHash = HashFunctions.getTigerHashBytes(blankData);
+		} catch (NoSuchAlgorithmException e) {
+			log.log(Level.SEVERE,"unable to hash blank hash",e);
+		} catch (UnsupportedEncodingException e) {
+			log.log(Level.SEVERE,"unable to hash blank hash",e);
+		} catch (NoSuchProviderException e) {
+			log.log(Level.SEVERE,"unable to hash blank hash",e);
+		}
+	}
 
 	/**
 	 * Instantiates the TC hash store.
@@ -163,6 +182,10 @@ public class HashStore {
 		HashChunk hs = null;
 		try {
 			byte[] data = bdb.getData(hash);
+			if(data == null && Arrays.equals(hash,blankHash)) {
+				log.info("found blank data request");
+				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
+			}
 			hs = new HashChunk(hash, 0, data.length, data, false);
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "unable to get hash "
