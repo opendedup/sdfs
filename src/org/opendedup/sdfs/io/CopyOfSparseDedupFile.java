@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import org.opendedup.util.VMDKParser;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
-public class SparseDedupFile implements DedupFile {
+public class CopyOfSparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
@@ -82,7 +83,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
+	public CopyOfSparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		log.finer("dedup file opened for " + mf.getPath());
 		this.mf = mf;
 		this.init();
@@ -100,7 +101,7 @@ public class SparseDedupFile implements DedupFile {
 		this.writeCache();
 		this.sync();
 		try {
-			SparseDedupFile _df = new SparseDedupFile(snapmf);
+			CopyOfSparseDedupFile _df = new CopyOfSparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.close();
@@ -169,25 +170,25 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#writeCache()
 	 */
 	public void writeCache() throws IOException {
-		log.info("Flushing Cache of for " + mf.getPath() + " of size "
+		if (this.isClosed())
+			throw new IOException("file is closed");
+
+		log.finer("Flushing Cache of for " + mf.getPath() + " of size "
 				+ this.writeBuffers.size());
 		Object[] buffers = this.writeBuffers.values().toArray();
-		int z = 0;
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-			this.writeCache(buf, true);
-			z++;
+				buf.persist();
 		}
-		log.info("flushed " + z + " buffers from " + mf.getPath());
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer,
 			boolean removeWhenWritten) throws IOException {
 		if (this.isClosed())
 			this.initDB();
-
+		
 		if (writeBuffer != null && writeBuffer.isDirty()) {
-
+			
 			MessageDigest hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
@@ -463,32 +464,22 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public synchronized void close() {
-		if(!this.closed) {
-		this.closed = true;
 		try {
-			try {
-				ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
-				for(int i = 0; i < this.buffers.size(); i++) {
-					al.add(this.buffers.get(i));
-				}
-				for(int i = 0; i < al.size(); i++) {
-					al.get(i).close();
-				}
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
 			try {
 				this.writeCache();
 			} catch (Exception e) {
 			}
+			;
 			try {
 				this.bdb.sync();
 			} catch (Exception e) {
 			}
+			;
 			try {
 				this.bdb.close();
 			} catch (Exception e) {
 			}
+			;
 			this.closed = true;
 			try {
 				this.chunkStore.close();
@@ -504,7 +495,6 @@ public class SparseDedupFile implements DedupFile {
 			DedupFileStore.removeOpenDedupFile(mf);
 			bdb = null;
 			chunkStore = null;
-		}
 		}
 	}
 
@@ -588,6 +578,7 @@ public class SparseDedupFile implements DedupFile {
 				this.databaseDirPath = directory.getPath();
 				this.databasePath = dbf.getPath();
 				this.chunkStorePath = dbc.getPath();
+				// bdb.setdfunit(1000000);
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
@@ -595,6 +586,7 @@ public class SparseDedupFile implements DedupFile {
 						(long) -1, Main.CHUNK_LENGTH);
 				this.bdb = new LongByteArrayMap(1 + Main.hashLength + 1 + 8,
 						this.databasePath);
+				// bdb.tune(1000000, -1, -1, 0);
 				DedupFileStore.addOpenDedupFile(this);
 			} catch (Exception except) {
 				except.printStackTrace();

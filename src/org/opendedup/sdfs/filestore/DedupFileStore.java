@@ -66,7 +66,7 @@ public class DedupFileStore {
 			throws IOException {
 		
 		if (!closing) {
-			log.info("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
+			log.finer("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
 			DedupFile df = null;
 			if (mf.getDfGuid() == null) {
 				try {

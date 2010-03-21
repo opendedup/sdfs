@@ -142,7 +142,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int link(String from, String to) throws FuseException {
-		log.info("symlink(): " + from + "\n");
+		log.debug("symlink(): " + from + "\n");
 		throw new FuseException("symlink not supported")
 				.initErrno(FuseException.ENOSYS);
 	}
@@ -168,7 +168,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
-		log.info("opening "+path+" with flags "+ flags +" and openSetter " + openSetter.isDirectIO() + openSetter.isKeepCache());
+		log.debug("opening "+path+" with flags "+ flags +" and openSetter " + openSetter.isDirectIO() + openSetter.isKeepCache());
 		openSetter.setFh(this.getFileChannel(path));
 		return 0;
 	}
