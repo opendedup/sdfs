@@ -128,7 +128,7 @@ public class LongByteArrayMap implements AbstractMap {
 					f.getParentFile().mkdirs();
 				}
 				this.bdbf = new RandomAccessFile(filePath, this.fileParams);
-				log.info("opening [" + this.filePath + "]");
+				log.finer("opening [" + this.filePath + "]");
 				if (!fileExists)
 					this.bdbf.setLength(1048576);
 				// initiall allocate 1 megabyte
