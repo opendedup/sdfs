@@ -199,6 +199,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			this.freeSlots.putLong(-1);
 		}
 		log.finer("Populated free slots");
+		long start = System.currentTimeMillis();
 		int freeSl = 0;
 		if (exists) {
 			this.closed = false;
@@ -209,12 +210,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 			kRaf.seek(0);
 			this.freeSlots.position(0);
 			int count = 0;
+			
 			while (kFc.position() < kRaf.length()) {
 				count++;
 				if (count > 500000) {
 					count = 0;
 					System.out.print("#");
 				}
+				
 
 				byte[] raw = new byte[ChunkData.RAWDL];
 				try {
@@ -272,8 +275,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 			}
 			this.freeSlots.position(0);
 		}
+		System.out.println(" Done Loading ");
 		log
-				.info("##################### Finished Loading Hash Database #####################");
+				.info("########## Finished Loading Hash Database in ["+(System.currentTimeMillis() - start)/100 +"] seconds ###########");
 		log.info("loaded [" + kSz + "] into the hashtable [" + this.fileName
 				+ "] free slots available are [" + freeSl + "]");
 		return size;

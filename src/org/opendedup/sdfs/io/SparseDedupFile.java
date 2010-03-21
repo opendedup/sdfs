@@ -286,7 +286,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "upable to write " + hash, e);
+			log.log(Level.SEVERE, "unable to write " + hash, e);
 			throw new IOException(e.toString());
 		} finally {
 			updatelock.unlock();
@@ -591,7 +591,7 @@ public class SparseDedupFile implements DedupFile {
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
-				this.chunkStore = new LargeLongByteArrayMap(dbc.getPath(),
+				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath,
 						(long) -1, Main.CHUNK_LENGTH);
 				this.bdb = new LongByteArrayMap(1 + Main.hashLength + 1 + 8,
 						this.databasePath);
@@ -607,8 +607,14 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			if (this.closed)
 				this.initDB();
-			if (!mf.isDedup())
+			if (!mf.isDedup()) {
+				this.writeCache();
 				this.checkForDups();
+				this.chunkStore.close();
+				new File(this.chunkStorePath).delete();
+				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath,
+						(long) -1, Main.CHUNK_LENGTH);
+			}
 			else
 				this.pushLocalDataToChunkStore();
 		} catch (IOException e) {
@@ -617,18 +623,18 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private void pushLocalDataToChunkStore() throws IOException {
-		if (bdb == null)
-			throw new IOException("bdb is null");
+		if (this.closed)
+			this.initDB();
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		log.finer("checking for dups");
+		log.finer("removing for dups within " + mf.getPath());
 		long doops = 0;
 		long records = 0;
 		while (l > -1) {
 			try {
 				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
 				WritableCacheBuffer writeBuffer = null;
-				if (pck.isLocalData()) {
+				if (pck.isLocalData() && mf.isDedup()) {
 					byte[] chunk = chunkStore.get(l);
 					boolean doop = HCServiceProxy.writeChunk(pck.getHash(),
 							chunk, Main.CHUNK_LENGTH, Main.CHUNK_LENGTH, mf
