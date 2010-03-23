@@ -19,6 +19,7 @@ import org.opendedup.util.HashFunctions;
 public class ChunkData {
 	public static final int RAWDL = 1 + 2 + 32 + 8 + 8 + 8 + 4 + 8;
 	public static final int CLAIMED_OFFSET = 1 + 2 + 32 + 8;
+	private static byte [] BLANKCM = new byte[RAWDL];
 	private boolean mDelete = false;
 	private short hashLen = 0;
 	private byte[] hash = null;
@@ -32,6 +33,7 @@ public class ChunkData {
 	private static byte [] blankHash = null;;
 
 	static {
+		Arrays.fill(BLANKCM, (byte) 0);
 		try {
 			blankHash = HashFunctions.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
 		}catch(Exception e) {
@@ -78,7 +80,7 @@ public class ChunkData {
 	public ByteBuffer getMetaDataBytes() {
 		ByteBuffer buf = ByteBuffer.allocateDirect(RAWDL);
 		if (this.mDelete) {
-			buf.put(new byte[RAWDL]);
+			buf.put(BLANKCM);
 			buf.position(0);
 			return buf;
 		} else {
