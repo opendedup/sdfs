@@ -13,6 +13,7 @@ public class ChunkClaimJob implements Job {
 	public void execute(JobExecutionContext ctx) throws JobExecutionException {
 		try {
 			HashChunkService.processHashClaims();
+			HashChunkService.removeStailHashes();
 		} catch (Exception e) {
 			throw new JobExecutionException(e);
 		}

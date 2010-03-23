@@ -70,6 +70,8 @@ public class Config {
 					.getAttribute("page-size"));
 			Main.chunkStoreReadAheadPages = Integer.parseInt(cbe
 					.getAttribute("read-ahead-pages"));
+			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
+			Main.evictionAge = Integer.parseInt(cbe.getAttribute("eviction-age"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
 				Main.AWSChunkStore = true;
@@ -126,7 +128,6 @@ public class Config {
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-
 		Main.multiReadTimeout = Integer.parseInt(cache
 				.getAttribute("multi-read-timeout"));
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
@@ -138,6 +139,7 @@ public class Config {
 				.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
+		Main.fDkiskSchedule =  cache.getAttribute("claim-hash-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
@@ -151,16 +153,21 @@ public class Config {
 		Main.defaultDirPermissions = Integer.parseInt(permissions
 				.getAttribute("default-folder"));
 		Main.chunkStorePageSize = Main.CHUNK_LENGTH;
-		log.info("parsing local chunkstore parameters");
+		
+		log.fine("parsing local chunkstore parameters");
 		Element localChunkStore = (Element) doc.getElementsByTagName(
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
 		if (Main.chunkStoreLocal) {
-			log.info("this is a local chunkstore");
+			log.fine("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
 			// Main.chunkStoreMetaData =
 			// localChunkStore.getAttribute("chunk-store-metadata");
+			Main.chunkStoreAllocationSize = Long.parseLong(
+					localChunkStore.getAttribute("allocation-size"));
+			Main.gcChunksSchedule = localChunkStore.getAttribute("chunk-gc-schedule");
+			Main.evictionAge = Integer.parseInt(localChunkStore.getAttribute("eviction-age"));
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
 					.getAttribute("pre-allocate"));

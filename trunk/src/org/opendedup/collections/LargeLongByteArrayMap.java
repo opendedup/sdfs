@@ -74,6 +74,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			bdbf.close();
 		} catch (IOException e) {
 		}
+		System.gc();
 	}
 
 	@Override

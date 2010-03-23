@@ -194,7 +194,7 @@ public class Main {
 	 */
 	public static int maxInactiveFileTime = 15 * 60 * 1000;
 	/**
-	 * Specifies whether the chunkstore will store data to AWS S3 or not. This
+	 * Specifies whether the Dedup Storage Engine will store data to AWS S3 or not. This
 	 * is set on the chunk store.
 	 */
 	public static boolean AWSChunkStore = false;
@@ -234,7 +234,7 @@ public class Main {
 	public static boolean preAllocateChunkStore = true;
 
 	/**
-	 * PreAllocates the size of the chunkstore
+	 * PreAllocates the size of the Dedup Storage Engine
 	 */
 	public static long chunkStoreAllocationSize = 536870912000L;
 
@@ -244,7 +244,7 @@ public class Main {
 	public static boolean dedupFiles = false;
 
 	/**
-	 * The page size used for the chunkStore. This should be the same as the
+	 * The page size used for the Dedup Storage Engine. This should be the same as the
 	 * Chunk Length used on the client side.
 	 */
 	public static int chunkStorePageSize = 4096;
@@ -256,12 +256,27 @@ public class Main {
 	public static int chunkStoreReadAheadPages = 4;
 
 	/**
-	 * If the chunkStore is remote or local
+	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean chunkStoreLocal = false;
 
 	/**
-	 * the legth of the hash. Will be either 16 or 32 depending on md5 or SHA1
+	 * the length of the hash. Will be either 16 or 32 depending on md5 or SHA1
 	 */
 	public static short hashLength = 24;
+	/**
+	 * FDisk Schedule in cron format
+	 *  @see org.opendedup.sdfs.FDISKJob
+	 */
+	public static String fDkiskSchedule = "0 0 0/1 * * ?";
+	/**
+	 * Remove chunks schedule
+	 * @see org.opendedup.sdfs.RemoveChunksJob
+	 */
+	public static String gcChunksSchedule = "0 0 0/2 * * ?";
+	
+	/**
+	 * Age, if older than, that data will be evicted from the Dedup Storage Engine
+	 */
+	public static int evictionAge = 3;
 }

@@ -169,7 +169,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#writeCache()
 	 */
 	public void writeCache() throws IOException {
-		log.info("Flushing Cache of for " + mf.getPath() + " of size "
+		log.finer("Flushing Cache of for " + mf.getPath() + " of size "
 				+ this.writeBuffers.size());
 		Object[] buffers = this.writeBuffers.values().toArray();
 		int z = 0;
@@ -178,7 +178,7 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache(buf, true);
 			z++;
 		}
-		log.info("flushed " + z + " buffers from " + mf.getPath());
+		log.finer("flushed " + z + " buffers from " + mf.getPath());
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer,
@@ -205,8 +205,9 @@ public class SparseDedupFile implements DedupFile {
 			if (!doop) {
 				mf.getIOMonitor().addActualBytesWritten(
 						writeBuffer.getCurrentLen());
-				mf.getIOMonitor().removeDuplicateBlock(
-						writeBuffer.getCurrentLen());
+				if(writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk())
+					mf.getIOMonitor().removeDuplicateBlock(
+							writeBuffer.getCurrentLen());
 			}
 			if (this.closed)
 				this.initDB();
@@ -227,7 +228,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			try {
 				this.updateMap(writeBuffer, hash, doop);
-				if (doop)
+				if (doop && !writeBuffer.isPrevDoop())
 					mf.getIOMonitor().addDulicateBlock(writeBuffer.getLength());
 			} catch (IOException e) {
 				log.log(Level.SEVERE, "unable to add chunk ["
@@ -347,6 +348,7 @@ public class SparseDedupFile implements DedupFile {
 					.getLength(), this);
 		} else {
 			writeBuffer = new WritableCacheBuffer(ck, this);
+			writeBuffer.setPrevDoop(ck.isDoop());
 		}
 		// need to fix this
 
@@ -741,6 +743,7 @@ public class SparseDedupFile implements DedupFile {
 					byte dk[] = chunkStore.get(place);
 					ck = new DedupChunk(pck.getHash(), dk, place,
 							Main.CHUNK_LENGTH);
+					ck.setDoop(pck.isDoop());
 				}
 				pck = null;
 

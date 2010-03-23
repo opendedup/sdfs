@@ -9,6 +9,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -45,25 +46,8 @@ public class Volume implements java.io.Serializable {
 			f.mkdirs();
 		this.path = f.getPath();
 		capString = vol.getAttribute("capacity");
-		String units = capString.substring(capString.length() - 2);
-		int sz = Integer.parseInt(capString
-				.substring(0, capString.length() - 2));
-		long fSize = 0;
-		if (units.equalsIgnoreCase("TB"))
-			fSize = sz * tbc;
-		else if (units.equalsIgnoreCase("GB"))
-			fSize = sz * gbc;
-		else if (units.equalsIgnoreCase("MB"))
-			fSize = sz * mbc;
-		else {
-			log.severe(" error : unable to determine capacity of volume "
-					+ this.capString);
-			throw new IOException("unable to determine capacity of volume "
-					+ this.capString);
-		}
-		this.currentSize = fSize;
-		log.info("setting volume size to " + this.currentSize);
-		Main.chunkStoreAllocationSize = this.currentSize;
+		this.currentSize = StringUtils.parseSize(capString);
+		log.info("Setting volume size to " + this.currentSize);
 	}
 
 	public long getCapacity() {
