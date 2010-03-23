@@ -14,6 +14,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 
+import org.opendedup.util.StringUtils;
 import org.w3c.dom.*; //JAXP 1.1
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -53,7 +54,11 @@ public class VolumeConfigWriter {
 	String chunk_store_meta_location = null;
 	String chunk_store_hashdb_location = null;
 	boolean chunk_store_pre_allocate = false;
+	long chunk_store_allocation_size = 0;
 	Short chunk_read_ahead_pages = 4;
+	String chunk_gc_schedule = "0 0 0/2 * * ?";
+	String fdisk_schedule = "0 0 0/1 * * ?";
+	int remove_if_older_than = 3;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -138,6 +143,9 @@ public class VolumeConfigWriter {
 			this.meta_file_cache = Integer.parseInt(cmd
 					.getOptionValue("io-meta-file-cache"));
 		}
+		if (cmd.hasOption("io-claim-chunks-schedule")) {
+			this.fdisk_schedule = cmd.getOptionValue("io-claim-chunks-schedule");
+		}
 		if (cmd.hasOption("permissions-file")) {
 			this.filePermissions = cmd.getOptionValue("permissions-file");
 		}
@@ -170,6 +178,17 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-local")) {
 			this.chunk_store_local = Boolean.parseBoolean((cmd
 					.getOptionValue("chunk-store-local")));
+		}
+		if (cmd.hasOption("chunk-store-gc-schedule")) {
+			this.chunk_gc_schedule = cmd.getOptionValue("chunk-store-gc-schedule");
+		}
+		if (cmd.hasOption("chunk-store-eviction")) {
+			this.remove_if_older_than = Integer.parseInt(cmd.getOptionValue("chunk-store-eviction"));
+		}
+		if (cmd.hasOption("chunk-store-size")) {
+			this.chunk_store_allocation_size = Long.parseLong(cmd.getOptionValue("chunk-store-size"));
+		} else {
+			this.chunk_store_allocation_size = StringUtils.parseSize(this.volume_capacity)/2;
 		}
 
 		File file = new File("/etc/sdfs/" + this.volume_name.trim()
@@ -219,6 +238,7 @@ public class VolumeConfigWriter {
 		io.setAttribute("system-read-cache", Integer
 				.toString(this.system_read_cache));
 		io.setAttribute("write-threads", Short.toString(this.write_threads));
+		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		root.appendChild(io);
 		Element perm = xmldoc.createElement("permissions");
 		perm.setAttribute("default-file", this.filePermissions);
@@ -236,6 +256,9 @@ public class VolumeConfigWriter {
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("pre-allocate", Boolean
 				.toString(this.chunk_store_pre_allocate));
+		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
+		cs.setAttribute("eviction-age", Integer.toString(this.remove_if_older_than));
 		cs.setAttribute("read-ahead-pages", Short
 				.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
@@ -365,6 +388,13 @@ public class VolumeConfigWriter {
 								"The maximum number metadata files to be cached at any one time. "
 										+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
 						.hasArg().withArgName("NUMBER").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("io-claim-chunks-schedule")
+				.withDescription(
+						"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
+								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
+				.hasArg().withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder.withLongOpt("permissions-file")
 				.withDescription(
 						"Default File Permissions. "
@@ -430,6 +460,27 @@ public class VolumeConfigWriter {
 						"The number of pages to read ahead when doing a disk read on the chunk store."
 								+ " \nDefaults to: \n 8").hasArg().withArgName(
 						"NUMBER").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-gc-schedule")
+				.withDescription(
+						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
+				.hasArg().withArgName("CRON Schedule").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-eviction")
+				.withDescription(
+						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 3")
+				.hasArg().withArgName("HOURS").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-size")
+				.withDescription(
+						"The size in bytes of the Dedup Storeage Engine. "
+								+ "This . \n Defaults to: \n 1/2 the size of the Volume")
+				.hasArg().withArgName("BYTES").create());
 		return options;
 	}
 
@@ -458,7 +509,7 @@ public class VolumeConfigWriter {
 
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.setWidth(125);
+		formatter.setWidth(175);
 		formatter
 				.printHelp(
 						"mkfs.sdfs --volume-name=sdfs --volume-capacity=100GB",

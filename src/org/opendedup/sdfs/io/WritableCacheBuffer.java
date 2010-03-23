@@ -37,6 +37,9 @@ public class WritableCacheBuffer extends DedupChunk {
 	File blockFile = null;
 	RandomAccessFile raf = null;
 	boolean rafInit = false;
+	boolean prevDoop = false;
+	
+
 	static {
 		try {
 			defaultHash = HashFunctions
@@ -355,6 +358,14 @@ public class WritableCacheBuffer extends DedupChunk {
 			blockFile.delete();
 			blockFile = null;
 		}
+	}
+	
+	public boolean isPrevDoop() {
+		return prevDoop;
+	}
+
+	public void setPrevDoop(boolean prevDoop) {
+		this.prevDoop = prevDoop;
 	}
 
 }

@@ -17,6 +17,7 @@ public class DedupChunk implements java.io.Serializable {
 	private long position;
 	private boolean newChunk = false;
 	private boolean writable = false;
+	private boolean doop = false;
 
 	/**
 	 * 
@@ -133,6 +134,14 @@ public class DedupChunk implements java.io.Serializable {
 
 	public void destroy() {
 
+	}
+
+	public void setDoop(boolean doop) {
+		this.doop = doop;
+	}
+
+	public boolean isDoop() {
+		return doop;
 	}
 
 }

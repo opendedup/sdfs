@@ -310,6 +310,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 		ByteBuffer _oldSlots = freeSlots;
 		freeSlots = ByteBuffer.allocateDirect(8 * 1000000);
+		while (this.freeSlots.position() < this.freeSlots.capacity()) {
+			this.freeSlots.putLong(-1);
+		}
 		_oldSlots.position(0);
 		try {
 			while (_oldSlots.position() < _oldSlots.capacity()) {

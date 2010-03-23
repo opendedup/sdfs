@@ -1,8 +1,12 @@
 package org.opendedup.util;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class StringUtils {
+	final static long tbc = 1024 * 1024 * 1024 * 1024;
+	final static long gbc = 1024 * 1024 * 1024;
+	final static int mbc = 1024 * 1024;
 
 	static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2',
 			(byte) '3', (byte) '4', (byte) '5', (byte) '6', (byte) '7',
@@ -49,5 +53,24 @@ public class StringUtils {
 		 * output : fffefdfcfbfa
 		 */
 
+	}
+	
+	public static long parseSize(String capString) throws IOException {
+		String units = capString.substring(capString.length() - 2);
+		int sz = Integer.parseInt(capString
+				.substring(0, capString.length() - 2));
+		long fSize = 0;
+		if (units.equalsIgnoreCase("TB"))
+			fSize = sz * tbc;
+		else if (units.equalsIgnoreCase("GB"))
+			fSize = sz * gbc;
+		else if (units.equalsIgnoreCase("MB"))
+			fSize = sz * mbc;
+		else {
+			
+			throw new IOException("unable to determine capacity of volume "
+					+ capString);
+		}
+		return fSize;
 	}
 }

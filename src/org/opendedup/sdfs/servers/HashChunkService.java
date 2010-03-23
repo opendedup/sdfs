@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
@@ -89,7 +90,7 @@ public class HashChunkService {
 	}
 
 	public static void removeStailHashes() throws IOException {
-		hs.evictChunks(System.currentTimeMillis() - (2*24*60*60*1000));
+		hs.evictChunks(System.currentTimeMillis() - Main.evictionAge * 60 *60 * 1000);
 	}
 
 	public static void commitChunks() {
