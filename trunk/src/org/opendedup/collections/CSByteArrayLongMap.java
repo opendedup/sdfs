@@ -46,12 +46,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
-
+	//The amount of memory available for free slots.
+	private int freeSlotsBufferSize = 8 * 10000000;
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
 	private static final int kBufMaxSize = 1000;
-	ByteBuffer freeSlots = ByteBuffer.allocateDirect(8 * 1000000);
+	ByteBuffer freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
 			throws IOException {
@@ -320,13 +321,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} finally {
 			this.freeSlotLock.unlock();
 		}
-		freeSlots = ByteBuffer.allocateDirect(8 * 1000000);
+		freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
 		while (this.freeSlots.position() < this.freeSlots.capacity()) {
 			this.freeSlots.putLong(-1);
 		}
 
+		RandomAccessFile _fs = null;
 		try {
-			RandomAccessFile _fs = new RandomAccessFile(this.fileName,
+			_fs = new RandomAccessFile(this.fileName,
 					fileParams);
 			long rem = 0;
 			for (int i = 0; i < size; i++) {
@@ -375,15 +377,19 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 			}
 
-			_fs.close();
-			_fs = null;
+			
 			log.info("Removed [" + rem + "] records. Free slots ["
 					+ (this.freeSlots.position() / 8) + "]");
 		} catch (Exception e) {
 		} finally {
+			try {
+				_fs.close();
+			}catch(Exception e) {}
+			_fs = null;
 			this.freeSlots.position(0);
 			this.flushBuffer(true);
 			this.removingChunks = false;
+			
 		}
 		System.gc();
 	}
@@ -592,6 +598,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 		this.flushFullBuffer();
 		try {
+			if(cm.getHash().length == 0)
+				return true;
 			if (!this.getMap(cm.getHash()).remove(cm.getHash())) {
 				return false;
 			} else {
