@@ -318,6 +318,7 @@ public class LongByteArrayMap implements AbstractMap {
 		try {
 			if (!this.isClosed()) {
 				this.closed = true;
+				bdb.force();
 				bdb = null;
 				this.bdbf.getFD().sync();
 				this.bdbf.getChannel().close();
