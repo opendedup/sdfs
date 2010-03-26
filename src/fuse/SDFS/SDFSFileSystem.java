@@ -345,7 +345,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int listxattr(String path, XattrLister lister) throws FuseException {
-		File f = this.resolvePath(path);
 		sdfsCmds.listAttrs(lister);
 		return 0;
 	}

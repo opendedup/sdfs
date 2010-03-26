@@ -32,7 +32,7 @@ public class SDFSCmds {
 			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
 			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
-			"user.sdfs.DuplicateData", "user.sdfs.UniqueData",
+			"user.sdfs.DuplicateData", 
 			"user.sdfs.VMDK", "user.sdfs.fileGUID", "user.sdfs.dfGUID",
 			"user.sdfs.dedupAll"
 
@@ -51,7 +51,7 @@ public class SDFSCmds {
 			"Flush write cache for specificed file <unique-command-id>",
 			"Flush write cache for all files",
 			"checks if the file is open <unique-command-id>", "", "", "", "",
-			"", "", "", "", "", "", "" };
+			"", "", "", "", "", ""};
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
 	private LRUMap cmdStatus = new LRUMap(100);
 
@@ -95,10 +95,6 @@ public class SDFSCmds {
 			}
 			if (command.equalsIgnoreCase("user.sdfs.DuplicateData")) {
 				return Long.toString(mf.getIOMonitor().getDuplicateBlocks());
-			}
-			if (command.equalsIgnoreCase("user.sdfs.UniqueData")) {
-				return Long.toString(mf.length()
-						- mf.getIOMonitor().getDuplicateBlocks());
 			}
 			if (command.equalsIgnoreCase("user.sdfs.VMDK")) {
 				return Boolean.toString(mf.isVmdk());

@@ -77,7 +77,7 @@ public class VMDKParser {
 		vmdk.setLength(size, true);
 		vmdk.getIOMonitor().setActualBytesWritten(0);
 		vmdk.getIOMonitor().setBytesRead(0);
-		vmdk.getIOMonitor().setDuplicateBlocks(size);
+		vmdk.getIOMonitor().setDuplicateBlocks(0);
 		vmdk.sync();
 		log.info("Created vmdk of size " + vmdk.length() + " at " + path
 				+ File.separator + fileName);

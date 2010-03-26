@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.monitor;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 public class IOMonitor implements java.io.Serializable {
@@ -59,19 +60,11 @@ public class IOMonitor implements java.io.Serializable {
 		this.bytesRead = bytesRead;
 	}
 
-	public void removeDuplicateBlock(int len) {
-		if (len > this.duplicateBlocks) {
-			this.duplicateBlocks = 0;
-		} else {
-			this.duplicateBlocks = this.duplicateBlocks - len;
-		}
+	public void removeDuplicateBlock() {
+			this.duplicateBlocks = this.duplicateBlocks - Main.CHUNK_LENGTH;
 	}
 
-	public void addDulicateBlock(int len) {
-		long newlen = this.duplicateBlocks + len;
-		if (newlen < mf.length())
-			this.duplicateBlocks = newlen;
-		else
-			this.duplicateBlocks = mf.length();
+	public void addDulicateBlock() {
+		this.duplicateBlocks = this.duplicateBlocks + Main.CHUNK_LENGTH;;
 	}
 }

@@ -206,8 +206,7 @@ public class SparseDedupFile implements DedupFile {
 				mf.getIOMonitor().addActualBytesWritten(
 						writeBuffer.getCurrentLen());
 				if(writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk())
-					mf.getIOMonitor().removeDuplicateBlock(
-							writeBuffer.getCurrentLen());
+					mf.getIOMonitor().removeDuplicateBlock();
 			}
 			if (this.closed)
 				this.initDB();
@@ -229,7 +228,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				this.updateMap(writeBuffer, hash, doop);
 				if (doop && !writeBuffer.isPrevDoop())
-					mf.getIOMonitor().addDulicateBlock(writeBuffer.getLength());
+					mf.getIOMonitor().addDulicateBlock();
 			} catch (IOException e) {
 				log.log(Level.SEVERE, "unable to add chunk ["
 						+ writeBuffer.getHash() + "] at position "
