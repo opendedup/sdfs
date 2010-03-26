@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/bcprov-jdk16-143.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/jdbm.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/jets3t-0.7.1.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/java-xmlbuilder-1.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/tijmp.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/clhm-production.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/quartz-1.7.3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

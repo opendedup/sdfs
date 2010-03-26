@@ -324,7 +324,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			_mf.dedup = this.dedup;
 			_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
 			_mf.getIOMonitor().setVirtualBytesWritten(this.length());
-			_mf.getIOMonitor().setDuplicateBlocks(this.length());
+			_mf.getIOMonitor().setDuplicateBlocks(this.getIOMonitor().getDuplicateBlocks());
 			_mf.setVmdk(this.isVmdk());
 			if (this.isVmdk())
 				_mf.setVmdkData(this.getVmdkData().clone());

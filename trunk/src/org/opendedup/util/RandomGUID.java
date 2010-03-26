@@ -120,7 +120,6 @@ public class RandomGUID extends Object {
 	 */
 	public String toString() {
 		String raw = valueAfterMD5.toUpperCase();
-		System.out.println(raw + " " + raw.length());
 		StringBuffer sb = new StringBuffer();
 		sb.append(raw.substring(0, 8));
 		sb.append("-");
