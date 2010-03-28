@@ -1,36 +1,20 @@
 package org.opendedup.sdfs.servers;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.collections.map.LRUMap;
-import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
 public class HCServiceProxy {
 
@@ -40,7 +24,15 @@ public class HCServiceProxy {
 	public static HashMap<String, HashClientPool> readServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
-	private static LRUMap readBuffers = new LRUMap(Main.systemReadCacheSize);
+	private static ConcurrentLinkedHashMap<String,ByteCache> readBuffers = ConcurrentLinkedHashMap
+	.create(
+			ConcurrentLinkedHashMap.EvictionPolicy.LRU,Main.systemReadCacheSize,Main.writeThreads,
+			new ConcurrentLinkedHashMap.EvictionListener<String,ByteCache>() {
+				public void onEviction(String key,
+						ByteCache writeBuffer) {
+				}
+			}
+			);
 	private static HashMap<String, byte[]> readingBuffers = new HashMap<String, byte[]>();
 	// private static LRUMap existingHashes = new
 	// LRUMap(Main.systemReadCacheSize);
@@ -95,16 +87,14 @@ public class HCServiceProxy {
 				if (!doop && sendChunk) {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
-
 					} catch (Exception e) {
+						log.log(Level.WARNING,"unable to use hashclient",e);
 						hc.close();
 						hc.openConnection();
 						hc.writeChunk(hash, aContents, 0, len);
 					}
 				}
 			} catch (Exception e1) {
-				if (hc != null)
-					returnObject(db, hc);
 				// TODO Auto-generated catch block
 				log.log(Level.SEVERE, "Unable to write chunk " + hash, e1);
 				throw new IOException("Unable to write chunk " + hash);
@@ -192,7 +182,6 @@ public class HCServiceProxy {
 				}
 			} catch (Exception e) {
 			} finally {
-				if (readlock.isLocked())
 					readlock.unlock();
 			}
 			if (reading) {
@@ -236,12 +225,14 @@ public class HCServiceProxy {
 				readingBuffers.remove(hashStr);
 				// kBytesFetched = kBytesFetched + (data.length / KBYTE);
 				// chunksFetched++;
-				returnObject(db, hc);
+				
 				return data;
 			} catch (Exception e) {
 				log.log(Level.WARNING, "Unable to fetch buffer " + hashStr, e);
 				throw new IOException("Unable to fetch buffer " + hashStr);
 			} finally {
+				if(hc != null)
+					returnObject(db, hc);
 				if (readlock.isLocked())
 					readlock.unlock();
 			}

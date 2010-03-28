@@ -68,13 +68,9 @@ public class HashStore {
 		blankData = new byte [Main.chunkStorePageSize];
 		try {
 			blankHash = HashFunctions.getTigerHashBytes(blankData);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			log.log(Level.SEVERE,"unable to hash blank hash",e);
-		} catch (UnsupportedEncodingException e) {
-			log.log(Level.SEVERE,"unable to hash blank hash",e);
-		} catch (NoSuchProviderException e) {
-			log.log(Level.SEVERE,"unable to hash blank hash",e);
-		}
+		} 
 	}
 
 	/**
@@ -138,7 +134,6 @@ public class HashStore {
 	 * @return the number of rows from the database
 	 */
 	public long getRowCount() {
-
 		return bdb.getSize();
 	}
 
@@ -159,7 +154,6 @@ public class HashStore {
 	 * 
 	 * @throws IOException
 	 */
-
 	private void connectDB() throws IOException {
 		File directory = new File(Main.hashDBStore + File.separator);
 		if (!directory.exists())

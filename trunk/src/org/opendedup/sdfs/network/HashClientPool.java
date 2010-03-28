@@ -2,41 +2,39 @@ package org.opendedup.sdfs.network;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServer;
 
 public class HashClientPool {
 
-	private int port;
 	private HCServer server;
 	private int poolSize;
-	private ArrayList<HashClient> passiveObjects = new ArrayList<HashClient>();
+	private LinkedBlockingQueue<HashClient> passiveObjects = null;
 	private ArrayList<HashClient> activeObjects = new ArrayList<HashClient>();
-	private ReentrantLock plock = new ReentrantLock();
 	private ReentrantLock alock = new ReentrantLock();
+	private ReentrantLock plock = new ReentrantLock();
 
 	public HashClientPool(HCServer server, String name, int size)
 			throws IOException {
 		this.server = server;
 		this.poolSize = size;
+		passiveObjects = new LinkedBlockingQueue<HashClient>(this.poolSize);
 		this.populatePool();
 	}
 
 	public void populatePool() throws IOException {
 		for (int i = 0; i < poolSize; i++) {
 			try {
-				plock.lock();
+
 				this.passiveObjects.add(this.makeObject());
 			} catch (Exception e) {
-				plock.unlock();
-				e.printStackTrace();
 				throw new IOException("Unable to get object out of pool "
 						+ e.toString());
 
 			} finally {
-				if (plock.isLocked())
-					plock.unlock();
 			}
 		}
 	}
@@ -54,31 +52,20 @@ public class HashClientPool {
 	public HashClient borrowObject() throws IOException {
 		HashClient hc = null;
 		try {
-			plock.lock();
-			if (this.passiveObjects.size() > 0) {
-
-				hc = this.passiveObjects.remove(0);
-			}
+			hc = this.passiveObjects.take();
 		} catch (Exception e) {
-			plock.unlock();
-			e.printStackTrace();
-			throw new IOException("Unable to get object out of pool "
-					+ e.toString());
-
+			throw new IOException(e);
 		} finally {
-			plock.unlock();
 		}
 		if (hc == null) {
-			hc = makeObject();
+			hc = this.makeObject();
 		}
 		if (hc.isClosed())
 			hc.openConnection();
+		this.alock.lock();
 		try {
-			this.alock.lock();
 			this.activeObjects.add(hc);
 		} catch (Exception e) {
-			alock.unlock();
-			e.printStackTrace();
 			throw new IOException("Unable to get object out of pool "
 					+ e.toString());
 
@@ -89,11 +76,11 @@ public class HashClientPool {
 	}
 
 	public void returnObject(HashClient hc) throws IOException {
+		alock.lock();
 		try {
-			alock.lock();
+
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
-			alock.unlock();
 			e.printStackTrace();
 			throw new IOException("Unable to get object out of pool "
 					+ e.toString());
@@ -102,16 +89,15 @@ public class HashClientPool {
 			alock.unlock();
 		}
 		try {
-			plock.lock();
-			this.passiveObjects.add(hc);
+			if (this.passiveObjects.size() < this.poolSize)
+				this.passiveObjects.put(hc);
+			else
+				hc.close();
 		} catch (Exception e) {
-			plock.unlock();
-			e.printStackTrace();
 			throw new IOException("Unable to get object out of pool "
 					+ e.toString());
 
 		} finally {
-			plock.unlock();
 		}
 	}
 

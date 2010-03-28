@@ -2,17 +2,17 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Date;
 
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.sdfs.Main;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.CronTrigger;
-import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
+import java.util.Properties;
 
 public class SDFSGCScheduler {
 
@@ -22,10 +22,15 @@ public class SDFSGCScheduler {
 
 	public SDFSGCScheduler() {
 		try {
+			Properties props = new Properties();
+			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+			props.setProperty("org.quartz.threadPool.threadCount", "1");
+			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(Thread.MIN_PRIORITY));
 			log.info("Scheduling Garbage Collection Jobs for SDFS");
-			SchedulerFactory schedFact = new StdSchedulerFactory();
+			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
+			
 			JobDetail ccjobDetail = new JobDetail("fdisk", null, FDISKJob.class);
 			CronTrigger cctrigger = new CronTrigger("fdiskTrigger","group1", Main.fDkiskSchedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);

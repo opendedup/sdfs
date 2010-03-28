@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Date;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +24,11 @@ public class ChunkStoreGCScheduler {
 	public ChunkStoreGCScheduler() {
 		try {
 			log.info("Scheduling Garbage Collection Jobs");
-			SchedulerFactory schedFact = new StdSchedulerFactory();
+			Properties props = new Properties();
+			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+			props.setProperty("org.quartz.threadPool.threadCount", "1");
+			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(Thread.MIN_PRIORITY));
+			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
 			JobDetail ccjobDetail = new JobDetail("claimChunks", null, ChunkClaimJob.class);

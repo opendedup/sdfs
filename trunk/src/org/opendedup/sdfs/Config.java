@@ -34,8 +34,9 @@ public class Config {
 	 * parse the hubstore config file
 	 * 
 	 * @param fileName
+	 * @throws IOException 
 	 */
-	public synchronized static void parseHubStoreConfigFile(String fileName) {
+	public synchronized static void parseHubStoreConfigFile(String fileName) throws IOException {
 		try {
 			File file = new File(fileName);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -52,14 +53,7 @@ public class Config {
 					.item(0);
 			log.info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
-			Main.hashDBStore = locations.getAttribute("hash-db-store");
-			Element dbe = (Element) doc.getElementsByTagName("hash-store")
-					.item(0);
-			Main.FSDBConString = dbe.getAttribute("options");
-			Main.entriesPerDB = Integer.parseInt(dbe
-					.getAttribute("entries-per-db"));
-			Main.maxReturnResults = Integer.parseInt(dbe
-					.getAttribute("max-return-results"));
+			Main.hashDBStore = locations.getAttribute("hash-db-store");;
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
 					.item(0);
 			Main.preAllocateChunkStore = Boolean.parseBoolean(cbe
@@ -92,8 +86,8 @@ public class Config {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
+			log.log(Level.SEVERE,"unable to parse config file ["+fileName+"]", e);
+			throw new IOException(e);
 		}
 	}
 
@@ -177,9 +171,11 @@ public class Config {
 					+ " in chunkstore ##############");
 		}
 
+		/*
 		IOMeter meter = new IOMeter(Main.ioLogFile);
 		Thread th = new Thread(meter);
 		th.start();
+		*/
 	}
 
 	/**
@@ -227,15 +223,15 @@ public class Config {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.log(Level.SEVERE, "unable to parse config file [" + fileName + "]",e1);
+			throw new IOException(e1);
 		}
 		Document doc = null;
 		try {
 			doc = db.parse(file);
 		} catch (SAXException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.log(Level.SEVERE, "unable to parse config file [" + fileName + "]",e1);
+			throw new IOException(e1);
 		}
 		doc.getDocumentElement().normalize();
 		log.info("Parsing " + doc.getDocumentElement().getNodeName());

@@ -46,13 +46,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
-	//The amount of memory available for free slots.
+	// The amount of memory available for free slots.
 	private int freeSlotsBufferSize = 8 * 10000000;
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
 	private static final int kBufMaxSize = 1000;
 	ByteBuffer freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
+	private boolean firstGCRun = true;
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
 			throws IOException {
@@ -135,6 +136,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	public synchronized void claimRecords() throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
+		log.info("claiming records");
 		RandomAccessFile _fs = new RandomAccessFile(this.fileName,
 				this.fileParams);
 		long startTime = System.currentTimeMillis();
@@ -143,7 +145,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 			try {
 				maps[i].iterInit();
 				long val = 0;
-
 				while (val != -1 && !this.closed) {
 					try {
 						this.iolock.lock();
@@ -311,87 +312,97 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.getMap(key).containsKey(key);
 	}
 
-	public void removeRecords(long time) throws IOException {
-		if (this.isClosed())
-			throw new IOException("Hashtable " + this.fileName + " is close");
-		this.freeSlotLock.lock();
-		try {
-			this.removingChunks = true;
-		} catch (Exception e) {
-		} finally {
-			this.freeSlotLock.unlock();
-		}
-		freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
-		while (this.freeSlots.position() < this.freeSlots.capacity()) {
-			this.freeSlots.putLong(-1);
-		}
-
-		RandomAccessFile _fs = null;
-		try {
-			_fs = new RandomAccessFile(this.fileName,
-					fileParams);
-			long rem = 0;
-			for (int i = 0; i < size; i++) {
-				byte[] raw = new byte[ChunkData.RAWDL];
-				try {
-					this.iolock.lock();
-
+	public synchronized void removeRecords(long time) throws IOException {
+		if (this.firstGCRun) {
+			this.firstGCRun = false;
+			return;
+		} else {
+			log.info("removing free blocks");
+			if (this.isClosed())
+				throw new IOException("Hashtable " + this.fileName
+						+ " is close");
+			this.freeSlotLock.lock();
+			try {
+				this.removingChunks = true;
+			} catch (Exception e) {
+			} finally {
+				this.freeSlotLock.unlock();
+			}
+			freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
+			while (this.freeSlots.position() < this.freeSlots.capacity()) {
+				this.freeSlots.putLong(-1);
+			}
+			this.freeSlots.position(0);
+			RandomAccessFile _fs = null;
+			try {
+				_fs = new RandomAccessFile(this.fileName, fileParams);
+				long rem = 0;
+				for (int i = 0; i < size; i++) {
+					byte[] raw = new byte[ChunkData.RAWDL];
 					try {
-						_fs.read(raw);
-					} catch (Exception e) {
-					} finally {
-						this.iolock.unlock();
-					}
-					if (Arrays.equals(raw, BLANKCM)
-							&& (this.freeSlots.position() < this.freeSlots
-									.capacity())) {
+						this.iolock.lock();
 
-						this.freeSlots.putLong(i * Main.chunkStorePageSize);
-						rem++;
-					} else {
 						try {
-							ChunkData cm = new ChunkData(raw);
-							boolean foundFree = Arrays.equals(cm.getHash(),
-									FREE);
-							boolean foundReserved = Arrays.equals(cm.getHash(),
-									REMOVED);
-							if (cm.getLastClaimed() < time && !foundFree
-									&& !foundReserved) {
-								if (this.remove(cm)) {
-									if (this.freeSlots.position() < this.freeSlots
-											.capacity()) {
-										this.freeSlots.putLong(cm.getcPos());
-									}
-									rem++;
-								}
-							}
-						} catch (Exception e1) {
-							log.log(Level.WARNING,
-									"unable to access record at "
-											+ _fs.getChannel().position(), e1);
+							_fs.read(raw);
+						} catch (Exception e) {
+						} finally {
+							this.iolock.unlock();
 						}
+						if (Arrays.equals(raw, BLANKCM)
+								&& (this.freeSlots.position() < this.freeSlots
+										.capacity())) {
+
+							this.freeSlots.putLong(i * Main.chunkStorePageSize);
+							rem++;
+						} else {
+							try {
+								ChunkData cm = new ChunkData(raw);
+								boolean foundFree = Arrays.equals(cm.getHash(),
+										FREE);
+								boolean foundReserved = Arrays.equals(cm
+										.getHash(), REMOVED);
+								if (cm.getLastClaimed() < time && !foundFree
+										&& !foundReserved) {
+									if (this.remove(cm)) {
+										if (this.freeSlots.position() < this.freeSlots
+												.capacity()) {
+											this.freeSlots
+													.putLong(cm.getcPos());
+										}
+										rem++;
+									}
+								}
+							} catch (Exception e1) {
+								log.log(Level.WARNING,
+										"unable to access record at "
+												+ _fs.getChannel().position(),
+										e1);
+							}
+						}
+					} catch (BufferUnderflowException e) {
+
+					} finally {
+						
 					}
-				} catch (BufferUnderflowException e) {
 
 				}
 
-			}
+				log.info("Removed [" + rem + "] records. Free slots ["
+						+ (this.freeSlots.position() / 8) + "]");
+			} catch (Exception e) {
+			} finally {
+				try {
+					_fs.close();
+				} catch (Exception e) {
+				}
+				_fs = null;
+				this.freeSlots.position(0);
+				this.flushBuffer(true);
+				this.removingChunks = false;
 
-			
-			log.info("Removed [" + rem + "] records. Free slots ["
-					+ (this.freeSlots.position() / 8) + "]");
-		} catch (Exception e) {
-		} finally {
-			try {
-				_fs.close();
-			}catch(Exception e) {}
-			_fs = null;
-			this.freeSlots.position(0);
-			this.flushBuffer(true);
-			this.removingChunks = false;
-			
+			}
+			System.gc();
 		}
-		System.gc();
 	}
 
 	public boolean put(ChunkData cm) throws IOException {
@@ -598,7 +609,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 		this.flushFullBuffer();
 		try {
-			if(cm.getHash().length == 0)
+			if (cm.getHash().length == 0)
 				return true;
 			if (!this.getMap(cm.getHash()).remove(cm.getHash())) {
 				return false;

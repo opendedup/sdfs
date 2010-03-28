@@ -1,5 +1,4 @@
 <routing-config>
-<local-chunkstore enabled="true" pre-allocate="true" read-ahead-pages="8" chunk-store="/opt/dchunks" hash-db-store="/opt/ddb"/>
 <servers>
 	<server name="server1" host="127.0.0.1" port="2222" enable-udp="false" compress="false" network-threads="8"/>
 	<server name="server2" host="127.0.0.1" port="2222" enable-udp="false" compress="false" network-threads="8"/>
