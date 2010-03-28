@@ -33,6 +33,7 @@ class ClientThread extends Thread {
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
+		log.info("Client Threads is " + clients.size());
 		addClient(this);
 	}
 

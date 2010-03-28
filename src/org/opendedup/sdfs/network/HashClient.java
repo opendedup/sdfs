@@ -46,6 +46,7 @@ public class HashClient {
 		// Try to open a socket on a given host and port
 		// Try to open input and output streams
 		try {
+			log.info("Connecting to server " + server.getHostName() + " on port " + server.getPort());
 			clientSocket = new Socket(server.getHostName(), server.getPort());
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
@@ -59,11 +60,10 @@ public class HashClient {
 			inReader.readLine();
 			this.closed = false;
 		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host " + server);
+			log.severe("Don't know about host " + server);
 			this.closed = true;
 		} catch (Exception e) {
-			System.err
-					.println("Couldn't get I/O for the connection to the host");
+			log.log(Level.SEVERE,"Couldn't get I/O for the connection to the host",e);
 			this.closed = true;
 		}
 	}
@@ -71,8 +71,9 @@ public class HashClient {
 	public void executeCmd(IOCmd cmd) throws IOException {
 		if (this.closed)
 			this.openConnection();
+		lock.lock();
 		try {
-			lock.lock();
+
 			cmd.executeCmd(is, os);
 		} catch (Exception e) {
 			this.closed = true;
@@ -81,12 +82,10 @@ public class HashClient {
 				cmd.executeCmd(is, os);
 			} catch (Exception e1) {
 				log.log(Level.SEVERE, "unable to execute command", e);
-				lock.unlock();
 				throw new IOException("unable to execute command");
 			}
 		} finally {
-			if (lock.isLocked())
-				lock.unlock();
+			lock.unlock();
 		}
 	}
 
@@ -118,7 +117,6 @@ public class HashClient {
 	}
 
 	public void close() {
-		System.out.println("Closing Connection " + this.name);
 		try {
 			os.write(NetworkCMDS.QUIT_CMD);
 			os.flush();

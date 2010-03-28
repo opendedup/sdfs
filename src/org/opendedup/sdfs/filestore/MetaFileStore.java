@@ -63,17 +63,18 @@ public class MetaFileStore {
 					+ File.separator + "mfstore", _props);
 			long recid = recman.getNamedObject("metaFile");
 			if (recid != 0) {
-				log.info("Reloading existing meta file store");
+				
 				mftable = BTree.load(recman, recid);
 				log.fine("Entries " + mftable.entryCount());
+				log.info("Reloaded existing meta file store");
 			} else {
-				log.fine("Creating meta file store");
 				mftable = BTree.createInstance(recman, new StringComparator(),
 						new DefaultSerializer(), new DefaultSerializer());
 				log.info("Total File Entries [" + mftable.entryCount() + "]");
 				mftable
 						.setKeyCompressionProvider(new LeadingValueCompressionProvider());
 				recman.setNamedObject("metaFile", mftable.getRecid());
+				log.fine("Created meta file store");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

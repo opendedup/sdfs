@@ -323,8 +323,8 @@ public class DedupFileChannel {
 			try {
 				readBuffer = df.getReadBuffer(currentLocation);
 			} catch (Exception e) {
-				log.log(Level.WARNING, e.toString(), e);
-				break;
+				//break;
+				throw new IOException("unable to read at [" + filePos + "] because [" + e.toString() + "]");
 			}
 			synchronized (readBuffer) {
 				int startPos = (int) (currentLocation - readBuffer

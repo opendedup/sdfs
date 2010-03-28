@@ -38,7 +38,6 @@ Getting Started
 Known Limitation(s)
 
 	Testing has been limited thus far. Please test and report bugs	
-	Deleting of data and reclaiming of space has not been implemented yet. ETA: This will be available in the coming days.
 	Graceful exit if physical disk capacity is reached. ETA : Will be implemented shortly 
 	Maximum individual filesize within sdfs currently 250GB at 4k chunks and multiples of that at higher chunk sizes.
 	
@@ -139,6 +138,13 @@ Tips and Tricks
 
     		Memory Requirements Calculation: (volume size/chunk size)*33 
 	
+	Using fuse 2.7:
+
+	Fuse 2.8 adds the big_writes option which greatly increases performance. In addition fuse 2.8 works much better for NFS mounts. If you need to use fuse 2.7 
+	try mounting the sdfs filesystem with different fuse options. This can be done by a suggetion for fuse options are "direct_io,allow_other,fsname=SDFS".
+	Take a look at this example:
+
+	sudo ./mount.sdfs -v sdfs_vol1 -m /media/sdfs  -o direct_io,allow_other,fsname=SDFS
 			
 
-3/12/10
+3/26/10
