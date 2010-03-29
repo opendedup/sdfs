@@ -1,5 +1,9 @@
 package org.opendedup.collections;
 
+import gnu.trove.iterator.TLongIterator;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.set.hash.TLongHashSet;
+
 import java.io.File;
 
 import java.io.FileNotFoundException;
@@ -15,6 +19,7 @@ import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -52,7 +57,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 	int kSz = 0;
 	long ram = 0;
 	private static final int kBufMaxSize = 1000;
-	ByteBuffer freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
+	TLongHashSet freeSlots = new TLongHashSet(freeSlotsBufferSize);
+	TLongIterator iter = null;
 	private boolean firstGCRun = true;
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
@@ -197,11 +203,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 		kFc = kRaf.getChannel();
 
 		this.freeSlots.clear();
-		log.finer("Populating free slots");
-		while (this.freeSlots.position() < this.freeSlots.capacity()) {
-			this.freeSlots.putLong(-1);
-		}
-		log.finer("Populated free slots");
 		long start = System.currentTimeMillis();
 		int freeSl = 0;
 		if (exists) {
@@ -211,7 +212,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 			log
 					.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
-			this.freeSlots.position(0);
 			int count = 0;
 
 			while (kFc.position() < kRaf.length()) {
@@ -225,13 +225,11 @@ public class CSByteArrayLongMap implements AbstractMap {
 				try {
 					long currentPos = kFc.position();
 					kRaf.read(raw);
-					if (Arrays.equals(raw, BLANKCM)
-							&& (this.freeSlots.position() < this.freeSlots
-									.capacity())) {
+					if (Arrays.equals(raw, BLANKCM)) {
 						log
 								.finer("found free slot at "
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
-						this.freeSlots.putLong((currentPos / raw.length)
+						this.addFreeSolt((currentPos / raw.length)
 								* Main.chunkStorePageSize);
 						freeSl++;
 					} else {
@@ -268,13 +266,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 									if (cm.getHash().length > 0) {
 										this.put(cm, false);
 										kSz++;
-									} else if (this.freeSlots.position() < this.freeSlots
-											.capacity()) {
+									} else {
 										log
 												.finer("found free slot at "
 														+ ((currentPos / raw.length) * Main.chunkStorePageSize));
-										this.freeSlots
-												.putLong((currentPos / raw.length)
+										this
+												.addFreeSolt((currentPos / raw.length)
 														* Main.chunkStorePageSize);
 										freeSl++;
 									}
@@ -286,14 +283,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 				}
 			}
-			this.freeSlots.position(0);
 		}
 		System.out.println(" Done Loading ");
 		log.info("########## Finished Loading Hash Database in ["
 				+ (System.currentTimeMillis() - start) / 100
 				+ "] seconds ###########");
 		log.info("loaded [" + kSz + "] into the hashtable [" + this.fileName
-				+ "] free slots available are [" + freeSl + "]");
+				+ "] free slots available are [" + freeSl + "] ["
+				+ this.freeSlots.size() + "]");
 		return size;
 	}
 
@@ -321,54 +318,20 @@ public class CSByteArrayLongMap implements AbstractMap {
 			if (this.isClosed())
 				throw new IOException("Hashtable " + this.fileName
 						+ " is close");
-			this.freeSlotLock.lock();
-			try {
-				this.removingChunks = true;
-			} catch (Exception e) {
-			} finally {
-				this.freeSlotLock.unlock();
-			}
-			freeSlots = ByteBuffer.allocateDirect(freeSlotsBufferSize);
-			while (this.freeSlots.position() < this.freeSlots.capacity()) {
-				this.freeSlots.putLong(-1);
-			}
-			this.freeSlots.position(0);
 			RandomAccessFile _fs = null;
 			try {
-				_fs = new RandomAccessFile(this.fileName, fileParams);
+				_fs = new RandomAccessFile(this.fileName, "r");
 				long rem = 0;
 				for (int i = 0; i < size; i++) {
 					byte[] raw = new byte[ChunkData.RAWDL];
 					try {
-						this.iolock.lock();
-
-						try {
-							_fs.read(raw);
-						} catch (Exception e) {
-						} finally {
-							this.iolock.unlock();
-						}
-						if (Arrays.equals(raw, BLANKCM)
-								&& (this.freeSlots.position() < this.freeSlots
-										.capacity())) {
-
-							this.freeSlots.putLong(i * Main.chunkStorePageSize);
-							rem++;
-						} else {
+						_fs.read(raw);
+						if (!Arrays.equals(raw, BLANKCM)) {
 							try {
 								ChunkData cm = new ChunkData(raw);
-								boolean foundFree = Arrays.equals(cm.getHash(),
-										FREE);
-								boolean foundReserved = Arrays.equals(cm
-										.getHash(), REMOVED);
-								if (cm.getLastClaimed() < time && !foundFree
-										&& !foundReserved) {
+								if (cm.getLastClaimed() < time) {
 									if (this.remove(cm)) {
-										if (this.freeSlots.position() < this.freeSlots
-												.capacity()) {
-											this.freeSlots
-													.putLong(cm.getcPos());
-										}
+										this.addFreeSolt(cm.getcPos());
 										rem++;
 									}
 								}
@@ -382,13 +345,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 					} catch (BufferUnderflowException e) {
 
 					} finally {
-						
+
 					}
 
 				}
 
 				log.info("Removed [" + rem + "] records. Free slots ["
-						+ (this.freeSlots.position() / 8) + "]");
+						+ this.freeSlots.size() + "]");
 			} catch (Exception e) {
 			} finally {
 				try {
@@ -396,7 +359,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 				} catch (Exception e) {
 				}
 				_fs = null;
-				this.freeSlots.position(0);
 				this.flushBuffer(true);
 				this.removingChunks = false;
 
@@ -451,20 +413,35 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.removingChunks)
 			return -1;
 		freeSlotLock.lock();
+		
 		try {
-			int sPos = this.freeSlots.position();
-			if (this.freeSlots.position() < this.freeSlots.capacity()) {
-				long pos = this.freeSlots.getLong();
-				if (pos != -1) {
-					this.freeSlots.position(sPos);
-					this.freeSlots.putLong(-1);
-				}
-				return pos;
-			} else {
-				this.freeSlots.position(0);
+			if(this.freeSlots.size() == 0) {
+				return -1;
 			}
-		} catch (Exception e) {
-
+			if (this.iter == null)
+				this.iter = this.freeSlots.iterator();
+				try {
+				long nxt = this.iter.next();
+				this.iter.remove();
+				if(nxt >=0)
+					return nxt;
+				else 
+					return -1;
+				}
+				catch(ConcurrentModificationException e) {
+					log.finest("hash table modified");
+					this.iter = this.freeSlots.iterator();
+					long nxt = this.iter.next();
+					this.iter.remove();
+					if(nxt >=0)
+						return nxt;
+					else 
+						return -1;
+				}
+				
+			} 
+		 catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			this.freeSlotLock.unlock();
 		}
@@ -476,22 +453,16 @@ public class CSByteArrayLongMap implements AbstractMap {
 			return;
 		freeSlotLock.lock();
 		try {
-			int sPos = this.freeSlots.position();
-			while (this.freeSlots.position() < this.freeSlots.capacity()) {
-				long pos = this.freeSlots.getLong();
-				if (pos == -1) {
-					this.freeSlots.position(freeSlots.position() - 8);
-					this.freeSlots.putLong(position);
-					this.freeSlots.position(sPos);
-					return;
-				}
+			if (!this.freeSlots.contains(position)
+					&& this.freeSlots.size() < this.freeSlotsBufferSize) {
+				this.freeSlots.add(position);
 			}
-		} catch (Exception e) {
 
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			this.freeSlotLock.unlock();
 		}
-
 	}
 
 	private boolean put(ChunkData cm, boolean persist) throws IOException {
@@ -530,17 +501,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		return false;
-		/*
-		 * try { this.hashlock.lock(); int pos = this.index(cm.getHash()); if
-		 * (pos == -1) { return false; } else { this.keys.position(pos);
-		 * this.keys.put(cm.getHash()); pos = (pos / FREE.length) * 8;
-		 * this.values.position(pos); this.values.putLong(cm.getcPos()); pos =
-		 * (pos/8)*4; cm.updateNumClaimed(this.claims.getInt());
-		 * this.kBuf.add(cm); return true; }
-		 * 
-		 * } catch (Exception e) { log.log(Level.SEVERE, "error record record",
-		 * e); return false; } finally { this.hashlock.unlock(); }
-		 */
+
 	}
 
 	public long get(byte[] key) throws IOException {

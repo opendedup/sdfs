@@ -140,6 +140,30 @@ public class ByteArrayLongMap {
 			this.hashlock.unlock();
 		}
 	}
+	
+	public boolean update(byte[] key,long value) throws IOException {
+		try {
+			this.hashlock.lock();
+			int pos = this.index(key);
+			if (pos == -1) {
+				return false;
+			} else {
+				keys.position(pos);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.putLong(value);
+				pos = (pos / 8);
+				this.claims.position(pos);
+				this.claims.put((byte) 1);
+				return true;
+			}
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "error getting record", e);
+			return false;
+		} finally {
+			this.hashlock.unlock();
+		}
+	}
 
 	public boolean remove(byte[] key) throws IOException {
 		try {
