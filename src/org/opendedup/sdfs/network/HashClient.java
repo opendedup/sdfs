@@ -46,7 +46,7 @@ public class HashClient {
 		// Try to open a socket on a given host and port
 		// Try to open input and output streams
 		try {
-			log.info("Connecting to server " + server.getHostName() + " on port " + server.getPort());
+			log.fine("Connecting to server " + server.getHostName() + " on port " + server.getPort());
 			clientSocket = new Socket(server.getHostName(), server.getPort());
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
