@@ -26,7 +26,7 @@ public class HCServiceProxy {
 	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
 	private static ConcurrentLinkedHashMap<String,ByteCache> readBuffers = ConcurrentLinkedHashMap
 	.create(
-			ConcurrentLinkedHashMap.EvictionPolicy.LRU,Main.systemReadCacheSize,Main.writeThreads,
+			ConcurrentLinkedHashMap.EvictionPolicy.LRU,10485760/Main.CHUNK_LENGTH,Main.writeThreads,
 			new ConcurrentLinkedHashMap.EvictionListener<String,ByteCache>() {
 				public void onEviction(String key,
 						ByteCache writeBuffer) {

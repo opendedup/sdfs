@@ -27,7 +27,7 @@ public class Volume implements java.io.Serializable {
 	String capString = null;
 	long currentSize;
 	String path;
-	final int blockSize = 32768;
+	final int blockSize = 1024;
 
 	public Volume(String path, long capacity, long currentSize) {
 		File f = new File(path);
@@ -46,8 +46,9 @@ public class Volume implements java.io.Serializable {
 			f.mkdirs();
 		this.path = f.getPath();
 		capString = vol.getAttribute("capacity");
-		this.currentSize = StringUtils.parseSize(capString);
-		log.info("Setting volume size to " + this.currentSize);
+		this.capacity = StringUtils.parseSize(capString);
+		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
+		log.info("Setting volume size to " + this.capacity);
 	}
 
 	public long getCapacity() {

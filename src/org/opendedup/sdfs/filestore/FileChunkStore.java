@@ -40,7 +40,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
 	private static final int readAheadPages = Main.chunkStoreReadAheadPages;
-	private static final int MAX_ENTRIES = Main.chunkStorePageSize/3;
+	private static final int MAX_ENTRIES = 10485760/Main.chunkStorePageSize;
 	private String name;
 	private boolean closed = false;
 	private FileChannel chunkDataReader = null;
@@ -318,6 +318,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					buf.position(0);
 					position = position + pageSize;
 				}
+				fbuf = null;
 			}
 			buf = null;
 			/*
