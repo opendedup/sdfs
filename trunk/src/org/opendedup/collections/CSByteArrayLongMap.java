@@ -56,7 +56,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
-	private static final int kBufMaxSize = 1000;
+	private static final int kBufMaxSize = 10485760/Main.chunkStorePageSize;
 	TLongHashSet freeSlots = new TLongHashSet(freeSlotsBufferSize);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
@@ -213,7 +213,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
 			int count = 0;
-
+			System.out.print("Loading ");
 			while (kFc.position() < kRaf.length()) {
 				count++;
 				if (count > 500000) {
@@ -476,7 +476,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (persist) {
 			cm.setcPos(this.getFreeSlot());
 			cm.persistData(true);
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),(byte)1);
 			if (added) {
 				this.arlock.lock();
 				try {
@@ -490,7 +490,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				cm = null;
 			}
 		} else {
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),(byte)1);
 		}
 
 		return added;

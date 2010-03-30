@@ -355,7 +355,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	private void init(String path) {
 		this.lastAccessed = System.currentTimeMillis();
 		this.path = path;
-		this.name = path.substring(path.lastIndexOf(File.separator) + 1).trim();
+		this.name = path.substring(path.lastIndexOf(File.separator) + 1);
 		File f = new File(path);
 		if (!f.exists()) {
 			log.finer("Creating new MetaFile for " + this.path);

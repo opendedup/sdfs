@@ -58,6 +58,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int chmod(String path, int mode) throws FuseException {
+		log.info("setting file permissions " + mode);
 		File f = resolvePath(path);
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		mf.setPermissions(mode);
@@ -154,13 +155,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int mknod(String path, int mode, int rdev) throws FuseException {
-		// log.info("mknod(): " + path + " " + mode + " " + rdev + "\n");
+		//log.info("mknod(): " + path + " " + mode + " " + rdev + "\n");
 		File f = new File(this.mountedVolume + path);
 		if (f.exists())
 			throw new FuseException("file exists")
 					.initErrno(FuseException.EPERM);
 		else {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+			mf.setPermissions(mode);
 			mf.sync();
 		}
 		return 0;
@@ -168,7 +170,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
-		log.debug("opening "+path+" with flags "+ flags +" and openSetter " + openSetter.isDirectIO() + openSetter.isKeepCache());
+		//log.debug("opening "+path+" with flags "+ flags +" and openSetter " + openSetter.isDirectIO() + openSetter.isKeepCache());
 		openSetter.setFh(this.getFileChannel(path));
 		return 0;
 	}

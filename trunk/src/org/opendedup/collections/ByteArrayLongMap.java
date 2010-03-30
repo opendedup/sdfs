@@ -15,6 +15,7 @@ import org.opendedup.util.StringUtils;
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
 	ByteBuffer claims = null;
+	ByteBuffer store = null;
 	ByteBuffer keys = null;
 	private int size = 0;
 	private final static long blank = -1;
@@ -102,10 +103,12 @@ public class ByteArrayLongMap {
 		keys = ByteBuffer.allocateDirect(size * FREE.length);
 		values = ByteBuffer.allocateDirect(size * 8);
 		claims = ByteBuffer.allocateDirect(size);
+		store = ByteBuffer.allocateDirect(size);
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
 			claims.put((byte) 0);
+			store.put((byte) 0);
 			kSz++;
 		}
 		// values = new long[this.size][this.size];
@@ -141,7 +144,7 @@ public class ByteArrayLongMap {
 		}
 	}
 	
-	public boolean update(byte[] key,long value) throws IOException {
+	public boolean update(byte[] key,long value,byte storeID) throws IOException {
 		try {
 			this.hashlock.lock();
 			int pos = this.index(key);
@@ -155,6 +158,8 @@ public class ByteArrayLongMap {
 				pos = (pos / 8);
 				this.claims.position(pos);
 				this.claims.put((byte) 1);
+				this.store.position(pos);
+				this.store.put(storeID);
 				return true;
 			}
 		} catch (Exception e) {
@@ -185,6 +190,8 @@ public class ByteArrayLongMap {
 				pos = (pos / 8);
 				this.claims.position(pos);
 				this.claims.put((byte) 0);
+				this.store.position(pos);
+				this.store.put((byte)0);
 				return true;
 			}
 		} catch (Exception e) {
@@ -331,7 +338,7 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	public boolean put(byte[] key, long value) {
+	public boolean put(byte[] key, long value,byte storeID) {
 		try {
 			this.hashlock.lock();
 			int pos = this.insertionIndex(key);
@@ -345,6 +352,8 @@ public class ByteArrayLongMap {
 			pos = (pos / 8);
 			this.claims.position(pos);
 			this.claims.put((byte) 1);
+			this.store.position(pos);
+			this.store.put(storeID);
 			return pos > -1 ? true : false;
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "error inserting record", e);
@@ -409,7 +418,7 @@ public class ByteArrayLongMap {
 			}
 			if (val < 0)
 				val = val * -1;
-			boolean k = b.put(hash, val);
+			boolean k = b.put(hash, val,(byte)1);
 			if (k == false)
 				System.out.println("Unable to add this " + k);
 
