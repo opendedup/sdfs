@@ -58,7 +58,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int chmod(String path, int mode) throws FuseException {
-		log.info("setting file permissions " + mode);
+		//log.info("setting file permissions " + mode);
 		File f = resolvePath(path);
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		mf.setPermissions(mode);
