@@ -19,7 +19,7 @@ import org.opendedup.sdfs.Main;
 public class LongByteArrayMap implements AbstractMap {
 
 	private static Logger log = Logger.getLogger("sdfs");
-	RandomAccessFile bdbf = null;
+	//RandomAccessFile bdbf = null;
 	MappedByteBuffer bdb = null;
 	int arrayLength = 0;
 	String filePath = null;
@@ -55,8 +55,9 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public long nextKey() throws IOException {
+		File f = new File(this.filePath);
 		long pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
-		long fLen = ((this.bdbf.length() * (long) Main.CHUNK_LENGTH) / arrayLength);
+		long fLen = ((f.length() * (long) Main.CHUNK_LENGTH) / arrayLength);
 		if (iterPos == 0)
 			log.info("fLen = " + fLen);
 		while (pos <= fLen) {
@@ -89,7 +90,8 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] nextValue() throws IOException {
 		int pos = iterPos * this.arrayLength;
 		byte[] val = null;
-		while (pos < this.bdbf.length()) {
+		File f = new File(this.filePath);
+		while (pos < f.length()) {
 			val = new byte[this.arrayLength];
 			try {
 				this.hashlock.lock();
@@ -120,6 +122,7 @@ public class LongByteArrayMap implements AbstractMap {
 	private void openFile() throws IOException {
 		if (this.closed) {
 			this.hashlock.lock();
+			RandomAccessFile bdbf = null;
 			try {
 
 				File f = new File(filePath);
@@ -127,17 +130,17 @@ public class LongByteArrayMap implements AbstractMap {
 				if (!f.getParentFile().exists()) {
 					f.getParentFile().mkdirs();
 				}
-				this.bdbf = new RandomAccessFile(filePath, this.fileParams);
+				 bdbf = new RandomAccessFile(filePath, this.fileParams);
 				log.finer("opening [" + this.filePath + "]");
 				if (!fileExists)
-					this.bdbf.setLength(1048576);
-				// initiall allocate 1 megabyte
+					bdbf.setLength(32768);
+				// initiall allocate 32k
 				if (this.fileParams.equalsIgnoreCase("r")) {
 					this.bdb = bdbf.getChannel().map(MapMode.READ_ONLY, 0,
-							this.bdbf.length());
+							bdbf.length());
 				} else {
 					this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0,
-							this.bdbf.length());
+							bdbf.length());
 				}
 				this.bdb.load();
 				this.closed = false;
@@ -146,6 +149,9 @@ public class LongByteArrayMap implements AbstractMap {
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
+				try {
+					bdbf.close();
+				}catch(Exception e) {}
 				this.hashlock.unlock();
 			}
 		}
@@ -164,18 +170,28 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	private void setMapFileLength(int len) throws IOException {
-		if (len > this.bdbf.length()) {
-			this.bdbf.setLength(len);
+		RandomAccessFile bdbf = null;
+		try {
+			 bdbf = new RandomAccessFile(filePath, this.fileParams);
+		if (len > bdbf.length()) {
+			bdbf.setLength(len);
 			// initiall allocate 1 megabyte
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0, len);
 			this.bdb.load();
+		}
+		}catch(IOException e) {
+			throw e;
+		}
+		finally {
+			bdbf.close();
 		}
 
 	}
 
 	private int getMapFilePosition(long pos) throws IOException {
 		int propLen = this.calcMapFilePos(pos);
-		if ((propLen + 262144) > bdbf.length())
+		File f =  new File(filePath);
+		if ((propLen + 262144) > f.length())
 			this.setMapFileLength(propLen + 1048576);
 		return propLen;
 	}
@@ -267,7 +283,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#sync()
 	 */
 	public void sync() throws IOException {
-		this.bdbf.getFD().sync();
+		this.bdb.force();
 	}
 
 	/*
@@ -291,6 +307,8 @@ public class LongByteArrayMap implements AbstractMap {
 
 	public void copy(String destFilePath) throws IOException {
 		this.hashlock.lock();
+		Path p  = null;
+		Path dest = null;
 		try {
 			this.sync();
 			File f = new File(destFilePath);
@@ -298,12 +316,14 @@ public class LongByteArrayMap implements AbstractMap {
 				f.delete();
 			else
 				f.getParentFile().mkdirs();
-			Path p = Paths.get(this.filePath);
-			Path dest = Paths.get(destFilePath);
+			p = Paths.get(this.filePath);
+			dest = Paths.get(destFilePath);
 			p.copyTo(dest);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
+			p = null;
+			dest = null;
 			this.hashlock.unlock();
 		}
 	}
@@ -322,22 +342,15 @@ public class LongByteArrayMap implements AbstractMap {
 					bdb.force();
 					bdb = null;
 				} catch (Exception e) {
-				}
-				try {
-					this.bdbf.getFD().sync();
-					this.bdbf.getChannel().close();
-				} catch (Exception e) {
-				}
-				try {
-					this.bdbf.close();
-					this.bdbf = null;
-				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				System.gc();
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			this.hashlock.unlock();
 		}
+		
 	}
 }

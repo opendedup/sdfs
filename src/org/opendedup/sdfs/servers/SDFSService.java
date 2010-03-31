@@ -19,6 +19,7 @@ public class SDFSService {
 
 		this.configFile = configFile;
 		this.routingFile = routingFile;
+		log.info("Running SDFS Version " + Main.version);
 		log.info("reading config file = " + this.configFile);
 		log.info("reading routing file = " + this.routingFile);
 	}

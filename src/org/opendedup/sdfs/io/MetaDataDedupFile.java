@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -50,7 +51,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	private boolean ownerWriteOnly = false;
 	private boolean ownerExecOnly = false;
 	private boolean ownerReadOnly = false;
-	private String name;
 	private String dfGuid = null;
 	private String guid = "";
 	private IOMonitor monitor;
@@ -308,7 +308,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 */
 	private void init(String path) {
 		this.path = path;
-		this.name = path.substring(path.lastIndexOf(File.separator) + 1);
+		//this.name = path.substring(path.lastIndexOf(File.separator) + 1);
+		
 		File f = new File(path);
 		if (!f.exists()) {
 			log.finer("Creating new MetaFile for " + this.path);
@@ -444,7 +445,10 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	public long lastModified() throws IOException {
 		Path p = Paths.get(this.path);
 		BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
-		return attrs.lastModifiedTime().toMillis();
+		long lm = attrs.lastModifiedTime().toMillis();
+		p = null;
+		attrs = null;
+		return lm;
 	}
 
 	/**
@@ -517,7 +521,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			String[] files = f.list();
 			MetaDataDedupFile[] df = new MetaDataDedupFile[files.length];
 			for (int i = 0; i < df.length; i++) {
-
 				df[i] = MetaFileStore.getMF(this.getPath() + File.separator
 						+ files[i]);
 			}
@@ -544,15 +547,17 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			return f.renameTo(new File(dest.getPath()));
 		} else {
 			try {
-				dest.deleteStub();
+				MetaFileStore.removeMetaFile(dest.getPath());
 			} catch (Exception e) {
-
+				e.toString();
 			}
 			boolean rename = f.renameTo(new File(dest.getPath()));
 			if (rename) {
-				MetaFileStore.removedCachedMF(this.path);
+				MetaFileStore.removedCachedMF(this.getPath());
 				this.path = dest.getPath();
 				this.unmarshal();
+			} else {
+				log.info("unable to move file");
 			}
 			return rename;
 		}
@@ -639,7 +644,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	}
 
 	public String getName() {
-		return name;
+		return new File(this.path).getName();
 
 	}
 
@@ -652,6 +657,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	public boolean setLastModified(long lastModified) throws IOException {
 		Path p = Paths.get(this.path);
 		p.setAttribute("unix:lastModifiedTime", FileTime.fromMillis(lastModified));
+		p = null;
 		return true;
 	}
 
@@ -732,12 +738,16 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	public void setLastAccessed(long lastAccessed) throws IOException {
 		Path p = Paths.get(this.path);
 		p.setAttribute("unix:lastAccessTime", FileTime.fromMillis(lastAccessed));
+		p = null;
 	}
 
 	public long getLastAccessed() throws IOException {
 		Path p = Paths.get(this.path);
 		BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
-		return attrs.lastAccessTime().toMillis();
+		long atime = attrs.lastAccessTime().toMillis();
+		attrs = null;
+		p = null;
+		return atime;
 	}
 
 	private class Stub {
