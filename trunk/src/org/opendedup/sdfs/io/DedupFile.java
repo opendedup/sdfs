@@ -171,7 +171,7 @@ public interface DedupFile {
 	 * 
 	 * @return when the file was last modified
 	 */
-	public abstract long lastModified();
+	public abstract long lastModified()throws IOException;
 
 	/**
 	 * Returns the DedupChunk associated with a position in the DedupFile.

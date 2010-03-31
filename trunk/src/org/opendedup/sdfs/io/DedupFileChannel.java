@@ -161,9 +161,10 @@ public class DedupFileChannel {
 	 * @param lastModified
 	 *            sets the last time the data was modified for the underlying
 	 *            file
+	 * @throws IOException 
 	 */
-	public void setLastModified(long lastModified) {
-		mf.setLastModified(lastModified, true);
+	public void setLastModified(long lastModified) throws IOException {
+		mf.setLastModified(lastModified);
 	}
 
 	/**
@@ -220,7 +221,7 @@ public class DedupFileChannel {
 				this.currentPosition = _cp;
 				if (_cp > mf.length()) {
 					mf.setLength(_cp, false);
-					mf.setLastModified(System.currentTimeMillis(), false);
+					mf.setLastModified(System.currentTimeMillis());
 				}
 			}
 		} catch (BufferClosedException e) {

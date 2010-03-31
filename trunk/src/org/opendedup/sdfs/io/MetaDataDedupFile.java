@@ -8,10 +8,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.*;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.Attributes;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -35,8 +41,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	protected long timeStamp = 0;
 	private long length = 0;
 	private String path = "";
-	private long lastModified = 0;
-	private long lastAccessed = 0;
 	private boolean execute = true;
 	private boolean read = true;
 	private boolean write = true;
@@ -52,9 +56,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	private IOMonitor monitor;
 	private boolean vmdk;
 	private VMDKData vmdkData;
-	private int permissions;
-	private int owner_id;
-	private int group_id;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
 
@@ -125,56 +126,12 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		return keys;
 	}
 
-	/**
-	 * 
-	 * @return posix permissions e.g. 0777
-	 */
-	public int getPermissions() {
-		return permissions;
-	}
 
-	/**
-	 * 
-	 * @param permissions
-	 *            sets permissions
-	 */
-	public void setPermissions(int permissions) {
-		this.permissions = permissions;
-	}
 
-	/**
-	 * 
-	 * @return the file owner id
-	 */
-	public int getOwner_id() {
-		return owner_id;
-	}
 
-	/**
-	 * 
-	 * @param owner_id
-	 *            sets the file owner id
-	 */
-	public void setOwner_id(int owner_id) {
-		this.owner_id = owner_id;
-	}
 
-	/**
-	 * 
-	 * @return returns the group owner id
-	 */
-	public int getGroup_id() {
-		return group_id;
-	}
 
-	/**
-	 * 
-	 * @param group_id
-	 *            sets the group owner id
-	 */
-	public void setGroup_id(int group_id) {
-		this.group_id = group_id;
-	}
+
 
 	/**
 	 * 
@@ -310,7 +267,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			_mf.execute = this.execute;
 			_mf.file = true;
 			_mf.hidden = this.hidden;
-			_mf.lastModified = this.lastModified;
 			_mf.setLength(this.length, false);
 			_mf.ownerExecOnly = this.ownerExecOnly;
 			_mf.ownerReadOnly = this.ownerReadOnly;
@@ -318,13 +274,11 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			_mf.timeStamp = this.timeStamp;
 			_mf.read = this.read;
 			_mf.write = this.write;
-			_mf.owner_id = this.owner_id;
-			_mf.group_id = this.group_id;
-			_mf.permissions = this.permissions;
 			_mf.dedup = this.dedup;
 			_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
 			_mf.getIOMonitor().setVirtualBytesWritten(this.length());
-			_mf.getIOMonitor().setDuplicateBlocks(this.getIOMonitor().getDuplicateBlocks());
+			_mf.getIOMonitor().setDuplicateBlocks(
+					this.getIOMonitor().getDuplicateBlocks());
 			_mf.setVmdk(this.isVmdk());
 			if (this.isVmdk())
 				_mf.setVmdkData(this.getVmdkData().clone());
@@ -353,7 +307,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 *            the path to the file
 	 */
 	private void init(String path) {
-		this.lastAccessed = System.currentTimeMillis();
 		this.path = path;
 		this.name = path.substring(path.lastIndexOf(File.separator) + 1);
 		File f = new File(path);
@@ -361,16 +314,9 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			log.finer("Creating new MetaFile for " + this.path);
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
-			this.owner_id = Main.defaultOwner;
-			this.group_id = Main.defaultGroup;
-			this.permissions = Main.defaultFilePermissions;
-			this.lastModified = System.currentTimeMillis();
 			this.dedup = Main.dedupFiles;
 			this.setLength(0, false);
 		} else if (f.isDirectory()) {
-			this.permissions = Main.defaultDirPermissions;
-			this.owner_id = Main.defaultOwner;
-			this.group_id = Main.defaultGroup;
 			this.directory = true;
 			this.length = 4096;
 		} else if (f.isFile()) {
@@ -392,22 +338,22 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		if (!f.isDirectory()) {
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
-
+			FileWriter writer = null;
 			try {
-				FileWriter writer = new FileWriter(this.path);
+				writer = new FileWriter(this.path);
 				writer.write(stub.getGUID().trim() + "\n");
+			} catch (Exception e) {
+				log.log(Level.SEVERE, "unable to write stub", e);
+				return false;
+			} finally {
 				try {
 					writer.close();
 					writer = null;
 				} catch (Exception e) {
 
 				}
-				return true;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
 			}
+			return true;
 		}
 		return true;
 	}
@@ -419,10 +365,17 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 * @throws IOException
 	 */
 	private String getStubGuid() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(this.path));
-		String _guid = reader.readLine();
-		reader.close();
-		reader = null;
+		BufferedReader reader = null;
+		String _guid = null;
+		try {
+			reader = new BufferedReader(new FileReader(this.path));
+			_guid = reader.readLine();
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			reader.close();
+			reader = null;
+		}
 		return _guid;
 	}
 
@@ -453,7 +406,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 				this.execute = df.execute;
 				this.file = true;
 				this.hidden = df.hidden;
-				this.lastModified = df.lastModified;
 				this.length = df.length;
 				this.ownerExecOnly = df.ownerExecOnly;
 				this.ownerReadOnly = df.ownerReadOnly;
@@ -465,9 +417,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 				this.vmdk = df.vmdk;
 				this.vmdkData = df.vmdkData;
 				this.dedup = df.dedup;
-				this.permissions = df.getPermissions();
-				this.owner_id = df.getOwner_id();
-				this.group_id = df.getGroup_id();
 				this.monitor = df.getIOMonitor();
 				df = null;
 			} else {
@@ -490,11 +439,12 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * 
 	 * @return time when file was last modified
+	 * @throws IOException 
 	 */
-	public long lastModified() {
-		if (this.isDirectory())
-			return new File(this.path).lastModified();
-		return lastModified;
+	public long lastModified() throws IOException {
+		Path p = Paths.get(this.path);
+		BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
+		return attrs.lastModifiedTime().toMillis();
 	}
 
 	/**
@@ -525,36 +475,11 @@ public class MetaDataDedupFile implements java.io.Serializable {
 
 	/**
 	 * 
-	 * @param removeMeta
-	 *            if true removes the file, otherwise it will remove just the
-	 *            cached object from the MetaFileStore.
-	 * @return true if done
-	 */
-	public synchronized boolean delete(boolean removeMeta) {
-		try {
-			log.finer("deleting " + this.path);
-			MetaFileStore.removedCachedMF(this.path);
-			if (removeMeta) {
-				MetaFileStore.removeDedupFile(this.getPath());
-				if (this.dfGuid != null) {
-					this.getDedupFile().delete();
-					DedupFileStore.removeOpenDedupFile(this);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Main.volume.updateCurrentSize(-1 * this.length());
-		File f = new File(this.path);
-		return f.delete();
-	}
-
-	/**
-	 * 
 	 * @return true if deleted
 	 */
-	public boolean delete() {
-		return this.delete(true);
+	public boolean deleteStub() {
+		File f = new File(this.path);
+		return f.delete();
 	}
 
 	/**
@@ -566,16 +491,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		this.dfGuid = df.getGUID();
 	}
 
-	/**
-	 * Delete this file only. This is used to delete the file in question but
-	 * not the DedupFile Reference
-	 * 
-	 */
-	protected synchronized boolean deleteSelf() {
-		File f = new File(this.path);
-		MetaFileStore.removedCachedMF(this.path);
-		return f.delete();
-	}
+
 
 	/**
 	 * 
@@ -628,7 +544,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			return f.renameTo(new File(dest.getPath()));
 		} else {
 			try {
-				dest.delete();
+				dest.deleteStub();
 			} catch (Exception e) {
 
 			}
@@ -730,13 +646,12 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * @param lastModified
 	 *            the lastModified to set
+	 * @throws IOException 
 	 */
 
-	public boolean setLastModified(long lastModified, boolean serialize) {
-		this.lastModified = lastModified;
-		this.lastAccessed = lastModified;
-		if (serialize)
-			this.unmarshal();
+	public boolean setLastModified(long lastModified) throws IOException {
+		Path p = Paths.get(this.path);
+		p.setAttribute("unix:lastModifiedTime", FileTime.fromMillis(lastModified));
 		return true;
 	}
 
@@ -812,13 +727,17 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * 
 	 * @param lastAccessed
+	 * @throws IOException 
 	 */
-	public void setLastAccessed(long lastAccessed) {
-		this.lastAccessed = lastAccessed;
+	public void setLastAccessed(long lastAccessed) throws IOException {
+		Path p = Paths.get(this.path);
+		p.setAttribute("unix:lastAccessTime", FileTime.fromMillis(lastAccessed));
 	}
 
-	public long getLastAccessed() {
-		return lastAccessed;
+	public long getLastAccessed() throws IOException {
+		Path p = Paths.get(this.path);
+		BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
+		return attrs.lastAccessTime().toMillis();
 	}
 
 	private class Stub {

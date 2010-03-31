@@ -1,5 +1,0 @@
-<chunk-server>
-<network port="2222" hostname="0.0.0.0" use-udp="false"/>
-<locations chunk-store="/opt/dse/ddb" hash-db-store="/opt/dse/dchunks"/>
-<chunk-store pre-allocate="true" chunk-gc-schedule="0 0 0/4 * * ?" allocation-size="53687091200" page-size="4096" read-ahead-pages="8"/>
-</chunk-server>

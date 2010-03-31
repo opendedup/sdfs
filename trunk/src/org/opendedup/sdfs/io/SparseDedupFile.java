@@ -713,7 +713,7 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#lastModified()
 	 */
-	public long lastModified() {
+	public long lastModified() throws IOException {
 		return mf.lastModified();
 	}
 

@@ -183,15 +183,22 @@ public class MetaFileStore {
 	 * @param guid
 	 *            the guid for the MetaDataDedupFile
 	 */
-	public static void removeDedupFile(String path) {
+	public static synchronized boolean removeMetaFile(String path) {
 		MetaDataDedupFile mf = null;
+		boolean deleted = false;
 		try {
 			mf = getMF(path);
 			log.finer("Removing " + mf.getGUID());
-
 			mftable.remove(mf.getGUID());
 			commit();
 			pathMap.remove(mf.getPath());
+			deleted = mf.getDedupFile().delete();
+			if(!deleted)
+				return deleted;
+			else {
+				Main.volume.updateCurrentSize(-1 * mf.length());
+				deleted = mf.deleteStub();
+			}
 		} catch (Exception e) {
 			if (mf != null)
 				log.log(Level.FINEST, "unable to remove " + path, e);
@@ -199,6 +206,8 @@ public class MetaFileStore {
 				log.log(Level.FINEST, "unable to remove  because [" + path
 						+ "] is null");
 		}
+		mf = null;
+		return deleted;
 	}
 
 	/**
