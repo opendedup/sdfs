@@ -88,13 +88,6 @@ public class RandomGUID extends Object {
 			} else {
 				rand = myRand.nextLong();
 			}
-
-			// This StringBuffer can be a long as you need; the MD5
-			// hash will always return 128 bits. You can change
-			// the seed to include anything you want here.
-			// You could even stream a file through the MD5 making
-			// the odds of guessing it at least as great as that
-			// of guessing the contents of the file!
 			sbValueBeforeMD5.append(s_id);
 			sbValueBeforeMD5.append(":");
 			sbValueBeforeMD5.append(Long.toString(time));
