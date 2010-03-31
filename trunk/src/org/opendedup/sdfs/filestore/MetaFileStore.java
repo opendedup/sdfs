@@ -2,6 +2,10 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.Attributes;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +67,7 @@ public class MetaFileStore {
 					+ File.separator + "mfstore", _props);
 			long recid = recman.getNamedObject("metaFile");
 			if (recid != 0) {
-				
+
 				mftable = BTree.load(recman, recid);
 				log.fine("Entries " + mftable.entryCount());
 				log.info("Reloaded existing meta file store");
@@ -187,17 +191,28 @@ public class MetaFileStore {
 		MetaDataDedupFile mf = null;
 		boolean deleted = false;
 		try {
-			mf = getMF(path);
-			log.finer("Removing " + mf.getGUID());
-			mftable.remove(mf.getGUID());
-			commit();
-			pathMap.remove(mf.getPath());
-			deleted = mf.getDedupFile().delete();
-			if(!deleted)
-				return deleted;
-			else {
-				Main.volume.updateCurrentSize(-1 * mf.length());
-				deleted = mf.deleteStub();
+			Path p = Paths.get(path);
+			boolean isSymbolicLink = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+			boolean isDir = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isDirectory();
+			if (isSymbolicLink || isDir) {
+				p.delete();
+				p = null;
+				return true;
+			} else {
+				mf = getMF(path);
+				log.info("Removing " + mf.getGUID() + " " + path);
+				commit();
+				pathMap.remove(mf.getPath());
+				deleted = mf.getDedupFile().delete();
+				if (!deleted)
+					return deleted;
+				else {
+					Main.volume.updateCurrentSize(-1 * mf.length());
+					deleted = mf.deleteStub();
+					mftable.remove(mf.getGUID());
+				}
 			}
 		} catch (Exception e) {
 			if (mf != null)
@@ -206,6 +221,7 @@ public class MetaFileStore {
 				log.log(Level.FINEST, "unable to remove  because [" + path
 						+ "] is null");
 		}
+		log.finest(" meta-file size is " + mftable.entryCount());
 		mf = null;
 		return deleted;
 	}

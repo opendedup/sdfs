@@ -114,6 +114,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getattr(String path, FuseGetattrSetter getattrSetter)
 			throws FuseException {
+		log.debug("getting info for path " + path);
 		int ftype =this.getFtype(path);
 		if (ftype == FuseFtype.TYPE_SYMLINK) {
 			Path p = null;
@@ -122,14 +123,22 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			p = Paths.get(this.mountedVolume + path);
 			int uid = (Integer)p.getAttribute("unix:uid");
 			int gid = (Integer)p.getAttribute("unix:gid");
+			int mode = (Integer)p.getAttribute("unix:mode");
 			attrs = Attributes.readBasicFileAttributes(p);
-			int atime = (int) (attrs.lastAccessTime().toMillis() / 1000L);
-			int mtime = (int) (attrs.lastModifiedTime().toMillis() / 1000L);
+			int atime = 0;
+			int ctime = 0;
+			int mtime = 0;
+			try {
+				mtime = (int) (attrs.lastModifiedTime().toMillis() / 1000L);
+				atime = (int) (attrs.lastAccessTime().toMillis() / 1000L);
+				ctime = (int) (attrs.creationTime().toMillis() / 1000L);
+			}catch(Exception e) {}
+			
 			int fileLength = path.length();
-			getattrSetter.set(p.hashCode(), FuseFtype.TYPE_SYMLINK | 0777, 1, uid, gid, 0,
+			getattrSetter.set(p.hashCode(), FuseFtype.TYPE_SYMLINK | mode, 1, uid, gid, 0,
 					fileLength * NAME_LENGTH,
 					(fileLength * NAME_LENGTH + BLOCK_SIZE - 1)
-							/ BLOCK_SIZE, atime, mtime, 0);
+							/ BLOCK_SIZE, atime, mtime, ctime);
 			}catch(Exception e) {
 				log.error("unable to parse sylink " + path,e);
 				throw new FuseException("error getting symlink " + path)
@@ -147,20 +156,21 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			int gid = (Integer)p.getAttribute("unix:gid");
 			int mode = (Integer)p.getAttribute("unix:mode");
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-			int atime = (int) (mf.lastModified() / 1000L);
+			int atime = (int) (mf.getLastAccessed() / 1000L);
 			int ctime = (int) (mf.getTimeStamp() / 1000L);
+			int mtime = (int) (mf.lastModified() / 1000L);
 			if (mf.isDirectory()) {
 				int fileLength = mf.list().length;
 				getattrSetter.set(mf.getGUID().hashCode(), this.getFtype(path)
 						|mode, 1, uid, gid, 0, fileLength * NAME_LENGTH,
 						(fileLength * NAME_LENGTH + BLOCK_SIZE - 1)
-								/ BLOCK_SIZE, atime, atime, ctime);
+								/ BLOCK_SIZE, atime, mtime, ctime);
 			} else {
 				long fileLength = mf.length();
 				getattrSetter.set(mf.getGUID().hashCode(), this.getFtype(path)
 						| mode, 1, uid, gid, 0, fileLength,
 						(fileLength + BLOCK_SIZE - 1) / BLOCK_SIZE, atime,
-						atime, ctime);
+						mtime, ctime);
 			}
 			}catch(Exception e) {
 				log.error("unable to parse sylink " + path,e);
@@ -179,11 +189,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		File f = null;
 		try {
 		f = resolvePath(path);
-		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-		MetaDataDedupFile[] mfs = mf.listFiles();
+		File[] mfs = f.listFiles();
 		for (int i = 0; i < mfs.length; i++) {
-			MetaDataDedupFile _mf = mfs[i];
-			dirFiller.add(_mf.getName(), _mf.hashCode(), this.getFtype(path));
+			File _mf = mfs[i];
+			dirFiller.add(_mf.getName(), _mf.hashCode(), this.getFtype(_mf));
 		}
 		}catch (Exception e) {
 			
@@ -456,6 +465,30 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		return _f;
 	}
 	
+	private int getFtype(File _f) throws FuseException {
+		Path p = Paths.get(_f.getPath());
+		try {
+			boolean isSymbolicLink = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+			if (isSymbolicLink)
+				return FuseFtype.TYPE_SYMLINK;
+			else if (_f.isDirectory())
+				return FuseFtype.TYPE_DIR;
+			else if (_f.isFile())
+				return FuseFtype.TYPE_FILE;
+		} catch (IOException e) {
+			e.printStackTrace();
+			_f = null;
+			p = null;
+			throw new FuseException("No such node")
+					.initErrno(FuseException.ENOENT);
+		}
+		log.error("could not determine type for " + _f.getPath());
+		throw new FuseException("could not determine type")
+				.initErrno(FuseException.ENOENT);
+
+	}
+	
 	private int getFtype(String path) throws FuseException {
 		File _f = new File(mountedVolume + path);
 		Path p = Paths.get(_f.getPath());
@@ -474,6 +507,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throw new FuseException("No such node")
 					.initErrno(FuseException.ENOENT);
 		}
+		log.error("could not determine type for " + path);
 		throw new FuseException("could not determine type")
 				.initErrno(FuseException.ENOENT);
 

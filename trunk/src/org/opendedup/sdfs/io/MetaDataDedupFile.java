@@ -2,15 +2,12 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.*;
 
 import java.io.*;
@@ -39,7 +36,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	transient public static final char pathSeparatorChar = File.pathSeparatorChar;
 	transient public static final char separatorChar = File.separatorChar;
 	transient private static Logger log = Logger.getLogger("sdfs");
-	protected long timeStamp = 0;
 	private long length = 0;
 	private String path = "";
 	private boolean execute = true;
@@ -125,13 +121,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		}
 		return keys;
 	}
-
-
-
-
-
-
-
 
 	/**
 	 * 
@@ -271,7 +260,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			_mf.ownerExecOnly = this.ownerExecOnly;
 			_mf.ownerReadOnly = this.ownerReadOnly;
 			_mf.ownerWriteOnly = this.ownerWriteOnly;
-			_mf.timeStamp = this.timeStamp;
 			_mf.read = this.read;
 			_mf.write = this.write;
 			_mf.dedup = this.dedup;
@@ -308,8 +296,8 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 */
 	private void init(String path) {
 		this.path = path;
-		//this.name = path.substring(path.lastIndexOf(File.separator) + 1);
-		
+		// this.name = path.substring(path.lastIndexOf(File.separator) + 1);
+
 		File f = new File(path);
 		if (!f.exists()) {
 			log.finer("Creating new MetaFile for " + this.path);
@@ -323,7 +311,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 		} else if (f.isFile()) {
 			this.mashal();
 		}
-		this.timeStamp = System.currentTimeMillis();
 	}
 
 	/**
@@ -411,7 +398,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 				this.ownerExecOnly = df.ownerExecOnly;
 				this.ownerReadOnly = df.ownerReadOnly;
 				this.ownerWriteOnly = df.ownerWriteOnly;
-				this.timeStamp = df.timeStamp;
 				this.read = df.read;
 				this.write = df.write;
 				this.dfGuid = df.dfGuid;
@@ -440,7 +426,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * 
 	 * @return time when file was last modified
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public long lastModified() throws IOException {
 		Path p = Paths.get(this.path);
@@ -494,8 +480,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	protected void setDedupFile(DedupFile df) {
 		this.dfGuid = df.getGUID();
 	}
-
-
 
 	/**
 	 * 
@@ -651,31 +635,32 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * @param lastModified
 	 *            the lastModified to set
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 
 	public boolean setLastModified(long lastModified) throws IOException {
 		Path p = Paths.get(this.path);
-		p.setAttribute("unix:lastModifiedTime", FileTime.fromMillis(lastModified));
+		p.setAttribute("unix:lastModifiedTime", FileTime
+				.fromMillis(lastModified));
 		p = null;
 		return true;
 	}
 
 	/**
 	 * @return the timeStamp
+	 * @throws IOException
 	 */
 	public long getTimeStamp() {
-		return timeStamp;
-	}
-
-	/**
-	 * @param timeStamp
-	 *            the timeStamp to set
-	 */
-	public void setTimeStamp(long timeStamp, boolean serialize) {
-		this.timeStamp = timeStamp;
-		if (serialize)
-			this.unmarshal();
+		try {
+			Path p = Paths.get(this.path);
+			BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
+			long lm = attrs.creationTime().toMillis();
+			p = null;
+			attrs = null;
+			return lm;
+		} catch (Exception e) {
+			return 0;
+		}
 	}
 
 	/**
@@ -733,11 +718,13 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	/**
 	 * 
 	 * @param lastAccessed
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void setLastAccessed(long lastAccessed) throws IOException {
 		Path p = Paths.get(this.path);
-		p.setAttribute("unix:lastAccessTime", FileTime.fromMillis(lastAccessed));
+		p
+				.setAttribute("unix:lastAccessTime", FileTime
+						.fromMillis(lastAccessed));
 		p = null;
 	}
 
