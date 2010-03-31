@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
 import java.util.logging.Logger;
@@ -73,8 +74,9 @@ public class OpenFileMonitor implements Runnable {
 	 * @param df
 	 *            the DedupFile to check
 	 * @return true if stale.
+	 * @throws IOException 
 	 */
-	public boolean isFileStale(DedupFile df) {
+	public boolean isFileStale(DedupFile df) throws IOException {
 		long currentTime = System.currentTimeMillis();
 		long staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
 				.getLastAccessed()
