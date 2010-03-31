@@ -1,7 +1,6 @@
 package fuse.SDFS;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -12,27 +11,19 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.servers.SDFSService;
-
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 
 import fuse.Filesystem3;
 import fuse.FuseDirFiller;
 import fuse.FuseException;
 import fuse.FuseFtype;
-import fuse.FuseFtypeConstants;
 import fuse.FuseGetattrSetter;
-import fuse.FuseMount;
 import fuse.FuseOpenSetter;
 import fuse.FuseSizeSetter;
 import fuse.FuseStatfsSetter;
@@ -75,6 +66,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		} catch (IOException e) {
 			throw new FuseException("access denied for " + path)
 			.initErrno(FuseException.EACCES);
+		} finally {
+			path = null;
 		}
 		return 0;
 	}
@@ -88,6 +81,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		} catch (IOException e) {
 			throw new FuseException("access denied for " + path)
 			.initErrno(FuseException.EACCES);
+		}finally {
+			path = null;
 		}
 		return 0;
 	}
@@ -121,25 +116,33 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throws FuseException {
 		int ftype =this.getFtype(path);
 		if (ftype == FuseFtype.TYPE_SYMLINK) {
+			Path p = null;
+			BasicFileAttributes attrs = null;
 			try {
-			Path p = Paths.get(this.mountedVolume + path);
+			p = Paths.get(this.mountedVolume + path);
 			int uid = (Integer)p.getAttribute("unix:uid");
 			int gid = (Integer)p.getAttribute("unix:gid");
-			BasicFileAttributes attrs = Attributes.readBasicFileAttributes(p);
+			attrs = Attributes.readBasicFileAttributes(p);
 			int atime = (int) (attrs.lastAccessTime().toMillis() / 1000L);
 			int mtime = (int) (attrs.lastModifiedTime().toMillis() / 1000L);
+			int fileLength = path.length();
 			getattrSetter.set(p.hashCode(), FuseFtype.TYPE_SYMLINK | 0777, 1, uid, gid, 0,
-					8, (NAME_LENGTH + BLOCK_SIZE - 1)
+					fileLength * NAME_LENGTH,
+					(fileLength * NAME_LENGTH + BLOCK_SIZE - 1)
 							/ BLOCK_SIZE, atime, mtime, 0);
 			}catch(Exception e) {
 				log.error("unable to parse sylink " + path,e);
 				throw new FuseException("error getting symlink " + path)
 				.initErrno(FuseException.EACCES);
+			} finally {
+				attrs = null;
+				p = null;
 			}
 		} else {
 			File f = resolvePath(path);
+			Path p = null;
 			try {
-			Path p = Paths.get(f.getPath());
+			p = Paths.get(f.getPath());
 			int uid = (Integer)p.getAttribute("unix:uid");
 			int gid = (Integer)p.getAttribute("unix:gid");
 			int mode = (Integer)p.getAttribute("unix:mode");
@@ -163,6 +166,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				log.error("unable to parse sylink " + path,e);
 				throw new FuseException("error getting symlink " + path)
 				.initErrno(FuseException.EACCES);
+			} finally {
+				f = null;
+				p = null;
 			}
 		}
 		return 0;
@@ -170,12 +176,19 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getdir(String path, FuseDirFiller dirFiller)
 			throws FuseException {
-		File f = resolvePath(path);
+		File f = null;
+		try {
+		f = resolvePath(path);
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		MetaDataDedupFile[] mfs = mf.listFiles();
 		for (int i = 0; i < mfs.length; i++) {
 			MetaDataDedupFile _mf = mfs[i];
 			dirFiller.add(_mf.getName(), _mf.hashCode(), this.getFtype(path));
+		}
+		}catch (Exception e) {
+			
+		}finally {
+			f = null;
 		}
 		return 0;
 	}
@@ -195,6 +208,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			log.error("error linking " + from + " to " + to, e);
 			throw new FuseException("error linking " + from + " to " + to)
 					.initErrno(FuseException.EACCES);
+		} finally {
+			srcP = null;
+			dstP = null;
 		}
 		return 0;
 	}
@@ -208,9 +224,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int mknod(String path, int mode, int rdev) throws FuseException {
 		// log.info("mknod(): " + path + " " + mode + " " + rdev + "\n");
 		File f = new File(this.mountedVolume + path);
-		if (f.exists())
+		if (f.exists()) {
+			f = null;
 			throw new FuseException("file exists")
 					.initErrno(FuseException.EPERM);
+		}
 		else {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 			mf.sync();
@@ -220,6 +238,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} catch (IOException e) {
 				throw new FuseException("access denied for " + path)
 				.initErrno(FuseException.EACCES);
+			} finally {
+				p = null;
+				f = null;
 			}
 			
 		}
@@ -254,15 +275,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int readlink(String path, CharBuffer link) throws FuseException {
-		log.info("reading link for " + path);
 		Path p = Paths.get(this.mountedVolume + path);
 		try {
 			String lpath = p.readSymbolicLink().toString();
-			log.info("linked path is " + lpath);
 			link.put(lpath);
 		} catch (IOException e) {
 			throw new FuseException("error getting linking " + path)
 					.initErrno(FuseException.EACCES);
+		} finally {
+			p = null;
 		}
 		return 0;
 	}
@@ -279,19 +300,30 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int rename(String from, String to) throws FuseException {
-		File f = resolvePath(from);
+		File f = null;
+		try {
+			f = resolvePath(from);
+		
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		MetaDataDedupFile newMF = MetaFileStore.getMF(this.mountedVolume + to);
 		mf.renameTo(newMF);
+		}catch(Exception e) {
+			throw new FuseException("error renaming " + from + " " + to)
+			.initErrno(FuseException.EACCES);
+		} finally {
+			f = null;
+		}
 		return 0;
 	}
 
 	public int rmdir(String path) throws FuseException {
 		if (this.getFtype(path) == FuseFtype.TYPE_SYMLINK) {
 			File f = new File(mountedVolume + path);
-			if (!f.delete())
+			if (!f.delete()) {
+				f = null;
 				throw new FuseException("error deleting symlink " + path)
 						.initErrno(FuseException.EACCES);
+			}
 			return 0;
 		} else {
 			File f = resolvePath(path);
@@ -325,7 +357,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int symlink(String from, String to) throws FuseException {
-		log.info("symlink(): " + from + " to " + to);
 		File dst = new File(mountedVolume + to);
 		if (dst.exists()) {
 			throw new FuseException("file exists")
@@ -414,7 +445,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		}
 		return 0;
 	}
-	
 
 	private File resolvePath(String path) throws FuseException {
 		File _f = new File(mountedVolume + path);
@@ -424,9 +454,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					.initErrno(FuseException.ENOENT);
 		}
 		return _f;
-
 	}
-
 	
 	private int getFtype(String path) throws FuseException {
 		File _f = new File(mountedVolume + path);

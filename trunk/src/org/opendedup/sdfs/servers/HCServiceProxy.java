@@ -77,7 +77,6 @@ public class HCServiceProxy {
 				}
 			}
 		} else {
-
 			byte[] hashRoute = { hash[0] };
 			String db = StringUtils.getHexString(hashRoute);
 			HashClient hc = null;
