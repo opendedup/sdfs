@@ -18,6 +18,7 @@ public class ByteArrayLongMap {
 	ByteBuffer store = null;
 	ByteBuffer keys = null;
 	private int size = 0;
+	private int entries = 0;
 	private final static long blank = -1;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private static Logger log = Logger.getLogger("sdfs");
@@ -192,6 +193,7 @@ public class ByteArrayLongMap {
 				this.claims.put((byte) 0);
 				this.store.position(pos);
 				this.store.put((byte)0);
+				this.entries = entries -1;
 				return true;
 			}
 		} catch (Exception e) {
@@ -340,6 +342,9 @@ public class ByteArrayLongMap {
 
 	public boolean put(byte[] key, long value,byte storeID) {
 		try {
+			if(entries >= size)
+				throw new IOException("entries is greater than or equal to the maximum number of entries. You need to expand" +
+						"the volume or DSE allocation size");
 			this.hashlock.lock();
 			int pos = this.insertionIndex(key);
 			if (pos < 0)
@@ -354,6 +359,7 @@ public class ByteArrayLongMap {
 			this.claims.put((byte) 1);
 			this.store.position(pos);
 			this.store.put(storeID);
+			this.entries = entries +1;
 			return pos > -1 ? true : false;
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "error inserting record", e);
@@ -361,6 +367,10 @@ public class ByteArrayLongMap {
 		} finally {
 			this.hashlock.unlock();
 		}
+	}
+	
+	public int getEntries() {
+		return this.entries;
 	}
 
 	public long get(byte[] key) {

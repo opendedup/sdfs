@@ -20,7 +20,7 @@ public class DedupFileChannel {
 	// The dedup file associated with this file channel
 	private DedupFile df;
 	// The MetaDataDedupFile associated with this file channel.
-	private MetaDataDedupFile mf;
+	public MetaDataDedupFile mf;
 	private static Logger log = Logger.getLogger(DedupFileChannel.class
 			.getName());
 	private boolean writtenTo = false;
