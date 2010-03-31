@@ -172,11 +172,10 @@ public class MetaFileStore {
 	 */
 	public static boolean commit() {
 		try {
-			recman.commit();
+			//recman.commit();
 			return true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.log(Level.SEVERE,"unable to commit transaction",e);
 		}
 		return false;
 	}
@@ -202,7 +201,6 @@ public class MetaFileStore {
 				return true;
 			} else {
 				mf = getMF(path);
-				log.info("Removing " + mf.getGUID() + " " + path);
 				commit();
 				pathMap.remove(mf.getPath());
 				deleted = mf.getDedupFile().delete();
