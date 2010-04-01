@@ -124,7 +124,6 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.lock();
 			RandomAccessFile bdbf = null;
 			try {
-
 				File f = new File(filePath);
 				boolean fileExists = f.exists();
 				if (!f.getParentFile().exists()) {

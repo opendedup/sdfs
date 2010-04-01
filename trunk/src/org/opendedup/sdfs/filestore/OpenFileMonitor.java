@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.logging.Level;
 
 import java.util.logging.Logger;
@@ -52,7 +53,9 @@ public class OpenFileMonitor implements Runnable {
 			try {
 				DedupFile[] files = DedupFileStore.getArray();
 				for (int i = 0; i < files.length; i++) {
-					DedupFile df = files[i];
+					DedupFile df = null;
+					try {
+					df = files[i];
 					if (this.isFileStale(df)) {
 						try {
 							df.close();
@@ -61,8 +64,18 @@ public class OpenFileMonitor implements Runnable {
 									+ df.getMetaFile().getPath(), e);
 						}
 					}
+					}catch (NoSuchFileException e) {
+						try {
+							df.close();
+						} catch (Exception e1) {
+							
+						}
+					} 
 				}
-			} catch (Exception e) {
+			}catch (NoSuchFileException e) {
+				
+			} 
+			catch (Exception e) {
 				log.log(Level.WARNING, "Unable check files", e);
 			}
 		}

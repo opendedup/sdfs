@@ -101,6 +101,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 	 * @return the extended attribute
 	 */
 	public String getXAttribute(String name) {
+		log.info("looking for extended attr " + name + " " + this.extendedAttrs.size() );
 		if (this.extendedAttrs.containsKey(name))
 			return extendedAttrs.get(name);
 		else
@@ -263,6 +264,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 			_mf.read = this.read;
 			_mf.write = this.write;
 			_mf.dedup = this.dedup;
+			_mf.extendedAttrs = this.extendedAttrs;
 			_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
 			_mf.getIOMonitor().setVirtualBytesWritten(this.length());
 			_mf.getIOMonitor().setDuplicateBlocks(
@@ -395,6 +397,7 @@ public class MetaDataDedupFile implements java.io.Serializable {
 				this.file = true;
 				this.hidden = df.hidden;
 				this.length = df.length;
+				this.extendedAttrs = df.extendedAttrs;
 				this.ownerExecOnly = df.ownerExecOnly;
 				this.ownerReadOnly = df.ownerReadOnly;
 				this.ownerWriteOnly = df.ownerWriteOnly;
