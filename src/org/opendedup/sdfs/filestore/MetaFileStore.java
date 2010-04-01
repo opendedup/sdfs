@@ -191,21 +191,20 @@ public class MetaFileStore {
 		boolean deleted = false;
 		try {
 			Path p = Paths.get(path);
-			boolean isSymbolicLink = Attributes.readBasicFileAttributes(p,
-					LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
-			boolean isDir = Attributes.readBasicFileAttributes(p,
-					LinkOption.NOFOLLOW_LINKS).isDirectory();
-			if (isSymbolicLink || isDir) {
+			boolean isFile = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isRegularFile();
+			if (!isFile) {
 				p.delete();
 				p = null;
 				return true;
 			} else {
 				mf = getMF(path);
-				commit();
 				pathMap.remove(mf.getPath());
 				deleted = mf.getDedupFile().delete();
-				if (!deleted)
+				if (!deleted) {
+					log.fine("could not delete " + mf.getPath());
 					return deleted;
+				}
 				else {
 					Main.volume.updateCurrentSize(-1 * mf.length());
 					deleted = mf.deleteStub();

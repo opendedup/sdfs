@@ -9,7 +9,7 @@ import org.opendedup.util.HashFunctions;
  * 
  */
 public class Main {
-	public static double version = .812;
+	public static String version = "0.8.13";
 	// public static String target = "/opt/dedup";
 	/**
 	 * The location where the actual blocks of deduplicated data will be

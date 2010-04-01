@@ -35,8 +35,8 @@ public class SDFSCmds {
 			"user.sdfs.DuplicateData", 
 			"user.sdfs.VMDK", "user.sdfs.fileGUID", "user.sdfs.dfGUID",
 			"user.sdfs.dedupAll"
-
 	};
+	
 	public static final String[] cmdDes = {
 			"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>",
 			"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>",
