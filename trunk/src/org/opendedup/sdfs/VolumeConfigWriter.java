@@ -55,9 +55,9 @@ public class VolumeConfigWriter {
 	boolean chunk_store_pre_allocate = false;
 	long chunk_store_allocation_size = 0;
 	Short chunk_read_ahead_pages = 4;
-	String chunk_gc_schedule = "0 0 0/23 * * ?";
-	String fdisk_schedule = "0 0 0/6 * * ?";
-	int remove_if_older_than = 25;
+	String chunk_gc_schedule = "0 0 0/4 * * ?";
+	String fdisk_schedule = "0 0 0/2 * * ?";
+	int remove_if_older_than = 6;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -181,7 +181,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-size")) {
 			this.chunk_store_allocation_size = Long.parseLong(cmd.getOptionValue("chunk-store-size"));
 		} else {
-			this.chunk_store_allocation_size = StringUtils.parseSize(this.volume_capacity)/2;
+			this.chunk_store_allocation_size = StringUtils.parseSize(this.volume_capacity);
 		}
 
 		File file = new File("/etc/sdfs/" + this.volume_name.trim()
@@ -206,6 +206,7 @@ public class VolumeConfigWriter {
 		xmldoc = impl.createDocument(null, "subsystem-config", null);
 		// Root element.
 		Element root = xmldoc.getDocumentElement();
+		root.setAttribute("version", Main.version);
 		Element locations = xmldoc.createElement("locations");
 		locations.setAttribute("dedup-db-store", this.dedup_db_store);
 		locations.setAttribute("io-log", this.io_log);
@@ -465,7 +466,7 @@ public class VolumeConfigWriter {
 				.withLongOpt("chunk-store-size")
 				.withDescription(
 						"The size in bytes of the Dedup Storeage Engine. "
-								+ "This . \n Defaults to: \n 1/2 the size of the Volume")
+								+ "This . \n Defaults to: \n The size of the Volume")
 				.hasArg().withArgName("BYTES").create());
 		return options;
 	}

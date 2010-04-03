@@ -325,6 +325,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				}
 				long position = start;
 				fbuf.position(0);
+				if(readAheadPages > 1) {
 				for (int i = 0; i < (readAheadPages - 1); i++) {
 					byte[] b = new byte[pageSize];
 					fbuf.get(b);
@@ -340,6 +341,17 @@ public class FileChunkStore implements AbstractChunkStore {
 					}
 					buf.position(0);
 					position = position + pageSize;
+				}
+				}else {
+					try {
+						cache.put(Long.toString(position), fbuf);
+					} catch (Exception e) {
+					}
+					if (position == start) {
+						fbuf.position(0);
+						chunk = new byte[pageSize];
+						fbuf.get(chunk);
+					}
 				}
 				fbuf = null;
 			}

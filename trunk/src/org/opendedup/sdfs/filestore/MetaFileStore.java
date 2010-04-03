@@ -21,6 +21,9 @@ import jdbm.helper.compression.LeadingValueCompressionProvider;
 import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
+
+import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
 /**
  * 
@@ -40,8 +43,20 @@ public class MetaFileStore {
 	// CacheRecordManager recman;
 	private static BTree<String, MetaDataDedupFile> mftable;
 	// A quick lookup table for path to MetaDataDedupFile
-	private static transient LRUMap pathMap = new LRUMap(100);
 	private static Logger log = Logger.getLogger("sdfs");
+	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = ConcurrentLinkedHashMap
+	.create(
+			ConcurrentLinkedHashMap.EvictionPolicy.LRU,
+			100,
+			Main.writeThreads,
+			new ConcurrentLinkedHashMap.EvictionListener<String, MetaDataDedupFile>() {
+				// This method is called just after a new entry has been
+				// added
+				public void onEviction(String key,
+						MetaDataDedupFile file) {
+
+				}
+			});
 
 	static {
 		Properties _props = new Properties();
@@ -49,7 +64,7 @@ public class MetaFileStore {
 		_props.put(RecordManagerOptions.AUTO_COMMIT, "false");
 		// _props.put(RecordManagerOptions.COMPRESSOR,
 		// RecordManagerOptions.COMPRESSOR_BEST_SPEED);
-		// _props.put(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
+		_props.put(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
 		// _props.put(RecordManagerOptions.CACHE_TYPE ,
 		// RecordManagerOptions.SOFT_REF_CACHE);
 		/*
@@ -191,9 +206,23 @@ public class MetaFileStore {
 		boolean deleted = false;
 		try {
 			Path p = Paths.get(path);
-			boolean isFile = Attributes.readBasicFileAttributes(p,
-					LinkOption.NOFOLLOW_LINKS).isRegularFile();
-			if (!isFile) {
+			boolean isDir = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isDirectory();
+			boolean isSymlink = Attributes.readBasicFileAttributes(p,
+					LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+			if(isDir) {
+				File ps = new File(path);
+				File[] files = ps.listFiles();
+				for (int i = 0; i < files.length; i++) {
+					if (files[i].isDirectory()) {
+						removeMetaFile(files[i].getPath());
+					} else {
+						files[i].delete();
+					}
+				}
+				return (ps.delete());
+			}
+			if (isSymlink) {
 				p.delete();
 				p = null;
 				return true;
@@ -201,14 +230,12 @@ public class MetaFileStore {
 				mf = getMF(path);
 				pathMap.remove(mf.getPath());
 				deleted = mf.getDedupFile().delete();
+				deleted = mf.deleteStub();
+				Main.volume.updateCurrentSize(-1 * mf.length());
+				mftable.remove(mf.getGUID());
 				if (!deleted) {
-					log.fine("could not delete " + mf.getPath());
+					log.info("could not delete " + mf.getPath());
 					return deleted;
-				}
-				else {
-					Main.volume.updateCurrentSize(-1 * mf.length());
-					deleted = mf.deleteStub();
-					mftable.remove(mf.getGUID());
 				}
 			}
 		} catch (Exception e) {

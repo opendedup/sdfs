@@ -15,6 +15,7 @@ import java.util.logging.*;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.BufferClosedException;
+import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.VMDKData;
 
@@ -64,6 +65,7 @@ public class VMDKParser {
 		sb.append("ddb.adapterType = \"buslogic\"\n");
 		MetaDataDedupFile vmd = MetaFileStore.getMF(path + File.separator
 				+ fileName + ".vmdk");
+		DedupFileChannel ch = vmd.getDedupFile().getChannel();
 		ByteBuffer b = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
 		byte[] strB = sb.toString().getBytes();
 		b.put(strB);
@@ -79,6 +81,7 @@ public class VMDKParser {
 		vmdk.getIOMonitor().setBytesRead(0);
 		vmdk.getIOMonitor().setDuplicateBlocks(0);
 		vmdk.sync();
+		ch.close();
 		log.info("Created vmdk of size " + vmdk.length() + " at " + path
 				+ File.separator + fileName);
 		return vmdk;

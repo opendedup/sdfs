@@ -56,6 +56,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
+	//TODO change the kBufMazSize so it not reflective to the pageSize
 	private static final int kBufMaxSize = 10485760/Main.chunkStorePageSize;
 	TLongHashSet freeSlots = new TLongHashSet(freeSlotsBufferSize);
 	TLongIterator iter = null;

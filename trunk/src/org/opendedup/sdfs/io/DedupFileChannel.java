@@ -3,6 +3,7 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +28,9 @@ public class DedupFileChannel {
 	private long dups;
 	private long currentPosition = 0;
 	private String GUID = UUID.randomUUID().toString();
+	private int aio = 0;
+	private ReentrantLock closeLock = new ReentrantLock();
+	private boolean closed = false;
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -44,6 +48,17 @@ public class DedupFileChannel {
 			df.sync();
 		}
 		log.log(Level.FINER, "Initializing Cached File " + mf.getPath());
+	}
+
+	public boolean isClosed() {
+		this.closeLock.lock();
+		try {
+			return this.closed;
+		} catch (Exception e) {
+			return this.closed;
+		} finally {
+			this.closeLock.unlock();
+		}
 	}
 
 	/**
@@ -161,7 +176,7 @@ public class DedupFileChannel {
 	 * @param lastModified
 	 *            sets the last time the data was modified for the underlying
 	 *            file
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void setLastModified(long lastModified) throws IOException {
 		mf.setLastModified(lastModified);
@@ -182,6 +197,7 @@ public class DedupFileChannel {
 	 */
 	public void writeFile(byte[] bbuf, int len, int pos, long offset)
 			throws java.io.IOException {
+		// this.addAio();
 		try {
 			this.writtenTo = true;
 			long _cp = offset;
@@ -221,8 +237,9 @@ public class DedupFileChannel {
 				this.currentPosition = _cp;
 				if (_cp > mf.length()) {
 					mf.setLength(_cp, false);
-					mf.setLastModified(System.currentTimeMillis());
+					
 				}
+				mf.setLastModified(System.currentTimeMillis());
 			}
 		} catch (BufferClosedException e) {
 			writeFile(bbuf, len, pos, offset);
@@ -235,6 +252,8 @@ public class DedupFileChannel {
 			this.close();
 			throw new IOException("error while writing to " + this.mf.getPath()
 					+ " " + e.toString());
+		} finally {
+			// this.removeAio();
 		}
 	}
 
@@ -276,18 +295,23 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
-		try {
-			if (this.writtenTo && Main.safeSync) {
-				df.writeCache();
-				mf.sync();
-				df.sync();
+		if (!this.isClosed()) {
+			this.closeLock.lock();
+			try {
+				if (this.writtenTo && Main.safeSync) {
+					df.writeCache();
+					mf.sync();
+					df.sync();
+
+				}
+			} catch (Exception e) {
+
+			} finally {
+				df.unRegisterChannel(this);
+				this.closed = true;
+				this.closeLock.unlock();
 			}
-		} catch (Exception e) {
-
-		} finally {
-			df.unRegisterChannel(this);
 		}
-
 	}
 
 	/**
@@ -306,67 +330,78 @@ public class DedupFileChannel {
 	 */
 	public int read(byte[] bbuf, int bufPos, int siz, long filePos)
 			throws IOException {
-		if (filePos >= mf.length()) {
-			return -1;
-		}
-		long currentLocation = filePos;
-		ByteBuffer buf = ByteBuffer.wrap(bbuf);
-		buf.position(bufPos);
-		int bytesLeft = siz;
-		long futureFilePostion = bytesLeft + currentLocation;
-		if (futureFilePostion > mf.length()) {
-			bytesLeft = (int) (mf.length() - currentLocation);
-		}
-		int read = 0;
-
-		while (bytesLeft > 0) {
-			DedupChunk readBuffer = null;
-			try {
-				readBuffer = df.getReadBuffer(currentLocation);
-			} catch (Exception e) {
-				//break;
-				throw new IOException("unable to read at [" + filePos + "] because [" + e.toString() + "]");
+		// this.addAio();
+		try {
+			if (filePos >= mf.length()) {
+				return -1;
 			}
-			synchronized (readBuffer) {
-				int startPos = (int) (currentLocation - readBuffer
-						.getFilePosition());
-				int endPos = startPos + bytesLeft;
+			long currentLocation = filePos;
+			ByteBuffer buf = ByteBuffer.wrap(bbuf);
+			buf.position(bufPos);
+			int bytesLeft = siz;
+			long futureFilePostion = bytesLeft + currentLocation;
+			if (futureFilePostion > mf.length()) {
+				bytesLeft = (int) (mf.length() - currentLocation);
+			}
+			int read = 0;
+
+			while (bytesLeft > 0) {
+				DedupChunk readBuffer = null;
 				try {
-					if ((endPos) <= readBuffer.getLength()) {
-						buf.put(readBuffer.getChunk(), startPos, bytesLeft);
-						mf.getIOMonitor().addBytesRead(bytesLeft);
-						// log.finest("Read " + bytesLeft + " bytes");
-						read = read + bytesLeft;
-						bytesLeft = 0;
-					} else {
-						int _len = readBuffer.getLength() - startPos;
-						buf.put(readBuffer.getChunk(), startPos, _len);
-						mf.getIOMonitor().addBytesRead(_len);
-						currentLocation = currentLocation + _len;
-						bytesLeft = bytesLeft - _len;
-						read = read + _len;
+					readBuffer = df.getReadBuffer(currentLocation);
+				} catch (Exception e) {
+					// break;
+					throw new IOException("unable to read at [" + filePos
+							+ "] because [" + e.toString() + "]");
+				}
+				synchronized (readBuffer) {
+					int startPos = (int) (currentLocation - readBuffer
+							.getFilePosition());
+					int endPos = startPos + bytesLeft;
+					try {
+						if ((endPos) <= readBuffer.getLength()) {
+							buf.put(readBuffer.getChunk(), startPos, bytesLeft);
+							mf.getIOMonitor().addBytesRead(bytesLeft);
+							// log.finest("Read " + bytesLeft + " bytes");
+							read = read + bytesLeft;
+							bytesLeft = 0;
+						} else {
+							int _len = readBuffer.getLength() - startPos;
+							buf.put(readBuffer.getChunk(), startPos, _len);
+							mf.getIOMonitor().addBytesRead(_len);
+							currentLocation = currentLocation + _len;
+							bytesLeft = bytesLeft - _len;
+							read = read + _len;
+						}
 					}
+					catch (IOException e) {
+						log.log(Level.SEVERE, "Error while reading buffer ", e);
+						log.severe("Error Reading Buffer "
+								+ readBuffer.getHash() + " start position ["
+								+ startPos + "] " + "end position [" + endPos
+								+ "] bytes left [" + bytesLeft
+								+ "] filePostion [" + currentLocation + "] ");
+						this.close();
+						throw new IOException("Error reading buffer");
+					}
+					if (currentLocation == mf.length()) {
+						return read;
+					}
+					mf.setLastAccessed(System.currentTimeMillis());
+					this.currentPosition = currentLocation;
 				}
-				
-				catch (IOException e) {
-					log.log(Level.SEVERE, "Error while reading buffer ", e);
-					log.severe("Error Reading Buffer " + readBuffer.getHash()
-							+ " start position [" + startPos + "] "
-							+ "end position [" + endPos + "] bytes left ["
-							+ bytesLeft + "] filePostion [" + currentLocation
-							+ "] ");
-					this.close();
-					throw new IOException("Error reading buffer");
-				}
-				if (currentLocation == mf.length()) {
-					return read;
-				}
-				mf.setLastAccessed(System.currentTimeMillis());
-				this.currentPosition = currentLocation;
 			}
+			return read;
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			// this.removeAio();
 		}
-		return read;
 
+	}
+
+	public DedupFile getDedupFile() {
+		return this.df;
 	}
 
 	/**
