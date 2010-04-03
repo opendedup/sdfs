@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.*;
 
 import java.io.*;
@@ -86,44 +85,44 @@ public class MetaDataDedupFile implements java.io.Serializable {
         }
 
         /**
-         * adds a posix extended attribute
-         *
-         * @param name
-         *            the name of the attribute
-         * @param value
-         *            the value of the attribute
-         */
-        public void addXAttribute(String name, String value) {
-                extendedAttrs.put(name, value);
-        }
+    	 * adds a posix extended attribute
+    	 * 
+    	 * @param name
+    	 *            the name of the attribute
+    	 * @param value
+    	 *            the value of the attribute
+    	 */
+    	public void addXAttribute(String name, String value) {
+    		extendedAttrs.put(name, value);
+    	}
 
-        /**
-         * returns an extended attribute for a give name
-         *
-         * @param name
-         * @return the extended attribute
-         */
-        public String getXAttribute(String name) {
-                if (this.extendedAttrs.containsKey(name))
-                        return extendedAttrs.get(name);
-                else
-                        return "-1";
-        }
+    	/**
+    	 * returns an extended attribute for a give name
+    	 * 
+    	 * @param name
+    	 * @return the extended attribute
+    	 */
+    	public String getXAttribute(String name) {
+    		if (this.extendedAttrs.containsKey(name))
+    			return extendedAttrs.get(name);
+    		else
+    			return "-1";
+    	}
 
-        /**
-         *
-         * @return list of all extended attribute names
-         */
-        public String[] getXAttersNames() {
-                String[] keys = new String[this.extendedAttrs.size()];
-                Iterator<String> iter = this.extendedAttrs.keySet().iterator();
-                int i = 0;
-                while (iter.hasNext()) {
-                        keys[i] = iter.next();
-                        i++;
-                }
-                return keys;
-        }
+    	/**
+    	 * 
+    	 * @return list of all extended attribute names
+    	 */
+    	public String[] getXAttersNames() {
+    		String[] keys = new String[this.extendedAttrs.size()];
+    		Iterator<String> iter = this.extendedAttrs.keySet().iterator();
+    		int i = 0;
+    		while (iter.hasNext()) {
+    			keys[i] = iter.next();
+    			i++;
+    		}
+    		return keys;
+    	}
 
         /**
          *

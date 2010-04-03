@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -10,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +43,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	static int kbc = 1024;
 	private SDFSCmds sdfsCmds;
 
-	private HashMap<String, DedupFileChannel> channels = new HashMap<String, DedupFileChannel>();
 
 	public SDFSFileSystem(String mountedVolume, String mountPoint) {
 
