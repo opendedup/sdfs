@@ -43,6 +43,7 @@ public class SparseDedupFile implements DedupFile {
 			Main.writeThreads + 1, Main.writeThreads);
 	private ReentrantLock flushingLock = new ReentrantLock();
 	private ReentrantLock channelLock = new ReentrantLock();
+	private ReentrantLock initLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
@@ -103,7 +104,7 @@ public class SparseDedupFile implements DedupFile {
 			SparseDedupFile _df = new SparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
-			_df.close();
+			_df.forceClose();
 			bdb.copy(_df.getDatabasePath());
 			chunkStore.copy(_df.chunkStorePath);
 			return _df;
@@ -115,7 +116,7 @@ public class SparseDedupFile implements DedupFile {
 			ch = null;
 		}
 	}
-	
+
 	public void createBlankFile(long len) throws IOException {
 		try {
 			long numChks = len / Main.CHUNK_LENGTH;
@@ -147,11 +148,19 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public boolean delete() {
-		this.close();
-		String filePath = Main.dedupDBStore + File.separator
-				+ this.GUID.substring(0, 2) + File.separator + this.GUID;
-		DedupFileStore.removeOpenDedupFile(this.mf);
-		return DeleteDir.deleteDirectory(new File(filePath));
+		this.channelLock.lock();
+		try {
+			this.forceClose();
+			String filePath = Main.dedupDBStore + File.separator
+					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
+			DedupFileStore.removeOpenDedupFile(this.mf);
+			return DeleteDir.deleteDirectory(new File(filePath));
+		} catch (Exception e) {
+
+		} finally {
+			this.channelLock.unlock();
+		}
+		return false;
 	}
 
 	/*
@@ -218,7 +227,6 @@ public class SparseDedupFile implements DedupFile {
 							.getChunk());
 					if (data != null) {
 						mf.setVmdk(true);
-						mf.setVmdkData(data);
 						log.finer(data.toString());
 					}
 				} catch (Exception e) {
@@ -446,7 +454,7 @@ public class SparseDedupFile implements DedupFile {
 	public DedupFileChannel getChannel() throws IOException {
 		channelLock.lock();
 		try {
-			if (this.isClosed())
+			if (this.isClosed() || this.buffers.size() == 0)
 				this.initDB();
 			DedupFileChannel channel = new DedupFileChannel(mf);
 			this.buffers.add(channel);
@@ -469,9 +477,23 @@ public class SparseDedupFile implements DedupFile {
 		channelLock.lock();
 		try {
 			this.buffers.remove(channel);
-			if (this.buffers.size() == 0 && Main.safeClose)
-				this.close();
+			if (this.buffers.size() == 0 && Main.safeClose) {
+				this.forceClose();
+			}
 		} catch (Exception e) {
+		} finally {
+			channelLock.unlock();
+		}
+	}
+	
+	public boolean hasOpenChannels() {
+		channelLock.lock();
+		try {
+		if(this.buffers.size() > 0)
+			return true;
+		else return false;
+		} catch (Exception e) {
+			return false;
 		} finally {
 			channelLock.unlock();
 		}
@@ -482,8 +504,8 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
-	public synchronized void close() {
-		
+	public void forceClose() {
+		this.initLock.lock();
 		try {
 			try {
 				ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
@@ -525,6 +547,7 @@ public class SparseDedupFile implements DedupFile {
 			bdb = null;
 			chunkStore = null;
 			this.closed = true;
+			this.initLock.unlock();
 		}
 	}
 
@@ -596,8 +619,9 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private synchronized void initDB() throws IOException {
-		if (this.isClosed()) {
-			try {
+		this.initLock.lock();
+		try {
+			if (this.isClosed()) {
 				File directory = new File(Main.dedupDBStore + File.separator
 						+ this.GUID.substring(0, 2) + File.separator
 						+ this.GUID);
@@ -616,11 +640,14 @@ public class SparseDedupFile implements DedupFile {
 				this.bdb = new LongByteArrayMap(1 + Main.hashLength + 1 + 8,
 						this.databasePath);
 				DedupFileStore.addOpenDedupFile(this);
-			} catch (Exception except) {
-				except.printStackTrace();
+				this.closed = false;
 			}
-			this.closed = false;
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			this.initLock.unlock();
 		}
+
 	}
 
 	public void optimize(long length) {
@@ -644,8 +671,8 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			try {
 				ch.close();
-			}catch(Exception e) {
-				
+			} catch (Exception e) {
+
 			}
 			ch = null;
 		}

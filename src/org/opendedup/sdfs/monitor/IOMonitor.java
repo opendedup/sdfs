@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.monitor;
 
+import java.nio.ByteBuffer;
+
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
@@ -10,10 +12,8 @@ public class IOMonitor implements java.io.Serializable {
 	private long actualBytesWritten;
 	private long bytesRead;
 	private long duplicateBlocks;
-	private MetaDataDedupFile mf;
 
-	public IOMonitor(MetaDataDedupFile mf) {
-		this.mf = mf;
+	public IOMonitor() {
 	}
 
 	public long getVirtualBytesWritten() {
@@ -66,5 +66,23 @@ public class IOMonitor implements java.io.Serializable {
 
 	public void addDulicateBlock() {
 		this.duplicateBlocks = this.duplicateBlocks + Main.CHUNK_LENGTH;;
+	}
+	
+	public byte[] toByteArray() {
+		ByteBuffer buf = ByteBuffer.wrap(new byte[32]);
+		buf.putLong(this.virtualBytesWritten);
+		buf.putLong(this.actualBytesWritten);
+		buf.putLong(this.bytesRead);
+		buf.putLong(this.duplicateBlocks);
+		return buf.array();
+	}
+
+
+	public void fromByteArray(byte [] b) {
+		ByteBuffer buf = ByteBuffer.wrap(b);
+		this.virtualBytesWritten = buf.getLong();
+		this.actualBytesWritten = buf.getLong();
+		this.bytesRead = buf.getLong();
+		this.duplicateBlocks = buf.getLong();
 	}
 }

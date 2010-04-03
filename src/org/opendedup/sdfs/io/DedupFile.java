@@ -126,7 +126,7 @@ public interface DedupFile {
 	/**
 	 * Closes the DedupFile and all DedupFileChannels
 	 */
-	public abstract void close();
+	public abstract void forceClose();
 
 	/**
 	 * Gets the GUID associated with this file. Each DedupFile has an associated
@@ -222,5 +222,7 @@ public interface DedupFile {
 	 *            the lenght to optimize for
 	 */
 	public abstract void optimize(long length);
+	
+	public abstract boolean hasOpenChannels();
 
 }

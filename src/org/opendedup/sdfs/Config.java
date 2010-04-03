@@ -43,7 +43,13 @@ public class Config {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			Document doc = db.parse(file);
 			doc.getDocumentElement().normalize();
-			log.info("Parsing " + doc.getDocumentElement().getNodeName());
+			
+			String version = "0.8.12";
+			try {
+				version = doc.getDocumentElement().getAttribute("version");
+			}catch(Exception e) {}
+			Main.version = version;
+			log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
 			Element network = (Element) doc.getElementsByTagName("network")
 					.item(0);
 			Main.serverHostName = network.getAttribute("hostname");
@@ -104,7 +110,14 @@ public class Config {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		doc.getDocumentElement().normalize();
-		log.info("Parsing " + doc.getDocumentElement().getNodeName());
+		
+		String version = "0.8.12";
+		try {
+			version = doc.getDocumentElement().getAttribute("version");
+		}catch(Exception e) {}
+		
+		Main.version = version;
+		log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations")
 				.item(0);
 		log.info("parsing folder locations");

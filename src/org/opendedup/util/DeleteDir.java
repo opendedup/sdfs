@@ -14,7 +14,11 @@ public class DeleteDir {
 					files[i].delete();
 				}
 			}
+			return (path.delete());
 		}
-		return (path.delete());
+		else {
+			return true;
+		}
+		
 	}
 }

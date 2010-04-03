@@ -56,9 +56,9 @@ public class OpenFileMonitor implements Runnable {
 					DedupFile df = null;
 					try {
 					df = files[i];
-					if (this.isFileStale(df)) {
+					if (this.isFileStale(df) && !df.hasOpenChannels()) {
 						try {
-							df.close();
+							df.forceClose();
 						} catch (Exception e) {
 							log.log(Level.WARNING, "Unable close file for "
 									+ df.getMetaFile().getPath(), e);
@@ -66,7 +66,7 @@ public class OpenFileMonitor implements Runnable {
 					}
 					}catch (NoSuchFileException e) {
 						try {
-							df.close();
+							df.forceClose();
 						} catch (Exception e1) {
 							
 						}
