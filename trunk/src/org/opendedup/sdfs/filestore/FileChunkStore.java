@@ -22,9 +22,12 @@ import java.util.logging.Logger;
 import org.apache.commons.collections.map.LRUMap;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
+
+import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
 /**
  * 
@@ -55,7 +58,19 @@ public class FileChunkStore implements AbstractChunkStore {
 	Path p;
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
-	private static transient LRUMap cache = new LRUMap(MAX_ENTRIES);
+	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = ConcurrentLinkedHashMap
+	.create(
+			ConcurrentLinkedHashMap.EvictionPolicy.LRU,
+			MAX_ENTRIES,
+			Main.writeThreads,
+			new ConcurrentLinkedHashMap.EvictionListener<String, ByteBuffer>() {
+				// This method is called just after a new entry has been
+				// added
+				public void onEviction(String key,
+						ByteBuffer buf) {
+
+				}
+			});
 	private byte[] FREE = new byte[Main.chunkStorePageSize];
 	private long farthestWrite = 0;
 
@@ -234,8 +249,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		FileChannel ch = null;
 		ByteBuffer buf = null;
 		try {
-			buf = ByteBuffer.allocateDirect(pageSize);
-			buf.put(chunk);
+			buf = ByteBuffer.wrap(chunk);
 			buf.position(0);
 			if (cache.containsKey(Long.toString(start))) {
 				cache.put(Long.toString(start), buf);
@@ -244,7 +258,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			raf = new RandomAccessFile(f, "rw");
 			ch = raf.getChannel();
 			ch.position(start);
-
 			ch.write(buf);
 			furthestPositionlock.lock();
 			try {
@@ -302,7 +315,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			if (buf == null) {
 				RandomAccessFile raf = null;
 				FileChannel ch = null;
-				ByteBuffer fbuf = ByteBuffer.allocateDirect(pageSize
+				ByteBuffer fbuf = ByteBuffer.allocate(pageSize
 						* readAheadPages);
 				try {
 					raf = new RandomAccessFile(f, "rw");
@@ -345,12 +358,11 @@ public class FileChunkStore implements AbstractChunkStore {
 				}else {
 					try {
 						cache.put(Long.toString(position), fbuf);
-					} catch (Exception e) {
-					}
-					if (position == start) {
 						fbuf.position(0);
 						chunk = new byte[pageSize];
 						fbuf.get(chunk);
+					} catch (Exception e) {
+						
 					}
 				}
 				fbuf = null;

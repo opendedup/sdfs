@@ -168,6 +168,13 @@ public class VolumeConfigWriter {
 			this.chunk_read_ahead_pages = Short.parseShort(cmd
 					.getOptionValue("chunk-read-ahead-pages"));
 		}
+		else {
+			if(this.chunk_size < 128) {
+				this.chunk_read_ahead_pages = (short) (128/this.chunk_size);
+			}else {
+				this.chunk_read_ahead_pages = 1;
+			}
+		}
 		if (cmd.hasOption("chunk-store-local")) {
 			this.chunk_store_local = Boolean.parseBoolean((cmd
 					.getOptionValue("chunk-store-local")));
@@ -445,7 +452,7 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("chunk-read-ahead-pages")
 				.withDescription(
 						"The number of pages to read ahead when doing a disk read on the chunk store."
-								+ " \nDefaults to: \n 8").hasArg().withArgName(
+								+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128").hasArg().withArgName(
 						"NUMBER").create());
 		options
 		.addOption(OptionBuilder

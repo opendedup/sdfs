@@ -1,0 +1,20 @@
+Version 0.8.14 4/4/2010
+	This release was focused on bug fixes and enhancements related to performance testing. Take a look at 
+	http://opendedup.org/index.php/perfmon for more details on performance metrics.
+
+	Fixes:
+	
+	* File permissions when folders are created is now set properly
+	* Fixed issue where SDFS kept file maps open even when files were closed
+	* Last Modified for files are now being set correctly, when the file is written too.
+	* Deleting of directories works correctly. When rmdir is called it will remove all children
+	* When files are deleted that are removed from the file map table. This was not the case in previous versions.
+	
+	Enhancements
+	
+	* Performance tuning for reading with larger chunk sizes (64k,128k). The previous default for volume creation 
+	required the read-ahead was set to "8". This is not efficient for large block sizes and has been fixed to and
+	set to "1" if the block size is greater that 32k.
+	
+	
+	
