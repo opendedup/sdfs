@@ -1,5 +1,3 @@
-SDFS
-
 What is this?
 
   A deduplicated file system based on fuse.
@@ -7,8 +5,9 @@ What is this?
 System Requirements
   
   * x64 Linux Distribution. The application was tested and developed on ubuntu 9.1
-  * Fuse 2.8+ . Debian Packages for this are available at http://code.google.com/p/dedupfilesystem-sdfs/downloads/list
-  * 2 GB of RAM
+  * Fuse 2.7+ (with command line switch -o direct_io,allow_other,fsname=SDFS). Fuse 2.8 is preferred - Debian Packages
+    for this are available at http://code.google.com/p/dedupfilesystem-sdfs/downloads/list
+  * 2 GB of Available RAM
   * Java 7 - available at https://jdk7.dev.java.net/
 
 Optional Packages
@@ -48,11 +47,14 @@ Data Removal
 	are removed from the chunk store. The process for determining and removing stale chunks is as follows.
 		
 		1. SDFS file-system informs the ChunkStore what chunks are currently in use. This happens when
-		chunks are first created and then every 4 hours on the hour after that.
+		chunks are first created and then every 6 hours on the hour after that.
 		2. The Chunk Store checks for data that has not been claimed, in the last two days, by the SDFS file system 
-		every evening at 11pm.
-		3. The chunks that have not been claimed in the last two days are put into a pool and overwritten as new data
+		every 24 hours.
+		3. The chunks that have not been claimed in the last 25 hours are put into a pool and overwritten as new data
 		is written to the ChunkStore.
+
+	All of this is configurable and can be changed after a volume is written to. Take a look at cron format for more details.
+
 		
 
 Tips and Tricks
@@ -147,4 +149,4 @@ Tips and Tricks
 	sudo ./mount.sdfs -v sdfs_vol1 -m /media/sdfs  -o direct_io,allow_other,fsname=SDFS
 			
 
-3/26/10
+4/4/10
