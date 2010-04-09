@@ -1,10 +1,11 @@
 package org.opendedup.sdfs.network;
 
-import java.io.*;
-import java.net.*;
-import java.nio.*;
-import java.nio.channels.*; // bug? redundant with previous one??
-import java.util.*;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +55,6 @@ public class NioUDPServer implements Runnable {
 	public void run() {
 		try {
 			log.info("Starting UDP Server");
-			Random theRandom = new Random();
 			InetSocketAddress theInetSocketAddress = new InetSocketAddress(
 					Main.serverHostName, Main.serverPort);
 

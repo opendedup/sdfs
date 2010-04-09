@@ -1,28 +1,20 @@
 package org.opendedup.collections;
 
 import gnu.trove.iterator.TLongIterator;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +22,6 @@ import java.util.logging.Logger;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
 public class CSByteArrayLongMap implements AbstractMap {
@@ -52,13 +43,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
 	// The amount of memory available for free slots.
-	private int freeSlotsBufferSize = 8 * 10000000;
 	private boolean closed = true;
 	int kSz = 0;
 	long ram = 0;
 	//TODO change the kBufMazSize so it not reflective to the pageSize
 	private static final int kBufMaxSize = 10485760/Main.chunkStorePageSize;
-	TLongHashSet freeSlots = new TLongHashSet(freeSlotsBufferSize);
+	TLongHashSet freeSlots = new TLongHashSet();
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
 
@@ -454,8 +444,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			return;
 		freeSlotLock.lock();
 		try {
-			if (!this.freeSlots.contains(position)
-					&& this.freeSlots.size() < this.freeSlotsBufferSize) {
+			if (!this.freeSlots.contains(position)) {
 				this.freeSlots.add(position);
 			}
 
@@ -508,6 +497,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 	public long get(byte[] key) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
+		}
+		boolean foundFree = Arrays.equals(key, FREE);
+		boolean foundReserved = Arrays.equals(key, REMOVED);
+		if (foundFree) {
+			return this.freeValue;
+		}
+		if (foundReserved) {
+			return this.resValue;
 		}
 		return this.getMap(key).get(key);
 

@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/bcprov-jdk16-143.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/jdbm.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/jets3t-0.7.1.jar"/>

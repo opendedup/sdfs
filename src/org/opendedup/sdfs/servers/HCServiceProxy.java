@@ -6,10 +6,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.util.StringUtils;
@@ -18,25 +16,26 @@ import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedH
 
 public class HCServiceProxy {
 
-	private static final long KBYTE = 1024L;
 	private static Logger log = Logger.getLogger("sdfs");
 	public static HashMap<String, HashClientPool> writeServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
-	private static ConcurrentLinkedHashMap<String,ByteCache> readBuffers = ConcurrentLinkedHashMap
-	.create(
-			ConcurrentLinkedHashMap.EvictionPolicy.LRU,10485760/Main.CHUNK_LENGTH,Main.writeThreads,
-			new ConcurrentLinkedHashMap.EvictionListener<String,ByteCache>() {
-				public void onEviction(String key,
-						ByteCache writeBuffer) {
-				}
-			}
-			);
+	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
+	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = ConcurrentLinkedHashMap
+			.create(
+					ConcurrentLinkedHashMap.EvictionPolicy.LRU,
+					cacheLenth,
+					Main.writeThreads,
+					new ConcurrentLinkedHashMap.EvictionListener<String, ByteCache>() {
+						public void onEviction(String key, ByteCache writeBuffer) {
+						}
+					});
+	
+
 	private static HashMap<String, byte[]> readingBuffers = new HashMap<String, byte[]>();
 	// private static LRUMap existingHashes = new
 	// LRUMap(Main.systemReadCacheSize);
-	private static int writePoolPos = 0;
 	private static ReentrantLock readlock = new ReentrantLock();
 
 	// private static boolean initialized = false;
@@ -87,7 +86,7 @@ public class HCServiceProxy {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
 					} catch (Exception e) {
-						log.log(Level.WARNING,"unable to use hashclient",e);
+						log.log(Level.WARNING, "unable to use hashclient", e);
 						hc.close();
 						hc.openConnection();
 						hc.writeChunk(hash, aContents, 0, len);
@@ -181,7 +180,7 @@ public class HCServiceProxy {
 				}
 			} catch (Exception e) {
 			} finally {
-					readlock.unlock();
+				readlock.unlock();
 			}
 			if (reading) {
 				int z = 0;
@@ -224,13 +223,13 @@ public class HCServiceProxy {
 				readingBuffers.remove(hashStr);
 				// kBytesFetched = kBytesFetched + (data.length / KBYTE);
 				// chunksFetched++;
-				
+
 				return data;
 			} catch (Exception e) {
 				log.log(Level.WARNING, "Unable to fetch buffer " + hashStr, e);
 				throw new IOException("Unable to fetch buffer " + hashStr);
 			} finally {
-				if(hc != null)
+				if (hc != null)
 					returnObject(db, hc);
 				if (readlock.isLocked())
 					readlock.unlock();

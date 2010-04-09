@@ -1,10 +1,8 @@
 package org.opendedup.sdfs.network;
 
 import java.io.DataInputStream;
-import org.apache.commons.collections.map.LRUMap;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.*;
 
 public class HashExistsCmd implements IOCmd {
 	byte[] hash;

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServer;
 
 public class HashClientPool {
@@ -15,7 +14,6 @@ public class HashClientPool {
 	private LinkedBlockingQueue<HashClient> passiveObjects = null;
 	private ArrayList<HashClient> activeObjects = new ArrayList<HashClient>();
 	private ReentrantLock alock = new ReentrantLock();
-	private ReentrantLock plock = new ReentrantLock();
 
 	public HashClientPool(HCServer server, String name, int size)
 			throws IOException {

@@ -3,11 +3,11 @@ package fuse.SDFS;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendedup.mtools.DiskUtils;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -53,7 +53,17 @@ public class SDFSCmds {
 			"checks if the file is open <unique-command-id>", "", "", "", "",
 			"", "", "", "", "", ""};
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
-	private LRUMap cmdStatus = new LRUMap(100);
+	
+	private static LinkedHashMap<String, String> cmdStatus = new LinkedHashMap<String, String>(
+			100) {
+		// (an anonymous inner class)
+		private static final long serialVersionUID = 1;
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+			return size() > 100;
+		}
+	};
 
 	static {
 		for (int i = 0; i < cmds.length; i++) {

@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.network;
 
-import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
 
