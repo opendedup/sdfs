@@ -158,20 +158,8 @@ public class WritableCacheBuffer extends DedupChunk {
 		return this.buf.position();
 	}
 
-	private void position(int pos) {
-		this.buf.position(pos);
-	}
-
-	private void setCurrentLen(int currentLen) {
-		this.currentLen = currentLen;
-	}
-
 	public long getEndPosition() {
 		return endPosition;
-	}
-
-	private void setEndPosition(long endPosition) {
-		this.endPosition = endPosition;
 	}
 
 	public byte[] getChunk() throws IOException {
