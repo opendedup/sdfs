@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.util.HashFunctions;
-import org.opendedup.util.StringUtils;
 
 public class TrackingByteArrayLongMap {
 	ByteBuffer values = null;

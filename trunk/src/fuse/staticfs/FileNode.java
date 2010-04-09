@@ -9,9 +9,9 @@
 
 package fuse.staticfs;
 
-import fuse.FuseException;
-
 import java.nio.ByteBuffer;
+
+import fuse.FuseException;
 
 public abstract class FileNode extends Node {
 	public FileNode(String name) {

@@ -8,10 +8,16 @@
  */
 package fuse.compat;
 
-import fuse.*;
-
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+
+import fuse.Filesystem3;
+import fuse.FuseDirFiller;
+import fuse.FuseException;
+import fuse.FuseGetattrSetter;
+import fuse.FuseOpenSetter;
+import fuse.FuseStatfs;
+import fuse.FuseStatfsSetter;
 
 /**
  * This is an adapter that adapts the semi-old filehandle enabled API

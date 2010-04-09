@@ -9,12 +9,12 @@
 
 package fuse.staticfs;
 
-import fuse.FuseFtype;
-import fuse.compat.FuseStat;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import fuse.FuseFtype;
+import fuse.compat.FuseStat;
 
 public class DirectoryNode extends Node {
 	private Map<String, Node> children;

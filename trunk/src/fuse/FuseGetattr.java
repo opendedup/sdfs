@@ -9,8 +9,6 @@
 
 package fuse;
 
-import fuse.FuseFtype;
-import fuse.FuseGetattrSetter;
 
 public class FuseGetattr extends FuseFtype implements FuseGetattrSetter,
 		FuseStatConstants {

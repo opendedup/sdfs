@@ -9,9 +9,11 @@
 
 package java2c;
 
-import fuse.*;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -21,6 +23,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import fuse.FuseContext;
+import fuse.FuseFS;
+import fuse.FuseFSDirEnt;
+import fuse.FuseFSDirFiller;
+import fuse.FuseGetattr;
+import fuse.FuseOpen;
+import fuse.FuseSize;
+import fuse.FuseStatfs;
 
 public class CAPIGenerator {
 	private Class<?> clazz;

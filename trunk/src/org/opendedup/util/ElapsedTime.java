@@ -1,7 +1,7 @@
 package org.opendedup.util;
 
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ElapsedTime {
 

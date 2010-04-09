@@ -1,18 +1,15 @@
 package org.opendedup.sdfs.filestore.gc;
 
-import java.util.Date;
-
-
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.sdfs.Main;
+import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
-import org.quartz.CronTrigger;
 import org.quartz.impl.StdSchedulerFactory;
-import java.util.Properties;
 
 public class SDFSGCScheduler {
 

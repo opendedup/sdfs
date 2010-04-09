@@ -8,9 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.HashFunctions;
-import org.opendedup.util.StringUtils;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;

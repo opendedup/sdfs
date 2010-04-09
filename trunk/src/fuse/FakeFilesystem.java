@@ -9,14 +9,16 @@
 
 package fuse;
 
+import java.io.File;
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.BufferOverflowException;
-import java.nio.CharBuffer;
-import java.util.*;
 
 @SuppressWarnings( { "OctalInteger" })
 public class FakeFilesystem implements Filesystem3, XattrSupport {

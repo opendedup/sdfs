@@ -9,13 +9,6 @@
 
 package fuse.zipfs;
 
-import fuse.*;
-import fuse.compat.Filesystem1;
-import fuse.compat.FuseDirEnt;
-import fuse.compat.FuseStat;
-import fuse.zipfs.util.Node;
-import fuse.zipfs.util.Tree;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,8 +18,18 @@ import java.util.Iterator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import fuse.FuseException;
+import fuse.FuseFtype;
+import fuse.FuseMount;
+import fuse.FuseStatfs;
+import fuse.compat.Filesystem1;
+import fuse.compat.FuseDirEnt;
+import fuse.compat.FuseStat;
+import fuse.zipfs.util.Node;
+import fuse.zipfs.util.Tree;
 
 public class ZipFilesystem implements Filesystem1 {
 	private static final Log log = LogFactory.getLog(ZipFilesystem.class);

@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.opendedup.sdfs.servers.HCServer;
 
 public class HashFunctionPool {
 

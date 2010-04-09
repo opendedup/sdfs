@@ -1,6 +1,8 @@
 package org.opendedup.util;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import org.opendedup.sdfs.Main;

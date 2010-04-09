@@ -1,14 +1,11 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,7 +14,6 @@ import java.util.logging.Logger;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.util.HashFunctions;
-import org.opendedup.util.StringUtils;
 
 public class AFByteArrayLongMap implements AbstractMap {
 	ByteBuffer values = null;
