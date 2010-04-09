@@ -35,5 +35,9 @@ public class NetworkCMDS {
 	public static final byte WRITE_COMPRESSED_CMD = 6;
 	/** Keep alive ping command. Not used in this implementation */
 	public static final byte PING_CMD = 9;
+	public static final byte STORE_MAX_SIZE_CMD = 10;
+	public static final byte STORE_SIZE_CMD = 11;
+	public static final byte STORE_PAGE_SIZE = 12;
+	
 
 }

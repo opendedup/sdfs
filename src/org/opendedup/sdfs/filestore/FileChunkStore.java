@@ -1,31 +1,20 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.collections.map.LRUMap;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.HashFunctions;
-import org.opendedup.util.StringUtils;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
