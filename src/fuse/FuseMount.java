@@ -9,8 +9,9 @@
 
 package fuse;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import fuse.compat.Filesystem1;
 import fuse.compat.Filesystem1ToFilesystem2Adapter;
 import fuse.compat.Filesystem2;

@@ -9,12 +9,12 @@
 
 package fuse.staticfs;
 
-import fuse.FuseFS;
+import java.nio.ByteBuffer;
+
 import fuse.FuseException;
+import fuse.FuseFS;
 import fuse.FuseFtype;
 import fuse.compat.FuseStat;
-
-import java.nio.ByteBuffer;
 
 public class ReadOnlyFileNode extends FileNode {
 	private byte[] content;

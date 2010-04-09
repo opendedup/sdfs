@@ -1,8 +1,6 @@
 package org.opendedup.sdfs.io;
 
-import org.opendedup.sdfs.Main;
 import org.opendedup.util.CloneMagic;
-import org.opendedup.util.RandomGUID;
 
 public class VMDKData implements java.io.Serializable, Cloneable {
 	/**

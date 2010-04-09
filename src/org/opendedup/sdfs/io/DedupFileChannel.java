@@ -28,7 +28,6 @@ public class DedupFileChannel {
 	private long dups;
 	private long currentPosition = 0;
 	private String GUID = UUID.randomUUID().toString();
-	private int aio = 0;
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
 

@@ -1,6 +1,6 @@
 package org.opendedup.sdfs.io;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * 

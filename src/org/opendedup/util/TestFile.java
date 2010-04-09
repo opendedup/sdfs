@@ -1,6 +1,5 @@
 package org.opendedup.util;
 
-import java.io.File;
 import java.io.IOException;
 
 public class TestFile {

@@ -9,13 +9,13 @@
 
 package fuse.zipfs;
 
+import java.io.File;
+import java.io.IOException;
+
 import fuse.FuseMount;
 import fuse.staticfs.DirectoryNode;
 import fuse.staticfs.MountpointNode;
 import fuse.staticfs.StaticFilesystem;
-
-import java.io.File;
-import java.io.IOException;
 
 public class MultiZipFilesystem extends StaticFilesystem {
 	public MultiZipFilesystem(String args[], int offset) throws IOException {

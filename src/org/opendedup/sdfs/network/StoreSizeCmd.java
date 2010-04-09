@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.network;
 
 import java.io.DataInputStream;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 

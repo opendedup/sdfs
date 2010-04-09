@@ -1,9 +1,8 @@
 package java2c;
 
-import java.io.PrintStream;
 import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 
 /**
  * Created by IntelliJ IDEA. User: peter Date: May 18, 2005 Time: 11:27:16 AM To

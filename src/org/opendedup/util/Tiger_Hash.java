@@ -32,7 +32,6 @@ class Tiger_Hash implements Cloneable {
 	// ...........................................................................
 
 	/** Length of this hash */
-	private static final int HASH_SIZE = 24;
 
 	// Instance variables
 	// ...........................................................................

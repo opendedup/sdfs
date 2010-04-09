@@ -9,16 +9,16 @@
 
 package fuse.zipfs;
 
-import fuse.FuseException;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import fuse.FuseException;
 
 public class ZipEntryDataReader {
 	private static final Log log = LogFactory.getLog(ZipEntryDataReader.class);

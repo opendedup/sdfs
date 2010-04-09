@@ -9,12 +9,13 @@
 
 package fuse.staticfs;
 
-import fuse.*;
+import java.nio.ByteBuffer;
+
+import fuse.FuseException;
+import fuse.FuseStatfs;
 import fuse.compat.Filesystem1;
 import fuse.compat.FuseDirEnt;
 import fuse.compat.FuseStat;
-
-import java.nio.ByteBuffer;
 
 public class StaticFilesystem implements Filesystem1 {
 	DirectoryNode rootNode;

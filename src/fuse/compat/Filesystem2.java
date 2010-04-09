@@ -8,9 +8,11 @@
  */
 package fuse.compat;
 
-import fuse.*;
-
 import java.nio.ByteBuffer;
+
+import fuse.FilesystemConstants;
+import fuse.FuseException;
+import fuse.FuseStatfs;
 
 /**
  * The file system operations:

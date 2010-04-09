@@ -40,20 +40,6 @@ public class StringUtils {
 		}
 		return bts;
 	}
-
-	public static void main(String args[]) throws Exception {
-		byte[] byteArray = { (byte) 255, (byte) 254, (byte) 253, (byte) 252,
-				(byte) 251, (byte) 250 };
-		String bla = StringUtils.getHexString(byteArray);
-		System.out.println(bla);
-		byte[] b = StringUtils.getHexBytes(bla);
-		bla = StringUtils.getHexString(byteArray);
-		System.out.println(bla);
-		/*
-		 * output : fffefdfcfbfa
-		 */
-
-	}
 	
 	public static long parseSize(String capString) throws IOException {
 		String units = capString.substring(capString.length() - 2);

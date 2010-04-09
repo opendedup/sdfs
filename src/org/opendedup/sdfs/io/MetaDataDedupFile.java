@@ -1,16 +1,14 @@
 package org.opendedup.sdfs.io;
 
+import java.io.BufferedReader;
 import java.io.File;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
-import java.util.logging.*;
-
-import java.io.*;
+import java.util.logging.Logger;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -40,7 +38,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
         private boolean read = true;
         private boolean write = true;
         private boolean directory = false;
-        private boolean file = true;
         private boolean hidden = false;
         private boolean ownerWriteOnly = false;
         private boolean ownerExecOnly = false;
@@ -308,7 +305,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
                         MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath);
                         _mf.directory = this.directory;
                         _mf.execute = this.execute;
-                        _mf.file = true;
                         _mf.hidden = this.hidden;
                         _mf.lastModified = this.lastModified;
                         _mf.setLength(this.length, false);
@@ -452,7 +448,6 @@ public class MetaDataDedupFile implements java.io.Serializable {
                                 this.guid = df.guid;
                                 this.directory = df.directory;
                                 this.execute = df.execute;
-                                this.file = true;
                                 this.hidden = df.hidden;
                                 this.lastModified = df.lastModified;
                                 this.length = df.length;

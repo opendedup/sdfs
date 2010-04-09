@@ -1,7 +1,5 @@
 package org.opendedup.util;
 
-import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -13,6 +11,7 @@ import java.util.zip.Inflater;
 //import org.h2.compress.LZFOutputStream;
 
 public class CompressionUtils {
+	@SuppressWarnings("unused")
 	private static Logger log = Logger.getLogger("sdfs");
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
@@ -63,16 +62,5 @@ public class CompressionUtils {
 
 	}
 
-	public static void main(String[] args) throws IOException {
-		String test = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-		/*
-		 * byte [] tstByte = test.getBytes();
-		 * System.out.println("Uncompress lenght=" + tstByte.length); byte []
-		 * compByte = compress(tstByte); System.out.println("compress lenght=" +
-		 * compByte.length); byte [] decompByte = decompress(compByte);
-		 * System.out.println("decompress lenght=" + decompByte.length); String
-		 * tstOut = new String(decompByte); System.out.println(tstOut + " = " +
-		 * test);
-		 */
-	}
+	
 }

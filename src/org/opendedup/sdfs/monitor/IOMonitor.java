@@ -3,7 +3,6 @@ package org.opendedup.sdfs.monitor;
 import java.nio.ByteBuffer;
 
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 public class IOMonitor implements java.io.Serializable {
 
