@@ -217,7 +217,6 @@ public class DiskUtils {
 	public static void prepareVMDK(String fileName, long cylinders)
 			throws IOException {
 		log.info("Preparing vmdk " + fileName + " " + cylinders);
-		File parent = new File(fileName).getParentFile();
 		String cmd = Main.scriptsDir + File.separator + "prepdisk.sh" + " "
 				+ fileName + " " + cylinders + " " + Main.scriptsDir;
 		log.info("executing " + cmd);

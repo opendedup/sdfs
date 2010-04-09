@@ -1,10 +1,10 @@
 package org.opendedup.sdfs.network;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.opendedup.util.CompressionUtils;
 
 public class WriteHashCmd implements IOCmd {
 	byte[] hash;

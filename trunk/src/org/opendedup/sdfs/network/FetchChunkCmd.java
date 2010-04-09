@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.StringUtils;
 
 public class FetchChunkCmd implements IOCmd {

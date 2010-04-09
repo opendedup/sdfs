@@ -18,10 +18,8 @@ import jdbm.helper.DefaultSerializer;
 import jdbm.helper.StringComparator;
 import jdbm.helper.compression.LeadingValueCompressionProvider;
 
-import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs;
 
 import org.opendedup.sdfs.io.Volume;
-import org.opendedup.util.HashFunctions;
 
 /**
  * 

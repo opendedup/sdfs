@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -14,7 +15,6 @@ import java.util.logging.Logger;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.servers.HashChunkService;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
@@ -40,7 +40,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile posRaf = null;
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
-	private static long bytesRead = 0;
 	private static long bytesWritten = 0;
 	private transient static Logger log = Logger.getLogger("sdfs");
 	File f;
@@ -276,6 +275,10 @@ public class FileChunkStore implements AbstractChunkStore {
 			ch = null;
 			buf = null;
 			raf = null;
+			hash = null;
+			chunk = null;
+			len = 0;
+			start = 0;
 		}
 	}
 
@@ -414,22 +417,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		this.listeners.add(listener.getID(), listener);
-	}
-
-	private void fireChunkMovedEvent(byte[] hash, long oldLocation,
-			long newLocation, int length) throws IOException {
-		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
-				this);
-		this.listeners.get(HashChunkService.getHashRoute(hash))
-				.chunkMovedEvent(evt);
-	}
-
-	private void fireChunkRemovedEvent(byte[] hash, long oldLocation,
-			long newLocation, int length) throws IOException {
-		ChunkEvent evt = new ChunkEvent(hash, oldLocation, newLocation, length,
-				this);
-		this.listeners.get(HashChunkService.getHashRoute(hash))
-				.chunkMovedEvent(evt);
 	}
 
 	public void close() throws IOException {

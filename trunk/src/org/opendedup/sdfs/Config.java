@@ -18,7 +18,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendedup.sdfs.io.Volume;
-import org.opendedup.sdfs.monitor.IOMeter;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.servers.HCServer;
 import org.opendedup.sdfs.servers.HCServiceProxy;

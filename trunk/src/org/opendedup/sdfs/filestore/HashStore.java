@@ -1,23 +1,14 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.opendedup.collections.AFByteArrayLongMap;
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
@@ -52,7 +43,6 @@ public class HashStore {
 	// Lock for hash queries
 	private ReentrantLock hashlock = new ReentrantLock();
 
-	private static ReentrantLock clock = new ReentrantLock();
 	// The chunk store used to store the actual deduped data;
 	//private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of
