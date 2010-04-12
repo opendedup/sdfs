@@ -43,11 +43,12 @@ public class Config {
 			Document doc = db.parse(file);
 			doc.getDocumentElement().normalize();
 			
-			String version = "0.8.12";
-			try {
+			String version = Main.version;
+			if(doc.getDocumentElement().hasAttribute("version")){
 				version = doc.getDocumentElement().getAttribute("version");
-			}catch(Exception e) {}
-			Main.version = version;
+				Main.version = version;
+			}
+			
 			log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
 			Element network = (Element) doc.getElementsByTagName("network")
 					.item(0);
@@ -111,9 +112,10 @@ public class Config {
 		doc.getDocumentElement().normalize();
 		
 		String version = "0.8.12";
-		try {
+		if(doc.getDocumentElement().hasAttribute("version")){
 			version = doc.getDocumentElement().getAttribute("version");
-		}catch(Exception e) {}
+			Main.version = version;
+		}
 		
 		Main.version = version;
 		log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);

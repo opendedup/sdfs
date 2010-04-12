@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +42,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 	private SDFSCmds sdfsCmds;
-
 
 	public SDFSFileSystem(String mountedVolume, String mountPoint) {
 
@@ -122,26 +122,31 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				int gid = 0;
 				int mode = 0000;
 				try {
-					uid = (Integer) p.getAttribute("unix:uid");
-					gid = (Integer) p.getAttribute("unix:gid");
-					mode = (Integer) p.getAttribute("unix:mode");
+					uid = (Integer) p.getAttribute("unix:uid",
+							LinkOption.NOFOLLOW_LINKS);
+					gid = (Integer) p.getAttribute("unix:gid",
+							LinkOption.NOFOLLOW_LINKS);
+					mode = (Integer) p.getAttribute("unix:mode",
+							LinkOption.NOFOLLOW_LINKS);
 				} catch (Exception e) {
 				}
 
 				int atime = 0;
 				int ctime = 0;
 				int mtime = 0;
+				long fileLength = 0;
 				try {
-					attrs = Attributes.readBasicFileAttributes(p);
+					attrs = Attributes.readBasicFileAttributes(p,
+							LinkOption.NOFOLLOW_LINKS);
+					fileLength = attrs.size();
 					mtime = (int) (attrs.lastModifiedTime().toMillis() / 1000L);
 					atime = (int) (attrs.lastAccessTime().toMillis() / 1000L);
 					ctime = (int) (attrs.creationTime().toMillis() / 1000L);
+					
 				} catch (Exception e) {
 				}
-
-				int fileLength = path.length();
 				getattrSetter.set(p.hashCode(), FuseFtype.TYPE_SYMLINK | mode,
-						1, uid, gid, 0, fileLength * NAME_LENGTH, (fileLength
+						1, uid, gid, 0, fileLength, (fileLength
 								* NAME_LENGTH + BLOCK_SIZE - 1)
 								/ BLOCK_SIZE, atime, mtime, ctime);
 			} catch (Exception e) {
@@ -537,14 +542,19 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getxattr(String path, String name, ByteBuffer dst)
 			throws FuseException, BufferOverflowException {
-		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs."))
-			dst.put(sdfsCmds.getAttr(name, path).getBytes());
-		else {
-			File f = this.resolvePath(path);
-			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-			String val = mf.getXAttribute(name);
-			if (val != null)
-				dst.put(val.getBytes());
+		int ftype = this.getFtype(path);
+		if (ftype != FuseFtype.TYPE_SYMLINK) {
+			if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.")
+					|| name.startsWith("user.dse"))
+				dst.put(sdfsCmds.getAttr(name, path).getBytes());
+			else {
+				File f = this.resolvePath(path);
+
+				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+				String val = mf.getXAttribute(name);
+				if (val != null)
+					dst.put(val.getBytes());
+			}
 		}
 		return 0;
 	}
@@ -553,7 +563,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throws FuseException {
 		if (name.startsWith("security.capability"))
 			return 0;
-		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs")) {
+		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs")
+				|| name.startsWith("user.dse")) {
 			try {
 				sizeSetter
 						.setSize(sdfsCmds.getAttr(name, path).getBytes().length);
@@ -584,7 +595,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		byte valB[] = new byte[value.capacity()];
 		value.get(valB);
 		String valStr = new String(valB);
-		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.")) {
+		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.")
+				|| name.startsWith("user.dse")) {
 			sdfsCmds.runCMD(path, name, valStr);
 		} else {
 			File f = this.resolvePath(path);

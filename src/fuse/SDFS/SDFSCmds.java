@@ -8,9 +8,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.VMDKParser;
 
@@ -34,7 +36,7 @@ public class SDFSCmds {
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
 			"user.sdfs.DuplicateData", 
 			"user.sdfs.VMDK", "user.sdfs.fileGUID", "user.sdfs.dfGUID",
-			"user.sdfs.dedupAll"
+			"user.sdfs.dedupAll","user.dse.size","user.dse.maxsize"
 	};
 	
 	public static final String[] cmdDes = {
@@ -51,7 +53,7 @@ public class SDFSCmds {
 			"Flush write cache for specificed file <unique-command-id>",
 			"Flush write cache for all files",
 			"checks if the file is open <unique-command-id>", "", "", "", "",
-			"", "", "", "", "", ""};
+			"", "", "", "", "", "","","","",""};
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
 	
 	private static LinkedHashMap<String, String> cmdStatus = new LinkedHashMap<String, String>(
@@ -116,6 +118,13 @@ public class SDFSCmds {
 				if (mf.getDfGuid() != null)
 					return mf.getDfGuid();
 			}
+		}
+		if(command.equalsIgnoreCase("user.dse.size")) {
+			return Long.toString(HCServiceProxy.getSize() * Main.CHUNK_LENGTH);
+		}
+		if(command.equalsIgnoreCase("user.dse.maxsize")) {
+			
+			return Long.toString(HCServiceProxy.getMaxSize() * Main.CHUNK_LENGTH);
 		}
 		if (command.equals("user.cmd.ids.status"))
 			return cmdList.get(command);

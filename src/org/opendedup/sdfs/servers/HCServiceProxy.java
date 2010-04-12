@@ -45,6 +45,30 @@ public class HCServiceProxy {
 	}
 
 	private static long dupsFound;
+	
+	public static long getSize() {
+		if (Main.chunkStoreLocal) {
+			return HashChunkService.getSize();
+		}else {
+			return -2;
+		}
+	}
+	
+	public static long getMaxSize() {
+		if (Main.chunkStoreLocal) {
+			return HashChunkService.getMaxSize();
+		}else {
+			return -1;
+		}
+	}
+	
+	public static int getPageSize() {
+		if (Main.chunkStoreLocal) {
+			return HashChunkService.getPageSize();
+		}else {
+			return -1;
+		}
+	}
 
 	private static HashClient getReadHashClient(String name) throws Exception {
 		HashClient hc = (HashClient) readhashRoutes.get(name).borrowObject();
