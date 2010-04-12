@@ -39,22 +39,24 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private String fileName;
 	private List<ChunkData> kBuf = Collections
 			.synchronizedList(new ArrayList<ChunkData>());
-	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
+	private ByteArrayLongMap[] maps = new ByteArrayLongMap[64];
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
 	// The amount of memory available for free slots.
 	private boolean closed = true;
-	int kSz = 0;
+	long kSz = 0;
 	long ram = 0;
-	//TODO change the kBufMazSize so it not reflective to the pageSize
-	private static final int kBufMaxSize = 10485760/Main.chunkStorePageSize;
+	private long maxSz = 0;
+	// TODO change the kBufMazSize so it not reflective to the pageSize
+	private static final int kBufMaxSize = 10485760 / Main.chunkStorePageSize;
 	TLongHashSet freeSlots = new TLongHashSet();
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
-			throws IOException {
-		this.size = maxSize;
+			throws IOException, HashtableFullException {
+		this.size = (long)(maxSize);
+		this.maxSz = maxSize;
 		this.fileName = fileName;
 		FREE = new byte[arraySize];
 		REMOVED = new byte[arraySize];
@@ -67,9 +69,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName,
-			String fileParams) throws IOException {
+			String fileParams) throws IOException, HashtableFullException {
 		this.fileParams = fileParams;
-		this.size = maxSize;
+		this.size = (long)(maxSize * 1.125);
+		this.maxSz = maxSize;
 		this.fileName = fileName;
 		FREE = new byte[arraySize];
 		REMOVED = new byte[arraySize];
@@ -82,7 +85,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
-		byte hashRoute = (byte) (hash[1] / (byte) 8);
+		byte hashRoute = (byte) (hash[1] / (byte) 2);
 		if (hashRoute < 0) {
 			hashRoute += 1;
 			hashRoute *= -1;
@@ -94,7 +97,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			try {
 				m = maps[hashRoute];
 				if (m == null) {
-					int sz = (int) (size / 16);
+					int sz = (int) (size / maps.length);
 					ram = ram + (sz * (24 + 8));
 
 					m = new ByteArrayLongMap(sz, (short) FREE.length);
@@ -121,7 +124,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.closed;
 	}
 
-	public int getSize() {
+	public long getSize() {
 		return this.kSz;
 
 	}
@@ -179,20 +182,14 @@ public class CSByteArrayLongMap implements AbstractMap {
 	 * @param initialCapacity
 	 *            an <code>int</code> value
 	 * @return an <code>int</code> value
+	 * @throws HashtableFullException 
 	 * @throws FileNotFoundException
 	 */
-	public long setUp() throws IOException {
+	public long setUp() throws IOException, HashtableFullException {
 		boolean exists = new File(fileName).exists();
-		long fileSize = this.size * (FREE.length + 8);
-		if (fileSize > Integer.MAX_VALUE)
-			throw new IOException("File size is limited to "
-					+ Integer.MAX_VALUE + " proposed fileSize would be "
-					+ fileSize + " try "
-					+ "reducing the number of entries or the key size");
 		kRaf = new RandomAccessFile(fileName, this.fileParams);
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = kRaf.getChannel();
-
 		this.freeSlots.clear();
 		long start = System.currentTimeMillis();
 		int freeSl = 0;
@@ -255,8 +252,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 											+ value);
 								} else {
 									if (cm.getHash().length > 0) {
-										this.put(cm, false);
-										kSz++;
+										boolean added =this.put(cm, false);
+										if(added)
+											this.kSz++;
 									} else {
 										log
 												.finer("found free slot at "
@@ -358,7 +356,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
-	public boolean put(ChunkData cm) throws IOException {
+	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
 		if (cm.getHash().length != this.FREE.length)
 			throw new IOException("key length mismatch");
 		if (this.isClosed()) {
@@ -393,8 +391,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} else {
 			added = this.put(cm, true);
 		}
-		if (added)
-			kSz++;
+
 		return added;
 	}
 
@@ -404,34 +401,32 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.removingChunks)
 			return -1;
 		freeSlotLock.lock();
-		
+
 		try {
-			if(this.freeSlots.size() == 0) {
+			if (this.freeSlots.size() == 0) {
 				return -1;
 			}
 			if (this.iter == null)
 				this.iter = this.freeSlots.iterator();
-				try {
+			try {
 				long nxt = this.iter.next();
 				this.iter.remove();
-				if(nxt >=0)
+				if (nxt >= 0)
 					return nxt;
-				else 
+				else
 					return -1;
-				}
-				catch(ConcurrentModificationException e) {
-					log.finest("hash table modified");
-					this.iter = this.freeSlots.iterator();
-					long nxt = this.iter.next();
-					this.iter.remove();
-					if(nxt >=0)
-						return nxt;
-					else 
-						return -1;
-				}
-				
-			} 
-		 catch (Exception e) {
+			} catch (ConcurrentModificationException e) {
+				log.finest("hash table modified");
+				this.iter = this.freeSlots.iterator();
+				long nxt = this.iter.next();
+				this.iter.remove();
+				if (nxt >= 0)
+					return nxt;
+				else
+					return -1;
+			}
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			this.freeSlotLock.unlock();
@@ -455,10 +450,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
-	private boolean put(ChunkData cm, boolean persist) throws IOException {
+	private boolean put(ChunkData cm, boolean persist) throws IOException, HashtableFullException {
 		if (this.isClosed())
-			throw new IOException("Hashtable " + this.fileName + " is close");
-		if (kSz >= this.size)
+			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
+		if (kSz >= this.maxSz)
 			throw new IOException("maximum sized reached");
 		boolean added = false;
 		if (persist)
@@ -466,21 +461,25 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (persist) {
 			cm.setcPos(this.getFreeSlot());
 			cm.persistData(true);
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),(byte)1);
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
+					(byte) 1);
 			if (added) {
 				this.arlock.lock();
 				try {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
+					this.kSz++;
 					this.arlock.unlock();
+					
 				}
 			} else {
 				this.addFreeSolt(cm.getcPos());
 				cm = null;
 			}
 		} else {
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),(byte)1);
+			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
+					(byte) 1);
 		}
 
 		return added;
@@ -579,8 +578,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
+					kSz--;
 					this.arlock.unlock();
 				}
+
 				return true;
 			}
 		} catch (Exception e) {

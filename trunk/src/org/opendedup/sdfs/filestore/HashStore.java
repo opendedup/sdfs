@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.collections.CSByteArrayLongMap;
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
@@ -34,7 +35,6 @@ public class HashStore {
 
 	// A lookup table for the specific hash store based on the first byte of the
 	// hash.
-	private long entries;
 	CSByteArrayLongMap bdb = null;
 	// the name of the hash store. This is usually associate with the first byte
 	// of all possible hashes. There should
@@ -78,10 +78,7 @@ public class HashStore {
 			e.printStackTrace();
 		}
 		//this.initChunkStore();
-		long rows = this.getRowCount();
-		entries = entries + rows;
-		log.info(this.getName() + " Row Count : " + rows);
-		log.info("Total Entries " + entries);
+		log.info("Total Entries " +  + bdb.getSize());
 		log.info("Added " + this.name);
 		this.closed = false;
 	}
@@ -92,7 +89,11 @@ public class HashStore {
 	 * 
 	 */
 	public long getEntries() {
-		return entries;
+		return bdb.getSize();
+	}
+	
+	public long getMaxEntries() {
+		return this.bdb.getMaxSize();
 	}
 
 	/**
@@ -120,14 +121,6 @@ public class HashStore {
 	}
 
 	/**
-	 * 
-	 * @return the number of rows from the database
-	 */
-	public long getRowCount() {
-		return bdb.getSize();
-	}
-
-	/**
 	 *method used to determine if the hash already exists in the database
 	 * 
 	 * @param hash
@@ -143,8 +136,9 @@ public class HashStore {
 	 * The method used to open and connect to the TC database.
 	 * 
 	 * @throws IOException
+	 * @throws HashtableFullException 
 	 */
-	private void connectDB() throws IOException {
+	private void connectDB() throws IOException, HashtableFullException {
 		File directory = new File(Main.hashDBStore + File.separator);
 		if (!directory.exists())
 			directory.mkdirs();
@@ -196,8 +190,9 @@ public class HashStore {
 	 * @return true returns true if the data was written. Data will not be
 	 *         written if the hash already exists in the db.
 	 * @throws IOException 
+	 * @throws HashtableFullException 
 	 */
-	public boolean addHashChunk(HashChunk chunk) throws IOException {
+	public boolean addHashChunk(HashChunk chunk) throws IOException, HashtableFullException {
 		boolean written = false;
 		if(!bdb.containsKey(chunk.getName())){
 		try {
@@ -205,20 +200,24 @@ public class HashStore {
 			ChunkData cm = new ChunkData(chunk.getName(),
 					Main.chunkStorePageSize, chunk.getData());
 			if (bdb.put(cm)) {
-				entries++;
 				written = true;
 			} else {
 
 			}
 		
-		} catch (Exception e) {
-			if (hashlock.isLocked())
-				hashlock.unlock();
-
+		} catch (IOException e) {
 			log.log(Level.SEVERE, "Unable to commit chunk "
 					+ StringUtils.getHexString(chunk.getName()), e);
-		} finally {
-
+			throw e;
+		} catch (HashtableFullException e) {
+			log.log(Level.SEVERE, "Unable to commit chunk "
+					+ StringUtils.getHexString(chunk.getName()), e);
+			throw e;
+		} 
+		
+		finally {
+			if (hashlock.isLocked())
+				hashlock.unlock();
 		}
 		}
 		return written;

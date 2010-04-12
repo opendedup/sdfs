@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
@@ -44,7 +45,9 @@ public class HashChunkService {
 	private static long dupsFound;
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean compressed) throws IOException {
+			int position, int len, boolean compressed) throws IOException, HashtableFullException {
+		if(aContents.length > Main.chunkStorePageSize)
+			throw new IOException("content size out of bounds [" +aContents.length + "] > [" + Main.chunkStorePageSize + "]");
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
 		boolean written = hs.addHashChunk(new HashChunk(hash, 0, len,
@@ -95,6 +98,18 @@ public class HashChunkService {
 	public static void commitChunks() {
 		// H2HashStore.commitTransactions();
 		unComittedChunks = 0;
+	}
+	
+	public static long getSize() {
+		return hs.getEntries();
+	}
+	
+	public static long getMaxSize() {
+		return hs.getMaxEntries();
+	}
+	
+	public static int getPageSize() {
+		return Main.chunkStorePageSize;
 	}
 
 	public static long getChunksRead() {

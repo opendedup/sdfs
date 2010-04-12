@@ -175,8 +175,8 @@ public class VolumeConfigWriter {
 					.getOptionValue("chunk-read-ahead-pages"));
 		}
 		else {
-			if(this.chunk_size < 128) {
-				this.chunk_read_ahead_pages = (short) (128/this.chunk_size);
+			if(this.chunk_size < 32) {
+				this.chunk_read_ahead_pages = (short) (32/this.chunk_size);
 			}else {
 				this.chunk_read_ahead_pages = 1;
 			}

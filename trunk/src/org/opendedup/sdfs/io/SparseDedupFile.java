@@ -279,6 +279,7 @@ public class SparseDedupFile implements DedupFile {
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
 			boolean doop) throws IOException {
 		if (this.closed) {
+			this.forceClose();
 			throw new IOException("file already closed");
 		}
 		try {
@@ -295,8 +296,9 @@ public class SparseDedupFile implements DedupFile {
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to write " + hash, e);
-			throw new IOException(e.toString());
+			log.log(Level.SEVERE, "unable to write " + hash + " closing " + mf.getPath(), e);
+			this.forceClose();
+			throw new IOException(e);
 		} finally {
 			updatelock.unlock();
 		}
@@ -371,6 +373,7 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	public DedupChunk getReadBuffer(long position) throws IOException {
 		if (this.closed) {
+			this.forceClose();
 			throw new IOException("file already closed");
 		}
 		long chunkPos = this.getChuckPosition(position);

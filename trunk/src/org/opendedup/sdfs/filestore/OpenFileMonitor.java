@@ -57,7 +57,8 @@ public class OpenFileMonitor implements Runnable {
 					df = files[i];
 					if (this.isFileStale(df) && !df.hasOpenChannels()) {
 						try {
-							df.forceClose();
+							if(df != null)
+								df.forceClose();
 						} catch (Exception e) {
 							log.log(Level.WARNING, "Unable close file for "
 									+ df.getMetaFile().getPath(), e);
