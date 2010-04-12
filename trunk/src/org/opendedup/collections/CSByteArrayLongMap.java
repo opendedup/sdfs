@@ -39,7 +39,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private String fileName;
 	private List<ChunkData> kBuf = Collections
 			.synchronizedList(new ArrayList<ChunkData>());
-	private ByteArrayLongMap[] maps = new ByteArrayLongMap[64];
+	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
 	// The amount of memory available for free slots.
@@ -85,7 +85,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
-		byte hashRoute = (byte) (hash[1] / (byte) 2);
+		byte hashRoute = (byte) (hash[1] / (byte) 8);
 		if (hashRoute < 0) {
 			hashRoute += 1;
 			hashRoute *= -1;
