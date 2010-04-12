@@ -13,7 +13,6 @@ import org.opendedup.util.HashFunctions;
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
 	ByteBuffer claims = null;
-	ByteBuffer store = null;
 	ByteBuffer keys = null;
 	private int size = 0;
 	private int entries = 0;
@@ -102,12 +101,12 @@ public class ByteArrayLongMap {
 		keys = ByteBuffer.allocateDirect(size * FREE.length);
 		values = ByteBuffer.allocateDirect(size * 8);
 		claims = ByteBuffer.allocateDirect(size);
-		store = ByteBuffer.allocateDirect(size);
+		//store = ByteBuffer.allocateDirect(size);
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
 			claims.put((byte) 0);
-			store.put((byte) 0);
+			//store.put((byte) 0);
 			kSz++;
 		}
 		// values = new long[this.size][this.size];
@@ -157,8 +156,8 @@ public class ByteArrayLongMap {
 				pos = (pos / 8);
 				this.claims.position(pos);
 				this.claims.put((byte) 1);
-				this.store.position(pos);
-				this.store.put(storeID);
+				//this.store.position(pos);
+				//this.store.put(storeID);
 				return true;
 			}
 		} catch (Exception e) {
@@ -189,8 +188,8 @@ public class ByteArrayLongMap {
 				pos = (pos / 8);
 				this.claims.position(pos);
 				this.claims.put((byte) 0);
-				this.store.position(pos);
-				this.store.put((byte)0);
+				//this.store.position(pos);
+				//this.store.put((byte)0);
 				this.entries = entries -1;
 				return true;
 			}
@@ -355,8 +354,8 @@ public class ByteArrayLongMap {
 			pos = (pos / 8);
 			this.claims.position(pos);
 			this.claims.put((byte) 1);
-			this.store.position(pos);
-			this.store.put(storeID);
+			//this.store.position(pos);
+			//this.store.put(storeID);
 			this.entries = entries +1;
 			return pos > -1 ? true : false;
 		} catch (Exception e) {

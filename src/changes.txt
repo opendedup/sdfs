@@ -1,3 +1,16 @@
+Version 0.8.15 4/12/2010
+	This release focuses on enhancements and bug fixes found during scalability testing. 
+	
+	Fixes :
+	* Symlink permission issues. Permissions were inherited from linked file. They are now independent. This is 
+	consistent with native fs behaviors.
+	* Fixed artificial limit found for hash tables. It is now possible to create volumes larger than 1TB at 4k chunk size.
+	* Memory allocation fix. 1.6 GB memory was reclaimed. It is now possible to run small volumes of SDFS in under 100mb of RAM.
+	Enhancements :
+	* Minor ehancements that in total should increase performance by around 10%.  
+	* Added warning and throws exception when the DSE is full. This is the first of many enhancements to come in this area.
+	 
+	
 Version 0.8.14 4/4/2010
 	This release was focused on bug fixes and enhancements related to performance testing. Take a look at 
 	http://opendedup.org/index.php/perfmon for more details on performance metrics.
