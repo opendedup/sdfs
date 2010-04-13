@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -10,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFileAttributes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -335,9 +335,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			f = resolvePath(from);
 
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-			MetaDataDedupFile newMF = MetaFileStore.getMF(this.mountedVolume
+			mf.renameTo(this.mountedVolume
 					+ to);
-			mf.renameTo(newMF);
 		} catch (Exception e) {
 			throw new FuseException("error renaming " + from + " " + to)
 					.initErrno(FuseException.EACCES);
@@ -382,7 +381,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			used = blocks;
 		statfsSetter
 				.set(Main.volume.getBlockSize(), blocks, blocks - used, blocks
-						- used, (int) MetaFileStore.getEntries(), 0,
+						- used, (int) 0, 0,
 						NAME_LENGTH);
 		return 0;
 	}

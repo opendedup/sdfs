@@ -24,7 +24,6 @@ import fuse.FuseStatfsSetter;
  * (fuse.compat.Filesystem2) to the new errno-as-return-value-or-exception API
  * (fuse.Filesystem3)
  */
-@SuppressWarnings( { "UnnecessaryUnboxing", "UnnecessaryBoxing" })
 public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	private Filesystem2 fs2;
 

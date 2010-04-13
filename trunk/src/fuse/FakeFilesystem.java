@@ -20,7 +20,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@SuppressWarnings( { "OctalInteger" })
 public class FakeFilesystem implements Filesystem3, XattrSupport {
 	private static final Log log = LogFactory.getLog(FakeFilesystem.class);
 
