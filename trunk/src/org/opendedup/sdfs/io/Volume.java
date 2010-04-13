@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -90,7 +91,7 @@ public class Volume implements java.io.Serializable {
 	}
 	
 	public long getNumberOfFiles() {
-		return MetaFileStore.getEntries();
+		return Paths.get(path).getNameCount();
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException {

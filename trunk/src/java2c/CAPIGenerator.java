@@ -67,7 +67,7 @@ public class CAPIGenerator {
 				.toArray(new Field[instanceFieldsList.size()]);
 
 		// obtain all public constructors and give them C names
-		Constructor[] constructors = clazz.getConstructors();
+		Constructor<?>[] constructors = clazz.getConstructors();
 		List<Constructor<?>> constructorsList = new ArrayList<Constructor<?>>();
 		Map<Constructor<?>, String> constructor2name = new HashMap<Constructor<?>, String>();
 		for (int i = 0; i < constructors.length; i++) {
@@ -403,7 +403,7 @@ public class CAPIGenerator {
 		return appendJVMTypeSignature(clazz, new StringBuffer()).toString();
 	}
 
-	private String getJVMTypeSignatures(Class[] classes) {
+	private String getJVMTypeSignatures(Class<?>[] classes) {
 		return appendJVMTypeSignatures(classes, new StringBuffer()).toString();
 	}
 
@@ -448,7 +448,7 @@ public class CAPIGenerator {
 		return buff;
 	}
 
-	private StringBuffer appendJVMTypeSignatures(Class[] classes,
+	private StringBuffer appendJVMTypeSignatures(Class<?>[] classes,
 			StringBuffer buff) {
 		for (int i = 0; i < classes.length; i++)
 			appendJVMTypeSignature(classes[i], buff);
@@ -494,7 +494,7 @@ public class CAPIGenerator {
 	}
 
 	private String getMethodName(Class<?> returnType, String methodName,
-			Class[] argumentTypes) {
+			Class<?>[] argumentTypes) {
 		String prepend = (returnType != null ? getJVMTypeSignature(returnType)
 				+ "__" : "");
 		if (argumentTypes == null || argumentTypes.length == 0)

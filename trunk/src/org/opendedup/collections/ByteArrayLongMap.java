@@ -16,7 +16,6 @@ public class ByteArrayLongMap {
 	ByteBuffer keys = null;
 	private int size = 0;
 	private int entries = 0;
-	private final static long blank = -1;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private static Logger log = Logger.getLogger("sdfs");
 	public byte[] FREE = new byte[16];
@@ -122,7 +121,6 @@ public class ByteArrayLongMap {
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
 	 */
-	@SuppressWarnings( { "unchecked" })
 	public boolean containsKey(byte[] key) {
 		try {
 			this.hashlock.lock();
