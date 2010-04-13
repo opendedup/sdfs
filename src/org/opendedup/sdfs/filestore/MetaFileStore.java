@@ -22,6 +22,7 @@ import jdbm.helper.compression.LeadingValueCompressionProvider;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
@@ -39,74 +40,25 @@ public class MetaFileStore {
 
 	// private static String dbURL =
 	// "jdbc:derby:myDB;create=true;user=me;password=mine";
-	private static RecordManager recman;
-	// CacheRecordManager recman;
-	private static BTree<String, MetaDataDedupFile> mftable;
+
 	// A quick lookup table for path to MetaDataDedupFile
 	private static Logger log = Logger.getLogger("sdfs");
 	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = ConcurrentLinkedHashMap
 	.create(
 			ConcurrentLinkedHashMap.EvictionPolicy.LRU,
-			100,
+			10000,
 			Main.writeThreads,
 			new ConcurrentLinkedHashMap.EvictionListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
 				public void onEviction(String key,
 						MetaDataDedupFile file) {
-
+					file.unmarshal();
 				}
 			});
 
-	static {
-		Properties _props = new Properties();
-		_props.put(RecordManagerOptions.CACHE_SIZE, "100");
-		_props.put(RecordManagerOptions.AUTO_COMMIT, "false");
-		// _props.put(RecordManagerOptions.COMPRESSOR,
-		// RecordManagerOptions.COMPRESSOR_BEST_SPEED);
-		_props.put(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
-		// _props.put(RecordManagerOptions.CACHE_TYPE ,
-		// RecordManagerOptions.SOFT_REF_CACHE);
-		/*
-		 * Properties props = new Properties();
-		 * props.put(RecordManagerOptions.CACHE_TYPE ,
-		 * RecordManagerOptions.SOFT_REF_CACHE);
-		 * props.put(RecordManagerOptions.AUTO_COMMIT, "true"); props.put(
-		 * RecordManagerOptions.CACHE_SIZE, "2000000" );
-		 */
-		try {
-			File f = new File(Main.metaDBStore);
-			if (!f.exists())
-				f.mkdirs();
-			recman = RecordManagerFactory.createRecordManager(Main.metaDBStore
-					+ File.separator + "mfstore", _props);
-			long recid = recman.getNamedObject("metaFile");
-			if (recid != 0) {
+	
 
-				mftable = BTree.load(recman, recid);
-				log.fine("Entries " + mftable.entryCount());
-				log.info("Reloaded existing meta file store");
-			} else {
-				mftable = BTree.createInstance(recman, new StringComparator(),
-						new DefaultSerializer(), new DefaultSerializer());
-				log.info("Total File Entries [" + mftable.entryCount() + "]");
-				mftable
-						.setKeyCompressionProvider(new LeadingValueCompressionProvider());
-				recman.setNamedObject("metaFile", mftable.getRecid());
-				log.fine("Created meta file store");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * 
-	 * @return the number of entries within the jdbm database
-	 */
-	public static long getEntries() {
-		return mftable.entryCount();
-	}
 
 	/**
 	 * caches a file to the pathmap
@@ -116,6 +68,12 @@ public class MetaFileStore {
 	private static void cacheMF(MetaDataDedupFile mf) {
 		pathMap.put(mf.getPath(), mf);
 	}
+	
+	public static void rename(String src,String dst,MetaDataDedupFile mf){
+		pathMap.remove(src);
+		pathMap.put(dst, mf);
+	}
+	
 
 	/**
 	 * Removes a cached file from the pathmap
@@ -136,12 +94,12 @@ public class MetaFileStore {
 	public static synchronized MetaDataDedupFile getMF(String path) {
 		File f = new File(path);
 		if (f.isDirectory()) {
-			return new MetaDataDedupFile(f.getPath());
+			return MetaDataDedupFile.getFile(f.getPath());
 		}
 		MetaDataDedupFile mf = (MetaDataDedupFile) pathMap.get(f.getPath());
 		if (mf == null) {
-			mf = new MetaDataDedupFile(f.getPath());
-			setMetaFile(mf);
+			mf = MetaDataDedupFile.getFile(f.getPath());
+			cacheMF(mf);
 		}
 		return mf;
 	}
@@ -187,6 +145,14 @@ public class MetaFileStore {
 	 */
 	public static boolean commit() {
 		try {
+			Object[] files = pathMap.values().toArray();
+			int z = 0;
+			for (int i = 0; i <files.length; i++) {
+				MetaDataDedupFile buf = (MetaDataDedupFile) files[i];
+				buf.unmarshal();
+				z++;
+			}
+			log.finer("flushed " + z + " files ");
 			//recman.commit();
 			return true;
 		} catch (Exception e) {
@@ -232,7 +198,6 @@ public class MetaFileStore {
 				deleted = mf.getDedupFile().delete();
 				deleted = mf.deleteStub();
 				Main.volume.updateCurrentSize(-1 * mf.length());
-				mftable.remove(mf.getGUID());
 				if (!deleted) {
 					log.info("could not delete " + mf.getPath());
 					return deleted;
@@ -245,44 +210,11 @@ public class MetaFileStore {
 				log.log(Level.FINEST, "unable to remove  because [" + path
 						+ "] is null");
 		}
-		log.finest(" meta-file size is " + mftable.entryCount());
 		mf = null;
 		return deleted;
 	}
 
-	/**
-	 * Adds a MetaDataDedupFile to the jdbm database
-	 * 
-	 * @param mf
-	 *            the MetaDataDedupFile
-	 * @return true if committed
-	 */
-	public static boolean setMetaFile(MetaDataDedupFile mf) {
-		try {
-			mftable.insert(mf.getGUID(), mf, true);
-			cacheMF(mf);
-			return commit();
-		} catch (IOException e) {
-			log.log(Level.SEVERE, "unable to add " + mf.getGUID(), e);
-			return false;
-		}
-	}
 
-	/**
-	 * Gets a file by the guid
-	 * 
-	 * @param guid
-	 *            the guid of the MetaDataDedupFile
-	 * @return the MetaDataDedupFile if it exists, otherwise it returns null.
-	 */
-	public static MetaDataDedupFile getMetaFile(String guid) {
-		try {
-			return mftable.find(guid);
-		} catch (IOException e) {
-			log.log(Level.SEVERE, "unable to get metafile for " + guid, e);
-		}
-		return null;
-	}
 
 	/**
 	 * closes the jdbm database.
@@ -291,7 +223,6 @@ public class MetaFileStore {
 		System.out.println("Closing metafilestore");
 		try {
 			commit();
-			recman.close();
 		} catch (Exception e) {
 		}
 		System.out.println("metafilestore closed");
