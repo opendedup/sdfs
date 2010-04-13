@@ -10,6 +10,10 @@ import java.util.ArrayList;
  */
 public class FuseFSDirFiller extends ArrayList<FuseFSDirEnt> implements
 		FuseDirFiller {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Charset cs;
 
 	public void setCharset(Charset cs) {

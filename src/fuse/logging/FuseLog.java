@@ -195,6 +195,7 @@ public class FuseLog implements Log {
 			return getLevelValue(name) <= LEVEL_WARN;
 		}
 
+		@SuppressWarnings("unused")
 		public String toString(String name) {
 			return levelNames[getLevelValue(name)];
 		}
