@@ -1,28 +1,16 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jdbm.RecordManager;
-import jdbm.RecordManagerFactory;
-import jdbm.RecordManagerOptions;
-import jdbm.btree.BTree;
-import jdbm.helper.DefaultSerializer;
-import jdbm.helper.StringComparator;
-import jdbm.helper.compression.LeadingValueCompressionProvider;
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
 
