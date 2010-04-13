@@ -31,7 +31,7 @@ public class Main {
 	 * The virtual file structure maps what will be presented as the filesystem
 	 * is being mapped. This is used on the client.
 	 */
-	public static String metaDBStore = "/opt/dedup/jdb";
+	//public static String metaDBStore = "/opt/dedup/jdb";
 	/**
 	 * The location where the IO stats log file will be held. The IO log file is
 	 * used to record IO stats at specific intervals. This is used on the client
