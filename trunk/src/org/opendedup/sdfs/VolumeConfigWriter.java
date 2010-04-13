@@ -36,7 +36,6 @@ public class VolumeConfigWriter {
 	 */
 	String volume_name = null;
 	String base_path = "/opt/sdfs/" + volume_name;
-	String meta_file_store = base_path + File.separator + "mdb";
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
@@ -85,17 +84,12 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
-		this.meta_file_store = this.base_path + File.separator + "mdb";
 		this.io_log = this.base_path + File.separator + "io.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
 		this.chunk_store_hashdb_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "hdb";
-
-		if (cmd.hasOption("meta-db-store")) {
-			this.meta_file_store = cmd.getOptionValue("base-path");
-		}
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
@@ -223,7 +217,6 @@ public class VolumeConfigWriter {
 		Element locations = xmldoc.createElement("locations");
 		locations.setAttribute("dedup-db-store", this.dedup_db_store);
 		locations.setAttribute("io-log", this.io_log);
-		locations.setAttribute("meta-db-store", this.meta_file_store);
 		root.appendChild(locations);
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
@@ -300,13 +293,6 @@ public class VolumeConfigWriter {
 						.withDescription(
 								"the folder path for all volume data and meta data.\n Defaults to: \n /opt/sdfs/<volume name>")
 						.hasArg().withArgName("PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("meta-db-store")
-						.withDescription(
-								"the folder path to for the meta file database.\n Defaults to: \n --base-path + "
-										+ File.separator + "mdb").hasArg()
-						.withArgName("PATH").create());
 		options
 				.addOption(OptionBuilder
 						.withLongOpt("dedup-db-store")

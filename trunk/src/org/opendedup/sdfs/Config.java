@@ -122,7 +122,6 @@ public class Config {
 		Element locations = (Element) doc.getElementsByTagName("locations")
 				.item(0);
 		log.info("parsing folder locations");
-		Main.metaDBStore = locations.getAttribute("meta-db-store");
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
 		Main.ioLogFile = locations.getAttribute("io-log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
