@@ -166,6 +166,7 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
+		
 		if (Main.chunkStoreLocal) {
 			log.fine("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
@@ -180,8 +181,18 @@ public class Config {
 					.getAttribute("pre-allocate"));
 			Main.chunkStoreReadAheadPages = Integer.parseInt(localChunkStore
 					.getAttribute("read-ahead-pages"));
+			 Element networkcs = (Element) doc.getElementsByTagName("network").item(0);
+			 if(networkcs != null) {
+				 Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs.getAttribute("enable"));
+				 Main.serverHostName = localChunkStore.getAttribute("hostname");
+				 Main.serverPort = Integer.parseInt(localChunkStore.getAttribute("port"));
+			 }
 			log.info("######### Will allocate " + Main.chunkStoreAllocationSize
 					+ " in chunkstore ##############");
+		}
+		else {
+			String routingConfig = localChunkStore.getAttribute("routing-config");
+			Config.parserRoutingFile(routingConfig);
 		}
 
 		/*

@@ -259,6 +259,11 @@ public class Main {
 	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean chunkStoreLocal = false;
+	
+	/**
+	 * If the Dedup Storage Engine is remote or local
+	 */
+	public static boolean enableNetworkChunkStore = false;
 
 	/**
 	 * the length of the hash. Will be either 16 or 32 depending on md5 or SHA1

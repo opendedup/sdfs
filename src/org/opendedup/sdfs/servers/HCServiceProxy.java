@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -12,7 +13,9 @@ import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.util.StringUtils;
 
-import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
@@ -22,16 +25,16 @@ public class HCServiceProxy {
 	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
-	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = ConcurrentLinkedHashMap
-			.create(
-					ConcurrentLinkedHashMap.EvictionPolicy.LRU,
-					cacheLenth,
-					Main.writeThreads,
-					new ConcurrentLinkedHashMap.EvictionListener<String, ByteCache>() {
-						public void onEviction(String key, ByteCache writeBuffer) {
-						}
-					});
+	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>().concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
+	.maximumWeightedCapacity(cacheLenth).listener(
+			new EvictionListener<String, ByteCache>() {
+				// This method is called just after a new entry has been
+				// added
+				public void onEviction(String key, ByteCache writeBuffer) {
+				}
+			}
 	
+	).build();
 
 	private static HashMap<String, byte[]> readingBuffers = new HashMap<String, byte[]>();
 	// private static LRUMap existingHashes = new

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -12,7 +13,9 @@ import java.util.logging.Logger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
-import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * 
@@ -31,22 +34,17 @@ public class MetaFileStore {
 
 	// A quick lookup table for path to MetaDataDedupFile
 	private static Logger log = Logger.getLogger("sdfs");
-	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = ConcurrentLinkedHashMap
-	.create(
-			ConcurrentLinkedHashMap.EvictionPolicy.LRU,
-			10000,
-			Main.writeThreads,
-			new ConcurrentLinkedHashMap.EvictionListener<String, MetaDataDedupFile>() {
+	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>().concurrencyLevel(Main.writeThreads)
+	.maximumWeightedCapacity(10000).listener(
+			new EvictionListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
 				public void onEviction(String key,
 						MetaDataDedupFile file) {
 					file.unmarshal();
 				}
-			});
-
-	
-
+			}
+	).build();
 
 	/**
 	 * caches a file to the pathmap
