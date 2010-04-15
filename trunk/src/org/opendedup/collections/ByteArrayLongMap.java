@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.util.HashFunctions;
+import org.opendedup.util.StringUtils;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
@@ -199,13 +200,18 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	public int hashFunc1(int hash) {
+	private int hashFunc1(int hash) {
 		return hash % size;
 	}
 
-	public int hashFunc2(int hash) {
-		return 6 - hash % 6;
-	}
+
+	
+	public int hashFunc3(int hash) {
+        int result = hash + 1;
+        return result;
+    }
+	
+	
 
 	/**
 	 * Locates the index of <tt>obj</tt>.
@@ -219,7 +225,7 @@ public class ByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		int stepSize = hashFunc2(hash);
+		//int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -235,14 +241,19 @@ public class ByteArrayLongMap {
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		if (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)) {
 			// see Knuth, p. 529
-			// final int probe = (1 + (hash % (length - 2))) * FREE.length;
-
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
+			int z = 0;
 			do {
-				index += (stepSize * FREE.length); // add the step
+				z++;
+				index += (probe); // add the step
 				index %= (size * FREE.length); // for wraparound
 				cur = new byte[FREE.length];
 				keys.position(index);
 				keys.get(cur);
+				if(z > size) {
+					log.info("entries exhaused size=" + this.size + " entries=" +this.entries);
+					return -1;
+				}
 			} while (!Arrays.equals(cur, FREE)
 					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
 		}
@@ -266,7 +277,7 @@ public class ByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		int stepSize = hashFunc2(hash);
+		//int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -277,7 +288,7 @@ public class ByteArrayLongMap {
 			return -index - 1; // already stored
 		} else { // already FULL or REMOVED, must probe
 			// compute the double hash
-			// final int probe = (1 + (hash % (length - 2))) * FREE.length;
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
 			// if the slot we landed on is FULL (but not removed), probe
 			// until we find an empty slot, a REMOVED slot, or an element
@@ -293,16 +304,9 @@ public class ByteArrayLongMap {
 			if (!Arrays.equals(cur, REMOVED)) {
 				// starting at the natural offset, probe until we find an
 				// offset that isn't full.
-				int w = 0;
 				do {
-					w++;
-
-					index += (stepSize * FREE.length); // add the step
+					index += (probe); // add the step
 					index %= (size * FREE.length); // for wraparound
-					if (w > 1000) {
-						log.finest("been searching at index " + index
-								+ " for " + w);
-					}
 					cur = new byte[FREE.length];
 					keys.position(index);
 					keys.get(cur);
@@ -319,7 +323,7 @@ public class ByteArrayLongMap {
 				while (!Arrays.equals(cur, FREE)
 						&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur,
 								key))) {
-					index += (stepSize * FREE.length); // add the step
+					index += (probe); // add the step
 					index %= (size * FREE.length); // for wraparound
 					cur = new byte[FREE.length];
 					keys.position(index);
@@ -337,10 +341,10 @@ public class ByteArrayLongMap {
 
 	public boolean put(byte[] key, long value,byte storeID) {
 		try {
+			this.hashlock.lock();
 			if(entries >= size)
 				throw new IOException("entries is greater than or equal to the maximum number of entries. You need to expand" +
 						"the volume or DSE allocation size");
-			this.hashlock.lock();
 			int pos = this.insertionIndex(key);
 			if (pos < 0)
 				return false;

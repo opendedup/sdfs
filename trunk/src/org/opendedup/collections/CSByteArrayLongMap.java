@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,6 +23,7 @@ import java.util.logging.Logger;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.util.NextPrime;
 import org.opendedup.util.StringUtils;
 
 public class CSByteArrayLongMap implements AbstractMap {
@@ -39,7 +41,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private String fileName;
 	private List<ChunkData> kBuf = Collections
 			.synchronizedList(new ArrayList<ChunkData>());
-	private ByteArrayLongMap[] maps = new ByteArrayLongMap[16];
+	private ByteArrayLongMap[] maps = new ByteArrayLongMap[256];
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
 	// The amount of memory available for free slots.
@@ -47,9 +49,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 	long kSz = 0;
 	long ram = 0;
 	private long maxSz = 0;
+	private int hashRoutes = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
 	private static final int kBufMaxSize = 10485760 / Main.chunkStorePageSize;
-	TLongHashSet freeSlots = new TLongHashSet();
+	TLongHashSet freeSlots = new TLongHashSet(1000000);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
 
@@ -85,24 +88,28 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
-		byte hashRoute = (byte) (hash[1] / (byte) 8);
-		if (hashRoute < 0) {
-			hashRoute += 1;
-			hashRoute *= -1;
+		int hashb = hash[2];
+		if(hashb < 0) {
+			hashb = ((hashb * -1)+ 127);
 		}
+		int hashRoute = hashb;
 		ByteArrayLongMap m = maps[hashRoute];
 		if (m == null) {
 			iolock.lock();
 			arlock.lock();
 			try {
+				
 				m = maps[hashRoute];
 				if (m == null) {
-					int sz = (int) (size / maps.length);
+					int propsize = (int) (size / maps.length);
+					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
+					log.info("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));
-
 					m = new ByteArrayLongMap(sz, (short) FREE.length);
 					maps[hashRoute] = m;
 				}
+				hashRoutes++;
+				log.info("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, "unable to create hashmap. "
 						+ maps.length, e);
@@ -299,6 +306,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public synchronized void removeRecords(long time) throws IOException {
+		log.info("Garbage Collection records older than " + new Date(time));
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
 			return;
@@ -324,11 +332,17 @@ public class CSByteArrayLongMap implements AbstractMap {
 										rem++;
 									}
 								}
+								else {
+									cm = null;
+								}
 							} catch (Exception e1) {
 								log.log(Level.WARNING,
 										"unable to access record at "
 												+ _fs.getChannel().position(),
 										e1);
+							}
+							finally {
+								raw = null;
 							}
 						}
 					} catch (BufferUnderflowException e) {
@@ -357,6 +371,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
+		if(this.kSz >= this.maxSz)
+			throw new IOException("entries is greater than or equal to the maximum number of entries. You need to expand" +
+			"the volume or DSE allocation size");
 		if (cm.getHash().length != this.FREE.length)
 			throw new IOException("key length mismatch");
 		if (this.isClosed()) {
@@ -551,6 +568,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					kFc.write(cm.getMetaDataBytes());
 				} catch (Exception e) {
 				} finally {
+					cm = null;
 					this.iolock.unlock();
 				}
 				cm = null;

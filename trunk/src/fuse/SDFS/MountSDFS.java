@@ -44,7 +44,6 @@ public class MountSDFS {
 
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
-		String routingConfigFile = "/etc/sdfs/routing-config.xml";
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -64,13 +63,12 @@ public class MountSDFS {
 		}
 
 		if (!cmd.hasOption("m")) {
-			System.out.println("error : mount point is not defined");
-			printHelp(options);
-			System.exit(-1);
+			fal.add(args[1]);
 		} else {
 			fal.add(cmd.getOptionValue("m"));
 		}
 
+		
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
 					+ "-volume-cfg.xml");
@@ -88,6 +86,15 @@ public class MountSDFS {
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
+		} else {
+			File f = new File("/etc/sdfs/" + args[0].trim()
+					+ "-volume-cfg.xml");
+			if (!f.exists()) {
+				System.out.println("Volume configuration file " + f.getPath()
+						+ " does not exist");
+				System.exit(-1);
+			}
+			volumeConfigFile = f.getPath();
 		}
 
 		if (volumeConfigFile == null) {
@@ -97,8 +104,7 @@ public class MountSDFS {
 			System.exit(-1);
 		}
 
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,
-				routingConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile);
 
 		try {
 			sdfsService.start();

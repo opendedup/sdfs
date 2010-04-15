@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -21,7 +22,9 @@ import org.opendedup.util.HashFunctionPool;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
-import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 
 public class SparseDedupFile implements DedupFile {
 
@@ -47,12 +50,41 @@ public class SparseDedupFile implements DedupFile {
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
-	private transient ConcurrentLinkedHashMap<Long, WritableCacheBuffer> writeBuffers = ConcurrentLinkedHashMap
+	private transient ConcurrentLinkedHashMap<Long, WritableCacheBuffer> writeBuffers = new 
+	Builder<Long, WritableCacheBuffer>().concurrencyLevel(Main.writeThreads).initialCapacity(maxWriteBuffers+1)
+	.maximumWeightedCapacity(maxWriteBuffers+1).listener(
+			new EvictionListener<Long, WritableCacheBuffer>() {
+				// This method is called just after a new entry has been
+				// added
+				public void onEviction(Long key,
+						WritableCacheBuffer writeBuffer) {
+
+					if (writeBuffer != null) {
+						flushingLock.lock();
+						try {
+							flushingBuffers.put(key, writeBuffer);
+						} catch (Exception e) {
+
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} finally {
+							flushingLock.unlock();
+						}
+
+						pool.execute(writeBuffer);
+					}
+
+				}
+			}
+	
+	).build();
+	
+	/*
 			.create(
-					ConcurrentLinkedHashMap.EvictionPolicy.LRU,
+					
 					maxWriteBuffers + 1,
 					Main.writeThreads,
-					new ConcurrentLinkedHashMap.EvictionListener<Long, WritableCacheBuffer>() {
+					new EvictionListener<Long, WritableCacheBuffer>() {
 						// This method is called just after a new entry has been
 						// added
 						public void onEviction(Long key,
@@ -75,6 +107,7 @@ public class SparseDedupFile implements DedupFile {
 
 						}
 					});
+					*/
 
 	private boolean closed = true;
 	static {

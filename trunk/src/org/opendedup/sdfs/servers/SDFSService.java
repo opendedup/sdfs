@@ -11,22 +11,18 @@ import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 
 public class SDFSService {
 	String configFile;
-	String routingFile;
 	private static Logger log = Logger.getLogger("sdfs");
 	private SDFSGCScheduler gc = null;
 
-	public SDFSService(String configFile, String routingFile) {
+	public SDFSService(String configFile) {
 
 		this.configFile = configFile;
-		this.routingFile = routingFile;
 		log.info("Running SDFS Version " + Main.version);
 		log.info("reading config file = " + this.configFile);
-		log.info("reading routing file = " + this.routingFile);
 	}
 
 	public void start() throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
-		Config.parserRoutingFile(this.routingFile);
 		if (Main.chunkStoreLocal)
 			HashChunkService.init();
 		gc = new SDFSGCScheduler();

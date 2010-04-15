@@ -169,8 +169,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				int atime = (int) (mf.getLastAccessed() / 1000L);
 				int ctime = (int) (mf.getTimeStamp() / 1000L);
 				int mtime = (int) (mf.lastModified() / 1000L);
-				if (mf.isDirectory()) {
-					int fileLength = mf.list().length;
+				if (f.isDirectory()) {
+					int	fileLength =f.list().length;
 					getattrSetter.set(mf.getGUID().hashCode(), this
 							.getFtype(path)
 							| mode, 1, uid, gid, 0, fileLength * NAME_LENGTH,
@@ -185,8 +185,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 							/ BLOCK_SIZE, atime, mtime, ctime);
 				}
 			} catch (Exception e) {
-				log.error("unable to parse sylink " + path, e);
-				throw new FuseException("error getting symlink " + path)
+				log.error("unable to parse attributes " + path + " at physical path " +f.getPath(), e);
+				throw new FuseException("error getting attribures " + path)
 						.initErrno(FuseException.EACCES);
 			} finally {
 				f = null;

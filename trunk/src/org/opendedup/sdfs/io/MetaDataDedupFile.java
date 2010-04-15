@@ -203,8 +203,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			mf = new MetaDataDedupFile(path);
 		}
 		else {
+			ObjectInputStream in = null;
 			try {
-			ObjectInputStream in =
+			in =
 		        new ObjectInputStream(
 		          new FileInputStream(path));
 			
@@ -212,6 +213,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				mf.path = path;
 			} catch (Exception e) {
 				log.log(Level.SEVERE,"unable to de-serialize " +path,e);
+			}finally {
+				if(in != null) {
+					try {
+						in.close();
+					} catch (IOException e) {
+					}
+				}
 			}
 
 		}
@@ -377,19 +385,25 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	private synchronized boolean writeFile() {
 		File f = new File(this.path);
-		
 		if (!f.isDirectory()) {
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
+			ObjectOutputStream out = null;
 			try {
-				ObjectOutputStream out = new ObjectOutputStream(
+				out = new ObjectOutputStream(
 						new FileOutputStream(this.path));
 				out.writeObject(this);
-				out.close();
 			} catch (Exception e) {
 				log.log(Level.WARNING, "unable to write file metadata for ["
 						+ this.path + "]", e);
 				return false;
+			}
+			finally {
+				if(out != null)
+					try {
+						out.close();
+					} catch (IOException e) {
+					}
 			}
 			return true;
 
@@ -520,6 +534,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean mkdirs() {
+		this.directory = true;
 		File f = new File(this.path);
 		return f.mkdirs();
 	}
@@ -729,7 +744,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.execute = in.readBoolean();
 		this.read = in.readBoolean();
 		this.write = in.readBoolean();
-		this.directory = in.readBoolean();
 		this.hidden = in.readBoolean();
 		this.ownerWriteOnly = in.readBoolean();
 		this.ownerExecOnly = in.readBoolean();
@@ -753,7 +767,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else {
 			byte[] mlb = new byte[ml];
 			in.read(mlb);
-			this.guid = new String(mlb);
+			this.monitor = new IOMonitor();
+			monitor.fromByteArray(mlb);
 		}
 		this.vmdk = in.readBoolean();
 		this.owner_id = in.readInt();
@@ -772,7 +787,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		out.writeBoolean(execute);
 		out.writeBoolean(read);
 		out.writeBoolean(write);
-		out.writeBoolean(directory);
 		out.writeBoolean(hidden);
 		out.writeBoolean(ownerWriteOnly);
 		out.writeBoolean(ownerExecOnly);

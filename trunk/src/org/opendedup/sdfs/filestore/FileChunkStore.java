@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -15,7 +16,9 @@ import java.util.logging.Logger;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 
-import com.reardencommerce.kernel.collections.shared.evictable.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * 
@@ -45,19 +48,8 @@ public class FileChunkStore implements AbstractChunkStore {
 	Path p;
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
-	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = ConcurrentLinkedHashMap
-	.create(
-			ConcurrentLinkedHashMap.EvictionPolicy.LRU,
-			MAX_ENTRIES,
-			Main.writeThreads,
-			new ConcurrentLinkedHashMap.EvictionListener<String, ByteBuffer>() {
-				// This method is called just after a new entry has been
-				// added
-				public void onEviction(String key,
-						ByteBuffer buf) {
-
-				}
-			});
+	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
+	.concurrencyLevel(Main.writeThreads).build();
 	private byte[] FREE = new byte[Main.chunkStorePageSize];
 	private long farthestWrite = 0;
 
