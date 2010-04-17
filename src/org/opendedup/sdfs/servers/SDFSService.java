@@ -8,6 +8,7 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
+import org.opendedup.sdfs.network.NetworkHCServer;
 
 public class SDFSService {
 	String configFile;
@@ -23,8 +24,13 @@ public class SDFSService {
 
 	public void start() throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
-		if (Main.chunkStoreLocal)
-			HashChunkService.init();
+		if (Main.chunkStoreLocal) {
+			if(Main.enableNetworkChunkStore) {
+				NetworkHCServer.init();
+			} else {
+				HashChunkService.init();
+			}
+		}
 		gc = new SDFSGCScheduler();
 	}
 
