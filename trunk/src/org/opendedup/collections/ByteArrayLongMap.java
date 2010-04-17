@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
@@ -9,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.opendedup.util.HashFunctions;
-import org.opendedup.util.StringUtils;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;

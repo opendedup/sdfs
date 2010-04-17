@@ -184,8 +184,8 @@ public class Config {
 			 Element networkcs = (Element) doc.getElementsByTagName("network").item(0);
 			 if(networkcs != null) {
 				 Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs.getAttribute("enable"));
-				 Main.serverHostName = localChunkStore.getAttribute("hostname");
-				 Main.serverPort = Integer.parseInt(localChunkStore.getAttribute("port"));
+				 Main.serverHostName = networkcs.getAttribute("hostname");
+				 Main.serverPort = Integer.parseInt(networkcs.getAttribute("port"));
 			 }
 			log.info("######### Will allocate " + Main.chunkStoreAllocationSize
 					+ " in chunkstore ##############");
