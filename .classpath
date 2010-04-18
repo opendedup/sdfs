@@ -14,7 +14,6 @@
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/quartz-1.7.3.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/trove-3.0.0a3/lib/trove-3.0.0a3.jar"/>
-	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/uuid-3.1.jar"/>
 	<classpathentry kind="lib" path="/home/annesam/java_api/sdfs-bin/lib/clhm-release-1.0-lru.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
