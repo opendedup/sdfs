@@ -328,7 +328,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					this.getIOMonitor().getDuplicateBlocks());
 			_mf.setVmdk(this.isVmdk());
 			_mf.unmarshal();
-
 			return _mf;
 		} else {
 			File f = new File(snaptoPath);

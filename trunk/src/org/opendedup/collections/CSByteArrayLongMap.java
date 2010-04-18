@@ -109,7 +109,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					maps[hashRoute] = m;
 				}
 				hashRoutes++;
-				log.info("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
+				log.finer("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, "unable to create hashmap. "
 						+ maps.length, e);
@@ -644,24 +644,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 		System.out.println("Hashtable [" + this.fileName + "] closed");
 	}
-
-	@Override
-	public byte[] get(long pos) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void put(long pos, byte[] data) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void remove(long pos) throws IOException {
-		// TODO Auto-generated method stub
-	}
-
+	
 	@Override
 	public void vanish() throws IOException {
 		// TODO Auto-generated method stub

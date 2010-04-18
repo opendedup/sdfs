@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,8 +11,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.file.CopyOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
@@ -179,7 +178,6 @@ public class LongByteArrayMap implements AbstractMap {
 			bdbf = new RandomAccessFile(filePath, this.fileParams);
 			if (len > bdbf.length()) {
 				bdbf.setLength(len);
-				// initiall allocate 1 megabyte
 				this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0, len);
 				this.bdb.load();
 			}
