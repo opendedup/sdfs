@@ -45,7 +45,14 @@ public class MetaFileStore {
 				}
 			}
 	).build();
-
+	
+	static {
+		if(Main.version.startsWith("0.8")) {
+			log.severe("Incompatible volume must be at least version 0.9.0 current volume vesion is [" + Main.version + "]");
+			System.exit(-1);
+		}
+			
+	}
 	/**
 	 * caches a file to the pathmap
 	 * 

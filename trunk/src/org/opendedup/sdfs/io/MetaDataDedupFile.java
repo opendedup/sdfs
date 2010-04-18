@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.util.ByteUtils;
 
-import com.eaio.uuid.UUID;
+import java.util.UUID;
 
 /**
  * 
@@ -356,7 +357,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		File f = new File(path);
 		if (!f.exists()) {
 			log.finer("Creating new MetaFile for " + this.path);
-			this.guid = new UUID().toString();
+			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor();
 			this.owner_id = Main.defaultOwner;
 			this.group_id = Main.defaultGroup;

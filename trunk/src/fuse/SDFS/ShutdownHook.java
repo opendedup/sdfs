@@ -17,12 +17,13 @@ class ShutdownHook extends Thread {
 		System.out.println("Data Can be lost if this is interrupted");
 		service.stop();
 		System.out.println("All Data Flushed");
-		System.out.println("SDFS Shut Down Cleanly");
 		try {
 			Process p = Runtime.getRuntime().exec("umount " + mountPoint);
 			p.waitFor();
 		} catch (Exception e) {
 		}
+		System.out.println("SDFS Shut Down Cleanly");
+		
 
 	}
 }

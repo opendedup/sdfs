@@ -103,13 +103,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 				if (m == null) {
 					int propsize = (int) (size / maps.length);
 					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
-					log.info("will create byte array of size " + sz + " propsize was " + propsize);
+					log.fine("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));
 					m = new ByteArrayLongMap(sz, (short) FREE.length);
 					maps[hashRoute] = m;
 				}
 				hashRoutes++;
-				log.finer("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
+				log.fine("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, "unable to create hashmap. "
 						+ maps.length, e);

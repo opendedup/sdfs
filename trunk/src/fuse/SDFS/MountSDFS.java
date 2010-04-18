@@ -64,8 +64,10 @@ public class MountSDFS {
 
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
+			Main.volumeMountPoint = args[1];
 		} else {
 			fal.add(cmd.getOptionValue("m"));
+			Main.volumeMountPoint = cmd.getOptionValue("m");
 		}
 
 		

@@ -57,6 +57,11 @@ public class SDFSService {
 			HashChunkService.close();
 		}
 		System.out.println("SDFS is Shut Down");
+		try {
+			Process p = Runtime.getRuntime().exec("umount " +Main.volumeMountPoint);
+			p.waitFor();
+		} catch (Exception e) {
+		}
 	}
 
 }

@@ -8,7 +8,7 @@ import org.opendedup.sdfs.io.Volume;
  * 
  */
 public class Main {
-	public static String version = "0.8.15";
+	public static String version = "0.9.0";
 	// public static String target = "/opt/dedup";
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -164,6 +164,11 @@ public class Main {
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
+	/**
+	 * The Volume mount point. This is used on the client.
+	 */
+	public static String volumeMountPoint;
+	
 	/**
 	 * Determines whether dedup file map will be closed when the filesystem
 	 * requests that the represented file is. This should be set to false if NFS
