@@ -3,11 +3,12 @@ package org.opendedup.sdfs.io;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.eaio.uuid.UUID;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -634,7 +635,7 @@ public class SparseDedupFile implements DedupFile {
 	private void init() throws IOException {
 		if (mf.getDfGuid() == null) {
 			// new Instance
-			this.GUID = new UUID().toString();
+			this.GUID = UUID.randomUUID().toString();
 		} else {
 			this.GUID = mf.getDfGuid();
 		}
