@@ -1,3 +1,26 @@
+Version 0.9.0 4/18/2010
+	First Release of the 0.9.x tree. 0.9 will focus primarily of Volume Replication and bug fixes. SDFS has introduced a new 
+	data scheme for file system meta data. This new scheme is not compatible with older volumes. If you would like to migrate
+	to the newer volume structure you will need to copy data directly to a new SDFS volume. The DSE data structure is the same.
+	Future versions will all be backwards compatible.
+	Fixes :
+	* Data Storage Issue within DSE: The DSE would only store 75% of the allocation size. This has been fixed and the DSE will now
+	be able to be fully allocated.
+	* Infinite Loop with Gabage Collection: There is an error within the Trove4J library used by the DSE that cause an infinite loop.
+	A work around is in place that should help avoid the issue.
+	* Possible infinite loop with DSE: There was an outlier condition found that cause the data storeage routine to hit an infinite loop.
+	* Volumes not cleanly unmounted: A volume in not unmounted always when the application is killed.
+	* ACLs for Directories and Symlinks: The mode was not being set correctly for directories and symlinks inheriting the permissions
+	from the linked file
+	Enhancements:
+	* The data structure for file meta data has been changed to support volume replication and better performance for storing small 
+	files. This change breaks compatibility with previous versions for SDFS. This is a one time change. Future versions will all be 
+	backwards compatible.
+	* Data Storage Performance has been increased by approximately 15% due to various DSE enhancements.
+	* Better performance for file level snapshots.
+	* Enables volume replication through rsync of volume namespace. DSE replication will be coming in later 0.9.x versions.
+	
+	
 Version 0.8.15 4/12/2010
 	This release focuses on enhancements and bug fixes found during scalability testing. 
 	
