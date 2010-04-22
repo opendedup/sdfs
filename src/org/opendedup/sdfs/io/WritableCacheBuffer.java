@@ -36,6 +36,7 @@ public class WritableCacheBuffer extends DedupChunk {
 	RandomAccessFile raf = null;
 	boolean rafInit = false;
 	boolean prevDoop = false;
+	private boolean safeSync = Main.safeSync;
 	
 
 	static {
@@ -52,7 +53,7 @@ public class WritableCacheBuffer extends DedupChunk {
 		super(hash, startPos, length, true);
 		this.df = df;
 		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
-		if (Main.safeSync) {
+		if (safeSync) {
 			blockFile = new File(df.getDatabaseDirPath() + File.separator
 					+ startPos + ".chk");
 			if (blockFile.exists()) {
@@ -90,7 +91,7 @@ public class WritableCacheBuffer extends DedupChunk {
 				.isNewChunk());
 		this.df = df;
 		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
-		if (Main.safeSync) {
+		if (safeSync) {
 			blockFile = new File(df.getDatabaseDirPath() + File.separator
 					+ dk.getFilePosition() + ".chk");
 			if (blockFile.exists()) {
@@ -129,7 +130,7 @@ public class WritableCacheBuffer extends DedupChunk {
 	}
 
 	public boolean sync() throws IOException {
-		if (Main.safeSync) {
+		if (safeSync) {
 			try {
 				this.lock.lock();
 
@@ -204,7 +205,7 @@ public class WritableCacheBuffer extends DedupChunk {
 			buf.put(b);
 			if (buf.position() > currentLen)
 				this.currentLen = buf.position();
-			if (Main.safeSync) {
+			if (safeSync) {
 				raf = new RandomAccessFile(blockFile, "rw");
 				if (!this.rafInit) {
 					raf.seek(0);

@@ -63,7 +63,7 @@ public class OpenFileMonitor implements Runnable {
 							log.log(Level.WARNING, "Unable close file for "
 									+ df.getMetaFile().getPath(), e);
 						}
-					}
+					} 
 					}catch (NoSuchFileException e) {
 						try {
 							df.forceClose();

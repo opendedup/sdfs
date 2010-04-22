@@ -80,36 +80,6 @@ public class SparseDedupFile implements DedupFile {
 	
 	).build();
 	
-	/*
-			.create(
-					
-					maxWriteBuffers + 1,
-					Main.writeThreads,
-					new EvictionListener<Long, WritableCacheBuffer>() {
-						// This method is called just after a new entry has been
-						// added
-						public void onEviction(Long key,
-								WritableCacheBuffer writeBuffer) {
-
-							if (writeBuffer != null) {
-								flushingLock.lock();
-								try {
-									flushingBuffers.put(key, writeBuffer);
-								} catch (Exception e) {
-
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} finally {
-									flushingLock.unlock();
-								}
-
-								pool.execute(writeBuffer);
-							}
-
-						}
-					});
-					*/
-
 	private boolean closed = true;
 	static {
 		File f = new File(Main.dedupDBStore);
@@ -231,7 +201,6 @@ public class SparseDedupFile implements DedupFile {
 		}
 
 		if (writeBuffer != null && writeBuffer.isDirty()) {
-
 			MessageDigest hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
@@ -252,8 +221,6 @@ public class SparseDedupFile implements DedupFile {
 				if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk())
 					mf.getIOMonitor().removeDuplicateBlock();
 			}
-			if (this.closed)
-				this.initDB();
 			if (writeBuffer.getFilePosition() == 0
 					&& mf.getPath().endsWith(".vmdk")) {
 				try {
