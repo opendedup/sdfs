@@ -426,7 +426,6 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file already closed");
 		}
 		if (Main.safeSync) {
-
 			this.bdb.sync();
 			try {
 				log.finer("Flushing Cache of for " + mf.getPath() + " of size "
@@ -446,7 +445,7 @@ public class SparseDedupFile implements DedupFile {
 
 			}
 		} else {
-			this.bdb.sync();
+			//this.bdb.sync();
 		}
 	}
 
@@ -509,6 +508,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public void forceClose() {
+		log.info("closing " + mf.getPath());
 		this.initLock.lock();
 		try {
 			try {
