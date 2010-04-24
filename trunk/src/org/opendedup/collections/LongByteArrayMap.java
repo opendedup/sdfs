@@ -225,6 +225,13 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.unlock();
 		}
 	}
+	
+	public void truncate(long length) throws IOException {
+		this.hashlock.lock();
+		long pos = (length / Main.CHUNK_LENGTH) * FREE.length;
+		this.setMapFileLength((int)pos + 1048576);
+		this.hashlock.unlock();
+	}
 
 	/*
 	 * (non-Javadoc)

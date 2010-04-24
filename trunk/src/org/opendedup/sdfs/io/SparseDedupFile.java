@@ -508,7 +508,6 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public void forceClose() {
-		log.info("closing " + mf.getPath());
 		this.initLock.lock();
 		try {
 			try {
@@ -837,7 +836,8 @@ public class SparseDedupFile implements DedupFile {
 		long place = this.getChuckPosition(location);
 		try {
 			this.bdb.remove(place);
-			this.chunkStore.remove(place);
+			if(!mf.isDedup())
+				this.chunkStore.remove(place);
 		} catch (Exception e) {
 			log.log(Level.WARNING, "unable to remove chunk at position "
 					+ place, e);
@@ -846,6 +846,16 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 
 		}
+	}
+	
+	public synchronized void truncate(long size) throws IOException {
+		if (this.closed) {
+			throw new IOException("file already closed");
+		}
+		this.bdb.truncate(size);
+		if(!mf.isDedup())
+			this.chunkStore.setLength(size);
+		
 	}
 
 	private DedupChunk createNewChunk(long location) {
