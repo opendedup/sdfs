@@ -54,13 +54,7 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (cmd.hasOption("o")) {
-			fal.add("-o");
-			fal.add(cmd.getOptionValue("o"));
-		} else {
-			fal.add("-o");
-			fal.add("direct_io,big_writes,allow_other,fsname=SDFS");
-		}
+		
 
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
@@ -69,11 +63,14 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("m"));
 			Main.volumeMountPoint = cmd.getOptionValue("m");
 		}
-
 		
+		
+
+		String volname = "SDFS";
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
 					+ "-volume-cfg.xml");
+			volname= f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
@@ -82,6 +79,7 @@ public class MountSDFS {
 			volumeConfigFile = f.getPath();
 		} else if (cmd.hasOption("vc")) {
 			File f = new File(cmd.getOptionValue("vc").trim());
+			volname= f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
@@ -91,12 +89,21 @@ public class MountSDFS {
 		} else {
 			File f = new File("/etc/sdfs/" + args[0].trim()
 					+ "-volume-cfg.xml");
+			volname= f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
+		}
+		
+		if (cmd.hasOption("o")) {
+			fal.add("-o");
+			fal.add(cmd.getOptionValue("o"));
+		} else {
+			fal.add("-o");
+			fal.add("direct_io,big_writes,allow_other,fsname=" +volname);
 		}
 
 		if (volumeConfigFile == null) {

@@ -224,5 +224,7 @@ public interface DedupFile {
 	public abstract void optimize(long length);
 	
 	public abstract boolean hasOpenChannels();
+	
+	public abstract void truncate(long length)throws IOException;
 
 }

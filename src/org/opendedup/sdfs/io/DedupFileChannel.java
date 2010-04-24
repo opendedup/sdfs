@@ -78,6 +78,8 @@ public class DedupFileChannel {
 	public synchronized void truncateFile(long siz) throws IOException {
 		log.finest("Truncating File");
 		if (siz < mf.length()) {
+			df.truncate(siz);
+			/*
 			WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz);
 			int endPos = (int) (siz - writeBuffer.getFilePosition());
 			DedupChunk nextDk = df.getHash(writeBuffer.getEndPosition() + 1,
@@ -91,6 +93,8 @@ public class DedupFileChannel {
 			}
 			writeBuffer.truncate(endPos);
 			// df.writeCache(writeBuffer,true);
+			 */
+			
 		}
 		mf.setLastAccessed(System.currentTimeMillis());
 		mf.setLength(siz, true);

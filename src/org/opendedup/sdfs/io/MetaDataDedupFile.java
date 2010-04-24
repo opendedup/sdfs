@@ -9,6 +9,8 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -54,8 +56,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private IOMonitor monitor;
 	private boolean vmdk;
 	private int permissions;
-	private int owner_id;
-	private int group_id;
+	private int owner_id = -1;
+	private int group_id = -1;
+	private int mode = -1;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
 
@@ -65,6 +68,20 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public boolean isDedup() {
 		return dedup;
+	}
+	
+	public int getMode() throws IOException {
+		if(mode == -1) {
+			Path p = Paths.get(this.path);
+			this.mode = (Integer) p.getAttribute("unix:mode");
+		}
+		return this.mode;
+	}
+	
+	public void setMode(int mode) throws IOException {
+		this.mode = mode;
+		Path p = Paths.get(this.path);
+		p.setAttribute("unix:mode", Integer.valueOf(mode));
 	}
 
 	/**
@@ -108,7 +125,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (this.extendedAttrs.containsKey(name))
 			return extendedAttrs.get(name);
 		else
-			return "-1";
+			return null;
 	}
 
 	/**
@@ -146,8 +163,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	/**
 	 * 
 	 * @return the file owner id
+	 * @throws IOException 
 	 */
-	public int getOwner_id() {
+	public int getOwner_id() throws IOException {
+		if(owner_id == -1) {
+			Path p = Paths.get(this.path);
+			this.owner_id = (Integer) p.getAttribute("unix:uid");
+		}
 		return owner_id;
 	}
 
@@ -155,16 +177,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param owner_id
 	 *            sets the file owner id
+	 * @throws IOException 
 	 */
-	public void setOwner_id(int owner_id) {
+	public void setOwner_id(int owner_id) throws IOException {
 		this.owner_id = owner_id;
+		Path p = Paths.get(this.path);
+		p.setAttribute("unix:uid", Integer.valueOf(owner_id));
 	}
 
 	/**
 	 * 
 	 * @return returns the group owner id
+	 * @throws IOException 
 	 */
-	public int getGroup_id() {
+	public int getGroup_id() throws IOException {
+		if(group_id == -1) {
+			Path p = Paths.get(this.path);
+			this.group_id = (Integer) p.getAttribute("unix:gid");
+		}
 		return group_id;
 	}
 
@@ -172,9 +202,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param group_id
 	 *            sets the group owner id
+	 * @throws IOException 
 	 */
-	public void setGroup_id(int group_id) {
+	public void setGroup_id(int group_id) throws IOException {
 		this.group_id = group_id;
+		Path p = Paths.get(this.path);
+		p.setAttribute("unix:gid", Integer.valueOf(group_id));
 	}
 
 	/**
@@ -736,7 +769,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
-
 		this.timeStamp = in.readLong();
 		this.length = in.readLong();
 		this.lastModified = in.readLong();
@@ -771,8 +803,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			monitor.fromByteArray(mlb);
 		}
 		this.vmdk = in.readBoolean();
-		this.owner_id = in.readInt();
-		this.group_id = in.readInt();
+		//owner id is ignored
+		in.readInt();
+		//group id is ignored
+		in.readInt();
 		byte[] hmb = new byte[in.readInt()];
 		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
 		this.dedup = in.readBoolean();
