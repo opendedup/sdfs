@@ -1,3 +1,10 @@
+Version 0.9.1 4/24/2010
+	Bug fixes and performance enhancements identified during testing on LVM volumes and NFS.
+	Fixes :
+	* Getting extended attributes that do not exist not exits as expected. This fix was needed for mounting of NFS mounted volumes
+	Enhancements :
+	* Caching of permissions improves performance for NFS writes.
+	
 Version 0.9.0 4/18/2010
 	First Release of the 0.9.x tree. 0.9 will focus primarily of Volume Replication and bug fixes. SDFS has introduced a new 
 	data scheme for file system meta data. This new scheme is not compatible with older volumes. If you would like to migrate
