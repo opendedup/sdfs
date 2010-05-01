@@ -40,19 +40,19 @@ public class SDFSCmds {
 	};
 	
 	public static final String[] cmdDes = {
-			"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>",
-			"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>",
-			"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>",
-			"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
+			"\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\"",
+			"\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\"",
+			"\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\"",
+			"\"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
 					+ "The command must be executed on a directory. e.g."
 					+ "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
-			"clear all command id status",
+			"clear all command id status\"",
 			RandomGUID.getGuid(),
-			"get the status if a specific command e.g. to get the status of"
-					+ " command id 54333 run getfattr -n user.cmd.ids.status.54333",
-			"Flush write cache for specificed file <unique-command-id>",
-			"Flush write cache for all files",
-			"checks if the file is open <unique-command-id>", "", "", "", "",
+			"\"get the status if a specific command e.g. to get the status of"
+					+ " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
+			"\"Flush write cache for specificed file <unique-command-id>\"",
+			"\"Flush write cache for all files\"",
+			"\"checks if the file is open <unique-command-id>\"", "", "", "", "",
 			"", "", "", "", "", "","","","",""};
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
 	
