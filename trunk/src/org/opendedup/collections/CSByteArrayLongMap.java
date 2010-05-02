@@ -98,7 +98,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 			iolock.lock();
 			arlock.lock();
 			try {
-				
 				m = maps[hashRoute];
 				if (m == null) {
 					int propsize = (int) (size / maps.length);
