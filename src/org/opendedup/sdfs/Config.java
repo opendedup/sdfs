@@ -55,6 +55,7 @@ public class Config {
 			Main.serverHostName = network.getAttribute("hostname");
 			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
 			Main.useUDP = Boolean.parseBoolean(network.getAttribute("use-udp"));
+			Main.enableNetworkChunkStore = true;
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
 			log.info("parsing folder locations");
@@ -184,7 +185,7 @@ public class Config {
 			 Element networkcs = (Element) doc.getElementsByTagName("network").item(0);
 			 if(networkcs != null) {
 				 Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs.getAttribute("enable"));
-				 Main.serverHostName = networkcs.getAttribute("hostname");
+				 Main.serverHostName = networkcs.getAttribute("listen-ip");
 				 Main.serverPort = Integer.parseInt(networkcs.getAttribute("port"));
 			 }
 			log.info("######### Will allocate " + Main.chunkStoreAllocationSize
