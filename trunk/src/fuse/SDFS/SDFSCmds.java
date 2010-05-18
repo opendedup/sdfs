@@ -2,6 +2,7 @@ package fuse.SDFS;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class SDFSCmds {
 
 	public static final String[] cmds = { "user.cmd.dedupAll",
 			"user.cmd.optimize", "user.cmd.snapshot", "user.cmd.vmdk.make",
-			"user.cmd.ids.clearstatus", "user.cmd.nextid",
+			"user.cmd.ids.clearstatus", 
 			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
 			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
@@ -40,20 +41,34 @@ public class SDFSCmds {
 	};
 	
 	public static final String[] cmdDes = {
-			"\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\"",
-			"\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\"",
-			"\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\"",
-			"\"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
-					+ "The command must be executed on a directory. e.g."
-					+ "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
-			"clear all command id status\"",
-			RandomGUID.getGuid(),
-			"\"get the status if a specific command e.g. to get the status of"
-					+ " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
-			"\"Flush write cache for specificed file <unique-command-id>\"",
-			"\"Flush write cache for all files\"",
-			"\"checks if the file is open <unique-command-id>\"", "", "", "", "",
-			"", "", "", "", "", "","","","",""};
+		"",
+		"", "", "",
+		"", 
+		"", "", "",
+		"", "",
+		"", "",
+		"", 
+		"", "", "",
+		"","",""
+	};
+	
+	/*
+	public static final String[] cmdDes = {
+		"\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\"",
+		"\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\"",
+		"\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\"",
+		"\"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
+				+ "The command must be executed on a directory. e.g."
+				+ "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
+		"clear all command id status\"",
+		RandomGUID.getGuid(),
+		"\"get the status if a specific command e.g. to get the status of"
+				+ " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
+		"\"Flush write cache for specificed file <unique-command-id>\"",
+		"\"Flush write cache for all files\"",
+		"\"checks if the file is open <unique-command-id>\"", "", "", "", "",
+		"", "", "", "", "", "","","","",""};
+	*/
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
 	
 	private static LinkedHashMap<String, String> cmdStatus = new LinkedHashMap<String, String>(
