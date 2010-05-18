@@ -1,3 +1,7 @@
+Version 0.9.2 5/2/2010
+	Fixes	
+	* Major Bug Fixed that removed data after time through garbage collection. All users should update to this release immediately.
+	* Minor issue with copying attributes.
 Version 0.9.1 4/24/2010
 	Bug fixes and performance enhancements identified during testing on LVM volumes and NFS.
 	Fixes :

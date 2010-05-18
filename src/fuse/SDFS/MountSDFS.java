@@ -159,7 +159,5 @@ public class MountSDFS {
 					.println("To get Java 7 go to https://jdk7.dev.java.net/");
 			System.exit(-1);
 		}
-
 	}
-
 }

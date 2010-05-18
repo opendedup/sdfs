@@ -528,7 +528,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throw new FuseException("No such node")
 					.initErrno(FuseException.ENOENT);
 		}
-		log.error("could not determine type for " + _f.getPath());
 		throw new FuseException().initErrno(FuseException.ENOENT);
 
 	}
@@ -536,9 +535,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private int getFtype(String path) throws FuseException {
 		File _f = new File(mountedVolume + path);
 		if (!_f.exists()) {
-			log.info("could not find " + _f.getPath());
 			throw new FuseException().initErrno(FuseException.ENOENT);
-
 		}
 		Path p = Paths.get(_f.getPath());
 		try {
