@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
@@ -32,7 +32,6 @@ public class SparseDedupFile implements DedupFile {
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
 	private transient MetaDataDedupFile mf;
-	private transient static Logger log = Logger.getLogger("sdfs");
 	private transient ArrayList<DedupFileChannel> buffers = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
@@ -89,7 +88,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
-		log.finer("dedup file opened for " + mf.getPath());
+		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
 		this.init();
 	}
@@ -113,7 +112,7 @@ public class SparseDedupFile implements DedupFile {
 			chunkStore.copy(_df.chunkStorePath);
 			return _df;
 		} catch (Exception e) {
-			log.log(Level.WARNING, "unable to clone file " + mf.getPath(), e);
+			SDFSLogger.getLog().warn( "unable to clone file " + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
 		} finally {
 			ch.close();
@@ -132,7 +131,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			mf.setLength(len, true);
 		} catch (Exception e) {
-			log.log(Level.WARNING, "unable to create blank file "
+			SDFSLogger.getLog().warn( "unable to create blank file "
 					+ mf.getPath(), e);
 			throw new IOException(
 					"unable to create blank file " + mf.getPath(), e);
@@ -182,7 +181,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#writeCache()
 	 */
 	public void writeCache() throws IOException {
-		log.finer("Flushing Cache of for " + mf.getPath() + " of size "
+		SDFSLogger.getLog().debug("Flushing Cache of for " + mf.getPath() + " of size "
 				+ this.writeBuffers.size());
 		Object[] buffers = this.writeBuffers.values().toArray();
 		int z = 0;
@@ -191,7 +190,7 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache(buf, true);
 			z++;
 		}
-		log.finer("flushed " + z + " buffers from " + mf.getPath());
+		SDFSLogger.getLog().debug("flushed " + z + " buffers from " + mf.getPath());
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer,
@@ -228,10 +227,10 @@ public class SparseDedupFile implements DedupFile {
 							.getChunk());
 					if (data != null) {
 						mf.setVmdk(true);
-						log.finer(data.toString());
+						SDFSLogger.getLog().debug(data.toString());
 					}
 				} catch (Exception e) {
-					log.log(Level.WARNING, "Unable to parse vmdk header for  "
+					SDFSLogger.getLog().warn( "Unable to parse vmdk header for  "
 							+ mf.getPath(), e);
 				}
 			}
@@ -240,7 +239,7 @@ public class SparseDedupFile implements DedupFile {
 				if (doop && !writeBuffer.isPrevDoop())
 					mf.getIOMonitor().addDulicateBlock();
 			} catch (IOException e) {
-				log.log(Level.SEVERE, "unable to add chunk ["
+				SDFSLogger.getLog().fatal( "unable to add chunk ["
 						+ writeBuffer.getHash() + "] at position "
 						+ writeBuffer.getFilePosition(), e);
 				WritableCacheBuffer buf = this.flushingBuffers
@@ -298,7 +297,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to write " + hash + " closing " + mf.getPath(), e);
+			SDFSLogger.getLog().fatal( "unable to write " + hash + " closing " + mf.getPath(), e);
 			this.forceClose();
 			throw new IOException(e);
 		} finally {
@@ -346,7 +345,7 @@ public class SparseDedupFile implements DedupFile {
 		} catch (IOException e) {
 			if (marshallock.isLocked())
 				marshallock.unlock();
-			log.log(Level.SEVERE,
+			SDFSLogger.getLog().fatal(
 					"Unable to get block at position " + position, e);
 			throw new IOException("Unable to get block at position " + position);
 		}
@@ -409,7 +408,7 @@ public class SparseDedupFile implements DedupFile {
 			long count = -1;
 			return count;
 		} catch (Exception e) {
-			log.log(Level.WARNING, "Table does not exist in database "
+			SDFSLogger.getLog().warn( "Table does not exist in database "
 					+ this.GUID, e);
 		} finally {
 		}
@@ -428,7 +427,7 @@ public class SparseDedupFile implements DedupFile {
 		if (Main.safeSync) {
 			this.bdb.sync();
 			try {
-				log.finer("Flushing Cache of for " + mf.getPath() + " of size "
+				SDFSLogger.getLog().debug("Flushing Cache of for " + mf.getPath() + " of size "
 						+ this.writeBuffers.size());
 				Object[] buffers = this.writeBuffers.values().toArray();
 				for (int i = 0; i < buffers.length; i++) {
@@ -543,7 +542,7 @@ public class SparseDedupFile implements DedupFile {
 			mf.sync();
 		} catch (Exception e) {
 			e.printStackTrace();
-			// log.log(Level.WARNING, "Unable to close database " + this.GUID,
+			// SDFSLogger.getLog().warn( "Unable to close database " + this.GUID,
 			// e);
 		} finally {
 			DedupFileStore.removeOpenDedupFile(mf);
@@ -687,7 +686,7 @@ public class SparseDedupFile implements DedupFile {
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		log.finer("removing for dups within " + mf.getPath());
+		SDFSLogger.getLog().debug("removing for dups within " + mf.getPath());
 		long doops = 0;
 		long records = 0;
 		while (l > -1) {
@@ -718,7 +717,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 
 		}
-		log.finer("Checked [" + records + "] blocks found [" + doops
+		SDFSLogger.getLog().debug("Checked [" + records + "] blocks found [" + doops
 				+ "] new duplicate blocks");
 	}
 
@@ -728,7 +727,7 @@ public class SparseDedupFile implements DedupFile {
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		log.finer("checking for dups");
+		SDFSLogger.getLog().debug("checking for dups");
 		long doops = 0;
 		long records = 0;
 		long localRec = 0;
@@ -763,7 +762,7 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.chunkStore.unlockCollection();
 		}
-		log.finer("Checked [" + records + "] blocks found [" + doops
+		SDFSLogger.getLog().debug("Checked [" + records + "] blocks found [" + doops
 				+ "] new duplicate blocks from [" + localRec
 				+ "] local records last key was [" + pos + "]");
 	}
@@ -815,7 +814,7 @@ public class SparseDedupFile implements DedupFile {
 				return ck;
 			}
 		} catch (Exception e) {
-			log.log(Level.WARNING,
+			SDFSLogger.getLog().warn(
 					"unable to fetch chunk at position " + place, e);
 
 			return null;
@@ -839,7 +838,7 @@ public class SparseDedupFile implements DedupFile {
 			if(!mf.isDedup())
 				this.chunkStore.remove(place);
 		} catch (Exception e) {
-			log.log(Level.WARNING, "unable to remove chunk at position "
+			SDFSLogger.getLog().warn( "unable to remove chunk at position "
 					+ place, e);
 			throw new IOException("unable to remove chunk at position " + place
 					+ " because " + e.toString());

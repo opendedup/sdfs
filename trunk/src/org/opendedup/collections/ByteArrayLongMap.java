@@ -6,10 +6,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.opendedup.util.HashFunctions;
+import org.opendedup.util.SDFSLogger;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
@@ -18,7 +17,6 @@ public class ByteArrayLongMap {
 	private int size = 0;
 	private int entries = 0;
 	private ReentrantLock hashlock = new ReentrantLock();
-	private static Logger log = Logger.getLogger("sdfs");
 	public byte[] FREE = new byte[16];
 	public byte[] REMOVED = new byte[16];
 	private int iterPos = 0;
@@ -134,7 +132,7 @@ public class ByteArrayLongMap {
 			}
 			return false;
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error getting record", e);
+			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
 			this.hashlock.unlock();
@@ -160,7 +158,7 @@ public class ByteArrayLongMap {
 				return true;
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error getting record", e);
+			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
 			this.hashlock.unlock();
@@ -193,7 +191,7 @@ public class ByteArrayLongMap {
 				return true;
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error getting record", e);
+			SDFSLogger.getLog().fatal( "error getting record", e);
 			return false;
 		} finally {
 			this.hashlock.unlock();
@@ -251,7 +249,7 @@ public class ByteArrayLongMap {
 				keys.position(index);
 				keys.get(cur);
 				if(z > size) {
-					log.info("entries exhaused size=" + this.size + " entries=" +this.entries);
+					SDFSLogger.getLog().info("entries exhaused size=" + this.size + " entries=" +this.entries);
 					return -1;
 				}
 			} while (!Arrays.equals(cur, FREE)
@@ -361,7 +359,7 @@ public class ByteArrayLongMap {
 			this.entries = entries +1;
 			return pos > -1 ? true : false;
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error inserting record", e);
+			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;
 		} finally {
 			this.hashlock.unlock();
@@ -396,7 +394,7 @@ public class ByteArrayLongMap {
 				return val;
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error getting record", e);
+			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {
 			this.hashlock.unlock();

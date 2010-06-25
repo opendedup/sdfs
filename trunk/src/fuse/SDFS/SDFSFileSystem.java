@@ -18,6 +18,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.util.SDFSLogger;
 
 import fuse.Filesystem3;
 import fuse.FuseDirFiller;

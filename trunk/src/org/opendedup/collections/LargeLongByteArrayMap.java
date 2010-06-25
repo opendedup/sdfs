@@ -1,13 +1,15 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
+
+import org.opendedup.util.SDFSLogger;
 
 public class LargeLongByteArrayMap implements AbstractMap {
 
@@ -17,7 +19,6 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	String fileName;
 	boolean closed = true;
 	private ReentrantLock hashlock = new ReentrantLock();
-	private static Logger log = Logger.getLogger("sdfs");
 
 	public LargeLongByteArrayMap(String fileName, long initialSize,
 			int arraySize) throws IOException {
@@ -226,7 +227,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		RandomAccessFile rf = null;
 		RandomAccessFile nrf = null;
 		try {
-			log.info("optimizing file [" + this.fileName + "]");
+			SDFSLogger.getLog().info("optimizing file [" + this.fileName + "]");
 			File f = new File(this.fileName + ".new");
 			f.delete();
 			rf = new RandomAccessFile(this.fileName, "rw");
@@ -259,7 +260,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			orig.delete();
 			File newF = new File(this.fileName + ".new");
 			newF.renameTo(orig);
-			log.info("optimizing file [" + this.fileName + "] migrated ["
+			SDFSLogger.getLog().info("optimizing file [" + this.fileName + "] migrated ["
 					+ mData + "] bytes of data to new file");
 		} catch (IOException e) {
 			throw e;

@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -11,11 +12,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.SDFSLogger;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
@@ -43,7 +43,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
 	private static long bytesWritten = 0;
-	private transient static Logger log = Logger.getLogger("sdfs");
 	File f;
 	Path p;
 	private long currentLength = 0L;
@@ -59,7 +58,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 *            the name of the chunk store.
 	 */
 	public FileChunkStore(String name) {
-		log.info("Opening Chunk Store");
+		SDFSLogger.getLog().info("Opening Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
 			if (!chunk_location.exists()) {
@@ -92,7 +91,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				this.expandFile(Main.chunkStoreAllocationSize);
 			this.closed = false;
 			stores.add(this);
-			log.info("ChunkStore " + this.name + " created");
+			SDFSLogger.getLog().info("ChunkStore " + this.name + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -251,7 +250,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			bytesWritten = bytesWritten + chunk.length;
 
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to write data at position " + start,
+			SDFSLogger.getLog().fatal( "unable to write data at position " + start,
 					e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
@@ -361,8 +360,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			return chunk;
 		} catch (Exception e) {
 			// getChunklock.unlock();
-			log
-					.log(Level.SEVERE, "unable to read data at position "
+			SDFSLogger.getLog()
+					.fatal( "unable to read data at position "
 							+ start, e);
 			throw new IOException("unable to read data at position " + start);
 		}
@@ -375,9 +374,9 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	public synchronized void expandFile(long length) throws IOException {
 		if (this.chunkDataWriter.length() < length) {
-			log.info("########### Pre-Allocating Chunkstore to size " + length
+			SDFSLogger.getLog().info("########### Pre-Allocating Chunkstore to size " + length
 					+ " ###################");
-			log
+			SDFSLogger.getLog()
 					.info("########### Pre-Allocation may take a while ####################################");
 			byte[] FREE = new byte[32768 * 4];
 			Arrays.fill(FREE, (byte) 0);
@@ -387,7 +386,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				this.chunkDataWriter.write(FREE);
 				written = written + FREE.length;
 			}
-			log.info("############ Pre-Allocated Chunkstore to size " + length
+			SDFSLogger.getLog().info("############ Pre-Allocated Chunkstore to size " + length
 					+ "####################");
 		}
 		this.chunkDataWriter.seek(0);
@@ -447,7 +446,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				raf.setLength(origLoc);
 			return true;
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "could not move data from [" + origLoc
+			SDFSLogger.getLog().fatal( "could not move data from [" + origLoc
 					+ "] to [" + newLoc + "]", e);
 			return false;
 		} finally {

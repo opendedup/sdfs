@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
@@ -20,7 +20,7 @@ public class NetworkHCServer {
 
 	static Socket clientSocket = null;
 	static ServerSocket serverSocket = null;
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	private static NioUDPServer udpServer = null;
 
 	// This chat server can accept up to 10 clients' connections
@@ -37,7 +37,7 @@ public class NetworkHCServer {
 			try {
 				Config.parseHubStoreConfigFile(args[0]);
 			} catch (IOException e1) {
-				log.severe("exiting because of an error with the config file");
+				SDFSLogger.getLog().fatal("exiting because of an error with the config file");
 			}
 			init();
 
@@ -60,10 +60,10 @@ public class NetworkHCServer {
 			}
 			serverSocket = new ServerSocket();
 			serverSocket.bind(addr);
-			log.info("listening on " + addr.toString());
+			SDFSLogger.getLog().info("listening on " + addr.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.log(Level.SEVERE, "unable to open network ports", e);
+			SDFSLogger.getLog().fatal( "unable to open network ports", e);
 			System.exit(-1);
 		}
 
@@ -80,7 +80,7 @@ public class NetworkHCServer {
 				clientSocket.setTcpNoDelay(true);
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
-				log.log(Level.SEVERE,"Unable to open port " + e.toString(),e);
+				SDFSLogger.getLog().fatal("Unable to open port " + e.toString(),e);
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
@@ -22,7 +22,7 @@ public class HashChunkService {
 	private static int unComittedChunks;
 	private static int MAX_UNCOMITTEDCHUNKS = 100;
 	private static HashStore hs = null;
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	private static ChunkStoreGCScheduler csGC = null;
 
 	/**
@@ -37,7 +37,7 @@ public class HashChunkService {
 			hs = new HashStore();
 			csGC = new ChunkStoreGCScheduler();
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to start hashstore", e);
+			SDFSLogger.getLog().fatal( "unable to start hashstore", e);
 			System.exit(-1);
 		}
 	}

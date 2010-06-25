@@ -4,16 +4,17 @@ import java.io.File;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
+
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class Volume implements java.io.Serializable {
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	/**
 	 * Represents the mounted volume associated with file system
 	 */
@@ -40,14 +41,14 @@ public class Volume implements java.io.Serializable {
 	public Volume(Element vol) throws IOException {
 
 		File f = new File(vol.getAttribute("path"));
-		log.info("Mounting volume " + f.getPath());
+		SDFSLogger.getLog().info("Mounting volume " + f.getPath());
 		if (!f.exists())
 			f.mkdirs();
 		this.path = f.getPath();
 		capString = vol.getAttribute("capacity");
 		this.capacity = StringUtils.parseSize(capString);
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
-		log.info("Setting volume size to " + this.capacity);
+		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 	}
 
 	public long getCapacity() {

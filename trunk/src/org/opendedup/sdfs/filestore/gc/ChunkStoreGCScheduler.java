@@ -2,8 +2,8 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.quartz.CronTrigger;
@@ -15,13 +15,13 @@ import org.quartz.impl.StdSchedulerFactory;
 
 public class ChunkStoreGCScheduler {
 
-	private static Logger log = Logger.getLogger("sdfs");
+	
 
 	Scheduler sched = null;
 
 	public ChunkStoreGCScheduler() {
 		try {
-			log.info("Scheduling Garbage Collection Jobs");
+			SDFSLogger.getLog().info("Scheduling Garbage Collection Jobs");
 			Properties props = new Properties();
 			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
 			props.setProperty("org.quartz.threadPool.threadCount", "1");
@@ -34,9 +34,9 @@ public class ChunkStoreGCScheduler {
 			cctrigger.setStartTime(TriggerUtils.getEvenMinuteDate(new Date())); 
 			cctrigger.setName("claimChunksTrigger");
 			sched.scheduleJob(ccjobDetail, cctrigger);
-			log.info("Garbage Collection Jobs Scheduled");
+			SDFSLogger.getLog().info("Garbage Collection Jobs Scheduled");
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "Unable to schedule Garbage Collection", e);
+			SDFSLogger.getLog().fatal( "Unable to schedule Garbage Collection", e);
 		}
 	}
 

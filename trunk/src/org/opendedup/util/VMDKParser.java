@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -19,7 +19,7 @@ import org.opendedup.sdfs.io.VMDKData;
 public class VMDKParser {
 	static long gb = 1024 * 1024 * 1024;
 	static long twogb = 2 * 1024 * 1024 * 1024;
-	private transient static Logger log = Logger.getLogger("sdfs");
+	
 
 	public static MetaDataDedupFile writeFile(String path, String fileName,
 			long size) throws IOException, BufferClosedException {
@@ -79,7 +79,7 @@ public class VMDKParser {
 		vmdk.getIOMonitor().setDuplicateBlocks(0);
 		vmdk.sync();
 		ch.close();
-		log.info("Created vmdk of size " + vmdk.length() + " at " + path
+		SDFSLogger.getLog().info("Created vmdk of size " + vmdk.length() + " at " + path
 				+ File.separator + fileName);
 		return vmdk;
 

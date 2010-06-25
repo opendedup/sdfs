@@ -13,8 +13,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -37,7 +37,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	transient public static final String separator = File.separator;
 	transient public static final char pathSeparatorChar = File.pathSeparatorChar;
 	transient public static final char separatorChar = File.separatorChar;
-	transient private static Logger log = Logger.getLogger("sdfs");
+	transient 
 	protected long timeStamp = 0;
 	private long length = 0;
 	private String path = "";
@@ -246,7 +246,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				mf = (MetaDataDedupFile)in.readObject();
 				mf.path = path;
 			} catch (Exception e) {
-				log.log(Level.SEVERE,"unable to de-serialize " +path,e);
+				SDFSLogger.getLog().fatal("unable to de-serialize " +path,e);
 			}finally {
 				if(in != null) {
 					try {
@@ -303,7 +303,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (this.dfGuid == null) {
 			DedupFile df = DedupFileStore.getDedupFile(this);
 			this.dfGuid = df.getGUID();
-			log.finer("No DF EXISTS .... Set dedup file for " + this.getPath()
+			SDFSLogger.getLog().debug("No DF EXISTS .... Set dedup file for " + this.getPath()
 					+ " to " + this.dfGuid);
 			this.sync();
 			return df;
@@ -389,7 +389,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.path = path;
 		File f = new File(path);
 		if (!f.exists()) {
-			log.finer("Creating new MetaFile for " + this.path);
+			SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor();
 			this.owner_id = Main.defaultOwner;
@@ -427,7 +427,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						new FileOutputStream(this.path));
 				out.writeObject(this);
 			} catch (Exception e) {
-				log.log(Level.WARNING, "unable to write file metadata for ["
+				SDFSLogger.getLog().warn( "unable to write file metadata for ["
 						+ this.path + "]", e);
 				return false;
 			}
@@ -583,7 +583,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				this.path = dest;
 				this.unmarshal();
 			} else {
-				log.info("unable to move file");
+				SDFSLogger.getLog().info("unable to move file");
 			}
 			return rename;
 		}

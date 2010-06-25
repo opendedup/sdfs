@@ -1,8 +1,8 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.quartz.CronTrigger;
@@ -13,7 +13,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 public class SDFSGCScheduler {
 
-	private static Logger log = Logger.getLogger("sdfs");
+	
 
 	Scheduler sched = null;
 
@@ -23,7 +23,7 @@ public class SDFSGCScheduler {
 			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
 			props.setProperty("org.quartz.threadPool.threadCount", "1");
 			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(Thread.MIN_PRIORITY));
-			log.info("Scheduling Garbage Collection Jobs for SDFS");
+			SDFSLogger.getLog().info("Scheduling Garbage Collection Jobs for SDFS");
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
@@ -31,9 +31,9 @@ public class SDFSGCScheduler {
 			JobDetail ccjobDetail = new JobDetail("fdisk", null, FDISKJob.class);
 			CronTrigger cctrigger = new CronTrigger("fdiskTrigger","group1", Main.fDkiskSchedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);
-			log.info("Garbage Collection Jobs Scheduled");
+			SDFSLogger.getLog().info("Garbage Collection Jobs Scheduled");
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "Unable to schedule SDFS Garbage Collection", e);
+			SDFSLogger.getLog().fatal( "Unable to schedule SDFS Garbage Collection", e);
 		}
 	}
 

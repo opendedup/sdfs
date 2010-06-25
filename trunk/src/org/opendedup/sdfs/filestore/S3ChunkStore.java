@@ -3,8 +3,8 @@ package org.opendedup.sdfs.filestore;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -32,7 +32,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String name;
 	private S3Bucket s3Bucket = null;
 	S3Service s3Service;
-	private transient static Logger log = Logger.getLogger("sdfs");
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
@@ -43,7 +42,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			this.s3Bucket = s3Service.getBucket(awsAccessKey);
 			if (this.s3Bucket == null) {
 				this.s3Bucket = s3Service.createBucket(awsAccessKey);
-				log.info("created new store " + awsAccessKey);
+				SDFSLogger.getLog().info("created new store " + awsAccessKey);
 			}
 		} catch (S3ServiceException e) {
 			e.printStackTrace();
@@ -119,7 +118,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 
-			log.log(Level.SEVERE, "unable to upload " + hashString, e);
+			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
 			throw new IOException(e.toString());
 		} finally {
 			s3IS.close();
@@ -143,7 +142,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		try {
 			s3Service.deleteObject(s3Bucket, hashString);
 		} catch (S3ServiceException e) {
-			log.log(Level.WARNING, "Unable to delete object " + hashString, e);
+			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
 		}
 
 	}

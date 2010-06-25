@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import gnu.trove.iterator.TLongIterator;
+
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
@@ -17,13 +18,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.NextPrime;
+import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 public class CSByteArrayLongMap implements AbstractMap {
@@ -32,7 +32,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private long size = 0;
 	private ReentrantLock arlock = new ReentrantLock();
 	private ReentrantLock iolock = new ReentrantLock();
-	private static Logger log = Logger.getLogger("sdfs");
 	private byte[] FREE = new byte[24];
 	private byte[] REMOVED = new byte[24];
 	private byte[] BLANKCM = new byte[ChunkData.RAWDL];
@@ -102,15 +101,15 @@ public class CSByteArrayLongMap implements AbstractMap {
 				if (m == null) {
 					int propsize = (int) (size / maps.length);
 					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
-					log.fine("will create byte array of size " + sz + " propsize was " + propsize);
+					SDFSLogger.getLog().debug("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));
 					m = new ByteArrayLongMap(sz, (short) FREE.length);
 					maps[hashRoute] = m;
 				}
 				hashRoutes++;
-				log.fine("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
+				SDFSLogger.getLog().debug("hashroute [" + hashRoute + "] created hr=" + this.hashRoutes);
 			} catch (Exception e) {
-				log.log(Level.SEVERE, "unable to create hashmap. "
+				SDFSLogger.getLog().fatal( "unable to create hashmap. "
 						+ maps.length, e);
 				throw new IOException(e);
 			} finally {
@@ -142,7 +141,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	public synchronized void claimRecords() throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
-		log.info("claiming records");
+		SDFSLogger.getLog().info("claiming records");
 		RandomAccessFile _fs = new RandomAccessFile(this.fileName,
 				this.fileParams);
 		long startTime = System.currentTimeMillis();
@@ -178,7 +177,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} catch (Exception e) {
 
 		}
-		log.info("processed [" + (z) + "] records in ["
+		SDFSLogger.getLog().info("processed [" + (z) + "] records in ["
 				+ (System.currentTimeMillis() - startTime) + "] ms");
 	}
 
@@ -201,9 +200,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 		int freeSl = 0;
 		if (exists) {
 			this.closed = false;
-			log.info("This looks an existing hashtable will repopulate with ["
+			SDFSLogger.getLog().info("This looks an existing hashtable will repopulate with ["
 					+ size + "] entries.");
-			log
+			SDFSLogger.getLog()
 					.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
 			int count = 0;
@@ -220,8 +219,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 					long currentPos = kFc.position();
 					kRaf.read(raw);
 					if (Arrays.equals(raw, BLANKCM)) {
-						log
-								.finer("found free slot at "
+						SDFSLogger.getLog()
+								.debug("found free slot at "
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
 						this.addFreeSolt((currentPos / raw.length)
 								* Main.chunkStorePageSize);
@@ -233,12 +232,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 						 * try { byte[] chkHash =
 						 * HashFunctions.getTigerHashBytes(cm .getData()); if
 						 * (!Arrays.equals(chkHash, cm.getHash())) { corrupt =
-						 * true; log.severe("corrupt data found at " +
+						 * true; SDFSLogger.getLog().fatal("corrupt data found at " +
 						 * cm.getcPos()); cm.setmDelete(true);
 						 * this.flushFullBuffer(); this.kBuf.add(cm);
 						 * this.freeSlots .putLong((currentPos / raw.length)
 						 * Main.chunkStorePageSize); } } catch (Exception e) {
-						 * log.severe("Error while checking and hashing data");
+						 * SDFSLogger.getLog().fatal("Error while checking and hashing data");
 						 * throw new IOException(e); }
 						 */
 						if (!corrupt) {
@@ -250,11 +249,11 @@ public class CSByteArrayLongMap implements AbstractMap {
 							if (!cm.ismDelete()) {
 								if (foundFree) {
 									this.freeValue = value;
-									log.info("found free  key  with value "
+									SDFSLogger.getLog().info("found free  key  with value "
 											+ value);
 								} else if (foundReserved) {
 									this.resValue = value;
-									log.info("found reserve  key  with value "
+									SDFSLogger.getLog().info("found reserve  key  with value "
 											+ value);
 								} else {
 									if (cm.getHash().length > 0) {
@@ -262,8 +261,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 										if(added)
 											this.kSz++;
 									} else {
-										log
-												.finer("found free slot at "
+										SDFSLogger.getLog()
+												.debug("found free slot at "
 														+ ((currentPos / raw.length) * Main.chunkStorePageSize));
 										this
 												.addFreeSolt((currentPos / raw.length)
@@ -280,10 +279,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 			}
 		}
 		System.out.println(" Done Loading ");
-		log.info("########## Finished Loading Hash Database in ["
+		SDFSLogger.getLog().info("########## Finished Loading Hash Database in ["
 				+ (System.currentTimeMillis() - start) / 100
 				+ "] seconds ###########");
-		log.info("loaded [" + kSz + "] into the hashtable [" + this.fileName
+		SDFSLogger.getLog().info("loaded [" + kSz + "] into the hashtable [" + this.fileName
 				+ "] free slots available are [" + freeSl + "] ["
 				+ this.freeSlots.size() + "]");
 		return size;
@@ -305,12 +304,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public synchronized void removeRecords(long time) throws IOException {
-		log.info("Garbage Collection records older than " + new Date(time));
+		SDFSLogger.getLog().info("Garbage Collection records older than " + new Date(time));
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
 			return;
 		} else {
-			log.info("removing free blocks");
+			SDFSLogger.getLog().info("removing free blocks");
 			if (this.isClosed())
 				throw new IOException("Hashtable " + this.fileName
 						+ " is close");
@@ -335,7 +334,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 									cm = null;
 								}
 							} catch (Exception e1) {
-								log.log(Level.WARNING,
+								SDFSLogger.getLog().warn(
 										"unable to access record at "
 												+ _fs.getChannel().position(),
 										e1);
@@ -352,7 +351,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 				}
 
-				log.info("Removed [" + rem + "] records. Free slots ["
+				SDFSLogger.getLog().info("Removed [" + rem + "] records. Free slots ["
 						+ this.freeSlots.size() + "]");
 			} catch (Exception e) {
 			} finally {
@@ -432,7 +431,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				else
 					return -1;
 			} catch (ConcurrentModificationException e) {
-				log.finest("hash table modified");
+				SDFSLogger.getLog().debug("hash table modified");
 				this.iter = this.freeSlots.iterator();
 				long nxt = this.iter.next();
 				this.iter.remove();
@@ -532,7 +531,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (ps != -1) {
 			return ChunkData.getChunk(key, ps);
 		} else {
-			log.info("found no data for key [" + StringUtils.getHexString(key)
+			SDFSLogger.getLog().info("found no data for key [" + StringUtils.getHexString(key)
 					+ "]");
 			return null;
 		}
@@ -602,7 +601,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				return true;
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "error getting record", e);
+			SDFSLogger.getLog().fatal( "error getting record", e);
 			return false;
 		}
 	}

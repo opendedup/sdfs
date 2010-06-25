@@ -7,8 +7,8 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -19,7 +19,7 @@ public class HashFunctionPool {
 	private ArrayList<MessageDigest> activeObjects = new ArrayList<MessageDigest>();
 	private ReentrantLock plock = new ReentrantLock();
 	private ReentrantLock alock = new ReentrantLock();
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	static {
 		Security.addProvider(new BouncyCastleProvider());
 	}
@@ -37,7 +37,7 @@ public class HashFunctionPool {
 			} catch (Exception e) {
 				plock.unlock();
 				e.printStackTrace();
-				log.log(Level.SEVERE,
+				SDFSLogger.getLog().fatal(
 						"unable to instancial Hash Function pool", e);
 
 			} finally {

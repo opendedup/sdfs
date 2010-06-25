@@ -1,6 +1,7 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -37,7 +38,7 @@ public class VolumeConfigWriter {
 	String volume_name = null;
 	String base_path = "/opt/sdfs/" + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
-	String io_log = base_path + File.separator + "io.log";
+	String log = base_path + File.separator + "io.SDFSLogger.getLog()";
 	boolean safe_close = true;
 	boolean safe_sync = false;
 	short write_threads = 16;
@@ -84,7 +85,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
-		this.io_log = this.base_path + File.separator + "io.log";
+		this.log = this.base_path + File.separator + "io.SDFSLogger.getLog()";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
@@ -93,8 +94,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
-		if (cmd.hasOption("io-log")) {
-			this.io_log = cmd.getOptionValue("io-log");
+		if (cmd.hasOption("io-SDFSLogger.getLog()")) {
+			this.log = cmd.getOptionValue("io-SDFSLogger.getLog()");
 		}
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd
@@ -216,7 +217,7 @@ public class VolumeConfigWriter {
 		root.setAttribute("version", Main.version);
 		Element locations = xmldoc.createElement("locations");
 		locations.setAttribute("dedup-db-store", this.dedup_db_store);
-		locations.setAttribute("io-log", this.io_log);
+		locations.setAttribute("io-SDFSLogger.getLog()", this.log);
 		root.appendChild(locations);
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
@@ -300,9 +301,9 @@ public class VolumeConfigWriter {
 								"the folder path to location for the dedup file database.\n Defaults to: \n --base-path + "
 										+ File.separator + "ddb").hasArg()
 						.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("io-log").withDescription(
-				"the file path to location for the io log.\n Defaults to: \n --base-path + "
-						+ File.separator + "io.log").hasArg().withArgName(
+		options.addOption(OptionBuilder.withLongOpt("io-SDFSLogger.getLog()").withDescription(
+				"the file path to location for the io SDFSLogger.getLog().\n Defaults to: \n --base-path + "
+						+ File.separator + "io.SDFSLogger.getLog()").hasArg().withArgName(
 				"PATH").create());
 		options
 				.addOption(OptionBuilder
