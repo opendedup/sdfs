@@ -1,16 +1,16 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
+import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -50,7 +50,6 @@ public class HashStore {
 	
 	// private static ChunkStoreGCScheduler gcSched = new
 	// ChunkStoreGCScheduler();
-	private static Logger log = Logger.getLogger("sdfs");
 	private boolean closed = true;
 	private static byte [] blankHash = null;
 	private static byte [] blankData = null;
@@ -59,7 +58,7 @@ public class HashStore {
 		try {
 			blankHash = HashFunctions.getTigerHashBytes(blankData);
 		} catch (Exception e) {
-			log.log(Level.SEVERE,"unable to hash blank hash",e);
+			SDFSLogger.getLog().fatal("unable to hash blank hash",e);
 		} 
 	}
 
@@ -78,8 +77,8 @@ public class HashStore {
 			e.printStackTrace();
 		}
 		//this.initChunkStore();
-		log.info("Total Entries " +  + bdb.getSize());
-		log.info("Added " + this.name);
+		SDFSLogger.getLog().info("Total Entries " +  + bdb.getSize());
+		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;
 	}
 
@@ -161,12 +160,12 @@ public class HashStore {
 		try {
 			byte[] data = bdb.getData(hash);
 			if(data == null && Arrays.equals(hash,blankHash)) {
-				log.info("found blank data request");
+				SDFSLogger.getLog().info("found blank data request");
 				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
 			}
 			hs = new HashChunk(hash, 0, data.length, data, false);
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to get hash "
+			SDFSLogger.getLog().fatal( "unable to get hash "
 					+ StringUtils.getHexString(hash), e);
 		} finally {
 			// hashlock.unlock();
@@ -206,11 +205,11 @@ public class HashStore {
 			}
 		
 		} catch (IOException e) {
-			log.log(Level.SEVERE, "Unable to commit chunk "
+			SDFSLogger.getLog().fatal( "Unable to commit chunk "
 					+ StringUtils.getHexString(chunk.getName()), e);
 			throw e;
 		} catch (HashtableFullException e) {
-			log.log(Level.SEVERE, "Unable to commit chunk "
+			SDFSLogger.getLog().fatal( "Unable to commit chunk "
 					+ StringUtils.getHexString(chunk.getName()), e);
 			throw e;
 		} 

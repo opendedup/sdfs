@@ -1,13 +1,14 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
+import org.opendedup.util.SDFSLogger;
 
 
 /**
@@ -23,7 +24,6 @@ public class DedupFileStore {
 
 	private static boolean closing = false;
 	// private static ReentrantLock clock = new ReentrantLock();
-	private static Logger log = Logger.getLogger("sdfs");
 	private static OpenFileMonitor openFileMonitor = null;
 	/*
 	 * stores open files in an LRU map. Files will be evicted based on the
@@ -53,13 +53,13 @@ public class DedupFileStore {
 			throws IOException {
 		
 		if (!closing) {
-			log.finer("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
+			SDFSLogger.getLog().debug("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
 			DedupFile df = null;
 			if (mf.getDfGuid() == null) {
 				try {
 					df = new SparseDedupFile(mf);
 
-					log.finer("creating new dedup file for " + mf.getPath());
+					SDFSLogger.getLog().debug("creating new dedup file for " + mf.getPath());
 				} catch (Exception e) {
 
 				}
@@ -91,11 +91,11 @@ public class DedupFileStore {
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
 			if (!openFile.containsKey(df.getGUID())) {
-				log.finer("adding dedupfile");
+				SDFSLogger.getLog().debug("adding dedupfile");
 				if(openFile.size() >= Main.maxOpenFiles)
 					throw new IOException("maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
 				openFile.put(df.getGUID(), df);
-				log.finer("dedupfile cache size is " + openFile.size());
+				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
 			
 			}
 		} else {
@@ -179,7 +179,7 @@ public class DedupFileStore {
 	 * Flushes the write buffers for all open files.
 	 */
 	public static void flushAllFiles() {
-		log.finer("flushing write caches of size " + openFile.size());
+		SDFSLogger.getLog().debug("flushing write caches of size " + openFile.size());
 		Object[] dfs = getArray();
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
@@ -189,6 +189,6 @@ public class DedupFileStore {
 
 			}
 		}
-		log.finer("write caches flushed");
+		SDFSLogger.getLog().debug("write caches flushed");
 	}
 }

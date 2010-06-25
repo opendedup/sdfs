@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -14,14 +15,13 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
 
-	private static Logger log = Logger.getLogger("sdfs");
 	// RandomAccessFile bdbf = null;
 	MappedByteBuffer bdb = null;
 	int arrayLength = 0;
@@ -62,7 +62,7 @@ public class LongByteArrayMap implements AbstractMap {
 		long pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
 		long fLen = ((f.length() * (long) Main.CHUNK_LENGTH) / arrayLength);
 		if (iterPos == 0)
-			log.info("fLen = " + fLen);
+			SDFSLogger.getLog().info("fLen = " + fLen);
 		while (pos <= fLen) {
 			try {
 				try {
@@ -85,7 +85,7 @@ public class LongByteArrayMap implements AbstractMap {
 
 		}
 		if (pos == fLen)
-			log.info("length end " + pos);
+			SDFSLogger.getLog().info("length end " + pos);
 
 		return -1;
 	}
@@ -133,7 +133,7 @@ public class LongByteArrayMap implements AbstractMap {
 					f.getParentFile().mkdirs();
 				}
 				bdbf = new RandomAccessFile(filePath, this.fileParams);
-				log.finer("opening [" + this.filePath + "]");
+				SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
 				if (!fileExists)
 					bdbf.setLength(32768);
 				// initiall allocate 32k
@@ -216,7 +216,7 @@ public class LongByteArrayMap implements AbstractMap {
 			this.bdb.position(fpos);
 			this.bdb.put(data);
 		} catch (BufferOverflowException e) {
-			log.severe("trying to write at " + fpos + " but file length is "
+			SDFSLogger.getLog().fatal("trying to write at " + fpos + " but file length is "
 					+ this.bdb.capacity());
 			throw e;
 		} catch (Exception e) {
@@ -278,7 +278,7 @@ public class LongByteArrayMap implements AbstractMap {
 		} catch (BufferUnderflowException e) {
 			return null;
 		} catch (Exception e) {
-			log.severe("error getting data at " + fpos);
+			SDFSLogger.getLog().fatal("error getting data at " + fpos);
 			throw new IOException(e);
 		} finally {
 			this.hashlock.unlock();

@@ -2,13 +2,14 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.Attributes;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -33,7 +34,7 @@ public class MetaFileStore {
 	// "jdbc:derby:myDB;create=true;user=me;password=mine";
 
 	// A quick lookup table for path to MetaDataDedupFile
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>().concurrencyLevel(Main.writeThreads)
 	.maximumWeightedCapacity(10000).listener(
 			new EvictionListener<String, MetaDataDedupFile>() {
@@ -48,7 +49,7 @@ public class MetaFileStore {
 	
 	static {
 		if(Main.version.startsWith("0.8")) {
-			log.severe("Incompatible volume must be at least version 0.9.0 current volume vesion is [" + Main.version + "]");
+			SDFSLogger.getLog().fatal("Incompatible volume must be at least version 0.9.0 current volume vesion is [" + Main.version + "]");
 			System.exit(-1);
 		}
 			
@@ -145,11 +146,11 @@ public class MetaFileStore {
 				buf.unmarshal();
 				z++;
 			}
-			log.finer("flushed " + z + " files ");
+			SDFSLogger.getLog().debug("flushed " + z + " files ");
 			//recman.commit();
 			return true;
 		} catch (Exception e) {
-			log.log(Level.SEVERE,"unable to commit transaction",e);
+			SDFSLogger.getLog().fatal("unable to commit transaction",e);
 		}
 		return false;
 	}
@@ -192,15 +193,15 @@ public class MetaFileStore {
 				deleted = mf.deleteStub();
 				Main.volume.updateCurrentSize(-1 * mf.length());
 				if (!deleted) {
-					log.info("could not delete " + mf.getPath());
+					SDFSLogger.getLog().info("could not delete " + mf.getPath());
 					return deleted;
 				}
 			}
 		} catch (Exception e) {
 			if (mf != null)
-				log.log(Level.FINEST, "unable to remove " + path, e);
+				SDFSLogger.getLog().debug( "unable to remove " + path, e);
 			if (mf == null)
-				log.log(Level.FINEST, "unable to remove  because [" + path
+				SDFSLogger.getLog().debug( "unable to remove  because [" + path
 						+ "] is null");
 		}
 		mf = null;

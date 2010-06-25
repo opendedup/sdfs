@@ -2,7 +2,7 @@ package org.opendedup.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
+
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -12,7 +12,7 @@ import java.util.zip.Inflater;
 
 public class CompressionUtils {
 	@SuppressWarnings("unused")
-	private static Logger log = Logger.getLogger("sdfs");
+	
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression

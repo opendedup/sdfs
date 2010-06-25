@@ -1,17 +1,16 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.SDFSLogger;
 
 public class FDisk {
-        private static Logger log = Logger.getLogger("sdfs");
         private long files = 0;
         private long corruptFiles = 0;
 
@@ -19,7 +18,7 @@ public class FDisk {
                 long start = System.currentTimeMillis();
                 File f = new File(Main.dedupDBStore);
                 this.traverse(f);
-                log.info("took [" + (System.currentTimeMillis() - start) / 1000
+                SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / 1000
                                 + "] seconds to check [" + files + "]. Found ["
                                 + this.corruptFiles + "] corrupt files");
         }
@@ -36,7 +35,7 @@ public class FDisk {
                                 try {
                                         this.checkDedupFile(dir);
                                 } catch (Exception e) {
-                                        log.log(Level.WARNING, "error traversing for FDISK", e);
+                                        SDFSLogger.getLog().warn("error traversing for FDISK", e);
                                 }
                         }
                 }
@@ -64,10 +63,10 @@ public class FDisk {
                         }
                         if (corruption) {
                                 this.corruptFiles++;
-                                log.warning("map file " + mapFile.getPath() + " is corrupt");
+                                SDFSLogger.getLog().warn("map file " + mapFile.getPath() + " is corrupt");
                         }
                 } catch (Exception e) {
-                        log.log(Level.WARNING, "error while checking file ["
+                        SDFSLogger.getLog().warn("error while checking file ["
                                         + mapFile.getPath() + "]", e);
                 } finally {
                         mp.close();

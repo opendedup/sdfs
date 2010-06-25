@@ -1,8 +1,8 @@
 package org.opendedup.util;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
@@ -10,7 +10,7 @@ public class PoolThread extends Thread {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
-	private transient static Logger log = Logger.getLogger("sdfs");
+	
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -31,8 +31,8 @@ public class PoolThread extends Thread {
 					}
 				}
 			} catch (Exception e) {
-				log.log(Level.SEVERE, "unable to execute thread", e);
-				// log or otherwise report exception,
+				SDFSLogger.getLog().fatal( "unable to execute thread", e);
+				// SDFSLogger.getLog() or otherwise report exception,
 				// but keep pool thread alive.
 			}
 		}

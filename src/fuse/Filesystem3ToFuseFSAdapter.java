@@ -9,6 +9,7 @@
 package fuse;
 
 import java.nio.BufferOverflowException;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -17,7 +18,7 @@ import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
+import org.apache.commons.logging.*;
 
 /**
  * This is an adapter that implements fuse.FuseFS byte level API and delegates

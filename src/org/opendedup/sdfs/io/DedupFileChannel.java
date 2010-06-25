@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 
@@ -22,8 +22,7 @@ public class DedupFileChannel {
 	private DedupFile df;
 	// The MetaDataDedupFile associated with this file channel.
 	public MetaDataDedupFile mf;
-	private static Logger log = Logger.getLogger(DedupFileChannel.class
-			.getName());
+
 	private boolean writtenTo = false;
 	private long dups;
 	private long currentPosition = 0;
@@ -46,7 +45,7 @@ public class DedupFileChannel {
 			mf.sync();
 			df.sync();
 		}
-		log.log(Level.FINER, "Initializing Cached File " + mf.getPath());
+		SDFSLogger.getLog().debug( "Initializing Cached File " + mf.getPath());
 	}
 
 	public boolean isClosed() {
@@ -76,7 +75,7 @@ public class DedupFileChannel {
 	 * @exception IOException
 	 */
 	public synchronized void truncateFile(long siz) throws IOException {
-		log.finest("Truncating File");
+		SDFSLogger.getLog().debug("Truncating File");
 		if (siz < mf.length()) {
 			df.truncate(siz);
 			/*
@@ -85,7 +84,7 @@ public class DedupFileChannel {
 			DedupChunk nextDk = df.getHash(writeBuffer.getEndPosition() + 1,
 					false);
 			while (nextDk != null) {
-				log.finest("Removing chunk at position "
+				SDFSLogger.getLog().debug("Removing chunk at position "
 						+ nextDk.getFilePosition());
 				df.removeHash(nextDk.getFilePosition());
 				nextDk = df.getHash(nextDk.getFilePosition()
@@ -213,7 +212,7 @@ public class DedupFileChannel {
 				// Find out where to write to in the buffer
 				int startPos = (int) (_cp - writeBuffer.getFilePosition());
 				if (startPos < 0)
-					log.severe("Error " + _cp + " "
+					SDFSLogger.getLog().fatal("Error " + _cp + " "
 							+ writeBuffer.getFilePosition());
 				// Find out how many total bytes there are left to write in
 				// this
@@ -248,7 +247,7 @@ public class DedupFileChannel {
 			writeFile(bbuf, len, pos, offset);
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.log(Level.SEVERE, "error while writing to " + this.mf.getPath()
+			SDFSLogger.getLog().fatal( "error while writing to " + this.mf.getPath()
 					+ " " + e.toString(), e);
 			// TODO : fix rollback
 			// df.rollBack();
@@ -365,7 +364,7 @@ public class DedupFileChannel {
 						if ((endPos) <= readBuffer.getLength()) {
 							buf.put(readBuffer.getChunk(), startPos, bytesLeft);
 							mf.getIOMonitor().addBytesRead(bytesLeft);
-							// log.finest("Read " + bytesLeft + " bytes");
+							// SDFSLogger.getLog().debug("Read " + bytesLeft + " bytes");
 							read = read + bytesLeft;
 							bytesLeft = 0;
 						} else {
@@ -378,8 +377,8 @@ public class DedupFileChannel {
 						}
 					}
 					catch (IOException e) {
-						log.log(Level.SEVERE, "Error while reading buffer ", e);
-						log.severe("Error Reading Buffer "
+						SDFSLogger.getLog().fatal( "Error while reading buffer ", e);
+						SDFSLogger.getLog().fatal("Error Reading Buffer "
 								+ readBuffer.getHash() + " start position ["
 								+ startPos + "] " + "end position [" + endPos
 								+ "] bytes left [" + bytesLeft

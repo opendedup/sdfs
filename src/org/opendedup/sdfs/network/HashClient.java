@@ -15,8 +15,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServer;
@@ -30,7 +30,7 @@ public class HashClient {
 	private boolean closed = false;
 	private HCServer server;
 	private String name = "";
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	private ReentrantLock lock = new ReentrantLock();
 
 	// private LRUMap existsBuffers = new LRUMap(10);
@@ -56,7 +56,7 @@ public class HashClient {
 		// Try to open a socket on a given host and port
 		// Try to open input and output streams
 		try {
-			log.fine("Connecting to server " + server.getHostName() + " on port " + server.getPort());
+			SDFSLogger.getLog().debug("Connecting to server " + server.getHostName() + " on port " + server.getPort());
 			clientSocket = new Socket(server.getHostName(), server.getPort());
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
@@ -70,10 +70,10 @@ public class HashClient {
 			inReader.readLine();
 			this.closed = false;
 		} catch (UnknownHostException e) {
-			log.severe("Don't know about host " + server);
+			SDFSLogger.getLog().fatal("Don't know about host " + server);
 			this.closed = true;
 		} catch (Exception e) {
-			log.log(Level.SEVERE,"Couldn't get I/O for the connection to the host",e);
+			SDFSLogger.getLog().fatal("Couldn't get I/O for the connection to the host",e);
 			this.closed = true;
 		}
 	}
@@ -91,7 +91,7 @@ public class HashClient {
 				this.openConnection();
 				cmd.executeCmd(is, os);
 			} catch (Exception e1) {
-				log.log(Level.SEVERE, "unable to execute command", e);
+				SDFSLogger.getLog().fatal( "unable to execute command", e);
 				throw new IOException("unable to execute command");
 			}
 		} finally {

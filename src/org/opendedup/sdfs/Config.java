@@ -1,9 +1,8 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,13 +20,13 @@ import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.servers.HCServer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class Config {
-	private static Logger log = Logger.getLogger("sdfs");
 
 	/**
 	 * parse the hubstore config file
@@ -49,7 +48,7 @@ public class Config {
 				Main.version = version;
 			}
 			
-			log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
+			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
 			Element network = (Element) doc.getElementsByTagName("network")
 					.item(0);
 			Main.serverHostName = network.getAttribute("hostname");
@@ -58,7 +57,7 @@ public class Config {
 			Main.enableNetworkChunkStore = true;
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
-			log.info("parsing folder locations");
+			SDFSLogger.getLog().info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
 			Main.hashDBStore = locations.getAttribute("hash-db-store");;
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
@@ -82,18 +81,18 @@ public class Config {
 			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
-				log.info("creating chunk store at " + Main.chunkStore);
+				SDFSLogger.getLog().info("creating chunk store at " + Main.chunkStore);
 				f.mkdirs();
 			}
 
 			f = new File(Main.hashDBStore);
 			if (!f.exists()) {
-				log.info("creating hash database store at " + Main.chunkStore);
+				SDFSLogger.getLog().info("creating hash database store at " + Main.chunkStore);
 				f.mkdirs();
 			}
 
 		} catch (Exception e) {
-			log.log(Level.SEVERE,"unable to parse config file ["+fileName+"]", e);
+			SDFSLogger.getLog().fatal("unable to parse config file ["+fileName+"]", e);
 			throw new IOException(e);
 		}
 	}
@@ -119,12 +118,12 @@ public class Config {
 		}
 		
 		Main.version = version;
-		log.info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
+		SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations")
 				.item(0);
-		log.info("parsing folder locations");
+		SDFSLogger.getLog().info("parsing folder locations");
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
-		Main.ioLogFile = locations.getAttribute("io-log");
+		Main.ioLogFile = locations.getAttribute("io-SDFSLogger.getLog()");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
@@ -162,14 +161,14 @@ public class Config {
 				.getAttribute("default-folder"));
 		Main.chunkStorePageSize = Main.CHUNK_LENGTH;
 		
-		log.fine("parsing local chunkstore parameters");
+		SDFSLogger.getLog().debug("parsing local chunkstore parameters");
 		Element localChunkStore = (Element) doc.getElementsByTagName(
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
 		
 		if (Main.chunkStoreLocal) {
-			log.fine("this is a local chunkstore");
+			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
 			// Main.chunkStoreMetaData =
 			// localChunkStore.getAttribute("chunk-store-metadata");
@@ -188,7 +187,7 @@ public class Config {
 				 Main.serverHostName = networkcs.getAttribute("listen-ip");
 				 Main.serverPort = Integer.parseInt(networkcs.getAttribute("port"));
 			 }
-			log.info("######### Will allocate " + Main.chunkStoreAllocationSize
+			SDFSLogger.getLog().info("######### Will allocate " + Main.chunkStoreAllocationSize
 					+ " in chunkstore ##############");
 		}
 		else {
@@ -248,24 +247,24 @@ public class Config {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
-			log.log(Level.SEVERE, "unable to parse config file [" + fileName + "]",e1);
+			SDFSLogger.getLog().fatal( "unable to parse config file [" + fileName + "]",e1);
 			throw new IOException(e1);
 		}
 		Document doc = null;
 		try {
 			doc = db.parse(file);
 		} catch (SAXException e1) {
-			log.log(Level.SEVERE, "unable to parse config file [" + fileName + "]",e1);
+			SDFSLogger.getLog().fatal( "unable to parse config file [" + fileName + "]",e1);
 			throw new IOException(e1);
 		}
 		doc.getDocumentElement().normalize();
-		log.info("Parsing " + doc.getDocumentElement().getNodeName());
+		SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName());
 		Element servers = (Element) doc.getElementsByTagName("servers").item(0);
 
-		log.info("parsing Servers");
+		SDFSLogger.getLog().info("parsing Servers");
 		NodeList server = servers.getElementsByTagName("server");
 		for (int s = 0; s < server.getLength(); s++) {
-			log.info("Connection to  Servers [" + server.getLength() + "]");
+			SDFSLogger.getLog().info("Connection to  Servers [" + server.getLength() + "]");
 			Element _server = (Element) server.item(s);
 			HCServer hcs = new HCServer(_server.getAttribute("host").trim(),
 					Integer.parseInt(_server.getAttribute("port").trim()),
@@ -281,11 +280,11 @@ public class Config {
 						"name").trim(), Integer.parseInt(_server
 						.getAttribute("network-threads"))));
 			} catch (Exception e) {
-				log.log(Level.WARNING, "unable to connect to server "
+				SDFSLogger.getLog().warn( "unable to connect to server "
 						+ _server.getAttribute("name").trim(), e);
 				throw new IOException("unable to connect to server");
 			}
-			log.info("Added Server " + _server.getAttribute("name"));
+			SDFSLogger.getLog().info("Added Server " + _server.getAttribute("name"));
 		}
 		Element _c = (Element) doc.getElementsByTagName("chunks").item(0);
 		NodeList chunks = _c.getElementsByTagName("chunk");

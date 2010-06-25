@@ -1,6 +1,6 @@
 package org.opendedup.sdfs.servers;
 
-import java.util.logging.Logger;
+
 
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
@@ -9,17 +9,18 @@ import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 import org.opendedup.sdfs.network.NetworkHCServer;
+import org.opendedup.util.SDFSLogger;
 
 public class SDFSService {
 	String configFile;
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	private SDFSGCScheduler gc = null;
 
 	public SDFSService(String configFile) {
 
 		this.configFile = configFile;
-		log.info("Running SDFS Version " + Main.version);
-		log.info("reading config file = " + this.configFile);
+		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
+		SDFSLogger.getLog().info("reading config file = " + this.configFile);
 	}
 
 	public void start() throws Exception {

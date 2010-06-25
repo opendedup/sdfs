@@ -6,8 +6,8 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -35,7 +35,7 @@ public class NioUDPServer implements Runnable {
 	int datagramSize = 36;
 
 	private boolean closed = false;
-	private transient static Logger log = Logger.getLogger("sdfs");
+	
 
 	NioUDPServer() {
 		Thread th = new Thread(this);
@@ -54,7 +54,7 @@ public class NioUDPServer implements Runnable {
 
 	public void run() {
 		try {
-			log.info("Starting UDP Server");
+			SDFSLogger.getLog().info("Starting UDP Server");
 			InetSocketAddress theInetSocketAddress = new InetSocketAddress(
 					Main.serverHostName, Main.serverPort);
 
@@ -72,7 +72,7 @@ public class NioUDPServer implements Runnable {
 			// datagrams on the DatagramChannel
 			theDatagramChannel.register(theSelector, SelectionKey.OP_READ);
 
-			log.info("UDP Server Started on " + theInetSocketAddress);
+			SDFSLogger.getLog().info("UDP Server Started on " + theInetSocketAddress);
 
 			// send and read concurrently, but do not block on read:
 
@@ -114,7 +114,7 @@ public class NioUDPServer implements Runnable {
 								}
 
 							} catch (Exception e) {
-								log.log(Level.WARNING,
+								SDFSLogger.getLog().warn(
 										"unable to process hash request", e);
 							} finally {
 								iter.remove();
@@ -123,14 +123,14 @@ public class NioUDPServer implements Runnable {
 							}
 						}
 					} catch (Exception e) {
-						log.log(Level.WARNING,
+						SDFSLogger.getLog().warn(
 								"unable to process hash request", e);
 					}
 
 				}
 			}
 		} catch (Exception e) {
-			log.log(Level.SEVERE, "unable to run udp server", e);
+			SDFSLogger.getLog().fatal( "unable to run udp server", e);
 			return;
 		}
 

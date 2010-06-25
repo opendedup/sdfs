@@ -33,16 +33,16 @@ public class Main {
 	 */
 	//public static String metaDBStore = "/opt/dedup/jdb";
 	/**
-	 * The location where the IO stats log file will be held. The IO log file is
+	 * The location where the IO stats SDFSLogger.getLog() file will be held. The IO SDFSLogger.getLog() file is
 	 * used to record IO stats at specific intervals. This is used on the client
 	 * and chunk store.
 	 */
-	public static String ioLogFile = "/opt/dedup/iolog.log";
+	public static String ioLogFile = "/opt/dedup/ioSDFSLogger.getLog().SDFSLogger.getLog()";
 	/**
-	 * The location where debug and system logs are kept. This is used on the
+	 * The location where debug and system SDFSLogger.getLog()s are kept. This is used on the
 	 * client and chunk store.
 	 */
-	public static String logLocation = "/var/log/dedup/";
+	public static String logLocation = "/var/SDFSLogger.getLog()/dedup/";
 	/**
 	 * The chunk size used for deduplication of incoming data. This is used on
 	 * the client.

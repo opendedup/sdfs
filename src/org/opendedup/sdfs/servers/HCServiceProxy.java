@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -19,7 +19,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
-	private static Logger log = Logger.getLogger("sdfs");
+	
 	public static HashMap<String, HashClientPool> writeServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
@@ -113,7 +113,7 @@ public class HCServiceProxy {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
 					} catch (Exception e) {
-						log.log(Level.WARNING, "unable to use hashclient", e);
+						SDFSLogger.getLog().warn( "unable to use hashclient", e);
 						hc.close();
 						hc.openConnection();
 						hc.writeChunk(hash, aContents, 0, len);
@@ -121,7 +121,7 @@ public class HCServiceProxy {
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
-				log.log(Level.SEVERE, "Unable to write chunk " + hash, e1);
+				SDFSLogger.getLog().fatal( "Unable to write chunk " + hash, e1);
 				throw new IOException("Unable to write chunk " + hash);
 			} finally {
 				if (hc != null)
@@ -151,7 +151,7 @@ public class HCServiceProxy {
 				db = StringUtils.getHexString(hashRoute);
 				hc = getWriteHashClient(db);
 			} catch (Exception e1) {
-				log.log(Level.SEVERE, "unable to execute find hash for "
+				SDFSLogger.getLog().fatal( "unable to execute find hash for "
 						+ hashStr);
 				throw new IOException(e1);
 			}
@@ -168,9 +168,7 @@ public class HCServiceProxy {
 					returnObject(db, hc);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					log
-							.log(
-									Level.SEVERE,
+					SDFSLogger.getLog().fatal(
 									"unable to return network thread object to pool",
 									e);
 				}
@@ -223,7 +221,7 @@ public class HCServiceProxy {
 						break;
 					} else if (z > Main.multiReadTimeout) {
 						if (Main.multiReadTimeout > 0)
-							log.info("Timeout waiting for read " + hashStr);
+							SDFSLogger.getLog().info("Timeout waiting for read " + hashStr);
 						readingBuffers.remove(hashStr);
 						break;
 					}
@@ -253,7 +251,7 @@ public class HCServiceProxy {
 
 				return data;
 			} catch (Exception e) {
-				log.log(Level.WARNING, "Unable to fetch buffer " + hashStr, e);
+				SDFSLogger.getLog().warn( "Unable to fetch buffer " + hashStr, e);
 				throw new IOException("Unable to fetch buffer " + hashStr);
 			} finally {
 				if (hc != null)

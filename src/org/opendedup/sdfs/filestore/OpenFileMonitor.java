@@ -2,8 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.io.DedupFile;
 
@@ -23,7 +23,7 @@ public class OpenFileMonitor implements Runnable {
 	int maxInactive = 900000;
 	boolean closed = false;
 	Thread th = null;
-	private static Logger log = Logger.getLogger("sdfs");
+	
 
 	/**
 	 * Instantiates the OpenFileMonitor
@@ -60,7 +60,7 @@ public class OpenFileMonitor implements Runnable {
 							if(df != null)
 								df.forceClose();
 						} catch (Exception e) {
-							log.log(Level.WARNING, "Unable close file for "
+							SDFSLogger.getLog().warn( "Unable close file for "
 									+ df.getMetaFile().getPath(), e);
 						}
 					} 
@@ -76,7 +76,7 @@ public class OpenFileMonitor implements Runnable {
 				
 			} 
 			catch (Exception e) {
-				log.log(Level.WARNING, "Unable check files", e);
+				SDFSLogger.getLog().warn( "Unable check files", e);
 			}
 		}
 	}

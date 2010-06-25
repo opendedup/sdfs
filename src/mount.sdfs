@@ -1,4 +1,4 @@
-/usr/lib/jvm/jdk/bin/java -agentlib:tijmp -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
+/usr/lib/jvm/jdk/bin/java -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
  -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
   -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+AggressiveOpts  \
   -XX:+UseCompressedOops \

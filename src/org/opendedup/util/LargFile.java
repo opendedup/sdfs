@@ -11,7 +11,7 @@ public class LargFile {
 	public static void writeFile(String path, int size,int bs) throws IOException {
 		long len = 1024L * 1024L * 1024L * size;
 		long sz = 0;
-		File log = new File(path+".log");
+		File log = new File(path+"log");
 		File f = new File(path);
 		java.io.FileWriter writer = new FileWriter(log);
 		FileOutputStream str = new FileOutputStream(f, true);

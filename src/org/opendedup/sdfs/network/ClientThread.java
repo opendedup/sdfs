@@ -10,8 +10,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.opendedup.util.SDFSLogger;
+
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -34,11 +34,11 @@ class ClientThread extends Thread {
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	private static Logger log = Logger.getLogger("sdfs");
+	
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
-		log.finer("Client Threads is " + clients.size());
+		SDFSLogger.getLog().debug("Client Threads is " + clients.size());
 		addClient(this);
 	}
 
@@ -68,7 +68,7 @@ class ClientThread extends Thread {
 				try {
 					byte cmd = is.readByte();
 					if (cmd == NetworkCMDS.QUIT_CMD) {
-						log.info("Quiting Client Network Thread");
+						SDFSLogger.getLog().info("Quiting Client Network Thread");
 						break;
 					}
 					if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
@@ -171,7 +171,7 @@ class ClientThread extends Thread {
 								}
 							}
 						} catch (NullPointerException e) {
-							log.warning("chunk "
+							SDFSLogger.getLog().warn("chunk "
 									+ StringUtils.getHexString(hash)
 									+ " does not exist");
 							try {
@@ -204,7 +204,7 @@ class ClientThread extends Thread {
 					}
 
 				} catch (Exception e) {
-					log.log(Level.FINEST, "unable to write data", e);
+					SDFSLogger.getLog().debug( "unable to write data", e);
 					try {
 						reader.close();
 					} catch (Exception e1) {

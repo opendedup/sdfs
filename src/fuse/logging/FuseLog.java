@@ -1,6 +1,8 @@
 package fuse.logging;
 
 import java.io.PrintStream;
+
+
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ public class FuseLog implements Log {
 		trace = debug = info = warn = error = fatal = out;
 	}
 
-	public static final String LEVEL_PREFIX = "fuse.logging.level";
+	public static final String LEVEL_PREFIX = "fuse.SDFSLogger.getLog()ging.level";
 
 	private static final int LEVEL_TRACE = 0;
 	private static final int LEVEL_DEBUG = 1;
@@ -122,7 +124,7 @@ public class FuseLog implements Log {
 	}
 
 	//
-	// logging routine
+	// SDFSLogger.getLog()ging routine
 
 	private void _log(int levelValue, PrintStream stream, Object object,
 			Throwable throwable) {
@@ -163,7 +165,7 @@ public class FuseLog implements Log {
 
 					if (levelValue < 0)
 						throw new IllegalArgumentException(
-								"Invalid logging level specified for System property: "
+								"Invalid SDFSLogger.getLog()ging level specified for System property: "
 										+ propName + ": " + levelName);
 
 					name2levelMap.put(levelKey, new Integer(levelValue));
