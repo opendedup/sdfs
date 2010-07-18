@@ -6,7 +6,6 @@ public class SDFSLogger {
 
 	private static Log log = LogFactory.getLog("sdfs");
 	
-	
 	public static Log getLog() {
 		return log;
 	}

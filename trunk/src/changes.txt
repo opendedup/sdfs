@@ -1,3 +1,7 @@
+Version 0.9.3 7/18/2010
+	Fixes
+	* Fixed Verbose Logging. All logging is not outputted to log4j.
+	 
 Version 0.9.2 5/2/2010
 	Fixes	
 	* Major Bug Fixed that removed data after time through garbage collection. All users should update to this release immediately.

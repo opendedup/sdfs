@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,7 +65,7 @@ public class SDFSCmds {
 		RandomGUID.getGuid(),
 		"\"get the status if a specific command e.g. to get the status of"
 				+ " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
-		"\"Flush write cache for specificed file <unique-command-id>\"",
+		"\"Flush write cachefor specificed file <unique-command-id>\"",
 		"\"Flush write cache for all files\"",
 		"\"checks if the file is open <unique-command-id>\"", "", "", "", "",
 		"", "", "", "", "", "","","","",""};
