@@ -403,8 +403,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				if (MetaFileStore.removeMetaFile(f.getPath()))
 					return 0;
 				else {
-					log.warn("unable to delete folder " + f.getPath());
-					throw new FuseException().initErrno(FuseException.ENOSYS);
+					log.debug("unable to delete folder " + f.getPath());
+					throw new FuseException().initErrno(FuseException.ENOTEMPTY);
 				}
 			}
 		}
@@ -441,7 +441,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int truncate(String path, long size) throws FuseException {
-		log.info("tuncate");
 		try {
 			DedupFileChannel ch = this.getFileChannel(path);
 			ch.truncateFile(size);
@@ -505,7 +504,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		File _f = new File(mountedVolume + path);
 		if (!_f.exists()) {
 			_f = null;
-			log.info("No such node");
+			log.debug("No such node");
 			throw new FuseException().initErrno(FuseException.ENOENT);
 		}
 		return _f;
@@ -585,7 +584,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 				String val = mf.getXAttribute(name);
 				if (val != null) {
-					log.info("val=" + val);
+					log.debug("val=" + val);
 					dst.put(val.getBytes());
 				} else
 					throw new FuseException().initErrno(FuseException.ENODATA);

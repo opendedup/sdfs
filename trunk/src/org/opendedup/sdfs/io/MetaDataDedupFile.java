@@ -37,7 +37,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	transient public static final String separator = File.separator;
 	transient public static final char pathSeparatorChar = File.pathSeparatorChar;
 	transient public static final char separatorChar = File.separatorChar;
-	transient 
 	protected long timeStamp = 0;
 	private long length = 0;
 	private String path = "";
@@ -766,7 +765,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return lastAccessed;
 	}
 
-	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
 		this.timeStamp = in.readLong();
@@ -808,6 +806,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		//group id is ignored
 		in.readInt();
 		byte[] hmb = new byte[in.readInt()];
+		in.read(hmb);
 		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
 		this.dedup = in.readBoolean();
 	}
@@ -850,5 +849,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		out.writeInt(hmb.length);
 		out.write(hmb);
 		out.writeBoolean(dedup);
+		
 	}
 }
