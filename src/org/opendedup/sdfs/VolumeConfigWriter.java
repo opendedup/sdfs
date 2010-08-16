@@ -38,7 +38,7 @@ public class VolumeConfigWriter {
 	String volume_name = null;
 	String base_path = "/opt/sdfs/" + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
-	String log = base_path + File.separator + "io.SDFSLogger.getLog()";
+	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
 	boolean safe_sync = false;
 	short write_threads = 16;
@@ -85,7 +85,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
-		this.log = this.base_path + File.separator + "io.SDFSLogger.getLog()";
+		this.io_log = this.base_path + File.separator + "io.SDFSLogger.getLog()";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
@@ -95,7 +95,7 @@ public class VolumeConfigWriter {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
 		if (cmd.hasOption("io-SDFSLogger.getLog()")) {
-			this.log = cmd.getOptionValue("io-SDFSLogger.getLog()");
+			this.io_log = cmd.getOptionValue("io-SDFSLogger.getLog()");
 		}
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd
@@ -217,7 +217,7 @@ public class VolumeConfigWriter {
 		root.setAttribute("version", Main.version);
 		Element locations = xmldoc.createElement("locations");
 		locations.setAttribute("dedup-db-store", this.dedup_db_store);
-		locations.setAttribute("io-SDFSLogger.getLog()", this.log);
+		locations.setAttribute("io-log", this.io_log);
 		root.appendChild(locations);
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
@@ -488,8 +488,10 @@ public class VolumeConfigWriter {
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
+			
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}

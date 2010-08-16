@@ -8,7 +8,7 @@ import org.opendedup.sdfs.io.Volume;
  * 
  */
 public class Main {
-	public static String version = "0.9.2";
+	public static String version = "0.9.3";
 	// public static String target = "/opt/dedup";
 	/**
 	 * The location where the actual blocks of deduplicated data will be

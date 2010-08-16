@@ -172,7 +172,9 @@ public class MetaFileStore {
 					LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
 			if(isDir) {
 				File ps = new File(path);
+				/*
 				File[] files = ps.listFiles();
+				
 				for (int i = 0; i < files.length; i++) {
 					if (files[i].isDirectory()) {
 						removeMetaFile(files[i].getPath());
@@ -180,6 +182,7 @@ public class MetaFileStore {
 						files[i].delete();
 					}
 				}
+				*/
 				return (ps.delete());
 			}
 			if (isSymlink) {
