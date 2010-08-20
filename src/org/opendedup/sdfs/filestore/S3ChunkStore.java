@@ -48,6 +48,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			e.printStackTrace();
 			throw new IOException(e.toString());
 		}
+		
 	}
 
 	public long bytesRead() {
@@ -117,7 +118,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 			s3Service.putObject(s3Bucket, s3Object);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-
 			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
 			throw new IOException(e.toString());
 		} finally {
@@ -135,6 +135,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		System.out.println(outStr);
 	}
 
+	
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {

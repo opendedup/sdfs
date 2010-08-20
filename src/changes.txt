@@ -1,6 +1,6 @@
 Version 0.9.3 8/15/2010
 	Fixes
-	* Fixed Verbose Logging. All logging is not outputted to log4j.
+	* Fixed Verbose Logging. All logging is now outputted to log4j.
 	* Fixed Nonempry dirs deleted by rmdir
 	* Fixed extended attributes and dedupAll bit not being read from file meta-data
 	

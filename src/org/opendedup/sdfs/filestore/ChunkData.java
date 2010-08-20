@@ -29,10 +29,11 @@ public class ChunkData {
 	private int cLen = 0;
 	private long cPos = 0;
 	private byte[] chunk = null;
-	private static AbstractChunkStore fileStore = new FileChunkStore("chunks");
+	private static AbstractChunkStore fileStore = null;
 	private static byte [] blankHash = null;;
 
 	static {
+		fileStore = new FileChunkStore("chunks");
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
 			blankHash = HashFunctions.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
