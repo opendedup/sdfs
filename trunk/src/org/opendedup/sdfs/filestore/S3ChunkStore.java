@@ -145,7 +145,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} catch (S3ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
 		}
-
 	}
 
 	@Override

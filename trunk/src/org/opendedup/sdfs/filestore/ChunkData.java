@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
+import org.opendedup.util.SDFSLogger;
+import org.opendedup.util.StringUtils;
 
 /**
  * 
@@ -33,6 +35,14 @@ public class ChunkData {
 	private static byte [] blankHash = null;;
 
 	static {
+		if(Main.AWSChunkStore)
+			try {
+				fileStore = new S3ChunkStore("chunks");
+			} catch (IOException e1) {
+				SDFSLogger.getLog().fatal("Inable to initiate S3 Chunk Store",e1);
+				SDFSLogger.getLog().fatal("Exiting");
+				System.exit(-1);
+			}
 		fileStore = new FileChunkStore("chunks");
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
@@ -117,6 +127,13 @@ public class ChunkData {
 
 	public void setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
+		if(this.mDelete && Main.AWSChunkStore) {
+			try {
+				fileStore.deleteChunk(this.hash,0, 0);
+			} catch (IOException e) {
+				SDFSLogger.getLog().error("Unable to remove hash [" + StringUtils.getHexString(this.hash) + "]",e);
+			}
+		}
 	}
 
 	public long getLastClaimed() {
