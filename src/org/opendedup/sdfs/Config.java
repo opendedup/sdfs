@@ -189,6 +189,13 @@ public class Config {
 			 }
 			SDFSLogger.getLog().info("######### Will allocate " + Main.chunkStoreAllocationSize
 					+ " in chunkstore ##############");
+			int awsSz = doc.getElementsByTagName("aws").getLength();
+			if (awsSz > 0) {
+				Main.AWSChunkStore = true;
+				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+				Main.awsAccessKey = aws.getAttribute("aws-access-key");
+				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
+			}
 		}
 		else {
 			String routingConfig = localChunkStore.getAttribute("routing-config");
