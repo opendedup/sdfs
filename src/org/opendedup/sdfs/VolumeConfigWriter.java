@@ -64,6 +64,12 @@ public class VolumeConfigWriter {
 	String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 0 0/2 * * ?";
 	int remove_if_older_than = 6;
+	boolean awsEnabled = false;
+	String awsAccessKey = "";
+	String awsSecretKey = "";
+	String awsBucketName = "";
+	int chunk_store_read_cache= Main.chunkStorePageCache;
+	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -85,7 +91,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
-		this.io_log = this.base_path + File.separator + "io.SDFSLogger.getLog()";
+		this.io_log = this.base_path + File.separator
+				+ "io.SDFSLogger.getLog()";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
@@ -142,7 +149,8 @@ public class VolumeConfigWriter {
 					.getOptionValue("io-meta-file-cache"));
 		}
 		if (cmd.hasOption("io-claim-chunks-schedule")) {
-			this.fdisk_schedule = cmd.getOptionValue("io-claim-chunks-schedule");
+			this.fdisk_schedule = cmd
+					.getOptionValue("io-claim-chunks-schedule");
 		}
 		if (cmd.hasOption("permissions-file")) {
 			this.filePermissions = cmd.getOptionValue("permissions-file");
@@ -168,11 +176,10 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-read-ahead-pages")) {
 			this.chunk_read_ahead_pages = Short.parseShort(cmd
 					.getOptionValue("chunk-read-ahead-pages"));
-		}
-		else {
-			if(this.chunk_size < 32) {
-				this.chunk_read_ahead_pages = (short) (32/this.chunk_size);
-			}else {
+		} else {
+			if (this.chunk_size < 32) {
+				this.chunk_read_ahead_pages = (short) (32 / this.chunk_size);
+			} else {
 				this.chunk_read_ahead_pages = 1;
 			}
 		}
@@ -180,16 +187,45 @@ public class VolumeConfigWriter {
 			this.chunk_store_local = Boolean.parseBoolean((cmd
 					.getOptionValue("chunk-store-local")));
 		}
+		if (cmd.hasOption("aws-enabled")) {
+			this.awsEnabled = Boolean.parseBoolean(cmd
+					.getOptionValue("aws-enabled"));
+		}
+		if(cmd.hasOption("chunk-store-read-cache")) {
+			this.chunk_store_read_cache = (Integer.parseInt(cmd.getOptionValue("chunk-store-read-cache")) * 1024)/this.chunk_size;
+		}
+		if(cmd.hasOption("chunk-store-dirty-timeout")) {
+			this.chunk_store_dirty_timeout = Integer.parseInt(cmd.getOptionValue("chunk-store-dirty-timeout"));
+		}
+		if (this.awsEnabled) {
+			if (cmd.hasOption("aws-secret-key")
+					&& cmd.hasOption("aws-access-key")
+					&& cmd.hasOption("aws-bucket-name")) {
+				this.awsAccessKey = cmd.getOptionValue("aws-access-key");
+				this.awsSecretKey = cmd.getOptionValue("aws-secret-key");
+				this.awsBucketName = cmd.getOptionValue("aws-bucket-name");
+
+			} else {
+				System.out.println("Error : Unable to create volume");
+				System.out
+						.println("aws-access-key, aws-secret-key, and aws-bucket-name are required.");
+				System.exit(-1);
+			}
+		}
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
-			this.chunk_gc_schedule = cmd.getOptionValue("chunk-store-gc-schedule");
+			this.chunk_gc_schedule = cmd
+					.getOptionValue("chunk-store-gc-schedule");
 		}
 		if (cmd.hasOption("chunk-store-eviction")) {
-			this.remove_if_older_than = Integer.parseInt(cmd.getOptionValue("chunk-store-eviction"));
+			this.remove_if_older_than = Integer.parseInt(cmd
+					.getOptionValue("chunk-store-eviction"));
 		}
 		if (cmd.hasOption("chunk-store-size")) {
-			this.chunk_store_allocation_size = Long.parseLong(cmd.getOptionValue("chunk-store-size"));
+			this.chunk_store_allocation_size = Long.parseLong(cmd
+					.getOptionValue("chunk-store-size"));
 		} else {
-			this.chunk_store_allocation_size = StringUtils.parseSize(this.volume_capacity);
+			this.chunk_store_allocation_size = StringUtils
+					.parseSize(this.volume_capacity);
 		}
 
 		File file = new File("/etc/sdfs/" + this.volume_name.trim()
@@ -257,13 +293,24 @@ public class VolumeConfigWriter {
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("pre-allocate", Boolean
 				.toString(this.chunk_store_pre_allocate));
-		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("allocation-size", Long
+				.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
-		cs.setAttribute("eviction-age", Integer.toString(this.remove_if_older_than));
+		cs.setAttribute("eviction-age", Integer
+				.toString(this.remove_if_older_than));
 		cs.setAttribute("read-ahead-pages", Short
 				.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
+		
+		if(this.awsEnabled) {
+			Element aws = xmldoc.createElement("aws");
+			aws.setAttribute("enabled", "true");
+			aws.setAttribute("aws-access-key", this.awsAccessKey);
+			aws.setAttribute("aws-secret-key", this.awsSecretKey);
+			aws.setAttribute("aws-bucket-name", this.awsBucketName);
+			cs.appendChild(aws);
+		}
 		root.appendChild(cs);
 		try {
 			// Prepare the DOM document for writing
@@ -301,10 +348,14 @@ public class VolumeConfigWriter {
 								"the folder path to location for the dedup file database.\n Defaults to: \n --base-path + "
 										+ File.separator + "ddb").hasArg()
 						.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("io-SDFSLogger.getLog()").withDescription(
-				"the file path to location for the io SDFSLogger.getLog().\n Defaults to: \n --base-path + "
-						+ File.separator + "io.SDFSLogger.getLog()").hasArg().withArgName(
-				"PATH").create());
+		options
+				.addOption(OptionBuilder
+						.withLongOpt("io-SDFSLogger.getLog()")
+						.withDescription(
+								"the file path to location for the io SDFSLogger.getLog().\n Defaults to: \n --base-path + "
+										+ File.separator
+										+ "io.SDFSLogger.getLog()").hasArg()
+						.withArgName("PATH").create());
 		options
 				.addOption(OptionBuilder
 						.withLongOpt("io-safe-close")
@@ -382,12 +433,12 @@ public class VolumeConfigWriter {
 										+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
 						.hasArg().withArgName("NUMBER").create());
 		options
-		.addOption(OptionBuilder
-				.withLongOpt("io-claim-chunks-schedule")
-				.withDescription(
-						"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
-								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
-				.hasArg().withArgName("CRON Schedule").create());
+				.addOption(OptionBuilder
+						.withLongOpt("io-claim-chunks-schedule")
+						.withDescription(
+								"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
+										+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
+						.hasArg().withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder.withLongOpt("permissions-file")
 				.withDescription(
 						"Default File Permissions. "
@@ -442,32 +493,54 @@ public class VolumeConfigWriter {
 						"Pre-allocate the chunk store if true."
 								+ " \nDefaults to: \n false").hasArg()
 				.withArgName("true|false").create());
-		options.addOption(OptionBuilder.withLongOpt("chunk-read-ahead-pages")
-				.withDescription(
-						"The number of pages to read ahead when doing a disk read on the chunk store."
-								+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128").hasArg().withArgName(
-						"NUMBER").create());
 		options
-		.addOption(OptionBuilder
-				.withLongOpt("chunk-store-gc-schedule")
-				.withDescription(
-						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
-				.hasArg().withArgName("CRON Schedule").create());
+				.addOption(OptionBuilder
+						.withLongOpt("chunk-read-ahead-pages")
+						.withDescription(
+								"The number of pages to read ahead when doing a disk read on the chunk store."
+										+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
+						.hasArg().withArgName("NUMBER").create());
 		options
-		.addOption(OptionBuilder
-				.withLongOpt("chunk-store-eviction")
-				.withDescription(
-						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 3")
-				.hasArg().withArgName("HOURS").create());
+				.addOption(OptionBuilder
+						.withLongOpt("chunk-store-gc-schedule")
+						.withDescription(
+								"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
+										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
+						.hasArg().withArgName("CRON Schedule").create());
 		options
-		.addOption(OptionBuilder
-				.withLongOpt("chunk-store-size")
+				.addOption(OptionBuilder
+						.withLongOpt("chunk-store-eviction")
+						.withDescription(
+								"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
+										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 3")
+						.hasArg().withArgName("HOURS").create());
+		options
+				.addOption(OptionBuilder
+						.withLongOpt("chunk-store-size")
+						.withDescription(
+								"The size in bytes of the Dedup Storeage Engine. "
+										+ "This . \n Defaults to: \n The size of the Volume")
+						.hasArg().withArgName("BYTES").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-enabled")
 				.withDescription(
-						"The size in bytes of the Dedup Storeage Engine. "
-								+ "This . \n Defaults to: \n The size of the Volume")
-				.hasArg().withArgName("BYTES").create());
+						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. aws-secret-key, aws-access-key, and aws-bucket-name will also need to be set. ")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-secret-key")
+				.withDescription(
+						"Set to the value of Amazon S3 Cloud Storage secret key. aws-enabled, aws-access-key, and aws-bucket-name will also need to be set. ")
+				.hasArg().withArgName("S3 Secret Key").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-access-key")
+				.withDescription(
+						"Set to the value of Amazon S3 Cloud Storage access key. aws-enabled, aws-secret-key, and aws-bucket-name will also need to be set. ")
+				.hasArg().withArgName("S3 Access Key").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-bucket-name")
+				.withDescription(
+						"Set to the value of Amazon S3 Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
+				.hasArg().withArgName("Unique S3 Bucket Name").create());
 		return options;
 	}
 
@@ -488,7 +561,7 @@ public class VolumeConfigWriter {
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
-			
+
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());
 			e.printStackTrace();

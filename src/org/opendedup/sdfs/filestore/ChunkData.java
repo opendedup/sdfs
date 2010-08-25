@@ -21,7 +21,7 @@ import org.opendedup.util.StringUtils;
 public class ChunkData {
 	public static final int RAWDL = 1 + 2 + 32 + 8 + 8 + 8 + 4 + 8;
 	public static final int CLAIMED_OFFSET = 1 + 2 + 32 + 8;
-	private static byte [] BLANKCM = new byte[RAWDL];
+	private static byte[] BLANKCM = new byte[RAWDL];
 	private boolean mDelete = false;
 	private short hashLen = 0;
 	private byte[] hash = null;
@@ -32,22 +32,26 @@ public class ChunkData {
 	private long cPos = 0;
 	private byte[] chunk = null;
 	private static AbstractChunkStore fileStore = null;
-	private static byte [] blankHash = null;;
+	private static byte[] blankHash = null;;
 
 	static {
-		if(Main.AWSChunkStore)
+		if (Main.AWSChunkStore) {
 			try {
-				fileStore = new S3ChunkStore("chunks");
+				fileStore = new S3ChunkStore(Main.awsBucket);
 			} catch (IOException e1) {
-				SDFSLogger.getLog().fatal("Inable to initiate S3 Chunk Store",e1);
+				SDFSLogger.getLog().fatal("Inable to initiate S3 Chunk Store",
+						e1);
 				SDFSLogger.getLog().fatal("Exiting");
 				System.exit(-1);
 			}
-		fileStore = new FileChunkStore("chunks");
+		} else {
+			fileStore = new FileChunkStore("chunks");
+		}
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
-			blankHash = HashFunctions.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
-		}catch(Exception e) {
+			blankHash = HashFunctions
+					.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -112,12 +116,12 @@ public class ChunkData {
 	public void persistData(boolean clear) throws IOException {
 		if (cPos == -1) {
 			this.cPos = fileStore.reserveWritePosition(cLen);
-		} 
+		}
 		if (this.mDelete) {
 			chunk = new byte[cLen];
-		} 
+		}
 		fileStore.writeChunk(hash, chunk, cLen, cPos);
-		if(clear)
+		if (clear)
 			this.chunk = null;
 	}
 
@@ -127,11 +131,13 @@ public class ChunkData {
 
 	public void setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
-		if(this.mDelete && Main.AWSChunkStore) {
+		if (this.mDelete && Main.AWSChunkStore) {
 			try {
-				fileStore.deleteChunk(this.hash,0, 0);
+				fileStore.deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {
-				SDFSLogger.getLog().error("Unable to remove hash [" + StringUtils.getHexString(this.hash) + "]",e);
+				SDFSLogger.getLog().error(
+						"Unable to remove hash ["
+								+ StringUtils.getHexString(this.hash) + "]", e);
 			}
 		}
 	}
@@ -171,13 +177,13 @@ public class ChunkData {
 	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
 		try {
 			return fileStore.getChunk(hash, pos, Main.chunkStorePageSize);
-		} catch(IOException e) {
-			if(Arrays.areEqual(hash, blankHash))
+		} catch (IOException e) {
+			if (Arrays.areEqual(hash, blankHash))
 				return new byte[Main.chunkStorePageSize];
 			else
 				throw e;
 		}
-		
+
 	}
 
 	public byte[] getData() throws IOException {

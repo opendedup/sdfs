@@ -8,8 +8,10 @@ import org.opendedup.sdfs.io.Volume;
  * 
  */
 public class Main {
-	public static String version = "0.9.3";
-	// public static String target = "/opt/dedup";
+	/**
+	 * The Version of SDFS this is
+	 */
+	public static String version = "0.9.4";
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk store.
@@ -187,12 +189,6 @@ public class Main {
 	 */
 	public static boolean safeSync = true;
 	/**
-	 * Determines if TokyoCabinet is used to store dedup file maps. This is true
-	 * by default and provides the best performance. The alternative is to use
-	 * H2 database. This is used on the client.
-	 */
-	public static boolean TCDedupFile = true;
-	/**
 	 * The maximum about of time that a file is inactive before it is close.
 	 * Inactivity is determined by the time the file was last accessed. @see
 	 * com.annesam.sdfs.filestore.OpenFileMonitor . This is used on the client.
@@ -203,6 +199,10 @@ public class Main {
 	 * is set on the chunk store.
 	 */
 	public static boolean AWSChunkStore = false;
+	/**
+	 * 
+	 */
+	public static String awsBucket = null;
 	/**
 	 * The awsAccessKey. This is used on the client.
 	 */
@@ -259,6 +259,16 @@ public class Main {
 	 * speed up reads quite a bit.
 	 */
 	public static int chunkStoreReadAheadPages = 4;
+	
+	/**
+	 * The number of pages (HashChunks) to cache for reading.
+	 */
+	public static int chunkStorePageCache = 5000;
+	
+	/**
+	 * The time in milliseconds for a page cache to timeout while waiting for a chunck to be read.
+	 */
+	public static int chunkStoreDirtyCacheTimeout = 1000;
 
 	/**
 	 * If the Dedup Storage Engine is remote or local

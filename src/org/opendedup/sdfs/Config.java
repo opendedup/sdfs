@@ -74,10 +74,13 @@ public class Config {
 			Main.evictionAge = Integer.parseInt(cbe.getAttribute("eviction-age"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
-				Main.AWSChunkStore = true;
+				
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+				Main.AWSChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
+				Main.awsBucket = aws.getAttribute("aws-bucket-name");
 			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
@@ -189,12 +192,14 @@ public class Config {
 			 }
 			SDFSLogger.getLog().info("######### Will allocate " + Main.chunkStoreAllocationSize
 					+ " in chunkstore ##############");
-			int awsSz = doc.getElementsByTagName("aws").getLength();
+			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
-				Main.AWSChunkStore = true;
-				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
+				Main.AWSChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
+				Main.awsBucket = aws.getAttribute("aws-bucket-name");
 			}
 		}
 		else {

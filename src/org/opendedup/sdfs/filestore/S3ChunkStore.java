@@ -1,8 +1,11 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.DataInputStream;
 import java.io.IOException;
+
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
 
@@ -25,24 +28,30 @@ import org.opendedup.util.StringUtils;
  * 
  */
 public class S3ChunkStore implements AbstractChunkStore {
-	private static String awsAccessKey = null;
-	private static String awsSecretKey = null;
-	private static AWSCredentials awsCredentials = new AWSCredentials(
-			awsAccessKey, awsSecretKey);
+	private static AWSCredentials awsCredentials = null;
 	private String name;
 	private S3Bucket s3Bucket = null;
 	S3Service s3Service;
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
+	static {
+		try {
+		awsCredentials = new AWSCredentials(
+				Main.awsAccessKey, Main.awsSecretKey);
+		}catch(Exception e) {
+			SDFSLogger.getLog().fatal("Unable to authenticate to AWS",e);
+			System.exit(-1);
+		}
+	}
 	public S3ChunkStore(String name) throws IOException {
 		this.name = name;
 		try {
 			s3Service = new RestS3Service(awsCredentials);
-			this.s3Bucket = s3Service.getBucket(awsAccessKey);
+			this.s3Bucket = s3Service.getBucket(this.name);
 			if (this.s3Bucket == null) {
-				this.s3Bucket = s3Service.createBucket(awsAccessKey);
-				SDFSLogger.getLog().info("created new store " + awsAccessKey);
+				this.s3Bucket = s3Service.createBucket(this.name);
+				SDFSLogger.getLog().info("created new store " + name);
 			}
 		} catch (S3ServiceException e) {
 			e.printStackTrace();
@@ -72,12 +81,17 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString = StringUtils.getHexString(hash);
-		try {
+		try { 
+			long rstart = System.currentTimeMillis();
 			S3Object obj = s3Service.getObject(s3Bucket, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
 			obj.closeDataInputStream();
+			long rEnd = System.currentTimeMillis();
+			double duration = (rEnd - rstart)/1000;
+			double bps = data.length/duration;
+			System.out.println(data.length  + " read  - Rate = " + bps + "(B/s)");
 			return data;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -108,6 +122,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 
+		long rstart = System.currentTimeMillis();
 		String hashString = StringUtils.getHexString(hash);
 		S3Object s3Object = new S3Object(hashString);
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
@@ -122,12 +137,17 @@ public class S3ChunkStore implements AbstractChunkStore {
 			throw new IOException(e.toString());
 		} finally {
 			s3IS.close();
+			long rEnd = System.currentTimeMillis();
+			double duration = (rEnd - rstart)/1000;
+			double bps = chunk.length/duration;
+			System.out.println(chunk.length  + " written  - Rate = " + bps + "(B/s)");
 		}
 
 	}
 
 	public static void main(String[] args) throws IOException {
-		S3ChunkStore store = new S3ChunkStore("test");
+		
+		S3ChunkStore store = new S3ChunkStore("bucket-aaaaaaa11111");
 		String test = "This is a test";
 		byte[] md5 = HashFunctions.getMD5ByteHash(test.getBytes());
 		store.writeChunk(md5, test.getBytes(), 0, 0);
@@ -144,6 +164,20 @@ public class S3ChunkStore implements AbstractChunkStore {
 			s3Service.deleteObject(s3Bucket, hashString);
 		} catch (S3ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
+		}
+	}
+	
+	public void deleteBucket(String bucketName) {
+		try {
+		
+			S3Object [] obj = s3Service.listObjects(bucketName);
+			for(int i = 0 ; i < obj.length; i ++) {
+				s3Service.deleteObject(bucketName, obj[i].getKey());
+				SDFSLogger.getLog().warn("Deleted [" + obj[i].getKey() + "]");
+			}
+			s3Service.deleteBucket(bucketName);
+		} catch (S3ServiceException e) {
+			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
 		}
 	}
 
