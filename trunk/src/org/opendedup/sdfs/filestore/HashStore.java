@@ -4,14 +4,20 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
+
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * 
@@ -42,24 +48,37 @@ public class HashStore {
 	private String name;
 	// Lock for hash queries
 	private ReentrantLock hashlock = new ReentrantLock();
+	//private ReentrantLock cacheLock = new ReentrantLock();
+	private transient HashMap<String, HashChunk> readingBuffers = new HashMap<String, HashChunk>(Main.chunkStorePageCache);
+	private transient ConcurrentLinkedHashMap<String, HashChunk> cacheBuffers = new Builder<String, HashChunk>()
+			.concurrencyLevel(Main.writeThreads).initialCapacity(Main.chunkStorePageCache)
+			.maximumWeightedCapacity(Main.chunkStorePageCache).listener(
+					new EvictionListener<String, HashChunk>() {
+						// This method is called just after a new entry has been
+						// added
+						public void onEviction(String key, HashChunk buffer) {
+						}
+					}
+
+			).build();
 
 	// The chunk store used to store the actual deduped data;
-	//private AbstractChunkStore chunkStore = null;
+	// private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of
 	// hashstores.
-	
+
 	// private static ChunkStoreGCScheduler gcSched = new
 	// ChunkStoreGCScheduler();
 	private boolean closed = true;
-	private static byte [] blankHash = null;
-	private static byte [] blankData = null;
+	private static byte[] blankHash = null;
+	private static byte[] blankData = null;
 	static {
-		blankData = new byte [Main.chunkStorePageSize];
+		blankData = new byte[Main.chunkStorePageSize];
 		try {
 			blankHash = HashFunctions.getTigerHashBytes(blankData);
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to hash blank hash",e);
-		} 
+			SDFSLogger.getLog().fatal("unable to hash blank hash", e);
+		}
 	}
 
 	/**
@@ -76,8 +95,8 @@ public class HashStore {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//this.initChunkStore();
-		SDFSLogger.getLog().info("Total Entries " +  + bdb.getSize());
+		// this.initChunkStore();
+		SDFSLogger.getLog().info("Total Entries " + +bdb.getSize());
 		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;
 	}
@@ -90,7 +109,7 @@ public class HashStore {
 	public long getEntries() {
 		return bdb.getSize();
 	}
-	
+
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
@@ -103,12 +122,10 @@ public class HashStore {
 	 * @throws IOException
 	 */
 	/*
-	private void initChunkStore() throws IOException {
-		if (Main.AWSChunkStore)
-			chunkStore = new S3ChunkStore(this.getName());
-		else
-			chunkStore = fileStore;
-	}*/
+	 * private void initChunkStore() throws IOException { if
+	 * (Main.AWSChunkStore) chunkStore = new S3ChunkStore(this.getName()); else
+	 * chunkStore = fileStore; }
+	 */
 
 	/**
 	 * returns the name of the TCHashStore
@@ -135,7 +152,7 @@ public class HashStore {
 	 * The method used to open and connect to the TC database.
 	 * 
 	 * @throws IOException
-	 * @throws HashtableFullException 
+	 * @throws HashtableFullException
 	 */
 	private void connectDB() throws IOException, HashtableFullException {
 		File directory = new File(Main.hashDBStore + File.separator);
@@ -157,18 +174,43 @@ public class HashStore {
 	 */
 	public HashChunk getHashChunk(byte[] hash) throws IOException {
 		HashChunk hs = null;
+		String hStr = StringUtils.getHexString(hash);
+		hs = this.cacheBuffers.get(hStr);
+		if (hs != null) {
+			return hs;
+		}
+
+		if (this.readingBuffers.containsKey(hStr)) {
+			int t = 0;
+			while (t < Main.chunkStoreDirtyCacheTimeout) {
+				try {
+					Thread.sleep(1);
+					hs = this.cacheBuffers.get(hStr);
+					if (hs != null) {
+						return hs;
+					}
+				} catch (Exception e) {
+
+				}
+				t++;
+			}
+		} else {
+			if(this.readingBuffers.size() < Main.chunkStorePageCache)
+				this.readingBuffers.put(hStr, hs);
+		}
 		try {
 			byte[] data = bdb.getData(hash);
-			if(data == null && Arrays.equals(hash,blankHash)) {
-				SDFSLogger.getLog().info("found blank data request");
+			if (data == null && Arrays.equals(hash, blankHash)) {
 				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
 			}
 			hs = new HashChunk(hash, 0, data.length, data, false);
+			this.cacheBuffers.put(hStr, hs);
+				
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "unable to get hash "
-					+ StringUtils.getHexString(hash), e);
+			SDFSLogger.getLog().fatal(
+					"unable to get hash " + StringUtils.getHexString(hash), e);
 		} finally {
-			// hashlock.unlock();
+			this.readingBuffers.remove(hStr);
 		}
 		return hs;
 	}
@@ -188,36 +230,39 @@ public class HashStore {
 	 *            the chunk to persist
 	 * @return true returns true if the data was written. Data will not be
 	 *         written if the hash already exists in the db.
-	 * @throws IOException 
-	 * @throws HashtableFullException 
+	 * @throws IOException
+	 * @throws HashtableFullException
 	 */
-	public boolean addHashChunk(HashChunk chunk) throws IOException, HashtableFullException {
+	public boolean addHashChunk(HashChunk chunk) throws IOException,
+			HashtableFullException {
 		boolean written = false;
-		if(!bdb.containsKey(chunk.getName())){
-		try {
-			//long start = chunkStore.reserveWritePosition(chunk.getLen());
-			ChunkData cm = new ChunkData(chunk.getName(),
-					Main.chunkStorePageSize, chunk.getData());
-			if (bdb.put(cm)) {
-				written = true;
-			} else {
+		if (!bdb.containsKey(chunk.getName())) {
+			try {
+				// long start = chunkStore.reserveWritePosition(chunk.getLen());
+				ChunkData cm = new ChunkData(chunk.getName(),
+						Main.chunkStorePageSize, chunk.getData());
+				if (bdb.put(cm)) {
+					written = true;
+				} else {
 
+				}
+
+			} catch (IOException e) {
+				SDFSLogger.getLog().fatal(
+						"Unable to commit chunk "
+								+ StringUtils.getHexString(chunk.getName()), e);
+				throw e;
+			} catch (HashtableFullException e) {
+				SDFSLogger.getLog().fatal(
+						"Unable to commit chunk "
+								+ StringUtils.getHexString(chunk.getName()), e);
+				throw e;
 			}
-		
-		} catch (IOException e) {
-			SDFSLogger.getLog().fatal( "Unable to commit chunk "
-					+ StringUtils.getHexString(chunk.getName()), e);
-			throw e;
-		} catch (HashtableFullException e) {
-			SDFSLogger.getLog().fatal( "Unable to commit chunk "
-					+ StringUtils.getHexString(chunk.getName()), e);
-			throw e;
-		} 
-		
-		finally {
-			if (hashlock.isLocked())
-				hashlock.unlock();
-		}
+
+			finally {
+				if (hashlock.isLocked())
+					hashlock.unlock();
+			}
 		}
 		return written;
 	}
