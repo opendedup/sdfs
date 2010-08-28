@@ -18,6 +18,15 @@ public class Main {
 	 */
 	public static String chunkStore = "/opt/dedup/chunks";
 	/**
+	 * Secret Key to Encrypt chunks in DSE.
+	 */
+	public static String chunkStoreEncryptionKey = "Password";
+	/**
+	 * whether encryption should be enabled for the DSE
+	 */
+	public static boolean chunkStoreEncryptionEnabled = false;
+	
+	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
 	 */
@@ -39,7 +48,7 @@ public class Main {
 	 * used to record IO stats at specific intervals. This is used on the client
 	 * and chunk store.
 	 */
-	public static String ioLogFile = "/opt/dedup/ioSDFSLogger.getLog().SDFSLogger.getLog()";
+	public static String ioLogFile = "/opt/dedup/iolog.txt";
 	/**
 	 * The location where debug and system SDFSLogger.getLog()s are kept. This is used on the
 	 * client and chunk store.
@@ -261,9 +270,9 @@ public class Main {
 	public static int chunkStoreReadAheadPages = 4;
 	
 	/**
-	 * The number of pages (HashChunks) to cache for reading.
+	 * The size (MB) of pages (HashChunks) to cache for reading.
 	 */
-	public static int chunkStorePageCache = 5000;
+	public static int chunkStorePageCache = 5;
 	
 	/**
 	 * The time in milliseconds for a page cache to timeout while waiting for a chunck to be read.

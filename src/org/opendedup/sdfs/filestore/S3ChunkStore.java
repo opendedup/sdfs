@@ -3,7 +3,11 @@ package org.opendedup.sdfs.filestore;
 import java.io.ByteArrayInputStream;
 
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
@@ -15,6 +19,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
 
@@ -32,6 +37,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String name;
 	private S3Bucket s3Bucket = null;
 	S3Service s3Service;
+	private static final int pageSize = Main.chunkStorePageSize;
+	private boolean closed = false;
+	private long currentLength = 0L;
+	private RandomAccessFile posRaf = null;
+	private static File chunk_location = new File(Main.chunkStore);
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
@@ -53,11 +63,31 @@ public class S3ChunkStore implements AbstractChunkStore {
 				this.s3Bucket = s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
 			}
+			this.openPosFile();
 		} catch (S3ServiceException e) {
 			e.printStackTrace();
 			throw new IOException(e.toString());
 		}
 		
+	}
+	
+	private void openPosFile() throws IOException {
+		File posFile = new File(chunk_location + File.separator + name
+				+ ".pos");
+		boolean newPos = true;
+		if (posFile.exists())
+			newPos = false;
+		else {
+			posFile.getParentFile().mkdirs();
+		}
+		posRaf = new RandomAccessFile(posFile, "rw");
+		if (!newPos) {
+			posRaf.seek(0);
+			this.currentLength = posRaf.readLong();
+		} else {
+			posRaf.seek(0);
+			posRaf.writeLong(currentLength);
+		}
 	}
 
 	public long bytesRead() {
@@ -80,18 +110,15 @@ public class S3ChunkStore implements AbstractChunkStore {
 	}
 
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
-		String hashString = StringUtils.getHexString(hash);
+		String hashString =  this.getHashName(hash);
 		try { 
-			long rstart = System.currentTimeMillis();
 			S3Object obj = s3Service.getObject(s3Bucket, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
 			obj.closeDataInputStream();
-			long rEnd = System.currentTimeMillis();
-			double duration = (rEnd - rstart)/1000;
-			double bps = data.length/duration;
-			System.out.println(data.length  + " read  - Rate = " + bps + "(B/s)");
+			if(Main.chunkStoreEncryptionEnabled)
+				data = EncryptUtils.decrypt(data);
 			return data;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -104,10 +131,19 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public String getName() {
 		return this.name;
 	}
+	
+	private static ReentrantLock reservePositionlock = new ReentrantLock();
 
 	public long reserveWritePosition(int len) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		if (this.closed)
+			throw new IOException("ChunkStore is closed");
+		reservePositionlock.lock();
+		long pos = this.currentLength;
+		this.currentLength = this.currentLength + pageSize;
+		this.posRaf.seek(0);
+		this.posRaf.writeLong(this.currentLength);
+		reservePositionlock.unlock();
+		return pos;
 	}
 
 	public void setName(String name) {
@@ -122,9 +158,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 
-		long rstart = System.currentTimeMillis();
-		String hashString = StringUtils.getHexString(hash);
+		String hashString =  this.getHashName(hash);
 		S3Object s3Object = new S3Object(hashString);
+		if(Main.chunkStoreEncryptionEnabled)
+			chunk = EncryptUtils.encrypt(chunk);
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
@@ -137,29 +174,19 @@ public class S3ChunkStore implements AbstractChunkStore {
 			throw new IOException(e.toString());
 		} finally {
 			s3IS.close();
-			long rEnd = System.currentTimeMillis();
-			double duration = (rEnd - rstart)/1000;
-			double bps = chunk.length/duration;
-			System.out.println(chunk.length  + " written  - Rate = " + bps + "(B/s)");
 		}
 
 	}
 
 	public static void main(String[] args) throws IOException {
 		
-		S3ChunkStore store = new S3ChunkStore("bucket-aaaaaaa11111");
-		String test = "This is a test";
-		byte[] md5 = HashFunctions.getMD5ByteHash(test.getBytes());
-		store.writeChunk(md5, test.getBytes(), 0, 0);
-		String outStr = new String(store.getChunk(md5, 0, 0));
-		System.out.println(outStr);
 	}
 
 	
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
-		String hashString = StringUtils.getHexString(hash);
+		String hashString = this.getHashName(hash);
 		try {
 			s3Service.deleteObject(s3Bucket, hashString);
 		} catch (S3ServiceException e) {
@@ -167,17 +194,33 @@ public class S3ChunkStore implements AbstractChunkStore {
 		}
 	}
 	
-	public void deleteBucket(String bucketName) {
+	public static void deleteBucket(String bucketName,String awsAccessKey, String awsSecretKey ) {
 		try {
-		
-			S3Object [] obj = s3Service.listObjects(bucketName);
+			System.out.println("");
+			System.out.print("Deleting Bucket [" + bucketName + "]");
+			AWSCredentials bawsCredentials = new AWSCredentials(
+					awsAccessKey, awsSecretKey);
+			S3Service bs3Service = new RestS3Service(bawsCredentials);
+			S3Object [] obj = bs3Service.listObjects(bucketName);
 			for(int i = 0 ; i < obj.length; i ++) {
-				s3Service.deleteObject(bucketName, obj[i].getKey());
-				SDFSLogger.getLog().warn("Deleted [" + obj[i].getKey() + "]");
+				bs3Service.deleteObject(bucketName, obj[i].getKey());
+				System.out.print(".");
 			}
-			s3Service.deleteBucket(bucketName);
+			bs3Service.deleteBucket(bucketName);
+			SDFSLogger.getLog().info("Bucket [" + bucketName + "] deleted");
+			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (S3ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
+		}
+	}
+	
+	private String getHashName(byte [] hash) throws IOException {
+		if(Main.chunkStoreEncryptionEnabled) {
+			byte [] encH = EncryptUtils.encrypt(hash);
+			return StringUtils.getHexString(encH);
+		}
+		else {
+			return StringUtils.getHexString(hash);
 		}
 	}
 

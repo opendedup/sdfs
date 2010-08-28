@@ -49,10 +49,12 @@ public class HashStore {
 	// Lock for hash queries
 	private ReentrantLock hashlock = new ReentrantLock();
 	//private ReentrantLock cacheLock = new ReentrantLock();
-	private transient HashMap<String, HashChunk> readingBuffers = new HashMap<String, HashChunk>(Main.chunkStorePageCache);
+	int mapSize = (Main.chunkStorePageCache * 1024*1024)/Main.chunkStorePageSize;
+	
+	private transient HashMap<String, HashChunk> readingBuffers = new HashMap<String, HashChunk>(mapSize);
 	private transient ConcurrentLinkedHashMap<String, HashChunk> cacheBuffers = new Builder<String, HashChunk>()
-			.concurrencyLevel(Main.writeThreads).initialCapacity(Main.chunkStorePageCache)
-			.maximumWeightedCapacity(Main.chunkStorePageCache).listener(
+			.concurrencyLevel(Main.writeThreads).initialCapacity(mapSize)
+			.maximumWeightedCapacity(mapSize).listener(
 					new EvictionListener<String, HashChunk>() {
 						// This method is called just after a new entry has been
 						// added
@@ -90,12 +92,14 @@ public class HashStore {
 	 */
 	public HashStore() throws IOException {
 		this.name = "sdfs";
+		
 		try {
 			this.connectDB();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// this.initChunkStore();
+		SDFSLogger.getLog().info("Cache Size = " +  Main.chunkStorePageSize + " and Dirty Timeout = " + Main.chunkStoreDirtyCacheTimeout);
 		SDFSLogger.getLog().info("Total Entries " + +bdb.getSize());
 		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;
@@ -195,7 +199,7 @@ public class HashStore {
 				t++;
 			}
 		} else {
-			if(this.readingBuffers.size() < Main.chunkStorePageCache)
+			if(this.readingBuffers.size() < mapSize)
 				this.readingBuffers.put(hStr, hs);
 		}
 		try {
