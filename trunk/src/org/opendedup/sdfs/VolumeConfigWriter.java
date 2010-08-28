@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -70,6 +71,8 @@ public class VolumeConfigWriter {
 	String awsBucketName = "";
 	int chunk_store_read_cache= Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
+	String chunk_store_encryption_key = PassPhrase.getNext();
+	boolean chunk_store_encrypt = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -192,7 +195,10 @@ public class VolumeConfigWriter {
 					.getOptionValue("aws-enabled"));
 		}
 		if(cmd.hasOption("chunk-store-read-cache")) {
-			this.chunk_store_read_cache = (Integer.parseInt(cmd.getOptionValue("chunk-store-read-cache")) * 1024)/this.chunk_size;
+			this.chunk_store_read_cache = Integer.parseInt(cmd.getOptionValue("chunk-store-read-cache"));
+		}
+		if(cmd.hasOption("chunk-store-encrypt")) {
+			this.chunk_store_encrypt = Boolean.parseBoolean(cmd.getOptionValue("chunk-store-encrypt"));
 		}
 		if(cmd.hasOption("chunk-store-dirty-timeout")) {
 			this.chunk_store_dirty_timeout = Integer.parseInt(cmd.getOptionValue("chunk-store-dirty-timeout"));
@@ -301,6 +307,10 @@ public class VolumeConfigWriter {
 		cs.setAttribute("read-ahead-pages", Short
 				.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
+		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
+		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
+		cs.setAttribute("chunk-store-read-cache", Integer.toString(this.chunk_store_read_cache));
+		cs.setAttribute("chunk-store-dirty-timeout", Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		
 		if(this.awsEnabled) {
@@ -521,6 +531,30 @@ public class VolumeConfigWriter {
 								"The size in bytes of the Dedup Storeage Engine. "
 										+ "This . \n Defaults to: \n The size of the Volume")
 						.hasArg().withArgName("BYTES").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-read-cache")
+				.withDescription(
+						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads" +
+						" for AWS/Cloud storage "
+								+ "This . \n Defaults to: \n 5MB")
+				.hasArg().withArgName("Megabytes").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-encrypt")
+						.withDescription(
+								"Whether or not to Encrypt chunks within the Dedup Storage Engine. The encryption key is generated automatically." +
+								" For AWS this is a good option to enable. The default for this is" +
+								" false")
+						.hasArg().withArgName("true|false").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("chunk-store-dirty-timeout")
+				.withDescription(
+						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. " +
+						"For AWS with slow links you may want to set this to a higher number. The default for this is" +
+						" 1000 ms.")
+				.hasArg().withArgName("Milliseconds").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(

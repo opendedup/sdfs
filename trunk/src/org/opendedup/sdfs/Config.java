@@ -72,6 +72,14 @@ public class Config {
 					.getAttribute("read-ahead-pages"));
 			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
 			Main.evictionAge = Integer.parseInt(cbe.getAttribute("eviction-age"));
+			if(cbe.hasAttribute("chunk-store-read-cache"));
+				Main.chunkStorePageCache = Integer.parseInt(cbe.getAttribute("chunk-store-read-cache"));
+			if(cbe.hasAttribute("chunk-store-dirty-timeout"))
+				Main.chunkStoreDirtyCacheTimeout = Integer.parseInt(cbe.getAttribute("chunk-store-dirty-timeout"));
+			if(cbe.hasAttribute("encrypt")) {
+				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe.getAttribute("encrypt"));
+				Main.chunkStoreEncryptionKey = cbe.getAttribute("encryption-key");
+			}
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
 				
@@ -179,6 +187,10 @@ public class Config {
 					localChunkStore.getAttribute("allocation-size"));
 			Main.gcChunksSchedule = localChunkStore.getAttribute("chunk-gc-schedule");
 			Main.evictionAge = Integer.parseInt(localChunkStore.getAttribute("eviction-age"));
+			if(localChunkStore.hasAttribute("encrypt")) {
+				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean("encrypt");
+				Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
+			}
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
 					.getAttribute("pre-allocate"));

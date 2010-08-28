@@ -1,3 +1,14 @@
+Version 0.9.4 8/27/2010
+	This version focuses on enabling cloud based storage backend for the dedup storage engine. Amazon S3 is the first storage provider that has
+	been added but others will be added as requested. Basically all data will be stored to the cloud storage provider and meta-data will sit on
+	the local filesystem where the SDFS volume was mounted from.
+	
+	Enhancements :
+	* Amazon S3 Storage enabled. This will allow users to store unique chunks to an S3 backend. 
+	* AES 128 bit Encryption of data to cloud or local dedup storage engine. 
+	* Compression for S3 cloud storage. 
+	* Improved read performance through caching requests.
+	
 Version 0.9.3 8/15/2010
 	Fixes
 	* Fixed Verbose Logging. All logging is now outputted to log4j.
