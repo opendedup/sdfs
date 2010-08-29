@@ -19,6 +19,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.StringUtils;
@@ -119,10 +120,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 			obj.closeDataInputStream();
 			if(Main.chunkStoreEncryptionEnabled)
 				data = EncryptUtils.decrypt(data);
+			if(Main.awsCompress)
+				data = CompressionUtils.decompressZLIB(data);
 			return data;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			SDFSLogger.getLog().error("unable to fetch block [" + hash + "]",e);
 			throw new IOException("unable to read " + hashString);
 		}
 
@@ -160,8 +163,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 		String hashString =  this.getHashName(hash);
 		S3Object s3Object = new S3Object(hashString);
-		if(Main.chunkStoreEncryptionEnabled)
+		if(Main.awsCompress) {
+			chunk = CompressionUtils.compressZLIB(chunk);
+			s3Object.addMetadata("compress", "true");
+		}else {
+			s3Object.addMetadata("compress", "false");
+		}
+		if(Main.chunkStoreEncryptionEnabled) {
 			chunk = EncryptUtils.encrypt(chunk);
+			s3Object.addMetadata("encrypt", "true");
+		}else {
+			s3Object.addMetadata("encrypt", "false");
+		}
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
@@ -175,7 +188,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} finally {
 			s3IS.close();
 		}
-
 	}
 
 	public static void main(String[] args) throws IOException {

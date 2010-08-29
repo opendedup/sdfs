@@ -59,7 +59,6 @@ public class CompressionUtils {
 		// Get the decompressed data
 		byte[] decompressedData = bos.toByteArray();
 		return decompressedData;
-
 	}
 
 	
