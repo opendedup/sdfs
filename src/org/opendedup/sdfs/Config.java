@@ -89,6 +89,7 @@ public class Config {
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
 				Main.awsBucket = aws.getAttribute("aws-bucket-name");
+				Main.awsCompress = Boolean.parseBoolean(aws.getAttribute("compress"));
 			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
@@ -212,6 +213,7 @@ public class Config {
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
 				Main.awsBucket = aws.getAttribute("aws-bucket-name");
+				Main.awsCompress = Boolean.parseBoolean(aws.getAttribute("compress"));
 			}
 		}
 		else {

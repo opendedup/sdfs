@@ -73,6 +73,7 @@ public class VolumeConfigWriter {
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
+	boolean awsCompress = Main.awsCompress;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -218,6 +219,8 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
+		if(cmd.hasOption("aws-compress"))
+			this.awsCompress = Boolean.parseBoolean(cmd.getOptionValue("aws-compress"));
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
 			this.chunk_gc_schedule = cmd
 					.getOptionValue("chunk-store-gc-schedule");
@@ -319,6 +322,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-access-key", this.awsAccessKey);
 			aws.setAttribute("aws-secret-key", this.awsSecretKey);
 			aws.setAttribute("aws-bucket-name", this.awsBucketName);
+			aws.setAttribute("compress", Boolean.toString(this.awsCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -360,9 +364,9 @@ public class VolumeConfigWriter {
 						.withArgName("PATH").create());
 		options
 				.addOption(OptionBuilder
-						.withLongOpt("io-SDFSLogger.getLog()")
+						.withLongOpt("io-log")
 						.withDescription(
-								"the file path to location for the io SDFSLogger.getLog().\n Defaults to: \n --base-path + "
+								"the file path to location for the io log.\n Defaults to: \n --base-path + "
 										+ File.separator
 										+ "io.SDFSLogger.getLog()").hasArg()
 						.withArgName("PATH").create());
@@ -522,7 +526,7 @@ public class VolumeConfigWriter {
 						.withLongOpt("chunk-store-eviction")
 						.withDescription(
 								"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 3")
+										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
 						.hasArg().withArgName("HOURS").create());
 		options
 				.addOption(OptionBuilder
@@ -575,6 +579,11 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to the value of Amazon S3 Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
 				.hasArg().withArgName("Unique S3 Bucket Name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-compress")
+				.withDescription(
+						"Compress AWS chunks before they are sent to the S3 Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+				.hasArg().withArgName("true|false").create());
 		return options;
 	}
 

@@ -5,7 +5,7 @@ Version 0.9.4 8/27/2010
 	
 	Enhancements :
 	* Amazon S3 Storage enabled. This will allow users to store unique chunks to an S3 backend. 
-	* AES 128 bit Encryption of data to cloud or local dedup storage engine. 
+	* AES 256 bit Encryption of data to cloud dedup storage engine. 
 	* Compression for S3 cloud storage. 
 	* Improved read performance through caching requests.
 	

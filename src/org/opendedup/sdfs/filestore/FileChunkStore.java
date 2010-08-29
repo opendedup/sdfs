@@ -228,8 +228,10 @@ public class FileChunkStore implements AbstractChunkStore {
 		FileChannel ch = null;
 		ByteBuffer buf = null;
 		try {
+			/*
 			if(Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
+			*/
 			buf = ByteBuffer.wrap(chunk);
 			buf.position(0);
 			if (cache.containsKey(Long.toString(start))) {
@@ -360,8 +362,10 @@ public class FileChunkStore implements AbstractChunkStore {
 			 * = bytesRead + len; //String str = new String(chunk);
 			 * //getChunklock.unlock();
 			 */
+			/*
 			if(Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.decrypt(chunk);
+			*/
 			return chunk;
 		} catch (Exception e) {
 			// getChunklock.unlock();
