@@ -138,8 +138,22 @@ Tips and Tricks
 	 stored chunk takes up approximately 33 bytes of RAM.To calculate how much RAM you will need for a specific volume divide the volume size (in bytes) by 
 	 the chunk size (in bytes) and multiply that times 33.
 
-    		Memory Requirements Calculation: (volume size/chunk size)*33 
-	
+    		Memory Requirements Calculation: (volume size/chunk size)*33
+    
+    Cloud Storage and Amazon S3 Web Serivce
+    
+    It is now possible to store dedup chunks to the Amazon S3 cloud storage service. This will allow you to store unlimited amounts of data without the need
+    for local storage. AES 256 bit encryption and compression (default) is provided for storing data to AWS. It is suggested that the chunk size be set to 
+    the default (128k) to allow for maximum compression and fewest round trips for data. 
+    To Setup AWS enable dedup volume follow these steps:
+    1. Go to http://aws.amazon.com and create an account.
+    2. Sign up for S3 data storage
+    3. Get your Access Key ID and Secret Key ID.
+    4. Make an SDFS volume using the following parameters:
+    	./mkfs.sdfs  --volume-name=<volume name> --volume-capacity=<volume capacity> --aws-enabled=true --aws-access-key=<the aws assigned access key> --aws-bucket-name=<a universally unique bucket name such as the aws-access-key> --aws-secret-key=<assigned aws secret key> --chunk-store-encrypt=true
+    5. Mount volume and go to town!
+    	./mount.sdfs <volume name> <mount point>
+    	
 	Using fuse 2.7:
 
 	Fuse 2.8 adds the big_writes option which greatly increases performance. In addition fuse 2.8 works much better for NFS mounts. If you need to use fuse 2.7 
