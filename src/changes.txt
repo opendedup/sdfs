@@ -1,7 +1,7 @@
 Version 0.9.4 8/27/2010
-	This version focuses on enabling cloud based storage backend for the dedup storage engine. Amazon S3 is the first storage provider that has
-	been added but others will be added as requested. Basically all data will be stored to the cloud storage provider and meta-data will sit on
-	the local filesystem where the SDFS volume was mounted from.
+	This version focuses on enabling cloud based storage deduplication. The storage backend for the dedup storage engine has been rewritten to
+	allow for cloud storage. Amazon S3 is the first storage provider that has been added but others will be added as requested. Basically all 
+	data will be stored to the cloud storage provider and meta-data will sit on the local filesystem where the SDFS volume was mounted from.
 	
 	Enhancements :
 	* Amazon S3 Storage enabled. This will allow users to store unique chunks to an S3 backend. 
