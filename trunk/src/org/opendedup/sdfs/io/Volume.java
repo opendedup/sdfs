@@ -24,6 +24,7 @@ public class Volume implements java.io.Serializable {
 
 	private static final long serialVersionUID = 5505952237500542215L;
 	long capacity;
+	String name;
 	String capString = null;
 	long currentSize;
 	String path;
@@ -34,8 +35,13 @@ public class Volume implements java.io.Serializable {
 		if (!f.exists())
 			f.mkdirs();
 		this.path = f.getPath();
+		this.name = f.getName().split("-")[0];
 		this.capacity = capacity;
 		this.currentSize = currentSize;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public Volume(Element vol) throws IOException {
