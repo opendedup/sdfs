@@ -1,6 +1,9 @@
 package org.opendedup.sdfs;
 
+import java.io.File;
+
 import org.opendedup.sdfs.io.Volume;
+import org.opendedup.util.OSValidator;
 
 /**
  * 
@@ -8,15 +11,20 @@ import org.opendedup.sdfs.io.Volume;
  * 
  */
 public class Main {
+	static {
+		if(OSValidator.isWindows()) {
+			Main.chunkStore = System.getenv("programfiles") + File.separator + "sdfs" + File.separator ;
+		}
+	}
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "0.9.4";
+	public static String version = "0.9.5";
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk store.
 	 */
-	public static String chunkStore = "/opt/dedup/chunks";
+	public static String chunkStore = "";
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
@@ -30,13 +38,13 @@ public class Main {
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
 	 */
-	public static String hashDBStore = "/opt/dedup/jdb";
+	public static String hashDBStore = null;
 	/**
 	 * The location where dedup file maps will be stored. Dedup file maps are
 	 * database files and the virtual representation of a file on disk. This is
 	 * used on the client.
 	 */
-	public static String dedupDBStore = "/opt/dedup/jdb";
+	public static String dedupDBStore = null;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem
@@ -48,12 +56,12 @@ public class Main {
 	 * used to record IO stats at specific intervals. This is used on the client
 	 * and chunk store.
 	 */
-	public static String ioLogFile = "/opt/dedup/iolog.txt";
+	public static String ioLogFile = null;
 	/**
 	 * The location where debug and system SDFSLogger.getLog()s are kept. This is used on the
 	 * client and chunk store.
 	 */
-	public static String logLocation = "/var/SDFSLogger.getLog()/dedup/";
+	public static String logLocation = null;
 	/**
 	 * The chunk size used for deduplication of incoming data. This is used on
 	 * the client.

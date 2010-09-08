@@ -26,8 +26,9 @@ package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
 
+
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
-import gnu.trove.TByteArrayList;
+import gnu.trove.list.array.TByteArrayList;
 
 import java.util.Date;
 

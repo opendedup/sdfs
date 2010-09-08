@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
@@ -37,7 +38,7 @@ public class VolumeConfigWriter {
 	 * @throws Exception
 	 */
 	String volume_name = null;
-	String base_path = "/opt/sdfs/" + volume_name;
+	String base_path = OSValidator.getProgramBasePath() + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
@@ -248,7 +249,7 @@ public class VolumeConfigWriter {
 
 	public void writeConfigFile() throws ParserConfigurationException,
 			IOException {
-		File file = new File("/etc/sdfs/" + this.volume_name.trim()
+		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim()
 				+ "-volume-cfg.xml");
 		// Create XML DOM document (Memory consuming).
 		Document xmldoc = null;
@@ -353,7 +354,7 @@ public class VolumeConfigWriter {
 				.addOption(OptionBuilder
 						.withLongOpt("base-path")
 						.withDescription(
-								"the folder path for all volume data and meta data.\n Defaults to: \n /opt/sdfs/<volume name>")
+								"the folder path for all volume data and meta data.\n Defaults to: \n "+OSValidator.getProgramBasePath()+"<volume name>")
 						.hasArg().withArgName("PATH").create());
 		options
 				.addOption(OptionBuilder
@@ -368,7 +369,7 @@ public class VolumeConfigWriter {
 						.withDescription(
 								"the file path to location for the io log.\n Defaults to: \n --base-path + "
 										+ File.separator
-										+ "io.SDFSLogger.getLog()").hasArg()
+										+ "sdfs.log").hasArg()
 						.withArgName("PATH").create());
 		options
 				.addOption(OptionBuilder
@@ -590,7 +591,7 @@ public class VolumeConfigWriter {
 	public static void main(String[] args) {
 		try {
 			System.out.println("Attempting to create volume ...");
-			File f = new File("/etc/sdfs");
+			File f = new File(OSValidator.getConfigPath());
 			if (!f.exists())
 				f.mkdirs();
 			VolumeConfigWriter wr = new VolumeConfigWriter();
