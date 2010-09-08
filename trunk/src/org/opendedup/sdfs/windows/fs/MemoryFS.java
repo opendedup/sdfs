@@ -182,7 +182,7 @@ public class MemoryFS implements DokanOperations {
 			int copySize = Math.min(buffer.capacity(), fi.getFileSize() - (int) offset);
 			if (copySize <= 0)
 				return 0;
-			buffer.put(fi.content.toNativeArray((int) offset, copySize));
+			buffer.put(fi.content.toArray((int) offset, copySize));
 			return copySize;
 		} catch (Exception e) {
 			e.printStackTrace();
