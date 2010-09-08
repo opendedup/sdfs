@@ -38,7 +38,7 @@ public class VolumeConfigWriter {
 	 * @throws Exception
 	 */
 	String volume_name = null;
-	String base_path = OSValidator.getProgramBasePath() + volume_name;
+	String base_path = OSValidator.getProgramBasePath() + File.separator + "volumes" +File.separator+ volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
@@ -92,7 +92,7 @@ public class VolumeConfigWriter {
 		}
 		volume_name = cmd.getOptionValue("volume-name");
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
-		base_path = "/opt/sdfs/" + volume_name;
+		base_path = OSValidator.getProgramBasePath() + "volumes" +File.separator+ volume_name;
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
@@ -238,7 +238,7 @@ public class VolumeConfigWriter {
 					.parseSize(this.volume_capacity);
 		}
 
-		File file = new File("/etc/sdfs/" + this.volume_name.trim()
+		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim()
 				+ "-volume-cfg.xml");
 		if (file.exists()) {
 			throw new IOException("Volume [" + this.volume_name
@@ -249,6 +249,11 @@ public class VolumeConfigWriter {
 
 	public void writeConfigFile() throws ParserConfigurationException,
 			IOException {
+		File dir = new File(OSValidator.getConfigPath());
+		if(!dir.exists()) {
+			System.out.println("making" + dir.getAbsolutePath());
+			dir.mkdirs();
+		}
 		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim()
 				+ "-volume-cfg.xml");
 		// Create XML DOM document (Memory consuming).
@@ -601,7 +606,7 @@ public class VolumeConfigWriter {
 					+ "] created with a capacity of [" + wr.volume_capacity
 					+ "]");
 			System.out
-					.println("check [/etc/sdfs/"
+					.println("check [" + OSValidator.getConfigPath()
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
