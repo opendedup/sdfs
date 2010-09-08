@@ -7,11 +7,11 @@ public class OSValidator{
 	public static void main(String[] args)
 	{
 		if(isWindows()){
-			System.out.println("This is Windows");
+			System.out.println("This is Windows " + getProgramBasePath() + " " + getConfigPath());
 		}else if(isMac()){
-			System.out.println("This is Mac");
+			System.out.println("This is Mac "  + getProgramBasePath() + " " + getConfigPath());
 		}else if(isUnix()){
-			System.out.println("This is Unix or Linux");
+			System.out.println("This is Unix or Linux "  + getProgramBasePath() + " " + getConfigPath());
 		}else{
 			System.out.println("Your OS is not support!!");
 		}
