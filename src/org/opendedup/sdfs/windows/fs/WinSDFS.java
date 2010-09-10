@@ -72,17 +72,11 @@ public class WinSDFS implements DokanOperations {
 	final long rootCreateTime = FileTimeUtils.toFileTime(new Date());
 	long rootLastWrite = rootCreateTime;
 	private String mountedVolume = null;
+	private char driveLetter = 'S';
 	private Log log = SDFSLogger.getLog();
 
 	static void log(String msg) {
 		System.out.println("== app == " + msg);
-	}
-
-	public static void main(String[] args) {
-		char driveLetter = (args.length == 0) ? 'S' : args[0].charAt(0);
-		new WinSDFS().mount(driveLetter);
-
-		System.exit(0);
 	}
 
 	public WinSDFS() {
@@ -96,11 +90,14 @@ public class WinSDFS implements DokanOperations {
 		System.out.println("driverVersion = " + driverVersion);
 	}
 
-	void mount(char driveLetter) {
+	void mount(char driveLetter,String mountedVolume) {
+		this.mountedVolume = mountedVolume;
 		DokanOptions dokanOptions = new DokanOptions();
 		dokanOptions.driveLetter = driveLetter;
+		this.driveLetter = driveLetter;
 		int result = Dokan.mount(dokanOptions, this);
 		log("[MemoryFS] result = " + result);
+		log.info("mounted " + mountedVolume + " to " + this.driveLetter);
 	}
 
 	synchronized long getNextHandle() {
@@ -394,6 +391,7 @@ public class WinSDFS implements DokanOperations {
 
 	public void onUnmount(DokanFileInfo arg0) throws DokanOperationException {
 		log("[onUnmount]");
+		Dokan.unmount(driveLetter);
 	}
 
 	private DedupFileChannel getFileChannel(String path)
