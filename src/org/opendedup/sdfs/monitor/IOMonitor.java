@@ -84,4 +84,18 @@ public class IOMonitor implements java.io.Serializable {
 		this.bytesRead = buf.getLong();
 		this.duplicateBlocks = buf.getLong();
 	}
+	
+	public String toXML() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("<file-io-info virtual-bytes-written=\"");
+		sb.append(this.virtualBytesWritten);
+		sb.append("\" actual-bytes-written=\"");
+		sb.append(this.actualBytesWritten);
+		sb.append("\" bytes-read=\"");
+		sb.append(this.bytesRead);
+		sb.append("\" duplicate-blocks=\"");
+		sb.append(this.duplicateBlocks);
+		sb.append("\"/>");
+		return sb.toString();
+	}
 }

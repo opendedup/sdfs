@@ -297,7 +297,6 @@ public class WinSDFS implements DokanOperations {
 			log.error("Unable to set length  of " + fileName + " to " + length);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
-
 	}
 
 	public void onFlushFileBuffers(String fileName, DokanFileInfo arg1)
@@ -348,7 +347,6 @@ public class WinSDFS implements DokanOperations {
 		} finally {
 			f = null;
 		}
-
 	}
 
 	public Win32FindData[] onFindFilesWithPattern(String arg0, String arg1,
@@ -418,7 +416,7 @@ public class WinSDFS implements DokanOperations {
 
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 			mf.renameTo(this.mountedVolume + to);
-			DedupFileChannel ch = this.getFileChannel(from);
+			DedupFileChannel ch = this.dedupChannels.get(from);
 			if (ch != null) {
 				this.channelLock.lock();
 				try {
@@ -431,7 +429,7 @@ public class WinSDFS implements DokanOperations {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("unable to move file " + from + " to " + to,e);
 			throw new DokanOperationException(ERROR_FILE_EXISTS);
 		} finally {
 			f = null;
@@ -478,7 +476,6 @@ public class WinSDFS implements DokanOperations {
 			throws DokanOperationException {
 		DedupFileChannel ch = this.dedupChannels.get(path);
 		if (ch == null) {
-
 			File f = this.resolvePath(path);
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
