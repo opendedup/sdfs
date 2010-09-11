@@ -2,7 +2,11 @@ package org.opendedup.sdfs.monitor;
 
 import java.nio.ByteBuffer;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.opendedup.sdfs.Main;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class IOMonitor implements java.io.Serializable {
 
@@ -85,17 +89,25 @@ public class IOMonitor implements java.io.Serializable {
 		this.duplicateBlocks = buf.getLong();
 	}
 	
-	public String toXML() {
+	public Element toXML(Document doc) throws ParserConfigurationException {
+		Element root = doc.createElement("io-info");
+		root.setAttribute("virtual-bytes-written", Long.toString(this.virtualBytesWritten));
+		root.setAttribute("actual-bytes-written", Long.toString(this.actualBytesWritten));
+		root.setAttribute("bytes-read", Long.toString(this.bytesRead));
+		root.setAttribute("duplicate-blocks", Long.toString(this.duplicateBlocks));
+		return root;
+	}
+	
+	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("<file-io-info virtual-bytes-written=\"");
+		sb.append("virtual-bytes-written=\"");
 		sb.append(this.virtualBytesWritten);
-		sb.append("\" actual-bytes-written=\"");
+		sb.append("\"\n actual-bytes-written=\"");
 		sb.append(this.actualBytesWritten);
-		sb.append("\" bytes-read=\"");
+		sb.append("\"\n bytes-read=\"");
 		sb.append(this.bytesRead);
-		sb.append("\" duplicate-blocks=\"");
+		sb.append("\"\n duplicate-blocks=\"");
 		sb.append(this.duplicateBlocks);
-		sb.append("\"/>");
 		return sb.toString();
 	}
 }

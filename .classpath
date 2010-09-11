@@ -21,5 +21,7 @@
 	<classpathentry kind="lib" path="C:/Users/annesam/code/sdfs-bin/lib/trove-3.0.0a3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/annesam/code/sdfs-bin/lib/uuid-3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JDokan"/>
+	<classpathentry kind="lib" path="C:/Users/annesam/code/sdfs-bin/lib/jdokan.jar"/>
+	<classpathentry kind="lib" path="C:/Users/annesam/code/sdfs-bin/lib/simple-4.1.21.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
