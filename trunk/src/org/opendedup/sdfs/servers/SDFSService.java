@@ -32,6 +32,7 @@ public class SDFSService {
 				HashChunkService.init();
 			}
 		}
+		
 		gc = new SDFSGCScheduler();
 	}
 

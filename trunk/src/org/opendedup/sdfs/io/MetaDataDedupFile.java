@@ -21,8 +21,12 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.util.ByteUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.util.UUID;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * 
@@ -850,5 +854,30 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		out.write(hmb);
 		out.writeBoolean(dedup);
 		
+	}
+	public Element toXML(Document doc) throws ParserConfigurationException {
+		Element root = doc.createElement("file-info");
+		root.setAttribute("file-name", this.getName());
+		root.setAttribute("sdfs-path", this.getPath());
+		if(this.isFile()) {
+			root.setAttribute("type", "file");
+			root.setAttribute("atime", Long.toString(this.getLastAccessed()));
+			root.setAttribute("mtime", Long.toString(this.lastModified()));
+			root.setAttribute("ctime", Long.toString(this.getTimeStamp()));
+			root.setAttribute("hidden", Boolean.toString(this.isHidden()));
+			root.setAttribute("size", Long.toString(this.length()));
+			root.setAttribute("open", Boolean.toString(DedupFileStore.fileOpen(this)));
+			root.setAttribute("file-guid", this.getGUID());
+			root.setAttribute("dedup-map-guid", this.getDfGuid());
+			root.setAttribute("dedup", Boolean.toString(this.isDedup()));
+			root.setAttribute("vmdk", Boolean.toString(this.isVmdk()));
+			Element monEl = this.getIOMonitor().toXML(doc);
+			root.appendChild(monEl);
+		}
+		if(this.isDirectory()) {
+			root.setAttribute("type", "directory");
+		}
+		
+		return root;
 	}
 }
