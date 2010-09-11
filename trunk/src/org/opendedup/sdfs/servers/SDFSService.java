@@ -8,6 +8,7 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
+import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkHCServer;
 import org.opendedup.util.SDFSLogger;
 
@@ -32,7 +33,7 @@ public class SDFSService {
 				HashChunkService.init();
 			}
 		}
-		
+			MgmtWebServer.start();
 		gc = new SDFSGCScheduler();
 	}
 
@@ -58,6 +59,7 @@ public class SDFSService {
 			System.out.println("Shutting down HashStore");
 			HashChunkService.close();
 		}
+		MgmtWebServer.stop();
 		System.out.println("SDFS is Shut Down");
 		try {
 			Process p = Runtime.getRuntime().exec("umount " +Main.volumeMountPoint);
