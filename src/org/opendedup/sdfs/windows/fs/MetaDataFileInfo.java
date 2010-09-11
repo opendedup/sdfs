@@ -38,6 +38,7 @@ import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.util.SDFSLogger;
 
 public class MetaDataFileInfo {
 	static long nextFileIndex = 2;
@@ -64,11 +65,13 @@ public class MetaDataFileInfo {
 	}
 
 	Win32FindData toWin32FindData() {
+		SDFSLogger.getLog().info("11111");
 		return new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
-				getFileSize(), 0, 0, FilenameUtils.getName(fileName), Utils.toShortName(fileName));
+				getFileSize(), -4095, 819200, FilenameUtils.getName(fileName), Utils.toShortName(fileName));
 	}
 
 	ByHandleFileInformation toByHandleFileInformation() {
+		SDFSLogger.getLog().info("1111122222");
 		return new ByHandleFileInformation(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
 				MemoryFS.volumeSerialNumber, getFileSize(), 1, fileIndex);
 	}

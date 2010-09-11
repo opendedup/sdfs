@@ -28,7 +28,7 @@ import net.decasdev.dokan.Dokan;
 
 public class UnmountFS {
 	public static void main(String[] args) {
-		char driveLetter = (args.length == 0) ? 'Z' : args[0].charAt(0);
+		char driveLetter = (args.length == 0) ? 'S' : args[0].charAt(0);
 		Dokan.unmount(driveLetter);
 		System.exit(0);
 	}
