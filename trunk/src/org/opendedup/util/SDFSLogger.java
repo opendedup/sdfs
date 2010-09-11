@@ -1,12 +1,18 @@
 package org.opendedup.util;
 
-import org.apache.commons.logging.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
 
 public class SDFSLogger {
 
-	private static Log log = LogFactory.getLog("sdfs");
+	private static Logger log = Logger.getLogger("sdfs");
+	static {
+		 BasicConfigurator.configure();
+		 log.setLevel(Level.INFO);
+	}
 	
-	public static Log getLog() {
+	public static Logger getLog() {
 		return log;
 	}
 
