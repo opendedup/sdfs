@@ -21,8 +21,37 @@ public class SDFSCmdline {
 			System.exit(1);
 		}
 		if(cmd.hasOption("file-info")) {
-			
+			if(cmd.hasOption("file-path")) {
+				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
+			}else{
+				System.out.println("file info request failed. --file-path option is required");
+			}
 		}
+		if(cmd.hasOption("snapshot")) {
+			if(cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
+				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),cmd.getOptionValue("snapshot-path"));
+			}else{
+				System.out.println("snapshot request failed. --file-path and --snapshot-path options are required");
+			}
+		}
+		if(cmd.hasOption("flush-file-buffers")) {
+			if(cmd.hasOption("file-path")) {
+				ProcessFlushBuffersCmd.runCmd("file",cmd.getOptionValue("file-path"));
+			}else{
+				System.out.println("flush file request failed. --file-path");
+			}
+		}
+		if(cmd.hasOption("flush-all-buffers")) {
+				ProcessFlushBuffersCmd.runCmd("all","/");
+		}
+		if(cmd.hasOption("dedup-file")) {
+			if(cmd.hasOption("file-path")) {
+				ProcessFlushBuffersCmd.runCmd(cmd.getOptionValue("file-path"),cmd.getOptionValue("dedup-file"));
+			}else{
+				System.out.println("dedup file request failed. --file-path");
+			}
+		}
+		
 	}
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
@@ -36,13 +65,6 @@ public class SDFSCmdline {
 								"Returns io file attributes such as dedup rate and file io statistics. " +
 								"\n e.g. --file-info --file-path=<path to file or folder>")
 						.hasArg(false).create());
-		options
-		.addOption(OptionBuilder
-				.withLongOpt("snapshot")
-				.withDescription(
-						"Creates a snapshot for a particular file or folder.\n e.g. --snapshot " +
-						"--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
-				.hasArg(false).create());
 		options
 		.addOption(OptionBuilder
 				.withLongOpt("snapshot")
@@ -68,9 +90,10 @@ public class SDFSCmdline {
 		.addOption(OptionBuilder
 				.withLongOpt("dedup-file")
 				.withDescription(
-						"Flushes to buffer of a praticular file.\n e.g. --flush-file-buffers " +
+						"Deduplicates all file blocks if set to true, otherwise it will only dedup blocks that are" +
+						" already stored in the DSE.\n e.g. --dedup-file=true " +
 						"--file-path=<file to flush>")
-				.hasArg(false).create());
+				.withArgName("true|false").create());
 		options
 		.addOption(OptionBuilder
 				.withLongOpt("file-path")
@@ -100,20 +123,7 @@ public class SDFSCmdline {
 	
 	public static void main(String [] args) throws Exception {
 		BasicConfigurator.configure();
-		StringBuilder sb = new StringBuilder();
-		Formatter formatter = new Formatter(sb);
-	    System.out.printf ("%-10.10s %-10.10s %-10.10s\n", "one", "two", "three");
-	    System.out.printf ("%-10.10s %-10.10s %-10.10s\n", "one", "two", "three");
-	    System.out.printf ("%-10.10s %-10.10s %-10.10s\n", "one", "two", "three");
-	    formatter.format("%-10.10s %-10.10s %-10.10s", "one", "two", "three\n");
-	    formatter.format("%-10.10s %-10.10s %-10.10s", "one", "two", "three\n");
-	    formatter.format("%-10.10s %-10.10s %-10.10s", "four", "five", "six\n");
-	    formatter.format("%-10.10s %-10.10s %-10.10s", "one", "two", "three\n");
-	    formatter.format("%-10.10s %-10.10s %-10.10s", "four", "five", "six\n");
-	    System.out.println(sb);
 		parseCmdLine(args);
-		
-	    // Send all output to the Appendable object sb
 	    
 	}
 }
