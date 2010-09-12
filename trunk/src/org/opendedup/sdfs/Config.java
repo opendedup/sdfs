@@ -39,6 +39,7 @@ public class Config {
 			File file = new File(fileName);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
+			
 			Document doc = db.parse(file);
 			doc.getDocumentElement().normalize();
 			
