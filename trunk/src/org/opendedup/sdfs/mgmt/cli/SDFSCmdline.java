@@ -1,8 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
-import java.util.Formatter;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -129,8 +126,12 @@ public class SDFSCmdline {
 	
 	public static void main(String [] args) throws Exception {
 		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.INFO);
+		Logger.getRootLogger().setLevel(Level.ERROR);
+		try {
 		parseCmdLine(args);
+		}catch(Exception e) {
+			System.out.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
+		}
 	    
 	}
 }

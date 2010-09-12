@@ -25,7 +25,7 @@ public class MgmtServerConnection {
 		}
 	}
 
-	private static InputStream connectAndGet(String url) throws IOException {
+	private static InputStream connectAndGet(String url) {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "Test Client");
 
@@ -38,8 +38,9 @@ public class MgmtServerConnection {
 			return method.getResponseBodyAsStream();
 
 		} catch (Exception e) {
-			throw new IOException("Unable to process command "
-					+ method.getQueryString());
+			System.err.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
+			System.exit(-1);
+			return null;
 		} 
 
 	}

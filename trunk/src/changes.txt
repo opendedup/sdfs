@@ -1,3 +1,11 @@
+Version 0.9.5 9/12/2010
+	This version focuses on porting SDFS to Windows. SDFS can now be mounted on Windows (tested with Windows 7). Dokan and Java 7(32 bit) 
+	are required for Windows Support. Windows support is experimental and not well tested.
+	
+	Enhancements :
+	* Windows (32bit) Support. 
+	* New Command Line Interface for getting file statistics and creating snapshots. 
+	
 Version 0.9.4 8/27/2010
 	This version focuses on enabling cloud based storage deduplication. The storage backend for the dedup storage engine has been rewritten to
 	allow for cloud storage. Amazon S3 is the first storage provider that has been added but others will be added as requested. Basically all 
