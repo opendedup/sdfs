@@ -1,32 +1,31 @@
 What is this?
 
-  A deduplicated file system based on fuse.
+  A deduplicated file system.
 
 System Requirements
   
-  * Windows (XP,Vista,2003,2008) Distribution. The application was tested and developed on Windows 7 (32bit)
+  * Windows (7,XP,Vista,2003,2008) Distribution. The application was tested and developed on Windows 7 (32bit)
   * Dokan 5.3+.  Dokan can be downloaded from http://dokan-dev.net/en/
   * 2 GB of Available RAM
-  * Java 7 (32 bit) - available at https://jdk7.dev.java.net/
+  * Java 7 (32 bit) - included in package.
 
 
 Getting Started
 
-  Step 1: Set your JAVA_HOME to the path of the java 1.7 jdk or jre folder, or edit the path in the shell scripts 
-	(mount.sdfs and mkfs.sdfs) to reflect the java path To set JAVA_HOME:
-	Right click My Computer and select Properties.
-	On the Advanced tab, select Environment Variables, and then edit JAVA_HOME to point to where the JDK software is located,
-	for example, C:\Program Files\Java\jre7.
-
-  Step 2: Create an sdfs file system.
-	To create and SDFS file System you must run the following command from within the SDFS binary directory. Make sure you have "Full Control
-	permissions to the "c:\program files\sdfs" directory.:
-		
+  Step 1: Install the Dokan library and driver. It can be downloaded from:
+  	http://dokan-dev.net/wp-content/uploads/dokaninstall_053.exe
+  
+  Step 1: Create an sdfs file system.
+	To create and SDFS file System you must run the mksdfs command from within the SDFS binary directory. Make sure you have "Full Control
+	permissions to the "c:\program files\sdfs" directory.
+	
+	Example to create a SDFS volume:
+	
 		mksdfs --volume-name=<volume-name> --volume-capacity=<capacity>
 	      e.g.
 		mksdfs --volume-name=sdfs_vol1 --volume-capacity=100GB
 
-  Step 3: Mount the sdfs
+  Step 2: Mount the sdfs
 
 	To mount SDFS run the following command:
 		mountsdfs -v <volume-name> -m <mount-point>
@@ -38,7 +37,23 @@ Known Limitation(s)
 	Testing has been limited thus far. Please test and report bugs	
 	Graceful exit if physical disk capacity is reached. ETA : Will be implemented shortly 
 	Maximum individual filesize within sdfs currently 250GB at 4k chunks and multiples of that at higher chunk sizes.
+	Only one SDFS volume can be mounted at a time.
+
+Performance :
+
+	By default SDFS on Windows is single threaded and this will be changed in the future once more testing is done. Based on testing, a single
+	threaded SDFS volume will write at about 15 MB/s.  
+	To enable faster throughput multithreading can be enabled either when the volume is created on within the XML file. To enable 
+	multithreading at volume creation add  "--io-safe-close=false" as a command line option to mksdfs. Otherwise edit the xml configuration
+	file (<volume-name>-volume-cfg.xml) within c:\program files\sdfs\etc and set "io-saf-close=false" .
 	
+	Example to create a SDFS volume with multi-threaded support:
+	
+		mksdfs --volume-name=<volume-name> --volume-capacity=<capacity> --io-safe-close=false
+		
+	Safe close prevents the file from closing when commanded by the filesystem, but is instead closed based on inactivity. Setting this to
+	"false" could cause corruption if the file is still open while the system crashes.
+
 Data Removal
 	
 	SDFS uses a batch process to remove unused blocks of hashed data.This process is used because the file-system is 
@@ -124,9 +139,9 @@ Tips and Tricks
     2. Sign up for S3 data storage
     3. Get your Access Key ID and Secret Key ID.
     4. Make an SDFS volume using the following parameters:
-    	mkfs.sdfs  --volume-name=<volume name> --volume-capacity=<volume capacity> --aws-enabled=true --aws-access-key=<the aws assigned access key> --aws-bucket-name=<a universally unique bucket name such as the aws-access-key> --aws-secret-key=<assigned aws secret key> --chunk-store-encrypt=true
+    	mksdfs  --volume-name=<volume name> --volume-capacity=<volume capacity> --aws-enabled=true --aws-access-key=<the aws assigned access key> --aws-bucket-name=<a universally unique bucket name such as the aws-access-key> --aws-secret-key=<assigned aws secret key> --chunk-store-encrypt=true
     5. Mount volume and go to town!
-    	mount.sdfs -v <volume name> -m <mount point>
+    	mountsdfs -v <volume name> -m <mount point>
     				
 
-8/30/10
+9/12/10
