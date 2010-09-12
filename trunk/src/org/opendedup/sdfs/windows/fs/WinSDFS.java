@@ -75,7 +75,7 @@ import net.decasdev.dokan.WinError;
 public class WinSDFS implements DokanOperations {
 	/** fileName -> MemFileInfo */
 	// TODO FIX THIS
-	final static int volumeSerialNumber = 6442;
+	final static int volumeSerialNumber = 64426442;
 	/** Next handle */
 	long nextHandleNo = 1;
 	final long rootCreateTime = FileTimeUtils.toFileTime(new Date());
@@ -520,7 +520,7 @@ public class WinSDFS implements DokanOperations {
 		File _f = new File(mountedVolume + path);
 		if (!_f.exists()) {
 			_f = null;
-			log.debug("No such node");
+			log.info("No such node " + path);
 			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
 		}
 		return _f;
