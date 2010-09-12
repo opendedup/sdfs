@@ -17,11 +17,15 @@ public class FDisk {
         public FDisk() {
                 long start = System.currentTimeMillis();
                 File f = new File(Main.dedupDBStore);
+                try{
                 this.traverse(f);
                 SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / 1000
                                 + "] seconds to check [" + files + "]. Found ["
                                 + this.corruptFiles + "] corrupt files");
-        }
+                }catch(Exception e) {
+                	 SDFSLogger.getLog().info("fdisk failed",e);
+                }
+        } 
 
         private void traverse(File dir) {
 
