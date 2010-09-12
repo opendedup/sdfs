@@ -79,7 +79,7 @@ public class MgmtWebServer implements Container {
 	public static void start() {
 		try {
 			Container container = new MgmtWebServer();
-			Connection connection = new SocketConnection(container);
+			connection = new SocketConnection(container);
 			SocketAddress address = new InetSocketAddress("localhost", 6442);
 			connection.connect(address);
 			SDFSLogger.getLog().info("Management WebServer Started at " + address.toString());

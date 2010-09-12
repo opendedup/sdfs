@@ -45,8 +45,9 @@ public class OSValidator{
 	public static String getProgramBasePath () {
 		if(isUnix() || isMac())
 			return "/opt/sdfs/";
-		else
+		else {
 			return System.getenv("programfiles") + File.separator + "sdfs" + File.separator;
+		}
 		
 	}
 	

@@ -1,10 +1,11 @@
 Version 0.9.5 9/12/2010
 	This version focuses on porting SDFS to Windows. SDFS can now be mounted on Windows (tested with Windows 7). Dokan and Java 7(32 bit) 
-	are required for Windows Support. Windows support is experimental and not well tested.
+	are required for Windows Support. Windows support is experimental and not well tested. All features should work the same own Windows
+	as they do on Linux except for permissions and symlinks. SDFS on Windows currently has no permissions.
 	
 	Enhancements :
 	* Windows (32bit) Support. 
-	* New Command Line Interface for getting file statistics and creating snapshots. 
+	* New Command Line Interface for getting file statistics and creating snapshots. Command line help is available using sdfscli --help. 
 	
 Version 0.9.4 8/27/2010
 	This version focuses on enabling cloud based storage deduplication. The storage backend for the dedup storage engine has been rewritten to
