@@ -10,6 +10,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 public class SDFSCmdline {
 	public static void parseCmdLine(String[] args) throws Exception {
@@ -23,9 +24,11 @@ public class SDFSCmdline {
 		if(cmd.hasOption("file-info")) {
 			if(cmd.hasOption("file-path")) {
 				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
+				
 			}else{
 				System.out.println("file info request failed. --file-path option is required");
 			}
+			System.exit(0);
 		}
 		if(cmd.hasOption("snapshot")) {
 			if(cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
@@ -33,6 +36,7 @@ public class SDFSCmdline {
 			}else{
 				System.out.println("snapshot request failed. --file-path and --snapshot-path options are required");
 			}
+			System.exit(0);
 		}
 		if(cmd.hasOption("flush-file-buffers")) {
 			if(cmd.hasOption("file-path")) {
@@ -40,6 +44,7 @@ public class SDFSCmdline {
 			}else{
 				System.out.println("flush file request failed. --file-path");
 			}
+			System.exit(0);
 		}
 		if(cmd.hasOption("flush-all-buffers")) {
 				ProcessFlushBuffersCmd.runCmd("all","/");
@@ -50,6 +55,7 @@ public class SDFSCmdline {
 			}else{
 				System.out.println("dedup file request failed. --file-path");
 			}
+			System.exit(0);
 		}
 		
 	}
@@ -123,6 +129,7 @@ public class SDFSCmdline {
 	
 	public static void main(String [] args) throws Exception {
 		BasicConfigurator.configure();
+		Logger.getRootLogger().setLevel(Level.INFO);
 		parseCmdLine(args);
 	    
 	}
