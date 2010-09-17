@@ -15,6 +15,4 @@ public class SDFSLogger {
 	public static Logger getLog() {
 		return log;
 	}
-
-
 }
