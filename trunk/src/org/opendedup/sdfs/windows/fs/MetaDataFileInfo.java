@@ -27,8 +27,8 @@ package org.opendedup.sdfs.windows.fs;
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
 
 
+
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
-import gnu.trove.list.array.TByteArrayList;
 
 import java.util.Date;
 
@@ -38,6 +38,7 @@ import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.util.SDFSLogger;
 
 public class MetaDataFileInfo {
 	static long nextFileIndex = 2;
@@ -61,11 +62,15 @@ public class MetaDataFileInfo {
 		creationTime = FileTimeUtils.toFileTime(new Date(mf.getTimeStamp()));
 		lastAccessTime = FileTimeUtils.toFileTime(new Date(mf.getLastAccessed()));
 		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));
+		SDFSLogger.getLog().debug("created file info for " + fileName);
 	}
 
 	Win32FindData toWin32FindData() {
-		return new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
-				getFileSize(), 0, 0, FilenameUtils.getName(fileName), Utils.toShortName(fileName));
+		String lName = FilenameUtils.getName(fileName);
+		String sName = Utils.toShortName(fileName);
+		Win32FindData d=  new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
+				getFileSize(), 0, 0, lName, sName);
+		return d;
 	}
 
 	ByHandleFileInformation toByHandleFileInformation() {

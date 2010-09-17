@@ -122,9 +122,9 @@ Tips and Tricks
 
 	Memory:
 	
-	 The mount.sdfs shell script currently allocates up to 2GB of RAM for the SDFS file system. This is fine for SDFS file systems of around
+	 The mountsdfs shell script currently allocates up to 2GB of RAM for the SDFS file system. This is fine for SDFS file systems of around
 	 200GB for 4k chunk size and around 6TB for 128k chunk size. To expand the memory edit the "-Xmx2g" within mount.sdfs script to something
-	 better for your environment. Each stored chunk takes up approximately 33 bytes of RAM.To calculate how much RAM you will need for a 
+	 better for your environment. Each stored chunk takes up approximately 33 bytes of RAM. To calculate how much RAM you will need for a 
 	 specific volume divide the volume size (in bytes) by the chunk size (in bytes) and multiply that times 33.
 
     		Memory Requirements Calculation: (volume size/chunk size)*33

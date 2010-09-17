@@ -30,10 +30,14 @@ public class FDisk {
         private void traverse(File dir) {
 
                 if (dir.isDirectory()) {
+                	try {
                         String[] children = dir.list();
                         for (int i = 0; i < children.length; i++) {
                                 traverse(new File(dir, children[i]));
                         }
+                	}catch(Exception e) {
+                		SDFSLogger.getLog().error("error traversing " + dir.getPath(),e);
+                	}
                 } else {
                         if (dir.getPath().endsWith(".map")) {
                                 try {
