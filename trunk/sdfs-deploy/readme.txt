@@ -1,5 +1,3 @@
-SDFS
-
 What is this?
 
   A deduplicated file system based on fuse.
@@ -7,8 +5,9 @@ What is this?
 System Requirements
   
   * x64 Linux Distribution. The application was tested and developed on ubuntu 9.1
-  * Fuse 2.8+ . Debian Packages for this are available at http://code.google.com/p/dedupfilesystem-sdfs/downloads/list
-  * 2 GB of RAM
+  * Fuse 2.7+ (with command line switch -o direct_io,allow_other,fsname=SDFS). Fuse 2.8 is preferred - Debian Packages
+    for this are available at http://code.google.com/p/dedupfilesystem-sdfs/downloads/list
+  * 2 GB of Available RAM
   * Java 7 - available at https://jdk7.dev.java.net/
 
 Optional Packages
@@ -38,9 +37,25 @@ Getting Started
 Known Limitation(s)
 
 	Testing has been limited thus far. Please test and report bugs	
-	Deleting of data and reclaiming of space has not been implemented yet. ETA: This will be available in the coming days.
 	Graceful exit if physical disk capacity is reached. ETA : Will be implemented shortly 
-	Maximum filesize it currently 250GB
+	Maximum individual filesize within sdfs currently 250GB at 4k chunks and multiples of that at higher chunk sizes.
+	
+Data Removal
+	
+	SDFS uses a batch process to remove unused blocks of hashed data.This process is used because the file-system is 
+	decoupled from the back end storage (ChunkStore) where the actual data is held. As hashed data becomes stale they 
+	are removed from the chunk store. The process for determining and removing stale chunks is as follows.
+		
+		1. SDFS file-system informs the ChunkStore what chunks are currently in use. This happens when
+		chunks are first created and then every 6 hours on the hour after that.
+		2. The Chunk Store checks for data that has not been claimed, in the last two days, by the SDFS file system 
+		every 24 hours.
+		3. The chunks that have not been claimed in the last 25 hours are put into a pool and overwritten as new data
+		is written to the ChunkStore.
+
+	All of this is configurable and can be changed after a volume is written to. Take a look at cron format for more details.
+
+		
 
 Tips and Tricks
 
@@ -118,8 +133,34 @@ Tips and Tricks
 
 	Memory:
 	
-	The mount.sdfs shell script currently allocates up to 2GB of RAM for the SDFS file system. This is fine for SDFS file systems of around 200GB for 4k chunk size
-	and around 6TB for 128k chunk size. To expand the memory edit the "-Xmx2g" within mount.sdfs script to something better for your environment.
+	 The mount.sdfs shell script currently allocates up to 2GB of RAM for the SDFS file system. This is fine for SDFS file systems of around 200GB for 4k chunk
+	 size and around 6TB for 128k chunk size. To expand the memory edit the "-Xmx2g" within mount.sdfs script to something better for your environment. Each 
+	 stored chunk takes up approximately 33 bytes of RAM.To calculate how much RAM you will need for a specific volume divide the volume size (in bytes) by 
+	 the chunk size (in bytes) and multiply that times 33.
+
+    		Memory Requirements Calculation: (volume size/chunk size)*33
+    
+    Cloud Storage and Amazon S3 Web Serivce
+    
+    It is now possible to store dedup chunks to the Amazon S3 cloud storage service. This will allow you to store unlimited amounts of data without the need
+    for local storage. AES 256 bit encryption and compression (default) is provided for storing data to AWS. It is suggested that the chunk size be set to 
+    the default (128k) to allow for maximum compression and fewest round trips for data. 
+    To Setup AWS enable dedup volume follow these steps:
+    1. Go to http://aws.amazon.com and create an account.
+    2. Sign up for S3 data storage
+    3. Get your Access Key ID and Secret Key ID.
+    4. Make an SDFS volume using the following parameters:
+    	./mkfs.sdfs  --volume-name=<volume name> --volume-capacity=<volume capacity> --aws-enabled=true --aws-access-key=<the aws assigned access key> --aws-bucket-name=<a universally unique bucket name such as the aws-access-key> --aws-secret-key=<assigned aws secret key> --chunk-store-encrypt=true
+    5. Mount volume and go to town!
+    	./mount.sdfs <volume name> <mount point>
+    	
+	Using fuse 2.7:
+
+	Fuse 2.8 adds the big_writes option which greatly increases performance. In addition fuse 2.8 works much better for NFS mounts. If you need to use fuse 2.7 
+	try mounting the sdfs filesystem with different fuse options. This can be done by a suggetion for fuse options are "direct_io,allow_other,fsname=SDFS".
+	Take a look at this example:
+
+	sudo ./mount.sdfs -v sdfs_vol1 -m /media/sdfs  -o direct_io,allow_other,fsname=SDFS
 			
 
-3/12/10
+4/4/10
