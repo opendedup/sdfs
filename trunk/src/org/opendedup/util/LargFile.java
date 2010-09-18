@@ -45,7 +45,7 @@ public class LargFile {
 	
 
 	public static void main(String[] args) throws IOException {
-			writeFile("/media/dedup/test.bin", 10,1048576);
+			writeFile("/media/dedup/test.bin", 30,1048576);
 	}
 
 }

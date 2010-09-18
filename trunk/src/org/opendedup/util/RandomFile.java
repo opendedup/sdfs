@@ -26,8 +26,8 @@ public class RandomFile {
 	}
 
 	public static void main(String[] args) throws IOException {
-		long size = 200 * 1024L * 1024L * 1024L;
-		writeRandomFile("/home/annesam/rnd.bin", size);
+		long size = 100 * 1024L * 1024L * 1024L;
+		writeRandomFile("/media/dedup/rnd.bin", size);
 	}
 
 }

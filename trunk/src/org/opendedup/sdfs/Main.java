@@ -19,7 +19,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "0.9.5";
+	public static String version = "0.9.6";
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk store.
