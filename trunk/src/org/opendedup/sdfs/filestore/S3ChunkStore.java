@@ -1,17 +1,11 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
-
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.opendedup.sdfs.Main;
-import org.opendedup.util.SDFSLogger;
-
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -19,9 +13,10 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.HashFunctions;
+import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 /**

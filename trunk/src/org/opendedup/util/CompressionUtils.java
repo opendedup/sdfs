@@ -11,7 +11,6 @@ import java.util.zip.Inflater;
 //import org.h2.compress.LZFOutputStream;
 
 public class CompressionUtils {
-	@SuppressWarnings("unused")
 	
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {

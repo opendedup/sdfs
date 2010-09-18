@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;

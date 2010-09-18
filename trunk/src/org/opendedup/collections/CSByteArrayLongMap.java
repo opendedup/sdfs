@@ -99,7 +99,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			try {
 				m = maps[hashRoute];
 				if (m == null) {
-					int propsize = (int) (size / maps.length);
+					//int propsize = (int) (size / maps.length);
 					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 					//SDFSLogger.getLog().debug("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));

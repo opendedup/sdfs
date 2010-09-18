@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
