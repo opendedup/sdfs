@@ -83,6 +83,8 @@ public class MetaDataFileInfo {
 	}
 
 	static long getNextFileIndex() {
+		if(nextFileIndex == Long.MAX_VALUE)
+			nextFileIndex = 0;
 		return nextFileIndex++;
 	}
 }
