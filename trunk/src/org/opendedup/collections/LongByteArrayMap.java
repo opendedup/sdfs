@@ -27,7 +27,7 @@ public class LongByteArrayMap implements AbstractMap {
 	int arrayLength = 0;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
-	private ReentrantLock mmaplock = new ReentrantLock();
+	//private ReentrantLock mmaplock = new ReentrantLock();
 	private boolean closed = true;
 	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
@@ -35,6 +35,8 @@ public class LongByteArrayMap implements AbstractMap {
 	private long startMap = 0;
 	private int readBufferSize = 50 * 1024*1024;
 	private long endPos = readBufferSize;
+	private long softReadBufferSize = 32768;
+	File dbFile = null;
 	
 
 	public LongByteArrayMap(int arrayLength, String filePath)
@@ -132,10 +134,10 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.lock();
 			RandomAccessFile bdbf = null;
 			try {
-				File f = new File(filePath);
-				boolean fileExists = f.exists();
-				if (!f.getParentFile().exists()) {
-					f.getParentFile().mkdirs();
+				dbFile = new File(filePath);
+				boolean fileExists = dbFile.exists();
+				if (!dbFile.getParentFile().exists()) {
+					dbFile.getParentFile().mkdirs();
 				}
 				bdbf = new RandomAccessFile(filePath, this.fileParams);
 				SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
@@ -185,15 +187,12 @@ public class LongByteArrayMap implements AbstractMap {
 
 	private void setMapFileLength(long start,int len) throws IOException {
 		RandomAccessFile bdbf = null;
-		this.mmaplock.lock();
 		try {
 			SDFSLogger.getLog().info("setting buffer to " + start + " " + len + " current start is " + start);
 			bdbf = new RandomAccessFile(filePath, this.fileParams);
-			if ((start + len) > bdbf.length()) {
-					bdbf.setLength(start + len);
-					SDFSLogger.getLog().info("resized file to " + bdbf.length());
-			}
+			bdb.force();
 			this.bdb =null;
+			System.gc();
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
 		} catch (IOException e) {
