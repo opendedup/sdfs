@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.SDFSLogger;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;

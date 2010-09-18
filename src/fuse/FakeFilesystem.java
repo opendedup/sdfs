@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendedup.util.SDFSLogger;
 
 public class FakeFilesystem implements Filesystem3, XattrSupport {
 	private static final Log log = LogFactory.getLog(FakeFilesystem.class);
