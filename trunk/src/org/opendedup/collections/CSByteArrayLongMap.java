@@ -575,7 +575,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 		kFc.force(false);
 		oldkBuf.clear();
 		oldkBuf = null;
-
 	}
 
 	public boolean remove(ChunkData cm) throws IOException {
