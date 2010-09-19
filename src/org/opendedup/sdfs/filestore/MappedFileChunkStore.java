@@ -30,8 +30,8 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
  *         bytes)|date last accessed (8 bytes)| chunk len (4 bytes)|chunk
  *         position (8 bytes)]
  */
-public class FileChunkStore implements AbstractChunkStore {
-	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
+public class MappedFileChunkStore implements AbstractChunkStore {
+	private static ArrayList<MappedFileChunkStore> stores = new ArrayList<MappedFileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
 	private static final int readAheadPages = Main.chunkStoreReadAheadPages;
 	private static final int MAX_ENTRIES = 10485760 / Main.chunkStorePageSize;
@@ -53,7 +53,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @param name
 	 *            the name of the chunk store.
 	 */
-	public FileChunkStore(String name) {
+	public MappedFileChunkStore(String name) {
 		SDFSLogger.getLog().info("Opening Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
@@ -412,7 +412,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	}
 
 	public static void closeAll() {
-		Iterator<FileChunkStore> iter = stores.iterator();
+		Iterator<MappedFileChunkStore> iter = stores.iterator();
 		while (iter.hasNext()) {
 			try {
 				iter.next().close();
