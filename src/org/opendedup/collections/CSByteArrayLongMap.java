@@ -572,6 +572,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				cm = null;
 			}
 		}
+		kFc.force(false);
 		oldkBuf.clear();
 		oldkBuf = null;
 
