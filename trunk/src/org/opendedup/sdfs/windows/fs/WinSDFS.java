@@ -183,7 +183,7 @@ public class WinSDFS implements DokanOperations {
 
 			case CREATE_NEW:
 				try {
-					log.info("creating " + fileName);
+					log.debug("creating " + fileName);
 					MetaDataDedupFile mf = MetaFileStore.getMF(path);
 					mf.sync();
 				} catch (Exception e) {
@@ -194,7 +194,7 @@ public class WinSDFS implements DokanOperations {
 			case CREATE_ALWAYS:
 			case OPEN_ALWAYS:
 				try {
-					log.info("creating " + fileName);
+					log.debug("creating " + fileName);
 					MetaDataDedupFile mf = MetaFileStore.getMF(path);
 					mf.sync();
 				} catch (Exception e) {
@@ -501,7 +501,7 @@ public class WinSDFS implements DokanOperations {
 				} catch (Exception e) {
 
 				} finally {
-					log.info("number of channels is "
+					log.debug("number of channels is "
 							+ this.dedupChannels.size());
 					channelLock.unlock();
 				}
@@ -521,7 +521,7 @@ public class WinSDFS implements DokanOperations {
 			} catch (IOException e) {
 				log.error("unable to close channel" + handleNo, e);
 			} finally {
-				log.info("number of channels is " + this.dedupChannels.size());
+				log.debug("number of channels is " + this.dedupChannels.size());
 			}
 
 		}
@@ -540,7 +540,7 @@ public class WinSDFS implements DokanOperations {
 		File _f = new File(mountedVolume + path);
 		if (!_f.exists()) {
 			_f = null;
-			log.info("No such node " + path);
+			log.debug("No such node " + path);
 			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
 		}
 		return _f;
