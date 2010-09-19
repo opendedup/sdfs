@@ -187,7 +187,8 @@ public class LongByteArrayMap implements AbstractMap {
 		RandomAccessFile bdbf = null;
 		try {
 			bdbf = new RandomAccessFile(filePath, this.fileParams);
-			bdbf.setLength(start + len); 
+			if(bdbf.length() <(start + len))
+				bdbf.setLength(start + len);
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
