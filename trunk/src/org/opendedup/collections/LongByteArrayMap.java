@@ -114,7 +114,6 @@ public class LongByteArrayMap implements AbstractMap {
 					return val;
 			} catch (Exception e) {
 			} finally {
-				this.hashlock.unlock();
 			}
 		}
 		return null;
@@ -192,7 +191,6 @@ public class LongByteArrayMap implements AbstractMap {
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
-			
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data to expand file at " + start
@@ -229,7 +227,6 @@ public class LongByteArrayMap implements AbstractMap {
 				mlen = eI;
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
-				System.gc();
 				bPos = 0;
 			} else {
 				mlen = mlen + bPos + eI;
