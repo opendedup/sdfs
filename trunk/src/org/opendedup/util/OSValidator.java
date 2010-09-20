@@ -15,6 +15,8 @@ public class OSValidator{
 		}else{
 			System.out.println("Your OS is not support!!");
 		}
+		System.out.println(Runtime.getRuntime().maxMemory());
+		System.out.println(Runtime.getRuntime().availableProcessors());
 	}
 	
  
