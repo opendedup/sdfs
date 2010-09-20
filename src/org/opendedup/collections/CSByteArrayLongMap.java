@@ -54,7 +54,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 	TLongHashSet freeSlots = new TLongHashSet(1000000);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
-	private long lastAccessedTime =  System.currentTimeMillis();
 
 	public CSByteArrayLongMap(long maxSize, short arraySize, String fileName)
 			throws IOException, HashtableFullException {
@@ -100,7 +99,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			try {
 				m = maps[hashRoute];
 				if (m == null) {
-					//int propsize = (int) (size / maps.length);
+					int propsize = (int) (size / maps.length);
 					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 					//SDFSLogger.getLog().debug("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));
@@ -147,17 +146,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 				this.fileParams);
 		long startTime = System.currentTimeMillis();
 		int z = 0;
-		long currentTime = System.currentTimeMillis();
 		for (int i = 0; i < maps.length; i++) {
 			try {
 				maps[i].iterInit();
 				long val = 0;
 				while (val != -1 && !this.closed) {
 					try {
-						if(currentTime < (System.currentTimeMillis() -1000)) {
-							SDFSLogger.getLog().warn("Sleep event detected! Aborting hash claim");
-							throw new IOException("Sleep detected");
-						}
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
 						if (val != -1) {
@@ -169,9 +163,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 						}
 					} catch (Exception e) {
 					} finally {
-						currentTime = System.currentTimeMillis();
 						this.iolock.unlock();
 					}
+
 				}
 			} catch (NullPointerException e) {
 
@@ -306,7 +300,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		this.lastAccessedTime = System.currentTimeMillis();
 		return this.getMap(key).containsKey(key);
 	}
 
@@ -324,16 +317,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 			try {
 				_fs = new RandomAccessFile(this.fileName, "r");
 				long rem = 0;
-				long currentTime =  System.currentTimeMillis();
 				for (int i = 0; i < size; i++) {
-					if(currentTime < (System.currentTimeMillis() -300)) {
-						SDFSLogger.getLog().info("Sleep detected. Exiting removing records because timeout was exceeded");
-						throw new IOException("Sleep detected");
-					}
-					if(time > this.lastAccessedTime) {
-						SDFSLogger.getLog().info("Sleep detected. Exiting removing records because timeout was exceeded");
-						throw new IOException("Sleep detected");
-					}
 					byte[] raw = new byte[ChunkData.RAWDL];
 					try {
 						_fs.read(raw);
@@ -362,7 +346,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					} catch (BufferUnderflowException e) {
 
 					} finally {
-						currentTime =  System.currentTimeMillis();
+
 					}
 
 				}
@@ -378,13 +362,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 				_fs = null;
 				this.flushBuffer(true);
 				this.removingChunks = false;
+
 			}
 			System.gc();
 		}
 	}
 
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
-		this.lastAccessedTime = System.currentTimeMillis();
 		if(this.kSz >= this.maxSz)
 			throw new IOException("entries is greater than or equal to the maximum number of entries. You need to expand" +
 			"the volume or DSE allocation size");
@@ -525,7 +509,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public long get(byte[] key) throws IOException {
-		this.lastAccessedTime = System.currentTimeMillis();
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
@@ -542,7 +525,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public byte[] getData(byte[] key) throws IOException {
-		this.lastAccessedTime = System.currentTimeMillis();
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long ps = this.get(key);
@@ -590,13 +572,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 				cm = null;
 			}
 		}
-		kFc.force(false);
 		oldkBuf.clear();
 		oldkBuf = null;
+
 	}
 
 	public boolean remove(ChunkData cm) throws IOException {
-		this.lastAccessedTime = System.currentTimeMillis();
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
