@@ -43,7 +43,7 @@ public class VolumeConfigWriter {
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
 	boolean safe_sync = false;
-	short write_threads = 16;
+	int write_threads = (short)(Runtime.getRuntime().availableProcessors()*4);
 	boolean dedup_files = true;
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
@@ -289,7 +289,7 @@ public class VolumeConfigWriter {
 		io.setAttribute("safe-sync", Boolean.toString(this.safe_sync));
 		io.setAttribute("system-read-cache", Integer
 				.toString(this.system_read_cache));
-		io.setAttribute("write-threads", Short.toString(this.write_threads));
+		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		root.appendChild(io);
 		Element perm = xmldoc.createElement("permissions");

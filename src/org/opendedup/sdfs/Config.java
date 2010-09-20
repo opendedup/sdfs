@@ -143,7 +143,7 @@ public class Config {
 		Main.safeClose = Boolean.parseBoolean(cache.getAttribute("safe-close"));
 		// Makes sure writes are sync'd when set to true.
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
-		Main.writeThreads = Short.parseShort(cache
+		Main.writeThreads = Integer.parseInt(cache
 				.getAttribute("write-threads"));
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));

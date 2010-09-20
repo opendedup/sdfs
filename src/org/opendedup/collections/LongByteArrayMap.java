@@ -32,14 +32,17 @@ public class LongByteArrayMap implements AbstractMap {
 	public int iterPos = 0;
 	public String fileParams = "rw";
 	private long startMap = 0;
-	private int maxReadBufferSize = 50 * 1024 * 1024;
+	private int maxReadBufferSize = 200 * 1024 * 1024;
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
-	private static boolean isWindows = OSValidator.isWindows();
-
+	private boolean smallMemory = false;
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
+		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			smallMemory = true;
+			this.maxReadBufferSize = 50 * 1024 * 1024;
+		}	
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
 		FREE = new byte[arrayLength];
@@ -50,6 +53,10 @@ public class LongByteArrayMap implements AbstractMap {
 
 	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
+		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			smallMemory = true;
+			this.maxReadBufferSize = 50 * 1024 * 1024;
+		}	
 		this.fileParams = fileParams;
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
@@ -193,7 +200,7 @@ public class LongByteArrayMap implements AbstractMap {
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
-			if(isWindows)
+			if(smallMemory)
 				System.gc();
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
