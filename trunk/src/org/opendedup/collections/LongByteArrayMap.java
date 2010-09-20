@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -31,10 +32,11 @@ public class LongByteArrayMap implements AbstractMap {
 	public int iterPos = 0;
 	public String fileParams = "rw";
 	private long startMap = 0;
-	private int maxReadBufferSize = 100 * 1024 * 1024;
+	private int maxReadBufferSize = 50 * 1024 * 1024;
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
+	private static boolean isWindows = OSValidator.isWindows();
 
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
@@ -191,6 +193,8 @@ public class LongByteArrayMap implements AbstractMap {
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
+			if(isWindows)
+				System.gc();
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data to expand file at " + start
