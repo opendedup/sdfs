@@ -62,6 +62,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			}
 			this.name = name;
 			f = new File(chunk_location + File.separator + name + ".chk");
+			if(!f.getParentFile().exists())
+				f.getParentFile().mkdirs();
 			p = f.toPath();
 			File posFile = new File(chunk_location + File.separator + name
 					+ ".pos");
