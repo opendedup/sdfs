@@ -298,7 +298,6 @@ public class SparseDedupFile implements DedupFile {
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal( "unable to write " + hash + " closing " + mf.getPath(), e);
-			this.forceClose();
 			throw new IOException(e);
 		} finally {
 			updatelock.unlock();
@@ -523,6 +522,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				this.writeCache();
 			} catch (Exception e) {
+				System.exit(0);
 			}
 			try {
 				this.bdb.sync();

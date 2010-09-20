@@ -18,7 +18,7 @@ import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
-public class LongByteArrayMap implements AbstractMap {
+public class ExpandingLongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
 	MappedByteBuffer bdb = null;
@@ -36,7 +36,7 @@ public class LongByteArrayMap implements AbstractMap {
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
 
-	public LongByteArrayMap(int arrayLength, String filePath)
+	public ExpandingLongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
@@ -46,7 +46,7 @@ public class LongByteArrayMap implements AbstractMap {
 		new SyncThread(this);
 	}
 
-	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
+	public ExpandingLongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
 		this.fileParams = fileParams;
 		this.arrayLength = arrayLength;
