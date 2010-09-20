@@ -398,7 +398,6 @@ public class WinSDFS implements DokanOperations {
 			throws DokanOperationException {
 		// log("[onDeleteDirectory] " + path);
 		File f = resolvePath(path);
-
 		if (!MetaFileStore.removeMetaFile(f.getPath())) {
 			log.debug("unable to delete folder " + f.getPath());
 			throw new DokanOperationException(WinError.ERROR_DIR_NOT_EMPTY);
@@ -413,7 +412,6 @@ public class WinSDFS implements DokanOperations {
 		File f = null;
 		try {
 			f = resolvePath(from);
-
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 			mf.renameTo(this.mountedVolume + to);
 			DedupFileChannel ch = this.dedupChannels.get(arg3.handle);
