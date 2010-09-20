@@ -116,13 +116,6 @@ public class WinSDFS implements DokanOperations {
 		DokanOptions dokanOptions = new DokanOptions();
 		dokanOptions.driveLetter = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
-		/*
-		if (!Main.safeClose)
-			dokanOptions.threadCount = Main.writeThreads;
-		else {
-			dokanOptions.threadCount = 1;
-		}
-		*/
 		this.driveLetter = driveLetter;
 		log.info("######## mounting " + mountedVolume + " to "
 				+ this.driveLetter + " #############");
