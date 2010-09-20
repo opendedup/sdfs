@@ -17,7 +17,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -36,11 +35,11 @@ public class LongByteArrayMap implements AbstractMap {
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
-	private boolean smallMemory = false;
+	//private boolean smallMemory = false;
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
-			smallMemory = true;
+			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
 		}	
 		this.arrayLength = arrayLength;
@@ -54,7 +53,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
-			smallMemory = true;
+			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
 		}	
 		this.fileParams = fileParams;
@@ -200,8 +199,6 @@ public class LongByteArrayMap implements AbstractMap {
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
-			if(smallMemory)
-				System.gc();
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data to expand file at " + start
