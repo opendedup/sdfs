@@ -43,7 +43,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile posRaf = null;
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
-	private static long bytesWritten = 0;
 	File f;
 	Path p;
 	private long currentLength = 0L;
@@ -51,7 +50,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
 	.concurrencyLevel(Main.writeThreads).build();
 	private byte[] FREE = new byte[Main.chunkStorePageSize];
-	private long farthestWrite = 0;
 
 	/**
 	 * 
@@ -80,7 +78,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			if (!newPos) {
 				posRaf.seek(0);
 				this.currentLength = posRaf.readLong();
-				this.farthestWrite = this.currentLength;
 			} else {
 				posRaf.seek(0);
 				posRaf.writeLong(currentLength);
@@ -212,7 +209,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		 */
 	}
 
-	private ReentrantLock furthestPositionlock = new ReentrantLock();
+	//private ReentrantLock furthestPositionlock = new ReentrantLock();
 
 	/*
 	 * (non-Javadoc)
@@ -240,17 +237,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			ch = raf.getChannel();
 			ch.position(start);
 			ch.write(buf);
-			furthestPositionlock.lock();
-			try {
-				if (ch.position() > this.farthestWrite) {
-					this.farthestWrite = ch.position();
-				}
-			} catch (Exception e) {
-			} finally {
-				this.furthestPositionlock.unlock();
-			}
-
-			bytesWritten = bytesWritten + chunk.length;
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal( "unable to write data at position " + start,
