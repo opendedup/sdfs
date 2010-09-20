@@ -189,7 +189,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			Path p = null;
 			try {
 				p = Paths.get(f.getPath());
-
 				if (f.isDirectory()) {
 					int uid = (Integer) p.getAttribute("unix:uid");
 					int gid = (Integer) p.getAttribute("unix:gid");
@@ -214,9 +213,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					int ctime = (int) (mf.getTimeStamp() / 1000L);
 					int mtime = (int) (mf.lastModified() / 1000L);
 					long fileLength = mf.length();
+					long actualBytes = (mf.getIOMonitor().getActualBytesWritten()*2)/1024;
+					if(actualBytes == 0 && mf.getIOMonitor().getActualBytesWritten() >0)
+						actualBytes = (Main.CHUNK_LENGTH*2)/1024;
 					getattrSetter.set(mf.getGUID().hashCode(), mode, 1, uid,
-							gid, 0, fileLength, (fileLength + BLOCK_SIZE - 1)
-									/ BLOCK_SIZE, atime, mtime, ctime);
+							gid, 0, fileLength, actualBytes, atime, mtime, ctime);
 				}
 			} catch (Exception e) {
 				log.error("unable to parse attributes " + path
