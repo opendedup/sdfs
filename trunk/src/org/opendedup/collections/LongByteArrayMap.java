@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -25,7 +26,6 @@ public class LongByteArrayMap implements AbstractMap {
 	int arrayLength = 0;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
-	// private ReentrantLock mmaplock = new ReentrantLock();
 	private boolean closed = true;
 	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
@@ -190,7 +190,6 @@ public class LongByteArrayMap implements AbstractMap {
 			if (bdbf.length() < (start + len))
 				bdbf.setLength(start + len);
 			this.bdb = null;
-			System.gc();
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
 			this.bdb.load();
 			
@@ -213,8 +212,8 @@ public class LongByteArrayMap implements AbstractMap {
 			int mlen = (int) (this.endPos - this.startMap);
 			if (mlen > this.maxReadBufferSize) {
 				mlen = this.maxReadBufferSize;
-			} else if (dbFile.length() <= this.maxReadBufferSize) {
-				mlen = (int) dbFile.length();
+			} else if ((dbFile.length() -propLen) <= this.maxReadBufferSize) {
+				mlen = (int) (dbFile.length()-propLen);
 			}
 			this.endPos = this.startMap + mlen;
 			this.setMapFileLength(startMap, mlen);
@@ -223,35 +222,21 @@ public class LongByteArrayMap implements AbstractMap {
 					.debug(
 							"expanded buffer to " + startMap + " end is "
 									+ this.endPos);
-		} else if (bPos >= (bdb.capacity() - FREE.length)) {
+		}else if(propLen >=(this.endPos - FREE.length)) {
 			int mlen = (int) (propLen - this.startMap);
-			if((propLen + this.maxReadBufferSize) < dbFile.length()) {
-				this.startMap = propLen;
-				mlen = this.maxReadBufferSize;
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
-				System.gc();
-			}
-			else if (mlen > this.maxReadBufferSize) {
+			if (mlen >= this.maxReadBufferSize) {
 				this.startMap = propLen;
 				mlen = eI;
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
 				System.gc();
-			} else if (bPos > eI) {
-				mlen = bPos + eI;
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
+				bPos = 0;
 			} else {
-				mlen = bdb.capacity() + eI;
+				mlen = mlen + bPos + eI;
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
 			}
-			bPos = (int) (propLen - startMap);
-			SDFSLogger.getLog().debug(
-					"reset buffer to " + startMap + " end is " + this.endPos);
 		}
-
 		return bPos;
 	}
 
