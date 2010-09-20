@@ -69,6 +69,11 @@ import org.opendedup.util.SDFSLogger;
 public class WinSDFS implements DokanOperations {
 	/** fileName -> MemFileInfo */
 	// TODO FIX THIS
+	public static final int FILE_CASE_PRESERVED_NAMES = 0x00000002;
+	public static final int FILE_FILE_COMPRESSION = 0x00000010;
+	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
+	public static final int FILE_UNICODE_ON_DISK = 0x00000004;
+	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES | FILE_UNICODE_ON_DISK| FILE_SUPPORTS_SPARSE_FILES;
 	final static int volumeSerialNumber = 64426442;
 	/** Next handle */
 	long nextHandleNo = 1;
@@ -452,6 +457,7 @@ public class WinSDFS implements DokanOperations {
 	public DokanVolumeInformation onGetVolumeInformation(String arg0,
 			DokanFileInfo arg1) throws DokanOperationException {
 		DokanVolumeInformation info = new DokanVolumeInformation();
+		info.fileSystemFlags = SUPPORTED_FLAGS;
 		info.volumeName = "Dedup Filesystem";
 		info.fileSystemName = "SDFS";
 		info.volumeSerialNumber = volumeSerialNumber;
