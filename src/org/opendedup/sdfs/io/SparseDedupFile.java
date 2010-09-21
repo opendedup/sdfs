@@ -608,7 +608,8 @@ public class SparseDedupFile implements DedupFile {
 			if (bdb == null)
 				this.initDB();
 		} catch (Exception e) {
-			throw new IOException(e.toString());
+			SDFSLogger.getLog().error("unable to init " + this.GUID,e);
+			throw new IOException(e);
 		}
 	}
 
