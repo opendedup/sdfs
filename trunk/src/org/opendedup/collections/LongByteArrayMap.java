@@ -31,7 +31,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public int iterPos = 0;
 	public String fileParams = "rw";
 	private long startMap = 0;
-	private int maxReadBufferSize = 200 * 1024 * 1024;
+	private int maxReadBufferSize = 500 * 1024 * 1024;
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
@@ -41,6 +41,7 @@ public class LongByteArrayMap implements AbstractMap {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
 			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
+			endPos = maxReadBufferSize;
 		}	
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
@@ -55,10 +56,11 @@ public class LongByteArrayMap implements AbstractMap {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
 			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
+			endPos = maxReadBufferSize;
 		}	
 		this.fileParams = fileParams;
 		this.arrayLength = arrayLength;
-		this.filePath = filePath;
+		this.filePath = filePath;		
 		FREE = new byte[arrayLength];
 		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
@@ -166,6 +168,7 @@ public class LongByteArrayMap implements AbstractMap {
 				this.bdb.load();
 				this.closed = false;
 			} catch (IOException e) {
+				SDFSLogger.getLog().error("unable to open file " + filePath + " to end position " + endPos);
 				throw e;
 			} catch (Exception e) {
 				throw new IOException(e);
@@ -232,7 +235,14 @@ public class LongByteArrayMap implements AbstractMap {
 			int mlen = (int) (propLen - this.startMap);
 			if (mlen >= this.maxReadBufferSize) {
 				this.startMap = propLen;
-				mlen = eI;
+				if(this.startMap + this.maxReadBufferSize <= dbFile.length()) {
+					mlen = this.maxReadBufferSize;
+				}else if(this.startMap + eI < dbFile.length()) {
+					mlen = (int)(dbFile.length() - startMap);
+				}
+				else {
+					mlen = eI;
+				}
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
 				bPos = 0;
@@ -381,10 +391,8 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel dstC = null;
 		try {
 			this.sync();
-
 			File dest = new File(destFilePath);
 			File src = new File(this.filePath);
-
 			if (dest.exists())
 				dest.delete();
 			else
