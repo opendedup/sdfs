@@ -191,7 +191,11 @@ public class CSByteArrayLongMap implements AbstractMap {
 	 * @throws FileNotFoundException
 	 */
 	public long setUp() throws IOException, HashtableFullException {
+		File _fs = new File(fileName);
 		boolean exists = new File(fileName).exists();
+		if(!_fs.getParentFile().exists()) {
+			_fs.getParentFile().mkdirs();
+		}
 		kRaf = new RandomAccessFile(fileName, this.fileParams);
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = kRaf.getChannel();

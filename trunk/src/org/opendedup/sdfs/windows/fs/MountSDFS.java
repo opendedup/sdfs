@@ -37,6 +37,7 @@ public class MountSDFS {
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
 		String volumeConfigFile = null;
+		String routingConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
@@ -55,7 +56,15 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("m"));
 			Main.volumeMountPoint = cmd.getOptionValue("m");
 		}
-		
+		if (cmd.hasOption("r")) {
+			File f = new File(cmd.getOptionValue("r").trim());
+			if (!f.exists()) {
+				System.out.println("Routing configuration file " + f.getPath()
+						+ " does not exist");
+				System.exit(-1);
+			}
+			routingConfigFile = f.getPath();
+		}
 		
 
 		if (cmd.hasOption("v")) {
@@ -67,7 +76,8 @@ public class MountSDFS {
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
-		} else if (cmd.hasOption("vc")) {
+		} 
+		else if (cmd.hasOption("vc")) {
 			File f = new File(cmd.getOptionValue("vc").trim());
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
@@ -92,8 +102,9 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(-1);
 		}
+		
 
-		SDFSService sdfsService = new SDFSService(volumeConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile,routingConfigFile);
 
 		try {
 			sdfsService.start();

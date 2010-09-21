@@ -1,3 +1,15 @@
+Version 0.9.6 9/20/2010
+	This versions focuses on fixes to Windows port of SDFS and memory utilization. 
+	
+	Fixes
+	* Windows : Error when deleting files has been fixed
+	* Linux : Fixed reporting "du -h". Now gives actual deduplication rates.
+		
+	Enhancements
+	* Files can now be an unlimited size. Files used to be limited to approximately 250GB in size. This has been expanded to the size
+	allotted by the underlying file system.
+	* Better memory utilization. Changes to file maps should allow for better memory utilization for larger files.
+
 Version 0.9.5 9/12/2010
 	This version focuses on porting SDFS to Windows. SDFS can now be mounted on Windows (tested with Windows 7). Dokan and Java 7(32 bit) 
 	are required for Windows Support. Windows support is experimental and not well tested. All features should work the same own Windows

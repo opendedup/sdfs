@@ -80,28 +80,35 @@ public class NetworkHCServer {
 				clientSocket.setTcpNoDelay(true);
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
-				SDFSLogger.getLog().fatal("Unable to open port " + e.toString(),e);
+				if(!serverSocket.isClosed())
+					SDFSLogger.getLog().fatal("Unable to open port " + e.toString(),e);
 			}
 		}
 	}
 
 	public static void close() {
 		try {
+		System.out.println("#### Shutting Down Network Service ####");
+		
 			serverSocket.close();
 		} catch (Exception e) {
 		}
 		try {
+			
 			udpServer.close();
 		} catch (Exception e) {
 		}
+		System.out.println("#### Shutting down HashStore ####");
 		HashChunkService.close();
+		System.out.println("#### Shutting down ChunkStore ####");
 		FileChunkStore.closeAll();
+		System.out.println("#### Shut down completed ####");
 	}
 }
 	class ShutdownHook extends Thread {
 		public void run() {
 			System.out
-					.println("###################### Shutting down StorageHub #################################");
+					.println("#### Shutting down StorageHub ####");
 
 			NetworkHCServer.close();
 		}
