@@ -106,8 +106,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
-		if (cmd.hasOption("io-SDFSLogger.getLog()")) {
-			this.io_log = cmd.getOptionValue("io-SDFSLogger.getLog()");
+		if (cmd.hasOption("io-log")) {
+			this.io_log = cmd.getOptionValue("io-log");
 		}
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd

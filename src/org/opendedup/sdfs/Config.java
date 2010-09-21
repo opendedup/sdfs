@@ -60,7 +60,7 @@ public class Config {
 					.item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
-			Main.hashDBStore = locations.getAttribute("hash-db-store");;
+			Main.hashDBStore = locations.getAttribute("hash-db-store");
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
 					.item(0);
 			Main.preAllocateChunkStore = Boolean.parseBoolean(cbe
@@ -217,10 +217,6 @@ public class Config {
 				Main.awsCompress = Boolean.parseBoolean(aws.getAttribute("compress"));
 			}
 		}
-		else {
-			String routingConfig = localChunkStore.getAttribute("routing-config");
-			Config.parserRoutingFile(routingConfig);
-		}
 
 		/*
 		IOMeter meter = new IOMeter(Main.ioLogFile);
@@ -269,6 +265,7 @@ public class Config {
 		if (Main.chunkStoreLocal)
 			return;
 		File file = new File(fileName);
+		SDFSLogger.getLog().info("Parsing routing config " + fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = null;
 		try {
