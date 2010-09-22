@@ -94,6 +94,9 @@ public class HashChunkService {
 	public static void removeStailHashes() throws IOException {
 		hs.evictChunks(System.currentTimeMillis() - Main.evictionAge*60*60*1000);
 	}
+	public static void removeStailHashes(int minutes) throws IOException {
+		hs.evictChunks(System.currentTimeMillis() - minutes*60*1000);
+	}
 
 	public static void commitChunks() {
 		// H2HashStore.commitTransactions();
