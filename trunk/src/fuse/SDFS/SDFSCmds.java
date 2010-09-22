@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
@@ -29,7 +30,7 @@ public class SDFSCmds {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 
-	public static final String[] cmds = { "user.cmd.dedupAll",
+	public static final String[] cmds = { "user.cmd.cleanstore","user.cmd.dedupAll",
 			"user.cmd.optimize", "user.cmd.snapshot", "user.cmd.vmdk.make",
 			"user.cmd.ids.clearstatus", 
 			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
@@ -41,7 +42,7 @@ public class SDFSCmds {
 	};
 	
 	public static final String[] cmdDes = {
-		"",
+		"","",
 		"", "", "",
 		"", 
 		"", "", "",
@@ -54,6 +55,7 @@ public class SDFSCmds {
 	
 	/*
 	public static final String[] cmdDes = {
+	"\"Collect all the unused chunks older than <minutes>\" e.g. setfattr -n user.cmd.cleanstore -v 6777:<minutes> ./",
 		"\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\"",
 		"\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\"",
 		"\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\"",
@@ -187,6 +189,15 @@ public class SDFSCmds {
 			if (command.equalsIgnoreCase("user.cmd.dedupAll")) {
 				boolean dedup = Boolean.parseBoolean(args[1]);
 				status = dedup(path, dedup);
+			}
+			if(command.equalsIgnoreCase("user.cmd.cleanstore")) {
+				int minutes = Integer.parseInt(args[1]);
+				status = "command completed successfully";
+				try {
+					ManualGC.clearChunks(minutes);
+				} catch(Exception e) {
+					status = "command failed : " +e.getMessage();
+				}
 			}
 			if (command.equalsIgnoreCase("user.cmd.optimize")) {
 				long length = Long.parseLong(args[1]);

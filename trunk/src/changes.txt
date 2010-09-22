@@ -4,6 +4,7 @@ Version 0.9.6 9/20/2010
 	Fixes
 	* Windows : Error when deleting files has been fixed
 	* Linux : Fixed reporting "du -h". Now gives actual deduplication rates.
+	* Both : Routing Config File was not being read when starting in network mode.
 		
 	Enhancements
 	* Files can now be an unlimited size. Files used to be limited to approximately 250GB in size. This has been expanded to the size
