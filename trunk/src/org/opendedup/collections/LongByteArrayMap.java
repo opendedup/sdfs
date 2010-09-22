@@ -31,7 +31,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public int iterPos = 0;
 	public String fileParams = "rw";
 	private long startMap = 0;
-	private int maxReadBufferSize = 500 * 1024 * 1024;
+	private int maxReadBufferSize = Integer.MAX_VALUE;
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
@@ -39,6 +39,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
 			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
 			endPos = maxReadBufferSize;
@@ -54,6 +55,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
 		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
 			//smallMemory = true;
 			this.maxReadBufferSize = 50 * 1024 * 1024;
 			endPos = maxReadBufferSize;
