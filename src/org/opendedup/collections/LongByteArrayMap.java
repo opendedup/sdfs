@@ -203,7 +203,6 @@ public class LongByteArrayMap implements AbstractMap {
 				bdbf.setLength(start + len);
 			this.bdb = null;
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
-			this.bdb.load();
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data to expand file at " + start
