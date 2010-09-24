@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -18,26 +19,31 @@ import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
-public class ExpandingLongByteArrayMap implements AbstractMap {
+public class LLongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
 	MappedByteBuffer bdb = null;
 	int arrayLength = 0;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
-	// private ReentrantLock mmaplock = new ReentrantLock();
 	private boolean closed = true;
 	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
 	public String fileParams = "rw";
 	private long startMap = 0;
-	private int maxReadBufferSize = 100 * 1024 * 1024;
+	private int maxReadBufferSize = Integer.MAX_VALUE;
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
-
-	public ExpandingLongByteArrayMap(int arrayLength, String filePath)
+	//private boolean smallMemory = false;
+	public LLongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
+		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
+			//smallMemory = true;
+			this.maxReadBufferSize = 50 * 1024 * 1024;
+			endPos = maxReadBufferSize;
+		}	
 		this.arrayLength = arrayLength;
 		this.filePath = filePath;
 		FREE = new byte[arrayLength];
@@ -46,11 +52,17 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 		new SyncThread(this);
 	}
 
-	public ExpandingLongByteArrayMap(int arrayLength, String filePath, String fileParams)
+	public LLongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
+		if(Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
+			//smallMemory = true;
+			this.maxReadBufferSize = 50 * 1024 * 1024;
+			endPos = maxReadBufferSize;
+		}	
 		this.fileParams = fileParams;
 		this.arrayLength = arrayLength;
-		this.filePath = filePath;
+		this.filePath = filePath;		
 		FREE = new byte[arrayLength];
 		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
@@ -114,7 +126,6 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 					return val;
 			} catch (Exception e) {
 			} finally {
-				this.hashlock.unlock();
 			}
 		}
 		return null;
@@ -159,6 +170,7 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 				this.bdb.load();
 				this.closed = false;
 			} catch (IOException e) {
+				SDFSLogger.getLog().error("unable to open file " + filePath + " to end position " + endPos);
 				throw e;
 			} catch (Exception e) {
 				throw new IOException(e);
@@ -186,14 +198,12 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 	private void setMapFileLength(long start, int len) throws IOException {
 		RandomAccessFile bdbf = null;
 		try {
+			SDFSLogger.getLog().info("setting start to " + start + " length " + len);
 			bdbf = new RandomAccessFile(filePath, this.fileParams);
 			if (bdbf.length() < (start + len))
 				bdbf.setLength(start + len);
 			this.bdb = null;
-			System.gc();
 			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
-			this.bdb.load();
-			
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data to expand file at " + start
@@ -213,8 +223,8 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 			int mlen = (int) (this.endPos - this.startMap);
 			if (mlen > this.maxReadBufferSize) {
 				mlen = this.maxReadBufferSize;
-			} else if (dbFile.length() <= this.maxReadBufferSize) {
-				mlen = (int) dbFile.length();
+			} else if ((dbFile.length() -propLen) <= this.maxReadBufferSize) {
+				mlen = (int) (dbFile.length()-propLen);
 			}
 			this.endPos = this.startMap + mlen;
 			this.setMapFileLength(startMap, mlen);
@@ -223,35 +233,27 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 					.debug(
 							"expanded buffer to " + startMap + " end is "
 									+ this.endPos);
-		} else if (bPos >= (bdb.capacity() - FREE.length)) {
+		}else if(propLen >=(this.endPos - FREE.length)) {
 			int mlen = (int) (propLen - this.startMap);
-			if((propLen + this.maxReadBufferSize) < dbFile.length()) {
+			if (mlen >= this.maxReadBufferSize) {
 				this.startMap = propLen;
-				mlen = this.maxReadBufferSize;
+				if(this.startMap + this.maxReadBufferSize <= dbFile.length()) {
+					mlen = this.maxReadBufferSize;
+				}else if(this.startMap + eI < dbFile.length()) {
+					mlen = (int)(dbFile.length() - startMap);
+				}
+				else {
+					mlen = eI;
+				}
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
-				System.gc();
-			}
-			else if (mlen > this.maxReadBufferSize) {
-				this.startMap = propLen;
-				mlen = eI;
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
-				System.gc();
-			} else if (bPos > eI) {
-				mlen = bPos + eI;
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
+				bPos = 0;
 			} else {
-				mlen = bdb.capacity() + eI;
+				mlen = mlen + bPos + eI;
 				this.endPos = this.startMap + mlen;
 				this.setMapFileLength(startMap, mlen);
 			}
-			bPos = (int) (propLen - startMap);
-			SDFSLogger.getLog().debug(
-					"reset buffer to " + startMap + " end is " + this.endPos);
 		}
-
 		return bPos;
 	}
 
@@ -391,10 +393,8 @@ public class ExpandingLongByteArrayMap implements AbstractMap {
 		FileChannel dstC = null;
 		try {
 			this.sync();
-
 			File dest = new File(destFilePath);
 			File src = new File(this.filePath);
-
 			if (dest.exists())
 				dest.delete();
 			else
