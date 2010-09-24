@@ -3,13 +3,16 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -22,7 +25,7 @@ import org.opendedup.util.SDFSLogger;
 public class LongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
-	MappedByteBuffer bdb = null;
+	FileChannel bdb = null;
 	int arrayLength = 0;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
@@ -35,6 +38,7 @@ public class LongByteArrayMap implements AbstractMap {
 	private int eI = 1024 * 1024;
 	private long endPos = maxReadBufferSize;
 	File dbFile = null;
+	Path bdbf = null;
 	//private boolean smallMemory = false;
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
@@ -144,30 +148,24 @@ public class LongByteArrayMap implements AbstractMap {
 	private void openFile() throws IOException {
 		if (this.closed) {
 			this.hashlock.lock();
-			RandomAccessFile bdbf = null;
+			bdbf = Paths.get(filePath);
 			try {
 				dbFile = new File(filePath);
 				boolean fileExists = dbFile.exists();
 				if (!dbFile.getParentFile().exists()) {
 					dbFile.getParentFile().mkdirs();
 				}
-				bdbf = new RandomAccessFile(filePath, this.fileParams);
 				SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
+				this.bdb = (FileChannel)bdbf.newByteChannel(
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,StandardOpenOption.READ,
+					StandardOpenOption.SPARSE);
 				if (!fileExists) {
-					bdbf.setLength(eI);
+					bdb.position(eI);
 				}
-				if (bdbf.length() < this.endPos) {
-					this.endPos = bdbf.length();
+				if (dbFile.length() < this.endPos) {
+					this.endPos = dbFile.length();
 				}
 				// initiall allocate 32k
-				if (this.fileParams.equalsIgnoreCase("r")) {
-					this.bdb = bdbf.getChannel().map(MapMode.READ_ONLY, 0,
-							this.endPos);
-				} else {
-					this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, 0,
-							this.endPos);
-				}
-				this.bdb.load();
 				this.closed = false;
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("unable to open file " + filePath + " to end position " + endPos);
@@ -175,10 +173,6 @@ public class LongByteArrayMap implements AbstractMap {
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				try {
-					bdbf.close();
-				} catch (Exception e) {
-				}
 				this.hashlock.unlock();
 			}
 		}
@@ -196,65 +190,12 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	private void setMapFileLength(long start, int len) throws IOException {
-		RandomAccessFile bdbf = null;
-		try {
-			SDFSLogger.getLog().info("setting start to " + start + " length " + len);
-			bdbf = new RandomAccessFile(filePath, this.fileParams);
-			if (bdbf.length() < (start + len))
-				bdbf.setLength(start + len);
-			this.bdb = null;
-			this.bdb = bdbf.getChannel().map(MapMode.READ_WRITE, start, len);
-		} catch (IOException e) {
-			SDFSLogger.getLog().fatal(
-					"unable to write data to expand file at " + start
-							+ " to length " + (start + len), e);
-			throw new IOException("unable to expand memory map");
-		} finally {
-			bdbf.close();
-		}
 
 	}
 
-	private int getMapFilePosition(long pos) throws IOException {
+	private long getMapFilePosition(long pos) throws IOException {
 		long propLen = this.calcMapFilePos(pos);
-		int bPos = (int) (propLen - startMap);
-		if (propLen < this.startMap) {
-			this.startMap = propLen;
-			int mlen = (int) (this.endPos - this.startMap);
-			if (mlen > this.maxReadBufferSize) {
-				mlen = this.maxReadBufferSize;
-			} else if ((dbFile.length() -propLen) <= this.maxReadBufferSize) {
-				mlen = (int) (dbFile.length()-propLen);
-			}
-			this.endPos = this.startMap + mlen;
-			this.setMapFileLength(startMap, mlen);
-			bPos = 0;
-			SDFSLogger.getLog()
-					.debug(
-							"expanded buffer to " + startMap + " end is "
-									+ this.endPos);
-		}else if(propLen >=(this.endPos - FREE.length)) {
-			int mlen = (int) (propLen - this.startMap);
-			if (mlen >= this.maxReadBufferSize) {
-				this.startMap = propLen;
-				if(this.startMap + this.maxReadBufferSize <= dbFile.length()) {
-					mlen = this.maxReadBufferSize;
-				}else if(this.startMap + eI < dbFile.length()) {
-					mlen = (int)(dbFile.length() - startMap);
-				}
-				else {
-					mlen = eI;
-				}
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
-				bPos = 0;
-			} else {
-				mlen = mlen + bPos + eI;
-				this.endPos = this.startMap + mlen;
-				this.setMapFileLength(startMap, mlen);
-			}
-		}
-		return bPos;
+		return propLen;
 	}
 
 	/*
@@ -269,22 +210,26 @@ public class LongByteArrayMap implements AbstractMap {
 		if (data.length != this.arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + this.arrayLength);
-		this.hashlock.lock();
-		int fpos = 0;
+		long fpos = 0;
+		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			this.bdb.position(fpos);
-			this.bdb.put(data);
+			_bdb = (FileChannel)bdbf.newByteChannel(
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,StandardOpenOption.READ,
+					StandardOpenOption.SPARSE);
+			_bdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
 					"trying to write at " + fpos + " but file length is "
-							+ this.bdb.capacity());
+							+ this.bdb.size());
 			throw e;
 		} catch (Exception e) {
 			// System.exit(-1);
 			throw new IOException(e);
 		} finally {
-			this.hashlock.unlock();
+			try {
+				_bdb.close();
+			}catch(Exception e) {}
 		}
 	}
 
@@ -317,9 +262,8 @@ public class LongByteArrayMap implements AbstractMap {
 
 		this.hashlock.lock();
 		try {
-			int fpos = this.getMapFilePosition(pos);
-			this.bdb.position(fpos);
-			this.bdb.put(FREE);
+			long fpos = this.getMapFilePosition(pos);
+			this.bdb.write(ByteBuffer.wrap(FREE),fpos);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -336,14 +280,16 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-
-		this.hashlock.lock();
-		int fpos = 0;
+		long fpos = 0;
+		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			byte[] b = new byte[this.arrayLength];
-			this.bdb.position(fpos);
-			this.bdb.get(b);
+			_bdb = (FileChannel)bdbf.newByteChannel(
+					StandardOpenOption.WRITE,StandardOpenOption.READ,
+					StandardOpenOption.SPARSE);
+			ByteBuffer buf = ByteBuffer.wrap(new byte[this.arrayLength]);
+			_bdb.read(buf,fpos);
+			byte [] b = buf.array();
 			if (Arrays.equals(b, this.FREE))
 				return null;
 			return b;
@@ -352,10 +298,12 @@ public class LongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"error getting data at " + fpos + " buffer capacity="
-							+ this.bdb.capacity(), e);
+							+ this.bdb.size(), e);
 			throw new IOException(e);
 		} finally {
-			this.hashlock.unlock();
+			try {
+				_bdb.close();
+			}catch(Exception e) {}
 		}
 	}
 
@@ -365,7 +313,19 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#sync()
 	 */
 	public void sync() throws IOException {
-		this.bdb.force();
+		FileChannel _bdb = null;
+		try {
+			_bdb = (FileChannel)bdbf.newByteChannel(
+					StandardOpenOption.WRITE,StandardOpenOption.READ,
+					StandardOpenOption.SPARSE);
+			_bdb.force(true);
+		}catch(IOException e) {
+			
+		}finally {
+			try {
+				_bdb.close();
+			}catch(Exception e){}
+		}
 	}
 
 	/*
@@ -430,12 +390,10 @@ public class LongByteArrayMap implements AbstractMap {
 			if (!this.isClosed()) {
 				this.closed = true;
 				try {
-					bdb.force();
-					bdb = null;
+					bdb.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				System.gc();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
