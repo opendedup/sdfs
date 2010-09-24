@@ -311,8 +311,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 		SDFSLogger.getLog().info("Garbage Collection records older than " + new Date(time));
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
-			return;
+			throw new IOException("Garbage Collection aborted because it is the first run");
 		} else {
+			
 			SDFSLogger.getLog().info("removing free blocks");
 			if (this.isClosed())
 				throw new IOException("Hashtable " + this.fileName

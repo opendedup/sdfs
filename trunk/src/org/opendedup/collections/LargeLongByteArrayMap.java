@@ -4,8 +4,10 @@ import java.io.File;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -185,20 +187,34 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	public void copy(String destFilePath) throws IOException {
 		this.hashlock.lock();
+		FileChannel srcC = null;
+		FileChannel dstC = null;
 		try {
+			
 			this.sync();
-			File f = new File(destFilePath);
-			if (f.exists())
-				f.delete();
+			File dest = new File(destFilePath);
+			File src = new File(this.fileName);
+			if (dest.exists())
+				dest.delete();
 			else
-				f.getParentFile().mkdirs();
-			Path p = Paths.get(this.fileName);
-			Path dest = Paths.get(destFilePath);
-			p.copyTo(dest);
+				dest.getParentFile().mkdirs();
+			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel();
+			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.SPARSE);
+			srcC.transferTo(0, src.length(), dstC);
 
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
+			try {
+				srcC.close();
+			} catch (Exception e) {
+			}
+			try {
+				dstC.close();
+			} catch (Exception e) {
+			}
 			this.hashlock.unlock();
 		}
 	}

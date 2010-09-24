@@ -198,6 +198,7 @@ public class LongByteArrayMap implements AbstractMap {
 	private void setMapFileLength(long start, int len) throws IOException {
 		RandomAccessFile bdbf = null;
 		try {
+			SDFSLogger.getLog().info("setting start to " + start + " length " + len);
 			bdbf = new RandomAccessFile(filePath, this.fileParams);
 			if (bdbf.length() < (start + len))
 				bdbf.setLength(start + len);
