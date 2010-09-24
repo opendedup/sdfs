@@ -48,7 +48,7 @@ public class VolumeConfigWriter {
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
 	short chunk_size = 128;
-	int max_file_write_buffers = 8;
+	int max_file_write_buffers = 24;
 	int file_read_cache = 5;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
@@ -429,7 +429,7 @@ public class VolumeConfigWriter {
 						.withLongOpt("io-max-file-write-buffers")
 						.withDescription(
 								"The amount of memory to have available for reading and writing per file. Each buffer in the size"
-										+ " of io-chunk-size. \n Defaults to: \n 16")
+										+ " of io-chunk-size. \n Defaults to: \n 24")
 						.hasArg().withArgName("SIZE in MB").create());
 		options
 				.addOption(OptionBuilder

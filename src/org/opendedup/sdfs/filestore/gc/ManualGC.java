@@ -12,11 +12,13 @@ public class ManualGC {
 	public static void clearChunks(int minutes) {
 		if (!gcStarted) {
 			gcStarted = true;
+			long tm = System.currentTimeMillis();
 			try {
 				new FDisk();
 				if (Main.chunkStoreLocal) {
 					HashChunkService.processHashClaims();
-					HashChunkService.removeStailHashes(minutes);
+					long crtm = System.currentTimeMillis() - tm;
+					HashChunkService.removeStailHashes(minutes + (int)((crtm/1000)/60));
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish garbage collection",
