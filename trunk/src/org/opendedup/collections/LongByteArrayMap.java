@@ -1,20 +1,14 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
-
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,7 +27,6 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
 	public String fileParams = "rw";
-	private long startMap = 0;
 	//private int maxReadBufferSize = Integer.MAX_VALUE;
 	//private int eI = 1024 * 1024;
 	//private long endPos = maxReadBufferSize;

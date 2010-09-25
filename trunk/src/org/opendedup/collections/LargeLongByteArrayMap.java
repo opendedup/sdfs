@@ -89,7 +89,6 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 			}
 		}
-		System.gc();
 	}
 
 	public byte[] get(long pos) throws IOException {
