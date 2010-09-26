@@ -146,11 +146,19 @@ public class CSByteArrayLongMap implements AbstractMap {
 				this.fileParams);
 		long startTime = System.currentTimeMillis();
 		int z = 0;
+		int k = 0;
 		for (int i = 0; i < maps.length; i++) {
 			try {
 				maps[i].iterInit();
 				long val = 0;
 				while (val != -1 && !this.closed) {
+					k++;
+					if(k > 310) {
+						k = 0;
+						try {
+							Thread.sleep(1);
+						}catch(Exception e){}
+					}
 					try {
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
@@ -232,18 +240,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 					} else {
 						ChunkData cm = new ChunkData(raw);
 						boolean corrupt = false;
-						/*
-						 * try { byte[] chkHash =
-						 * HashFunctions.getTigerHashBytes(cm .getData()); if
-						 * (!Arrays.equals(chkHash, cm.getHash())) { corrupt =
-						 * true; SDFSLogger.getLog().fatal("corrupt data found at " +
-						 * cm.getcPos()); cm.setmDelete(true);
-						 * this.flushFullBuffer(); this.kBuf.add(cm);
-						 * this.freeSlots .putLong((currentPos / raw.length)
-						 * Main.chunkStorePageSize); } } catch (Exception e) {
-						 * SDFSLogger.getLog().fatal("Error while checking and hashing data");
-						 * throw new IOException(e); }
-						 */
 						if (!corrupt) {
 							boolean foundFree = Arrays.equals(cm.getHash(),
 									FREE);

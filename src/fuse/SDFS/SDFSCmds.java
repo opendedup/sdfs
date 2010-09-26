@@ -16,6 +16,7 @@ import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
+import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.VMDKParser;
 
 import fuse.FuseException;
@@ -195,6 +196,7 @@ public class SDFSCmds {
 				int minutes = Integer.parseInt(args[1]);
 				status = "command completed successfully";
 				try {
+					SDFSLogger.getLog().debug("Clearing store of data older that [" +minutes + "]");
 					ManualGC.clearChunks(minutes);
 				} catch(Exception e) {
 					status = "command failed : " +e.getMessage();
