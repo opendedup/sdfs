@@ -29,16 +29,9 @@ public class Volume implements java.io.Serializable {
 	long currentSize;
 	String path;
 	final int blockSize = 1024;
-
-	public Volume(String path, long capacity, long currentSize) {
-		File f = new File(path);
-		if (!f.exists())
-			f.mkdirs();
-		this.path = f.getPath();
-		this.name = f.getName().split("-")[0];
-		this.capacity = capacity;
-		this.currentSize = currentSize;
-	}
+	double fullPercentage = -1;
+	private long absoluteLength= -1;
+	
 
 	public String getName() {
 		return name;
@@ -54,7 +47,15 @@ public class Volume implements java.io.Serializable {
 		capString = vol.getAttribute("capacity");
 		this.capacity = StringUtils.parseSize(capString);
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
+		if(vol.hasAttribute("maximum-percentage-full")) {
+			this.fullPercentage = Double.parseDouble(vol.getAttribute("maximum-percentage-full"))/100;
+			this.absoluteLength = (long)(this.capacity * this.fullPercentage);
+		}
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
+		if(this.fullPercentage > 0)
+			SDFSLogger.getLog().info("Setting maximum capacity to " + this.absoluteLength);
+		else
+			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 	}
 
 	public long getCapacity() {
@@ -71,6 +72,15 @@ public class Volume implements java.io.Serializable {
 
 	public String getPath() {
 		return path;
+	}
+	
+	public boolean isFull() {
+		if(this.fullPercentage == -1 || this.currentSize == 0)
+			return false;
+		else {
+			return(this.currentSize > this.absoluteLength);
+		}
+			
 	}
 
 	public void setPath(String path) {
@@ -106,6 +116,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("path", path);
 		root.setAttribute("current-size", Long.toString(this.currentSize));
 		root.setAttribute("capacity", this.capString);
+		root.setAttribute("maximum-percentage-full", Double.toString(this.fullPercentage));
 		return root;
 	}
 }

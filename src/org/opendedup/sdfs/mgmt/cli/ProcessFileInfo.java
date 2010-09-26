@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.Formatter;
 
 import org.w3c.dom.Document;
@@ -47,15 +48,16 @@ public class ProcessFileInfo {
 							ioEl.getAttribute("bytes-read"));
 					long realBytes = Long.parseLong(ioEl
 							.getAttribute("virtual-bytes-written"));
-					long dedupBytes = Long.parseLong(ioEl
-							.getAttribute("duplicate-blocks"));
+					long dedupBytes = Long.parseLong(ioEl.getAttribute("duplicate-blocks"));
 					if(dedupBytes == 0 || realBytes == 0) {
 
-						System.out.printf("dedup rate : %s%%\n",0);
+						System.out.printf("dedup rate : %d%%\n",0);
 					}
 					else {
-					double dedupRate = (dedupBytes / realBytes)*100;
-					
+						double dedupRate = (((double)dedupBytes / (double)realBytes)*100);
+						DecimalFormat twoDForm = new DecimalFormat("#.##");
+						dedupRate = Double.valueOf(twoDForm.format(dedupRate));
+
 					System.out.printf("dedup rate : %s%%\n",
 							Double.toString(dedupRate));
 					

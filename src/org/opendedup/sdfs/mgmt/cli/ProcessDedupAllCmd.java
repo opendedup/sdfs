@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 public class ProcessDedupAllCmd {
 	public static void runCmd(String file,String option) {
 		try {
+			System.out.printf("Setting dedup for file [%s] to [%s]\n",file, option);
 			file = URLEncoder.encode(file, "UTF-8");
 			option = URLEncoder.encode(option, "UTF-8");
 			StringBuilder sb = new StringBuilder();

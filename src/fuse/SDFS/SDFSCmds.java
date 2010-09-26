@@ -18,6 +18,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.VMDKParser;
 
+import fuse.FuseException;
 import fuse.XattrLister;
 
 public class SDFSCmds {
@@ -162,7 +163,7 @@ public class SDFSCmds {
 
 	}
 
-	public void runCMD(String path, String command, String value) {
+	public void runCMD(String path, String command, String value) throws FuseException {
 		if (command.startsWith("user.sdfs")) {
 			String name = command;
 			String valStr = value;
@@ -204,9 +205,15 @@ public class SDFSCmds {
 				status = optimize(path, length);
 			}
 			if (command.equalsIgnoreCase("user.cmd.snapshot")) {
+				if(Main.volume.isFull())
+					throw new FuseException("Volume Full")
+				.initErrno(FuseException.ENOSPC);
 				status = takeSnapshot(path, args[1]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.vmdk.make")) {
+				if(Main.volume.isFull())
+					throw new FuseException("Volume Full")
+				.initErrno(FuseException.ENOSPC);
 				status = this.makeVMDK(path, args[1], args[2]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.ids.clearstatus")) {

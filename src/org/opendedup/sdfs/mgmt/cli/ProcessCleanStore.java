@@ -1,26 +1,25 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.net.URLEncoder;
+
 import java.util.Formatter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class ProcessSnapshotCmd {
-	public static void runCmd(String file,String snapshot) {
+public class ProcessCleanStore {
+	public static void runCmd(int minutes) {
 		try {
-			System.out.printf("taking snapshot of [%s] destination is [%s]\n",file,snapshot);
-			file = URLEncoder.encode(file, "UTF-8");
-			snapshot = URLEncoder.encode(snapshot, "UTF-8");
+			String file = URLEncoder.encode("null", "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			
-			formatter.format("file=%s&cmd=snapshot&options=%s", file,snapshot);
+			System.out.printf("Cleaning store of data older that [%d] minutes", minutes);
+			formatter.format("file=%s&cmd=%s&options=%s", file,"cleanstore",Integer.toString(minutes));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			System.out.printf("Snapshot [%s] returned [%s]",status,msg);
+			System.out.printf("Clean store command [%s] returned [%s]",status,msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
