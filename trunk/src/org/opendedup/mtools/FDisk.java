@@ -56,12 +56,18 @@ public class FDisk {
                         byte[] val = new byte[0];
                         mp.iterInit();
                         boolean corruption = false;
+                        int i = 0;
                         while (val != null) {
                                 val = mp.nextValue();
                                 if (val != null) {
+                                	i ++;
+                                	
+                                	if(i > 300) {
                                 	try {
-                                		Thread.sleep(0, 50);
+                                		i = 0;
+                                		Thread.sleep(1);
                                 	}catch(Exception e){}
+                                	}
                                         SparseDataChunk ck = new SparseDataChunk(val);
                                         if (!ck.isLocalData()) {
                                                 boolean exists = HCServiceProxy
