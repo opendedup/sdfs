@@ -716,7 +716,9 @@ public class SparseDedupFile implements DedupFile {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+		}
+		if(this.buffers.size() == 0) {
+			this.forceClose();
 		}
 		SDFSLogger.getLog().debug("Checked [" + records + "] blocks found [" + doops
 				+ "] new duplicate blocks");
@@ -756,8 +758,11 @@ public class SparseDedupFile implements DedupFile {
 				l = bdb.nextKey();
 			}
 			newCS.close();
+			new File(this.chunkStorePath).delete();
 			newCS.move(this.chunkStorePath);
 			newCS = null;
+			this.chunkStore = new LargeLongByteArrayMap(chunkStorePath,
+					(long) -1, Main.CHUNK_LENGTH);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -823,7 +828,6 @@ public class SparseDedupFile implements DedupFile {
 
 		}
 	}
-
 	/*
 	 * (non-Javadoc)
 	 * 

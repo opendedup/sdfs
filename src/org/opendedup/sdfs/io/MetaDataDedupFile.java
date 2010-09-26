@@ -92,8 +92,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param dedup
 	 *            if true all chunks will be deduped, Otherwise chunks will be
 	 *            deduped opportunistically.
+	 * @throws IOException 
 	 */
-	public void setDedup(boolean dedupNow) {
+	public void setDedup(boolean dedupNow) throws IOException {
+		if(!this.getDedupFile().isClosed())
+			throw new IOException("The file must be closed to perform this operation");
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
