@@ -6,6 +6,7 @@ Version 0.9.7
 	Enhancements :
 	* IO : Changed IO for file reads and writes. Should reduce memory requirements without reduced performance.
 	* SDFSCli : Added command to clear old data manually from the SDFS Volume
+	* Garbage Collection : Garbage collection plays nicely and does not take up a lot of IO when performed.
 	* Volume : Added "maximum-percentage-full" option to sdfs configuration xml file. This will allow volumes to
 	define the maximum size of a volume for writes. to set it to 100% of the volume capacity set maximum-percentage-full="100". The
 	attribute itself goes into the <volume> tag. e.g. <volume maximum-percentage-full="200" [other options].... />. It it set to a "-1"
