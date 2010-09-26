@@ -57,6 +57,7 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	String volume_capacity = null;
+	double max_percent_full = -1;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
@@ -230,6 +231,9 @@ public class VolumeConfigWriter {
 			this.remove_if_older_than = Integer.parseInt(cmd
 					.getOptionValue("chunk-store-eviction"));
 		}
+		if(cmd.hasOption("volume-maximum-full-percentage")) {
+			this.max_percent_full = Double.parseDouble(cmd.getOptionValue("volume-maximum-full-percentage"));
+		}
 		if (cmd.hasOption("chunk-store-size")) {
 			this.chunk_store_allocation_size = Long.parseLong(cmd
 					.getOptionValue("chunk-store-size"));
@@ -302,6 +306,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("capacity", this.volume_capacity);
 		vol.setAttribute("current-size", "0");
 		vol.setAttribute("path", this.base_path + File.separator + "files");
+		vol.setAttribute("maximum-percentage-full", Double.toString(this.max_percent_full));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -485,6 +490,12 @@ public class VolumeConfigWriter {
 						"The name of the volume. "
 								+ " \n THIS IS A REQUIRED OPTION").hasArg()
 				.withArgName("STRING").create());
+		options.addOption(OptionBuilder.withLongOpt("volume-maximum-full-percentage")
+				.withDescription(
+						"The maximum percentage of the volume capacity, as set by volume-capacity, before the volume starts" +
+						"reporting that the disk is full. If the number is negative then it will be infinite. "
+								+ " \n e.g. --volume-maximum-full-percentage=100").hasArg()
+				.withArgName("PERCENTAGE").create());
 		options
 				.addOption(OptionBuilder
 						.withLongOpt("chunk-store-local")

@@ -25,6 +25,7 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.CreationDisposition.CREATE_ALWAYS;
+
 import static net.decasdev.dokan.CreationDisposition.CREATE_NEW;
 import static net.decasdev.dokan.CreationDisposition.OPEN_ALWAYS;
 import static net.decasdev.dokan.CreationDisposition.OPEN_EXISTING;
@@ -32,6 +33,7 @@ import static net.decasdev.dokan.CreationDisposition.TRUNCATE_EXISTING;
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
 import static net.decasdev.dokan.WinError.ERROR_ALREADY_EXISTS;
+import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_PATH_NOT_FOUND;
@@ -141,6 +143,7 @@ public class WinSDFS implements DokanOperations {
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode,
 			int creationDisposition, int flagsAndAttributes, DokanFileInfo arg5)
 			throws DokanOperationException {
+		
 		// log("[onCreateFile] " + fileName + ", creationDisposition = "
 		// + creationDisposition);
 		if (fileName.equals("\\")) {
@@ -180,7 +183,10 @@ public class WinSDFS implements DokanOperations {
 			switch (creationDisposition) {
 
 			case CREATE_NEW:
+				if(Main.volume.isFull())
+					throw new DokanOperationException(ERROR_DISK_FULL);
 				try {
+					
 					log.debug("creating " + fileName);
 					MetaDataDedupFile mf = MetaFileStore.getMF(path);
 					mf.sync();
@@ -191,6 +197,8 @@ public class WinSDFS implements DokanOperations {
 				return getNextHandle();
 			case CREATE_ALWAYS:
 			case OPEN_ALWAYS:
+				if(Main.volume.isFull())
+					throw new DokanOperationException(ERROR_DISK_FULL);
 				try {
 					log.debug("creating " + fileName);
 					MetaDataDedupFile mf = MetaFileStore.getMF(path);
@@ -223,6 +231,8 @@ public class WinSDFS implements DokanOperations {
 
 	public void onCreateDirectory(String pathName, DokanFileInfo file)
 			throws DokanOperationException {
+		if(Main.volume.isFull())
+			throw new DokanOperationException(ERROR_DISK_FULL);
 		// log("[onCreateDirectory] " + pathName);
 		pathName = Utils.trimTailBackSlash(pathName);
 		File f = new File(this.mountedVolume + pathName);
@@ -268,6 +278,8 @@ public class WinSDFS implements DokanOperations {
 
 	public int onWriteFile(String fileName, ByteBuffer buf, long offset,
 			DokanFileInfo arg3) throws DokanOperationException {
+		if(Main.volume.isFull())
+			throw new DokanOperationException(ERROR_DISK_FULL);
 		// log("[onWriteFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
 		byte[] b = new byte[buf.capacity()];

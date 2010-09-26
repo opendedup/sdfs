@@ -59,6 +59,9 @@ public class FDisk {
                         while (val != null) {
                                 val = mp.nextValue();
                                 if (val != null) {
+                                	try {
+                                		Thread.sleep(0, 50);
+                                	}catch(Exception e){}
                                         SparseDataChunk ck = new SparseDataChunk(val);
                                         if (!ck.isLocalData()) {
                                                 boolean exists = HCServiceProxy

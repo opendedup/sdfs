@@ -60,6 +60,14 @@ public class MgmtWebServer implements Container {
 					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
 				}
 			}	
+			else if(cmd.equalsIgnoreCase("cleanstore")) {
+				try {
+				String msg = new CleanStoreCmd().getResult(cmdOptions,null);
+				result = "<result status=\"success\" msg=\""+msg+"\"/>";
+				}catch(IOException e) {
+					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+				}
+			}
 			PrintStream body = response.getPrintStream();
 			long time = System.currentTimeMillis();
 

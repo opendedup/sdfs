@@ -271,6 +271,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int mkdir(String path, int mode) throws FuseException {
 		File f = new File(this.mountedVolume + path);
+		if(Main.volume.isFull())
+			throw new FuseException("Volume Full")
+		.initErrno(FuseException.ENOSPC);
 		if (f.exists()) {
 			f = null;
 			throw new FuseException("folder exists")
@@ -293,6 +296,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int mknod(String path, int mode, int rdev) throws FuseException {
 		// log.info("mknod(): " + path + " " + mode + " " + rdev + "\n");
 		File f = new File(this.mountedVolume + path);
+		if(Main.volume.isFull())
+			throw new FuseException("Volume Full")
+		.initErrno(FuseException.ENOSPC);
 		if (f.exists()) {
 			f = null;
 			throw new FuseException("file exists")
@@ -484,6 +490,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
+		if(Main.volume.isFull())
+			throw new FuseException("Volume Full")
+		.initErrno(FuseException.ENOSPC);
 		/*
 		 * log.info("writing data to  " +path + " at " + offset +
 		 * " and length of " + buf.capacity());

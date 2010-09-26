@@ -35,7 +35,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public LongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
 		if (Runtime.getRuntime().maxMemory() < 1610612736) {
-			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
+			SDFSLogger.getLog().debug("Preparing for smaller memory footprint");
 			// smallMemory = true;
 			// this.maxReadBufferSize = 50 * 1024 * 1024;
 			// endPos = maxReadBufferSize;
@@ -51,7 +51,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
 		if (Runtime.getRuntime().maxMemory() < 1610612736) {
-			SDFSLogger.getLog().info("Preparing for smaller memory footprint");
+			SDFSLogger.getLog().debug("Preparing for smaller memory footprint");
 			// smallMemory = true;
 			// this.maxReadBufferSize = 50 * 1024 * 1024;
 			// endPos = maxReadBufferSize;
@@ -194,6 +194,8 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
+		this.hashlock.lock();
+		this.hashlock.unlock();
 		if (data.length != this.arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + this.arrayLength);
@@ -283,6 +285,8 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
+		this.hashlock.lock();
+		this.hashlock.unlock();
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
