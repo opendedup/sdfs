@@ -75,7 +75,7 @@ public class Volume implements java.io.Serializable {
 	}
 	
 	public boolean isFull() {
-		if(this.fullPercentage == -1 || this.currentSize == 0)
+		if(this.fullPercentage < 0 || this.currentSize == 0)
 			return false;
 		else {
 			return(this.currentSize > this.absoluteLength);
