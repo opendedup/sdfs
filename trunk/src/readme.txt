@@ -47,11 +47,10 @@ Data Removal
 	are removed from the chunk store. The process for determining and removing stale chunks is as follows.
 		
 		1. SDFS file-system informs the ChunkStore what chunks are currently in use. This happens when
-		chunks are first created and then every 6 hours on the hour after that.
-		2. The Chunk Store checks for data that has not been claimed, in the last two days, by the SDFS file system 
-		every 24 hours.
-		3. The chunks that have not been claimed in the last 25 hours are put into a pool and overwritten as new data
-		is written to the ChunkStore.
+		chunks are first created and then every 2 hours on the hour after that.
+		2. The Chunk Store checks for data that has not been claimed in the last 8 hours upon mount and then every 4 hours after that.
+		3. The chunks that have not been claimed in the last 10 hours upon mount and 6 hours after that are put into a pool and 
+		overwritten as new data is written to the ChunkStore.
 
 	All of this is configurable and can be changed after a volume is written to. Take a look at cron format for more details.
 

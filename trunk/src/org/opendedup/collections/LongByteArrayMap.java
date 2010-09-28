@@ -194,8 +194,8 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-		this.hashlock.lock();
-		this.hashlock.unlock();
+		
+		
 		if (data.length != this.arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + this.arrayLength);
@@ -206,6 +206,7 @@ public class LongByteArrayMap implements AbstractMap {
 			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
+			this.hashlock.lock();
 			_bdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
@@ -217,9 +218,13 @@ public class LongByteArrayMap implements AbstractMap {
 			throw new IOException(e);
 		} finally {
 			try {
+				this.hashlock.unlock();
+			}catch(Exception e) {}
+			try {
 				_bdb.close();
 			} catch (Exception e) {
 			}
+			
 		}
 	}
 
