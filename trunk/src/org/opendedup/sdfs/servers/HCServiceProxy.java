@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.network.HashClient;
@@ -89,18 +90,14 @@ public class HCServiceProxy {
 	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean sendChunk) throws IOException {
+			int position, int len, boolean sendChunk) throws IOException, HashtableFullException {
 		boolean doop = false;
 		if (Main.chunkStoreLocal) {
 			doop = HashChunkService.hashExists(hash);
 			if (!doop && sendChunk) {
-				try {
 					doop = HashChunkService.writeChunk(hash, aContents, 0,
 							Main.CHUNK_LENGTH, false);
 
-				} catch (Exception e) {
-					throw new IOException(e);
-				}
 			}
 		} else {
 			byte[] hashRoute = { hash[0] };

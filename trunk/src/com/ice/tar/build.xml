@@ -1,0 +1,172 @@
+
+<!-- Targets: all, zip, deploy, compile, clean, init -->
+
+<project name="ndui" default="all" basedir="../../../..">
+
+	<target name="all" depends="zip">
+	</target>
+
+	<target name="clean" depends="init">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="zip" depends="deploy">
+		<zip zipfile="${basedir}/javatar-${relnum}.zip">
+			<zipfileset
+				dir="${build}"
+				prefix="javatar-${relnum}/"
+				/>
+		</zip>
+
+	<tar tarfile="${basedir}/javatar-${relnum}.tar" >
+		<tarfileset
+			dir="${build}"
+			prefix="javatar-${relnum}/"
+			/>
+	</tar>
+
+	<gzip
+		src="${basedir}/javatar-${relnum}.tar"
+		zipfile="${basedir}/javatar-${relnum}.tar.gz"
+		/>
+
+  	</target>
+
+	<target name="deploy" depends="compile,source,doc">
+		<jar
+			jarfile="${jardir}/tar.jar"
+			manifest="${tardir}/META-INF/MANIFEST.MF"
+			>
+			<fileset dir="${classdir}" />
+  		</jar>
+
+		<copy file="${activationjar}" todir="${jardir}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac
+			srcdir="${srcdir}"
+			destdir="${classdir}"
+			verbose="${my.verbose}"
+			deprecation="${my.deprec}"
+			>
+
+			<include name="com/ice/tar/"/>
+
+			<classpath>
+				<pathelement location="${activationjar}" />
+			</classpath>
+
+		</javac>
+	</target>
+
+	<target name="source" depends="init">
+		<copy todir="${sourcedir}">
+			<fileset
+				dir="${srcdir}"
+				includes="com/ice/tar/"
+				excludes="**/CVS/"
+				/>
+		</copy>
+	</target>
+
+	<target name="doc" depends="javadoc,docs">
+	</target>
+
+	<target name="docs" depends="init">
+		<copy todir="${docdir}">
+			<fileset
+				dir="${tardir}/doc/"
+				excludes="**/CVS/"
+				/>
+		</copy>
+	</target>
+
+	<target name="javadoc" depends="init" unless="javadoc.notreq">
+  		<javadoc
+			packagenames="com.ice.tar"
+			destdir="${apidocdir}"
+			author="true"
+			version="true"
+			use="true"
+			windowtitle="Java Tar by Tim Endres"
+			bottom="${copyright}"
+			>
+
+			<group title="Java Tar" packages="com.ice.tar"/>
+
+			<link href="http://java.sun.com/products/jdk/1.3/docs/api/"/>
+
+			<sourcepath>
+				<pathelement location="${srcdir}"/>
+			</sourcepath>
+
+			<classpath>
+				<pathelement location="${activationjar}" />
+			</classpath>
+
+		</javadoc>
+	</target>
+
+	<target name="init" depends="init-props,echo-props">
+
+		<tstamp/>
+
+		<mkdir dir="${build}" />
+		<mkdir dir="${docdir}" />
+		<mkdir dir="${apidocdir}" />
+		<mkdir dir="${jardir}" />
+		<mkdir dir="${classdir}" />
+		<mkdir dir="${sourcedir}" />
+
+		<uptodate property="javadoc.notreq" targetfile="${apidocdir}/index.html" >
+			<srcfiles dir="${srcdir}" includes="**/*.java"/>
+		</uptodate>
+
+	</target>
+
+	<target name="echo-props">
+		<echo message="basedir=${basedir}" />
+		<echo message="build=${build}" />
+		<echo message="bindir=${bindir}" />
+		<echo message="jardir=${jardir}" />
+		<echo message="classdir=${classdir}" />
+		<echo message="sourcedir=${sourcedir}" />
+		<echo message="srcdir=${srcdir}" />
+	</target>
+
+	<target name="init-props">
+		<property name="my.verbose" value="off"/>
+
+		<!-- TAGS -->
+		<property name="reltag" value="release-2-5" />
+		<property name="relnum" value="2.5" />
+
+		<!-- DIRECTORIES -->
+		<property name="build" value="${basedir}/tar-${relnum}" />
+
+		<property name="classdir" value="${build}/classes" />
+		<property name="jardir" value="${build}/jars" />
+		<property name="docdir" value="${build}/doc" />
+		<property name="apidocdir" value="${docdir}/api" />
+		<property name="sourcedir" value="${build}/source" />
+
+		<property name="srcdir" value="${basedir}/java" />
+		<property name="tardir" value="${srcdir}/com/ice/tar" />
+
+		<!-- JARS -->
+		<property name="activationjar"
+			value="C:/java/jaf-1.0.1/activation.jar" />
+
+		<!-- GLOBALS -->
+		<property name="java.home" value="C:/java/jdk1.3"/>
+		<property name="java.lib" value="${java.home}/jre/lib"/>
+		<property name="build.compiler" value="modern"/>
+
+		<property name="copyright"
+			value="&lt;i&gt;This software has been placed into the public domain.&lt;/i&gt;"
+			/>
+	</target>
+
+</project>
+

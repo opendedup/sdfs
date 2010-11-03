@@ -306,7 +306,7 @@ public class SDFSCmds {
 			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize(length);
 			return "SUCCESS Optimization Success: optimized [" + srcPath
 					+ "] of length [" + length + "]";
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("ERROR Optimize Failed: unable to optimize Source ["
 					+ srcPath + "] " + "length [" + length + "] because :"
 					+ e.toString(), e);

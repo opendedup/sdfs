@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import gnu.trove.iterator.TLongIterator;
 
+
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
@@ -103,7 +104,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 					//SDFSLogger.getLog().debug("will create byte array of size " + sz + " propsize was " + propsize);
 					ram = ram + (sz * (24 + 8));
-					m = new ByteArrayLongMap(sz, (short) FREE.length);
+					m = new ByteArrayLongMap(sz, (short) (FREE.length));
 					maps[hashRoute] = m;
 				}
 				hashRoutes++;
@@ -117,7 +118,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 				iolock.unlock();
 			}
 		}
-
 		return m;
 	}
 
@@ -470,7 +470,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
 		if (kSz >= this.maxSz)
-			throw new IOException("maximum sized reached");
+			throw new  HashtableFullException("maximum sized reached");
 		boolean added = false;
 		if (persist)
 			this.flushFullBuffer();

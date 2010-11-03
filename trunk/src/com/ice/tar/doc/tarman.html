@@ -1,0 +1,121 @@
+<html>
+<!-- $Id: tarman.html,v 1.5 2000/06/16 04:40:58 time Exp $ -->
+<!-- Authored by Timothy Gerard Endres, time@gjt.org -->
+<!-- This work has been placed into the public domain -->
+
+<head>
+</head>
+
+<body>
+
+<h2>com.ice.tar.tar</h2>
+
+<p>
+The com.ice.tar.tar program is used to test the com.ice.tar
+package. You can use it to create tar archives, list the contents
+of tar archives, and to extract the contents of tar archives. The
+program attempts to emulate the standard tar program, however, this
+emulation is very weak.
+
+<p>
+You invoke the program in one of three ways:
+<ul>
+
+<li>
+<strong>
+com.ice.tar.tar -c pathname [pathname...]
+</strong>
+<br>
+Create a new tar archive.
+
+<li>
+<strong>
+com.ice.tar.tar -t [options]
+</strong>
+<br>
+List the contents of a tar archive.
+
+<li>
+<strong>
+com.ice.tar.tar -x [options]
+</strong>
+<br>
+Extract the contents of a tar archive.
+
+</ul>
+
+<p>
+<h2>Options</h2>
+
+<dl>
+
+<dt><strong>-c</strong>
+<dd>Create tar archive.
+
+<dt><strong>-t</strong>
+<dd>List contents of tar archive.
+
+<dt><strong>-x</strong>
+<dd>Extract contents of tar archive.
+
+<dt><strong>-f filename</strong>
+<dd>
+Sets the tar archive file to <em>filename</em>. If filename
+is '-', then stdin or stdout is used, depending on whether
+you are reading or writing the archive.
+
+<dt><strong>-z</strong>
+<dd>
+Indicates that the tar archive being read is GZIP-ed, or that
+the archive being written should be GZIP-ed.
+
+<dt><strong>-u userName</strong>
+<dd>
+Sets the user name to use when creating an archive.
+
+<dt><strong>-U userId</strong>
+<dd>
+Sets the user id to use when creating an archive.
+
+<dt><strong>-g groupName</strong>
+<dd>
+Sets the group name to use when creating an archive.
+
+<dt><strong>-G groupId</strong>
+<dd>
+Sets the group id to use when creating an archive.
+
+<dt><strong>-v</strong>
+<dd>Turns on verbose mode.
+
+<dt><strong>--trans</strong>
+<dd>Turns on ascii translation flag. This will cause ascii text
+files to have local line endings translated into UNIX line endings.
+This translation will make the tar archive more "portable" with
+respect to text files. The determination of whether a file is
+ascii or not is done using the Java Activation MimeFileTypeMap
+support. You can specify a MIME types file for this purpose
+using the --mime option.
+
+<dt><strong>--mime file</strong>
+<dd>Reads file for MIME types and turns on the ascii translation flag.
+
+</dl>
+
+<p>
+The tar command will also recognize combined option characters,
+like the traditional tar. Therefore, '-xvfz arch.tar.gz' would
+be acceptable parameters to the tar command.
+
+<hr>
+<font SIZE="-2">
+<center>
+$Id: tarman.html,v 1.5 2000/06/16 04:40:58 time Exp $<br>
+Authored By Timothy Gerard Endres, time@gjt.org<br>
+This work been placed into the public domain.
+</center>
+</font>
+
+</body>
+
+</html>

@@ -1,0 +1,162 @@
+<html>
+<!-- $Id: devref.html,v 1.2 2000/06/16 04:40:58 time Exp $ -->
+<!-- Copyright (c) 1998 by Timothy Gerard Endres -->
+<!-- This is free software. Please refer to the file named -->
+<!-- 'LICENSE' or the file named 'License.html' for licensing details. -->
+
+<head>
+</head>
+
+<body>
+
+<h2>Java Tar Developer Reference</h2>
+
+The
+<a href="http://www.gjt.org/javadoc/com/ice/tar/package-summary.html">
+Java Tar pacakge
+</a>
+is written to be very similar to the
+<a href="http://www.gjt.org/apidoc/java/util/zip/package-summary.html">
+java.util.zip
+</a>
+package.
+
+
+<h2>TarEntry</h2>
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarEntry.html">
+TarEntry
+</a>
+objects are similar to
+<a href="http://www.gjt.org/apidoc/java/util/zip/ZipEntry.html">
+ZipEntry
+</a>
+objects. They represent an item in a tar archive.
+Typically, TarEntry's come from one of two places.
+They can come from a <code>TarInputStream.getNextEntry()</code>.
+They can also come from a <code>new TarEntry( java.io.File )</code>.
+However, you can also construct a TarEntry providing only the
+TarEntry's name. This allows you to construct TarEntry's that
+will be written to a TarOutputStream from any InputStream source.
+
+<p>
+An example of this technique is used by the Giant Java Tree's
+AutoRad server. You can
+<a href="http://www.gjt.org/cgi-bin/cvswebgjt/cvswebgjt.cgi/~checkout~/java/org/gjt/pkgd/PackageThread.java">
+view the source code to PackageThread.java.
+</a>
+Use your browser's 'Find' command to locate the
+<code>writeTarArchive()</code> method.
+
+<h2>TarHeader</h2>
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarHeader.html">
+TarHeader
+</a>
+objects are simply place holders (data structures) for the
+header information of a TarEntry. Methods are provided for
+parsing headers from tar archives, as well as generating
+headers from file information.
+
+<h2>TarInputStream</h2>
+
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarInputStream.html">
+TarInputStream
+</a>
+is a subclass of
+<a href="http://www.gjt.org/apidoc/java/io/FilterInputStream.html">
+FilterInputStream.
+</a> TarInputStream is very similar to
+<a href="http://www.gjt.org/apidoc/java/util/zip/ZipInputStream.html">
+ZipInputStream
+</a>
+in the way it presents the tar archive concept to you.
+
+<p>
+To read a tar archive, you open a TarInputStream, then loop
+using <code>getNextEntry()</code>, followed by a <code>read()</code> of
+the contents of the entry. The read method will return EOF (-1) at the
+end of each entry, at which time you loop to the next entry.
+
+
+<h2>TarOutputStream</h2>
+
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarOutputStream.html">
+TarOutputStream
+</a>
+is a subclass of
+<a href="http://www.gjt.org/apidoc/java/io/FilterOutputStream.html">
+FilterOutputStream.
+</a>
+TarOutputStream is very similar to
+<a href="http://www.gjt.org/apidoc/java/util/zip/ZipOutputStream.html">
+ZipOutputStream
+</a>
+in the way it presents the tar archive concept to you.
+
+<p>
+To write a tar archive, you open a TarOutputStream, then loop
+using <code>putNextEntry()</code>, followed by a <code>write()</code> of
+the contents of the entry. Each putNextEntry call will effectively
+define the end of the previous entry's contents.
+
+
+<h2>TarArchive</h2>
+
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarArchive.html">
+TarArchive
+</a>
+objects represent an archive of files and directories represented
+by TarEntry objects. Each TarEntry is delineated by a record
+containing the entry's header, followed by the contents of the
+object defined by the header. Directory entries can be explicitly
+placed in a tar archive, or simply implied by the paths of the
+file entries in the archive. When com.ice.tar.tar writes an archive,
+it explicitly write each directory entry that it encounters when
+recursing over a directory's subtree.
+
+<p>
+To write a tar archive, create a new TarArchive with an
+OutputStream, then repeatedly call writeEntry() with TarEntry
+objects created using the TarEntry( File ) constructor for
+each top level item to be placed in the archive.
+
+<p>
+To extract the contents of a tar archive,
+create a new TarArchive
+with an InputStream, then call extractContents() with File
+that indicates the destination extraction directory.
+
+<p>
+Please refer to the code for TarArchive.extractContents()
+for the details of reading individual archive entries.
+
+
+<h2>TarBuffer</h2>
+
+<a href="http://www.gjt.org/javadoc/com/ice/tar/TarBuffer.html">
+TarBuffer
+</a>
+class is used to implement the blocked I/O of tar. This is done
+to ensure that Java Tar is as compatible as possible with other
+tar implementations.
+
+
+<h2>Home</h2>
+
+<a href="http://www.trustice.com/java/tar/">
+The Java Tar Home Page.
+</a>
+
+<!-- ================ HOME PAGE ================== -->
+
+<hr>
+<font SIZE="-2">
+<center>
+$Id: devref.html,v 1.2 2000/06/16 04:40:58 time Exp $<br>
+Authored By Timothy Gerard Endres, time@dotfile.com<br>
+This work been placed into the public domain.
+</center>
+</font>
+
+</body>
+
+</html>

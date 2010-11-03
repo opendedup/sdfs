@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.opendedup.util.SDFSLogger;
 
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -64,6 +65,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private int mode = -1;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
+	
 
 	/**
 	 * 
@@ -94,7 +96,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            deduped opportunistically.
 	 * @throws IOException 
 	 */
-	public void setDedup(boolean dedupNow) throws IOException {
+	public void setDedup(boolean dedupNow) throws IOException, HashtableFullException {
 		if(!this.getDedupFile().isClosed())
 			throw new IOException("The file must be closed to perform this operation");
 		if (!this.dedup && dedupNow) {
@@ -816,6 +818,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		in.read(hmb);
 		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
 		this.dedup = in.readBoolean();
+	
 	}
 
 	@Override

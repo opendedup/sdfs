@@ -109,6 +109,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				throw new FuseException("access denied for " + path)
 						.initErrno(FuseException.EACCES);
 			} finally {
+				
 			}
 		}
 		return 0;
@@ -538,7 +539,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					.initErrno(FuseException.ENOENT);
 		}
 		throw new FuseException().initErrno(FuseException.ENOENT);
-
 	}
 
 	private int getFtype(String path) throws FuseException {
@@ -565,7 +565,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		}
 		log.error("could not determine type for " + path);
 		throw new FuseException().initErrno(FuseException.ENOENT);
-
 	}
 
 	private DedupFileChannel getFileChannel(String path) throws FuseException {
@@ -625,7 +624,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int listxattr(String path, XattrLister lister) throws FuseException {
-
 		sdfsCmds.listAttrs(lister);
 		return 0;
 	}

@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
@@ -99,7 +100,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @seecom.annesam.sdfs.io.AbstractDedupFile#snapshot(com.annesam.sdfs.io.
 	 * MetaDataDedupFile)
 	 */
-	public DedupFile snapshot(MetaDataDedupFile snapmf) throws IOException {
+	public DedupFile snapshot(MetaDataDedupFile snapmf) throws IOException, HashtableFullException {
 		DedupFileChannel ch = this.getChannel();
 		this.writeCache();
 		this.sync();
@@ -180,7 +181,7 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#writeCache()
 	 */
-	public void writeCache() throws IOException {
+	public void writeCache() throws IOException, HashtableFullException {
 		SDFSLogger.getLog().debug("Flushing Cache of for " + mf.getPath() + " of size "
 				+ this.writeBuffers.size());
 		Object[] buffers = this.writeBuffers.values().toArray();
@@ -194,7 +195,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer,
-			boolean removeWhenWritten) throws IOException {
+			boolean removeWhenWritten) throws IOException, HashtableFullException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
@@ -653,7 +654,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public void optimize(long length) {
+	public void optimize(long length) throws HashtableFullException {
 		DedupFileChannel ch = null;
 		try {
 			ch = this.getChannel();

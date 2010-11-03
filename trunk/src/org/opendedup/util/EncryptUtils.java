@@ -120,7 +120,7 @@ public class EncryptUtils {
 		}
 		return clearText;
 	}
-	
+
 	
 	
 	public static void main(String [] args) throws IOException {
