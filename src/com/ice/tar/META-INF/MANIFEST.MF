@@ -1,0 +1,8 @@
+Manifest-Version: 2.3
+Main-Class: com.ice.tar.tar
+Class-Path: activation.jar
+Name: "Java Tar"
+Created-By: "Tim Endres <time@gjt.org>"
+Implementation-Vendor: "com.ice"
+Implementation-Title: "Java Tar Release 2.3"
+Implementation-Version: "2.3"

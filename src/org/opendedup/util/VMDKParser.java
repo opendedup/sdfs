@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.BufferClosedException;
@@ -22,7 +23,7 @@ public class VMDKParser {
 	
 
 	public static MetaDataDedupFile writeFile(String path, String fileName,
-			long size) throws IOException, BufferClosedException {
+			long size) throws IOException, BufferClosedException, HashtableFullException {
 		path = path + File.separator + fileName;
 		File f = new File(path);
 		if (!f.exists())

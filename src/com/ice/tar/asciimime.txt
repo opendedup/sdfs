@@ -1,0 +1,10 @@
+#
+# TAR ASCII Mime Types file. Extensions in here will determine the files that have
+# their line endings translated to and from UNIX '\n'.
+#
+text/xml						xml XML
+text/html						htm HTM html HTML shtml SHTML
+text/plain						java JAVA c C cc CC cpp CPP h H txt TXT pm PM ph PH pl PL sh SH bat BAT properties
+text/rtf						rtf RTF
+text/x-javahelp					hs HS jhm JHM
+

@@ -1,5 +1,7 @@
 package org.opendedup.collections;
 
+import gnu.trove.set.hash.TLongHashSet;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -14,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.NextPrime;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -30,6 +33,7 @@ public class LongByteArrayMap implements AbstractMap {
 	// private long endPos = maxReadBufferSize;
 	File dbFile = null;
 	Path bdbf = null;
+	TLongHashSet locks = null;
 
 	// private boolean smallMemory = false;
 	public LongByteArrayMap(int arrayLength, String filePath)
@@ -46,6 +50,11 @@ public class LongByteArrayMap implements AbstractMap {
 		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
 		new SyncThread(this);
+		try {
+			locks = new TLongHashSet(NextPrime.getNextPrimeI(2048));
+		}catch(Exception e) {
+			SDFSLogger.getLog().error(e);
+		}
 	}
 
 	public LongByteArrayMap(int arrayLength, String filePath, String fileParams)
@@ -62,6 +71,11 @@ public class LongByteArrayMap implements AbstractMap {
 		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
 		new SyncThread(this);
+		try {
+			locks = new TLongHashSet(NextPrime.getNextPrimeI(2048));
+		}catch(Exception e) {
+			SDFSLogger.getLog().error(e);
+		}
 	}
 
 	public void iterInit() {
@@ -194,8 +208,6 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-		
-		
 		if (data.length != this.arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + this.arrayLength);
@@ -224,7 +236,6 @@ public class LongByteArrayMap implements AbstractMap {
 				_bdb.close();
 			} catch (Exception e) {
 			}
-			
 		}
 	}
 

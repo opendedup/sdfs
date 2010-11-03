@@ -120,8 +120,11 @@ public class DedupFileStore {
 			if (df == null) {
 				df = new SparseDedupFile(oldmf);
 			}
-
+			try {
 			return df.snapshot(newmf);
+			}catch(Exception e) {
+				throw new IOException(e);
+			}
 
 		} else {
 			throw new IOException("DedupFileStore is closed");
@@ -184,8 +187,8 @@ public class DedupFileStore {
 			DedupFile df = (DedupFile) dfs[i];
 			try {
 				df.writeCache();
-			} catch (IOException e) {
-
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("DSE Full",e);
 			}
 		}
 		SDFSLogger.getLog().debug("write caches flushed");

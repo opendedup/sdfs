@@ -49,7 +49,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
 	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
 	.concurrencyLevel(Main.writeThreads).build();
-	private byte[] FREE = new byte[Main.chunkStorePageSize];
+	private byte[] FREE = new byte[pageSize];
 
 	/**
 	 * 

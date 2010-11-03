@@ -2,6 +2,8 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+import org.opendedup.collections.HashtableFullException;
+
 /**
  * 
  * @author annesam Interface that represents the file map associated with a
@@ -33,7 +35,7 @@ public interface DedupFile {
 	/**
 	 * Writes all the cache buffers to the dedup chunk store service
 	 */
-	public abstract void writeCache() throws IOException;
+	public abstract void writeCache() throws IOException,HashtableFullException;
 
 	/**
 	 * 
@@ -64,7 +66,7 @@ public interface DedupFile {
 	 * @return the cloned DedupFile
 	 * @throws IOException
 	 */
-	public abstract DedupFile snapshot(MetaDataDedupFile mf) throws IOException;
+	public abstract DedupFile snapshot(MetaDataDedupFile mf) throws IOException,HashtableFullException;
 
 	/**
 	 * Deletes the DedupFile and all on disk references
@@ -84,7 +86,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void writeCache(WritableCacheBuffer writeBuffer,
-			boolean removeWhenWritten) throws IOException;
+			boolean removeWhenWritten) throws IOException,HashtableFullException;
 
 	/**
 	 * 
@@ -215,13 +217,14 @@ public interface DedupFile {
 	 */
 	public abstract boolean isAbsolute();
 
+	
 	/**
 	 * Optimizes the dedup file hash map for a specific length of file.
 	 * 
 	 * @param length
 	 *            the lenght to optimize for
 	 */
-	public abstract void optimize(long length);
+	public abstract void optimize(long length) throws HashtableFullException;
 	
 	public abstract boolean hasOpenChannels();
 	
