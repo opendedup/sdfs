@@ -9,7 +9,7 @@ import org.opendedup.util.VMDKParser;
 
 public class MakeVMDKCmd implements XtendedCmd {
 
-	static long tbc = 1024 * 1024 * 1024 * 1024;
+	static long tbc = 1099511627776L;
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;

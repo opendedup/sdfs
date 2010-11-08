@@ -4,7 +4,7 @@ import org.opendedup.collections.AbstractMap;
 
 public class SyncThread implements Runnable {
 	AbstractMap map;
-
+	Thread th = null;
 	public SyncThread(AbstractMap m) {
 		map = m;
 		Thread th = new Thread(this);
@@ -25,6 +25,10 @@ public class SyncThread implements Runnable {
 			}
 
 		}
+	}
+	
+	public void close() {
+		th.interrupt();
 	}
 
 }

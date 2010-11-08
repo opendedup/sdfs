@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class StringUtils {
-	final static long tbc = 1024 * 1024 * 1024 * 1024;
+	final static long tbc = 1099511627776L;
 	final static long gbc = 1024 * 1024 * 1024;
 	final static int mbc = 1024 * 1024;
 
@@ -58,5 +58,9 @@ public class StringUtils {
 					+ capString);
 		}
 		return fSize;
+	}
+	
+	public static void main(String [] args) throws IOException {
+		System.out.println("Volume = " + parseSize("1TB"));
 	}
 }

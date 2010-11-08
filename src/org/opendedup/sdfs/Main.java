@@ -20,6 +20,7 @@ public class Main {
 	 * The Version of SDFS this is
 	 */
 	public static String version = "1.0.0";
+	
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk store.
@@ -175,11 +176,6 @@ public class Main {
 	 */
 	public static int maxReturnResults = 3000;
 	/**
-	 * Additional DB connection parameters that will used if H2 is the
-	 * hash/dedup file store. This is used on the chunk store and the client.
-	 */
-	public static String FSDBConString = "CACHE_SIZE=8192;PAGE_STORE=TRUE;LOG=0";
-	/**
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
@@ -320,4 +316,8 @@ public class Main {
 	 * Age, if older than, that data will be evicted from the Dedup Storage Engine
 	 */
 	public static int evictionAge = 3;
+	/**
+	 * Compressed Index
+	 */
+	public static boolean compressedIndex =  false;
 }

@@ -165,7 +165,7 @@ public class HashStore {
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
-		bdb = new CSByteArrayLongMap(entries, (short) Main.hashLength, dbf
+		bdb = new CSByteArrayLongMap(entries, dbf
 				.getPath());
 	}
 

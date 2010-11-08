@@ -2,32 +2,41 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
+
+import com.ning.compress.lzf.LZFDecoder;
+import com.ning.compress.lzf.LZFEncoder;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
 	ByteBuffer claims = null;
 	ByteBuffer keys = null;
+	byte[] compValues = null;
+	byte[] compClaims = null;
+	byte[] compKeys = null;
 	private int size = 0;
 	private int entries = 0;
 	private ReentrantLock hashlock = new ReentrantLock();
-	public byte[] FREE = new byte[16];
-	public byte[] REMOVED = new byte[16];
+	public static byte[] FREE = new byte[16];
+	public static byte[] REMOVED = new byte[16];
 	private int iterPos = 0;
 
-	public ByteArrayLongMap(int size, short arraySize) {
-		this.size = size;
-		FREE = new byte[arraySize];
-		REMOVED = new byte[arraySize];
+	static {
+		FREE = new byte[Main.hashLength];
+		REMOVED = new byte[Main.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
+	}
+
+	public ByteArrayLongMap(int size, short arraySize) throws IOException {
+		this.size = size;
 		this.setUp();
 	}
 
@@ -94,24 +103,63 @@ public class ByteArrayLongMap {
 	 * @param initialCapacity
 	 *            an <code>int</code> value
 	 * @return an <code>int</code> value
+	 * @throws IOException
 	 */
-	public int setUp() {
+	public int setUp() throws IOException {
 		int kSz = 0;
-		keys = ByteBuffer.allocateDirect(size * FREE.length);
-		values = ByteBuffer.allocateDirect(size * 8);
-		claims = ByteBuffer.allocateDirect(size);
-		//store = ByteBuffer.allocateDirect(size);
+		if (!Main.compressedIndex) {
+			keys = ByteBuffer.allocate(size * FREE.length);
+			values = ByteBuffer.allocate(size * 8);
+			claims = ByteBuffer.allocate(size);
+			
+		} else {
+			byte[] keyB = new byte[size * FREE.length];
+			byte[] valueB = new byte[size * 8];
+			byte[] claimsB = new byte[size];
+			this.compKeys = LZFEncoder.encode(keyB);
+			this.compValues = LZFEncoder.encode(valueB);
+			this.compClaims = LZFEncoder.encode(claimsB);
+		}
+		this.decompress();
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
 			claims.put((byte) 0);
-			//store.put((byte) 0);
+			// store.put((byte) 0);
 			kSz++;
 		}
+		this.compress();
+		this.derefByteArray();
+		// store = ByteBuffer.allocateDirect(size);
+		
 		// values = new long[this.size][this.size];
 		// Arrays.fill( keys, FREE );
 		// Arrays.fill(values, blank);
 		return size;
+	}
+
+	private void decompress() throws IOException {
+		if (Main.compressedIndex) {
+			keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
+			values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
+			claims = ByteBuffer.wrap(LZFDecoder.decode(compClaims));
+		}
+	}
+
+	private void derefByteArray() {
+		if (Main.compressedIndex) {
+			keys = null;
+			values = null;
+			claims = null;
+		}
+	}
+
+	private void compress() throws IOException {
+		if (Main.compressedIndex) {
+			compKeys = LZFEncoder.encode(keys.array());
+			compValues = LZFEncoder.encode(values.array());
+			compClaims = LZFEncoder.encode(claims.array());
+		}
 	}
 
 	/**
@@ -124,6 +172,7 @@ public class ByteArrayLongMap {
 	public boolean containsKey(byte[] key) {
 		try {
 			this.hashlock.lock();
+			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
@@ -136,32 +185,42 @@ public class ByteArrayLongMap {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 	}
-	
-	public boolean update(byte[] key,long value,byte storeID) throws IOException {
+
+	public boolean update(byte[] key, long value, byte storeID)
+			throws IOException {
 		try {
 			this.hashlock.lock();
+			this.decompress();
 			int pos = this.index(key);
 			if (pos == -1) {
 				return false;
 			} else {
-				keys.position(pos);
-				pos = (pos / FREE.length) * 8;
-				this.values.position(pos);
-				this.values.putLong(value);
-				pos = (pos / 8);
-				this.claims.position(pos);
-				this.claims.put((byte) 1);
-				//this.store.position(pos);
-				//this.store.put(storeID);
-				return true;
+				try {
+					keys.position(pos);
+					pos = (pos / FREE.length) * 8;
+					this.values.position(pos);
+					this.values.putLong(value);
+					pos = (pos / 8);
+					this.claims.position(pos);
+					this.claims.put((byte) 1);
+					// this.store.position(pos);
+					// this.store.put(storeID);
+					return true;
+				} catch (Exception e) {
+					throw e;
+				} finally {
+					this.compress();
+				}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 	}
@@ -169,6 +228,7 @@ public class ByteArrayLongMap {
 	public boolean remove(byte[] key) throws IOException {
 		try {
 			this.hashlock.lock();
+			this.decompress();
 			int pos = this.index(key);
 			this.claims.position(pos / FREE.length);
 			byte claimed = this.claims.get();
@@ -177,24 +237,31 @@ public class ByteArrayLongMap {
 			} else if (claimed == 1) {
 				return false;
 			} else {
-				keys.position(pos);
-				keys.put(this.REMOVED);
-				pos = (pos / FREE.length) * 8;
-				this.values.position(pos);
-				this.values.position(pos);
-				this.values.putLong(-1);
-				pos = (pos / 8);
-				this.claims.position(pos);
-				this.claims.put((byte) 0);
-				//this.store.position(pos);
-				//this.store.put((byte)0);
-				this.entries = entries -1;
-				return true;
+				try {
+					keys.position(pos);
+					keys.put(REMOVED);
+					pos = (pos / FREE.length) * 8;
+					this.values.position(pos);
+					this.values.position(pos);
+					this.values.putLong(-1);
+					pos = (pos / 8);
+					this.claims.position(pos);
+					this.claims.put((byte) 0);
+					// this.store.position(pos);
+					// this.store.put((byte)0);
+					this.entries = entries - 1;
+					return true;
+				} catch (Exception e) {
+					throw e;
+				} finally {
+					this.compress();
+				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "error getting record", e);
+			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 	}
@@ -203,14 +270,10 @@ public class ByteArrayLongMap {
 		return hash % size;
 	}
 
-
-	
 	public int hashFunc3(int hash) {
-        int result = hash + 1;
-        return result;
-    }
-	
-	
+		int result = hash + 1;
+		return result;
+	}
 
 	/**
 	 * Locates the index of <tt>obj</tt>.
@@ -224,7 +287,7 @@ public class ByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		//int stepSize = hashFunc2(hash);
+		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -249,8 +312,10 @@ public class ByteArrayLongMap {
 				cur = new byte[FREE.length];
 				keys.position(index);
 				keys.get(cur);
-				if(z > size) {
-					SDFSLogger.getLog().info("entries exhaused size=" + this.size + " entries=" +this.entries);
+				if (z > size) {
+					SDFSLogger.getLog().info(
+							"entries exhaused size=" + this.size + " entries="
+									+ this.entries);
 					return -1;
 				}
 			} while (!Arrays.equals(cur, FREE)
@@ -276,7 +341,7 @@ public class ByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		//int stepSize = hashFunc2(hash);
+		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -338,15 +403,18 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	public boolean put(byte[] key, long value,byte storeID) {
+	public boolean put(byte[] key, long value, byte storeID) {
 		try {
 			this.hashlock.lock();
-			if(entries >= size)
-				throw new IOException("entries is greater than or equal to the maximum number of entries. You need to expand" +
-						"the volume or DSE allocation size");
+			this.decompress();
+			if (entries >= size)
+				throw new IOException(
+						"entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0)
 				return false;
+			try {
 			this.keys.position(pos);
 			this.keys.put(key);
 			pos = (pos / FREE.length) * 8;
@@ -355,18 +423,24 @@ public class ByteArrayLongMap {
 			pos = (pos / 8);
 			this.claims.position(pos);
 			this.claims.put((byte) 1);
-			//this.store.position(pos);
-			//this.store.put(storeID);
-			this.entries = entries +1;
+			// this.store.position(pos);
+			// this.store.put(storeID);
+			this.entries = entries + 1;
 			return pos > -1 ? true : false;
+			}catch(Exception e) {
+				throw e;
+			}finally {
+				this.compress();
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;
 		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 	}
-	
+
 	public int getEntries() {
 		return this.entries;
 	}
@@ -378,6 +452,7 @@ public class ByteArrayLongMap {
 	public long get(byte[] key, boolean claim) {
 		try {
 			this.hashlock.lock();
+			this.decompress();
 			if (key == null)
 				return -1;
 			int pos = this.index(key);
@@ -398,6 +473,7 @@ public class ByteArrayLongMap {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 
@@ -426,7 +502,7 @@ public class ByteArrayLongMap {
 			}
 			if (val < 0)
 				val = val * -1;
-			boolean k = b.put(hash, val,(byte)1);
+			boolean k = b.put(hash, val, (byte) 1);
 			if (k == false)
 				System.out.println("Unable to add this " + k);
 

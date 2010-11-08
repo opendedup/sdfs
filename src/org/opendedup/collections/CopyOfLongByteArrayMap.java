@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import gnu.trove.set.hash.TLongHashSet;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -20,32 +19,35 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.SDFSLogger;
 
-public class LongByteArrayMap implements AbstractMap {
+public class CopyOfLongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
-	private static final int arrayLength = 1 + Main.hashLength + 1 + 8;
+	int arrayLength = 0;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
-	public static byte[] FREE = new byte[16];
+	public byte[] FREE = new byte[16];
 	public int iterPos = 0;
-	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
 	// private int eI = 1024 * 1024;
 	// private long endPos = maxReadBufferSize;
 	File dbFile = null;
 	Path bdbf = null;
 	TLongHashSet locks = null;
-	
-	static {
-		FREE = new byte[arrayLength];
-		Arrays.fill(FREE, (byte) 0);
-	}
 
 	// private boolean smallMemory = false;
-	public LongByteArrayMap(String filePath)
+	public CopyOfLongByteArrayMap(int arrayLength, String filePath)
 			throws IOException {
+		if (Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().debug("Preparing for smaller memory footprint");
+			// smallMemory = true;
+			// this.maxReadBufferSize = 50 * 1024 * 1024;
+			// endPos = maxReadBufferSize;
+		}
+		this.arrayLength = arrayLength;
 		this.filePath = filePath;
+		FREE = new byte[arrayLength];
+		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
 		new SyncThread(this);
 		try {
@@ -55,9 +57,18 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	public LongByteArrayMap(String filePath, String fileParams)
+	public CopyOfLongByteArrayMap(int arrayLength, String filePath, String fileParams)
 			throws IOException {
+		if (Runtime.getRuntime().maxMemory() < 1610612736) {
+			SDFSLogger.getLog().debug("Preparing for smaller memory footprint");
+			// smallMemory = true;
+			// this.maxReadBufferSize = 50 * 1024 * 1024;
+			// endPos = maxReadBufferSize;
+		}
+		this.arrayLength = arrayLength;
 		this.filePath = filePath;
+		FREE = new byte[arrayLength];
+		Arrays.fill(FREE, (byte) 0);
 		this.openFile();
 		new SyncThread(this);
 		try {
@@ -105,11 +116,11 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public byte[] nextValue() throws IOException {
-		long pos = iterPos * arrayLength;
+		long pos = iterPos * this.arrayLength;
 		byte[] val = null;
 		File f = new File(this.filePath);
 		while (pos < f.length()) {
-			val = new byte[arrayLength];
+			val = new byte[this.arrayLength];
 			try {
 				try {
 					this.hashlock.lock();
@@ -146,11 +157,12 @@ public class LongByteArrayMap implements AbstractMap {
 			try {
 				dbFile = new File(filePath);
 				boolean fileExists = dbFile.exists();
+				if (!dbFile.getParentFile().exists()) {
+					dbFile.getParentFile().mkdirs();
+				}
 				SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
+
 				if (!fileExists) {
-					if (!dbFile.getParentFile().exists()) {
-						dbFile.getParentFile().mkdirs();
-					}
 					FileChannel bdb = (FileChannel) bdbf.newByteChannel(
 							StandardOpenOption.CREATE,
 							StandardOpenOption.WRITE, StandardOpenOption.READ,
@@ -196,18 +208,16 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-		if (data.length != arrayLength)
+		if (data.length != this.arrayLength)
 			throw new IOException("data length " + data.length
-					+ " does not equal " + arrayLength);
+					+ " does not equal " + this.arrayLength);
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			
 			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
-			_bdb.lock(fpos, data.length, false);
 			this.hashlock.lock();
 			_bdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
@@ -299,10 +309,10 @@ public class LongByteArrayMap implements AbstractMap {
 			fpos = this.getMapFilePosition(pos);
 			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.WRITE,
 					StandardOpenOption.READ, StandardOpenOption.SPARSE);
-			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+			ByteBuffer buf = ByteBuffer.wrap(new byte[this.arrayLength]);
 			_bdb.read(buf, fpos);
 			byte[] b = buf.array();
-			if (Arrays.equals(b, FREE))
+			if (Arrays.equals(b, this.FREE))
 				return null;
 			return b;
 		} catch (BufferUnderflowException e) {
