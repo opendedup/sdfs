@@ -37,7 +37,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
 	private static final int BLOCK_SIZE = 32768;
 	private static final int NAME_LENGTH = 2048;
-	static long tbc = 1024 * 1024 * 1024 * 1024;
+	static long tbc = 1099511627776L;
 	static int gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;

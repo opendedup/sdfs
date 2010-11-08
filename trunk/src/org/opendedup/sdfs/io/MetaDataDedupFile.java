@@ -65,6 +65,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private int mode = -1;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
+	private String version = Main.version;
+	
 	
 
 	/**
@@ -818,6 +820,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		in.read(hmb);
 		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
 		this.dedup = in.readBoolean();
+		try {
+		if(in.available() > 0) {
+			int vlen = in.readInt();
+			byte [] vb = new byte[vlen];
+			in.read(vb);
+			this.version = new String(vb);
+		}
+		}catch(Exception e) {
+			
+		}
 	
 	}
 
@@ -859,6 +871,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		out.writeInt(hmb.length);
 		out.write(hmb);
 		out.writeBoolean(dedup);
+		byte [] vb = this.version.getBytes();
+		out.writeInt(vb.length);
+		out.write(vb);
 		
 	}
 	public Element toXML(Document doc) throws ParserConfigurationException {
