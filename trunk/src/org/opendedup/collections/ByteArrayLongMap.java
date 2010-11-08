@@ -111,7 +111,6 @@ public class ByteArrayLongMap {
 			keys = ByteBuffer.allocate(size * FREE.length);
 			values = ByteBuffer.allocate(size * 8);
 			claims = ByteBuffer.allocate(size);
-			
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];
