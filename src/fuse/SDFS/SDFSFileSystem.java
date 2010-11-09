@@ -2,6 +2,7 @@ package fuse.SDFS;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -56,6 +57,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int chmod(String path, int mode) throws FuseException {
 		// log.info("setting file permissions " + mode);
+		//SDFSLogger.getLog().info("4");
 		File f = resolvePath(path);
 		int ftype = this.getFtype(path);
 		if (ftype == FuseFtype.TYPE_SYMLINK || ftype == FuseFtype.TYPE_DIR) {
@@ -85,6 +87,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int chown(String path, int uid, int gid) throws FuseException {
+		//SDFSLogger.getLog().info("3");
 		File f = resolvePath(path);
 		int ftype = this.getFtype(path);
 		if (ftype == FuseFtype.TYPE_SYMLINK || ftype == FuseFtype.TYPE_DIR) {
@@ -116,6 +119,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int flush(String path, Object fh) throws FuseException {
+		//SDFSLogger.getLog().info("1");
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
@@ -129,6 +133,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int fsync(String path, Object fh, boolean isDatasync)
 			throws FuseException {
+		//SDFSLogger.getLog().info("2");
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
@@ -142,6 +147,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getattr(String path, FuseGetattrSetter getattrSetter)
 			throws FuseException {
+		//SDFSLogger.getLog().info("5");
 		int ftype = this.getFtype(path);
 		if (ftype == FuseFtype.TYPE_SYMLINK) {
 			Path p = null;
@@ -234,6 +240,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getdir(String path, FuseDirFiller dirFiller)
 			throws FuseException {
+		//SDFSLogger.getLog().info("6");
 		File f = null;
 		try {
 			f = resolvePath(path);
@@ -271,6 +278,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int mkdir(String path, int mode) throws FuseException {
+		//SDFSLogger.getLog().info("7");
 		File f = new File(this.mountedVolume + path);
 		if(Main.volume.isFull())
 			throw new FuseException("Volume Full")
@@ -296,6 +304,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int mknod(String path, int mode, int rdev) throws FuseException {
 		// log.info("mknod(): " + path + " " + mode + " " + rdev + "\n");
+		//SDFSLogger.getLog().info("8");
 		File f = new File(this.mountedVolume + path);
 		if(Main.volume.isFull())
 			throw new FuseException("Volume Full")
@@ -324,6 +333,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
+		//SDFSLogger.getLog().info("9");
 		try {
 			openSetter.setFh(this.getFileChannel(path));
 		} catch (FuseException e) {
@@ -335,6 +345,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int read(String path, Object fh, ByteBuffer buf, long offset)
 			throws FuseException {
+		//SDFSLogger.getLog().info("10");
 		// log.info("Reading " + path + " at " + offset + " with buffer " +
 		// buf.capacity());
 		byte[] b = new byte[buf.capacity()];
@@ -354,6 +365,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int readlink(String path, CharBuffer link) throws FuseException {
 		Path p = Paths.get(this.mountedVolume + path);
+		//SDFSLogger.getLog().info("11");
 		try {
 			String lpath = p.readSymbolicLink().toString();
 			link.put(lpath);
@@ -369,6 +381,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int release(String path, Object fh, int flags) throws FuseException {
 		// log.info("closing " + path + " with flags " + flags);
+		//SDFSLogger.getLog().info("12");
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.close();
@@ -379,6 +392,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int rename(String from, String to) throws FuseException {
+		//SDFSLogger.getLog().info("13");
 		File f = null;
 		try {
 			f = resolvePath(from);
@@ -395,6 +409,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int rmdir(String path) throws FuseException {
+		//SDFSLogger.getLog().info("14");
 		if (this.getFtype(path) == FuseFtype.TYPE_SYMLINK) {
 			File f = new File(mountedVolume + path);
 			if (!f.delete()) {
@@ -420,6 +435,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
 		// statfsSetter.set(blockSize, blocks, blocksFree, blocksAvail, files,
 		// filesFree, namelen)
+		//SDFSLogger.getLog().info("15");
 		int blocks = (int) Main.volume.getTotalBlocks();
 
 		int used = (int) Main.volume.getUsedBlocks();
@@ -431,6 +447,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int symlink(String from, String to) throws FuseException {
+		//SDFSLogger.getLog().info("16");
 		File dst = new File(mountedVolume + to);
 		if (dst.exists()) {
 			throw new FuseException().initErrno(FuseException.EPERM);
@@ -448,6 +465,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int truncate(String path, long size) throws FuseException {
+		//SDFSLogger.getLog().info("17");
 		try {
 			DedupFileChannel ch = this.getFileChannel(path);
 			ch.truncateFile(size);
@@ -460,6 +478,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int unlink(String path) throws FuseException {
+		//SDFSLogger.getLog().info("18");
 		if (this.getFtype(path) == FuseFtype.TYPE_SYMLINK) {
 			File f = new File(mountedVolume + path);
 			if (!f.delete())
@@ -482,6 +501,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	public int utime(String path, int atime, int mtime) throws FuseException {
+		//SDFSLogger.getLog().info("19");
 		File f = this.resolvePath(path);
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		mf.setLastAccessed(atime * 1000L);
@@ -491,6 +511,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
+		//SDFSLogger.getLog().info("19");
 		if(Main.volume.isFull())
 			throw new FuseException("Volume Full")
 		.initErrno(FuseException.ENOSPC);
@@ -603,6 +624,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getxattrsize(String path, String name, FuseSizeSetter sizeSetter)
 			throws FuseException {
+		//SDFSLogger.getLog().info("21");
 		if (name.startsWith("security.capability"))
 			return 0;
 		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs")

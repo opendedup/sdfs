@@ -43,7 +43,7 @@ public class VolumeConfigWriter {
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
 	boolean safe_sync = false;
-	int write_threads = (short)(Runtime.getRuntime().availableProcessors()*4);
+	int write_threads = (short)(Runtime.getRuntime().availableProcessors()*3);
 	boolean dedup_files = true;
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
@@ -141,6 +141,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-max-file-write-buffers")) {
 			this.max_file_write_buffers = Integer.parseInt(cmd
 					.getOptionValue("io-max-file-write-buffers"));
+		} else {
+			this.max_file_write_buffers = (this.chunk_size/4)*5;
 		}
 		if (cmd.hasOption("io-max-open-files")) {
 			this.max_open_files = Integer.parseInt(cmd

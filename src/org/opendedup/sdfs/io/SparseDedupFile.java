@@ -66,7 +66,8 @@ public class SparseDedupFile implements DedupFile {
 						} catch (Exception e) {
 
 							// TODO Auto-generated catch block
-							e.printStackTrace();
+							SDFSLogger.getLog().error(
+									"issue adding for flushing buffer", e);
 						} finally {
 							flushingLock.unlock();
 						}
@@ -380,8 +381,15 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	public DedupChunk getReadBuffer(long position) throws IOException {
 		if (this.closed) {
-			this.forceClose();
-			throw new IOException("file already closed");
+			// this.forceClose();
+			// throw new IOException("file already closed");
+			channelLock.lock();
+			try {
+				this.initDB();
+			} catch (Exception e) {
+			} finally {
+				this.channelLock.unlock();
+			}
 		}
 		long chunkPos = this.getChuckPosition(position);
 		DedupChunk readBuffer = this.writeBuffers.get(chunkPos);
@@ -490,7 +498,6 @@ public class SparseDedupFile implements DedupFile {
 	 * .io.DedupFileChannel)
 	 */
 	public void unRegisterChannel(DedupFileChannel channel) {
-
 		if (Main.safeClose) {
 			channelLock.lock();
 			try {
@@ -525,45 +532,49 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public void forceClose() {
+
 		this.initLock.lock();
+		this.channelLock.lock();
 		try {
-			if (Main.safeClose) {
-				try {
-					ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
-					for (int i = 0; i < this.buffers.size(); i++) {
-						al.add(this.buffers.get(i));
+			if (!this.closed) {
+				if (Main.safeClose) {
+					try {
+						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
+						for (int i = 0; i < this.buffers.size(); i++) {
+							al.add(this.buffers.get(i));
+						}
+						for (int i = 0; i < al.size(); i++) {
+							al.get(i).close();
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					for (int i = 0; i < al.size(); i++) {
-						al.get(i).close();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				} else {
+					this.staticChannel.forceClose();
+					this.staticChannel = null;
 				}
-			} else {
-				this.staticChannel.forceClose();
-				this.staticChannel = null;
+				try {
+					this.writeCache();
+				} catch (Exception e) {
+					System.exit(0);
+				}
+				try {
+					this.bdb.sync();
+				} catch (Exception e) {
+				}
+				try {
+					this.bdb.close();
+				} catch (Exception e) {
+				}
+				this.bdb = null;
+				this.closed = true;
+				try {
+					this.chunkStore.close();
+				} catch (Exception e) {
+				}
+				mf.setDedupFile(this);
+				mf.sync();
 			}
-			try {
-				this.writeCache();
-			} catch (Exception e) {
-				System.exit(0);
-			}
-			try {
-				this.bdb.sync();
-			} catch (Exception e) {
-			}
-			try {
-				this.bdb.close();
-			} catch (Exception e) {
-			}
-			this.bdb = null;
-			this.closed = true;
-			try {
-				this.chunkStore.close();
-			} catch (Exception e) {
-			}
-			mf.setDedupFile(this);
-			mf.sync();
 		} catch (Exception e) {
 			e.printStackTrace();
 			// SDFSLogger.getLog().warn( "Unable to close database " +
@@ -574,6 +585,7 @@ public class SparseDedupFile implements DedupFile {
 			bdb = null;
 			chunkStore = null;
 			this.closed = true;
+			this.channelLock.unlock();
 			this.initLock.unlock();
 		}
 	}
