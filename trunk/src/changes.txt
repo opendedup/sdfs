@@ -3,7 +3,10 @@ Version 1.0.0
 	* Fixed : Volume Capacity configuration did not get set appropriately when TB was set as unit for capacity.
 	Enhancements :
 	* Windows : Added SDFS system variable.
-	* Performance : Changed memory al
+	* Performance : Changed memory allocation for write buffers and threads per volume. This should increase performance by about 10% 
+	for newer volumes
+	* Performance : NFS performance should be on par between safeclose="true" and safeclose="false"
+	* Performance : Some slight memory enhancements.
 
 Version 0.9.7
 	Fixes
