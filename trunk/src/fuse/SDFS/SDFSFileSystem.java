@@ -45,7 +45,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private SDFSCmds sdfsCmds;
 
 	public SDFSFileSystem(String mountedVolume, String mountPoint) {
-
 		log.info("mounting " + mountedVolume + " to " + mountPoint);
 		this.mountedVolume = mountedVolume;
 		this.mountPoint = mountPoint;
