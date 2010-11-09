@@ -1,7 +1,9 @@
 Version 1.0.0
-	Fixes
+	Fixes :
+	* Fixed : Volume Capacity configuration did not get set appropriately when TB was set as unit for capacity.
 	Enhancements :
 	* Windows : Added SDFS system variable.
+	* Performance : Changed memory al
 
 Version 0.9.7
 	Fixes

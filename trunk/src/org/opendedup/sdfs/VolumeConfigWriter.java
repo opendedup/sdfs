@@ -143,6 +143,8 @@ public class VolumeConfigWriter {
 					.getOptionValue("io-max-file-write-buffers"));
 		} else {
 			this.max_file_write_buffers = (this.chunk_size/4)*5;
+			if(this.max_file_write_buffers > 32)
+				this.max_file_write_buffers = 32;
 		}
 		if (cmd.hasOption("io-max-open-files")) {
 			this.max_open_files = Integer.parseInt(cmd
