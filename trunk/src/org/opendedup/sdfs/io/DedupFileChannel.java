@@ -25,7 +25,7 @@ public class DedupFileChannel {
 	private boolean writtenTo = false;
 	private long dups;
 	private long currentPosition = 0;
-	//private String GUID = UUID.randomUUID().toString();
+	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
 
@@ -155,9 +155,11 @@ public class DedupFileChannel {
 	public void force(boolean metaData) throws IOException {
 		// FixMe Does not persist chunks. This may be an issue.
 		// this.writeCache();
-		if (metaData) {
-			df.sync();
-			mf.sync();
+		if (Main.safeSync) {
+			if (metaData) {
+				df.sync();
+				mf.sync();
+			}
 		}
 	}
 
@@ -228,7 +230,6 @@ public class DedupFileChannel {
 				this.currentPosition = _cp;
 				if (_cp > mf.length()) {
 					mf.setLength(_cp, false);
-
 				}
 				mf.setLastModified(System.currentTimeMillis());
 			}
@@ -314,7 +315,6 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 	public void forceClose() throws IOException {
-		SDFSLogger.getLog().info("channel closed");
 		if (!this.isClosed()) {
 			this.closeLock.lock();
 			try {
