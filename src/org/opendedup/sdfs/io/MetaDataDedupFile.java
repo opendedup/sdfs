@@ -99,8 +99,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @throws IOException 
 	 */
 	public void setDedup(boolean dedupNow) throws IOException, HashtableFullException {
-		if(!this.getDedupFile().isClosed())
-			throw new IOException("The file must be closed to perform this operation");
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
