@@ -532,7 +532,6 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public void forceClose() {
-
 		this.initLock.lock();
 		this.channelLock.lock();
 		try {

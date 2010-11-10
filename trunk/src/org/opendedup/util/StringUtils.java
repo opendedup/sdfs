@@ -47,11 +47,11 @@ public class StringUtils {
 				.substring(0, capString.length() - 2));
 		long fSize = 0;
 		if (units.equalsIgnoreCase("TB"))
-			fSize = sz * tbc;
+			fSize = (long)(sz * tbc);
 		else if (units.equalsIgnoreCase("GB"))
-			fSize = sz * gbc;
+			fSize = (long)(sz * gbc);
 		else if (units.equalsIgnoreCase("MB"))
-			fSize = sz * mbc;
+			fSize = (long)(sz * mbc);
 		else {
 			
 			throw new IOException("unable to determine capacity of volume "

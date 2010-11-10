@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Document;
@@ -28,7 +29,7 @@ public class Volume implements java.io.Serializable {
 	String capString = null;
 	long currentSize;
 	String path;
-	final int blockSize = 1024;
+	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
 	private long absoluteLength= -1;
 	
