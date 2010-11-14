@@ -302,18 +302,18 @@ public class HashFunctions {
 	static int NUM = 100000;
 
 	public static void main(String[] args) throws Exception {
+		int numberOfTries = 10000000;
 		long start = System.currentTimeMillis();
-		byte [] z = new byte[4096];
-		byte[] hash = HashFunctions.getTigerHashBytes(z);
-		System.out.println(StringUtils.getHexString(hash));
 		Random rnd = new Random();
-		for (int i = 0; i < 8000000; i++) {
+		for (int i = 0; i < numberOfTries; i++) {
 			byte[] b = new byte[64];
 			rnd.nextBytes(b);
-			hash = HashFunctions.getTigerHashBytes(b);
+			HashFunctions.getTigerHashBytes(b);
 		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
+		long duration = System.currentTimeMillis() - start;
+		System.out.println("Took " + duration
 				+ " ms");
+		System.out.println("Hashes per ms = " +(numberOfTries/duration));
 	}
 
 	public static void insertRecorts(long number) throws Exception {

@@ -549,8 +549,12 @@ public class SparseDedupFile implements DedupFile {
 						e.printStackTrace();
 					}
 				} else {
-					this.staticChannel.forceClose();
-					this.staticChannel = null;
+					try {
+						this.staticChannel.forceClose();
+						this.staticChannel = null;
+					} catch (Exception e) {
+
+					}
 				}
 				try {
 					this.writeCache();
