@@ -342,6 +342,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite)
 			throws IOException {
 		if (!this.isDirectory()) {
+			SDFSLogger.getLog().info("is snapshot file");
 			File f = new File(snaptoPath);
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath
@@ -372,6 +373,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			_mf.unmarshal();
 			return _mf;
 		} else {
+			SDFSLogger.getLog().info("is snapshot dir");
 			File f = new File(snaptoPath);
 			f.mkdirs();
 			int trimlen = this.getPath().length();

@@ -44,6 +44,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private ByteArrayLongMap[] maps = null;
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
+	private static int freeSlotsLength = 1000000;
 	// The amount of memory available for free slots.
 	private boolean closed = true;
 	long kSz = 0;
@@ -52,7 +53,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private int hashRoutes = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
 	private static final int kBufMaxSize = 10485760 / Main.chunkStorePageSize;
-	TLongHashSet freeSlots = new TLongHashSet(1000000);
+	TLongHashSet freeSlots = new TLongHashSet(freeSlotsLength);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
 
@@ -262,7 +263,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 								.getLog()
 								.debug("found free slot at "
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
-						this.addFreeSolt((currentPos / raw.length)
+						this.addFreeSlot((currentPos / raw.length)
 								* Main.chunkStorePageSize);
 						freeSl++;
 					} else {
@@ -295,7 +296,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 												.getLog()
 												.debug("found free slot at "
 														+ ((currentPos / raw.length) * Main.chunkStorePageSize));
-										this.addFreeSolt((currentPos / raw.length)
+										this.addFreeSlot((currentPos / raw.length)
 												* Main.chunkStorePageSize);
 										freeSl++;
 									}
@@ -315,7 +316,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 						+ "] seconds ###########");
 		SDFSLogger.getLog().info(
 				"loaded [" + kSz + "] into the hashtable [" + this.fileName
-						+ "] free slots available are [" + freeSl + "] ["
+						+ "] free slots available are [" + freeSl + "] free slots added ["
 						+ this.freeSlots.size() + "]");
 		return size;
 	}
@@ -361,7 +362,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 								ChunkData cm = new ChunkData(raw);
 								if (cm.getLastClaimed() < time) {
 									if (this.remove(cm)) {
-										this.addFreeSolt(cm.getcPos());
+										this.addFreeSlot(cm.getcPos());
 										rem++;
 									}
 								} else {
@@ -484,19 +485,21 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return -1;
 	}
 
-	private void addFreeSolt(long position) {
+	private void addFreeSlot(long position) {
 		if (this.removingChunks)
 			return;
 		freeSlotLock.lock();
-		try {
-			if (!this.freeSlots.contains(position)) {
-				this.freeSlots.add(position);
-			}
+		if (this.freeSlots.size() < freeSlotsLength) {
+			try {
+				if (!this.freeSlots.contains(position)) {
+					this.freeSlots.add(position);
+				}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			this.freeSlotLock.unlock();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				this.freeSlotLock.unlock();
+			}
 		}
 	}
 
@@ -526,7 +529,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 				}
 			} else {
-				this.addFreeSolt(cm.getcPos());
+				this.addFreeSlot(cm.getcPos());
 				cm = null;
 			}
 		} else {
