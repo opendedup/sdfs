@@ -887,8 +887,7 @@ public class SparseDedupFile implements DedupFile {
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to remove chunk at position " + place, e);
-			throw new IOException("unable to remove chunk at position " + place
-					+ " because " + e.toString());
+			throw new IOException(e);
 		} finally {
 
 		}

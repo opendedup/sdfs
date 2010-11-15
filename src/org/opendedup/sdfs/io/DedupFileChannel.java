@@ -371,8 +371,11 @@ public class DedupFileChannel {
 					readBuffer = df.getReadBuffer(currentLocation);
 				} catch (Exception e) {
 					// break;
+					SDFSLogger.getLog().error("Error reading file at [" +filePos + "]",e);		
 					throw new IOException("unable to read at [" + filePos
-							+ "] because [" + e.toString() + "]");
+							+ "] because [" + e.toString() + "]"
+					
+					);
 				}
 				synchronized (readBuffer) {
 					int startPos = (int) (currentLocation - readBuffer
