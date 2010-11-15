@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.servers.HCServer;
+import org.opendedup.util.SDFSLogger;
 
 public class HashClientPool {
 
@@ -29,8 +30,8 @@ public class HashClientPool {
 
 				this.passiveObjects.add(this.makeObject());
 			} catch (Exception e) {
-				throw new IOException("Unable to get object out of pool "
-						+ e.toString());
+				SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+				throw new IOException(e.toString());
 
 			} finally {
 			}
@@ -64,8 +65,8 @@ public class HashClientPool {
 		try {
 			this.activeObjects.add(hc);
 		} catch (Exception e) {
-			throw new IOException("Unable to get object out of pool "
-					+ e.toString());
+			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			throw new IOException(e.toString());
 
 		} finally {
 			alock.unlock();
@@ -80,8 +81,8 @@ public class HashClientPool {
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new IOException("Unable to get object out of pool "
-					+ e.toString());
+			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			throw new IOException(e.toString());
 
 		} finally {
 			alock.unlock();
@@ -92,8 +93,8 @@ public class HashClientPool {
 			else
 				hc.close();
 		} catch (Exception e) {
-			throw new IOException("Unable to get object out of pool "
-					+ e.toString());
+			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			throw new IOException(e.toString());
 
 		} finally {
 		}

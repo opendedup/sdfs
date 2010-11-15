@@ -83,7 +83,7 @@ class ClientThread extends Thread {
 						} catch (IOException e) {
 							if (writelock.isLocked())
 								writelock.unlock();
-							throw new IOException(e.toString());
+							throw new IOException(e);
 						} finally {
 
 						}
@@ -112,7 +112,7 @@ class ClientThread extends Thread {
 						} catch (IOException e) {
 							if (writelock.isLocked())
 								writelock.unlock();
-							throw new IOException(e.toString());
+							throw new IOException(e);
 						} finally {
 
 						}
@@ -165,7 +165,7 @@ class ClientThread extends Thread {
 								} catch (IOException e) {
 									if (writelock.isLocked())
 										writelock.unlock();
-									throw new IOException(e.toString());
+									throw new IOException(e);
 								} finally {
 
 								}
@@ -197,7 +197,7 @@ class ClientThread extends Thread {
 						} catch (IOException e) {
 							if (writelock.isLocked())
 								writelock.unlock();
-							throw new IOException(e.toString());
+							throw new IOException(e);
 						} finally {
 
 						}

@@ -423,7 +423,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				this.arlock.lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
-				throw new IOException(e.toString());
+				throw new IOException(e);
 			} finally {
 				this.arlock.unlock();
 			}
@@ -434,7 +434,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				this.arlock.lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
-				throw new IOException(e.toString());
+				throw new IOException(e);
 			} finally {
 				this.arlock.unlock();
 			}

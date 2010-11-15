@@ -61,8 +61,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			}
 			this.openPosFile();
 		} catch (S3ServiceException e) {
-			e.printStackTrace();
-			throw new IOException(e.toString());
+			throw new IOException(e);
 		}
 		
 	}
@@ -179,7 +178,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
-			throw new IOException(e.toString());
+			throw new IOException(e);
 		} finally {
 			s3IS.close();
 		}
