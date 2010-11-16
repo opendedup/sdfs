@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import gnu.trove.iterator.TLongIterator;
 
 
+
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
@@ -20,7 +21,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;

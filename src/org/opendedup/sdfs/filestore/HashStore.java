@@ -3,10 +3,10 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
@@ -47,7 +47,6 @@ public class HashStore {
 	// be 256 total hash stores.
 	private String name;
 	// Lock for hash queries
-	private ReentrantLock hashlock = new ReentrantLock();
 	//private ReentrantLock cacheLock = new ReentrantLock();
 	int mapSize = (Main.chunkStorePageCache * 1024*1024)/Main.chunkStorePageSize;
 	
@@ -264,8 +263,7 @@ public class HashStore {
 			}
 
 			finally {
-				if (hashlock.isLocked())
-					hashlock.unlock();
+				
 			}
 		}
 		return written;
