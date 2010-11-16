@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
 public class HashFunctionPool {
@@ -54,7 +56,12 @@ public class HashFunctionPool {
 	
 	public AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
 			NoSuchProviderException {
-		AbstractHashEngine hc = new Tiger2HashEngine();
+		AbstractHashEngine hc = null;
+		if(Main.hashLength == 16) {
+			hc = new Tiger16HashEngine();
+		}else {
+			hc = new TigerHashEngine();
+		}
 		return hc;
 	}
 	

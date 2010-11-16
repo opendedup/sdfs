@@ -8,10 +8,10 @@ import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 
 
-public class Tiger2HashEngine implements AbstractHashEngine {
+public class Tiger16HashEngine implements AbstractHashEngine {
 	
 	AbstractChecksum md = null;
-	public Tiger2HashEngine () throws NoSuchAlgorithmException{
+	public Tiger16HashEngine () throws NoSuchAlgorithmException{
 		md = JacksumAPI.getChecksumInstance("tiger128");
 	}
 	
