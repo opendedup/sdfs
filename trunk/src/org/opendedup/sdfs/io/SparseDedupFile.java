@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -10,14 +11,16 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
-import org.opendedup.util.HashFunctionPool;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
@@ -43,7 +46,7 @@ public class SparseDedupFile implements DedupFile {
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
 			Main.writeThreads + 1, Main.writeThreads);
-	private ReentrantLock flushingLock = new ReentrantLock();
+	private ReentrantReadWriteLock flushingLock = new ReentrantReadWriteLock();
 	private ReentrantLock channelLock = new ReentrantLock();
 	private ReentrantLock initLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
@@ -60,7 +63,7 @@ public class SparseDedupFile implements DedupFile {
 				public void onEviction(Long key, WritableCacheBuffer writeBuffer) {
 
 					if (writeBuffer != null) {
-						flushingLock.lock();
+						flushingLock.writeLock().lock();
 						try {
 							flushingBuffers.put(key, writeBuffer);
 						} catch (Exception e) {
@@ -69,7 +72,7 @@ public class SparseDedupFile implements DedupFile {
 							SDFSLogger.getLog().error(
 									"issue adding for flushing buffer", e);
 						} finally {
-							flushingLock.unlock();
+							flushingLock.writeLock().unlock();
 						}
 
 						pool.execute(writeBuffer);
@@ -205,10 +208,10 @@ public class SparseDedupFile implements DedupFile {
 		}
 
 		if (writeBuffer != null && writeBuffer.isDirty()) {
-			MessageDigest hc = hashPool.borrowObject();
+			AbstractHashEngine hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
-				hash = hc.digest(writeBuffer.getChunk());
+				hash = hc.getHash(writeBuffer.getChunk());
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
@@ -260,13 +263,13 @@ public class SparseDedupFile implements DedupFile {
 			} finally {
 
 				WritableCacheBuffer buf = null;
-				this.flushingLock.lock();
+				this.flushingLock.writeLock().lock();
 				try {
 					buf = this.flushingBuffers.remove(writeBuffer
 							.getFilePosition());
 				} catch (Exception e) {
 				} finally {
-					this.flushingLock.unlock();
+					this.flushingLock.writeLock().unlock();
 				}
 				if (buf != null)
 					buf.destroy();
@@ -331,12 +334,12 @@ public class SparseDedupFile implements DedupFile {
 			if (writeBuffer != null && writeBuffer.isClosed()) {
 				writeBuffer.open();
 			} else if (writeBuffer == null) {
-				this.flushingLock.lock();
+				this.flushingLock.writeLock().lock();
 				try {
 					writeBuffer = this.flushingBuffers.remove(chunkPos);
 				} catch (Exception e) {
 				} finally {
-					this.flushingLock.unlock();
+					this.flushingLock.writeLock().unlock();
 				}
 				if (writeBuffer != null) {
 					this.writeBuffers.put(chunkPos, writeBuffer);
@@ -394,12 +397,12 @@ public class SparseDedupFile implements DedupFile {
 		long chunkPos = this.getChuckPosition(position);
 		DedupChunk readBuffer = this.writeBuffers.get(chunkPos);
 		if (readBuffer == null) {
-			this.flushingLock.lock();
+			this.flushingLock.readLock().lock();
 			try {
 				readBuffer = this.flushingBuffers.get(chunkPos);
 			} catch (Exception e) {
 			} finally {
-				this.flushingLock.unlock();
+				this.flushingLock.readLock().unlock();
 			}
 		}
 		if (readBuffer == null) {
