@@ -12,7 +12,7 @@ public class Tiger2HashEngine implements AbstractHashEngine {
 	
 	AbstractChecksum md = null;
 	public Tiger2HashEngine () throws NoSuchAlgorithmException{
-		md = JacksumAPI.getChecksumInstance("tiger");
+		md = JacksumAPI.getChecksumInstance("tiger128");
 	}
 	
 	public byte[] getHash(byte[] data) {
@@ -24,7 +24,7 @@ public class Tiger2HashEngine implements AbstractHashEngine {
 	
 	public int getHashLenth() {
 		// TODO Auto-generated method stub
-		return 24;
+		return 16;
 	}
 	
 	public void destroy() {

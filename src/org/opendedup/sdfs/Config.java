@@ -72,6 +72,10 @@ public class Config {
 			Main.chunkStoreReadAheadPages = Integer.parseInt(cbe
 					.getAttribute("read-ahead-pages"));
 			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
+			if(cbe.hasAttribute("hash-size")) {
+				Main.hashLength = Short.parseShort(cbe.getAttribute("hash-size"));
+				SDFSLogger.getLog().info("Setting hash size to " + Main.hashLength);
+			}
 			Main.evictionAge = Integer.parseInt(cbe.getAttribute("eviction-age"));
 			if(cbe.hasAttribute("chunk-store-read-cache"));
 				Main.chunkStorePageCache = Integer.parseInt(cbe.getAttribute("chunk-store-read-cache"));
@@ -145,6 +149,10 @@ public class Config {
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
 		Main.writeThreads = Integer.parseInt(cache
 				.getAttribute("write-threads"));
+		if(cache.hasAttribute("hash-size")) {
+			Main.hashLength = Short.parseShort(cache.getAttribute("hash-size"));
+			SDFSLogger.getLog().info("Setting hash size to " + Main.hashLength);
+		}
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;

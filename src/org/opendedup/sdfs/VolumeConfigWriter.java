@@ -76,6 +76,7 @@ public class VolumeConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean awsCompress = Main.awsCompress;
+	int hashSize = 16;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -113,6 +114,13 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-close"));
+		}
+		if(cmd.hasOption("hash-size")) {
+			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
+			if(hs == 16 || hs == 24) 
+				this.hashSize = hs;
+			else
+				throw new Exception("hash size must be 16 or 24");
 		}
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
@@ -299,6 +307,7 @@ public class VolumeConfigWriter {
 				.toString(this.system_read_cache));
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
+		io.setAttribute("hash-size", Integer.toString(this.hashSize));
 		root.appendChild(io);
 		Element perm = xmldoc.createElement("permissions");
 		perm.setAttribute("default-file", this.filePermissions);
@@ -556,6 +565,15 @@ public class VolumeConfigWriter {
 								"The size in bytes of the Dedup Storeage Engine. "
 										+ "This . \n Defaults to: \n The size of the Volume")
 						.hasArg().withArgName("BYTES").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("hash-size")
+				.withDescription(
+						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer" +
+						"versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions" +
+						"below 1.0.1 ."
+								+ "This . \n Defaults to: \n 5MB")
+				.hasArg().withArgName("16 or 24 bytes").create());
 		options
 		.addOption(OptionBuilder
 				.withLongOpt("chunk-store-read-cache")

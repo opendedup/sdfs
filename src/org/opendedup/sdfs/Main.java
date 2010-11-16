@@ -298,7 +298,7 @@ public class Main {
 	public static boolean enableNetworkChunkStore = false;
 
 	/**
-	 * the length of the hash. Will be either 16 or 32 depending on md5 or SHA1
+	 * the length of the hash. Will be either 16 or 24 depending on md/tiger128 or tiger192
 	 */
 	public static short hashLength = 24;
 	/**

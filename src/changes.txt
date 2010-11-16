@@ -1,3 +1,13 @@
+Version 1.0.1
+	Fixes :
+	* Snapshots were not functioning correctly
+	* Volume creation to did not correctly report volume sizes
+	* Memory utilization with lots of unclaimed hashes in the dse
+	Enhancements:
+	* Performance improvements due to better threading 
+	* Faster tiger hashing
+	* Lowered memory requirements by 1/3 for new volumes and new DSE. Memory requirements for DSE Was 33 bytes for hash and is 23 now.
+
 Version 1.0.0
 	Fixes :
 	* Fixed : Volume Capacity configuration did not get set appropriately when TB was set as unit for capacity.
