@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -35,8 +36,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private long size = 0;
 	private ReentrantLock arlock = new ReentrantLock();
 	private ReentrantLock iolock = new ReentrantLock();
-	private byte[] FREE = new byte[24];
-	private byte[] REMOVED = new byte[24];
+	private byte[] FREE = new byte[Main.hashLength];
+	private byte[] REMOVED = new byte[Main.hashLength];
 	private byte[] BLANKCM = new byte[ChunkData.RAWDL];
 	private long resValue = -1;
 	private long freeValue = -1;
@@ -126,7 +127,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 							.getNextPrimeI((int) (size / maps.length));
 					// SDFSLogger.getLog().debug("will create byte array of size "
 					// + sz + " propsize was " + propsize);
-					ram = ram + (sz * (24 + 8));
+					ram = ram + (sz * (Main.hashLength + 8));
 					m = new ByteArrayLongMap(sz, (short) (FREE.length));
 					maps[hashRoute] = m;
 					// System.out.println("Creating map at " + hashb +

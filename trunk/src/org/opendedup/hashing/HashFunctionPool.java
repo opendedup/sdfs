@@ -61,4 +61,5 @@ public class HashFunctionPool {
 	public void destroyObject(AbstractHashEngine hc) {
 		hc.destroy();
 	}
+
 }

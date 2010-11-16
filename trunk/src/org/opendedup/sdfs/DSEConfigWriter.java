@@ -68,6 +68,7 @@ public class DSEConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean awsCompress = Main.awsCompress;
+	int hashSize = 16;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -173,6 +174,13 @@ public class DSEConfigWriter {
 		if(cmd.hasOption("listen-ip")) {
 			this.list_ip = cmd.getOptionValue("listen-ip");
 		}
+		if(cmd.hasOption("hash-size")) {
+			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
+			if(hs == 16 || hs == 24) 
+				this.hashSize = hs;
+			else
+				throw new Exception("hash size must be 16 or 24");
+		}
 		if(cmd.hasOption("listen-port")) {
 			this.network_port = Integer.parseInt(cmd.getOptionValue("listen-port"));
 		}
@@ -229,7 +237,7 @@ public class DSEConfigWriter {
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
 		cs.setAttribute("chunk-store-read-cache", Integer.toString(this.chunk_store_read_cache));
 		cs.setAttribute("chunk-store-dirty-timeout", Integer.toString(this.chunk_store_dirty_timeout));
-		
+		cs.setAttribute("hash-size", Integer.toString(this.hashSize));
 		if(this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
@@ -334,6 +342,15 @@ public class DSEConfigWriter {
 						" for AWS/Cloud storage "
 								+ "This . \n Defaults to: \n 5MB")
 				.hasArg().withArgName("Megabytes").create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("hash-size")
+				.withDescription(
+						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer" +
+						"versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions" +
+						"below 1.0.1 ."
+								+ "This . \n Defaults to: \n 5MB")
+				.hasArg().withArgName("16 or 24 bytes").create());
 		options
 		.addOption(OptionBuilder
 				.withLongOpt("encrypt")
