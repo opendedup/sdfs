@@ -2,23 +2,22 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
 public class HashFunctionPool {
 
 	private int poolSize;
 	private ConcurrentLinkedQueue<AbstractHashEngine> passiveObjects = new ConcurrentLinkedQueue<AbstractHashEngine>();
-
+	
 	public HashFunctionPool(int size) {
 		this.poolSize = size;
 		this.populatePool();
 	}
-
+	
 	public void populatePool() {
 		for (int i = 0; i < poolSize; i++) {
 			try {
@@ -29,10 +28,11 @@ public class HashFunctionPool {
 						"unable to instancial Hash Function pool", e);
 
 			} finally {
+				
 			}
 		}
 	}
-
+	
 	public AbstractHashEngine borrowObject() throws IOException {
 		AbstractHashEngine hc = null;
 		hc = this.passiveObjects.poll();
@@ -47,19 +47,18 @@ public class HashFunctionPool {
 		}
 		return hc;
 	}
-
+	
 	public void returnObject(AbstractHashEngine hc) throws IOException {
 		this.passiveObjects.add(hc);
 	}
-
+	
 	public AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
 			NoSuchProviderException {
 		AbstractHashEngine hc = new Tiger2HashEngine();
 		return hc;
 	}
-
+	
 	public void destroyObject(AbstractHashEngine hc) {
 		hc.destroy();
 	}
-
 }

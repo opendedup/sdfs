@@ -2,13 +2,13 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Document;
