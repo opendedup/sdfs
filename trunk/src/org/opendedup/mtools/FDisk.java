@@ -15,6 +15,7 @@ public class FDisk {
         private long corruptFiles = 0;
 
         public FDisk() {
+        	SDFSLogger.getLog().info("Starting FDISK");
                 long start = System.currentTimeMillis();
                 File f = new File(Main.dedupDBStore);
                 try{

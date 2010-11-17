@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -183,7 +182,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 					if (k > 310) {
 						k = 0;
 						try {
-							Thread.sleep(1);
 						} catch (Exception e) {
 						}
 					}
