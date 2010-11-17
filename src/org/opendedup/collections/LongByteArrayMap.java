@@ -2,8 +2,6 @@ package org.opendedup.collections;
 
 import gnu.trove.set.hash.TLongHashSet;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -15,7 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.NextPrime;
@@ -28,8 +26,8 @@ public class LongByteArrayMap implements AbstractMap {
 	String filePath = null;
 	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 	private boolean closed = true;
-	public static byte[] FREE = new byte[16];
-	public int iterPos = 0;
+	public static byte[] FREE = new byte[Main.hashLength];
+	public long iterPos = 0;
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
 	// private int eI = 1024 * 1024;
@@ -37,21 +35,21 @@ public class LongByteArrayMap implements AbstractMap {
 	File dbFile = null;
 	Path bdbf = null;
 	TLongHashSet locks = null;
-	
+	FileChannel iterbdb = null;
+
 	static {
 		FREE = new byte[arrayLength];
 		Arrays.fill(FREE, (byte) 0);
 	}
 
 	// private boolean smallMemory = false;
-	public LongByteArrayMap(String filePath)
-			throws IOException {
+	public LongByteArrayMap(String filePath) throws IOException {
 		this.filePath = filePath;
 		this.openFile();
 		new SyncThread(this);
 		try {
 			locks = new TLongHashSet(NextPrime.getNextPrimeI(2048));
-		}catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error(e);
 		}
 	}
@@ -63,71 +61,88 @@ public class LongByteArrayMap implements AbstractMap {
 		new SyncThread(this);
 		try {
 			locks = new TLongHashSet(NextPrime.getNextPrimeI(2048));
-		}catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error(e);
 		}
 	}
 
-	public void iterInit() {
+	public void iterInit() throws IOException {
 		this.iterPos = 0;
+		iterbdb = (FileChannel) bdbf.newByteChannel(
+				StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+				StandardOpenOption.READ, StandardOpenOption.SPARSE);
 	}
+	
+	private ReentrantLock iterlock = new ReentrantLock();
 
 	public long nextKey() throws IOException {
-		File f = new File(this.filePath);
-		long pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
-		long fLen = ((f.length() * (long) Main.CHUNK_LENGTH) / arrayLength);
-		if (iterPos == 0)
-			SDFSLogger.getLog().info("fLen = " + fLen);
-		while (pos <= fLen) {
-			try {
+		iterlock.lock();
+		try {
+			File f = new File(this.filePath);
+			while (this.iterbdb.position() < f.length()) {
 				try {
-					this.hashlock.readLock().lock();
-					pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
+					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+					long pos = iterPos * Main.CHUNK_LENGTH;
+					iterbdb.position(iterPos * arrayLength);
+					iterbdb.read(buf);
+					byte[] val = buf.array();
 					iterPos++;
+					if (!Arrays.equals(val, FREE)) {
+						return pos;
+					}
 				} catch (Exception e1) {
-				} finally {
-					this.hashlock.readLock().unlock();
+					e1.printStackTrace();
 				}
-				byte[] b = this.get(pos);
-				if (b != null)
-					return pos;
-
-			} catch (Exception e) {
-
-			} finally {
-
 			}
-
+			if((iterPos * arrayLength) != f.length())
+				throw new IOException("did not reach end of file for [" + f.getPath() + "] len="
+					+ iterPos * arrayLength + " file len ="
+					+ f.length());
+			
+			try {
+				iterbdb.close();
+				iterbdb = null;
+			} catch (Exception e) {
+			}
+			return -1;
+		} finally {
+			iterlock.unlock();
 		}
-		if (pos == fLen)
-			SDFSLogger.getLog().info("length end " + pos);
-
-		return -1;
 	}
 
+	
+
 	public byte[] nextValue() throws IOException {
-		long pos = iterPos * arrayLength;
-		byte[] val = null;
-		File f = new File(this.filePath);
-		while (pos < f.length()) {
-			val = new byte[arrayLength];
-			try {
+		iterlock.lock();
+		try {
+			File f = new File(this.filePath);
+			while (this.iterbdb.position() < f.length()) {
 				try {
-					this.hashlock.readLock().lock();
-					pos = (long) iterPos * (long) Main.CHUNK_LENGTH;
+					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+					iterbdb.position(iterPos * arrayLength);
+					iterbdb.read(buf);
+					byte[] val = buf.array();
 					iterPos++;
+					if (!Arrays.equals(val, FREE)) {
+						return val;
+					}
 				} catch (Exception e1) {
-				} finally {
-					this.hashlock.readLock().unlock();
+					e1.printStackTrace();
 				}
-				val = this.get(pos);
-				if (val != null)
-					return val;
-			} catch (Exception e) {
-			} finally {
 			}
+			if((iterPos * arrayLength) != f.length())
+				throw new IOException("did not reach end of file for [" + f.getPath() + "] len="
+					+ iterPos * arrayLength + " file len ="
+					+ f.length());
+			try {
+				iterbdb.close();
+				iterbdb = null;
+			} catch (Exception e) {
+			}
+			return null;
+		} finally {
+			iterlock.unlock();
 		}
-		return null;
 
 	}
 
@@ -204,7 +219,7 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			
+
 			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
@@ -222,7 +237,8 @@ public class LongByteArrayMap implements AbstractMap {
 		} finally {
 			try {
 				this.hashlock.writeLock().unlock();
-			}catch(Exception e) {}
+			} catch (Exception e) {
+			}
 			try {
 				_bdb.close();
 			} catch (Exception e) {
@@ -235,7 +251,7 @@ public class LongByteArrayMap implements AbstractMap {
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
-			
+
 			fpos = this.getMapFilePosition(length);
 			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
@@ -251,7 +267,6 @@ public class LongByteArrayMap implements AbstractMap {
 			}
 			this.hashlock.writeLock().unlock();
 		}
-		
 
 	}
 

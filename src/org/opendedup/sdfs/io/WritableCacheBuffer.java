@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -10,8 +11,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.util.SDFSLogger;
 
 
+import org.opendedup.hashing.Tiger16HashEngine;
+import org.opendedup.hashing.TigerHashEngine;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.HashFunctions;
 
 /**
  * 
@@ -42,8 +44,15 @@ public class WritableCacheBuffer extends DedupChunk {
 
 	static {
 		try {
-			defaultHash = HashFunctions
-					.getSHAHashBytes(new byte[Main.CHUNK_LENGTH]);
+			if(Main.hashLength == 16) {
+			Tiger16HashEngine he  = new Tiger16HashEngine ();
+			defaultHash = he.getHash(new byte[Main.CHUNK_LENGTH]);
+			he.destroy();
+			}else {
+				TigerHashEngine he  = new TigerHashEngine ();
+				defaultHash = he.getHash(new byte[Main.CHUNK_LENGTH]);
+				he.destroy();
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal( "error initializing WritableCacheBuffer", e);
 		}
