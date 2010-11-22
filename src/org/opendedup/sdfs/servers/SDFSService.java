@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
-import org.opendedup.hashing.MD5CudaHash;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;

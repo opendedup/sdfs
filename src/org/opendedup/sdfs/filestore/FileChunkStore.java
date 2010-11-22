@@ -59,7 +59,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				chunk_location.mkdirs();
 			}
 			this.name = name;
-			f = new File("/dev/sda1");
+			f = new File(chunk_location + File.separator + name + ".chk");
 			p = f.toPath();
 			File posFile = new File(chunk_location + File.separator + name
 					+ ".pos");
