@@ -19,17 +19,12 @@ public class PoolThread extends Thread {
 	public void run() {
 		while (!isStopped()) {
 			try {
-				WritableCacheBuffer runnable = null;
-				runnable = taskQueue.poll();
-				if (runnable == null)
-					Thread.sleep(1);
-				else {
+				WritableCacheBuffer runnable = taskQueue.take();
 					try {
 						runnable.close();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal( "unable to execute thread", e);
 				// SDFSLogger.getLog() or otherwise report exception,

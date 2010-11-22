@@ -377,7 +377,7 @@ public class DedupFileChannel {
 					
 					);
 				}
-				synchronized (readBuffer) {
+				//synchronized (readBuffer) {
 					int startPos = (int) (currentLocation - readBuffer
 							.getFilePosition());
 					int endPos = startPos + bytesLeft;
@@ -415,7 +415,7 @@ public class DedupFileChannel {
 					}
 					mf.setLastAccessed(System.currentTimeMillis());
 					this.currentPosition = currentLocation;
-				}
+				//}
 			}
 			return read;
 		} catch (IOException e) {

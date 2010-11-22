@@ -285,7 +285,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	private ReentrantLock updatelock = new ReentrantLock();
+	//private ReentrantLock updatelock = new ReentrantLock();
 
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
 			boolean doop) throws IOException {
@@ -294,7 +294,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file already closed");
 		}
 		try {
-			updatelock.lock();
+			//updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
 			SparseDataChunk chunk = null;
 			if (mf.isDedup() || doop) {
@@ -311,7 +311,7 @@ public class SparseDedupFile implements DedupFile {
 					"unable to write " + hash + " closing " + mf.getPath(), e);
 			throw new IOException(e);
 		} finally {
-			updatelock.unlock();
+			//updatelock.unlock();
 		}
 
 	}
@@ -831,7 +831,8 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
-	public synchronized DedupChunk getHash(long location, boolean create)
+	private ReentrantLock getHashLock = new ReentrantLock();
+	public DedupChunk getHash(long location, boolean create)
 			throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");

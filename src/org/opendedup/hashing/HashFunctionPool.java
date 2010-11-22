@@ -59,6 +59,7 @@ public class HashFunctionPool {
 		AbstractHashEngine hc = null;
 		if(Main.hashLength == 16) {
 			hc = new Tiger16HashEngine();
+			//hc = new MD5CudaHash();
 		}else {
 			hc = new TigerHashEngine();
 		}
