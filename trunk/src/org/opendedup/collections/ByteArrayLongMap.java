@@ -25,8 +25,8 @@ public class ByteArrayLongMap {
 	private int entries = 0;
 	
 	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
-	public static byte[] FREE = new byte[16];
-	public static byte[] REMOVED = new byte[16];
+	public static byte[] FREE = new byte[Main.hashLength];
+	public static byte[] REMOVED = new byte[Main.hashLength];
 	private int iterPos = 0;
 
 	static {
