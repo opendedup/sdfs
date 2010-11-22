@@ -4,7 +4,6 @@ import gnu.trove.iterator.TLongIterator;
 
 
 
-
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
@@ -60,7 +59,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 	TLongHashSet freeSlots = new TLongHashSet(freeSlotsLength);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
-	private long maxPos = 0;
 
 	public CSByteArrayLongMap(long maxSize, String fileName)
 			throws IOException, HashtableFullException {
@@ -292,8 +290,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 													+ value);
 								} else {
 									if (cm.getHash().length > 0) {
-										if(cm.getcPos() > this.maxPos)
-											this.maxPos = cm.getcPos() + Main.chunkStorePageSize;
 										boolean added = this.put(cm, false);
 										if (added)
 											this.kSz++;

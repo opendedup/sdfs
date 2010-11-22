@@ -908,7 +908,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private DedupChunk createNewChunk(long location) {
-		DedupChunk ck = new DedupChunk(new byte[16], location,
+		DedupChunk ck = new DedupChunk(new byte[Main.hashLength], location,
 				Main.CHUNK_LENGTH, true);
 		return ck;
 	}
