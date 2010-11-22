@@ -2,6 +2,7 @@ package org.opendedup.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.opendedup.util.SDFSLogger;
 
@@ -10,13 +11,13 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class ThreadPool {
 
-	private LinkedBlockingQueue<WritableCacheBuffer> taskQueue = null;
+	private ArrayBlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private List<PoolThread> threads = new ArrayList<PoolThread>();
 	private boolean isStopped = false;
 	
 
 	public ThreadPool(int noOfThreads, int maxNoOfTasks) {
-		taskQueue = new LinkedBlockingQueue<WritableCacheBuffer>(maxNoOfTasks);
+		taskQueue = new ArrayBlockingQueue<WritableCacheBuffer>(maxNoOfTasks);
 
 		for (int i = 0; i < noOfThreads; i++) {
 			threads.add(new PoolThread(taskQueue));
@@ -26,7 +27,7 @@ public class ThreadPool {
 		}
 	}
 
-	public synchronized void execute(WritableCacheBuffer task)
+	public void execute(WritableCacheBuffer task)
 			{
 		if (this.isStopped) {
 			SDFSLogger.getLog().warn("threadpool is stopped will not execute task");

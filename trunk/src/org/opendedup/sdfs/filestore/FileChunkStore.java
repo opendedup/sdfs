@@ -2,11 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,9 +14,6 @@ import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.SDFSLogger;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * 
@@ -34,8 +28,6 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 public class FileChunkStore implements AbstractChunkStore {
 	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
-	private static final int readAheadPages = Main.chunkStoreReadAheadPages;
-	private static final int MAX_ENTRIES = 10485760 / Main.chunkStorePageSize;
 	private String name;
 	private boolean closed = false;
 	private FileChannel chunkDataReader = null;
@@ -47,8 +39,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	Path p;
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
-	private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
-	.concurrencyLevel(Main.writeThreads).build();
+	/*
+	 * private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new
+	 * Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
+	 * .concurrencyLevel(Main.writeThreads).build();
+	 */
 	private byte[] FREE = new byte[pageSize];
 
 	/**
@@ -64,7 +59,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				chunk_location.mkdirs();
 			}
 			this.name = name;
-			f = new File(chunk_location + File.separator + name + ".chk");
+			f = new File("/dev/sda1");
 			p = f.toPath();
 			File posFile = new File(chunk_location + File.separator + name
 					+ ".pos");
@@ -209,7 +204,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		 */
 	}
 
-	//private ReentrantLock furthestPositionlock = new ReentrantLock();
+	// private ReentrantLock furthestPositionlock = new ReentrantLock();
 
 	/*
 	 * (non-Javadoc)
@@ -222,37 +217,23 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		RandomAccessFile raf = null;
-		FileChannel ch = null;
-		ByteBuffer buf = null;
 		try {
-			if(Main.chunkStoreEncryptionEnabled)
+			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
-			buf = ByteBuffer.wrap(chunk);
-			buf.position(0);
-			if (cache.containsKey(Long.toString(start))) {
-				cache.put(Long.toString(start), buf);
-			}
-
 			raf = new RandomAccessFile(f, "rw");
-			ch = raf.getChannel();
-			ch.position(start);
-			ch.write(buf);
+			raf.seek(start);
+			raf.write(chunk);
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "unable to write data at position " + start,
-					e);
+			SDFSLogger.getLog().fatal(
+					"unable to write data at position " + start, e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
-			try {
-				ch.close();
-			} catch (Exception e) {
-			}
+
 			try {
 				raf.close();
 			} catch (Exception e) {
 			}
-			ch = null;
-			buf = null;
 			raf = null;
 			hash = null;
 			chunk = null;
@@ -267,95 +248,28 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#getChunk(long, int)
 	 */
+	
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		// long time = System.currentTimeMillis();
+		RandomAccessFile raf = null;
+		byte[] fbuf = new byte[pageSize];
 		try {
-			// long time = System.currentTimeMillis();
-			ByteBuffer buf = (ByteBuffer) cache.get(Long.toString(start));
-			byte[] chunk = null;
-			if (buf != null) {
-				try {
-					buf.position(0);
-					chunk = new byte[pageSize];
-					buf.get(chunk);
-				} catch (Exception e) {
-					buf = null;
-				}
-			}
-			if (buf == null) {
-				RandomAccessFile raf = null;
-				FileChannel ch = null;
-				ByteBuffer fbuf = ByteBuffer.allocate(pageSize
-						* readAheadPages);
-				try {
-					raf = new RandomAccessFile(f, "rw");
-
-					ch = raf.getChannel();
-					ch.position(start);
-					ch.read(fbuf);
-				} catch (Exception e) {
-				} finally {
-					try {
-						ch.close();
-					} catch (Exception e) {
-					}
-					try {
-						raf.close();
-					} catch (Exception e) {
-					}
-					raf = null;
-					ch = null;
-				}
-				long position = start;
-				fbuf.position(0);
-				if(readAheadPages > 1) {
-				for (int i = 0; i < (readAheadPages - 1); i++) {
-					byte[] b = new byte[pageSize];
-					fbuf.get(b);
-					buf = ByteBuffer.wrap(b);
-					try {
-						cache.put(Long.toString(position), buf);
-					} catch (Exception e) {
-					}
-					if (position == start) {
-						buf.position(0);
-						chunk = new byte[pageSize];
-						buf.get(chunk);
-					}
-					buf.position(0);
-					position = position + pageSize;
-				}
-				}else {
-					try {
-						cache.put(Long.toString(position), fbuf);
-						fbuf.position(0);
-						chunk = new byte[pageSize];
-						fbuf.get(chunk);
-					} catch (Exception e) {
-						
-					}
-				}
-				fbuf = null;
-			}
-			buf = null;
-			/*
-			 * //seek ahead to the block where the chunks are raf.seek(start
-			 * +43); raf.writeLong(time); int lenth = raf.readInt(); byte[]
-			 * chunk = new byte[lenth]; raf.read(chunk); raf.close(); bytesRead
-			 * = bytesRead + len; //String str = new String(chunk);
-			 * //getChunklock.unlock();
-			 */
-			if(Main.chunkStoreEncryptionEnabled)
-				chunk = EncryptUtils.decrypt(chunk);
-			return chunk;
+			raf = new RandomAccessFile(f, "r");
+			raf.seek(start);
+			raf.read(fbuf);
 		} catch (Exception e) {
-			// getChunklock.unlock();
-			SDFSLogger.getLog()
-					.fatal( "unable to read data at position "
-							+ start, e);
-			throw new IOException("unable to read data at position " + start);
+			SDFSLogger.getLog().error("unable to fetch chunk at position " + start,e);
+			throw new IOException(e);
+		} finally {
+			try {
+				raf.close();
+			} catch (Exception e) {
+			}
+			raf = null;
 		}
+		return fbuf;
 	}
 
 	/*
@@ -365,9 +279,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	public synchronized void expandFile(long length) throws IOException {
 		if (this.chunkDataWriter.length() < length) {
-			SDFSLogger.getLog().info("########### Pre-Allocating Chunkstore to size " + length
-					+ " ###################");
-			SDFSLogger.getLog()
+			SDFSLogger.getLog().info(
+					"########### Pre-Allocating Chunkstore to size " + length
+							+ " ###################");
+			SDFSLogger
+					.getLog()
 					.info("########### Pre-Allocation may take a while ####################################");
 			byte[] FREE = new byte[32768 * 4];
 			Arrays.fill(FREE, (byte) 0);
@@ -377,8 +293,9 @@ public class FileChunkStore implements AbstractChunkStore {
 				this.chunkDataWriter.write(FREE);
 				written = written + FREE.length;
 			}
-			SDFSLogger.getLog().info("############ Pre-Allocated Chunkstore to size " + length
-					+ "####################");
+			SDFSLogger.getLog().info(
+					"############ Pre-Allocated Chunkstore to size " + length
+							+ "####################");
 		}
 		this.chunkDataWriter.seek(0);
 
@@ -437,8 +354,9 @@ public class FileChunkStore implements AbstractChunkStore {
 				raf.setLength(origLoc);
 			return true;
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "could not move data from [" + origLoc
-					+ "] to [" + newLoc + "]", e);
+			SDFSLogger.getLog().fatal(
+					"could not move data from [" + origLoc + "] to [" + newLoc
+							+ "]", e);
 			return false;
 		} finally {
 			raf.close();

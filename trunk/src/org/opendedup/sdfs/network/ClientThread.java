@@ -170,6 +170,7 @@ class ClientThread extends Thread {
 
 								}
 							}
+							
 						} catch (NullPointerException e) {
 							SDFSLogger.getLog().warn("chunk "
 									+ StringUtils.getHexString(hash)

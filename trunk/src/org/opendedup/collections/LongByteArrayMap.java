@@ -4,6 +4,7 @@ import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -36,6 +37,7 @@ public class LongByteArrayMap implements AbstractMap {
 	Path bdbf = null;
 	TLongHashSet locks = null;
 	FileChannel iterbdb = null;
+	FileChannel pbdb = null;
 
 	static {
 		FREE = new byte[arrayLength];
@@ -174,6 +176,9 @@ public class LongByteArrayMap implements AbstractMap {
 					bdb.position(1024);
 					bdb.close();
 				}
+				pbdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
+						StandardOpenOption.WRITE, StandardOpenOption.READ,
+						StandardOpenOption.SPARSE);
 				// initiall allocate 32k
 				this.closed = false;
 			} catch (IOException e) {
@@ -208,6 +213,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#put(long, byte[])
 	 */
+	
 	public void put(long pos, byte[] data) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
@@ -216,16 +222,12 @@ public class LongByteArrayMap implements AbstractMap {
 			throw new IOException("data length " + data.length
 					+ " does not equal " + arrayLength);
 		long fpos = 0;
-		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
 
-			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
-					StandardOpenOption.WRITE, StandardOpenOption.READ,
-					StandardOpenOption.SPARSE);
-			_bdb.lock(fpos, data.length, false);
+			//_bdb.lock(fpos, data.length, false);
 			this.hashlock.writeLock().lock();
-			_bdb.write(ByteBuffer.wrap(data), fpos);
+			pbdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
 					"trying to write at " + fpos + " but file length is "
@@ -237,10 +239,6 @@ public class LongByteArrayMap implements AbstractMap {
 		} finally {
 			try {
 				this.hashlock.writeLock().unlock();
-			} catch (Exception e) {
-			}
-			try {
-				_bdb.close();
 			} catch (Exception e) {
 			}
 		}
@@ -279,7 +277,6 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-
 		this.hashlock.writeLock().lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
@@ -311,14 +308,14 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 		this.hashlock.readLock().lock();
 		long fpos = 0;
-		FileChannel _bdb = null;
+		RandomAccessFile _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.WRITE,
-					StandardOpenOption.READ, StandardOpenOption.SPARSE);
-			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-			_bdb.read(buf, fpos);
-			byte[] b = buf.array();
+			_bdb = new RandomAccessFile(bdbf.toString(),"r");
+			byte[] b = new byte[arrayLength];
+			_bdb.seek(fpos);
+			_bdb.read(b);
+			//byte[] b = buf.array();
 			if (Arrays.equals(b, FREE))
 				return null;
 			return b;
@@ -416,8 +413,14 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#close()
 	 */
 	public void close() {
+		this.hashlock.writeLock().lock();
 		if (!this.isClosed()) {
 			this.closed = true;
+		}
+		try {
+			pbdb.close();
+		}catch(Exception e) {} finally {
+			this.hashlock.writeLock().unlock();
 		}
 	}
 }

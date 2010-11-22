@@ -4,6 +4,7 @@ import gnu.trove.iterator.TLongIterator;
 
 
 
+
 import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
@@ -33,7 +35,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	RandomAccessFile kRaf = null;
 	FileChannel kFc = null;
 	private long size = 0;
-	private ReentrantLock arlock = new ReentrantLock();
+	private ReentrantReadWriteLock arlock = new ReentrantReadWriteLock();
 	private ReentrantLock iolock = new ReentrantLock();
 	private byte[] FREE = new byte[Main.hashLength];
 	private byte[] REMOVED = new byte[Main.hashLength];
@@ -58,6 +60,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	TLongHashSet freeSlots = new TLongHashSet(freeSlotsLength);
 	TLongIterator iter = null;
 	private boolean firstGCRun = true;
+	private long maxPos = 0;
 
 	public CSByteArrayLongMap(long maxSize, String fileName)
 			throws IOException, HashtableFullException {
@@ -116,7 +119,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		ByteArrayLongMap m = maps[hashRoute];
 		if (m == null) {
 			iolock.lock();
-			arlock.lock();
+			arlock.writeLock().lock();
 			try {
 				m = maps[hashRoute];
 				if (m == null) {
@@ -140,7 +143,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 						"unable to create hashmap. " + maps.length, e);
 				throw new IOException(e);
 			} finally {
-				arlock.unlock();
+				arlock.writeLock().unlock();
 				iolock.unlock();
 			}
 		}
@@ -289,6 +292,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 													+ value);
 								} else {
 									if (cm.getHash().length > 0) {
+										if(cm.getcPos() > this.maxPos)
+											this.maxPos = cm.getcPos() + Main.chunkStorePageSize;
 										boolean added = this.put(cm, false);
 										if (added)
 											this.kSz++;
@@ -421,23 +426,23 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (foundFree) {
 			this.freeValue = cm.getcPos();
 			try {
-				this.arlock.lock();
+				this.arlock.readLock().lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				this.arlock.unlock();
+				this.arlock.readLock().unlock();
 			}
 			added = true;
 		} else if (foundReserved) {
 			this.resValue = cm.getcPos();
 			try {
-				this.arlock.lock();
+				this.arlock.readLock().lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				this.arlock.unlock();
+				this.arlock.readLock().unlock();
 			}
 			added = true;
 		} else {
@@ -526,13 +531,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
 			if (added) {
-				this.arlock.lock();
+				this.arlock.readLock().lock();
 				try {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
 					this.kSz++;
-					this.arlock.unlock();
+					this.arlock.readLock().unlock();
 
 				}
 			} else {
@@ -590,7 +595,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		List<ChunkData> oldkBuf = null;
 		try {
 			if (lock)
-				this.arlock.lock();
+				this.arlock.writeLock().lock();
 			oldkBuf = kBuf;
 			if (this.isClosed())
 				kBuf = null;
@@ -600,7 +605,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} catch (Exception e) {
 		} finally {
 			if (lock)
-				this.arlock.unlock();
+				this.arlock.writeLock().unlock();
 		}
 		Iterator<ChunkData> iter = oldkBuf.iterator();
 		while (iter.hasNext()) {
@@ -637,13 +642,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 				return false;
 			} else {
 				cm.setmDelete(true);
-				this.arlock.lock();
+				this.arlock.readLock().lock();
 				try {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
 					kSz--;
-					this.arlock.unlock();
+					this.arlock.readLock().unlock();
 				}
 
 				return true;

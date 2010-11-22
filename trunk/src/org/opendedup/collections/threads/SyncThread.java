@@ -15,7 +15,7 @@ public class SyncThread implements Runnable {
 	public void run() {
 		while (!map.isClosed()) {
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				break;
 			}
@@ -23,7 +23,6 @@ public class SyncThread implements Runnable {
 				map.sync();
 			} catch (Exception e) {
 			}
-
 		}
 	}
 	
