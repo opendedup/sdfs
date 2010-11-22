@@ -831,7 +831,6 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
-	private ReentrantLock getHashLock = new ReentrantLock();
 	public DedupChunk getHash(long location, boolean create)
 			throws IOException {
 		if (this.closed) {
