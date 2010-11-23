@@ -311,6 +311,8 @@ public class LongByteArrayMap implements AbstractMap {
 		RandomAccessFile _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
+			if(pos > dbFile.length())
+				return null;
 			_bdb = new RandomAccessFile(bdbf.toString(),"r");
 			byte[] b = new byte[arrayLength];
 			_bdb.seek(fpos);
@@ -414,6 +416,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 */
 	public void close() {
 		this.hashlock.writeLock().lock();
+		dbFile = null;
 		if (!this.isClosed()) {
 			this.closed = true;
 		}
