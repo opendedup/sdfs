@@ -2,11 +2,14 @@ Version 1.0.1
 	Fixes :
 	* Snapshots were not functioning correctly
 	* Volume creation to did not correctly report volume sizes
-	* Memory utilization with lots of unclaimed hashes in the dse
+	* Memory utilization with lots of unclaimed hashes in the DSE
+	* Garbage collection on sparse files was broken.
 	Enhancements:
-	* Performance improvements due to better threading 
+	* Near IO line speed performance at 4k block sizes
+	* better threading and locking contention
 	* Faster tiger hashing
-	* Lowered memory requirements by 1/3 for new volumes and new DSE. Memory requirements for DSE Was 33 bytes for hash and is 23 now.
+	* Lowered memory requirements by 1/3 for new volumes and new DSE. Memory requirements for DSE Was 33 bytes for each
+	unique hash and is 23 now.
 
 Version 1.0.0
 	Fixes :
