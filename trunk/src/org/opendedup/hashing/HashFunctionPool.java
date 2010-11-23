@@ -58,11 +58,9 @@ public class HashFunctionPool {
 			NoSuchProviderException {
 		AbstractHashEngine hc = null;
 		if(Main.hashLength == 16) {
-			SDFSLogger.getLog().info("Setting hash engine for 16 byte");
 			hc = new Tiger16HashEngine();
 			//hc = new MD5CudaHash();
 		}else {
-			SDFSLogger.getLog().info("Setting hash engine for 24 byte");
 			hc = new TigerHashEngine();
 		}
 		return hc;
