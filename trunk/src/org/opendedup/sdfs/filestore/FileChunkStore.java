@@ -32,7 +32,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private boolean closed = false;
 	private FileChannel chunkDataReader = null;
 	private RandomAccessFile chunkDataWriter = null;
-	private RandomAccessFile posRaf = null;
 	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
 	File f;
@@ -61,27 +60,10 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = name;
 			f = new File(chunk_location + File.separator + name + ".chk");
 			p = f.toPath();
-			File posFile = new File(chunk_location + File.separator + name
-					+ ".pos");
-			boolean newPos = true;
-			if (posFile.exists())
-				newPos = false;
-			else {
-				posFile.getParentFile().mkdirs();
-			}
-			posRaf = new RandomAccessFile(posFile, "rw");
-			if (!newPos) {
-				posRaf.seek(0);
-				this.currentLength = posRaf.readLong();
-			} else {
-				posRaf.seek(0);
-				posRaf.writeLong(currentLength);
-			}
+			this.currentLength = f.length();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
 			in = new RandomAccessFile(f, "r");
 			chunkDataReader = in.getChannel();
-			if (Main.preAllocateChunkStore)
-				this.expandFile(Main.chunkStoreAllocationSize);
 			this.closed = false;
 			stores.add(this);
 			SDFSLogger.getLog().info("ChunkStore " + this.name + " created");
@@ -115,13 +97,6 @@ public class FileChunkStore implements AbstractChunkStore {
 				in.close();
 			}
 		} catch (IOException e) {
-		}
-		try {
-			synchronized (posRaf) {
-				posRaf.close();
-			}
-		} catch (Exception e) {
-
 		}
 	}
 
@@ -185,8 +160,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		reservePositionlock.lock();
 		long pos = this.currentLength;
 		this.currentLength = this.currentLength + pageSize;
-		this.posRaf.seek(0);
-		this.posRaf.writeLong(this.currentLength);
 		reservePositionlock.unlock();
 		return pos;
 	}
@@ -272,34 +245,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		return fbuf;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#expandFile(long)
-	 */
-	public synchronized void expandFile(long length) throws IOException {
-		if (this.chunkDataWriter.length() < length) {
-			SDFSLogger.getLog().info(
-					"########### Pre-Allocating Chunkstore to size " + length
-							+ " ###################");
-			SDFSLogger
-					.getLog()
-					.info("########### Pre-Allocation may take a while ####################################");
-			byte[] FREE = new byte[32768 * 4];
-			Arrays.fill(FREE, (byte) 0);
-			this.chunkDataWriter.seek(0);
-			long written = 0;
-			while (written < length) {
-				this.chunkDataWriter.write(FREE);
-				written = written + FREE.length;
-			}
-			SDFSLogger.getLog().info(
-					"############ Pre-Allocated Chunkstore to size " + length
-							+ "####################");
-		}
-		this.chunkDataWriter.seek(0);
-
-	}
+	
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)

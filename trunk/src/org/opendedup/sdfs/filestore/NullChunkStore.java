@@ -32,12 +32,6 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void expandFile(long length) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		// TODO Auto-generated method stub
 		return new byte[0];

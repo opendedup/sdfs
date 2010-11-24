@@ -112,7 +112,6 @@ public interface AbstractChunkStore {
 	 *            store.
 	 * @throws IOException
 	 */
-	public abstract void expandFile(long length) throws IOException;
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
 			throws IOException;
