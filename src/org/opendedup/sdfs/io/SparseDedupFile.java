@@ -2,7 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -105,10 +104,13 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	public DedupFile snapshot(MetaDataDedupFile snapmf) throws IOException,
 			HashtableFullException {
-		DedupFileChannel ch = this.getChannel();
-		this.writeCache();
-		this.sync();
+		flushingLock.writeLock().lock();
+		DedupFileChannel ch = null;
 		try {
+			ch = this.getChannel();
+			this.writeCache();
+			this.sync();
+
 			SparseDedupFile _df = new SparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
@@ -120,7 +122,9 @@ public class SparseDedupFile implements DedupFile {
 			SDFSLogger.getLog().warn("unable to clone file " + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
 		} finally {
-			ch.close();
+			this.flushingLock.writeLock().unlock();
+			if(ch != null)
+				ch.close();
 			ch = null;
 		}
 	}
@@ -285,7 +289,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	//private ReentrantLock updatelock = new ReentrantLock();
+	// private ReentrantLock updatelock = new ReentrantLock();
 
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
 			boolean doop) throws IOException {
@@ -294,7 +298,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file already closed");
 		}
 		try {
-			//updatelock.lock();
+			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
 			SparseDataChunk chunk = null;
 			if (mf.isDedup() || doop) {
@@ -311,7 +315,7 @@ public class SparseDedupFile implements DedupFile {
 					"unable to write " + hash + " closing " + mf.getPath(), e);
 			throw new IOException(e);
 		} finally {
-			//updatelock.unlock();
+			// updatelock.unlock();
 		}
 
 	}
@@ -831,8 +835,7 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
-	public DedupChunk getHash(long location, boolean create)
-			throws IOException {
+	public DedupChunk getHash(long location, boolean create) throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}

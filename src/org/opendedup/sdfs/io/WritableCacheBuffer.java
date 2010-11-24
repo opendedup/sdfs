@@ -210,6 +210,12 @@ public class WritableCacheBuffer extends DedupChunk {
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed");
 		try {
+			/*
+			if(pos != 0)
+				SDFSLogger.getLog().info("start at " + pos);
+			if(b.length != this.capacity())
+				SDFSLogger.getLog().info("!capacity " + b.length);
+			*/
 			this.lock.writeLock().lock();
 			buf.position(pos);
 			buf.put(b);
