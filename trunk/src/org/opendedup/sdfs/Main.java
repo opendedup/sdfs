@@ -23,7 +23,7 @@ public class Main {
 	
 	/**
 	 * The location where the actual blocks of deduplicated data will be
-	 * located. This is used for the chunk store.
+	 * located. This is used for the chunk stores.
 	 */
 	public static String chunkStore = "";
 	/**
