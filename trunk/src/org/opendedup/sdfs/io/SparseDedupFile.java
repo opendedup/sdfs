@@ -327,7 +327,7 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	private ReentrantLock marshallock = new ReentrantLock();
 
-	public WritableCacheBuffer getWriteBuffer(long position) throws IOException {
+	public WritableCacheBuffer getWriteBuffer(long position,boolean newBuff) throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
@@ -351,7 +351,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 			}
 			if (writeBuffer == null) {
-				writeBuffer = marshalWriteBuffer(chunkPos);
+				writeBuffer = marshalWriteBuffer(chunkPos,newBuff);
 			}
 			marshallock.unlock();
 			this.writeBuffers.putIfAbsent(chunkPos, writeBuffer);
@@ -365,10 +365,15 @@ public class SparseDedupFile implements DedupFile {
 		}
 	}
 
-	private WritableCacheBuffer marshalWriteBuffer(long chunkPos)
+	private WritableCacheBuffer marshalWriteBuffer(long chunkPos,boolean newChunk)
 			throws IOException {
+		
 		WritableCacheBuffer writeBuffer = null;
-		DedupChunk ck = this.getHash(chunkPos, true);
+		DedupChunk ck = null;
+		if(newChunk)
+			ck = createNewChunk(chunkPos);
+		else
+			ck = this.getHash(chunkPos, true);
 		if (ck.isNewChunk()) {
 			writeBuffer = new WritableCacheBuffer(ck.getHash(), chunkPos,
 					ck.getLength(), this);
