@@ -198,20 +198,25 @@ public class DedupFileChannel {
 			int write = 0;
 			while (bytesLeft > 0) {
 				// Check to see if we need a new Write buffer
-				WritableCacheBuffer writeBuffer = df.getWriteBuffer(_cp);
+				//WritableCacheBuffer writeBuffer = df.getWriteBuffer(_cp);
 				// Find out where to write to in the buffer
-				int startPos = (int) (_cp - writeBuffer.getFilePosition());
+				long filePos = df.getChuckPosition(_cp);
+				int startPos = (int) (_cp - filePos);
 				if (startPos < 0)
 					SDFSLogger.getLog().fatal(
 							"Error " + _cp + " "
-									+ writeBuffer.getFilePosition());
+									+ filePos);
 				// Find out how many total bytes there are left to write in
 				// this
 				// loop
 				int endPos = startPos + bytesLeft;
 				// If the writebuffer can fit what is left, write it and
 				// quit.
-				if ((endPos) <= writeBuffer.capacity()) {
+				if ((endPos) <= Main.CHUNK_LENGTH) {
+					boolean newBuf = false;
+					if(endPos == Main.CHUNK_LENGTH)
+						newBuf = true;
+					WritableCacheBuffer writeBuffer = df.getWriteBuffer(filePos,newBuf);
 					byte[] b = new byte[bytesLeft];
 					buf.get(b);
 					writeBuffer.write(b, startPos);
@@ -219,7 +224,11 @@ public class DedupFileChannel {
 					_cp = _cp + bytesLeft;
 					bytesLeft = 0;
 				} else {
-					int _len = writeBuffer.capacity() - startPos;
+					int _len = Main.CHUNK_LENGTH - startPos;
+					boolean newBuf = false;
+					if(_len == Main.CHUNK_LENGTH)
+						newBuf = true;
+					WritableCacheBuffer writeBuffer = df.getWriteBuffer(filePos,newBuf);
 					byte[] b = new byte[_len];
 					buf.get(b);
 					writeBuffer.write(b, startPos);

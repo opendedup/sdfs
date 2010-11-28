@@ -45,7 +45,7 @@ public interface DedupFile {
 	 * @return the write buffer for the give position
 	 * @throws IOException
 	 */
-	public abstract WritableCacheBuffer getWriteBuffer(long position)
+	public abstract WritableCacheBuffer getWriteBuffer(long position,boolean newBuf)
 			throws IOException;
 
 	/**
