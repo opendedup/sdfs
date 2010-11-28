@@ -68,7 +68,7 @@ public class VMDKParser {
 		byte[] strB = sb.toString().getBytes();
 		b.put(strB);
 		vmd.setLength(strB.length, true);
-		vmd.getDedupFile().getWriteBuffer(0).write(b.array(), 0);
+		vmd.getDedupFile().getWriteBuffer(0,true).write(b.array(), 0);
 		vmd.getDedupFile().writeCache();
 		vmd.sync();
 		vmd.getDedupFile().writeCache();
