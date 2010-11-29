@@ -27,7 +27,6 @@ public class SDFSGCScheduler {
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
-			
 			JobDetail ccjobDetail = new JobDetail("fdisk", null, FDISKJob.class);
 			CronTrigger cctrigger = new CronTrigger("fdiskTrigger","group1", Main.fDkiskSchedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);
