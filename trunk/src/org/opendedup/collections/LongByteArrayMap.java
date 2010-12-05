@@ -176,7 +176,7 @@ public class LongByteArrayMap implements AbstractMap {
 							StandardOpenOption.SPARSE);
 					bdb.position(1024);
 					bdb.close();
-					
+
 					flen = 0;
 					this.map = new BitSet();
 					SDFSLogger.getLog().info("creating map file");
@@ -343,7 +343,6 @@ public class LongByteArrayMap implements AbstractMap {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.annesam.collections.AbstractMap#get(long)
-	 * 
 	 */
 	public byte[] get(long pos) throws IOException {
 		if (this.isClosed()) {
@@ -437,7 +436,8 @@ public class LongByteArrayMap implements AbstractMap {
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.SPARSE);
 			srcC.transferTo(0, src.length(), dstC);
-
+			SDFSLogger.getLog().debug("snapped map to [" + dest.getPath() + "]");
+			this.copyMap(destFilePath);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -450,6 +450,37 @@ public class LongByteArrayMap implements AbstractMap {
 			} catch (Exception e) {
 			}
 			this.hashlock.readLock().unlock();
+		}
+	}
+
+	private void copyMap(String dstPath) throws IOException {
+		FileChannel srcC = null;
+		FileChannel dstC = null;
+		try {
+			String destFilePath = dstPath.substring(0, dstPath.length() - 4)
+					+ ".ewa";
+			File dest = new File(destFilePath);
+			File src = this.ewahFile;
+			if (dest.exists())
+				dest.delete();
+			else
+				dest.getParentFile().mkdirs();
+			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
+					StandardOpenOption.READ, StandardOpenOption.SPARSE);
+			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.SPARSE);
+			srcC.transferTo(0, src.length(), dstC);
+			SDFSLogger.getLog().debug("snapped bitmap to [" + dest.getPath() + "]");
+		} finally {
+			try {
+				srcC.close();
+			} catch (Exception e) {
+			}
+			try {
+				dstC.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
