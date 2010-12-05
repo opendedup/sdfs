@@ -105,12 +105,15 @@ public class DedupChunk implements java.io.Serializable {
 	public void setNewChunk(boolean newChunk) {
 		this.newChunk = newChunk;
 	}
-
 	public synchronized byte[] getChunk() throws IOException {
+		try {
 		if (data != null)
 			return data;
 		else
 			return HCServiceProxy.fetchChunk(hash);
+		}finally {
+			//getChunkLock.unlock();
+		}
 	}
 
 	/**

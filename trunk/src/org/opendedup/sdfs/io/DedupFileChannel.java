@@ -65,27 +65,33 @@ public class DedupFileChannel {
 	 *            the size of the file channel
 	 * @exception IOException
 	 */
-	public synchronized void truncateFile(long siz) throws IOException {
+	private ReentrantLock truncateLock = new ReentrantLock();
+
+	public void truncateFile(long siz) throws IOException {
 		SDFSLogger.getLog().debug("Truncating File");
-		if (siz < mf.length()) {
-			df.truncate(siz);
-			/*
-			 * WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz); int
-			 * endPos = (int) (siz - writeBuffer.getFilePosition()); DedupChunk
-			 * nextDk = df.getHash(writeBuffer.getEndPosition() + 1, false);
-			 * while (nextDk != null) {
-			 * SDFSLogger.getLog().debug("Removing chunk at position " +
-			 * nextDk.getFilePosition());
-			 * df.removeHash(nextDk.getFilePosition()); nextDk =
-			 * df.getHash(nextDk.getFilePosition() + nextDk.getLength() + 1,
-			 * true); } writeBuffer.truncate(endPos); //
-			 * df.writeCache(writeBuffer,true);
-			 */
+		truncateLock.lock();
+		try {
+			if (siz < mf.length()) {
+				df.truncate(siz);
+				/*
+				 * WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz); int
+				 * endPos = (int) (siz - writeBuffer.getFilePosition());
+				 * DedupChunk nextDk = df.getHash(writeBuffer.getEndPosition() +
+				 * 1, false); while (nextDk != null) {
+				 * SDFSLogger.getLog().debug("Removing chunk at position " +
+				 * nextDk.getFilePosition());
+				 * df.removeHash(nextDk.getFilePosition()); nextDk =
+				 * df.getHash(nextDk.getFilePosition() + nextDk.getLength() + 1,
+				 * true); } writeBuffer.truncate(endPos); //
+				 * df.writeCache(writeBuffer,true);
+				 */
 
+			}
+			mf.setLastAccessed(System.currentTimeMillis());
+			mf.setLength(siz, true);
+		} finally {
+			truncateLock.unlock();
 		}
-		mf.setLastAccessed(System.currentTimeMillis());
-		mf.setLength(siz, true);
-
 	}
 
 	/**
@@ -198,14 +204,12 @@ public class DedupFileChannel {
 			int write = 0;
 			while (bytesLeft > 0) {
 				// Check to see if we need a new Write buffer
-				//WritableCacheBuffer writeBuffer = df.getWriteBuffer(_cp);
+				// WritableCacheBuffer writeBuffer = df.getWriteBuffer(_cp);
 				// Find out where to write to in the buffer
 				long filePos = df.getChuckPosition(_cp);
 				int startPos = (int) (_cp - filePos);
 				if (startPos < 0)
-					SDFSLogger.getLog().fatal(
-							"Error " + _cp + " "
-									+ filePos);
+					SDFSLogger.getLog().fatal("Error " + _cp + " " + filePos);
 				// Find out how many total bytes there are left to write in
 				// this
 				// loop
@@ -214,9 +218,10 @@ public class DedupFileChannel {
 				// quit.
 				if ((endPos) <= Main.CHUNK_LENGTH) {
 					boolean newBuf = false;
-					if(endPos == Main.CHUNK_LENGTH)
+					if (endPos == Main.CHUNK_LENGTH)
 						newBuf = true;
-					WritableCacheBuffer writeBuffer = df.getWriteBuffer(filePos,newBuf);
+					WritableCacheBuffer writeBuffer = df.getWriteBuffer(
+							filePos, newBuf);
 					byte[] b = new byte[bytesLeft];
 					buf.get(b);
 					writeBuffer.write(b, startPos);
@@ -226,9 +231,10 @@ public class DedupFileChannel {
 				} else {
 					int _len = Main.CHUNK_LENGTH - startPos;
 					boolean newBuf = false;
-					if(_len == Main.CHUNK_LENGTH)
+					if (_len == Main.CHUNK_LENGTH)
 						newBuf = true;
-					WritableCacheBuffer writeBuffer = df.getWriteBuffer(filePos,newBuf);
+					WritableCacheBuffer writeBuffer = df.getWriteBuffer(
+							filePos, newBuf);
 					byte[] b = new byte[_len];
 					buf.get(b);
 					writeBuffer.write(b, startPos);
@@ -380,51 +386,51 @@ public class DedupFileChannel {
 					readBuffer = df.getReadBuffer(currentLocation);
 				} catch (Exception e) {
 					// break;
-					SDFSLogger.getLog().error("Error reading file at [" +filePos + "]",e);		
+					SDFSLogger.getLog().error(
+							"Error reading file at [" + filePos + "]", e);
 					throw new IOException("unable to read at [" + filePos
 							+ "] because [" + e.toString() + "]"
-					
+
 					);
 				}
-				//synchronized (readBuffer) {
-					int startPos = (int) (currentLocation - readBuffer
-							.getFilePosition());
-					int endPos = startPos + bytesLeft;
-					try {
-						if ((endPos) <= readBuffer.getLength()) {
-							buf.put(readBuffer.getChunk(), startPos, bytesLeft);
-							mf.getIOMonitor().addBytesRead(bytesLeft);
-							// SDFSLogger.getLog().debug("Read " + bytesLeft +
-							// " bytes");
-							read = read + bytesLeft;
-							bytesLeft = 0;
-						} else {
-							int _len = readBuffer.getLength() - startPos;
-							buf.put(readBuffer.getChunk(), startPos, _len);
-							mf.getIOMonitor().addBytesRead(_len);
-							currentLocation = currentLocation + _len;
-							bytesLeft = bytesLeft - _len;
-							read = read + _len;
-						}
-					} catch (IOException e) {
-						SDFSLogger.getLog().fatal(
-								"Error while reading buffer ", e);
-						SDFSLogger.getLog().fatal(
-								"Error Reading Buffer " + readBuffer.getHash()
-										+ " start position [" + startPos + "] "
-										+ "end position [" + endPos
-										+ "] bytes left [" + bytesLeft
-										+ "] filePostion [" + currentLocation
-										+ "] ");
-						this.close();
-						throw new IOException("Error reading buffer");
+				// synchronized (readBuffer) {
+				int startPos = (int) (currentLocation - readBuffer
+						.getFilePosition());
+				int endPos = startPos + bytesLeft;
+				try {
+					if ((endPos) <= readBuffer.getLength()) {
+						buf.put(readBuffer.getChunk(), startPos, bytesLeft);
+						mf.getIOMonitor().addBytesRead(bytesLeft);
+						// SDFSLogger.getLog().debug("Read " + bytesLeft +
+						// " bytes");
+						read = read + bytesLeft;
+						bytesLeft = 0;
+					} else {
+						int _len = readBuffer.getLength() - startPos;
+						buf.put(readBuffer.getChunk(), startPos, _len);
+						mf.getIOMonitor().addBytesRead(_len);
+						currentLocation = currentLocation + _len;
+						bytesLeft = bytesLeft - _len;
+						read = read + _len;
 					}
-					if (currentLocation == mf.length()) {
-						return read;
-					}
-					mf.setLastAccessed(System.currentTimeMillis());
-					this.currentPosition = currentLocation;
-				//}
+				} catch (IOException e) {
+					SDFSLogger.getLog().fatal("Error while reading buffer ", e);
+					SDFSLogger.getLog().fatal(
+							"Error Reading Buffer " + readBuffer.getHash()
+									+ " start position [" + startPos + "] "
+									+ "end position [" + endPos
+									+ "] bytes left [" + bytesLeft
+									+ "] filePostion [" + currentLocation
+									+ "] ");
+					this.close();
+					throw new IOException("Error reading buffer");
+				}
+				if (currentLocation == mf.length()) {
+					return read;
+				}
+				mf.setLastAccessed(System.currentTimeMillis());
+				this.currentPosition = currentLocation;
+				// }
 			}
 			return read;
 		} catch (IOException e) {

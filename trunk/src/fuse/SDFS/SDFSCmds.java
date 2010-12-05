@@ -331,7 +331,7 @@ public class SDFSCmds {
 		}
 	}
 
-	private synchronized String takeSnapshot(String srcPath, String dstPath) {
+	private String takeSnapshot(String srcPath, String dstPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		File nf = new File(this.mountedVolume + File.separator + dstPath);
 

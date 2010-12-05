@@ -17,6 +17,7 @@ public class LargFile {
 		FileOutputStream str = new FileOutputStream(f, true);
 		Random rnd = new Random();
 		byte[] b = new byte[bs];
+		
 		System.out.println("1:" + len);
 		long time = System.currentTimeMillis();
 		int writes = 0;
@@ -27,6 +28,7 @@ public class LargFile {
 			str.getChannel().write(buf);
 			sz = sz + b.length;
 			if (writes > interval) {
+				
 				float mb = (float) (writes * bs) / (1024 * 1024);
 				float duration = (float) (System.currentTimeMillis() - time) / 1000;
 				float mbps = mb / duration;
