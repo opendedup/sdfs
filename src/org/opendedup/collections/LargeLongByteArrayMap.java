@@ -203,7 +203,8 @@ public class LargeLongByteArrayMap implements AbstractMap {
 				dest.delete();
 			else
 				dest.getParentFile().mkdirs();
-			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel();
+			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(StandardOpenOption.READ,
+					StandardOpenOption.SPARSE);
 			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.SPARSE);
