@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.IOException;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
@@ -49,9 +50,11 @@ public class DedupFileStore {
 	 * @return the dedup file map associated with the MetaDataDedupFile
 	 * @throws IOException
 	 */
-	public static synchronized DedupFile getDedupFile(MetaDataDedupFile mf)
+	private static ReentrantLock getDFLock = new ReentrantLock();
+	public static DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
-		
+		getDFLock.lock();
+		try {
 		if (!closing) {
 			SDFSLogger.getLog().debug("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
 			DedupFile df = null;
@@ -78,6 +81,9 @@ public class DedupFileStore {
 			return df;
 		} else {
 			throw new IOException("DedupFileStore is closed");
+		}
+		}finally {
+			getDFLock.unlock();
 		}
 	}
 

@@ -1,12 +1,12 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -42,6 +43,7 @@ public class LongByteArrayMap implements AbstractMap {
 	BitSet map = null;
 	File ewahFile = null;
 	long flen = 0;
+	RAFPool rafPool = null;
 
 	static {
 		FREE = new byte[arrayLength];
@@ -174,6 +176,7 @@ public class LongByteArrayMap implements AbstractMap {
 							StandardOpenOption.SPARSE);
 					bdb.position(1024);
 					bdb.close();
+					
 					flen = 0;
 					this.map = new BitSet();
 					SDFSLogger.getLog().info("creating map file");
@@ -196,6 +199,7 @@ public class LongByteArrayMap implements AbstractMap {
 					}
 					flen = dbFile.length();
 				}
+				rafPool = new RAFPool(filePath);
 				pbdb = (FileChannel) bdbf.newByteChannel(
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
@@ -339,6 +343,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.annesam.collections.AbstractMap#get(long)
+	 * 
 	 */
 	public byte[] get(long pos) throws IOException {
 		if (this.isClosed()) {
@@ -346,18 +351,18 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 		this.hashlock.readLock().lock();
 		long fpos = 0;
-		RandomAccessFile _bdb = null;
+		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
 			if (map != null && !map.get(this.calcBitMapPos(pos)))
 				return null;
 			else if (map == null && fpos > flen)
 				return null;
-			_bdb = new RandomAccessFile(bdbf.toString(), "r");
-			byte[] b = new byte[arrayLength];
-			_bdb.seek(fpos);
-			_bdb.read(b);
-			// byte[] b = buf.array();
+			_bdb = rafPool.borrowObject();
+			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+			_bdb.position(fpos);
+			_bdb.read(buf);
+			byte[] b = buf.array();
 			if (Arrays.equals(b, FREE))
 				return null;
 			return b;
@@ -371,7 +376,7 @@ public class LongByteArrayMap implements AbstractMap {
 		} finally {
 			try {
 				if (_bdb != null)
-					_bdb.close();
+					rafPool.returnObject(_bdb);
 			} catch (Exception e) {
 			}
 			this.hashlock.readLock().unlock();
@@ -454,6 +459,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#close()
 	 */
 	public void close() {
+		SDFSLogger.getLog().info("Closing file");
 		this.hashlock.writeLock().lock();
 		if (map != null) {
 			ObjectOutputStream out = null;
@@ -471,9 +477,8 @@ public class LongByteArrayMap implements AbstractMap {
 				} catch (IOException e) {
 				}
 			}
-
 		}
-
+		this.rafPool.close();
 		dbFile = null;
 		if (!this.isClosed()) {
 			this.closed = true;

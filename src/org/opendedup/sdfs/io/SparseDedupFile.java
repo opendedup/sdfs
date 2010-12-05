@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
@@ -52,6 +54,7 @@ public class SparseDedupFile implements DedupFile {
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	// private int maxWriteBuffers = 128;
 	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
+
 	private transient ConcurrentLinkedHashMap<Long, WritableCacheBuffer> writeBuffers = new Builder<Long, WritableCacheBuffer>()
 			.concurrencyLevel(Main.writeThreads)
 			.initialCapacity(maxWriteBuffers + 1)
@@ -123,7 +126,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("unable to clone file " + mf.getPath(), e);
 		} finally {
 			this.flushingLock.writeLock().unlock();
-			if(ch != null)
+			if (ch != null)
 				ch.close();
 			ch = null;
 		}
@@ -325,14 +328,13 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getWriteBuffer(long)
 	 */
-	private ReentrantLock marshallock = new ReentrantLock();
 
-	public WritableCacheBuffer getWriteBuffer(long position,boolean newBuff) throws IOException {
+	public WritableCacheBuffer getWriteBuffer(long position, boolean newBuff)
+			throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
 		try {
-			marshallock.lock();
 			long chunkPos = this.getChuckPosition(position);
 			WritableCacheBuffer writeBuffer = this.writeBuffers.get(chunkPos);
 			if (writeBuffer != null && writeBuffer.isClosed()) {
@@ -346,31 +348,28 @@ public class SparseDedupFile implements DedupFile {
 					this.flushingLock.writeLock().unlock();
 				}
 				if (writeBuffer != null) {
-					this.writeBuffers.put(chunkPos, writeBuffer);
+					// this.writeBuffers.put(chunkPos, writeBuffer);
 					writeBuffer.open();
 				}
 			}
 			if (writeBuffer == null) {
-				writeBuffer = marshalWriteBuffer(chunkPos,newBuff);
+				writeBuffer = marshalWriteBuffer(chunkPos, newBuff);
 			}
-			marshallock.unlock();
 			this.writeBuffers.putIfAbsent(chunkPos, writeBuffer);
 			return this.writeBuffers.get(chunkPos);
 		} catch (IOException e) {
-			if (marshallock.isLocked())
-				marshallock.unlock();
 			SDFSLogger.getLog().fatal(
 					"Unable to get block at position " + position, e);
 			throw new IOException("Unable to get block at position " + position);
 		}
 	}
 
-	private WritableCacheBuffer marshalWriteBuffer(long chunkPos,boolean newChunk)
-			throws IOException {
-		
+	private WritableCacheBuffer marshalWriteBuffer(long chunkPos,
+			boolean newChunk) throws IOException {
+
 		WritableCacheBuffer writeBuffer = null;
 		DedupChunk ck = null;
-		if(newChunk)
+		if (newChunk)
 			ck = createNewChunk(chunkPos);
 		else
 			ck = this.getHash(chunkPos, true);
@@ -673,7 +672,7 @@ public class SparseDedupFile implements DedupFile {
 		return this.databaseDirPath;
 	}
 
-	private synchronized void initDB() throws IOException {
+	private void initDB() throws IOException {
 		this.initLock.lock();
 		try {
 			if (this.isClosed()) {
@@ -886,12 +885,16 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#removeHash(long)
 	 */
-	public synchronized void removeHash(long location) throws IOException {
+	private ReentrantLock removeHashLock = new ReentrantLock();
+
+	public void removeHash(long location) throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
 		long place = this.getChuckPosition(location);
+		removeHashLock.lock();
 		try {
+
 			this.bdb.remove(place);
 			if (!mf.isDedup())
 				this.chunkStore.remove(place);
@@ -900,17 +903,24 @@ public class SparseDedupFile implements DedupFile {
 					"unable to remove chunk at position " + place, e);
 			throw new IOException(e);
 		} finally {
-
+			removeHashLock.unlock();
 		}
 	}
 
-	public synchronized void truncate(long size) throws IOException {
-		if (this.closed) {
-			throw new IOException("file already closed");
+	private ReentrantLock truncateLock = new ReentrantLock();
+
+	public void truncate(long size) throws IOException {
+		truncateLock.lock();
+		try {
+			if (this.closed) {
+				throw new IOException("file already closed");
+			}
+			this.bdb.truncate(size);
+			if (!mf.isDedup())
+				this.chunkStore.setLength(size);
+		} finally {
+			truncateLock.unlock();
 		}
-		this.bdb.truncate(size);
-		if (!mf.isDedup())
-			this.chunkStore.setLength(size);
 
 	}
 

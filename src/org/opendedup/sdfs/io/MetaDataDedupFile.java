@@ -302,18 +302,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *         does not already exist.
 	 * @throws IOException
 	 */
+	private ReentrantLock getDFLock = new ReentrantLock();
 
-	public synchronized DedupFile getDedupFile() throws IOException {
-		if (this.dfGuid == null) {
-			DedupFile df = DedupFileStore.getDedupFile(this);
-			this.dfGuid = df.getGUID();
-			SDFSLogger.getLog().debug(
-					"No DF EXISTS .... Set dedup file for " + this.getPath()
-							+ " to " + this.dfGuid);
-			this.sync();
-			return df;
-		} else {
-			return DedupFileStore.getDedupFile(this);
+	public DedupFile getDedupFile() throws IOException {
+		try {
+			getDFLock.lock();
+			if (this.dfGuid == null) {
+				DedupFile df = DedupFileStore.getDedupFile(this);
+				this.dfGuid = df.getGUID();
+				SDFSLogger.getLog().debug(
+						"No DF EXISTS .... Set dedup file for "
+								+ this.getPath() + " to " + this.dfGuid);
+				this.sync();
+				return df;
+			} else {
+				return DedupFileStore.getDedupFile(this);
+			}
+		} finally {
+			getDFLock.unlock();
 		}
 	}
 
@@ -532,7 +538,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * not the DedupFile Reference
 	 * 
 	 */
-	protected synchronized boolean deleteSelf() {
+	protected boolean deleteSelf() {
 		File f = new File(this.path);
 		MetaFileStore.removedCachedMF(this.path);
 		return f.delete();

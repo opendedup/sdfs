@@ -51,18 +51,17 @@ public class HashStore {
 	int mapSize = (Main.chunkStorePageCache * 1024*1024)/Main.chunkStorePageSize;
 	
 	private transient HashMap<String, HashChunk> readingBuffers = new HashMap<String, HashChunk>(mapSize);
+	/*
 	private transient ConcurrentLinkedHashMap<String, HashChunk> cacheBuffers = new Builder<String, HashChunk>()
 			.concurrencyLevel(Main.writeThreads).initialCapacity(mapSize)
 			.maximumWeightedCapacity(mapSize).listener(
 					new EvictionListener<String, HashChunk>() {
-						// This method is called just after a new entry has been
-						// added
 						public void onEviction(String key, HashChunk buffer) {
 						}
 					}
 
 			).build();
-
+*/
 	// The chunk store used to store the actual deduped data;
 	// private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of
@@ -177,7 +176,8 @@ public class HashStore {
 	 */
 	public HashChunk getHashChunk(byte[] hash) throws IOException {
 		HashChunk hs = null;
-		String hStr = StringUtils.getHexString(hash);
+		//String hStr = StringUtils.getHexString(hash);
+		/*
 		hs = this.cacheBuffers.get(hStr);
 		if (hs != null) {
 			return hs;
@@ -201,19 +201,20 @@ public class HashStore {
 			if(this.readingBuffers.size() < mapSize)
 				this.readingBuffers.put(hStr, hs);
 		}
+		*/
 		try {
 			byte[] data = bdb.getData(hash);
 			if (data == null && Arrays.equals(hash, blankHash)) {
 				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
 			}
 			hs = new HashChunk(hash, 0, data.length, data, false);
-			this.cacheBuffers.put(hStr, hs);
+			//this.cacheBuffers.put(hStr, hs);
 				
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to get hash " + StringUtils.getHexString(hash), e);
 		} finally {
-			this.readingBuffers.remove(hStr);
+			//this.readingBuffers.remove(hStr);
 		}
 		return hs;
 	}

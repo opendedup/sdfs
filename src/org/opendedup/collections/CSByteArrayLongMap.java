@@ -413,7 +413,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		this.flushFullBuffer();
+		// this.flushFullBuffer();
 		boolean added = false;
 		boolean foundFree = Arrays.equals(cm.getHash(), FREE);
 		boolean foundReserved = Arrays.equals(cm.getHash(), REMOVED);
@@ -517,8 +517,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (kSz >= this.maxSz)
 			throw new HashtableFullException("maximum sized reached");
 		boolean added = false;
-		if (persist)
-			this.flushFullBuffer();
+		// if (persist)
+		// this.flushFullBuffer();
 		if (persist) {
 			cm.setcPos(this.getFreeSlot());
 			cm.persistData(true);
@@ -621,7 +621,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				}
 			}
 			oldkBuf.clear();
-			
+
 		}
 		oldkBuf = null;
 
@@ -631,7 +631,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		this.flushFullBuffer();
+		// this.flushFullBuffer();
 		try {
 			if (cm.getHash().length == 0)
 				return true;
@@ -656,7 +656,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
-	private synchronized void flushFullBuffer() throws IOException {
+	protected void flushFullBuffers() throws IOException {
 		boolean flush = false;
 		try {
 			// this.hashlock.lock();
@@ -672,12 +672,20 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
-	public synchronized void sync() throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.fileName + "] is close");
+	private ReentrantLock syncLock = new ReentrantLock();
+
+	public void sync() throws IOException {
+		syncLock.lock();
+		try {
+			if (this.isClosed()) {
+				throw new IOException("hashtable [" + this.fileName
+						+ "] is close");
+			}
+			this.flushBuffer(true);
+			// this.kRaf.getFD().sync();
+		} finally {
+			syncLock.unlock();
 		}
-		this.flushBuffer(true);
-		// this.kRaf.getFD().sync();
 	}
 
 	public void close() {
