@@ -203,8 +203,7 @@ public class SDFSCmds {
 				}
 			}
 			if (command.equalsIgnoreCase("user.cmd.optimize")) {
-				long length = Long.parseLong(args[1]);
-				status = optimize(path, length);
+				status = optimize(path);
 			}
 			if (command.equalsIgnoreCase("user.cmd.snapshot")) {
 				if(Main.volume.isFull())
@@ -300,18 +299,18 @@ public class SDFSCmds {
 		}
 	}
 
-	private String optimize(String srcPath, long length) {
+	private String optimize(String srcPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
-			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize(length);
+			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize();
 			return "SUCCESS Optimization Success: optimized [" + srcPath
-					+ "] of length [" + length + "]";
+					+ "]";
 		} catch (Exception e) {
 			log.error("ERROR Optimize Failed: unable to optimize Source ["
-					+ srcPath + "] " + "length [" + length + "] because :"
+					+ srcPath + "] because :"
 					+ e.toString(), e);
 			return "ERROR Optimize Failed: unable to optimize Source ["
-					+ srcPath + "] " + "length [" + length + "] because :"
+					+ srcPath + "] because :"
 					+ e.toString();
 		}
 	}
@@ -354,5 +353,7 @@ public class SDFSCmds {
 					+ "] because :" + e.toString();
 		}
 	}
+	
+	
 
 }

@@ -2,11 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -15,11 +11,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 
@@ -40,8 +36,6 @@ public class LongByteArrayMap implements AbstractMap {
 	Path bdbf = null;
 	FileChannel iterbdb = null;
 	FileChannel pbdb = null;
-	BitSet map = null;
-	File ewahFile = null;
 	long flen = 0;
 	RAFPool rafPool = null;
 
@@ -115,14 +109,13 @@ public class LongByteArrayMap implements AbstractMap {
 			File f = new File(this.filePath);
 			while ((iterPos * arrayLength) < f.length()) {
 				try {
-					if (map == null || map.get(iterPos)) {
-						ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-						iterbdb.position(iterPos * arrayLength);
-						iterbdb.read(buf);
-						byte[] val = buf.array();
-						if (!Arrays.equals(val, FREE)) {
-							return val;
-						}
+
+					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+					iterbdb.position(iterPos * arrayLength);
+					iterbdb.read(buf);
+					byte[] val = buf.array();
+					if (!Arrays.equals(val, FREE)) {
+						return val;
 					}
 				} catch (Exception e1) {
 					e1.printStackTrace();
@@ -161,9 +154,6 @@ public class LongByteArrayMap implements AbstractMap {
 			bdbf = Paths.get(filePath);
 			try {
 				dbFile = new File(filePath);
-				String ewahFilePath = filePath.substring(0,
-						filePath.length() - 4) + ".ewa";
-				ewahFile = new File(ewahFilePath);
 				boolean fileExists = dbFile.exists();
 				SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
 				if (!fileExists) {
@@ -178,25 +168,8 @@ public class LongByteArrayMap implements AbstractMap {
 					bdb.close();
 
 					flen = 0;
-					this.map = new BitSet();
-					SDFSLogger.getLog().info("creating map file");
 				} else {
-					if (ewahFile.exists()) {
-						ObjectInputStream in = null;
-						try {
-							in = new ObjectInputStream(new FileInputStream(
-									ewahFile));
-							this.map = (BitSet) in.readObject();
-						} catch (Exception e) {
-							SDFSLogger.getLog().warn(
-									"unable to read ewa file "
-											+ ewahFile.getPath(), e);
-							this.map = null;
-						} finally {
-							if (in != null)
-								in.close();
-						}
-					}
+
 					flen = dbFile.length();
 				}
 				rafPool = new RAFPool(filePath);
@@ -218,17 +191,6 @@ public class LongByteArrayMap implements AbstractMap {
 
 	private long calcMapFilePos(long fpos) throws IOException {
 		long pos = (fpos / Main.CHUNK_LENGTH) * FREE.length;
-		/*
-		 * if (pos > Integer.MAX_VALUE) throw new IOException(
-		 * "Requested file position " + fpos +
-		 * " is larger than the maximum length of a file for this file system "
-		 * + (Integer.MAX_VALUE * Main.CHUNK_LENGTH) / FREE.length);
-		 */
-		return pos;
-	}
-
-	private int calcBitMapPos(long fpos) throws IOException {
-		int pos = (int) (fpos / Main.CHUNK_LENGTH);
 		/*
 		 * if (pos > Integer.MAX_VALUE) throw new IOException(
 		 * "Requested file position " + fpos +
@@ -262,12 +224,8 @@ public class LongByteArrayMap implements AbstractMap {
 
 			// _bdb.lock(fpos, data.length, false);
 			this.hashlock.writeLock().lock();
-			if (map != null)
-				map.set(this.calcBitMapPos(pos));
-			else {
-				if (fpos > flen)
-					flen = fpos;
-			}
+			if (fpos > flen)
+				flen = fpos;
 			pbdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
@@ -326,8 +284,6 @@ public class LongByteArrayMap implements AbstractMap {
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
 			_bdb.write(ByteBuffer.wrap(FREE), fpos);
-			if (map != null)
-				map.clear(this.calcBitMapPos(pos));
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -353,9 +309,8 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			if (map != null && !map.get(this.calcBitMapPos(pos)))
-				return null;
-			else if (map == null && fpos > flen)
+
+			if (fpos > flen)
 				return null;
 			_bdb = rafPool.borrowObject();
 			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -410,7 +365,6 @@ public class LongByteArrayMap implements AbstractMap {
 				this.close();
 			File f = new File(this.filePath);
 			f.delete();
-			this.ewahFile.delete();
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -430,14 +384,23 @@ public class LongByteArrayMap implements AbstractMap {
 				dest.delete();
 			else
 				dest.getParentFile().mkdirs();
-			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
-					StandardOpenOption.READ, StandardOpenOption.SPARSE);
-			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
-					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-					StandardOpenOption.SPARSE);
-			srcC.transferTo(0, src.length(), dstC);
-			SDFSLogger.getLog().debug("snapped map to [" + dest.getPath() + "]");
-			this.copyMap(destFilePath);
+			if (OSValidator.isWindows()) {
+				SDFSLogger.getLog().info("Snapping on windows volume");
+				srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
+						StandardOpenOption.READ, StandardOpenOption.SPARSE);
+				dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+						StandardOpenOption.SPARSE);
+				srcC.transferTo(0, src.length(), dstC);
+			} else {
+				SDFSLogger.getLog().debug("snapping on unix/linux volume");
+				Process p = Runtime.getRuntime().exec(
+						"cp --sparse=always " + src.getPath() + " "
+								+ dest.getPath());
+				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
+			}
+			SDFSLogger.getLog()
+					.debug("snapped map to [" + dest.getPath() + "]");
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -453,37 +416,6 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	private void copyMap(String dstPath) throws IOException {
-		FileChannel srcC = null;
-		FileChannel dstC = null;
-		try {
-			String destFilePath = dstPath.substring(0, dstPath.length() - 4)
-					+ ".ewa";
-			File dest = new File(destFilePath);
-			File src = this.ewahFile;
-			if (dest.exists())
-				dest.delete();
-			else
-				dest.getParentFile().mkdirs();
-			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
-					StandardOpenOption.READ, StandardOpenOption.SPARSE);
-			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
-					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-					StandardOpenOption.SPARSE);
-			srcC.transferTo(0, src.length(), dstC);
-			SDFSLogger.getLog().debug("snapped bitmap to [" + dest.getPath() + "]");
-		} finally {
-			try {
-				srcC.close();
-			} catch (Exception e) {
-			}
-			try {
-				dstC.close();
-			} catch (Exception e) {
-			}
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -492,23 +424,6 @@ public class LongByteArrayMap implements AbstractMap {
 	public void close() {
 		SDFSLogger.getLog().info("Closing file");
 		this.hashlock.writeLock().lock();
-		if (map != null) {
-			ObjectOutputStream out = null;
-			try {
-				out = new ObjectOutputStream(
-						new FileOutputStream(this.ewahFile));
-				out.writeObject(this.map);
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn(
-						"unable to write ewah file " + this.ewahFile.getPath(),
-						e);
-			} finally {
-				try {
-					out.close();
-				} catch (IOException e) {
-				}
-			}
-		}
 		this.rafPool.close();
 		dbFile = null;
 		if (!this.isClosed()) {

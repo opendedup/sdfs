@@ -20,52 +20,65 @@ public class MgmtWebServer implements Container {
 			String cmd = request.getQuery().get("cmd");
 			String cmdOptions = request.getQuery().get("options");
 			String result = "<result status=\"failed\" msg=\"command not found\"/>";
-			if(cmd == null)
+			if (cmd == null)
 				result = "<result status=\"failed\" msg=\"no command specified\"/>";
-			else if(cmd.equalsIgnoreCase("info")) {
+			else if (cmd.equalsIgnoreCase("info")) {
 				String msg = new GetAttributes().getResult(cmdOptions, file);
 				result = "<result status=\"success\" msg=\"command completed successfully\">";
 				result = result + msg;
 				result = result + "</result>";
-			}
-			else if(cmd.equalsIgnoreCase("snapshot")) {
+			} else if (cmd.equalsIgnoreCase("snapshot")) {
 				try {
-				String msg = new SnapshotCmd().getResult(cmdOptions,file);
-				result = "<result status=\"success\" msg=\""+msg+"\"/>";
-				}catch(IOException e) {
-					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+					String msg = new SnapshotCmd().getResult(cmdOptions, file);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
 				}
-			}
-			else if(cmd.equalsIgnoreCase("flush")) {
+			} else if (cmd.equalsIgnoreCase("msnapshot")) {
 				try {
-				String msg = new FlushBuffersCmd().getResult(cmdOptions,file);
-				result = "<result status=\"success\" msg=\""+msg+"\"/>";
-				}catch(IOException e) {
-					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+					int snaps = request.getQuery().getInteger("snaps");
+					String msg = new MultiSnapshotCmd(snaps).getResult(
+							cmdOptions, file);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
 				}
-			}
-			else if(cmd.equalsIgnoreCase("makevmdk")) {
+			} else if (cmd.equalsIgnoreCase("flush")) {
 				try {
-				String msg = new MakeVMDKCmd().getResult(cmdOptions,file);
-				result = "<result status=\"success\" msg=\""+msg+"\"/>";
-				}catch(IOException e) {
-					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+					String msg = new FlushBuffersCmd().getResult(cmdOptions,
+							file);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
 				}
-			}
-			else if(cmd.equalsIgnoreCase("dedup")) {
+			} else if (cmd.equalsIgnoreCase("makevmdk")) {
 				try {
-				String msg = new SetDedupAllCmd().getResult(cmdOptions,file);
-				result = "<result status=\"success\" msg=\""+msg+"\"/>";
-				}catch(IOException e) {
-					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+					String msg = new MakeVMDKCmd().getResult(cmdOptions, file);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
 				}
-			}	
-			else if(cmd.equalsIgnoreCase("cleanstore")) {
+			} else if (cmd.equalsIgnoreCase("dedup")) {
 				try {
-				String msg = new CleanStoreCmd().getResult(cmdOptions,null);
-				result = "<result status=\"success\" msg=\""+msg+"\"/>";
-				}catch(IOException e) {
-					result = "<result status=\"failed\" msg=\""+e.getMessage()+"\"/>";
+					String msg = new SetDedupAllCmd().getResult(cmdOptions,
+							file);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
+				}
+			} else if (cmd.equalsIgnoreCase("cleanstore")) {
+				try {
+					String msg = new CleanStoreCmd()
+							.getResult(cmdOptions, null);
+					result = "<result status=\"success\" msg=\"" + msg + "\"/>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
 				}
 			}
 			PrintStream body = response.getPrintStream();
@@ -90,7 +103,8 @@ public class MgmtWebServer implements Container {
 			connection = new SocketConnection(container);
 			SocketAddress address = new InetSocketAddress("localhost", 6442);
 			connection.connect(address);
-			SDFSLogger.getLog().info("Management WebServer Started at " + address.toString());
+			SDFSLogger.getLog().info(
+					"Management WebServer Started at " + address.toString());
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to start Web Management Server",
 					e);

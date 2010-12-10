@@ -329,12 +329,15 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getWriteBuffer(long)
 	 */
 
+	private ReentrantLock marshallock = new ReentrantLock();
+
 	public WritableCacheBuffer getWriteBuffer(long position, boolean newBuff)
 			throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
 		try {
+			marshallock.lock();
 			long chunkPos = this.getChuckPosition(position);
 			WritableCacheBuffer writeBuffer = this.writeBuffers.get(chunkPos);
 			if (writeBuffer != null && writeBuffer.isClosed()) {
@@ -355,9 +358,12 @@ public class SparseDedupFile implements DedupFile {
 			if (writeBuffer == null) {
 				writeBuffer = marshalWriteBuffer(chunkPos, newBuff);
 			}
+			marshallock.unlock();
 			this.writeBuffers.putIfAbsent(chunkPos, writeBuffer);
 			return this.writeBuffers.get(chunkPos);
 		} catch (IOException e) {
+			if (marshallock.isLocked())
+                marshallock.unlock();
 			SDFSLogger.getLog().fatal(
 					"Unable to get block at position " + position, e);
 			throw new IOException("Unable to get block at position " + position);
@@ -703,7 +709,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public void optimize(long length) throws HashtableFullException {
+	public void optimize() throws HashtableFullException {
 		DedupFileChannel ch = null;
 		try {
 			ch = this.getChannel();
@@ -717,8 +723,13 @@ public class SparseDedupFile implements DedupFile {
 				new File(this.chunkStorePath).delete();
 				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath,
 						(long) -1, Main.CHUNK_LENGTH);
-			} else
+			} else {
 				this.pushLocalDataToChunkStore();
+				this.chunkStore.vanish();
+				this.chunkStore = null;
+				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath,
+						(long) -1, Main.CHUNK_LENGTH);
+			}
 		} catch (IOException e) {
 
 		} finally {

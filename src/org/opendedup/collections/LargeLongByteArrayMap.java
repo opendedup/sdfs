@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -12,6 +11,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 public class LargeLongByteArrayMap implements AbstractMap {
@@ -139,7 +139,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			this.hashlock.writeLock().unlock();
 			rf.close();
 			rf = null;
-			
+
 		}
 	}
 
@@ -178,6 +178,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	@Override
 	public void vanish() throws IOException {
+		this.close();
 		RandomAccessFile bdbf = null;
 		try {
 			bdbf = new RandomAccessFile(fileName, "rw");
@@ -195,7 +196,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		FileChannel srcC = null;
 		FileChannel dstC = null;
 		try {
-			
+
 			this.sync();
 			File dest = new File(destFilePath);
 			File src = new File(this.fileName);
@@ -203,12 +204,19 @@ public class LargeLongByteArrayMap implements AbstractMap {
 				dest.delete();
 			else
 				dest.getParentFile().mkdirs();
-			srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(StandardOpenOption.READ,
-					StandardOpenOption.SPARSE);
-			dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
-					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-					StandardOpenOption.SPARSE);
-			srcC.transferTo(0, src.length(), dstC);
+			if (OSValidator.isWindows()) {
+				srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
+						StandardOpenOption.READ, StandardOpenOption.SPARSE);
+				dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+						StandardOpenOption.SPARSE);
+				srcC.transferTo(0, src.length(), dstC);
+			} else {
+				Process p = Runtime.getRuntime().exec(
+						"cp --sparse=always " + src.getPath() + " "
+								+ dest.getPath());
+				SDFSLogger.getLog().info("copy exit value is " + p.waitFor());
+			}
 
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -282,8 +290,9 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			orig.delete();
 			File newF = new File(this.fileName + ".new");
 			newF.renameTo(orig);
-			SDFSLogger.getLog().info("optimizing file [" + this.fileName + "] migrated ["
-					+ mData + "] bytes of data to new file");
+			SDFSLogger.getLog().info(
+					"optimizing file [" + this.fileName + "] migrated ["
+							+ mData + "] bytes of data to new file");
 		} catch (IOException e) {
 			throw e;
 		} finally {
