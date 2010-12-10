@@ -224,7 +224,7 @@ public interface DedupFile {
 	 * @param length
 	 *            the lenght to optimize for
 	 */
-	public abstract void optimize(long length) throws HashtableFullException;
+	public abstract void optimize() throws HashtableFullException;
 	
 	public abstract boolean hasOpenChannels();
 	

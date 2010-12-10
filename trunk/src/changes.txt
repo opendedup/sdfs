@@ -1,3 +1,9 @@
+Version 1.0.2
+	Fixes :
+	Enhancements :
+	* Optimize file option no longer takes a length.
+	* Faster throughput through better threading
+	
 Version 1.0.1
 	Fixes :
 	* Snapshots were not functioning correctly

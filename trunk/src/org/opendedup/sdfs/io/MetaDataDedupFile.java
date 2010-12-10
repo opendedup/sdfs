@@ -101,7 +101,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
-				this.getDedupFile().optimize(this.length);
+				this.getDedupFile().optimize();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -368,7 +368,22 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			_mf.group_id = this.group_id;
 			_mf.permissions = this.permissions;
 			_mf.dedup = this.dedup;
-			_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
+			if(!this.dedup) {
+				try {
+					this.setDedup(true);
+					_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
+				} catch (HashtableFullException e) {
+					throw new IOException(e);
+				} finally {
+					try {
+						this.setDedup(false);
+					} catch (HashtableFullException e) {
+						SDFSLogger.getLog().error("error while setting dedup option back to false",e);
+					}
+				}
+			} else {
+				_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
+			}
 			_mf.getIOMonitor().setVirtualBytesWritten(this.length());
 			_mf.getIOMonitor().setDuplicateBlocks(
 					this.getIOMonitor().getDuplicateBlocks());
