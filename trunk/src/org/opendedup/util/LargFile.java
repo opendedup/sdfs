@@ -47,7 +47,7 @@ public class LargFile {
 	
 
 	public static void main(String[] args) throws IOException {
-			writeFile("/media/dedup/test.bin", 30,1048576);
+			writeFile(args[0], Integer.parseInt(args[1]),1048576);
 	}
 
 }
