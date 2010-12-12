@@ -26,7 +26,7 @@ import org.opendedup.util.VMDKParser;
 import org.apache.commons.collections.map.AbstractLinkedMap;
 import org.apache.commons.collections.map.LRUMap;
 
-public class SparseDedupFile implements DedupFile {
+public class LRUSparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
@@ -91,7 +91,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
+	public LRUSparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		//SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" + this.maxWriteBuffers);
 		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
@@ -113,7 +113,7 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync();
 
-			SparseDedupFile _df = new SparseDedupFile(snapmf);
+			LRUSparseDedupFile _df = new LRUSparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.forceClose();

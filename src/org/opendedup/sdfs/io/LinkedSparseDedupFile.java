@@ -1,12 +1,13 @@
 package org.opendedup.sdfs.io;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.io.File;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,10 +24,7 @@ import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
-import org.apache.commons.collections.map.AbstractLinkedMap;
-import org.apache.commons.collections.map.LRUMap;
-
-public class SparseDedupFile implements DedupFile {
+public class LinkedSparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
@@ -52,20 +50,19 @@ public class SparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient TLongObjectHashMap<WritableCacheBuffer> flushingBuffers = new TLongObjectHashMap<WritableCacheBuffer>(Main.writeThreads);
+	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
 
 	@SuppressWarnings("serial")
-	private transient LRUMap writeBuffers = new LRUMap(
-			maxWriteBuffers + 1,false) {
-		protected boolean removeLRU	(
-				AbstractLinkedMap.LinkEntry eldest) {
+	private transient LinkedHashMap<Long, WritableCacheBuffer> writeBuffers = new LinkedHashMap<Long, WritableCacheBuffer>(
+			maxWriteBuffers + 1, 1, false) {
+		protected boolean removeEldestEntry(
+				Map.Entry<Long, WritableCacheBuffer> eldest) {
 			if (size() >= maxWriteBuffers) {
-				WritableCacheBuffer writeBuffer = (WritableCacheBuffer)eldest.getValue();
-				
+				WritableCacheBuffer writeBuffer = eldest.getValue();
 				if (writeBuffer != null) {
 					flushingLock.lock();
 					try {
-						flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
+						flushingBuffers.put(eldest.getKey(), writeBuffer);
 					} catch (Exception e) {
 
 						// TODO Auto-generated catch block
@@ -91,8 +88,8 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
-		//SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" + this.maxWriteBuffers);
+	public LinkedSparseDedupFile(MetaDataDedupFile mf) throws IOException {
+		SDFSLogger.getLog().info("Max WriteBuffers=" + this.maxWriteBuffers);
 		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
 		this.init();
@@ -113,7 +110,7 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync();
 
-			SparseDedupFile _df = new SparseDedupFile(snapmf);
+			LinkedSparseDedupFile _df = new LinkedSparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.forceClose();
@@ -218,10 +215,8 @@ public class SparseDedupFile implements DedupFile {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
-		if(writeBuffer == null)
-			return;
 
-		if (writeBuffer.isDirty()) {
+		if (writeBuffer != null && writeBuffer.isDirty()) {
 			AbstractHashEngine hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
@@ -266,7 +261,7 @@ public class SparseDedupFile implements DedupFile {
 						"unable to add chunk [" + writeBuffer.getHash()
 								+ "] at position "
 								+ writeBuffer.getFilePosition(), e);
-				WritableCacheBuffer buf = (WritableCacheBuffer)this.flushingBuffers
+				WritableCacheBuffer buf = this.flushingBuffers
 						.remove(writeBuffer.getFilePosition());
 				if (buf != null)
 					buf.destroy();
@@ -279,7 +274,7 @@ public class SparseDedupFile implements DedupFile {
 				WritableCacheBuffer buf = null;
 				this.flushingLock.lock();
 				try {
-					buf = (WritableCacheBuffer)this.flushingBuffers.remove(writeBuffer
+					buf = this.flushingBuffers.remove(writeBuffer
 							.getFilePosition());
 				} catch (Exception e) {
 				} finally {
@@ -293,7 +288,7 @@ public class SparseDedupFile implements DedupFile {
 			if (removeWhenWritten) {
 				this.writeBufferLock.lock();
 				try {
-					this.writeBuffers.remove(new Long(writeBuffer.getFilePosition()));
+					this.writeBuffers.remove(writeBuffer.getFilePosition());
 				} finally {
 					this.writeBufferLock.unlock();
 				}
@@ -347,31 +342,32 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file already closed");
 		}
 		try {
-			
-			long chunkPos = this.getChuckPosition(position);
-			Long cpL = new Long(chunkPos);
 			this.writeBufferLock.lock();
-			WritableCacheBuffer writeBuffer = (WritableCacheBuffer)this.writeBuffers.get(cpL);
-			
+			long chunkPos = this.getChuckPosition(position);
+			WritableCacheBuffer writeBuffer = this.writeBuffers.get(chunkPos);
 			if (writeBuffer != null && writeBuffer.isClosed()) {
 				writeBuffer.open();
 			} else if (writeBuffer == null) {
 				this.flushingLock.lock();
 				try {
-					writeBuffer = (WritableCacheBuffer)this.flushingBuffers.remove(chunkPos);
+					writeBuffer = this.flushingBuffers.remove(chunkPos);
 				} finally {
 					this.flushingLock.unlock();
 				}
 				if (writeBuffer != null) {
 					writeBuffer.open();
-					this.writeBuffers.put(cpL, writeBuffer);
 				}
 			}
 			if (writeBuffer == null) {
 				writeBuffer = marshalWriteBuffer(chunkPos, newBuff);
-				this.writeBuffers.put(cpL, writeBuffer);
 			}
+			this.writeBuffers.put(chunkPos, writeBuffer);
+
 			return writeBuffer;
+		} catch (IOException e) {
+			SDFSLogger.getLog().fatal(
+					"Unable to get block at position " + position, e);
+			throw new IOException("Unable to get block at position " + position);
 		} finally {
 			this.writeBufferLock.unlock();
 		}
@@ -416,19 +412,18 @@ public class SparseDedupFile implements DedupFile {
 			}
 		}
 		long chunkPos = this.getChuckPosition(position);
-		Long cpL = new Long(chunkPos);
 		DedupChunk readBuffer = null;
 		try {
 
 			this.writeBufferLock.lock();
-			readBuffer = (WritableCacheBuffer)this.writeBuffers.get(cpL);
+			readBuffer = this.writeBuffers.get(chunkPos);
 		} finally {
 			this.writeBufferLock.unlock();
 		}
 		if (readBuffer == null) {
 			this.flushingLock.lock();
 			try {
-				readBuffer = (WritableCacheBuffer)this.flushingBuffers.get(chunkPos);
+				readBuffer = this.flushingBuffers.get(chunkPos);
 			} finally {
 				this.flushingLock.unlock();
 			}

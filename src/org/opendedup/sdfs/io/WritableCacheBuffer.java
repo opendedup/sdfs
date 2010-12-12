@@ -2,15 +2,12 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.util.SDFSLogger;
-
 
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.hashing.TigerHashEngine;
@@ -27,11 +24,11 @@ public class WritableCacheBuffer extends DedupChunk {
 
 	private static final long serialVersionUID = 8325202759315844948L;
 	private transient static byte[] defaultHash = null;
-	private ByteBuffer buf = null;
+	private byte[] buf = null;
 	private boolean dirty = false;
 	private long endPosition = 0;
 	private int currentLen = 0;
-	
+
 	private int bytesWritten = 0;
 	private DedupFile df;
 	private ReentrantLock lock = new ReentrantLock();
@@ -41,21 +38,21 @@ public class WritableCacheBuffer extends DedupChunk {
 	boolean rafInit = false;
 	boolean prevDoop = false;
 	private boolean safeSync = Main.safeSync;
-	
 
 	static {
 		try {
-			if(Main.hashLength == 16) {
-			Tiger16HashEngine he  = new Tiger16HashEngine ();
-			defaultHash = he.getHash(new byte[Main.CHUNK_LENGTH]);
-			he.destroy();
-			}else {
-				TigerHashEngine he  = new TigerHashEngine ();
+			if (Main.hashLength == 16) {
+				Tiger16HashEngine he = new Tiger16HashEngine();
+				defaultHash = he.getHash(new byte[Main.CHUNK_LENGTH]);
+				he.destroy();
+			} else {
+				TigerHashEngine he = new TigerHashEngine();
 				defaultHash = he.getHash(new byte[Main.CHUNK_LENGTH]);
 				he.destroy();
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "error initializing WritableCacheBuffer", e);
+			SDFSLogger.getLog().fatal("error initializing WritableCacheBuffer",
+					e);
 		}
 	}
 
@@ -63,13 +60,14 @@ public class WritableCacheBuffer extends DedupChunk {
 			DedupFile df) throws IOException {
 		super(hash, startPos, length, true);
 		this.df = df;
-		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+		buf = new byte[Main.CHUNK_LENGTH];
 		if (safeSync) {
 			blockFile = new File(df.getDatabaseDirPath() + File.separator
 					+ startPos + ".chk");
 			if (blockFile.exists()) {
-				SDFSLogger.getLog().warn("recovering from unexpected close at " + startPos);
-				buf = ByteBuffer.wrap(readBlockFile());
+				SDFSLogger.getLog().warn(
+						"recovering from unexpected close at " + startPos);
+				buf = readBlockFile();
 			}
 			this.rafInit = true;
 		}
@@ -101,14 +99,15 @@ public class WritableCacheBuffer extends DedupChunk {
 		super(dk.getHash(), dk.getFilePosition(), dk.getLength(), dk
 				.isNewChunk());
 		this.df = df;
-		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+		buf = new byte[Main.CHUNK_LENGTH];
 		if (safeSync) {
 			blockFile = new File(df.getDatabaseDirPath() + File.separator
 					+ dk.getFilePosition() + ".chk");
 			if (blockFile.exists()) {
-				SDFSLogger.getLog().warn("recovering from unexpected close at "
-						+ dk.getFilePosition());
-				buf = ByteBuffer.wrap(readBlockFile());
+				SDFSLogger.getLog().warn(
+						"recovering from unexpected close at "
+								+ dk.getFilePosition());
+				buf = readBlockFile();
 			}
 			if (dk.isNewChunk())
 				rafInit = true;
@@ -117,25 +116,26 @@ public class WritableCacheBuffer extends DedupChunk {
 			try {
 				byte[] ck = dk.getChunk();
 				if (ck.length > Main.CHUNK_LENGTH) {
-					SDFSLogger.getLog().info("Alert ! returned chunk to large " + ck.length
-							+ " > " + Main.CHUNK_LENGTH);
-					buf = ByteBuffer.wrap(ck);
+					SDFSLogger.getLog().info(
+							"Alert ! returned chunk to large " + ck.length
+									+ " > " + Main.CHUNK_LENGTH);
+					buf = ck;
 				} else {
-					buf.put(ck);
+					this.currentLen = ck.length;
+					buf = ck;
 				}
 			} catch (Exception e) {
-				buf.put(new byte[Main.CHUNK_LENGTH]);
+				buf = new byte[Main.CHUNK_LENGTH];
 				SDFSLogger.getLog().fatal(
 						"unable to get chunk bytes for " + dk.getHash()
 								+ " at position " + dk.getFilePosition(), e);
 			}
 		}
 		// this.currentLen = 0;
-		this.currentLen = buf.position();
 		if (Arrays.equals(dk.getHash(), defaultHash)) {
 			this.currentLen = 0;
 		}
-		this.setLength(buf.capacity());
+		this.setLength(buf.length);
 		this.endPosition = this.getFilePosition() + this.getLength();
 		this.setWritable(true);
 	}
@@ -152,8 +152,8 @@ public class WritableCacheBuffer extends DedupChunk {
 				return true;
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn( "unable to sync "
-						+ this.blockFile.getPath(), e);
+				SDFSLogger.getLog().warn(
+						"unable to sync " + this.blockFile.getPath(), e);
 				throw new IOException(e);
 			} finally {
 				this.lock.unlock();
@@ -163,11 +163,11 @@ public class WritableCacheBuffer extends DedupChunk {
 	}
 
 	public int capacity() {
-		return this.buf.capacity();
+		return this.buf.length;
 	}
 
 	public int position() {
-		return this.buf.position();
+		return this.currentLen;
 	}
 
 	public long getEndPosition() {
@@ -175,20 +175,12 @@ public class WritableCacheBuffer extends DedupChunk {
 	}
 
 	public byte[] getChunk() throws IOException {
-		byte b[] = new byte[Main.CHUNK_LENGTH];
+		this.lock.lock();
 		try {
-			this.lock.lock();
-			// SDFSLogger.getLog().info("Buffer pos :" + buf.position() + " len :" +
-			// buf.capacity());
-			buf.position(0);
-			buf.get(b);
-
-		} catch (Exception e) {
-			throw new IOException(e);
+			return buf;
 		} finally {
 			this.lock.unlock();
 		}
-		return b;
 	}
 
 	public int getCurrentLen() {
@@ -205,28 +197,36 @@ public class WritableCacheBuffer extends DedupChunk {
 	 * @param len
 	 *            the length to write from the target array
 	 * @throws BufferClosedException
+	 * @throws IOException
 	 */
 
-	public void write(byte[] b, int pos) throws BufferClosedException {
+	public void write(byte[] b, int pos) throws BufferClosedException,
+			IOException {
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed");
 		try {
 			/*
-			if(pos != 0)
-				SDFSLogger.getLog().info("start at " + pos);
-			if(b.length != this.capacity())
-				SDFSLogger.getLog().info("!capacity " + b.length);
-			*/
+			 * if(pos != 0) SDFSLogger.getLog().info("start at " + pos);
+			 * if(b.length != this.capacity())
+			 * SDFSLogger.getLog().info("!capacity " + b.length);
+			 */
 			this.lock.lock();
-			buf.position(pos);
-			buf.put(b);
-			if (buf.position() > currentLen)
-				this.currentLen = buf.position();
+			if (pos > buf.length) {
+				byte[] _b = new byte[Main.CHUNK_LENGTH];
+				System.arraycopy(buf, 0, _b, 0, buf.length);
+				buf = _b;
+			}
+			ByteBuffer _buff = ByteBuffer.wrap(buf);
+			_buff.position(pos);
+			_buff.put(b);
+			buf = _buff.array();
+			if (pos > currentLen)
+				this.currentLen = pos;
 			if (safeSync) {
 				raf = new RandomAccessFile(blockFile, "rw");
 				if (!this.rafInit) {
 					raf.seek(0);
-					raf.write(buf.array());
+					raf.write(buf);
 					this.rafInit = true;
 				}
 				raf.seek(pos);
@@ -236,25 +236,20 @@ public class WritableCacheBuffer extends DedupChunk {
 			}
 			this.setDirty(true);
 			this.bytesWritten = this.bytesWritten + b.length;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("Error while writing data [" + b.length + "] position ["
-					+ pos + "]");
-			throw new IllegalArgumentException("error");
 		} finally {
 			this.lock.unlock();
 		}
 	}
 
 	public void truncate(int len) {
-
 		try {
 			this.lock.lock();
 			if (len < this.currentLen) {
 				if (!Main.safeSync) {
 					byte[] b = new byte[Main.CHUNK_LENGTH];
 					ByteBuffer _buf = ByteBuffer.wrap(b);
-					_buf.put(buf.array(), 0, len);
-					buf = _buf;
+					_buf.put(buf, 0, len);
+					buf = _buf.array();
 				} else {
 					this.destroy();
 
@@ -262,10 +257,6 @@ public class WritableCacheBuffer extends DedupChunk {
 			}
 			this.setDirty(true);
 			this.currentLen = len;
-		} catch (Exception e) {
-
-			SDFSLogger.getLog().fatal( "Error while truncating " + len, e);
-			throw new IllegalArgumentException("error");
 		} finally {
 			this.lock.unlock();
 		}
@@ -313,24 +304,25 @@ public class WritableCacheBuffer extends DedupChunk {
 	public void close() {
 		try {
 			this.lock.lock();
-			this.df.writeCache(this, false);
 			this.closed = true;
+			this.df.writeCache(this, false);
+
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "Error while closing", e);
+			SDFSLogger.getLog().fatal("Error while closing", e);
 			throw new IllegalArgumentException("error while closing "
 					+ e.toString());
 		} finally {
 			this.lock.unlock();
 		}
 	}
-	
+
 	public void persist() {
 		try {
 			this.lock.lock();
-			this.df.writeCache(this,true);
+			this.df.writeCache(this, true);
 			this.closed = true;
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "Error while closing", e);
+			SDFSLogger.getLog().fatal("Error while closing", e);
 			throw new IllegalArgumentException("error while closing "
 					+ e.toString());
 		} finally {
@@ -361,7 +353,7 @@ public class WritableCacheBuffer extends DedupChunk {
 			blockFile = null;
 		}
 	}
-	
+
 	public boolean isPrevDoop() {
 		return prevDoop;
 	}

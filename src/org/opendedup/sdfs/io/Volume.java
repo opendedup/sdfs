@@ -5,6 +5,7 @@ import java.io.File;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,6 +25,7 @@ public class Volume implements java.io.Serializable {
 	static int mbc = 1024 * 1024;
 
 	private static final long serialVersionUID = 5505952237500542215L;
+	private ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
 	String name;
 	String capString = null;
@@ -93,10 +95,13 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void updateCurrentSize(long sz) {
-		synchronized (this) {
+		this.updateLock.lock();
+		try{
 			this.currentSize = this.currentSize + sz;
 			if (this.currentSize < 0)
 				this.currentSize = 0;
+		}finally {
+			this.updateLock.unlock();
 		}
 	}
 
