@@ -13,13 +13,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
@@ -32,7 +30,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	RandomAccessFile kRaf = null;
 	FileChannel kFc = null;
 	private long size = 0;
-	private ReentrantReadWriteLock arlock = new ReentrantReadWriteLock();
+	private ReentrantLock arlock = new ReentrantLock();
 	private ReentrantLock iolock = new ReentrantLock();
 	private byte[] FREE = new byte[Main.hashLength];
 	private byte[] REMOVED = new byte[Main.hashLength];
@@ -40,8 +38,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private long resValue = -1;
 	private long freeValue = -1;
 	private String fileName;
-	private List<ChunkData> kBuf = Collections
-			.synchronizedList(new ArrayList<ChunkData>());
+	private List<ChunkData> kBuf = new ArrayList<ChunkData>();
 	private ByteArrayLongMap[] maps = null;
 	private boolean removingChunks = false;
 	private String fileParams = "rw";
@@ -63,7 +60,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
 		else
-			maps = new ByteArrayLongMap[256];
+			maps = new ByteArrayLongMap[16];
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;
@@ -82,7 +79,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
 		else
-			maps = new ByteArrayLongMap[256];
+			maps = new ByteArrayLongMap[16];
 		this.fileParams = fileParams;
 		this.size = (long) (maxSize * 1.125);
 		this.maxSz = maxSize;
@@ -110,12 +107,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 				hashb = ((hashb * -1) + 127);
 			}
 		}
-		int hashRoute = hashb;
+		int hashRoute = hashb / 16;
 
 		ByteArrayLongMap m = maps[hashRoute];
 		if (m == null) {
 			iolock.lock();
-			arlock.writeLock().lock();
+			arlock.lock();
 			try {
 				m = maps[hashRoute];
 				if (m == null) {
@@ -139,7 +136,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 						"unable to create hashmap. " + maps.length, e);
 				throw new IOException(e);
 			} finally {
-				arlock.writeLock().unlock();
+				arlock.unlock();
 				iolock.unlock();
 			}
 		}
@@ -420,23 +417,23 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (foundFree) {
 			this.freeValue = cm.getcPos();
 			try {
-				this.arlock.readLock().lock();
+				this.arlock.lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				this.arlock.readLock().unlock();
+				this.arlock.unlock();
 			}
 			added = true;
 		} else if (foundReserved) {
 			this.resValue = cm.getcPos();
 			try {
-				this.arlock.readLock().lock();
+				this.arlock.lock();
 				this.kBuf.add(cm);
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				this.arlock.readLock().unlock();
+				this.arlock.unlock();
 			}
 			added = true;
 		} else {
@@ -525,13 +522,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
 			if (added) {
-				this.arlock.readLock().lock();
+				this.arlock.lock();
 				try {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
 					this.kSz++;
-					this.arlock.readLock().unlock();
+					this.arlock.unlock();
 
 				}
 			} else {
@@ -585,21 +582,25 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	}
 
-	private synchronized void flushBuffer(boolean lock) throws IOException {
+	private void flushBuffer(boolean lock) throws IOException {
 		List<ChunkData> oldkBuf = null;
+		
 		try {
-			if (lock)
-				this.arlock.writeLock().lock();
+			if (lock) {
+				this.arlock.lock();
+				if (kBuf.size() == 0) {
+					return;
+				}
+			}
 			oldkBuf = kBuf;
 			if (this.isClosed())
 				kBuf = null;
 			else {
-				kBuf = Collections.synchronizedList(new ArrayList<ChunkData>());
+				kBuf = new ArrayList<ChunkData>();
 			}
-		} catch (Exception e) {
 		} finally {
 			if (lock)
-				this.arlock.writeLock().unlock();
+				this.arlock.unlock();
 		}
 		if (oldkBuf.size() > 0) {
 			Iterator<ChunkData> iter = oldkBuf.iterator();
@@ -639,13 +640,13 @@ public class CSByteArrayLongMap implements AbstractMap {
 				return false;
 			} else {
 				cm.setmDelete(true);
-				this.arlock.readLock().lock();
+				this.arlock.lock();
 				try {
 					this.kBuf.add(cm);
 				} catch (Exception e) {
 				} finally {
 					kSz--;
-					this.arlock.readLock().unlock();
+					this.arlock.unlock();
 				}
 
 				return true;

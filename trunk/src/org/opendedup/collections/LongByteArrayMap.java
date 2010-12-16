@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -11,12 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.RAFPool;
+import org.opendedup.util.FCPool;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -24,7 +24,7 @@ public class LongByteArrayMap implements AbstractMap {
 	// RandomAccessFile bdbf = null;
 	private static final int arrayLength = 1 + Main.hashLength + 1 + 8;
 	String filePath = null;
-	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
+	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
 	public static byte[] FREE = new byte[Main.hashLength];
 	public int iterPos = 0;
@@ -37,7 +37,7 @@ public class LongByteArrayMap implements AbstractMap {
 	FileChannel iterbdb = null;
 	FileChannel pbdb = null;
 	long flen = 0;
-	RAFPool rafPool = null;
+	FCPool rafPool = null;
 
 	static {
 		FREE = new byte[arrayLength];
@@ -150,7 +150,7 @@ public class LongByteArrayMap implements AbstractMap {
 
 	private void openFile() throws IOException {
 		if (this.closed) {
-			this.hashlock.writeLock().lock();
+			this.hashlock.lock();
 			bdbf = Paths.get(filePath);
 			try {
 				dbFile = new File(filePath);
@@ -172,19 +172,17 @@ public class LongByteArrayMap implements AbstractMap {
 
 					flen = dbFile.length();
 				}
-				rafPool = new RAFPool(filePath);
+				rafPool = new FCPool(filePath);
 				pbdb = (FileChannel) bdbf.newByteChannel(
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				// initiall allocate 32k
 				this.closed = false;
-			} catch (IOException e) {
-				SDFSLogger.getLog().error("unable to open file " + filePath);
-				throw e;
 			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to open file " + filePath,e);
 				throw new IOException(e);
-			} finally {
-				this.hashlock.writeLock().unlock();
+			}  finally {
+				this.hashlock.unlock();
 			}
 		}
 	}
@@ -223,7 +221,7 @@ public class LongByteArrayMap implements AbstractMap {
 			fpos = this.getMapFilePosition(pos);
 
 			// _bdb.lock(fpos, data.length, false);
-			this.hashlock.writeLock().lock();
+			this.hashlock.lock();
 			if (fpos > flen)
 				flen = fpos;
 			pbdb.write(ByteBuffer.wrap(data), fpos);
@@ -237,14 +235,14 @@ public class LongByteArrayMap implements AbstractMap {
 			throw new IOException(e);
 		} finally {
 			try {
-				this.hashlock.writeLock().unlock();
+				this.hashlock.unlock();
 			} catch (Exception e) {
 			}
 		}
 	}
 
 	public void truncate(long length) throws IOException {
-		this.hashlock.writeLock().lock();
+		this.hashlock.lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
@@ -261,7 +259,7 @@ public class LongByteArrayMap implements AbstractMap {
 				_bdb.close();
 			} catch (Exception e) {
 			}
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 		this.flen = fpos;
 	}
@@ -275,7 +273,7 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-		this.hashlock.writeLock().lock();
+		this.hashlock.lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
@@ -291,7 +289,7 @@ public class LongByteArrayMap implements AbstractMap {
 				_bdb.close();
 			} catch (Exception e) {
 			}
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
@@ -304,7 +302,7 @@ public class LongByteArrayMap implements AbstractMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
-		this.hashlock.readLock().lock();
+		
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
@@ -314,8 +312,13 @@ public class LongByteArrayMap implements AbstractMap {
 				return null;
 			_bdb = rafPool.borrowObject();
 			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+			this.hashlock.lock();
+			try{
 			_bdb.position(fpos);
 			_bdb.read(buf);
+			}finally {
+				this.hashlock.unlock();
+			}
 			byte[] b = buf.array();
 			if (Arrays.equals(b, FREE))
 				return null;
@@ -333,7 +336,7 @@ public class LongByteArrayMap implements AbstractMap {
 					rafPool.returnObject(_bdb);
 			} catch (Exception e) {
 			}
-			this.hashlock.readLock().unlock();
+			
 		}
 	}
 
@@ -359,7 +362,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#vanish()
 	 */
 	public void vanish() throws IOException {
-		this.hashlock.writeLock().lock();
+		this.hashlock.lock();
 		try {
 			if (!this.isClosed())
 				this.close();
@@ -368,12 +371,12 @@ public class LongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
 	public void copy(String destFilePath) throws IOException {
-		this.hashlock.readLock().lock();
+		this.hashlock.lock();
 		FileChannel srcC = null;
 		FileChannel dstC = null;
 		try {
@@ -412,7 +415,7 @@ public class LongByteArrayMap implements AbstractMap {
 				dstC.close();
 			} catch (Exception e) {
 			}
-			this.hashlock.readLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
@@ -422,8 +425,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#close()
 	 */
 	public void close() {
-		SDFSLogger.getLog().info("Closing file");
-		this.hashlock.writeLock().lock();
+		this.hashlock.lock();
 		this.rafPool.close();
 		dbFile = null;
 		if (!this.isClosed()) {
@@ -433,7 +435,7 @@ public class LongByteArrayMap implements AbstractMap {
 			pbdb.close();
 		} catch (Exception e) {
 		} finally {
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 }

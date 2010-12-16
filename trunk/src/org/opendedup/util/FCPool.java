@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.opendedup.util.SDFSLogger;
 
-public class RAFPool {
+public class FCPool {
 
 	private int poolSize = 1;
 	
@@ -17,7 +17,7 @@ public class RAFPool {
 	private String fileName = null;
 	private boolean closed=false;
 	
-	public RAFPool(String fileName) {
+	public FCPool(String fileName) {
 		this.fileName = fileName;
 		this.populatePool();
 	}
