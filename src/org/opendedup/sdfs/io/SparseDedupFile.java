@@ -1,12 +1,11 @@
 package org.opendedup.sdfs.io;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.io.File;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -52,8 +51,7 @@ public class SparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient TLongObjectHashMap<WritableCacheBuffer> flushingBuffers = new TLongObjectHashMap<WritableCacheBuffer>(Main.writeThreads);
-
+	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
 	@SuppressWarnings("serial")
 	private transient LRUMap writeBuffers = new LRUMap(
 			maxWriteBuffers + 1,false) {

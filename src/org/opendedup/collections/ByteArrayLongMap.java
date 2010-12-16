@@ -109,9 +109,9 @@ public class ByteArrayLongMap {
 	public int setUp() throws IOException {
 		int kSz = 0;
 		if (!Main.compressedIndex) {
-			keys = ByteBuffer.allocate(size * FREE.length);
-			values = ByteBuffer.allocate(size * 8);
-			claims = ByteBuffer.allocate(size);
+			keys = ByteBuffer.allocateDirect(size * FREE.length);
+			values = ByteBuffer.allocateDirect(size * 8);
+			claims = ByteBuffer.allocateDirect(size);
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];

@@ -4,9 +4,10 @@ import java.io.File;
 
 
 
+
+
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
@@ -15,9 +16,6 @@ import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 /**
  * 
@@ -50,18 +48,6 @@ public class HashStore {
 	//private ReentrantLock cacheLock = new ReentrantLock();
 	int mapSize = (Main.chunkStorePageCache * 1024*1024)/Main.chunkStorePageSize;
 	
-	private transient HashMap<String, HashChunk> readingBuffers = new HashMap<String, HashChunk>(mapSize);
-	/*
-	private transient ConcurrentLinkedHashMap<String, HashChunk> cacheBuffers = new Builder<String, HashChunk>()
-			.concurrencyLevel(Main.writeThreads).initialCapacity(mapSize)
-			.maximumWeightedCapacity(mapSize).listener(
-					new EvictionListener<String, HashChunk>() {
-						public void onEviction(String key, HashChunk buffer) {
-						}
-					}
-
-			).build();
-*/
 	// The chunk store used to store the actual deduped data;
 	// private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of

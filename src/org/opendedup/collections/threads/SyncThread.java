@@ -15,7 +15,7 @@ public class SyncThread implements Runnable {
 	public void run() {
 		while (!map.isClosed()) {
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				break;
 			}

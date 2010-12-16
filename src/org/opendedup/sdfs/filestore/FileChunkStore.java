@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.RAFPool;
+import org.opendedup.util.FCPool;
 import org.opendedup.util.SDFSLogger;
 
 /**
@@ -30,7 +30,6 @@ import org.opendedup.util.SDFSLogger;
 public class FileChunkStore implements AbstractChunkStore {
 	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
-	private String name;
 	private boolean closed = false;
 	private FileChannel chunkDataReader = null;
 	private RandomAccessFile chunkDataWriter = null;
@@ -40,7 +39,9 @@ public class FileChunkStore implements AbstractChunkStore {
 	Path p;
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
-	private RAFPool rafPool = null;
+	private FCPool rafPool = null;
+	private String name;
+	
 	/*
 	 * private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new
 	 * Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
@@ -53,16 +54,15 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @param name
 	 *            the name of the chunk store.
 	 */
-	public FileChunkStore(String name) {
+	public FileChunkStore() {
 		SDFSLogger.getLog().info("Opening Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
 			if (!chunk_location.exists()) {
 				chunk_location.mkdirs();
 			}
-			this.name = name;
-			f = new File(chunk_location + File.separator + name + ".chk");
-			
+			f = new File(chunk_location + File.separator + "chunks.chk");
+			this.name = "chunks";
 			p = f.toPath();
 			this.currentLength = 0;
 			chunkDataWriter = new RandomAccessFile(f, "rw");
@@ -70,8 +70,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			chunkDataReader = in.getChannel();
 			this.closed = false;
 			stores.add(this);
-			rafPool = new RAFPool(f.getPath());
-			SDFSLogger.getLog().info("ChunkStore " + this.name + " created");
+			rafPool = new FCPool(f.getPath());
+			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

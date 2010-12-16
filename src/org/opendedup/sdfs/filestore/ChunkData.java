@@ -37,15 +37,30 @@ public class ChunkData {
 	static {
 		if (Main.AWSChunkStore) {
 			try {
-				fileStore = new S3ChunkStore(Main.awsBucket);
-			} catch (IOException e1) {
-				SDFSLogger.getLog().fatal("Inable to initiate S3 Chunk Store",
-						e1);
-				SDFSLogger.getLog().fatal("Exiting");
+				fileStore =(AbstractChunkStore)Class.forName("org.opendedup.sdfs.filestore.S3ChunkStore").newInstance();
+			} catch (InstantiationException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (IllegalAccessException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (ClassNotFoundException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			}
 		} else {
-			fileStore = new FileChunkStore("chunks");
+			try {
+				fileStore =(AbstractChunkStore)Class.forName("org.opendedup.sdfs.filestore.FileChunkStore").newInstance();
+			} catch (InstantiationException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (IllegalAccessException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (ClassNotFoundException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			}
 		}
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
