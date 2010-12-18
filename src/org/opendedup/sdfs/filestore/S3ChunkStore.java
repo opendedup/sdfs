@@ -18,6 +18,7 @@ import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  * 
@@ -63,7 +64,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} catch (S3ServiceException e) {
 			throw new IOException(e);
 		}
-		
 	}
 	
 	private void openPosFile() throws IOException {
@@ -247,6 +247,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 			throws IOException {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void init(Element config) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.util.OSValidator;
+import org.w3c.dom.Element;
 
 /**
  * 
@@ -26,6 +27,17 @@ public class Main {
 	 * located. This is used for the chunk stores.
 	 */
 	public static String chunkStore = "";
+	
+	/**
+	 * Future implementation for pluggable chunkstores 
+	 */
+	public static Element chunkStoreConfig = null;
+	
+	/**
+	 * Future implementation of pluggable cs
+	 */
+	public static String chunkStoreClass = "org.opendedup.sdfs.filestore.NullChunkStore";
+	
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */

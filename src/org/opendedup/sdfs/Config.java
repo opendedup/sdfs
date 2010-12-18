@@ -63,6 +63,13 @@ public class Config {
 			Main.hashDBStore = locations.getAttribute("hash-db-store");
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
 					.item(0);
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
+			if(cbe.hasAttribute("chunkstore-class")) {
+				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
+			}
+			if(cbe.getElementsByTagName("extended-config").getLength() > 0) {
+				Main.chunkStoreConfig = (Element)cbe.getElementsByTagName("extended-config").item(0);
+			}
 			Main.preAllocateChunkStore = Boolean.parseBoolean(cbe
 					.getAttribute("pre-allocate"));
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
@@ -87,7 +94,7 @@ public class Config {
 			}
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
-				
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
 				Main.AWSChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
@@ -196,6 +203,13 @@ public class Config {
 			Main.chunkStoreAllocationSize = Long.parseLong(
 					localChunkStore.getAttribute("allocation-size"));
 			Main.gcChunksSchedule = localChunkStore.getAttribute("chunk-gc-schedule");
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
+			if(localChunkStore.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = localChunkStore.getAttribute("chunkstore-class");
+			if(localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
+				Main.chunkStoreConfig = (Element)localChunkStore.getElementsByTagName("extended-config").item(0);
+			}
+			
 			Main.evictionAge = Integer.parseInt(localChunkStore.getAttribute("eviction-age"));
 			if(localChunkStore.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean("encrypt");
@@ -216,6 +230,7 @@ public class Config {
 					+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
 				Main.AWSChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));

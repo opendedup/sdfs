@@ -16,6 +16,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.FCPool;
 import org.opendedup.util.SDFSLogger;
+import org.w3c.dom.Element;
 
 /**
  * 
@@ -42,11 +43,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	private FCPool rafPool = null;
 	private String name;
 	
-	/*
-	 * private static ConcurrentLinkedHashMap<String, ByteBuffer> cache = new
-	 * Builder<String,ByteBuffer>().maximumWeightedCapacity(MAX_ENTRIES)
-	 * .concurrencyLevel(Main.writeThreads).build();
-	 */
 	private byte[] FREE = new byte[pageSize];
 
 	/**
@@ -316,6 +312,12 @@ public class FileChunkStore implements AbstractChunkStore {
 			raf = null;
 			buf = null;
 		}
+	}
+
+	@Override
+	public void init(Element config) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
