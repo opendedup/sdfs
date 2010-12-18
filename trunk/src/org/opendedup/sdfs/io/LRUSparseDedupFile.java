@@ -1,12 +1,12 @@
 package org.opendedup.sdfs.io;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.io.File;
+
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +43,7 @@ public class LRUSparseDedupFile implements DedupFile {
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, Main.writeThreads);
+			Main.writeThreads + 1, 2048);
 	private ReentrantLock flushingLock = new ReentrantLock();
 	private ReentrantLock channelLock = new ReentrantLock();
 	private ReentrantLock initLock = new ReentrantLock();
@@ -52,8 +52,7 @@ public class LRUSparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient TLongObjectHashMap<WritableCacheBuffer> flushingBuffers = new TLongObjectHashMap<WritableCacheBuffer>(Main.writeThreads);
-
+	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>(Main.maxWriteBuffers);
 	@SuppressWarnings("serial")
 	private transient LRUMap writeBuffers = new LRUMap(
 			maxWriteBuffers + 1,false) {
@@ -74,7 +73,6 @@ public class LRUSparseDedupFile implements DedupFile {
 					} finally {
 						flushingLock.unlock();
 					}
-
 					pool.execute(writeBuffer);
 				}
 				remove(eldest.getKey());

@@ -1,0 +1,16 @@
+# DEFAULT CACHE REGION
+
+# sets the default aux value for any non configured caches
+jcs.default=
+jcs.default.cacheattributes=
+    org.apache.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=1000
+jcs.default.cacheattributes.MemoryCacheName=
+    org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.default.elementattributes.IsEternal=false
+jcs.default.elementattributes.MaxLifeSeconds=3600
+jcs.default.elementattributes.IdleTime=1800
+jcs.default.elementattributes.IsSpool=false
+jcs.default.elementattributes.IsRemote=false
+jcs.default.elementattributes.IsLateral=false
+

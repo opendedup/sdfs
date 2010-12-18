@@ -1,16 +1,19 @@
 package org.opendedup.util;
 
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.collections.QuickList;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class PoolThread extends Thread {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
+	private QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(30);
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -19,12 +22,17 @@ public class PoolThread extends Thread {
 	public void run() {
 		while (!isStopped()) {
 			try {
-				WritableCacheBuffer runnable = taskQueue.take();
-				try {
-					runnable.close();
-				} catch (Exception e) {
-					e.printStackTrace();
+				tasks.clear();
+				int ts = taskQueue.drainTo(tasks,10);
+				for (int i = 0; i < ts; i++) {
+					WritableCacheBuffer runnable = tasks.get(i);
+					try {
+						runnable.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
+				Thread.sleep(1);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to execute thread", e);
 				// SDFSLogger.getLog() or otherwise report exception,

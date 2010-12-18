@@ -17,13 +17,13 @@ public class LargFile {
 		FileOutputStream str = new FileOutputStream(f, true);
 		Random rnd = new Random();
 		byte[] b = new byte[bs];
-		
+		rnd.nextBytes(b);
 		System.out.println("1:" + len);
 		long time = System.currentTimeMillis();
 		int writes = 0;
 		int interval = (32768*10000)/bs;
 		while (sz < len) {
-			rnd.nextBytes(b);
+			
 			ByteBuffer buf = ByteBuffer.wrap(b);
 			str.getChannel().write(buf);
 			sz = sz + b.length;

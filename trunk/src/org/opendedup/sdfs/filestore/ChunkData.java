@@ -35,9 +35,9 @@ public class ChunkData {
 	private static byte[] blankHash = null;;
 
 	static {
-		if (Main.AWSChunkStore) {
 			try {
-				fileStore =(AbstractChunkStore)Class.forName("org.opendedup.sdfs.filestore.S3ChunkStore").newInstance();
+				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
+				fileStore.init(Main.chunkStoreConfig);
 			} catch (InstantiationException e) {
 				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
@@ -48,20 +48,6 @@ public class ChunkData {
 				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			}
-		} else {
-			try {
-				fileStore =(AbstractChunkStore)Class.forName("org.opendedup.sdfs.filestore.FileChunkStore").newInstance();
-			} catch (InstantiationException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (IllegalAccessException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (ClassNotFoundException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			}
-		}
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
 			blankHash = HashFunctions

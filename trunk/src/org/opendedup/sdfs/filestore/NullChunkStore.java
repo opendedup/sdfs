@@ -2,6 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+import org.w3c.dom.Element;
+
 /**
  * 
  * @author Sam Silverberg
@@ -92,6 +94,12 @@ public class NullChunkStore implements AbstractChunkStore {
 			throws IOException {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void init(Element config) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

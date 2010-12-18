@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class SparseDedupFile implements DedupFile {
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, Main.writeThreads);
+			Main.writeThreads + 1, 2048);
 	private ReentrantLock flushingLock = new ReentrantLock();
 	private ReentrantLock channelLock = new ReentrantLock();
 	private ReentrantLock initLock = new ReentrantLock();
@@ -51,7 +52,7 @@ public class SparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>();
+	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>(Main.maxWriteBuffers);
 	@SuppressWarnings("serial")
 	private transient LRUMap writeBuffers = new LRUMap(
 			maxWriteBuffers + 1,false) {
@@ -72,7 +73,6 @@ public class SparseDedupFile implements DedupFile {
 					} finally {
 						flushingLock.unlock();
 					}
-
 					pool.execute(writeBuffer);
 				}
 				remove(eldest.getKey());

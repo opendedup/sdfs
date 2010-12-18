@@ -2,6 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+import org.w3c.dom.Element;
+
 /**
  * 
  * @author Sam Silverberg The AbstractChunkStore is used as in interface to
@@ -26,6 +28,10 @@ public interface AbstractChunkStore {
 	 */
 	public abstract void closeStore();
 
+	/**
+	 * Closes the chunk store, if this is required
+	 */
+	public abstract void init(Element config);
 	/**
 	 * Each chunk store must have a unique name.
 	 * 
