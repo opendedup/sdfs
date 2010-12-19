@@ -7,7 +7,9 @@ import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -47,10 +49,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author <a href="mailto:ben.manes@reardencommerce.com">Ben Manes</a>
  * @see http://code.google.com/p/concurrentlinkedhashmap/wiki/ProductionVersion
  */
-public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<
+public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements Map<
     K, V>, Serializable {
   private static final long serialVersionUID = 8350170357874293408L;
-  final ConcurrentMap<K, Node<K, V>> data;
+  final HashMap<K, Node<K, V>> data;
   final EvictionListener<K, V> listener;
   final AtomicInteger capacity;
   final EvictionPolicy policy;
@@ -58,10 +60,10 @@ public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements 
   final Node<K, V> sentinel;
   final Lock lock;
 
-  @SuppressWarnings("unchecked")
+  
   public LongProductionMap(EvictionPolicy policy,int initialCapacity, int maximumCapacity,int concurrencyLevel,EvictionListener<K, V> listener) {
-    this.data = new ConcurrentHashMap<K, Node<K, V>>(
-        initialCapacity,  0.75f,concurrencyLevel);
+    this.data = new HashMap<K, Node<K, V>>(
+        initialCapacity,  0.75f);
     this.capacity = new AtomicInteger(maximumCapacity);
     this.listener = listener;
     this.length = new AtomicInteger();
@@ -151,7 +153,7 @@ public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements 
         return false;
       } else if (policy.onEvict(this, node)) {
         // Attempt to remove the node if it's still available
-        if (data.remove(node.getKey(), new Identity(node))) {
+        if (data.remove(node.getKey()) != null) {
           length.decrementAndGet();
           node.remove();
           listener.onEviction(node.getKey(), node.getValue());
@@ -205,8 +207,9 @@ public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements 
    * @return The previous value in the data store.
    */
   private Node<K, V> putIfAbsent(Node<K, V> node) {
-    Node<K, V> old = data.putIfAbsent(node.getKey(), node);
+    Node<K, V> old = data.get(node.getKey());
     if (old == null) {
+    	data.put(node.getKey(), node);
       length.incrementAndGet();
       node.appendToTail();
       evict();
@@ -235,7 +238,7 @@ public final class LongProductionMap<K, V> extends AbstractMap<K, V> implements 
    */
   public boolean remove(Object key, Object value) {
     Node<K, V> node = data.get(key);
-    if ((node != null) && node.value.equals(value) && data.remove(key, new Identity(node))) {
+    if ((node != null) && node.value.equals(value) && data.remove(key) != null) {
       length.decrementAndGet();
       node.remove();
       return true;

@@ -1,8 +1,7 @@
 package org.opendedup.sdfs.io;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.io.File;
+
 
 
 import java.io.IOException;
@@ -15,6 +14,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.ProductionMap;
+import org.opendedup.collections.ProductionMap.EvictionPolicy;
+import org.opendedup.collections.ProductionMap.EvictionListener;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
@@ -25,10 +27,9 @@ import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
-import org.apache.commons.collections.map.AbstractLinkedMap;
-import org.apache.commons.collections.map.LRUMap;
 
-public class SparseDedupFile implements DedupFile {
+
+public class ProdSparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
@@ -54,34 +55,33 @@ public class SparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient HashMap<Long,WritableCacheBuffer> flushingBuffers = new HashMap<Long,WritableCacheBuffer>(Main.maxWriteBuffers);
-	@SuppressWarnings("serial")
-	private transient LRUMap writeBuffers = new LRUMap(
-			maxWriteBuffers + 1,false) {
-		protected boolean removeLRU	(
-				AbstractLinkedMap.LinkEntry eldest) {
-			if (size() >= maxWriteBuffers) {
-				WritableCacheBuffer writeBuffer = (WritableCacheBuffer)eldest.getValue();
-				
-				if (writeBuffer != null) {
-					flushingLock.lock();
-					try {
-						flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
-					} catch (Exception e) {
+	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>(Main.maxWriteBuffers);
+	EvictionListener<Long, WritableCacheBuffer> listener = new EvictionListener<Long, WritableCacheBuffer>() {
+		// This method is called just after a new entry has been
+		// added
+		public void onEviction(Long key, WritableCacheBuffer writeBuffer) {
 
-						// TODO Auto-generated catch block
-						SDFSLogger.getLog().error(
-								"issue adding for flushing buffer", e);
-					} finally {
-						flushingLock.unlock();
-					}
-					pool.execute(writeBuffer);
+			if (writeBuffer != null) {
+				flushingLock.lock();
+				try {
+					flushingBuffers.put(key, writeBuffer);
+				} catch (Exception e) {
+
+					// TODO Auto-generated catch block
+					SDFSLogger.getLog().error(
+							"issue adding for flushing buffer", e);
+				} finally {
+					flushingLock.unlock();
 				}
-				remove(eldest.getKey());
+
+				pool.execute(writeBuffer);
 			}
-			return false;
+
 		}
 	};
+	private transient ProductionMap<Long, WritableCacheBuffer> writeBuffers = new ProductionMap<Long, WritableCacheBuffer>(EvictionPolicy.SECOND_CHANCE,
+			maxWriteBuffers + 1,maxWriteBuffers + 1,Main.writeThreads,listener
+			);
 
 	private boolean closed = true;
 	static {
@@ -91,7 +91,7 @@ public class SparseDedupFile implements DedupFile {
 
 	}
 
-	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
+	public ProdSparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		//SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" + this.maxWriteBuffers);
 		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
@@ -113,7 +113,7 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync();
 
-			SparseDedupFile _df = new SparseDedupFile(snapmf);
+			ProdSparseDedupFile _df = new ProdSparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.forceClose();
@@ -207,15 +207,6 @@ public class SparseDedupFile implements DedupFile {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 			this.writeCache(buf, true);
 			z++;
-		}
-		this.flushingLock.lock();
-		try {
-			SDFSLogger.getLog().debug(
-					"Flushing Cache of for " + mf.getPath() + " of size "
-							+ this.writeBuffers.size());
-			buffers = this.flushingBuffers.values().toArray();
-		} finally {
-			this.flushingLock.unlock();
 		}
 		SDFSLogger.getLog().debug(
 				"flushed " + z + " buffers from " + mf.getPath());

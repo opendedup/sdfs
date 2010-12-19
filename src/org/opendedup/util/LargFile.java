@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class LargFile {
-	public static void writeFile(String path, int size,int bs) throws IOException {
+	public static void writeFile(String path, int size,int bs,boolean unique) throws IOException {
 		long len = 1024L * 1024L * 1024L * size;
 		long sz = 0;
 		File log = new File(path+"log");
@@ -17,7 +17,8 @@ public class LargFile {
 		FileOutputStream str = new FileOutputStream(f, true);
 		Random rnd = new Random();
 		byte[] b = new byte[bs];
-		rnd.nextBytes(b);
+		if(!unique)
+			rnd.nextBytes(b);
 		System.out.println("1:" + len);
 		long time = System.currentTimeMillis();
 		int writes = 0;
@@ -28,7 +29,8 @@ public class LargFile {
 			str.getChannel().write(buf);
 			sz = sz + b.length;
 			if (writes > interval) {
-				
+				if(unique)
+					rnd.nextBytes(b);
 				float mb = (float) (writes * bs) / (1024 * 1024);
 				float duration = (float) (System.currentTimeMillis() - time) / 1000;
 				float mbps = mb / duration;
@@ -47,7 +49,7 @@ public class LargFile {
 	
 
 	public static void main(String[] args) throws IOException {
-			writeFile(args[0], Integer.parseInt(args[1]),1048576);
+			writeFile(args[0], Integer.parseInt(args[1]),1048576,Boolean.parseBoolean(args[2]));
 	}
 
 }
