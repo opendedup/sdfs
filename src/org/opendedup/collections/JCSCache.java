@@ -1,5 +1,9 @@
 package org.opendedup.collections;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.CompositeCacheAttributes;
@@ -7,6 +11,11 @@ import org.apache.jcs.engine.ElementAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.apache.jcs.engine.control.event.behavior.IElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
+import org.bouncycastle.util.Arrays;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
+import org.opendedup.util.SDFSLogger;
+
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 public class JCSCache implements IElementEventHandler{
 	private int maxSize = 1024;
@@ -55,7 +64,14 @@ public class JCSCache implements IElementEventHandler{
 	public void doTest(int tries)
     throws Exception
 {
+		/** jcs / hashtable */
+	    float ratioPut = 0;
 
+	    /** jcs / hashtable */
+	    float ratioGet = 0;
+
+	    /** ration goal */
+	    float target = 3.50f;
 
     int loops = 20;
     // run settings
@@ -66,40 +82,52 @@ public class JCSCache implements IElementEventHandler{
 
     long putTotalJCS = 0;
     long getTotalJCS = 0;
-
-    String jcsDisplayName = "JCS";
+    long putTotalHashtable = 0;
+    long getTotalHashtable = 0;
 
     try
     {
+
+        //JCS.setConfigFilename( "/cache.ccf" );
+        JCS cache = JCS.getInstance( "testCache1" );
+
         for ( int j = 0; j < loops; j++ )
         {
 
-            jcsDisplayName = "JCS      ";
+            String name = "JCS      ";
+            
+
+            // /////////////////////////////////////////////////////////////
+            name = "Hashtable";
+            LinkedHashMap<String,String> cache2 = new LinkedHashMap<String,String>(tries/2, 1, true){
+        		protected boolean removeEldestEntry(
+        				Map.Entry<String,String> eldest) {
+        			System.out.println("called");
+        			return false;
+        		}
+        	};
             start = System.currentTimeMillis();
+            
             for ( int i = 0; i < tries; i++ )
             {
-                jcs.put( "key:" + i, "data" + i );
+                cache2.put( "key:" + i, "data:"+i);
             }
             end = System.currentTimeMillis();
             time = end - start;
-            putTotalJCS += time;
+            putTotalHashtable += time;
             tPer = Float.intBitsToFloat( (int) time ) / Float.intBitsToFloat( tries );
-            System.out
-                .println( jcsDisplayName + " put time for " + tries + " = " + time + "; millis per = " + tPer );
+            System.out.println( name + " put time for " + tries + " = " + time + "; millis per = " + tPer );
 
             start = System.currentTimeMillis();
             for ( int i = 0; i < tries; i++ )
             {
-                jcs.getCacheElement( "key:" + i );
+                cache2.get( "key:" + i );
             }
             end = System.currentTimeMillis();
             time = end - start;
-            getTotalJCS += time;
+            getTotalHashtable += time;
             tPer = Float.intBitsToFloat( (int) time ) / Float.intBitsToFloat( tries );
-            System.out
-                .println( jcsDisplayName + " get time for " + tries + " = " + time + "; millis per = " + tPer );
-
-           
+            System.out.println( name + " get time for " + tries + " = " + time + "; millis per = " + tPer );
 
             System.out.println( "\n" );
         }
@@ -113,22 +141,28 @@ public class JCSCache implements IElementEventHandler{
 
     long putAvJCS = putTotalJCS / loops;
     long getAvJCS = getTotalJCS / loops;
+    long putAvHashtable = putTotalHashtable / loops;
+    long getAvHashtable = getTotalHashtable / loops;
 
     System.out.println( "Finished " + loops + " loops of " + tries + " gets and puts" );
 
     System.out.println( "\n" );
-    System.out.println( "Put average for " + jcsDisplayName + "  = " + putAvJCS );
-    
+    System.out.println( "Put average for JCS       = " + putAvJCS );
+    System.out.println( "Put average for Hashtable = " + putAvHashtable );
+    ratioPut = Float.intBitsToFloat( (int) putAvJCS ) / Float.intBitsToFloat( (int) putAvHashtable );
+    System.out.println( "JCS puts took " + ratioPut + " times the Hashtable, the goal is <" + target + "x" );
 
     System.out.println( "\n" );
-    System.out.println( "Get average for  " + jcsDisplayName + "  = " + getAvJCS );
-    
+    System.out.println( "Get average for JCS       = " + getAvJCS );
+    System.out.println( "Get average for Hashtable = " + getAvHashtable );
+    ratioGet = Float.intBitsToFloat( (int) getAvJCS ) / Float.intBitsToFloat( (int) getAvHashtable );
+    System.out.println( "JCS gets took " + ratioGet + " times the Hashtable, the goal is <" + target + "x" );
 
 }
 	
 	public static void main(String [] args) throws Exception {
 		JCSCache cache = new JCSCache(1000000, "test");
-		cache.doTest(500);
+		cache.doTest(50000);
 	}
 
 }

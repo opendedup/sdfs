@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.io;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 import java.io.File;
 
 
@@ -52,7 +54,7 @@ public class LRUSparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient HashMap<Long, WritableCacheBuffer> flushingBuffers = new HashMap<Long, WritableCacheBuffer>(Main.maxWriteBuffers);
+	private transient HashMap<Long,WritableCacheBuffer> flushingBuffers = new HashMap<Long,WritableCacheBuffer>(Main.maxWriteBuffers);
 	@SuppressWarnings("serial")
 	private transient LRUMap writeBuffers = new LRUMap(
 			maxWriteBuffers + 1,false) {
@@ -205,6 +207,15 @@ public class LRUSparseDedupFile implements DedupFile {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 			this.writeCache(buf, true);
 			z++;
+		}
+		this.flushingLock.lock();
+		try {
+			SDFSLogger.getLog().debug(
+					"Flushing Cache of for " + mf.getPath() + " of size "
+							+ this.writeBuffers.size());
+			buffers = this.flushingBuffers.values().toArray();
+		} finally {
+			this.flushingLock.unlock();
 		}
 		SDFSLogger.getLog().debug(
 				"flushed " + z + " buffers from " + mf.getPath());

@@ -14,6 +14,7 @@ public class LargFile {
 		File log = new File(path+"log");
 		File f = new File(path);
 		java.io.FileWriter writer = new FileWriter(log);
+		System.out.println("unique data=" + unique);
 		FileOutputStream str = new FileOutputStream(f, true);
 		Random rnd = new Random();
 		byte[] b = new byte[bs];
@@ -24,13 +25,14 @@ public class LargFile {
 		int writes = 0;
 		int interval = (32768*10000)/bs;
 		while (sz < len) {
-			
+			if(unique) {
+				rnd.nextBytes(b);
+			}
 			ByteBuffer buf = ByteBuffer.wrap(b);
 			str.getChannel().write(buf);
 			sz = sz + b.length;
 			if (writes > interval) {
-				if(unique)
-					rnd.nextBytes(b);
+				
 				float mb = (float) (writes * bs) / (1024 * 1024);
 				float duration = (float) (System.currentTimeMillis() - time) / 1000;
 				float mbps = mb / duration;

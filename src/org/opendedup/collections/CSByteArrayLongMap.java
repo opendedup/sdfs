@@ -264,8 +264,16 @@ public class CSByteArrayLongMap implements AbstractMap {
 								* Main.chunkStorePageSize);
 						freeSl++;
 					} else {
-						ChunkData cm = new ChunkData(raw);
+						ChunkData cm = null;
 						boolean corrupt = false;
+						try {
+							cm = new ChunkData(raw);
+						}catch(Exception e) {
+							SDFSLogger.getLog().info("HashTable corrupt!");
+							corrupt = true;
+						}
+						
+						
 						if (!corrupt) {
 							boolean foundFree = Arrays.equals(cm.getHash(),
 									FREE);
