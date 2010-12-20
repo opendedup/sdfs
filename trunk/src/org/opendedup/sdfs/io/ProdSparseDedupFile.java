@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -14,9 +15,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.collections.ProductionMap;
-import org.opendedup.collections.ProductionMap.EvictionPolicy;
-import org.opendedup.collections.ProductionMap.EvictionListener;
+import org.opendedup.collections.LongProductionMap;
+import org.opendedup.collections.LongProductionMap.EvictionPolicy;
+import org.opendedup.collections.LongProductionMap.EvictionListener;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
@@ -79,7 +80,7 @@ public class ProdSparseDedupFile implements DedupFile {
 
 		}
 	};
-	private transient ProductionMap<Long, WritableCacheBuffer> writeBuffers = new ProductionMap<Long, WritableCacheBuffer>(EvictionPolicy.SECOND_CHANCE,
+	private transient LongProductionMap<Long, WritableCacheBuffer> writeBuffers = new LongProductionMap<Long, WritableCacheBuffer>(EvictionPolicy.SECOND_CHANCE,
 			maxWriteBuffers + 1,maxWriteBuffers + 1,Main.writeThreads,listener
 			);
 
