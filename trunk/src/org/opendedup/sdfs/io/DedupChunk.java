@@ -19,6 +19,10 @@ public class DedupChunk implements java.io.Serializable {
 	private boolean writable = false;
 	private boolean doop = false;
 
+	
+	public DedupChunk(long position) {
+		this.position = position;
+	}
 	/**
 	 * 
 	 * @param hash

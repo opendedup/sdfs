@@ -519,10 +519,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		 * " and length of " + buf.capacity());
 		 */
 		DedupFileChannel ch = (DedupFileChannel) fh;
-		byte[] b = new byte[buf.capacity()];
-		buf.get(b);
 		try {
-			ch.writeFile(b, b.length, 0, offset);
+			ch.writeFile(buf, buf.capacity(), 0, offset);
 		} catch (IOException e) {
 			log.error("unable to write to file" + path, e);
 			throw new FuseException().initErrno(FuseException.EACCES);

@@ -2,11 +2,13 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
+
 import org.opendedup.util.SDFSLogger;
 
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
@@ -23,7 +25,7 @@ public class HashChunkService {
 	private static int unComittedChunks;
 	private static int MAX_UNCOMITTEDCHUNKS = 100;
 	private static HashStore hs = null;
-	
+	private static AbstractChunkStore fileStore = null;
 	private static ChunkStoreGCScheduler csGC = null;
 
 	/**
@@ -34,6 +36,19 @@ public class HashChunkService {
 	}
 
 	static {
+			try {
+				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
+				fileStore.init(Main.chunkStoreConfig);
+			} catch (InstantiationException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (IllegalAccessException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			} catch (ClassNotFoundException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				System.exit(-1);
+			}
 		try {
 			hs = new HashStore();
 			csGC = new ChunkStoreGCScheduler();
@@ -44,6 +59,10 @@ public class HashChunkService {
 	}
 
 	private static long dupsFound;
+	
+	public static AbstractChunkStore getChuckStore() {
+		return fileStore;
+	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean compressed) throws IOException, HashtableFullException {
@@ -137,6 +156,7 @@ public class HashChunkService {
 	}
 
 	public static void close() {
+		fileStore.close();
 		csGC.stopSchedules();
 		hs.close();
 

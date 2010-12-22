@@ -28,7 +28,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void closeStore() {
+	public void close() {
 		// TODO Auto-generated method stub
 
 	}
@@ -98,6 +98,12 @@ public class NullChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void init(Element config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setSize(long size) {
 		// TODO Auto-generated method stub
 		
 	}

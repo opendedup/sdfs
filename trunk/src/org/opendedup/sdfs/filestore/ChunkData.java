@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -31,23 +32,10 @@ public class ChunkData {
 	private int cLen = 0;
 	private long cPos = 0;
 	private byte[] chunk = null;
-	private static AbstractChunkStore fileStore = null;
+	
 	private static byte[] blankHash = null;;
 
 	static {
-			try {
-				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
-				fileStore.init(Main.chunkStoreConfig);
-			} catch (InstantiationException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (IllegalAccessException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (ClassNotFoundException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			}
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
 			blankHash = HashFunctions
@@ -116,12 +104,12 @@ public class ChunkData {
 
 	public void persistData(boolean clear) throws IOException {
 		if (cPos == -1) {
-			this.cPos = fileStore.reserveWritePosition(cLen);
+			this.cPos = HashChunkService.getChuckStore().reserveWritePosition(cLen);
 		}
 		if (this.mDelete) {
 			chunk = new byte[cLen];
 		}
-		fileStore.writeChunk(hash, chunk, cLen, cPos);
+		HashChunkService.getChuckStore().writeChunk(hash, chunk, cLen, cPos);
 		if (clear)
 			this.chunk = null;
 	}
@@ -134,7 +122,7 @@ public class ChunkData {
 		this.mDelete = mDelete;
 		if (this.mDelete && Main.AWSChunkStore) {
 			try {
-				fileStore.deleteChunk(this.hash, 0, 0);
+				HashChunkService.getChuckStore().deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(
 						"Unable to remove hash ["
@@ -177,7 +165,7 @@ public class ChunkData {
 
 	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
 		try {
-			return fileStore.getChunk(hash, pos, Main.chunkStorePageSize);
+			return HashChunkService.getChuckStore().getChunk(hash, pos, Main.chunkStorePageSize);
 		} catch (IOException e) {
 			if (Arrays.areEqual(hash, blankHash))
 				return new byte[Main.chunkStorePageSize];
@@ -189,7 +177,7 @@ public class ChunkData {
 
 	public byte[] getData() throws IOException {
 		if (this.chunk == null) {
-			return fileStore.getChunk(hash, this.cPos, this.cLen);
+			return HashChunkService.getChuckStore().getChunk(hash, this.cPos, this.cLen);
 		} else
 			return chunk;
 	}

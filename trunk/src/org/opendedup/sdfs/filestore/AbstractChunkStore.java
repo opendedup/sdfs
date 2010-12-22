@@ -26,7 +26,7 @@ public interface AbstractChunkStore {
 	/**
 	 * Closes the chunk store, if this is required
 	 */
-	public abstract void closeStore();
+	public abstract void close();
 
 	/**
 	 * Closes the chunk store, if this is required
@@ -52,6 +52,8 @@ public interface AbstractChunkStore {
 	 * @return Returns the size of the chunk store on disk or service
 	 */
 	public abstract long size();
+	
+	public abstract void setSize(long size);
 
 	/**
 	 * 
@@ -128,5 +130,6 @@ public interface AbstractChunkStore {
 			AbstractChunkStoreListener listener);
 	
 	public abstract boolean moveChunk(byte [] hash, long origLoc, long newLoc) throws IOException;
+	
 
 }
