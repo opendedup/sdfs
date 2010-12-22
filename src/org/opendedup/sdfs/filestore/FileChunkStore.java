@@ -5,16 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.DirectBufPool;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.FCPool;
+import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
@@ -29,7 +31,6 @@ import org.w3c.dom.Element;
  *         position (8 bytes)]
  */
 public class FileChunkStore implements AbstractChunkStore {
-	private static ArrayList<FileChunkStore> stores = new ArrayList<FileChunkStore>();
 	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
 	private FileChannel chunkDataReader = null;
@@ -41,8 +42,9 @@ public class FileChunkStore implements AbstractChunkStore {
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
 	private FCPool rafPool = null;
+	private DirectBufPool bufPool = null;
 	private String name;
-	
+
 	private byte[] FREE = new byte[pageSize];
 
 	/**
@@ -60,13 +62,13 @@ public class FileChunkStore implements AbstractChunkStore {
 			f = new File(chunk_location + File.separator + "chunks.chk");
 			this.name = "chunks";
 			p = f.toPath();
-			this.currentLength = 0;
 			chunkDataWriter = new RandomAccessFile(f, "rw");
+			this.currentLength = chunkDataWriter.length();
 			in = new RandomAccessFile(f, "r");
 			chunkDataReader = in.getChannel();
 			this.closed = false;
-			stores.add(this);
-			rafPool = new FCPool(f.getPath());
+			this.rafPool = new FCPool(f.getPath());
+			this.bufPool = new DirectBufPool(pageSize);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -178,25 +180,20 @@ public class FileChunkStore implements AbstractChunkStore {
 		 */
 	}
 
-	// private ReentrantLock furthestPositionlock = new ReentrantLock();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#writeChunk(byte[],
-	 * int, long)
-	 */
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		FileChannel raf = null;
+		ByteBuffer buf = null;
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
 			raf = rafPool.borrowObject();
-			//raf.position(start);
-			raf.write(ByteBuffer.wrap(chunk),start);
+			buf = this.bufPool.borrowObject();
+			buf.put(chunk);
+			buf.flip();
+			raf.write(buf, start);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -205,8 +202,10 @@ public class FileChunkStore implements AbstractChunkStore {
 		} finally {
 
 			try {
-				if(raf != null)
+				if (raf != null)
 					rafPool.returnObject(raf);
+				if (buf != null)
+					bufPool.returnObject(buf);
 			} catch (Exception e) {
 			}
 			hash = null;
@@ -214,31 +213,28 @@ public class FileChunkStore implements AbstractChunkStore {
 			len = 0;
 			start = 0;
 		}
+
 	}
 
-	// private ReentrantLock getChunklock = new ReentrantLock();
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#getChunk(long, int)
-	 */
-	
+	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
 		FileChannel raf = null;
+
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
-		
+
 		try {
 			raf = rafPool.borrowObject();
-			raf.read(fbuf,start);
+			raf.read(fbuf, start);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to fetch chunk at position " + start,e);
+			SDFSLogger.getLog().error(
+					"unable to fetch chunk at position " + start, e);
 			throw new IOException(e);
 		} finally {
 			try {
-				if(raf != null)
+				if (raf != null)
 					rafPool.returnObject(raf);
 			} catch (Exception e) {
 			}
@@ -246,8 +242,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		}
 		return fbuf.array();
 	}
-
-	
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
@@ -265,22 +259,15 @@ public class FileChunkStore implements AbstractChunkStore {
 		this.listeners.add(listener.getID(), listener);
 	}
 
-	public void close() throws IOException {
-		this.closed = true;
-		this.closeStore();
-		this.rafPool.close();
-		RandomAccessFile raf = new RandomAccessFile(f, "rw");
-		raf.getChannel().force(true);
-	}
-
-	public static void closeAll() {
-		Iterator<FileChunkStore> iter = stores.iterator();
-		while (iter.hasNext()) {
-			try {
-				iter.next().close();
-			} catch (IOException e) {
-
-			}
+	public void close() {
+		try {
+			this.closed = true;
+			this.closeStore();
+			this.rafPool.close();
+			RandomAccessFile raf = new RandomAccessFile(f, "rw");
+			raf.getChannel().force(true);
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("while closing filechunkstore ", e);
 		}
 	}
 
@@ -317,7 +304,13 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void init(Element config) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void setSize(long size) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

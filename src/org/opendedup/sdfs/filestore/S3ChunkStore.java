@@ -95,7 +95,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
-	public void closeStore() {
+	public void close() {
 
 	}
 
@@ -251,6 +251,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void init(Element config) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setSize(long size) {
 		// TODO Auto-generated method stub
 		
 	}

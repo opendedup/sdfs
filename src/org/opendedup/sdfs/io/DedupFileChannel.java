@@ -193,13 +193,13 @@ public class DedupFileChannel {
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
-	public void writeFile(byte[] bbuf, int len, int pos, long offset)
+	public void writeFile(ByteBuffer buf, int len, int pos, long offset)
 			throws java.io.IOException {
 		// this.addAio();
 		try {
 			this.writtenTo = true;
 			long _cp = offset;
-			ByteBuffer buf = ByteBuffer.wrap(bbuf, pos, len);
+			//ByteBuffer buf = ByteBuffer.wrap(bbuf, pos, len);
 			int bytesLeft = len;
 			int write = 0;
 			while (bytesLeft > 0) {
@@ -249,7 +249,7 @@ public class DedupFileChannel {
 				mf.setLastModified(System.currentTimeMillis());
 			}
 		} catch (BufferClosedException e) {
-			writeFile(bbuf, len, pos, offset);
+			writeFile(buf, len, pos, offset);
 		} catch (Exception e) {
 			e.printStackTrace();
 			SDFSLogger.getLog().fatal(
@@ -276,7 +276,7 @@ public class DedupFileChannel {
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
-	public void writeFile(byte[] buf, int len, int pos)
+	public void writeFile(ByteBuffer buf, int len, int pos)
 			throws java.io.IOException {
 		this.writeFile(buf, len, pos, this.position());
 	}

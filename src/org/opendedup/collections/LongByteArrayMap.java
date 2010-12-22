@@ -2,6 +2,8 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+import java.io.RandomAccessFile;
+
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -16,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.FCPool;
+import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 
 public class LongByteArrayMap implements AbstractMap {
@@ -36,8 +38,9 @@ public class LongByteArrayMap implements AbstractMap {
 	Path bdbf = null;
 	FileChannel iterbdb = null;
 	FileChannel pbdb = null;
+	RandomAccessFile rf = null;
 	long flen = 0;
-	FCPool rafPool = null;
+	RAFPool rafPool = null;
 
 	static {
 		FREE = new byte[arrayLength];
@@ -172,7 +175,8 @@ public class LongByteArrayMap implements AbstractMap {
 
 					flen = dbFile.length();
 				}
-				rafPool = new FCPool(filePath);
+				rafPool = new RAFPool(filePath);
+				rf = new RandomAccessFile(filePath,"rw");
 				pbdb = (FileChannel) bdbf.newByteChannel(
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
@@ -220,10 +224,13 @@ public class LongByteArrayMap implements AbstractMap {
 		try {
 			fpos = this.getMapFilePosition(pos);
 
-			// _bdb.lock(fpos, data.length, false);
+			//
 			this.hashlock.lock();
 			if (fpos > flen)
 				flen = fpos;
+			
+			//rf.seek(fpos);
+			//rf.write(data);
 			pbdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
@@ -304,25 +311,24 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 		
 		long fpos = 0;
-		FileChannel _bdb = null;
+		RandomAccessFile _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
 
 			if (fpos > flen)
 				return null;
 			_bdb = rafPool.borrowObject();
-			ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+			byte [] buf = new byte[arrayLength];
 			this.hashlock.lock();
 			try{
-			_bdb.position(fpos);
+			_bdb.seek(fpos);
 			_bdb.read(buf);
 			}finally {
 				this.hashlock.unlock();
 			}
-			byte[] b = buf.array();
-			if (Arrays.equals(b, FREE))
+			if (Arrays.equals(buf, FREE))
 				return null;
-			return b;
+			return buf;
 		} catch (BufferUnderflowException e) {
 			return null;
 		} catch (Exception e) {
@@ -437,5 +443,8 @@ public class LongByteArrayMap implements AbstractMap {
 		} finally {
 			this.hashlock.unlock();
 		}
+		try {
+			this.rf.close();
+		}catch(Exception e) {}
 	}
 }

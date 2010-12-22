@@ -76,6 +76,10 @@ public class WritableCacheBuffer extends DedupChunk {
 		this.endPosition = this.getFilePosition() + this.getLength();
 		this.setWritable(true);
 	}
+	
+	protected WritableCacheBuffer(long startPos) throws IOException {
+		super(startPos);
+	}
 
 	private byte[] readBlockFile() throws IOException {
 		raf = new RandomAccessFile(blockFile, "r");
@@ -360,6 +364,10 @@ public class WritableCacheBuffer extends DedupChunk {
 
 	public void setPrevDoop(boolean prevDoop) {
 		this.prevDoop = prevDoop;
+	}
+	
+	public int hashCode() {
+		return new Long(this.getFilePosition()).hashCode();
 	}
 
 }

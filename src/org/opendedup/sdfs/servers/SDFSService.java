@@ -2,10 +2,10 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
-import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
@@ -66,8 +66,6 @@ public class SDFSService {
 
 		}
 		if (Main.chunkStoreLocal) {
-			System.out.println("Shutting down ChunkStore");
-			FileChunkStore.closeAll();
 			System.out.println("Shutting down HashStore");
 			HashChunkService.close();
 		}

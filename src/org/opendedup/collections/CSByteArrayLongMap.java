@@ -22,6 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -227,6 +228,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		if (!_fs.getParentFile().exists()) {
 			_fs.getParentFile().mkdirs();
 		}
+		long endPos = 0;
 		kRaf = new RandomAccessFile(fileName, this.fileParams);
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = kRaf.getChannel();
@@ -258,7 +260,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					if (Arrays.equals(raw, BLANKCM)) {
 						SDFSLogger
 								.getLog()
-								.debug("found free slot at "
+								.info("found free slot at "
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
 						this.addFreeSlot((currentPos / raw.length)
 								* Main.chunkStorePageSize);
@@ -280,6 +282,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 							boolean foundReserved = Arrays.equals(cm.getHash(),
 									REMOVED);
 							long value = cm.getcPos();
+							
 							if (!cm.ismDelete()) {
 								if (foundFree) {
 									this.freeValue = value;
@@ -296,6 +299,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 										boolean added = this.put(cm, false);
 										if (added)
 											this.kSz++;
+										if(value > endPos)
+											endPos = value + Main.CHUNK_LENGTH;
 									} else {
 										SDFSLogger
 												.getLog()
@@ -314,7 +319,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				}
 			}
 		}
-		System.out.println(" Done Loading ");
+		HashChunkService.getChuckStore().setSize(endPos);
 		SDFSLogger.getLog().info(
 				"########## Finished Loading Hash Database in ["
 						+ (System.currentTimeMillis() - start) / 100
@@ -322,7 +327,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 		SDFSLogger.getLog().info(
 				"loaded [" + kSz + "] into the hashtable [" + this.fileName
 						+ "] free slots available are [" + freeSl
-						+ "] free slots added [" + this.freeSlots.size() + "]");
+						+ "] free slots added [" + this.freeSlots.size() + "] end file position is [" + endPos + "]");
+		
 		return size;
 	}
 

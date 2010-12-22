@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.util.LinkedHashMap;
+
 import java.util.Map;
 
 
@@ -11,11 +12,7 @@ import org.apache.jcs.engine.ElementAttributes;
 import org.apache.jcs.engine.behavior.ICompositeCacheAttributes;
 import org.apache.jcs.engine.control.event.behavior.IElementEvent;
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
-import org.bouncycastle.util.Arrays;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
-import org.opendedup.util.SDFSLogger;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 public class JCSCache implements IElementEventHandler{
 	private int maxSize = 1024;
@@ -89,7 +86,6 @@ public class JCSCache implements IElementEventHandler{
     {
 
         //JCS.setConfigFilename( "/cache.ccf" );
-        JCS cache = JCS.getInstance( "testCache1" );
 
         for ( int j = 0; j < loops; j++ )
         {
@@ -99,7 +95,8 @@ public class JCSCache implements IElementEventHandler{
 
             // /////////////////////////////////////////////////////////////
             name = "Hashtable";
-            LinkedHashMap<String,String> cache2 = new LinkedHashMap<String,String>(tries/2, 1, true){
+            @SuppressWarnings("serial")
+			LinkedHashMap<String,String> cache2 = new LinkedHashMap<String,String>(tries/2, 1, true){
         		protected boolean removeEldestEntry(
         				Map.Entry<String,String> eldest) {
         			System.out.println("called");

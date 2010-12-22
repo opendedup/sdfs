@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.io.IOException;
+
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,7 +10,6 @@ import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.servers.HashChunkService;
 
 public class NetworkHCServer {
@@ -100,8 +100,6 @@ public class NetworkHCServer {
 		}
 		System.out.println("#### Shutting down HashStore ####");
 		HashChunkService.close();
-		System.out.println("#### Shutting down ChunkStore ####");
-		FileChunkStore.closeAll();
 		System.out.println("#### Shut down completed ####");
 	}
 }

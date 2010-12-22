@@ -282,16 +282,14 @@ public class WinSDFS implements DokanOperations {
 			throw new DokanOperationException(ERROR_DISK_FULL);
 		// log("[onWriteFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
-		byte[] b = new byte[buf.capacity()];
-		buf.get(b);
 		try {
-			ch.writeFile(b, b.length, 0, offset);
+			ch.writeFile(buf, buf.capacity(), 0, offset);
 			// log("wrote " + new String(b));
 		} catch (IOException e) {
 			log.error("unable to write to file" + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
-		return b.length;
+		return buf.capacity();
 	}
 
 	public void onSetEndOfFile(String fileName, long length, DokanFileInfo arg2)
