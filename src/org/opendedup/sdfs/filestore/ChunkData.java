@@ -82,7 +82,7 @@ public class ChunkData {
 	}
 
 	public ByteBuffer getMetaDataBytes() {
-		ByteBuffer buf = ByteBuffer.allocateDirect(RAWDL);
+		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
 		if (this.mDelete) {
 			buf.put(BLANKCM);
 			buf.position(0);

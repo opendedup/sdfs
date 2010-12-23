@@ -1,4 +1,4 @@
-/usr/lib/java/jdk/bin/java  -Djava.library.path=/home/annesam/java_api/JCuda-All-0.3.2RC-bin-linux-x86_64/:/home/annesam/java_api/sdfs-bin/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
+/usr/lib/java/jdk1.7.0/jre/bin/java  -Djava.library.path=/home/annesam/java_api/JCuda-All-0.3.2RC-bin-linux-x86_64/:/home/annesam/java_api/sdfs-bin/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
  -Dfuse.logging.level=INFO -Xmx4g  -Xms4g \
   -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+AggressiveOpts  \
   -XX:+UseCompressedOops \

@@ -204,7 +204,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					int mtime = (int) (mf.lastModified() / 1000L);
 					int ctime = (int) (mf.getTimeStamp() / 1000L);
 					
-					int fileLength = f.list().length;
+					int fileLength = 0;
+					if(f.list() != null)
+						fileLength = f.list().length;
 					getattrSetter.set(mf.getGUID().hashCode(), mode, 1, uid,
 							gid, 0, fileLength * NAME_LENGTH, (fileLength
 									* NAME_LENGTH + BLOCK_SIZE - 1)
@@ -316,6 +318,26 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 			mf.sync();
+			//Wait up to 5 seconds for file to be created
+			int z = 5000;
+			int i = 0;
+			while(!f.exists()) {
+				i++;
+				if(i == z) {
+					throw new FuseException("file creation timed out for " + path)
+					.initErrno(FuseException.EBUSY);
+				}
+				else {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						throw new FuseException("file creation interrupted for " + path)
+						.initErrno(FuseException.EACCES);
+					}
+				}
+				
+					
+			}
 			try {
 				mf.setMode(mode);
 			} catch (IOException e) {

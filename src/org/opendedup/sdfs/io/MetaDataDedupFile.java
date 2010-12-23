@@ -469,6 +469,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} finally {
 			if (out != null)
 				try {
+					out.flush();
 					out.close();
 				} catch (IOException e) {
 				}

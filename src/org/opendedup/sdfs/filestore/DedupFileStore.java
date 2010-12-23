@@ -96,6 +96,7 @@ public class DedupFileStore {
 	 */
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
+			SDFSLogger.getLog().info("total number of open files "  + openFile.size());
 			if (!openFile.containsKey(df.getGUID())) {
 				SDFSLogger.getLog().debug("adding dedupfile");
 				if(openFile.size() >= Main.maxOpenFiles)
