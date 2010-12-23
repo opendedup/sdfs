@@ -2,6 +2,7 @@ package org.opendedup.util;
 
 import java.io.FileNotFoundException;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -9,11 +10,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.opendedup.util.SDFSLogger;
 
+import sun.nio.ch.FileChannelImpl;
+
 public class FCPool {
 
 	private int poolSize = 1;
 	
-	private ConcurrentLinkedQueue<FileChannel> passiveObjects = new ConcurrentLinkedQueue<FileChannel>();
+	private ConcurrentLinkedQueue<FileChannelImpl> passiveObjects = new ConcurrentLinkedQueue<FileChannelImpl>();
 	private String fileName = null;
 	private boolean closed=false;
 	
@@ -37,10 +40,10 @@ public class FCPool {
 		}
 	}
 	
-	public FileChannel borrowObject() throws IOException {
+	public FileChannelImpl borrowObject() throws IOException {
 		if(this.closed)
 			throw new IOException("RAF Pool closed for " + this.fileName);
-		FileChannel hc = null;
+		FileChannelImpl hc = null;
 		hc = this.passiveObjects.poll();
 		if (hc == null) {
 			try {
@@ -52,17 +55,18 @@ public class FCPool {
 		return hc;
 	}
 	
-	public void returnObject(FileChannel raf) throws IOException {
+	public void returnObject(FileChannelImpl raf) throws IOException {
 		if(this.closed)
 			raf.close();
 		else 
 			this.passiveObjects.add(raf);
 	}
 	
-	public FileChannel makeObject() throws FileNotFoundException {
+	public FileChannelImpl makeObject() throws IOException {
 		RandomAccessFile hc = null;
 		hc = new RandomAccessFile(fileName,"rw");
-		return hc.getChannel();
+		FileChannelImpl ch =  (FileChannelImpl) FileChannelImpl.open(hc.getFD(), true, true, hc);
+		return ch;
 	}
 	
 	public void destroyObject(FileChannel raf) {

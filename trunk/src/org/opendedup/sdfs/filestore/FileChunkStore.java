@@ -20,6 +20,8 @@ import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
+import sun.nio.ch.FileChannelImpl;
+
 /**
  * 
  * @author Sam Silverberg This chunk store saves chunks into a single contiguous
@@ -184,7 +186,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		FileChannel raf = null;
+		FileChannelImpl raf = null;
 		ByteBuffer buf = null;
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
@@ -213,7 +215,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			len = 0;
 			start = 0;
 		}
-
 	}
 
 	@Override
@@ -221,7 +222,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
-		FileChannel raf = null;
+		FileChannelImpl raf = null;
 
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 

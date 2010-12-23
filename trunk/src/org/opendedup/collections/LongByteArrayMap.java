@@ -21,6 +21,8 @@ import org.opendedup.util.OSValidator;
 import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 
+import sun.nio.ch.FileChannelImpl;
+
 public class LongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
@@ -37,7 +39,7 @@ public class LongByteArrayMap implements AbstractMap {
 	File dbFile = null;
 	Path bdbf = null;
 	FileChannel iterbdb = null;
-	FileChannel pbdb = null;
+	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
 	long flen = 0;
 	RAFPool rafPool = null;
@@ -177,7 +179,7 @@ public class LongByteArrayMap implements AbstractMap {
 				}
 				rafPool = new RAFPool(filePath);
 				rf = new RandomAccessFile(filePath,"rw");
-				pbdb = (FileChannel) bdbf.newByteChannel(
+				pbdb = (FileChannelImpl) bdbf.newByteChannel(
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				// initiall allocate 32k
