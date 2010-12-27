@@ -2,10 +2,10 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.util.DirectBufPool;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.FCPool;
-import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 

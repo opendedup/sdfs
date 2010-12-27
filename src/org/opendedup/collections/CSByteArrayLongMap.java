@@ -6,14 +6,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.threads.SyncThread;
@@ -40,9 +38,9 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private String fileName;
 	private List<ChunkData> kBuf = new ArrayList<ChunkData>(30000);
 	private ByteArrayLongMap[] maps = null;
-	private boolean removingChunks = false;
+	//private boolean removingChunks = false;
 	private String fileParams = "rw";
-	private static int freeSlotsLength = 3000000;
+	//private static int freeSlotsLength = 3000000;
 	// The amount of memory available for free slots.
 	private boolean closed = true;
 	long kSz = 0;
@@ -323,7 +321,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				"loaded [" + kSz + "] into the hashtable [" + this.fileName
 						+ "] free slots available are [" + freeSl
 						+ "] free slots added [" + this.freeSlots.size()
-						+ "] end file position is [" + endPos + "]");
+						+ "] end file position is [" + endPos + "]!");
 
 		return size;
 	}
@@ -403,7 +401,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 				}
 				_fs = null;
 				this.flushBuffer(true);
-				this.removingChunks = false;
+				//this.removingChunks = false;
 
 			}
 			System.gc();
@@ -449,7 +447,6 @@ public class CSByteArrayLongMap implements AbstractMap {
 		} else {
 			added = this.put(cm, true);
 		}
-
 		return added;
 	}
 

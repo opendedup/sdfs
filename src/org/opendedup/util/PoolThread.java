@@ -13,7 +13,7 @@ public class PoolThread extends Thread {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
-	private QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(60);
+	private QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(35);
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -23,7 +23,7 @@ public class PoolThread extends Thread {
 		while (!isStopped()) {
 			try {
 				tasks.clear();
-				int ts = taskQueue.drainTo(tasks,20);
+				int ts = taskQueue.drainTo(tasks,30);
 				for (int i = 0; i < ts; i++) {
 					WritableCacheBuffer runnable = tasks.get(i);
 					try {

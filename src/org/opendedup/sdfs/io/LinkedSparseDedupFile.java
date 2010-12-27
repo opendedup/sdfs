@@ -41,7 +41,7 @@ public class LinkedSparseDedupFile implements DedupFile {
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, 2048);
+			Main.writeThreads + 1, 2048*2);
 	private ReentrantLock flushingLock = new ReentrantLock();
 	private ReentrantLock channelLock = new ReentrantLock();
 	private ReentrantLock initLock = new ReentrantLock();
@@ -54,7 +54,7 @@ public class LinkedSparseDedupFile implements DedupFile {
 
 	@SuppressWarnings("serial")
 	private transient LinkedHashMap<Long, WritableCacheBuffer> writeBuffers = new LinkedHashMap<Long, WritableCacheBuffer>(
-			maxWriteBuffers + 1, 1, false) {
+			maxWriteBuffers *2, .75f, false) {
 		protected boolean removeEldestEntry(
 				Map.Entry<Long, WritableCacheBuffer> eldest) {
 			if (size() >= maxWriteBuffers) {
@@ -74,9 +74,10 @@ public class LinkedSparseDedupFile implements DedupFile {
 
 					pool.execute(writeBuffer);
 				}
-				remove(eldest.getKey());
+				return true;
+			}else {
+				return false;
 			}
-			return false;
 		}
 	};
 

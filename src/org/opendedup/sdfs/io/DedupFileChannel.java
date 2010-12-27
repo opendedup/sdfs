@@ -293,7 +293,7 @@ public class DedupFileChannel {
 	 * @return the bytes read
 	 * @throws IOException
 	 */
-	public int read(byte[] bbuf, int bufPos, int siz) throws IOException {
+	public int read(ByteBuffer bbuf, int bufPos, int siz) throws IOException {
 		return this.read(bbuf, bufPos, siz, this.position());
 	}
 
@@ -363,7 +363,7 @@ public class DedupFileChannel {
 	 * @return the bytes read
 	 * @throws IOException
 	 */
-	public int read(byte[] bbuf, int bufPos, int siz, long filePos)
+	public int read(ByteBuffer buf, int bufPos, int siz, long filePos)
 			throws IOException {
 		// this.addAio();
 		try {
@@ -371,7 +371,6 @@ public class DedupFileChannel {
 				return -1;
 			}
 			long currentLocation = filePos;
-			ByteBuffer buf = ByteBuffer.wrap(bbuf);
 			buf.position(bufPos);
 			int bytesLeft = siz;
 			long futureFilePostion = bytesLeft + currentLocation;
@@ -379,7 +378,6 @@ public class DedupFileChannel {
 				bytesLeft = (int) (mf.length() - currentLocation);
 			}
 			int read = 0;
-
 			while (bytesLeft > 0) {
 				DedupChunk readBuffer = null;
 				try {
@@ -393,7 +391,6 @@ public class DedupFileChannel {
 
 					);
 				}
-				// synchronized (readBuffer) {
 				int startPos = (int) (currentLocation - readBuffer
 						.getFilePosition());
 				int endPos = startPos + bytesLeft;
@@ -401,8 +398,6 @@ public class DedupFileChannel {
 					if ((endPos) <= readBuffer.getLength()) {
 						buf.put(readBuffer.getChunk(), startPos, bytesLeft);
 						mf.getIOMonitor().addBytesRead(bytesLeft);
-						// SDFSLogger.getLog().debug("Read " + bytesLeft +
-						// " bytes");
 						read = read + bytesLeft;
 						bytesLeft = 0;
 					} else {
@@ -430,7 +425,6 @@ public class DedupFileChannel {
 				}
 				mf.setLastAccessed(System.currentTimeMillis());
 				this.currentPosition = currentLocation;
-				// }
 			}
 			return read;
 		} catch (IOException e) {

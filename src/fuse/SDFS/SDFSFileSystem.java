@@ -369,13 +369,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		//SDFSLogger.getLog().info("10");
 		// log.info("Reading " + path + " at " + offset + " with buffer " +
 		// buf.capacity());
-		byte[] b = new byte[buf.capacity()];
 		try {
 			DedupFileChannel ch = (DedupFileChannel) fh;
-			int read = ch.read(b, 0, b.length, offset);
+			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-			buf.put(b, 0, read);
 		} catch (IOException e) {
 			log.error("unable to read file " + path, e);
 			throw new FuseException("error opening " + path)

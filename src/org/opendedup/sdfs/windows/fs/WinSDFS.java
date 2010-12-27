@@ -261,14 +261,10 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg3) throws DokanOperationException {
 		// log("[onReadFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
-		byte[] b = new byte[buf.capacity()];
 		try {
-			int read = ch.read(b, 0, b.length, offset);
+			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-			buf.put(b, 0, read);
-			// log("read " + b.length + " " + offset + "[" + new String(b) +
-			// "]");
 			return read;
 		} catch (IOException e) {
 			log.error("unable to read file " + fileName, e);

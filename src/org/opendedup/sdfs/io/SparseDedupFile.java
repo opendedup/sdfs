@@ -44,7 +44,7 @@ public class SparseDedupFile implements DedupFile {
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
 	private static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, 2048);
+			Main.writeThreads + 1, 8192);
 	private ReentrantLock flushingLock = new ReentrantLock();
 	private ReentrantLock channelLock = new ReentrantLock();
 	private ReentrantLock initLock = new ReentrantLock();
@@ -53,7 +53,7 @@ public class SparseDedupFile implements DedupFile {
 	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient HashMap<Long,WritableCacheBuffer> flushingBuffers = new HashMap<Long,WritableCacheBuffer>(2048*2);
+	private transient HashMap<Long,WritableCacheBuffer> flushingBuffers = new HashMap<Long,WritableCacheBuffer>(4096);
 	@SuppressWarnings("serial")
 	private transient LRUMap writeBuffers = new LRUMap(
 			maxWriteBuffers + 1,false) {
@@ -76,7 +76,7 @@ public class SparseDedupFile implements DedupFile {
 					}
 					pool.execute(writeBuffer);
 				}
-				remove(eldest.getKey());
+				return true;
 			}
 			return false;
 		}
@@ -225,7 +225,8 @@ public class SparseDedupFile implements DedupFile {
 			boolean removeWhenWritten) throws IOException,
 			HashtableFullException {
 		if (this.closed) {
-			throw new IOException("file already closed");
+			return;
+			//throw new IOException("file already closed");
 		}
 		if(writeBuffer == null)
 			return;

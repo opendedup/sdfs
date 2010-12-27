@@ -2,10 +2,11 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
@@ -24,7 +25,7 @@ public class ByteArrayLongMap {
 	private int size = 0;
 	private int entries = 0;
 	
-	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
+	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[Main.hashLength];
 	public static byte[] REMOVED = new byte[Main.hashLength];
 	private int iterPos = 0;
@@ -171,7 +172,7 @@ public class ByteArrayLongMap {
 	 */
 	public boolean containsKey(byte[] key) {
 		try {
-			this.hashlock.readLock().lock();
+			this.hashlock.lock();
 			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
@@ -186,14 +187,14 @@ public class ByteArrayLongMap {
 			return false;
 		} finally {
 			this.derefByteArray();
-			this.hashlock.readLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
 	public boolean update(byte[] key, long value, byte storeID)
 			throws IOException {
 		try {
-			this.hashlock.writeLock().lock();
+			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
 			if (pos == -1) {
@@ -221,13 +222,13 @@ public class ByteArrayLongMap {
 			return false;
 		} finally {
 			this.derefByteArray();
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
 	public boolean remove(byte[] key) throws IOException {
 		try {
-			this.hashlock.writeLock().lock();
+			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
 			this.claims.position(pos / FREE.length);
@@ -262,7 +263,7 @@ public class ByteArrayLongMap {
 			return false;
 		} finally {
 			this.derefByteArray();
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
@@ -405,7 +406,7 @@ public class ByteArrayLongMap {
 
 	public boolean put(byte[] key, long value, byte storeID) {
 		try {
-			this.hashlock.writeLock().lock();
+			this.hashlock.lock();
 			this.decompress();
 			if (entries >= size)
 				throw new IOException(
@@ -437,7 +438,7 @@ public class ByteArrayLongMap {
 			return false;
 		} finally {
 			this.derefByteArray();
-			this.hashlock.writeLock().unlock();
+			this.hashlock.unlock();
 		}
 	}
 
@@ -451,7 +452,7 @@ public class ByteArrayLongMap {
 
 	public long get(byte[] key, boolean claim) {
 		try {
-			this.hashlock.readLock().lock();
+			this.hashlock.lock();
 			this.decompress();
 			if (key == null)
 				return -1;
@@ -474,7 +475,7 @@ public class ByteArrayLongMap {
 			return -1;
 		} finally {
 			this.derefByteArray();
-			this.hashlock.readLock().unlock();
+			this.hashlock.unlock();
 		}
 
 	}
