@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.HashtableFullException;
@@ -25,10 +26,7 @@ import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
 
-import org.apache.commons.collections.map.AbstractLinkedMap;
-import org.apache.commons.collections.map.LRUMap;
-
-public class LRUSparseDedupFile implements DedupFile {
+public class FifoSparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
@@ -55,34 +53,8 @@ public class LRUSparseDedupFile implements DedupFile {
 	// Main.CHUNK_LENGTH) + 1;
 	private int maxWriteBuffers = Main.maxWriteBuffers;
 	private transient HashMap<Long,WritableCacheBuffer> flushingBuffers = new HashMap<Long,WritableCacheBuffer>(4096);
-	@SuppressWarnings("serial")
-	private transient LRUMap writeBuffers = new LRUMap(
-			maxWriteBuffers + 1,false) {
-		protected boolean removeLRU	(
-				AbstractLinkedMap.LinkEntry eldest) {
-			if (size() >= maxWriteBuffers) {
-				WritableCacheBuffer writeBuffer = (WritableCacheBuffer)eldest.getValue();
-				
-				if (writeBuffer != null) {
-					flushingLock.lock();
-					try {
-						flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
-					} catch (Exception e) {
-
-						// TODO Auto-generated catch block
-						SDFSLogger.getLog().error(
-								"issue adding for flushing buffer", e);
-					} finally {
-						flushingLock.unlock();
-					}
-					pool.execute(writeBuffer);
-				}
-				return true;
-			}
-			return false;
-		}
-	};
-
+	private transient HashMap<Long,WritableCacheBuffer> writeBuffers = new HashMap<Long,WritableCacheBuffer>(maxWriteBuffers*2);
+	LinkedBlockingQueue<WritableCacheBuffer> fifoQ = new LinkedBlockingQueue<WritableCacheBuffer>(maxWriteBuffers*2);
 	private boolean closed = true;
 	static {
 		File f = new File(Main.dedupDBStore);
@@ -91,7 +63,7 @@ public class LRUSparseDedupFile implements DedupFile {
 
 	}
 
-	public LRUSparseDedupFile(MetaDataDedupFile mf) throws IOException {
+	public FifoSparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		//SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" + this.maxWriteBuffers);
 		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
@@ -114,7 +86,7 @@ public class LRUSparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync();
 
-			LRUSparseDedupFile _df = new LRUSparseDedupFile(snapmf);
+			FifoSparseDedupFile _df = new FifoSparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.forceClose();
@@ -226,7 +198,8 @@ public class LRUSparseDedupFile implements DedupFile {
 			boolean removeWhenWritten) throws IOException,
 			HashtableFullException {
 		if (this.closed) {
-			throw new IOException("file already closed");
+			return;
+			//throw new IOException("file already closed");
 		}
 		if(writeBuffer == null)
 			return;
@@ -276,7 +249,7 @@ public class LRUSparseDedupFile implements DedupFile {
 						"unable to add chunk [" + writeBuffer.getHash()
 								+ "] at position "
 								+ writeBuffer.getFilePosition(), e);
-				WritableCacheBuffer buf = (WritableCacheBuffer)this.flushingBuffers
+				WritableCacheBuffer buf = this.flushingBuffers
 						.remove(writeBuffer.getFilePosition());
 				if (buf != null)
 					buf.destroy();
@@ -289,7 +262,7 @@ public class LRUSparseDedupFile implements DedupFile {
 				WritableCacheBuffer buf = null;
 				this.flushingLock.lock();
 				try {
-					buf = (WritableCacheBuffer)this.flushingBuffers.remove(writeBuffer
+					buf = this.flushingBuffers.remove(writeBuffer
 							.getFilePosition());
 				} catch (Exception e) {
 				} finally {
@@ -319,8 +292,9 @@ public class LRUSparseDedupFile implements DedupFile {
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
 			boolean doop) throws IOException {
 		if (this.closed) {
-			this.forceClose();
-			throw new IOException("file already closed");
+			//this.forceClose();
+			//throw new IOException("file already closed");
+			return;
 		}
 		try {
 			// updatelock.lock();
@@ -361,29 +335,58 @@ public class LRUSparseDedupFile implements DedupFile {
 			long chunkPos = this.getChuckPosition(position);
 			Long cpL = new Long(chunkPos);
 			this.writeBufferLock.lock();
-			WritableCacheBuffer writeBuffer = (WritableCacheBuffer)this.writeBuffers.get(cpL);
+			WritableCacheBuffer writeBuffer = this.writeBuffers.get(cpL);
 			
 			if (writeBuffer != null && writeBuffer.isClosed()) {
 				writeBuffer.open();
 			} else if (writeBuffer == null) {
 				this.flushingLock.lock();
 				try {
-					writeBuffer = (WritableCacheBuffer)this.flushingBuffers.remove(chunkPos);
+					writeBuffer =this.flushingBuffers.remove(chunkPos);
 				} finally {
 					this.flushingLock.unlock();
 				}
 				if (writeBuffer != null) {
 					writeBuffer.open();
 					this.writeBuffers.put(cpL, writeBuffer);
+					this.fifoQ.add(writeBuffer);
+					this.removeFifo();
 				}
 			}
 			if (writeBuffer == null) {
 				writeBuffer = marshalWriteBuffer(chunkPos, newBuff);
 				this.writeBuffers.put(cpL, writeBuffer);
+				this.fifoQ.add(writeBuffer);
+				this.removeFifo();
 			}
 			return writeBuffer;
 		} finally {
 			this.writeBufferLock.unlock();
+		}
+	}
+	
+	private void removeFifo() {
+		if(fifoQ.size() >= this.maxWriteBuffers) {
+			WritableCacheBuffer writeBuffer = fifoQ.poll();
+			if(writeBuffer != null) {
+				if (writeBuffer != null) {
+					
+					flushingLock.lock();
+					try {
+						flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
+					} catch (Exception e) {
+
+						// TODO Auto-generated catch block
+						SDFSLogger.getLog().error(
+								"issue adding for flushing buffer", e);
+					} finally {
+						flushingLock.unlock();
+					}
+					this.writeBuffers.remove(writeBuffer.getFilePosition());
+					pool.execute(writeBuffer);
+				}
+			}
+				
 		}
 	}
 
@@ -431,14 +434,14 @@ public class LRUSparseDedupFile implements DedupFile {
 		try {
 
 			this.writeBufferLock.lock();
-			readBuffer = (WritableCacheBuffer)this.writeBuffers.get(cpL);
+			readBuffer = this.writeBuffers.get(cpL);
 		} finally {
 			this.writeBufferLock.unlock();
 		}
 		if (readBuffer == null) {
 			this.flushingLock.lock();
 			try {
-				readBuffer = (WritableCacheBuffer)this.flushingBuffers.get(chunkPos);
+				readBuffer = this.flushingBuffers.get(chunkPos);
 			} finally {
 				this.flushingLock.unlock();
 			}
@@ -612,12 +615,13 @@ public class LRUSparseDedupFile implements DedupFile {
 					this.bdb.sync();
 				} catch (Exception e) {
 				}
+				this.closed = true;
 				try {
 					this.bdb.close();
 				} catch (Exception e) {
 				}
 				this.bdb = null;
-				this.closed = true;
+				
 				try {
 					this.chunkStore.close();
 				} catch (Exception e) {

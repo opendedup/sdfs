@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -18,7 +19,7 @@ public class DedupChunk implements java.io.Serializable {
 	private boolean newChunk = false;
 	private boolean writable = false;
 	private boolean doop = false;
-
+	private ReentrantLock lock = new ReentrantLock();
 	
 	public DedupChunk(long position) {
 		this.position = position;
@@ -109,14 +110,15 @@ public class DedupChunk implements java.io.Serializable {
 	public void setNewChunk(boolean newChunk) {
 		this.newChunk = newChunk;
 	}
-	public synchronized byte[] getChunk() throws IOException {
+	public byte[] getChunk() throws IOException {
+		this.lock.lock();
 		try {
 		if (data != null)
 			return data;
 		else
 			return HCServiceProxy.fetchChunk(hash);
 		}finally {
-			//getChunkLock.unlock();
+			this.lock.unlock();
 		}
 	}
 

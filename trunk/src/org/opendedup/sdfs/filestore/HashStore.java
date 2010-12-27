@@ -169,6 +169,7 @@ public class HashStore {
 			return hs;
 		}
 
+
 		if (this.readingBuffers.containsKey(hStr)) {
 			int t = 0;
 			while (t < Main.chunkStoreDirtyCacheTimeout) {
