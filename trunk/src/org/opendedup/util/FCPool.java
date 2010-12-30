@@ -71,6 +71,7 @@ public class FCPool {
 	
 	public void destroyObject(FileChannel raf) {
 		try {
+			raf.force(false);
 			raf.close();
 		} catch (Exception e) {
 		}

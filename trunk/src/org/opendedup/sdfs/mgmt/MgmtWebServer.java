@@ -23,10 +23,26 @@ public class MgmtWebServer implements Container {
 			if (cmd == null)
 				result = "<result status=\"failed\" msg=\"no command specified\"/>";
 			else if (cmd.equalsIgnoreCase("info")) {
-				String msg = new GetAttributes().getResult(cmdOptions, file);
-				result = "<result status=\"success\" msg=\"command completed successfully\">";
-				result = result + msg;
-				result = result + "</result>";
+				try {
+					String msg = new GetAttributes()
+							.getResult(cmdOptions, file);
+					result = "<result status=\"success\" msg=\"command completed successfully\">";
+					result = result + msg;
+					result = result + "</result>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
+				}
+			} else if (cmd.equalsIgnoreCase("dse-info")) {
+				try {
+					String msg = new GetDSE().getResult(cmdOptions, file);
+					result = "<result status=\"success\" msg=\"command completed successfully\">";
+					result = result + msg;
+					result = result + "</result>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
+				}
 			} else if (cmd.equalsIgnoreCase("snapshot")) {
 				try {
 					String msg = new SnapshotCmd().getResult(cmdOptions, file);
@@ -103,8 +119,10 @@ public class MgmtWebServer implements Container {
 			connection = new SocketConnection(container);
 			SocketAddress address = new InetSocketAddress("localhost", 6442);
 			connection.connect(address);
-			SDFSLogger.getLog().info(
-					"Management WebServer Started at " + address.toString());
+			SDFSLogger
+					.getLog()
+					.info("###################### Management WebServer Started at "
+							+ address.toString() + " #########################");
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to start Web Management Server",
 					e);

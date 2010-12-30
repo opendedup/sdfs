@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.RandomAccessFile;
 
 
@@ -18,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 
 import sun.nio.ch.FileChannelImpl;
@@ -42,7 +42,6 @@ public class LongByteArrayMap implements AbstractMap {
 	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
 	long flen = 0;
-	RAFPool rafPool = null;
 
 	static {
 		FREE = new byte[arrayLength];
@@ -177,7 +176,6 @@ public class LongByteArrayMap implements AbstractMap {
 
 					flen = dbFile.length();
 				}
-				rafPool = new RAFPool(filePath);
 				rf = new RandomAccessFile(filePath,"rw");
 				pbdb = (FileChannelImpl) bdbf.newByteChannel(
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
@@ -313,18 +311,15 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 		
 		long fpos = 0;
-		RandomAccessFile _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
 
 			if (fpos > flen)
 				return null;
-			_bdb = rafPool.borrowObject();
 			byte [] buf = new byte[arrayLength];
 			this.hashlock.lock();
 			try{
-			_bdb.seek(fpos);
-			_bdb.read(buf);
+				pbdb.read(ByteBuffer.wrap(buf), fpos);
 			}finally {
 				this.hashlock.unlock();
 			}
@@ -339,11 +334,7 @@ public class LongByteArrayMap implements AbstractMap {
 							+ dbFile.length(), e);
 			throw new IOException(e);
 		} finally {
-			try {
-				if (_bdb != null)
-					rafPool.returnObject(_bdb);
-			} catch (Exception e) {
-			}
+			
 			
 		}
 	}
@@ -434,12 +425,12 @@ public class LongByteArrayMap implements AbstractMap {
 	 */
 	public void close() {
 		this.hashlock.lock();
-		this.rafPool.close();
 		dbFile = null;
 		if (!this.isClosed()) {
 			this.closed = true;
 		}
 		try {
+			pbdb.force(true);
 			pbdb.close();
 		} catch (Exception e) {
 		} finally {

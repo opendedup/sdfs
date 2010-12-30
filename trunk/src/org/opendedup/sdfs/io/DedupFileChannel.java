@@ -197,9 +197,10 @@ public class DedupFileChannel {
 			throws java.io.IOException {
 		// this.addAio();
 		try {
+			buf.position(pos);
 			this.writtenTo = true;
 			long _cp = offset;
-			//ByteBuffer buf = ByteBuffer.wrap(bbuf, pos, len);
+			// ByteBuffer buf = ByteBuffer.wrap(bbuf, pos, len);
 			int bytesLeft = len;
 			int write = 0;
 			while (bytesLeft > 0) {
@@ -220,11 +221,26 @@ public class DedupFileChannel {
 					boolean newBuf = false;
 					if (endPos == Main.CHUNK_LENGTH)
 						newBuf = true;
-					WritableCacheBuffer writeBuffer = df.getWriteBuffer(
-							filePos, newBuf);
+					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[bytesLeft];
-					buf.get(b);
-					writeBuffer.write(b, startPos);
+					try {
+						buf.get(b);
+					} catch (java.nio.BufferUnderflowException e) {
+						buf.get(b, 0, buf.capacity() - buf.position());
+						SDFSLogger.getLog().info(
+								"ss buffer underflow writing "
+										+ (buf.capacity() - buf.position())
+										+ " instead of " + bytesLeft);
+					}
+					while (writeBuffer == null) {
+						try {
+							writeBuffer = df.getWriteBuffer(filePos, newBuf);
+							writeBuffer.write(b, startPos);
+						} catch (BufferClosedException e) {
+							writeBuffer = null;
+							SDFSLogger.getLog().info("trying to write again");
+						}
+					}
 					write = write + bytesLeft;
 					_cp = _cp + bytesLeft;
 					bytesLeft = 0;
@@ -233,11 +249,26 @@ public class DedupFileChannel {
 					boolean newBuf = false;
 					if (_len == Main.CHUNK_LENGTH)
 						newBuf = true;
-					WritableCacheBuffer writeBuffer = df.getWriteBuffer(
-							filePos, newBuf);
+					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[_len];
-					buf.get(b);
-					writeBuffer.write(b, startPos);
+					try {
+						buf.get(b);
+					} catch (java.nio.BufferUnderflowException e) {
+						buf.get(b, 0, buf.capacity() - buf.position());
+						SDFSLogger.getLog().info(
+								"buffer underflow getting "
+										+ (buf.capacity() - buf.position())
+										+ " instead of " + _len);
+					}
+					while (writeBuffer == null) {
+						try {
+							writeBuffer = df.getWriteBuffer(filePos, newBuf);
+							writeBuffer.write(b, startPos);
+						} catch (BufferClosedException e) {
+							SDFSLogger.getLog().info("strying to write again");
+							writeBuffer = null;
+						}
+					}
 					_cp = _cp + _len;
 					bytesLeft = bytesLeft - _len;
 					write = write + _len;
@@ -248,9 +279,7 @@ public class DedupFileChannel {
 				}
 				mf.setLastModified(System.currentTimeMillis());
 			}
-		} catch (BufferClosedException e) {
-			writeFile(buf, len, pos, offset);
-		} catch (Exception e) {
+		}  catch (Exception e) {
 			e.printStackTrace();
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.mf.getPath() + " "

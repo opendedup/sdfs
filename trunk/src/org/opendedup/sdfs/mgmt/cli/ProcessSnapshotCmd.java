@@ -20,7 +20,7 @@ public class ProcessSnapshotCmd {
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			System.out.printf("Snapshot [%s] returned [%s]",status,msg);
+			System.out.printf("Snapshot [%s] returned [%s]\n",status,msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

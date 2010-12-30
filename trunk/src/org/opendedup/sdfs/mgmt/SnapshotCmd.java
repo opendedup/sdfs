@@ -17,18 +17,11 @@ public class SnapshotCmd implements XtendedCmd {
 	private String takeSnapshot(String srcPath, String dstPath) throws IOException{
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File nf = new File(Main.volume.getPath() + File.separator + dstPath);
-
-		if (f.getPath().equalsIgnoreCase(nf.getPath()))
-			throw new IOException("Snapshot Failed: Source [" + srcPath
-					+ "] and destination [" + dstPath + "] are the same");
-		if (nf.exists())
-			throw new IOException("Snapshot Failed: destination [" + dstPath
-					+ "] already exists");
 		try {
 			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("Snapshot Failed: unable to take snapshot Source ["
 					+ srcPath + "] " + "Destination [" + dstPath
 					+ "] because :" + e.toString(), e);

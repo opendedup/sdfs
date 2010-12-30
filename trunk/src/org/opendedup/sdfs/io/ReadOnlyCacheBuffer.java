@@ -17,29 +17,13 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private DedupFile df = null;
 
 	public ReadOnlyCacheBuffer(DedupChunk dk, DedupFile df) throws IOException {
 		super(dk.getHash(), dk.getFilePosition(), dk.getLength(), dk
 				.isNewChunk());
-		if (Main.safeSync) {
-			StringBuffer sb = new StringBuffer();
-			sb.append(df.getDatabaseDirPath());
-			sb.append(File.separator);
-			sb.append(dk.getFilePosition());
-			sb.append(".chk");
-			Path blockFile = Paths.get(sb.toString());
-			try {
-				this.fileContents = this.readBlockFile(blockFile);
-			} catch (Exception e) {
-				this.fileContents = null;
-			}
-
-			blockFile = null;
-			sb = null;
-		}
-		if (this.fileContents == null) {
-			this.fileContents = dk.getChunk();
-		}
+		this.df = df;
+		
 	}
 
 	private byte[] readBlockFile(Path blockFile) throws IOException {
@@ -54,6 +38,25 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 	}
 
 	public byte[] getChunk() throws IOException {
+		if (Main.safeSync) {
+			StringBuffer sb = new StringBuffer();
+			sb.append(df.getDatabaseDirPath());
+			sb.append(File.separator);
+			sb.append(this.getFilePosition());
+			sb.append(".chk");
+			Path blockFile = Paths.get(sb.toString());
+			try {
+				this.fileContents = this.readBlockFile(blockFile);
+			} catch (Exception e) {
+				this.fileContents = null;
+			}
+
+			blockFile = null;
+			sb = null;
+		}
+		if (this.fileContents == null) {
+			this.fileContents = super.getChunk();
+		}
 		return fileContents;
 
 	}

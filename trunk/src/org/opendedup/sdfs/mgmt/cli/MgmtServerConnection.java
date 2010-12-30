@@ -27,7 +27,7 @@ public class MgmtServerConnection {
 
 	private static InputStream connectAndGet(String url) {
 		HttpClient client = new HttpClient();
-		client.getParams().setParameter("http.useragent", "Test Client");
+		client.getParams().setParameter("http.useragent", "SDFS Client");
 
 		GetMethod method = new GetMethod("http://localhost:6442/?" + url);
 		try {
@@ -38,7 +38,7 @@ public class MgmtServerConnection {
 			return method.getResponseBodyAsStream();
 
 		} catch (Exception e) {
-			System.err.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
+			System.err.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
 			System.exit(-1);
 			return null;
 		} 
