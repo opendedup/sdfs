@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.Formatter;
 
+import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,12 +41,21 @@ public class ProcessFileInfo {
 							fileEl.getAttribute("open"));
 					System.out.printf("real bytes written : %s\n",
 							ioEl.getAttribute("actual-bytes-written"));
+					System.out.printf("format real data written : %s\n",
+							StorageUnit.of(Long.parseLong(ioEl.getAttribute("actual-bytes-written"))).format(Long.parseLong(ioEl.getAttribute("actual-bytes-written"))));
 					System.out.printf("virtual bytes written : %s\n",
 							ioEl.getAttribute("virtual-bytes-written"));
-					System.out.printf("dublicate data : %s\n",
+					System.out.printf("format virtual data written : %s\n",
+							StorageUnit.of(Long.parseLong(ioEl.getAttribute("virtual-bytes-written"))).format(Long.parseLong(ioEl.getAttribute("virtual-bytes-written"))));
+					System.out.printf("duplicate data bytes: %s\n",
 							ioEl.getAttribute("duplicate-blocks"));
-					System.out.printf("byes read : %s\n",
+					System.out.printf("format duplicate data : %s\n",
+							StorageUnit.of(Long.parseLong(ioEl.getAttribute("duplicate-blocks"))).format(Long.parseLong(ioEl.getAttribute("duplicate-blocks"))));
+					System.out.printf("bytes read : %s\n",
 							ioEl.getAttribute("bytes-read"));
+					System.out.printf("format data read: %s\n",
+							StorageUnit.of(Long.parseLong(ioEl.getAttribute("bytes-read"))).format(Long.parseLong(ioEl.getAttribute("bytes-read"))));
+					
 					long realBytes = Long.parseLong(ioEl
 							.getAttribute("virtual-bytes-written"));
 					long dedupBytes = Long.parseLong(ioEl.getAttribute("duplicate-blocks"));

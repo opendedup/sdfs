@@ -1,9 +1,8 @@
 package org.opendedup.util;
 
-import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -13,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.zip.Adler32;
 
@@ -65,59 +63,12 @@ public class HashFunctions {
 		}
 	}
 
-	public static String getMurmurhash(byte[] data) {
-		int seed = 1;
-		int m = 0x5bd1e995;
-		int r = 24;
-
-		int h = seed ^ data.length;
-
-		int len = data.length;
-		int len_4 = len >> 2;
-
-		for (int i = 0; i < len_4; i++) {
-			int i_4 = i << 2;
-			int k = data[i_4 + 3];
-			k = k << 8;
-			k = k | (data[i_4 + 2] & 0xff);
-			k = k << 8;
-			k = k | (data[i_4 + 1] & 0xff);
-			k = k << 8;
-			k = k | (data[i_4 + 0] & 0xff);
-			k *= m;
-			k ^= k >>> r;
-			k *= m;
-			h *= m;
-			h ^= k;
-		}
-
-		int len_m = len_4 << 2;
-		int left = len - len_m;
-
-		if (left != 0) {
-			if (left >= 3) {
-				h ^= (int) data[len - 3] << 16;
-			}
-			if (left >= 2) {
-				h ^= (int) data[len - 2] << 8;
-			}
-			if (left >= 1) {
-				h ^= (int) data[len - 1];
-			}
-
-			h *= m;
-		}
-
-		h ^= h >>> 13;
-		h *= m;
-		h ^= h >>> 15;
-		return Integer.toHexString(h);
-	}
-
-	public static byte[] getMurmurHashBytes(byte[] data) {
-		int seed = 1;
-		int m = 0x5bd1e995;
-		int r = 24;
+	private static int seed = 1;
+	private static int m = 0x5bd1e995;
+	private static int r = 24;
+	
+	public static int getMurmurHashCode(byte[] data) {
+		
 
 		// Initialize the hash to a 'random' value
 		int len = data.length;
@@ -155,50 +106,12 @@ public class HashFunctions {
 		h *= m;
 		h ^= h >>> 15;
 
-		byte[] b = new byte[4];
-		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.putInt(h);
-		return buf.array();
+		
+		return h;
 
 	}
 
-	public static void testWords(String file) throws NoSuchAlgorithmException,
-			NoSuchProviderException {
-		HashMap<String, String> map = new HashMap<String, String>();
-		try {
-			// use buffering, reading one line at a time
-			// FileReader always assumes default encoding is OK!
-			BufferedReader input = new BufferedReader(new FileReader(file));
-			try {
-				String line = null; // not declared within while loop
-				/*
-				 * readLine is a bit quirky : it returns the content of a line
-				 * MINUS the newline. it returns null only for the END of the
-				 * stream. it returns an empty String if two newlines appear in
-				 * a row.
-				 */
-				while ((line = input.readLine()) != null) {
-					String str = getMurmurhash(line.getBytes());
-					// System.out.println(line + " " + str + " " +
-					// str.getBytes().length);
-					if (line.equals("inviter"))
-						System.out.println(str);
-					if (map.containsKey(str)
-							&& !map.get(str).equals(line.trim())) {
-						System.out.println("Collision found between "
-								+ map.get(str) + " and " + line + " " + str);
-						System.out.println(getSHAHash(line.getBytes()));
-						return;
-					}
-					map.put(str, line);
-				}
-			} finally {
-				input.close();
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
+	
 
 	public static void testFile(String file, int buffer_len)
 			throws IOException, NoSuchAlgorithmException {

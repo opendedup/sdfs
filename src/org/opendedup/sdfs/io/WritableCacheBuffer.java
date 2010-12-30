@@ -7,6 +7,8 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.hashing.Tiger16HashEngine;
@@ -32,11 +34,12 @@ public class WritableCacheBuffer extends DedupChunk {
 	private int bytesWritten = 0;
 	private DedupFile df;
 	private ReentrantLock lock = new ReentrantLock();
-	private boolean closed;
+	private boolean closed = false;
 	File blockFile = null;
 	RandomAccessFile raf = null;
 	boolean rafInit = false;
 	boolean prevDoop = false;
+	boolean flushing = false;
 	private boolean safeSync = Main.safeSync;
 
 	static {
@@ -76,7 +79,7 @@ public class WritableCacheBuffer extends DedupChunk {
 		this.endPosition = this.getFilePosition() + this.getLength();
 		this.setWritable(true);
 	}
-	
+
 	protected WritableCacheBuffer(long startPos) throws IOException {
 		super(startPos);
 	}
@@ -96,6 +99,21 @@ public class WritableCacheBuffer extends DedupChunk {
 
 	public DedupFile getDedupFile() {
 		return this.df;
+	}
+	
+	public void flush(boolean flushing) {
+		this.lock.lock();
+		this.flushing = flushing;
+		this.lock.unlock();
+	}
+	
+	public boolean isFlushing() {
+		this.lock.lock();
+		try {
+		return this.flushing;
+		}finally{
+			this.lock.unlock();
+		}
 	}
 
 	protected WritableCacheBuffer(DedupChunk dk, DedupFile df)
@@ -148,7 +166,6 @@ public class WritableCacheBuffer extends DedupChunk {
 		if (safeSync) {
 			try {
 				this.lock.lock();
-
 				raf = new RandomAccessFile(blockFile, "rw");
 				raf.getChannel().force(false);
 				raf.close();
@@ -206,15 +223,17 @@ public class WritableCacheBuffer extends DedupChunk {
 
 	public void write(byte[] b, int pos) throws BufferClosedException,
 			IOException {
-		if (this.closed)
-			throw new BufferClosedException("Buffer Closed");
+		this.lock.lock();
+		
 		try {
+			if (this.closed || this.flushing)
+				throw new BufferClosedException("Buffer Closed");
 			/*
 			 * if(pos != 0) SDFSLogger.getLog().info("start at " + pos);
 			 * if(b.length != this.capacity())
 			 * SDFSLogger.getLog().info("!capacity " + b.length);
 			 */
-			this.lock.lock();
+
 			if (pos > buf.length) {
 				byte[] _b = new byte[Main.CHUNK_LENGTH];
 				System.arraycopy(buf, 0, _b, 0, buf.length);
@@ -245,9 +264,11 @@ public class WritableCacheBuffer extends DedupChunk {
 		}
 	}
 
-	public void truncate(int len) {
+	public void truncate(int len) throws BufferClosedException {
 		try {
 			this.lock.lock();
+			if (this.closed || this.flushing)
+				throw new BufferClosedException("Buffer Closed");
 			if (len < this.currentLen) {
 				if (!Main.safeSync) {
 					byte[] b = new byte[Main.CHUNK_LENGTH];
@@ -287,6 +308,7 @@ public class WritableCacheBuffer extends DedupChunk {
 	protected void open() {
 		try {
 			this.lock.lock();
+			this.flushing = false;
 			this.closed = false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Error while opening");
@@ -308,14 +330,21 @@ public class WritableCacheBuffer extends DedupChunk {
 	public void close() {
 		try {
 			this.lock.lock();
-			this.closed = true;
-			this.df.writeCache(this, false);
-
+			if(!this.flushing)
+				SDFSLogger.getLog().info(this.getFilePosition() + " not flushing");
+			else if (!this.closed) {
+				this.closed = true;
+				this.df.writeCache(this, false);
+			}else {
+				SDFSLogger.getLog().info(this.getFilePosition() + " already closed");
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Error while closing", e);
 			throw new IllegalArgumentException("error while closing "
 					+ e.toString());
 		} finally {
+			this.closed = false;
+			this.flushing = false;
 			this.lock.unlock();
 		}
 	}
@@ -344,9 +373,6 @@ public class WritableCacheBuffer extends DedupChunk {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				raf = null;
-				buf = null;
 			} catch (Exception e) {
 			} finally {
 				this.lock.unlock();
@@ -365,9 +391,14 @@ public class WritableCacheBuffer extends DedupChunk {
 	public void setPrevDoop(boolean prevDoop) {
 		this.prevDoop = prevDoop;
 	}
-	
+
 	public int hashCode() {
-		return new Long(this.getFilePosition()).hashCode();
+		this.lock.lock();
+		try {
+			return HashFunctions.getMurmurHashCode(buf);
+		} finally {
+			this.lock.unlock();
+		}
 	}
 
 }

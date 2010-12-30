@@ -29,6 +29,11 @@ public class SDFSCmdline {
 			}
 			System.exit(0);
 		}
+		if (cmd.hasOption("dse-info")) {
+			ProcessDSEInfo.runCmd();
+			System.exit(0);
+		}
+		
 		if (cmd.hasOption("snapshot")) {
 			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
 				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"), cmd
@@ -82,6 +87,13 @@ public class SDFSCmdline {
 								"Returns io file attributes such as dedup rate and file io statistics. "
 										+ "\n e.g. --file-info --file-path=<path to file or folder>")
 						.hasArg(false).create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("dse-info")
+				.withDescription(
+						"Returns Dedup Storage Engine Statitics. "
+								+ "\n e.g. --dse-info")
+				.hasArg(false).create());
 		options
 				.addOption(OptionBuilder
 						.withLongOpt("snapshot")

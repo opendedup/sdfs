@@ -19,7 +19,7 @@ public class ProcessCleanStore {
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			System.out.printf("Clean store command [%s] returned [%s]",status,msg);
+			System.out.printf("Clean store command [%s] returned [%s]\n",status,msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

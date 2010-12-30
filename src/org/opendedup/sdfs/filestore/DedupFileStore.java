@@ -2,7 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
-import java.util.concurrent.ConcurrentHashMap;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
@@ -10,6 +10,10 @@ import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.util.SDFSLogger;
+
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 
 /**
@@ -30,7 +34,15 @@ public class DedupFileStore {
 	 * stores open files in an LRU map. Files will be evicted based on the
 	 * maxOpenFiles parameter
 	 */
-	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
+	private static ConcurrentLinkedHashMap<String, DedupFile> openFile = new Builder<String, DedupFile>()
+	.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(Main.maxOpenFiles-1)
+	.listener(new EvictionListener<String, DedupFile>() {
+		// This method is called just after a new entry has been
+		// added
+		public void onEviction(String key, DedupFile file) {
+			file.forceClose();
+		}
+	}).build();
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -96,7 +108,6 @@ public class DedupFileStore {
 	 */
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
-			SDFSLogger.getLog().info("total number of open files "  + openFile.size());
 			if (!openFile.containsKey(df.getGUID())) {
 				SDFSLogger.getLog().debug("adding dedupfile");
 				if(openFile.size() >= Main.maxOpenFiles)

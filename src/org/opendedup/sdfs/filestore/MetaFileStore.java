@@ -133,6 +133,8 @@ public class MetaFileStore {
 	public static MetaDataDedupFile snapshot(String origionalPath,
 			String snapPath, boolean overwrite) throws IOException {
 		MetaDataDedupFile mf = getMF(origionalPath);
+		if(mf==null)
+			throw new IOException(origionalPath + " does not exist. Cannot take a snapshot of a non-existent file.");
 		synchronized (mf) {
 			MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
 			return _mf;

@@ -18,7 +18,7 @@ public class ProcessFlushBuffersCmd {
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			System.out.printf("Flush Command [%s] returned [%s]",status,msg);
+			System.out.printf("Flush Command [%s] returned [%s]\n",status,msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

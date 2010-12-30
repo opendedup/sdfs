@@ -147,8 +147,12 @@ public class CSByteArrayLongMap implements AbstractMap {
 	}
 
 	public long getSize() {
-		return this.kSz;
-
+		return getUsedSize()/Main.CHUNK_LENGTH;
+	}
+	
+	public long getUsedSize() {
+		long _sz = HashChunkService.getChuckStore().size() - (long)(this.freeSlots.cardinality() * Main.CHUNK_LENGTH);
+		return _sz;
 	}
 
 	public long getMaxSize() {
@@ -254,7 +258,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 					if (Arrays.equals(raw, BLANKCM)) {
 						SDFSLogger
 								.getLog()
-								.info("found free slot at "
+								.debug("found free slot at "
 										+ ((currentPos / raw.length) * Main.chunkStorePageSize));
 						this.addFreeSlot((currentPos / raw.length)
 								* Main.chunkStorePageSize);
@@ -320,7 +324,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		SDFSLogger.getLog().info(
 				"loaded [" + kSz + "] into the hashtable [" + this.fileName
 						+ "] free slots available are [" + freeSl
-						+ "] free slots added [" + this.freeSlots.size()
+						+ "] free slots added [" + this.freeSlots.cardinality()
 						+ "] end file position is [" + endPos + "]!");
 
 		return size;
@@ -458,21 +462,21 @@ public class CSByteArrayLongMap implements AbstractMap {
 			int slot = this.freeSlots.nextSetBit(0);
 			if (slot != -1) {
 				this.freeSlots.clear(slot);
-				SDFSLogger.getLog().info("using " + slot);
+				SDFSLogger.getLog().debug("using free slot " + slot);
 				return slot * Main.CHUNK_LENGTH;
 			} else
 				return slot;
 		} finally {
 			fslock.unlock();
 		}
-
 	}
 
 	private void addFreeSlot(long position) {
 		this.fslock.lock();
 		try {
 			int pos = (int) position / Main.CHUNK_LENGTH;
-			this.freeSlots.set(pos);
+			if(pos >= 0)
+				this.freeSlots.set(pos);
 		} finally {
 			this.fslock.unlock();
 		}
@@ -666,8 +670,8 @@ public class CSByteArrayLongMap implements AbstractMap {
 		this.closed = true;
 		try {
 			this.flushBuffer(true);
-			this.kRaf.getFD().sync();
-			this.kRaf.close();
+			this.kFc.close();
+			this.kFc = null;
 			this.kRaf = null;
 		} catch (Exception e) {
 			e.printStackTrace();
