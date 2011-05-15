@@ -11,6 +11,7 @@ package fuse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendedup.util.SDFSLogger;
 
 import fuse.compat.Filesystem1;
 import fuse.compat.Filesystem1ToFilesystem2Adapter;
@@ -60,11 +61,11 @@ public class FuseMount {
 				.getThreadGroup(), "FUSE Threads");
 		threadGroup.setDaemon(true);
 
-		log.info("Mounting filesystem");
+		SDFSLogger.getLog().info("Mounted SDFS FileSystem ");
 
 		mount(args, fuseFS, threadGroup);
 
-		log.info("Filesystem is unmounted");
+		SDFSLogger.getLog().info("SDFS FileSystem is unmounted");
 
 		if (log.isDebugEnabled()) {
 			int n = threadGroup.activeCount();
@@ -74,7 +75,7 @@ public class FuseMount {
 			Thread[] threads = new Thread[n];
 			threadGroup.enumerate(threads);
 			for (int i = 0; i < threads.length; i++) {
-				log.debug("thread[" + i + "] = " + threads[i] + ", isDaemon = "
+				SDFSLogger.getLog().debug("thread[" + i + "] = " + threads[i] + ", isDaemon = "
 						+ threads[i].isDaemon());
 			}
 		}

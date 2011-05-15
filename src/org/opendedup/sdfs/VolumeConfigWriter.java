@@ -38,12 +38,13 @@ public class VolumeConfigWriter {
 	 * @throws Exception
 	 */
 	String volume_name = null;
-	String base_path = OSValidator.getProgramBasePath() + File.separator + "volumes" +File.separator+ volume_name;
+	String base_path = OSValidator.getProgramBasePath() + File.separator
+			+ "volumes" + File.separator + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
 	boolean safe_sync = false;
-	int write_threads = (short)(Runtime.getRuntime().availableProcessors()*3);
+	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	boolean dedup_files = true;
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
@@ -71,12 +72,14 @@ public class VolumeConfigWriter {
 	String awsAccessKey = "";
 	String awsSecretKey = "";
 	String awsBucketName = "";
-	int chunk_store_read_cache= Main.chunkStorePageCache;
+	int chunk_store_read_cache = Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean awsCompress = Main.awsCompress;
 	int hashSize = 16;
+	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
+	String gc_class = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -94,12 +97,12 @@ public class VolumeConfigWriter {
 		}
 		volume_name = cmd.getOptionValue("volume-name");
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
-		base_path = OSValidator.getProgramBasePath() + "volumes" +File.separator+ volume_name;
+		base_path = OSValidator.getProgramBasePath() + "volumes"
+				+ File.separator + volume_name;
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
-		this.io_log = this.base_path + File.separator
-				+ "io.SDFSLogger.getLog()";
+		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
@@ -115,12 +118,15 @@ public class VolumeConfigWriter {
 			this.safe_close = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-close"));
 		}
-		if(cmd.hasOption("hash-size")) {
+		if (cmd.hasOption("hash-size")) {
 			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
-			if(hs == 16 || hs == 24) 
+			if (hs == 16 || hs == 24)
 				this.hashSize = hs;
 			else
 				throw new Exception("hash size must be 16 or 24");
+		}
+		if (cmd.hasOption("chunkstore-class")) {
+			this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
 		}
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
@@ -150,8 +156,8 @@ public class VolumeConfigWriter {
 			this.max_file_write_buffers = Integer.parseInt(cmd
 					.getOptionValue("io-max-file-write-buffers"));
 		} else {
-			this.max_file_write_buffers = (this.chunk_size/4)*5;
-			if(this.max_file_write_buffers > 32)
+			this.max_file_write_buffers = (this.chunk_size / 4) * 5;
+			if (this.max_file_write_buffers > 32)
 				this.max_file_write_buffers = 32;
 		}
 		if (cmd.hasOption("io-max-open-files")) {
@@ -191,6 +197,7 @@ public class VolumeConfigWriter {
 			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-pre-allocate"));
 		}
+
 		if (cmd.hasOption("chunk-read-ahead-pages")) {
 			this.chunk_read_ahead_pages = Short.parseShort(cmd
 					.getOptionValue("chunk-read-ahead-pages"));
@@ -209,14 +216,20 @@ public class VolumeConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
-		if(cmd.hasOption("chunk-store-read-cache")) {
-			this.chunk_store_read_cache = Integer.parseInt(cmd.getOptionValue("chunk-store-read-cache"));
+		if (cmd.hasOption("chunk-store-read-cache")) {
+			this.chunk_store_read_cache = Integer.parseInt(cmd
+					.getOptionValue("chunk-store-read-cache"));
 		}
-		if(cmd.hasOption("chunk-store-encrypt")) {
-			this.chunk_store_encrypt = Boolean.parseBoolean(cmd.getOptionValue("chunk-store-encrypt"));
+		if (cmd.hasOption("chunk-store-encrypt")) {
+			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
+					.getOptionValue("chunk-store-encrypt"));
 		}
-		if(cmd.hasOption("chunk-store-dirty-timeout")) {
-			this.chunk_store_dirty_timeout = Integer.parseInt(cmd.getOptionValue("chunk-store-dirty-timeout"));
+		if (cmd.hasOption("chunk-store-dirty-timeout")) {
+			this.chunk_store_dirty_timeout = Integer.parseInt(cmd
+					.getOptionValue("chunk-store-dirty-timeout"));
+		}
+		if(cmd.hasOption("gc-class")) {
+			this.gc_class = cmd.getOptionValue("gc-class");
 		}
 		if (this.awsEnabled) {
 			if (cmd.hasOption("aws-secret-key")
@@ -233,8 +246,9 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
-		if(cmd.hasOption("aws-compress"))
-			this.awsCompress = Boolean.parseBoolean(cmd.getOptionValue("aws-compress"));
+		if (cmd.hasOption("aws-compress"))
+			this.awsCompress = Boolean.parseBoolean(cmd
+					.getOptionValue("aws-compress"));
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
 			this.chunk_gc_schedule = cmd
 					.getOptionValue("chunk-store-gc-schedule");
@@ -243,19 +257,21 @@ public class VolumeConfigWriter {
 			this.remove_if_older_than = Integer.parseInt(cmd
 					.getOptionValue("chunk-store-eviction"));
 		}
-		if(cmd.hasOption("volume-maximum-full-percentage")) {
-			this.max_percent_full = Double.parseDouble(cmd.getOptionValue("volume-maximum-full-percentage"));
+		if (cmd.hasOption("volume-maximum-full-percentage")) {
+			this.max_percent_full = Double.parseDouble(cmd
+					.getOptionValue("volume-maximum-full-percentage"));
 		}
 		if (cmd.hasOption("chunk-store-size")) {
-			this.chunk_store_allocation_size = Long.parseLong(cmd
+			this.chunk_store_allocation_size = StringUtils
+			.parseSize(cmd
 					.getOptionValue("chunk-store-size"));
 		} else {
 			this.chunk_store_allocation_size = StringUtils
 					.parseSize(this.volume_capacity);
 		}
 
-		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim()
-				+ "-volume-cfg.xml");
+		File file = new File(OSValidator.getConfigPath()
+				+ this.volume_name.trim() + "-volume-cfg.xml");
 		if (file.exists()) {
 			throw new IOException("Volume [" + this.volume_name
 					+ "] already exists");
@@ -266,12 +282,12 @@ public class VolumeConfigWriter {
 	public void writeConfigFile() throws ParserConfigurationException,
 			IOException {
 		File dir = new File(OSValidator.getConfigPath());
-		if(!dir.exists()) {
+		if (!dir.exists()) {
 			System.out.println("making" + dir.getAbsolutePath());
 			dir.mkdirs();
 		}
-		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim()
-				+ "-volume-cfg.xml");
+		File file = new File(OSValidator.getConfigPath()
+				+ this.volume_name.trim() + "-volume-cfg.xml");
 		// Create XML DOM document (Memory consuming).
 		Document xmldoc = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -280,35 +296,37 @@ public class VolumeConfigWriter {
 		// Document.
 		xmldoc = impl.createDocument(null, "subsystem-config", null);
 		// Root element.
+		
 		Element root = xmldoc.getDocumentElement();
 		root.setAttribute("version", Main.version);
 		Element locations = xmldoc.createElement("locations");
+		
 		locations.setAttribute("dedup-db-store", this.dedup_db_store);
 		locations.setAttribute("io-log", this.io_log);
 		root.appendChild(locations);
+		
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
-		io.setAttribute("file-read-cache", Integer
-				.toString(this.file_read_cache));
+		io.setAttribute("file-read-cache",
+				Integer.toString(this.file_read_cache));
 		io.setAttribute("max-file-inactive", "900");
-		io.setAttribute("max-file-write-buffers", Integer
-				.toString(this.max_file_write_buffers));
-		io
-				.setAttribute("max-open-files", Integer
-						.toString(this.max_open_files));
-		io.setAttribute("meta-file-cache", Integer
-				.toString(this.meta_file_cache));
-		io.setAttribute("multi-read-timeout", Integer
-				.toString(this.multi_read_timeout));
+		io.setAttribute("max-file-write-buffers",
+				Integer.toString(this.max_file_write_buffers));
+		io.setAttribute("max-open-files", Integer.toString(this.max_open_files));
+		io.setAttribute("meta-file-cache",
+				Integer.toString(this.meta_file_cache));
+		io.setAttribute("multi-read-timeout",
+				Integer.toString(this.multi_read_timeout));
 		io.setAttribute("safe-close", Boolean.toString(this.safe_close));
 		io.setAttribute("safe-sync", Boolean.toString(this.safe_sync));
-		io.setAttribute("system-read-cache", Integer
-				.toString(this.system_read_cache));
+		io.setAttribute("system-read-cache",
+				Integer.toString(this.system_read_cache));
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("hash-size", Integer.toString(this.hashSize));
 		root.appendChild(io);
+		
 		Element perm = xmldoc.createElement("permissions");
 		perm.setAttribute("default-file", this.filePermissions);
 		perm.setAttribute("default-folder", this.dirPermissions);
@@ -319,28 +337,39 @@ public class VolumeConfigWriter {
 		vol.setAttribute("capacity", this.volume_capacity);
 		vol.setAttribute("current-size", "0");
 		vol.setAttribute("path", this.base_path + File.separator + "files");
-		vol.setAttribute("maximum-percentage-full", Double.toString(this.max_percent_full));
+		vol.setAttribute("maximum-percentage-full",
+				Double.toString(this.max_percent_full));
 		root.appendChild(vol);
-
+		
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
-		cs.setAttribute("pre-allocate", Boolean
-				.toString(this.chunk_store_pre_allocate));
-		cs.setAttribute("allocation-size", Long
-				.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("pre-allocate",
+				Boolean.toString(this.chunk_store_pre_allocate));
+		cs.setAttribute("allocation-size",
+				Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
-		cs.setAttribute("eviction-age", Integer
-				.toString(this.remove_if_older_than));
-		cs.setAttribute("read-ahead-pages", Short
-				.toString(this.chunk_read_ahead_pages));
+		cs.setAttribute("eviction-age",
+				Integer.toString(this.remove_if_older_than));
+		cs.setAttribute("gc-class", this.gc_class);
+		cs.setAttribute("read-ahead-pages",
+				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
-		cs.setAttribute("chunk-store-read-cache", Integer.toString(this.chunk_store_read_cache));
-		cs.setAttribute("chunk-store-dirty-timeout", Integer.toString(this.chunk_store_dirty_timeout));
+		cs.setAttribute("chunk-store-read-cache",
+				Integer.toString(this.chunk_store_read_cache));
+		cs.setAttribute("chunk-store-dirty-timeout",
+				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
+		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		
-		if(this.awsEnabled) {
+		Element launchParams = xmldoc.createElement("launch-params");
+		launchParams.setAttribute("class-path", Main.classPath);
+		launchParams.setAttribute("java-path", Main.javaPath);
+		long mem = calcMem(this.chunk_store_allocation_size);
+		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"+mem+"m -Xms" +mem+ "m");
+		root.appendChild(launchParams);
+		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-access-key", this.awsAccessKey);
@@ -371,118 +400,113 @@ public class VolumeConfigWriter {
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(OptionBuilder.withLongOpt("help").withDescription(
-				"Display these options.").hasArg(false).create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("base-path")
-						.withDescription(
-								"the folder path for all volume data and meta data.\n Defaults to: \n "+OSValidator.getProgramBasePath()+"<volume name>")
-						.hasArg().withArgName("PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("dedup-db-store")
-						.withDescription(
-								"the folder path to location for the dedup file database.\n Defaults to: \n --base-path + "
-										+ File.separator + "ddb").hasArg()
-						.withArgName("PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-log")
-						.withDescription(
-								"the file path to location for the io log.\n Defaults to: \n --base-path + "
-										+ File.separator
-										+ "sdfs.log").hasArg()
-						.withArgName("PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-safe-close")
-						.withDescription(
-								"If true all files will be closed on filesystem close call. Otherwise, files will be closed"
-										+ " based on inactivity. Set this to false if you plan on sharing the file system over"
-										+ " an nfs share. True takes less RAM than False. \n Defaults to: \n true")
-						.hasArg().withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-safe-sync")
-						.withDescription(
-								"If true all files will sync locally on filesystem sync call. Otherwise, by defaule (false), files will sync"
-										+ " on close and data will per written to disk based on --max-file-write-buffers.  "
-										+ "Setting this to true will ensure that no data loss will occur if the system is turned off abrubtly"
-										+ " at the cost of slower speed. \n Defaults to: \n false")
-						.hasArg().withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-write-threads")
-						.withDescription(
-								"The number of threads that can be used to process data writted to the file system. \n Defaults to: \n 16")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-dedup-files")
-						.withDescription(
-								"True mean that all files will be deduped inline by default. This can be changed on a one off"
-										+ "basis by using the command \"setfattr -n user.cmd.dedupAll -v 556:false <path to file on sdfs volume>\"\n Defaults to: \n true")
-						.hasArg().withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-multi-read-timeout")
-						.withDescription(
-								"Timeout to try to read from cache before it request data from the chunkstore. \n Defaults to: \n 1000")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-system-read-cache")
-						.withDescription(
-								"Size, in number of chunks, that read chunks will be cached into memory. \n Defaults to: \n 1000")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-chunk-size")
-						.withDescription(
-								"The unit size, in kB, of chunks stored. Set this to 4 if you would like to dedup VMDK files inline.\n Defaults to: \n 128")
-						.hasArg().withArgName("SIZE in kB").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-max-file-write-buffers")
-						.withDescription(
-								"The amount of memory to have available for reading and writing per file. Each buffer in the size"
-										+ " of io-chunk-size. \n Defaults to: \n 24")
-						.hasArg().withArgName("SIZE in MB").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-file-read-cache")
-						.withDescription(
-								"The number of memory buffers to have available for reading per file. Each buffer in the size"
-										+ " of io-chunk-size. \n Defaults to: \n 5")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-max-open-files")
-						.withDescription(
-								"The maximum number of files that can be open at any one time. "
-										+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-meta-file-cache")
-						.withDescription(
-								"The maximum number metadata files to be cached at any one time. "
-										+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("io-claim-chunks-schedule")
-						.withDescription(
-								"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
-										+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
-						.hasArg().withArgName("CRON Schedule").create());
-		options.addOption(OptionBuilder.withLongOpt("permissions-file")
+		options.addOption(OptionBuilder.withLongOpt("help")
+				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("base-path")
+				.withDescription(
+						"the folder path for all volume data and meta data.\n Defaults to: \n "
+								+ OSValidator.getProgramBasePath()
+								+ "<volume name>").hasArg().withArgName("PATH")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("gc-class")
+				.withDescription(
+						"The class used for intelligent block garbage collection.\n Defaults to: \n "
+								+ Main.gcClass).hasArg().withArgName("CLASS NAME")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dedup-db-store")
+				.withDescription(
+						"the folder path to location for the dedup file database.\n Defaults to: \n --base-path + "
+								+ File.separator + "ddb").hasArg()
+				.withArgName("PATH").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-log")
+				.withDescription(
+						"the file path to location for the io log.\n Defaults to: \n --base-path + "
+								+ File.separator + "sdfs.log").hasArg()
+				.withArgName("PATH").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-safe-close")
+				.withDescription(
+						"If true all files will be closed on filesystem close call. Otherwise, files will be closed"
+								+ " based on inactivity. Set this to false if you plan on sharing the file system over"
+								+ " an nfs share. True takes less RAM than False. \n Defaults to: \n true")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-safe-sync")
+				.withDescription(
+						"If true all files will sync locally on filesystem sync call. Otherwise, by defaule (false), files will sync"
+								+ " on close and data will per written to disk based on --max-file-write-buffers.  "
+								+ "Setting this to true will ensure that no data loss will occur if the system is turned off abrubtly"
+								+ " at the cost of slower speed. \n Defaults to: \n false")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-write-threads")
+				.withDescription(
+						"The number of threads that can be used to process data writted to the file system. \n Defaults to: \n 16")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-dedup-files")
+				.withDescription(
+						"True mean that all files will be deduped inline by default. This can be changed on a one off"
+								+ "basis by using the command \"setfattr -n user.cmd.dedupAll -v 556:false <path to file on sdfs volume>\"\n Defaults to: \n true")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-multi-read-timeout")
+				.withDescription(
+						"Timeout to try to read from cache before it request data from the chunkstore. \n Defaults to: \n 1000")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-system-read-cache")
+				.withDescription(
+						"Size, in number of chunks, that read chunks will be cached into memory. \n Defaults to: \n 1000")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-chunk-size")
+				.withDescription(
+						"The unit size, in kB, of chunks stored. Set this to 4 if you would like to dedup VMDK files inline.\n Defaults to: \n 128")
+				.hasArg().withArgName("SIZE in kB").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-max-file-write-buffers")
+				.withDescription(
+						"The amount of memory to have available for reading and writing per file. Each buffer in the size"
+								+ " of io-chunk-size. \n Defaults to: \n 24")
+				.hasArg().withArgName("SIZE in MB").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-file-read-cache")
+				.withDescription(
+						"The number of memory buffers to have available for reading per file. Each buffer in the size"
+								+ " of io-chunk-size. \n Defaults to: \n 5")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-max-open-files")
+				.withDescription(
+						"The maximum number of files that can be open at any one time. "
+								+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-meta-file-cache")
+				.withDescription(
+						"The maximum number metadata files to be cached at any one time. "
+								+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-claim-chunks-schedule")
+				.withDescription(
+						"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
+								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
+				.hasArg().withArgName("CRON Schedule").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("permissions-file")
 				.withDescription(
 						"Default File Permissions. "
 								+ " \n Defaults to: \n 0644").hasArg()
 				.withArgName("POSIX PERMISSIONS").create());
-		options.addOption(OptionBuilder.withLongOpt("permissions-folder")
+		options.addOption(OptionBuilder
+				.withLongOpt("permissions-folder")
 				.withDescription(
 						"Default Folder Permissions. "
 								+ " \n Defaults to: \n 0755").hasArg()
@@ -493,111 +517,114 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("permissions-group")
 				.withDescription("Default Group. " + " \n Defaults to: \n 0")
 				.hasArg().withArgName("POSIX PERMISSIONS").create());
-		options.addOption(OptionBuilder.withLongOpt("volume-capacity")
+		options.addOption(OptionBuilder
+				.withLongOpt("volume-capacity")
 				.withDescription(
 						"Capacity of the volume in [MB|GB|TB]. "
 								+ " \n THIS IS A REQUIRED OPTION").hasArg()
 				.withArgName("SIZE [MB|GB|TB]").create());
-		options.addOption(OptionBuilder.withLongOpt("volume-name")
+		options.addOption(OptionBuilder
+				.withLongOpt("volume-name")
 				.withDescription(
 						"The name of the volume. "
 								+ " \n THIS IS A REQUIRED OPTION").hasArg()
 				.withArgName("STRING").create());
-		options.addOption(OptionBuilder.withLongOpt("volume-maximum-full-percentage")
-				.withDescription(
-						"The maximum percentage of the volume capacity, as set by volume-capacity, before the volume starts" +
-						"reporting that the disk is full. If the number is negative then it will be infinite. "
-								+ " \n e.g. --volume-maximum-full-percentage=100").hasArg()
-				.withArgName("PERCENTAGE").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("chunk-store-local")
-						.withDescription(
-								"enables or disables local chunk store. The chunk store can be "
-										+ "local(true or remote(false) provided you supply the routing config file "
-										+ "and there is a storageHub listening on the remote server(s) when you "
-										+ "mount the SDFS volume."
-										+ " \nDefaults to: \n true").hasArg()
-						.withArgName("true|flase").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("chunk-store-data-location").withDescription(
+				.withLongOpt("volume-maximum-full-percentage")
+				.withDescription(
+						"The maximum percentage of the volume capacity, as set by volume-capacity, before the volume starts"
+								+ "reporting that the disk is full. If the number is negative then it will be infinite. "
+								+ " \n e.g. --volume-maximum-full-percentage=100")
+				.hasArg().withArgName("PERCENTAGE").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-local")
+				.withDescription(
+						"enables or disables local chunk store. The chunk store can be "
+								+ "local(true or remote(false) provided you supply the routing config file "
+								+ "and there is a storageHub listening on the remote server(s) when you "
+								+ "mount the SDFS volume."
+								+ " \nDefaults to: \n true").hasArg()
+				.withArgName("true|flase").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-data-location")
+				.withDescription(
 						"The directory where chunks will be stored."
 								+ " \nDefaults to: \n --base-path + "
 								+ File.separator + "chunkstore"
 								+ File.separator + "chunks").hasArg()
 				.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt(
-				"chunk-store-hashdb-location").withDescription(
-				"The directory where hash database for chunk locations will be stored."
-						+ " \nDefaults to: \n --base-path + " + File.separator
-						+ "chunkstore" + File.separator + "hdb").hasArg()
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-hashdb-location")
+				.withDescription(
+						"The directory where hash database for chunk locations will be stored."
+								+ " \nDefaults to: \n --base-path + "
+								+ File.separator + "chunkstore"
+								+ File.separator + "hdb").hasArg()
 				.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("chunk-store-pre-allocate")
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-pre-allocate")
 				.withDescription(
 						"Pre-allocate the chunk store if true."
 								+ " \nDefaults to: \n false").hasArg()
 				.withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("chunk-read-ahead-pages")
-						.withDescription(
-								"The number of pages to read ahead when doing a disk read on the chunk store."
-										+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("chunk-store-gc-schedule")
-						.withDescription(
-								"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
-										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
-						.hasArg().withArgName("CRON Schedule").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("chunk-store-eviction")
-						.withDescription(
-								"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
-						.hasArg().withArgName("HOURS").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("chunk-store-size")
-						.withDescription(
-								"The size in bytes of the Dedup Storeage Engine. "
-										+ "This . \n Defaults to: \n The size of the Volume")
-						.hasArg().withArgName("BYTES").create());
-		options
-		.addOption(OptionBuilder
+		options.addOption(OptionBuilder
+				.withLongOpt("chunkstore-class")
+				.withDescription(
+						"The class for the specific chunk store to be used. \n Defaults to org.opendedup.sdfs.filestore.FileChunkStore")
+				.hasArg().withArgName("Class Name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-read-ahead-pages")
+				.withDescription(
+						"The number of pages to read ahead when doing a disk read on the chunk store."
+								+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-gc-schedule")
+				.withDescription(
+						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
+				.hasArg().withArgName("CRON Schedule").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-eviction")
+				.withDescription(
+						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
+				.hasArg().withArgName("HOURS").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-size")
+				.withDescription(
+						"The size in bytes of the Dedup Storeage Engine. "
+								+ "This . \n Defaults to: \n The size of the Volume")
+				.hasArg().withArgName("BYTES").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("hash-size")
 				.withDescription(
-						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer" +
-						"versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions" +
-						"below 1.0.1 ."
-								+ "This . \n Defaults to: \n 5MB")
-				.hasArg().withArgName("16 or 24 bytes").create());
-		options
-		.addOption(OptionBuilder
+						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer"
+								+ "versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions"
+								+ "below 1.0.1 ."
+								+ "This . \n Defaults to: \n 5MB").hasArg()
+				.withArgName("16 or 24 bytes").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-read-cache")
 				.withDescription(
-						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads" +
-						" for AWS/Cloud storage "
-								+ "This . \n Defaults to: \n 5MB")
-				.hasArg().withArgName("Megabytes").create());
-		options
-		.addOption(OptionBuilder
+						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads"
+								+ " for AWS/Cloud storage "
+								+ "This . \n Defaults to: \n 5MB").hasArg()
+				.withArgName("Megabytes").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-encrypt")
-						.withDescription(
-								"Whether or not to Encrypt chunks within the Dedup Storage Engine. The encryption key is generated automatically." +
-								" For AWS this is a good option to enable. The default for this is" +
-								" false")
-						.hasArg().withArgName("true|false").create());
-		options
-		.addOption(OptionBuilder
+				.withDescription(
+						"Whether or not to Encrypt chunks within the Dedup Storage Engine. The encryption key is generated automatically."
+								+ " For AWS this is a good option to enable. The default for this is"
+								+ " false").hasArg().withArgName("true|false")
+				.create());
+		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-dirty-timeout")
 				.withDescription(
-						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. " +
-						"For AWS with slow links you may want to set this to a higher number. The default for this is" +
-						" 1000 ms.")
-				.hasArg().withArgName("Milliseconds").create());
+						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. "
+								+ "For AWS with slow links you may want to set this to a higher number. The default for this is"
+								+ " 1000 ms.").hasArg()
+				.withArgName("Milliseconds").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
@@ -639,7 +666,8 @@ public class VolumeConfigWriter {
 					+ "] created with a capacity of [" + wr.volume_capacity
 					+ "]");
 			System.out
-					.println("check [" + OSValidator.getConfigPath()
+					.println("check ["
+							+ OSValidator.getConfigPath()
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
@@ -658,6 +686,12 @@ public class VolumeConfigWriter {
 				.printHelp(
 						"mkfs.sdfs --volume-name=sdfs --volume-capacity=100GB",
 						options);
+	}
+	
+	private static long calcMem(long dseSize) {
+		long mem = (dseSize/4096) *25;
+		mem = (mem/1024)/1024;
+		return mem + 1000;
 	}
 
 }

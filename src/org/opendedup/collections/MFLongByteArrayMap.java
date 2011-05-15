@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -65,7 +66,7 @@ public class MFLongByteArrayMap implements AbstractMap {
 
 	public void iterInit() throws IOException {
 		this.iterPos = 0;
-		iterbdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
+		iterbdb = (FileChannel) Files.newByteChannel(bdbf,StandardOpenOption.CREATE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ,
 				StandardOpenOption.SPARSE);
 	}
@@ -171,7 +172,7 @@ public class MFLongByteArrayMap implements AbstractMap {
 				}
 				flen = dbFile.length();
 				rafPool = new FCPool(filePath);
-				pbdb = (FileChannel) bdbf.newByteChannel(
+				pbdb = (FileChannel) Files.newByteChannel(bdbf,
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				this.mBuf = pbdb.map(MapMode.READ_WRITE, 0,
@@ -275,7 +276,7 @@ public class MFLongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(length);
-			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
+			_bdb = (FileChannel) Files.newByteChannel(bdbf,StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
 			_bdb.truncate(fpos);
@@ -306,7 +307,7 @@ public class MFLongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			_bdb = (FileChannel) bdbf.newByteChannel(StandardOpenOption.CREATE,
+			_bdb = (FileChannel) Files.newByteChannel(bdbf,StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.READ,
 					StandardOpenOption.SPARSE);
 			_bdb.write(ByteBuffer.wrap(FREE), fpos);
@@ -409,9 +410,9 @@ public class MFLongByteArrayMap implements AbstractMap {
 				dest.getParentFile().mkdirs();
 			if (OSValidator.isWindows()) {
 				SDFSLogger.getLog().info("Snapping on windows volume");
-				srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
+				srcC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()),
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
-				dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+				dstC = (FileChannel) Files.newByteChannel(Paths.get(dest.getPath()),
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);

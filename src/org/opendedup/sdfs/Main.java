@@ -13,31 +13,45 @@ import org.w3c.dom.Element;
  */
 public class Main {
 	static {
-		if(OSValidator.isWindows()) {
-			Main.chunkStore = System.getenv("programfiles") + File.separator + "sdfs" + File.separator ;
+		if (OSValidator.isWindows()) {
+			Main.chunkStore = System.getenv("programfiles") + File.separator
+					+ "sdfs" + File.separator;
 		}
 	}
+	
+	public static String logPath = "/var/log/sdfs.log";
+	/**
+	 * Class path when launching sdfs
+	 */
+	public static String classPath = "/usr/share/sdfs/lib/commons-collections-3.2.1.jar:/usr/share/sdfs/lib/nimbus-sdfs.jar:/usr/share/sdfs/lib/jacksum.jar:/usr/share/sdfs/lib/slf4j-log4j12-1.5.10.jar:/usr/share/sdfs/lib/slf4j-api-1.5.10.jar:/usr/share/sdfs/lib/simple-4.1.21.jar:/usr/share/sdfs/lib/commons-io-1.4.jar:/usr/share/sdfs/lib/clhm-release-1.0-lru.jar:/usr/share/sdfs/lib/trove-3.0.0a3.jar:/usr/share/sdfs/lib/quartz-1.8.3.jar:/usr/share/sdfs/lib/log4j-1.2.15.jar:/usr/share/sdfs/lib/bcprov-jdk16-143.jar:/usr/share/sdfs/lib/commons-codec-1.3.jar:/usr/share/sdfs/lib/commons-httpclient-3.1.jar:/usr/share/sdfs/lib/commons-logging-1.1.1.jar:/usr/share/sdfs/lib/java-xmlbuilder-1.jar:/usr/share/sdfs/lib/jets3t-0.7.4.jar:/usr/share/sdfs/lib/commons-cli-1.2.jar";
+
+	public static String javaOptions = "-Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Dfuse.logging.level=INFO -Xmn1g -server -XX:+UseLargePages -XX:+UseG1GC";
+	
+	public static String javaPath = "/usr/share/sdfs/jre1.7.0/bin/java";
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.0.2";
-	
+	public static String version = "1.9.8";
+
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk stores.
 	 */
 	public static String chunkStore = "";
-	
 	/**
-	 * Future implementation for pluggable chunkstores 
+	 * Future implementation for pluggable chunkstores
 	 */
 	public static Element chunkStoreConfig = null;
-	
 	/**
 	 * Future implementation of pluggable cs
 	 */
 	public static String chunkStoreClass = "org.opendedup.sdfs.filestore.NullChunkStore";
-	
+
+	/**
+	 * Future implementation of pluggable garbageCollector
+	 */
+	public static String gcClass = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
+
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
@@ -46,7 +60,7 @@ public class Main {
 	 * whether encryption should be enabled for the DSE
 	 */
 	public static boolean chunkStoreEncryptionEnabled = false;
-	
+
 	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
@@ -63,16 +77,16 @@ public class Main {
 	 * The virtual file structure maps what will be presented as the filesystem
 	 * is being mapped. This is used on the client.
 	 */
-	//public static String metaDBStore = "/opt/dedup/jdb";
+	// public static String metaDBStore = "/opt/dedup/jdb";
 	/**
-	 * The location where the IO stats SDFSLogger.getLog() file will be held. The IO SDFSLogger.getLog() file is
-	 * used to record IO stats at specific intervals. This is used on the client
-	 * and chunk store.
+	 * The location where the IO stats SDFSLogger.getLog() file will be held.
+	 * The IO SDFSLogger.getLog() file is used to record IO stats at specific
+	 * intervals. This is used on the client and chunk store.
 	 */
 	public static String ioLogFile = null;
 	/**
-	 * The location where debug and system SDFSLogger.getLog()s are kept. This is used on the
-	 * client and chunk store.
+	 * The location where debug and system SDFSLogger.getLog()s are kept. This
+	 * is used on the client and chunk store.
 	 */
 	public static String logLocation = null;
 	/**
@@ -114,6 +128,7 @@ public class Main {
 	 * is used on the client.
 	 */
 	public static int maxWriteBuffers = 100;
+	
 	/**
 	 * Write threads @see com.annesam.util.ThreadPool are used to process data
 	 * from dedup file write buffers in a multi threaded fashion. When data is
@@ -122,13 +137,14 @@ public class Main {
 	 * threads is set by writeThreads. The number here should be set to at least
 	 * the number of cpu cores used by the client. This is used on the client.
 	 */
+	
 	public static int writeThreads = 8;
 	/**
 	 * The representation of a blank hash of the default chunk size. This is
 	 * used on the client.
 	 */
+	
 	public static byte[] blankHash = new byte[CHUNK_LENGTH];
-
 	public static String internalMountPath = "/media";
 	public static String vmdkMountPath = "/media/vmmount";
 	public static String scriptsDir = "/opt/dedup/scripts/";
@@ -195,7 +211,7 @@ public class Main {
 	 * The Volume mount point. This is used on the client.
 	 */
 	public static String volumeMountPoint;
-	
+
 	/**
 	 * Determines whether dedup file map will be closed when the filesystem
 	 * requests that the represented file is. This should be set to false if NFS
@@ -220,8 +236,8 @@ public class Main {
 	 */
 	public static int maxInactiveFileTime = 15 * 60 * 1000;
 	/**
-	 * Specifies whether the Dedup Storage Engine will store data to AWS S3 or not. This
-	 * is set on the chunk store.
+	 * Specifies whether the Dedup Storage Engine will store data to AWS S3 or
+	 * not. This is set on the chunk store.
 	 */
 	public static boolean AWSChunkStore = false;
 	/**
@@ -250,6 +266,7 @@ public class Main {
 	 * client.
 	 */
 	public static int multiReadTimeout = 1000;
+	
 	/**
 	 * Pre-Allocates space for the TC datables on the chunk store. This is
 	 * specified per hash store and not for all hashes held. Typically this
@@ -278,8 +295,8 @@ public class Main {
 	public static boolean dedupFiles = false;
 
 	/**
-	 * The page size used for the Dedup Storage Engine. This should be the same as the
-	 * Chunk Length used on the client side.
+	 * The page size used for the Dedup Storage Engine. This should be the same
+	 * as the Chunk Length used on the client side.
 	 */
 	public static int chunkStorePageSize = 4096;
 
@@ -288,14 +305,15 @@ public class Main {
 	 * speed up reads quite a bit.
 	 */
 	public static int chunkStoreReadAheadPages = 4;
-	
+
 	/**
 	 * The size (MB) of pages (HashChunks) to cache for reading.
 	 */
 	public static int chunkStorePageCache = 5;
-	
+
 	/**
-	 * The time in milliseconds for a page cache to timeout while waiting for a chunck to be read.
+	 * The time in milliseconds for a page cache to timeout while waiting for a
+	 * chunck to be read.
 	 */
 	public static int chunkStoreDirtyCacheTimeout = 1000;
 
@@ -303,33 +321,37 @@ public class Main {
 	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean chunkStoreLocal = false;
-	
+
 	/**
 	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean enableNetworkChunkStore = false;
 
 	/**
-	 * the length of the hash. Will be either 16 or 24 depending on md/tiger128 or tiger192
+	 * the length of the hash. Will be either 16 or 24 depending on md/tiger128
+	 * or tiger192
 	 */
 	public static short hashLength = 24;
 	/**
 	 * FDisk Schedule in cron format
-	 *  @see org.opendedup.sdfs.FDISKJob
+	 * 
+	 * @see org.opendedup.sdfs.FDISKJob
 	 */
 	public static String fDkiskSchedule = "0 0 0/1 * * ?";
 	/**
 	 * Remove chunks schedule
+	 * 
 	 * @see org.opendedup.sdfs.RemoveChunksJob
 	 */
 	public static String gcChunksSchedule = "0 0 0/2 * * ?";
-	
+
 	/**
-	 * Age, if older than, that data will be evicted from the Dedup Storage Engine
+	 * Age, if older than, that data will be evicted from the Dedup Storage
+	 * Engine
 	 */
 	public static int evictionAge = 3;
 	/**
 	 * Compressed Index
 	 */
-	public static boolean compressedIndex =  false;
+	public static boolean compressedIndex = false;
 }

@@ -2,11 +2,13 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.Attributes;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.util.SDFSLogger;
@@ -179,10 +181,10 @@ public class MetaFileStore {
 			boolean deleted = false;
 			try {
 				Path p = Paths.get(path);
-				boolean isDir = Attributes.readBasicFileAttributes(p,
+				boolean isDir = Files.readAttributes(p,PosixFileAttributes.class,
 						LinkOption.NOFOLLOW_LINKS).isDirectory();
-				boolean isSymlink = Attributes.readBasicFileAttributes(p,
-						LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+				boolean isSymlink = Files.readAttributes(p,PosixFileAttributes.class,
+						LinkOption.NOFOLLOW_LINKS).isDirectory();
 				if (isDir) {
 					File ps = new File(path);
 					/*
@@ -196,15 +198,23 @@ public class MetaFileStore {
 					return (ps.delete());
 				}
 				if (isSymlink) {
-					p.delete();
+					p.toFile().delete();
 					p = null;
 					return true;
 				} else {
 					mf = getMF(path);
 					pathMap.remove(mf.getPath());
+					
+					Main.volume.updateCurrentSize(-1 * mf.length());
+					try {
+						Main.volume.addActualWriteBytes(-1 * mf.getIOMonitor().getActualBytesWritten());
+						Main.volume.addDuplicateBytes(-1 *  mf.getIOMonitor().getDuplicateBlocks());
+						Main.volume.addVirtualBytesWritten(-1 * mf.getIOMonitor().getVirtualBytesWritten());
+					}catch(Exception e) {
+						
+					}
 					deleted = mf.getDedupFile().delete();
 					deleted = mf.deleteStub();
-					Main.volume.updateCurrentSize(-1 * mf.length());
 					if (!deleted) {
 						SDFSLogger.getLog().info(
 								"could not delete " + mf.getPath());
@@ -229,12 +239,12 @@ public class MetaFileStore {
 	 * closes the jdbm database.
 	 */
 	public static void close() {
-		System.out.println("Closing metafilestore");
+		SDFSLogger.getLog().info("Closing metafilestore");
 		try {
 			commit();
 		} catch (Exception e) {
 		}
-		System.out.println("metafilestore closed");
+		SDFSLogger.getLog().info("metafilestore closed");
 	}
 
 }

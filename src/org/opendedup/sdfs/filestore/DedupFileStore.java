@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
@@ -177,7 +176,7 @@ public class DedupFileStore {
 	 */
 	public static DedupFile[] getArray() {
 		DedupFile[] dfr = new DedupFile[openFile.size()];
-		dfr = openFile.values().toArray(dfr);
+		openFile.values().toArray(dfr);
 		return dfr;
 	}
 
@@ -186,13 +185,15 @@ public class DedupFileStore {
 	 */
 	public static void close() {
 		closing = true;
-		System.out.println("closing write caches of size " + openFile.size());
+		SDFSLogger.getLog().debug("Open Files = " + openFile.size());
 		if (openFileMonitor != null)
 			openFileMonitor.close();
 		Object[] dfs = getArray();
+		SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
 			df.forceClose();
+			SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
 		}
 	}
 	/**

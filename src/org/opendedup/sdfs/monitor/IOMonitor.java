@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.monitor;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -15,6 +16,7 @@ public class IOMonitor implements java.io.Serializable {
 	private long actualBytesWritten;
 	private long bytesRead;
 	private long duplicateBlocks;
+	private final ReentrantLock updateLock = new ReentrantLock();
 
 	public IOMonitor() {
 	}
@@ -32,15 +34,24 @@ public class IOMonitor implements java.io.Serializable {
 	}
 
 	public void addBytesRead(int len) {
+		this.updateLock.lock();
 		this.bytesRead = this.bytesRead + len;
+		this.updateLock.unlock();
+		Main.volume.addReadBytes(len);
 	}
 
 	public void addActualBytesWritten(int len) {
+		this.updateLock.lock();
 		this.actualBytesWritten = this.actualBytesWritten + len;
+		this.updateLock.unlock();
+		Main.volume.addActualWriteBytes(len);
 	}
 
 	public void addVirtualBytesWritten(int len) {
+		this.updateLock.lock();
 		this.virtualBytesWritten = this.virtualBytesWritten + len;
+		this.updateLock.unlock();
+		Main.volume.addVirtualBytesWritten(len);
 	}
 
 	public void setVirtualBytesWritten(long len) {
@@ -61,14 +72,32 @@ public class IOMonitor implements java.io.Serializable {
 
 	public void setBytesRead(long bytesRead) {
 		this.bytesRead = bytesRead;
+		
 	}
 
 	public void removeDuplicateBlock() {
 			this.duplicateBlocks = this.duplicateBlocks - Main.CHUNK_LENGTH;
+			Main.volume.addDuplicateBytes(-1*Main.CHUNK_LENGTH);
+	}
+	
+	public void clearAllCounters() {
+		this.updateLock.lock();
+		Main.volume.addReadBytes(-1 * this.bytesRead);
+		Main.volume.addDuplicateBytes(-1 * this.duplicateBlocks);
+		Main.volume.addActualWriteBytes(-1 * this.actualBytesWritten);
+		Main.volume.addVirtualBytesWritten(-1 * this.virtualBytesWritten);
+		this.bytesRead = 0;
+		this.duplicateBlocks = 0;
+		this.actualBytesWritten = 0;
+		this.virtualBytesWritten = 0;
+		this.updateLock.unlock();
 	}
 
 	public void addDulicateBlock() {
-		this.duplicateBlocks = this.duplicateBlocks + Main.CHUNK_LENGTH;;
+		this.updateLock.lock();
+		this.duplicateBlocks = this.duplicateBlocks + Main.CHUNK_LENGTH;
+		this.updateLock.unlock();
+		Main.volume.addDuplicateBytes(Main.CHUNK_LENGTH);
 	}
 	
 	public byte[] toByteArray() {

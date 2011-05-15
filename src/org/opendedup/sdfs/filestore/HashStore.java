@@ -101,6 +101,15 @@ public class HashStore {
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
+	
+	/**
+	 * 
+	 * @return the total number of free blocks available for re-use
+	 * 
+	 */
+	public int getFreeBlocks() {
+		return bdb.getFreeBlocks();
+	}
 
 	/**
 	 * Initiates the chunkstore. It will create a S3 chunk store per HashStore
@@ -210,8 +219,8 @@ public class HashStore {
 		this.bdb.claimRecords();
 	}
 
-	public void evictChunks(long time) throws IOException {
-		this.bdb.removeRecords(time);
+	public long evictChunks(int time,boolean forceRun) throws IOException {
+		return this.bdb.removeRecords(time,forceRun);
 	}
 
 	/**

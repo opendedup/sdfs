@@ -50,7 +50,7 @@ public class CacheBuffer extends DedupChunk {
 	 *            the dedup chunk to copy to this Cachebuffer.
 	 * @throws IOException
 	 */
-	public CacheBuffer(DedupChunk dk) throws IOException {
+	public CacheBuffer(DedupChunk dk) throws IOException, BufferClosedException {
 		super(dk.getHash(), dk.getFilePosition(), dk.getLength(), dk
 				.isNewChunk());
 		this.chunk = dk.getChunk();

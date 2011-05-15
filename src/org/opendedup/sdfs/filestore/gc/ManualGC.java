@@ -7,25 +7,33 @@ import org.opendedup.util.SDFSLogger;
 
 public class ManualGC {
 
-	public static boolean gcStarted = false;
+	public static long clearChunks(int minutes) {
+		GCMain.gclock.lock();
+		if (GCMain.gcRunning) {
+			
+			GCMain.gclock.unlock();
+			return -1;
+		} else {
 
-	public static void clearChunks(int minutes) {
-		if (!gcStarted) {
-			gcStarted = true;
-			long tm = System.currentTimeMillis();
 			try {
+				GCMain.gcRunning = true;
+
+				long tm = System.currentTimeMillis();
 				new FDisk();
 				if (Main.chunkStoreLocal) {
 					HashChunkService.processHashClaims();
 					long crtm = System.currentTimeMillis() - tm;
-					HashChunkService.removeStailHashes(minutes + (int)((crtm/1000)/60));
+					return HashChunkService.removeStailHashes(minutes
+							+ (int) ((crtm / 1000) / 60), true);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish garbage collection",
 						e);
 			} finally {
-				gcStarted = false;
+				GCMain.gcRunning = false;
+				GCMain.gclock.unlock();
 			}
+			return 0;
 		}
 	}
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -33,7 +34,7 @@ public class WriteTest implements Runnable {
 			long len = 1024L * 1024L * 1024L * size;
 			long sz = 0;
 			Path ps = Paths.get(path);
-			FileChannel fc = (FileChannel) ps.newByteChannel(
+			FileChannel fc = (FileChannel) Files.newByteChannel(ps,
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);
 			Random rnd = new Random();
@@ -75,7 +76,7 @@ public class WriteTest implements Runnable {
 
 	public void delete() throws IOException {
 		Path ps = Paths.get(path);
-		ps.deleteIfExists();
+		Files.deleteIfExists(ps);
 	}
 
 	public static float[] test(String path, int size, boolean unique, int runs) {
@@ -164,13 +165,19 @@ public class WriteTest implements Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
+		if(args.length != 6) {
+			System.out.println("WriteTest <Path to write to> <File Size (GB)> <random data (true|false)> <Number of Parallel Runs> <Test Name> <Output File>");
+			System.exit(0);
+		}
 		float[] results = test(args[0], Integer.parseInt(args[1]),
 				Boolean.parseBoolean(args[2]), Integer.parseInt(args[3]));
+		
 		String testName = args[4];
 		String logFileName = args[5];
+		
 		Path p = Paths.get(logFileName);
-		boolean nf = !p.exists();
-		FileChannel ch = (FileChannel) p.newByteChannel(
+		boolean nf = !Files.exists(p);
+		FileChannel ch = (FileChannel) Files.newByteChannel(p,
 				StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.APPEND);
 		if (nf) {

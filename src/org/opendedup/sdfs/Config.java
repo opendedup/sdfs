@@ -10,8 +10,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -32,24 +30,27 @@ public class Config {
 	 * parse the hubstore config file
 	 * 
 	 * @param fileName
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public synchronized static void parseHubStoreConfigFile(String fileName) throws IOException {
+	public synchronized static void parseHubStoreConfigFile(String fileName)
+			throws IOException {
 		try {
 			File file = new File(fileName);
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			
+
 			Document doc = db.parse(file);
 			doc.getDocumentElement().normalize();
-			
+
 			String version = Main.version;
-			if(doc.getDocumentElement().hasAttribute("version")){
+			if (doc.getDocumentElement().hasAttribute("version")) {
 				version = doc.getDocumentElement().getAttribute("version");
 				Main.version = version;
 			}
-			
-			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
+
+			SDFSLogger.getLog().info(
+					"Parsing " + doc.getDocumentElement().getNodeName()
+							+ " version " + version);
 			Element network = (Element) doc.getElementsByTagName("network")
 					.item(0);
 			Main.serverHostName = network.getAttribute("hostname");
@@ -64,11 +65,12 @@ public class Config {
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
 					.item(0);
 			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
-			if(cbe.hasAttribute("chunkstore-class")) {
+			if (cbe.hasAttribute("chunkstore-class")) {
 				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
 			}
-			if(cbe.getElementsByTagName("extended-config").getLength() > 0) {
-				Main.chunkStoreConfig = (Element)cbe.getElementsByTagName("extended-config").item(0);
+			if (cbe.getElementsByTagName("extended-config").getLength() > 0) {
+				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName(
+						"extended-config").item(0);
 			}
 			Main.preAllocateChunkStore = Boolean.parseBoolean(cbe
 					.getAttribute("pre-allocate"));
@@ -79,18 +81,26 @@ public class Config {
 			Main.chunkStoreReadAheadPages = Integer.parseInt(cbe
 					.getAttribute("read-ahead-pages"));
 			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
-			if(cbe.hasAttribute("hash-size")) {
-				Main.hashLength = Short.parseShort(cbe.getAttribute("hash-size"));
-				SDFSLogger.getLog().info("Setting hash size to " + Main.hashLength);
+			if (cbe.hasAttribute("hash-size")) {
+				Main.hashLength = Short.parseShort(cbe
+						.getAttribute("hash-size"));
+				SDFSLogger.getLog().info(
+						"Setting hash size to " + Main.hashLength);
 			}
-			Main.evictionAge = Integer.parseInt(cbe.getAttribute("eviction-age"));
-			if(cbe.hasAttribute("chunk-store-read-cache"));
-				Main.chunkStorePageCache = Integer.parseInt(cbe.getAttribute("chunk-store-read-cache"));
-			if(cbe.hasAttribute("chunk-store-dirty-timeout"))
-				Main.chunkStoreDirtyCacheTimeout = Integer.parseInt(cbe.getAttribute("chunk-store-dirty-timeout"));
-			if(cbe.hasAttribute("encrypt")) {
-				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe.getAttribute("encrypt"));
-				Main.chunkStoreEncryptionKey = cbe.getAttribute("encryption-key");
+			Main.evictionAge = Integer.parseInt(cbe
+					.getAttribute("eviction-age"));
+			if (cbe.hasAttribute("chunk-store-read-cache"))
+				;
+			Main.chunkStorePageCache = Integer.parseInt(cbe
+					.getAttribute("chunk-store-read-cache"));
+			if (cbe.hasAttribute("chunk-store-dirty-timeout"))
+				Main.chunkStoreDirtyCacheTimeout = Integer.parseInt(cbe
+						.getAttribute("chunk-store-dirty-timeout"));
+			if (cbe.hasAttribute("encrypt")) {
+				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe
+						.getAttribute("encrypt"));
+				Main.chunkStoreEncryptionKey = cbe
+						.getAttribute("encryption-key");
 			}
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
@@ -101,22 +111,26 @@ public class Config {
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
 				Main.awsBucket = aws.getAttribute("aws-bucket-name");
-				Main.awsCompress = Boolean.parseBoolean(aws.getAttribute("compress"));
+				Main.awsCompress = Boolean.parseBoolean(aws
+						.getAttribute("compress"));
 			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
-				SDFSLogger.getLog().info("creating chunk store at " + Main.chunkStore);
+				SDFSLogger.getLog().info(
+						"creating chunk store at " + Main.chunkStore);
 				f.mkdirs();
 			}
 
 			f = new File(Main.hashDBStore);
 			if (!f.exists()) {
-				SDFSLogger.getLog().info("creating hash database store at " + Main.chunkStore);
+				SDFSLogger.getLog().info(
+						"creating hash database store at " + Main.chunkStore);
 				f.mkdirs();
 			}
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to parse config file ["+fileName+"]", e);
+			SDFSLogger.getLog().fatal(
+					"unable to parse config file [" + fileName + "]", e);
 			throw new IOException(e);
 		}
 	}
@@ -134,15 +148,17 @@ public class Config {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		doc.getDocumentElement().normalize();
-		
+
 		String version = "0.8.12";
-		if(doc.getDocumentElement().hasAttribute("version")){
+		if (doc.getDocumentElement().hasAttribute("version")) {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
 		}
-		
+		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
 		Main.version = version;
-		SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
+		SDFSLogger.getLog().info(
+				"Parsing " + doc.getDocumentElement().getNodeName()
+						+ " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations")
 				.item(0);
 		SDFSLogger.getLog().info("parsing folder locations");
@@ -156,7 +172,7 @@ public class Config {
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
 		Main.writeThreads = Integer.parseInt(cache
 				.getAttribute("write-threads"));
-		if(cache.hasAttribute("hash-size")) {
+		if (cache.hasAttribute("hash-size")) {
 			Main.hashLength = Short.parseShort(cache.getAttribute("hash-size"));
 			SDFSLogger.getLog().info("Setting hash size to " + Main.hashLength);
 		}
@@ -174,7 +190,7 @@ public class Config {
 				.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
-		Main.fDkiskSchedule =  cache.getAttribute("claim-hash-schedule");
+		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
@@ -188,64 +204,78 @@ public class Config {
 		Main.defaultDirPermissions = Integer.parseInt(permissions
 				.getAttribute("default-folder"));
 		Main.chunkStorePageSize = Main.CHUNK_LENGTH;
-		
+
 		SDFSLogger.getLog().debug("parsing local chunkstore parameters");
 		Element localChunkStore = (Element) doc.getElementsByTagName(
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
-		
+
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
+			if (localChunkStore.hasAttribute("gc-name"))
+				Main.gcClass = localChunkStore.getAttribute("gc-name");
 			// Main.chunkStoreMetaData =
 			// localChunkStore.getAttribute("chunk-store-metadata");
-			Main.chunkStoreAllocationSize = Long.parseLong(
-					localChunkStore.getAttribute("allocation-size"));
-			Main.gcChunksSchedule = localChunkStore.getAttribute("chunk-gc-schedule");
+			Main.chunkStoreAllocationSize = Long.parseLong(localChunkStore
+					.getAttribute("allocation-size"));
+			Main.gcChunksSchedule = localChunkStore
+					.getAttribute("chunk-gc-schedule");
 			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
-			if(localChunkStore.hasAttribute("chunkstore-class"))
-				Main.chunkStoreClass = localChunkStore.getAttribute("chunkstore-class");
-			if(localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
-				Main.chunkStoreConfig = (Element)localChunkStore.getElementsByTagName("extended-config").item(0);
+			if (localChunkStore.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = localChunkStore
+						.getAttribute("chunkstore-class");
+			if (localChunkStore.getElementsByTagName("extended-config")
+					.getLength() > 0) {
+				Main.chunkStoreConfig = (Element) localChunkStore
+						.getElementsByTagName("extended-config").item(0);
 			}
-			
-			Main.evictionAge = Integer.parseInt(localChunkStore.getAttribute("eviction-age"));
-			if(localChunkStore.hasAttribute("encrypt")) {
-				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean("encrypt");
-				Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
+
+			Main.evictionAge = Integer.parseInt(localChunkStore
+					.getAttribute("eviction-age"));
+			if (localChunkStore.hasAttribute("encrypt")) {
+				Main.chunkStoreEncryptionEnabled = Boolean
+						.parseBoolean("encrypt");
+				Main.chunkStoreEncryptionKey = localChunkStore
+						.getAttribute("encryption-key");
 			}
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
 					.getAttribute("pre-allocate"));
 			Main.chunkStoreReadAheadPages = Integer.parseInt(localChunkStore
 					.getAttribute("read-ahead-pages"));
-			 Element networkcs = (Element) doc.getElementsByTagName("network").item(0);
-			 if(networkcs != null) {
-				 Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs.getAttribute("enable"));
-				 Main.serverHostName = networkcs.getAttribute("listen-ip");
-				 Main.serverPort = Integer.parseInt(networkcs.getAttribute("port"));
-			 }
-			SDFSLogger.getLog().info("######### Will allocate " + Main.chunkStoreAllocationSize
-					+ " in chunkstore ##############");
+			Element networkcs = (Element) doc.getElementsByTagName("network")
+					.item(0);
+			if (networkcs != null) {
+				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
+						.getAttribute("enable"));
+				Main.serverHostName = networkcs.getAttribute("listen-ip");
+				Main.serverPort = Integer.parseInt(networkcs
+						.getAttribute("port"));
+			}
+			SDFSLogger.getLog().info(
+					"######### Will allocate " + Main.chunkStoreAllocationSize
+							+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
+				Element aws = (Element) localChunkStore.getElementsByTagName(
+						"aws").item(0);
 				Main.AWSChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
 				Main.awsAccessKey = aws.getAttribute("aws-access-key");
 				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
 				Main.awsBucket = aws.getAttribute("aws-bucket-name");
-				Main.awsCompress = Boolean.parseBoolean(aws.getAttribute("compress"));
+				Main.awsCompress = Boolean.parseBoolean(aws
+						.getAttribute("compress"));
 			}
 		}
 
 		/*
-		IOMeter meter = new IOMeter(Main.ioLogFile);
-		Thread th = new Thread(meter);
-		th.start();
-		*/
+		 * IOMeter meter = new IOMeter(Main.ioLogFile); Thread th = new
+		 * Thread(meter); th.start();
+		 */
 	}
 
 	/**
@@ -260,12 +290,12 @@ public class Config {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
+		Element root = doc.getDocumentElement();
 		doc.getDocumentElement().normalize();
-		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
-		System.out.println("Writing volume config = "
-				+ volume.getAttribute("path"));
-		volume.setAttribute("current-size", Long.toString(Main.volume
-				.getCurrentSize()));
+		Element volume = (Element) root.getElementsByTagName("volume").item(0);
+		root.removeChild(volume);
+		volume = Main.volume.toXMLElement(doc);
+		root.appendChild(volume);
 		try {
 			// Prepare the DOM document for writing
 			Source source = new DOMSource(doc);
@@ -276,11 +306,11 @@ public class Config {
 			Transformer xformer = TransformerFactory.newInstance()
 					.newTransformer();
 			xformer.transform(source, result);
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"Unable to write volume config " + fileName, e);
 		}
+		SDFSLogger.getLog().info("Wrote volume config = " + fileName);
 	}
 
 	public static synchronized void parserRoutingFile(String fileName)
@@ -294,44 +324,52 @@ public class Config {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e1) {
-			SDFSLogger.getLog().fatal( "unable to parse config file [" + fileName + "]",e1);
+			SDFSLogger.getLog().fatal(
+					"unable to parse config file [" + fileName + "]", e1);
 			throw new IOException(e1);
 		}
 		Document doc = null;
 		try {
 			doc = db.parse(file);
 		} catch (SAXException e1) {
-			SDFSLogger.getLog().fatal( "unable to parse config file [" + fileName + "]",e1);
+			SDFSLogger.getLog().fatal(
+					"unable to parse config file [" + fileName + "]", e1);
 			throw new IOException(e1);
 		}
 		doc.getDocumentElement().normalize();
-		SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName());
+		SDFSLogger.getLog().info(
+				"Parsing " + doc.getDocumentElement().getNodeName());
 		Element servers = (Element) doc.getElementsByTagName("servers").item(0);
 
 		SDFSLogger.getLog().info("parsing Servers");
 		NodeList server = servers.getElementsByTagName("server");
 		for (int s = 0; s < server.getLength(); s++) {
-			SDFSLogger.getLog().info("Connection to  Servers [" + server.getLength() + "]");
+			SDFSLogger.getLog().info(
+					"Connection to  Servers [" + server.getLength() + "]");
 			Element _server = (Element) server.item(s);
 			HCServer hcs = new HCServer(_server.getAttribute("host").trim(),
 					Integer.parseInt(_server.getAttribute("port").trim()),
 					Boolean.parseBoolean(_server.getAttribute("use-udp")),
 					Boolean.parseBoolean(_server.getAttribute("compress")));
 			try {
-				HCServiceProxy.writeServers.put(_server.getAttribute("name")
-						.trim(), new HashClientPool(hcs, _server.getAttribute(
-						"name").trim(), Integer.parseInt(_server
-						.getAttribute("network-threads"))));
-				HCServiceProxy.readServers.put(_server.getAttribute("name")
-						.trim(), new HashClientPool(hcs, _server.getAttribute(
-						"name").trim(), Integer.parseInt(_server
-						.getAttribute("network-threads"))));
+				HCServiceProxy.writeServers.put(
+						_server.getAttribute("name").trim(),
+						new HashClientPool(hcs, _server.getAttribute("name")
+								.trim(), Integer.parseInt(_server
+								.getAttribute("network-threads"))));
+				HCServiceProxy.readServers.put(
+						_server.getAttribute("name").trim(),
+						new HashClientPool(hcs, _server.getAttribute("name")
+								.trim(), Integer.parseInt(_server
+								.getAttribute("network-threads"))));
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn( "unable to connect to server "
-						+ _server.getAttribute("name").trim(), e);
+				SDFSLogger.getLog().warn(
+						"unable to connect to server "
+								+ _server.getAttribute("name").trim(), e);
 				throw new IOException("unable to connect to server");
 			}
-			SDFSLogger.getLog().info("Added Server " + _server.getAttribute("name"));
+			SDFSLogger.getLog().info(
+					"Added Server " + _server.getAttribute("name"));
 		}
 		Element _c = (Element) doc.getElementsByTagName("chunks").item(0);
 		NodeList chunks = _c.getElementsByTagName("chunk");
@@ -345,6 +383,38 @@ public class Config {
 					HCServiceProxy.readServers.get(chunk.getAttribute("server")
 							.trim()));
 		}
+
+	}
+
+	public static synchronized void parserLaunchConfig(String fileName)
+			throws IOException {
+		File file = new File(fileName);
+		SDFSLogger.getLog().info("Parsing launch  config " + fileName);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = null;
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (ParserConfigurationException e1) {
+			SDFSLogger.getLog().fatal(
+					"unable to parse config file [" + fileName + "]", e1);
+			throw new IOException(e1);
+		}
+		Document doc = null;
+		try {
+			doc = db.parse(file);
+		} catch (SAXException e1) {
+			SDFSLogger.getLog().fatal(
+					"unable to parse config file [" + fileName + "]", e1);
+			throw new IOException(e1);
+		}
+		doc.getDocumentElement().normalize();
+		Element launchParams = (Element) doc.getElementsByTagName("launch-params").item(0);
+		Main.classPath = launchParams.getAttribute("class-path");
+		SDFSLogger.getLog().info("SDFS Classpath=" + Main.javaPath);
+		Main.javaOptions = launchParams.getAttribute("java-options");
+		SDFSLogger.getLog().info("SDFS Java options=" + Main.javaOptions);
+		Main.javaPath = launchParams.getAttribute("java-path");
+		SDFSLogger.getLog().info("SDFS java path=" + Main.javaPath);
 
 	}
 

@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import org.opendedup.sdfs.servers.SDFSService;
+import org.opendedup.util.SDFSLogger;
 
 class ShutdownHook extends Thread {
 	private SDFSService service;
@@ -13,17 +14,15 @@ class ShutdownHook extends Thread {
 
 	public void run() {
 
-		System.out.println("Please Wait while shutting down SDFS");
-		System.out.println("Data Can be lost if this is interrupted");
+		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
+		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
 		service.stop();
-		System.out.println("All Data Flushed");
+		SDFSLogger.getLog().info("All Data Flushed");
 		try {
 			Process p = Runtime.getRuntime().exec("umount " + mountPoint);
 			p.waitFor();
 		} catch (Exception e) {
 		}
-		System.out.println("SDFS Shut Down Cleanly");
-		
-
+		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
 	}
 }

@@ -35,7 +35,7 @@ public interface DedupFile {
 	/**
 	 * Writes all the cache buffers to the dedup chunk store service
 	 */
-	public abstract void writeCache() throws IOException,HashtableFullException;
+	public abstract int writeCache() throws IOException,HashtableFullException;
 
 	/**
 	 * 
@@ -85,8 +85,7 @@ public interface DedupFile {
 	 *            written
 	 * @throws IOException
 	 */
-	public abstract void writeCache(WritableCacheBuffer writeBuffer,
-			boolean removeWhenWritten) throws IOException,HashtableFullException;
+	public abstract void writeCache(WritableCacheBuffer writeBuffer) throws IOException,HashtableFullException;
 
 	/**
 	 * 

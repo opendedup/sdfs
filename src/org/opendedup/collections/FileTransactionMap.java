@@ -15,9 +15,8 @@ import org.opendedup.util.SDFSLogger;
 import com.ning.compress.lzf.LZFDecoder;
 import com.ning.compress.lzf.LZFEncoder;
 
-public class ByteArrayLongMap {
+public class FileTransactionMap {
 	ByteBuffer values = null;
-	ByteBuffer claims = null;
 	ByteBuffer keys = null;
 	byte[] compValues = null;
 	byte[] compClaims = null;
@@ -37,7 +36,7 @@ public class ByteArrayLongMap {
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public ByteArrayLongMap(int size, short arraySize) throws IOException {
+	public FileTransactionMap(int size, short arraySize) throws IOException {
 		this.size = size;
 		this.setUp();
 	}
@@ -62,45 +61,7 @@ public class ByteArrayLongMap {
 		return null;
 	}
 
-	public byte[] nextClaimedKey(boolean clearClaim) {
-		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * FREE.length);
-			keys.get(key);
-			iterPos++;
-			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				claims.position(iterPos - 1);
-				byte claimed = claims.get();
-				if (clearClaim) {
-					claims.position(iterPos - 1);
-					claims.put((byte) 0);
-				}
-				if (claimed == 1)
-					return key;
-			}
-		}
-		return null;
-	}
-
-	public long nextClaimedValue(boolean clearClaim) {
-		while (iterPos < size) {
-			long val = -1;
-			values.position(iterPos * 8);
-			val = values.getLong();
-			iterPos++;
-			if (val >= 0) {
-				claims.position(iterPos - 1);
-				byte claimed = claims.get();
-				if (clearClaim) {
-					claims.position(iterPos - 1);
-					claims.put((byte) 0);
-				}
-				if (claimed == 1)
-					return val;
-			}
-		}
-		return -1;
-	}
+	
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -115,7 +76,6 @@ public class ByteArrayLongMap {
 		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
-			claims = ByteBuffer.allocateDirect(size);
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];
@@ -128,7 +88,6 @@ public class ByteArrayLongMap {
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
-			claims.put((byte) 0);
 			// store.put((byte) 0);
 			kSz++;
 		}
@@ -146,7 +105,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
 			values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
-			claims = ByteBuffer.wrap(LZFDecoder.decode(compClaims));
 		}
 	}
 
@@ -154,7 +112,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			keys = null;
 			values = null;
-			claims = null;
 		}
 	}
 
@@ -162,7 +119,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			compKeys = LZFEncoder.encode(keys.array());
 			compValues = LZFEncoder.encode(values.array());
-			compClaims = LZFEncoder.encode(claims.array());
 		}
 	}
 
@@ -179,12 +135,10 @@ public class ByteArrayLongMap {
 			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
-				int pos = (index / FREE.length);
-				this.claims.position(pos);
-				this.claims.put((byte) 1);
 				return true;
 			}
 			return false;
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
@@ -208,9 +162,6 @@ public class ByteArrayLongMap {
 					pos = (pos / FREE.length) * 8;
 					this.values.position(pos);
 					this.values.putLong(value);
-					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 1);
 					// this.store.position(pos);
 					// this.store.put(storeID);
 					return true;
@@ -234,13 +185,7 @@ public class ByteArrayLongMap {
 			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
-			this.claims.position(pos / FREE.length);
-			byte claimed = this.claims.get();
-			if (pos == -1) {
-				return false;
-			} else if (claimed == 1) {
-				return false;
-			} else {
+			
 				try {
 					keys.position(pos);
 					keys.put(REMOVED);
@@ -248,9 +193,6 @@ public class ByteArrayLongMap {
 					this.values.position(pos);
 					this.values.position(pos);
 					this.values.putLong(-1);
-					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 0);
 					// this.store.position(pos);
 					// this.store.put((byte)0);
 					this.entries = entries - 1;
@@ -260,7 +202,6 @@ public class ByteArrayLongMap {
 				} finally {
 					this.compress();
 				}
-			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
@@ -425,8 +366,6 @@ public class ByteArrayLongMap {
 			this.values.position(pos);
 			this.values.putLong(value);
 			pos = (pos / 8);
-			this.claims.position(pos);
-			this.claims.put((byte) 1);
 			// this.store.position(pos);
 			// this.store.put(storeID);
 			this.entries = entries + 1;
@@ -449,11 +388,8 @@ public class ByteArrayLongMap {
 		return this.entries;
 	}
 
-	public long get(byte[] key) {
-		return this.get(key, true);
-	}
 
-	public long get(byte[] key, boolean claim) {
+	public long get(byte[] key) {
 		try {
 			this.hashlock.lock();
 			this.decompress();
@@ -466,11 +402,6 @@ public class ByteArrayLongMap {
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long val = this.values.getLong();
-				if (claim) {
-					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 1);
-				}
 				return val;
 			}
 		} catch (Exception e) {
@@ -488,7 +419,7 @@ public class ByteArrayLongMap {
 	}
 
 	public static void main(String[] args) throws Exception {
-		ByteArrayLongMap b = new ByteArrayLongMap(1000000, (short) 16);
+		FileTransactionMap b = new FileTransactionMap(1000000, (short) 16);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
 		byte[] hash = null;
@@ -533,7 +464,6 @@ public class ByteArrayLongMap {
 		start = System.currentTimeMillis();
 		vals = 0;
 		while (key != null) {
-			key = b.nextClaimedKey(false);
 			if (Arrays.equals(key, hash1))
 				System.out.println("found it! at " + vals);
 			vals++;
@@ -541,13 +471,9 @@ public class ByteArrayLongMap {
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms " + vals);
 		b.iterInit();
-		long v = 0;
 		start = System.currentTimeMillis();
 		vals = 0;
-		while (v >= 0) {
-			v = b.nextClaimedValue(true);
-			vals++;
-		}
+		
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms " + vals);
 	}
