@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -27,8 +28,8 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 	}
 
 	private byte[] readBlockFile(Path blockFile) throws IOException {
-		SeekableByteChannel fc = (SeekableByteChannel) blockFile
-				.newByteChannel(StandardOpenOption.READ);
+		SeekableByteChannel fc = (SeekableByteChannel) Files
+				.newByteChannel(blockFile,StandardOpenOption.READ);
 		byte[] b = new byte[(int) fc.size()];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		fc.read(buf);
@@ -37,7 +38,7 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 		return buf.array();
 	}
 
-	public byte[] getChunk() throws IOException {
+	public byte[] getChunk() throws IOException, BufferClosedException {
 		if (Main.safeSync) {
 			StringBuffer sb = new StringBuffer();
 			sb.append(df.getDatabaseDirPath());

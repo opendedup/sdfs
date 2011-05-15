@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -205,9 +206,9 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			else
 				dest.getParentFile().mkdirs();
 			if (OSValidator.isWindows()) {
-				srcC = (FileChannel) Paths.get(src.getPath()).newByteChannel(
+				srcC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()),
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
-				dstC = (FileChannel) Paths.get(dest.getPath()).newByteChannel(
+				dstC = (FileChannel) Files.newByteChannel(Paths.get(dest.getPath()),
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);
@@ -244,7 +245,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 				f.getParentFile().mkdirs();
 			Path p = Paths.get(this.fileName);
 			Path dest = Paths.get(destFilePath);
-			p.moveTo(dest);
+			Files.move(p, dest);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {

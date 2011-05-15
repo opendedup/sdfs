@@ -3,6 +3,7 @@ package fuse.SDFS.utils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -18,8 +19,8 @@ public class FileUtils {
 	public static void main(String[] args) throws IOException {
 		File f = new File(args[0]);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) p
-				.getFileAttributeView(PosixFileAttributeView.class);
+		PosixFileAttributeView view = (PosixFileAttributeView) Files
+				.getFileAttributeView(p,PosixFileAttributeView.class);
 		PosixFileAttributes attrs1 = (PosixFileAttributes) view
 				.readAttributes();
 		Set<PosixFilePermission> perms = attrs1.permissions();
@@ -142,16 +143,16 @@ public class FileUtils {
 			set.add(PosixFilePermission.OTHERS_EXECUTE);
 		File f = new File(path);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) p
-				.getFileAttributeView(PosixFileAttributeView.class);
+		PosixFileAttributeView view = (PosixFileAttributeView) Files
+				.getFileAttributeView(p,PosixFileAttributeView.class);
 		view.setPermissions(set);
 	}
 
 	public static int getFilePermissions(String path) throws IOException {
 		File f = new File(path);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) p
-				.getFileAttributeView(PosixFileAttributeView.class);
+		PosixFileAttributeView view = (PosixFileAttributeView) Files
+				.getFileAttributeView(p,PosixFileAttributeView.class);
 
 		PosixFileAttributes attrs1 = (PosixFileAttributes) view
 				.readAttributes();

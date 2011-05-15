@@ -1,9 +1,33 @@
+Version 1.0.5
+	Fixes :
+	* Fixed garbage collection on large files. Files over 500GB were not being claimed correctly because of the use of 32 bit integers.
+	* Fixed for newest version of Java 7. Please update your java to the latest version to use this file.
+	Enhancements :
+	* SDFS now logs to files located in /var/log/sdfs/<config-name>.log. Logs roll after 10MB and one archive log is kept.
+	
+Version 1.0.4
+	Fixes :
+	Enhancements :
+	* Changed mkfs.sdfs commandline attribute --chunk-store-size to take MB/GB/TB
+		e.g. --chunk-store-size=100GB
+	
+Version 1.0.3
+	Fixes :
+	Enhancements :
+	* Added new Garbage Collection Framework.
+		1. Threshold GC - Garbage Collection runs when DSE grows by a 10% step. This GC trades off better performance for higher
+		realtime storage utilization. To enable this GC edit the local-chunkstore tag within the volume config and modify/add the 
+		attribute gc-name="org.opendedup.sdfs.filestore.gc.PFullGC".
+	* Added mkfs.sdfs commandline parameter gc-class. This can be used to set the garbage collection strategy at volume creation. 
+	  The two build in options for this are  org.opendedup.sdfs.filestore.gc.PFullGC and org.opendedup.sdfs.filestore.gc.ContinuousGC.
+	* Added output to sdfscli --dse-info parameter called "DSE Percent Full". This calculates the percentage full for the dse.
+
 Version 1.0.2
 	Fixes :
 	Enhancements :
 	* Optimize file option no longer takes a length.
 	* Faster throughput through better threading
-	
+
 Version 1.0.1
 	Fixes :
 	* Snapshots were not functioning correctly
@@ -26,7 +50,6 @@ Version 1.0.0
 	for newer volumes
 	* Performance : NFS performance should be on par between safeclose="true" and safeclose="false"
 	* Performance : Some slight memory enhancements.
-
 Version 0.9.7
 	Fixes
 	* SDFSCli : fixed command line for dedup-all. It was not parsing correctly
@@ -40,7 +63,6 @@ Version 0.9.7
 	define the maximum size of a volume for writes. to set it to 100% of the volume capacity set maximum-percentage-full="100". The
 	attribute itself goes into the <volume> tag. e.g. <volume maximum-percentage-full="200" [other options].... />. It it set to a "-1"
 	it will be ignored.
-	
 Version 0.9.6 9/20/2010
 	This versions focuses on fixes to Windows port of SDFS and memory utilization. 
 	
@@ -53,7 +75,6 @@ Version 0.9.6 9/20/2010
 	* Files can now be an unlimited size. Files used to be limited to approximately 250GB in size. This has been expanded to the size
 	allotted by the underlying file system.
 	* Better memory utilization. Changes to file maps should allow for better memory utilization for larger files.
-
 Version 0.9.5 9/12/2010
 	This version focuses on porting SDFS to Windows. SDFS can now be mounted on Windows (tested with Windows 7). Dokan and Java 7(32 bit) 
 	are required for Windows Support. Windows support is experimental and not well tested. All features should work the same own Windows
@@ -62,7 +83,6 @@ Version 0.9.5 9/12/2010
 	Enhancements :
 	* Windows (32bit) Support. 
 	* New Command Line Interface for getting file statistics and creating snapshots. Command line help is available using sdfscli --help. 
-	
 Version 0.9.4 8/27/2010
 	This version focuses on enabling cloud based storage deduplication. The storage backend for the dedup storage engine has been rewritten to
 	allow for cloud storage. Amazon S3 is the first storage provider that has been added but others will be added as requested. Basically all 
@@ -73,13 +93,11 @@ Version 0.9.4 8/27/2010
 	* AES 256 bit Encryption of data to cloud dedup storage engine. 
 	* Compression for S3 cloud storage. 
 	* Improved read performance through caching requests.
-	
 Version 0.9.3 8/15/2010
 	Fixes
 	* Fixed Verbose Logging. All logging is now outputted to log4j.
 	* Fixed Nonempry dirs deleted by rmdir
 	* Fixed extended attributes and dedupAll bit not being read from file meta-data
-	
 Version 0.9.2 5/2/2010
 	Fixes	
 	* Major Bug Fixed that removed data after time through garbage collection. All users should update to this release immediately.
@@ -90,7 +108,6 @@ Version 0.9.1 4/24/2010
 	* Getting extended attributes that do not exist not exits as expected. This fix was needed for mounting of NFS mounted volumes
 	Enhancements :
 	* Caching of permissions improves performance for NFS writes.
-	
 Version 0.9.0 4/18/2010
 	First Release of the 0.9.x tree. 0.9 will focus primarily of Volume Replication and bug fixes. SDFS has introduced a new 
 	data scheme for file system meta data. This new scheme is not compatible with older volumes. If you would like to migrate
@@ -112,8 +129,6 @@ Version 0.9.0 4/18/2010
 	* Data Storage Performance has been increased by approximately 15% due to various DSE enhancements.
 	* Better performance for file level snapshots.
 	* Enables volume replication through rsync of volume namespace. DSE replication will be coming in later 0.9.x versions.
-	
-	
 Version 0.8.15 4/12/2010
 	This release focuses on enhancements and bug fixes found during scalability testing. 
 	

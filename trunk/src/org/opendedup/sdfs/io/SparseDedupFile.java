@@ -5,11 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.collections.map.AbstractLinkedMap;
+import org.apache.commons.collections.map.LRUMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
@@ -22,9 +23,6 @@ import org.opendedup.util.DeleteDir;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
-
-import org.apache.commons.collections.map.AbstractLinkedMap;
-import org.apache.commons.collections.map.LRUMap;
 
 public class SparseDedupFile implements DedupFile {
 
@@ -42,40 +40,31 @@ public class SparseDedupFile implements DedupFile {
 			Main.writeThreads + 1);
 	// private transient ArrayList<PreparedStatement> insertStatements = new
 	// ArrayList<PreparedStatement>();
-	private static transient final ThreadPool pool = new ThreadPool(
+	protected static transient final ThreadPool pool = new ThreadPool(
 			Main.writeThreads + 1, 8192);
-	private ReentrantLock channelLock = new ReentrantLock();
-	private ReentrantLock initLock = new ReentrantLock();
-	private ReentrantLock writeBufferLock = new ReentrantLock();
+	private final ReentrantLock channelLock = new ReentrantLock();
+	private final ReentrantLock initLock = new ReentrantLock();
+	private final ReentrantLock writeBufferLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
-	// private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) /
-	// Main.CHUNK_LENGTH) + 1;
-	private int maxWriteBuffers = Main.maxWriteBuffers;
-	private transient ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
-			4096);
+	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
+	protected transient ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
+			4096, .75f, Main.writeThreads + 1);
 	@SuppressWarnings("serial")
-	private transient LRUMap writeBuffers = new LRUMap(maxWriteBuffers + 1,
+	protected transient LRUMap writeBuffers = new LRUMap(maxWriteBuffers + 1,
 			false) {
 		protected boolean removeLRU(AbstractLinkedMap.LinkEntry eldest) {
 			if (size() >= maxWriteBuffers) {
 				WritableCacheBuffer writeBuffer = (WritableCacheBuffer) eldest
 						.getValue();
 				if (writeBuffer != null) {
-					
-					
 					try {
-						if(flushingBuffers.containsKey(eldest.getKey()))
-								SDFSLogger.getLog().info("snap!!!");
-						writeBuffer.flush(true);
-						flushingBuffers.put(writeBuffer.getFilePosition(),
-								writeBuffer);
-						
-					} finally {
+						writeBuffer.flush();
+					} catch (Exception e) {
+						SDFSLogger.getLog().info(
+								"while closing position "
+										+ writeBuffer.getFilePosition(), e);
 					}
-					pool.execute(writeBuffer);
-					
 				}
-				return true;
 			}
 			return false;
 		}
@@ -95,7 +84,6 @@ public class SparseDedupFile implements DedupFile {
 		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
 		this.mf = mf;
 		this.init();
-
 	}
 
 	/*
@@ -111,11 +99,11 @@ public class SparseDedupFile implements DedupFile {
 			ch = this.getChannel();
 			this.writeCache();
 			this.sync();
-
 			SparseDedupFile _df = new SparseDedupFile(snapmf);
 			_df.bdb.vanish();
 			_df.chunkStore.vanish();
 			_df.forceClose();
+			this.writeBufferLock.lock();
 			bdb.copy(_df.getDatabasePath());
 			chunkStore.copy(_df.chunkStorePath);
 			return _df;
@@ -123,6 +111,7 @@ public class SparseDedupFile implements DedupFile {
 			SDFSLogger.getLog().warn("unable to clone file " + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
 		} finally {
+			this.writeBufferLock.unlock();
 			if (ch != null)
 				ch.close();
 			ch = null;
@@ -138,6 +127,7 @@ public class SparseDedupFile implements DedupFile {
 						Main.blankHash, false, System.currentTimeMillis());
 				bdb.put(pos, chunk.getBytes());
 			}
+			
 			mf.setLength(len, true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
@@ -189,7 +179,7 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#writeCache()
 	 */
-	public void writeCache() throws IOException, HashtableFullException {
+	public int writeCache() throws IOException, HashtableFullException {
 		Object[] buffers = null;
 		this.writeBufferLock.lock();
 		try {
@@ -200,12 +190,15 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.writeBufferLock.unlock();
 		}
-		int z = 0;
+
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-			buf.flush(true);
-			this.writeCache(buf, true);
-			z++;
+			try {
+				buf.flush();
+			} catch (BufferClosedException e) {
+				SDFSLogger.getLog().error(
+						"while closing position " + buf.getFilePosition(), e);
+			}
 		}
 		try {
 			SDFSLogger.getLog().debug(
@@ -214,107 +207,81 @@ public class SparseDedupFile implements DedupFile {
 			buffers = this.flushingBuffers.values().toArray();
 		} finally {
 		}
+		int z = 0;
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-			buf.flush(true);
-			this.writeCache(buf, true);
+			try {
+			buf.close();
+			}catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"while closing position " + buf.getFilePosition(), e);
+			}
 			z++;
 		}
-		SDFSLogger.getLog().debug(
-				"flushed " + z + " buffers from " + mf.getPath());
+		return z;
 	}
 
-	public void writeCache(WritableCacheBuffer writeBuffer,
-			boolean removeWhenWritten) throws IOException,
+	public void writeCache(WritableCacheBuffer writeBuffer) throws IOException,
 			HashtableFullException {
 		if (this.closed) {
 			return;
 			// throw new IOException("file already closed");
 		}
-		
 		if (writeBuffer == null)
 			return;
-			if(!removeWhenWritten && !this.flushingBuffers.containsKey(writeBuffer.getFilePosition())) {
-				SDFSLogger.getLog().info("wtf???");
-				return;
-			}
-
 		if (writeBuffer.isDirty()) {
 			AbstractHashEngine hc = hashPool.borrowObject();
 			byte[] hash = null;
 			try {
-				hash = hc.getHash(writeBuffer.getChunk());
+				hash = hc.getHash(writeBuffer.getFlushedBuffer());
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
 				hashPool.returnObject(hc);
 			}
-			boolean doop = HCServiceProxy.writeChunk(hash,
-					writeBuffer.getChunk(), writeBuffer.getLength(),
-					writeBuffer.capacity(), mf.isDedup());
-			mf.getIOMonitor().addVirtualBytesWritten(
-					writeBuffer.getCurrentLen());
-			if (!doop) {
-				mf.getIOMonitor().addActualBytesWritten(
-						writeBuffer.getCurrentLen());
-				if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk())
-					mf.getIOMonitor().removeDuplicateBlock();
-			}
-			if (writeBuffer.getFilePosition() == 0
-					&& mf.getPath().endsWith(".vmdk")) {
-				try {
-					VMDKData data = VMDKParser.parserVMDKFile(writeBuffer
-							.getChunk());
-					if (data != null) {
-						mf.setVmdk(true);
-						SDFSLogger.getLog().debug(data.toString());
-					}
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn(
-							"Unable to parse vmdk header for  " + mf.getPath(),
-							e);
-				}
-			}
+			boolean doop = false;
 			try {
+				doop = HCServiceProxy.writeChunk(hash,
+						writeBuffer.getFlushedBuffer(),
+						writeBuffer.getLength(), writeBuffer.capacity(),
+						mf.isDedup());
+				mf.getIOMonitor()
+						.addVirtualBytesWritten(writeBuffer.capacity());
+				if (!doop) {
+					if(writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
+						mf.getIOMonitor().addActualBytesWritten(
+								writeBuffer.capacity());
+					}
+					if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk()) {
+						mf.getIOMonitor().removeDuplicateBlock();
+					}
+				}
+				if (writeBuffer.getFilePosition() == 0
+						&& mf.getPath().endsWith(".vmdk")) {
+					try {
+						VMDKData data = VMDKParser.parserVMDKFile(writeBuffer
+								.getFlushedBuffer());
+						if (data != null) {
+							mf.setVmdk(true);
+							SDFSLogger.getLog().debug(data.toString());
+						}
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"Unable to parse vmdk header for  "
+										+ mf.getPath(), e);
+					}
+				}
+
 				this.updateMap(writeBuffer, hash, doop);
 				if (doop && !writeBuffer.isPrevDoop())
 					mf.getIOMonitor().addDulicateBlock();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().fatal(
 						"unable to add chunk [" + writeBuffer.getHash()
 								+ "] at position "
 								+ writeBuffer.getFilePosition(), e);
 			} finally {
-				//WritableCacheBuffer buf = null;
-				try {
-					this.flushingBuffers.remove(writeBuffer
-							.getFilePosition());
-					/*
-					if (buf != null && !buf.equals(writeBuffer)) {
-						SDFSLogger.getLog().info("page fault");
-						this.flushingBuffers.put(buf.getFilePosition(), buf);
-					}else if(buf== null && !removeWhenWritten) {
-						SDFSLogger.getLog().info("removing  " + writeBuffer.getFilePosition());
-					}
-					else if (buf!= null ) {
-						buf.destroy();
-					}
-					*/
-				} catch (Exception e) {
-				} finally {
-				}
-					
-			}
 
-			if (removeWhenWritten) {
-				this.writeBufferLock.lock();
-				try {
-					this.writeBuffers.remove(new Long(writeBuffer
-							.getFilePosition()));
-				} finally {
-					this.writeBufferLock.unlock();
-				}
-				writeBuffer.destroy();
 			}
 
 		}
@@ -339,7 +306,8 @@ public class SparseDedupFile implements DedupFile {
 			} else {
 				chunk = new SparseDataChunk(doop, hash, true,
 						System.currentTimeMillis());
-				this.chunkStore.put(filePosition, writeBuffer.getChunk());
+				this.chunkStore.put(filePosition,
+						writeBuffer.getFlushedBuffer());
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
@@ -364,29 +332,23 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file already closed");
 		}
 		try {
-
 			long chunkPos = this.getChuckPosition(position);
 			this.writeBufferLock.lock();
 			WritableCacheBuffer writeBuffer = (WritableCacheBuffer) this.writeBuffers
 					.get(chunkPos);
+			if (writeBuffer == null) {
+				writeBuffer = (WritableCacheBuffer) this.flushingBuffers
+						.get(chunkPos);
 
-			if (writeBuffer != null && writeBuffer.isClosed()) {
-				writeBuffer.open();
-			} else if (writeBuffer == null) {
-					writeBuffer = (WritableCacheBuffer) this.flushingBuffers.remove(chunkPos);
-				if (writeBuffer != null) {
-					writeBuffer.open();
-					this.writeBuffers.put(chunkPos, writeBuffer);
-				}
 			}
 			if (writeBuffer == null) {
 				writeBuffer = marshalWriteBuffer(chunkPos, newBuff);
-				this.writeBuffers.put(chunkPos, writeBuffer);
 			}
+			writeBuffer.open();
 			return writeBuffer;
 		} finally {
 			this.writeBufferLock.unlock();
-			
+
 		}
 	}
 
@@ -428,27 +390,24 @@ public class SparseDedupFile implements DedupFile {
 				this.channelLock.unlock();
 			}
 		}
-		long chunkPos = this.getChuckPosition(position);
-		DedupChunk readBuffer = null;
 		try {
+			long chunkPos = this.getChuckPosition(position);
 			this.writeBufferLock.lock();
-			readBuffer = (WritableCacheBuffer) this.writeBuffers.get(chunkPos);
-			this.writeBufferLock.unlock();
-			if (readBuffer == null) {
-				try {
-					readBuffer = this.flushingBuffers
-							.get(chunkPos);
-				} finally {
-					//this.flushingLock.unlock();
-				}
+			WritableCacheBuffer writeBuffer = (WritableCacheBuffer) this.writeBuffers
+					.get(chunkPos);
+			if (writeBuffer == null) {
+				writeBuffer = (WritableCacheBuffer) this.flushingBuffers
+						.get(chunkPos);
+
 			}
-			if (readBuffer == null) {
-				DedupChunk ck = this.getHash(position, true);
-				readBuffer = new ReadOnlyCacheBuffer(ck, this);
+			if (writeBuffer == null) {
+				writeBuffer = marshalWriteBuffer(chunkPos, false);
 			}
-			return readBuffer;
+			writeBuffer.open();
+			return writeBuffer;
 		} finally {
-			
+			this.writeBufferLock.unlock();
+
 		}
 	}
 
@@ -581,6 +540,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	public void forceClose() {
+		this.writeBufferLock.lock();
 		this.initLock.lock();
 		this.channelLock.lock();
 		try {
@@ -606,9 +566,11 @@ public class SparseDedupFile implements DedupFile {
 					}
 				}
 				try {
-					this.writeCache();
+					SDFSLogger.getLog().debug(
+							"Flushed " + this.writeCache() + " buffers");
 				} catch (Exception e) {
-					System.exit(0);
+					SDFSLogger.getLog().error(
+							"unable to flush " + this.databasePath, e);
 				}
 				try {
 					this.bdb.sync();
@@ -639,6 +601,7 @@ public class SparseDedupFile implements DedupFile {
 			this.closed = true;
 			this.channelLock.unlock();
 			this.initLock.unlock();
+			this.writeBufferLock.unlock();
 		}
 	}
 
@@ -902,10 +865,9 @@ public class SparseDedupFile implements DedupFile {
 					byte dk[] = chunkStore.get(place);
 					ck = new DedupChunk(pck.getHash(), dk, place,
 							Main.CHUNK_LENGTH);
-					ck.setDoop(pck.isDoop());
 				}
+				ck.setDoop(pck.isDoop());
 				pck = null;
-
 			}
 			b = null;
 			if (ck == null && create == true) {
@@ -928,16 +890,15 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#removeHash(long)
 	 */
-	private ReentrantLock removeHashLock = new ReentrantLock();
 
 	public void removeHash(long location) throws IOException {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
 		long place = this.getChuckPosition(location);
-		removeHashLock.lock();
+		this.writeBufferLock.lock();
 		try {
-
+			this.writeCache();
 			this.bdb.remove(place);
 			if (!mf.isDedup())
 				this.chunkStore.remove(place);
@@ -946,23 +907,31 @@ public class SparseDedupFile implements DedupFile {
 					"unable to remove chunk at position " + place, e);
 			throw new IOException(e);
 		} finally {
-			removeHashLock.unlock();
+			this.writeBufferLock.unlock();
 		}
 	}
 
-	private ReentrantLock truncateLock = new ReentrantLock();
 
 	public void truncate(long size) throws IOException {
-		truncateLock.lock();
+		this.writeBufferLock.lock();
 		try {
 			if (this.closed) {
 				throw new IOException("file already closed");
 			}
+			
+			this.writeCache();
+			if(size == 0) {
+				this.mf.getIOMonitor().clearAllCounters();
+			}
 			this.bdb.truncate(size);
 			if (!mf.isDedup())
 				this.chunkStore.setLength(size);
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn(
+					"unable to truncate to " + size, e);
+			throw new IOException(e);
 		} finally {
-			truncateLock.unlock();
+			this.writeBufferLock.unlock();
 		}
 
 	}

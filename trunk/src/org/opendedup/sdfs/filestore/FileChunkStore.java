@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -13,13 +14,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.DirectBufPool;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.FCPool;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
-
-import sun.nio.ch.FileChannelImpl;
 
 /**
  * 
@@ -30,20 +27,17 @@ import sun.nio.ch.FileChannelImpl;
  *         of deletion (1 byte)|hash lenth(2 bytes)|hash(32 bytes)|date added (8
  *         bytes)|date last accessed (8 bytes)| chunk len (4 bytes)|chunk
  *         position (8 bytes)]
- */
+ **/
 public class FileChunkStore implements AbstractChunkStore {
 	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
-	private FileChannel chunkDataReader = null;
+	private FileChannel fc = null;
 	private RandomAccessFile chunkDataWriter = null;
-	private RandomAccessFile in = null;
 	private static File chunk_location = new File(Main.chunkStore);
 	File f;
 	Path p;
 	private long currentLength = 0L;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
-	private FCPool rafPool = null;
-	private DirectBufPool bufPool = null;
 	private String name;
 
 	private byte[] FREE = new byte[pageSize];
@@ -65,11 +59,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
 			this.currentLength = chunkDataWriter.length();
-			in = new RandomAccessFile(f, "r");
-			chunkDataReader = in.getChannel();
 			this.closed = false;
-			this.rafPool = new FCPool(f.getPath());
-			this.bufPool = new DirectBufPool(pageSize);
+			fc = chunkDataWriter.getChannel();
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -84,24 +75,18 @@ public class FileChunkStore implements AbstractChunkStore {
 	public void closeStore() {
 
 		try {
-			synchronized (chunkDataWriter) {
-				chunkDataWriter.close();
-			}
+			fc.force(true);
+			
 		} catch (IOException e) {
 		}
+
 		try {
-			synchronized (chunkDataReader) {
-				chunkDataReader.force(true);
-				chunkDataReader.close();
-			}
+			fc.close();
+			
 		} catch (IOException e) {
 		}
-		try {
-			synchronized (in) {
-				in.close();
-			}
-		} catch (IOException e) {
-		}
+		fc = null;
+		
 	}
 
 	/*
@@ -185,30 +170,19 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		FileChannelImpl raf = null;
 		ByteBuffer buf = null;
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
-			raf = rafPool.borrowObject();
-			buf = this.bufPool.borrowObject();
-			buf.put(chunk);
-			buf.flip();
-			raf.write(buf, start);
+			buf = ByteBuffer.wrap(chunk);
+			fc.write(buf, start);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data at position " + start, e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
-
-			try {
-				if (raf != null)
-					rafPool.returnObject(raf);
-				if (buf != null)
-					bufPool.returnObject(buf);
-			} catch (Exception e) {
-			}
+			buf=null;
 			hash = null;
 			chunk = null;
 			len = 0;
@@ -221,24 +195,19 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
-		FileChannelImpl raf = null;
 
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 
 		try {
-			raf = rafPool.borrowObject();
-			raf.read(fbuf, start);
+			fc.read(fbuf, start);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + start, e);
 			throw new IOException(e);
 		} finally {
 			try {
-				if (raf != null)
-					rafPool.returnObject(raf);
 			} catch (Exception e) {
 			}
-			raf = null;
 		}
 		return fbuf.array();
 	}
@@ -263,7 +232,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			this.closed = true;
 			this.closeStore();
-			this.rafPool.close();
+
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			raf.getChannel().force(true);
 		} catch (Exception e) {

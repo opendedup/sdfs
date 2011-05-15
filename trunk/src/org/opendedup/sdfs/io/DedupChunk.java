@@ -110,7 +110,7 @@ public class DedupChunk implements java.io.Serializable {
 	public void setNewChunk(boolean newChunk) {
 		this.newChunk = newChunk;
 	}
-	public byte[] getChunk() throws IOException {
+	public byte[] getChunk() throws IOException, BufferClosedException {
 		this.lock.lock();
 		try {
 		if (data != null)
@@ -151,6 +151,10 @@ public class DedupChunk implements java.io.Serializable {
 
 	public boolean isDoop() {
 		return doop;
+	}
+	
+	public void open() {
+		
 	}
 
 }

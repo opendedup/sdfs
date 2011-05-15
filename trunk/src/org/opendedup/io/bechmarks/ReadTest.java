@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -29,7 +30,7 @@ public class ReadTest implements Runnable {
 			long len = new File(path).length();
 			long sz = 0;
 			Path ps = Paths.get(path);
-			FileChannel fc = (FileChannel) ps.newByteChannel(
+			FileChannel fc = (FileChannel) Files.newByteChannel(ps,
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);
 			ByteBuffer buf = ByteBuffer.allocateDirect(bs);
@@ -66,7 +67,7 @@ public class ReadTest implements Runnable {
 
 	public void delete() throws IOException {
 		Path ps = Paths.get(path);
-		ps.deleteIfExists();
+		Files.deleteIfExists(ps);
 	}
 
 	public static float[] test(String path, int runs) {
@@ -154,12 +155,16 @@ public class ReadTest implements Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
+		if(args.length != 4) {
+			System.out.println("ReadTest <Path to read from> <Number of Parallel Runs> <Test Name> <Output File>");
+			System.exit(0);
+		}
 		float[] results = test(args[0], Integer.parseInt(args[1]));
 		String testName = args[2];
 		String logFileName = args[3];
 		Path p = Paths.get(logFileName);
-		boolean nf = !p.exists();
-		FileChannel ch = (FileChannel) p.newByteChannel(
+		boolean nf = !Files.exists(p);
+		FileChannel ch = (FileChannel) Files.newByteChannel(p,
 				StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.APPEND);
 		if (nf) {

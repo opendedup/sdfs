@@ -11,8 +11,8 @@ public class CleanStoreCmd implements XtendedCmd {
 	public String getResult(String cmd, String file) throws IOException {
 		int minutes = Integer.parseInt(cmd);
 		try {
-			ManualGC.clearChunks(minutes);
-			return "SUCCESS Clean Store: cleanded dedup storage engine of data not claimed in  [" + minutes + "] ";
+			long chunks = ManualGC.clearChunks(minutes);
+			return "SUCCESS Clean Store: cleanded dedup storage engine of ["+chunks +"] records not claimed in  [" + minutes + "] ";
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("ERROR Clean Store: unable to cleand dedup storage engine of data not claimed in  [" + minutes + "] because :" + e.toString(), e);
 			throw new IOException("ERROR Clean Store: unable to cleand dedup storage engine of data not claimed in  [" + minutes + "] because :" + e.toString());

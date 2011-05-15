@@ -17,6 +17,7 @@ public class GetDSE implements XtendedCmd {
 				Element root = doc.getDocumentElement();
 				root.setAttribute("max-size", Long.toString(HashChunkService.getMaxSize()* HashChunkService.getPageSize()));
 				root.setAttribute("current-size", Long.toString(HashChunkService.getSize()* HashChunkService.getPageSize()));
+				root.setAttribute("free-blocks", Long.toString(HashChunkService.getFreeBlocks()));
 				root.setAttribute("page-size", Long.toString(HashChunkService.getPageSize()));
 				return XMLUtils.toXMLString(doc);
 			} catch (Exception e) {

@@ -23,8 +23,8 @@ public class SDFSGCScheduler {
 			props.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
 			props.setProperty("org.quartz.threadPool.threadCount", "1");
-			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(Thread.MIN_PRIORITY));
-			SDFSLogger.getLog().info("Scheduling Garbage Collection Jobs for SDFS");
+			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(Thread.NORM_PRIORITY));
+			SDFSLogger.getLog().info("Scheduling FDISK Jobs for SDFS");
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();

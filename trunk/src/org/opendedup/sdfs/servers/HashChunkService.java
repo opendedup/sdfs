@@ -51,7 +51,9 @@ public class HashChunkService {
 			}
 		try {
 			hs = new HashStore();
+			if(!Main.chunkStoreLocal || Main.enableNetworkChunkStore) {
 			csGC = new ChunkStoreGCScheduler();
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal( "unable to start hashstore", e);
 			System.exit(-1);
@@ -112,10 +114,10 @@ public class HashChunkService {
 	}
 
 	public static void removeStailHashes() throws IOException {
-		hs.evictChunks(System.currentTimeMillis() - Main.evictionAge*60*60*1000);
+		hs.evictChunks(Main.evictionAge*60*60*1000,false);
 	}
-	public static void removeStailHashes(int minutes) throws IOException {
-		hs.evictChunks(System.currentTimeMillis() - minutes*60*1000);
+	public static long removeStailHashes(int minutes,boolean forceRun) throws IOException {
+		return hs.evictChunks(minutes*60*1000,forceRun);
 	}
 
 	public static void commitChunks() {
@@ -125,6 +127,10 @@ public class HashChunkService {
 	
 	public static long getSize() {
 		return hs.getEntries();
+	}
+	
+	public static long getFreeBlocks() {
+		return hs.getFreeBlocks();
 	}
 	
 	public static long getMaxSize() {
@@ -157,7 +163,8 @@ public class HashChunkService {
 
 	public static void close() {
 		fileStore.close();
-		csGC.stopSchedules();
+		if(csGC != null)
+			csGC.stopSchedules();
 		hs.close();
 
 	}

@@ -49,7 +49,6 @@ public class IOMeter implements Runnable {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

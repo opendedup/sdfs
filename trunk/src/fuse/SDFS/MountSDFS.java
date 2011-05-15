@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
+import org.opendedup.util.OSValidator;
 
 import fuse.FuseMount;
 
@@ -123,7 +124,10 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(-1);
 		}
-
+		if(OSValidator.isUnix())
+			Main.logPath = "/var/log/sdfs/" + volname + ".log";
+		if(OSValidator.isWindows())
+			Main.logPath = Main.volume.getPath() +"\\log\\" + Main.volume.getName() + ".log";
 		SDFSService sdfsService = new SDFSService(volumeConfigFile,routingConfigFile);
 
 		try {

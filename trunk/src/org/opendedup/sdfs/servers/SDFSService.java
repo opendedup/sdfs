@@ -2,12 +2,12 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
-
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
+import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkHCServer;
 import org.opendedup.util.OSValidator;
@@ -17,17 +17,18 @@ public class SDFSService {
 	String configFile;
 
 	private SDFSGCScheduler gc = null;
+	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
 
 	public SDFSService(String configFile, String routingFile) {
 
 		this.configFile = configFile;
 		this.routingFile = routingFile;
-		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
+		System.out.println("Running SDFS Version " + Main.version);
 		if (routingFile != null)
 			SDFSLogger.getLog().info(
 					"reading routing config file = " + this.routingFile);
-		SDFSLogger.getLog().info("reading config file = " + this.configFile);
+		System.out.println("reading config file = " + this.configFile);
 	}
 
 	public void start() throws Exception {
@@ -44,39 +45,43 @@ public class SDFSService {
 			} else {
 				HashChunkService.init();
 			}
+			this.stGC = new StandAloneGCScheduler();
 		}
 		MgmtWebServer.start();
-		gc = new SDFSGCScheduler();
+		if (!Main.chunkStoreLocal) {
+			gc = new SDFSGCScheduler();
+		}
 	}
 
 	public void stop() {
-		System.out.println("Shutting Down SDFS");
-		System.out.println("Stopping FDISK scheduler");
-		gc.stopSchedules();
-		System.out.println("Flushing and Closing Write Caches");
+		SDFSLogger.getLog().info("Shutting Down SDFS");
+		SDFSLogger.getLog().info("Stopping FDISK scheduler");
+		if (!Main.chunkStoreLocal) {
+			gc.stopSchedules();
+		} else {
+			this.stGC.close();
+		}
+		SDFSLogger.getLog().info("Flushing and Closing Write Caches");
 		DedupFileStore.close();
-		System.out.println("Write Caches Flushed and Closed");
-		System.out.println("Committing open Files");
+		SDFSLogger.getLog().info("Write Caches Flushed and Closed");
+		SDFSLogger.getLog().info("Committing open Files");
 		MetaFileStore.close();
-		System.out.println("Open File Committed");
-		System.out.println("Writing Config File");
+		SDFSLogger.getLog().info("Open File Committed");
+		SDFSLogger.getLog().info("Writing Config File");
 		try {
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		if (Main.chunkStoreLocal) {
-			System.out.println("Shutting down HashStore");
+			SDFSLogger.getLog().info("Shutting down HashStore");
 			HashChunkService.close();
 		}
 		/*
-		try {
-			MD5CudaHash.freeMem();
-		} catch (Exception e) {
-		}
-		*/
+		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
+		 */
 		MgmtWebServer.stop();
-		System.out.println("SDFS is Shut Down");
+		SDFSLogger.getLog().info("SDFS is Shut Down");
 		try {
 			Process p = Runtime.getRuntime().exec(
 					"umount " + Main.volumeMountPoint);

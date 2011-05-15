@@ -219,8 +219,10 @@ public class DedupFileChannel {
 				// quit.
 				if ((endPos) <= Main.CHUNK_LENGTH) {
 					boolean newBuf = false;
+					/*
 					if (endPos == Main.CHUNK_LENGTH)
 						newBuf = true;
+					*/
 					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[bytesLeft];
 					try {
@@ -247,8 +249,10 @@ public class DedupFileChannel {
 				} else {
 					int _len = Main.CHUNK_LENGTH - startPos;
 					boolean newBuf = false;
+					/*
 					if (_len == Main.CHUNK_LENGTH)
 						newBuf = true;
+					*/
 					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[_len];
 					try {
@@ -279,7 +283,7 @@ public class DedupFileChannel {
 				}
 				mf.setLastModified(System.currentTimeMillis());
 			}
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.mf.getPath() + " "
@@ -424,20 +428,31 @@ public class DedupFileChannel {
 						.getFilePosition());
 				int endPos = startPos + bytesLeft;
 				try {
+					byte[] _rb = null;
+					while (_rb == null) {
+						try {
+							_rb = readBuffer.getChunk();
+						} catch (BufferClosedException e) {
+							_rb = null;
+							readBuffer = df.getReadBuffer(currentLocation);
+							SDFSLogger.getLog().info("tring to read again");
+						}
+					}
 					if ((endPos) <= readBuffer.getLength()) {
-						buf.put(readBuffer.getChunk(), startPos, bytesLeft);
+						buf.put(_rb, startPos, bytesLeft);
 						mf.getIOMonitor().addBytesRead(bytesLeft);
 						read = read + bytesLeft;
 						bytesLeft = 0;
 					} else {
 						int _len = readBuffer.getLength() - startPos;
-						buf.put(readBuffer.getChunk(), startPos, _len);
+
+						buf.put(_rb, startPos, _len);
 						mf.getIOMonitor().addBytesRead(_len);
 						currentLocation = currentLocation + _len;
 						bytesLeft = bytesLeft - _len;
 						read = read + _len;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					SDFSLogger.getLog().fatal("Error while reading buffer ", e);
 					SDFSLogger.getLog().fatal(
 							"Error Reading Buffer " + readBuffer.getHash()
@@ -456,8 +471,9 @@ public class DedupFileChannel {
 				this.currentPosition = currentLocation;
 			}
 			return read;
-		} catch (IOException e) {
-			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new IOException(e);
 		} finally {
 			// this.removeAio();
 		}
