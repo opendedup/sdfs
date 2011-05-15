@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<subsystem-config>
-<locations dedup-db-store="/opt/sdfs/sdfs/ddb" io-log="/opt/sdfs/null/io.log" meta-db-store="/opt/sdfs/sdfs/mdb"/>
-<io chunk-size="128" dedup-files="true" file-read-cache="5" max-file-inactive="900" max-file-write-buffers="50" max-open-files="1024" meta-file-cache="1024" multi-read-timeout="1000" safe-close="true" safe-sync="false" system-read-cache="1000" write-threads="16"/>
-<permissions default-file="0644" default-folder="0755" default-group="0" default-owner="0"/>
-<volume capacity="100GB" current-size="0" path="/opt/sdfs/sdfs/files"/>
-<local-chunkstore chunk-store="/opt/sdfs/sdfs/chunkstore/chunks" enabled="true" hash-db-store="/opt/sdfs/sdfs/chunkstore/hdb" pre-allocate="true" read-ahead-pages="4"/>
-</subsystem-config>
