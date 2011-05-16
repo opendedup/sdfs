@@ -19,7 +19,7 @@ Version 1.0.3
 		realtime storage utilization. To enable this GC edit the local-chunkstore tag within the volume config and modify/add the 
 		attribute gc-name="org.opendedup.sdfs.filestore.gc.PFullGC".
 	* Added mkfs.sdfs commandline parameter gc-class. This can be used to set the garbage collection strategy at volume creation. 
-	  The two build in options for this are  org.opendedup.sdfs.filestore.gc.PFullGC and org.opendedup.sdfs.filestore.gc.ContinuousGC.
+	  The current option for this is  org.opendedup.sdfs.filestore.gc.PFullGC.
 	* Added output to sdfscli --dse-info parameter called "DSE Percent Full". This calculates the percentage full for the dse.
 
 Version 1.0.2
