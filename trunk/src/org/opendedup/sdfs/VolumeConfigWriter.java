@@ -79,7 +79,7 @@ public class VolumeConfigWriter {
 	boolean awsCompress = Main.awsCompress;
 	int hashSize = 16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
-	String gc_class = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
+	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
