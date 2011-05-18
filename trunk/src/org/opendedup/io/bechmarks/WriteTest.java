@@ -34,6 +34,7 @@ public class WriteTest implements Runnable {
 			long len = 1024L * 1024L * 1024L * size;
 			long sz = 0;
 			Path ps = Paths.get(path);
+			Files.deleteIfExists(ps);
 			FileChannel fc = (FileChannel) Files.newByteChannel(ps,
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);

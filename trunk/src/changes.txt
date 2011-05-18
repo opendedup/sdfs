@@ -4,16 +4,6 @@ Version 1.0.5
 	* Fixed for newest version of Java 7. Please update your java to the latest version to use this file.
 	Enhancements :
 	* SDFS now logs to files located in /var/log/sdfs/<config-name>.log. Logs roll after 10MB and one archive log is kept.
-	
-Version 1.0.4
-	Fixes :
-	Enhancements :
-	* Changed mkfs.sdfs commandline attribute --chunk-store-size to take MB/GB/TB
-		e.g. --chunk-store-size=100GB
-	
-Version 1.0.3
-	Fixes :
-	Enhancements :
 	* Added new Garbage Collection Framework.
 		1. Threshold GC - Garbage Collection runs when DSE grows by a 10% step. This GC trades off better performance for higher
 		realtime storage utilization. To enable this GC edit the local-chunkstore tag within the volume config and modify/add the 
@@ -21,12 +11,11 @@ Version 1.0.3
 	* Added mkfs.sdfs commandline parameter gc-class. This can be used to set the garbage collection strategy at volume creation. 
 	  The current option for this is  org.opendedup.sdfs.filestore.gc.PFullGC.
 	* Added output to sdfscli --dse-info parameter called "DSE Percent Full". This calculates the percentage full for the dse.
-
-Version 1.0.2
-	Fixes :
-	Enhancements :
+	* Changed mkfs.sdfs commandline attribute --chunk-store-size to take MB/GB/TB
+		e.g. --chunk-store-size=100GB
 	* Optimize file option no longer takes a length.
 	* Faster throughput through better threading
+	
 
 Version 1.0.1
 	Fixes :
