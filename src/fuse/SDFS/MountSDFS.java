@@ -126,8 +126,6 @@ public class MountSDFS {
 		}
 		if(OSValidator.isUnix())
 			Main.logPath = "/var/log/sdfs/" + volname + ".log";
-		if(OSValidator.isWindows())
-			Main.logPath = Main.volume.getPath() +"\\log\\" + Main.volume.getName() + ".log";
 		SDFSService sdfsService = new SDFSService(volumeConfigFile,routingConfigFile);
 
 		try {
