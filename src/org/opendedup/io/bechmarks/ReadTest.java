@@ -159,6 +159,7 @@ public class ReadTest implements Runnable {
 			System.out.println("ReadTest <Path to read from> <Number of Parallel Runs> <Test Name> <Output File>");
 			System.exit(0);
 		}
+		System.out.println("Running Read Test ...");
 		float[] results = test(args[0], Integer.parseInt(args[1]));
 		String testName = args[2];
 		String logFileName = args[3];

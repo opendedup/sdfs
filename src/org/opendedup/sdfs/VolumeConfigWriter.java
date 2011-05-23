@@ -44,7 +44,7 @@ public class VolumeConfigWriter {
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
 	boolean safe_sync = false;
-	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
+	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 4);
 	boolean dedup_files = true;
 	int multi_read_timeout = 1000;
 	int system_read_cache = 1000;
