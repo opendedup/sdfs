@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,7 +34,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
 	private FileChannel fc = null;
-	private RandomAccessFile chunkDataWriter = null;
+	//private RandomAccessFile chunkDataWriter = null;
 	private static File chunk_location = new File(Main.chunkStore);
 	File f;
 	Path p;
@@ -57,10 +59,13 @@ public class FileChunkStore implements AbstractChunkStore {
 			f = new File(chunk_location + File.separator + "chunks.chk");
 			this.name = "chunks";
 			p = f.toPath();
-			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength = chunkDataWriter.length();
+			//chunkDataWriter = new RandomAccessFile(f, "rw");
+			//this.currentLength = chunkDataWriter.length();
 			this.closed = false;
-			fc = chunkDataWriter.getChannel();
+			//fc = chunkDataWriter.getChannel();
+			fc = (FileChannel)Files.newByteChannel(p, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.READ);
+			
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,7 +78,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#closeStore()
 	 */
 	public void closeStore() {
-
 		try {
 			fc.force(true);
 			
@@ -86,7 +90,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		} catch (IOException e) {
 		}
 		fc = null;
-		
 	}
 
 	/*
@@ -171,10 +174,12 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		ByteBuffer buf = null;
+		//FileChannel fc = null;
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
 			buf = ByteBuffer.wrap(chunk);
+			
 			fc.write(buf, start);
 
 		} catch (Exception e) {
@@ -187,6 +192,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			chunk = null;
 			len = 0;
 			start = 0;
+			//fc.close();
 		}
 	}
 
@@ -197,7 +203,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		// long time = System.currentTimeMillis();
 
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
-
 		try {
 			fc.read(fbuf, start);
 		} catch (Exception e) {
@@ -205,9 +210,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					"unable to fetch chunk at position " + start, e);
 			throw new IOException(e);
 		} finally {
-			try {
-			} catch (Exception e) {
-			}
+			
 		}
 		return fbuf.array();
 	}
@@ -232,7 +235,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			this.closed = true;
 			this.closeStore();
-
+			
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			raf.getChannel().force(true);
 		} catch (Exception e) {
