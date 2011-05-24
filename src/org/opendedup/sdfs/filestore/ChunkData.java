@@ -120,7 +120,7 @@ public class ChunkData {
 
 	public void setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
-		if (this.mDelete && Main.AWSChunkStore) {
+		if (this.mDelete) {
 			try {
 				HashChunkService.getChuckStore().deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {
@@ -180,6 +180,10 @@ public class ChunkData {
 			return HashChunkService.getChuckStore().getChunk(hash, this.cPos, this.cLen);
 		} else
 			return chunk;
+	}
+	
+	public static void deleteData(byte[] hash, long pos) throws IOException {
+			HashChunkService.getChuckStore().deleteChunk(hash, pos, Main.chunkStorePageSize);
 	}
 
 	public long getAdded() {

@@ -38,7 +38,6 @@ public class LongByteArrayMap implements AbstractMap {
 	File dbFile = null;
 	Path bdbf = null;
 	FileChannel iterbdb = null;
-	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
 	long flen = 0;
 
@@ -187,9 +186,6 @@ public class LongByteArrayMap implements AbstractMap {
 					flen = dbFile.length();
 				}
 				rf = new RandomAccessFile(filePath, "rw");
-				pbdb = (FileChannelImpl) Files.newByteChannel(bdbf,
-						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				// initiall allocate 32k
 				this.closed = false;
 			} catch (Exception e) {
@@ -239,9 +235,9 @@ public class LongByteArrayMap implements AbstractMap {
 			if (fpos > flen)
 				flen = fpos;
 
-			// rf.seek(fpos);
-			// rf.write(data);
-			pbdb.write(ByteBuffer.wrap(data), fpos);
+			rf.seek(fpos);
+			rf.write(data);
+			//pbdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
 					"trying to write at " + fpos + " but file length is "
@@ -329,7 +325,9 @@ public class LongByteArrayMap implements AbstractMap {
 			byte[] buf = new byte[arrayLength];
 			this.hashlock.lock();
 			try {
-				pbdb.read(ByteBuffer.wrap(buf), fpos);
+				rf.seek(fpos);
+				rf.read(buf);
+				//pbdb.read(ByteBuffer.wrap(buf), fpos);
 			} finally {
 				this.hashlock.unlock();
 			}
@@ -439,15 +437,10 @@ public class LongByteArrayMap implements AbstractMap {
 			this.closed = true;
 		}
 		try {
-			pbdb.force(true);
-			pbdb.close();
+			this.rf.close();
 		} catch (Exception e) {
 		} finally {
 			this.hashlock.unlock();
-		}
-		try {
-			this.rf.close();
-		} catch (Exception e) {
 		}
 	}
 }

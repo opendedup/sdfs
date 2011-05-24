@@ -3,9 +3,11 @@ package org.opendedup.hashing;
 import java.io.IOException;
 
 
+
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedTransferQueue;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
@@ -13,7 +15,7 @@ import org.opendedup.util.SDFSLogger;
 public class HashFunctionPool {
 
 	private int poolSize;
-	private ConcurrentLinkedQueue<AbstractHashEngine> passiveObjects = new ConcurrentLinkedQueue<AbstractHashEngine>();
+	private LinkedTransferQueue<AbstractHashEngine> passiveObjects = new LinkedTransferQueue<AbstractHashEngine>();
 	
 	public HashFunctionPool(int size) {
 		this.poolSize = size;

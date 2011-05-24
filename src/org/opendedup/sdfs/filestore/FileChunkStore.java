@@ -2,11 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.RAFPool;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
@@ -34,14 +32,14 @@ public class FileChunkStore implements AbstractChunkStore {
 	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
 	private FileChannel fc = null;
-	//private RandomAccessFile chunkDataWriter = null;
+	// private RandomAccessFile chunkDataWriter = null;
 	private static File chunk_location = new File(Main.chunkStore);
 	File f;
 	Path p;
 	private long currentLength = 0L;
+	private RAFPool pool = null;
 	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
 	private String name;
-
 	private byte[] FREE = new byte[pageSize];
 
 	/**
@@ -59,13 +57,15 @@ public class FileChunkStore implements AbstractChunkStore {
 			f = new File(chunk_location + File.separator + "chunks.chk");
 			this.name = "chunks";
 			p = f.toPath();
-			//chunkDataWriter = new RandomAccessFile(f, "rw");
-			//this.currentLength = chunkDataWriter.length();
+			pool = new RAFPool(f.toString());
+			// chunkDataWriter = new RandomAccessFile(f, "rw");
+			// this.currentLength = chunkDataWriter.length();
 			this.closed = false;
-			//fc = chunkDataWriter.getChannel();
-			fc = (FileChannel)Files.newByteChannel(p, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+			// fc = chunkDataWriter.getChannel();
+			fc = (FileChannel) Files.newByteChannel(p,
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);
-			
+
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,13 +80,13 @@ public class FileChunkStore implements AbstractChunkStore {
 	public void closeStore() {
 		try {
 			fc.force(true);
-			
+
 		} catch (IOException e) {
 		}
 
 		try {
 			fc.close();
-			
+
 		} catch (IOException e) {
 		}
 		fc = null;
@@ -173,26 +173,28 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		ByteBuffer buf = null;
-		//FileChannel fc = null;
+		// FileChannel fc = null;
+		RandomAccessFile rf = pool.borrowObject();
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
-			buf = ByteBuffer.wrap(chunk);
-			
-			fc.write(buf, start);
+			// buf = ByteBuffer.wrap(chunk);
 
+			// fc.write(buf, start);
+
+			rf.seek(start);
+			rf.write(chunk);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write data at position " + start, e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
-			buf=null;
 			hash = null;
 			chunk = null;
 			len = 0;
 			start = 0;
-			//fc.close();
+			pool.returnObject(rf);
+			// fc.close();
 		}
 	}
 
@@ -201,23 +203,29 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
-
-		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
+		RandomAccessFile rf = pool.borrowObject();
+		byte[] fbuf = new byte[pageSize];
 		try {
-			fc.read(fbuf, start);
+			rf.seek(start);
+			rf.read(fbuf);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + start, e);
 			throw new IOException(e);
 		} finally {
-			
+			pool.returnObject(rf);
+			rf = null;
 		}
-		return fbuf.array();
+		return fbuf;
 	}
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
+
+	}
+
+	public void zeroChunk(byte[] hash, long start, int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
@@ -235,7 +243,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			this.closed = true;
 			this.closeStore();
-			
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			raf.getChannel().force(true);
 		} catch (Exception e) {
