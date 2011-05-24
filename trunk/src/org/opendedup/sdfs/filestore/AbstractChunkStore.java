@@ -31,7 +31,7 @@ public interface AbstractChunkStore {
 	/**
 	 * Closes the chunk store, if this is required
 	 */
-	public abstract void init(Element config);
+	public abstract void init(Element config) throws IOException;
 	/**
 	 * Each chunk store must have a unique name.
 	 * 

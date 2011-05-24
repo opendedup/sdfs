@@ -270,6 +270,19 @@ public class Config {
 				Main.awsCompress = Boolean.parseBoolean(aws
 						.getAttribute("compress"));
 			}
+			int gsSz = localChunkStore.getElementsByTagName("google-store").getLength();
+			if (gsSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
+				Element aws = (Element) localChunkStore.getElementsByTagName(
+						"google-store").item(0);
+				Main.AWSChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
+				Main.awsAccessKey = aws.getAttribute("gs-access-key");
+				Main.awsSecretKey = aws.getAttribute("gs-secret-key");
+				Main.awsBucket = aws.getAttribute("gs-bucket-name");
+				Main.awsCompress = Boolean.parseBoolean(aws
+						.getAttribute("compress"));
+			}
 		}
 
 		/*

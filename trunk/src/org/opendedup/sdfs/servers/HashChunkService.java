@@ -56,13 +56,16 @@ public class HashChunkService {
 				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
 				fileStore.init(Main.chunkStoreConfig);
 			} catch (InstantiationException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
 				System.exit(-1);
 			} catch (IllegalAccessException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
 				System.exit(-1);
 			} catch (ClassNotFoundException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
+				System.exit(-1);
+			} catch (IOException e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
 				System.exit(-1);
 			}
 		try {

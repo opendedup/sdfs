@@ -3,9 +3,10 @@ package org.opendedup.util;
 import java.io.FileNotFoundException;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedTransferQueue;
 
 import org.opendedup.util.SDFSLogger;
 
@@ -13,7 +14,7 @@ public class RAFPool {
 
 	private int poolSize = 1;
 	
-	private ConcurrentLinkedQueue<RandomAccessFile> passiveObjects = new ConcurrentLinkedQueue<RandomAccessFile>();
+	private LinkedTransferQueue<RandomAccessFile> passiveObjects = new LinkedTransferQueue<RandomAccessFile>();
 	private String fileName = null;
 	private boolean closed=false;
 	
