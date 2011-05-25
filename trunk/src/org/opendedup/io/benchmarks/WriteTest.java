@@ -1,4 +1,4 @@
-package org.opendedup.io.bechmarks;
+package org.opendedup.io.benchmarks;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,15 +15,15 @@ import java.util.Random;
 public class WriteTest implements Runnable {
 	String path;
 	int size;
-	boolean unique;
+	int uniqueP;
 	int bs = 1048576;
 	public long duration = 0;
 	boolean finished = false;
 
-	public WriteTest(String path, int size, boolean unique) {
+	public WriteTest(String path, int size, int uniqueP) {
 		this.path = path;
 		this.size = size;
-		this.unique = unique;
+		this.uniqueP = uniqueP;
 		Thread th = new Thread(this);
 		th.start();
 	}
@@ -40,16 +40,19 @@ public class WriteTest implements Runnable {
 					StandardOpenOption.READ);
 			Random rnd = new Random();
 			byte[] b = new byte[bs];
-			if (!unique)
-				rnd.nextBytes(b);
 			long time = System.currentTimeMillis();
+			int currPR = 0;
 			while (sz < len) {
-				if (unique) {
+				if (currPR < this.uniqueP) {
 					rnd.nextBytes(b);
 				}
 				ByteBuffer buf = ByteBuffer.wrap(b);
 				fc.write(buf);
 				sz = sz + b.length;
+				if(currPR == 100)
+					currPR = 0;
+				else
+					currPR++;
 			}
 			duration = (System.currentTimeMillis() - time);
 			fc.close();
@@ -80,7 +83,7 @@ public class WriteTest implements Runnable {
 		Files.deleteIfExists(ps);
 	}
 
-	public static float[] test(String path, int size, boolean unique, int runs) {
+	public static float[] test(String path, int size, int unique, int runs) {
 		WriteTest[] tests = new WriteTest[runs];
 		float results[] = new float[runs];
 		for (int i = 0; i < tests.length; i++) {
@@ -167,11 +170,11 @@ public class WriteTest implements Runnable {
 
 	public static void main(String[] args) throws IOException {
 		if(args.length != 6) {
-			System.out.println("WriteTest <Path to write to> <File Size (GB)> <random data (true|false)> <Number of Parallel Runs> <Test Name> <Output File>");
+			System.out.println("WriteTest <Path to write to> <File Size (GB)> <precent random data (0-100)> <Number of Parallel Runs> <Test Name> <Output File>");
 			System.exit(0);
 		}
 		float[] results = test(args[0], Integer.parseInt(args[1]),
-				Boolean.parseBoolean(args[2]), Integer.parseInt(args[3]));
+				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 		
 		String testName = args[4];
 		String logFileName = args[5];
@@ -182,7 +185,7 @@ public class WriteTest implements Runnable {
 				StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.APPEND);
 		if (nf) {
-			String header = "test-name,date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),unique,runs\n";
+			String header = "test-name,date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
 			ch.write(ByteBuffer.wrap(header.getBytes()));
 		}
 		String output = testName + "," + new Date() + "," + findMean(results)
