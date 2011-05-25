@@ -291,5 +291,11 @@ public class FileChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Override
+	public void clearStore()throws IOException {
+		throw new IOException("Not implemented in this store");
+
+	}
 
 }
