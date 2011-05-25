@@ -123,6 +123,9 @@ public interface AbstractChunkStore {
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
 			throws IOException;
+	
+	public abstract void clearStore()
+	throws IOException;
 
 	public abstract void claimChunk(byte[] hash, long start) throws IOException;
 
