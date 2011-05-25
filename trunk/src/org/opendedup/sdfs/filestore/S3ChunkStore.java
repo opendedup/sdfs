@@ -125,22 +125,16 @@ public class S3ChunkStore implements AbstractChunkStore {
 		S3Object s3Object = new S3Object(hashString);
 		if(Main.awsCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
-			s3Object.addMetadata("compress", "true");
-		}else {
-			s3Object.addMetadata("compress", "false");
 		}
 		if(Main.chunkStoreEncryptionEnabled) {
 			chunk = EncryptUtils.encrypt(chunk);
-			s3Object.addMetadata("encrypt", "true");
-		}else {
-			s3Object.addMetadata("encrypt", "false");
 		}
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
 		s3Object.setContentLength(s3IS.available());
 		try {
-			s3Service.putObject(s3Bucket, s3Object);
+			s3Service.putObject(this.name, s3Object);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
@@ -160,8 +154,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 			throws IOException {
 		String hashString = this.getHashName(hash);
 		try {
-			s3Service.deleteObject(s3Bucket, hashString);
-		} catch (S3ServiceException e) {
+			s3Service.deleteObject(this.name, hashString);
+		} catch (ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
 		}
 	}
@@ -178,11 +172,27 @@ public class S3ChunkStore implements AbstractChunkStore {
 				bs3Service.deleteObject(bucketName, obj[i].getKey());
 				System.out.print(".");
 			}
+			System.out.println("\n");
 			bs3Service.deleteBucket(bucketName);
 			SDFSLogger.getLog().info("Bucket [" + bucketName + "] deleted");
 			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
+		}
+	}
+	
+	public void clearStore() throws IOException {
+		try {
+			SDFSLogger.getLog().warn("Deleting all entries from Bucket [" + this.name + "]");
+			S3Object [] obj = s3Service.listObjects(this.name);
+			SDFSLogger.getLog().info("Will delete " + obj.length + " objects");
+			for(int i = 0 ; i < obj.length; i ++) {
+				s3Service.deleteObject(this.name, obj[i].getKey());
+			}
+			SDFSLogger.getLog().info("All entries in bucket [" + this.getName() + "] deleted");
+		} catch (ServiceException e) {
+			SDFSLogger.getLog().warn( "Unable to delete entries in " + this.getName(), e);
+			throw new IOException(e);
 		}
 	}
 	
@@ -223,6 +233,16 @@ public class S3ChunkStore implements AbstractChunkStore {
 			this.s3Bucket = s3Service.getBucket(this.name);
 			if (this.s3Bucket == null) {
 				this.s3Bucket = s3Service.createBucket(this.name);
+				if (Main.awsCompress) {
+					this.s3Bucket.addMetadata("compress", "true");
+				} else {
+					this.s3Bucket.addMetadata("compress", "false");
+				}
+				if (Main.chunkStoreEncryptionEnabled) {
+					this.s3Bucket.addMetadata("encrypt", "true");
+				} else {
+					this.s3Bucket.addMetadata("encrypt", "false");
+				}
 				SDFSLogger.getLog().info("created new store " + name);
 			}
 		} catch (S3ServiceException e) {
