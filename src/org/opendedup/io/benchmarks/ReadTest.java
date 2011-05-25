@@ -1,4 +1,4 @@
-package org.opendedup.io.bechmarks;
+package org.opendedup.io.benchmarks;
 
 import java.io.File;
 
