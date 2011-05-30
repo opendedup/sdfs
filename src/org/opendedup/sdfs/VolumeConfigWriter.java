@@ -42,7 +42,7 @@ public class VolumeConfigWriter {
 			+ "volumes" + File.separator + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
-	boolean safe_close = false;
+	boolean safe_close = true;
 	boolean safe_sync = false;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	boolean dedup_files = true;
@@ -79,7 +79,7 @@ public class VolumeConfigWriter {
 	boolean awsCompress = Main.awsCompress;
 	int hashSize = 16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
-	String gc_class = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
+	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -337,6 +337,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("path", this.base_path + File.separator + "files");
 		vol.setAttribute("maximum-percentage-full",
 				Double.toString(this.max_percent_full));
+		vol.setAttribute("closed-gracefully", "true");
 		root.appendChild(vol);
 		
 		Element cs = xmldoc.createElement("local-chunkstore");

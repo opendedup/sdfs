@@ -39,6 +39,12 @@ public class SDFSService {
 			Config.parserRoutingFile(OSValidator.getConfigPath()
 					+ File.separator + "routing-config.xml");
 		}
+		try {
+			Main.volume.setClosedGracefully(false);
+			Config.writeSDFSConfigFile(configFile);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("Unable to write volume config.", e);
+		}
 		if (Main.chunkStoreLocal) {
 			if (Main.enableNetworkChunkStore) {
 				NetworkHCServer.init();
@@ -48,6 +54,7 @@ public class SDFSService {
 			this.stGC = new StandAloneGCScheduler();
 		}
 		MgmtWebServer.start();
+		
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
 		}
@@ -68,11 +75,7 @@ public class SDFSService {
 		MetaFileStore.close();
 		SDFSLogger.getLog().info("Open File Committed");
 		SDFSLogger.getLog().info("Writing Config File");
-		try {
-			Config.writeSDFSConfigFile(configFile);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to write volume config.", e);
-		}
+		
 		
 		/*
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
@@ -88,6 +91,12 @@ public class SDFSService {
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
 			HashChunkService.close();
+		}
+		try {
+			Main.volume.setClosedGracefully(true);
+			Config.writeSDFSConfigFile(configFile);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 	}
 
