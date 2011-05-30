@@ -5,7 +5,6 @@ import java.io.File;
 
 
 
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -685,6 +684,20 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 			mf.addXAttribute(name, valStr);
 		}
+		return 0;
+	}
+
+	@Override
+	public int getxattr(String path, String name, ByteBuffer dst, int position)
+			throws FuseException, BufferOverflowException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int setxattr(String path, String name, ByteBuffer value, int flags,
+			int position) throws FuseException {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 

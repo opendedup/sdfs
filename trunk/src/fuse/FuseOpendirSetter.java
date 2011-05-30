@@ -11,13 +11,12 @@ package fuse;
 /**
  * A callback interface used in <code>fuse.Filesystem3.opendir()</code> method
  */
-public interface FuseOpendirSetter {
-	/**
-	 * Callback for filehandle API
-	 * <p/>
-	 * 
-	 * @param fh
-	 *            the filehandle to return from <code>opendir()</code> method.
-	 */
-	public void setFh(Object fh);
+public interface FuseOpendirSetter
+{
+   /**
+    * Callback for filehandle API
+    * <p/>
+    * @param fh the filehandle to return from <code>opendir()</code> method.
+    */
+   public void setFh(Object fh);
 }
