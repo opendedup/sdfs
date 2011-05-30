@@ -37,7 +37,8 @@ public class LongByteArrayMap implements AbstractMap {
 	// private long endPos = maxReadBufferSize;
 	File dbFile = null;
 	Path bdbf = null;
-	FileChannel iterbdb = null;
+	// FileChannel iterbdb = null;
+	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
 	long flen = 0;
 
@@ -65,8 +66,7 @@ public class LongByteArrayMap implements AbstractMap {
 		iterlock.lock();
 		try {
 			this.iterPos = 0;
-			iterbdb = (FileChannel) Files
-					.newByteChannel(bdbf,StandardOpenOption.READ);
+
 		} finally {
 			iterlock.unlock();
 		}
@@ -77,19 +77,31 @@ public class LongByteArrayMap implements AbstractMap {
 	public long nextKey() throws IOException {
 		iterlock.lock();
 		try {
-			while (this.iterbdb.position() < flen) {
+			long _cpos = (long) (iterPos * (long) arrayLength);
+			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					long pos = iterPos * Main.CHUNK_LENGTH;
-					iterbdb.position(iterPos * arrayLength);
-					iterbdb.read(buf);
+					this.hashlock.lock();
+					try {
+						pbdb.read(buf, _cpos);
+					} catch (Exception e) {
+						throw e;
+					} finally {
+						this.hashlock.unlock();
+					}
 					byte[] val = buf.array();
 					iterPos++;
 					if (!Arrays.equals(val, FREE)) {
 						return pos;
 					}
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					SDFSLogger.getLog().debug(
+							"unable to iterate through key at " + iterPos
+									* arrayLength, e1);
+				} finally {
+					iterPos++;
+					_cpos = (long) (iterPos * (long) arrayLength);
 				}
 			}
 			if ((iterPos * arrayLength) != flen)
@@ -97,11 +109,6 @@ public class LongByteArrayMap implements AbstractMap {
 						+ this.filePath + "] len=" + iterPos * arrayLength
 						+ " file len =" + flen);
 
-			try {
-				iterbdb.close();
-				iterbdb = null;
-			} catch (Exception e) {
-			}
 			return -1;
 		} finally {
 			iterlock.unlock();
@@ -111,39 +118,43 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] nextValue() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = (long)(iterPos * (long)arrayLength);
+			long _cpos = (long) (iterPos * (long) arrayLength);
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-					iterbdb.read(buf, _cpos);
+					this.hashlock.lock();
+					try {
+						pbdb.read(buf, _cpos);
+					} catch (Exception e) {
+						throw e;
+					} finally {
+						this.hashlock.unlock();
+					}
 					byte[] val = buf.array();
 					if (!Arrays.equals(val, FREE)) {
 						return val;
 					}
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					SDFSLogger.getLog().debug(
+							"unable to iterate through value at " + iterPos
+									* arrayLength, e1);
 				} finally {
 					iterPos++;
-					_cpos = (long)(iterPos * (long)arrayLength);
+					_cpos = (long) (iterPos * (long) arrayLength);
 				}
 			}
-			if ((iterPos * arrayLength) != iterbdb.size()) {
+			if ((iterPos * arrayLength) != pbdb.size()) {
 				SDFSLogger.getLog().warn(
 						"did not reach end of file for [" + this.filePath
 								+ "] len=" + iterPos * arrayLength
-								+ " file len =" + iterbdb.size());
+								+ " file len =" + pbdb.size());
 				this.hashlock.lock();
 				try {
-					flen = this.iterbdb.size();
+					flen = this.pbdb.size();
 				} finally {
 					this.hashlock.unlock();
 				}
 				return this.nextValue();
-			}
-			try {
-				iterbdb.close();
-				iterbdb = null;
-			} catch (Exception e) {
 			}
 			return null;
 		} finally {
@@ -186,6 +197,9 @@ public class LongByteArrayMap implements AbstractMap {
 					flen = dbFile.length();
 				}
 				rf = new RandomAccessFile(filePath, "rw");
+				pbdb = (FileChannelImpl) Files.newByteChannel(bdbf,
+						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				// initiall allocate 32k
 				this.closed = false;
 			} catch (Exception e) {
@@ -235,9 +249,9 @@ public class LongByteArrayMap implements AbstractMap {
 			if (fpos > flen)
 				flen = fpos;
 
-			rf.seek(fpos);
-			rf.write(data);
-			//pbdb.write(ByteBuffer.wrap(data), fpos);
+			// rf.seek(fpos);
+			// rf.write(data);
+			pbdb.write(ByteBuffer.wrap(data), fpos);
 		} catch (BufferOverflowException e) {
 			SDFSLogger.getLog().fatal(
 					"trying to write at " + fpos + " but file length is "
@@ -260,9 +274,9 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(length);
-			_bdb = (FileChannel) Files.newByteChannel(bdbf,StandardOpenOption.CREATE,
-					StandardOpenOption.WRITE, StandardOpenOption.READ,
-					StandardOpenOption.SPARSE);
+			_bdb = (FileChannel) Files.newByteChannel(bdbf,
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.READ, StandardOpenOption.SPARSE);
 			_bdb.truncate(fpos);
 		} catch (Exception e) {
 			// System.exit(-1);
@@ -291,9 +305,9 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(pos);
-			_bdb = (FileChannel) Files.newByteChannel(bdbf,StandardOpenOption.CREATE,
-					StandardOpenOption.WRITE, StandardOpenOption.READ,
-					StandardOpenOption.SPARSE);
+			_bdb = (FileChannel) Files.newByteChannel(bdbf,
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.READ, StandardOpenOption.SPARSE);
 			_bdb.write(ByteBuffer.wrap(FREE), fpos);
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -325,9 +339,7 @@ public class LongByteArrayMap implements AbstractMap {
 			byte[] buf = new byte[arrayLength];
 			this.hashlock.lock();
 			try {
-				rf.seek(fpos);
-				rf.read(buf);
-				//pbdb.read(ByteBuffer.wrap(buf), fpos);
+				pbdb.read(ByteBuffer.wrap(buf), fpos);
 			} finally {
 				this.hashlock.unlock();
 			}
@@ -395,11 +407,12 @@ public class LongByteArrayMap implements AbstractMap {
 				dest.getParentFile().mkdirs();
 			if (OSValidator.isWindows()) {
 				SDFSLogger.getLog().info("Snapping on windows volume");
-				srcC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()),
-						StandardOpenOption.READ, StandardOpenOption.SPARSE);
-				dstC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()),
-						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+				srcC = (FileChannel) Files.newByteChannel(
+						Paths.get(src.getPath()), StandardOpenOption.READ,
 						StandardOpenOption.SPARSE);
+				dstC = (FileChannel) Files.newByteChannel(
+						Paths.get(src.getPath()), StandardOpenOption.CREATE,
+						StandardOpenOption.WRITE, StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
 				SDFSLogger.getLog().debug("snapping on unix/linux volume");
@@ -437,10 +450,15 @@ public class LongByteArrayMap implements AbstractMap {
 			this.closed = true;
 		}
 		try {
-			this.rf.close();
+			pbdb.force(true);
+			pbdb.close();
 		} catch (Exception e) {
 		} finally {
 			this.hashlock.unlock();
+		}
+		try {
+			this.rf.close();
+		} catch (Exception e) {
 		}
 	}
 }

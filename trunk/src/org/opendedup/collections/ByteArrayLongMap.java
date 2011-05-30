@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
@@ -24,7 +23,7 @@ public class ByteArrayLongMap {
 	byte[] compKeys = null;
 	private int size = 0;
 	private int entries = 0;
-	
+
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[Main.hashLength];
 	public static byte[] REMOVED = new byte[Main.hashLength];
@@ -41,8 +40,9 @@ public class ByteArrayLongMap {
 		this.size = size;
 		this.setUp();
 	}
-	
+
 	private ReentrantLock iterlock = new ReentrantLock();
+
 	public void iterInit() {
 		this.iterlock.lock();
 		this.iterPos = 0;
@@ -66,17 +66,24 @@ public class ByteArrayLongMap {
 		while (iterPos < size) {
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
-			keys.get(key);
-			iterPos++;
-			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				claims.position(iterPos - 1);
-				byte claimed = claims.get();
-				if (clearClaim) {
+			this.hashlock.lock();
+			try {
+				keys.get(key);
+				iterPos++;
+				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 					claims.position(iterPos - 1);
-					claims.put((byte) 0);
+					byte claimed = claims.get();
+					if (clearClaim) {
+						claims.position(iterPos - 1);
+						claims.put((byte) 0);
+					}
+					if (claimed == 1)
+						return key;
 				}
-				if (claimed == 1)
-					return key;
+			} catch (Exception e) {
+
+			} finally {
+				this.hashlock.unlock();
 			}
 		}
 		return null;
@@ -86,17 +93,23 @@ public class ByteArrayLongMap {
 		while (iterPos < size) {
 			long val = -1;
 			values.position(iterPos * 8);
-			val = values.getLong();
-			iterPos++;
-			if (val >= 0) {
-				claims.position(iterPos - 1);
-				byte claimed = claims.get();
-				if (clearClaim) {
+			this.hashlock.lock();
+			try {
+				val = values.getLong();
+				iterPos++;
+				if (val >= 0) {
 					claims.position(iterPos - 1);
-					claims.put((byte) 0);
+					byte claimed = claims.get();
+					if (clearClaim) {
+						claims.position(iterPos - 1);
+						claims.put((byte) 0);
+					}
+					if (claimed == 1)
+						return val;
 				}
-				if (claimed == 1)
-					return val;
+			} catch (Exception e) {
+			} finally {
+				this.hashlock.unlock();
 			}
 		}
 		return -1;
@@ -135,7 +148,7 @@ public class ByteArrayLongMap {
 		this.compress();
 		this.derefByteArray();
 		// store = ByteBuffer.allocateDirect(size);
-		
+
 		// values = new long[this.size][this.size];
 		// Arrays.fill( keys, FREE );
 		// Arrays.fill(values, blank);
@@ -183,6 +196,35 @@ public class ByteArrayLongMap {
 				this.claims.position(pos);
 				this.claims.put((byte) 1);
 				return true;
+			}
+			return false;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("error getting record", e);
+			return false;
+		} finally {
+			this.derefByteArray();
+			this.hashlock.unlock();
+		}
+	}
+
+	/**
+	 * Searches the set for <tt>obj</tt>
+	 * 
+	 * @param obj
+	 *            an <code>Object</code> value
+	 * @return a <code>boolean</code> value
+	 */
+	public boolean isClaimed(byte[] key) {
+		try {
+			this.hashlock.lock();
+			this.decompress();
+			int index = index(key);
+			if (index >= 0) {
+				int pos = (index / FREE.length);
+				this.claims.position(pos);
+				byte cl = this.claims.get();
+				if (cl == 1)
+					return true;
 			}
 			return false;
 		} catch (Exception e) {
@@ -419,21 +461,21 @@ public class ByteArrayLongMap {
 			if (pos < 0)
 				return false;
 			try {
-			this.keys.position(pos);
-			this.keys.put(key);
-			pos = (pos / FREE.length) * 8;
-			this.values.position(pos);
-			this.values.putLong(value);
-			pos = (pos / 8);
-			this.claims.position(pos);
-			this.claims.put((byte) 1);
-			// this.store.position(pos);
-			// this.store.put(storeID);
-			this.entries = entries + 1;
-			return pos > -1 ? true : false;
-			}catch(Exception e) {
+				this.keys.position(pos);
+				this.keys.put(key);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.putLong(value);
+				pos = (pos / 8);
+				this.claims.position(pos);
+				this.claims.put((byte) 1);
+				// this.store.position(pos);
+				// this.store.put(storeID);
+				this.entries = entries + 1;
+				return pos > -1 ? true : false;
+			} catch (Exception e) {
 				throw e;
-			}finally {
+			} finally {
 				this.compress();
 			}
 		} catch (Exception e) {
