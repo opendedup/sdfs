@@ -32,7 +32,7 @@ public class ChunkData {
 	private int cLen = 0;
 	private long cPos = 0;
 	private byte[] chunk = null;
-	
+
 	private static byte[] blankHash = null;;
 
 	static {
@@ -80,6 +80,19 @@ public class ChunkData {
 		this.cPos = -1;
 		this.chunk = chunk;
 	}
+	
+	public ChunkData(byte[] hash, long pos) {
+		long tm = System.currentTimeMillis();
+		this.added = tm;
+		this.lastClaimed = tm;
+		this.numClaimed = 1;
+		this.mDelete = false;
+		this.hashLen = (short) hash.length;
+		this.hash = hash;
+		this.cLen = Main.CHUNK_LENGTH;
+		this.cPos = -1;
+		this.chunk = null;
+	}
 
 	public ByteBuffer getMetaDataBytes() {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
@@ -103,15 +116,19 @@ public class ChunkData {
 	}
 
 	public void persistData(boolean clear) throws IOException {
-		if (cPos == -1) {
-			this.cPos = HashChunkService.getChuckStore().reserveWritePosition(cLen);
+		if (this.chunk != null) {
+			if (cPos == -1) {
+				this.cPos = HashChunkService.getChuckStore()
+						.reserveWritePosition(cLen);
+			}
+			if (this.mDelete) {
+				chunk = new byte[cLen];
+			}
+			HashChunkService.getChuckStore()
+					.writeChunk(hash, chunk, cLen, cPos);
+			if (clear)
+				this.chunk = null;
 		}
-		if (this.mDelete) {
-			chunk = new byte[cLen];
-		}
-		HashChunkService.getChuckStore().writeChunk(hash, chunk, cLen, cPos);
-		if (clear)
-			this.chunk = null;
 	}
 
 	public boolean ismDelete() {
@@ -120,7 +137,7 @@ public class ChunkData {
 
 	public void setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
-		if (this.mDelete) {
+		if (this.mDelete && Main.AWSChunkStore) {
 			try {
 				HashChunkService.getChuckStore().deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {
@@ -165,7 +182,8 @@ public class ChunkData {
 
 	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
 		try {
-			return HashChunkService.getChuckStore().getChunk(hash, pos, Main.chunkStorePageSize);
+			return HashChunkService.getChuckStore().getChunk(hash, pos,
+					Main.chunkStorePageSize);
 		} catch (IOException e) {
 			if (Arrays.areEqual(hash, blankHash))
 				return new byte[Main.chunkStorePageSize];
@@ -177,13 +195,10 @@ public class ChunkData {
 
 	public byte[] getData() throws IOException {
 		if (this.chunk == null) {
-			return HashChunkService.getChuckStore().getChunk(hash, this.cPos, this.cLen);
+			return HashChunkService.getChuckStore().getChunk(hash, this.cPos,
+					this.cLen);
 		} else
 			return chunk;
-	}
-	
-	public static void deleteData(byte[] hash, long pos) throws IOException {
-			HashChunkService.getChuckStore().deleteChunk(hash, pos, Main.chunkStorePageSize);
 	}
 
 	public long getAdded() {

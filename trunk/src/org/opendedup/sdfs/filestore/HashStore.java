@@ -12,6 +12,7 @@ import java.util.Arrays;
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -160,6 +161,10 @@ public class HashStore {
 		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
 		bdb = new CSByteArrayLongMap(entries, dbf
 				.getPath());
+		if(!Main.closedGracefully) {
+			SDFSLogger.getLog().info("DSE did not close gracefully, running check");
+			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
+		}
 	}
 
 	/**

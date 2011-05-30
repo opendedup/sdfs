@@ -3,7 +3,10 @@ package org.opendedup.sdfs.filestore;
 import java.io.ByteArrayInputStream;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -33,7 +36,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String name;
 	private S3Bucket s3Bucket = null;
 	S3Service s3Service;
+	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
+	private long currentLength = 0L;
+	private RandomAccessFile posRaf = null;
+	private static File chunk_location = new File(Main.chunkStore);
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
@@ -46,18 +53,39 @@ public class S3ChunkStore implements AbstractChunkStore {
 			System.exit(-1);
 		}
 	}
-	
-	public S3ChunkStore() throws IOException {
-		
-	}
-	
 	public S3ChunkStore(String name) throws IOException {
 		this.name = name;
-		this.init(null);
-		
+		try {
+			s3Service = new RestS3Service(awsCredentials);
+			this.s3Bucket = s3Service.getBucket(this.name);
+			if (this.s3Bucket == null) {
+				this.s3Bucket = s3Service.createBucket(this.name);
+				SDFSLogger.getLog().info("created new store " + name);
+			}
+			this.openPosFile();
+		} catch (S3ServiceException e) {
+			throw new IOException(e);
+		}
 	}
 	
-	
+	private void openPosFile() throws IOException {
+		File posFile = new File(chunk_location + File.separator + name
+				+ ".pos");
+		boolean newPos = true;
+		if (posFile.exists())
+			newPos = false;
+		else {
+			posFile.getParentFile().mkdirs();
+		}
+		posRaf = new RandomAccessFile(posFile, "rw");
+		if (!newPos) {
+			posRaf.seek(0);
+			this.currentLength = posRaf.readLong();
+		} else {
+			posRaf.seek(0);
+			posRaf.writeLong(currentLength);
+		}
+	}
 
 	public long bytesRead() {
 		// TODO Auto-generated method stub
@@ -81,7 +109,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString =  this.getHashName(hash);
 		try { 
-			S3Object obj = s3Service.getObject(this.name, hashString);
+			S3Object obj = s3Service.getObject(s3Bucket, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
@@ -103,18 +131,26 @@ public class S3ChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 	
+	private static ReentrantLock reservePositionlock = new ReentrantLock();
 
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		
-		return 0;
+		reservePositionlock.lock();
+		long pos = this.currentLength;
+		this.currentLength = this.currentLength + pageSize;
+		this.posRaf.seek(0);
+		this.posRaf.writeLong(this.currentLength);
+		reservePositionlock.unlock();
+		return pos;
 	}
 
 	public void setName(String name) {
+
 	}
 
 	public long size() {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -125,16 +161,22 @@ public class S3ChunkStore implements AbstractChunkStore {
 		S3Object s3Object = new S3Object(hashString);
 		if(Main.awsCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
+			s3Object.addMetadata("compress", "true");
+		}else {
+			s3Object.addMetadata("compress", "false");
 		}
 		if(Main.chunkStoreEncryptionEnabled) {
 			chunk = EncryptUtils.encrypt(chunk);
+			s3Object.addMetadata("encrypt", "true");
+		}else {
+			s3Object.addMetadata("encrypt", "false");
 		}
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
 		s3Object.setContentLength(s3IS.available());
 		try {
-			s3Service.putObject(this.name, s3Object);
+			s3Service.putObject(s3Bucket, s3Object);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
@@ -154,8 +196,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 			throws IOException {
 		String hashString = this.getHashName(hash);
 		try {
-			s3Service.deleteObject(this.name, hashString);
-		} catch (ServiceException e) {
+			s3Service.deleteObject(s3Bucket, hashString);
+		} catch (S3ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
 		}
 	}
@@ -172,27 +214,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 				bs3Service.deleteObject(bucketName, obj[i].getKey());
 				System.out.print(".");
 			}
-			System.out.println("\n");
 			bs3Service.deleteBucket(bucketName);
 			SDFSLogger.getLog().info("Bucket [" + bucketName + "] deleted");
 			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (ServiceException e) {
 			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
-		}
-	}
-	
-	public void clearStore() throws IOException {
-		try {
-			SDFSLogger.getLog().warn("Deleting all entries from Bucket [" + this.name + "]");
-			S3Object [] obj = s3Service.listObjects(this.name);
-			SDFSLogger.getLog().info("Will delete " + obj.length + " objects");
-			for(int i = 0 ; i < obj.length; i ++) {
-				s3Service.deleteObject(this.name, obj[i].getKey());
-			}
-			SDFSLogger.getLog().info("All entries in bucket [" + this.getName() + "] deleted");
-		} catch (ServiceException e) {
-			SDFSLogger.getLog().warn( "Unable to delete entries in " + this.getName(), e);
-			throw new IOException(e);
 		}
 	}
 	
@@ -226,33 +252,25 @@ public class S3ChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void init(Element config) throws IOException {
-		try {
-			s3Service = new RestS3Service(awsCredentials);
-			this.name = Main.awsBucket;
-			this.s3Bucket = s3Service.getBucket(this.name);
-			if (this.s3Bucket == null) {
-				this.s3Bucket = s3Service.createBucket(this.name);
-				if (Main.awsCompress) {
-					this.s3Bucket.addMetadata("compress", "true");
-				} else {
-					this.s3Bucket.addMetadata("compress", "false");
-				}
-				if (Main.chunkStoreEncryptionEnabled) {
-					this.s3Bucket.addMetadata("encrypt", "true");
-				} else {
-					this.s3Bucket.addMetadata("encrypt", "false");
-				}
-				SDFSLogger.getLog().info("created new store " + name);
-			}
-		} catch (S3ServiceException e) {
-			throw new IOException(e);
-		}
+	public void init(Element config) {
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void setSize(long size) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ChunkData getNextChunck() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void iterationInit() {
 		// TODO Auto-generated method stub
 		
 	}

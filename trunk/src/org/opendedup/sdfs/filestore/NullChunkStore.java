@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+
 import org.w3c.dom.Element;
 
 /**
@@ -107,11 +108,17 @@ public class NullChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	@Override
-	public void clearStore()throws IOException {
-		throw new IOException("Not implemented in this store");
 
+	@Override
+	public ChunkData getNextChunck() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void iterationInit() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

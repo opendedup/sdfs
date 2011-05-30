@@ -123,9 +123,6 @@ public interface AbstractChunkStore {
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
 			throws IOException;
-	
-	public abstract void clearStore()
-	throws IOException;
 
 	public abstract void claimChunk(byte[] hash, long start) throws IOException;
 
@@ -134,5 +131,8 @@ public interface AbstractChunkStore {
 	
 	public abstract boolean moveChunk(byte [] hash, long origLoc, long newLoc) throws IOException;
 	
+	public abstract ChunkData getNextChunck() throws IOException;
+	
+	public abstract void iterationInit()throws IOException;
 
 }

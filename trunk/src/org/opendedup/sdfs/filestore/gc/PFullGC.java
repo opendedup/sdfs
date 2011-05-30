@@ -37,7 +37,10 @@ public class PFullGC implements GCControllerImpl {
 	}
 	
 	private double calcNxtRun() {
-		return this.calcPFull() + .1;
+		double next = this.calcPFull() + .1;
+		if(next >= 1)
+			next = (double).91;
+		return next;
 	}
 
 }
