@@ -9,33 +9,41 @@
 
 package fuse;
 
-public class FuseException extends Exception implements Errno {
-	private static final long serialVersionUID = 0;
 
-	private int errno;
+public class FuseException extends Exception implements Errno
+{
+   private static final long serialVersionUID = 0;
+   
+   private int errno;
 
-	public FuseException() {
-	}
+   public FuseException()
+   {
+   }
 
-	public FuseException(Throwable cause) {
-		super(cause);
-	}
+   public FuseException(Throwable cause)
+   {
+      super(cause);
+   }
 
-	public FuseException(String message) {
-		super(message);
-	}
+   public FuseException(String message)
+   {
+      super(message);
+   }
 
-	public FuseException(String message, Throwable cause) {
-		super(message, cause);
-	}
+   public FuseException(String message, Throwable cause)
+   {
+      super(message, cause);
+   }
 
-	public FuseException initErrno(int errno) {
-		this.errno = errno;
+   public FuseException initErrno(int errno)
+   {
+      this.errno = errno;
 
-		return this;
-	}
+      return this;
+   }
 
-	public int getErrno() {
-		return errno;
-	}
+   public int getErrno()
+   {
+      return errno;
+   }
 }
