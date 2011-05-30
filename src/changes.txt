@@ -1,3 +1,13 @@
+Version 1.0.6
+	Fixes :
+	* Fixed corruption issue where files were not closing properly when safeclose was set to false.
+	* Fixed HashStore not closing properly on shutdown
+	* Fixed Garbage Collection of files not being claimed properly in some cases
+	* Recompiled the java fuse library for latest java build
+	* Added latest java build to the library (b144)
+	* Fixed exit value on mount.sdfs error exit
+	* Fixed sdfs.log location to /var/log/sdfs.log
+	
 Version 1.0.5
 	Fixes :
 	* Fixed garbage collection on large files. Files over 500GB were not being claimed correctly because of the use of 32 bit integers.
