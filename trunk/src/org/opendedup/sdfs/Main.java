@@ -50,7 +50,7 @@ public class Main {
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
-	public static String gcClass = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
+	public static String gcClass = "org.opendedup.sdfs.filestore.gc.PFullGC";
 
 	/**
 	 * Secret Key to Encrypt chunks in DSE.

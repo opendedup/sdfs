@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -42,6 +43,7 @@ public class Volume implements java.io.Serializable {
 	private long virtualBytesWritten = 0;
 	private long readBytes = 0;
 	private long actualWriteBytes = 0;
+	private boolean closedGracefully = false;
 
 	public String getName() {
 		return name;
@@ -69,7 +71,8 @@ public class Volume implements java.io.Serializable {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full")) / 100;
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
-		}
+		} if(vol.hasAttribute("closed-gracefully"))
+			Main.closedGracefully = Boolean.parseBoolean(vol.getAttribute("closed-gracefully"));
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -122,6 +125,14 @@ public class Volume implements java.io.Serializable {
 		}
 	}
 
+	public boolean isClosedGracefully() {
+		return closedGracefully;
+	}
+
+	public void setClosedGracefully(boolean closedGracefully) {
+		this.closedGracefully = closedGracefully;
+	}
+
 	public long getTotalBlocks() {
 		return (this.capacity / this.blockSize);
 	}
@@ -145,6 +156,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Long.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
 		return root;
 	}
 
@@ -160,6 +172,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("read-bytes", Long.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
 		root.setAttribute("dse-size", Long.toString(HashChunkService.getSize()* HashChunkService.getPageSize()));
+		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
 		return doc;
 	}
 
