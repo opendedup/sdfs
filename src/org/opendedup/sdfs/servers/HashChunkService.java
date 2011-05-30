@@ -4,7 +4,6 @@ import java.io.IOException;
 
 
 import org.opendedup.util.SDFSLogger;
-import org.opendedup.util.StringUtils;
 
 
 import org.opendedup.collections.HashtableFullException;
@@ -13,10 +12,6 @@ import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HashChunkService {
 
@@ -32,17 +27,6 @@ public class HashChunkService {
 	private static HashStore hs = null;
 	private static AbstractChunkStore fileStore = null;
 	private static ChunkStoreGCScheduler csGC = null;
-	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
-	private static ConcurrentLinkedHashMap<String, HashChunk> readBuffers = new Builder<String, HashChunk>().concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
-	.maximumWeightedCapacity(cacheLenth).listener(
-			new EvictionListener<String, HashChunk>() {
-				// This method is called just after a new entry has been
-				// added
-				public void onEviction(String key, HashChunk writeBuffer) {
-				}
-			}
-	
-	).build();
 
 	/**
 	 * @return the chunksFetched
@@ -56,16 +40,16 @@ public class HashChunkService {
 				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
 				fileStore.init(Main.chunkStoreConfig);
 			} catch (InstantiationException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			} catch (IllegalAccessException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			} catch (ClassNotFoundException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			} catch (IOException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore. Exiting...",e);
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
 				System.exit(-1);
 			}
 		try {
@@ -112,12 +96,7 @@ public class HashChunkService {
 	}
 
 	public static HashChunk fetchChunk(byte[] hash) throws IOException {
-		String hashStr = StringUtils.getHexString(hash);
-		HashChunk hashChunk = readBuffers.get(hashStr);
-		if(hashChunk == null) {
-			hashChunk = hs.getHashChunk(hash);
-			readBuffers.put(hashStr, hashChunk);
-		}
+		HashChunk hashChunk = hs.getHashChunk(hash);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;

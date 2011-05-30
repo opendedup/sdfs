@@ -270,4 +270,16 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		}
 	}
 
+	@Override
+	public ChunkData getNextChunck() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void iterationInit() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

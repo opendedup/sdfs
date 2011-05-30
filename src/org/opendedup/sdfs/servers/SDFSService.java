@@ -73,10 +73,7 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
-		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info("Shutting down HashStore");
-			HashChunkService.close();
-		}
+		
 		/*
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
@@ -87,6 +84,10 @@ public class SDFSService {
 					"umount " + Main.volumeMountPoint);
 			p.waitFor();
 		} catch (Exception e) {
+		}
+		if (Main.chunkStoreLocal) {
+			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+			HashChunkService.close();
 		}
 	}
 
