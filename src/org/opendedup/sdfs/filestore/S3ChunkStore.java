@@ -109,7 +109,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString =  this.getHashName(hash);
 		try { 
-			S3Object obj = s3Service.getObject(s3Bucket, hashString);
+			S3Object obj = s3Service.getObject(this.name, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
