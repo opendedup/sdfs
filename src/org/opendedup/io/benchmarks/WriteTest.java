@@ -174,12 +174,12 @@ public class WriteTest implements Runnable {
 					.println("WriteTest <Path to write to> <File Size (GB)> <precent random data (0-100)> <Number of Parallel Runs> <Number of total runs> <Test Name> <Output File>");
 			System.exit(0);
 		}
-		int r = Integer.parseInt(args[5]);
+		int r = Integer.parseInt(args[4]);
 		for (int i =0; i<r;i++) {
 			float[] results = test(args[0], Integer.parseInt(args[1]),
 					Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 
-			String testName = args[4];
+			String testName = args[5];
 			String logFileName = args[6];
 
 			Path p = Paths.get(logFileName);
