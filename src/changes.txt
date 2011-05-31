@@ -7,6 +7,7 @@ Version 1.0.6
 	* Added latest java build to the library (b144)
 	* Fixed exit value on mount.sdfs error exit
 	* Fixed sdfs.log location to /var/log/sdfs.log
+	* Fixed java hangs on  umount
 	
 Version 1.0.5
 	Fixes :
