@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
+import org.opendedup.util.SDFSLogger;
 
 import fuse.FuseMount;
 
@@ -149,6 +150,7 @@ public class MountSDFS {
 			}
 			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), cmd
 					.getOptionValue("m")), log);
+			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

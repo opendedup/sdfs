@@ -366,7 +366,8 @@ public class VolumeConfigWriter {
 		launchParams.setAttribute("class-path", Main.classPath);
 		launchParams.setAttribute("java-path", Main.javaPath);
 		long mem = calcMem(this.chunk_store_allocation_size);
-		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"+mem+"m");
+		long xmn = calcXmn(this.chunk_store_allocation_size);
+		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"+mem+"m -Xmn" + xmn +"m");
 		root.appendChild(launchParams);
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
@@ -693,6 +694,17 @@ public class VolumeConfigWriter {
 		double _dmem = mem/1000;
 		_dmem = Math.ceil(_dmem);
 		long _mem = ((long)(_dmem *1000)) + 1000;
+		return _mem;
+	}
+	
+	private static long calcXmn(long dseSize) {
+		double mem = (dseSize/4096) *25;
+		mem = (mem/1024)/1024;
+		double _dmem = mem/400;
+		_dmem = Math.ceil(_dmem);
+		long _mem = ((long)(_dmem *100));
+		if(_mem > 2000)
+			_mem = 2000;
 		return _mem;
 	}
 
