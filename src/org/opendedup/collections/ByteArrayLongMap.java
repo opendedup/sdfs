@@ -556,7 +556,7 @@ public class ByteArrayLongMap {
 		long end = System.currentTimeMillis();
 		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
 		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
-				+ " ms at pos " + b.get(hash1));
+				+ " ms at pos " + b.get(hash, true));
 		b.iterInit();
 		int vals = 0;
 		byte[] key = new byte[16];

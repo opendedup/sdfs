@@ -90,7 +90,7 @@ public class ChunkData {
 		this.hashLen = (short) hash.length;
 		this.hash = hash;
 		this.cLen = Main.CHUNK_LENGTH;
-		this.cPos = -1;
+		this.cPos = pos;
 		this.chunk = null;
 	}
 

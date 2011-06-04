@@ -58,7 +58,6 @@ public class FuseMount {
         log.info("Filesystem is unmounted");
 
         if (log.isDebugEnabled()) {
-        	 log.info("1");
             int n = threadGroup.activeCount();
             log.debug("ThreadGroup(\"" + threadGroup.getName() + "\").activeCount() = " + n);
 
@@ -68,7 +67,6 @@ public class FuseMount {
                 log.debug("thread[" + i + "] = " + threads[i] + ", isDaemon = " + threads[i].isDaemon());
             }
         }
-        log.info("2");
     }
 
     //

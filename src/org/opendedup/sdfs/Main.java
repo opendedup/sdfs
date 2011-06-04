@@ -18,6 +18,7 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	public static boolean logToConsole = true;
 	
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	/**
@@ -31,7 +32,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.0.6";
+	public static String version = "1.1.0";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -46,7 +47,8 @@ public class Main {
 	 * Future implementation of pluggable cs
 	 */
 	public static String chunkStoreClass = "org.opendedup.sdfs.filestore.NullChunkStore";
-
+	//public static String hashesDBClass = "com.opendedup.collections.FileBasedCSMap";
+	public static String hashesDBClass = "org.opendedup.collections.CSByteArrayLongMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
@@ -331,7 +333,7 @@ public class Main {
 	 * the length of the hash. Will be either 16 or 24 depending on md/tiger128
 	 * or tiger192
 	 */
-	public static short hashLength = 24;
+	public static short hashLength = 16;
 	/**
 	 * FDisk Schedule in cron format
 	 * 

@@ -25,7 +25,7 @@ import org.opendedup.util.StringUtils;
 
 import sun.nio.ch.FileChannelImpl;
 
-public class CSByteArrayLongMap implements AbstractMap {
+public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	RandomAccessFile kRaf = null;
 	FileChannelImpl kFc = null;
 	private long size = 0;
@@ -54,7 +54,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 	private boolean firstGCRun = true;
 	private boolean flushing = false;
 
-	public CSByteArrayLongMap(long maxSize, String fileName)
+	public void init(long maxSize, String fileName)
 			throws IOException, HashtableFullException {
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
@@ -73,25 +73,7 @@ public class CSByteArrayLongMap implements AbstractMap {
 		new SyncThread(this);
 	}
 
-	public CSByteArrayLongMap(long maxSize, String fileName, String fileParams)
-			throws IOException, HashtableFullException {
-		if (Main.compressedIndex)
-			maps = new ByteArrayLongMap[65535];
-		else
-			maps = new ByteArrayLongMap[256];
-		this.fileParams = fileParams;
-		this.size = (long) (maxSize * 1.125);
-		this.maxSz = maxSize;
-		this.fileName = fileName;
-		FREE = new byte[Main.hashLength];
-		REMOVED = new byte[Main.hashLength];
-		Arrays.fill(FREE, (byte) 0);
-		Arrays.fill(BLANKCM, (byte) 0);
-		Arrays.fill(REMOVED, (byte) 1);
-		this.setUp();
-		this.closed = false;
-		new SyncThread(this);
-	}
+	
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
 		int hashb = 0;
@@ -140,6 +122,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return m;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getAllocatedRam()
+	 */
+	@Override
 	public long getAllocatedRam() {
 		return this.ram;
 	}
@@ -148,19 +134,35 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.closed;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getSize()
+	 */
+	@Override
 	public long getSize() {
 		return this.kSz;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getUsedSize()
+	 */
+	@Override
 	public long getUsedSize() {
 
 		return kSz * Main.CHUNK_LENGTH;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getMaxSize()
+	 */
+	@Override
 	public long getMaxSize() {
 		return this.size;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#claimRecords()
+	 */
+	@Override
 	public synchronized void claimRecords() throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -336,14 +338,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return size;
 	}
 
-	/**
-	 * Searches the set for <tt>obj</tt>
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return a <code>boolean</code> value
-	 * @throws IOException
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#containsKey(byte[])
 	 */
+	@Override
 	public boolean containsKey(byte[] key) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -351,6 +349,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return this.getMap(key).containsKey(key);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getFreeBlocks()
+	 */
+	@Override
 	public int getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
@@ -436,6 +438,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore.ChunkData)
+	 */
+	@Override
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
@@ -511,6 +517,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore.ChunkData, boolean)
+	 */
+	@Override
 	public boolean put(ChunkData cm, boolean persist) throws IOException,
 			HashtableFullException {
 		// persist = false;
@@ -548,6 +558,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		return added;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#update(org.opendedup.sdfs.filestore.ChunkData)
+	 */
+	@Override
 	public boolean update(ChunkData cm) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -556,6 +570,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#get(byte[])
+	 */
+	@Override
 	public long get(byte[] key) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -572,6 +590,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#getData(byte[])
+	 */
+	@Override
 	public byte[] getData(byte[] key) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -651,6 +673,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#remove(org.opendedup.sdfs.filestore.ChunkData)
+	 */
+	@Override
 	public boolean remove(ChunkData cm) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -702,6 +728,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 
 	private ReentrantLock syncLock = new ReentrantLock();
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#sync()
+	 */
+	@Override
 	public void sync() throws IOException {
 		syncLock.lock();
 		try {
@@ -716,6 +746,10 @@ public class CSByteArrayLongMap implements AbstractMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractHashesMap#close()
+	 */
+	@Override
 	public void close() {
 		this.arlock.lock();
 		this.iolock.lock();
