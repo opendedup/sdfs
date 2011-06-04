@@ -1,10 +1,10 @@
 package org.opendedup.sdfs.filestore;
 
-import org.opendedup.collections.CSByteArrayLongMap;
+import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.util.SDFSLogger;
 
 public class ConsistancyCheck {
-	public static synchronized void runCheck(CSByteArrayLongMap map,AbstractChunkStore store) {
+	public static synchronized void runCheck(AbstractHashesMap map,AbstractChunkStore store) {
 		try {
 			store.iterationInit();
 			ChunkData data = store.getNextChunck();

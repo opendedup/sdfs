@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
@@ -40,7 +41,7 @@ public class HashStore {
 
 	// A lookup table for the specific hash store based on the first byte of the
 	// hash.
-	CSByteArrayLongMap bdb = null;
+	AbstractHashesMap bdb = null;
 	// the name of the hash store. This is usually associate with the first byte
 	// of all possible hashes. There should
 	// be 256 total hash stores.
@@ -159,8 +160,23 @@ public class HashStore {
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
-		bdb = new CSByteArrayLongMap(entries, dbf
-				.getPath());
+		try {
+			bdb =(AbstractHashesMap)Class.forName(Main.hashesDBClass).newInstance();
+			bdb.init(entries, dbf
+					.getPath());
+		} catch (InstantiationException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			System.exit(-1);
+		} catch (IllegalAccessException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			System.exit(-1);
+		} catch (ClassNotFoundException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			System.exit(-1);
+		} catch (IOException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			System.exit(-1);
+		}
 		if(!Main.closedGracefully) {
 			SDFSLogger.getLog().info("DSE did not close gracefully, running check");
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());

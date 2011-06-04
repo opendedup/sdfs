@@ -56,6 +56,8 @@ public class FileChunkStore implements AbstractChunkStore {
 				chunk_location.mkdirs();
 			}
 			f = new File(chunk_location + File.separator + "chunks.chk");
+			if(!f.getParentFile().exists())
+				f.getParentFile().mkdirs();
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");

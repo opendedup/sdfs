@@ -82,14 +82,7 @@ public class LongByteArrayMap implements AbstractMap {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					long pos = iterPos * Main.CHUNK_LENGTH;
-					this.hashlock.lock();
-					try {
-						pbdb.read(buf, _cpos);
-					} catch (Exception e) {
-						throw e;
-					} finally {
-						this.hashlock.unlock();
-					}
+					pbdb.read(buf, _cpos);
 					byte[] val = buf.array();
 					iterPos++;
 					if (!Arrays.equals(val, FREE)) {
@@ -122,14 +115,8 @@ public class LongByteArrayMap implements AbstractMap {
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-					this.hashlock.lock();
-					try {
-						pbdb.read(buf, _cpos);
-					} catch (Exception e) {
-						throw e;
-					} finally {
-						this.hashlock.unlock();
-					}
+					pbdb.read(buf, _cpos);
+					this.hashlock.unlock();
 					byte[] val = buf.array();
 					if (!Arrays.equals(val, FREE)) {
 						return val;
@@ -241,31 +228,16 @@ public class LongByteArrayMap implements AbstractMap {
 			throw new IOException("data length " + data.length
 					+ " does not equal " + arrayLength);
 		long fpos = 0;
-		try {
-			fpos = this.getMapFilePosition(pos);
+		fpos = this.getMapFilePosition(pos);
 
-			//
-			this.hashlock.lock();
-			if (fpos > flen)
-				flen = fpos;
-
-			// rf.seek(fpos);
-			// rf.write(data);
-			pbdb.write(ByteBuffer.wrap(data), fpos);
-		} catch (BufferOverflowException e) {
-			SDFSLogger.getLog().fatal(
-					"trying to write at " + fpos + " but file length is "
-							+ dbFile.length());
-			throw e;
-		} catch (Exception e) {
-			// System.exit(-1);
-			throw new IOException(e);
-		} finally {
-			try {
-				this.hashlock.unlock();
-			} catch (Exception e) {
-			}
-		}
+		//
+		this.hashlock.lock();
+		if (fpos > flen)
+			flen = fpos;
+		this.hashlock.unlock();
+		// rf.seek(fpos);
+		// rf.write(data);
+		pbdb.write(ByteBuffer.wrap(data), fpos);
 	}
 
 	public void truncate(long length) throws IOException {
@@ -286,9 +258,10 @@ public class LongByteArrayMap implements AbstractMap {
 				_bdb.close();
 			} catch (Exception e) {
 			}
+			this.flen = fpos;
 			this.hashlock.unlock();
 		}
-		this.flen = fpos;
+
 	}
 
 	/*
@@ -337,12 +310,7 @@ public class LongByteArrayMap implements AbstractMap {
 			if (fpos > flen)
 				return null;
 			byte[] buf = new byte[arrayLength];
-			this.hashlock.lock();
-			try {
-				pbdb.read(ByteBuffer.wrap(buf), fpos);
-			} finally {
-				this.hashlock.unlock();
-			}
+			pbdb.read(ByteBuffer.wrap(buf), fpos);
 			if (Arrays.equals(buf, FREE))
 				return null;
 			return buf;

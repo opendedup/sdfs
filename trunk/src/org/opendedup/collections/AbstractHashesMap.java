@@ -1,0 +1,53 @@
+package org.opendedup.collections;
+
+import java.io.IOException;
+
+import org.opendedup.sdfs.filestore.ChunkData;
+
+public interface AbstractHashesMap {
+
+	public abstract long getAllocatedRam();
+
+	public abstract long getSize();
+
+	public abstract long getUsedSize();
+
+	public abstract long getMaxSize();
+
+	public abstract void claimRecords() throws IOException;
+
+	/**
+	 * Searches the set for <tt>obj</tt>
+	 * 
+	 * @param obj
+	 *            an <code>Object</code> value
+	 * @return a <code>boolean</code> value
+	 * @throws IOException
+	 */
+	public abstract boolean containsKey(byte[] key) throws IOException;
+
+	public abstract int getFreeBlocks();
+
+	public abstract boolean put(ChunkData cm) throws IOException,
+			HashtableFullException;
+
+	public abstract boolean put(ChunkData cm, boolean persist)
+			throws IOException, HashtableFullException;
+
+	public abstract boolean update(ChunkData cm) throws IOException;
+
+	public abstract long get(byte[] key) throws IOException;
+
+	public abstract byte[] getData(byte[] key) throws IOException;
+
+	public abstract boolean remove(ChunkData cm) throws IOException;
+	
+	public abstract long removeRecords(int time,boolean forceRun) throws IOException;
+
+	public abstract void sync() throws IOException;
+
+	public abstract void close();
+	
+	public abstract void init(long maxSize, String fileName) throws IOException,HashtableFullException;
+
+}
