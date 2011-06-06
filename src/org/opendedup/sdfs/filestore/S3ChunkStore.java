@@ -41,6 +41,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private long currentLength = 0L;
 	private RandomAccessFile posRaf = null;
 	private static File chunk_location = new File(Main.chunkStore);
+	boolean compress = false;
+	boolean encrypt = false;
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
@@ -53,19 +55,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 			System.exit(-1);
 		}
 	}
-	public S3ChunkStore(String name) throws IOException {
-		this.name = name;
-		try {
-			s3Service = new RestS3Service(awsCredentials);
-			this.s3Bucket = s3Service.getBucket(this.name);
-			if (this.s3Bucket == null) {
-				this.s3Bucket = s3Service.createBucket(this.name);
-				SDFSLogger.getLog().info("created new store " + name);
-			}
-			this.openPosFile();
-		} catch (S3ServiceException e) {
-			throw new IOException(e);
-		}
+	public S3ChunkStore() {
+		
 	}
 	
 	private void openPosFile() throws IOException {
@@ -114,9 +105,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
 			obj.closeDataInputStream();
-			if(Main.chunkStoreEncryptionEnabled)
+			if(this.encrypt)
 				data = EncryptUtils.decrypt(data);
-			if(Main.awsCompress)
+			if(this.compress)
 				data = CompressionUtils.decompressZLIB(data);
 			return data;
 		} catch (Exception e) {
@@ -131,18 +122,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 	
-	private static ReentrantLock reservePositionlock = new ReentrantLock();
 
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		reservePositionlock.lock();
-		long pos = this.currentLength;
-		this.currentLength = this.currentLength + pageSize;
-		this.posRaf.seek(0);
-		this.posRaf.writeLong(this.currentLength);
-		reservePositionlock.unlock();
-		return pos;
+		
+		return 1;
 	}
 
 	public void setName(String name) {
@@ -252,8 +237,37 @@ public class S3ChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void init(Element config) {
-		// TODO Auto-generated method stub
+	public void init(Element config) throws IOException {
+		this.name = Main.awsBucket;
+		try {
+			s3Service = new RestS3Service(awsCredentials);
+			this.s3Bucket = s3Service.getBucket(this.name);
+			if (this.s3Bucket == null) {
+				this.s3Bucket = s3Service.createBucket(this.name);
+				if(Main.awsCompress) {
+					this.s3Bucket.addMetadata("compress", "true");
+				}else {
+					this.s3Bucket.addMetadata("compress", "false");
+				}
+				if(Main.chunkStoreEncryptionEnabled) {
+					this.s3Bucket.addMetadata("encrypt", "true");
+				}else {
+					this.s3Bucket.addMetadata("encrypt", "false");
+				}
+				SDFSLogger.getLog().info("created new store " + name);
+			}
+			if(this.s3Bucket.containsMetadata("compress"))
+				this.compress = Boolean.parseBoolean((String)this.s3Bucket.getMetadata("compress"));
+			else
+				this.compress = Main.awsCompress;
+			if(this.s3Bucket.containsMetadata("encrypt"))
+				this.encrypt = Boolean.parseBoolean((String)this.s3Bucket.getMetadata("encrypt"));
+			else 
+				this.encrypt = Main.chunkStoreEncryptionEnabled;
+			this.openPosFile();
+		} catch (S3ServiceException e) {
+			throw new IOException(e);
+		}
 		
 	}
 
