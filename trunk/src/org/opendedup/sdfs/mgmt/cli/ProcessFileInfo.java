@@ -57,14 +57,14 @@ public class ProcessFileInfo {
 							StorageUnit.of(Long.parseLong(ioEl.getAttribute("bytes-read"))).format(Long.parseLong(ioEl.getAttribute("bytes-read"))));
 					
 					long realBytes = Long.parseLong(ioEl
-							.getAttribute("virtual-bytes-written"));
+							.getAttribute("actual-bytes-written"));
 					long dedupBytes = Long.parseLong(ioEl.getAttribute("duplicate-blocks"));
 					if(dedupBytes == 0 || realBytes == 0) {
 
 						System.out.printf("dedup rate : %d%%\n",0);
 					}
 					else {
-						double dedupRate = (((double)dedupBytes / (double)realBytes)*100);
+						double dedupRate = (((double)dedupBytes / (double)(dedupBytes + realBytes))*100);
 						DecimalFormat twoDForm = new DecimalFormat("#.##");
 						dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 

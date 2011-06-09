@@ -16,8 +16,9 @@ public class ChunkClaimJob implements Job {
 		} else {
 			GCMain.gcRunning = true;
 			try {
+				long tm = System.currentTimeMillis() - (1*60*1000);
 				HashChunkService.processHashClaims();
-				HashChunkService.removeStailHashes();
+				HashChunkService.removeStailHashes(tm,true);
 			} catch (Exception e) {
 				throw new JobExecutionException(e);
 			} finally {

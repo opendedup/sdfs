@@ -116,11 +116,9 @@ public class HashChunkService {
 		hs.processHashClaims();
 	}
 
-	public static void removeStailHashes() throws IOException {
-		hs.evictChunks(Main.evictionAge*60*60*1000,false);
-	}
-	public static long removeStailHashes(int minutes,boolean forceRun) throws IOException {
-		return hs.evictChunks(minutes*60*1000,forceRun);
+	
+	public static long removeStailHashes(long ms,boolean forceRun) throws IOException {
+		return hs.evictChunks(ms,forceRun);
 	}
 
 	public static void commitChunks() {

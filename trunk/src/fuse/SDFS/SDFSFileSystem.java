@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -15,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import javax.naming.directory.BasicAttributes;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -692,14 +692,40 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int getxattr(String path, String name, ByteBuffer dst, int position)
 			throws FuseException, BufferOverflowException {
-		// TODO Auto-generated method stub
-		return 0;
+			int ftype = this.getFtype(path);
+			if (ftype != FuseFtype.TYPE_SYMLINK) {
+				if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.")
+						|| name.startsWith("user.dse"))
+					dst.put(sdfsCmds.getAttr(name, path).getBytes());
+				else {
+					File f = this.resolvePath(path);
+
+					MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+					String val = mf.getXAttribute(name);
+					if (val != null) {
+						SDFSLogger.getLog().debug("val=" + val);
+						dst.put(val.getBytes());
+					} else
+						throw new FuseException().initErrno(FuseException.ENODATA);
+				}
+			}
+			return 0;
 	}
 
 	@Override
 	public int setxattr(String path, String name, ByteBuffer value, int flags,
 			int position) throws FuseException {
-		// TODO Auto-generated method stub
+		byte valB[] = new byte[value.capacity()];
+		value.get(valB);
+		String valStr = new String(valB);
+		if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.")
+				|| name.startsWith("user.dse")) {
+			sdfsCmds.runCMD(path, name, valStr);
+		} else {
+			File f = this.resolvePath(path);
+			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+			mf.addXAttribute(name, valStr);
+		}
 		return 0;
 	}
 

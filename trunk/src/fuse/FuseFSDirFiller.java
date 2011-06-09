@@ -1,6 +1,6 @@
 package fuse;
 
-import java.util.List;
+
 import java.util.ArrayList;
 import java.nio.charset.Charset;
 import java.nio.CharBuffer;
@@ -13,7 +13,11 @@ import java.nio.ByteBuffer;
  */
 public class FuseFSDirFiller extends ArrayList<FuseFSDirEnt> implements FuseDirFiller
 {
-   private Charset cs;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private Charset cs;
 
    public void setCharset(Charset cs)
    {

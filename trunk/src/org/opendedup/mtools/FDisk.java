@@ -14,7 +14,7 @@ public class FDisk {
 	private long files = 0;
 	private long corruptFiles = 0;
 
-	public FDisk() {
+	public FDisk() throws IOException {
 		SDFSLogger.getLog().info("Starting FDISK");
 		long start = System.currentTimeMillis();
 		File f = new File(Main.dedupDBStore);
@@ -26,10 +26,11 @@ public class FDisk {
 							+ this.corruptFiles + "] corrupt files");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
+			throw new IOException(e);
 		}
 	}
 
-	private void traverse(File dir) {
+	private void traverse(File dir) throws IOException {
 
 		if (dir.isDirectory()) {
 			try {
@@ -43,11 +44,7 @@ public class FDisk {
 			}
 		} else {
 			if (dir.getPath().endsWith(".map")) {
-				try {
 					this.checkDedupFile(dir);
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("error traversing for FDISK", e);
-				}
 			}
 		}
 	}
@@ -79,6 +76,7 @@ public class FDisk {
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"error while checking file [" + mapFile.getPath() + "]", e);
+			throw new IOException(e);
 		} finally {
 			mp.close();
 			mp = null;

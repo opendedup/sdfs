@@ -434,7 +434,6 @@ public class DedupFileChannel {
 						} catch (BufferClosedException e) {
 							_rb = null;
 							readBuffer = df.getReadBuffer(currentLocation);
-							SDFSLogger.getLog().info("tring to read again");
 						}
 					}
 					if ((endPos) <= readBuffer.getLength()) {

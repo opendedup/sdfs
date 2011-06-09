@@ -17,10 +17,10 @@ public class PFullGC implements GCControllerImpl {
 	@Override
 	public void runGC() {
 		if(this.calcPFull() >= this.nextPFull) {
-			ManualGC.clearChunks(1);
+			ManualGC.clearChunks(2);
 			if(firstRun) {
 				this.firstRun = false;
-				ManualGC.clearChunks(1);
+				ManualGC.clearChunks(2);
 			}	
 			this.prevPFull = calcPFull();
 			this.nextPFull = this.calcNxtRun();
@@ -38,7 +38,7 @@ public class PFullGC implements GCControllerImpl {
 	
 	private double calcNxtRun() {
 		double next = this.calcPFull() + .1;
-		if(next >= 1)
+		if(next >= .92)
 			next = (double).91;
 		return next;
 	}

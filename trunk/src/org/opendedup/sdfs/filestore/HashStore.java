@@ -6,11 +6,11 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.opendedup.collections.AbstractHashesMap;
-import org.opendedup.collections.CSByteArrayLongMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -240,7 +240,7 @@ public class HashStore {
 		this.bdb.claimRecords();
 	}
 
-	public long evictChunks(int time,boolean forceRun) throws IOException {
+	public long evictChunks(long time,boolean forceRun) throws IOException {
 		return this.bdb.removeRecords(time,forceRun);
 	}
 
@@ -262,11 +262,7 @@ public class HashStore {
 				// long start = chunkStore.reserveWritePosition(chunk.getLen());
 				ChunkData cm = new ChunkData(chunk.getName(),
 						Main.chunkStorePageSize, chunk.getData());
-				if (bdb.put(cm)) {
-					written = true;
-				} else {
-
-				}
+				written = bdb.put(cm);
 
 			} catch (IOException e) {
 				SDFSLogger.getLog().fatal(

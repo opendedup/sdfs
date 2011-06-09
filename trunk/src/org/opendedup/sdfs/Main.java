@@ -18,9 +18,11 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	
 	public static boolean logToConsole = true;
 	
 	public static String logPath = "/var/log/sdfs/sdfs.log";
+	
 	/**
 	 * Class path when launching sdfs
 	 */
@@ -29,6 +31,7 @@ public class Main {
 	public static String javaOptions = "-Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Dfuse.logging.level=INFO -server -XX:+UseLargePages -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+UseCompressedOops";
 	
 	public static String javaPath = "/usr/share/sdfs/jre1.7.0/bin/java";
+	
 	/**
 	 * The Version of SDFS this is
 	 */
@@ -37,16 +40,19 @@ public class Main {
 	/**
 	 * The location where the actual blocks of deduplicated data will be
 	 * located. This is used for the chunk stores.
-	 */
+	 */	
 	public static String chunkStore = "";
+	
 	/**
 	 * Future implementation for pluggable chunkstores
 	 */
 	public static Element chunkStoreConfig = null;
+	
 	/**
 	 * Future implementation of pluggable cs
 	 */
 	public static String chunkStoreClass = "org.opendedup.sdfs.filestore.NullChunkStore";
+	
 	public static String hashesDBClass = "com.opendedup.collections.FileBasedCSMap";
 	//public static String hashesDBClass = "org.opendedup.collections.CSByteArrayLongMap";
 	/**
