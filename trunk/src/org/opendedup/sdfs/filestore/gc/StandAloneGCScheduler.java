@@ -19,7 +19,7 @@ public class StandAloneGCScheduler implements Runnable {
 		while(!closed) {
 			gcController.runGC();
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(60*1000);
 			} catch (InterruptedException e) {
 				closed = true;
 			}
