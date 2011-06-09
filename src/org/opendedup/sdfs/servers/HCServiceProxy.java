@@ -94,7 +94,7 @@ public class HCServiceProxy {
 			int position, int len, boolean sendChunk) throws IOException, HashtableFullException {
 		boolean doop = false;
 		if (Main.chunkStoreLocal) {
-			doop = HashChunkService.hashExists(hash);
+			//doop = HashChunkService.hashExists(hash);
 			if (!doop && sendChunk) {
 					doop = HashChunkService.writeChunk(hash, aContents, 0,
 							Main.CHUNK_LENGTH, false);

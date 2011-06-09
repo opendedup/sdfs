@@ -42,7 +42,7 @@ public interface AbstractHashesMap {
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
 	
-	public abstract long removeRecords(int time,boolean forceRun) throws IOException;
+	public abstract long removeRecords(long ms,boolean forceRun) throws IOException;
 
 	public abstract void sync() throws IOException;
 

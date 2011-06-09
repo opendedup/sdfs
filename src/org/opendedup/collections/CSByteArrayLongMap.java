@@ -1,12 +1,12 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -357,9 +357,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return this.freeSlots.cardinality();
 	}
 
-	public synchronized long removeRecords(int timeIncrement, boolean forceRun)
+	public synchronized long removeRecords(long time, boolean forceRun)
 			throws IOException {
-		long time = System.currentTimeMillis() - timeIncrement;
 		SDFSLogger.getLog().info(
 				"Garbage collection starting for records older than " + new Date(time));
 		long rem = 0;

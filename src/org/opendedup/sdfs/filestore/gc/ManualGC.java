@@ -22,9 +22,7 @@ public class ManualGC {
 				new FDisk();
 				if (Main.chunkStoreLocal) {
 					HashChunkService.processHashClaims();
-					long crtm = System.currentTimeMillis() - tm;
-					return HashChunkService.removeStailHashes(minutes
-							+ (int) ((crtm / 1000) / 60), true);
+					return HashChunkService.removeStailHashes(tm- (minutes*60*1000), true);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish garbage collection",

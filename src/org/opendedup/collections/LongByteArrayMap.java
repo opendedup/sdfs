@@ -2,10 +2,10 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.RandomAccessFile;
 
 import java.io.IOException;
-import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -116,15 +116,10 @@ public class LongByteArrayMap implements AbstractMap {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					pbdb.read(buf, _cpos);
-					this.hashlock.unlock();
 					byte[] val = buf.array();
 					if (!Arrays.equals(val, FREE)) {
 						return val;
 					}
-				} catch (Exception e1) {
-					SDFSLogger.getLog().debug(
-							"unable to iterate through value at " + iterPos
-									* arrayLength, e1);
 				} finally {
 					iterPos++;
 					_cpos = (long) (iterPos * (long) arrayLength);
