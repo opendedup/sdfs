@@ -2,11 +2,11 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -36,7 +36,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String name;
 	private S3Bucket s3Bucket = null;
 	S3Service s3Service;
-	private static final int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
 	private long currentLength = 0L;
 	private RandomAccessFile posRaf = null;
