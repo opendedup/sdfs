@@ -2,12 +2,14 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkHCServer;
 import org.opendedup.util.OSValidator;
@@ -19,6 +21,7 @@ public class SDFSService {
 	private SDFSGCScheduler gc = null;
 	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
+	private VolumeConfigWriterThread wth = null;
 
 	public SDFSService(String configFile, String routingFile) {
 
@@ -54,6 +57,7 @@ public class SDFSService {
 			this.stGC = new StandAloneGCScheduler();
 		}
 		MgmtWebServer.start();
+		wth = new VolumeConfigWriterThread(configFile);
 		
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
@@ -81,6 +85,11 @@ public class SDFSService {
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
 		MgmtWebServer.stop();
+		try {
+			wth.stop();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		SDFSLogger.getLog().info("SDFS is Shut Down");
 		try {
 			Process p = Runtime.getRuntime().exec(

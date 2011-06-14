@@ -127,7 +127,7 @@ public class SparseDedupFile implements DedupFile {
 						Main.blankHash, false, System.currentTimeMillis());
 				bdb.put(pos, chunk.getBytes());
 			}
-			
+
 			mf.setLength(len, true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
@@ -211,8 +211,8 @@ public class SparseDedupFile implements DedupFile {
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 			try {
-			buf.close();
-			}catch (Exception e) {
+				buf.close();
+			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"while closing position " + buf.getFilePosition(), e);
 			}
@@ -248,7 +248,7 @@ public class SparseDedupFile implements DedupFile {
 				mf.getIOMonitor()
 						.addVirtualBytesWritten(writeBuffer.capacity());
 				if (!doop) {
-					if(writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
+					if (writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
 						mf.getIOMonitor().addActualBytesWritten(
 								writeBuffer.capacity());
 					}
@@ -467,7 +467,14 @@ public class SparseDedupFile implements DedupFile {
 
 			}
 		} else {
-			// this.bdb.sync();
+			try {
+				this.bdb.sync();
+				int writtenBuffers = this.writeCache();
+				SDFSLogger.getLog().debug(
+						"Flushed " + writtenBuffers + "with sync");
+			} catch (HashtableFullException e) {
+				throw new IOException(e);
+			}
 		}
 	}
 
@@ -555,7 +562,8 @@ public class SparseDedupFile implements DedupFile {
 							al.get(i).close();
 						}
 					} catch (Exception e) {
-						SDFSLogger.getLog().error("error closing " + mf.getPath(),e);
+						SDFSLogger.getLog().error(
+								"error closing " + mf.getPath(), e);
 					}
 				} else {
 					try {
@@ -567,8 +575,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 				try {
 					int nwb = this.writeCache();
-					SDFSLogger.getLog().debug(
-							"Flushed " + nwb + " buffers");
+					SDFSLogger.getLog().debug("Flushed " + nwb + " buffers");
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
 							"unable to flush " + this.databasePath, e);
@@ -591,8 +598,8 @@ public class SparseDedupFile implements DedupFile {
 				mf.sync();
 			}
 		} catch (Exception e) {
-			
-			SDFSLogger.getLog().error("error closing " + mf.getPath(),e);
+
+			SDFSLogger.getLog().error("error closing " + mf.getPath(), e);
 		} finally {
 			DedupFileStore.removeOpenDedupFile(mf);
 			bdb = null;
@@ -769,7 +776,8 @@ public class SparseDedupFile implements DedupFile {
 				records++;
 				l = bdb.nextKey();
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error pushing data for " + mf.getPath(),e);
+				SDFSLogger.getLog().error(
+						"error pushing data for " + mf.getPath(), e);
 			}
 		}
 		if (this.buffers.size() == 0) {
@@ -910,24 +918,22 @@ public class SparseDedupFile implements DedupFile {
 		}
 	}
 
-
 	public void truncate(long size) throws IOException {
 		this.writeBufferLock.lock();
 		try {
 			if (this.closed) {
 				throw new IOException("file already closed");
 			}
-			
+
 			this.writeCache();
-			if(size == 0) {
+			if (size == 0) {
 				this.mf.getIOMonitor().clearAllCounters();
 			}
 			this.bdb.truncate(size);
 			if (!mf.isDedup())
 				this.chunkStore.setLength(size);
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn(
-					"unable to truncate to " + size, e);
+			SDFSLogger.getLog().warn("unable to truncate to " + size, e);
 			throw new IOException(e);
 		} finally {
 			this.writeBufferLock.unlock();
