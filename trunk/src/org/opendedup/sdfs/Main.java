@@ -53,8 +53,8 @@ public class Main {
 	 */
 	public static String chunkStoreClass = "org.opendedup.sdfs.filestore.NullChunkStore";
 	
-	public static String hashesDBClass = "com.opendedup.collections.FileBasedCSMap";
-	//public static String hashesDBClass = "org.opendedup.collections.CSByteArrayLongMap";
+	//public static String hashesDBClass = "com.opendedup.collections.FileBasedCSMap";
+	public static String hashesDBClass = "org.opendedup.collections.CSByteArrayLongMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
