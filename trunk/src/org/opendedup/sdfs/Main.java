@@ -19,7 +19,7 @@ public class Main {
 		}
 	}
 	
-	public static boolean logToConsole = true;
+	public static boolean logToConsole = false;
 	
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	

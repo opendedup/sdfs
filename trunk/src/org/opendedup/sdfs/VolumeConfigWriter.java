@@ -2,6 +2,7 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -42,7 +43,7 @@ public class VolumeConfigWriter {
 			+ "volumes" + File.separator + volume_name;
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
-	boolean safe_close = true;
+	boolean safe_close = false;
 	boolean safe_sync = false;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	boolean dedup_files = true;
@@ -72,20 +73,14 @@ public class VolumeConfigWriter {
 	String awsAccessKey = "";
 	String awsSecretKey = "";
 	String awsBucketName = "";
-	boolean gsCompress = Main.awsCompress;
-	boolean gsEnabled = false;
-	String gsAccessKey = "";
-	String gsSecretKey = "";
-	String gsBucketName = "";
-	boolean awsCompress = Main.awsCompress;
 	int chunk_store_read_cache = Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
-	
+	boolean awsCompress = Main.awsCompress;
 	int hashSize = 16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
-	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
+	String gc_class = "org.opendedup.sdfs.filestore.gc.ContinuousGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -232,8 +227,8 @@ public class VolumeConfigWriter {
 			this.chunk_store_dirty_timeout = Integer.parseInt(cmd
 					.getOptionValue("chunk-store-dirty-timeout"));
 		}
-		if(cmd.hasOption("gc-class")) {
-			this.gc_class = cmd.getOptionValue("gc-class");
+		if(cmd.hasOption("gc-name")) {
+			this.gc_class = cmd.getOptionValue("gc-name");
 		}
 		if (this.awsEnabled) {
 			if (cmd.hasOption("aws-secret-key")
@@ -242,39 +237,17 @@ public class VolumeConfigWriter {
 				this.awsAccessKey = cmd.getOptionValue("aws-access-key");
 				this.awsSecretKey = cmd.getOptionValue("aws-secret-key");
 				this.awsBucketName = cmd.getOptionValue("aws-bucket-name");
-				if(!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
 						.println("aws-access-key, aws-secret-key, and aws-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("aws-compress"))
-				this.awsCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("aws-compress"));
 		}
-		else if (this.gsEnabled) {
-			if (cmd.hasOption("gs-secret-key")
-					&& cmd.hasOption("gs-access-key")
-					&& cmd.hasOption("gs-bucket-name")) {
-				this.awsAccessKey = cmd.getOptionValue("gs-access-key");
-				this.awsSecretKey = cmd.getOptionValue("gs-secret-key");
-				this.awsBucketName = cmd.getOptionValue("gs-bucket-name");
-				if(!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
-			} else {
-				System.out.println("Error : Unable to create volume");
-				System.out
-						.println("gs-access-key, gs-secret-key, and gs-bucket-name are required.");
-				System.exit(-1);
-			}
-			if (cmd.hasOption("gs-compress"))
-				this.awsCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("aws-compress"));
-		}
-		
-		
+		if (cmd.hasOption("aws-compress"))
+			this.awsCompress = Boolean.parseBoolean(cmd
+					.getOptionValue("aws-compress"));
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
 			this.chunk_gc_schedule = cmd
 					.getOptionValue("chunk-store-gc-schedule");
@@ -332,6 +305,7 @@ public class VolumeConfigWriter {
 		root.appendChild(locations);
 		
 		Element io = xmldoc.createElement("io");
+		io.setAttribute("log-level","1");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
 		io.setAttribute("file-read-cache",
@@ -365,7 +339,6 @@ public class VolumeConfigWriter {
 		vol.setAttribute("path", this.base_path + File.separator + "files");
 		vol.setAttribute("maximum-percentage-full",
 				Double.toString(this.max_percent_full));
-		vol.setAttribute("closed-gracefully", "true");
 		root.appendChild(vol);
 		
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -377,7 +350,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
 		cs.setAttribute("eviction-age",
 				Integer.toString(this.remove_if_older_than));
-		cs.setAttribute("gc-class", this.gc_class);
+		cs.setAttribute("gc-name", this.gc_class);
 		cs.setAttribute("read-ahead-pages",
 				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
@@ -404,15 +377,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-secret-key", this.awsSecretKey);
 			aws.setAttribute("aws-bucket-name", this.awsBucketName);
 			aws.setAttribute("compress", Boolean.toString(this.awsCompress));
-			cs.appendChild(aws);
-		}
-		else if (this.gsEnabled) {
-			Element aws = xmldoc.createElement("google-store");
-			aws.setAttribute("enabled", "true");
-			aws.setAttribute("gs-access-key", this.gsAccessKey);
-			aws.setAttribute("gs-secret-key", this.gsSecretKey);
-			aws.setAttribute("gs-bucket-name", this.gsBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.gsCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -448,7 +412,7 @@ public class VolumeConfigWriter {
 								+ "<volume name>").hasArg().withArgName("PATH")
 				.create());
 		options.addOption(OptionBuilder
-				.withLongOpt("gc-class")
+				.withLongOpt("gc-name")
 				.withDescription(
 						"The class used for intelligent block garbage collection.\n Defaults to: \n "
 								+ Main.gcClass).hasArg().withArgName("CLASS NAME")
@@ -687,31 +651,6 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Compress AWS chunks before they are sent to the S3 Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-enabled")
-				.withDescription(
-						"Set to true to enable this volume to store to Google Cloud Storage. gs-secret-key, gs-access-key, and gs-bucket-name will also need to be set. ")
-				.hasArg().withArgName("true|false").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-secret-key")
-				.withDescription(
-						"Set to the value of Google Cloud Storage secret key. gs-enabled, gs-access-key, and gs-bucket-name will also need to be set. ")
-				.hasArg().withArgName("Google Secret Key").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("aws-access-key")
-				.withDescription(
-						"Set to the value of the Google Cloud Storage access key. gs-enabled, gs-secret-key, and gs-bucket-name will also need to be set. ")
-				.hasArg().withArgName("Google Access Key").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-bucket-name")
-				.withDescription(
-						"Set to the value of the Google Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. gs-enabled, gs-secret-key, and gs-secret-key will also need to be set. ")
-				.hasArg().withArgName("Unique Google Bucket Name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-compress")
-				.withDescription(
-						"Compress chunks before they are sent to the Google Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
-				.hasArg().withArgName("true|false").create());
 		return options;
 	}
 
@@ -755,7 +694,7 @@ public class VolumeConfigWriter {
 		mem = (mem/1024)/1024;
 		double _dmem = mem/1000;
 		_dmem = Math.ceil(_dmem);
-		long _mem = ((long)(_dmem *1000)) + 1000;
+		long _mem = ((long)(_dmem *1000)) + 3000;
 		return _mem;
 	}
 	

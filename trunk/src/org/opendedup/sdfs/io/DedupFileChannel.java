@@ -160,13 +160,8 @@ public class DedupFileChannel {
 	 */
 	public void force(boolean metaData) throws IOException {
 		// FixMe Does not persist chunks. This may be an issue.
-		// this.writeCache();
-		if (Main.safeSync) {
-			if (metaData) {
-				df.sync();
-				mf.sync();
-			}
-		}
+		df.sync();
+		mf.sync();
 	}
 
 	/**
@@ -434,6 +429,7 @@ public class DedupFileChannel {
 						} catch (BufferClosedException e) {
 							_rb = null;
 							readBuffer = df.getReadBuffer(currentLocation);
+							SDFSLogger.getLog().info("tring to read again");
 						}
 					}
 					if ((endPos) <= readBuffer.getLength()) {

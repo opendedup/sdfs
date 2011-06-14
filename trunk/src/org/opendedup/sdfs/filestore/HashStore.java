@@ -178,7 +178,7 @@ public class HashStore {
 			System.exit(-1);
 		}
 		if(!Main.closedGracefully) {
-			SDFSLogger.getLog().info("DSE did not close gracefully, running check");
+			SDFSLogger.getLog().info("DSE did not close gracefully, running consistancy check");
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
 		}
 	}

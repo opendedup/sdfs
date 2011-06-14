@@ -163,8 +163,11 @@ public class Config {
 				.item(0);
 		SDFSLogger.getLog().info("parsing folder locations");
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
-		Main.ioLogFile = locations.getAttribute("io-SDFSLogger.getLog()");
+		Main.ioLogFile = locations.getAttribute("io-log.log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
+		if(cache.hasAttribute("log-level")) {
+			SDFSLogger.setLevel(Integer.parseInt(cache.getAttribute("log-level")));
+		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
 		Main.safeClose = Boolean.parseBoolean(cache.getAttribute("safe-close"));
@@ -310,7 +313,7 @@ public class Config {
 			SDFSLogger.getLog().error(
 					"Unable to write volume config " + fileName, e);
 		}
-		SDFSLogger.getLog().info("Wrote volume config = " + fileName);
+		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
 	}
 
 	public static synchronized void parserRoutingFile(String fileName)

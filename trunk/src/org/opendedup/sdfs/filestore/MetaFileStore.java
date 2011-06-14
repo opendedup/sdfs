@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ public class MetaFileStore {
 	// A quick lookup table for path to MetaDataDedupFile
 
 	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>()
-			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(10000)
+			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(5000)
 			.listener(new EvictionListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
@@ -89,10 +90,9 @@ public class MetaFileStore {
 	 */
 	private static ReentrantLock getMFLock = new ReentrantLock();
 
-	public static MetaDataDedupFile getMF(String path) {
+	public static MetaDataDedupFile getMF(File f) {
 		getMFLock.lock();
 		try {
-			File f = new File(path);
 			if (f.isDirectory()) {
 				return MetaDataDedupFile.getFile(f.getPath());
 			}
@@ -106,6 +106,10 @@ public class MetaFileStore {
 			getMFLock.unlock();
 		}
 	}
+	
+	public static MetaDataDedupFile getMF(String filePath) {
+		return getMF(new File(filePath));
+	}
 
 	/**
 	 * 
@@ -117,7 +121,7 @@ public class MetaFileStore {
 	 */
 	public static MetaDataDedupFile getMF(File parent, String child) {
 		String pth = parent.getAbsolutePath() + File.separator + child;
-		return getMF(pth);
+		return getMF(new File(pth));
 	}
 
 	/**
@@ -134,7 +138,7 @@ public class MetaFileStore {
 	 */
 	public static MetaDataDedupFile snapshot(String origionalPath,
 			String snapPath, boolean overwrite) throws IOException {
-		MetaDataDedupFile mf = getMF(origionalPath);
+		MetaDataDedupFile mf = getMF(new File(origionalPath));
 		if(mf==null)
 			throw new IOException(origionalPath + " does not exist. Cannot take a snapshot of a non-existent file.");
 		synchronized (mf) {
@@ -202,7 +206,7 @@ public class MetaFileStore {
 					p = null;
 					return true;
 				} else {
-					mf = getMF(path);
+					mf = getMF(new File(path));
 					pathMap.remove(mf.getPath());
 					
 					Main.volume.updateCurrentSize(-1 * mf.length());
