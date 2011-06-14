@@ -43,7 +43,18 @@ public class MgmtWebServer implements Container {
 					result = "<result status=\"failed\" msg=\""
 							+ e.getMessage() + "\"/>";
 				}
-			} else if (cmd.equalsIgnoreCase("volume-info")) {
+			} else if (cmd.equalsIgnoreCase("debug-info")) {
+				try {
+					String msg = new GetDebug().getResult(cmdOptions, file);
+					result = "<result status=\"success\" msg=\"command completed successfully\">";
+					result = result + msg;
+					result = result + "</result>";
+				} catch (IOException e) {
+					result = "<result status=\"failed\" msg=\""
+							+ e.getMessage() + "\"/>";
+				}
+			} 
+			else if (cmd.equalsIgnoreCase("volume-info")) {
 				try {
 					String msg = new GetVolume().getResult(cmdOptions, file);
 					result = "<result status=\"success\" msg=\"command completed successfully\">";
@@ -107,7 +118,7 @@ public class MgmtWebServer implements Container {
 					result = "<result status=\"failed\" msg=\""
 							+ e.getMessage() + "\"/>";
 				}
-			}
+			} 
 			PrintStream body = response.getPrintStream();
 			long time = System.currentTimeMillis();
 
