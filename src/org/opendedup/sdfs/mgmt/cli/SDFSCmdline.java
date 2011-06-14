@@ -37,6 +37,10 @@ public class SDFSCmdline {
 			ProcessVolumeInfo.runCmd();
 			System.exit(0);
 		}
+		if (cmd.hasOption("debug-info")) {
+			ProcessDebugInfo.runCmd();
+			System.exit(0);
+		}
 		
 		if (cmd.hasOption("snapshot")) {
 			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
@@ -97,6 +101,13 @@ public class SDFSCmdline {
 				.withDescription(
 						"Returns Dedup Storage Engine Statitics. "
 								+ "\n e.g. --dse-info")
+				.hasArg(false).create());
+		options
+		.addOption(OptionBuilder
+				.withLongOpt("debug-info")
+				.withDescription(
+						"Returns Debug Information. "
+								+ "\n e.g. --debug-info")
 				.hasArg(false).create());
 		options
 		.addOption(OptionBuilder
