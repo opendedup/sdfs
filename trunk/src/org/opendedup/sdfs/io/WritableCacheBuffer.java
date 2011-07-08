@@ -301,13 +301,13 @@ public class WritableCacheBuffer extends DedupChunk {
 		try {
 			this.lock.lock();
 			if (this.flushing) {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"cannot flush buffer at pos " + this.getFilePosition()
 								+ " already flushing");
 				throw new BufferClosedException("Buffer Closed");
 			}
 			if (this.closed) {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"cannot flush buffer at pos " + this.getFilePosition()
 								+ " closed");
 				throw new BufferClosedException("Buffer Closed");

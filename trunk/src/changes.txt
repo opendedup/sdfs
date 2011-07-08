@@ -1,3 +1,9 @@
+Version 1.1.0
+	Enhancements
+	* Ability to config debug logging within the sdfs config set log-level to 0
+	* Periodically persist (every 30 seconds) volume config to /etc/sdfs.
+	* Added Google Storage as a target for cloud based DSE(dedupe data).
+	
 Version 1.0.6
 	Fixes :
 	* Fixed corruption issue where files were not closing properly when safeclose was set to false.
