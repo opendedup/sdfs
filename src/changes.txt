@@ -1,4 +1,9 @@
 Version 1.1.0
+	Fixes:
+	* Log files now roll after 10MB
+	* Windows Class path wrong
+	* SDFS S3 Storage was not working correctly
+	* Logging too verbose for write buffers 
 	Enhancements
 	* Ability to config debug logging within the sdfs config set log-level to 0
 	* Periodically persist (every 30 seconds) volume config to /etc/sdfs.
