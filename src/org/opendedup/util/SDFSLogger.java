@@ -2,7 +2,8 @@ package org.opendedup.util;
 
 import java.io.IOException;
 
-import org.apache.log4j.FileAppender;
+
+import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
@@ -13,10 +14,12 @@ public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
 	static {
-		FileAppender app = null;
+		RollingFileAppender app = null;
 		try {
 			
-			app = new FileAppender(new PatternLayout("%d [%t] %p %c %x - %m%n"),Main.logPath,true);
+			app = new RollingFileAppender(new PatternLayout("%d [%t] %p %c %x - %m%n"),Main.logPath,true);
+			app.setMaxBackupIndex(2);
+			app.setMaxFileSize("10MB");
 		} catch (IOException e) {
 			System.out.println("Unable to initialize logger");
 			e.printStackTrace();
