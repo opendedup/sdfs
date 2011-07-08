@@ -1,4 +1,4 @@
-Version 1.1.0
+Version 1.0.7
 	Fixes:
 	* Log files now roll after 10MB
 	* Windows Class path wrong
