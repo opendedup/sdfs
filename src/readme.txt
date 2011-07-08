@@ -38,7 +38,6 @@ Known Limitation(s)
 
 	Testing has been limited thus far. Please test and report bugs	
 	Graceful exit if physical disk capacity is reached. ETA : Will be implemented shortly 
-	Maximum individual filesize within sdfs currently 250GB at 4k chunks and multiples of that at higher chunk sizes.
 	
 Data Removal
 	
@@ -46,19 +45,51 @@ Data Removal
 	decoupled from the back end storage (ChunkStore) where the actual data is held. As hashed data becomes stale they 
 	are removed from the chunk store. The process for determining and removing stale chunks is as follows.
 		
-		1. SDFS file-system informs the ChunkStore what chunks are currently in use. This happens when
-		chunks are first created and then every 2 hours on the hour after that.
-		2. The Chunk Store checks for data that has not been claimed in the last 8 hours upon mount and then every 4 hours after that.
+		1. SDFS file-system scans all files, claims, and informs the ChunkStore what chunks are currently in use. This happens when
+		chunks are first stored and then every time the ChunkStore grows by 10%.
+		2. The ChunkStore checks for data that has not been claimed by the file system.
 		3. The chunks that have not been claimed in the last 10 hours upon mount and 6 hours after that are put into a pool and 
 		overwritten as new data is written to the ChunkStore.
+		
+	The ChunkStore can be cleaned manually by running: sdfscli --cleanstore=<minutes> where minutes is the duration since the chunks 
+	were last claimed. Chunks are claimed during the cleanstore process so it is safe to set this to "1".
+		e.g. sdfscli --cleanstore=1
 
-	All of this is configurable and can be changed after a volume is written to. Take a look at cron format for more details.
 
 		
 
 Tips and Tricks
 
 	There are plenty of options to create a file system and to see them run "./mkfs.sdfs --help".
+	
+	SDFSCli:
+	
+	sdfscli is a command line tool to perform advanced functions withing the SDFS filesystem. Below are a list of command line options
+	usage: sdfs.cmd <options>
+    --cleanstore <minutes>            Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. 
+    								  This command only works if the dedup storage engine is local and not in network mode
+    --debug-info                      Returns Debug Information.
+                                      e.g. --debug-info
+    --dedup-file <true|false>         Deduplicates all file blocks if set to true, otherwise it will only dedup blocks that are already stored in the DSE.
+                                      e.g. --dedup-file=true --file-path=<file to flush>
+    --dse-info                        Returns Dedup Storage Engine Statitics.
+                                      e.g. --dse-info
+    --file-info                       Returns io file attributes such as dedup rate and file io statistics.
+                                      e.g. --file-info --file-path=<path to file or folder>
+    --file-path <RELATIVE PATH>       The relative path to the file or folder to take action on.
+                                      e.g. --file-path=readme.txt or --file-path=file\file.txt
+    --flush-all-buffers               Flushes all buffers within an SDFS file system.
+                                      e.g. --flush-file-buffers --file-path=<file to flush>
+    --flush-file-buffers              Flushes to buffer of a praticular file.
+                                      e.g. --flush-file-buffers --file-path=<file to flush>
+    --help                            Display these options.
+    --snapshot                        Creates a snapshot for a particular file or folder.
+                                      e.g. --snapshot --file-path=<source-file> --snapshot-path=<snapshot-destination>
+    --snapshot-path <RELATIVE PATH>   The relative path to the destination of the snapshot.
+                                      e.g. --snapshot-path=snap-readme.txt or --snapshot-path=file\snap-file.txt
+    --volume-info                     Returns SDFS Volume Statitics.
+                                      e.g. --volume-info
+	
 
 	Chunk Size:
 
@@ -70,7 +101,7 @@ Tips and Tricks
 	and will allow you to store as much as 32TB of data with the same 8GB of memory.
 
 	To create a volume that will store VMs (VMDK files) create a volume using 4k chunk size as follows:
-		sudo ./mkfs.sdfs --volume-name=sdfs_vol1 --volume-capacity=150GB --io-chunk-size=4k --io-max-file-write-buffers=150
+		sudo ./mkfs.sdfs --volume-name=sdfs_vol1 --volume-capacity=150GB --io-chunk-size=4k 
 
 
 	File Placement:
@@ -137,7 +168,7 @@ Tips and Tricks
 	 stored chunk takes up approximately 33 bytes of RAM.To calculate how much RAM you will need for a specific volume divide the volume size (in bytes) by 
 	 the chunk size (in bytes) and multiply that times 33.
 
-    		Memory Requirements Calculation: (volume size/chunk size)*33
+    		Memory Requirements Calculation: (volume size/chunk size)*25
     
     Cloud Storage and Amazon S3 Web Serivce
     
