@@ -28,7 +28,7 @@ public class Main {
 	 */
 	public static String classPath = "/usr/share/sdfs/lib/commons-collections-3.2.1.jar:/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/jacksum.jar:/usr/share/sdfs/lib/slf4j-log4j12-1.5.10.jar:/usr/share/sdfs/lib/slf4j-api-1.5.10.jar:/usr/share/sdfs/lib/simple-4.1.21.jar:/usr/share/sdfs/lib/commons-io-1.4.jar:/usr/share/sdfs/lib/clhm-release-1.0-lru.jar:/usr/share/sdfs/lib/trove-3.0.0a3.jar:/usr/share/sdfs/lib/quartz-1.8.3.jar:/usr/share/sdfs/lib/log4j-1.2.15.jar:/usr/share/sdfs/lib/bcprov-jdk16-143.jar:/usr/share/sdfs/lib/commons-codec-1.3.jar:/usr/share/sdfs/lib/commons-httpclient-3.1.jar:/usr/share/sdfs/lib/commons-logging-1.1.1.jar:/usr/share/sdfs/lib/java-xmlbuilder-1.jar:/usr/share/sdfs/lib/jets3t-0.7.4.jar:/usr/share/sdfs/lib/commons-cli-1.2.jar";
 
-	public static String javaOptions = "-Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Dfuse.logging.level=INFO -server -XX:+UseLargePages -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+UseCompressedOops";
+	public static String javaOptions = "-Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Dfuse.logging.level=INFO -server -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31";
 	
 	public static String javaPath = "/usr/share/sdfs/jre1.7.0/bin/java";
 	
