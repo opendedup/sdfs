@@ -2,11 +2,9 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
-
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
@@ -21,22 +19,22 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
-	
 	public static HashMap<String, HashClientPool> writeServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
-	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>().concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
-	.maximumWeightedCapacity(cacheLenth).listener(
-			new EvictionListener<String, ByteCache>() {
+	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>()
+			.concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
+			.maximumWeightedCapacity(cacheLenth)
+			.listener(new EvictionListener<String, ByteCache>() {
 				// This method is called just after a new entry has been
 				// added
 				public void onEviction(String key, ByteCache writeBuffer) {
 				}
 			}
-	
-	).build();
+
+			).build();
 
 	private static HashMap<String, byte[]> readingBuffers = new HashMap<String, byte[]>();
 	// private static LRUMap existingHashes = new
@@ -50,27 +48,27 @@ public class HCServiceProxy {
 	}
 
 	private static long dupsFound;
-	
+
 	public static long getSize() {
 		if (Main.chunkStoreLocal) {
 			return HashChunkService.getSize();
-		}else {
+		} else {
 			return -2;
 		}
 	}
-	
+
 	public static long getMaxSize() {
 		if (Main.chunkStoreLocal) {
 			return HashChunkService.getMaxSize();
-		}else {
+		} else {
 			return -1;
 		}
 	}
-	
+
 	public static int getPageSize() {
 		if (Main.chunkStoreLocal) {
 			return HashChunkService.getPageSize();
-		}else {
+		} else {
 			return -1;
 		}
 	}
@@ -91,13 +89,14 @@ public class HCServiceProxy {
 	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean sendChunk) throws IOException, HashtableFullException {
+			int position, int len, boolean sendChunk) throws IOException,
+			HashtableFullException {
 		boolean doop = false;
 		if (Main.chunkStoreLocal) {
-			//doop = HashChunkService.hashExists(hash);
+			// doop = HashChunkService.hashExists(hash);
 			if (!doop && sendChunk) {
-					doop = HashChunkService.writeChunk(hash, aContents, 0,
-							Main.CHUNK_LENGTH, false);
+				doop = HashChunkService.writeChunk(hash, aContents, 0,
+						Main.CHUNK_LENGTH, false);
 
 			}
 		} else {
@@ -111,7 +110,7 @@ public class HCServiceProxy {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
 					} catch (Exception e) {
-						SDFSLogger.getLog().warn( "unable to use hashclient", e);
+						SDFSLogger.getLog().warn("unable to use hashclient", e);
 						hc.close();
 						hc.openConnection();
 						hc.writeChunk(hash, aContents, 0, len);
@@ -119,7 +118,7 @@ public class HCServiceProxy {
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
-				SDFSLogger.getLog().fatal( "Unable to write chunk " + hash, e1);
+				SDFSLogger.getLog().fatal("Unable to write chunk " + hash, e1);
 				throw new IOException("Unable to write chunk " + hash);
 			} finally {
 				if (hc != null)
@@ -149,8 +148,8 @@ public class HCServiceProxy {
 				db = StringUtils.getHexString(hashRoute);
 				hc = getWriteHashClient(db);
 			} catch (Exception e1) {
-				SDFSLogger.getLog().fatal( "unable to execute find hash for "
-						+ hashStr);
+				SDFSLogger.getLog().fatal(
+						"unable to execute find hash for " + hashStr);
 				throw new IOException(e1);
 			}
 			try {
@@ -166,8 +165,9 @@ public class HCServiceProxy {
 					returnObject(db, hc);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					SDFSLogger.getLog().fatal(
-									"unable to return network thread object to pool",
+					SDFSLogger
+							.getLog()
+							.fatal("unable to return network thread object to pool",
 									e);
 				}
 			}
@@ -219,7 +219,8 @@ public class HCServiceProxy {
 						break;
 					} else if (z > Main.multiReadTimeout) {
 						if (Main.multiReadTimeout > 0)
-							SDFSLogger.getLog().info("Timeout waiting for read " + hashStr);
+							SDFSLogger.getLog().info(
+									"Timeout waiting for read " + hashStr);
 						readingBuffers.remove(hashStr);
 						break;
 					}
@@ -249,7 +250,8 @@ public class HCServiceProxy {
 
 				return data;
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn( "Unable to fetch buffer " + hashStr, e);
+				SDFSLogger.getLog()
+						.warn("Unable to fetch buffer " + hashStr, e);
 				throw new IOException("Unable to fetch buffer " + hashStr);
 			} finally {
 				if (hc != null)

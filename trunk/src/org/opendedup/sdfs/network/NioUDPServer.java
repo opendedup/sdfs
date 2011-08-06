@@ -8,7 +8,6 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import org.opendedup.util.SDFSLogger;
 
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
 
@@ -35,7 +34,6 @@ public class NioUDPServer implements Runnable {
 	int datagramSize = 36;
 
 	private boolean closed = false;
-	
 
 	NioUDPServer() {
 		Thread th = new Thread(this);
@@ -72,7 +70,8 @@ public class NioUDPServer implements Runnable {
 			// datagrams on the DatagramChannel
 			theDatagramChannel.register(theSelector, SelectionKey.OP_READ);
 
-			SDFSLogger.getLog().info("UDP Server Started on " + theInetSocketAddress);
+			SDFSLogger.getLog().info(
+					"UDP Server Started on " + theInetSocketAddress);
 
 			// send and read concurrently, but do not block on read:
 
@@ -130,7 +129,7 @@ public class NioUDPServer implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "unable to run udp server", e);
+			SDFSLogger.getLog().fatal("unable to run udp server", e);
 			return;
 		}
 

@@ -20,7 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
+ */
 
 package org.opendedup.sdfs.windows.fs;
 
@@ -39,13 +39,13 @@ public class Utils {
 		String base = FilenameUtils.getBaseName(fileName);
 		if (base.length() > 8)
 			base = base.substring(8);
-	
+
 		String ext = FilenameUtils.getExtension(fileName);
 		if (ext.length() > 3)
 			ext = ext.substring(3);
 		if (ext.length() > 0)
 			ext = "." + ext;
-	
+
 		return base + ext;
 	}
 

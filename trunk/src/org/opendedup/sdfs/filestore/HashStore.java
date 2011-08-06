@@ -2,11 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
-
-
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -17,7 +12,6 @@ import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
-
 
 /**
  * 
@@ -47,9 +41,10 @@ public class HashStore {
 	// be 256 total hash stores.
 	private String name;
 	// Lock for hash queries
-	//private ReentrantLock cacheLock = new ReentrantLock();
-	int mapSize = (Main.chunkStorePageCache * 1024*1024)/Main.chunkStorePageSize;
-	
+	// private ReentrantLock cacheLock = new ReentrantLock();
+	int mapSize = (Main.chunkStorePageCache * 1024 * 1024)
+			/ Main.chunkStorePageSize;
+
 	// The chunk store used to store the actual deduped data;
 	// private AbstractChunkStore chunkStore = null;
 	// Instanciates a FileChunk store that is shared for all instances of
@@ -78,14 +73,17 @@ public class HashStore {
 	 */
 	public HashStore() throws IOException {
 		this.name = "sdfs";
-		
+
 		try {
 			this.connectDB();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// this.initChunkStore();
-		SDFSLogger.getLog().info("Cache Size = " +  Main.chunkStorePageSize + " and Dirty Timeout = " + Main.chunkStoreDirtyCacheTimeout);
+		SDFSLogger.getLog().info(
+				"Cache Size = " + Main.chunkStorePageSize
+						+ " and Dirty Timeout = "
+						+ Main.chunkStoreDirtyCacheTimeout);
 		SDFSLogger.getLog().info("Total Entries " + +bdb.getSize());
 		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;
@@ -103,7 +101,7 @@ public class HashStore {
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
-	
+
 	/**
 	 * 
 	 * @return the total number of free blocks available for re-use
@@ -136,7 +134,7 @@ public class HashStore {
 	}
 
 	/**
-	 *method used to determine if the hash already exists in the database
+	 * method used to determine if the hash already exists in the database
 	 * 
 	 * @param hash
 	 *            the md5 or sha hash to lookup
@@ -161,24 +159,25 @@ public class HashStore {
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
 		try {
-			bdb =(AbstractHashesMap)Class.forName(Main.hashesDBClass).newInstance();
-			bdb.init(entries, dbf
-					.getPath());
+			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
+					.newInstance();
+			bdb.init(entries, dbf.getPath());
 		} catch (InstantiationException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		} catch (IllegalAccessException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		} catch (ClassNotFoundException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		} catch (IOException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		}
-		if(!Main.closedGracefully) {
-			SDFSLogger.getLog().info("DSE did not close gracefully, running consistancy check");
+		if (!Main.closedGracefully) {
+			SDFSLogger.getLog().info(
+					"DSE did not close gracefully, running consistancy check");
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
 		}
 	}
@@ -192,46 +191,32 @@ public class HashStore {
 	 */
 	public HashChunk getHashChunk(byte[] hash) throws IOException {
 		HashChunk hs = null;
-		//String hStr = StringUtils.getHexString(hash);
+		// String hStr = StringUtils.getHexString(hash);
 		/*
-		hs = this.cacheBuffers.get(hStr);
-		if (hs != null) {
-			return hs;
-		}
-
-
-		if (this.readingBuffers.containsKey(hStr)) {
-			int t = 0;
-			while (t < Main.chunkStoreDirtyCacheTimeout) {
-				try {
-					Thread.sleep(1);
-					hs = this.cacheBuffers.get(hStr);
-					if (hs != null) {
-						return hs;
-					}
-				} catch (Exception e) {
-
-				}
-				t++;
-			}
-		} else {
-			if(this.readingBuffers.size() < mapSize)
-				this.readingBuffers.put(hStr, hs);
-		}
-		*/
+		 * hs = this.cacheBuffers.get(hStr); if (hs != null) { return hs; }
+		 * 
+		 * 
+		 * if (this.readingBuffers.containsKey(hStr)) { int t = 0; while (t <
+		 * Main.chunkStoreDirtyCacheTimeout) { try { Thread.sleep(1); hs =
+		 * this.cacheBuffers.get(hStr); if (hs != null) { return hs; } } catch
+		 * (Exception e) {
+		 * 
+		 * } t++; } } else { if(this.readingBuffers.size() < mapSize)
+		 * this.readingBuffers.put(hStr, hs); }
+		 */
 		try {
 			byte[] data = bdb.getData(hash);
 			if (data == null && Arrays.equals(hash, blankHash)) {
 				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
 			}
 			hs = new HashChunk(hash, 0, data.length, data, false);
-			//this.cacheBuffers.put(hStr, hs);
-				
+			// this.cacheBuffers.put(hStr, hs);
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to get hash " + StringUtils.getHexString(hash), e);
 		} finally {
-			//this.readingBuffers.remove(hStr);
+			// this.readingBuffers.remove(hStr);
 		}
 		return hs;
 	}
@@ -240,8 +225,8 @@ public class HashStore {
 		this.bdb.claimRecords();
 	}
 
-	public long evictChunks(long time,boolean forceRun) throws IOException {
-		return this.bdb.removeRecords(time,forceRun);
+	public long evictChunks(long time, boolean forceRun) throws IOException {
+		return this.bdb.removeRecords(time, forceRun);
 	}
 
 	/**
@@ -277,7 +262,7 @@ public class HashStore {
 			}
 
 			finally {
-				
+
 			}
 		}
 		return written;

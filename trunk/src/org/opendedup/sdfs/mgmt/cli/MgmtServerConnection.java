@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -13,7 +12,7 @@ import org.w3c.dom.Document;
 
 public class MgmtServerConnection {
 	public static Document getResponse(String url) throws IOException {
-		
+
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -32,16 +31,19 @@ public class MgmtServerConnection {
 		GetMethod method = new GetMethod("http://localhost:6442/?" + url);
 		try {
 			int returnCode = client.executeMethod(method);
-			if(returnCode != 200)
+			if (returnCode != 200)
 				throw new IOException("Unable to process command "
-						+ method.getQueryString() + " return code was" + returnCode + " return msg was " + method.getResponseBodyAsString());
+						+ method.getQueryString() + " return code was"
+						+ returnCode + " return msg was "
+						+ method.getResponseBodyAsString());
 			return method.getResponseBodyAsStream();
 
 		} catch (Exception e) {
-			System.err.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
+			System.err
+					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
 			System.exit(-1);
 			return null;
-		} 
+		}
 
 	}
 

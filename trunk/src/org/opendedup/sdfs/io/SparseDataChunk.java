@@ -17,8 +17,7 @@ public class SparseDataChunk {
 		if (rawData.length != RAWDL)
 			throw new IOException(
 					"possible data corruption: byte array length "
-							+ rawData.length + " does not equal "
-							+ RAWDL);
+							+ rawData.length + " does not equal " + RAWDL);
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		byte b = buf.get();
 		if (b == 0)

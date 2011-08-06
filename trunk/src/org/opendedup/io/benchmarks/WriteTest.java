@@ -175,7 +175,7 @@ public class WriteTest implements Runnable {
 			System.exit(0);
 		}
 		int r = Integer.parseInt(args[4]);
-		for (int i =0; i<r;i++) {
+		for (int i = 0; i < r; i++) {
 			float[] results = test(args[0], Integer.parseInt(args[1]),
 					Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 

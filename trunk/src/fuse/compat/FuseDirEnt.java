@@ -11,20 +11,19 @@ package fuse.compat;
 import fuse.FuseFtype;
 
 /**
- * This is a String level API directory entry used in fuse.compat.Filesystem1 and fuse.compat.Filesystem2 compatibility APIs
+ * This is a String level API directory entry used in fuse.compat.Filesystem1
+ * and fuse.compat.Filesystem2 compatibility APIs
  */
-public class FuseDirEnt extends FuseFtype
-{
-   public String name;
+public class FuseDirEnt extends FuseFtype {
+	public String name;
 
-   // CHANGE-22: inode added
-   public int inode;
+	// CHANGE-22: inode added
+	public int inode;
 
+	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
+		buff.append(isPrefixed ? ", " : " ").append("name='").append(name)
+				.append("'").append("inode='").append(inode).append("'");
 
-   protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed)
-   {
-      buff.append(isPrefixed? ", " : " ").append("name='").append(name).append("'").append("inode='").append(inode).append("'");
-
-      return super.appendAttributes(buff, true);
-   }
+		return super.appendAttributes(buff, true);
+	}
 }

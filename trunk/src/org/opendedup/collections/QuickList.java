@@ -1,6 +1,5 @@
 package org.opendedup.collections;
 
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -8,25 +7,23 @@ import java.util.ListIterator;
 
 import org.opendedup.sdfs.Main;
 
-public class QuickList<E> implements java.util.List<E>{
-	
+public class QuickList<E> implements java.util.List<E> {
+
 	private int size = 0;
 	private int arraySize = 0;
 	private transient E[] array;
-	
+
 	public static byte[] FREE = new byte[Main.hashLength];
 	public static byte[] REMOVED = new byte[Main.hashLength];
-	
-
 
 	public QuickList(int size) {
 		this.arraySize = size;
-		array = this.newElementArray(this.arraySize);	
+		array = this.newElementArray(this.arraySize);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private E[] newElementArray(int size) {
-		   return (E[]) new Object[size];
+		return (E[]) new Object[size];
 	}
 
 	@Override
@@ -111,7 +108,7 @@ public class QuickList<E> implements java.util.List<E>{
 	@Override
 	public void clear() {
 		this.size = 0;
-		
+
 	}
 
 	@Override
@@ -120,16 +117,16 @@ public class QuickList<E> implements java.util.List<E>{
 	}
 
 	@Override
-	public E set(int location, E object)  {
+	public E set(int location, E object) {
 		E result = this.array[location];
 		this.array[location] = object;
 		this.setSize(location);
 		return result;
 	}
-	
+
 	private void setSize(int pos) {
-		int pSz = pos +1;
-		if(pSz > size) {
+		int pSz = pos + 1;
+		if (pSz > size) {
 			this.size = pSz;
 		}
 	}
@@ -138,7 +135,7 @@ public class QuickList<E> implements java.util.List<E>{
 	public void add(int index, E element) {
 		this.array[index] = element;
 		this.setSize(index);
-		
+
 	}
 
 	@Override
@@ -177,5 +174,4 @@ public class QuickList<E> implements java.util.List<E>{
 		return null;
 	}
 
-	
 }

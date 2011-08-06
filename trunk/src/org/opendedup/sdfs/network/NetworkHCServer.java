@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.opendedup.util.SDFSLogger;
 
-
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -20,7 +19,7 @@ public class NetworkHCServer {
 
 	static Socket clientSocket = null;
 	static ServerSocket serverSocket = null;
-	
+
 	private static NioUDPServer udpServer = null;
 
 	// This chat server can accept up to 10 clients' connections
@@ -37,7 +36,8 @@ public class NetworkHCServer {
 			try {
 				Config.parseHubStoreConfigFile(args[0]);
 			} catch (IOException e1) {
-				SDFSLogger.getLog().fatal("exiting because of an error with the config file");
+				SDFSLogger.getLog().fatal(
+						"exiting because of an error with the config file");
 			}
 			init();
 
@@ -63,7 +63,7 @@ public class NetworkHCServer {
 			SDFSLogger.getLog().info("listening on " + addr.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
-			SDFSLogger.getLog().fatal( "unable to open network ports", e);
+			SDFSLogger.getLog().fatal("unable to open network ports", e);
 			System.exit(-1);
 		}
 
@@ -80,21 +80,22 @@ public class NetworkHCServer {
 				clientSocket.setTcpNoDelay(true);
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
-				if(!serverSocket.isClosed())
-					SDFSLogger.getLog().fatal("Unable to open port " + e.toString(),e);
+				if (!serverSocket.isClosed())
+					SDFSLogger.getLog().fatal(
+							"Unable to open port " + e.toString(), e);
 			}
 		}
 	}
 
 	public static void close() {
 		try {
-		System.out.println("#### Shutting Down Network Service ####");
-		
+			System.out.println("#### Shutting Down Network Service ####");
+
 			serverSocket.close();
 		} catch (Exception e) {
 		}
 		try {
-			
+
 			udpServer.close();
 		} catch (Exception e) {
 		}
@@ -103,11 +104,11 @@ public class NetworkHCServer {
 		System.out.println("#### Shut down completed ####");
 	}
 }
-	class ShutdownHook extends Thread {
-		public void run() {
-			System.out
-					.println("#### Shutting down StorageHub ####");
 
-			NetworkHCServer.close();
-		}
+class ShutdownHook extends Thread {
+	public void run() {
+		System.out.println("#### Shutting down StorageHub ####");
+
+		NetworkHCServer.close();
 	}
+}

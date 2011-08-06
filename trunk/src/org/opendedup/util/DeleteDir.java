@@ -15,10 +15,9 @@ public class DeleteDir {
 				}
 			}
 			return (path.delete());
-		}
-		else {
+		} else {
 			return true;
 		}
-		
+
 	}
 }

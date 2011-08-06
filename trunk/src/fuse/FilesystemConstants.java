@@ -11,9 +11,8 @@ package fuse;
 /**
  * Filesystem constants common to all filesystem interfaces
  */
-public interface FilesystemConstants
-{
-   public static final int O_RDONLY = 00;
-   public static final int O_WRONLY = 01;
-   public static final int O_RDWR = 02;   
+public interface FilesystemConstants {
+	public static final int O_RDONLY = 00;
+	public static final int O_WRONLY = 01;
+	public static final int O_RDWR = 02;
 }

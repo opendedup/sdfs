@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import org.opendedup.util.SDFSLogger;
 
-
 import org.opendedup.sdfs.io.DedupFile;
 
 /**
@@ -23,7 +22,6 @@ public class OpenFileMonitor implements Runnable {
 	int maxInactive = 900000;
 	boolean closed = false;
 	Thread th = null;
-	
 
 	/**
 	 * Instantiates the OpenFileMonitor
@@ -54,29 +52,30 @@ public class OpenFileMonitor implements Runnable {
 				for (int i = 0; i < files.length; i++) {
 					DedupFile df = null;
 					try {
-					df = files[i];
-					if (this.isFileStale(df) && !df.hasOpenChannels()) {
-						try {
-							if(df != null)
-								df.forceClose();
-						} catch (Exception e) {
-							SDFSLogger.getLog().warn( "Unable close file for "
-									+ df.getMetaFile().getPath(), e);
+						df = files[i];
+						if (this.isFileStale(df) && !df.hasOpenChannels()) {
+							try {
+								if (df != null)
+									df.forceClose();
+							} catch (Exception e) {
+								SDFSLogger
+										.getLog()
+										.warn("Unable close file for "
+												+ df.getMetaFile().getPath(), e);
+							}
 						}
-					} 
-					}catch (NoSuchFileException e) {
+					} catch (NoSuchFileException e) {
 						try {
 							df.forceClose();
 						} catch (Exception e1) {
-							
+
 						}
-					} 
+					}
 				}
-			}catch (NoSuchFileException e) {
-				
-			} 
-			catch (Exception e) {
-				SDFSLogger.getLog().warn( "Unable check files", e);
+			} catch (NoSuchFileException e) {
+
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("Unable check files", e);
 			}
 		}
 	}
@@ -87,13 +86,12 @@ public class OpenFileMonitor implements Runnable {
 	 * @param df
 	 *            the DedupFile to check
 	 * @return true if stale.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public boolean isFileStale(DedupFile df) throws IOException {
 		long currentTime = System.currentTimeMillis();
 		long staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
-				.getLastAccessed()
-				+ this.maxInactive;
+				.getLastAccessed() + this.maxInactive;
 		return currentTime > staleTime;
 	}
 

@@ -24,12 +24,12 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 		super(dk.getHash(), dk.getFilePosition(), dk.getLength(), dk
 				.isNewChunk());
 		this.df = df;
-		
+
 	}
 
 	private byte[] readBlockFile(Path blockFile) throws IOException {
-		SeekableByteChannel fc = (SeekableByteChannel) Files
-				.newByteChannel(blockFile,StandardOpenOption.READ);
+		SeekableByteChannel fc = (SeekableByteChannel) Files.newByteChannel(
+				blockFile, StandardOpenOption.READ);
 		byte[] b = new byte[(int) fc.size()];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		fc.read(buf);

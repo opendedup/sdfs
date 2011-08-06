@@ -2,9 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
 import org.opendedup.util.SDFSLogger;
-
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
@@ -36,43 +34,47 @@ public class HashChunkService {
 	}
 
 	static {
-			try {
-				fileStore =(AbstractChunkStore)Class.forName(Main.chunkStoreClass).newInstance();
-				fileStore.init(Main.chunkStoreConfig);
-			} catch (InstantiationException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (IllegalAccessException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (ClassNotFoundException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			} catch (IOException e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore",e);
-				System.exit(-1);
-			}
+		try {
+			fileStore = (AbstractChunkStore) Class
+					.forName(Main.chunkStoreClass).newInstance();
+			fileStore.init(Main.chunkStoreConfig);
+		} catch (InstantiationException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (IllegalAccessException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (ClassNotFoundException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (IOException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		}
 		try {
 			hs = new HashStore();
-			if(!Main.chunkStoreLocal || Main.enableNetworkChunkStore) {
-			csGC = new ChunkStoreGCScheduler();
+			if (!Main.chunkStoreLocal || Main.enableNetworkChunkStore) {
+				csGC = new ChunkStoreGCScheduler();
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "unable to start hashstore", e);
+			SDFSLogger.getLog().fatal("unable to start hashstore", e);
 			System.exit(-1);
 		}
 	}
 
 	private static long dupsFound;
-	
+
 	public static AbstractChunkStore getChuckStore() {
 		return fileStore;
 	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean compressed) throws IOException, HashtableFullException {
-		if(aContents.length > Main.chunkStorePageSize)
-			throw new IOException("content size out of bounds [" +aContents.length + "] > [" + Main.chunkStorePageSize + "]");
+			int position, int len, boolean compressed) throws IOException,
+			HashtableFullException {
+		if (aContents.length > Main.chunkStorePageSize)
+			throw new IOException("content size out of bounds ["
+					+ aContents.length + "] > [" + Main.chunkStorePageSize
+					+ "]");
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
 		boolean written = hs.addHashChunk(new HashChunk(hash, 0, len,
@@ -116,28 +118,28 @@ public class HashChunkService {
 		hs.processHashClaims();
 	}
 
-	
-	public static long removeStailHashes(long ms,boolean forceRun) throws IOException {
-		return hs.evictChunks(ms,forceRun);
+	public static long removeStailHashes(long ms, boolean forceRun)
+			throws IOException {
+		return hs.evictChunks(ms, forceRun);
 	}
 
 	public static void commitChunks() {
 		// H2HashStore.commitTransactions();
 		unComittedChunks = 0;
 	}
-	
+
 	public static long getSize() {
 		return hs.getEntries();
 	}
-	
+
 	public static long getFreeBlocks() {
 		return hs.getFreeBlocks();
 	}
-	
+
 	public static long getMaxSize() {
 		return hs.getMaxEntries();
 	}
-	
+
 	public static int getPageSize() {
 		return Main.chunkStorePageSize;
 	}
@@ -164,7 +166,7 @@ public class HashChunkService {
 
 	public static void close() {
 		fileStore.close();
-		if(csGC != null)
+		if (csGC != null)
 			csGC.stopSchedules();
 		hs.close();
 

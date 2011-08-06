@@ -79,7 +79,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);
-			this.mode = (Integer) Files.getAttribute(p,"unix:mode");
+			this.mode = (Integer) Files.getAttribute(p, "unix:mode");
 		}
 		return this.mode;
 	}
@@ -87,7 +87,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode) throws IOException {
 		this.mode = mode;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p,"unix:mode", Integer.valueOf(mode));
+		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
 	}
 
 	/**
@@ -105,7 +105,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				this.getDedupFile().optimize();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				SDFSLogger.getLog().error("unable to set dedup on " + this.getPath(), e);
+				SDFSLogger.getLog().error(
+						"unable to set dedup on " + this.getPath(), e);
 			}
 		}
 		this.dedup = dedupNow;
@@ -176,7 +177,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getOwner_id() throws IOException {
 		if (owner_id == -1) {
 			Path p = Paths.get(this.path);
-			this.owner_id = (Integer) Files.getAttribute(p,"unix:uid");
+			this.owner_id = (Integer) Files.getAttribute(p, "unix:uid");
 		}
 		return owner_id;
 	}
@@ -190,7 +191,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setOwner_id(int owner_id) throws IOException {
 		this.owner_id = owner_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p,"unix:uid", Integer.valueOf(owner_id));
+		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id));
 	}
 
 	/**
@@ -201,7 +202,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getGroup_id() throws IOException {
 		if (group_id == -1) {
 			Path p = Paths.get(this.path);
-			this.group_id = (Integer) Files.getAttribute(p,"unix:gid");
+			this.group_id = (Integer) Files.getAttribute(p, "unix:gid");
 		}
 		return group_id;
 	}
@@ -215,7 +216,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setGroup_id(int group_id) throws IOException {
 		this.group_id = group_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p,"unix:gid", Integer.valueOf(group_id));
+		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id));
 	}
 
 	/**
@@ -390,11 +391,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			} else {
 				_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
 			}
-			_mf.getIOMonitor().setVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten());
+			_mf.getIOMonitor().setVirtualBytesWritten(
+					this.getIOMonitor().getVirtualBytesWritten());
 			_mf.getIOMonitor().setDuplicateBlocks(
-					this.getIOMonitor().getDuplicateBlocks() + this.getIOMonitor().getActualBytesWritten());
-			Main.volume.addDuplicateBytes(this.getIOMonitor().getDuplicateBlocks() + this.getIOMonitor().getActualBytesWritten());
-			Main.volume.addVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten());
+					this.getIOMonitor().getDuplicateBlocks()
+							+ this.getIOMonitor().getActualBytesWritten());
+			Main.volume.addDuplicateBytes(this.getIOMonitor()
+					.getDuplicateBlocks()
+					+ this.getIOMonitor().getActualBytesWritten());
+			Main.volume.addVirtualBytesWritten(this.getIOMonitor()
+					.getVirtualBytesWritten());
 			_mf.setVmdk(this.isVmdk());
 			_mf.unmarshal();
 			return _mf;
@@ -756,7 +762,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the length to set
 	 */
 	public void setLength(long l, boolean serialize) {
-		
+
 		long len = l - this.length;
 		Main.volume.updateCurrentSize(len);
 		this.length = l;
@@ -925,8 +931,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				root.setAttribute("open",
 						Boolean.toString(DedupFileStore.fileOpen(this)));
 			} catch (NullPointerException e) {
-				root.setAttribute("open",
-						Boolean.toString(false));
+				root.setAttribute("open", Boolean.toString(false));
 			}
 			root.setAttribute("file-guid", this.getGUID());
 			root.setAttribute("dedup-map-guid", this.getDfGuid());

@@ -15,14 +15,17 @@ public class SetDedupAllCmd implements XtendedCmd {
 		try {
 			boolean dedup = Boolean.parseBoolean(cmd);
 			MetaFileStore.getMF(f.getPath()).setDedup(dedup);
-			return "SUCCESS Dedup Success: set dedup to [" + f.getPath() + "]  ["
-					+ dedup + "]";
+			return "SUCCESS Dedup Success: set dedup to [" + f.getPath()
+					+ "]  [" + dedup + "]";
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("ERROR Dedup Failed: unable to set dedup Source ["
-					+ f.getPath() + "] " + "to [" + cmd + "] because :"
-					+ e.toString(), e);
-			throw new IOException("ERROR Dedup Failed: unable to set dedup Source [" + f.getPath()
-					+ "] " + "to [" + cmd + "]  because :" + e.toString());
+			SDFSLogger.getLog().error(
+					"ERROR Dedup Failed: unable to set dedup Source ["
+							+ f.getPath() + "] " + "to [" + cmd + "] because :"
+							+ e.toString(), e);
+			throw new IOException(
+					"ERROR Dedup Failed: unable to set dedup Source ["
+							+ f.getPath() + "] " + "to [" + cmd
+							+ "]  because :" + e.toString());
 		}
 	}
 

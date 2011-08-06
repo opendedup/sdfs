@@ -30,7 +30,8 @@ public class HashClientPool {
 
 				this.passiveObjects.add(this.makeObject());
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+				SDFSLogger.getLog().error("Unable to get object out of pool ",
+						e);
 				throw new IOException(e.toString());
 
 			} finally {
@@ -65,7 +66,7 @@ public class HashClientPool {
 		try {
 			this.activeObjects.add(hc);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
 			throw new IOException(e.toString());
 
 		} finally {
@@ -81,7 +82,7 @@ public class HashClientPool {
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
 			e.printStackTrace();
-			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
 			throw new IOException(e.toString());
 
 		} finally {
@@ -93,7 +94,7 @@ public class HashClientPool {
 			else
 				hc.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of pool ",e);
+			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
 			throw new IOException(e.toString());
 
 		} finally {

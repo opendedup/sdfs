@@ -8,24 +8,27 @@ public class StandAloneGCScheduler implements Runnable {
 	private boolean closed = false;
 	Thread th = null;
 
-	public StandAloneGCScheduler() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		gcController = (GCControllerImpl)Class.forName(Main.gcClass).newInstance();
-		SDFSLogger.getLog().info("Using " + Main.gcClass + " for DSE Garbage Collection");
+	public StandAloneGCScheduler() throws InstantiationException,
+			IllegalAccessException, ClassNotFoundException {
+		gcController = (GCControllerImpl) Class.forName(Main.gcClass)
+				.newInstance();
+		SDFSLogger.getLog().info(
+				"Using " + Main.gcClass + " for DSE Garbage Collection");
 		th = new Thread(this);
 		th.start();
 	}
-	
+
 	public void run() {
-		while(!closed) {
+		while (!closed) {
 			gcController.runGC();
 			try {
-				Thread.sleep(60*1000);
+				Thread.sleep(60 * 1000);
 			} catch (InterruptedException e) {
 				closed = true;
 			}
 		}
 	}
-	
+
 	public void close() {
 		this.closed = true;
 		th.interrupt();

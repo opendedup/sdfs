@@ -40,27 +40,27 @@ public class StringUtils {
 		}
 		return bts;
 	}
-	
+
 	public static long parseSize(String capString) throws IOException {
 		String units = capString.substring(capString.length() - 2);
-		int sz = Integer.parseInt(capString
-				.substring(0, capString.length() - 2));
+		int sz = Integer
+				.parseInt(capString.substring(0, capString.length() - 2));
 		long fSize = 0;
 		if (units.equalsIgnoreCase("TB"))
-			fSize = (long)(sz * tbc);
+			fSize = (long) (sz * tbc);
 		else if (units.equalsIgnoreCase("GB"))
-			fSize = (long)(sz * gbc);
+			fSize = (long) (sz * gbc);
 		else if (units.equalsIgnoreCase("MB"))
-			fSize = (long)(sz * mbc);
+			fSize = (long) (sz * mbc);
 		else {
-			
+
 			throw new IOException("unable to determine capacity of volume "
 					+ capString);
 		}
 		return fSize;
 	}
-	
-	public static void main(String [] args) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		System.out.println("Volume = " + parseSize("1TB"));
 	}
 }

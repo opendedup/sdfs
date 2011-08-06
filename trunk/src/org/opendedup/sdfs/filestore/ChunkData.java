@@ -80,7 +80,7 @@ public class ChunkData {
 		this.cPos = -1;
 		this.chunk = chunk;
 	}
-	
+
 	public ChunkData(byte[] hash, long pos) {
 		long tm = System.currentTimeMillis();
 		this.added = tm;

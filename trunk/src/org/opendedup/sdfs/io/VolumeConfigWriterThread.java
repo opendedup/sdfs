@@ -7,9 +7,9 @@ import org.opendedup.util.SDFSLogger;
 public class VolumeConfigWriterThread implements Runnable {
 	private String configFile = null;
 	private Thread th = null;
-	private long duration = 15*1000;
+	private long duration = 15 * 1000;
 	boolean closed = false;
-	
+
 	public VolumeConfigWriterThread(String configFile) {
 		this.configFile = configFile;
 		th = new Thread(this);
@@ -18,8 +18,8 @@ public class VolumeConfigWriterThread implements Runnable {
 
 	@Override
 	public void run() {
-		while(!closed) {
-			
+		while (!closed) {
+
 			try {
 				Thread.sleep(duration);
 				Main.volume.setClosedGracefully(false);
@@ -31,7 +31,7 @@ public class VolumeConfigWriterThread implements Runnable {
 		}
 
 	}
-	
+
 	public void stop() {
 		th.interrupt();
 		this.closed = true;

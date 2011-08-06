@@ -13,19 +13,22 @@ public class MakeVMDKCmd implements XtendedCmd {
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
+
 	@Override
 	public String getResult(String cmd, String file) throws IOException {
 		String[] args = cmd.split(":");
 		String destination = args[0];
 		String size = args[1];
-		File f = new File(Main.volume.getPath() + File.separator +file );
+		File f = new File(Main.volume.getPath() + File.separator + file);
 		if (!f.isDirectory())
 			return "ERROR VMDK Creation Failed : ["
 					+ file
 					+ "] is not a directory. This command can only be executed on directories";
-		File dst = new File(Main.volume.getPath() + File.separator +destination );
+		File dst = new File(Main.volume.getPath() + File.separator
+				+ destination);
 		if (dst.exists())
-			throw new IOException("ERROR VMDK Creation Failed : [" +destination+ "] already exists");
+			throw new IOException("ERROR VMDK Creation Failed : ["
+					+ destination + "] already exists");
 		try {
 			String units = size.substring(size.length() - 2);
 			int sz = Integer.parseInt(size.substring(0, size.length() - 2));
@@ -37,11 +40,11 @@ public class MakeVMDKCmd implements XtendedCmd {
 			if (units.equalsIgnoreCase("MB"))
 				fSize = sz * mbc;
 			VMDKParser.writeFile(f.getPath(), destination, fSize);
-			return "SUCCESS VMDK Creation Success : VMDK Created in "
-					+ file + File.separator + destination +" for size " + size; 
+			return "SUCCESS VMDK Creation Success : VMDK Created in " + file
+					+ File.separator + destination + " for size " + size;
 		} catch (Exception e) {
-			String errorMsg = "ERROR VMDK Creation Failed : for "
-					+ file + File.separator + destination + " of size " + size;
+			String errorMsg = "ERROR VMDK Creation Failed : for " + file
+					+ File.separator + destination + " of size " + size;
 			SDFSLogger.getLog().error(errorMsg, e);
 			throw new IOException(errorMsg + " because: " + e.toString());
 		}

@@ -54,8 +54,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private boolean firstGCRun = true;
 	private boolean flushing = false;
 
-	public void init(long maxSize, String fileName)
-			throws IOException, HashtableFullException {
+	public void init(long maxSize, String fileName) throws IOException,
+			HashtableFullException {
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
 		else
@@ -72,8 +72,6 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.closed = false;
 		new SyncThread(this);
 	}
-
-	
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
 		int hashb = 0;
@@ -122,7 +120,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return m;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getAllocatedRam()
 	 */
 	@Override
@@ -134,7 +134,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return this.closed;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getSize()
 	 */
 	@Override
@@ -142,7 +144,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return this.kSz;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getUsedSize()
 	 */
 	@Override
@@ -151,7 +155,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return kSz * Main.CHUNK_LENGTH;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getMaxSize()
 	 */
 	@Override
@@ -159,7 +165,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return this.size;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#claimRecords()
 	 */
 	@Override
@@ -338,7 +346,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return size;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#containsKey(byte[])
 	 */
 	@Override
@@ -349,7 +359,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return this.getMap(key).containsKey(key);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getFreeBlocks()
 	 */
 	@Override
@@ -360,7 +372,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	public synchronized long removeRecords(long time, boolean forceRun)
 			throws IOException {
 		SDFSLogger.getLog().info(
-				"Garbage collection starting for records older than " + new Date(time));
+				"Garbage collection starting for records older than "
+						+ new Date(time));
 		long rem = 0;
 		if (forceRun)
 			this.firstGCRun = false;
@@ -437,8 +450,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore.ChunkData)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore
+	 * .ChunkData)
 	 */
 	@Override
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
@@ -508,7 +525,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			int pos = (int) (position / Main.CHUNK_LENGTH);
 			if (pos >= 0)
 				this.freeSlots.set(pos);
-			else if(pos < 0) {
+			else if (pos < 0) {
 				SDFSLogger.getLog().info("Position is less than 0 " + pos);
 			}
 		} finally {
@@ -516,8 +533,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore.ChunkData, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.opendedup.collections.AbstractHashesMap#put(org.opendedup.sdfs.filestore
+	 * .ChunkData, boolean)
 	 */
 	@Override
 	public boolean put(ChunkData cm, boolean persist) throws IOException,
@@ -557,8 +578,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		return added;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opendedup.collections.AbstractHashesMap#update(org.opendedup.sdfs.filestore.ChunkData)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.opendedup.collections.AbstractHashesMap#update(org.opendedup.sdfs
+	 * .filestore.ChunkData)
 	 */
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
@@ -569,7 +594,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#get(byte[])
 	 */
 	@Override
@@ -589,7 +616,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#getData(byte[])
 	 */
 	@Override
@@ -672,8 +701,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.opendedup.collections.AbstractHashesMap#remove(org.opendedup.sdfs.filestore.ChunkData)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.opendedup.collections.AbstractHashesMap#remove(org.opendedup.sdfs
+	 * .filestore.ChunkData)
 	 */
 	@Override
 	public boolean remove(ChunkData cm) throws IOException {
@@ -727,7 +760,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	private ReentrantLock syncLock = new ReentrantLock();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#sync()
 	 */
 	@Override
@@ -745,7 +780,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractHashesMap#close()
 	 */
 	@Override

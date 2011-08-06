@@ -11,7 +11,6 @@ import java.util.zip.Inflater;
 //import org.h2.compress.LZFOutputStream;
 
 public class CompressionUtils {
-	
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression
@@ -60,5 +59,4 @@ public class CompressionUtils {
 		return decompressedData;
 	}
 
-	
 }

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -34,7 +33,6 @@ class ClientThread extends Thread {
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -57,8 +55,8 @@ class ClientThread extends Thread {
 					clientSocket.getInputStream()), 32768 * 2);
 			DataInputStream is = new DataInputStream(new BufferedInputStream(
 					clientSocket.getInputStream(), 32768 * 2));
-			os = new DataOutputStream(new BufferedOutputStream(clientSocket
-					.getOutputStream()));
+			os = new DataOutputStream(new BufferedOutputStream(
+					clientSocket.getOutputStream()));
 			String versionMessage = "SDFS version " + Main.PROTOCOL_VERSION
 					+ "\r\n";
 			os.write(versionMessage.getBytes());
@@ -68,7 +66,8 @@ class ClientThread extends Thread {
 				try {
 					byte cmd = is.readByte();
 					if (cmd == NetworkCMDS.QUIT_CMD) {
-						SDFSLogger.getLog().info("Quiting Client Network Thread");
+						SDFSLogger.getLog().info(
+								"Quiting Client Network Thread");
 						break;
 					}
 					if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
@@ -170,11 +169,11 @@ class ClientThread extends Thread {
 
 								}
 							}
-							
+
 						} catch (NullPointerException e) {
-							SDFSLogger.getLog().warn("chunk "
-									+ StringUtils.getHexString(hash)
-									+ " does not exist");
+							SDFSLogger.getLog().warn(
+									"chunk " + StringUtils.getHexString(hash)
+											+ " does not exist");
 							try {
 								writelock.lock();
 								os.writeInt(-1);
@@ -205,7 +204,7 @@ class ClientThread extends Thread {
 					}
 
 				} catch (Exception e) {
-					SDFSLogger.getLog().debug( "unable to write data", e);
+					SDFSLogger.getLog().debug("unable to write data", e);
 					try {
 						reader.close();
 					} catch (Exception e1) {

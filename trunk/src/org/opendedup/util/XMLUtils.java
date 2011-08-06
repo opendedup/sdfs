@@ -16,8 +16,9 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 public class XMLUtils {
-	
-	public static Document getXMLDoc(String root) throws ParserConfigurationException {
+
+	public static Document getXMLDoc(String root)
+			throws ParserConfigurationException {
 		Document xmldoc = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();

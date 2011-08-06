@@ -206,11 +206,12 @@ public class LargeLongByteArrayMap implements AbstractMap {
 			else
 				dest.getParentFile().mkdirs();
 			if (OSValidator.isWindows()) {
-				srcC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()),
-						StandardOpenOption.READ, StandardOpenOption.SPARSE);
-				dstC = (FileChannel) Files.newByteChannel(Paths.get(dest.getPath()),
-						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+				srcC = (FileChannel) Files.newByteChannel(
+						Paths.get(src.getPath()), StandardOpenOption.READ,
 						StandardOpenOption.SPARSE);
+				dstC = (FileChannel) Files.newByteChannel(
+						Paths.get(dest.getPath()), StandardOpenOption.CREATE,
+						StandardOpenOption.WRITE, StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
 				Process p = Runtime.getRuntime().exec(

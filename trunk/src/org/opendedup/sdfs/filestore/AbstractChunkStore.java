@@ -32,6 +32,7 @@ public interface AbstractChunkStore {
 	 * Closes the chunk store, if this is required
 	 */
 	public abstract void init(Element config) throws IOException;
+
 	/**
 	 * Each chunk store must have a unique name.
 	 * 
@@ -52,7 +53,7 @@ public interface AbstractChunkStore {
 	 * @return Returns the size of the chunk store on disk or service
 	 */
 	public abstract long size();
-	
+
 	public abstract void setSize(long size);
 
 	/**
@@ -128,11 +129,12 @@ public interface AbstractChunkStore {
 
 	public abstract void addChunkStoreListener(
 			AbstractChunkStoreListener listener);
-	
-	public abstract boolean moveChunk(byte [] hash, long origLoc, long newLoc) throws IOException;
-	
+
+	public abstract boolean moveChunk(byte[] hash, long origLoc, long newLoc)
+			throws IOException;
+
 	public abstract ChunkData getNextChunck() throws IOException;
-	
-	public abstract void iterationInit()throws IOException;
+
+	public abstract void iterationInit() throws IOException;
 
 }

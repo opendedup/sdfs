@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
-
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -45,7 +44,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 			System.exit(-1);
 		}
 	}
-	
+
 	public GoogleChunkStore() throws IOException {
 	}
 
@@ -138,7 +137,8 @@ public class GoogleChunkStore implements AbstractChunkStore {
 			gsService.putObject(this.name, gsObject);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			SDFSLogger.getLog().fatal("unable to upload " + hashString + " to " +this.name, e);
+			SDFSLogger.getLog().fatal(
+					"unable to upload " + hashString + " to " + this.name, e);
 			throw new IOException(e);
 		} finally {
 			s3IS.close();
@@ -254,18 +254,21 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public void clearStore() throws IOException {
 		try {
-			SDFSLogger.getLog().warn("Deleting all entries from Bucket [" + this.name + "]");
-			GSObject [] obj = gsService.listObjects(this.name);
+			SDFSLogger.getLog().warn(
+					"Deleting all entries from Bucket [" + this.name + "]");
+			GSObject[] obj = gsService.listObjects(this.name);
 			SDFSLogger.getLog().info("Will delete " + obj.length + " objects");
-			for(int i = 0 ; i < obj.length; i ++) {
+			for (int i = 0; i < obj.length; i++) {
 				gsService.deleteObject(this.name, obj[i].getKey());
 			}
-			SDFSLogger.getLog().info("All entries in bucket [" + this.getName() + "] deleted");
+			SDFSLogger.getLog().info(
+					"All entries in bucket [" + this.getName() + "] deleted");
 		} catch (ServiceException e) {
-			SDFSLogger.getLog().warn( "Unable to delete entries in " + this.getName(), e);
+			SDFSLogger.getLog().warn(
+					"Unable to delete entries in " + this.getName(), e);
 			throw new IOException(e);
 		}
 	}
@@ -279,7 +282,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	@Override
 	public void iterationInit() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

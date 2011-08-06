@@ -23,8 +23,8 @@ public class EncryptUtils {
 	private static SecretKeySpec key = null;
 	static {
 		try {
-			keyBytes = HashFunctions.getSHAHashBytes(Main.chunkStoreEncryptionKey
-					.getBytes());
+			keyBytes = HashFunctions
+					.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,8 +35,7 @@ public class EncryptUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Security
-				.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		key = new SecretKeySpec(keyBytes, "AES");
 	}
 
@@ -55,23 +54,23 @@ public class EncryptUtils {
 		}
 		return encryptedChunk;
 	}
-	
-	public static byte [] decryptDep(byte [] encryptedChunk) throws IOException {
-		byte [] chunk = new byte[encryptedChunk.length];
+
+	public static byte[] decryptDep(byte[] encryptedChunk) throws IOException {
+		byte[] chunk = new byte[encryptedChunk.length];
 		try {
 			Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
 			cipher.init(Cipher.DECRYPT_MODE, key);
-		    int ptLength = cipher.update(encryptedChunk, 0, chunk.length, chunk, 0);
-		    ptLength += cipher.doFinal(chunk, ptLength);
+			int ptLength = cipher.update(encryptedChunk, 0, chunk.length,
+					chunk, 0);
+			ptLength += cipher.doFinal(chunk, ptLength);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to encrypt chunk", e);
 			throw new IOException(e);
 		}
 		return chunk;
 	}
-	
-	
-	public static byte [] encrypt(byte [] chunk) {
+
+	public static byte[] encrypt(byte[] chunk) {
 		BlockCipher engine = new AESEngine();
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(engine);
 
@@ -82,21 +81,19 @@ public class EncryptUtils {
 		int olen = cipher.processBytes(chunk, 0, chunk.length, cipherText, 0);
 		try {
 			olen += cipher.doFinal(cipherText, olen);
-			if( olen < size ){
-	            byte[] tmp = new byte[ olen ];
-	            System.arraycopy(
-	                    cipherText, 0, tmp, 0, olen );
-	            cipherText = tmp;
-	        }
-		}catch (CryptoException ce)
-		{
+			if (olen < size) {
+				byte[] tmp = new byte[olen];
+				System.arraycopy(cipherText, 0, tmp, 0, olen);
+				cipherText = tmp;
+			}
+		} catch (CryptoException ce) {
 			System.err.println(ce);
 			System.exit(1);
 		}
 		return cipherText;
 	}
-	
-	public static byte [] decrypt(byte [] encChunk) {
+
+	public static byte[] decrypt(byte[] encChunk) {
 		BlockCipher engine = new AESEngine();
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(engine);
 
@@ -104,42 +101,41 @@ public class EncryptUtils {
 		int size = cipher.getOutputSize(encChunk.length);
 		byte[] clearText = new byte[size];
 
-		int olen = cipher.processBytes(encChunk, 0, encChunk.length, clearText, 0);
+		int olen = cipher.processBytes(encChunk, 0, encChunk.length, clearText,
+				0);
 		try {
 			olen += cipher.doFinal(clearText, olen);
-			if( olen < size ){
-	            byte[] tmp = new byte[ olen ];
-	            System.arraycopy(
-	                    clearText, 0, tmp, 0, olen );
-	            clearText = tmp;
-	        }
-		}catch (CryptoException ce)
-		{
+			if (olen < size) {
+				byte[] tmp = new byte[olen];
+				System.arraycopy(clearText, 0, tmp, 0, olen);
+				clearText = tmp;
+			}
+		} catch (CryptoException ce) {
 			System.err.println(ce);
 			System.exit(1);
 		}
 		return clearText;
 	}
 
-	
-	
-	public static void main(String [] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 		String testStr = "blaaaaaaaaaaaaa!sssssss";
-		byte [] enc = EncryptUtils.encrypt(testStr.getBytes());
-		byte [] dec = EncryptUtils.decrypt(enc);
+		byte[] enc = EncryptUtils.encrypt(testStr.getBytes());
+		byte[] dec = EncryptUtils.decrypt(enc);
 		String bla = new String(dec);
 		System.out.println(bla + " equals " + bla.equals(testStr));
-		if(!Arrays.areEqual(dec, testStr.getBytes()))
+		if (!Arrays.areEqual(dec, testStr.getBytes()))
 			System.out.println("Encryption Error!!");
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
 		for (int i = 0; i < 800; i++) {
-			byte[] b = new byte[128*1024];
+			byte[] b = new byte[128 * 1024];
 			rnd.nextBytes(b);
 			enc = EncryptUtils.encrypt(b);
 			dec = EncryptUtils.decrypt(enc);
-			if(!Arrays.areEqual(dec, b))
-				System.out.println("Encryption Error [" + HashFunctions.getMD5Hash(b) + "] [" + HashFunctions.getMD5Hash(dec) + "]");
+			if (!Arrays.areEqual(dec, b))
+				System.out.println("Encryption Error ["
+						+ HashFunctions.getMD5Hash(b) + "] ["
+						+ HashFunctions.getMD5Hash(dec) + "]");
 		}
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");

@@ -21,8 +21,8 @@ public class DiskUtils {
 		ArrayList<Partition> al = new ArrayList<Partition>();
 		Process p = Runtime.getRuntime().exec(
 				"fdisk -l -u -C " + cylinders + " " + fileName);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(p
-				.getInputStream()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
 		String line = null;
 		boolean initialized = false;
 		while ((line = reader.readLine()) != null) {
@@ -61,8 +61,8 @@ public class DiskUtils {
 		offset = offset * 512;
 		Process p = Runtime.getRuntime().exec(
 				"losetup -v -f -o " + offset + " " + fileName);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(p
-				.getInputStream()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
 		String line = reader.readLine();
 		String[] tokens = line.split(" /");
 		if (tokens.length != 2)
@@ -76,8 +76,9 @@ public class DiskUtils {
 	public static synchronized boolean mountVMDK(String fileName,
 			String mountPath, long offset) {
 		mountPath = new File(mountPath).getPath();
-		SDFSLogger.getLog().info("mounting " + fileName + " to " + mountPath
-				+ " with offset : " + offset);
+		SDFSLogger.getLog().info(
+				"mounting " + fileName + " to " + mountPath + " with offset : "
+						+ offset);
 		boolean mounted = true;
 		String loopBack = null;
 		if (!mountedVMDKs.containsKey(mountPath)) {
@@ -96,8 +97,9 @@ public class DiskUtils {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
-					SDFSLogger.getLog().info(" error mounting " + fileName + " mount output "
-							+ line);
+					SDFSLogger.getLog().info(
+							" error mounting " + fileName + " mount output "
+									+ line);
 					mounted = false;
 				}
 
@@ -115,11 +117,12 @@ public class DiskUtils {
 					try {
 						p.waitFor();
 					} catch (InterruptedException e) {
-						SDFSLogger.getLog().fatal( e.toString(), e);
+						SDFSLogger.getLog().fatal(e.toString(), e);
 					}
 				}
 				mountedVMDKs.put(mountPath, mp);
-				SDFSLogger.getLog().info("mount of " + fileName + " successful");
+				SDFSLogger.getLog()
+						.info("mount of " + fileName + " successful");
 			} catch (IOException e) {
 				if (loopBack != null) {
 					try {
@@ -130,8 +133,9 @@ public class DiskUtils {
 					}
 				}
 
-				SDFSLogger.getLog().fatal( "unable to mount volume " + fileName
-						+ " to " + mountPath, e);
+				SDFSLogger.getLog().fatal(
+						"unable to mount volume " + fileName + " to "
+								+ mountPath, e);
 				mounted = false;
 			}
 
@@ -158,8 +162,8 @@ public class DiskUtils {
 				File f = new File(mountPath);
 				f.delete();
 			} catch (Exception e) {
-				SDFSLogger.getLog().fatal( "unable to unmount volume " + mountPath,
-						e);
+				SDFSLogger.getLog().fatal(
+						"unable to unmount volume " + mountPath, e);
 			}
 		}
 	}
@@ -194,9 +198,9 @@ public class DiskUtils {
 	/*
 	 * public static File getInternalFile(String fileName) throws IOException {
 	 * Volume vol = JLanConfig.getVolume(fileName); File localVolumePath = new
-	 * File(vol.getLocalPath()); SDFSLogger.getLog().info("file name is " + fileName +
-	 * " volume is " + vol.getName() + " local path is  " + vol.getLocalPath());
-	 * File baseFilePath = new File(fileName); fileName =
+	 * File(vol.getLocalPath()); SDFSLogger.getLog().info("file name is " +
+	 * fileName + " volume is " + vol.getName() + " local path is  " +
+	 * vol.getLocalPath()); File baseFilePath = new File(fileName); fileName =
 	 * baseFilePath.getPath(); File internalFile = new
 	 * File(vol.getInternalMountPoint() + File.separator +
 	 * fileName.substring(localVolumePath.getPath().length())); return
@@ -213,16 +217,18 @@ public class DiskUtils {
 
 	public static void prepareVMDK(String fileName, long cylinders)
 			throws IOException {
-		SDFSLogger.getLog().info("Preparing vmdk " + fileName + " " + cylinders);
+		SDFSLogger.getLog()
+				.info("Preparing vmdk " + fileName + " " + cylinders);
 		String cmd = Main.scriptsDir + File.separator + "prepdisk.sh" + " "
 				+ fileName + " " + cylinders + " " + Main.scriptsDir;
 		SDFSLogger.getLog().info("executing " + cmd);
 		Process p = Runtime.getRuntime().exec(cmd);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(p
-				.getInputStream()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
 		String line;
 		while ((line = reader.readLine()) != null) {
-			SDFSLogger.getLog().info("Making " + fileName + " fdisk output " + line);
+			SDFSLogger.getLog().info(
+					"Making " + fileName + " fdisk output " + line);
 		}
 		try {
 			p.waitFor();
@@ -235,13 +241,14 @@ public class DiskUtils {
 				.exec("mkfs.ntfs  -f -c 32768 -v " + loopDevice);
 		reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		while ((line = reader.readLine()) != null) {
-			SDFSLogger.getLog().info("NTFS Format " + fileName + " ntfs output " + line);
+			SDFSLogger.getLog().info(
+					"NTFS Format " + fileName + " ntfs output " + line);
 		}
 		p = Runtime.getRuntime().exec("losetup -d " + loopDevice);
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
-			SDFSLogger.getLog().fatal( e.toString(), e);
+			SDFSLogger.getLog().fatal(e.toString(), e);
 		}
 	}
 
@@ -267,8 +274,8 @@ public class DiskUtils {
 			f.delete();
 			SDFSLogger.getLog().info("unmounted " + mp.getMountPoint());
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal( "unable to unmount volume "
-					+ mp.getMountPoint(), e);
+			SDFSLogger.getLog().fatal(
+					"unable to unmount volume " + mp.getMountPoint(), e);
 		}
 	}
 

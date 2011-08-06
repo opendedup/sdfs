@@ -74,8 +74,10 @@ public class CAPIGenerator {
 			Constructor<?> constructor = constructors[i];
 			if (Modifier.isPublic(constructor.getModifiers())) {
 				constructorsList.add(constructor);
-				constructor2name.put(constructor, getMethodName(null, "new",
-						constructor.getParameterTypes()));
+				constructor2name.put(
+						constructor,
+						getMethodName(null, "new",
+								constructor.getParameterTypes()));
 			}
 		}
 		constructors = (Constructor[]) constructorsList
@@ -96,8 +98,10 @@ public class CAPIGenerator {
 				else
 					instanceMethodsList.add(method);
 
-				method2name.put(method, getMethodName(method.getReturnType(),
-						method.getName(), method.getParameterTypes()));
+				method2name.put(
+						method,
+						getMethodName(method.getReturnType(), method.getName(),
+								method.getParameterTypes()));
 			}
 		}
 		Method[] staticMethods = (Method[]) staticMethodsList
@@ -164,9 +168,7 @@ public class CAPIGenerator {
 
 			for (int i = 0; i < staticMethods.length; i++) {
 				Method method = staticMethods[i];
-				hOut
-						.print("      jmethodID " + method2name.get(method)
-								+ ";\n");
+				hOut.print("      jmethodID " + method2name.get(method) + ";\n");
 			}
 
 			hOut.print("\n" + "   } static_method;\n" + "\n");
@@ -180,9 +182,7 @@ public class CAPIGenerator {
 
 			for (int i = 0; i < instanceMethods.length; i++) {
 				Method method = instanceMethods[i];
-				hOut
-						.print("      jmethodID " + method2name.get(method)
-								+ ";\n");
+				hOut.print("      jmethodID " + method2name.get(method) + ";\n");
 			}
 
 			hOut.print("\n" + "   } method;\n" + "\n");
@@ -442,8 +442,8 @@ public class CAPIGenerator {
 		else if (clazz == Double.TYPE)
 			buff.append("D");
 		else
-			buff.append("L").append(clazz.getName().replace('.', '/')).append(
-					";");
+			buff.append("L").append(clazz.getName().replace('.', '/'))
+					.append(";");
 
 		return buff;
 	}

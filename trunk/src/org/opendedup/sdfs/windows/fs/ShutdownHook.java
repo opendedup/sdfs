@@ -6,9 +6,9 @@ import org.opendedup.sdfs.servers.SDFSService;
 
 class ShutdownHook extends Thread {
 	private SDFSService service;
-	private char driveLetter;
+	private String driveLetter;
 
-	public ShutdownHook(SDFSService service, char driveLetter) {
+	public ShutdownHook(SDFSService service, String driveLetter) {
 		this.service = service;
 		this.driveLetter = driveLetter;
 	}
@@ -21,12 +21,11 @@ class ShutdownHook extends Thread {
 		System.out.println("All Data Flushed");
 		try {
 			System.out.println("Unmounting " + this.driveLetter);
-			Dokan.unmount(driveLetter);
+			Dokan.removeMountPoint(driveLetter);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println("SDFS Shut Down Cleanly");
-		
 
 	}
 }

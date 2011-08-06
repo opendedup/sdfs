@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
-
 import org.w3c.dom.Element;
 
 /**
@@ -100,13 +99,13 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public void init(Element config) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setSize(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -118,7 +117,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public void iterationInit() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

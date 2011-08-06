@@ -17,10 +17,9 @@ public class PageSizeCmd implements IOCmd {
 		this.pageSize = is.readInt();
 	}
 
-
 	public int pageSize() {
 		return this.pageSize;
-		}
+	}
 
 	public byte getCmdID() {
 		return NetworkCMDS.STORE_PAGE_SIZE;

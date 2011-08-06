@@ -18,20 +18,21 @@ import org.jets3t.service.security.AWSCredentials;
 import org.opendedup.util.SDFSLogger;
 
 public class Utils {
-	public static void deleteBucketAWS(String bucketName,String awsAccessKey, String awsSecretKey ) {
+	public static void deleteBucketAWS(String bucketName, String awsAccessKey,
+			String awsSecretKey) {
 		try {
 			System.out.println("");
 			System.out.print("Deleting Bucket [" + bucketName + "]");
-			AWSCredentials bawsCredentials = new AWSCredentials(
-					awsAccessKey, awsSecretKey);
+			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
+					awsSecretKey);
 			S3Service bs3Service = new RestS3Service(bawsCredentials);
-			S3Object [] obj = bs3Service.listObjects(bucketName);
+			S3Object[] obj = bs3Service.listObjects(bucketName);
 			int n = 0;
-			for(int i = 0 ; i < obj.length; i ++) {
+			for (int i = 0; i < obj.length; i++) {
 				bs3Service.deleteObject(bucketName, obj[i].getKey());
-				if(n == 100) {
+				if (n == 100) {
 					System.out.print(".");
-					n=0;
+					n = 0;
 				}
 				n++;
 			}
@@ -39,10 +40,11 @@ public class Utils {
 			System.out.println("done");
 			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (ServiceException e) {
-			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
+			SDFSLogger.getLog()
+					.warn("Unable to delete bucket " + bucketName, e);
 		}
 	}
-	
+
 	public static void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -52,8 +54,12 @@ public class Utils {
 			System.exit(1);
 		}
 		if (cmd.hasOption("aws-delete-bucket")) {
-			if (cmd.hasOption("aws-secret-key") && cmd.hasOption("aws-access-key") && cmd.hasOption("aws-bucket-name")) {
-				deleteBucketAWS(cmd.getOptionValue("aws-bucket-name"),cmd.getOptionValue("aws-access-key"),cmd.getOptionValue("aws-secret-key"));
+			if (cmd.hasOption("aws-secret-key")
+					&& cmd.hasOption("aws-access-key")
+					&& cmd.hasOption("aws-bucket-name")) {
+				deleteBucketAWS(cmd.getOptionValue("aws-bucket-name"),
+						cmd.getOptionValue("aws-access-key"),
+						cmd.getOptionValue("aws-secret-key"));
 				System.exit(0);
 
 			} else {
@@ -62,21 +68,20 @@ public class Utils {
 				System.exit(-1);
 			}
 		}
-		
 
 	}
 
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(OptionBuilder.withLongOpt("help").withDescription(
-				"Display these options.").hasArg(false).create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("aws-delete-bucket")
-						.withDescription(
-								"Deletes and S3 bucket. --aws-secret-key, --aws-access-key, and --aws-bucket-name options are required")
-						.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("help")
+				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-delete-bucket")
+				.withDescription(
+						"Deletes and S3 bucket. --aws-secret-key, --aws-access-key, and --aws-bucket-name options are required")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-secret-key")
 				.withDescription(
@@ -106,16 +111,14 @@ public class Utils {
 		Logger.getRootLogger().setLevel(Level.ERROR);
 		try {
 			parseCmdLine(args);
-		}catch(org.apache.commons.cli.UnrecognizedOptionException e) {
+		} catch (org.apache.commons.cli.UnrecognizedOptionException e) {
 			System.out.println(e.getMessage());
 			printHelp(buildOptions());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.out
 					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
 		}
 
 	}
-	
 
 }

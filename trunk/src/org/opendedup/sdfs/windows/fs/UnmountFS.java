@@ -20,7 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
+ */
 
 package org.opendedup.sdfs.windows.fs;
 
@@ -28,8 +28,8 @@ import net.decasdev.dokan.Dokan;
 
 public class UnmountFS {
 	public static void main(String[] args) {
-		char driveLetter = (args.length == 0) ? 'S' : args[0].charAt(0);
-		Dokan.unmount(driveLetter);
+		String driveLetter = (args.length == 0) ? "S" : args[0];
+		Dokan.removeMountPoint(driveLetter);
 		System.exit(0);
 	}
 }

@@ -38,15 +38,15 @@ public class DSEConfigWriter {
 	 * @param fileName
 	 * @throws Exception
 	 */
-	
+
 	static long tbc = 1099511627776L;
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
-	
-	
+
 	String dse_name = null;
-	String base_path = OSValidator.getProgramBasePath() + File.separator + "dse" +File.separator+ dse_name;
+	String base_path = OSValidator.getProgramBasePath() + File.separator
+			+ "dse" + File.separator + dse_name;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
@@ -63,7 +63,7 @@ public class DSEConfigWriter {
 	String awsAccessKey = "";
 	String awsSecretKey = "";
 	String awsBucketName = "";
-	int chunk_store_read_cache= Main.chunkStorePageCache;
+	int chunk_store_read_cache = Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
@@ -76,7 +76,7 @@ public class DSEConfigWriter {
 		CommandLine cmd = null;
 		try {
 			cmd = parser.parse(options, args);
-		}catch(UnrecognizedOptionException e) {
+		} catch (UnrecognizedOptionException e) {
 			System.err.println(e.getMessage());
 			printHelp(options);
 			System.exit(1);
@@ -92,7 +92,8 @@ public class DSEConfigWriter {
 			System.exit(-1);
 		}
 		dse_name = cmd.getOptionValue("dse-name");
-		base_path = OSValidator.getProgramBasePath() + "dse" +File.separator+ dse_name;
+		base_path = OSValidator.getProgramBasePath() + "dse" + File.separator
+				+ dse_name;
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
@@ -126,14 +127,17 @@ public class DSEConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
-		if(cmd.hasOption("read-cache")) {
-			this.chunk_store_read_cache = Integer.parseInt(cmd.getOptionValue("read-cache"));
+		if (cmd.hasOption("read-cache")) {
+			this.chunk_store_read_cache = Integer.parseInt(cmd
+					.getOptionValue("read-cache"));
 		}
-		if(cmd.hasOption("encrypt")) {
-			this.chunk_store_encrypt = Boolean.parseBoolean(cmd.getOptionValue("encrypt"));
+		if (cmd.hasOption("encrypt")) {
+			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
+					.getOptionValue("encrypt"));
 		}
-		if(cmd.hasOption("dirty-timeout")) {
-			this.chunk_store_dirty_timeout = Integer.parseInt(cmd.getOptionValue("dirty-timeout"));
+		if (cmd.hasOption("dirty-timeout")) {
+			this.chunk_store_dirty_timeout = Integer.parseInt(cmd
+					.getOptionValue("dirty-timeout"));
 		}
 		if (this.awsEnabled) {
 			if (cmd.hasOption("aws-secret-key")
@@ -150,39 +154,41 @@ public class DSEConfigWriter {
 				System.exit(-1);
 			}
 		}
-		if(cmd.hasOption("aws-compress"))
-			this.awsCompress = Boolean.parseBoolean(cmd.getOptionValue("aws-compress"));
+		if (cmd.hasOption("aws-compress"))
+			this.awsCompress = Boolean.parseBoolean(cmd
+					.getOptionValue("aws-compress"));
 		if (cmd.hasOption("gc-schedule")) {
-			this.chunk_gc_schedule = cmd
-					.getOptionValue("gc-schedule");
+			this.chunk_gc_schedule = cmd.getOptionValue("gc-schedule");
 		}
 		if (cmd.hasOption("eviction")) {
 			this.remove_if_older_than = Integer.parseInt(cmd
 					.getOptionValue("eviction"));
 		}
 		if (cmd.hasOption("dse-capacity")) {
-			
+
 			long sz = StringUtils.parseSize(cmd.getOptionValue("dse-capacity"));
 			this.chunk_store_allocation_size = sz;
 		}
-		if(cmd.hasOption("page-size")) {
+		if (cmd.hasOption("page-size")) {
 			this.chunk_size = Short.parseShort(cmd.getOptionValue("page-size"));
 		}
-		if(cmd.hasOption("enable-udp")) {
-			this.use_udp = Boolean.parseBoolean(cmd.getOptionValue("enable-udp"));
+		if (cmd.hasOption("enable-udp")) {
+			this.use_udp = Boolean.parseBoolean(cmd
+					.getOptionValue("enable-udp"));
 		}
-		if(cmd.hasOption("listen-ip")) {
+		if (cmd.hasOption("listen-ip")) {
 			this.list_ip = cmd.getOptionValue("listen-ip");
 		}
-		if(cmd.hasOption("hash-size")) {
+		if (cmd.hasOption("hash-size")) {
 			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
-			if(hs == 16 || hs == 24) 
+			if (hs == 16 || hs == 24)
 				this.hashSize = hs;
 			else
 				throw new Exception("hash size must be 16 or 24");
 		}
-		if(cmd.hasOption("listen-port")) {
-			this.network_port = Integer.parseInt(cmd.getOptionValue("listen-port"));
+		if (cmd.hasOption("listen-port")) {
+			this.network_port = Integer.parseInt(cmd
+					.getOptionValue("listen-port"));
 		}
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
@@ -196,7 +202,7 @@ public class DSEConfigWriter {
 	public void writeConfigFile() throws ParserConfigurationException,
 			IOException {
 		File dir = new File(OSValidator.getConfigPath());
-		if(!dir.exists()) {
+		if (!dir.exists()) {
 			System.out.println("making" + dir.getAbsolutePath());
 			dir.mkdirs();
 		}
@@ -222,23 +228,25 @@ public class DSEConfigWriter {
 		loc.setAttribute("chunk-store", this.chunk_store_data_location);
 		root.appendChild(loc);
 		Element cs = xmldoc.createElement("chunk-store");
-		
-		cs.setAttribute("page-size", Integer.toString(this.chunk_size*1024));
-		cs.setAttribute("pre-allocate", Boolean
-				.toString(this.chunk_store_pre_allocate));
-		cs.setAttribute("allocation-size", Long
-				.toString(this.chunk_store_allocation_size));
+
+		cs.setAttribute("page-size", Integer.toString(this.chunk_size * 1024));
+		cs.setAttribute("pre-allocate",
+				Boolean.toString(this.chunk_store_pre_allocate));
+		cs.setAttribute("allocation-size",
+				Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
-		cs.setAttribute("eviction-age", Integer
-				.toString(this.remove_if_older_than));
-		cs.setAttribute("read-ahead-pages", Short
-				.toString(this.chunk_read_ahead_pages));
+		cs.setAttribute("eviction-age",
+				Integer.toString(this.remove_if_older_than));
+		cs.setAttribute("read-ahead-pages",
+				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
-		cs.setAttribute("chunk-store-read-cache", Integer.toString(this.chunk_store_read_cache));
-		cs.setAttribute("chunk-store-dirty-timeout", Integer.toString(this.chunk_store_dirty_timeout));
+		cs.setAttribute("chunk-store-read-cache",
+				Integer.toString(this.chunk_store_read_cache));
+		cs.setAttribute("chunk-store-dirty-timeout",
+				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-size", Integer.toString(this.hashSize));
-		if(this.awsEnabled) {
+		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-access-key", this.awsAccessKey);
@@ -269,104 +277,102 @@ public class DSEConfigWriter {
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(OptionBuilder.withLongOpt("help").withDescription(
-				"Display these options.").hasArg(false).create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("base-path")
-						.withDescription(
-								"the folder path for all volume data and meta data.\n Defaults to: \n "+OSValidator.getProgramBasePath()+"<volume name>")
-						.hasArg().withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("dse-name")
+		options.addOption(OptionBuilder.withLongOpt("help")
+				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("base-path")
+				.withDescription(
+						"the folder path for all volume data and meta data.\n Defaults to: \n "
+								+ OSValidator.getProgramBasePath()
+								+ "<volume name>").hasArg().withArgName("PATH")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-name")
 				.withDescription(
 						"The name of the Dedup Storage Engine. "
 								+ " \n THIS IS A REQUIRED OPTION").hasArg()
 				.withArgName("STRING").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("data-location").withDescription(
+				.withLongOpt("data-location")
+				.withDescription(
 						"The directory where chunks will be stored."
 								+ " \nDefaults to: \n --base-path + "
 								+ File.separator + "chunkstore"
 								+ File.separator + "chunks").hasArg()
 				.withArgName("PATH").create());
-		options
-		.addOption(OptionBuilder
+		options.addOption(OptionBuilder
 				.withLongOpt("page-size")
 				.withDescription(
 						"The unit size, in kB, of chunks stored. This must match the chunk size for the volumes being stored.\n Defaults to: \n 128")
 				.hasArg().withArgName("SIZE in kB").create());
-		options.addOption(OptionBuilder.withLongOpt(
-				"hashdb-location").withDescription(
-				"The directory where hash database for chunk locations will be stored."
-						+ " \nDefaults to: \n --base-path + " + File.separator
-						+ "chunkstore" + File.separator + "hdb").hasArg()
+		options.addOption(OptionBuilder
+				.withLongOpt("hashdb-location")
+				.withDescription(
+						"The directory where hash database for chunk locations will be stored."
+								+ " \nDefaults to: \n --base-path + "
+								+ File.separator + "chunkstore"
+								+ File.separator + "hdb").hasArg()
 				.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("pre-allocate")
+		options.addOption(OptionBuilder
+				.withLongOpt("pre-allocate")
 				.withDescription(
 						"Pre-allocate the chunk store if true."
 								+ " \nDefaults to: \n false").hasArg()
 				.withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("read-ahead-pages")
-						.withDescription(
-								"The number of pages to read ahead when doing a disk read on the chunk store."
-										+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
-						.hasArg().withArgName("NUMBER").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("gc-schedule")
-						.withDescription(
-								"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
-										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
-						.hasArg().withArgName("CRON Schedule").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("eviction")
-						.withDescription(
-								"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-										+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
-						.hasArg().withArgName("HOURS").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("dse-capacity")
-						.withDescription(
-								"The size in bytes of the Dedup Storeage Engine. "
-										+ "This . \n Defaults to: \n The size of the Volume")
-						.hasArg().withArgName("BYTES").create());
-		options
-		.addOption(OptionBuilder
+		options.addOption(OptionBuilder
+				.withLongOpt("read-ahead-pages")
+				.withDescription(
+						"The number of pages to read ahead when doing a disk read on the chunk store."
+								+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
+				.hasArg().withArgName("NUMBER").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("gc-schedule")
+				.withDescription(
+						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
+				.hasArg().withArgName("CRON Schedule").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("eviction")
+				.withDescription(
+						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
+				.hasArg().withArgName("HOURS").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-capacity")
+				.withDescription(
+						"The size in bytes of the Dedup Storeage Engine. "
+								+ "This . \n Defaults to: \n The size of the Volume")
+				.hasArg().withArgName("BYTES").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("read-cache")
 				.withDescription(
-						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads" +
-						" for AWS/Cloud storage "
-								+ "This . \n Defaults to: \n 5MB")
-				.hasArg().withArgName("Megabytes").create());
-		options
-		.addOption(OptionBuilder
+						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads"
+								+ " for AWS/Cloud storage "
+								+ "This . \n Defaults to: \n 5MB").hasArg()
+				.withArgName("Megabytes").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("hash-size")
 				.withDescription(
-						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer" +
-						"versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions" +
-						"below 1.0.1 ."
-								+ "This . \n Defaults to: \n 5MB")
-				.hasArg().withArgName("16 or 24 bytes").create());
-		options
-		.addOption(OptionBuilder
+						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer"
+								+ "versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions"
+								+ "below 1.0.1 ."
+								+ "This . \n Defaults to: \n 5MB").hasArg()
+				.withArgName("16 or 24 bytes").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("encrypt")
-						.withDescription(
-								"Whether or not to Encrypt chunks within the Dedup Storage Engine. The encryption key is generated automatically." +
-								" For AWS this is a good option to enable. The default for this is" +
-								" false")
-						.hasArg().withArgName("true|false").create());
-		options
-		.addOption(OptionBuilder
+				.withDescription(
+						"Whether or not to Encrypt chunks within the Dedup Storage Engine. The encryption key is generated automatically."
+								+ " For AWS this is a good option to enable. The default for this is"
+								+ " false").hasArg().withArgName("true|false")
+				.create());
+		options.addOption(OptionBuilder
 				.withLongOpt("dirty-timeout")
 				.withDescription(
-						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. " +
-						"For AWS with slow links you may want to set this to a higher number. The default for this is" +
-						" 1000 ms.")
-				.hasArg().withArgName("Milliseconds").create());
+						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. "
+								+ "For AWS with slow links you may want to set this to a higher number. The default for this is"
+								+ " 1000 ms.").hasArg()
+				.withArgName("Milliseconds").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
@@ -410,10 +416,10 @@ public class DSEConfigWriter {
 		return options;
 	}
 
-	
 	public static void main(String[] args) {
 		try {
-			System.out.println("Attempting to create Dedup Storage Engine Config ...");
+			System.out
+					.println("Attempting to create Dedup Storage Engine Config ...");
 			File f = new File(OSValidator.getConfigPath());
 			if (!f.exists())
 				f.mkdirs();
@@ -421,10 +427,11 @@ public class DSEConfigWriter {
 			wr.parseCmdLine(args);
 			wr.writeConfigFile();
 			System.out.println("dse [" + wr.dse_name
-					+ "] created with a capacity of [" + wr.chunk_store_allocation_size
-					+ "]");
+					+ "] created with a capacity of ["
+					+ wr.chunk_store_allocation_size + "]");
 			System.out
-					.println("check [" + OSValidator.getConfigPath()
+					.println("check ["
+							+ OSValidator.getConfigPath()
 							+ wr.dse_name.trim()
 							+ "-dse-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
@@ -438,10 +445,8 @@ public class DSEConfigWriter {
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.setWidth(175);
-		formatter
-				.printHelp(
-						"mkfs.sdfs --dse-name=sdfs --dse-capacity=100GB",
-						options);
+		formatter.printHelp("mkfs.sdfs --dse-name=sdfs --dse-capacity=100GB",
+				options);
 	}
 
 }

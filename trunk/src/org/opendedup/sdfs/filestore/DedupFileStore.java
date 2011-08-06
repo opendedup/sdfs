@@ -14,7 +14,6 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
-
 /**
  * 
  * @author Sam Silverberg
@@ -34,14 +33,15 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentLinkedHashMap<String, DedupFile> openFile = new Builder<String, DedupFile>()
-	.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(Main.maxOpenFiles-1)
-	.listener(new EvictionListener<String, DedupFile>() {
-		// This method is called just after a new entry has been
-		// added
-		public void onEviction(String key, DedupFile file) {
-			file.forceClose();
-		}
-	}).build();
+			.concurrencyLevel(Main.writeThreads)
+			.maximumWeightedCapacity(Main.maxOpenFiles - 1)
+			.listener(new EvictionListener<String, DedupFile>() {
+				// This method is called just after a new entry has been
+				// added
+				public void onEviction(String key, DedupFile file) {
+					file.forceClose();
+				}
+			}).build();
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -62,38 +62,42 @@ public class DedupFileStore {
 	 * @throws IOException
 	 */
 	private static ReentrantLock getDFLock = new ReentrantLock();
+
 	public static DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
 		getDFLock.lock();
 		try {
-		if (!closing) {
-			SDFSLogger.getLog().debug("getting dedupfile for " + mf.getPath() + "and df " + mf.getDfGuid());
-			DedupFile df = null;
-			if (mf.getDfGuid() == null) {
-				try {
-					df = new SparseDedupFile(mf);
+			if (!closing) {
+				SDFSLogger.getLog().debug(
+						"getting dedupfile for " + mf.getPath() + "and df "
+								+ mf.getDfGuid());
+				DedupFile df = null;
+				if (mf.getDfGuid() == null) {
+					try {
+						df = new SparseDedupFile(mf);
 
-					SDFSLogger.getLog().debug("creating new dedup file for " + mf.getPath());
-				} catch (Exception e) {
+						SDFSLogger.getLog().debug(
+								"creating new dedup file for " + mf.getPath());
+					} catch (Exception e) {
 
+					}
+				} else {
+					df = (DedupFile) openFile.get(mf.getDfGuid());
+					if (df == null) {
+
+						df = new SparseDedupFile(mf);
+
+					}
 				}
-			} else {
-				df = (DedupFile) openFile.get(mf.getDfGuid());
 				if (df == null) {
-
-					df = new SparseDedupFile(mf);
-
+					throw new IOException("Can't find dedup file for "
+							+ mf.getPath() + " requested df=" + mf.getDfGuid());
 				}
+				return df;
+			} else {
+				throw new IOException("DedupFileStore is closed");
 			}
-			if (df == null) {
-				throw new IOException("Can't find dedup file for "
-						+ mf.getPath() + " requested df=" + mf.getDfGuid());
-			}
-			return df;
-		} else {
-			throw new IOException("DedupFileStore is closed");
-		}
-		}finally {
+		} finally {
 			getDFLock.unlock();
 		}
 	}
@@ -109,11 +113,13 @@ public class DedupFileStore {
 		if (!closing) {
 			if (!openFile.containsKey(df.getGUID())) {
 				SDFSLogger.getLog().debug("adding dedupfile");
-				if(openFile.size() >= Main.maxOpenFiles)
-					throw new IOException("maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
+				if (openFile.size() >= Main.maxOpenFiles)
+					throw new IOException("maximum number of files reached ["
+							+ Main.maxOpenFiles + "]. Too many open files");
 				openFile.put(df.getGUID(), df);
-				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
-			
+				SDFSLogger.getLog().debug(
+						"dedupfile cache size is " + openFile.size());
+
 			}
 		} else {
 			throw new IOException("DedupFileStore is closed");
@@ -138,8 +144,8 @@ public class DedupFileStore {
 				df = new SparseDedupFile(oldmf);
 			}
 			try {
-			return df.snapshot(newmf);
-			}catch(Exception e) {
+				return df.snapshot(newmf);
+			} catch (Exception e) {
 				throw new IOException(e);
 			}
 
@@ -196,18 +202,20 @@ public class DedupFileStore {
 			SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
 		}
 	}
+
 	/**
 	 * Flushes the write buffers for all open files.
 	 */
 	public static void flushAllFiles() {
-		SDFSLogger.getLog().debug("flushing write caches of size " + openFile.size());
+		SDFSLogger.getLog().debug(
+				"flushing write caches of size " + openFile.size());
 		Object[] dfs = getArray();
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
 			try {
 				df.writeCache();
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn("DSE Full",e);
+				SDFSLogger.getLog().warn("DSE Full", e);
 			}
 		}
 		SDFSLogger.getLog().debug("write caches flushed");
