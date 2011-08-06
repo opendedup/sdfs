@@ -35,7 +35,7 @@ public interface DedupFile {
 	/**
 	 * Writes all the cache buffers to the dedup chunk store service
 	 */
-	public abstract int writeCache() throws IOException,HashtableFullException;
+	public abstract int writeCache() throws IOException, HashtableFullException;
 
 	/**
 	 * 
@@ -45,8 +45,8 @@ public interface DedupFile {
 	 * @return the write buffer for the give position
 	 * @throws IOException
 	 */
-	public abstract WritableCacheBuffer getWriteBuffer(long position,boolean newBuf)
-			throws IOException;
+	public abstract WritableCacheBuffer getWriteBuffer(long position,
+			boolean newBuf) throws IOException;
 
 	/**
 	 * 
@@ -66,7 +66,8 @@ public interface DedupFile {
 	 * @return the cloned DedupFile
 	 * @throws IOException
 	 */
-	public abstract DedupFile snapshot(MetaDataDedupFile mf) throws IOException,HashtableFullException;
+	public abstract DedupFile snapshot(MetaDataDedupFile mf)
+			throws IOException, HashtableFullException;
 
 	/**
 	 * Deletes the DedupFile and all on disk references
@@ -85,7 +86,8 @@ public interface DedupFile {
 	 *            written
 	 * @throws IOException
 	 */
-	public abstract void writeCache(WritableCacheBuffer writeBuffer) throws IOException,HashtableFullException;
+	public abstract void writeCache(WritableCacheBuffer writeBuffer)
+			throws IOException, HashtableFullException;
 
 	/**
 	 * 
@@ -172,7 +174,7 @@ public interface DedupFile {
 	 * 
 	 * @return when the file was last modified
 	 */
-	public abstract long lastModified()throws IOException;
+	public abstract long lastModified() throws IOException;
 
 	/**
 	 * Returns the DedupChunk associated with a position in the DedupFile.
@@ -216,7 +218,6 @@ public interface DedupFile {
 	 */
 	public abstract boolean isAbsolute();
 
-	
 	/**
 	 * Optimizes the dedup file hash map for a specific length of file.
 	 * 
@@ -224,9 +225,9 @@ public interface DedupFile {
 	 *            the lenght to optimize for
 	 */
 	public abstract void optimize() throws HashtableFullException;
-	
+
 	public abstract boolean hasOpenChannels();
-	
-	public abstract void truncate(long length)throws IOException;
+
+	public abstract void truncate(long length) throws IOException;
 
 }

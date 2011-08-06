@@ -31,8 +31,7 @@ public class ProcessDSEInfo {
 					.format(maxSz));
 			System.out.printf("DSE Current Size : %s\n",
 					StorageUnit.of(currentSz).format(currentSz));
-			System.out.printf("DSE Percent Full : %s%%\n",
-					pFull);
+			System.out.printf("DSE Percent Full : %s%%\n", pFull);
 			System.out.printf("DSE Page Size : %s\n", pageSize);
 			System.out.printf("DSE Blocks Available for Reuse : %s\n",
 					freeBlocks);

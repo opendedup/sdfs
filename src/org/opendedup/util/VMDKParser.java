@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
-
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -20,10 +19,10 @@ import org.opendedup.sdfs.io.VMDKData;
 public class VMDKParser {
 	static long gb = 1024 * 1024 * 1024;
 	static long twogb = 2 * 1024 * 1024 * 1024;
-	
 
 	public static MetaDataDedupFile writeFile(String path, String fileName,
-			long size) throws IOException, BufferClosedException, HashtableFullException {
+			long size) throws IOException, BufferClosedException,
+			HashtableFullException {
 		path = path + File.separator + fileName;
 		File f = new File(path);
 		if (!f.exists())
@@ -68,7 +67,7 @@ public class VMDKParser {
 		byte[] strB = sb.toString().getBytes();
 		b.put(strB);
 		vmd.setLength(strB.length, true);
-		vmd.getDedupFile().getWriteBuffer(0,true).write(b.array(), 0);
+		vmd.getDedupFile().getWriteBuffer(0, true).write(b.array(), 0);
 		vmd.getDedupFile().writeCache();
 		vmd.sync();
 		vmd.getDedupFile().writeCache();
@@ -80,8 +79,9 @@ public class VMDKParser {
 		vmdk.getIOMonitor().setDuplicateBlocks(0);
 		vmdk.sync();
 		ch.close();
-		SDFSLogger.getLog().info("Created vmdk of size " + vmdk.length() + " at " + path
-				+ File.separator + fileName);
+		SDFSLogger.getLog().info(
+				"Created vmdk of size " + vmdk.length() + " at " + path
+						+ File.separator + fileName);
 		return vmdk;
 
 	}

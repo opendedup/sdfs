@@ -17,7 +17,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServer;
 
@@ -30,7 +29,7 @@ public class HashClient {
 	private boolean closed = false;
 	private HCServer server;
 	private String name = "";
-	
+
 	private ReentrantLock lock = new ReentrantLock();
 
 	// private LRUMap existsBuffers = new LRUMap(10);
@@ -56,16 +55,18 @@ public class HashClient {
 		// Try to open a socket on a given host and port
 		// Try to open input and output streams
 		try {
-			SDFSLogger.getLog().debug("Connecting to server " + server.getHostName() + " on port " + server.getPort());
+			SDFSLogger.getLog().debug(
+					"Connecting to server " + server.getHostName()
+							+ " on port " + server.getPort());
 			clientSocket = new Socket(server.getHostName(), server.getPort());
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
-			os = new DataOutputStream(new BufferedOutputStream(clientSocket
-					.getOutputStream(), Main.CHUNK_LENGTH + 34));
-			is = new DataInputStream(new BufferedInputStream(clientSocket
-					.getInputStream(), Main.CHUNK_LENGTH + 34));
-			inReader = new BufferedReader(new InputStreamReader(clientSocket
-					.getInputStream()));
+			os = new DataOutputStream(new BufferedOutputStream(
+					clientSocket.getOutputStream(), Main.CHUNK_LENGTH + 34));
+			is = new DataInputStream(new BufferedInputStream(
+					clientSocket.getInputStream(), Main.CHUNK_LENGTH + 34));
+			inReader = new BufferedReader(new InputStreamReader(
+					clientSocket.getInputStream()));
 			// Read the Header Line
 			inReader.readLine();
 			this.closed = false;
@@ -73,7 +74,8 @@ public class HashClient {
 			SDFSLogger.getLog().fatal("Don't know about host " + server);
 			this.closed = true;
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("Couldn't get I/O for the connection to the host",e);
+			SDFSLogger.getLog().fatal(
+					"Couldn't get I/O for the connection to the host", e);
 			this.closed = true;
 		}
 	}
@@ -91,7 +93,7 @@ public class HashClient {
 				this.openConnection();
 				cmd.executeCmd(is, os);
 			} catch (Exception e1) {
-				SDFSLogger.getLog().fatal( "unable to execute command", e);
+				SDFSLogger.getLog().fatal("unable to execute command", e);
 				throw new IOException("unable to execute command");
 			}
 		} finally {
@@ -158,8 +160,8 @@ public class HashClient {
 
 	public boolean writeChunk(byte[] hash, byte[] aContents, int position,
 			int len) throws IOException {
-		WriteHashCmd cmd = new WriteHashCmd(hash, aContents, len, server
-				.isCompress());
+		WriteHashCmd cmd = new WriteHashCmd(hash, aContents, len,
+				server.isCompress());
 
 		this.executeCmd(cmd);
 

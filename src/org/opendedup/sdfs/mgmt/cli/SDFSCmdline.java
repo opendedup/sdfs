@@ -41,11 +41,11 @@ public class SDFSCmdline {
 			ProcessDebugInfo.runCmd();
 			System.exit(0);
 		}
-		
+
 		if (cmd.hasOption("snapshot")) {
 			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
-				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"), cmd
-						.getOptionValue("snapshot-path"));
+				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),
+						cmd.getOptionValue("snapshot-path"));
 			} else {
 				System.out
 						.println("snapshot request failed. --file-path and --snapshot-path options are required");
@@ -54,8 +54,8 @@ public class SDFSCmdline {
 		}
 		if (cmd.hasOption("flush-file-buffers")) {
 			if (cmd.hasOption("file-path")) {
-				ProcessFlushBuffersCmd.runCmd("file", cmd
-						.getOptionValue("file-path"));
+				ProcessFlushBuffersCmd.runCmd("file",
+						cmd.getOptionValue("file-path"));
 			} else {
 				System.out.println("flush file request failed. --file-path");
 			}
@@ -67,8 +67,8 @@ public class SDFSCmdline {
 		if (cmd.hasOption("dedup-file")) {
 			if (cmd.hasOption("file-path")
 					&& cmd.getOptionValue("dedup-file") != null) {
-				ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"), cmd
-						.getOptionValue("dedup-file"));
+				ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"),
+						cmd.getOptionValue("dedup-file"));
 			} else {
 				System.out
 						.println("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
@@ -86,80 +86,72 @@ public class SDFSCmdline {
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(OptionBuilder.withLongOpt("help").withDescription(
-				"Display these options.").hasArg(false).create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("file-info")
-						.withDescription(
-								"Returns io file attributes such as dedup rate and file io statistics. "
-										+ "\n e.g. --file-info --file-path=<path to file or folder>")
-						.hasArg(false).create());
-		options
-		.addOption(OptionBuilder
+		options.addOption(OptionBuilder.withLongOpt("help")
+				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("file-info")
+				.withDescription(
+						"Returns io file attributes such as dedup rate and file io statistics. "
+								+ "\n e.g. --file-info --file-path=<path to file or folder>")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
 				.withLongOpt("dse-info")
 				.withDescription(
 						"Returns Dedup Storage Engine Statitics. "
-								+ "\n e.g. --dse-info")
-				.hasArg(false).create());
-		options
-		.addOption(OptionBuilder
+								+ "\n e.g. --dse-info").hasArg(false).create());
+		options.addOption(OptionBuilder
 				.withLongOpt("debug-info")
 				.withDescription(
-						"Returns Debug Information. "
-								+ "\n e.g. --debug-info")
+						"Returns Debug Information. " + "\n e.g. --debug-info")
 				.hasArg(false).create());
-		options
-		.addOption(OptionBuilder
+		options.addOption(OptionBuilder
 				.withLongOpt("volume-info")
 				.withDescription(
 						"Returns SDFS Volume Statitics. "
-								+ "\n e.g. --volume-info")
+								+ "\n e.g. --volume-info").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("snapshot")
+				.withDescription(
+						"Creates a snapshot for a particular file or folder.\n e.g. --snapshot "
+								+ "--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
 				.hasArg(false).create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("snapshot")
-						.withDescription(
-								"Creates a snapshot for a particular file or folder.\n e.g. --snapshot "
-										+ "--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
-						.hasArg(false).create());
-		options.addOption(OptionBuilder.withLongOpt("flush-file-buffers")
+		options.addOption(OptionBuilder
+				.withLongOpt("flush-file-buffers")
 				.withDescription(
 						"Flushes to buffer of a praticular file.\n e.g. --flush-file-buffers "
 								+ "--file-path=<file to flush>").hasArg(false)
 				.create());
-		options.addOption(OptionBuilder.withLongOpt("flush-all-buffers")
+		options.addOption(OptionBuilder
+				.withLongOpt("flush-all-buffers")
 				.withDescription(
 						"Flushes all buffers within an SDFS file system.\n e.g. --flush-file-buffers "
 								+ "--file-path=<file to flush>").hasArg(false)
 				.create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("dedup-file")
-						.withDescription(
-								"Deduplicates all file blocks if set to true, otherwise it will only dedup blocks that are"
-										+ " already stored in the DSE.\n e.g. --dedup-file=true "
-										+ "--file-path=<file to flush>")
-						.hasArg().withArgName("true|false").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("file-path")
-						.withDescription(
-								"The relative path to the file or folder to take action on.\n e.g. --file-path=readme.txt or --file-path=file\\file.txt")
-						.hasArg().withArgName("RELATIVE PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("snapshot-path")
-						.withDescription(
-								"The relative path to the destination of the snapshot.\n e.g. --snapshot-path=snap-readme.txt or --snapshot-path=file\\snap-file.txt")
-						.hasArg().withArgName("RELATIVE PATH").create());
-		options
-				.addOption(OptionBuilder
-						.withLongOpt("cleanstore")
-						.withDescription(
-								"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
-										+ "if the dedup storage engine is local and not in network mode")
-						.hasArg().withArgName("minutes").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dedup-file")
+				.withDescription(
+						"Deduplicates all file blocks if set to true, otherwise it will only dedup blocks that are"
+								+ " already stored in the DSE.\n e.g. --dedup-file=true "
+								+ "--file-path=<file to flush>").hasArg()
+				.withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("file-path")
+				.withDescription(
+						"The relative path to the file or folder to take action on.\n e.g. --file-path=readme.txt or --file-path=file\\file.txt")
+				.hasArg().withArgName("RELATIVE PATH").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("snapshot-path")
+				.withDescription(
+						"The relative path to the destination of the snapshot.\n e.g. --snapshot-path=snap-readme.txt or --snapshot-path=file\\snap-file.txt")
+				.hasArg().withArgName("RELATIVE PATH").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cleanstore")
+				.withDescription(
+						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
+								+ "if the dedup storage engine is local and not in network mode")
+				.hasArg().withArgName("minutes").create());
 		return options;
 	}
 
@@ -174,11 +166,10 @@ public class SDFSCmdline {
 		Logger.getRootLogger().setLevel(Level.ERROR);
 		try {
 			parseCmdLine(args);
-		}catch(org.apache.commons.cli.UnrecognizedOptionException e) {
+		} catch (org.apache.commons.cli.UnrecognizedOptionException e) {
 			System.out.println(e.getMessage());
 			printHelp(buildOptions());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.out
 					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
 		}

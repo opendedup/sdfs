@@ -75,14 +75,16 @@ public class WinSDFS implements DokanOperations {
 	public static final int FILE_FILE_COMPRESSION = 0x00000010;
 	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
 	public static final int FILE_UNICODE_ON_DISK = 0x00000004;
-	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES | FILE_UNICODE_ON_DISK| FILE_SUPPORTS_SPARSE_FILES;
+	
+	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES
+			| FILE_UNICODE_ON_DISK | FILE_SUPPORTS_SPARSE_FILES;
 	final static int volumeSerialNumber = 64426442;
 	/** Next handle */
 	long nextHandleNo = 1;
 	final long rootCreateTime = FileTimeUtils.toFileTime(new Date());
 	long rootLastWrite = rootCreateTime;
 	private String mountedVolume = null;
-	private char driveLetter = 'S';
+	private String driveLetter = "S:\\";
 	private Logger log = SDFSLogger.getLog();
 	TLongObjectHashMap<DedupFileChannel> dedupChannels = new TLongObjectHashMap<DedupFileChannel>(
 			Main.maxOpenFiles + 1);
@@ -117,11 +119,11 @@ public class WinSDFS implements DokanOperations {
 		System.out.println("driverVersion = " + driverVersion);
 	}
 
-	void mount(char driveLetter, String mountedVolume) {
-		Dokan.unmount(driveLetter);
+	void mount(String driveLetter, String mountedVolume) {
+		Dokan.removeMountPoint(driveLetter);
 		this.mountedVolume = mountedVolume;
 		DokanOptions dokanOptions = new DokanOptions();
-		dokanOptions.driveLetter = driveLetter;
+		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
 		this.driveLetter = driveLetter;
 		log.info("######## mounting " + mountedVolume + " to "
@@ -129,9 +131,30 @@ public class WinSDFS implements DokanOperations {
 		int result = Dokan.mount(dokanOptions, this);
 
 		// log("[MemoryFS] result = " + result);
-		log.info("######## mounted " + mountedVolume + " to "
-				+ this.driveLetter + " with result " + result
-				+ " #############");
+		if (result < 0) {
+			System.out.println("Unable to mount volume because result = "
+					+ result);
+			log.error("Unable to mount volume because result = " + result);
+			if (result == -1)
+				System.out.println("General Error");
+			if (result == -2)
+				System.out.println("Bad Drive letter");
+			if (result == -3)
+				System.out.println("Can't install driver");
+			if (result == -4)
+				System.out.println("Driver something wrong");
+			if (result == -5)
+				System.out
+						.println("Can't assign a drive letter or mount point");
+			if (result == -6)
+				System.out.println("Mount point is invalid");
+			System.exit(-1);
+
+		} else {
+			log.info("######## mounted " + mountedVolume + " to "
+					+ this.driveLetter + " with result " + result
+					+ " #############");
+		}
 	}
 
 	synchronized long getNextHandle() {
@@ -143,7 +166,7 @@ public class WinSDFS implements DokanOperations {
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode,
 			int creationDisposition, int flagsAndAttributes, DokanFileInfo arg5)
 			throws DokanOperationException {
-		
+
 		// log("[onCreateFile] " + fileName + ", creationDisposition = "
 		// + creationDisposition);
 		if (fileName.equals("\\")) {
@@ -183,10 +206,10 @@ public class WinSDFS implements DokanOperations {
 			switch (creationDisposition) {
 
 			case CREATE_NEW:
-				if(Main.volume.isFull())
+				if (Main.volume.isFull())
 					throw new DokanOperationException(ERROR_DISK_FULL);
 				try {
-					
+
 					log.debug("creating " + fileName);
 					MetaDataDedupFile mf = MetaFileStore.getMF(path);
 					mf.sync();
@@ -197,7 +220,7 @@ public class WinSDFS implements DokanOperations {
 				return getNextHandle();
 			case CREATE_ALWAYS:
 			case OPEN_ALWAYS:
-				if(Main.volume.isFull())
+				if (Main.volume.isFull())
 					throw new DokanOperationException(ERROR_DISK_FULL);
 				try {
 					log.debug("creating " + fileName);
@@ -231,7 +254,7 @@ public class WinSDFS implements DokanOperations {
 
 	public void onCreateDirectory(String pathName, DokanFileInfo file)
 			throws DokanOperationException {
-		if(Main.volume.isFull())
+		if (Main.volume.isFull())
 			throw new DokanOperationException(ERROR_DISK_FULL);
 		// log("[onCreateDirectory] " + pathName);
 		pathName = Utils.trimTailBackSlash(pathName);
@@ -273,7 +296,7 @@ public class WinSDFS implements DokanOperations {
 
 	public int onWriteFile(String fileName, ByteBuffer buf, long offset,
 			DokanFileInfo arg3) throws DokanOperationException {
-		if(Main.volume.isFull())
+		if (Main.volume.isFull())
 			throw new DokanOperationException(ERROR_DISK_FULL);
 		// log("[onWriteFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
@@ -391,7 +414,7 @@ public class WinSDFS implements DokanOperations {
 		}
 		File f = this.resolvePath(fileName);
 		if (!MetaFileStore.removeMetaFile(f.getPath())) {
-			log.warn("unable to delete folder " + f.getPath());
+			log.warn("unable to delete file " + f.getPath());
 			throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 		}
 		//
@@ -463,6 +486,7 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg1) throws DokanOperationException {
 		DokanVolumeInformation info = new DokanVolumeInformation();
 		info.fileSystemFlags = SUPPORTED_FLAGS;
+		info.maximumComponentLength = 256;
 		info.volumeName = "Dedup Filesystem";
 		info.fileSystemName = "SDFS";
 		info.volumeSerialNumber = volumeSerialNumber;
@@ -471,9 +495,10 @@ public class WinSDFS implements DokanOperations {
 
 	public void onUnmount(DokanFileInfo arg0) throws DokanOperationException {
 		// log("[onUnmount]");
-		Dokan.unmount(driveLetter);
-		TLongObjectIterator<DedupFileChannel> iter = this.dedupChannels.iterator();
-		while(iter.hasNext()) {
+		Dokan.removeMountPoint(driveLetter);
+		TLongObjectIterator<DedupFileChannel> iter = this.dedupChannels
+				.iterator();
+		while (iter.hasNext()) {
 			try {
 				iter.value().close();
 			} catch (IOException e) {

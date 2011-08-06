@@ -20,13 +20,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
+ */
 
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
-
-
 
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
 
@@ -60,7 +58,8 @@ public class MetaDataFileInfo {
 		if (isDirectory)
 			fileAttribute |= FILE_ATTRIBUTE_DIRECTORY;
 		creationTime = FileTimeUtils.toFileTime(new Date(mf.getTimeStamp()));
-		lastAccessTime = FileTimeUtils.toFileTime(new Date(mf.getLastAccessed()));
+		lastAccessTime = FileTimeUtils
+				.toFileTime(new Date(mf.getLastAccessed()));
 		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));
 		SDFSLogger.getLog().debug("created file info for " + fileName);
 	}
@@ -68,14 +67,16 @@ public class MetaDataFileInfo {
 	Win32FindData toWin32FindData() {
 		String lName = FilenameUtils.getName(fileName);
 		String sName = Utils.toShortName(fileName);
-		Win32FindData d=  new Win32FindData(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
-				getFileSize(), 0, 0, lName, sName);
+		Win32FindData d = new Win32FindData(fileAttribute, creationTime,
+				lastAccessTime, lastWriteTime, getFileSize(), 0, 0, lName,
+				sName);
 		return d;
 	}
 
 	ByHandleFileInformation toByHandleFileInformation() {
-		return new ByHandleFileInformation(fileAttribute, creationTime, lastAccessTime, lastWriteTime,
-				WinSDFS.volumeSerialNumber, getFileSize(), 1, fileIndex);
+		return new ByHandleFileInformation(fileAttribute, creationTime,
+				lastAccessTime, lastWriteTime, WinSDFS.volumeSerialNumber,
+				getFileSize(), 1, fileIndex);
 	}
 
 	long getFileSize() {
@@ -83,7 +84,7 @@ public class MetaDataFileInfo {
 	}
 
 	static long getNextFileIndex() {
-		if(nextFileIndex == Long.MAX_VALUE)
+		if (nextFileIndex == Long.MAX_VALUE)
 			nextFileIndex = 0;
 		return nextFileIndex++;
 	}

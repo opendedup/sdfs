@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
-
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -58,7 +57,7 @@ public class SDFSService {
 		}
 		MgmtWebServer.start();
 		wth = new VolumeConfigWriterThread(configFile);
-		
+
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
 		}
@@ -79,15 +78,14 @@ public class SDFSService {
 		MetaFileStore.close();
 		SDFSLogger.getLog().info("Open File Committed");
 		SDFSLogger.getLog().info("Writing Config File");
-		
-		
+
 		/*
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
 		MgmtWebServer.stop();
 		try {
 			wth.stop();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		SDFSLogger.getLog().info("SDFS is Shut Down");
@@ -98,7 +96,8 @@ public class SDFSService {
 		} catch (Exception e) {
 		}
 		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+			SDFSLogger.getLog().info(
+					"######### Shutting down HashStore ###################");
 			HashChunkService.close();
 		}
 		try {

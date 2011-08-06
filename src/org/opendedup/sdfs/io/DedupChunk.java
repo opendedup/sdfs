@@ -20,10 +20,11 @@ public class DedupChunk implements java.io.Serializable {
 	private boolean writable = false;
 	private boolean doop = false;
 	private ReentrantLock lock = new ReentrantLock();
-	
+
 	public DedupChunk(long position) {
 		this.position = position;
 	}
+
 	/**
 	 * 
 	 * @param hash
@@ -110,14 +111,15 @@ public class DedupChunk implements java.io.Serializable {
 	public void setNewChunk(boolean newChunk) {
 		this.newChunk = newChunk;
 	}
+
 	public byte[] getChunk() throws IOException, BufferClosedException {
 		this.lock.lock();
 		try {
-		if (data != null)
-			return data;
-		else
-			return HCServiceProxy.fetchChunk(hash);
-		}finally {
+			if (data != null)
+				return data;
+			else
+				return HCServiceProxy.fetchChunk(hash);
+		} finally {
 			this.lock.unlock();
 		}
 	}
@@ -152,9 +154,9 @@ public class DedupChunk implements java.io.Serializable {
 	public boolean isDoop() {
 		return doop;
 	}
-	
+
 	public void open() {
-		
+
 	}
 
 }

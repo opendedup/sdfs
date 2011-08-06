@@ -20,7 +20,7 @@ public class FileUtils {
 		File f = new File(args[0]);
 		Path p = f.toPath();
 		PosixFileAttributeView view = (PosixFileAttributeView) Files
-				.getFileAttributeView(p,PosixFileAttributeView.class);
+				.getFileAttributeView(p, PosixFileAttributeView.class);
 		PosixFileAttributes attrs1 = (PosixFileAttributes) view
 				.readAttributes();
 		Set<PosixFilePermission> perms = attrs1.permissions();
@@ -144,7 +144,7 @@ public class FileUtils {
 		File f = new File(path);
 		Path p = f.toPath();
 		PosixFileAttributeView view = (PosixFileAttributeView) Files
-				.getFileAttributeView(p,PosixFileAttributeView.class);
+				.getFileAttributeView(p, PosixFileAttributeView.class);
 		view.setPermissions(set);
 	}
 
@@ -152,7 +152,7 @@ public class FileUtils {
 		File f = new File(path);
 		Path p = f.toPath();
 		PosixFileAttributeView view = (PosixFileAttributeView) Files
-				.getFileAttributeView(p,PosixFileAttributeView.class);
+				.getFileAttributeView(p, PosixFileAttributeView.class);
 
 		PosixFileAttributes attrs1 = (PosixFileAttributes) view
 				.readAttributes();

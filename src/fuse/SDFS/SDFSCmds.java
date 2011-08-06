@@ -32,49 +32,42 @@ public class SDFSCmds {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 
-	public static final String[] cmds = { "user.cmd.cleanstore","user.cmd.dedupAll",
-			"user.cmd.optimize", "user.cmd.snapshot", "user.cmd.vmdk.make",
-			"user.cmd.ids.clearstatus", 
+	public static final String[] cmds = { "user.cmd.cleanstore",
+			"user.cmd.dedupAll", "user.cmd.optimize", "user.cmd.snapshot",
+			"user.cmd.vmdk.make", "user.cmd.ids.clearstatus",
 			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
 			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
-			"user.sdfs.DuplicateData", 
-			"user.sdfs.VMDK", "user.sdfs.fileGUID", "user.sdfs.dfGUID",
-			"user.sdfs.dedupAll","user.dse.size","user.dse.maxsize"
-	};
-	
-	public static final String[] cmdDes = {
-		"","",
-		"", "", "",
-		"", 
-		"", "", "",
-		"", "",
-		"", "",
-		"", 
-		"", "", "",
-		"","",""
-	};
-	
+			"user.sdfs.DuplicateData", "user.sdfs.VMDK", "user.sdfs.fileGUID",
+			"user.sdfs.dfGUID", "user.sdfs.dedupAll", "user.dse.size",
+			"user.dse.maxsize" };
+
+	public static final String[] cmdDes = { "", "", "", "", "", "", "", "", "",
+			"", "", "", "", "", "", "", "", "", "", "" };
+
 	/*
-	public static final String[] cmdDes = {
-	"\"Collect all the unused chunks older than <minutes>\" e.g. setfattr -n user.cmd.cleanstore -v 6777:<minutes> ./",
-		"\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\"",
-		"\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\"",
-		"\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\"",
-		"\"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
-				+ "The command must be executed on a directory. e.g."
-				+ "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
-		"clear all command id status\"",
-		RandomGUID.getGuid(),
-		"\"get the status if a specific command e.g. to get the status of"
-				+ " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
-		"\"Flush write cachefor specificed file <unique-command-id>\"",
-		"\"Flush write cache for all files\"",
-		"\"checks if the file is open <unique-command-id>\"", "", "", "", "",
-		"", "", "", "", "", "","","","",""};
-	*/
+	 * public static final String[] cmdDes = {
+	 * "\"Collect all the unused chunks older than <minutes>\" e.g. setfattr -n user.cmd.cleanstore -v 6777:<minutes> ./"
+	 * ,
+	 * "\"sets the file to dedup all chunks or not. Set to true if you would like to dedup all chunks <unique-command-id:true or false>\""
+	 * ,
+	 * "\"optimize the file by specifiying a specific length <unique-command-id:length-in-bytes>\""
+	 * ,
+	 * "\"Take a Snapshot of a File or Folder <unique-command-id:snapshotdst>\""
+	 * ,
+	 * "\"Creates an simple flat vmdk in this directory <unique-command-id:vmdkname:size(TB|GB|MB)>. "
+	 * + "The command must be executed on a directory. e.g." +
+	 * "setfattr -n user.cmd.vmdk.make -v 5556:bigvserver:500GB /dir",
+	 * "clear all command id status\"", RandomGUID.getGuid(),
+	 * "\"get the status if a specific command e.g. to get the status of" +
+	 * " command id 54333 run getfattr -n user.cmd.ids.status.54333\"",
+	 * "\"Flush write cachefor specificed file <unique-command-id>\"",
+	 * "\"Flush write cache for all files\"",
+	 * "\"checks if the file is open <unique-command-id>\"", "", "", "", "", "",
+	 * "", "", "", "", "","","","",""};
+	 */
 	public static HashMap<String, String> cmdList = new HashMap<String, String>();
-	
+
 	private static LinkedHashMap<String, String> cmdStatus = new LinkedHashMap<String, String>(
 			100) {
 		// (an anonymous inner class)
@@ -138,12 +131,13 @@ public class SDFSCmds {
 					return mf.getDfGuid();
 			}
 		}
-		if(command.equalsIgnoreCase("user.dse.size")) {
+		if (command.equalsIgnoreCase("user.dse.size")) {
 			return Long.toString(HCServiceProxy.getSize() * Main.CHUNK_LENGTH);
 		}
-		if(command.equalsIgnoreCase("user.dse.maxsize")) {
-			
-			return Long.toString(HCServiceProxy.getMaxSize() * Main.CHUNK_LENGTH);
+		if (command.equalsIgnoreCase("user.dse.maxsize")) {
+
+			return Long.toString(HCServiceProxy.getMaxSize()
+					* Main.CHUNK_LENGTH);
 		}
 		if (command.equals("user.cmd.ids.status"))
 			return cmdList.get(command);
@@ -164,7 +158,8 @@ public class SDFSCmds {
 
 	}
 
-	public void runCMD(String path, String command, String value) throws FuseException {
+	public void runCMD(String path, String command, String value)
+			throws FuseException {
 		if (command.startsWith("user.sdfs")) {
 			String name = command;
 			String valStr = value;
@@ -192,29 +187,31 @@ public class SDFSCmds {
 				boolean dedup = Boolean.parseBoolean(args[1]);
 				status = dedup(path, dedup);
 			}
-			if(command.equalsIgnoreCase("user.cmd.cleanstore")) {
+			if (command.equalsIgnoreCase("user.cmd.cleanstore")) {
 				int minutes = Integer.parseInt(args[1]);
 				status = "command completed successfully";
 				try {
-					SDFSLogger.getLog().debug("Clearing store of data older that [" +minutes + "]");
+					SDFSLogger.getLog().debug(
+							"Clearing store of data older that [" + minutes
+									+ "]");
 					ManualGC.clearChunks(minutes);
-				} catch(Exception e) {
-					status = "command failed : " +e.getMessage();
+				} catch (Exception e) {
+					status = "command failed : " + e.getMessage();
 				}
 			}
 			if (command.equalsIgnoreCase("user.cmd.optimize")) {
 				status = optimize(path);
 			}
 			if (command.equalsIgnoreCase("user.cmd.snapshot")) {
-				if(Main.volume.isFull())
+				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
-				.initErrno(FuseException.ENOSPC);
+							.initErrno(FuseException.ENOSPC);
 				status = takeSnapshot(path, args[1]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.vmdk.make")) {
-				if(Main.volume.isFull())
+				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
-				.initErrno(FuseException.ENOSPC);
+							.initErrno(FuseException.ENOSPC);
 				status = this.makeVMDK(path, args[1], args[2]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.ids.clearstatus")) {
@@ -303,15 +300,12 @@ public class SDFSCmds {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
 			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize();
-			return "SUCCESS Optimization Success: optimized [" + srcPath
-					+ "]";
+			return "SUCCESS Optimization Success: optimized [" + srcPath + "]";
 		} catch (Exception e) {
 			log.error("ERROR Optimize Failed: unable to optimize Source ["
-					+ srcPath + "] because :"
-					+ e.toString(), e);
+					+ srcPath + "] because :" + e.toString(), e);
 			return "ERROR Optimize Failed: unable to optimize Source ["
-					+ srcPath + "] because :"
-					+ e.toString();
+					+ srcPath + "] because :" + e.toString();
 		}
 	}
 
@@ -322,9 +316,10 @@ public class SDFSCmds {
 			return "SUCCESS Dedup Success: set dedup to [" + srcPath + "]  ["
 					+ dedup + "]";
 		} catch (Exception e) {
-			log.error("ERROR Dedup Failed: unable to set dedup Source ["
-					+ srcPath + "] " + "length [" + dedup + "] because :"
-					+ e.toString(), e);
+			log.error(
+					"ERROR Dedup Failed: unable to set dedup Source ["
+							+ srcPath + "] " + "length [" + dedup
+							+ "] because :" + e.toString(), e);
 			return "ERROR Dedup Failed: unable to set dedup Source [" + srcPath
 					+ "] " + "length [" + dedup + "]  because :" + e.toString();
 		}
@@ -353,7 +348,5 @@ public class SDFSCmds {
 					+ "] because :" + e.toString();
 		}
 	}
-	
-	
 
 }

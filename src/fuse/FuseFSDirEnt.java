@@ -9,22 +9,19 @@
 
 package fuse;
 
-
 /**
  * This is a byte level API directory entry
  */
 
-public class FuseFSDirEnt extends FuseFtype
-{
-   public byte[] name;
+public class FuseFSDirEnt extends FuseFtype {
+	public byte[] name;
 
-   public long inode;
+	public long inode;
 
+	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
+		buff.append(isPrefixed ? ", " : " ").append("name='").append(name)
+				.append("'").append("inode='").append(inode).append("'");
 
-   protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed)
-   {
-      buff.append(isPrefixed? ", " : " ").append("name='").append(name).append("'").append("inode='").append(inode).append("'");
-
-      return super.appendAttributes(buff, true);
-   }
+		return super.appendAttributes(buff, true);
+	}
 }

@@ -51,7 +51,7 @@ public class Volume implements java.io.Serializable {
 
 	public Volume(Element vol) throws IOException {
 		File f = new File(vol.getAttribute("path"));
-		
+
 		SDFSLogger.getLog().info("Mounting volume " + f.getPath());
 		if (!f.exists())
 			f.mkdirs();
@@ -71,8 +71,10 @@ public class Volume implements java.io.Serializable {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full")) / 100;
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
-		} if(vol.hasAttribute("closed-gracefully"))
-			Main.closedGracefully = Boolean.parseBoolean(vol.getAttribute("closed-gracefully"));
+		}
+		if (vol.hasAttribute("closed-gracefully"))
+			Main.closedGracefully = Boolean.parseBoolean(vol
+					.getAttribute("closed-gracefully"));
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -152,11 +154,12 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("current-size", Long.toString(this.currentSize));
 		root.setAttribute("capacity", this.capString);
 		root.setAttribute("maximum-percentage-full",
-				Double.toString(this.fullPercentage*100));
+				Double.toString(this.fullPercentage * 100));
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Long.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
-		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
+		root.setAttribute("closed-gracefully",
+				Boolean.toString(this.closedGracefully));
 		return root;
 	}
 
@@ -171,15 +174,19 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Long.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
-		root.setAttribute("dse-size", Long.toString(HashChunkService.getSize()* HashChunkService.getPageSize()));
-		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
+		root.setAttribute(
+				"dse-size",
+				Long.toString(HashChunkService.getSize()
+						* HashChunkService.getPageSize()));
+		root.setAttribute("closed-gracefully",
+				Boolean.toString(this.closedGracefully));
 		return doc;
 	}
 
 	public void addVirtualBytesWritten(long virtualBytesWritten) {
 		this.vbLock.lock();
 		this.virtualBytesWritten += virtualBytesWritten;
-		if(this.virtualBytesWritten < 0)
+		if (this.virtualBytesWritten < 0)
 			this.virtualBytesWritten = 0;
 		this.vbLock.unlock();
 	}
@@ -191,7 +198,7 @@ public class Volume implements java.io.Serializable {
 	public void addDuplicateBytes(long duplicateBytes) {
 		this.dbLock.lock();
 		this.duplicateBytes += duplicateBytes;
-		if(this.duplicateBytes <0)
+		if (this.duplicateBytes < 0)
 			this.duplicateBytes = 0;
 		this.dbLock.unlock();
 	}
@@ -203,7 +210,7 @@ public class Volume implements java.io.Serializable {
 	public void addReadBytes(long readBytes) {
 		this.rbLock.lock();
 		this.readBytes += readBytes;
-		if(this.readBytes < 0)
+		if (this.readBytes < 0)
 			this.readBytes = 0;
 		this.rbLock.unlock();
 	}
@@ -215,7 +222,7 @@ public class Volume implements java.io.Serializable {
 	public void addActualWriteBytes(long writeBytes) {
 		this.wbLock.lock();
 		this.actualWriteBytes += writeBytes;
-		if(this.actualWriteBytes < 0)
+		if (this.actualWriteBytes < 0)
 			this.actualWriteBytes = 0;
 		this.wbLock.unlock();
 	}

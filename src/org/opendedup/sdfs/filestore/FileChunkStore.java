@@ -2,9 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -56,7 +53,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				chunk_location.mkdirs();
 			}
 			f = new File(chunk_location + File.separator + "chunks.chk");
-			if(!f.getParentFile().exists())
+			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
 			this.name = "chunks";
 			p = f.toPath();
@@ -79,17 +76,17 @@ public class FileChunkStore implements AbstractChunkStore {
 
 		try {
 			fc.force(true);
-			
+
 		} catch (IOException e) {
 		}
 
 		try {
 			fc.close();
-			
+
 		} catch (IOException e) {
 		}
 		fc = null;
-		
+
 	}
 
 	/*
@@ -185,7 +182,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					"unable to write data at position " + start, e);
 			throw new IOException("unable to write data at position " + start);
 		} finally {
-			buf=null;
+			buf = null;
 			hash = null;
 			chunk = null;
 			len = 0;
@@ -294,7 +291,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void iterationInit() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

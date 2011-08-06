@@ -11,10 +11,11 @@ public class SnapshotCmd implements XtendedCmd {
 
 	@Override
 	public String getResult(String cmd, String file) throws IOException {
-		return takeSnapshot(file,cmd);
+		return takeSnapshot(file, cmd);
 	}
-	
-	private String takeSnapshot(String srcPath, String dstPath) throws IOException{
+
+	private String takeSnapshot(String srcPath, String dstPath)
+			throws IOException {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File nf = new File(Main.volume.getPath() + File.separator + dstPath);
 		try {
@@ -22,12 +23,14 @@ public class SnapshotCmd implements XtendedCmd {
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Snapshot Failed: unable to take snapshot Source ["
-					+ srcPath + "] " + "Destination [" + dstPath
-					+ "] because :" + e.toString(), e);
-			throw new IOException("Snapshot Failed: unable to take snapshot Source ["
-					+ srcPath + "] " + "Destination [" + dstPath
-					+ "] because :" + e.toString());
+			SDFSLogger.getLog().error(
+					"Snapshot Failed: unable to take snapshot Source ["
+							+ srcPath + "] " + "Destination [" + dstPath
+							+ "] because :" + e.toString(), e);
+			throw new IOException(
+					"Snapshot Failed: unable to take snapshot Source ["
+							+ srcPath + "] " + "Destination [" + dstPath
+							+ "] because :" + e.toString());
 		}
 	}
 

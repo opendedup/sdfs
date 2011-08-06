@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
 import java.util.Formatter;
 
 import org.w3c.dom.Document;
@@ -15,8 +14,10 @@ public class ProcessDebugInfo {
 			formatter.format("file=%s&cmd=debug-info", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
-			Element debug = (Element) root.getElementsByTagName("debug").item(0);
-			System.out.printf("Active Threads : %s\n", debug.getAttribute("active-threads"));
+			Element debug = (Element) root.getElementsByTagName("debug")
+					.item(0);
+			System.out.printf("Active Threads : %s\n",
+					debug.getAttribute("active-threads"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

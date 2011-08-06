@@ -32,7 +32,7 @@ public class NextPrime {
 			}
 		}
 	}
-	
+
 	public static int getNextPrimeI(long input) throws Exception {
 		long root;
 		boolean isPrime = false;
@@ -59,11 +59,12 @@ public class NextPrime {
 				}
 			}
 			if (isPrime == true) {
-				if(i > Integer.MAX_VALUE)
-					throw new Exception("Next Prime is Greater than max Int value");
-				return (int)i;
+				if (i > Integer.MAX_VALUE)
+					throw new Exception(
+							"Next Prime is Greater than max Int value");
+				return (int) i;
 			}
 		}
 	}
-	
+
 }

@@ -44,7 +44,7 @@ public class FDisk {
 			}
 		} else {
 			if (dir.getPath().endsWith(".map")) {
-					this.checkDedupFile(dir);
+				this.checkDedupFile(dir);
 			}
 		}
 	}

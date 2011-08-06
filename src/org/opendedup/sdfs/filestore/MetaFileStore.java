@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -12,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
@@ -106,7 +105,7 @@ public class MetaFileStore {
 			getMFLock.unlock();
 		}
 	}
-	
+
 	public static MetaDataDedupFile getMF(String filePath) {
 		return getMF(new File(filePath));
 	}
@@ -139,8 +138,10 @@ public class MetaFileStore {
 	public static MetaDataDedupFile snapshot(String origionalPath,
 			String snapPath, boolean overwrite) throws IOException {
 		MetaDataDedupFile mf = getMF(new File(origionalPath));
-		if(mf==null)
-			throw new IOException(origionalPath + " does not exist. Cannot take a snapshot of a non-existent file.");
+		if (mf == null)
+			throw new IOException(
+					origionalPath
+							+ " does not exist. Cannot take a snapshot of a non-existent file.");
 		synchronized (mf) {
 			MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
 			return _mf;
@@ -185,10 +186,19 @@ public class MetaFileStore {
 			boolean deleted = false;
 			try {
 				Path p = Paths.get(path);
-				boolean isDir = Files.readAttributes(p,PosixFileAttributes.class,
-						LinkOption.NOFOLLOW_LINKS).isDirectory();
-				boolean isSymlink = Files.readAttributes(p,PosixFileAttributes.class,
-						LinkOption.NOFOLLOW_LINKS).isDirectory();
+				boolean isDir = false;
+				boolean isSymlink = false;
+				if(!OSValidator.isWindows()) {
+					isDir = Files.readAttributes(p,
+						PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+						.isDirectory();
+					isSymlink = Files.readAttributes(p,
+						PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+						.isDirectory();
+				}
+				else {
+					isDir = new File(path).isDirectory();
+				}
 				if (isDir) {
 					File ps = new File(path);
 					/*
@@ -208,19 +218,22 @@ public class MetaFileStore {
 				} else {
 					mf = getMF(new File(path));
 					pathMap.remove(mf.getPath());
-					
+
 					Main.volume.updateCurrentSize(-1 * mf.length());
 					try {
-						Main.volume.addActualWriteBytes(-1 * mf.getIOMonitor().getActualBytesWritten());
-						Main.volume.addDuplicateBytes(-1 *  mf.getIOMonitor().getDuplicateBlocks());
-						Main.volume.addVirtualBytesWritten(-1 * mf.getIOMonitor().getVirtualBytesWritten());
-					}catch(Exception e) {
-						
+						Main.volume.addActualWriteBytes(-1
+								* mf.getIOMonitor().getActualBytesWritten());
+						Main.volume.addDuplicateBytes(-1
+								* mf.getIOMonitor().getDuplicateBlocks());
+						Main.volume.addVirtualBytesWritten(-1
+								* mf.getIOMonitor().getVirtualBytesWritten());
+					} catch (Exception e) {
+
 					}
 					deleted = mf.getDedupFile().delete();
 					deleted = mf.deleteStub();
 					if (!deleted) {
-						SDFSLogger.getLog().info(
+						SDFSLogger.getLog().warn(
 								"could not delete " + mf.getPath());
 						return deleted;
 					}

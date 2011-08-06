@@ -14,22 +14,21 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 
-
 public class MountSDFS {
 
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption("m", true,
 				"the drive letter for SDFS file system \n e.g. \'S\'");
-		options
-				.addOption(
-						"r",
-						true,
-						"path to chunkstore routing file. \n Will default to: \n"+ OSValidator.getConfigPath() +"routing-config.xml");
+		options.addOption("r", true,
+				"path to chunkstore routing file. \n Will default to: \n"
+						+ OSValidator.getConfigPath() + "routing-config.xml");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
-		options
-				.addOption("vc", true,
-						"sdfs volume configuration file to mount \ne.g. "+ OSValidator.getConfigPath() +"dedup-volume-cfg.xml");
+		options.addOption(
+				"vc",
+				true,
+				"sdfs volume configuration file to mount \ne.g. "
+						+ OSValidator.getConfigPath() + "dedup-volume-cfg.xml");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -47,7 +46,6 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(1);
 		}
-		
 
 		if (!cmd.hasOption("m")) {
 			printHelp(options);
@@ -65,19 +63,17 @@ public class MountSDFS {
 			}
 			routingConfigFile = f.getPath();
 		}
-		
 
 		if (cmd.hasOption("v")) {
-			File f = new File(OSValidator.getConfigPath() + cmd.getOptionValue("v").trim()
-					+ "-volume-cfg.xml");
+			File f = new File(OSValidator.getConfigPath()
+					+ cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
-		} 
-		else if (cmd.hasOption("vc")) {
+		} else if (cmd.hasOption("vc")) {
 			File f = new File(cmd.getOptionValue("vc").trim());
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
@@ -102,9 +98,9 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(-1);
 		}
-		
 
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,routingConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile,
+				routingConfigFile);
 
 		try {
 			sdfsService.start();
@@ -114,8 +110,8 @@ public class MountSDFS {
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		ShutdownHook shutdownHook = new ShutdownHook(sdfsService, cmd
-				.getOptionValue("m").charAt(0));
+		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
+				cmd.getOptionValue("m"));
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		try {
 			String[] sFal = new String[fal.size()];
@@ -124,8 +120,7 @@ public class MountSDFS {
 				System.out.println(sFal[i]);
 			}
 			WinSDFS sdfs = new WinSDFS();
-			sdfs.mount(cmd
-					.getOptionValue("m").charAt(0),Main.volume.getPath());
+			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

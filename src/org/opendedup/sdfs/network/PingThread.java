@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.network;
 
-
 import org.opendedup.sdfs.Main;
 
 public class PingThread implements Runnable {

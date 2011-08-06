@@ -472,7 +472,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 		} else {
 			try {
-				
+
 				int writtenBuffers = this.writeCache();
 				this.bdb.sync();
 				SDFSLogger.getLog().debug(

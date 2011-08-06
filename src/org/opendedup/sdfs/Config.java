@@ -165,8 +165,9 @@ public class Config {
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
 		Main.ioLogFile = locations.getAttribute("io-log.log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
-		if(cache.hasAttribute("log-level")) {
-			SDFSLogger.setLevel(Integer.parseInt(cache.getAttribute("log-level")));
+		if (cache.hasAttribute("log-level")) {
+			SDFSLogger.setLevel(Integer.parseInt(cache
+					.getAttribute("log-level")));
 		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
@@ -411,7 +412,8 @@ public class Config {
 			throw new IOException(e1);
 		}
 		doc.getDocumentElement().normalize();
-		Element launchParams = (Element) doc.getElementsByTagName("launch-params").item(0);
+		Element launchParams = (Element) doc.getElementsByTagName(
+				"launch-params").item(0);
 		Main.classPath = launchParams.getAttribute("class-path");
 		SDFSLogger.getLog().info("SDFS Classpath=" + Main.javaPath);
 		Main.javaOptions = launchParams.getAttribute("java-options");

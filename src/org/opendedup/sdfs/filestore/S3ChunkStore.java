@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
-
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -47,20 +46,20 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	static {
 		try {
-		awsCredentials = new AWSCredentials(
-				Main.awsAccessKey, Main.awsSecretKey);
-		}catch(Exception e) {
-			SDFSLogger.getLog().fatal("Unable to authenticate to AWS",e);
+			awsCredentials = new AWSCredentials(Main.awsAccessKey,
+					Main.awsSecretKey);
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
 			System.exit(-1);
 		}
 	}
+
 	public S3ChunkStore() {
-		
+
 	}
-	
+
 	private void openPosFile() throws IOException {
-		File posFile = new File(chunk_location + File.separator + name
-				+ ".pos");
+		File posFile = new File(chunk_location + File.separator + name + ".pos");
 		boolean newPos = true;
 		if (posFile.exists())
 			newPos = false;
@@ -97,21 +96,22 @@ public class S3ChunkStore implements AbstractChunkStore {
 	}
 
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
-		String hashString =  this.getHashName(hash);
-		try { 
+		String hashString = this.getHashName(hash);
+		try {
 			S3Object obj = s3Service.getObject(this.name, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
 			in.readFully(data);
 			obj.closeDataInputStream();
-			if(this.encrypt)
+			if (this.encrypt)
 				data = EncryptUtils.decrypt(data);
-			if(this.compress)
+			if (this.compress)
 				data = CompressionUtils.decompressZLIB(data);
 			return data;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			SDFSLogger.getLog().error("unable to fetch block [" + hash + "]",e);
+			SDFSLogger.getLog()
+					.error("unable to fetch block [" + hash + "]", e);
 			throw new IOException("unable to read " + hashString);
 		}
 
@@ -120,12 +120,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public String getName() {
 		return this.name;
 	}
-	
 
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		
+
 		return 1;
 	}
 
@@ -141,18 +140,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 
-		String hashString =  this.getHashName(hash);
+		String hashString = this.getHashName(hash);
 		S3Object s3Object = new S3Object(hashString);
-		if(Main.awsCompress) {
+		if (Main.awsCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			s3Object.addMetadata("compress", "true");
-		}else {
+		} else {
 			s3Object.addMetadata("compress", "false");
 		}
-		if(Main.chunkStoreEncryptionEnabled) {
+		if (Main.chunkStoreEncryptionEnabled) {
 			chunk = EncryptUtils.encrypt(chunk);
 			s3Object.addMetadata("encrypt", "true");
-		}else {
+		} else {
 			s3Object.addMetadata("encrypt", "false");
 		}
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
@@ -163,7 +162,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			s3Service.putObject(s3Bucket, s3Object);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			SDFSLogger.getLog().fatal( "unable to upload " + hashString, e);
+			SDFSLogger.getLog().fatal("unable to upload " + hashString, e);
 			throw new IOException(e);
 		} finally {
 			s3IS.close();
@@ -171,10 +170,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 	}
 
 	public static void main(String[] args) throws IOException {
-		
+
 	}
 
-	
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
@@ -182,19 +180,21 @@ public class S3ChunkStore implements AbstractChunkStore {
 		try {
 			s3Service.deleteObject(s3Bucket, hashString);
 		} catch (S3ServiceException e) {
-			SDFSLogger.getLog().warn( "Unable to delete object " + hashString, e);
+			SDFSLogger.getLog()
+					.warn("Unable to delete object " + hashString, e);
 		}
 	}
-	
-	public static void deleteBucket(String bucketName,String awsAccessKey, String awsSecretKey ) {
+
+	public static void deleteBucket(String bucketName, String awsAccessKey,
+			String awsSecretKey) {
 		try {
 			System.out.println("");
 			System.out.print("Deleting Bucket [" + bucketName + "]");
-			AWSCredentials bawsCredentials = new AWSCredentials(
-					awsAccessKey, awsSecretKey);
+			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
+					awsSecretKey);
 			S3Service bs3Service = new RestS3Service(bawsCredentials);
-			S3Object [] obj = bs3Service.listObjects(bucketName);
-			for(int i = 0 ; i < obj.length; i ++) {
+			S3Object[] obj = bs3Service.listObjects(bucketName);
+			for (int i = 0; i < obj.length; i++) {
 				bs3Service.deleteObject(bucketName, obj[i].getKey());
 				System.out.print(".");
 			}
@@ -202,16 +202,16 @@ public class S3ChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Bucket [" + bucketName + "] deleted");
 			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (ServiceException e) {
-			SDFSLogger.getLog().warn( "Unable to delete bucket " + bucketName, e);
+			SDFSLogger.getLog()
+					.warn("Unable to delete bucket " + bucketName, e);
 		}
 	}
-	
-	private String getHashName(byte [] hash) throws IOException {
-		if(Main.chunkStoreEncryptionEnabled) {
-			byte [] encH = EncryptUtils.encrypt(hash);
+
+	private String getHashName(byte[] hash) throws IOException {
+		if (Main.chunkStoreEncryptionEnabled) {
+			byte[] encH = EncryptUtils.encrypt(hash);
 			return StringUtils.getHexString(encH);
-		}
-		else {
+		} else {
 			return StringUtils.getHexString(hash);
 		}
 	}
@@ -243,37 +243,39 @@ public class S3ChunkStore implements AbstractChunkStore {
 			this.s3Bucket = s3Service.getBucket(this.name);
 			if (this.s3Bucket == null) {
 				this.s3Bucket = s3Service.createBucket(this.name);
-				if(Main.awsCompress) {
+				if (Main.awsCompress) {
 					this.s3Bucket.addMetadata("compress", "true");
-				}else {
+				} else {
 					this.s3Bucket.addMetadata("compress", "false");
 				}
-				if(Main.chunkStoreEncryptionEnabled) {
+				if (Main.chunkStoreEncryptionEnabled) {
 					this.s3Bucket.addMetadata("encrypt", "true");
-				}else {
+				} else {
 					this.s3Bucket.addMetadata("encrypt", "false");
 				}
 				SDFSLogger.getLog().info("created new store " + name);
 			}
-			if(this.s3Bucket.containsMetadata("compress"))
-				this.compress = Boolean.parseBoolean((String)this.s3Bucket.getMetadata("compress"));
+			if (this.s3Bucket.containsMetadata("compress"))
+				this.compress = Boolean.parseBoolean((String) this.s3Bucket
+						.getMetadata("compress"));
 			else
 				this.compress = Main.awsCompress;
-			if(this.s3Bucket.containsMetadata("encrypt"))
-				this.encrypt = Boolean.parseBoolean((String)this.s3Bucket.getMetadata("encrypt"));
-			else 
+			if (this.s3Bucket.containsMetadata("encrypt"))
+				this.encrypt = Boolean.parseBoolean((String) this.s3Bucket
+						.getMetadata("encrypt"));
+			else
 				this.encrypt = Main.chunkStoreEncryptionEnabled;
 			this.openPosFile();
 		} catch (S3ServiceException e) {
 			throw new IOException(e);
 		}
-		
+
 	}
 
 	@Override
 	public void setSize(long size) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -285,7 +287,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public void iterationInit() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

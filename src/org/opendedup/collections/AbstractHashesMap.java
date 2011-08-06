@@ -41,13 +41,15 @@ public interface AbstractHashesMap {
 	public abstract byte[] getData(byte[] key) throws IOException;
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
-	
-	public abstract long removeRecords(long ms,boolean forceRun) throws IOException;
+
+	public abstract long removeRecords(long ms, boolean forceRun)
+			throws IOException;
 
 	public abstract void sync() throws IOException;
 
 	public abstract void close();
-	
-	public abstract void init(long maxSize, String fileName) throws IOException,HashtableFullException;
+
+	public abstract void init(long maxSize, String fileName)
+			throws IOException, HashtableFullException;
 
 }

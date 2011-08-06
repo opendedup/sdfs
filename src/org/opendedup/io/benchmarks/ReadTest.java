@@ -37,7 +37,7 @@ public class ReadTest implements Runnable {
 			long time = System.currentTimeMillis();
 			while (sz < len) {
 				buf.position(0);
-				int read = fc.read(buf,sz);
+				int read = fc.read(buf, sz);
 				sz = sz + read;
 			}
 			duration = (System.currentTimeMillis() - time);
@@ -51,7 +51,7 @@ public class ReadTest implements Runnable {
 
 	public float results() {
 		long size = new File(path).length();
-		float mb = (float) (size/(1024*1024));
+		float mb = (float) (size / (1024 * 1024));
 		float seconds = (float) (duration / 1000);
 		float mbps = mb / seconds;
 		return mbps;
@@ -74,7 +74,8 @@ public class ReadTest implements Runnable {
 		ReadTest[] tests = new ReadTest[runs];
 		float results[] = new float[runs];
 		for (int i = 0; i < tests.length; i++) {
-			ReadTest test = new ReadTest(path + File.separator + "test" + i + ".bin");
+			ReadTest test = new ReadTest(path + File.separator + "test" + i
+					+ ".bin");
 			tests[i] = test;
 		}
 		boolean finished = false;
@@ -155,8 +156,9 @@ public class ReadTest implements Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		if(args.length != 4) {
-			System.out.println("ReadTest <Path to read from> <Number of Parallel Runs> <Test Name> <Output File>");
+		if (args.length != 4) {
+			System.out
+					.println("ReadTest <Path to read from> <Number of Parallel Runs> <Test Name> <Output File>");
 			System.exit(0);
 		}
 		System.out.println("Running Read Test ...");

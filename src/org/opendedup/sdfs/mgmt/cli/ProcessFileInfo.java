@@ -41,36 +41,56 @@ public class ProcessFileInfo {
 							fileEl.getAttribute("open"));
 					System.out.printf("real bytes written : %s\n",
 							ioEl.getAttribute("actual-bytes-written"));
-					System.out.printf("format real data written : %s\n",
-							StorageUnit.of(Long.parseLong(ioEl.getAttribute("actual-bytes-written"))).format(Long.parseLong(ioEl.getAttribute("actual-bytes-written"))));
+					System.out
+							.printf("format real data written : %s\n",
+									StorageUnit
+											.of(Long.parseLong(ioEl
+													.getAttribute("actual-bytes-written")))
+											.format(Long.parseLong(ioEl
+													.getAttribute("actual-bytes-written"))));
 					System.out.printf("virtual bytes written : %s\n",
 							ioEl.getAttribute("virtual-bytes-written"));
-					System.out.printf("format virtual data written : %s\n",
-							StorageUnit.of(Long.parseLong(ioEl.getAttribute("virtual-bytes-written"))).format(Long.parseLong(ioEl.getAttribute("virtual-bytes-written"))));
+					System.out
+							.printf("format virtual data written : %s\n",
+									StorageUnit
+											.of(Long.parseLong(ioEl
+													.getAttribute("virtual-bytes-written")))
+											.format(Long.parseLong(ioEl
+													.getAttribute("virtual-bytes-written"))));
 					System.out.printf("duplicate data bytes: %s\n",
 							ioEl.getAttribute("duplicate-blocks"));
-					System.out.printf("format duplicate data : %s\n",
-							StorageUnit.of(Long.parseLong(ioEl.getAttribute("duplicate-blocks"))).format(Long.parseLong(ioEl.getAttribute("duplicate-blocks"))));
+					System.out
+							.printf("format duplicate data : %s\n",
+									StorageUnit
+											.of(Long.parseLong(ioEl
+													.getAttribute("duplicate-blocks")))
+											.format(Long.parseLong(ioEl
+													.getAttribute("duplicate-blocks"))));
 					System.out.printf("bytes read : %s\n",
 							ioEl.getAttribute("bytes-read"));
-					System.out.printf("format data read: %s\n",
-							StorageUnit.of(Long.parseLong(ioEl.getAttribute("bytes-read"))).format(Long.parseLong(ioEl.getAttribute("bytes-read"))));
-					
+					System.out.printf(
+							"format data read: %s\n",
+							StorageUnit.of(
+									Long.parseLong(ioEl
+											.getAttribute("bytes-read")))
+									.format(Long.parseLong(ioEl
+											.getAttribute("bytes-read"))));
+
 					long realBytes = Long.parseLong(ioEl
 							.getAttribute("actual-bytes-written"));
-					long dedupBytes = Long.parseLong(ioEl.getAttribute("duplicate-blocks"));
-					if(dedupBytes == 0 || realBytes == 0) {
+					long dedupBytes = Long.parseLong(ioEl
+							.getAttribute("duplicate-blocks"));
+					if (dedupBytes == 0 || realBytes == 0) {
 
-						System.out.printf("dedup rate : %d%%\n",0);
-					}
-					else {
-						double dedupRate = (((double)dedupBytes / (double)(dedupBytes + realBytes))*100);
+						System.out.printf("dedup rate : %d%%\n", 0);
+					} else {
+						double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
 						DecimalFormat twoDForm = new DecimalFormat("#.##");
 						dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 
-					System.out.printf("dedup rate : %s%%\n",
-							Double.toString(dedupRate));
-					
+						System.out.printf("dedup rate : %s%%\n",
+								Double.toString(dedupRate));
+
 					}
 				}
 			}
@@ -81,8 +101,8 @@ public class ProcessFileInfo {
 		}
 
 	}
-	
-	public static void main(String []args) {
+
+	public static void main(String[] args) {
 		runCmd("/");
 	}
 

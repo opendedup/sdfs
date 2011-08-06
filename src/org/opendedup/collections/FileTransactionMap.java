@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
@@ -23,7 +22,7 @@ public class FileTransactionMap {
 	byte[] compKeys = null;
 	private int size = 0;
 	private int entries = 0;
-	
+
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[Main.hashLength];
 	public static byte[] REMOVED = new byte[Main.hashLength];
@@ -40,8 +39,9 @@ public class FileTransactionMap {
 		this.size = size;
 		this.setUp();
 	}
-	
+
 	private ReentrantLock iterlock = new ReentrantLock();
+
 	public void iterInit() {
 		this.iterlock.lock();
 		this.iterPos = 0;
@@ -60,8 +60,6 @@ public class FileTransactionMap {
 		}
 		return null;
 	}
-
-	
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -94,7 +92,7 @@ public class FileTransactionMap {
 		this.compress();
 		this.derefByteArray();
 		// store = ByteBuffer.allocateDirect(size);
-		
+
 		// values = new long[this.size][this.size];
 		// Arrays.fill( keys, FREE );
 		// Arrays.fill(values, blank);
@@ -138,7 +136,7 @@ public class FileTransactionMap {
 				return true;
 			}
 			return false;
-			
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
@@ -185,23 +183,23 @@ public class FileTransactionMap {
 			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
-			
-				try {
-					keys.position(pos);
-					keys.put(REMOVED);
-					pos = (pos / FREE.length) * 8;
-					this.values.position(pos);
-					this.values.position(pos);
-					this.values.putLong(-1);
-					// this.store.position(pos);
-					// this.store.put((byte)0);
-					this.entries = entries - 1;
-					return true;
-				} catch (Exception e) {
-					throw e;
-				} finally {
-					this.compress();
-				}
+
+			try {
+				keys.position(pos);
+				keys.put(REMOVED);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.position(pos);
+				this.values.putLong(-1);
+				// this.store.position(pos);
+				// this.store.put((byte)0);
+				this.entries = entries - 1;
+				return true;
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				this.compress();
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
@@ -360,19 +358,19 @@ public class FileTransactionMap {
 			if (pos < 0)
 				return false;
 			try {
-			this.keys.position(pos);
-			this.keys.put(key);
-			pos = (pos / FREE.length) * 8;
-			this.values.position(pos);
-			this.values.putLong(value);
-			pos = (pos / 8);
-			// this.store.position(pos);
-			// this.store.put(storeID);
-			this.entries = entries + 1;
-			return pos > -1 ? true : false;
-			}catch(Exception e) {
+				this.keys.position(pos);
+				this.keys.put(key);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.putLong(value);
+				pos = (pos / 8);
+				// this.store.position(pos);
+				// this.store.put(storeID);
+				this.entries = entries + 1;
+				return pos > -1 ? true : false;
+			} catch (Exception e) {
 				throw e;
-			}finally {
+			} finally {
 				this.compress();
 			}
 		} catch (Exception e) {
@@ -387,7 +385,6 @@ public class FileTransactionMap {
 	public int getEntries() {
 		return this.entries;
 	}
-
 
 	public long get(byte[] key) {
 		try {
@@ -473,7 +470,7 @@ public class FileTransactionMap {
 		b.iterInit();
 		start = System.currentTimeMillis();
 		vals = 0;
-		
+
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms " + vals);
 	}

@@ -2,7 +2,6 @@ package fuse.SDFS;
 
 import java.io.File;
 
-
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -25,22 +24,19 @@ public class MountSDFS {
 
 	public static Options buildOptions() {
 		Options options = new Options();
-		options
-				.addOption(
-						"o",
-						true,
-						"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
+		options.addOption(
+				"o",
+				true,
+				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
-		options
-				.addOption(
-						"r",
-						true,
-						"path to chunkstore routing file. \n Will default to: \n/etc/sdfs/routing-config.xml");
+		options.addOption(
+				"r",
+				true,
+				"path to chunkstore routing file. \n Will default to: \n/etc/sdfs/routing-config.xml");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
-		options
-				.addOption("vc", true,
-						"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
+		options.addOption("vc", true,
+				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -58,7 +54,6 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(1);
 		}
-		
 
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
@@ -67,8 +62,6 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("m"));
 			Main.volumeMountPoint = cmd.getOptionValue("m");
 		}
-		
-		
 
 		String volname = "SDFS";
 		if (cmd.hasOption("r")) {
@@ -83,7 +76,7 @@ public class MountSDFS {
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
 					+ "-volume-cfg.xml");
-			volname= f.getName();
+			volname = f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
@@ -92,7 +85,7 @@ public class MountSDFS {
 			volumeConfigFile = f.getPath();
 		} else if (cmd.hasOption("vc")) {
 			File f = new File(cmd.getOptionValue("vc").trim());
-			volname= f.getName();
+			volname = f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
@@ -100,9 +93,8 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		} else {
-			File f = new File("/etc/sdfs/" + args[0].trim()
-					+ "-volume-cfg.xml");
-			volname= f.getName();
+			File f = new File("/etc/sdfs/" + args[0].trim() + "-volume-cfg.xml");
+			volname = f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath()
 						+ " does not exist");
@@ -110,13 +102,13 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		
+
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
 			fal.add(cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("direct_io,big_writes,allow_other,fsname=" +volname);
+			fal.add("direct_io,big_writes,allow_other,fsname=" + volname);
 		}
 
 		if (volumeConfigFile == null) {
@@ -125,11 +117,13 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(-1);
 		}
-		if(OSValidator.isUnix())
+		if (OSValidator.isUnix())
 			Main.logPath = "/var/log/sdfs/" + volname + ".log";
-		if(OSValidator.isWindows())
-			Main.logPath = Main.volume.getPath() +"\\log\\" + Main.volume.getName() + ".log";
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,routingConfigFile);
+		if (OSValidator.isWindows())
+			Main.logPath = Main.volume.getPath() + "\\log\\"
+					+ Main.volume.getName() + ".log";
+		SDFSService sdfsService = new SDFSService(volumeConfigFile,
+				routingConfigFile);
 
 		try {
 			sdfsService.start();
@@ -139,8 +133,8 @@ public class MountSDFS {
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		ShutdownHook shutdownHook = new ShutdownHook(sdfsService, cmd
-				.getOptionValue("m"));
+		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
+				cmd.getOptionValue("m"));
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		try {
 			String[] sFal = new String[fal.size()];
@@ -148,8 +142,10 @@ public class MountSDFS {
 			for (int i = 0; i < sFal.length; i++) {
 				System.out.println(sFal[i]);
 			}
-			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), cmd
-					.getOptionValue("m")), log);
+			FuseMount.mount(
+					sFal,
+					new SDFSFileSystem(Main.volume.getPath(), cmd
+							.getOptionValue("m")), log);
 			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();

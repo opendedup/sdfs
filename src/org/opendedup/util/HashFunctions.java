@@ -1,6 +1,5 @@
 package org.opendedup.util;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -66,9 +65,8 @@ public class HashFunctions {
 	private static int seed = 1;
 	private static int m = 0x5bd1e995;
 	private static int r = 24;
-	
+
 	public static int getMurmurHashCode(byte[] data) {
-		
 
 		// Initialize the hash to a 'random' value
 		int len = data.length;
@@ -106,12 +104,9 @@ public class HashFunctions {
 		h *= m;
 		h ^= h >>> 15;
 
-		
 		return h;
 
 	}
-
-	
 
 	public static void testFile(String file, int buffer_len)
 			throws IOException, NoSuchAlgorithmException {
@@ -224,9 +219,8 @@ public class HashFunctions {
 			HashFunctions.getTigerHashBytes(b);
 		}
 		long duration = System.currentTimeMillis() - start;
-		System.out.println("Took " + duration
-				+ " ms");
-		System.out.println("Hashes per ms = " +(numberOfTries/duration));
+		System.out.println("Took " + duration + " ms");
+		System.out.println("Hashes per ms = " + (numberOfTries / duration));
 	}
 
 	public static void insertRecorts(long number) throws Exception {

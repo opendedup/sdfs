@@ -72,14 +72,14 @@ public class IOMonitor implements java.io.Serializable {
 
 	public void setBytesRead(long bytesRead) {
 		this.bytesRead = bytesRead;
-		
+
 	}
 
 	public void removeDuplicateBlock() {
-			this.duplicateBlocks = this.duplicateBlocks - Main.CHUNK_LENGTH;
-			Main.volume.addDuplicateBytes(-1*Main.CHUNK_LENGTH);
+		this.duplicateBlocks = this.duplicateBlocks - Main.CHUNK_LENGTH;
+		Main.volume.addDuplicateBytes(-1 * Main.CHUNK_LENGTH);
 	}
-	
+
 	public void clearAllCounters() {
 		this.updateLock.lock();
 		Main.volume.addReadBytes(-1 * this.bytesRead);
@@ -99,7 +99,7 @@ public class IOMonitor implements java.io.Serializable {
 		this.updateLock.unlock();
 		Main.volume.addDuplicateBytes(Main.CHUNK_LENGTH);
 	}
-	
+
 	public byte[] toByteArray() {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[32]);
 		buf.putLong(this.virtualBytesWritten);
@@ -109,24 +109,26 @@ public class IOMonitor implements java.io.Serializable {
 		return buf.array();
 	}
 
-
-	public void fromByteArray(byte [] b) {
+	public void fromByteArray(byte[] b) {
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		this.virtualBytesWritten = buf.getLong();
 		this.actualBytesWritten = buf.getLong();
 		this.bytesRead = buf.getLong();
 		this.duplicateBlocks = buf.getLong();
 	}
-	
+
 	public Element toXML(Document doc) throws ParserConfigurationException {
 		Element root = doc.createElement("io-info");
-		root.setAttribute("virtual-bytes-written", Long.toString(this.virtualBytesWritten));
-		root.setAttribute("actual-bytes-written", Long.toString(this.actualBytesWritten));
+		root.setAttribute("virtual-bytes-written",
+				Long.toString(this.virtualBytesWritten));
+		root.setAttribute("actual-bytes-written",
+				Long.toString(this.actualBytesWritten));
 		root.setAttribute("bytes-read", Long.toString(this.bytesRead));
-		root.setAttribute("duplicate-blocks", Long.toString(this.duplicateBlocks));
+		root.setAttribute("duplicate-blocks",
+				Long.toString(this.duplicateBlocks));
 		return root;
 	}
-	
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("virtual-bytes-written=\"");

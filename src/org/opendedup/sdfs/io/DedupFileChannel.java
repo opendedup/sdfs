@@ -215,9 +215,8 @@ public class DedupFileChannel {
 				if ((endPos) <= Main.CHUNK_LENGTH) {
 					boolean newBuf = false;
 					/*
-					if (endPos == Main.CHUNK_LENGTH)
-						newBuf = true;
-					*/
+					 * if (endPos == Main.CHUNK_LENGTH) newBuf = true;
+					 */
 					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[bytesLeft];
 					try {
@@ -245,9 +244,8 @@ public class DedupFileChannel {
 					int _len = Main.CHUNK_LENGTH - startPos;
 					boolean newBuf = false;
 					/*
-					if (_len == Main.CHUNK_LENGTH)
-						newBuf = true;
-					*/
+					 * if (_len == Main.CHUNK_LENGTH) newBuf = true;
+					 */
 					WritableCacheBuffer writeBuffer = null;
 					byte[] b = new byte[_len];
 					try {
@@ -429,7 +427,7 @@ public class DedupFileChannel {
 						} catch (BufferClosedException e) {
 							_rb = null;
 							readBuffer = df.getReadBuffer(currentLocation);
-							SDFSLogger.getLog().info("tring to read again");
+							SDFSLogger.getLog().info("trying to read again");
 						}
 					}
 					if ((endPos) <= readBuffer.getLength()) {
