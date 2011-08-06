@@ -1,3 +1,8 @@
+Version 1.0.8
+	Fixes:
+	* Windows Not Deleting files
+	Enhancements
+	* Update JDokan Lib for better compliance with Dokan 6.0 and Performance
 Version 1.0.7
 	Fixes:
 	* Log files now roll after 10MB
