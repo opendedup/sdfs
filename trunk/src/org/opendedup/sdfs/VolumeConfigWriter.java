@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.util.HashFunctions;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
@@ -86,6 +87,14 @@ public class VolumeConfigWriter {
 	int hashSize = 16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
+	String sdfsCliUserName = "admin";
+	String sdfsCliPassword = "admin";
+	String sdfsCliSalt = HashFunctions.getRandomString(6);
+	String sdfsCliListenAddr = "localhost";
+	boolean sdfsCliRequireAuth = false;
+	int sdfsCliPort = 6442;
+	boolean sdfsCliEnabled = true;
+	
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -201,6 +210,18 @@ public class VolumeConfigWriter {
 			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-pre-allocate"));
 		}
+		
+		if(cmd.hasOption("sdfscli-password")) {
+			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
+		}
+		if(cmd.hasOption("sdfscli-requre-auth")) {
+			this.sdfsCliRequireAuth = true;
+		}
+		if(cmd.hasOption("sdfscli-listen-port")) {
+			this.sdfsCliPort = Integer.parseInt(cmd.getOptionValue("sdfscli-listen-port"));
+		}
+		if(cmd.hasOption("sdfscli-listen-addr"))
+			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
 
 		if (cmd.hasOption("chunk-read-ahead-pages")) {
 			this.chunk_read_ahead_pages = Short.parseShort(cmd
@@ -299,7 +320,6 @@ public class VolumeConfigWriter {
 			throw new IOException("Volume [" + this.volume_name
 					+ "] already exists");
 		}
-
 	}
 
 	public void writeConfigFile() throws ParserConfigurationException,
@@ -396,6 +416,25 @@ public class VolumeConfigWriter {
 		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"
 				+ mem + "m -Xmn" + xmn + "m");
 		root.appendChild(launchParams);
+		Element sdfscli = xmldoc.createElement("sdfscli");
+		sdfscli.setAttribute("enable-auth",
+				Boolean.toString(this.sdfsCliRequireAuth));
+		sdfscli.setAttribute("username", this.sdfsCliUserName);
+		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
+		try {
+			sdfscli.setAttribute("password", HashFunctions.getSHAHash(
+					this.sdfsCliPassword.getBytes(),
+					this.sdfsCliSalt.getBytes()));
+		} catch (Exception e) {
+			System.out.println("unable to create password ");
+			e.printStackTrace();
+			throw new IOException(e);
+		}
+		sdfscli.setAttribute("salt", this.sdfsCliSalt);
+		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
+		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
+		root.appendChild(sdfscli);
+
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
@@ -437,6 +476,33 @@ public class VolumeConfigWriter {
 		Options options = new Options();
 		options.addOption(OptionBuilder.withLongOpt("help")
 				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sdfscli-password")
+				.withDescription("The password used to authenticate to the sdfscli management interface. The default username is admin and the default password is admin as well."
+						).hasArg(true).withArgName("password")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sdfscli-requre-auth")
+				.withDescription("Require authentication to connect to the sdfscli managment interface"
+						).hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sdfscli-listen-port")
+				.withDescription("TCP/IP Listenting port for the sdfscli management interface"
+						).hasArg(true).withArgName("tcp port")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sdfscli-listen-addr")
+				.withDescription("IP Listenting address for the sdfscli management interface. This defaults to \"localhost\""
+						).hasArg(true).withArgName("ip address or host name")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("base-path")
+				.withDescription(
+						"the folder path for all volume data and meta data.\n Defaults to: \n "
+								+ OSValidator.getProgramBasePath()
+								+ "<volume name>").hasArg().withArgName("PATH")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("base-path")

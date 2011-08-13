@@ -22,7 +22,19 @@ public class Main {
 	public static boolean logToConsole = false;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
-
+	
+	public static String sdfsCliUserName = "admin";
+	
+	public static String sdfsCliPassword = "";
+	
+	public static String sdfsCliSalt = "";
+	
+	public static boolean sdfsCliRequireAuth = false;
+	public static int sdfsCliPort = 6442;
+	public static boolean sdfsCliEnabled  = true;
+	public static String sdfsCliListenAddr = "localhost";
+	
+	
 	/**
 	 * Class path when launching sdfs
 	 */
@@ -35,7 +47,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.0.8";
+	public static String version = "1.0.9";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

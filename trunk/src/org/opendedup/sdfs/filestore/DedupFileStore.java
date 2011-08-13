@@ -139,14 +139,19 @@ public class DedupFileStore {
 	public static DedupFile cloneDedupFile(MetaDataDedupFile oldmf,
 			MetaDataDedupFile newmf) throws IOException {
 		if (!closing) {
-			DedupFile df = (SparseDedupFile) openFile.get(oldmf.getDfGuid());
-			if (df == null) {
-				df = new SparseDedupFile(oldmf);
-			}
-			try {
-				return df.snapshot(newmf);
-			} catch (Exception e) {
-				throw new IOException(e);
+			if (oldmf.getDfGuid() == null)
+				return null;
+			else {
+				DedupFile df = (SparseDedupFile) openFile
+						.get(oldmf.getDfGuid());
+				if (df == null) {
+					df = new SparseDedupFile(oldmf);
+				}
+				try {
+					return df.snapshot(newmf);
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 			}
 
 		} else {

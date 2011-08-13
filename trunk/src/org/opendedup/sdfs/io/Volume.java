@@ -44,6 +44,9 @@ public class Volume implements java.io.Serializable {
 	private long readBytes = 0;
 	private long actualWriteBytes = 0;
 	private boolean closedGracefully = false;
+	private long readOperations;
+	private long writeOperations;
+	
 
 	public String getName() {
 		return name;
@@ -142,6 +145,18 @@ public class Volume implements java.io.Serializable {
 	public long getUsedBlocks() {
 		return (this.currentSize / this.blockSize);
 	}
+	
+	public void addWIO() {
+		if(this.writeOperations == Long.MAX_VALUE)
+			this.writeOperations = 0;
+		this.writeOperations++;
+	}
+	
+	public void addRIO() {
+		if(this.readOperations == Long.MAX_VALUE)
+			this.readOperations = 0;
+		this.readOperations++;
+	}
 
 	public long getNumberOfFiles() {
 		return Paths.get(path).getNameCount();
@@ -178,6 +193,8 @@ public class Volume implements java.io.Serializable {
 				"dse-size",
 				Long.toString(HashChunkService.getSize()
 						* HashChunkService.getPageSize()));
+		root.setAttribute("readops", Long.toString(this.readOperations));
+		root.setAttribute("writeops", Long.toBinaryString(this.writeOperations));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		return doc;
@@ -185,6 +202,7 @@ public class Volume implements java.io.Serializable {
 
 	public void addVirtualBytesWritten(long virtualBytesWritten) {
 		this.vbLock.lock();
+		this.addWIO();
 		this.virtualBytesWritten += virtualBytesWritten;
 		if (this.virtualBytesWritten < 0)
 			this.virtualBytesWritten = 0;
@@ -210,6 +228,7 @@ public class Volume implements java.io.Serializable {
 	public void addReadBytes(long readBytes) {
 		this.rbLock.lock();
 		this.readBytes += readBytes;
+		this.addRIO();
 		if (this.readBytes < 0)
 			this.readBytes = 0;
 		this.rbLock.unlock();

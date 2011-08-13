@@ -274,6 +274,18 @@ public class Config {
 				Main.awsCompress = Boolean.parseBoolean(aws
 						.getAttribute("compress"));
 			}
+			int cliSz = doc.getElementsByTagName("sdfscli").getLength();
+			if(cliSz > 0) {
+				Element cli = (Element)doc.getElementsByTagName("sdfscli").item(0);
+				Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
+				Main.sdfsCliPassword = cli.getAttribute("password");
+				Main.sdfsCliSalt = cli.getAttribute("salt");
+				Main.sdfsCliUserName = cli.getAttribute("username");
+				Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
+				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
+				Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
+			}
+			
 		}
 
 		/*
@@ -300,6 +312,18 @@ public class Config {
 		root.removeChild(volume);
 		volume = Main.volume.toXMLElement(doc);
 		root.appendChild(volume);
+		int cliSz = doc.getElementsByTagName("sdfscli").getLength();
+		if(cliSz > 0) {
+			Element cli = (Element)doc.getElementsByTagName("sdfscli").item(0);
+			cli.setAttribute("enable",Boolean.toString(Main.sdfsCliEnabled));
+			cli.setAttribute("password", Main.sdfsCliPassword);
+			cli.setAttribute("salt", Main.sdfsCliSalt);
+			
+			cli.setAttribute("username", Main.sdfsCliUserName);
+			cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
+			cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
+			cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
+		}
 		try {
 			// Prepare the DOM document for writing
 			Source source = new DOMSource(doc);
@@ -420,7 +444,6 @@ public class Config {
 		SDFSLogger.getLog().info("SDFS Java options=" + Main.javaOptions);
 		Main.javaPath = launchParams.getAttribute("java-path");
 		SDFSLogger.getLog().info("SDFS java path=" + Main.javaPath);
-
 	}
 
 }

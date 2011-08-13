@@ -18,6 +18,12 @@ public class SnapshotCmd implements XtendedCmd {
 			throws IOException {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File nf = new File(Main.volume.getPath() + File.separator + dstPath);
+		
+		if(srcPath.startsWith("/"))
+			f = new File(srcPath);
+		if(dstPath.startsWith("/"));
+			nf = new File(dstPath);
+			
 		try {
 			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath

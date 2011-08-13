@@ -19,6 +19,13 @@ public class SDFSCmdline {
 			printHelp(options);
 			System.exit(1);
 		}
+		if(cmd.hasOption("username"))
+			MgmtServerConnection.userName = cmd.getOptionValue("username");
+		if(cmd.hasOption("password"))
+			MgmtServerConnection.password = cmd.getOptionValue("password");
+		if(cmd.hasOption("port"))
+			MgmtServerConnection.port = Integer.parseInt(cmd.getOptionValue("port"));
+		
 		if (cmd.hasOption("file-info")) {
 			if (cmd.hasOption("file-path")) {
 				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
@@ -80,6 +87,14 @@ public class SDFSCmdline {
 					.getOptionValue("cleanstore")));
 			System.exit(0);
 		}
+		if (cmd.hasOption("change-password")) {
+			ProcessSetPasswordCmd.runCmd(cmd
+					.getOptionValue("change-password"));
+			System.exit(0);
+		}
+		
+			
+		
 
 	}
 
@@ -88,6 +103,18 @@ public class SDFSCmdline {
 		Options options = new Options();
 		options.addOption(OptionBuilder.withLongOpt("help")
 				.withDescription("Display these options.").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("username")
+				.withDescription("User name to authenticate to SDFS CLI Interface for volume.").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("change-password")
+				.withDescription("Change the administrative password.").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("password")
+				.withDescription("password to authenticate to SDFS CLI Interface for volume.").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("port")
+				.withDescription("SDFS CLI Interface tcp listening port for volume.").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("file-info")
