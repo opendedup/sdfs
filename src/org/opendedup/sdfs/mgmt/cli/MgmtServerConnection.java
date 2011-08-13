@@ -11,6 +11,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.w3c.dom.Document;
 
 public class MgmtServerConnection {
+	public static int port = 6442;
+	public static String userName = null;
+	public static String password = null;
 	public static Document getResponse(String url) throws IOException {
 
 		try {
@@ -27,8 +30,9 @@ public class MgmtServerConnection {
 	private static InputStream connectAndGet(String url) {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "SDFS Client");
-
-		GetMethod method = new GetMethod("http://localhost:6442/?" + url);
+		if(userName != null && password != null)
+			url = url + "&username="+userName+"&password="+password;
+		GetMethod method = new GetMethod("http://localhost:"+port +"/?" + url);
 		try {
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)
@@ -37,14 +41,12 @@ public class MgmtServerConnection {
 						+ returnCode + " return msg was "
 						+ method.getResponseBodyAsString());
 			return method.getResponseBodyAsStream();
-
 		} catch (Exception e) {
 			System.err
 					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
 			System.exit(-1);
 			return null;
 		}
-
 	}
 
 	public static void main(String[] args) throws IOException {

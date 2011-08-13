@@ -9,6 +9,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 import java.util.Random;
@@ -210,17 +211,25 @@ public class HashFunctions {
 	static int NUM = 100000;
 
 	public static void main(String[] args) throws Exception {
-		int numberOfTries = 10000000;
-		long start = System.currentTimeMillis();
-		Random rnd = new Random();
-		for (int i = 0; i < numberOfTries; i++) {
-			byte[] b = new byte[64];
-			rnd.nextBytes(b);
-			HashFunctions.getTigerHashBytes(b);
-		}
-		long duration = System.currentTimeMillis() - start;
-		System.out.println("Took " + duration + " ms");
-		System.out.println("Hashes per ms = " + (numberOfTries / duration));
+		/*
+		 * int numberOfTries = 10000000; long start =
+		 * System.currentTimeMillis(); Random rnd = new Random(); for (int i =
+		 * 0; i < numberOfTries; i++) { byte[] b = new byte[64];
+		 * rnd.nextBytes(b); HashFunctions.getTigerHashBytes(b); } long duration
+		 * = System.currentTimeMillis() - start; System.out.println("Took " +
+		 * duration + " ms"); System.out.println("Hashes per ms = " +
+		 * (numberOfTries / duration));
+		 * 
+		 * ?
+		 */
+		String rndStr =  getRandomString(12);
+		
+		System.out.println(rndStr);
+		String auth =getSHAHash("admin".getBytes(),"test".getBytes());
+		if(auth.equals(getSHAHash("admin".getBytes(),"test".getBytes())))
+			System.out.println(auth);
+		else
+			System.out.println("failed");
 	}
 
 	public static void insertRecorts(long number) throws Exception {
@@ -244,6 +253,29 @@ public class HashFunctions {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		digest.reset();
 		return StringUtils.getHexString(digest.digest(input));
+	}
+
+	public static String getSHAHash(byte[] input,byte[] salt)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException,
+			NoSuchProviderException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		digest.reset();
+		digest.update(salt);
+		digest.update(input);
+		return StringUtils.getHexString(digest.digest());
+	}
+
+	public static String getRandomString(int sz) {
+		String str = new String(
+				"QAa0bcLdUK2eHfJgTP8XhiFj61DOklNm9nBoI5pGqYVrs3CtSuMZvwWx4yE7zR");
+		StringBuffer sb = new StringBuffer();
+		SecureRandom r = new SecureRandom();
+		int te = 0;
+		for (int i = 1; i <= sz; i++) {
+			te = r.nextInt(str.length());
+			sb.append(str.charAt(te));
+		}
+		return (sb.toString());
 	}
 
 	public static byte[] getSHAHashBytes(byte[] input)

@@ -16,6 +16,9 @@ public class ProcessDSEInfo {
 			formatter.format("file=%s&cmd=dse-info", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			if (root.getAttribute("status").equals("failed"))
+				System.out.println(root.getAttribute("msg"));
+			else {
 			Element dse = (Element) root.getElementsByTagName("dse").item(0);
 			long maxSz = Long.parseLong(dse.getAttribute("max-size"));
 			long currentSz = Long.parseLong(dse.getAttribute("current-size"));
@@ -35,7 +38,7 @@ public class ProcessDSEInfo {
 			System.out.printf("DSE Page Size : %s\n", pageSize);
 			System.out.printf("DSE Blocks Available for Reuse : %s\n",
 					freeBlocks);
-
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

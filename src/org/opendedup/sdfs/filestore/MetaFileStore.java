@@ -230,7 +230,13 @@ public class MetaFileStore {
 					} catch (Exception e) {
 
 					}
-					deleted = mf.getDedupFile().delete();
+					if(mf.getDfGuid() != null) {
+						try {
+						deleted = mf.getDedupFile().delete();
+						}catch(Exception e) {
+							SDFSLogger.getLog().debug("unable to delete dedup file for " +path,e);
+						}
+					}
 					deleted = mf.deleteStub();
 					if (!deleted) {
 						SDFSLogger.getLog().warn(

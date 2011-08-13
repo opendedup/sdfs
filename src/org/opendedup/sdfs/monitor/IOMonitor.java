@@ -16,6 +16,8 @@ public class IOMonitor implements java.io.Serializable {
 	private long actualBytesWritten;
 	private long bytesRead;
 	private long duplicateBlocks;
+	private long readOperations;
+	private long writeOperations;
 	private final ReentrantLock updateLock = new ReentrantLock();
 
 	public IOMonitor() {
@@ -35,6 +37,7 @@ public class IOMonitor implements java.io.Serializable {
 
 	public void addBytesRead(int len) {
 		this.updateLock.lock();
+		this.addRIO();
 		this.bytesRead = this.bytesRead + len;
 		this.updateLock.unlock();
 		Main.volume.addReadBytes(len);
@@ -46,9 +49,22 @@ public class IOMonitor implements java.io.Serializable {
 		this.updateLock.unlock();
 		Main.volume.addActualWriteBytes(len);
 	}
+	
+	public void addWIO() {
+		if(this.writeOperations == Long.MAX_VALUE)
+			this.writeOperations = 0;
+		this.writeOperations++;
+	}
+	
+	public void addRIO() {
+		if(this.readOperations == Long.MAX_VALUE)
+			this.readOperations = 0;
+		this.readOperations++;
+	}
 
 	public void addVirtualBytesWritten(int len) {
 		this.updateLock.lock();
+		this.addWIO();
 		this.virtualBytesWritten = this.virtualBytesWritten + len;
 		this.updateLock.unlock();
 		Main.volume.addVirtualBytesWritten(len);
@@ -126,6 +142,8 @@ public class IOMonitor implements java.io.Serializable {
 		root.setAttribute("bytes-read", Long.toString(this.bytesRead));
 		root.setAttribute("duplicate-blocks",
 				Long.toString(this.duplicateBlocks));
+		root.setAttribute("readops", Long.toString(this.readOperations));
+		root.setAttribute("writeops", Long.toBinaryString(this.writeOperations));
 		return root;
 	}
 
@@ -139,6 +157,10 @@ public class IOMonitor implements java.io.Serializable {
 		sb.append(this.bytesRead);
 		sb.append("\"\n duplicate-blocks=\"");
 		sb.append(this.duplicateBlocks);
+		sb.append("\"\n read-ops=\"");
+		sb.append(this.readOperations);
+		sb.append("\"\n write-ops=\"");
+		sb.append(this.writeOperations);
 		return sb.toString();
 	}
 }

@@ -17,6 +17,9 @@ public class ProcessFileInfo {
 			formatter.format("file=%s&cmd=info", file);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			if (root.getAttribute("status").equals("failed"))
+				System.out.println(root.getAttribute("msg"));
+			else {
 			Element files = (Element) root.getElementsByTagName("files")
 					.item(0);
 			for (int i = 0; i < files.getElementsByTagName("file-info")
@@ -93,6 +96,7 @@ public class ProcessFileInfo {
 
 					}
 				}
+			}
 			}
 
 		} catch (Exception e) {

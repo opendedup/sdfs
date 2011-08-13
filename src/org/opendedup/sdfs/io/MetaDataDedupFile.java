@@ -374,8 +374,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (!this.dedup) {
 				try {
 					this.setDedup(true);
-					_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
-							.getGUID();
+					try {
+						_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
+								.getGUID();
+					} catch (java.lang.NullPointerException e) {
+						SDFSLogger.getLog().debug(
+								"no dedupfile for " + this.path, e);
+					}
 				} catch (HashtableFullException e) {
 					throw new IOException(e);
 				} finally {
@@ -389,7 +394,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					}
 				}
 			} else {
-				_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
+				try {
+					_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
+							.getGUID();
+				} catch (java.lang.NullPointerException e) {
+					SDFSLogger.getLog().debug("no dedupfile for " + this.path,
+							e);
+				}
 			}
 			_mf.getIOMonitor().setVirtualBytesWritten(
 					this.getIOMonitor().getVirtualBytesWritten());
