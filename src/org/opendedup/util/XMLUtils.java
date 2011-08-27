@@ -1,5 +1,6 @@
 package org.opendedup.util;
 
+import java.io.File;
 import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -42,4 +43,13 @@ public class XMLUtils {
 		return xmlString;
 	}
 
+	public static String toXMLString(String fileName) throws Exception {
+		File file = new File(fileName);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(file);
+		doc.getDocumentElement().normalize();
+		return toXMLString(doc);
+
+	}
 }

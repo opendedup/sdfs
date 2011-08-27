@@ -26,11 +26,8 @@ public class GetAttributes implements XtendedCmd {
 				for (int i = 0; i < files.length; i++) {
 					MetaDataDedupFile mf = MetaFileStore.getMF(files[i]
 							.getPath());
-
 					Element fe = mf.toXML(doc);
-
 					root.appendChild(fe);
-
 				}
 				return XMLUtils.toXMLString(doc);
 			} catch (Exception e) {

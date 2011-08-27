@@ -194,7 +194,7 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.writeBufferLock.unlock();
 		}
-
+		int z = 0;
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 			try {
@@ -203,6 +203,7 @@ public class SparseDedupFile implements DedupFile {
 				SDFSLogger.getLog().debug(
 						"while closing position " + buf.getFilePosition(), e);
 			}
+			z++;
 		}
 		try {
 			SDFSLogger.getLog().debug(
@@ -211,7 +212,7 @@ public class SparseDedupFile implements DedupFile {
 			buffers = this.flushingBuffers.values().toArray();
 		} finally {
 		}
-		int z = 0;
+		z = 0;
 		for (int i = 0; i < buffers.length; i++) {
 			WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 			try {
@@ -472,12 +473,37 @@ public class SparseDedupFile implements DedupFile {
 			}
 		} else {
 			try {
-
-				int writtenBuffers = this.writeCache();
-				this.bdb.sync();
-				SDFSLogger.getLog().debug(
-						"Flushed " + writtenBuffers + "with sync");
-			} catch (HashtableFullException e) {
+				this.writeCache();
+				/*
+				Object[] buffers = null;
+				this.writeBufferLock.lock();
+				try {
+					SDFSLogger.getLog().debug(
+							"Flushing Cache for " + mf.getPath()
+									+ " of size " + this.writeBuffers.size());
+					if (this.writeBuffers.size() > 0) {
+						buffers = this.writeBuffers.values().toArray();
+					}
+				} finally {
+					this.writeBufferLock.unlock();
+				}
+				int z = 0;
+				if (buffers != null) {
+					for (int i = 0; i < buffers.length; i++) {
+						WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
+						try {
+							buf.flush();
+						} catch (BufferClosedException e) {
+							SDFSLogger.getLog().debug(
+									"while closing position "
+											+ buf.getFilePosition(), e);
+						}
+						z++;
+					}
+				}
+				SDFSLogger.getLog().debug("Flushed " + z + "with sync");
+				*/
+			} catch (Exception e) {
 				throw new IOException(e);
 			}
 		}

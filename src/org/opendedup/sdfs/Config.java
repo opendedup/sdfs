@@ -275,17 +275,20 @@ public class Config {
 						.getAttribute("compress"));
 			}
 			int cliSz = doc.getElementsByTagName("sdfscli").getLength();
-			if(cliSz > 0) {
-				Element cli = (Element)doc.getElementsByTagName("sdfscli").item(0);
-				Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
+			if (cliSz > 0) {
+				Element cli = (Element) doc.getElementsByTagName("sdfscli")
+						.item(0);
+				Main.sdfsCliEnabled = Boolean.parseBoolean(cli
+						.getAttribute("enable"));
 				Main.sdfsCliPassword = cli.getAttribute("password");
 				Main.sdfsCliSalt = cli.getAttribute("salt");
 				Main.sdfsCliUserName = cli.getAttribute("username");
 				Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
-				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
+				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
+						.getAttribute("enable-auth"));
 				Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 			}
-			
+
 		}
 
 		/*
@@ -313,15 +316,16 @@ public class Config {
 		volume = Main.volume.toXMLElement(doc);
 		root.appendChild(volume);
 		int cliSz = doc.getElementsByTagName("sdfscli").getLength();
-		if(cliSz > 0) {
-			Element cli = (Element)doc.getElementsByTagName("sdfscli").item(0);
-			cli.setAttribute("enable",Boolean.toString(Main.sdfsCliEnabled));
+		if (cliSz > 0) {
+			Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
+			cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
 			cli.setAttribute("password", Main.sdfsCliPassword);
 			cli.setAttribute("salt", Main.sdfsCliSalt);
-			
+
 			cli.setAttribute("username", Main.sdfsCliUserName);
 			cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
-			cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
+			cli.setAttribute("enable-auth",
+					Boolean.toString(Main.sdfsCliRequireAuth));
 			cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
 		}
 		try {

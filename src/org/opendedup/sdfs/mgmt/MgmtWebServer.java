@@ -42,10 +42,11 @@ public class MgmtWebServer implements Container {
 								"could not authenticate user " + userName
 										+ " to cli");
 					}
-				}
+				}else {
 				SDFSLogger.getLog().warn(
 						"could find user " + userName
 								+ " to authenticate to cli");
+				}
 			} else
 				auth = true;
 			if (auth) {
@@ -62,7 +63,22 @@ public class MgmtWebServer implements Container {
 						result = "<result status=\"failed\" msg=\""
 								+ e.getMessage() + "\"/>";
 					}
-				} else if (cmd.equalsIgnoreCase("dse-info")) {
+				} else if (cmd.equalsIgnoreCase("filteredinfo")) {
+					try {
+						boolean includeFiles = Boolean.parseBoolean(request.getQuery().get("includefiles"));
+						boolean includeFolders = Boolean.parseBoolean(request.getQuery().get("includefolders"));
+						int level = Integer.parseInt(request.getQuery().get("level"));
+						String msg = new GetFilteredFileAttributes().getResult(cmdOptions,
+								file,includeFiles,includeFolders,level);
+						result = "<result status=\"success\" msg=\"command completed successfully\">";
+						result = result + msg;
+						result = result + "</result>";
+					} catch (IOException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				} 
+				else if (cmd.equalsIgnoreCase("dse-info")) {
 					try {
 						String msg = new GetDSE().getResult(cmdOptions, file);
 						result = "<result status=\"success\" msg=\"command completed successfully\">";

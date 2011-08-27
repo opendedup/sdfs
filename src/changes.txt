@@ -1,3 +1,8 @@
+Version 1.0.9
+	Fixes:
+	* Files now being cleaned up when deleted
+	Enhancements
+	* SDFSCli new commands "mkdir" and "delete-file"
 Version 1.0.8
 	Fixes:
 	* Windows Not Deleting files

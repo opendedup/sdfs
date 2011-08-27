@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.util.SDFSLogger;
 
@@ -11,8 +12,13 @@ public class CleanStoreCmd implements XtendedCmd {
 	public String getResult(String cmd, String file) throws IOException {
 		int minutes = Integer.parseInt(cmd);
 		try {
+			
 			long chunks = ManualGC.clearChunks(minutes);
-			return "SUCCESS Clean Store: cleanded dedup storage engine of ["
+			if(Main.firstRun){
+				chunks = chunks + ManualGC.clearChunks(minutes);
+			}
+				
+			return "cleanded dedup storage engine of ["
 					+ chunks + "] records not claimed in  [" + minutes + "] ";
 		} catch (Exception e) {
 			SDFSLogger
