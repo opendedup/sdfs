@@ -17,7 +17,6 @@ public class ManualGC {
 
 			try {
 				GCMain.gcRunning = true;
-
 				long tm = System.currentTimeMillis();
 				new FDisk();
 				if (Main.chunkStoreLocal) {

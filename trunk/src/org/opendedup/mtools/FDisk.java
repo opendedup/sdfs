@@ -9,6 +9,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.SDFSLogger;
+import org.opendedup.util.StringUtils;
 
 public class FDisk {
 	private long files = 0;
@@ -55,6 +56,7 @@ public class FDisk {
 			byte[] val = new byte[0];
 			mp.iterInit();
 			boolean corruption = false;
+			long corruptBlocks = 0;
 			while (val != null) {
 				val = mp.nextValue();
 				if (val != null) {
@@ -63,7 +65,9 @@ public class FDisk {
 						boolean exists = HCServiceProxy
 								.hashExists(ck.getHash());
 						if (!exists) {
+							SDFSLogger.getLog().debug("file ["+ mapFile +"] could not find " + StringUtils.getHexString(ck.getHash()));
 							corruption = true;
+							corruptBlocks ++;
 						}
 					}
 				}
@@ -71,7 +75,7 @@ public class FDisk {
 			if (corruption) {
 				this.corruptFiles++;
 				SDFSLogger.getLog().info(
-						"map file " + mapFile.getPath() + " is suspect");
+						"map file " + mapFile.getPath() + " is suspect, [" + corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(

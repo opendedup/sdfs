@@ -188,27 +188,28 @@ public class MetaFileStore {
 				Path p = Paths.get(path);
 				boolean isDir = false;
 				boolean isSymlink = false;
-				if(!OSValidator.isWindows()) {
-					isDir = Files.readAttributes(p,
-						PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-						.isDirectory();
+				if (!OSValidator.isWindows()) {
+					isDir = Files.readAttributes(p, PosixFileAttributes.class,
+							LinkOption.NOFOLLOW_LINKS).isDirectory();
 					isSymlink = Files.readAttributes(p,
-						PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-						.isDirectory();
-				}
-				else {
+							PosixFileAttributes.class,
+							LinkOption.NOFOLLOW_LINKS).isDirectory();
+				} else {
 					isDir = new File(path).isDirectory();
 				}
 				if (isDir) {
 					File ps = new File(path);
-					/*
-					 * File[] files = ps.listFiles();
-					 * 
-					 * for (int i = 0; i < files.length; i++) { if
-					 * (files[i].isDirectory()) {
-					 * removeMetaFile(files[i].getPath()); } else {
-					 * files[i].delete(); } }
-					 */
+
+					File[] files = ps.listFiles();
+					
+					for (int i = 0; i < files.length; i++) {
+						boolean sd =removeMetaFile(files[i].getPath());
+						files[i].delete();
+						if(!sd) {
+							SDFSLogger.getLog().warn("delete failed : unable to delete [" +files[i] + "]");
+							return sd;
+						}
+					}
 					return (ps.delete());
 				}
 				if (isSymlink) {
@@ -230,11 +231,13 @@ public class MetaFileStore {
 					} catch (Exception e) {
 
 					}
-					if(mf.getDfGuid() != null) {
+					if (mf.getDfGuid() != null) {
 						try {
-						deleted = mf.getDedupFile().delete();
-						}catch(Exception e) {
-							SDFSLogger.getLog().debug("unable to delete dedup file for " +path,e);
+							deleted = mf.getDedupFile().delete();
+						} catch (Exception e) {
+							SDFSLogger.getLog().debug(
+									"unable to delete dedup file for " + path,
+									e);
 						}
 					}
 					deleted = mf.deleteStub();

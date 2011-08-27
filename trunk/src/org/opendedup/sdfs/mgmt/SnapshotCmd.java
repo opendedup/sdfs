@@ -18,23 +18,18 @@ public class SnapshotCmd implements XtendedCmd {
 			throws IOException {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File nf = new File(Main.volume.getPath() + File.separator + dstPath);
-		
-		if(srcPath.startsWith("/"))
-			f = new File(srcPath);
-		if(dstPath.startsWith("/"));
-			nf = new File(dstPath);
 			
 		try {
 			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);
-			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
-					+ "] " + "Destination [" + dstPath + "]";
+			return "Took snapshot of Source [" + srcPath
+					+ "] " + " to Destination [" + dstPath + "]";
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"Snapshot Failed: unable to take snapshot Source ["
+					"Unable to take snapshot Source ["
 							+ srcPath + "] " + "Destination [" + dstPath
 							+ "] because :" + e.toString(), e);
 			throw new IOException(
-					"Snapshot Failed: unable to take snapshot Source ["
+					"Unable to take snapshot Source ["
 							+ srcPath + "] " + "Destination [" + dstPath
 							+ "] because :" + e.toString());
 		}

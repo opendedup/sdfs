@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,8 +11,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.opendedup.util.SDFSLogger;
@@ -22,6 +25,7 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.util.ByteUtils;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -347,7 +351,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite)
 			throws IOException {
 		if (!this.isDirectory()) {
-			SDFSLogger.getLog().info("is snapshot file");
+			SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath
@@ -416,7 +420,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			_mf.unmarshal();
 			return _mf;
 		} else {
-			SDFSLogger.getLog().info("is snapshot dir");
+			SDFSLogger.getLog().debug("is snapshot dir");
 			File f = new File(snaptoPath);
 			f.mkdirs();
 			int trimlen = this.getPath().length();
@@ -927,7 +931,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	}
 
-	public Element toXML(Document doc) throws ParserConfigurationException {
+	public Element toXML(Document doc) throws ParserConfigurationException, DOMException, IOException {
 		Element root = doc.createElement("file-info");
 		root.setAttribute("file-name", this.getName());
 		root.setAttribute("sdfs-path", this.getPath());
@@ -952,7 +956,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.appendChild(monEl);
 		}
 		if (this.isDirectory()) {
+			Path p = Paths.get(this.getPath());
+			File f = new File(this.getPath());
 			root.setAttribute("type", "directory");
+			BasicFileAttributes attrs = Files.readAttributes(p,
+					BasicFileAttributes.class,
+					LinkOption.NOFOLLOW_LINKS);
+			root.setAttribute("atime", Long.toString(attrs.lastAccessTime().toMillis()));
+			root.setAttribute("mtime", Long.toString(attrs.lastModifiedTime().toMillis()));
+			root.setAttribute("ctime", Long.toString(attrs.creationTime().toMillis()));
+			root.setAttribute("hidden", Boolean.toString(f.isHidden()));
+			root.setAttribute("size", Long.toString(attrs.size()));
 		}
 
 		return root;

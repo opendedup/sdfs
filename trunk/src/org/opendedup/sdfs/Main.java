@@ -18,6 +18,7 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	public static boolean firstRun = true;
 
 	public static boolean logToConsole = false;
 

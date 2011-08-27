@@ -194,7 +194,7 @@ public class Volume implements java.io.Serializable {
 				Long.toString(HashChunkService.getSize()
 						* HashChunkService.getPageSize()));
 		root.setAttribute("readops", Long.toString(this.readOperations));
-		root.setAttribute("writeops", Long.toBinaryString(this.writeOperations));
+		root.setAttribute("writeops", Long.toString(this.writeOperations));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		return doc;

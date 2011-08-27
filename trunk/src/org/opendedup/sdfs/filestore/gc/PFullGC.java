@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.SDFSLogger;
 
@@ -7,11 +8,12 @@ public class PFullGC implements GCControllerImpl {
 
 	double prevPFull = 0;
 	double nextPFull = 0;
-	boolean firstRun = true;
+	
 
 	public PFullGC() {
 		this.prevPFull = calcPFull();
-		this.nextPFull = this.calcNxtRun();
+		this.nextPFull = Math.ceil(this.prevPFull * 10)/10;
+		
 		SDFSLogger.getLog().info(
 				"Current DSE Percentage Full is [" + this.prevPFull
 						+ "] will run GC when [" + this.nextPFull + "]");
@@ -21,8 +23,8 @@ public class PFullGC implements GCControllerImpl {
 	public void runGC() {
 		if (this.calcPFull() >= this.nextPFull) {
 			ManualGC.clearChunks(2);
-			if (firstRun) {
-				this.firstRun = false;
+			if (Main.firstRun) {
+				Main.firstRun = false;
 				ManualGC.clearChunks(2);
 			}
 			this.prevPFull = calcPFull();
