@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
+import org.opendedup.util.SDFSLogger;
 
 import fuse.FuseMount;
 
@@ -54,7 +55,6 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(1);
 		}
-
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
 			Main.volumeMountPoint = args[1];
@@ -103,13 +103,7 @@ public class MountSDFS {
 			volumeConfigFile = f.getPath();
 		}
 
-		if (cmd.hasOption("o")) {
-			fal.add("-o");
-			fal.add(cmd.getOptionValue("o"));
-		} else {
-			fal.add("-o");
-			fal.add("direct_io,big_writes,allow_other,fsname=" + volname);
-		}
+		
 
 		if (volumeConfigFile == null) {
 			System.out
@@ -136,16 +130,22 @@ public class MountSDFS {
 		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
 				cmd.getOptionValue("m"));
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		if (cmd.hasOption("o")) {
+			fal.add("-o");
+			fal.add(cmd.getOptionValue("o"));
+		} else {
+			fal.add("-o");
+			fal.add("direct_io,big_writes,allow_other,fsname=sdfs:"+volumeConfigFile+":"+ Main.sdfsCliPort);
+		}
 		try {
 			String[] sFal = new String[fal.size()];
 			fal.toArray(sFal);
 			for (int i = 0; i < sFal.length; i++) {
-				System.out.println(sFal[i]);
+				SDFSLogger.getLog().info("Mount Option : " +sFal[i]);
 			}
 			FuseMount.mount(
 					sFal,
-					new SDFSFileSystem(Main.volume.getPath(), cmd
-							.getOptionValue("m")), log);
+					new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
 			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -157,7 +157,7 @@ public class MountSDFS {
 		formatter
 				.printHelp(
 						"mount.sdfs -f -o <fuse options> -m <mount point> "
-								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> ",
+								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port>",
 						options);
 	}
 

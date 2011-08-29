@@ -20,10 +20,10 @@ public class SDFSService {
 	private SDFSGCScheduler gc = null;
 	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
-	private VolumeConfigWriterThread wth = null;
+	
 
 	public SDFSService(String configFile, String routingFile) {
-
+		
 		this.configFile = configFile;
 		this.routingFile = routingFile;
 		System.out.println("Running SDFS Version " + Main.version);
@@ -56,7 +56,7 @@ public class SDFSService {
 			this.stGC = new StandAloneGCScheduler();
 		}
 		MgmtWebServer.start();
-		wth = new VolumeConfigWriterThread(configFile);
+		Main.wth = new VolumeConfigWriterThread(configFile);
 
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
@@ -84,7 +84,7 @@ public class SDFSService {
 		 */
 		MgmtWebServer.stop();
 		try {
-			wth.stop();
+			Main.wth.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

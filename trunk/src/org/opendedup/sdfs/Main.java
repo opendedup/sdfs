@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 import org.opendedup.sdfs.io.Volume;
+import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.util.OSValidator;
 import org.w3c.dom.Element;
 
@@ -18,6 +19,8 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	public static VolumeConfigWriterThread wth = null;
+	
 	public static boolean firstRun = true;
 
 	public static boolean logToConsole = false;

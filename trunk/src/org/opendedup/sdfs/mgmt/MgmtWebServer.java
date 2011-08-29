@@ -2,6 +2,8 @@ package org.opendedup.sdfs.mgmt;
 
 import org.opendedup.sdfs.Main;
 
+
+import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.simpleframework.http.core.Container;
@@ -63,7 +65,32 @@ public class MgmtWebServer implements Container {
 						result = "<result status=\"failed\" msg=\""
 								+ e.getMessage() + "\"/>";
 					}
-				} else if (cmd.equalsIgnoreCase("filteredinfo")) {
+				} else if (cmd.equalsIgnoreCase("deletefile")) {
+					try {
+						String msg = new DeleteFileCmd().getResult(cmdOptions,
+								file);
+						result = "<result status=\"success\" msg=\"command completed successfully\">";
+						result = result + msg;
+						result = result + "</result>";
+					} catch (IOException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				}
+				else if (cmd.equalsIgnoreCase("makefolder")) {
+					try {
+						String msg = new MakeFolderCmd().getResult(cmdOptions,
+								file);
+						result = "<result status=\"success\" msg=\"command completed successfully\">";
+						result = result + msg;
+						result = result + "</result>";
+					} catch (IOException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				}
+				
+				else if (cmd.equalsIgnoreCase("filteredinfo")) {
 					try {
 						boolean includeFiles = Boolean.parseBoolean(request.getQuery().get("includefiles"));
 						boolean includeFolders = Boolean.parseBoolean(request.getQuery().get("includefolders"));
@@ -149,7 +176,29 @@ public class MgmtWebServer implements Container {
 						result = "<result status=\"failed\" msg=\""
 								+ e.getMessage() + "\"/>";
 					}
-				} else if (cmd.equalsIgnoreCase("makevmdk")) {
+				} else if (cmd.equalsIgnoreCase("expandvolume")) {
+					try {
+						String size = request.getQuery().get("size");
+						String msg = new ExpandVolumeCmd().getResult(
+								cmdOptions, size);
+						result = "<result status=\"success\" msg=\"" + msg
+								+ "\"/>";
+					} catch (IOException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				} 
+				else if (cmd.equalsIgnoreCase("volumeconfigpath")) {
+					try {
+						
+						result = "<result status=\"success\" msg=\"" + Main.wth.getConfigFilePath()
+								+ "\"/>";
+					} catch (java.lang.NullPointerException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				} 
+				else if (cmd.equalsIgnoreCase("makevmdk")) {
 					try {
 						String msg = new MakeVMDKCmd().getResult(cmdOptions,
 								file);
@@ -202,11 +251,12 @@ public class MgmtWebServer implements Container {
 			try {
 				Container container = new MgmtWebServer();
 				connection = new SocketConnection(container);
+				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 				SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr,
 						Main.sdfsCliPort);
 				connection.connect(address);
 				SDFSLogger.getLog().info(
-						"###################### Management WebServer Started at "
+						"###################### SDFSCLI Management WebServer Started at "
 								+ address.toString()
 								+ " #########################");
 			} catch (IOException e) {

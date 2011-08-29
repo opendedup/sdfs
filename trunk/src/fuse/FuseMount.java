@@ -56,7 +56,7 @@ public class FuseMount {
 				.getThreadGroup(), "FUSE Threads");
 		threadGroup.setDaemon(true);
 
-		log.info("Mounting filesystem");
+		log.info("Mounted filesystem");
 
 		mount(args, fuseFS, threadGroup);
 
@@ -87,7 +87,7 @@ public class FuseMount {
 		Thread fuseThread = new Thread(group, new Runnable() {
 			public void run() {
 				try {
-					log.info("Mounting filesystem");
+					log.info("Mounted filesystem");
 					mount(args, fuseFS, group);
 					log.info("Filesystem is unmounted");
 					if (log.isDebugEnabled()) {
