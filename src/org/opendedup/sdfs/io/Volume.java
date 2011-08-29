@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
@@ -90,8 +92,18 @@ public class Volume implements java.io.Serializable {
 		return capacity;
 	}
 
-	public void setCapacity(long capacity) {
+	public void setCapacity(long capacity) throws Exception {
+		if(capacity <= this.currentSize)
+			throw new IOException("Cannot resize volume to something less than current size. Current Size [" + this.currentSize + "] requested capacity [" + capacity + "]");
 		this.capacity = capacity;
+		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
+		Main.wth.writeConfig();
+		
+	}
+	
+	public void setCapacity(String capString) throws Exception {
+		this.setCapacity(StringUtils.parseSize(capString));
+		this.capString = capString;
 	}
 
 	public long getCurrentSize() {

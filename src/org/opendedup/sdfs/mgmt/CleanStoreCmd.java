@@ -16,6 +16,7 @@ public class CleanStoreCmd implements XtendedCmd {
 			long chunks = ManualGC.clearChunks(minutes);
 			if(Main.firstRun){
 				chunks = chunks + ManualGC.clearChunks(minutes);
+				Main.firstRun = false;
 			}
 				
 			return "cleanded dedup storage engine of ["

@@ -22,8 +22,7 @@ public class VolumeConfigWriterThread implements Runnable {
 
 			try {
 				Thread.sleep(duration);
-				Main.volume.setClosedGracefully(false);
-				Config.writeSDFSConfigFile(configFile);
+				writeConfig();
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("Unable to write volume config.", e);
 				this.closed = true;
@@ -31,10 +30,19 @@ public class VolumeConfigWriterThread implements Runnable {
 		}
 
 	}
+	
+	public synchronized void writeConfig() throws Exception {
+		Main.volume.setClosedGracefully(false);
+		Config.writeSDFSConfigFile(configFile);
+	}
 
 	public void stop() {
 		th.interrupt();
 		this.closed = true;
+	}
+	
+	public String getConfigFilePath() {
+		return this.configFile;
 	}
 
 }
