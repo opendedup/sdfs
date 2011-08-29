@@ -1,8 +1,9 @@
 Version 1.0.9
 	Fixes:
-	* Files now being cleaned up when deleted
+	* Mapped Files now being cleaned up when deleted
 	Enhancements
-	* SDFSCli new commands "mkdir" and "delete-file"
+	* SDFSCli new commands "expandvolume","mkdir" and "delete-file"
+	* SDFSCli authentication option added
 Version 1.0.8
 	Fixes:
 	* Windows Not Deleting files
