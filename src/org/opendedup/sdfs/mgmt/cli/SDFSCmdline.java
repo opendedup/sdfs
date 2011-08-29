@@ -92,6 +92,10 @@ public class SDFSCmdline {
 					.getOptionValue("change-password"));
 			System.exit(0);
 		}
+		if (cmd.hasOption("expandvolume")) {
+			ProcessXpandVolumeCmd.runCmd(cmd.getOptionValue("expandvolume"));
+			System.exit(0);
+		}
 		
 			
 		
@@ -106,6 +110,9 @@ public class SDFSCmdline {
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("username")
 				.withDescription("User name to authenticate to SDFS CLI Interface for volume.").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("expandvolume")
+				.withDescription("Expand the volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("change-password")
 				.withDescription("Change the administrative password.").hasArg(true)
