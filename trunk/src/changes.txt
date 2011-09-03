@@ -1,6 +1,7 @@
 Version 1.0.9
 	Fixes:
-	* Mapped Files now being cleaned up when deleted
+	* Mapped Files now being cleaned up when deleted as part of parent folder
+	* Garbage Collection now occurs on 10% increments.
 	Enhancements
 	* SDFSCli new commands "expandvolume","mkdir" and "delete-file"
 	* SDFSCli authentication option added
