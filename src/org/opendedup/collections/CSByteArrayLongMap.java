@@ -500,6 +500,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		} else {
 			added = this.put(cm, true);
 		}
+		cm =null;
 		return added;
 	}
 
@@ -575,6 +576,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
 		}
+		cm =null;
 		return added;
 	}
 

@@ -29,6 +29,14 @@ public class MountSDFS {
 				"o",
 				true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
+		options.addOption(
+				"d",
+				false,
+				"debug output");
+		options.addOption(
+				"s",
+				false,
+				"Run single threaded");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption(
@@ -38,7 +46,7 @@ public class MountSDFS {
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
-		options.addOption("h", false, "display available options");
+		options.addOption("h", false, "displays available options");
 		return options;
 	}
 
@@ -54,6 +62,12 @@ public class MountSDFS {
 		if (cmd.hasOption("h")) {
 			printHelp(options);
 			System.exit(1);
+		}
+		if (cmd.hasOption("d")) {
+			fal.add("-d");
+		}
+		if (cmd.hasOption("s")) {
+			fal.add("-s");
 		}
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
@@ -118,7 +132,9 @@ public class MountSDFS {
 					+ Main.volume.getName() + ".log";
 		SDFSService sdfsService = new SDFSService(volumeConfigFile,
 				routingConfigFile);
-
+		if (cmd.hasOption("d")) {
+			SDFSLogger.setLevel(0);
+		}
 		try {
 			sdfsService.start();
 		} catch (Exception e1) {
@@ -156,7 +172,7 @@ public class MountSDFS {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter
 				.printHelp(
-						"mount.sdfs -f -o <fuse options> -m <mount point> "
+						"mount.sdfs -o <fuse options> -m <mount point> "
 								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port>",
 						options);
 	}
