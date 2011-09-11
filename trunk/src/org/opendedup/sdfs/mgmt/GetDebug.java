@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt;
 import java.io.IOException;
 
 
+
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
@@ -14,7 +15,7 @@ import org.w3c.dom.Element;
 import com.sun.management.UnixOperatingSystemMXBean;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
+
 
 import java.io.File;
 
@@ -42,8 +43,8 @@ public class GetDebug implements XtendedCmd {
 				UnixOperatingSystemMXBean perf =  (UnixOperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean();
 				root.setAttribute("total-cpu-load", Double.toString(perf.getSystemLoadAverage()));
 				root.setAttribute("sdfs-cpu-load", Double.toString(perf.getProcessCpuLoad()));
-				root.setAttribute("total-memory", Long.toString(perf.getTotalPhysicalMemorySize()));
-				root.setAttribute("free-memory", Long.toString(perf.getFreePhysicalMemorySize()));
+				root.setAttribute("total-memory", Long.toString(Runtime.getRuntime().maxMemory()));
+				root.setAttribute("free-memory", Long.toString(Runtime.getRuntime().freeMemory()));
 			}
 			
 			
