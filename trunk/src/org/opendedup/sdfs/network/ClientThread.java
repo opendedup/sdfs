@@ -61,7 +61,6 @@ class ClientThread extends Thread {
 					+ "\r\n";
 			os.write(versionMessage.getBytes());
 			os.flush();
-
 			while (true) {
 				try {
 					byte cmd = is.readByte();
@@ -71,9 +70,11 @@ class ClientThread extends Thread {
 						break;
 					}
 					if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
+						short hops = is.readShort();
 						byte[] hash = new byte[is.readShort()];
 						is.readFully(hash);
-						boolean exists = HashChunkService.hashExists(hash);
+						boolean exists = HashChunkService.hashExists(hash,hops);
+						
 						try {
 							writelock.lock();
 							os.writeBoolean(exists);

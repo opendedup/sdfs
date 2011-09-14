@@ -10,6 +10,8 @@ import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
+import org.opendedup.sdfs.network.HashClient;
+import org.opendedup.sdfs.network.HashClientPool;
 
 public class HashChunkService {
 
@@ -25,12 +27,14 @@ public class HashChunkService {
 	private static HashStore hs = null;
 	private static AbstractChunkStore fileStore = null;
 	private static ChunkStoreGCScheduler csGC = null;
+	private static HashClientPool hcPool = null;
 
 	/**
 	 * @return the chunksFetched
 	 */
 	public static long getChunksFetched() {
 		return chunksFetched;
+
 	}
 
 	static {
@@ -59,6 +63,17 @@ public class HashChunkService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to start hashstore", e);
 			System.exit(-1);
+		}
+		if (Main.upStreamDSEHostEnabled) {
+			try {
+				hcPool = new HashClientPool(new HCServer(
+						Main.upStreamDSEHostName, Main.upStreamDSEPort, false,
+						false), "upstream", 24);
+			} catch (IOException e) {
+				System.err.println("unable to connect to upstream server");
+				e.printStackTrace();
+				System.exit(-1);
+			}
 		}
 	}
 
@@ -93,8 +108,26 @@ public class HashChunkService {
 		}
 	}
 
-	public static boolean hashExists(byte[] hash) throws IOException {
-		return hs.hashExists(hash);
+	public static boolean hashExists(byte[] hash, short hops)
+			throws IOException, HashtableFullException {
+		boolean exists = hs.hashExists(hash);
+		if (hops < Main.maxUpStreamDSEHops) {
+			if (!exists && Main.upStreamDSEHostEnabled) {
+				HashClient hc = null;
+				try {
+					hc = hcPool.borrowObject();
+
+					exists = hc.hashExists(hash, hops++);
+					if (exists) {
+						byte[] b = hc.fetchChunk(hash);
+						writeChunk(hash, b, 0, hash.length, false);
+					}
+				} finally {
+					hcPool.returnObject(hc);
+				}
+			}
+		}
+		return exists;
 	}
 
 	public static HashChunk fetchChunk(byte[] hash) throws IOException {

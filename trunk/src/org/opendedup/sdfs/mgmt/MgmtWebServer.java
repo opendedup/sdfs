@@ -155,7 +155,19 @@ public class MgmtWebServer implements Container {
 						result = "<result status=\"failed\" msg=\""
 								+ e.getMessage() + "\"/>";
 					}
-				} else if (cmd.equalsIgnoreCase("msnapshot")) {
+				}else if (cmd.equalsIgnoreCase("copyout")) {
+					try {
+						String msg = new CopyOutCmd().getResult(cmdOptions,
+								file);
+						result = "<result status=\"success\" msg=\"" + msg
+								+ "\"/>";
+					} catch (IOException e) {
+						result = "<result status=\"failed\" msg=\""
+								+ e.getMessage() + "\"/>";
+					}
+				}
+				
+				else if (cmd.equalsIgnoreCase("msnapshot")) {
 					try {
 						int snaps = request.getQuery().getInteger("snaps");
 						String msg = new MultiSnapshotCmd(snaps).getResult(

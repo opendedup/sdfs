@@ -38,7 +38,6 @@ public class HashClient {
 		this.server = server;
 		this.name = name;
 		this.openConnection();
-
 	}
 
 	public String getName() {
@@ -174,8 +173,8 @@ public class HashClient {
 		return cmd.getChunk();
 	}
 
-	public boolean hashExists(byte[] hash) throws IOException {
-		HashExistsCmd cmd = new HashExistsCmd(hash);
+	public boolean hashExists(byte[] hash,short hops) throws IOException {
+		HashExistsCmd cmd = new HashExistsCmd(hash,hops);
 		if (server.isUseUDP()) {
 			try {
 				this.executeUDPCmd(cmd);

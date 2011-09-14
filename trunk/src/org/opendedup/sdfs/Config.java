@@ -57,6 +57,11 @@ public class Config {
 			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
 			Main.useUDP = Boolean.parseBoolean(network.getAttribute("use-udp"));
 			Main.enableNetworkChunkStore = true;
+			if(network.hasAttribute("upstream-enabled")) {
+				Main.upStreamDSEHostEnabled = Boolean.parseBoolean(network.getAttribute("upstream-enabled"));
+				Main.upStreamDSEHostName = network.getAttribute("upstream-host");
+				Main.upStreamDSEPort = Integer.parseInt(network.getAttribute("upstream-host-port"));
+			}
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
@@ -254,9 +259,15 @@ public class Config {
 			if (networkcs != null) {
 				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
 						.getAttribute("enable"));
-				Main.serverHostName = networkcs.getAttribute("listen-ip");
+				Main.serverHostName = networkcs.getAttribute("hostname");
+				Main.useUDP = Boolean.parseBoolean(networkcs.getAttribute("use-udp"));
 				Main.serverPort = Integer.parseInt(networkcs
 						.getAttribute("port"));
+				if(networkcs.hasAttribute("upstream-enabled")) {
+					Main.upStreamDSEHostEnabled = Boolean.parseBoolean(networkcs.getAttribute("upstream-enabled"));
+					Main.upStreamDSEHostName = networkcs.getAttribute("upstream-host");
+					Main.upStreamDSEPort = Integer.parseInt(networkcs.getAttribute("upstream-host-port"));
+				}
 			}
 			SDFSLogger.getLog().info(
 					"######### Will allocate " + Main.chunkStoreAllocationSize

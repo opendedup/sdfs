@@ -9,14 +9,14 @@ public class ManualGC {
 
 	public static long clearChunks(int minutes) {
 		GCMain.gclock.lock();
-		if (GCMain.gcRunning) {
+		if (GCMain.isLocked()) {
 
 			GCMain.gclock.unlock();
 			return -1;
 		} else {
 
 			try {
-				GCMain.gcRunning = true;
+				GCMain.lock();
 				long tm = System.currentTimeMillis();
 				new FDisk();
 				if (Main.chunkStoreLocal) {
@@ -28,7 +28,7 @@ public class ManualGC {
 				SDFSLogger.getLog().warn("unable to finish garbage collection",
 						e);
 			} finally {
-				GCMain.gcRunning = false;
+				GCMain.unlock();
 				GCMain.gclock.unlock();
 			}
 			return 0;

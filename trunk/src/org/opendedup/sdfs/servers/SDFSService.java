@@ -10,6 +10,7 @@ import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
+import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.network.NetworkHCServer;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
@@ -20,6 +21,7 @@ public class SDFSService {
 	private SDFSGCScheduler gc = null;
 	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
+	private NetworkDSEServer ndServer= null;
 	
 
 	public SDFSService(String configFile, String routingFile) {
@@ -48,11 +50,13 @@ public class SDFSService {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		if (Main.chunkStoreLocal) {
+			HashChunkService.init();
 			if (Main.enableNetworkChunkStore) {
-				NetworkHCServer.init();
-			} else {
-				HashChunkService.init();
-			}
+				ndServer = new NetworkDSEServer();
+				new Thread(ndServer).start();
+			} 
+				
+			
 			this.stGC = new StandAloneGCScheduler();
 		}
 		MgmtWebServer.start();
@@ -99,6 +103,11 @@ public class SDFSService {
 			SDFSLogger.getLog().info(
 					"######### Shutting down HashStore ###################");
 			HashChunkService.close();
+			if (Main.enableNetworkChunkStore) {
+				ndServer.close();
+			} else {
+				
+			}
 		}
 		try {
 			Main.volume.setClosedGracefully(true);

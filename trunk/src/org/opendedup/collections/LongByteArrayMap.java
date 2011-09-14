@@ -378,9 +378,11 @@ public class LongByteArrayMap implements AbstractMap {
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
 				SDFSLogger.getLog().debug("snapping on unix/linux volume");
-				Process p = Runtime.getRuntime().exec(
-						"cp --sparse=always " + src.getPath() + " "
-								+ dest.getPath());
+				String cpCmd = 
+					"cp --sparse=always " + src.getPath() + " "
+					+ dest.getPath();
+				SDFSLogger.getLog().debug(cpCmd);
+				Process p = Runtime.getRuntime().exec(cpCmd);
 				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 			SDFSLogger.getLog()

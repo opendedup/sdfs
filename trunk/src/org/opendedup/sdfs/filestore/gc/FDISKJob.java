@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import java.io.IOException;
+
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.mtools.FDisk;
@@ -11,17 +13,21 @@ public class FDISKJob implements Job {
 	@Override
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		GCMain.gclock.lock();
-		if (GCMain.gcRunning) {
+		if (GCMain.isLocked()) {
 			GCMain.gclock.unlock();
 			return;
 		} else {
-			GCMain.gcRunning = true;
+			try {
+				GCMain.lock();
+			} catch (IOException e1) {
+				throw new JobExecutionException(e1);
+			}
 			try {
 				new FDisk();
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish executing fdisk", e);
 			} finally {
-				GCMain.gcRunning = false;
+				GCMain.unlock();
 				GCMain.gclock.unlock();
 			}
 		}
