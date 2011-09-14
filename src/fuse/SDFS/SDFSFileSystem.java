@@ -11,6 +11,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
@@ -661,9 +662,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		this.preIO(tm);
 		try {
 			File f = this.resolvePath(path);
-			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			mf.setLastAccessed(atime * 1000L);
-			mf.setLastModified(mtime * 1000L);
+			if(f.isFile()) {
+				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				mf.setLastAccessed(atime * 1000L);
+				mf.setLastModified(mtime * 1000L);
+			} else {
+				Path p = f.toPath();
+				try {
+					Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
+				}catch(IOException e) {
+					SDFSLogger.getLog().warn("unable to set time on directory " + path, e);
+				}
+			}
 		} finally {
 			this.postIO(tm);
 		}

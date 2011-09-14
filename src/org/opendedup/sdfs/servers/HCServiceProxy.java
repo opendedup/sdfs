@@ -105,7 +105,7 @@ public class HCServiceProxy {
 			HashClient hc = null;
 			try {
 				hc = getWriteHashClient(db);
-				doop = hc.hashExists(hash);
+				doop = hc.hashExists(hash,(short)0);
 				if (!doop && sendChunk) {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
@@ -128,10 +128,10 @@ public class HCServiceProxy {
 		return doop;
 	}
 
-	public static boolean hashExists(byte[] hash) throws IOException {
+	public static boolean hashExists(byte[] hash) throws IOException, HashtableFullException {
 		boolean exists = false;
 		if (Main.chunkStoreLocal) {
-			exists = HashChunkService.hashExists(hash);
+			exists = HashChunkService.hashExists(hash,(short)0);
 
 		} else {
 			String hashStr = StringUtils.getHexString(hash);
@@ -153,7 +153,7 @@ public class HCServiceProxy {
 				throw new IOException(e1);
 			}
 			try {
-				exists = hc.hashExists(hash);
+				exists = hc.hashExists(hash,(short)0);
 				if (exists) {
 					// existingHashes.put(hashStr, hashStr);
 				}

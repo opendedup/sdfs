@@ -14,9 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.collections.HashtableFullException;
@@ -432,6 +435,70 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				file.snapshot(newPath, overwrite);
 			}
 			return MetaFileStore.getMF(snaptoPath);
+		}
+	}
+	
+	/**
+	 * Clones a file and the underlying DedupFile
+	 * 
+	 * @param snaptoPath
+	 *            the path to clone to
+	 * @param overwrite
+	 *            if true, it will overwrite the destination file if it alreay
+	 *            exists
+	 * @return the new clone
+	 * @throws IOException
+	 */
+	public void copyTo(String npath, boolean overwrite)
+			throws IOException {
+		String snaptoPath = new File(npath + File.separator + "files" + this.path.substring(Main.volume.path.length())).getPath();
+		SDFSLogger.getLog().info("Copying to " + snaptoPath);
+		
+		if (!this.isDirectory()) {
+			SDFSLogger.getLog().debug("is snapshot file");
+			
+			File f = new File(snaptoPath);
+			if (f.exists() && !overwrite)
+				throw new IOException("path exists [" + snaptoPath
+						+ "]Cannot overwrite existing data ");
+			if (!f.getParentFile().exists())
+				f.getParentFile().mkdirs();
+			
+				Path p = f.toPath();
+				Files.copy(new File(this.path).toPath(),p,  StandardCopyOption.REPLACE_EXISTING,  StandardCopyOption.COPY_ATTRIBUTES);
+
+			this.getDedupFile().copyTo(npath);
+		} 
+		else {
+			SDFSLogger.getLog().debug("is snapshot dir");
+			File f = new File(snaptoPath);
+			f.mkdirs();
+			String cpCmd = 
+				"cp -rf --preserve=mode,ownership,timestamps " + this.path + " "
+				+ snaptoPath;
+			Process p = Runtime.getRuntime().exec(cpCmd);
+			try{
+				if(p.waitFor() != 0)
+					throw new IOException("unable to copy " + this.path);
+					
+			}catch(Exception e) {
+				throw new IOException(e);
+			}
+			MetaDataDedupFile dmf = MetaFileStore.getMF(snaptoPath);
+			dmf.copyDir(npath);
+		}
+	}
+	
+	private void copyDir(String npath) throws IOException {
+		MetaDataDedupFile[] files = this.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			MetaDataDedupFile file = files[i];
+			if(file.isDirectory())
+				file.copyDir(npath);
+			else{
+				SDFSLogger.getLog().debug("copy dedup file for : " + file.getPath() + " guid :" + file.getDfGuid());
+				file.getDedupFile().copyTo(npath);
+			}
 		}
 	}
 

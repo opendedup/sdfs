@@ -69,6 +69,9 @@ public class DSEConfigWriter {
 	boolean chunk_store_encrypt = false;
 	boolean awsCompress = Main.awsCompress;
 	int hashSize = 16;
+	boolean upstreamEnabled = false;
+	String upstreamHost = null;
+	int upstreamPort = 2222;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -190,6 +193,15 @@ public class DSEConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
+		if(cmd.hasOption("upstream-enabled")) {
+			if(!cmd.hasOption("upstream-host")) {
+				throw new Exception("upstream-host must be specified");
+			} else {
+				this.upstreamHost = cmd.getOptionValue("upstream-host");
+				if(cmd.hasOption("upstream-host-port"))
+					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("upstream-host-port"));
+			}
+		}
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
 		if (file.exists()) {
@@ -222,6 +234,9 @@ public class DSEConfigWriter {
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("port", Integer.toString(this.network_port));
 		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
+		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
+		network.setAttribute("upstream-host", this.upstreamHost);
+		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
 		root.appendChild(network);
 		Element loc = xmldoc.createElement("locations");
 		loc.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -401,13 +416,31 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-udp")
 				.withDescription(
-						"Enable udp for some communication between Volume and DSE. Defaults to false")
-				.hasArg().withArgName("true|false").create());
+						"Enable udp for some communication between Volume and DSE. Defaults to false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-ip")
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
 				.hasArg().withArgName("IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("listen-port")
+				.withDescription(
+						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("IP Port").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("upstream-enabled")
+				.withDescription(
+						"Enable Upstream Dedup Storage Engine communication").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("upstream-host")
+				.withDescription(
+						"Host name or IPv4 Address ")
+				.hasArg().withArgName("FQDN or IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("upstream-host-port")
+				.withDescription(
+						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("IP Port").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-port")
 				.withDescription(

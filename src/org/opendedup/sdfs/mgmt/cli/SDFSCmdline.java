@@ -48,6 +48,17 @@ public class SDFSCmdline {
 			ProcessDebugInfo.runCmd();
 			System.exit(0);
 		}
+		
+		if (cmd.hasOption("copy-out")) {
+			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
+				ProcessCopyOutCmd.runCmd(cmd.getOptionValue("file-path"),
+						cmd.getOptionValue("snapshot-path"));
+			} else {
+				System.out
+						.println("copy-out request failed. --file-path and --snapshot-path options are required");
+			}
+			System.exit(0);
+		}
 
 		if (cmd.hasOption("snapshot")) {
 			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
@@ -150,6 +161,12 @@ public class SDFSCmdline {
 				.withDescription(
 						"Creates a snapshot for a particular file or folder.\n e.g. --snapshot "
 								+ "--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("copy-out")
+				.withDescription(
+						"Creates a copy for a particular file or folder.\n e.g. --snapshot "
+								+ "--file-path=<source-file> --snapshot-path=<physical-destination> ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")

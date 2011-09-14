@@ -68,6 +68,17 @@ public interface DedupFile {
 	 */
 	public abstract DedupFile snapshot(MetaDataDedupFile mf)
 			throws IOException, HashtableFullException;
+	
+	/**
+	 * Clones the DedupFile
+	 * 
+	 * @param mf
+	 *            the MetaDataDedupFile to clone
+	 * @return the cloned DedupFile
+	 * @throws IOException
+	 */
+	public abstract void copyTo(String path)
+			throws IOException;
 
 	/**
 	 * Deletes the DedupFile and all on disk references

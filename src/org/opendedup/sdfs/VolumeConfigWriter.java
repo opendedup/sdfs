@@ -95,6 +95,14 @@ public class VolumeConfigWriter {
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
 	
+	boolean upstreamEnabled = false;
+	String upstreamHost = null;
+	int upstreamPort = 2222;
+	boolean use_udp = false;
+	int network_port = 2222;
+	String list_ip = "0.0.0.0";
+	boolean networkEnable = false;
+	
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -313,6 +321,29 @@ public class VolumeConfigWriter {
 			this.chunk_store_allocation_size = StringUtils
 					.parseSize(this.volume_capacity);
 		}
+		if (cmd.hasOption("dse-enable-network")) {
+			this.networkEnable = true;
+		}
+		if (cmd.hasOption("dse-enable-udp")) {
+			this.use_udp = true;
+		}
+		if (cmd.hasOption("dse-listen-ip")) {
+			this.list_ip = cmd.getOptionValue("dse-listen-ip");
+			this.networkEnable = true;
+		}
+		if (cmd.hasOption("dse-listen-port")) {
+			this.network_port = Integer.parseInt(cmd
+					.getOptionValue("listen-port"));
+		}
+		if(cmd.hasOption("dse-upstream-enabled")) {
+			if(!cmd.hasOption("dse-upstream-host")) {
+				throw new Exception("dse-upstream-host must be specified");
+			} else {
+				this.upstreamHost = cmd.getOptionValue("dse-upstream-host");
+				if(cmd.hasOption("dse-upstream-host-port"))
+					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("dse-upstream-host-port"));
+			}
+		}
 
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
@@ -407,7 +438,15 @@ public class VolumeConfigWriter {
 				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
-
+		Element network = xmldoc.createElement("network");
+		network.setAttribute("hostname", this.list_ip);
+		network.setAttribute("enable", Boolean.toString(networkEnable));
+		network.setAttribute("port", Integer.toString(this.network_port));
+		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
+		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
+		network.setAttribute("upstream-host", this.upstreamHost);
+		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
+		cs.appendChild(network);
 		Element launchParams = xmldoc.createElement("launch-params");
 		launchParams.setAttribute("class-path", Main.classPath);
 		launchParams.setAttribute("java-path", Main.javaPath);
@@ -483,7 +522,7 @@ public class VolumeConfigWriter {
 						).hasArg(true).withArgName("password")
 				.create());
 		options.addOption(OptionBuilder
-				.withLongOpt("sdfscli-requre-auth")
+				.withLongOpt("sdfscli-require-auth")
 				.withDescription("Require authentication to connect to the sdfscli managment interface"
 						).hasArg(false)
 				.create());
@@ -694,9 +733,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-size")
 				.withDescription(
-						"The size in bytes of the Dedup Storeage Engine. "
+						"The size in MB,TB,GB of the Dedup Storeage Engine. "
 								+ "This . \n Defaults to: \n The size of the Volume")
-				.hasArg().withArgName("BYTES").create());
+				.hasArg().withArgName("MB|GB|TB").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("hash-size")
 				.withDescription(
@@ -776,6 +815,43 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Compress chunks before they are sent to the Google Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-enable-udp")
+				.withDescription(
+						"Enable udp for some communication between Volume and DSE. Defaults to false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-listen-ip")
+				.withDescription(
+						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
+				.hasArg().withArgName("IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-listen-port")
+				.withDescription(
+						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("IP Port").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-upstream-enabled")
+				.withDescription(
+						"Enable Upstream Dedup Storage Engine communication").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-upstream-host")
+				.withDescription(
+						"Host name or IPv4 Address ")
+				.hasArg().withArgName("FQDN or IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-upstream-host-port")
+				.withDescription(
+						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("IP Port").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-listen-port")
+				.withDescription(
+						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("IP Port").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("dse-enable-network")
+				.withDescription(
+						"Enable Network Services for Dedup Storage Enginge to serve outside hosts").create());
 		return options;
 	}
 
@@ -797,12 +873,11 @@ public class VolumeConfigWriter {
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 		} catch (Exception e) {
-
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());
-			e.printStackTrace();
 			System.exit(-1);
 		}
+		System.exit(0);
 	}
 
 	private static void printHelp(Options options) {
