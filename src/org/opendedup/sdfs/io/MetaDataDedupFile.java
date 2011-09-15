@@ -451,16 +451,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void copyTo(String npath, boolean overwrite)
 			throws IOException {
-		String snaptoPath = new File(npath + File.separator + "files" + this.path.substring(Main.volume.path.length())).getPath();
+		String snaptoPath = new File(npath + File.separator + "files").getPath();
 		SDFSLogger.getLog().info("Copying to " + snaptoPath);
+		File f = new File(snaptoPath);
+		if (f.exists() && !overwrite)
+			throw new IOException("path exists [" + snaptoPath
+					+ "]Cannot overwrite existing data ");
 		
 		if (!this.isDirectory()) {
-			SDFSLogger.getLog().debug("is snapshot file");
 			
-			File f = new File(snaptoPath);
-			if (f.exists() && !overwrite)
-				throw new IOException("path exists [" + snaptoPath
-						+ "]Cannot overwrite existing data ");
+			
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
 			
@@ -471,15 +471,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} 
 		else {
 			SDFSLogger.getLog().debug("is snapshot dir");
-			File f = new File(snaptoPath);
-			f.mkdirs();
+			if (!f.exists())
+				f.mkdirs();
 			String cpCmd = 
 				"cp -rf --preserve=mode,ownership,timestamps " + this.path + " "
 				+ snaptoPath;
 			Process p = Runtime.getRuntime().exec(cpCmd);
 			try{
-				if(p.waitFor() != 0)
-					throw new IOException("unable to copy " + this.path);
+				int ecode =p.waitFor();
+				if(ecode != 0)
+					throw new IOException("unable to copy " + this.path + " cp exit code is " + ecode);
 					
 			}catch(Exception e) {
 				throw new IOException(e);

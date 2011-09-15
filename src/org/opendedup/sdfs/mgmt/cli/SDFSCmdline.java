@@ -59,6 +59,16 @@ public class SDFSCmdline {
 			}
 			System.exit(0);
 		}
+		
+		if (cmd.hasOption("archive-out")) {
+			if (cmd.hasOption("file-path")) {
+				ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("file-path"));
+			} else {
+				System.out
+						.println("archive-out request failed. --file-path option is required");
+			}
+			System.exit(0);
+		}
 
 		if (cmd.hasOption("snapshot")) {
 			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
@@ -167,6 +177,12 @@ public class SDFSCmdline {
 				.withDescription(
 						"Creates a copy for a particular file or folder.\n e.g. --snapshot "
 								+ "--file-path=<source-file> --snapshot-path=<physical-destination> ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("archive-out")
+				.withDescription(
+						"Creates an archive tar for a particular file or folder and outputs the location.\n e.g. --snapshot "
+								+ "--file-path=<source-file> ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")

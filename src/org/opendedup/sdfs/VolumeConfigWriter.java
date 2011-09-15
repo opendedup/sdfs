@@ -344,6 +344,16 @@ public class VolumeConfigWriter {
 					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("dse-upstream-host-port"));
 			}
 		}
+		if(cmd.hasOption("enable-replication-master")) {
+			this.sdfsCliRequireAuth = true;
+			this.sdfsCliListenAddr = "0.0.0.0";
+			this.networkEnable = true;
+		}
+		if(cmd.hasOption("enable-replication-slave")) {
+			if(!cmd.hasOption("replication-master"))
+				throw new Exception("replication-master must be specified");
+			this.upstreamHost = cmd.getOptionValue("replication-master");
+		}
 
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
@@ -852,6 +862,20 @@ public class VolumeConfigWriter {
 				.withLongOpt("dse-enable-network")
 				.withDescription(
 						"Enable Network Services for Dedup Storage Enginge to serve outside hosts").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("enable-replication-master")
+				.withDescription(
+						"Enable this volume as a replication master").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("enable-replication-slave")
+				.withDescription(
+						"Enable this volume as a replication slave").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-master")
+				.withDescription(
+						"The Replication master for this slave").withDescription(
+						"Host name or IPv4 Address ")
+						.hasArg().withArgName("FQDN or IPv4 Address").create());
 		return options;
 	}
 
