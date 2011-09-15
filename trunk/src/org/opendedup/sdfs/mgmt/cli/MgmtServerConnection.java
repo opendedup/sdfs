@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 
 public class MgmtServerConnection {
 	public static int port = 6442;
+	public static String server = "localhost";
 	public static String userName = null;
 	public static String password = null;
 	public static Document getResponse(String url) throws IOException {
@@ -19,7 +20,7 @@ public class MgmtServerConnection {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(connectAndGet(url));
+			Document doc = db.parse(connectAndGet(url,""));
 			doc.getDocumentElement().normalize();
 			return doc;
 		} catch (Exception e) {
@@ -27,14 +28,18 @@ public class MgmtServerConnection {
 		}
 	}
 
-	private static InputStream connectAndGet(String url) {
+	public static InputStream connectAndGet(String url,String file) {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "SDFS Client");
 		if(userName != null && password != null)
-			url = url + "&username="+userName+"&password="+password;
-		GetMethod method = new GetMethod("http://localhost:"+port +"/?" + url);
+			if(url.trim().length() ==0)
+				url = "username="+userName+"&password="+password;
+			else
+				url = url + "&username="+userName+"&password="+password;
+		GetMethod method = new GetMethod("http://"+server+":"+port +"/"+file+ "?" + url);
 		try {
 			int returnCode = client.executeMethod(method);
+			System.out.println("got return code " + returnCode);
 			if (returnCode != 200)
 				throw new IOException("Unable to process command "
 						+ method.getQueryString() + " return code was"

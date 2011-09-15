@@ -94,8 +94,7 @@ public class Config {
 			}
 			Main.evictionAge = Integer.parseInt(cbe
 					.getAttribute("eviction-age"));
-			if (cbe.hasAttribute("chunk-store-read-cache"))
-				;
+			if (cbe.hasAttribute("chunk-store-read-cache"));
 			Main.chunkStorePageCache = Integer.parseInt(cbe
 					.getAttribute("chunk-store-read-cache"));
 			if (cbe.hasAttribute("chunk-store-dirty-timeout"))

@@ -23,7 +23,7 @@ public class FDISKJob implements Job {
 				throw new JobExecutionException(e1);
 			}
 			try {
-				new FDisk();
+				//new FDisk();
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish executing fdisk", e);
 			} finally {
