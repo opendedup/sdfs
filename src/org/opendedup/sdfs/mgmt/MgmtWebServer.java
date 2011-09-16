@@ -20,9 +20,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
-
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath())
@@ -41,24 +38,15 @@ public class MgmtWebServer implements Container {
 			String result = "<result status=\"failed\" msg=\"could not authenticate user\"/>";
 			boolean auth = false;
 			if (Main.sdfsCliRequireAuth) {
-				String userName = request.getQuery().get("username");
-				if (userName != null
-						&& userName.equalsIgnoreCase(Main.sdfsCliUserName)) {
-					String password = request.getQuery().get("password");
-					if (password != null) {
-						String hash = HashFunctions.getSHAHash(password.trim()
-								.getBytes(), Main.sdfsCliSalt.getBytes());
-						if (hash.equals(Main.sdfsCliPassword))
-							auth = true;
-					} else {
-						SDFSLogger.getLog().warn(
-								"could not authenticate user " + userName
-										+ " to cli");
-					}
+				String password = request.getQuery().get("password");
+				if (password != null) {
+					String hash = HashFunctions.getSHAHash(password.trim()
+							.getBytes(), Main.sdfsCliSalt.getBytes());
+					if (hash.equals(Main.sdfsCliPassword))
+						auth = true;
 				} else {
 					SDFSLogger.getLog().warn(
-							"could find user " + userName
-									+ " to authenticate to cli");
+							"could not authenticate user  to cli");
 				}
 			} else
 				auth = true;
@@ -173,10 +161,9 @@ public class MgmtWebServer implements Container {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
 						}
-					} else if (cmd.equalsIgnoreCase("copyout")) {
+					} else if (cmd.equalsIgnoreCase("importarchive")) {
 						try {
-							String msg = new CopyOutCmd().getResult(cmdOptions,
-									file);
+							String msg = new ImportArchiveCmd().getResult(file,cmdOptions);
 							result = "<result status=\"success\" msg=\"" + msg
 									+ "\"/>";
 						} catch (IOException e) {
@@ -268,50 +255,66 @@ public class MgmtWebServer implements Container {
 						}
 					}
 				}
-					PrintStream body = response.getPrintStream();
-					long time = System.currentTimeMillis();
+				PrintStream body = response.getPrintStream();
+				long time = System.currentTimeMillis();
 
-					response.set("Content-Type", "text/xml");
-					response.set("Server", "SDFS Management Server");
-					response.setDate("Date", time);
-					response.setDate("Last-Modified", time);
-					body.println(result);
-					body.close();
-				 }
-			else {
-				if(!auth) {
+				response.set("Content-Type", "text/xml");
+				response.set("Server", "SDFS Management Server");
+				response.setDate("Date", time);
+				response.setDate("Last-Modified", time);
+				body.println(result);
+				body.close();
+			} else {
+				if (!auth) {
 					PrintStream body = response.getPrintStream();
 					response.setCode(403);
 					body.println("authentication required");
-					
-				}
-				File f = new File(archivePath + File.separator
-						+ reqPath.getPath());
-				if (f.exists()) {
-					long time = System.currentTimeMillis();
-					response.set("Content-Type", "application/x-gtar");
-					response.set("Server", "SDFS Management Server");
-					response.setDate("Date", time);
-					response.setDate("Last-Modified", time);
-					response.set("Content-Length", Long.toString(f.length()));
-					InputStream in = new FileInputStream(f);
-					OutputStream out = response.getOutputStream();
-					byte[] buf = new byte[32768];
-					int len;
-					while ((len = in.read(buf)) > 0) {
-						out.write(buf, 0, len);
-					}
-					in.close();
-					out.close();
-				} else {
+
+				} else if (reqPath.getPath().contains("..")) {
 					response.setCode(404);
 					PrintStream body = response.getPrintStream();
 					body.println("could not find " + reqPath);
+					body.close();
+				} else {
+
+					File f = new File(archivePath + File.separator
+							+ reqPath.getPath());
+					if (f.exists()) {
+						long time = System.currentTimeMillis();
+						response.set("Content-Type", "application/x-gtar");
+						response.set("Server", "SDFS Management Server");
+						response.setDate("Date", time);
+						response.setDate("Last-Modified", time);
+						response.set("Content-Length",
+								Long.toString(f.length()));
+						InputStream in = new FileInputStream(f);
+						OutputStream out = response.getOutputStream();
+						byte[] buf = new byte[32768];
+						int len;
+						while ((len = in.read(buf)) > 0) {
+							out.write(buf, 0, len);
+						}
+						in.close();
+						out.close();
+					} else {
+						response.setCode(404);
+						PrintStream body = response.getPrintStream();
+						body.println("could not find " + reqPath);
+						body.close();
+					}
 				}
 			}
 		} catch (Exception e) {
-			response.setMajor(500);
-			e.printStackTrace();
+			response.setCode(500);
+			try {
+				PrintStream body = response.getPrintStream();
+				body.println(e.toString());
+				body.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				SDFSLogger.getLog().error("unable to satify request ", e1);
+			}
+			SDFSLogger.getLog().error("unable to satify request ", e);
 		}
 	}
 

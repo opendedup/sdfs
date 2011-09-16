@@ -1,14 +1,13 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import org.apache.commons.cli.CommandLine;
+
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Level;
+import org.opendedup.util.SDFSLogger;
 
 public class SDFSCmdline {
 	public static void parseCmdLine(String[] args) throws Exception {
@@ -19,8 +18,11 @@ public class SDFSCmdline {
 			printHelp(options);
 			System.exit(1);
 		}
-		if(cmd.hasOption("username"))
-			MgmtServerConnection.userName = cmd.getOptionValue("username");
+		boolean quiet = false;
+		if(cmd.hasOption("debug"))
+			SDFSLogger.setLevel(0);
+		if(cmd.hasOption("server"))
+			MgmtServerConnection.server = cmd.getOptionValue("server");
 		if(cmd.hasOption("password"))
 			MgmtServerConnection.password = cmd.getOptionValue("password");
 		if(cmd.hasOption("port"))
@@ -31,8 +33,7 @@ public class SDFSCmdline {
 				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
 
 			} else {
-				System.out
-						.println("file info request failed. --file-path option is required");
+				SDFSLogger.getBasicLog().warn("file info request failed. --file-path option is required");
 			}
 			System.exit(0);
 		}
@@ -48,26 +49,11 @@ public class SDFSCmdline {
 			ProcessDebugInfo.runCmd();
 			System.exit(0);
 		}
-		
-		if (cmd.hasOption("copy-out")) {
-			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
-				ProcessCopyOutCmd.runCmd(cmd.getOptionValue("file-path"),
-						cmd.getOptionValue("snapshot-path"));
-			} else {
-				System.out
-						.println("copy-out request failed. --file-path and --snapshot-path options are required");
-			}
-			System.exit(0);
+		if(cmd.hasOption("import-archive")) {
+			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),quiet);
 		}
-		
 		if (cmd.hasOption("archive-out")) {
-			if (cmd.hasOption("file-path")) {
-				ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("file-path"));
-			} else {
-				System.out
-						.println("archive-out request failed. --file-path option is required");
-			}
-			System.exit(0);
+			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"));
 		}
 
 		if (cmd.hasOption("snapshot")) {
@@ -75,8 +61,7 @@ public class SDFSCmdline {
 				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),
 						cmd.getOptionValue("snapshot-path"));
 			} else {
-				System.out
-						.println("snapshot request failed. --file-path and --snapshot-path options are required");
+				SDFSLogger.getBasicLog().warn("snapshot request failed. --file-path and --snapshot-path options are required");
 			}
 			System.exit(0);
 		}
@@ -85,7 +70,7 @@ public class SDFSCmdline {
 				ProcessFlushBuffersCmd.runCmd("file",
 						cmd.getOptionValue("file-path"));
 			} else {
-				System.out.println("flush file request failed. --file-path");
+				SDFSLogger.getBasicLog().warn("flush file request failed. --file-path");
 			}
 			System.exit(0);
 		}
@@ -98,8 +83,7 @@ public class SDFSCmdline {
 				ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"),
 						cmd.getOptionValue("dedup-file"));
 			} else {
-				System.out
-						.println("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
+				SDFSLogger.getBasicLog().warn("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
 			}
 			System.exit(0);
 		}
@@ -117,10 +101,6 @@ public class SDFSCmdline {
 			ProcessXpandVolumeCmd.runCmd(cmd.getOptionValue("expandvolume"));
 			System.exit(0);
 		}
-		
-			
-		
-
 	}
 
 	@SuppressWarnings("static-access")
@@ -129,8 +109,8 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder.withLongOpt("help")
 				.withDescription("Display these options.").hasArg(false)
 				.create());
-		options.addOption(OptionBuilder.withLongOpt("username")
-				.withDescription("User name to authenticate to SDFS CLI Interface for volume.").hasArg(true)
+		options.addOption(OptionBuilder.withLongOpt("server")
+				.withDescription("SDFS host location.").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("expandvolume")
 				.withDescription("Expand the volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.").hasArg(true)
@@ -173,17 +153,22 @@ public class SDFSCmdline {
 								+ "--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
-				.withLongOpt("copy-out")
+				.withLongOpt("debug")
 				.withDescription(
-						"Creates a copy for a particular file or folder.\n e.g. --snapshot "
-								+ "--file-path=<source-file> --snapshot-path=<physical-destination> ")
+						"makes output more verbose")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("archive-out")
 				.withDescription(
-						"Creates an archive tar for a particular file or folder and outputs the location.\n e.g. --snapshot "
-								+ "--file-path=<source-file> ")
-				.hasArg(false).create());
+						"Creates an archive tar for a particular file or folder and outputs the location.\n e.g. --archive-out "
+								+ "<source-file> ")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("import-archive")
+				.withDescription(
+						"Imports an archive created using archive out.\n e.g. --import-archive <archive created with archive-out> "
+								+ "--file-path=<relative-folder-destination> ")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")
 				.withDescription(
@@ -229,16 +214,14 @@ public class SDFSCmdline {
 	}
 
 	public static void main(String[] args) throws Exception {
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.ERROR);
 		try {
 			parseCmdLine(args);
 		} catch (org.apache.commons.cli.UnrecognizedOptionException e) {
-			System.out.println(e.getMessage());
+			SDFSLogger.getBasicLog().warn(e.toString());
 			printHelp(buildOptions());
 		} catch (Exception e) {
-			System.out
-					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
+			SDFSLogger.getBasicLog().error("An error occured",e);
+			System.exit(-1);
 		}
 
 	}

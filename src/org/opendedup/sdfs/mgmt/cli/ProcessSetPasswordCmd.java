@@ -13,7 +13,6 @@ public class ProcessSetPasswordCmd {
 			newpassword = URLEncoder.encode(newpassword, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-
 			formatter.format("cmd=changepassword&newpassword=%s", newpassword);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();

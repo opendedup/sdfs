@@ -87,7 +87,6 @@ public class VolumeConfigWriter {
 	int hashSize = 16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
-	String sdfsCliUserName = "admin";
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
 	String sdfsCliListenAddr = "localhost";
@@ -468,7 +467,6 @@ public class VolumeConfigWriter {
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth",
 				Boolean.toString(this.sdfsCliRequireAuth));
-		sdfscli.setAttribute("username", this.sdfsCliUserName);
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
 		try {
 			sdfscli.setAttribute("password", HashFunctions.getSHAHash(
@@ -528,7 +526,7 @@ public class VolumeConfigWriter {
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-password")
-				.withDescription("The password used to authenticate to the sdfscli management interface. The default username is admin and the default password is admin as well."
+				.withDescription("The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\"."
 						).hasArg(true).withArgName("password")
 				.create());
 		options.addOption(OptionBuilder
