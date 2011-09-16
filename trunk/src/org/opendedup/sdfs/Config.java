@@ -292,7 +292,6 @@ public class Config {
 						.getAttribute("enable"));
 				Main.sdfsCliPassword = cli.getAttribute("password");
 				Main.sdfsCliSalt = cli.getAttribute("salt");
-				Main.sdfsCliUserName = cli.getAttribute("username");
 				Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
 				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
 						.getAttribute("enable-auth"));
@@ -331,8 +330,6 @@ public class Config {
 			cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
 			cli.setAttribute("password", Main.sdfsCliPassword);
 			cli.setAttribute("salt", Main.sdfsCliSalt);
-
-			cli.setAttribute("username", Main.sdfsCliUserName);
 			cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 			cli.setAttribute("enable-auth",
 					Boolean.toString(Main.sdfsCliRequireAuth));
