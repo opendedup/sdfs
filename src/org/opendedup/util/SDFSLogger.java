@@ -2,7 +2,6 @@ package org.opendedup.util;
 
 import java.io.IOException;
 
-
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.Level;
@@ -16,8 +15,7 @@ public class SDFSLogger {
 	private static Logger log = Logger.getLogger("sdfs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	static {
-		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout(
-		"%m%n"));
+		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
 		basicLog.setLevel(Level.INFO);
 		RollingFileAppender app = null;
@@ -37,7 +35,7 @@ public class SDFSLogger {
 	public static Logger getLog() {
 		return log;
 	}
-	
+
 	public static Logger getBasicLog() {
 		return basicLog;
 	}
@@ -48,9 +46,13 @@ public class SDFSLogger {
 		else
 			log.setLevel(Level.INFO);
 	}
-	
+
 	public static void setToFileAppender(String file) {
-		log.removeAllAppenders();
+		try {
+			log.removeAllAppenders();
+		} catch (Exception e) {
+
+		}
 		RollingFileAppender app = null;
 		try {
 			app = new RollingFileAppender(new PatternLayout(

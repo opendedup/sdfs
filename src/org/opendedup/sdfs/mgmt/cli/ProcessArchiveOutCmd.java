@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 
 public class ProcessArchiveOutCmd {
 	public static void runCmd(String file) throws IOException {
-			SDFSLogger.getBasicLog().debug("archive a copy of ["+file+"]");
+			SDFSLogger.getLog().debug("archive a copy of ["+file+"]");
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
@@ -21,7 +21,7 @@ public class ProcessArchiveOutCmd {
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			SDFSLogger.getBasicLog().debug("getting " + msg);
+			SDFSLogger.getLog().debug("getting " + msg);
 			InputStream in = MgmtServerConnection.connectAndGet("", msg);
 			FileOutputStream out = new FileOutputStream(msg);
 			byte[] buf = new byte[32768];
@@ -31,9 +31,8 @@ public class ProcessArchiveOutCmd {
 			}
 			in.close();
 			out.close();
-			
-			SDFSLogger.getBasicLog().debug("Copy Out ["+status+"] returned ["+msg+"]");
-			SDFSLogger.getBasicLog().info(msg);
+			SDFSLogger.getLog().debug("Copy Out ["+status+"] returned ["+msg+"]");
+			SDFSLogger.getLog().info(msg);
 			if(status.equalsIgnoreCase("failed"))
 				throw new IOException("archive failed because " +msg);
 
