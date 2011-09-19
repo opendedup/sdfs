@@ -22,9 +22,9 @@ public class ChunkClaimJob implements Job {
 				throw new JobExecutionException(e1);
 			}
 			try {
-				long tm = System.currentTimeMillis() - (1 * 60 * 1000);
-				//HashChunkService.processHashClaims();
-				//HashChunkService.removeStailHashes(tm, true);
+				long tm = System.currentTimeMillis() - (5 * 60 * 1000);
+				HashChunkService.processHashClaims();
+				HashChunkService.removeStailHashes(tm, true);
 			} catch (Exception e) {
 				throw new JobExecutionException(e);
 			} finally {

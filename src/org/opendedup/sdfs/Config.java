@@ -73,6 +73,8 @@ public class Config {
 			if (cbe.hasAttribute("chunkstore-class")) {
 				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
 			}
+			if(cbe.hasAttribute("hashdb-class"))
+				Main.hashesDBClass = cbe.getAttribute("hashdb-class");
 			if (cbe.getElementsByTagName("extended-config").getLength() > 0) {
 				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName(
 						"extended-config").item(0);
@@ -234,6 +236,8 @@ public class Config {
 			if (localChunkStore.hasAttribute("chunkstore-class"))
 				Main.chunkStoreClass = localChunkStore
 						.getAttribute("chunkstore-class");
+			if(localChunkStore.hasAttribute("hashdb-class"))
+				Main.hashesDBClass = localChunkStore.getAttribute("hashdb-class");
 			if (localChunkStore.getElementsByTagName("extended-config")
 					.getLength() > 0) {
 				Main.chunkStoreConfig = (Element) localChunkStore

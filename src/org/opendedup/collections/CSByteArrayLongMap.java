@@ -289,41 +289,18 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						}
 
 						if (!corrupt) {
-							boolean foundFree = Arrays.equals(cm.getHash(),
-									FREE);
-							boolean foundReserved = Arrays.equals(cm.getHash(),
-									REMOVED);
 							long value = cm.getcPos();
-
-							if (!cm.ismDelete()) {
-								if (foundFree) {
-									this.freeValue = value;
-									SDFSLogger.getLog().info(
-											"found free  key  with value "
-													+ value);
-								} else if (foundReserved) {
-									this.resValue = value;
-									SDFSLogger.getLog().info(
-											"found reserve  key  with value "
-													+ value);
-								} else {
-									if (cm.getHash().length > 0) {
-										boolean added = this.put(cm, false);
-										if (added)
-											this.kSz++;
-										if (value > endPos)
-											endPos = value + Main.CHUNK_LENGTH;
-									} else {
-										SDFSLogger
-												.getLog()
-												.debug("found free slot at "
-														+ ((currentPos / raw.length) * Main.chunkStorePageSize));
-										this.addFreeSlot((currentPos / raw.length)
-												* Main.chunkStorePageSize);
-										freeSl++;
-									}
-								}
-							}
+							boolean added = this.put(cm, false);
+							if (added)
+								this.kSz++;
+							if (cm.ismDelete()) {
+								this.remove(cm, false);
+								this.addFreeSlot((currentPos / raw.length)
+										* Main.chunkStorePageSize);
+								freeSl++;
+								this.kSz--;
+							} else if (value > endPos)
+								endPos = value + Main.CHUNK_LENGTH;
 						}
 					}
 				} catch (BufferUnderflowException e) {
@@ -500,7 +477,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		} else {
 			added = this.put(cm, true);
 		}
-		cm =null;
+		cm = null;
 		return added;
 	}
 
@@ -576,7 +553,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
 		}
-		cm =null;
+		cm = null;
 		return added;
 	}
 
@@ -703,6 +680,10 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
+	public boolean remove(ChunkData cm) throws IOException {
+		return this.remove(cm, true);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -710,8 +691,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	 * org.opendedup.collections.AbstractHashesMap#remove(org.opendedup.sdfs
 	 * .filestore.ChunkData)
 	 */
-	@Override
-	public boolean remove(ChunkData cm) throws IOException {
+
+	public boolean remove(ChunkData cm, boolean persist) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
@@ -723,17 +704,19 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				return false;
 			} else {
 				cm.setmDelete(true);
-				this.arlock.lock();
-				if (this.isClosed()) {
-					throw new IOException("hashtable [" + this.fileName
-							+ "] is close");
-				}
-				try {
-					this.kBuf.add(cm);
-				} catch (Exception e) {
-				} finally {
+				if (persist) {
+					this.arlock.lock();
+					if (this.isClosed()) {
+						throw new IOException("hashtable [" + this.fileName
+								+ "] is close");
+					}
+					try {
+						this.kBuf.add(cm);
+					} catch (Exception e) {
+					} finally {
 
-					this.arlock.unlock();
+						this.arlock.unlock();
+					}
 				}
 
 				return true;

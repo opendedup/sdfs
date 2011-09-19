@@ -124,11 +124,7 @@ public class LongByteArrayMap implements AbstractMap {
 					_cpos = (long) (iterPos * (long) arrayLength);
 				}
 			}
-			if ((iterPos * arrayLength) != pbdb.size()) {
-				SDFSLogger.getLog().warn(
-						"did not reach end of file for [" + this.filePath
-								+ "] len=" + iterPos * arrayLength
-								+ " file len =" + pbdb.size());
+			if ((iterPos * arrayLength) < pbdb.size()) {
 				this.hashlock.lock();
 				try {
 					flen = this.pbdb.size();

@@ -76,7 +76,19 @@ public class MgmtWebServer implements Container {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
 						}
-					} else if (cmd.equalsIgnoreCase("makefolder")) {
+					}else if (cmd.equalsIgnoreCase("deletearchive")) {
+						try {
+							String msg = new DeleteArchiveCmd().getResult(
+									cmdOptions, file);
+							result = "<result status=\"success\" msg=\"command completed successfully\">";
+							result = result + msg;
+							result = result + "</result>";
+						} catch (IOException e) {
+							result = "<result status=\"failed\" msg=\""
+									+ e.getMessage() + "\"/>";
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("makefolder")) {
 						try {
 							String msg = new MakeFolderCmd().getResult(
 									cmdOptions, file);
@@ -296,6 +308,7 @@ public class MgmtWebServer implements Container {
 						}
 						in.close();
 						out.close();
+						f.delete();
 					} else {
 						response.setCode(404);
 						PrintStream body = response.getPrintStream();

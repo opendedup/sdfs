@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -15,10 +16,10 @@ public class ArchiveOutCmd implements XtendedCmd {
 
 	@Override
 	public String getResult(String cmd, String file) throws IOException {
-		return takeSnapshot(file);
+		return archiveOut(file);
 	}
 
-	private String takeSnapshot(String srcPath)
+	private String archiveOut(String srcPath)
 			throws IOException {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File vp = new File(Main.volume.getPath()).getParentFile();
@@ -33,8 +34,6 @@ public class ArchiveOutCmd implements XtendedCmd {
 			TFile src = new TFile(nf);
 			src.cp_rp(dest);
 			TFile.umount(dest);
-			Process p = Runtime.getRuntime().exec("rm -rf " + nf.getPath());
-			p.waitFor();
 			return nf.getName() + ".tar.gz";
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
@@ -45,6 +44,9 @@ public class ArchiveOutCmd implements XtendedCmd {
 					"Unable to take archive of Source ["
 							+ srcPath + "] " + "Destination [" + nf.getPath()
 							+ "] because :" + e.toString());
+		} finally {
+			FileUtils.deleteDirectory(new File(nf.getPath()));
+			nf.delete();
 		}
 	}
 

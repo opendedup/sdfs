@@ -2,15 +2,18 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
+import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.Tiger16HashEngine;
+import org.opendedup.hashing.TigerHashEngine;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.SDFSLogger;
@@ -35,10 +38,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	File f;
 	Path p;
 	private long currentLength = 0L;
-	private ArrayList<AbstractChunkStoreListener> listeners = new ArrayList<AbstractChunkStoreListener>();
 	private String name;
 
 	private byte[] FREE = new byte[pageSize];
+	private FileChannel iterFC = null;
+	private AbstractHashEngine hc = null;
 
 	/**
 	 * 
@@ -223,10 +227,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf.close();
 	}
 
-	@Override
-	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
-		this.listeners.add(listener.getID(), listener);
-	}
+
 
 	public void close() {
 		try {
@@ -284,14 +285,50 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
+		if(iterFC.position() >= this.currentLength)
+			return null;
+		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
+		long pos = -1;
+		try {
+			pos = iterFC.position();
+			iterFC.read(fbuf);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"unable to fetch chunk at position " + iterFC.position(), e);
+			throw new IOException(e);
+		} finally {
+			try {
+			} catch (Exception e) {
+			}
+		}
+		byte [] hash = hc.getHash(fbuf.array());
+		return new ChunkData(hash,pos);
+			
+	}
+
+	private ReentrantLock iterlock = new ReentrantLock();
+	public void iterationInit() throws IOException {
+		this.iterlock.lock();
+		try {
+		if(Main.hashLength == 16) {
+			hc = new Tiger16HashEngine();
+			//hc = new MD5CudaHash();
+		}else {
+			hc = new TigerHashEngine();
+		}
+			this.iterFC = chunkDataWriter.getChannel();
+		}catch(Exception e) {
+			throw new IOException( e);
+		}finally {
+			this.iterlock.unlock();
+		}
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
-	public void iterationInit() {
+	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }

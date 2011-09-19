@@ -19,7 +19,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.collections.HashtableFullException;
@@ -437,7 +436,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			return MetaFileStore.getMF(snaptoPath);
 		}
 	}
-	
+
 	/**
 	 * Clones a file and the underlying DedupFile
 	 * 
@@ -449,56 +448,83 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public void copyTo(String npath, boolean overwrite)
-			throws IOException {
-		String snaptoPath = new File(npath + File.separator + "files").getPath();
+	public void copyTo(String npath, boolean overwrite) throws IOException {
+		String snaptoPath = new File(npath + File.separator + "files")
+				.getPath();
 		SDFSLogger.getLog().info("Copying to " + snaptoPath);
 		File f = new File(snaptoPath);
 		if (f.exists() && !overwrite)
 			throw new IOException("path exists [" + snaptoPath
 					+ "]Cannot overwrite existing data ");
-		
+
 		if (!this.isDirectory()) {
-			
-			
+
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
-			
-				Path p = f.toPath();
-				Files.copy(new File(this.path).toPath(),p,  StandardCopyOption.REPLACE_EXISTING,  StandardCopyOption.COPY_ATTRIBUTES);
+
+			Path p = f.toPath();
+			Files.copy(new File(this.path).toPath(), p,
+					StandardCopyOption.REPLACE_EXISTING,
+					StandardCopyOption.COPY_ATTRIBUTES);
 
 			this.getDedupFile().copyTo(npath);
-		} 
-		else {
+		} else {
 			SDFSLogger.getLog().debug("is snapshot dir");
 			if (!f.exists())
 				f.mkdirs();
-			String cpCmd = 
-				"cp -rf --preserve=mode,ownership,timestamps " + this.path + " "
-				+ snaptoPath;
+			String cpCmd = "cp -rf --preserve=mode,ownership,timestamps "
+					+ this.path + " " + snaptoPath;
 			Process p = Runtime.getRuntime().exec(cpCmd);
-			try{
-				int ecode =p.waitFor();
-				if(ecode != 0)
-					throw new IOException("unable to copy " + this.path + " cp exit code is " + ecode);
-					
-			}catch(Exception e) {
+			try {
+				int ecode = p.waitFor();
+				if (ecode != 0)
+					throw new IOException("unable to copy " + this.path
+							+ " cp exit code is " + ecode);
+
+			} catch (Exception e) {
 				throw new IOException(e);
 			}
-			MetaDataDedupFile dmf = MetaFileStore.getMF(snaptoPath);
+			MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
 			dmf.copyDir(npath);
 		}
 	}
-	
+
 	private void copyDir(String npath) throws IOException {
-		MetaDataDedupFile[] files = this.listFiles();
+		String[] files = this.list();
 		for (int i = 0; i < files.length; i++) {
-			MetaDataDedupFile file = files[i];
-			if(file.isDirectory())
+			MetaDataDedupFile file = MetaDataDedupFile.getFile(this.getPath()
+					+ File.separator + files[i]);
+			if (file.isDirectory())
 				file.copyDir(npath);
-			else{
-				SDFSLogger.getLog().debug("copy dedup file for : " + file.getPath() + " guid :" + file.getDfGuid());
-				file.getDedupFile().copyTo(npath);
+			else {
+				SDFSLogger.getLog().debug(
+						"copy dedup file for : " + file.getPath() + " guid :"
+								+ file.getDfGuid());
+				if (file.dfGuid != null) {
+					if (DedupFileStore.fileOpen(file))
+						file.getDedupFile().copyTo(npath);
+					else {
+						File sdbdirectory = new File(Main.dedupDBStore + File.separator
+								+ file.dfGuid.substring(0, 2) + File.separator
+								+ file.dfGuid);
+						Path sdbf = new File(sdbdirectory.getPath() + File.separator
+								+ file.dfGuid + ".map").toPath();
+						Path sdbc = new File(sdbdirectory.getPath() + File.separator
+								+ file.dfGuid + ".chk").toPath();
+						File ddbdir = new File(npath + File.separator + "ddb" + File.separator + file.dfGuid.substring(0,2) + File.separator + file.dfGuid);
+						ddbdir.mkdirs();
+						Path ddbf = new File(ddbdir.getPath() + File.separator
+								+ file.dfGuid + ".map").toPath();
+						Path ddbc = new File(ddbdir.getPath() + File.separator
+								+ file.dfGuid + ".chk").toPath();
+						Files.copy(sdbf, ddbf,
+								StandardCopyOption.REPLACE_EXISTING,
+								StandardCopyOption.COPY_ATTRIBUTES);
+						Files.copy(sdbc, ddbc,
+								StandardCopyOption.REPLACE_EXISTING,
+								StandardCopyOption.COPY_ATTRIBUTES);
+					}
+				}
 			}
 		}
 	}
@@ -999,7 +1025,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	}
 
-	public Element toXML(Document doc) throws ParserConfigurationException, DOMException, IOException {
+	public Element toXML(Document doc) throws ParserConfigurationException,
+			DOMException, IOException {
 		Element root = doc.createElement("file-info");
 		root.setAttribute("file-name", this.getName());
 		root.setAttribute("sdfs-path", this.getPath());
@@ -1028,11 +1055,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			File f = new File(this.getPath());
 			root.setAttribute("type", "directory");
 			BasicFileAttributes attrs = Files.readAttributes(p,
-					BasicFileAttributes.class,
-					LinkOption.NOFOLLOW_LINKS);
-			root.setAttribute("atime", Long.toString(attrs.lastAccessTime().toMillis()));
-			root.setAttribute("mtime", Long.toString(attrs.lastModifiedTime().toMillis()));
-			root.setAttribute("ctime", Long.toString(attrs.creationTime().toMillis()));
+					BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			root.setAttribute("atime",
+					Long.toString(attrs.lastAccessTime().toMillis()));
+			root.setAttribute("mtime",
+					Long.toString(attrs.lastModifiedTime().toMillis()));
+			root.setAttribute("ctime",
+					Long.toString(attrs.creationTime().toMillis()));
 			root.setAttribute("hidden", Boolean.toString(f.isHidden()));
 			root.setAttribute("size", Long.toString(attrs.size()));
 		}
