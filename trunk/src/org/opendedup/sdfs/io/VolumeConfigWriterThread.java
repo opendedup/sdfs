@@ -1,5 +1,9 @@
 package org.opendedup.sdfs.io;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
@@ -32,6 +36,9 @@ public class VolumeConfigWriterThread implements Runnable {
 	}
 	
 	public synchronized void writeConfig() throws Exception {
+		Path bak = new File(configFile + ".back").toPath();
+		Path src = new File(configFile).toPath();
+		Files.copy(src, bak);
 		Main.volume.setClosedGracefully(false);
 		Config.writeSDFSConfigFile(configFile);
 	}

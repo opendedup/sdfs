@@ -2,22 +2,23 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.util.RandomGUID;
 
-public class DeleteFileCmd implements XtendedCmd {
+public class DeleteArchiveCmd implements XtendedCmd {
 
 	public String getResult(String cmd, String file) throws IOException {
 		if(file.contains(".."))
 			throw new IOException("requeste file " + file + " does not exist");
-		String internalPath = Main.volume.getPath() + File.separator + file;
-		File f = new File(internalPath);
+		File vp = new File(Main.volume.getPath()).getParentFile();
+		File f = new File(vp.getPath() + File.separator + "archives" +File.separator + RandomGUID.getGuid() + ".tar.gz");
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
-			boolean removed = MetaFileStore.removeMetaFile(internalPath);
+			boolean removed = f.delete();
 			if(removed)
 				return "removed [" + file + "]";
 			else

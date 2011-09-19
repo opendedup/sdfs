@@ -159,6 +159,7 @@ public class HashStore {
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
 		try {
+			SDFSLogger.getLog().info("Loading hashdb class " + Main.hashesDBClass);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath());

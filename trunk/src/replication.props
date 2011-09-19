@@ -1,0 +1,14 @@
+#Replication master settings
+replication.master=192.168.0.201
+replication.master.password=admin
+replication.master.port=6442
+replication.master.folder=.
+
+#Replication slave settings
+replication.slave=localhost
+replication.slave.password=admin
+replication.slave.port=6443
+replication.slave.folder=backup-192.168.0.201
+
+#Replication service settings
+archive.staging=/tmp

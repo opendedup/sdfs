@@ -31,6 +31,7 @@ public class ProcessArchiveOutCmd {
 			}
 			in.close();
 			out.close();
+			
 			SDFSLogger.getBasicLog().debug("Copy Out ["+status+"] returned ["+msg+"]");
 			SDFSLogger.getBasicLog().info(msg);
 			if(status.equalsIgnoreCase("failed"))

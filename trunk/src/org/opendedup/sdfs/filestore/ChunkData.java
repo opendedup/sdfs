@@ -96,23 +96,20 @@ public class ChunkData {
 
 	public ByteBuffer getMetaDataBytes() {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
-		if (this.mDelete) {
-			buf.put(BLANKCM);
-			buf.position(0);
-			return buf;
-		} else {
+		if(this.mDelete)
+			buf.put((byte) 1);
+		else
 			buf.put((byte) 0);
-			buf.putShort(this.hashLen);
-			buf.put(hash);
-			buf.put(new byte[32 - this.hashLen]);
-			buf.putLong(this.added);
-			buf.putLong(this.lastClaimed);
-			buf.putLong(this.numClaimed);
-			buf.putInt(this.cLen);
-			buf.putLong(cPos);
-			buf.position(0);
-			return buf;
-		}
+		buf.putShort(this.hashLen);
+		buf.put(hash);
+		buf.put(new byte[32 - this.hashLen]);
+		buf.putLong(this.added);
+		buf.putLong(this.lastClaimed);
+		buf.putLong(this.numClaimed);
+		buf.putInt(this.cLen);
+		buf.putLong(cPos);
+		buf.position(0);
+		return buf;
 	}
 
 	public void persistData(boolean clear) throws IOException {

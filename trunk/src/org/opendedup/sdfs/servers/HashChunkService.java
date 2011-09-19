@@ -57,7 +57,7 @@ public class HashChunkService {
 		}
 		try {
 			hs = new HashStore();
-			if (!Main.chunkStoreLocal || Main.enableNetworkChunkStore) {
+			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
 				csGC = new ChunkStoreGCScheduler();
 			}
 		} catch (Exception e) {
