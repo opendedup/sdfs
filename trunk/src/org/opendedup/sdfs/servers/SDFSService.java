@@ -2,6 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -11,7 +12,6 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
-import org.opendedup.sdfs.network.NetworkHCServer;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 

@@ -2,13 +2,19 @@
 replication.master=192.168.0.201
 replication.master.password=admin
 replication.master.port=6442
-replication.master.folder=.
+replication.master.folder=
 
 #Replication slave settings
 replication.slave=localhost
 replication.slave.password=admin
-replication.slave.port=6443
-replication.slave.folder=backup-192.168.0.201
+replication.slave.port=6442
+#The folder where you would like to replicate to wild cards are %f (origional folder name) %d (date as yyMMddHHmmss) %h (remote host) 
+replication.slave.folder=backup-%h-%f-%d
 
 #Replication service settings
 archive.staging=/tmp
+logfile=/var/log/sdfs/replication.log
+#Schedule chron = as a cron job, single = run one time
+schedule.type=cron
+#Every 5 minutes
+schedule.cron=0 0/1 * * * ?
