@@ -17,24 +17,22 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ReplicationService {
 	private static Properties properties = new Properties();
-	private static String remoteServer;
-	private static String remoteServerPassword;
-	private static String remoteServerFolder;
-	private static int remoteServerPort;
-	private static String archiveFolder;
+	public String remoteServer;
+	public String remoteServerPassword;
+	public String remoteServerFolder;
+	public int remoteServerPort;
+	public String archiveFolder;
 
-	private static String localServer;
-	private static String localServerPassword;
-	private static String localServerFolder;
-	private static int localServerPort;
+	public String localServer;
+	public String localServerPassword;
+	public String localServerFolder;
+	public int localServerPort;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
@@ -52,23 +50,31 @@ public class ReplicationService {
 		}
 		SDFSLogger.setToFileAppender(properties.getProperty("logfile",
 		"/var/log/sdfs/archiveout.log"));
+		
 		SDFSLogger.getLog().info(
 				"Starting Replication " + properties.toString());
-		remoteServer = properties.getProperty("replication.master");
-		remoteServerPassword = properties.getProperty(
+		new ReplicationService(properties);
+		
+		
+
+	}
+	
+	public ReplicationService(Properties props) throws IOException {
+		this.remoteServer = properties.getProperty("replication.master");
+		this.remoteServerPassword = properties.getProperty(
 				"replication.master.password", "admin");
-		remoteServerFolder = properties.getProperty(
+		this.remoteServerFolder = properties.getProperty(
 				"replication.master.folder", "");
-		remoteServerPort = Integer.parseInt(properties.getProperty(
+		this.remoteServerPort = Integer.parseInt(properties.getProperty(
 				"replication.master.port", "6442"));
-		archiveFolder = properties.getProperty("archive.staging",
+		this.archiveFolder = properties.getProperty("archive.staging",
 				System.getProperty("java.io.tmpdir"));
-		localServer = properties.getProperty("replication.slave");
-		localServerPassword = properties.getProperty(
+		this.localServer = properties.getProperty("replication.slave");
+		this.localServerPassword = properties.getProperty(
 				"replication.slave.password", "admin");
-		localServerFolder = properties.getProperty("replication.slave.folder",
+		this.localServerFolder = properties.getProperty("replication.slave.folder",
 				"");
-		localServerPort = Integer.parseInt(properties.getProperty(
+		this.localServerPort = Integer.parseInt(properties.getProperty(
 				"replication.slave.port", "6442"));
 		String schedType = properties.getProperty("schedule.type", "single");
 		if (schedType.equalsIgnoreCase("cron")) {
@@ -76,37 +82,35 @@ public class ReplicationService {
 			String schedt = properties.getProperty("schedule.cron",
 					"0 0 0/1 * * ?");
 			SDFSLogger.getLog().info("will schedule replication " + schedt);
-			ReplicationScheduler rsched =new ReplicationScheduler(schedt);
-			Runtime.getRuntime().addShutdownHook(new ShutdownHook(rsched,remoteServer + ":" + remoteServerPort + ":"
-					+ remoteServerFolder));
+			ReplicationScheduler rsched =new ReplicationScheduler(schedt,this);
+			Runtime.getRuntime().addShutdownHook(new ShutdownHook(rsched,this.remoteServer + ":" + this.remoteServerPort + ":"
+					+ this.remoteServerFolder));
 		} else {
 			SDFSLogger.getLog().info("Running replication once");
-			replicate();
+			this.replicate();
 			SDFSLogger.getLog().info("done replicating");
 		}
-		
-
 	}
 
-	public static void replicate() throws IOException {
+	public void replicate() throws IOException {
 		SDFSLogger.getLog().info(
 				"replicating " + remoteServer + ":" + remoteServerPort + ":"
 						+ remoteServerFolder + " to " + localServer + ":"
 						+ localServerPort + ":" + localServerFolder);
-		String archive = ReplicationService.getRemoteArchive(remoteServer,
+		String archive = getRemoteArchive(remoteServer,
 				remoteServerPort, remoteServerPassword, archiveFolder,
 				remoteServerFolder);
 		SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss");
 		String tmStr = df.format(new Date());
-		String lFldr = localServerFolder.replaceAll("%d", tmStr).replaceAll("%h", remoteServer).replaceAll("%f", remoteServerFolder);
+		String lFldr = localServerFolder.replaceAll("%d", tmStr).replaceAll("%h", remoteServer);
 		
-		ReplicationService.localArchiveImport(localServer, localServerPort,
+		localArchiveImport(localServer, localServerPort,
 				localServerPassword, archive, lFldr);
 		File arcF = new File(archive);
 		arcF.delete();
 	}
 
-	private static Document getResponse(String server, int port,
+	private synchronized Document getResponse(String server, int port,
 			String password, String url) throws IOException {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -120,7 +124,7 @@ public class ReplicationService {
 		}
 	}
 
-	private static InputStream connectAndGet(String server, int port,
+	private synchronized InputStream connectAndGet(String server, int port,
 			String password, String url, String file) {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "SDFS Client");
@@ -149,7 +153,7 @@ public class ReplicationService {
 		}
 	}
 
-	private static void localArchiveImport(String server, int port,
+	private void localArchiveImport(String server, int port,
 			String password, String archive, String path) throws IOException {
 		SDFSLogger.getLog().debug(
 				"importing [" + archive + "] destination is [" + path + "]");
@@ -171,7 +175,7 @@ public class ReplicationService {
 
 	}
 
-	private static String getRemoteArchive(String server, int port,
+	private String getRemoteArchive(String server, int port,
 			String password, String tempDir, String file) throws IOException {
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
 		file = URLEncoder.encode(file, "UTF-8");

@@ -68,6 +68,13 @@ public class HashClient {
 					clientSocket.getInputStream()));
 			// Read the Header Line
 			inReader.readLine();
+			String passwdMessage = Main.upStreamPassword
+			+ "\r\n";
+			os.write(passwdMessage.getBytes());
+			os.flush();
+			int auth = is.readInt();
+			if(auth == 0)
+				throw new IOException("unable to authenticate chech upstream password");
 			this.closed = false;
 		} catch (UnknownHostException e) {
 			SDFSLogger.getLog().fatal("Don't know about host " + server);

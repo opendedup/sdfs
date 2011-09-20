@@ -57,7 +57,10 @@ public class Main {
 	 * Maximum number op upstream hops
 	 */
 	public static short maxUpStreamDSEHops = 3;
-
+	/**
+	 * Maximum number op upstream hops
+	 */
+	public static String upStreamPassword = "admin";
 	
 	
 	/**
@@ -154,7 +157,7 @@ public class Main {
 	 * The version of the communication protocol being used for client <-> chunk
 	 * store network communication.
 	 */
-	public static String PROTOCOL_VERSION = "0.9";
+	public static String PROTOCOL_VERSION = "1.1";
 	/**
 	 * The ping time used to keep client to chunk store network pipes open. This
 	 * is used on the client.
@@ -407,4 +410,5 @@ public class Main {
 	public static boolean compressedIndex = false;
 
 	public static boolean closedGracefully = true;
+
 }

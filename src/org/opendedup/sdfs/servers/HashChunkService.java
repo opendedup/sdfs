@@ -126,6 +126,9 @@ public class HashChunkService {
 					hcPool.returnObject(hc);
 				}
 			}
+			
+		}else {
+			SDFSLogger.getLog().info("hops reached " + hops);
 		}
 		return exists;
 	}

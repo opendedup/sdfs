@@ -81,7 +81,7 @@ public class NetworkHCServer {
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
 				if (!serverSocket.isClosed())
-					SDFSLogger.getLog().fatal(
+					SDFSLogger.getLog().error(
 							"Unable to open port " + e.toString(), e);
 			}
 		}

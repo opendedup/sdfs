@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -25,7 +26,7 @@ public class MetaFileImport {
 		this.traverse(f);
 		SDFSLogger.getLog().info(
 				"took [" + (System.currentTimeMillis() - start) / 1000
-						+ "] seconds to check [" + files + "]. Found ["
+						+ "] seconds to import [" + files + "]. Found ["
 						+ this.corruptFiles.size() + "] corrupt files");
 	}
 
@@ -52,6 +53,10 @@ public class MetaFileImport {
 		File mapFile = new File(Main.dedupDBStore + File.separator
 				+ dfGuid.substring(0, 2) + File.separator + dfGuid
 				+ File.separator + dfGuid + ".map");
+		if(!mapFile.exists()) {
+			SDFSLogger.getLog().error(mapFile.getPath() + " does not exist!");
+			throw new IOException(mapFile.getPath() + " does not exist!");
+		}
 		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
 		try {
 			byte[] val = new byte[0];
@@ -79,6 +84,7 @@ public class MetaFileImport {
 				}
 			}
 			if (corruption) {
+				MetaFileStore.removeMetaFile(mf.getPath());
 				if (this.corruptFiles.size() > 1000)
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
@@ -86,6 +92,9 @@ public class MetaFileImport {
 				SDFSLogger.getLog().info(
 						"map file " + mapFile.getPath() + " is suspect, ["
 								+ corruptBlocks + "] missing blocks found.");
+				
+			} else {
+				Main.volume.addVirtualBytesWritten(mf.length());
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(

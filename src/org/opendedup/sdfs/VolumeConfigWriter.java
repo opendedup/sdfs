@@ -96,6 +96,7 @@ public class VolumeConfigWriter {
 	
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
+	String upstreamPassword = "admin";
 	int upstreamPort = 2222;
 	boolean use_udp = false;
 	int network_port = 2222;
@@ -343,6 +344,8 @@ public class VolumeConfigWriter {
 					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("dse-upstream-host-port"));
 			}
 		}
+		if(cmd.hasOption("dse-upstream-password"))
+			this.upstreamPassword = cmd.getOptionValue("dse-upstream-password");
 		if(cmd.hasOption("enable-replication-master")) {
 			this.sdfsCliRequireAuth = true;
 			this.sdfsCliListenAddr = "0.0.0.0";
@@ -352,7 +355,10 @@ public class VolumeConfigWriter {
 			if(!cmd.hasOption("replication-master"))
 				throw new Exception("replication-master must be specified");
 			this.upstreamHost = cmd.getOptionValue("replication-master");
+			this.upstreamEnabled= true;
 		}
+		if(cmd.hasOption("replication-master-password"))
+			this.upstreamPassword = cmd.getOptionValue("replication-master-password");
 
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
@@ -455,6 +461,7 @@ public class VolumeConfigWriter {
 		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
 		network.setAttribute("upstream-host", this.upstreamHost);
 		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
+		network.setAttribute("upstream-password", this.upstreamPassword);
 		cs.appendChild(network);
 		Element launchParams = xmldoc.createElement("launch-params");
 		launchParams.setAttribute("class-path", Main.classPath);
@@ -852,6 +859,11 @@ public class VolumeConfigWriter {
 						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
 				.hasArg().withArgName("IP Port").create());
 		options.addOption(OptionBuilder
+				.withLongOpt("dse-upstream-password")
+				.withDescription(
+						"SDFSCLI Password of upstream host. Defaults to \"admin\"")
+				.hasArg().withArgName("STRING").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-port")
 				.withDescription(
 						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
@@ -871,9 +883,13 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-master")
 				.withDescription(
-						"The Replication master for this slave").withDescription(
-						"Host name or IPv4 Address ")
+						"The Replication master for this slave")
 						.hasArg().withArgName("FQDN or IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-master-password")
+				.withDescription(
+						"The Replication master sdfscli password. Defaults to \"admin\"")
+						.hasArg().withArgName("STRING").create());
 		return options;
 	}
 

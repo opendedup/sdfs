@@ -28,7 +28,7 @@ import org.opendedup.util.StringUtils;
 class ClientThread extends Thread {
 
 	// DataInputStream is = null;
-	DataOutputStream os = null;
+	
 	Socket clientSocket = null;
 	private ReentrantLock writelock = new ReentrantLock();
 
@@ -49,11 +49,14 @@ class ClientThread extends Thread {
 	}
 
 	public void run() {
+		DataOutputStream os = null;
+		DataInputStream is = null;
+		BufferedReader reader = null;
 		try {
 			// is = new DataInputStream(clientSocket.getInputStream());
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()), 32768 * 2);
-			DataInputStream is = new DataInputStream(new BufferedInputStream(
+			is = new DataInputStream(new BufferedInputStream(
 					clientSocket.getInputStream(), 32768 * 2));
 			os = new DataOutputStream(new BufferedOutputStream(
 					clientSocket.getOutputStream()));
@@ -61,8 +64,16 @@ class ClientThread extends Thread {
 					+ "\r\n";
 			os.write(versionMessage.getBytes());
 			os.flush();
+			String cPasswd = reader.readLine();
+			if(cPasswd.trim().equals(Main.sdfsCliPassword)) {
+				os.writeInt(0);
+				os.flush();
+				throw new IOException("Authentication failed");
+			}else {
+				os.writeInt(1);
+				os.flush();
+			}
 			while (true) {
-				try {
 					byte cmd = is.readByte();
 					if (cmd == NetworkCMDS.QUIT_CMD) {
 						SDFSLogger.getLog().info(
@@ -94,6 +105,8 @@ class ClientThread extends Thread {
 						byte[] hash = new byte[is.readShort()];
 						is.readFully(hash);
 						int len = is.readInt();
+						if(len != Main.CHUNK_LENGTH)
+							throw new IOException("invalid chunk length " +len);
 						byte[] chunkBytes = new byte[len];
 						is.readFully(chunkBytes);
 						boolean done = false;
@@ -104,6 +117,7 @@ class ClientThread extends Thread {
 							done = HashChunkService.writeChunk(hash,
 									chunkBytes, len, len, false);
 						}
+						
 						try {
 							writelock.lock();
 							os.writeBoolean(done);
@@ -203,29 +217,11 @@ class ClientThread extends Thread {
 
 						}
 					}
-
-				} catch (Exception e) {
-					SDFSLogger.getLog().debug("unable to write data", e);
-					try {
-						reader.close();
-					} catch (Exception e1) {
-					}
-					try {
-						os.close();
-					} catch (Exception e1) {
-					}
-					try {
-						is.close();
-					} catch (Exception e1) {
-					}
-					try {
-						clientSocket.close();
-					} catch (Exception e1) {
-					}
-					break;
-
-				}
 			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("connection failed ",e);
+			
+		} finally {
 			try {
 				reader.close();
 			} catch (Exception e1) {
@@ -242,9 +238,11 @@ class ClientThread extends Thread {
 				clientSocket.close();
 			} catch (Exception e1) {
 			}
-			clientSocket.close();
-		} catch (IOException e) {
-		} finally {
+		
+			try {
+				clientSocket.close();
+			} catch (IOException e1) {
+			}
 			ClientThread.removeClient(this);
 		}
 	}

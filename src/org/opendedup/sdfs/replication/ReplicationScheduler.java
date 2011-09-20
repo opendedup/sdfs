@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.opendedup.util.SDFSLogger;
 import org.quartz.CronTrigger;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
@@ -12,7 +13,7 @@ import org.quartz.impl.StdSchedulerFactory;
 public class ReplicationScheduler {
 	Scheduler sched = null;
 
-	public ReplicationScheduler(String schedule) {
+	public ReplicationScheduler(String schedule,ReplicationService service) {
 		try {
 			Properties props = new Properties();
 			props.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
@@ -25,7 +26,10 @@ public class ReplicationScheduler {
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
+			JobDataMap dataMap = new JobDataMap();
+			dataMap.put("service", service);
 			JobDetail ccjobDetail = new JobDetail("replication", null, ReplicationJob.class);
+			ccjobDetail.setJobDataMap(dataMap);
 			CronTrigger cctrigger = new CronTrigger("replicationTrigger", "group1",
 					schedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);

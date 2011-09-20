@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.StringUtils;
 
 public class FetchChunkCmd implements IOCmd {
@@ -27,9 +28,13 @@ public class FetchChunkCmd implements IOCmd {
 		os.write(hash);
 		os.flush();
 		int size = is.readInt();
+		if(size != Main.CHUNK_LENGTH)
+			throw new IOException("invalid chunk length " +size);
 		if (size == -1) {
 			chunk = new byte[0];
-		} else {
+		} else if(size != Main.CHUNK_LENGTH)
+			throw new IOException("invalid chunk length " +size);
+		else {
 			chunk = new byte[size];
 		}
 		is.readFully(chunk);

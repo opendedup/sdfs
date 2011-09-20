@@ -72,6 +72,7 @@ public class DSEConfigWriter {
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
 	int upstreamPort = 2222;
+	String upstreamPassword = "admin";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -202,6 +203,8 @@ public class DSEConfigWriter {
 					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("upstream-host-port"));
 			}
 		}
+		if(cmd.hasOption("upstream-password"))
+			this.upstreamPassword = cmd.getOptionValue("upstream-password");
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
 		if (file.exists()) {
@@ -237,6 +240,7 @@ public class DSEConfigWriter {
 		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
 		network.setAttribute("upstream-host", this.upstreamHost);
 		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
+		network.setAttribute("upstream-password", this.upstreamPassword);
 		root.appendChild(network);
 		Element loc = xmldoc.createElement("locations");
 		loc.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -436,6 +440,11 @@ public class DSEConfigWriter {
 				.withDescription(
 						"Host name or IPv4 Address ")
 				.hasArg().withArgName("FQDN or IPv4 Address").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("upstream-password")
+				.withDescription(
+						"SDFSCLI Password of upstream host")
+				.hasArg().withArgName("STRING").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("upstream-host-port")
 				.withDescription(
