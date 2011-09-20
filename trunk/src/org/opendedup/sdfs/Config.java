@@ -61,6 +61,7 @@ public class Config {
 				Main.upStreamDSEHostEnabled = Boolean.parseBoolean(network.getAttribute("upstream-enabled"));
 				Main.upStreamDSEHostName = network.getAttribute("upstream-host");
 				Main.upStreamDSEPort = Integer.parseInt(network.getAttribute("upstream-host-port"));
+				Main.upStreamPassword = network.getAttribute("upstream-password"); 
 			}
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
@@ -270,6 +271,7 @@ public class Config {
 					Main.upStreamDSEHostEnabled = Boolean.parseBoolean(networkcs.getAttribute("upstream-enabled"));
 					Main.upStreamDSEHostName = networkcs.getAttribute("upstream-host");
 					Main.upStreamDSEPort = Integer.parseInt(networkcs.getAttribute("upstream-host-port"));
+					Main.upStreamPassword = networkcs.getAttribute("upstream-password"); 
 				}
 			}
 			SDFSLogger.getLog().info(

@@ -8,9 +8,10 @@ import org.quartz.JobExecutionException;
 
 public class ReplicationJob implements Job {
 	@Override
-	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+	public void execute(JobExecutionContext context) throws JobExecutionException {
 			try {
-				ReplicationService.replicate();
+				ReplicationService service = (ReplicationService)context.getJobDetail().getJobDataMap().get("service");
+				service.replicate();
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish executing replication", e);
 				throw new JobExecutionException(e);

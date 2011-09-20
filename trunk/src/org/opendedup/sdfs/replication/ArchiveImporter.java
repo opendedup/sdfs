@@ -20,7 +20,11 @@ public class ArchiveImporter {
 		TFile dstFiles = new TFile(Main.volume.getPath() + File.separator + dest);
 		srcFiles.cp_rp(dstFiles);
 		srcFiles = new TFile(new File(srcArchive + "/ddb/"));
+		File ddb = new File(Main.dedupDBStore + File.separator);
+		if(!ddb.exists())
+			ddb.mkdirs();
 		dstFiles = new TFile(Main.dedupDBStore + File.separator);	
+		srcFiles.cp_rp(dstFiles);
 		TFile.umount(srcFiles.getInnerArchive());
 		MetaFileImport imp = new MetaFileImport(Main.volume.getPath() + File.separator + dest);
 		if(imp.getCorruptFiles().size() > 0) {
