@@ -16,5 +16,5 @@ archive.staging=/tmp
 logfile=/var/log/sdfs/replication.log
 #Schedule chron = as a cron job, single = run one time
 schedule.type=cron
-#Every 5 minutes
-schedule.cron=0 0/1 * * * ?
+#Every 30 minutes take a look at http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-06 for scheduling tutorial
+schedule.cron=0 0/30 * * * ?

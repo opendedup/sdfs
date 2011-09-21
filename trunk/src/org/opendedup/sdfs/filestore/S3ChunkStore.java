@@ -2,13 +2,13 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import org.jets3t.service.S3Service;
-import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
@@ -33,8 +33,7 @@ import org.w3c.dom.Element;
 public class S3ChunkStore implements AbstractChunkStore {
 	private static AWSCredentials awsCredentials = null;
 	private String name;
-	private S3Bucket s3Bucket = null;
-	S3Service s3Service;
+	private S3ServicePool pool = null;
 	private boolean closed = false;
 	private long currentLength = 0L;
 	private RandomAccessFile posRaf = null;
@@ -97,7 +96,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString = this.getHashName(hash);
+		RestS3Service s3Service = null;
 		try {
+			s3Service = pool.borrowObject();
 			S3Object obj = s3Service.getObject(this.name, hashString);
 			byte[] data = new byte[(int) obj.getContentLength()];
 			DataInputStream in = new DataInputStream(obj.getDataInputStream());
@@ -113,6 +114,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog()
 					.error("unable to fetch block [" + hash + "]", e);
 			throw new IOException("unable to read " + hashString);
+		} finally {
+			pool.returnObject(s3Service);
 		}
 
 	}
@@ -158,14 +161,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
 		s3Object.setContentLength(s3IS.available());
+		RestS3Service s3Service = null;
 		try {
-			s3Service.putObject(s3Bucket, s3Object);
+			s3Service = pool.borrowObject();
+			s3Service.putObject(this.name, s3Object);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			SDFSLogger.getLog().fatal("unable to upload " + hashString, e);
 			throw new IOException(e);
 		} finally {
+			pool.returnObject(s3Service);
 			s3IS.close();
+			
 		}
 	}
 
@@ -177,11 +184,15 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
 		String hashString = this.getHashName(hash);
+		RestS3Service s3Service = null;
 		try {
-			s3Service.deleteObject(s3Bucket, hashString);
-		} catch (S3ServiceException e) {
+			s3Service = pool.borrowObject();
+			s3Service.deleteObject(this.name, hashString);
+		} catch (Exception e) {
 			SDFSLogger.getLog()
 					.warn("Unable to delete object " + hashString, e);
+		} finally {
+			pool.returnObject(s3Service);
 		}
 	}
 
@@ -239,36 +250,41 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void init(Element config) throws IOException {
 		this.name = Main.awsBucket;
 		try {
-			s3Service = new RestS3Service(awsCredentials);
-			this.s3Bucket = s3Service.getBucket(this.name);
-			if (this.s3Bucket == null) {
-				this.s3Bucket = s3Service.createBucket(this.name);
+			
+			pool = new S3ServicePool(S3ChunkStore.awsCredentials,Main.writeThreads*2);
+			RestS3Service s3Service = pool.borrowObject(); 
+			
+			S3Bucket s3Bucket = s3Service.getBucket(this.name);
+			if (s3Bucket == null) {
+				s3Bucket = s3Service.createBucket(this.name);
 				if (Main.awsCompress) {
-					this.s3Bucket.addMetadata("compress", "true");
+					s3Bucket.addMetadata("compress", "true");
 				} else {
-					this.s3Bucket.addMetadata("compress", "false");
+					s3Bucket.addMetadata("compress", "false");
 				}
 				if (Main.chunkStoreEncryptionEnabled) {
-					this.s3Bucket.addMetadata("encrypt", "true");
+					s3Bucket.addMetadata("encrypt", "true");
 				} else {
-					this.s3Bucket.addMetadata("encrypt", "false");
+					s3Bucket.addMetadata("encrypt", "false");
 				}
 				SDFSLogger.getLog().info("created new store " + name);
 			}
-			if (this.s3Bucket.containsMetadata("compress"))
-				this.compress = Boolean.parseBoolean((String) this.s3Bucket
+			if (s3Bucket.containsMetadata("compress"))
+				this.compress = Boolean.parseBoolean((String) s3Bucket
 						.getMetadata("compress"));
 			else
 				this.compress = Main.awsCompress;
-			if (this.s3Bucket.containsMetadata("encrypt"))
-				this.encrypt = Boolean.parseBoolean((String) this.s3Bucket
+			if (s3Bucket.containsMetadata("encrypt"))
+				this.encrypt = Boolean.parseBoolean((String) s3Bucket
 						.getMetadata("encrypt"));
 			else
 				this.encrypt = Main.chunkStoreEncryptionEnabled;
 			this.openPosFile();
-		} catch (S3ServiceException e) {
+			pool.returnObject(s3Service);
+		} catch (Exception e) {
 			throw new IOException(e);
-		}
+		} 
+		
 
 	}
 
