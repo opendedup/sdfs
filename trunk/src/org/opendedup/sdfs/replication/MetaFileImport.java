@@ -95,6 +95,7 @@ public class MetaFileImport {
 				
 			} else {
 				Main.volume.addVirtualBytesWritten(mf.length());
+				Main.volume.updateCurrentSize(mf.getIOMonitor().getVirtualBytesWritten());
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
