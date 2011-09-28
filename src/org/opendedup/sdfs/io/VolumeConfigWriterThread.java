@@ -36,8 +36,12 @@ public class VolumeConfigWriterThread implements Runnable {
 	}
 	
 	public synchronized void writeConfig() throws Exception {
+		File bkf = new File(configFile + ".back");
+		if(bkf.exists())
+			bkf.delete();
 		Path bak = new File(configFile + ".back").toPath();
 		Path src = new File(configFile).toPath();
+		
 		Files.copy(src, bak);
 		Main.volume.setClosedGracefully(false);
 		Config.writeSDFSConfigFile(configFile);

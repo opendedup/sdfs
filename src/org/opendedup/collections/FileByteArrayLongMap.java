@@ -37,8 +37,7 @@ public class FileByteArrayLongMap {
 	private int iterPos = 0;
 	private boolean closed = false;
 	private BitSet claims = null;
-	private BitSet usedMap = null;
-	private BitSet rmMap = null;
+	private BitSet mapped = null;
 	long bgst = 0;
 
 	static {
@@ -180,14 +179,13 @@ public class FileByteArrayLongMap {
 		keys.load();
 		claims = new BitSet(size);
 		if (newInstance) {
-			usedMap = new BitSet(size);
-			rmMap = new BitSet(size);
+			mapped = new BitSet(size);
 		} else {
-			File f = new File(path + ".fmp");
+			File f = new File(path + ".vmp");
 			FileInputStream fin = new FileInputStream(f);
 			ObjectInputStream oon = new ObjectInputStream(fin);
 			try {
-				usedMap = (BitSet) oon.readObject();
+				mapped = (BitSet) oon.readObject();
 			} catch (ClassNotFoundException e) {
 				throw new IOException(e);
 			}
@@ -299,8 +297,7 @@ public class FileByteArrayLongMap {
 				this.tRaf.writeLong(-1);
 				pos = (pos / 8);
 				this.claims.clear(pos);
-				this.usedMap.clear(pos);
-				this.rmMap.set(pos);
+				this.mapped.clear(pos);
 				// this.store.position(pos);
 				// this.store.put((byte)0);
 				this.entries = entries - 1;
@@ -335,16 +332,17 @@ public class FileByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		if(this.isFree(index))
-			return -1;
-		
 		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
-		
+
 		if (Arrays.equals(cur, key)) {
 			return index;
+		}
+
+		if (Arrays.equals(cur, FREE)) {
+			return -1;
 		}
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
@@ -356,16 +354,9 @@ public class FileByteArrayLongMap {
 				z++;
 				index += (probe); // add the step
 				index %= (size * FREE.length); // for wraparound
-				if(isFree(index)) {
-					cur = Arrays.copyOf(FREE, FREE.length);
-				}
-				if(isRemoved(index))
-					cur = Arrays.copyOf(REMOVED, REMOVED.length);
-				else {
-					cur = new byte[FREE.length];
-					keys.position(index);
-					keys.get(cur);
-				}
+				cur = new byte[FREE.length];
+				keys.position(index);
+				keys.get(cur);
 				if (z > size) {
 					SDFSLogger.getLog().info(
 							"entries exhaused size=" + this.size + " entries="
@@ -375,26 +366,8 @@ public class FileByteArrayLongMap {
 			} while (!Arrays.equals(cur, FREE)
 					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
 		}
+
 		return Arrays.equals(cur, FREE) ? -1 : index;
-	}
-	
-	private boolean isFree(int index) {
-		/*
-		int bindex = index / FREE.length;
-		if(!this.usedMap.get(bindex) && !this.usedMap.get(bindex))
-			return true;
-		else
-			return false;
-			*/
-		return false;
-	}
-	
-	private boolean isRemoved(int index) {
-		/*
-		int bindex = index / FREE.length;
-		return this.rmMap.get(bindex);
-		*/
-		return false;
 	}
 
 	/**
@@ -413,14 +386,14 @@ public class FileByteArrayLongMap {
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		if(this.isFree(index))
-			return index;
 		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
 
-		if (Arrays.equals(cur, key)) {
+		if (Arrays.equals(cur, FREE)) {
+			return index; // empty, all done
+		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
 		} else { // already FULL or REMOVED, must probe
 			// compute the double hash
@@ -444,15 +417,8 @@ public class FileByteArrayLongMap {
 					index += (probe); // add the step
 					index %= (size * FREE.length); // for wraparound
 					cur = new byte[FREE.length];
-					if(isFree(index)) {
-						System.arraycopy(FREE, 0, cur, 0, FREE.length);
-					}
-					if(isRemoved(index))
-						System.arraycopy(REMOVED, 0, cur, 0, REMOVED.length);
-					else {
-						keys.position(index);
-						keys.get(cur);
-					}
+					keys.position(index);
+					keys.get(cur);
 				} while (!Arrays.equals(cur, FREE)
 						&& !Arrays.equals(cur, REMOVED)
 						&& !Arrays.equals(cur, key));
@@ -469,16 +435,6 @@ public class FileByteArrayLongMap {
 					index += (probe); // add the step
 					index %= (size * FREE.length); // for wraparound
 					cur = new byte[FREE.length];
-					if(isFree(index)) {
-						System.arraycopy(FREE, 0, cur, 0, FREE.length);
-					}
-					if(isRemoved(index))
-						System.arraycopy(REMOVED, 0, cur, 0, REMOVED.length);
-					else {
-						cur = new byte[FREE.length];
-						keys.position(index);
-						keys.get(cur);
-					}
 					keys.position(index);
 					keys.get(cur);
 				}
@@ -512,8 +468,7 @@ public class FileByteArrayLongMap {
 			this.vRaf.writeLong(value);
 			pos = (pos / 8);
 			this.claims.set(pos);
-			this.usedMap.set(pos);
-			this.rmMap.clear(pos);
+			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
 			this.entries = entries + 1;
@@ -563,7 +518,7 @@ public class FileByteArrayLongMap {
 	}
 
 	public int size() {
-		return this.usedMap.cardinality();
+		return this.mapped.cardinality();
 	}
 
 	public void close() {
@@ -588,10 +543,10 @@ public class FileByteArrayLongMap {
 
 		}
 		try {
-			File f = new File(path + ".fmp");
+			File f = new File(path + ".vmp");
 			FileOutputStream fout = new FileOutputStream(f);
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
-			oon.writeObject(usedMap);
+			oon.writeObject(mapped);
 			oon.flush();
 			oon.close();
 			fout.flush();
@@ -711,7 +666,7 @@ public class FileByteArrayLongMap {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				if (usedMap.get(iterPos)) {
+				if (mapped.get(iterPos)) {
 					this.tRaf.seek(iterPos * 8);
 					long tm = this.tRaf.readLong();
 					if (tm < time) {
@@ -727,8 +682,7 @@ public class FileByteArrayLongMap {
 							this.tRaf.seek(iterPos * 8);
 							this.tRaf.writeLong(-1);
 							this.claims.clear(iterPos);
-							this.usedMap.clear(iterPos);
-							this.rmMap.set(iterPos);
+							this.mapped.clear(iterPos);
 							this.entries = entries - 1;
 							return val;
 						}
