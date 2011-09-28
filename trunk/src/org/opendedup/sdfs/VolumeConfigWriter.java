@@ -466,8 +466,8 @@ public class VolumeConfigWriter {
 		Element launchParams = xmldoc.createElement("launch-params");
 		launchParams.setAttribute("class-path", Main.classPath);
 		launchParams.setAttribute("java-path", Main.javaPath);
-		long mem = calcMem(this.chunk_store_allocation_size);
-		long xmn = calcXmn(this.chunk_store_allocation_size);
+		long mem = calcMem(this.chunk_store_allocation_size,this.chunk_size *1024);
+		long xmn = calcXmn(this.chunk_store_allocation_size,this.chunk_size *1024);
 		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"
 				+ mem + "m -Xmn" + xmn + "m");
 		root.appendChild(launchParams);
@@ -927,17 +927,17 @@ public class VolumeConfigWriter {
 						options);
 	}
 
-	private static long calcMem(long dseSize) {
-		double mem = (dseSize / 4096) * 25;
+	private static long calcMem(long dseSize,int blocksz) {
+		double mem = (dseSize / blocksz) * 25;
 		mem = (mem / 1024) / 1024;
 		double _dmem = mem / 1000;
 		_dmem = Math.ceil(_dmem);
-		long _mem = ((long) (_dmem * 1000)) + 1000;
+		long _mem = ((long) (_dmem * 1000)) + calcXmn(dseSize,blocksz);
 		return _mem;
 	}
 
-	private static long calcXmn(long dseSize) {
-		double mem = (dseSize / 4096) * 25;
+	private static long calcXmn(long dseSize,int blocksz) {
+		double mem = (dseSize / blocksz) * 25;
 		mem = (mem / 1024) / 1024;
 		double _dmem = mem / 400;
 		_dmem = Math.ceil(_dmem);

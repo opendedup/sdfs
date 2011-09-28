@@ -14,6 +14,7 @@ public class ConsistancyCheck {
 			int count = 0;
 			System.out
 					.println("Running Consistancy Check on DSE, this may take a while");
+			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
 			System.out.print("Scanning DSE ");
 			while (data != null) {
 				count++;
@@ -34,7 +35,7 @@ public class ConsistancyCheck {
 					+ "]");
 			SDFSLogger
 					.getLog()
-					.error("Succesfully Ran Consistance Check for [" + records
+					.warn("Succesfully Ran Consistance Check for [" + records
 							+ "] records, recovered [" + recordsRecovered + "]");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
