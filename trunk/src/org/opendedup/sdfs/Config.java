@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 
 public class Config {
 
+	
 	/**
 	 * parse the hubstore config file
 	 * 
