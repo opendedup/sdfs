@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
@@ -273,6 +274,19 @@ public class VolumeConfigWriter {
 				this.awsBucketName = cmd.getOptionValue("aws-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
+				if(!S3ChunkStore.checkAuth(awsAccessKey, awsSecretKey)) {
+					System.out.println("Error : Unable to create volume");
+					System.out
+							.println("aws-access-key or aws-secret-key is incorrect");
+					System.exit(-1);
+				}
+				if(!S3ChunkStore.checkBucketUnique(awsAccessKey, awsSecretKey, awsBucketName)) {
+					System.out.println("Error : Unable to create volume");
+					System.out
+							.println("aws-bucket-name is not unique");
+					System.exit(-1);
+				}
+					
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out

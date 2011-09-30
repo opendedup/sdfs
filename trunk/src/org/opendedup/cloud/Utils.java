@@ -21,7 +21,6 @@ public class Utils {
 	public static void deleteBucketAWS(String bucketName, String awsAccessKey,
 			String awsSecretKey) {
 		try {
-			System.out.println("");
 			System.out.print("Deleting Bucket [" + bucketName + "]");
 			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
 					awsSecretKey);

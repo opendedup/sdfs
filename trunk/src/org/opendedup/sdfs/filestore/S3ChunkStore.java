@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
-
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +49,36 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
 			System.exit(-1);
+		}
+	}
+
+	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
+		AWSCredentials creds = null;
+		try {
+			creds = new AWSCredentials(awsAccessKey, awsSecretKey);
+			RestS3Service s3Service = new RestS3Service(creds);
+			s3Service.listAllBuckets();
+			return true;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
+			return false;
+		}
+	}
+
+	public static boolean checkBucketUnique(String awsAccessKey,
+			String awsSecretKey, String bucketName) {
+		AWSCredentials creds = null;
+		try {
+			creds = new AWSCredentials(awsAccessKey, awsSecretKey);
+			RestS3Service s3Service = new RestS3Service(creds);
+			S3Bucket s3Bucket = s3Service.getBucket(bucketName);
+			if (s3Bucket == null) {
+				s3Bucket = s3Service.createBucket(bucketName);
+			}
+			return true;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Unable to create aws bucket", e);
+			return false;
 		}
 	}
 
@@ -172,7 +201,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} finally {
 			pool.returnObject(s3Service);
 			s3IS.close();
-			
+
 		}
 	}
 
@@ -250,10 +279,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void init(Element config) throws IOException {
 		this.name = Main.awsBucket;
 		try {
-			
-			pool = new S3ServicePool(S3ChunkStore.awsCredentials,Main.writeThreads*2);
-			RestS3Service s3Service = pool.borrowObject(); 
-			
+
+			pool = new S3ServicePool(S3ChunkStore.awsCredentials,
+					Main.writeThreads * 2);
+			RestS3Service s3Service = pool.borrowObject();
+
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
 			if (s3Bucket == null) {
 				s3Bucket = s3Service.createBucket(this.name);
@@ -283,8 +313,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			pool.returnObject(s3Service);
 		} catch (Exception e) {
 			throw new IOException(e);
-		} 
-		
+		}
 
 	}
 
