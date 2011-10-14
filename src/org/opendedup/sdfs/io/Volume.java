@@ -26,7 +26,7 @@ public class Volume implements java.io.Serializable {
 	static long tbc = 1099511627776L;
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
-
+	private static final long minFree = 2147483648L; //Leave at least 2 GB Free on the drive.
 	private static final long serialVersionUID = 5505952237500542215L;
 	private final ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
@@ -34,6 +34,7 @@ public class Volume implements java.io.Serializable {
 	String capString = null;
 	long currentSize;
 	String path;
+	File pathF;
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
 	private final ReentrantLock dbLock = new ReentrantLock();
@@ -55,12 +56,12 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public Volume(Element vol) throws IOException {
-		File f = new File(vol.getAttribute("path"));
+		pathF = new File(vol.getAttribute("path"));
 
-		SDFSLogger.getLog().info("Mounting volume " + f.getPath());
-		if (!f.exists())
-			f.mkdirs();
-		this.path = f.getPath();
+		SDFSLogger.getLog().info("Mounting volume " + pathF.getPath());
+		if (!pathF.exists())
+			pathF.mkdirs();
+		this.path = pathF.getPath();
 		capString = vol.getAttribute("capacity");
 		this.capacity = StringUtils.parseSize(capString);
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
@@ -115,6 +116,12 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public boolean isFull() {
+		long avail = pathF.getUsableSpace();
+		if(avail < minFree) {
+			SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail + "]");
+			return true;
+			
+		}
 		if (this.fullPercentage < 0 || this.currentSize == 0)
 			return false;
 		else {

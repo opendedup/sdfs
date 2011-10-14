@@ -242,8 +242,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.vmdk = vmdk;
 	}
 
-	public MetaDataDedupFile() {
-	}
 
 	public static MetaDataDedupFile getFile(String path) {
 		File f = new File(path);
@@ -550,6 +548,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.dedup = Main.dedupFiles;
 			this.timeStamp = System.currentTimeMillis();
 			this.setLength(0, false);
+			this.sync();
 		} else if (f.isDirectory()) {
 			this.permissions = Main.defaultDirPermissions;
 			this.owner_id = Main.defaultOwner;

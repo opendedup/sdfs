@@ -87,7 +87,6 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			}
 		}
 		int hashRoute = hashb;
-
 		ByteArrayLongMap m = maps[hashRoute];
 		if (m == null) {
 			arlock.lock();
@@ -177,21 +176,13 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		SDFSLogger.getLog().info("claiming records");
 		long startTime = System.currentTimeMillis();
 		int z = 0;
-		int k = 0;
 		ByteBuffer lBuf = ByteBuffer.allocateDirect(8);
 		for (int i = 0; i < maps.length; i++) {
 			try {
 				maps[i].iterInit();
 				long val = 0;
-
 				while (val != -1 && !this.closed) {
-					k++;
-					if (k > 310) {
-						k = 0;
-						try {
-						} catch (Exception e) {
-						}
-					}
+					
 					try {
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
@@ -362,7 +353,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			if (this.isClosed())
 				throw new IOException("Hashtable " + this.fileName
 						+ " is close");
-			ByteBuffer rbuf = ByteBuffer.allocateDirect(ChunkData.RAWDL);
+			ByteBuffer rbuf = ByteBuffer.allocate(ChunkData.RAWDL);
 			try {
 				for (int i = 0; i < size; i++) {
 					if (this.isClosed())
@@ -389,7 +380,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							if (!Arrays.equals(raw, BLANKCM)) {
 								try {
 									ChunkData cm = new ChunkData(raw);
-									if (cm.getLastClaimed() < time) {
+									if (cm.getLastClaimed() != 0 && cm.getLastClaimed() < time) {
 										if (this.remove(cm)) {
 											rem++;
 										}
@@ -647,6 +638,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					if (cm != null) {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
+						if(cm.ismDelete())
+							cm.setLastClaimed(0);
+						else{
+							cm.setLastClaimed(System.currentTimeMillis());
+						}
 						try {
 							kFc.write(cm.getMetaDataBytes(), pos);
 						} catch (java.nio.channels.ClosedChannelException e1) {
@@ -701,21 +697,45 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			if (cm.getHash().length == 0)
 				return true;
 			if (!this.getMap(cm.getHash()).remove(cm.getHash())) {
+				cm.setmDelete(false);
 				return false;
 			} else {
 				cm.setmDelete(true);
 				if (persist) {
-					this.arlock.lock();
+					this.iolock.lock();
 					if (this.isClosed()) {
 						throw new IOException("hashtable [" + this.fileName
 								+ "] is close");
 					}
 					try {
-						this.kBuf.add(cm);
+						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
+								* (long) ChunkData.RAWDL;
+						if(cm.ismDelete())
+							cm.setLastClaimed(0);
+						else{
+							cm.setLastClaimed(System.currentTimeMillis());
+						}
+						try {
+							kFc.write(cm.getMetaDataBytes(), pos);
+						} catch (java.nio.channels.ClosedChannelException e1) {
+							kFc = (FileChannelImpl) new RandomAccessFile(
+									fileName, this.fileParams).getChannel();
+							kFc.write(cm.getMetaDataBytes(), pos);
+						} catch (Exception e) {
+							SDFSLogger.getLog().error(
+									"error while writing buffer", e);
+						} finally {
+							if (cm.ismDelete()) {
+								this.addFreeSlot(cm.getcPos());
+								this.kSz--;
+							}
+							cm = null;
+						}
+						cm = null;
 					} catch (Exception e) {
 					} finally {
 
-						this.arlock.unlock();
+						this.iolock.unlock();
 					}
 				}
 

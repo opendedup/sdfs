@@ -51,6 +51,8 @@ public class ByteArrayLongMap {
 
 	public byte[] nextKey() {
 		while (iterPos < size) {
+			this.hashlock.lock();
+			try {
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
 			keys.get(key);
@@ -58,15 +60,18 @@ public class ByteArrayLongMap {
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 				return key;
 			}
+			}finally {
+				this.hashlock.unlock();
+			}
 		}
 		return null;
 	}
 
 	public byte[] nextClaimedKey(boolean clearClaim) {
 		while (iterPos < size) {
+			this.hashlock.lock();
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
-			this.hashlock.lock();
 			try {
 				keys.get(key);
 				iterPos++;
@@ -92,21 +97,21 @@ public class ByteArrayLongMap {
 	public long nextClaimedValue(boolean clearClaim) {
 		while (iterPos < size) {
 			long val = -1;
-			values.position(iterPos * 8);
 			this.hashlock.lock();
+			values.position(iterPos * 8);
 			try {
 				val = values.getLong();
-				iterPos++;
 				if (val >= 0) {
-					claims.position(iterPos - 1);
+					claims.position(iterPos);
 					byte claimed = claims.get();
 					if (clearClaim) {
-						claims.position(iterPos - 1);
+						claims.position(iterPos);
 						claims.put((byte) 0);
 					}
 					if (claimed == 1)
 						return val;
 				}
+				iterPos++;
 			} catch (Exception e) {
 			} finally {
 				this.hashlock.unlock();
@@ -124,7 +129,6 @@ public class ByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public int setUp() throws IOException {
-		int kSz = 0;
 		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
@@ -143,7 +147,6 @@ public class ByteArrayLongMap {
 			values.putLong(-1);
 			claims.put((byte) 0);
 			// store.put((byte) 0);
-			kSz++;
 		}
 		this.compress();
 		this.derefByteArray();
@@ -287,7 +290,6 @@ public class ByteArrayLongMap {
 					keys.position(pos);
 					keys.put(REMOVED);
 					pos = (pos / FREE.length) * 8;
-					this.values.position(pos);
 					this.values.position(pos);
 					this.values.putLong(-1);
 					pos = (pos / 8);
