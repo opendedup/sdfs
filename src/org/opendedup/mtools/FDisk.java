@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -25,6 +26,9 @@ public class FDisk {
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check [" + files + "]. Found ["
 							+ this.corruptFiles + "] corrupt files");
+			if(this.corruptFiles > 0) {
+				SDFSEvent.gcWarnEvent(this.corruptFiles + " Corrupt Files found during FDisk task.");
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			throw new IOException(e);

@@ -12,6 +12,7 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
 
@@ -36,7 +37,10 @@ public class SDFSService {
 	}
 
 	public void start() throws Exception {
+		
 		Config.parseSDFSConfigFile(this.configFile);
+		MgmtWebServer.start();
+		SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
 		if (this.routingFile != null)
 			Config.parserRoutingFile(routingFile);
 		else if (!Main.chunkStoreLocal) {
@@ -44,6 +48,8 @@ public class SDFSService {
 					+ File.separator + "routing-config.xml");
 		}
 		try {
+			if(Main.volume.getName() == null)
+				Main.volume.setName(configFile);
 			Main.volume.setClosedGracefully(false);
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
@@ -59,15 +65,17 @@ public class SDFSService {
 			
 			this.stGC = new StandAloneGCScheduler();
 		}
-		MgmtWebServer.start();
+		
 		Main.wth = new VolumeConfigWriterThread(configFile);
 
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
 		}
+		SDFSEvent.mountInfoEvent("Mounted Volume Successfully");
 	}
 
 	public void stop() {
+		SDFSEvent.mountWarnEvent("Unmounting Volume");
 		SDFSLogger.getLog().info("Shutting Down SDFS");
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
 		if (!Main.chunkStoreLocal) {
@@ -92,7 +100,7 @@ public class SDFSService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		SDFSLogger.getLog().info("SDFS is Shut Down");
+		
 		try {
 			Process p = Runtime.getRuntime().exec(
 					"umount " + Main.volumeMountPoint);
@@ -115,6 +123,8 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
+		SDFSEvent.mountInfoEvent("Volume Unmounted");
+		SDFSLogger.getLog().info("SDFS is Shut Down");
 	}
 
 }

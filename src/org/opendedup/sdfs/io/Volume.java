@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
@@ -54,6 +55,10 @@ public class Volume implements java.io.Serializable {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public Volume(Element vol) throws IOException {
 		pathF = new File(vol.getAttribute("path"));
@@ -64,6 +69,8 @@ public class Volume implements java.io.Serializable {
 		this.path = pathF.getPath();
 		capString = vol.getAttribute("capacity");
 		this.capacity = StringUtils.parseSize(capString);
+		if(vol.hasAttribute("name"))
+			this.name = vol.getAttribute("name");
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
 		if (vol.hasAttribute("duplicate-bytes"))
 			this.addDuplicateBytes(Long.parseLong(vol
@@ -208,6 +215,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Long.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",
 				Long.toString(HashChunkService.getSize()
