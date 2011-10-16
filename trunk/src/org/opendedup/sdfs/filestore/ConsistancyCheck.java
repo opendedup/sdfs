@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.SDFSLogger;
 
 public class ConsistancyCheck {
@@ -15,6 +16,7 @@ public class ConsistancyCheck {
 			System.out
 					.println("Running Consistancy Check on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
+			SDFSEvent.mountWarnEvent("Running Consistancy Check on DSE, this may take a while");
 			System.out.print("Scanning DSE ");
 			while (data != null) {
 				count++;
@@ -37,10 +39,14 @@ public class ConsistancyCheck {
 					.getLog()
 					.warn("Succesfully Ran Consistance Check for [" + records
 							+ "] records, recovered [" + recordsRecovered + "]");
+			SDFSEvent.mountWarnEvent("Succesfully Ran Consistance Check for [" + records
+					+ "] records, recovered [" + recordsRecovered + "]");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"Unable to recover records because " + e.toString(), e);
 		}
 	}
+	
+	
 
 }

@@ -620,6 +620,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	private int getFtype(File _f) throws FuseException {
+		
+		if (!_f.exists()) {
+			throw new FuseException().initErrno(FuseException.ENOENT);
+		}
 		Path p = Paths.get(_f.getPath());
 		try {
 			boolean isSymbolicLink = Files.isSymbolicLink(p);
@@ -679,6 +683,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getxattr(String path, String name, ByteBuffer dst)
 			throws FuseException, BufferOverflowException {
+		this.resolvePath(path);
 		try {
 			int ftype = this.getFtype(path);
 			if (ftype != FuseFtype.TYPE_SYMLINK) {
@@ -706,6 +711,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int getxattrsize(String path, String name, FuseSizeSetter sizeSetter)
 			throws FuseException {
+		this.resolvePath(path);
 		try {
 			if (name.startsWith("security.capability"))
 				return 0;
@@ -770,6 +776,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int getxattr(String path, String name, ByteBuffer dst, int position)
 			throws FuseException, BufferOverflowException {
 		// Thread.currentThread().setName("21 "+Long.toString(System.currentTimeMillis()));
+		this.resolvePath(path);
 		try {
 			int ftype = this.getFtype(path);
 			if (ftype != FuseFtype.TYPE_SYMLINK) {
@@ -799,6 +806,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int setxattr(String path, String name, ByteBuffer value, int flags,
 			int position) throws FuseException {
+		this.resolvePath(path);
 		try {
 			byte valB[] = new byte[value.capacity()];
 			value.get(valB);
