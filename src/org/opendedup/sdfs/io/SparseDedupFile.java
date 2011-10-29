@@ -34,6 +34,7 @@ public class SparseDedupFile implements DedupFile {
 	private transient String databaseDirPath = null;
 	private transient String chunkStorePath = null;
 	private DedupFileChannel staticChannel = null;
+	public long lastSync = 0;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
 	private static HashFunctionPool hashPool = new HashFunctionPool(
@@ -45,6 +46,7 @@ public class SparseDedupFile implements DedupFile {
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock writeBufferLock = new ReentrantLock();
+	private final ReentrantLock syncLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	protected transient ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
@@ -473,10 +475,13 @@ public class SparseDedupFile implements DedupFile {
 		if (this.closed) {
 			throw new IOException("file already closed");
 		}
+		
 		if (Main.safeSync) {
-			this.bdb.sync();
-			Object[] buffers = null;
+			this.syncLock.lock();
+			
 			try {
+				this.bdb.sync();
+				Object[] buffers = null;
 				try {
 					this.writeBufferLock.lock();
 					SDFSLogger.getLog().debug(
@@ -497,7 +502,7 @@ public class SparseDedupFile implements DedupFile {
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-
+				this.syncLock.unlock();
 			}
 		} else {
 			try {
