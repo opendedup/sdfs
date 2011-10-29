@@ -18,7 +18,7 @@ import org.opendedup.sdfs.io.DedupFile;
  */
 public class OpenFileMonitor implements Runnable {
 
-	int interval = 60000;
+	int interval = 5000;
 	int maxInactive = 900000;
 	boolean closed = false;
 	Thread th = null;
@@ -56,12 +56,19 @@ public class OpenFileMonitor implements Runnable {
 						if (this.isFileStale(df) && !df.hasOpenChannels()) {
 							try {
 								if (df != null)
-									df.forceClose();
+									DedupFileStore.getDedupFile(df.getMetaFile()).forceClose();
 							} catch (Exception e) {
 								SDFSLogger
 										.getLog()
 										.warn("Unable close file for "
 												+ df.getMetaFile().getPath(), e);
+							}
+						} else {
+							try {
+								DedupFileStore.getDedupFile(df.getMetaFile()).sync();
+								DedupFileStore.getDedupFile(df.getMetaFile()).getMetaFile().sync();
+							} catch(Exception e) {
+								
 							}
 						}
 					} catch (NoSuchFileException e) {

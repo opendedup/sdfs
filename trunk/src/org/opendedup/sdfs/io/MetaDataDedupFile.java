@@ -295,7 +295,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param path
 	 *            the path to the dedup file.
 	 */
-	private MetaDataDedupFile() {
+	public MetaDataDedupFile() {
 	}
 
 	/**
