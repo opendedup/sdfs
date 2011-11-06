@@ -296,14 +296,15 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + iterFC.position(), e);
 			throw new IOException(e);
-		} finally {
-			try {
-			} catch (Exception e) {
-			}
+		} 
+		if(pos != -1)  {
+			byte [] hash = hc.getHash(fbuf.array());
+			return new ChunkData(hash,fbuf.array().length,fbuf.array());
 		}
-		byte [] hash = hc.getHash(fbuf.array());
-		return new ChunkData(hash,pos);
-			
+		else {
+			return null;
+		}
+		
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
