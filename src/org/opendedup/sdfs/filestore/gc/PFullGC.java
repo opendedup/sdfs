@@ -30,6 +30,7 @@ public class PFullGC implements GCControllerImpl {
 			if (Main.firstRun) {
 				Main.firstRun = false;
 				ManualGC.clearChunks(5);
+				ManualGC.clearChunks(5);
 			}
 			this.prevPFull = calcPFull();
 			this.nextPFull = this.calcNxtRun();
