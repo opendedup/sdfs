@@ -285,14 +285,17 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if(iterFC.position() >= iterFC.size())
+		if(iterFC.position() >= iterFC.size()) {
+			iterFC.close();
 			return null;
+		}
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 		long pos = -1;
 		try {
 			pos = iterFC.position();
 			iterFC.read(fbuf);
 		} catch (Exception e) {
+			iterFC.close();
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + iterFC.position(), e);
 			throw new IOException(e);
@@ -302,6 +305,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			return new ChunkData(hash,fbuf.array().length,fbuf.array());
 		}
 		else {
+			iterFC.close();
 			return null;
 		}
 		
@@ -313,11 +317,10 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 		if(Main.hashLength == 16) {
 			hc = new Tiger16HashEngine();
-			//hc = new MD5CudaHash();
 		}else {
 			hc = new TigerHashEngine();
 		}
-			this.iterFC = chunkDataWriter.getChannel();
+			this.iterFC =  new RandomAccessFile(f, "r").getChannel();
 		}catch(Exception e) {
 			throw new IOException( e);
 		}finally {

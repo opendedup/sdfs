@@ -1,3 +1,16 @@
+Version 1.1.2
+	Fixes:
+	* Consistancy Checker fixed for recovery of corrupt blocks
+	* Garbage Collection fixed for garbage collection during high io
+	Enhancements
+	* Added sdfscli notification for file system events
+	* Added periodic flush of all buffers for open files
+Version 1.1.0
+	Fixes:
+	* More graceful removal of garbage collected blocks
+	Enhancements
+	* SDFS Volume Replication
+	* S3 Performance Improvements
 Version 1.0.9
 	Fixes:
 	* Mapped Files now being cleaned up when deleted as part of parent folder
