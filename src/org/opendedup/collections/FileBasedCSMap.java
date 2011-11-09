@@ -462,4 +462,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		b.close();
 
 	}
+
+	@Override
+	public boolean recover(ChunkData cm) throws IOException,
+			HashtableFullException {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

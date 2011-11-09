@@ -182,12 +182,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				maps[i].iterInit();
 				long val = 0;
 				while (val != -1 && !this.closed) {
-					
+
 					try {
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
 						if (val != -1) {
-							long pos = (((long) val / (long) Main.chunkStorePageSize) * (long) ChunkData.RAWDL)
+							long pos = (((long) val / (long) Main.CHUNK_LENGTH) * (long) ChunkData.RAWDL)
 									+ ChunkData.CLAIMED_OFFSET;
 							z++;
 							lBuf.clear();
@@ -278,20 +278,22 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							SDFSLogger.getLog().info("HashTable corrupt!");
 							corrupt = true;
 						}
-
+						long pos = (currentPos / raw.length) * Main.CHUNK_LENGTH;
+						if(cm.getcPos()!= pos)
+							SDFSLogger.getLog().warn("Possible Corruption at " + cm.getcPos() + " file position is " +pos);
 						if (!corrupt) {
 							long value = cm.getcPos();
-							boolean added = this.put(cm, false);
-							if (added)
-								this.kSz++;
 							if (cm.ismDelete()) {
-								this.remove(cm, false);
-								this.addFreeSlot((currentPos / raw.length)
-										* Main.chunkStorePageSize);
+								this.addFreeSlot(cm.getcPos());
 								freeSl++;
 								this.kSz--;
-							} else if (value > endPos)
-								endPos = value + Main.CHUNK_LENGTH;
+							}else { 
+								boolean added = this.put(cm, false);
+								if (added)
+									this.kSz++;
+								if (value > endPos)
+									endPos = value + Main.CHUNK_LENGTH;
+							}
 						}
 					}
 				} catch (BufferUnderflowException e) {
@@ -380,7 +382,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							if (!Arrays.equals(raw, BLANKCM)) {
 								try {
 									ChunkData cm = new ChunkData(raw);
-									if (cm.getLastClaimed() != 0 && cm.getLastClaimed() < time) {
+									if (cm.getLastClaimed() != 0
+											&& cm.getLastClaimed() < time) {
 										if (this.remove(cm)) {
 											rem++;
 										}
@@ -502,6 +505,20 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
+	private void removeFreeSlot(long position) {
+		this.fslock.lock();
+		try {
+			int pos = (int) (position / Main.CHUNK_LENGTH);
+			if (pos >= 0)
+				this.freeSlots.clear(pos);
+			else if (pos < 0) {
+				SDFSLogger.getLog().info("Position is less than 0 " + pos);
+			}
+		} finally {
+			this.fslock.unlock();
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -543,6 +560,32 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		} else {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
+		}
+		cm = null;
+		return added;
+	}
+
+	public boolean recover(ChunkData cm) throws IOException,
+			HashtableFullException {
+		// persist = false;
+		if (this.isClosed())
+			throw new HashtableFullException("Hashtable " + this.fileName
+					+ " is close");
+		if (kSz >= this.maxSz)
+			throw new HashtableFullException("maximum sized reached");
+		boolean added = false;
+		// if (persist)
+		// this.flushFullBuffer();
+
+		added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
+				(byte) 1);
+		if (added) {
+			this.removeFreeSlot(cm.getcPos());
+			long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
+					* (long) ChunkData.RAWDL;
+			cm.setLastClaimed(System.currentTimeMillis());
+			kFc.write(cm.getMetaDataBytes(), pos);
+			this.kSz++;
 		}
 		cm = null;
 		return added;
@@ -636,11 +679,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				while (iter.hasNext()) {
 					ChunkData cm = iter.next();
 					if (cm != null) {
-						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
+						long pos = (cm.getcPos() / (long) Main.CHUNK_LENGTH)
 								* (long) ChunkData.RAWDL;
-						if(cm.ismDelete())
+						if (cm.ismDelete())
 							cm.setLastClaimed(0);
-						else{
+						else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}
 						try {
@@ -708,11 +751,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 								+ "] is close");
 					}
 					try {
-						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
+						long pos = (cm.getcPos() / Main.CHUNK_LENGTH)
 								* (long) ChunkData.RAWDL;
-						if(cm.ismDelete())
+						if (cm.ismDelete())
 							cm.setLastClaimed(0);
-						else{
+						else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}
 						try {

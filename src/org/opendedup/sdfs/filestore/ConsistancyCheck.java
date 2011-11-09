@@ -26,7 +26,7 @@ public class ConsistancyCheck {
 				}
 				records++;
 				if (!map.containsKey(data.getHash())) {
-					map.put(data);
+					map.recover(data);
 					recordsRecovered++;
 				}
 				data = store.getNextChunck();

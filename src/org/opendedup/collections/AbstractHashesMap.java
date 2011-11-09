@@ -31,6 +31,9 @@ public interface AbstractHashesMap {
 	public abstract boolean put(ChunkData cm) throws IOException,
 			HashtableFullException;
 
+	public abstract boolean recover(ChunkData cm) throws IOException,
+	HashtableFullException;
+	
 	public abstract boolean put(ChunkData cm, boolean persist)
 			throws IOException, HashtableFullException;
 

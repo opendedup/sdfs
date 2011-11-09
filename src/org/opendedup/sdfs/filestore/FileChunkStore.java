@@ -80,19 +80,19 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			fc.force(true);
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 
 		try {
 			fc.close();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 
 		try {
 			this.iterFC.close();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 		this.iterFC = null;
 		try {
@@ -235,10 +235,6 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		RandomAccessFile raf = new RandomAccessFile(f, "rw");
-		raf.seek(start);
-		raf.write(0);
-		raf.close();
 	}
 
 	public void close() {
@@ -315,7 +311,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		}
 		if (pos != -1) {
 			byte[] hash = hc.getHash(fbuf.array());
-			return new ChunkData(hash, fbuf.array().length, fbuf.array());
+			return new ChunkData(hash, pos);
 		} else {
 			iterFC.close();
 			return null;

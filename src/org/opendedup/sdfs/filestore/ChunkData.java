@@ -120,9 +120,12 @@ public class ChunkData {
 			}
 			if (this.mDelete) {
 				chunk = new byte[cLen];
-			}
-			HashChunkService.getChuckStore()
+				HashChunkService.getChuckStore()
+				.deleteChunk(hash, cPos,cLen);
+			}else {
+				HashChunkService.getChuckStore()
 					.writeChunk(hash, chunk, cLen, cPos);
+			}
 			if (clear)
 				this.chunk = null;
 		}
