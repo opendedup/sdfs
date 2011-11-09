@@ -38,23 +38,7 @@ public class HashChunkService {
 	}
 
 	static {
-		try {
-			fileStore = (AbstractChunkStore) Class
-					.forName(Main.chunkStoreClass).newInstance();
-			fileStore.init(Main.chunkStoreConfig);
-		} catch (InstantiationException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		} catch (IllegalAccessException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		} catch (ClassNotFoundException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		} catch (IOException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		}
+		initChunkStore();
 		try {
 			hs = new HashStore();
 			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
@@ -81,6 +65,34 @@ public class HashChunkService {
 
 	public static AbstractChunkStore getChuckStore() {
 		return fileStore;
+	}
+	
+	private static void initChunkStore() {
+		try {
+			fileStore = (AbstractChunkStore) Class
+					.forName(Main.chunkStoreClass).newInstance();
+			fileStore.init(Main.chunkStoreConfig);
+		} catch (InstantiationException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (IllegalAccessException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (ClassNotFoundException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		} catch (IOException e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.exit(-1);
+		}
+	}
+	
+	public static void reInitChunkStore() {
+		SDFSLogger.getLog().warn("Re-Initializing ChunkStore");
+		fileStore.close();
+		fileStore = null;
+		initChunkStore();
+		SDFSLogger.getLog().warn("Re-Initialized ChunkStore");
 	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,

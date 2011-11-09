@@ -182,9 +182,16 @@ public class HashStore {
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
 			bdb.sync();
 			bdb.close();
-			SDFSLogger.getLog().info(
-					"Closing Volume after Consistancy Check");
-			System.exit(0);
+			bdb = null;
+			HashChunkService.reInitChunkStore();
+			try {
+				bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
+						.newInstance();
+				bdb.init(entries, dbf.getPath());
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+				System.exit(-1);
+			}
 		}
 	}
 

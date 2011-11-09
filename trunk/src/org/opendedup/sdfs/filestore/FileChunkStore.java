@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -89,6 +88,21 @@ public class FileChunkStore implements AbstractChunkStore {
 
 		} catch (IOException e) {
 		}
+
+		try {
+			this.iterFC.close();
+
+		} catch (IOException e) {
+		}
+		this.iterFC = null;
+		try {
+			this.hc.destroy();
+		} catch (Exception e) {
+		}
+		try {
+			this.chunkDataWriter.close();
+		} catch(Exception e) {}
+		this.chunkDataWriter = null;
 		fc = null;
 
 	}
@@ -227,8 +241,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf.close();
 	}
 
-
-
 	public void close() {
 		try {
 			this.closed = true;
@@ -285,7 +297,7 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if(iterFC.position() >= iterFC.size()) {
+		if (iterFC.position() >= iterFC.size()) {
 			iterFC.close();
 			return null;
 		}
@@ -296,34 +308,35 @@ public class FileChunkStore implements AbstractChunkStore {
 			iterFC.read(fbuf);
 		} catch (Exception e) {
 			iterFC.close();
-			SDFSLogger.getLog().error(
-					"unable to fetch chunk at position " + iterFC.position(), e);
+			SDFSLogger.getLog()
+					.error("unable to fetch chunk at position "
+							+ iterFC.position(), e);
 			throw new IOException(e);
-		} 
-		if(pos != -1)  {
-			byte [] hash = hc.getHash(fbuf.array());
-			return new ChunkData(hash,fbuf.array().length,fbuf.array());
 		}
-		else {
+		if (pos != -1) {
+			byte[] hash = hc.getHash(fbuf.array());
+			return new ChunkData(hash, fbuf.array().length, fbuf.array());
+		} else {
 			iterFC.close();
 			return null;
 		}
-		
+
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
+
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {
-		if(Main.hashLength == 16) {
-			hc = new Tiger16HashEngine();
-		}else {
-			hc = new TigerHashEngine();
-		}
-			this.iterFC =  new RandomAccessFile(f, "r").getChannel();
-		}catch(Exception e) {
-			throw new IOException( e);
-		}finally {
+			if (Main.hashLength == 16) {
+				hc = new Tiger16HashEngine();
+			} else {
+				hc = new TigerHashEngine();
+			}
+			this.iterFC = new RandomAccessFile(f, "r").getChannel();
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
 			this.iterlock.unlock();
 		}
 		// TODO Auto-generated method stub
@@ -332,7 +345,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
