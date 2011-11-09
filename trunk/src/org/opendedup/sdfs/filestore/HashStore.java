@@ -180,6 +180,11 @@ public class HashStore {
 			SDFSLogger.getLog().info(
 					"DSE did not close gracefully, running consistancy check");
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
+			bdb.sync();
+			bdb.close();
+			SDFSLogger.getLog().info(
+					"Closing Volume after Consistancy Check");
+			System.exit(0);
 		}
 	}
 
