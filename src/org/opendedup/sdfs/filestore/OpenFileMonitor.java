@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 
 /**
@@ -53,7 +54,7 @@ public class OpenFileMonitor implements Runnable {
 					DedupFile df = null;
 					try {
 						df = files[i];
-						if (this.isFileStale(df) && !df.hasOpenChannels()) {
+						if (!Main.safeClose && this.isFileStale(df) && !df.hasOpenChannels()) {
 							try {
 								if (df != null)
 									DedupFileStore.getDedupFile(df.getMetaFile()).forceClose();
