@@ -54,10 +54,12 @@ public class OpenFileMonitor implements Runnable {
 					DedupFile df = null;
 					try {
 						df = files[i];
-						if (!Main.safeClose && this.isFileStale(df) && !df.hasOpenChannels()) {
+						if (!Main.safeClose && this.isFileStale(df)
+								&& !df.hasOpenChannels()) {
 							try {
 								if (df != null)
-									DedupFileStore.getDedupFile(df.getMetaFile()).forceClose();
+									DedupFileStore.getDedupFile(
+											df.getMetaFile()).forceClose();
 							} catch (Exception e) {
 								SDFSLogger
 										.getLog()
@@ -66,10 +68,12 @@ public class OpenFileMonitor implements Runnable {
 							}
 						} else {
 							try {
-								DedupFileStore.getDedupFile(df.getMetaFile()).sync();
-								DedupFileStore.getDedupFile(df.getMetaFile()).getMetaFile().sync();
-							} catch(Exception e) {
-								
+								DedupFileStore.getDedupFile(df.getMetaFile())
+										.sync();
+								DedupFileStore.getDedupFile(df.getMetaFile())
+										.getMetaFile().sync();
+							} catch (Exception e) {
+
 							}
 						}
 					} catch (NoSuchFileException e) {
@@ -97,10 +101,14 @@ public class OpenFileMonitor implements Runnable {
 	 * @throws IOException
 	 */
 	public boolean isFileStale(DedupFile df) throws IOException {
-		long currentTime = System.currentTimeMillis();
-		long staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
-				.getLastAccessed() + this.maxInactive;
-		return currentTime > staleTime;
+		if (this.maxInactive == -1)
+			return false;
+		else {
+			long currentTime = System.currentTimeMillis();
+			long staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
+					.getLastAccessed() + this.maxInactive;
+			return currentTime > staleTime;
+		}
 	}
 
 	/**
