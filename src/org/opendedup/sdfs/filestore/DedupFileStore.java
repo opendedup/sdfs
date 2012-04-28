@@ -178,7 +178,11 @@ public class DedupFileStore {
 	 * @return true if open
 	 */
 	public static boolean fileOpen(MetaDataDedupFile mf) {
+		try {
 		return openFile.containsKey(mf.getDfGuid());
+		}catch(NullPointerException e) {
+			return false;
+		}
 	}
 
 	/**
