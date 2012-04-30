@@ -102,9 +102,6 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync();
 			SparseDedupFile _df = new SparseDedupFile(snapmf);
-			_df.bdb.vanish();
-			_df.chunkStore.vanish();
-			_df.forceClose();
 			this.writeBufferLock.lock();
 			bdb.copy(_df.getDatabasePath());
 			chunkStore.copy(_df.chunkStorePath);
