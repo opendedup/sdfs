@@ -427,6 +427,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			try {
 				ch.close();
+				fh = null;
+				ch = null;
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("unable to close " + path, e);
 			}

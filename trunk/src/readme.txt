@@ -1,6 +1,7 @@
 What is this?
 
   A deduplicated file system based on fuse.
+  **Installed-Size
 
 System Requirements
   
