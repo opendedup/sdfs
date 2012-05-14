@@ -279,9 +279,7 @@ public class WritableCacheBuffer extends DedupChunk {
 			if (this.closed || this.flushing) {
 				this.closed = false;
 				this.flushing = false;
-
-				this.df.flushingBuffers.remove(this.getFilePosition());
-				this.df.writeBuffers.put(this.getFilePosition(), this);
+				df.putBufferIntoWrite(this);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Error while opening");
@@ -307,8 +305,7 @@ public class WritableCacheBuffer extends DedupChunk {
 				throw new BufferClosedException("Buffer Closed");
 			}
 			this.flushing = true;
-			this.df.writeBuffers.remove(this.getFilePosition());
-			this.df.flushingBuffers.put(this.getFilePosition(), this);
+			this.df.putBufferIntoFlush(this);
 			SparseDedupFile.pool.execute(this);
 		} finally {
 			this.lock.unlock();

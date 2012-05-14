@@ -124,10 +124,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
-		} catch (IOException e) {
-			SDFSLogger.getLog().error("unable to sync file", e);
-			throw new FuseException("symlink not supported")
-					.initErrno(FuseException.ENOSYS);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
+			throw new FuseException("unable to sync file")
+					.initErrno(FuseException.EACCES);
 		} finally {
 		}
 		return 0;
@@ -139,10 +139,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		try {
 			ch.force(true);
 			
-		} catch (IOException e) {
-			SDFSLogger.getLog().error("unable to sync file", e);
-			throw new FuseException("unable to sync")
-					.initErrno(FuseException.ENOSYS);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
+			throw new FuseException("unable to sync file")
+					.initErrno(FuseException.EACCES);
 		} finally {
 		}
 		return 0;
@@ -379,7 +379,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// Thread.currentThread().setName("10 " +
 		// Long.toString(System.currentTimeMillis()));
 		try {
-			openSetter.setFh(this.getFileChannel(path));
+			openSetter.setFh(this.getFileChannel(path,flags));
 		} catch (FuseException e) {
 			SDFSLogger.getLog().info("error while opening file", e);
 			throw e;
@@ -395,7 +395,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to read file " + path, e);
 			throw new FuseException("error opening " + path)
@@ -422,14 +421,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int release(String path, Object fh, int flags) throws FuseException {
 		try {
-			if (Main.safeClose = false)
+			if (!Main.safeClose)
 				return 0;
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			try {
-				ch.close();
+				ch.getDedupFile().unRegisterChannel(ch,flags);
 				fh = null;
 				ch = null;
-			} catch (IOException e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to close " + path, e);
 			}
 		} finally {
@@ -525,9 +524,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int truncate(String path, long size) throws FuseException {
 
 		try {
-			DedupFileChannel ch = this.getFileChannel(path);
+			DedupFileChannel ch = this.getFileChannel(path,-1);
 			ch.truncateFile(size);
-			ch.close();
+			ch.getDedupFile().unRegisterChannel(ch, -1);
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to truncate file " + path, e);
 			throw new FuseException().initErrno(FuseException.EACCES);
@@ -670,12 +669,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		throw new FuseException().initErrno(FuseException.ENOENT);
 	}
 
-	private DedupFileChannel getFileChannel(String path) throws FuseException {
+	private DedupFileChannel getFileChannel(String path,int flags) throws FuseException {
 		File f = this.resolvePath(path);
 
 		try {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			return mf.getDedupFile().getChannel();
+			return mf.getDedupFile().getChannel(flags);
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to open file" + path, e);
 			throw new FuseException("error opening " + path)

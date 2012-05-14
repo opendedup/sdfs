@@ -25,6 +25,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void createBlankFile(long len) throws IOException;
+	
 
 	/**
 	 * 
@@ -46,7 +47,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract WritableCacheBuffer getWriteBuffer(long position,
-			boolean newBuf) throws IOException;
+			boolean newBuf) throws FileClosedException,IOException;
 
 	/**
 	 * 
@@ -56,7 +57,7 @@ public interface DedupFile {
 	 * @return the specific read buffer.
 	 * @throws IOException
 	 */
-	public abstract DedupChunk getReadBuffer(long position) throws IOException;
+	public abstract DedupChunk getReadBuffer(long position) throws FileClosedException,IOException;
 
 	/**
 	 * Clones the DedupFile
@@ -112,7 +113,7 @@ public interface DedupFile {
 	 * 
 	 * @throws IOException
 	 */
-	public abstract void sync() throws IOException;
+	public abstract void sync() throws FileClosedException, IOException;
 
 	/**
 	 * Creates a DedupFileChannel for writing data to this DedupFile
@@ -120,7 +121,7 @@ public interface DedupFile {
 	 * @return a DedupFileChannel associated with this file
 	 * @throws IOException
 	 */
-	public abstract DedupFileChannel getChannel() throws IOException;
+	public abstract DedupFileChannel getChannel(int flags) throws IOException;
 
 	/**
 	 * Removes a DedupFileChannel for writing to this DedupFile
@@ -128,7 +129,8 @@ public interface DedupFile {
 	 * @param channel
 	 *            the channel to remove
 	 */
-	public abstract void unRegisterChannel(DedupFileChannel channel);
+	public abstract void unRegisterChannel(DedupFileChannel channel,int flags);
+
 
 	/**
 	 * 

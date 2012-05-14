@@ -158,14 +158,15 @@ public class Config {
 		doc.getDocumentElement().normalize();
 
 		String version = "0.8.12";
+		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
 		if (doc.getDocumentElement().hasAttribute("version")) {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
 		}
-		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
+		
 		Main.version = version;
 		SDFSLogger.getLog().info(
-				"Parsing " + doc.getDocumentElement().getNodeName()
+				"Parsing volume " + doc.getDocumentElement().getNodeName()
 						+ " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations")
 				.item(0);

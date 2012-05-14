@@ -57,9 +57,11 @@ public class OpenFileMonitor implements Runnable {
 						if (!Main.safeClose && this.isFileStale(df)
 								&& !df.hasOpenChannels()) {
 							try {
-								if (df != null)
+								if (df != null) {
 									DedupFileStore.getDedupFile(
 											df.getMetaFile()).forceClose();
+									SDFSLogger.getLog().debug("Closing [" +df.getMetaFile().getPath() + "] because its stale");
+								}
 							} catch (Exception e) {
 								SDFSLogger
 										.getLog()

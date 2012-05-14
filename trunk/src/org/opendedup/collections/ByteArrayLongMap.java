@@ -111,9 +111,10 @@ public class ByteArrayLongMap {
 					if (claimed == 1)
 						return val;
 				}
-				iterPos++;
 			} catch (Exception e) {
+				SDFSLogger.getLog().error("error getting next claimed value at [" + iterPos + "]", e);
 			} finally {
+				iterPos++;
 				this.hashlock.unlock();
 			}
 		}
