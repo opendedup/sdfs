@@ -327,7 +327,7 @@ public class WinSDFS implements DokanOperations {
 		DedupFileChannel ch = this.getFileChannel(fileName, arg1.handle);
 		try {
 			ch.force(true);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("unable to sync file " + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
@@ -444,7 +444,7 @@ public class WinSDFS implements DokanOperations {
 			if (ch != null) {
 				this.channelLock.lock();
 				try {
-					ch.close();
+					ch.getDedupFile().unRegisterChannel(ch, -1);
 					this.dedupChannels.remove(arg3.handle);
 				} catch (Exception e) {
 					log.error("unable to close " + from, e);
@@ -500,8 +500,8 @@ public class WinSDFS implements DokanOperations {
 				.iterator();
 		while (iter.hasNext()) {
 			try {
-				iter.value().close();
-			} catch (IOException e) {
+				iter.value().getDedupFile().unRegisterChannel(iter.value(), -1);
+			} catch (Exception e) {
 
 			}
 		}
@@ -516,11 +516,11 @@ public class WinSDFS implements DokanOperations {
 			File f = this.resolvePath(path);
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-				ch = mf.getDedupFile().getChannel();
+				ch = mf.getDedupFile().getChannel(-1);
 				channelLock.lock();
 				try {
 					if (this.dedupChannels.containsKey(handleNo)) {
-						ch.close();
+						ch.getDedupFile().unRegisterChannel(ch, -1);
 						ch = this.dedupChannels.get(handleNo);
 					} else {
 						this.dedupChannels.put(handleNo, ch);
@@ -544,8 +544,8 @@ public class WinSDFS implements DokanOperations {
 		DedupFileChannel ch = this.dedupChannels.remove(handleNo);
 		if (ch != null) {
 			try {
-				ch.close();
-			} catch (IOException e) {
+				ch.getDedupFile().unRegisterChannel(ch, -1);
+			} catch (Exception e) {
 				log.error("unable to close channel" + handleNo, e);
 			} finally {
 				log.debug("number of channels is " + this.dedupChannels.size());

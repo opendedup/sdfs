@@ -131,7 +131,19 @@ public class MgmtWebServer implements Container {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
 						}
-					} else if (cmd.equalsIgnoreCase("debug-info")) {
+					}else if (cmd.equalsIgnoreCase("open-files")) {
+						try {
+							String msg = new GetOpenFiles().getResult(cmdOptions,
+									file);
+							result = "<result status=\"success\" msg=\"command completed successfully\">";
+							result = result + msg;
+							result = result + "</result>";
+						} catch (IOException e) {
+							result = "<result status=\"failed\" msg=\""
+									+ e.getMessage() + "\"/>";
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("debug-info")) {
 						try {
 							String msg = new GetDebug().getResult(cmdOptions,
 									file);

@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Used to generate random GUID(s) with SDFS. GUIDS are generated off of the
@@ -199,8 +200,8 @@ public class RandomGUID extends Object {
 	 * Demonstraton and self test of class
 	 */
 	public static void main(String args[]) {
-		for (int i = 0; i < 100; i++) {
-			System.out.println(getVMDKGUID());
-		}
+		RandomGUID uuid = new RandomGUID();
+		String randomUUIDString = uuid.valueAfterMD5.toLowerCase();
+		System.out.println(randomUUIDString);
 	}
 }

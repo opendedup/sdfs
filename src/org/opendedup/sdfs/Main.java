@@ -75,7 +75,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.1.2";
+	public static String version = "1.1.3";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

@@ -18,7 +18,6 @@ public class ManualGC {
 		} else {
 			try {
 				GCMain.lock();
-				
 				long tm = System.currentTimeMillis();
 				SDFSEvent.gcInfoEvent("SDFS Volume Cleanup Initiated");
 				new FDisk();

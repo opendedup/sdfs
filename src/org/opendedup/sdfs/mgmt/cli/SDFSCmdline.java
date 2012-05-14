@@ -7,6 +7,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.log4j.BasicConfigurator;
 import org.opendedup.util.SDFSLogger;
 
 public class SDFSCmdline {
@@ -214,6 +215,7 @@ public class SDFSCmdline {
 	}
 
 	public static void main(String[] args) throws Exception {
+		BasicConfigurator.configure();
 		try {
 			parseCmdLine(args);
 		} catch (org.apache.commons.cli.UnrecognizedOptionException e) {
@@ -223,6 +225,5 @@ public class SDFSCmdline {
 			SDFSLogger.getBasicLog().error("An error occured",e);
 			System.exit(-1);
 		}
-
 	}
 }

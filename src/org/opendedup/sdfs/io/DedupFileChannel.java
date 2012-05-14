@@ -28,6 +28,7 @@ public class DedupFileChannel {
 	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
+	private int flags = -1;
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -37,13 +38,10 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 
-	protected DedupFileChannel(MetaDataDedupFile file) throws IOException {
+	protected DedupFileChannel(MetaDataDedupFile file,int flags) throws IOException {
 		df = file.getDedupFile();
 		mf = file;
-		if (Main.safeSync) {
-			mf.sync();
-			df.sync();
-		}
+		this.flags = flags;
 		SDFSLogger.getLog().debug("Initializing Cached File " + mf.getPath());
 	}
 
@@ -157,10 +155,18 @@ public class DedupFileChannel {
 	 * @param metaData
 	 *            true will sync data
 	 * @throws IOException
+	 * @throws FileClosedException 
 	 */
-	public void force(boolean metaData) throws IOException {
+	public void force(boolean metaData) throws IOException, FileClosedException {
 		// FixMe Does not persist chunks. This may be an issue.
-		df.sync();
+		try {
+			df.sync();
+		}catch(FileClosedException e) {
+			SDFSLogger.getLog().warn(mf.getPath() + " is closed but still writing");
+			DedupFileChannel _dc =  df.getChannel(-1);
+			df.sync();
+			df.unRegisterChannel(_dc,-1);
+		}
 		mf.sync();
 	}
 
@@ -276,13 +282,18 @@ public class DedupFileChannel {
 				}
 				mf.setLastModified(System.currentTimeMillis());
 			}
-		} catch (Exception e) {
+		} catch(FileClosedException e) {
+			SDFSLogger.getLog().warn(mf.getPath() + " is closed but still writing");
+			DedupFileChannel _dc =  df.getChannel(-1);
+			_dc.writeFile(buf, len, pos, offset);
+			df.unRegisterChannel(_dc,-1);
+		}
+		catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.mf.getPath() + " "
 							+ e.toString(), e);
 			// TODO : fix rollback
 			// df.rollBack();
-			this.close();
 			throw new IOException("error while writing to " + this.mf.getPath()
 					+ " " + e.toString());
 		} finally {
@@ -327,7 +338,7 @@ public class DedupFileChannel {
 	 * 
 	 * @throws IOException
 	 */
-	public void close() throws IOException {
+	protected void close(int flags) throws IOException {
 		if (Main.safeClose) {
 			if (!this.isClosed()) {
 				this.closeLock.lock();
@@ -341,7 +352,6 @@ public class DedupFileChannel {
 				} catch (Exception e) {
 
 				} finally {
-					df.unRegisterChannel(this);
 					this.closed = true;
 					this.closeLock.unlock();
 				}
@@ -354,7 +364,7 @@ public class DedupFileChannel {
 	 * 
 	 * @throws IOException
 	 */
-	public void forceClose() throws IOException {
+	protected void forceClose() throws IOException {
 		if (!this.isClosed()) {
 			this.closeLock.lock();
 			try {
@@ -367,7 +377,7 @@ public class DedupFileChannel {
 			} catch (Exception e) {
 
 			} finally {
-				df.unRegisterChannel(this);
+				df.unRegisterChannel(this, this.getFlags());
 				this.closed = true;
 				this.closeLock.unlock();
 			}
@@ -453,7 +463,6 @@ public class DedupFileChannel {
 									+ "] bytes left [" + bytesLeft
 									+ "] filePostion [" + currentLocation
 									+ "] ");
-					this.close();
 					throw new IOException("Error reading buffer");
 				}
 				if (currentLocation == mf.length()) {
@@ -572,5 +581,13 @@ public class DedupFileChannel {
 	public void removeLock(DedupFileLock lock) {
 		lock.release();
 		df.removeLock(lock);
+	}
+
+	public int getFlags() {
+		return flags;
+	}
+
+	public void setFlags(int flags) {
+		this.flags = flags;
 	}
 }

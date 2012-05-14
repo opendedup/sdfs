@@ -13,6 +13,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.DedupFileChannel;
+import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.VMDKData;
 
@@ -22,7 +23,7 @@ public class VMDKParser {
 
 	public static MetaDataDedupFile writeFile(String path, String fileName,
 			long size) throws IOException, BufferClosedException,
-			HashtableFullException {
+			HashtableFullException, FileClosedException {
 		path = path + File.separator + fileName;
 		File f = new File(path);
 		if (!f.exists())
@@ -62,7 +63,7 @@ public class VMDKParser {
 		sb.append("ddb.adapterType = \"buslogic\"\n");
 		MetaDataDedupFile vmd = MetaFileStore.getMF(path + File.separator
 				+ fileName + ".vmdk");
-		DedupFileChannel ch = vmd.getDedupFile().getChannel();
+		DedupFileChannel ch = vmd.getDedupFile().getChannel(-1);
 		ByteBuffer b = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
 		byte[] strB = sb.toString().getBytes();
 		b.put(strB);
@@ -78,7 +79,7 @@ public class VMDKParser {
 		vmdk.getIOMonitor().setBytesRead(0);
 		vmdk.getIOMonitor().setDuplicateBlocks(0);
 		vmdk.sync();
-		ch.close();
+		ch.getDedupFile().unRegisterChannel(ch, -1);
 		SDFSLogger.getLog().info(
 				"Created vmdk of size " + vmdk.length() + " at " + path
 						+ File.separator + fileName);
@@ -91,7 +92,6 @@ public class VMDKParser {
 		ByteArrayInputStream bis = new ByteArrayInputStream(b);
 		BufferedReader br = new BufferedReader(new InputStreamReader(bis));
 		String line;
-		int linesRead = 0;
 		VMDKData data = new VMDKData();
 		while ((line = br.readLine()) != null) {
 			String[] vals = line.split("=");
@@ -133,7 +133,6 @@ public class VMDKParser {
 			if (vals[0].trim().equalsIgnoreCase("ddb.adapterType")) {
 				data.setAdapterType(vals[1].trim().replaceAll("\"", ""));
 			}
-			linesRead++;
 
 		}
 		if (data.getUuid() == null)

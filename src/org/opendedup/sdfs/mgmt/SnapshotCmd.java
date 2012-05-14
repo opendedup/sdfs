@@ -21,6 +21,8 @@ public class SnapshotCmd implements XtendedCmd {
 		
 			
 		try {
+			if(!f.exists())
+				throw new IOException("Path not found [" + srcPath + "]");
 			if(nf.exists())
 				throw new IOException("Path already exists [" + dstPath + "]");
 			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);

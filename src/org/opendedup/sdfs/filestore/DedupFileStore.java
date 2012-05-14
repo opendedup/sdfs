@@ -84,7 +84,6 @@ public class DedupFileStore {
 				} else {
 					df = (DedupFile) openFile.get(mf.getDfGuid());
 					if (df == null) {
-
 						df = new SparseDedupFile(mf);
 
 					}
@@ -111,7 +110,6 @@ public class DedupFileStore {
 	 */
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
-			if (!openFile.containsKey(df.getGUID())) {
 				SDFSLogger.getLog().debug("adding dedupfile");
 				if (openFile.size() >= Main.maxOpenFiles)
 					throw new IOException("maximum number of files reached ["
@@ -119,8 +117,6 @@ public class DedupFileStore {
 				openFile.put(df.getGUID(), df);
 				SDFSLogger.getLog().debug(
 						"dedupfile cache size is " + openFile.size());
-
-			}
 		} else {
 			throw new IOException("DedupFileStore is closed");
 		}
@@ -164,10 +160,8 @@ public class DedupFileStore {
 	 * 
 	 * @param mf
 	 */
-	public static void removeOpenDedupFile(MetaDataDedupFile mf) {
-		if (!closing) {
-			openFile.remove(mf.getDfGuid());
-		}
+	public static void removeOpenDedupFile(String guid) {
+			openFile.remove(guid);
 	}
 
 	/**
@@ -179,7 +173,7 @@ public class DedupFileStore {
 	 */
 	public static boolean fileOpen(MetaDataDedupFile mf) {
 		try {
-		return openFile.containsKey(mf.getDfGuid());
+			return openFile.containsKey(mf.getDfGuid());
 		}catch(NullPointerException e) {
 			return false;
 		}
