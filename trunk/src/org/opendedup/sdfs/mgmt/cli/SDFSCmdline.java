@@ -1,18 +1,20 @@
 package org.opendedup.sdfs.mgmt.cli;
 
+
 import org.apache.commons.cli.CommandLine;
 
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.opendedup.util.SDFSLogger;
 
 public class SDFSCmdline {
 	public static void parseCmdLine(String[] args) throws Exception {
-		CommandLineParser parser = new PosixParser();
+		PosixParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
 		if (cmd.hasOption("help") || args.length == 0) {
@@ -215,6 +217,7 @@ public class SDFSCmdline {
 	}
 
 	public static void main(String[] args) throws Exception {
+		LogManager.getRootLogger().setLevel((Level)Level.INFO);
 		BasicConfigurator.configure();
 		try {
 			parseCmdLine(args);

@@ -2,7 +2,6 @@ package fuse.SDFS;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -138,7 +137,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
-			
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
 			throw new FuseException("unable to sync file")
@@ -248,7 +247,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 			}
 		} finally {
-			
+
 		}
 		return 0;
 	}
@@ -281,8 +280,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int link(String from, String to) throws FuseException {
 
-		
-		
 		throw new FuseException("error hard linking is not supported")
 				.initErrno(FuseException.ENOSYS);
 
@@ -379,7 +376,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// Thread.currentThread().setName("10 " +
 		// Long.toString(System.currentTimeMillis()));
 		try {
-			openSetter.setFh(this.getFileChannel(path,flags));
+			openSetter.setFh(this.getFileChannel(path, flags));
 		} catch (FuseException e) {
 			SDFSLogger.getLog().info("error while opening file", e);
 			throw e;
@@ -425,7 +422,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				return 0;
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			try {
-				ch.getDedupFile().unRegisterChannel(ch,flags);
+				ch.getDedupFile().unRegisterChannel(ch, flags);
 				fh = null;
 				ch = null;
 			} catch (Exception e) {
@@ -505,7 +502,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			if (dst.exists()) {
 				throw new FuseException().initErrno(FuseException.EPERM);
 			}
-			
+
 			Path srcP = Paths.get(from);
 			Path dstP = Paths.get(dst.getPath());
 			try {
@@ -524,7 +521,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int truncate(String path, long size) throws FuseException {
 
 		try {
-			DedupFileChannel ch = this.getFileChannel(path,-1);
+			DedupFileChannel ch = this.getFileChannel(path, -1);
 			ch.truncateFile(size);
 			ch.getDedupFile().unRegisterChannel(ch, -1);
 		} catch (IOException e) {
@@ -569,16 +566,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// Thread.currentThread().setName("20 "+Long.toString(System.currentTimeMillis()));
 		try {
 			File f = this.resolvePath(path);
-			if(f.isFile()) {
+			if (f.isFile()) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.setLastAccessed(atime * 1000L);
 				mf.setLastModified(mtime * 1000L);
 			} else {
 				Path p = f.toPath();
 				try {
-					Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
-				}catch(IOException e) {
-					SDFSLogger.getLog().warn("unable to set time on directory " + path, e);
+					Files.setLastModifiedTime(p,
+							FileTime.fromMillis(mtime * 1000L));
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn(
+							"unable to set time on directory " + path, e);
 				}
 			}
 		} finally {
@@ -621,7 +620,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	private int getFtype(File _f) throws FuseException {
-		
+
 		if (!_f.exists()) {
 			throw new FuseException().initErrno(FuseException.ENOENT);
 		}
@@ -669,7 +668,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		throw new FuseException().initErrno(FuseException.ENOENT);
 	}
 
-	private DedupFileChannel getFileChannel(String path,int flags) throws FuseException {
+	private DedupFileChannel getFileChannel(String path, int flags)
+			throws FuseException {
 		File f = this.resolvePath(path);
 
 		try {
@@ -739,8 +739,17 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public int listxattr(String path, XattrLister lister) throws FuseException {
 		try {
-			sdfsCmds.listAttrs(lister);
+			// sdfsCmds.listAttrs(lister);
+			File f = this.resolvePath(path);
+			if (!f.exists())
+				throw new FuseException().initErrno(FuseException.ENFILE);
+			MetaDataDedupFile mf = MetaFileStore.getMF(f);
+			String[] atters = mf.getXAttersNames();
+			for (int i = 0; i < atters.length; i++) {
+				lister.add(atters[i]);
+			}
 		} finally {
+			
 		}
 		return 0;
 	}
@@ -799,7 +808,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 			}
 		} finally {
-			
+
 		}
 		return 0;
 	}
@@ -821,11 +830,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				mf.addXAttribute(name, valStr);
 			}
 		} finally {
-			
+
 		}
 		return 0;
 	}
-
-	
 
 }
