@@ -1,5 +1,4 @@
 Version 1.1.3
-
 	Fixes:
 	* cp -a no longer creates corrupt files
 	* files close properly when safeclose enabled without error
