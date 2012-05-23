@@ -1,3 +1,12 @@
+Version 1.1.3
+
+	Fixes:
+	* cp -a no longer creates corrupt files
+	* files close properly when safeclose enabled without error
+	* Lots of other small fixes in code
+	Enhancements
+	* SDFS Garbage Collection improvements
+	* Snapshot performance improvements
 Version 1.1.2
 	Fixes:
 	* Consistancy Checker fixed for recovery of corrupt blocks
