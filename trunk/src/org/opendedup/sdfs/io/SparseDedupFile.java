@@ -37,12 +37,8 @@ public class SparseDedupFile implements DedupFile {
 	public long lastSync = 0;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
-	private static HashFunctionPool hashPool = new HashFunctionPool(
-			Main.writeThreads + 1);
-	// private transient ArrayList<PreparedStatement> insertStatements = new
-	// ArrayList<PreparedStatement>();
-	protected static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, 8192);
+	private static HashFunctionPool hashPool = new HashFunctionPool(Main.writeThreads + 1);
+	protected static transient final ThreadPool pool = new ThreadPool(Main.writeThreads + 1, 8192);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock writeBufferLock = new ReentrantLock();
@@ -498,7 +494,8 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	public void sync() throws FileClosedException, IOException {
 		if (this.closed) {
-			throw new FileClosedException("file already closed");
+				throw new FileClosedException("file already closed");
+				
 		}
 
 		if (Main.safeSync) {
@@ -573,13 +570,13 @@ public class SparseDedupFile implements DedupFile {
 				DedupFileChannel channel = new DedupFileChannel(mf, flags);
 				this.buffers.add(channel);
 				return channel;
-			} catch (IOException e) {
-				throw e;
-			} finally {
+			}  finally {
 				channelLock.unlock();
 			}
 		}
 	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -604,6 +601,38 @@ public class SparseDedupFile implements DedupFile {
 				}
 			} catch (Exception e) {
 			} finally {
+				channelLock.unlock();
+			}
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.annesam.sdfs.io.AbstractDedupFile#unRegisterChannel(com.annesam.sdfs
+	 * .io.DedupFileChannel)
+	 */
+	public void registerChannel(DedupFileChannel channel) throws IOException {
+		if (!Main.safeClose) {
+			channelLock.lock();
+			try {
+				if (this.staticChannel == null) {
+					if (this.isClosed())
+						this.initDB();
+					this.staticChannel = channel;
+				}
+			} catch (Exception e) {
+			} finally {
+				channelLock.unlock();
+			}
+		} else {
+			channelLock.lock();
+			try {
+				if (this.isClosed() || this.buffers.size() == 0)
+					this.initDB();
+				this.buffers.add(channel);
+			}  finally {
 				channelLock.unlock();
 			}
 		}

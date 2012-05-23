@@ -38,7 +38,8 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 
-	protected DedupFileChannel(MetaDataDedupFile file,int flags) throws IOException {
+	protected DedupFileChannel(MetaDataDedupFile file, int flags)
+			throws IOException {
 		df = file.getDedupFile();
 		mf = file;
 		this.flags = flags;
@@ -155,17 +156,23 @@ public class DedupFileChannel {
 	 * @param metaData
 	 *            true will sync data
 	 * @throws IOException
-	 * @throws FileClosedException 
+	 * @throws FileClosedException
 	 */
 	public void force(boolean metaData) throws IOException, FileClosedException {
 		// FixMe Does not persist chunks. This may be an issue.
 		try {
 			df.sync();
-		}catch(FileClosedException e) {
-			SDFSLogger.getLog().warn(mf.getPath() + " is closed but still writing");
-			DedupFileChannel _dc =  df.getChannel(-1);
-			df.sync();
-			df.unRegisterChannel(_dc,-1);
+		} catch (FileClosedException e) {
+			SDFSLogger.getLog().warn(
+					mf.getPath() + " is closed but still writing");
+			this.closeLock.lock();
+			try {
+				df.registerChannel(this);
+				this.closed = false;
+				this.force(metaData);
+			} finally {
+				this.closeLock.unlock();
+			}
 		}
 		mf.sync();
 	}
@@ -282,13 +289,18 @@ public class DedupFileChannel {
 				}
 				mf.setLastModified(System.currentTimeMillis());
 			}
-		} catch(FileClosedException e) {
-			SDFSLogger.getLog().warn(mf.getPath() + " is closed but still writing");
-			DedupFileChannel _dc =  df.getChannel(-1);
-			_dc.writeFile(buf, len, pos, offset);
-			df.unRegisterChannel(_dc,-1);
-		}
-		catch (IOException e) {
+		} catch (FileClosedException e) {
+			SDFSLogger.getLog().warn(
+					mf.getPath() + " is closed but still writing");
+			this.closeLock.lock();
+			try {
+				df.registerChannel(this);
+				this.closed = false;
+				this.writeFile(buf, len, pos, offset);
+			} finally {
+				this.closeLock.unlock();
+			}
+		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.mf.getPath() + " "
 							+ e.toString(), e);
@@ -417,7 +429,19 @@ public class DedupFileChannel {
 				DedupChunk readBuffer = null;
 				try {
 					readBuffer = df.getReadBuffer(currentLocation);
-				} catch (Exception e) {
+				}  catch (FileClosedException e) {
+					SDFSLogger.getLog().warn(
+							mf.getPath() + " is closed but still writing");
+					this.closeLock.lock();
+					try {
+						df.registerChannel(this);
+						this.closed = false;
+						readBuffer = df.getReadBuffer(currentLocation);
+					} finally {
+						this.closeLock.unlock();
+					}
+				}
+				catch (Exception e) {
 					// break;
 					SDFSLogger.getLog().error(
 							"Error reading file at [" + filePos + "]", e);
@@ -454,7 +478,18 @@ public class DedupFileChannel {
 						bytesLeft = bytesLeft - _len;
 						read = read + _len;
 					}
-				} catch (Exception e) {
+				} catch (FileClosedException e) {
+					SDFSLogger.getLog().warn(
+							mf.getPath() + " is closed but still writing");
+					this.closeLock.lock();
+					try {
+						df.registerChannel(this);
+						this.closed = false;
+						this.read(buf, bufPos, siz, filePos);
+					} finally {
+						this.closeLock.unlock();
+					}
+				}catch (Exception e) {
 					SDFSLogger.getLog().fatal("Error while reading buffer ", e);
 					SDFSLogger.getLog().fatal(
 							"Error Reading Buffer " + readBuffer.getHash()
@@ -472,7 +507,8 @@ public class DedupFileChannel {
 				this.currentPosition = currentLocation;
 			}
 			return read;
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read " + mf.getPath(), e);
 			throw new IOException(e);
 		} finally {

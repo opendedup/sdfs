@@ -130,6 +130,8 @@ public interface DedupFile {
 	 *            the channel to remove
 	 */
 	public abstract void unRegisterChannel(DedupFileChannel channel,int flags);
+	
+	public abstract void registerChannel(DedupFileChannel channel) throws IOException;
 
 
 	/**
