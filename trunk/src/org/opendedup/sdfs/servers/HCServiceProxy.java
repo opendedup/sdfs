@@ -158,13 +158,11 @@ public class HCServiceProxy {
 					// existingHashes.put(hashStr, hashStr);
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				throw new IOException(e);
 			} finally {
 				try {
 					returnObject(db, hc);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					SDFSLogger
 							.getLog()
 							.fatal("unable to return network thread object to pool",
