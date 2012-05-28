@@ -14,7 +14,8 @@ public class ArchiveImporter {
 	public static void importArchive(String srcArchive, String dest)
 			throws IOException {
 		File f = new File(srcArchive);
-		String sdest = dest + RandomGUID.getGuid();
+		String sdest = dest + "." + RandomGUID.getGuid();
+		SDFSLogger.getLog().info("Importing " + srcArchive + " to " + dest);
 		if (!f.exists())
 			throw new IOException("File does not exist " + srcArchive);
 		TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
@@ -71,17 +72,6 @@ public class ArchiveImporter {
 		if (f.exists()) {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(dest);
-				if (mf.isDirectory()) {
-					String[] files = mf.list();
-					for (int i = 0; i < files.length; i++) {
-						MetaDataDedupFile _mf = MetaFileStore.getMF(files[i]);
-						if (_mf.isDirectory())
-							rollBackImport(_mf.getPath());
-						else {
-							MetaFileStore.removeMetaFile(_mf.getPath());
-						}
-					}
-				}
 				MetaFileStore.removeMetaFile(mf.getPath());
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
@@ -93,8 +83,9 @@ public class ArchiveImporter {
 			}
 		}
 		try {
-			MetaDataDedupFile nmf = MetaFileStore.getMF(dest);
+			MetaDataDedupFile nmf = MetaFileStore.getMF(sdest);
 			nmf.renameTo(dest);
+			SDFSLogger.getLog().info("moved " +sdest + " to " + dest);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to commit replication while moving from staing ["
