@@ -30,24 +30,33 @@ public class ArchiveImporter {
 		dstFiles = new TFile(Main.dedupDBStore + File.separator);
 		srcFiles.cp_rp(dstFiles);
 		TFile.umount(srcFiles.getInnerArchive());
-		MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
-				+ File.separator + sdest);
-		if (imp.getCorruptFiles().size() > 0) {
-			SDFSLogger.getLog().warn("Import failed for " + srcArchive);
+		try {
+			MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
+					+ File.separator + sdest);
+			if (imp.getCorruptFiles().size() > 0) {
+				SDFSLogger.getLog().warn("Import failed for " + srcArchive);
+				SDFSLogger.getLog().warn("rolling back import");
+				rollBackImport(Main.volume.getPath() + File.separator + sdest);
+				SDFSLogger.getLog().warn("Import rolled back");
+				throw new IOException(
+						"uable to import files: There are files that are missing blocks");
+			} else {
+				try {
+					commitImport(Main.volume.getPath() + File.separator + dest,
+							Main.volume.getPath() + File.separator + sdest);
+				} catch (IOException e) {
+					rollBackImport(Main.volume.getPath() + File.separator
+							+ sdest);
+					throw e;
+				}
+			}
+		} catch (IOException e) {
 			SDFSLogger.getLog().warn("rolling back import");
 			rollBackImport(Main.volume.getPath() + File.separator + sdest);
 			SDFSLogger.getLog().warn("Import rolled back");
-			throw new IOException(
-					"uable to import files: There are files that are missing blocks");
-		} else {
-			try {
-				commitImport(Main.volume.getPath() + File.separator + dest,
-						Main.volume.getPath() + File.separator + sdest);
-			} catch (IOException e) {
-				rollBackImport(Main.volume.getPath() + File.separator + sdest);
-				throw e;
-			}
+			throw e;
 		}
+
 	}
 
 	public static void rollBackImport(String path) {
@@ -85,7 +94,7 @@ public class ArchiveImporter {
 		try {
 			MetaDataDedupFile nmf = MetaFileStore.getMF(sdest);
 			nmf.renameTo(dest);
-			SDFSLogger.getLog().info("moved " +sdest + " to " + dest);
+			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to commit replication while moving from staing ["

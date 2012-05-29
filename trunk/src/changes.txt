@@ -1,3 +1,8 @@
+Version 1.1.4
+	Fixes :
+	* Replication null pointer error for files without data
+	* Replication adds guid to end out target folder
+	* Create volume --sdfscli-requre-auth was a typo should have been --sdfscli-require-auth
 Version 1.1.3
 	Fixes:
 	* cp -a no longer creates corrupt files

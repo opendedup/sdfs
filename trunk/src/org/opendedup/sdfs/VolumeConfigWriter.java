@@ -223,7 +223,7 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("sdfscli-password")) {
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
-		if(cmd.hasOption("sdfscli-requre-auth")) {
+		if(cmd.hasOption("sdfscli-require-auth")) {
 			this.sdfsCliRequireAuth = true;
 		}
 		if(cmd.hasOption("sdfscli-listen-port")) {
