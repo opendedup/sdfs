@@ -37,7 +37,8 @@ public class Main {
 	public static int sdfsCliPort = 6442;
 	public static boolean sdfsCliEnabled  = true;
 	public static String sdfsCliListenAddr = "localhost";
-	
+	public static boolean runCompact = false;
+	public static boolean forceCompact = false;
 	
 	/**
 	 * Upstream DSE Host for cache misses and replication

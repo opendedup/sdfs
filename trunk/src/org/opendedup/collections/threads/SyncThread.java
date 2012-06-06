@@ -28,7 +28,9 @@ public class SyncThread implements Runnable {
 	}
 
 	public void close() {
-		th.interrupt();
+		try {
+			th.interrupt();
+		}catch(Exception e) {}
 	}
 
 }

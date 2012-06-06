@@ -15,7 +15,8 @@ public class CleanStoreCmd implements XtendedCmd {
 			
 			long chunks = ManualGC.clearChunks(minutes);
 			if(Main.firstRun){
-				chunks = chunks + ManualGC.clearChunks(minutes);
+				Thread.sleep(60*1000);
+				chunks = chunks + ManualGC.clearChunks(1);
 				Main.firstRun = false;
 			}
 				

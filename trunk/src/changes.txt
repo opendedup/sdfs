@@ -6,6 +6,10 @@ Version 1.1.5
 	* Snapshots were not working when safeclose=false
 	* SDFS Volume no longer exits if unable to connect to upstream host
 	* Create Volumes with decimal capacity sizes
+	* DSE Size was not reporting correctly on remount
+	* Garbage Collection was to clearing out old data on first run after remount
+	Enhancements
+	* Added experimental compaction feature "-c"
 Version 1.1.3
 	Fixes:
 	* cp -a no longer creates corrupt files

@@ -45,6 +45,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	// The amount of memory available for free slots.
 	private boolean closed = true;
 	long kSz = 0;
+	long compactKsz = 0;
 	long ram = 0;
 	private long maxSz = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
@@ -52,6 +53,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private final BitSet freeSlots = new BitSet();
 	private boolean firstGCRun = true;
 	private boolean flushing = false;
+	private SyncThread sth = null;
+	private boolean compacting = false;
 
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
@@ -69,7 +72,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		Arrays.fill(REMOVED, (byte) 1);
 		this.setUp();
 		this.closed = false;
-		new SyncThread(this);
+		sth = new SyncThread(this);
 	}
 
 	public ByteArrayLongMap getMap(byte[] hash) throws IOException {
@@ -172,7 +175,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		SDFSLogger.getLog().info("claiming records");
 		long startTime = System.currentTimeMillis();
-		long timeStamp = startTime + 30*1000;
+		long timeStamp = startTime + 30 * 1000;
 		int z = 0;
 		ByteBuffer lBuf = ByteBuffer.allocateDirect(8);
 		for (int i = 0; i < maps.length; i++) {
@@ -180,7 +183,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				maps[i].iterInit();
 				long val = 0;
 				while (val != -1 && !this.closed) {
-					
+
 					try {
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
@@ -210,8 +213,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			kFc.force(false);
 		} catch (Exception e) {
 
-		}
-		finally {
+		} finally {
 			this.iolock.unlock();
 		}
 		SDFSLogger.getLog().info(
@@ -280,16 +282,18 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							SDFSLogger.getLog().info("HashTable corrupt!");
 							corrupt = true;
 						}
-						long pos = (currentPos / raw.length) * Main.CHUNK_LENGTH;
-						if(cm.getcPos()!= pos)
-							SDFSLogger.getLog().warn("Possible Corruption at " + cm.getcPos() + " file position is " +pos);
+						long pos = (currentPos / raw.length)
+								* Main.CHUNK_LENGTH;
+						if (cm.getcPos() != pos)
+							SDFSLogger.getLog().warn(
+									"Possible Corruption at " + cm.getcPos()
+											+ " file position is " + pos);
 						if (!corrupt) {
 							long value = cm.getcPos();
 							if (cm.ismDelete()) {
 								this.addFreeSlot(cm.getcPos());
 								freeSl++;
-								this.kSz--;
-							}else { 
+							} else {
 								boolean added = this.put(cm, false);
 								if (added)
 									this.kSz++;
@@ -384,7 +388,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							if (!Arrays.equals(raw, BLANKCM)) {
 								try {
 									ChunkData cm = new ChunkData(raw);
-									if (cm.getLastClaimed() != 0 && cm.getLastClaimed() < time) {
+									if (cm.getLastClaimed() != 0
+											&& cm.getLastClaimed() < time) {
 										if (this.remove(cm)) {
 											rem++;
 										}
@@ -561,11 +566,26 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	 */
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.fileName + "] is close");
-		}
-		return false;
+		if (!compacting)
+			throw new IOException("cannot update unless compacting");
+		try {
+			if (this.get(cm.getHash()) != -10) {
+				this.arlock.lock();
+				try {
+					cm.persistData(true);
+					this.getMap(cm.getHash()).update(cm.getHash(), -10);
+					this.kBuf.add(cm);
+					this.compactKsz++;
+				} finally {
+					this.arlock.unlock();
 
+				}
+			}
+		} catch (KeyNotFoundException e) {
+			return false;
+		}
+
+		return false;
 	}
 
 	/*
@@ -642,9 +662,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					if (cm != null) {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
-						if(cm.ismDelete())
+						if (cm.ismDelete())
 							cm.setLastClaimed(0);
-						else{
+						else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}
 						try {
@@ -714,9 +734,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					try {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
-						if(cm.ismDelete())
+						if (cm.ismDelete())
 							cm.setLastClaimed(0);
-						else{
+						else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}
 						try {
@@ -799,6 +819,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.arlock.lock();
 		this.iolock.lock();
 		this.closed = true;
+		this.sth.close();
 		try {
 			this.flushBuffer(true);
 			while (this.flushing) {
@@ -819,6 +840,143 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void vanish() throws IOException {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void initCompact() throws IOException {
+		this.arlock.lock();
+		this.iolock.lock();
+		compacting = true;
+		compactKsz = 0;
+		try {
+			this.sth.close();
+			this.flushBuffer(true);
+			while (this.flushing) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+
+			this.kFc.close();
+			this.kRaf.close();
+			this.kFc = null;
+			this.kRaf = null;
+			this.fileName = this.fileName + ".new";
+			File _fs = new File(fileName);
+			boolean exists = new File(fileName).exists();
+			if (exists)
+				throw new IOException(this.fileName
+						+ " exists please remove and try again");
+			if (!_fs.getParentFile().exists()) {
+				_fs.getParentFile().mkdirs();
+			}
+			kRaf = new RandomAccessFile(fileName, this.fileParams);
+			// kRaf.setLength(ChunkMetaData.RAWDL * size);
+			kFc = (FileChannelImpl) kRaf.getChannel();
+			this.freeSlots.clear();
+			sth = new SyncThread(this);
+		} finally {
+			this.arlock.unlock();
+			this.iolock.unlock();
+		}
+	}
+
+	@Override
+	public void commitCompact(boolean force) throws IOException {
+		this.arlock.lock();
+		this.iolock.lock();
+		try {
+			if (!force && this.compactKsz != (this.kSz)) {
+				SDFSLogger.getLog().error(
+						"compacting sizes are not the same records=" + this.kSz
+								+ " compacted records=" + this.compactKsz);
+				/*
+				for (int i = 0; i < maps.length; i++) {
+					maps[i].iterInit();
+					long val = 0;
+					while (val != -1 && !this.closed) {
+						val = maps[i].nextClaimedValue(true);
+						if (val != -10) {
+							SDFSLogger.getLog().warn("missed value at " + val);
+						}
+					}
+				}
+				*/
+				this.kFc.close();
+				this.kRaf.close();
+				this.kFc = null;
+				this.kRaf = null;
+				File _fs = new File(fileName);
+				_fs.delete();
+				SDFSLogger.getLog().error("rolled back compacting");
+				throw new IOException("compacting failed");
+			}
+			else if(force && this.compactKsz != (this.kSz)) {
+				SDFSLogger.getLog().warn(
+						"compacting sizes are not the same records=" + this.kSz
+								+ " compacted records=" + this.compactKsz);
+				long diff = this.kSz - this.compactKsz;
+				if(diff > 0)
+					SDFSLogger.getLog().warn(
+							"compacting is discarding " + diff + " records");
+				if(diff < 0)
+					SDFSLogger.getLog().warn(
+							"compacting is adding " + (diff*-1) + " records");
+			}
+			this.flushBuffer(true);
+			while (this.flushing) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					throw new IOException(e);
+				}
+			}
+
+			compacting = false;
+			this.kFc.close();
+			this.kRaf.close();
+			this.kFc = null;
+			this.kRaf = null;
+			String nfn = this.fileName.replaceAll(".new", "");
+			File _nf = new File(nfn);
+			_nf.renameTo(new File(nfn + ".old"));
+			File f = new File(fileName);
+			f.renameTo(new File(nfn));
+			this.fileName = nfn;
+			new File(nfn + ".old").delete();
+			kRaf = new RandomAccessFile(fileName, this.fileParams);
+			// kRaf.setLength(ChunkMetaData.RAWDL * size);
+			kFc = (FileChannelImpl) kRaf.getChannel();
+			this.freeSlots.clear();
+			sth = new SyncThread(this);
+		} finally {
+			compacting = false;
+			this.arlock.unlock();
+			this.iolock.unlock();
+		}
 
 	}
+
+	@Override
+	public void rollbackCompact() throws IOException {
+		this.arlock.lock();
+		this.iolock.lock();
+		try {
+			this.kFc.close();
+			this.kRaf.close();
+			this.kFc = null;
+			this.kRaf = null;
+			File _fs = new File(fileName);
+			_fs.delete();
+			SDFSLogger.getLog().error("rolled back compacting");
+		} finally {
+			compacting = false;
+			this.arlock.unlock();
+			this.iolock.unlock();
+		}
+
+	}
+
 }

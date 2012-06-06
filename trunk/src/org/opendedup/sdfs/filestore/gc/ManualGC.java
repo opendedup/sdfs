@@ -10,6 +10,10 @@ import org.opendedup.util.SDFSLogger;
 public class ManualGC {
 
 	public static long clearChunks(int minutes) {
+		return clearChunksMills((long)minutes * 60 *1000);
+	}
+	
+	public static long clearChunksMills(long milliseconds) {
 		GCMain.gclock.lock();
 		if (GCMain.isLocked()) {
 
@@ -24,7 +28,7 @@ public class ManualGC {
 				if (Main.chunkStoreLocal) {
 					HashChunkService.processHashClaims();
 					return HashChunkService.removeStailHashes(tm
-							- (minutes * 60 * 1000), true);
+							- milliseconds, true);
 				}
 				SDFSEvent.gcInfoEvent("SDFS Volume Cleanup Succeeded");
 			} catch (Exception e) {

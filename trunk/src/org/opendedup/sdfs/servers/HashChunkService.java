@@ -7,6 +7,8 @@ import org.opendedup.util.SDFSLogger;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.DSECompaction;
+import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
@@ -57,6 +59,17 @@ public class HashChunkService {
 		}
 		try {
 			hs = new HashStore();
+			if(Main.runCompact) {
+				try {
+				DSECompaction.runCheck(hs.bdb,(FileChunkStore)HashChunkService.getChuckStore());
+				SDFSLogger.getLog().info("Finished compaction - exiting");
+				System.exit(0);
+				}catch(Exception e) {
+					SDFSLogger.getLog().error("failed to compact - exiting",e);
+					System.exit(-1);
+				}
+				
+			}
 			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
 				csGC = new ChunkStoreGCScheduler();
 			}
