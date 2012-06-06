@@ -31,9 +31,6 @@ public interface AbstractHashesMap {
 	public abstract boolean put(ChunkData cm) throws IOException,
 			HashtableFullException;
 
-	public abstract boolean recover(ChunkData cm) throws IOException,
-	HashtableFullException;
-	
 	public abstract boolean put(ChunkData cm, boolean persist)
 			throws IOException, HashtableFullException;
 
@@ -51,6 +48,12 @@ public interface AbstractHashesMap {
 	public abstract void sync() throws IOException;
 
 	public abstract void close();
+	
+	public abstract void initCompact()throws IOException;
+	
+	public abstract void commitCompact(boolean force)throws IOException;
+	
+	public abstract void rollbackCompact()throws IOException;
 
 	public abstract void init(long maxSize, String fileName)
 			throws IOException, HashtableFullException;
