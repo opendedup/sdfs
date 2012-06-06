@@ -46,6 +46,10 @@ public class MountSDFS {
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
+		options.addOption("c", false,
+				"sdfs volume will be compacted and then exit");
+		options.addOption("forcecompact", false,
+				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
 		options.addOption("h", false, "displays available options");
 		return options;
 	}
@@ -78,6 +82,11 @@ public class MountSDFS {
 		}
 
 		String volname = "SDFS";
+		if (cmd.hasOption("c")) {
+			Main.runCompact = true;
+			if(cmd.hasOption("force-compact"))
+				Main.forceCompact = true;
+		}
 		if (cmd.hasOption("r")) {
 			File f = new File(cmd.getOptionValue("r").trim());
 			if (!f.exists()) {

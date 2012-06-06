@@ -240,16 +240,14 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	public boolean update(byte[] key, long value, byte storeID)
-			throws IOException {
+	public boolean update(byte[] key, long value)
+			throws KeyNotFoundException {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			int pos = this.index(key);
 			if (pos == -1) {
-				return false;
+				throw new KeyNotFoundException();
 			} else {
-				try {
 					keys.position(pos);
 					pos = (pos / FREE.length) * 8;
 					this.values.position(pos);
@@ -257,20 +255,9 @@ public class ByteArrayLongMap {
 					pos = (pos / 8);
 					this.claims.position(pos);
 					this.claims.put((byte) 1);
-					// this.store.position(pos);
-					// this.store.put(storeID);
 					return true;
-				} catch (Exception e) {
-					throw e;
-				} finally {
-					this.compress();
-				}
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
-			return false;
-		} finally {
-			this.derefByteArray();
+		}  finally {
 			this.hashlock.unlock();
 		}
 	}
@@ -497,6 +484,8 @@ public class ByteArrayLongMap {
 	public long get(byte[] key) {
 		return this.get(key, true);
 	}
+	
+	
 
 	public long get(byte[] key, boolean claim) {
 		try {

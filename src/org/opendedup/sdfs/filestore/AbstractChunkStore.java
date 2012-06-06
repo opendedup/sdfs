@@ -134,6 +134,8 @@ public interface AbstractChunkStore {
 			throws IOException;
 
 	public abstract ChunkData getNextChunck() throws IOException;
+	
+	public abstract void compact() throws IOException;
 
 	public abstract void iterationInit() throws IOException;
 
