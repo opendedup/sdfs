@@ -99,14 +99,14 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void writeCache(WritableCacheBuffer writeBuffer)
-			throws IOException, HashtableFullException;
+			throws FileClosedException,IOException, HashtableFullException;
 
 	/**
 	 * 
 	 * @return the number of chunks in the DedupFile
 	 * @throws IOException
 	 */
-	public abstract long getNumberofChunks() throws IOException;
+	public abstract long getNumberofChunks() throws FileClosedException,IOException;
 
 	/**
 	 * Flushes all write buffers to disk

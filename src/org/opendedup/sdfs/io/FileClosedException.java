@@ -12,5 +12,9 @@ public class FileClosedException extends Exception {
 	public FileClosedException(String msg) {
 		super(msg);
 	}
+	
+	public FileClosedException() {
+		super();
+	}
 
 }

@@ -380,6 +380,10 @@ public class LongByteArrayMap implements AbstractMap {
 					+ dest.getPath();
 				SDFSLogger.getLog().debug(cpCmd);
 				Process p = Runtime.getRuntime().exec(cpCmd);
+				int exitValue = p.waitFor();
+				if(exitValue != 0) {
+					throw new IOException("unable to copy " + src.getPath() + " to  " + dest.getPath() + " exit value was " + exitValue);
+				}
 				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 			SDFSLogger.getLog()

@@ -411,8 +411,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				}
 			} else {
 				try {
-					_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
-							.getGUID();
+					DedupFileStore.cloneDedupFile(this, _mf);
 				} catch (java.lang.NullPointerException e) {
 					SDFSLogger.getLog().debug("no dedupfile for " + this.path,
 							e);
