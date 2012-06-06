@@ -32,6 +32,7 @@ public class ChunkData {
 	private int cLen = 0;
 	private long cPos = 0;
 	private byte[] chunk = null;
+	private AbstractChunkStore writeStore = null;
 
 	private static byte[] blankHash = null;;
 
@@ -114,18 +115,15 @@ public class ChunkData {
 
 	public void persistData(boolean clear) throws IOException {
 		if (this.chunk != null) {
+			if(writeStore == null)
+				writeStore = HashChunkService.getChuckStore();
 			if (cPos == -1) {
-				this.cPos = HashChunkService.getChuckStore()
-						.reserveWritePosition(cLen);
+				this.cPos = writeStore.reserveWritePosition(cLen);
 			}
 			if (this.mDelete) {
 				chunk = new byte[cLen];
-				HashChunkService.getChuckStore()
-				.deleteChunk(hash, cPos,cLen);
-			}else {
-				HashChunkService.getChuckStore()
-					.writeChunk(hash, chunk, cLen, cPos);
 			}
+			writeStore.writeChunk(hash, chunk, cLen, cPos);
 			if (clear)
 				this.chunk = null;
 		}
@@ -146,6 +144,10 @@ public class ChunkData {
 								+ StringUtils.getHexString(this.hash) + "]", e);
 			}
 		}
+	}
+	
+	protected void setChunk(byte [] chk) {
+		this.chunk = chk;
 	}
 
 	public long getLastClaimed() {
@@ -207,5 +209,9 @@ public class ChunkData {
 
 	public int getcLen() {
 		return cLen;
+	}
+
+	public void setWriteStore(AbstractChunkStore writeStore) {
+		this.writeStore = writeStore;
 	}
 }
