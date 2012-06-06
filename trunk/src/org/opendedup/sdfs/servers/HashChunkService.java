@@ -38,36 +38,6 @@ public class HashChunkService {
 	}
 
 	static {
-		initChunkStore();
-		try {
-			hs = new HashStore();
-			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
-				csGC = new ChunkStoreGCScheduler();
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to start hashstore", e);
-			System.exit(-1);
-		}
-		if (Main.upStreamDSEHostEnabled) {
-			try {
-				hcPool = new HashClientPool(new HCServer(
-						Main.upStreamDSEHostName, Main.upStreamDSEPort, false,
-						false), "upstream", 24);
-			} catch (IOException e) {
-				System.err.println("unable to connect to upstream server");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-		}
-	}
-
-	private static long dupsFound;
-
-	public static AbstractChunkStore getChuckStore() {
-		return fileStore;
-	}
-	
-	private static void initChunkStore() {
 		try {
 			fileStore = (AbstractChunkStore) Class
 					.forName(Main.chunkStoreClass).newInstance();
@@ -85,14 +55,36 @@ public class HashChunkService {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		}
+		try {
+			hs = new HashStore();
+			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
+				csGC = new ChunkStoreGCScheduler();
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("unable to start hashstore", e);
+			System.exit(-1);
+		}
+		if (Main.upStreamDSEHostEnabled) {
+			try {
+				hcPool = new HashClientPool(new HCServer(
+						Main.upStreamDSEHostName, Main.upStreamDSEPort, false,
+						false), "upstream", 24);
+			} catch (IOException e) {
+				System.err.println("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
+				SDFSLogger.getLog().error("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort, e);
+				System.err.println("Disabling upstream host " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
+				Main.upStreamDSEHostEnabled = false;
+				SDFSLogger.getLog().warn("Disabling upstream host " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
+				//e.printStackTrace();
+				//System.exit(-1);
+			}
+		}
 	}
-	
-	public static void reInitChunkStore() {
-		SDFSLogger.getLog().warn("Re-Initializing ChunkStore");
-		fileStore.close();
-		fileStore = null;
-		initChunkStore();
-		SDFSLogger.getLog().warn("Re-Initialized ChunkStore");
+
+	private static long dupsFound;
+
+	public static AbstractChunkStore getChuckStore() {
+		return fileStore;
 	}
 
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
