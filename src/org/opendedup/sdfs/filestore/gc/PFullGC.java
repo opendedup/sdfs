@@ -28,8 +28,8 @@ public class PFullGC implements GCControllerImpl {
 			try {
 			ManualGC.clearChunks(5);
 			if (Main.firstRun) {
+				Thread.sleep(5*60*1000);
 				Main.firstRun = false;
-				ManualGC.clearChunks(5);
 				ManualGC.clearChunks(5);
 			}
 			this.prevPFull = calcPFull();

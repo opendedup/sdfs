@@ -35,7 +35,7 @@ public class HashStore {
 
 	// A lookup table for the specific hash store based on the first byte of the
 	// hash.
-	AbstractHashesMap bdb = null;
+	public AbstractHashesMap bdb = null;
 	// the name of the hash store. This is usually associate with the first byte
 	// of all possible hashes. There should
 	// be 256 total hash stores.
@@ -180,18 +180,6 @@ public class HashStore {
 			SDFSLogger.getLog().info(
 					"DSE did not close gracefully, running consistancy check");
 			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
-			bdb.sync();
-			bdb.close();
-			bdb = null;
-			HashChunkService.reInitChunkStore();
-			try {
-				bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
-						.newInstance();
-				bdb.init(entries, dbf.getPath());
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-				System.exit(-1);
-			}
 		}
 	}
 
