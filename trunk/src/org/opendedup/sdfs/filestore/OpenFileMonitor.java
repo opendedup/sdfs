@@ -80,7 +80,8 @@ public class OpenFileMonitor implements Runnable {
 						}
 					} catch (NoSuchFileException e) {
 						try {
-							df.forceClose();
+							SDFSLogger.getLog().warn("OpenFile Monitor could not find file " + df.getMetaFile().getPath());
+							//df.forceClose();
 						} catch (Exception e1) {
 
 						}

@@ -43,8 +43,8 @@ public class StringUtils {
 
 	public static long parseSize(String capString) throws IOException {
 		String units = capString.substring(capString.length() - 2);
-		int sz = Integer
-				.parseInt(capString.substring(0, capString.length() - 2));
+		float sz = Float
+				.parseFloat(capString.substring(0, capString.length() - 2));
 		long fSize = 0;
 		if (units.equalsIgnoreCase("TB"))
 			fSize = (long) (sz * tbc);

@@ -98,16 +98,28 @@ public class SparseDedupFile implements DedupFile {
 	public DedupFile snapshot(MetaDataDedupFile snapmf) throws IOException,
 			HashtableFullException {
 		DedupFileChannel ch = null;
+		DedupFileChannel _ch = null;
+		SparseDedupFile _df = null;
 		try {
 			ch = this.getChannel(-1);
 			this.writeCache();
 			this.sync();
-			SparseDedupFile _df = new SparseDedupFile(snapmf);
+			_df = new SparseDedupFile(snapmf);
 			this.writeBufferLock.lock();
-			DedupFileChannel _ch = _df.getChannel(-1);
-			_df.unRegisterChannel(_ch, -1);
-			bdb.copy(_df.getDatabasePath());
-			chunkStore.copy(_df.chunkStorePath);
+			File _directory = new File(Main.dedupDBStore + File.separator
+					+ _df.GUID.substring(0, 2) + File.separator
+					+ _df.GUID);
+			File _dbf = new File(_directory.getPath() + File.separator
+					+ _df.GUID + ".map");
+			File _dbc = new File(_directory.getPath() + File.separator
+					+ _df.GUID + ".chk");
+			SDFSLogger.getLog().debug("Snap folder is "+_directory);
+			SDFSLogger.getLog().debug("Snap map is "+_dbf);
+			SDFSLogger.getLog().debug("Snap chunk is "+_dbc);
+			bdb.copy(_dbf.getPath());
+			chunkStore.copy(_dbc.getPath());
+			
+			snapmf.setDedupFile(_df);
 			return _df;
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to clone file " + mf.getPath(), e);
@@ -115,7 +127,9 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.writeBufferLock.unlock();
 			if (ch != null)
-				ch.close(-1);
+				this.unRegisterChannel(ch, -1);
+			if(_ch != null)
+				_df.unRegisterChannel(_ch, -1);
 			ch = null;
 		}
 	}
@@ -164,9 +178,9 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("unable to clone file " + mf.getPath(), e);
 		} finally {
 			this.writeBufferLock.unlock();
-			if (ch != null)
-				ch.close(-1);
-			ch = null;
+			if (ch != null) {
+				this.unRegisterChannel(ch, -1);
+			}
 		}
 	}
 
@@ -187,6 +201,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException(
 					"unable to create blank file " + mf.getPath(), e);
 		} finally {
+			
 		}
 	}
 
@@ -285,10 +300,9 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer) throws IOException,
-			HashtableFullException {
+			HashtableFullException,FileClosedException {
 		if (this.closed) {
-			return;
-			// throw new IOException("file already closed");
+			throw new FileClosedException("file already closed");
 		}
 		if (writeBuffer == null)
 			return;
@@ -354,10 +368,9 @@ public class SparseDedupFile implements DedupFile {
 	// private ReentrantLock updatelock = new ReentrantLock();
 
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
-			boolean doop) throws IOException {
+			boolean doop) throws FileClosedException,IOException {
 		if (this.closed) {
-			this.forceClose();
-			throw new IOException("file already closed");
+			throw new FileClosedException("file already closed");
 		}
 		try {
 			// updatelock.lock();
@@ -472,9 +485,9 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getNumberofChunks()
 	 */
-	public long getNumberofChunks() throws IOException {
+	public long getNumberofChunks() throws IOException, FileClosedException{
 		if (this.closed) {
-			throw new IOException("file already closed");
+			throw new FileClosedException();
 		}
 		try {
 			long count = -1;
@@ -843,10 +856,10 @@ public class SparseDedupFile implements DedupFile {
 						(long) -1, Main.CHUNK_LENGTH);
 			}
 		} catch (IOException e) {
-
+			
 		} finally {
 			try {
-				ch.close(-1);
+				this.unRegisterChannel(ch, -1);
 			} catch (Exception e) {
 
 			}
