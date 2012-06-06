@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -69,6 +70,28 @@ public class FileChunkStore implements AbstractChunkStore {
 			e.printStackTrace();
 		}
 	}
+	
+	public FileChunkStore(String fpath) {
+		SDFSLogger.getLog().info("Opening Chunk Store");
+		Arrays.fill(FREE, (byte) 0);
+		try {
+			if (!chunk_location.exists()) {
+				chunk_location.mkdirs();
+			}
+			f = new File(fpath);
+			if (!f.getParentFile().exists())
+				f.getParentFile().mkdirs();
+			this.name = "chunks";
+			p = f.toPath();
+			chunkDataWriter = new RandomAccessFile(f, "rw");
+			this.currentLength = chunkDataWriter.length();
+			this.closed = false;
+			fc = chunkDataWriter.getChannel();
+			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -80,29 +103,14 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			fc.force(true);
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 		}
 
 		try {
 			fc.close();
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 		}
-
-		try {
-			this.iterFC.close();
-
-		} catch (Exception e) {
-		}
-		this.iterFC = null;
-		try {
-			this.hc.destroy();
-		} catch (Exception e) {
-		}
-		try {
-			this.chunkDataWriter.close();
-		} catch(Exception e) {}
-		this.chunkDataWriter = null;
 		fc = null;
 
 	}
@@ -235,7 +243,13 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		RandomAccessFile raf = new RandomAccessFile(f, "rw");
+		raf.seek(start);
+		raf.write(0);
+		raf.close();
 	}
+
+
 
 	public void close() {
 		try {
@@ -293,55 +307,57 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if (iterFC.position() >= iterFC.size()) {
-			iterFC.close();
+		if(iterFC.position() >= iterFC.size())
 			return null;
-		}
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 		long pos = -1;
 		try {
 			pos = iterFC.position();
 			iterFC.read(fbuf);
 		} catch (Exception e) {
-			iterFC.close();
-			SDFSLogger.getLog()
-					.error("unable to fetch chunk at position "
-							+ iterFC.position(), e);
+			SDFSLogger.getLog().error(
+					"unable to fetch chunk at position " + iterFC.position(), e);
 			throw new IOException(e);
+		} finally {
+			try {
+			} catch (Exception e) {
+			}
 		}
-		if (pos != -1) {
-			byte[] hash = hc.getHash(fbuf.array());
-			return new ChunkData(hash, pos);
-		} else {
-			iterFC.close();
-			return null;
-		}
-
+		byte [] hash = hc.getHash(fbuf.array());
+		ChunkData chk = new ChunkData(hash,pos);
+		chk.setChunk(fbuf.array());
+		return chk;
+			
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
-
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {
-			if (Main.hashLength == 16) {
-				hc = new Tiger16HashEngine();
-			} else {
-				hc = new TigerHashEngine();
-			}
-			this.iterFC = new RandomAccessFile(f, "r").getChannel();
-		} catch (Exception e) {
-			throw new IOException(e);
-		} finally {
+		if(Main.hashLength == 16) {
+			hc = new Tiger16HashEngine();
+		}else {
+			hc = new TigerHashEngine();
+		}
+			this.iterFC = chunkDataWriter.getChannel();
+			this.iterFC.position(0);
+		}catch(Exception e) {
+			throw new IOException( e);
+		}finally {
 			this.iterlock.unlock();
 		}
+	}
+	
+	@Override
+	public void compact() throws IOException {
 		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }
