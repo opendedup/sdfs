@@ -464,9 +464,20 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public boolean recover(ChunkData cm) throws IOException,
-			HashtableFullException {
+	public void initCompact() {
 		// TODO Auto-generated method stub
-		return false;
+		
+	}
+
+	@Override
+	public void commitCompact(boolean force) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void rollbackCompact() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }
