@@ -9,7 +9,8 @@ Version 1.1.5
 	* DSE Size was not reporting correctly on remount
 	* Garbage Collection was to clearing out old data on first run after remount
 	Enhancements
-	* Added experimental compaction feature "-c"
+	* Added experimental compaction feature "-c" and the "-forcecompact" to mount options to 
+	compact a volume on mount. 
 Version 1.1.3
 	Fixes:
 	* cp -a no longer creates corrupt files

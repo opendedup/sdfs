@@ -34,10 +34,11 @@ public class NetworkHCServer {
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
 
 			try {
-				Config.parseHubStoreConfigFile(args[0]);
+				Config.parseDSEConfigFile(args[0]);
 			} catch (IOException e1) {
 				SDFSLogger.getLog().fatal(
 						"exiting because of an error with the config file");
+				System.exit(-1);
 			}
 			init();
 

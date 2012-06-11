@@ -33,7 +33,7 @@ public class Config {
 	 * @param fileName
 	 * @throws IOException
 	 */
-	public synchronized static void parseHubStoreConfigFile(String fileName)
+	public synchronized static void parseDSEConfigFile(String fileName)
 			throws IOException {
 		try {
 			File file = new File(fileName);
@@ -399,16 +399,12 @@ public class Config {
 					Boolean.parseBoolean(_server.getAttribute("use-udp")),
 					Boolean.parseBoolean(_server.getAttribute("compress")));
 			try {
-				HCServiceProxy.writeServers.put(
+				HCServiceProxy.dseServers.put(
 						_server.getAttribute("name").trim(),
 						new HashClientPool(hcs, _server.getAttribute("name")
 								.trim(), Integer.parseInt(_server
 								.getAttribute("network-threads"))));
-				HCServiceProxy.readServers.put(
-						_server.getAttribute("name").trim(),
-						new HashClientPool(hcs, _server.getAttribute("name")
-								.trim(), Integer.parseInt(_server
-								.getAttribute("network-threads"))));
+				
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn(
 						"unable to connect to server "
@@ -422,15 +418,10 @@ public class Config {
 		NodeList chunks = _c.getElementsByTagName("chunk");
 		for (int s = 0; s < chunks.getLength(); s++) {
 			Element chunk = (Element) chunks.item(s);
-			HCServiceProxy.writehashRoutes.put(chunk.getAttribute("name")
-					.trim(), HCServiceProxy.writeServers.get(chunk
+			HCServiceProxy.dseRoutes.put(chunk.getAttribute("name")
+					.trim(), HCServiceProxy.dseServers.get(chunk
 					.getAttribute("server").trim()));
-			HCServiceProxy.readhashRoutes.put(
-					chunk.getAttribute("name").trim(),
-					HCServiceProxy.readServers.get(chunk.getAttribute("server")
-							.trim()));
 		}
-
 	}
 
 	public static synchronized void parserLaunchConfig(String fileName)

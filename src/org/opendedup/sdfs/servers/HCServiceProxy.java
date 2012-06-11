@@ -19,10 +19,8 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
-	public static HashMap<String, HashClientPool> writeServers = new HashMap<String, HashClientPool>();
-	public static HashMap<String, HashClientPool> readServers = new HashMap<String, HashClientPool>();
-	public static HashMap<String, HashClientPool> writehashRoutes = new HashMap<String, HashClientPool>();
-	public static HashMap<String, HashClientPool> readhashRoutes = new HashMap<String, HashClientPool>();
+	public static HashMap<String, HashClientPool> dseServers = new HashMap<String, HashClientPool>();
+	public static HashMap<String, HashClientPool> dseRoutes = new HashMap<String, HashClientPool>();
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
 	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>()
 			.concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
@@ -74,17 +72,17 @@ public class HCServiceProxy {
 	}
 
 	private static HashClient getReadHashClient(String name) throws Exception {
-		HashClient hc = (HashClient) readhashRoutes.get(name).borrowObject();
+		HashClient hc = (HashClient) dseRoutes.get(name).borrowObject();
 		return hc;
 	}
 
 	private static void returnObject(String name, HashClient hc)
 			throws IOException {
-		readhashRoutes.get(name).returnObject(hc);
+		dseRoutes.get(name).returnObject(hc);
 	}
 
 	private static HashClient getWriteHashClient(String name) throws Exception {
-		HashClient hc = (HashClient) readhashRoutes.get(name).borrowObject();
+		HashClient hc = (HashClient) dseRoutes.get(name).borrowObject();
 		return hc;
 	}
 
