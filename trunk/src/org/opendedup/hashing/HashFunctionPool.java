@@ -13,6 +13,20 @@ public class HashFunctionPool {
 
 	private int poolSize;
 	private ConcurrentLinkedQueue<AbstractHashEngine> passiveObjects = new ConcurrentLinkedQueue<AbstractHashEngine>();
+	public static final String TIGER_16 = "tiger16";
+	public static final String TIGER_24 = "tiger24";
+	public static final String MURMUR3_16 = "murmur3_128";
+	public static int hashLength = 16;
+	
+	static {
+		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
+			hashLength = Tiger16HashEngine.getHashLenth();
+		} else if (Main.hashType.equalsIgnoreCase(TIGER_24)) {
+			hashLength = TigerHashEngine.getHashLenth();
+		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
+			hashLength = Murmur3HashEngine.getHashLenth();
+		}
+	}
 
 	public HashFunctionPool(int size) {
 		this.poolSize = size;
@@ -55,18 +69,24 @@ public class HashFunctionPool {
 
 	public AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
 			NoSuchProviderException {
-		AbstractHashEngine hc = null;
-		if (Main.hashLength == 16) {
-			hc = new Tiger16HashEngine();
-			// hc = new MD5CudaHash();
-		} else {
-			hc = new TigerHashEngine();
-		}
-		return hc;
+		return getHashEngine();
 	}
 
 	public void destroyObject(AbstractHashEngine hc) {
 		hc.destroy();
+	}
+
+	public static AbstractHashEngine getHashEngine()
+			throws NoSuchAlgorithmException, NoSuchProviderException {
+		AbstractHashEngine hc = null;
+		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
+			hc = new Tiger16HashEngine();
+		} else if (Main.hashType.equalsIgnoreCase(TIGER_24)) {
+			hc = new TigerHashEngine();
+		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
+			hc = new Murmur3HashEngine();
+		}
+		return hc;
 	}
 
 }

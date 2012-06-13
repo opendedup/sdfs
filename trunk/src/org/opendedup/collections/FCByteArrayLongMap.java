@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.IOException;
 
 
+
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -11,8 +12,8 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
-import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
 public class FCByteArrayLongMap {
@@ -24,18 +25,18 @@ public class FCByteArrayLongMap {
 	private FileChannel vFC = null;
 	private RandomAccessFile tRaf = null;
 	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[Main.hashLength];
-	public static byte[] REMOVED = new byte[Main.hashLength];
+	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	private int iterPos = 0;
 	private boolean closed = false;
 	ByteBuffer valueBuf = ByteBuffer.allocateDirect(8);
-	ByteBuffer keyBuf = ByteBuffer.wrap(new byte[Main.hashLength]);
+	ByteBuffer keyBuf = ByteBuffer.wrap(new byte[HashFunctionPool.hashLength]);
 	BitSet map = null;
 	long bgst = 0;
 
 	static {
-		FREE = new byte[Main.hashLength];
-		REMOVED = new byte[Main.hashLength];
+		FREE = new byte[HashFunctionPool.hashLength];
+		REMOVED = new byte[HashFunctionPool.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
 	}

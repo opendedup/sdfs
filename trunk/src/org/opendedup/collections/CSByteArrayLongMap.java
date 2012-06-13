@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.threads.SyncThread;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -31,8 +32,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private long size = 0;
 	private final ReentrantLock arlock = new ReentrantLock();
 	private final ReentrantLock iolock = new ReentrantLock();
-	private byte[] FREE = new byte[Main.hashLength];
-	private byte[] REMOVED = new byte[Main.hashLength];
+	private byte[] FREE = new byte[HashFunctionPool.hashLength];
+	private byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	private byte[] BLANKCM = new byte[ChunkData.RAWDL];
 	private long resValue = -1;
 	private long freeValue = -1;
@@ -65,8 +66,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;
-		FREE = new byte[Main.hashLength];
-		REMOVED = new byte[Main.hashLength];
+		FREE = new byte[HashFunctionPool.hashLength];
+		REMOVED = new byte[HashFunctionPool.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(BLANKCM, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
@@ -100,7 +101,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							.getNextPrimeI((int) (size / maps.length));
 					// SDFSLogger.getLog().debug("will create byte array of size "
 					// + sz + " propsize was " + propsize);
-					ram = ram + (sz * (Main.hashLength + 8));
+					ram = ram + (sz * (HashFunctionPool.hashLength + 8));
 					m = new ByteArrayLongMap(sz, (short) (FREE.length));
 					maps[hashRoute] = m;
 					// System.out.println("Creating map at " + hashb +

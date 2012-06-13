@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.hashing.TigerHashEngine;
 import org.opendedup.sdfs.Main;
@@ -334,11 +335,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {
-		if(Main.hashLength == 16) {
-			hc = new Tiger16HashEngine();
-		}else {
-			hc = new TigerHashEngine();
-		}
+			hc = HashFunctionPool.getHashEngine();
 			this.iterFC = chunkDataWriter.getChannel();
 			this.iterFC.position(0);
 		}catch(Exception e) {

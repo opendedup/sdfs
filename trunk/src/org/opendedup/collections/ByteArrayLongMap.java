@@ -8,6 +8,7 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
@@ -26,13 +27,13 @@ public class ByteArrayLongMap {
 	private int entries = 0;
 
 	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[Main.hashLength];
-	public static byte[] REMOVED = new byte[Main.hashLength];
+	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	private int iterPos = 0;
 
 	static {
-		FREE = new byte[Main.hashLength];
-		REMOVED = new byte[Main.hashLength];
+		FREE = new byte[HashFunctionPool.hashLength];
+		REMOVED = new byte[HashFunctionPool.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
 	}
@@ -130,6 +131,7 @@ public class ByteArrayLongMap {
 		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
+			claims = new BitSet(size);
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];

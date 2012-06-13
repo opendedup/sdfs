@@ -24,6 +24,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
@@ -70,7 +71,7 @@ public class DSEConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean cloudCompress = Main.cloudCompress;
-	int hashSize = 16;
+	String hashType = HashFunctionPool.TIGER_16;
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
 	int upstreamPort = 2222;
@@ -131,6 +132,10 @@ public class DSEConfigWriter {
 		}
 		if (cmd.hasOption("aws-enabled")) {
 			this.awsEnabled = Boolean.parseBoolean(cmd
+					.getOptionValue("aws-enabled"));
+		}
+		if (cmd.hasOption("azure-enabled")) {
+			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
 		if (cmd.hasOption("read-cache")) {
@@ -219,12 +224,19 @@ public class DSEConfigWriter {
 		if (cmd.hasOption("listen-ip")) {
 			this.list_ip = cmd.getOptionValue("listen-ip");
 		}
-		if (cmd.hasOption("hash-size")) {
-			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
-			if (hs == 16 || hs == 24)
-				this.hashSize = hs;
-			else
-				throw new Exception("hash size must be 16 or 24");
+		if (cmd.hasOption("hash-type")) {
+			String ht = cmd.getOptionValue("hash-type");
+			if (ht.equalsIgnoreCase(HashFunctionPool.TIGER_16)
+					|| ht.equalsIgnoreCase(HashFunctionPool.TIGER_24)
+					|| ht.equalsIgnoreCase(HashFunctionPool.MURMUR3_16))
+				this.hashType = ht;
+			else {
+				System.out.println("Invalid Hash Type. Must be "
+						+ HashFunctionPool.TIGER_16 + " "
+						+ HashFunctionPool.TIGER_24 + " "
+						+ HashFunctionPool.MURMUR3_16);
+				System.exit(-1);
+			}
 		}
 		if (cmd.hasOption("listen-port")) {
 			this.network_port = Integer.parseInt(cmd
@@ -300,7 +312,7 @@ public class DSEConfigWriter {
 				Integer.toString(this.chunk_store_read_cache));
 		cs.setAttribute("chunk-store-dirty-timeout",
 				Integer.toString(this.chunk_store_dirty_timeout));
-		cs.setAttribute("hash-size", Integer.toString(this.hashSize));
+		cs.setAttribute("hash-type", this.hashType);
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
@@ -415,13 +427,20 @@ public class DSEConfigWriter {
 								+ "This . \n Defaults to: \n 5MB").hasArg()
 				.withArgName("Megabytes").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("hash-size")
+				.withLongOpt("hash-type")
 				.withDescription(
-						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer"
-								+ "versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions"
-								+ "below 1.0.1 ."
-								+ "This . \n Defaults to: \n 5MB").hasArg()
-				.withArgName("16 or 24 bytes").create());
+						"This is the type of hash engine used to calculate a unique hash. The valid options for hash-type are "
+								+ HashFunctionPool.TIGER_16
+								+ " "
+								+ HashFunctionPool.TIGER_24
+								+ " "
+								+ HashFunctionPool.MURMUR3_16
+								+ " This Defaults to " + HashFunctionPool.TIGER_16).hasArg()
+				.withArgName(HashFunctionPool.TIGER_16
+						+ "|"
+						+ HashFunctionPool.TIGER_24
+						+ "|"
+						+ HashFunctionPool.MURMUR3_16).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("encrypt")
 				.withDescription(
