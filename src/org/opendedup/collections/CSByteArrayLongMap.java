@@ -254,7 +254,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
 			int count = 0;
-			System.out.print("Loading ");
+			System.out.print("Loading " + ChunkData.RAWDL);
 			while (kFc.position() < kRaf.length()) {
 				count++;
 				if (count > 500000) {
@@ -283,19 +283,15 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 							SDFSLogger.getLog().info("HashTable corrupt!");
 							corrupt = true;
 						}
-						long pos = (currentPos / raw.length)
-								* Main.CHUNK_LENGTH;
-						if (cm.getcPos() != pos)
-							SDFSLogger.getLog().warn(
-									"Possible Corruption at " + cm.getcPos()
-											+ " file position is " + pos);
 						if (!corrupt) {
 							long value = cm.getcPos();
 							if (cm.ismDelete()) {
+								SDFSLogger.getLog().info("chunk is deleted");
 								this.addFreeSlot(cm.getcPos());
 								freeSl++;
 							} else {
 								boolean added = this.put(cm, false);
+								SDFSLogger.getLog().info("added " + StringUtils.getHexString(cm.getHash()) + " position is " + cm.getcPos());
 								if (added)
 									this.kSz++;
 								if (value > endPos)
@@ -663,7 +659,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					if (cm != null) {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
-						if (cm.ismDelete()) 
+						if (cm.ismDelete())
 							cm.setLastClaimed(0);
 						else {
 							cm.setLastClaimed(System.currentTimeMillis());
@@ -737,8 +733,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 								* (long) ChunkData.RAWDL;
 						if (cm.ismDelete()) {
 							cm.setLastClaimed(0);
-						}
-						else {
+						} else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}
 						try {
@@ -895,17 +890,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						"compacting sizes are not the same records=" + this.kSz
 								+ " compacted records=" + this.compactKsz);
 				/*
-				for (int i = 0; i < maps.length; i++) {
-					maps[i].iterInit();
-					long val = 0;
-					while (val != -1 && !this.closed) {
-						val = maps[i].nextClaimedValue(true);
-						if (val != -10) {
-							SDFSLogger.getLog().warn("missed value at " + val);
-						}
-					}
-				}
-				*/
+				 * for (int i = 0; i < maps.length; i++) { maps[i].iterInit();
+				 * long val = 0; while (val != -1 && !this.closed) { val =
+				 * maps[i].nextClaimedValue(true); if (val != -10) {
+				 * SDFSLogger.getLog().warn("missed value at " + val); } } }
+				 */
 				this.kFc.close();
 				this.kRaf.close();
 				this.kFc = null;
@@ -914,18 +903,17 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				_fs.delete();
 				SDFSLogger.getLog().error("rolled back compacting");
 				throw new IOException("compacting failed");
-			}
-			else if(force && this.compactKsz != (this.kSz)) {
+			} else if (force && this.compactKsz != (this.kSz)) {
 				SDFSLogger.getLog().warn(
 						"compacting sizes are not the same records=" + this.kSz
 								+ " compacted records=" + this.compactKsz);
 				long diff = this.kSz - this.compactKsz;
-				if(diff > 0)
+				if (diff > 0)
 					SDFSLogger.getLog().warn(
 							"compacting is discarding " + diff + " records");
-				if(diff < 0)
+				if (diff < 0)
 					SDFSLogger.getLog().warn(
-							"compacting is adding " + (diff*-1) + " records");
+							"compacting is adding " + (diff * -1) + " records");
 			}
 			this.flushBuffer(true);
 			while (this.flushing) {
