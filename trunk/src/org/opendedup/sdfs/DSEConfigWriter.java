@@ -24,6 +24,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
@@ -60,9 +61,10 @@ public class DSEConfigWriter {
 	String chunk_gc_schedule = "0 0 0/4 * * ?";
 	int remove_if_older_than = 6;
 	boolean awsEnabled = false;
-	String awsAccessKey = "";
-	String awsSecretKey = "";
-	String awsBucketName = "";
+	boolean azureEnabled = false;
+	String cloudAccessKey = "";
+	String cloudSecretKey = "";
+	String cloudBucketName = "";
 	int chunk_store_read_cache = Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
@@ -144,23 +146,57 @@ public class DSEConfigWriter {
 					.getOptionValue("dirty-timeout"));
 		}
 		if (this.awsEnabled) {
-			if (cmd.hasOption("aws-secret-key")
-					&& cmd.hasOption("aws-access-key")
-					&& cmd.hasOption("aws-bucket-name")) {
-				this.awsAccessKey = cmd.getOptionValue("aws-access-key");
-				this.awsSecretKey = cmd.getOptionValue("aws-secret-key");
-				this.awsBucketName = cmd.getOptionValue("aws-bucket-name");
-
+			if (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key")
+					&& cmd.hasOption("cloud-bucket-name")) {
+				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				if (!cmd.hasOption("io-chunk-size"))
+					this.chunk_size = 128;
+				if(!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+					System.out.println("Error : Unable to create volume");
+					System.out
+							.println("cloud-access-key or cloud-secret-key is incorrect");
+					System.exit(-1);
+				}
+				if(!S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
+					System.out.println("Error : Unable to create volume");
+					System.out
+							.println("cloud-bucket-name is not unique");
+					System.exit(-1);
+				}
+					
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
-						.println("aws-access-key, aws-secret-key, and aws-bucket-name are required.");
+						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
+			if (cmd.hasOption("cloud-compress"))
+				this.cloudCompress = Boolean.parseBoolean(cmd
+						.getOptionValue("cloud-compress"));
+		} 
+		
+		else if (this.azureEnabled) {
+			if (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key")
+					&& cmd.hasOption("cloud-bucket-name")) {
+				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				if (!cmd.hasOption("io-chunk-size"))
+					this.chunk_size = 128;
+			} else {
+				System.out.println("Error : Unable to create volume");
+				System.out
+						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+				System.exit(-1);
+			}
+			if (cmd.hasOption("cloud-compress"))
+				this.cloudCompress = Boolean.parseBoolean(cmd
+						.getOptionValue("cloud-compress"));
 		}
-		if (cmd.hasOption("cloud-compress"))
-			this.cloudCompress = Boolean.parseBoolean(cmd
-					.getOptionValue("cloud-compress"));
 		if (cmd.hasOption("gc-schedule")) {
 			this.chunk_gc_schedule = cmd.getOptionValue("gc-schedule");
 		}
@@ -268,9 +304,17 @@ public class DSEConfigWriter {
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
-			aws.setAttribute("aws-access-key", this.awsAccessKey);
-			aws.setAttribute("aws-secret-key", this.awsSecretKey);
-			aws.setAttribute("aws-bucket-name", this.awsBucketName);
+			aws.setAttribute("aws-access-key", this.cloudAccessKey);
+			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
+			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
+			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
+			cs.appendChild(aws);
+		} else if (this.azureEnabled) {
+			Element aws = xmldoc.createElement("azure-store");
+			aws.setAttribute("enabled", "true");
+			aws.setAttribute("azure-access-key", this.cloudAccessKey);
+			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
+			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		}
@@ -395,27 +439,37 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
-						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. aws-secret-key, aws-access-key, and aws-bucket-name will also need to be set. ")
+						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-secret-key")
+				.withLongOpt("cloud-secret-key")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage secret key. aws-enabled, aws-access-key, and aws-bucket-name will also need to be set. ")
-				.hasArg().withArgName("S3 Secret Key").create());
+						"Set to the value of Cloud Storage secret key.")
+				.hasArg().withArgName("Cloud Secret Key").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-access-key")
+				.withLongOpt("cloud-access-key")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage access key. aws-enabled, aws-secret-key, and aws-bucket-name will also need to be set. ")
-				.hasArg().withArgName("S3 Access Key").create());
+						"Set to the value of Cloud Storage access key.")
+				.hasArg().withArgName("Cloud Access Key").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-bucket-name")
+				.withLongOpt("cloud-bucket-name")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
-				.hasArg().withArgName("Unique S3 Bucket Name").create());
+						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
+				.hasArg().withArgName("Unique Cloud Bucket Name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-compress")
+				.withLongOpt("cloud-compress")
 				.withDescription(
-						"Compress AWS chunks before they are sent to the S3 Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+						"Compress chunks before they are sent to the Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("gs-enabled")
+				.withDescription(
+						"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("azure-enabled")
+				.withDescription(
+						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-udp")
