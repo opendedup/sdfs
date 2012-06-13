@@ -322,6 +322,7 @@ public class Config {
 							+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
+				
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName(
 						"aws").item(0);
@@ -336,15 +337,15 @@ public class Config {
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure")
+				Element azure = (Element) doc.getElementsByTagName("azure-store")
 						.item(0);
-				Main.cloudChunkStore = Boolean.parseBoolean(azure
-						.getAttribute("enabled"));
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
 				Main.cloudCompress = Boolean.parseBoolean(azure
 						.getAttribute("compress"));
+				Main.cloudChunkStore = Boolean.parseBoolean(azure
+						.getAttribute("enabled"));
 			}
 			int cliSz = doc.getElementsByTagName("sdfscli").getLength();
 			if (cliSz > 0) {
