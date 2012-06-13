@@ -72,15 +72,11 @@ public class VolumeConfigWriter {
 	int remove_if_older_than = 6;
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
-	String awsAccessKey = "";
-	String awsSecretKey = "";
-	String awsBucketName = "";
-	boolean gsCompress = Main.cloudCompress;
 	boolean gsEnabled = false;
-	String gsAccessKey = "";
-	String gsSecretKey = "";
-	String gsBucketName = "";
-	boolean awsCompress = Main.cloudCompress;
+	String cloudAccessKey = "";
+	String cloudSecretKey = "";
+	String cloudBucketName = "";
+	boolean cloudCompress = Main.cloudCompress;
 	int chunk_store_read_cache = Main.chunkStorePageCache;
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
@@ -251,6 +247,10 @@ public class VolumeConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
+		if (cmd.hasOption("azure-enabled")) {
+			this.awsEnabled = Boolean.parseBoolean(cmd
+					.getOptionValue("azure-enabled"));
+		}
 		if (cmd.hasOption("chunk-store-read-cache")) {
 			this.chunk_store_read_cache = Integer.parseInt(cmd
 					.getOptionValue("chunk-store-read-cache"));
@@ -267,54 +267,74 @@ public class VolumeConfigWriter {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
 		if (this.awsEnabled) {
-			if (cmd.hasOption("aws-secret-key")
-					&& cmd.hasOption("aws-access-key")
-					&& cmd.hasOption("aws-bucket-name")) {
-				this.awsAccessKey = cmd.getOptionValue("aws-access-key");
-				this.awsSecretKey = cmd.getOptionValue("aws-secret-key");
-				this.awsBucketName = cmd.getOptionValue("aws-bucket-name");
+			if (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key")
+					&& cmd.hasOption("cloud-bucket-name")) {
+				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
-				if(!S3ChunkStore.checkAuth(awsAccessKey, awsSecretKey)) {
+				if(!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
-							.println("aws-access-key or aws-secret-key is incorrect");
+							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if(!S3ChunkStore.checkBucketUnique(awsAccessKey, awsSecretKey, awsBucketName)) {
+				if(!S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
-							.println("aws-bucket-name is not unique");
+							.println("cloud-bucket-name is not unique");
 					System.exit(-1);
 				}
 					
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
-						.println("aws-access-key, aws-secret-key, and aws-bucket-name are required.");
+						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("aws-compress"))
-				this.awsCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("aws-compress"));
+			if (cmd.hasOption("cloud-compress"))
+				this.cloudCompress = Boolean.parseBoolean(cmd
+						.getOptionValue("cloud-compress"));
 		} else if (this.gsEnabled) {
-			if (cmd.hasOption("gs-secret-key")
-					&& cmd.hasOption("gs-access-key")
-					&& cmd.hasOption("gs-bucket-name")) {
-				this.awsAccessKey = cmd.getOptionValue("gs-access-key");
-				this.awsSecretKey = cmd.getOptionValue("gs-secret-key");
-				this.awsBucketName = cmd.getOptionValue("gs-bucket-name");
+			if (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key")
+					&& cmd.hasOption("cloud-bucket-name")) {
+				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
-						.println("gs-access-key, gs-secret-key, and gs-bucket-name are required.");
+						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("gs-compress"))
-				this.awsCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("aws-compress"));
+			if (cmd.hasOption("cloud-compress"))
+				this.cloudCompress = Boolean.parseBoolean(cmd
+						.getOptionValue("cloud-compress"));
+		}
+		
+		else if (this.azureEnabled) {
+			if (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key")
+					&& cmd.hasOption("cloud-bucket-name")) {
+				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				if (!cmd.hasOption("io-chunk-size"))
+					this.chunk_size = 128;
+			} else {
+				System.out.println("Error : Unable to create volume");
+				System.out
+						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+				System.exit(-1);
+			}
+			if (cmd.hasOption("cloud-compress"))
+				this.cloudCompress = Boolean.parseBoolean(cmd
+						.getOptionValue("cloud-compress"));
 		}
 
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
@@ -507,18 +527,26 @@ public class VolumeConfigWriter {
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
-			aws.setAttribute("aws-access-key", this.awsAccessKey);
-			aws.setAttribute("aws-secret-key", this.awsSecretKey);
-			aws.setAttribute("aws-bucket-name", this.awsBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.awsCompress));
+			aws.setAttribute("aws-access-key", this.cloudAccessKey);
+			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
+			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
+			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		} else if (this.gsEnabled) {
 			Element aws = xmldoc.createElement("google-store");
 			aws.setAttribute("enabled", "true");
-			aws.setAttribute("gs-access-key", this.gsAccessKey);
-			aws.setAttribute("gs-secret-key", this.gsSecretKey);
-			aws.setAttribute("gs-bucket-name", this.gsBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.gsCompress));
+			aws.setAttribute("gs-access-key", this.cloudAccessKey);
+			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
+			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
+			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
+			cs.appendChild(aws);
+		} else if (this.azureEnabled) {
+			Element aws = xmldoc.createElement("azure-store");
+			aws.setAttribute("enabled", "true");
+			aws.setAttribute("azure-access-key", this.cloudAccessKey);
+			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
+			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
+			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -798,52 +826,37 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
-						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. aws-secret-key, aws-access-key, and aws-bucket-name will also need to be set. ")
+						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-secret-key")
+				.withLongOpt("cloud-secret-key")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage secret key. aws-enabled, aws-access-key, and aws-bucket-name will also need to be set. ")
-				.hasArg().withArgName("S3 Secret Key").create());
+						"Set to the value of Cloud Storage secret key.")
+				.hasArg().withArgName("Cloud Secret Key").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-access-key")
+				.withLongOpt("cloud-access-key")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage access key. aws-enabled, aws-secret-key, and aws-bucket-name will also need to be set. ")
-				.hasArg().withArgName("S3 Access Key").create());
+						"Set to the value of Cloud Storage access key.")
+				.hasArg().withArgName("Cloud Access Key").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-bucket-name")
+				.withLongOpt("cloud-bucket-name")
 				.withDescription(
-						"Set to the value of Amazon S3 Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
-				.hasArg().withArgName("Unique S3 Bucket Name").create());
+						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
+				.hasArg().withArgName("Unique Cloud Bucket Name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-compress")
+				.withLongOpt("cloud-compress")
 				.withDescription(
-						"Compress AWS chunks before they are sent to the S3 Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+						"Compress chunks before they are sent to the Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("gs-enabled")
 				.withDescription(
-						"Set to true to enable this volume to store to Google Cloud Storage. gs-secret-key, gs-access-key, and gs-bucket-name will also need to be set. ")
+						"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("gs-secret-key")
+				.withLongOpt("azure-enabled")
 				.withDescription(
-						"Set to the value of Google Cloud Storage secret key. gs-enabled, gs-access-key, and gs-bucket-name will also need to be set. ")
-				.hasArg().withArgName("Google Secret Key").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("aws-access-key")
-				.withDescription(
-						"Set to the value of the Google Cloud Storage access key. gs-enabled, gs-secret-key, and gs-bucket-name will also need to be set. ")
-				.hasArg().withArgName("Google Access Key").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-bucket-name")
-				.withDescription(
-						"Set to the value of the Google Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. gs-enabled, gs-secret-key, and gs-secret-key will also need to be set. ")
-				.hasArg().withArgName("Unique Google Bucket Name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("gs-compress")
-				.withDescription(
-						"Compress chunks before they are sent to the Google Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-udp")

@@ -122,6 +122,18 @@ public class Config {
 				Main.cloudCompress = Boolean.parseBoolean(aws
 						.getAttribute("compress"));
 			}
+			int azureSz = doc.getElementsByTagName("azure-store").getLength();
+			if (azureSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
+				Element azure = (Element) doc.getElementsByTagName("azure").item(0);
+				Main.cloudChunkStore = Boolean.parseBoolean(azure
+						.getAttribute("enabled"));
+				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
+				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
+				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
+				Main.cloudCompress = Boolean.parseBoolean(azure
+						.getAttribute("compress"));
+			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
 				SDFSLogger.getLog().info(
@@ -290,6 +302,18 @@ public class Config {
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
 				Main.cloudCompress = Boolean.parseBoolean(aws
+						.getAttribute("compress"));
+			}
+			int azureSz = doc.getElementsByTagName("azure-store").getLength();
+			if (azureSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
+				Element azure = (Element) doc.getElementsByTagName("azure").item(0);
+				Main.cloudChunkStore = Boolean.parseBoolean(azure
+						.getAttribute("enabled"));
+				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
+				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
+				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
+				Main.cloudCompress = Boolean.parseBoolean(azure
 						.getAttribute("compress"));
 			}
 			int cliSz = doc.getElementsByTagName("sdfscli").getLength();
