@@ -135,7 +135,7 @@ public class ChunkData {
 
 	public void setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
-		if (this.mDelete && Main.AWSChunkStore) {
+		if (this.mDelete && Main.cloudChunkStore) {
 			try {
 				HashChunkService.getChuckStore().deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {

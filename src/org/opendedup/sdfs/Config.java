@@ -114,12 +114,12 @@ public class Config {
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
-				Main.AWSChunkStore = Boolean.parseBoolean(aws
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
-				Main.awsAccessKey = aws.getAttribute("aws-access-key");
-				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
-				Main.awsBucket = aws.getAttribute("aws-bucket-name");
-				Main.awsCompress = Boolean.parseBoolean(aws
+				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
+				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
+				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
+				Main.cloudCompress = Boolean.parseBoolean(aws
 						.getAttribute("compress"));
 			}
 			File f = new File(Main.chunkStore);
@@ -284,12 +284,12 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName(
 						"aws").item(0);
-				Main.AWSChunkStore = Boolean.parseBoolean(aws
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
-				Main.awsAccessKey = aws.getAttribute("aws-access-key");
-				Main.awsSecretKey = aws.getAttribute("aws-secret-key");
-				Main.awsBucket = aws.getAttribute("aws-bucket-name");
-				Main.awsCompress = Boolean.parseBoolean(aws
+				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
+				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
+				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
+				Main.cloudCompress = Boolean.parseBoolean(aws
 						.getAttribute("compress"));
 			}
 			int cliSz = doc.getElementsByTagName("sdfscli").getLength();

@@ -34,9 +34,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String name;
 	private S3ServicePool pool = null;
 	private boolean closed = false;
-	private long currentLength = 0L;
-	private RandomAccessFile posRaf = null;
-	private static File chunk_location = new File(Main.chunkStore);
 	boolean compress = false;
 	boolean encrypt = false;
 
@@ -44,8 +41,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	static {
 		try {
-			awsCredentials = new AWSCredentials(Main.awsAccessKey,
-					Main.awsSecretKey);
+			awsCredentials = new AWSCredentials(Main.cloudAccessKey,
+					Main.cloudSecretKey);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
 			System.exit(-1);
@@ -84,24 +81,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	public S3ChunkStore() {
 
-	}
-
-	private void openPosFile() throws IOException {
-		File posFile = new File(chunk_location + File.separator + name + ".pos");
-		boolean newPos = true;
-		if (posFile.exists())
-			newPos = false;
-		else {
-			posFile.getParentFile().mkdirs();
-		}
-		posRaf = new RandomAccessFile(posFile, "rw");
-		if (!newPos) {
-			posRaf.seek(0);
-			this.currentLength = posRaf.readLong();
-		} else {
-			posRaf.seek(0);
-			posRaf.writeLong(currentLength);
-		}
 	}
 
 	public long bytesRead() {
@@ -174,7 +153,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 		String hashString = this.getHashName(hash);
 		S3Object s3Object = new S3Object(hashString);
-		if (Main.awsCompress) {
+		if (Main.cloudCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			s3Object.addMetadata("compress", "true");
 		} else {
@@ -277,7 +256,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void init(Element config) throws IOException {
-		this.name = Main.awsBucket;
+		this.name = Main.cloudBucket;
 		try {
 
 			pool = new S3ServicePool(S3ChunkStore.awsCredentials,
@@ -287,7 +266,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
 			if (s3Bucket == null) {
 				s3Bucket = s3Service.createBucket(this.name);
-				if (Main.awsCompress) {
+				if (Main.cloudCompress) {
 					s3Bucket.addMetadata("compress", "true");
 				} else {
 					s3Bucket.addMetadata("compress", "false");
@@ -303,13 +282,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 				this.compress = Boolean.parseBoolean((String) s3Bucket
 						.getMetadata("compress"));
 			else
-				this.compress = Main.awsCompress;
+				this.compress = Main.cloudCompress;
 			if (s3Bucket.containsMetadata("encrypt"))
 				this.encrypt = Boolean.parseBoolean((String) s3Bucket
 						.getMetadata("encrypt"));
 			else
 				this.encrypt = Main.chunkStoreEncryptionEnabled;
-			this.openPosFile();
 			pool.returnObject(s3Service);
 		} catch (Exception e) {
 			throw new IOException(e);

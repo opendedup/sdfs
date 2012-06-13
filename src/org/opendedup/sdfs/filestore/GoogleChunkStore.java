@@ -34,8 +34,8 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	static {
 		try {
-			GSCredentials gsCredentials = new GSCredentials(Main.awsAccessKey,
-					Main.awsSecretKey);
+			GSCredentials gsCredentials = new GSCredentials(Main.cloudAccessKey,
+					Main.cloudSecretKey);
 
 			// To communicate with Google Storage use the GoogleStorageService.
 			gsService = new GoogleStorageService(gsCredentials);
@@ -82,7 +82,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 			obj.closeDataInputStream();
 			if (Main.chunkStoreEncryptionEnabled)
 				data = EncryptUtils.decrypt(data);
-			if (Main.awsCompress)
+			if (Main.cloudCompress)
 				data = CompressionUtils.decompressZLIB(data);
 			return data;
 		} catch (Exception e) {
@@ -117,7 +117,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 		String hashString = this.getHashName(hash);
 		GSObject gsObject = new GSObject(hashString);
-		if (Main.awsCompress) {
+		if (Main.cloudCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			gsObject.addMetadata("compress", "true");
 		} else {
@@ -149,7 +149,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 		String hashString = hash;
 		GSObject gsObject = new GSObject(hashString);
-		if (Main.awsCompress) {
+		if (Main.cloudCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			gsObject.addMetadata("compress", "true");
 		} else {
@@ -197,8 +197,8 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		try {
 			System.out.println("");
 			System.out.print("Deleting Bucket [" + bucketName + "]");
-			GSCredentials credentials = new GSCredentials(Main.awsAccessKey,
-					Main.awsSecretKey);
+			GSCredentials credentials = new GSCredentials(Main.cloudAccessKey,
+					Main.cloudSecretKey);
 
 			// To communicate with Google Storage use the GoogleStorageService.
 			GoogleStorageService service = new GoogleStorageService(credentials);
@@ -242,8 +242,8 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	@Override
 	public void init(Element config) throws IOException {
 		try {
-			this.name = Main.awsBucket;
-			gsService.getOrCreateBucket(Main.awsBucket);
+			this.name = Main.cloudBucket;
+			gsService.getOrCreateBucket(Main.cloudBucket);
 		} catch (ServiceException e) {
 			throw new IOException(e);
 		}

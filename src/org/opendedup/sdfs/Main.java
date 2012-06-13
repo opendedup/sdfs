@@ -294,23 +294,31 @@ public class Main {
 	 * Specifies whether the Dedup Storage Engine will store data to AWS S3 or
 	 * not. This is set on the chunk store.
 	 */
-	public static boolean AWSChunkStore = false;
+	public static boolean cloudChunkStore = false;
 	/**
 	 * 
 	 */
-	public static String awsBucket = null;
+	public static String cloudBucket = null;
 	/**
 	 * The awsAccessKey. This is used on the client.
 	 */
-	public static String awsAccessKey = null;
+	public static String cloudAccessKey = null;
 	/**
 	 * The awsSecretKey. This is used on the client.
 	 */
-	public static String awsSecretKey = null;
+	public static String cloudSecretKey = null;
+	
+	/**Azure login info**/
+	public static boolean AZUREChunkStore = false;
+	public static String AZURE_ACCOUNT_NAME = "MyAccountName";
+	public static String AZURE_ACCOUNT_KEY = "MyAccountKey";
+	public static String AZURE_BLOB_HOST_NAME = null;
+	
+	
 	/**
 	 * Compress AWS data using zlib
 	 */
-	public static boolean awsCompress = true;
+	public static boolean cloudCompress = true;
 	/**
 	 * The time out on the client to wait for a read or write command to finish
 	 * for the same hash. This is used to limit the communication between the
