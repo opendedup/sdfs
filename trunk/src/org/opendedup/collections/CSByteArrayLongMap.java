@@ -662,7 +662,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					if (cm != null) {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
-						if (cm.ismDelete())
+						if (cm.ismDelete()) 
 							cm.setLastClaimed(0);
 						else {
 							cm.setLastClaimed(System.currentTimeMillis());
@@ -734,8 +734,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					try {
 						long pos = (cm.getcPos() / (long) Main.chunkStorePageSize)
 								* (long) ChunkData.RAWDL;
-						if (cm.ismDelete())
+						if (cm.ismDelete()) {
 							cm.setLastClaimed(0);
+						}
 						else {
 							cm.setLastClaimed(System.currentTimeMillis());
 						}

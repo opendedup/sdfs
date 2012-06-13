@@ -67,7 +67,7 @@ public class DSEConfigWriter {
 	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
-	boolean awsCompress = Main.awsCompress;
+	boolean cloudCompress = Main.cloudCompress;
 	int hashSize = 16;
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
@@ -158,9 +158,9 @@ public class DSEConfigWriter {
 				System.exit(-1);
 			}
 		}
-		if (cmd.hasOption("aws-compress"))
-			this.awsCompress = Boolean.parseBoolean(cmd
-					.getOptionValue("aws-compress"));
+		if (cmd.hasOption("cloud-compress"))
+			this.cloudCompress = Boolean.parseBoolean(cmd
+					.getOptionValue("cloud-compress"));
 		if (cmd.hasOption("gc-schedule")) {
 			this.chunk_gc_schedule = cmd.getOptionValue("gc-schedule");
 		}
@@ -271,7 +271,7 @@ public class DSEConfigWriter {
 			aws.setAttribute("aws-access-key", this.awsAccessKey);
 			aws.setAttribute("aws-secret-key", this.awsSecretKey);
 			aws.setAttribute("aws-bucket-name", this.awsBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.awsCompress));
+			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);

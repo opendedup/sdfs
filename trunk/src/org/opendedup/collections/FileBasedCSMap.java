@@ -388,7 +388,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 						+ "] is close");
 			}
 			for (int i = 0; i < this.maps.length; i++) {
-				//this.maps[i].sync();
+				try {
+				this.maps[i].sync();
+				}catch(	IOException e) {
+					SDFSLogger.getLog().warn("Unable to sync table " + i,e);
+				}
 			}
 			// this.flushBuffer(true);
 			// this.kRaf.getFD().sync();

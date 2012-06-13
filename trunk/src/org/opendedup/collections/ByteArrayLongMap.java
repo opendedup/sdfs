@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,7 +17,7 @@ import com.ning.compress.lzf.LZFEncoder;
 
 public class ByteArrayLongMap {
 	ByteBuffer values = null;
-	ByteBuffer claims = null;
+	private BitSet claims = null;
 	ByteBuffer keys = null;
 	byte[] compValues = null;
 	byte[] compClaims = null;
@@ -76,13 +77,11 @@ public class ByteArrayLongMap {
 				keys.get(key);
 				iterPos++;
 				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					claims.position(iterPos - 1);
-					byte claimed = claims.get();
+					boolean claimed = claims.get(iterPos - 1);
 					if (clearClaim) {
-						claims.position(iterPos - 1);
-						claims.put((byte) 0);
+						claims.clear(iterPos - 1);
 					}
-					if (claimed == 1)
+					if (claimed)
 						return key;
 				}
 			} catch (Exception e) {
@@ -102,13 +101,11 @@ public class ByteArrayLongMap {
 			try {
 				val = values.getLong();
 				if (val >= 0) {
-					claims.position(iterPos);
-					byte claimed = claims.get();
+					boolean claimed = claims.get(iterPos);
 					if (clearClaim) {
-						claims.position(iterPos);
-						claims.put((byte) 0);
+						claims.clear(iterPos);
 					}
-					if (claimed == 1)
+					if (claimed)
 						return val;
 				}
 			} catch (Exception e) {
@@ -133,7 +130,6 @@ public class ByteArrayLongMap {
 		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
-			claims = ByteBuffer.allocateDirect(size);
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];
@@ -146,7 +142,7 @@ public class ByteArrayLongMap {
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
-			claims.put((byte) 0);
+			claims.clear();
 			// store.put((byte) 0);
 		}
 		this.compress();
@@ -163,7 +159,7 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
 			values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
-			claims = ByteBuffer.wrap(LZFDecoder.decode(compClaims));
+			
 		}
 	}
 
@@ -179,7 +175,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			compKeys = LZFEncoder.encode(keys.array());
 			compValues = LZFEncoder.encode(values.array());
-			compClaims = LZFEncoder.encode(claims.array());
 		}
 	}
 
@@ -197,8 +192,7 @@ public class ByteArrayLongMap {
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
-				this.claims.position(pos);
-				this.claims.put((byte) 1);
+				this.claims.set(pos);
 				return true;
 			}
 			return false;
@@ -225,9 +219,8 @@ public class ByteArrayLongMap {
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
-				this.claims.position(pos);
-				byte cl = this.claims.get();
-				if (cl == 1)
+				boolean cl = this.claims.get(pos);
+				if (cl)
 					return true;
 			}
 			return false;
@@ -253,8 +246,7 @@ public class ByteArrayLongMap {
 					this.values.position(pos);
 					this.values.putLong(value);
 					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 1);
+					this.claims.set(pos);
 					return true;
 			}
 		}  finally {
@@ -267,11 +259,10 @@ public class ByteArrayLongMap {
 			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
-			this.claims.position(pos / FREE.length);
-			byte claimed = this.claims.get();
+			boolean claimed = this.claims.get(pos / FREE.length);
 			if (pos == -1) {
 				return false;
-			} else if (claimed == 1) {
+			} else if (claimed) {
 				return false;
 			} else {
 				try {
@@ -281,8 +272,7 @@ public class ByteArrayLongMap {
 					this.values.position(pos);
 					this.values.putLong(-1);
 					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 0);
+					this.claims.clear(pos);
 					// this.store.position(pos);
 					// this.store.put((byte)0);
 					this.entries = entries - 1;
@@ -457,8 +447,7 @@ public class ByteArrayLongMap {
 				this.values.position(pos);
 				this.values.putLong(value);
 				pos = (pos / 8);
-				this.claims.position(pos);
-				this.claims.put((byte) 1);
+				this.claims.set(pos);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 				this.entries = entries + 1;
@@ -502,8 +491,7 @@ public class ByteArrayLongMap {
 				long val = this.values.getLong();
 				if (claim) {
 					pos = (pos / 8);
-					this.claims.position(pos);
-					this.claims.put((byte) 1);
+					this.claims.set(pos);
 				}
 				return val;
 			}

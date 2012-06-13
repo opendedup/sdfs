@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.SyncFailedException;
 
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -294,7 +295,7 @@ public class FileByteArrayLongMap {
 				this.vRaf.seek(pos);
 				this.vRaf.writeLong(fp);
 				this.tRaf.seek(pos);
-				this.tRaf.writeLong(-1);
+				this.tRaf.writeLong(0);
 				pos = (pos / 8);
 				this.claims.clear(pos);
 				this.mapped.clear(pos);
@@ -659,6 +660,20 @@ public class FileByteArrayLongMap {
 
 		}
 		return k;
+	}
+	
+	public void sync() throws SyncFailedException, IOException {
+		keys.force();
+		vRaf.getFD().sync();
+		tRaf.getFD().sync();
+		File f = new File(path + ".vmp");
+		FileOutputStream fout = new FileOutputStream(f);
+		ObjectOutputStream oon = new ObjectOutputStream(fout);
+		oon.writeObject(mapped);
+		oon.flush();
+		oon.close();
+		fout.flush();
+		fout.close();
 	}
 
 	public synchronized long removeNextOldRecord(long time) throws IOException {
