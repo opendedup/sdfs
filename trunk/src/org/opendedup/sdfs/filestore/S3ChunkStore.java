@@ -2,10 +2,10 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.ServiceException;
@@ -36,6 +36,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private boolean closed = false;
 	boolean compress = false;
 	boolean encrypt = false;
+	private long currentLength = 0L;
+	private static final int pageSize = Main.chunkStorePageSize;
 
 	// private static ReentrantLock lock = new ReentrantLock();
 
@@ -132,11 +134,17 @@ public class S3ChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 
+	private static ReentrantLock reservePositionlock = new ReentrantLock();
+
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		reservePositionlock.lock();
+		long pos = this.currentLength;
+		this.currentLength = this.currentLength + pageSize;
+		reservePositionlock.unlock();
+		return pos;
 
-		return 1;
 	}
 
 	public void setName(String name) {
@@ -145,7 +153,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	public long size() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.currentLength;
 	}
 
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
@@ -297,7 +305,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void setSize(long size) {
-		// TODO Auto-generated method stub
+		this.currentLength = size;
 
 	}
 

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.GoogleStorageService;
@@ -29,13 +30,14 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	private String name;
 	private static GoogleStorageService gsService;
 	private boolean closed = false;
-
+	private long currentLength = 0L;
+	private static final int pageSize = Main.chunkStorePageSize;
 	// private static ReentrantLock lock = new ReentrantLock();
 
 	static {
 		try {
-			GSCredentials gsCredentials = new GSCredentials(Main.cloudAccessKey,
-					Main.cloudSecretKey);
+			GSCredentials gsCredentials = new GSCredentials(
+					Main.cloudAccessKey, Main.cloudSecretKey);
 
 			// To communicate with Google Storage use the GoogleStorageService.
 			gsService = new GoogleStorageService(gsCredentials);
@@ -98,18 +100,24 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 
+	private static ReentrantLock reservePositionlock = new ReentrantLock();
+
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		reservePositionlock.lock();
+		long pos = this.currentLength;
+		this.currentLength = this.currentLength + pageSize;
+		reservePositionlock.unlock();
+		return pos;
 
-		return 0;
 	}
 
 	public void setName(String name) {
 	}
 
 	public long size() {
-		return 0;
+		return this.currentLength;
 	}
 
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
@@ -251,7 +259,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void setSize(long size) {
-		// TODO Auto-generated method stub
+		this.currentLength = size;
 
 	}
 
@@ -288,7 +296,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	@Override
 	public void compact() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

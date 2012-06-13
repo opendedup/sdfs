@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -13,8 +14,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.Tiger16HashEngine;
-import org.opendedup.hashing.TigerHashEngine;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.SDFSLogger;

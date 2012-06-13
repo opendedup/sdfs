@@ -2,10 +2,13 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
@@ -39,7 +42,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	private boolean closed = false;
 	boolean compress = false;
 	boolean encrypt = false;
+	private long currentLength = 0L;
+	private static final int pageSize = Main.chunkStorePageSize;
 
+	
 	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
 		return false;
 	}
@@ -110,11 +116,17 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 
+	private static ReentrantLock reservePositionlock = new ReentrantLock();
+
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		reservePositionlock.lock();
+		long pos = this.currentLength;
+		this.currentLength = this.currentLength + pageSize;
+		reservePositionlock.unlock();
+		return pos;
 
-		return 1;
 	}
 
 	public void setName(String name) {
@@ -123,7 +135,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	public long size() {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.currentLength;
 	}
 
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
