@@ -18,6 +18,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.AbstractMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.threads.SyncThread;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -42,7 +43,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private long maxSz = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
 	private BitSet freeSlots = null;
-	private byte[] FREE = new byte[Main.hashLength];
+	private byte[] FREE = new byte[HashFunctionPool.hashLength];
 	private boolean firstGCRun = true;
 
 	public void init(long maxSize, String fileName) throws IOException,
@@ -163,10 +164,10 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 			// SDFSLogger.getLog().debug("will create byte array of size "
 			// + sz + " propsize was " + propsize);
-			ram = ram + (sz * (Main.hashLength + 8));
+			ram = ram + (sz * (HashFunctionPool.hashLength + 8));
 			String fp = this.fileName + "-" + i;
 			FileByteArrayLongMap m = new FileByteArrayLongMap(fp, sz,
-					Main.hashLength);
+					(short)HashFunctionPool.hashLength);
 			long mep = m.setUp();
 			if(mep > endPos)
 				endPos = mep;
@@ -178,7 +179,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		System.out.println(" Loaded " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);
 		System.out.println();
-		HashChunkService.getChuckStore().setSize(endPos + Main.hashLength);
+		HashChunkService.getChuckStore().setSize(endPos + HashFunctionPool.hashLength);
 		return size;
 	}
 

@@ -76,7 +76,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.1.5";
+	public static String version = "1.1.6";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -390,11 +390,11 @@ public class Main {
 	 */
 	public static boolean enableNetworkChunkStore = false;
 
+
 	/**
-	 * the length of the hash. Will be either 16 or 24 depending on md/tiger128
-	 * or tiger192
+	 * hash type can be tiger or murmur
 	 */
-	public static short hashLength = 16;
+	public static String hashType = "tiger";
 	/**
 	 * FDisk Schedule in cron format
 	 * 

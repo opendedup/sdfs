@@ -15,6 +15,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.SDFSLogger;
@@ -24,11 +25,11 @@ import sun.nio.ch.FileChannelImpl;
 public class LongByteArrayMap implements AbstractMap {
 
 	// RandomAccessFile bdbf = null;
-	private static final int arrayLength = 1 + Main.hashLength + 1 + 8;
+	private static final int arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
-	public static byte[] FREE = new byte[Main.hashLength];
+	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public long iterPos = 0;
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;

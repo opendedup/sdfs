@@ -23,6 +23,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.HashFunctions;
 import org.opendedup.util.OSValidator;
@@ -82,7 +83,7 @@ public class VolumeConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 
-	int hashSize = 16;
+	String hashType = HashFunctionPool.TIGER_16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String sdfsCliPassword = "admin";
@@ -91,7 +92,7 @@ public class VolumeConfigWriter {
 	boolean sdfsCliRequireAuth = false;
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
-	
+
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
 	String upstreamPassword = "admin";
@@ -100,7 +101,6 @@ public class VolumeConfigWriter {
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	boolean networkEnable = false;
-	
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -139,12 +139,19 @@ public class VolumeConfigWriter {
 			this.safe_close = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-close"));
 		}
-		if (cmd.hasOption("hash-size")) {
-			int hs = Integer.parseInt(cmd.getOptionValue("hash-size"));
-			if (hs == 16 || hs == 24)
-				this.hashSize = hs;
-			else
-				throw new Exception("hash size must be 16 or 24");
+		if (cmd.hasOption("hash-type")) {
+			String ht = cmd.getOptionValue("hash-type");
+			if (ht.equalsIgnoreCase(HashFunctionPool.TIGER_16)
+					|| ht.equalsIgnoreCase(HashFunctionPool.TIGER_24)
+					|| ht.equalsIgnoreCase(HashFunctionPool.MURMUR3_16))
+				this.hashType = ht;
+			else {
+				System.out.println("Invalid Hash Type. Must be "
+						+ HashFunctionPool.TIGER_16 + " "
+						+ HashFunctionPool.TIGER_24 + " "
+						+ HashFunctionPool.MURMUR3_16);
+				System.exit(-1);
+			}
 		}
 		if (cmd.hasOption("chunkstore-class")) {
 			this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
@@ -216,17 +223,18 @@ public class VolumeConfigWriter {
 			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-pre-allocate"));
 		}
-		
-		if(cmd.hasOption("sdfscli-password")) {
+
+		if (cmd.hasOption("sdfscli-password")) {
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
-		if(cmd.hasOption("sdfscli-require-auth")) {
+		if (cmd.hasOption("sdfscli-require-auth")) {
 			this.sdfsCliRequireAuth = true;
 		}
-		if(cmd.hasOption("sdfscli-listen-port")) {
-			this.sdfsCliPort = Integer.parseInt(cmd.getOptionValue("sdfscli-listen-port"));
+		if (cmd.hasOption("sdfscli-listen-port")) {
+			this.sdfsCliPort = Integer.parseInt(cmd
+					.getOptionValue("sdfscli-listen-port"));
 		}
-		if(cmd.hasOption("sdfscli-listen-addr"))
+		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
 
 		if (cmd.hasOption("chunk-read-ahead-pages")) {
@@ -248,7 +256,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("aws-enabled"));
 		}
 		if (cmd.hasOption("azure-enabled")) {
-			this.awsEnabled = Boolean.parseBoolean(cmd
+			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("azure-enabled"));
 		}
 		if (cmd.hasOption("chunk-store-read-cache")) {
@@ -275,19 +283,19 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
-				if(!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
 							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if(!S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
+				if (!S3ChunkStore.checkBucketUnique(cloudAccessKey,
+						cloudSecretKey, cloudBucketName)) {
 					System.out.println("Error : Unable to create volume");
-					System.out
-							.println("cloud-bucket-name is not unique");
+					System.out.println("cloud-bucket-name is not unique");
 					System.exit(-1);
 				}
-					
+
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -316,7 +324,7 @@ public class VolumeConfigWriter {
 				this.cloudCompress = Boolean.parseBoolean(cmd
 						.getOptionValue("cloud-compress"));
 		}
-		
+
 		else if (this.azureEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
 					&& cmd.hasOption("cloud-access-key")
@@ -370,30 +378,32 @@ public class VolumeConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
-		if(cmd.hasOption("dse-upstream-enabled")) {
-			if(!cmd.hasOption("dse-upstream-host")) {
+		if (cmd.hasOption("dse-upstream-enabled")) {
+			if (!cmd.hasOption("dse-upstream-host")) {
 				throw new Exception("dse-upstream-host must be specified");
 			} else {
 				this.upstreamHost = cmd.getOptionValue("dse-upstream-host");
-				if(cmd.hasOption("dse-upstream-host-port"))
-					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("dse-upstream-host-port"));
+				if (cmd.hasOption("dse-upstream-host-port"))
+					this.upstreamPort = Integer.parseInt(cmd
+							.getOptionValue("dse-upstream-host-port"));
 			}
 		}
-		if(cmd.hasOption("dse-upstream-password"))
+		if (cmd.hasOption("dse-upstream-password"))
 			this.upstreamPassword = cmd.getOptionValue("dse-upstream-password");
-		if(cmd.hasOption("enable-replication-master")) {
+		if (cmd.hasOption("enable-replication-master")) {
 			this.sdfsCliRequireAuth = true;
 			this.sdfsCliListenAddr = "0.0.0.0";
 			this.networkEnable = true;
 		}
-		if(cmd.hasOption("enable-replication-slave")) {
-			if(!cmd.hasOption("replication-master"))
+		if (cmd.hasOption("enable-replication-slave")) {
+			if (!cmd.hasOption("replication-master"))
 				throw new Exception("replication-master must be specified");
 			this.upstreamHost = cmd.getOptionValue("replication-master");
-			this.upstreamEnabled= true;
+			this.upstreamEnabled = true;
 		}
-		if(cmd.hasOption("replication-master-password"))
-			this.upstreamPassword = cmd.getOptionValue("replication-master-password");
+		if (cmd.hasOption("replication-master-password"))
+			this.upstreamPassword = cmd
+					.getOptionValue("replication-master-password");
 
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
@@ -449,7 +459,7 @@ public class VolumeConfigWriter {
 				Integer.toString(this.system_read_cache));
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
-		io.setAttribute("hash-size", Integer.toString(this.hashSize));
+		io.setAttribute("hash-type", this.hashType);
 		root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");
@@ -493,16 +503,20 @@ public class VolumeConfigWriter {
 		network.setAttribute("enable", Boolean.toString(networkEnable));
 		network.setAttribute("port", Integer.toString(this.network_port));
 		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
-		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
+		network.setAttribute("upstream-enabled",
+				Boolean.toString(this.upstreamEnabled));
 		network.setAttribute("upstream-host", this.upstreamHost);
-		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
+		network.setAttribute("upstream-host-port",
+				Integer.toString(this.upstreamPort));
 		network.setAttribute("upstream-password", this.upstreamPassword);
 		cs.appendChild(network);
 		Element launchParams = xmldoc.createElement("launch-params");
 		launchParams.setAttribute("class-path", Main.classPath);
 		launchParams.setAttribute("java-path", Main.javaPath);
-		long mem = calcMem(this.chunk_store_allocation_size,this.chunk_size *1024);
-		long xmn = calcXmn(this.chunk_store_allocation_size,this.chunk_size *1024);
+		long mem = calcMem(this.chunk_store_allocation_size,
+				this.chunk_size * 1024);
+		long xmn = calcXmn(this.chunk_store_allocation_size,
+				this.chunk_size * 1024);
 		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"
 				+ mem + "m -Xmn" + xmn + "m");
 		root.appendChild(launchParams);
@@ -576,24 +590,24 @@ public class VolumeConfigWriter {
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-password")
-				.withDescription("The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\"."
-						).hasArg(true).withArgName("password")
-				.create());
+				.withDescription(
+						"The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\".")
+				.hasArg(true).withArgName("password").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-require-auth")
-				.withDescription("Require authentication to connect to the sdfscli managment interface"
-						).hasArg(false)
-				.create());
+				.withDescription(
+						"Require authentication to connect to the sdfscli managment interface")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-listen-port")
-				.withDescription("TCP/IP Listenting port for the sdfscli management interface"
-						).hasArg(true).withArgName("tcp port")
-				.create());
+				.withDescription(
+						"TCP/IP Listenting port for the sdfscli management interface")
+				.hasArg(true).withArgName("tcp port").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-listen-addr")
-				.withDescription("IP Listenting address for the sdfscli management interface. This defaults to \"localhost\""
-						).hasArg(true).withArgName("ip address or host name")
-				.create());
+				.withDescription(
+						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
+				.hasArg(true).withArgName("ip address or host name").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("base-path")
 				.withDescription(
@@ -795,13 +809,20 @@ public class VolumeConfigWriter {
 								+ "This . \n Defaults to: \n The size of the Volume")
 				.hasArg().withArgName("MB|GB|TB").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("hash-size")
+				.withLongOpt("hash-type")
 				.withDescription(
-						"This is the size in bytes of the unique hash. In version 1.0 and below this would default to 24 and for newer"
-								+ "versions this will default to 16. Set this to 24 if you would like to make the DSE backwards compatible to versions"
-								+ "below 1.0.1 ."
-								+ "This . \n Defaults to: \n 5MB").hasArg()
-				.withArgName("16 or 24 bytes").create());
+						"This is the type of hash engine used to calculate a unique hash. The valid options for hash-type are "
+								+ HashFunctionPool.TIGER_16
+								+ " "
+								+ HashFunctionPool.TIGER_24
+								+ " "
+								+ HashFunctionPool.MURMUR3_16
+								+ " This Defaults to " + HashFunctionPool.TIGER_16).hasArg()
+				.withArgName(HashFunctionPool.TIGER_16
+						+ "|"
+						+ HashFunctionPool.TIGER_24
+						+ "|"
+						+ HashFunctionPool.MURMUR3_16).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-read-cache")
 				.withDescription(
@@ -861,7 +882,8 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-udp")
 				.withDescription(
-						"Enable udp for some communication between Volume and DSE. Defaults to false").create());
+						"Enable udp for some communication between Volume and DSE. Defaults to false")
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-ip")
 				.withDescription(
@@ -875,12 +897,11 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-upstream-enabled")
 				.withDescription(
-						"Enable Upstream Dedup Storage Engine communication").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dse-upstream-host")
-				.withDescription(
-						"Host name or IPv4 Address ")
-				.hasArg().withArgName("FQDN or IPv4 Address").create());
+						"Enable Upstream Dedup Storage Engine communication")
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("dse-upstream-host")
+				.withDescription("Host name or IPv4 Address ").hasArg()
+				.withArgName("FQDN or IPv4 Address").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-upstream-host-port")
 				.withDescription(
@@ -899,25 +920,23 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-network")
 				.withDescription(
-						"Enable Network Services for Dedup Storage Enginge to serve outside hosts").create());
+						"Enable Network Services for Dedup Storage Enginge to serve outside hosts")
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-replication-master")
-				.withDescription(
-						"Enable this volume as a replication master").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("enable-replication-slave")
-				.withDescription(
-						"Enable this volume as a replication slave").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("replication-master")
-				.withDescription(
-						"The Replication master for this slave")
-						.hasArg().withArgName("FQDN or IPv4 Address").create());
+				.withDescription("Enable this volume as a replication master")
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("enable-replication-slave")
+				.withDescription("Enable this volume as a replication slave")
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("replication-master")
+				.withDescription("The Replication master for this slave")
+				.hasArg().withArgName("FQDN or IPv4 Address").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-master-password")
 				.withDescription(
 						"The Replication master sdfscli password. Defaults to \"admin\"")
-						.hasArg().withArgName("STRING").create());
+				.hasArg().withArgName("STRING").create());
 		return options;
 	}
 
@@ -955,16 +974,16 @@ public class VolumeConfigWriter {
 						options);
 	}
 
-	private static long calcMem(long dseSize,int blocksz) {
+	private static long calcMem(long dseSize, int blocksz) {
 		double mem = (dseSize / blocksz) * 25;
 		mem = (mem / 1024) / 1024;
 		double _dmem = mem / 1000;
 		_dmem = Math.ceil(_dmem);
-		long _mem = ((long) (_dmem * 1000)) + calcXmn(dseSize,blocksz);
+		long _mem = ((long) (_dmem * 1000)) + calcXmn(dseSize, blocksz);
 		return _mem;
 	}
 
-	private static long calcXmn(long dseSize,int blocksz) {
+	private static long calcXmn(long dseSize, int blocksz) {
 		double mem = (dseSize / blocksz) * 25;
 		mem = (mem / 1024) / 1024;
 		double _dmem = mem / 400;

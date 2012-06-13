@@ -14,6 +14,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.servers.HCServer;
@@ -26,7 +27,6 @@ import org.xml.sax.SAXException;
 
 public class Config {
 
-	
 	/**
 	 * parse the hubstore config file
 	 * 
@@ -58,11 +58,15 @@ public class Config {
 			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
 			Main.useUDP = Boolean.parseBoolean(network.getAttribute("use-udp"));
 			Main.enableNetworkChunkStore = true;
-			if(network.hasAttribute("upstream-enabled")) {
-				Main.upStreamDSEHostEnabled = Boolean.parseBoolean(network.getAttribute("upstream-enabled"));
-				Main.upStreamDSEHostName = network.getAttribute("upstream-host");
-				Main.upStreamDSEPort = Integer.parseInt(network.getAttribute("upstream-host-port"));
-				Main.upStreamPassword = network.getAttribute("upstream-password"); 
+			if (network.hasAttribute("upstream-enabled")) {
+				Main.upStreamDSEHostEnabled = Boolean.parseBoolean(network
+						.getAttribute("upstream-enabled"));
+				Main.upStreamDSEHostName = network
+						.getAttribute("upstream-host");
+				Main.upStreamDSEPort = Integer.parseInt(network
+						.getAttribute("upstream-host-port"));
+				Main.upStreamPassword = network
+						.getAttribute("upstream-password");
 			}
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
@@ -75,7 +79,7 @@ public class Config {
 			if (cbe.hasAttribute("chunkstore-class")) {
 				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
 			}
-			if(cbe.hasAttribute("hashdb-class"))
+			if (cbe.hasAttribute("hashdb-class"))
 				Main.hashesDBClass = cbe.getAttribute("hashdb-class");
 			if (cbe.getElementsByTagName("extended-config").getLength() > 0) {
 				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName(
@@ -91,14 +95,23 @@ public class Config {
 					.getAttribute("read-ahead-pages"));
 			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
 			if (cbe.hasAttribute("hash-size")) {
-				Main.hashLength = Short.parseShort(cbe
-						.getAttribute("hash-size"));
+				short hsz = Short.parseShort(cbe.getAttribute("hash-size"));
+				if (hsz == 16)
+					Main.hashType = HashFunctionPool.TIGER_16;
+				if (hsz == 24)
+					Main.hashType = HashFunctionPool.TIGER_24;
 				SDFSLogger.getLog().info(
-						"Setting hash size to " + Main.hashLength);
+						"Setting hash engine to " + Main.hashType);
+			}
+			if (cbe.hasAttribute("hash-type")) {
+				Main.hashType = cbe.getAttribute("hash-type");
+				SDFSLogger.getLog().info(
+						"Setting hash engine to " + Main.hashType);
 			}
 			Main.evictionAge = Integer.parseInt(cbe
 					.getAttribute("eviction-age"));
-			if (cbe.hasAttribute("chunk-store-read-cache"));
+			if (cbe.hasAttribute("chunk-store-read-cache"))
+				;
 			Main.chunkStorePageCache = Integer.parseInt(cbe
 					.getAttribute("chunk-store-read-cache"));
 			if (cbe.hasAttribute("chunk-store-dirty-timeout"))
@@ -125,7 +138,8 @@ public class Config {
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure").item(0);
+				Element azure = (Element) doc.getElementsByTagName("azure")
+						.item(0);
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
@@ -175,7 +189,7 @@ public class Config {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
 		}
-		
+
 		Main.version = version;
 		SDFSLogger.getLog().info(
 				"Parsing volume " + doc.getDocumentElement().getNodeName()
@@ -198,8 +212,16 @@ public class Config {
 		Main.writeThreads = Integer.parseInt(cache
 				.getAttribute("write-threads"));
 		if (cache.hasAttribute("hash-size")) {
-			Main.hashLength = Short.parseShort(cache.getAttribute("hash-size"));
-			SDFSLogger.getLog().info("Setting hash size to " + Main.hashLength);
+			short hsz = Short.parseShort(cache.getAttribute("hash-size"));
+			if (hsz == 16)
+				Main.hashType = HashFunctionPool.TIGER_16;
+			if (hsz == 24)
+				Main.hashType = HashFunctionPool.TIGER_24;
+			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
+		}
+		if (cache.hasAttribute("hash-type")) {
+			Main.hashType = cache.getAttribute("hash-type");
+			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 		}
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
@@ -251,8 +273,9 @@ public class Config {
 			if (localChunkStore.hasAttribute("chunkstore-class"))
 				Main.chunkStoreClass = localChunkStore
 						.getAttribute("chunkstore-class");
-			if(localChunkStore.hasAttribute("hashdb-class"))
-				Main.hashesDBClass = localChunkStore.getAttribute("hashdb-class");
+			if (localChunkStore.hasAttribute("hashdb-class"))
+				Main.hashesDBClass = localChunkStore
+						.getAttribute("hashdb-class");
 			if (localChunkStore.getElementsByTagName("extended-config")
 					.getLength() > 0) {
 				Main.chunkStoreConfig = (Element) localChunkStore
@@ -278,14 +301,20 @@ public class Config {
 				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
 						.getAttribute("enable"));
 				Main.serverHostName = networkcs.getAttribute("hostname");
-				Main.useUDP = Boolean.parseBoolean(networkcs.getAttribute("use-udp"));
+				Main.useUDP = Boolean.parseBoolean(networkcs
+						.getAttribute("use-udp"));
 				Main.serverPort = Integer.parseInt(networkcs
 						.getAttribute("port"));
-				if(networkcs.hasAttribute("upstream-enabled")) {
-					Main.upStreamDSEHostEnabled = Boolean.parseBoolean(networkcs.getAttribute("upstream-enabled"));
-					Main.upStreamDSEHostName = networkcs.getAttribute("upstream-host");
-					Main.upStreamDSEPort = Integer.parseInt(networkcs.getAttribute("upstream-host-port"));
-					Main.upStreamPassword = networkcs.getAttribute("upstream-password"); 
+				if (networkcs.hasAttribute("upstream-enabled")) {
+					Main.upStreamDSEHostEnabled = Boolean
+							.parseBoolean(networkcs
+									.getAttribute("upstream-enabled"));
+					Main.upStreamDSEHostName = networkcs
+							.getAttribute("upstream-host");
+					Main.upStreamDSEPort = Integer.parseInt(networkcs
+							.getAttribute("upstream-host-port"));
+					Main.upStreamPassword = networkcs
+							.getAttribute("upstream-password");
 				}
 			}
 			SDFSLogger.getLog().info(
@@ -307,7 +336,8 @@ public class Config {
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure").item(0);
+				Element azure = (Element) doc.getElementsByTagName("azure")
+						.item(0);
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
@@ -428,7 +458,7 @@ public class Config {
 						new HashClientPool(hcs, _server.getAttribute("name")
 								.trim(), Integer.parseInt(_server
 								.getAttribute("network-threads"))));
-				
+
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn(
 						"unable to connect to server "
@@ -442,9 +472,9 @@ public class Config {
 		NodeList chunks = _c.getElementsByTagName("chunk");
 		for (int s = 0; s < chunks.getLength(); s++) {
 			Element chunk = (Element) chunks.item(s);
-			HCServiceProxy.dseRoutes.put(chunk.getAttribute("name")
-					.trim(), HCServiceProxy.dseServers.get(chunk
-					.getAttribute("server").trim()));
+			HCServiceProxy.dseRoutes.put(chunk.getAttribute("name").trim(),
+					HCServiceProxy.dseServers.get(chunk.getAttribute("server")
+							.trim()));
 		}
 	}
 

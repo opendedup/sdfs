@@ -25,7 +25,7 @@ public class TigerHashEngine implements AbstractHashEngine {
 		return hash;
 	}
 
-	public int getHashLenth() {
+	public static int getHashLenth() {
 		// TODO Auto-generated method stub
 		return 24;
 	}

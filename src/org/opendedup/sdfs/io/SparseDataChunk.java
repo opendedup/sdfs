@@ -3,6 +3,7 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 
 public class SparseDataChunk {
@@ -11,7 +12,7 @@ public class SparseDataChunk {
 	private byte[] hash;
 	private boolean localData = false;
 	private long timeAdded = 0;
-	public static final int RAWDL = 1 + Main.hashLength + 1 + 8;
+	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
 		if (rawData.length != RAWDL)
@@ -24,7 +25,7 @@ public class SparseDataChunk {
 			doop = false;
 		else
 			doop = true;
-		hash = new byte[Main.hashLength];
+		hash = new byte[HashFunctionPool.hashLength];
 		buf.get(hash);
 		b = buf.get();
 		if (b == 0)

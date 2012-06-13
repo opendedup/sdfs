@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,8 +21,8 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
-import org.opendedup.sdfs.Main;
 import org.opendedup.util.SDFSLogger;
 
 public class FileByteArrayLongMap {
@@ -33,8 +34,8 @@ public class FileByteArrayLongMap {
 	private RandomAccessFile vRaf = null;
 	private RandomAccessFile tRaf = null;
 	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[Main.hashLength];
-	public static byte[] REMOVED = new byte[Main.hashLength];
+	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	private int iterPos = 0;
 	private boolean closed = false;
 	private BitSet claims = null;
@@ -42,8 +43,8 @@ public class FileByteArrayLongMap {
 	long bgst = 0;
 
 	static {
-		FREE = new byte[Main.hashLength];
-		REMOVED = new byte[Main.hashLength];
+		FREE = new byte[HashFunctionPool.hashLength];
+		REMOVED = new byte[HashFunctionPool.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
 	}

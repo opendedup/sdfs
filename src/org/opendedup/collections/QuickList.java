@@ -1,11 +1,13 @@
 package org.opendedup.collections;
 
 import java.util.Collection;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.opendedup.sdfs.Main;
+import org.opendedup.hashing.HashFunctionPool;
+
 
 public class QuickList<E> implements java.util.List<E> {
 
@@ -13,8 +15,8 @@ public class QuickList<E> implements java.util.List<E> {
 	private int arraySize = 0;
 	private transient E[] array;
 
-	public static byte[] FREE = new byte[Main.hashLength];
-	public static byte[] REMOVED = new byte[Main.hashLength];
+	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 
 	public QuickList(int size) {
 		this.arraySize = size;
