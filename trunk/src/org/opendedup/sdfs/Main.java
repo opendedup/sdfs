@@ -257,6 +257,12 @@ public class Main {
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
+	
+	/**
+	 * 
+	 */
+	public static double gcPFIncrement = .05;
+	
 	/**
 	 * The Volume mount point. This is used on the client.
 	 */

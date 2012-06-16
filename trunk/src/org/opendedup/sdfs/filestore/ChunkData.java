@@ -1,12 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 
 import org.bouncycastle.util.Arrays;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
@@ -39,8 +40,7 @@ public class ChunkData {
 	static {
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
-			blankHash = HashFunctions
-					.getTigerHashBytes(new byte[Main.chunkStorePageSize]);
+			blankHash = HashFunctionPool.getHashEngine().getHash(new byte[Main.chunkStorePageSize]);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,9 +1,9 @@
 package org.opendedup.sdfs.mgmt;
 
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.Main;
 
 import org.opendedup.util.FindOpenPort;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 import org.simpleframework.http.core.Container;
 import org.simpleframework.transport.connect.Connection;

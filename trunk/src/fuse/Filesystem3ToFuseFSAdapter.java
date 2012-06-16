@@ -675,18 +675,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 
 	}
 
-	private int handleErrno(int errno, Object v1, Object v2) {
-		if (errno != 0) {
-			return handleErrno(errno);
-		}
-
-		if (log != null && log.isDebugEnabled()) {
-			log.debug("  returning: " + v1 + ", " + v2);
-		}
-
-		return errno;
-
-	}
+	
 
 	private int handleException(Exception e) {
 		int errno;

@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 
 import com.ning.compress.lzf.LZFDecoder;
@@ -29,6 +27,7 @@ public class ByteArrayLongMap {
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
+	
 	private int iterPos = 0;
 
 	static {
@@ -511,68 +510,5 @@ public class ByteArrayLongMap {
 		return this.size;
 	}
 
-	public static void main(String[] args) throws Exception {
-		ByteArrayLongMap b = new ByteArrayLongMap(1000000, (short) 16);
-		long start = System.currentTimeMillis();
-		Random rnd = new Random();
-		byte[] hash = null;
-		long val = -33;
-		byte[] hash1 = null;
-		long val1 = -33;
-		for (int i = 0; i < 60000; i++) {
-			byte[] z = new byte[64];
-			rnd.nextBytes(z);
-			hash = HashFunctions.getMD5ByteHash(z);
-			val = rnd.nextLong();
-			if (i == 55379) {
-				val1 = val;
-				hash1 = hash;
-			}
-			if (val < 0)
-				val = val * -1;
-			boolean k = b.put(hash, val, (byte) 1);
-			if (k == false)
-				System.out.println("Unable to add this " + k);
-
-		}
-		long end = System.currentTimeMillis();
-		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
-		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
-				+ " ms at pos " + b.get(hash, true));
-		b.iterInit();
-		int vals = 0;
-		byte[] key = new byte[16];
-		start = System.currentTimeMillis();
-		while (key != null) {
-			key = b.nextKey();
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			vals++;
-		}
-
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-		b.iterInit();
-		key = new byte[16];
-		start = System.currentTimeMillis();
-		vals = 0;
-		while (key != null) {
-			key = b.nextClaimedKey(false);
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			vals++;
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-		b.iterInit();
-		long v = 0;
-		start = System.currentTimeMillis();
-		vals = 0;
-		while (v >= 0) {
-			v = b.nextClaimedValue(true);
-			vals++;
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-	}
+	
 }

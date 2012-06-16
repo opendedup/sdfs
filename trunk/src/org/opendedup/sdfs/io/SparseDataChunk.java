@@ -1,10 +1,10 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.sdfs.Main;
 
 public class SparseDataChunk {
 

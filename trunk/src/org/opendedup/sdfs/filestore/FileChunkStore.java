@@ -140,7 +140,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#size()
 	 */
 	public long size() {
-		return this.currentLength;
+		return this.currentLength/Main.chunkStorePageSize;
 	}
 
 	/*

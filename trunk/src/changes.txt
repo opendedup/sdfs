@@ -1,12 +1,13 @@
 Version 1.1.6
 	Fixes:
-	* None
+	* Cloud Storage increments lenght correctly now. 
 	Enhancements
 	* Refactored cloud storage options. Changed all cloud provider specific options to generic options "cloud-access-key,cloud-bucket-name,cloud-compress,cloud-secret-key"
 	* Changed CSByteArrayLongMap claimed array from byte array to bitmap
 	* Added Murmur3 hash at a an option for hashing keys
 	* Changed hash-length mkfs option to hash-type. This option has to possible values tiger16|tiger24|murmur3_128
 	* Added azure as a cloud storage provider.
+	* Added progress bar to loading, DSE Compaction, and Consistancy Check
 Version 1.1.5
 	Fixes :
 	* Replication null pointer error for files without data

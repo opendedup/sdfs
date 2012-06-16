@@ -3,7 +3,6 @@ package fuse;
 /**
  * User: peter Date: Nov 11, 2005 Time: 10:14:14 AM
  */
-@SuppressWarnings({ "OctalInteger" })
 public interface FuseFtypeConstants {
 	// file type 'mode' bits
 

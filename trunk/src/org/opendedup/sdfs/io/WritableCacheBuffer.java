@@ -2,14 +2,15 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -415,7 +416,7 @@ public class WritableCacheBuffer extends DedupChunk {
 	public int hashCode() {
 		this.lock.lock();
 		try {
-			return HashFunctions.getMurmurHashCode(buf);
+			return MurmurHash3.MurmurHash3_x64_32(buf,6442);
 		} finally {
 			this.lock.unlock();
 		}

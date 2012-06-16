@@ -27,11 +27,9 @@ public class PFullGC implements GCControllerImpl {
 			task.longMsg = "Running Garbage Collection because percentage full is " + this.calcPFull() + " and threshold is " +this.nextPFull;
 			try {
 			ManualGC.clearChunks(5);
-			if (Main.firstRun) {
-				Thread.sleep(5*60*1000);
-				Main.firstRun = false;
-				ManualGC.clearChunks(5);
-			}
+			Thread.sleep(5*60*1000);
+			Main.firstRun = false;
+			ManualGC.clearChunks(5);
 			this.prevPFull = calcPFull();
 			this.nextPFull = this.calcNxtRun();
 			SDFSLogger.getLog().info(
@@ -59,7 +57,7 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	private double calcNxtRun() {
-		double next = this.calcPFull() + .1;
+		double next = this.calcPFull() + Main.gcPFIncrement;
 		if (next >= .92)
 			next = (double) .91;
 		return next;

@@ -2,10 +2,9 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
-import org.opendedup.sdfs.Main;
+
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.SDFSLogger;
-import org.opendedup.util.XMLUtils;
 
 public class GetEvents implements XtendedCmd {
 

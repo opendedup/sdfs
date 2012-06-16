@@ -1,7 +1,6 @@
 package org.opendedup.hashing;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 /**
 * MurmurHash3 implementation in Java, based on Austin Appleby's <a href=

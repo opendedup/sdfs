@@ -1,19 +1,19 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
+
+
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -276,7 +276,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		MAzureChunkStore store = new MAzureChunkStore();
 		store.init();
 		String testTxt = "this is a test";
-		byte[] hash = HashFunctions.getTigerHashBytes(testTxt.getBytes());
+		byte[] hash = HashFunctionPool.getHashEngine().getHash(testTxt.getBytes());
 		store.deleteChunk(hash, 0, 0);
 		store.writeChunk(hash, testTxt.getBytes(), 0, 0);
 		System.out.println(new String(store.getChunk(hash, 0, 0)));

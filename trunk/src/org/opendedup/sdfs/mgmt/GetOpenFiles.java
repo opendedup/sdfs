@@ -1,14 +1,11 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
-import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
