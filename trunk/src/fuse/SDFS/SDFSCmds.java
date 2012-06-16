@@ -32,14 +32,14 @@ public class SDFSCmds {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 
-	public static final String[] cmds = { "sdfs.cmd.cleanstore",
-			"sdfs.cmd.dedupAll", "sdfs.cmd.optimize", "sdfs.cmd.snapshot",
-			"sdfs.cmd.vmdk.make", "sdfs.cmd.ids.clearstatus",
-			"sdfs.cmd.ids.status", "sdfs.cmd.file.flush", "sdfs.cmd.flush.all",
+	public static final String[] cmds = { "user.cmd.cleanstore",
+			"user.cmd.dedupAll", "user.cmd.optimize", "user.cmd.snapshot",
+			"user.cmd.vmdk.make", "user.cmd.ids.clearstatus",
+			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
 			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
 			"user.sdfs.DuplicateData", "user.sdfs.VMDK", "user.sdfs.fileGUID",
-			"user.sdfs.dfGUID", "sdfs.dedupAll", "user.dse.size",
+			"user.sdfs.dfGUID", "user.sdfs.dedupAll", "user.dse.size",
 			"user.dse.maxsize" };
 
 	public static final String[] cmdDes = { "", "", "", "", "", "", "", "", "",
@@ -167,33 +167,27 @@ public class SDFSCmds {
 			if (!f.isDirectory()) {
 				if (name.startsWith("user.sdfs")) {
 					MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-					try {
-						long val = Long.parseLong(valStr);
-
-						if (name.equalsIgnoreCase("user.sdfs.ActualBytesWritten")) {
-							mf.getIOMonitor().setActualBytesWritten(val);
-						} else if (name
-								.equalsIgnoreCase("user.sdfs.VirtualBytesWritten")) {
-							mf.getIOMonitor().setVirtualBytesWritten(val);
-						} else if (name.equalsIgnoreCase("user.sdfs.BytesRead")) {
-							mf.getIOMonitor().setBytesRead(val);
-						} else if (name
-								.equalsIgnoreCase("user.sdfs.DuplicateData")) {
-							mf.getIOMonitor().setDuplicateBlocks(val);
-						}
-					} catch (Exception e) {
-						return;
+					long val = Long.parseLong(valStr);
+					if (name.equalsIgnoreCase("user.sdfs.ActualBytesWritten")) {
+						mf.getIOMonitor().setActualBytesWritten(val);
+					} else if (name
+							.equalsIgnoreCase("user.sdfs.VirtualBytesWritten")) {
+						mf.getIOMonitor().setVirtualBytesWritten(val);
+					} else if (name.equalsIgnoreCase("user.sdfs.BytesRead")) {
+						mf.getIOMonitor().setBytesRead(val);
+					} else if (name.equalsIgnoreCase("user.sdfs.DuplicateData")) {
+						mf.getIOMonitor().setDuplicateBlocks(val);
 					}
 				}
 			}
 		} else {
 			String[] args = value.split(":");
 			String status = "no status";
-			if (command.equalsIgnoreCase("sdfs.cmd.dedupAll")) {
+			if (command.equalsIgnoreCase("user.cmd.dedupAll")) {
 				boolean dedup = Boolean.parseBoolean(args[1]);
 				status = dedup(path, dedup);
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.cleanstore")) {
+			if (command.equalsIgnoreCase("user.cmd.cleanstore")) {
 				int minutes = Integer.parseInt(args[1]);
 				status = "command completed successfully";
 				try {
@@ -205,29 +199,29 @@ public class SDFSCmds {
 					status = "command failed : " + e.getMessage();
 				}
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.optimize")) {
+			if (command.equalsIgnoreCase("user.cmd.optimize")) {
 				status = optimize(path);
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.snapshot")) {
+			if (command.equalsIgnoreCase("user.cmd.snapshot")) {
 				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
 							.initErrno(FuseException.ENOSPC);
 				status = takeSnapshot(path, args[1]);
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.vmdk.make")) {
+			if (command.equalsIgnoreCase("user.cmd.vmdk.make")) {
 				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
 							.initErrno(FuseException.ENOSPC);
 				status = this.makeVMDK(path, args[1], args[2]);
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.ids.clearstatus")) {
+			if (command.equalsIgnoreCase("user.cmd.ids.clearstatus")) {
 				cmdStatus.clear();
 				status = "all status messages cleared";
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.file.flush")) {
+			if (command.equalsIgnoreCase("user.cmd.file.flush")) {
 				status = flushFileCache(path);
 			}
-			if (command.equalsIgnoreCase("sdfs.cmd.flush.all")) {
+			if (command.equalsIgnoreCase("user.cmd.flush.all")) {
 				status = flushAllCache();
 			}
 			cmdStatus.put(args[0], status + " cmd=" + command + " " + value);
