@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.RandomGUID;
 
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 public class SDFSEvent {
 	public String type = null;

@@ -1,11 +1,13 @@
 package org.opendedup.util;
 
 import java.io.IOException;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.Random;
-import java.util.UUID;
+
+import org.opendedup.hashing.HashFunctions;
 
 /**
  * Used to generate random GUID(s) with SDFS. GUIDS are generated off of the

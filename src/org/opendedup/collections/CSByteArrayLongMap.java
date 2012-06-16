@@ -20,6 +20,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -254,12 +255,13 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					.info("##################### Loading Hash Database #####################");
 			kRaf.seek(0);
 			int count = 0;
-			System.out.print("Loading " + ChunkData.RAWDL);
+			long entries = kRaf.length() / ChunkData.RAWDL;
+			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Hashes",entries,System.out);
 			while (kFc.position() < kRaf.length()) {
 				count++;
-				if (count > 500000) {
+				if (count > 100000) {
 					count = 0;
-					System.out.print("#");
+					bar.update(kFc.position()/ChunkData.RAWDL);
 				}
 
 				byte[] raw = new byte[ChunkData.RAWDL];
@@ -286,12 +288,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						if (!corrupt) {
 							long value = cm.getcPos();
 							if (cm.ismDelete()) {
-								SDFSLogger.getLog().info("chunk is deleted");
+								SDFSLogger.getLog().debug("chunk is deleted");
 								this.addFreeSlot(cm.getcPos());
 								freeSl++;
 							} else {
 								boolean added = this.put(cm, false);
-								SDFSLogger.getLog().info("added " + StringUtils.getHexString(cm.getHash()) + " position is " + cm.getcPos());
+								SDFSLogger.getLog().debug("added " + StringUtils.getHexString(cm.getHash()) + " position is " + cm.getcPos());
 								if (added)
 									this.kSz++;
 								if (value > endPos)
@@ -303,6 +305,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 				}
 			}
+			bar.finish();
 		}
 		System.out.println();
 		HashChunkService.getChuckStore().setSize(endPos);

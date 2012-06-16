@@ -8,6 +8,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StorageUnit;
 
@@ -25,12 +26,13 @@ public class DSECompaction {
 					.println("Running Compaction on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Compaction on DSE, this may take a while");
 			SDFSEvent.mountWarnEvent("Running Compaction on DSE, this may take a while");
-			System.out.print("Compacting DSE ");
+			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",ostore.size(),System.out);
+			long currentCount = 0;
 			while (data != null) {
 				count++;
-				if (count > 500000) {
+				if (count > 100000) {
 					count = 0;
-					System.out.print("#");
+					bar.update(currentCount);
 				}
 				
 				if (map.containsKey(data.getHash())) {
@@ -40,7 +42,9 @@ public class DSECompaction {
 					records++;
 				} 
 				data = ostore.getNextChunck();
+				currentCount++;
 			}
+			bar.finish();
 			System.out.println("Finished");
 			System.out.println("Succesfully Ran Compaction for ["
 					+ records + "] records");

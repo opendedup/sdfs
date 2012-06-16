@@ -142,7 +142,8 @@ public class FuseLog implements Log {
 
 		Levels() {
 			Properties props = System.getProperties();
-			for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+			for (@SuppressWarnings("rawtypes")
+			Enumeration e = props.propertyNames(); e.hasMoreElements();) {
 				String propName = (String) e.nextElement();
 				if (propName.startsWith(LEVEL_PREFIX)) {
 					String levelKey = (propName.length() == LEVEL_PREFIX
@@ -191,6 +192,7 @@ public class FuseLog implements Log {
 			return getLevelValue(name) <= LEVEL_WARN;
 		}
 
+		@SuppressWarnings("unused")
 		public String toString(String name) {
 			return levelNames[getLevelValue(name)];
 		}

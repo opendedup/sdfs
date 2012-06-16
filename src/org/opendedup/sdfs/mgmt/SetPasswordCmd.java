@@ -3,8 +3,8 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 
 public class SetPasswordCmd implements XtendedCmd {
