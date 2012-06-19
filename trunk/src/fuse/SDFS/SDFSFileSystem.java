@@ -46,7 +46,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		SDFSLogger.getLog().info(
 				"mounting " + mountedVolume + " to " + mountPoint);
 		this.mountedVolume = mountedVolume;
+		if(!this.mountedVolume.endsWith("/"))
+			this.mountedVolume = this.mountedVolume + "/";
 		this.mountPoint = mountPoint;
+		if(!this.mountPoint.endsWith("/"))
+			this.mountPoint = this.mountPoint + "/";
 		sdfsCmds = new SDFSCmds(this.mountedVolume, this.mountPoint);
 		File f = new File(this.mountedVolume);
 		if (!f.exists())
@@ -405,6 +409,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		Path p = Paths.get(this.mountedVolume + path);
 		try {
 			String lpath = Files.readSymbolicLink(p).toString();
+			if (lpath.startsWith(this.mountedVolume))
+				lpath = this.mountPoint
+						+ lpath.substring(this.mountedVolume.length());
 			link.put(lpath);
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("error getting linking " + path, e);
@@ -436,9 +443,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int rename(String from, String to) throws FuseException {
 		try {
 			File f = null;
+			
 			try {
 				f = resolvePath(from);
-
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.renameTo(this.mountedVolume + to);
 			} catch (Exception e) {
@@ -498,12 +505,16 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int symlink(String from, String to) throws FuseException {
 
 		try {
+			if(from.startsWith(this.mountPoint))
+				from = from.substring(mountPoint.length());
+			this.resolvePath(from);
 			File dst = new File(mountedVolume + to);
+			File src = new File(mountedVolume + from);
 			if (dst.exists()) {
 				throw new FuseException().initErrno(FuseException.EPERM);
 			}
 
-			Path srcP = Paths.get(from);
+			Path srcP = Paths.get(src.getPath());
 			Path dstP = Paths.get(dst.getPath());
 			try {
 				Files.createSymbolicLink(dstP, srcP);
@@ -622,7 +633,17 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private int getFtype(File _f) throws FuseException {
 
 		if (!_f.exists()) {
+			Path p = Paths.get(_f.getPath());
+			try {
+				if (Files.isSymbolicLink(p)) {
+					return FuseFtype.TYPE_SYMLINK;
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn(e);
+			}
+			SDFSLogger.getLog().warn(_f.getPath() + " does not exist");
 			throw new FuseException().initErrno(FuseException.ENOENT);
+
 		}
 		Path p = Paths.get(_f.getPath());
 		try {
@@ -749,7 +770,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				lister.add(atters[i]);
 			}
 		} finally {
-			
+
 		}
 		return 0;
 	}

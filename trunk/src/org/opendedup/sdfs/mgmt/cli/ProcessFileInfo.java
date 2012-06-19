@@ -31,6 +31,12 @@ public class ProcessFileInfo {
 						fileEl.getAttribute("file-name"));
 				System.out.printf("sdfs path : %s\n",
 						fileEl.getAttribute("sdfs-path"));
+				if(fileEl.hasAttribute("symlink")) {
+					System.out.printf("symlink : %s\n",
+							fileEl.getAttribute("symlink"));
+					System.out.printf("symlink path: %s\n",
+							fileEl.getAttribute("symlink-path"));
+				}
 				System.out.printf("file type : %s\n",
 						fileEl.getAttribute("type"));
 				if (fileEl.getAttribute("type").equalsIgnoreCase("file")) {

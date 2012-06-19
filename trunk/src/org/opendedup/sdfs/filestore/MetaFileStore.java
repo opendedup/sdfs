@@ -91,7 +91,20 @@ public class MetaFileStore {
 
 	public static MetaDataDedupFile getMF(File f) {
 		getMFLock.lock();
+		boolean symlink = false;
+		String symlinkPath = null;
 		try {
+			Path p = Paths.get(f.getPath());
+			if (Files.isSymbolicLink(p)) {
+				try {
+					symlinkPath = f.getPath();
+					symlink = true;
+					f = Files.readSymbolicLink(p).toFile();
+				} catch (Exception e) {
+					SDFSLogger.getLog().error(
+							"unable to get symlink " + f.getPath(), e);
+				}
+			}
 			if (f.isDirectory()) {
 				return MetaDataDedupFile.getFile(f.getPath());
 			}
@@ -99,6 +112,10 @@ public class MetaFileStore {
 			if (mf == null) {
 				mf = MetaDataDedupFile.getFile(f.getPath());
 				cacheMF(mf);
+			}
+			if(symlink) {
+				mf.setSymlink(true);
+				mf.setSymlinkPath(symlinkPath);
 			}
 			return mf;
 		} finally {
@@ -193,7 +210,7 @@ public class MetaFileStore {
 							LinkOption.NOFOLLOW_LINKS).isDirectory();
 					isSymlink = Files.readAttributes(p,
 							PosixFileAttributes.class,
-							LinkOption.NOFOLLOW_LINKS).isDirectory();
+							LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
 				} else {
 					isDir = new File(path).isDirectory();
 				}
@@ -201,12 +218,14 @@ public class MetaFileStore {
 					File ps = new File(path);
 
 					File[] files = ps.listFiles();
-					
+
 					for (int i = 0; i < files.length; i++) {
-						boolean sd =removeMetaFile(files[i].getPath());
+						boolean sd = removeMetaFile(files[i].getPath());
 						files[i].delete();
-						if(!sd) {
-							SDFSLogger.getLog().warn("delete failed : unable to delete [" +files[i] + "]");
+						if (!sd) {
+							SDFSLogger.getLog().warn(
+									"delete failed : unable to delete ["
+											+ files[i] + "]");
 							return sd;
 						}
 					}

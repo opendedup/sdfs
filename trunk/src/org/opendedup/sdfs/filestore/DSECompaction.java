@@ -63,14 +63,16 @@ public class DSECompaction {
 	
 	public static synchronized void runCheck(AbstractHashesMap map,
 			FileChunkStore ostore) throws IOException {
+		SDFSLogger.infoConsoleMsg("Initiating Compaction Process");
+		SDFSLogger.infoConsoleMsg("Step 1 of 4 - Running Garbage Collection");
 		long z =ManualGC.clearChunks(1);
-		SDFSLogger.getLog().info("Running Garbage Collection");
-		System.out.println("Running Garbage Collection");
+		
 		if(z > 0)
 			throw new IOException("Unexpected result from garbage collection run. Records should not be claimed but " + z + " were");
+		SDFSLogger.infoConsoleMsg("Step 2 of 4 - Running Garbage Collection again");
 		z =ManualGC.clearChunksMills(1000);
-		SDFSLogger.getLog().info("Cleared [" + z + "] records during garbage collection");
-		System.out.println("Cleared [" + z + "] records during garbage collection");
+		SDFSLogger.infoConsoleMsg("Cleared [" + z + "] records during garbage collection");
+		SDFSLogger.infoConsoleMsg("Step 3 of 4 - Initializing Compaction");
 		map.initCompact();
 		File newStorePath = new File(ostore.f.getPath()+".new");
 		FileChunkStore nstore = new FileChunkStore(newStorePath.getPath());
@@ -83,8 +85,7 @@ public class DSECompaction {
 			throw e;
 		}
 		map.commitCompact(Main.forceCompact);
-		SDFSLogger.getLog().warn("Committing FileStore Changes");
-		System.out.println("Committing FileStore Changes");
+		SDFSLogger.infoConsoleMsg("Step 4 of 4 - Committing FileStore Changes");
 		long osz = ostore.size();
 		long nsz = nstore.size();
 		String ostorePath = ostore.f.getPath();
@@ -93,9 +94,9 @@ public class DSECompaction {
 		File f = new File(ostorePath);
 		f.delete();
 		newStorePath.renameTo(f);
-		System.out.println("Commited FileStore Changes");
+		SDFSLogger.infoConsoleMsg("Finished Compaction - Commited FileStore Changes");
 		StorageUnit unit = StorageUnit.of(osz-nsz);
-		System.out.println("Saved " + unit.format(osz-nsz));
+		SDFSLogger.infoConsoleMsg("Saved " + unit.format(osz-nsz));
 	}
 	
 	

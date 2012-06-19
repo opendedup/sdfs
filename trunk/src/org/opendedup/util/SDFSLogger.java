@@ -35,7 +35,12 @@ public class SDFSLogger {
 	public static Logger getLog() {
 		return log;
 	}
-
+	
+	public static void infoConsoleMsg(String msg) {
+		System.out.println(msg);
+		log.info(msg);
+	}
+	
 	public static Logger getBasicLog() {
 		return basicLog;
 	}

@@ -2,7 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -72,6 +71,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private int mode = -1;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
 	private boolean dedup = Main.dedupFiles;
+	private boolean symlink = false;
+	private String symlinkPath = null;
 	private String version = Main.version;
 
 	/**
@@ -242,7 +243,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.vmdk = vmdk;
 	}
 
-
 	public static MetaDataDedupFile getFile(String path) {
 		File f = new File(path);
 		MetaDataDedupFile mf = null;
@@ -289,7 +289,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private MetaDataDedupFile(String path) {
 		init(path);
 	}
-	
+
 	/**
 	 * 
 	 * @param path
@@ -364,10 +364,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath
 						+ "]Cannot overwrite existing data ");
-			else if(f.exists()) {
+			else if (f.exists()) {
 				MetaFileStore.removeMetaFile(snaptoPath);
 			}
-			
+
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
 			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath);
@@ -513,14 +513,18 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					if (DedupFileStore.fileOpen(file))
 						file.getDedupFile().copyTo(npath);
 					else {
-						File sdbdirectory = new File(Main.dedupDBStore + File.separator
-								+ file.dfGuid.substring(0, 2) + File.separator
-								+ file.dfGuid);
-						Path sdbf = new File(sdbdirectory.getPath() + File.separator
-								+ file.dfGuid + ".map").toPath();
-						Path sdbc = new File(sdbdirectory.getPath() + File.separator
-								+ file.dfGuid + ".chk").toPath();
-						File ddbdir = new File(npath + File.separator + "ddb" + File.separator + file.dfGuid.substring(0,2) + File.separator + file.dfGuid);
+						File sdbdirectory = new File(Main.dedupDBStore
+								+ File.separator + file.dfGuid.substring(0, 2)
+								+ File.separator + file.dfGuid);
+						Path sdbf = new File(sdbdirectory.getPath()
+								+ File.separator + file.dfGuid + ".map")
+								.toPath();
+						Path sdbc = new File(sdbdirectory.getPath()
+								+ File.separator + file.dfGuid + ".chk")
+								.toPath();
+						File ddbdir = new File(npath + File.separator + "ddb"
+								+ File.separator + file.dfGuid.substring(0, 2)
+								+ File.separator + file.dfGuid);
 						ddbdir.mkdirs();
 						Path ddbf = new File(ddbdir.getPath() + File.separator
 								+ file.dfGuid + ".map").toPath();
@@ -741,7 +745,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean renameTo(String dest) {
 		File f = new File(this.path);
-		if (f.isDirectory()) {
+		if (this.symlink) {
+			f = new File(this.symlinkPath);
+			f.delete();
+			Path dstP = Paths.get(dest);
+			Path srcP = Paths.get(this.path);
+			try {
+				Files.createSymbolicLink(dstP, srcP);
+				return true;
+			} catch (IOException e) {
+				SDFSLogger.getLog().warn("unable to rename file to " + dest, e);
+				return false;
+			}
+		} else if (f.isDirectory()) {
 			return f.renameTo(new File(dest));
 		} else {
 			boolean rename = f.renameTo(new File(dest));
@@ -750,7 +766,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				this.path = dest;
 				this.unmarshal();
 			} else {
-				SDFSLogger.getLog().info("unable to move file");
+				SDFSLogger.getLog().warn("unable to move file");
 			}
 			return rename;
 		}
@@ -1057,6 +1073,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("dedup-map-guid", this.getDfGuid());
 			root.setAttribute("dedup", Boolean.toString(this.isDedup()));
 			root.setAttribute("vmdk", Boolean.toString(this.isVmdk()));
+			if (symlink) {
+				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
+				root.setAttribute("symlink-path", this.getSymlinkPath());
+			}
+
 			Element monEl = this.getIOMonitor().toXML(doc);
 			root.appendChild(monEl);
 		}
@@ -1074,8 +1095,28 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					Long.toString(attrs.creationTime().toMillis()));
 			root.setAttribute("hidden", Boolean.toString(f.isHidden()));
 			root.setAttribute("size", Long.toString(attrs.size()));
+			if (symlink) {
+				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
+				root.setAttribute("symlink-source", this.getSymlinkPath());
+			}
 		}
 
 		return root;
+	}
+
+	public boolean isSymlink() {
+		return symlink;
+	}
+
+	public void setSymlink(boolean symlink) {
+		this.symlink = symlink;
+	}
+
+	public String getSymlinkPath() {
+		return symlinkPath;
+	}
+
+	public void setSymlinkPath(String symlinkPath) {
+		this.symlinkPath = symlinkPath;
 	}
 }
