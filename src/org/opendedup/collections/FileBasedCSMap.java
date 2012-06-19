@@ -49,10 +49,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
 		
-		if (Main.compressedIndex)
-			maps = new FileByteArrayLongMap[65535];
-		else
-			maps = new FileByteArrayLongMap[256];
+		maps = new FileByteArrayLongMap[256];
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;
@@ -75,7 +72,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		} else {
 			hashb = hash[2];
 			if (hashb < 0) {
-				hashb = ((hashb * -1));
+				hashb = ((hashb * -1) -1);
 			}
 
 		}
@@ -172,7 +169,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			if(mep > endPos)
 				endPos = mep;
 			maps[i] = m;
-			System.out.print("#");
 			rsz = rsz + m.size();
 		}
 		System.out.println("");
