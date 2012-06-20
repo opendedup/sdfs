@@ -506,6 +506,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 		try {
 			File src = null;
+			SDFSLogger.getLog().info("symlink " + from + " to " + to);
 			if(from.startsWith(this.mountPoint)) {
 				from = from.substring(mountPoint.length());
 				this.resolvePath(from);
@@ -514,11 +515,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				src = new File(from);
 			}
 			File dst = new File(mountedVolume + to);
-			
 			if (dst.exists()) {
 				throw new FuseException().initErrno(FuseException.EPERM);
 			}
-
 			Path srcP = Paths.get(src.getPath());
 			Path dstP = Paths.get(dst.getPath());
 			try {

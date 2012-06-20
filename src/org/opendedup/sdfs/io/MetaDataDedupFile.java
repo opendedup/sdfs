@@ -253,11 +253,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			mf.symlink = true;
 			try {
 				mf.symlinkPath = Files.readSymbolicLink(p).toFile().getPath();
+				if(new File(mf.symlinkPath).isDirectory())
+					mf.directory = true;
 			} catch (IOException e) {
 				SDFSLogger.getLog().warn(e);
 			}
 		}
-		if (!f.exists() || f.isDirectory()) {
+		else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 		} else {
 			ObjectInputStream in = null;
@@ -1108,7 +1110,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("size", Long.toString(attrs.size()));
 			if (symlink) {
 				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
-				root.setAttribute("symlink-source", this.getSymlinkPath());
+				root.setAttribute("symlink-path", this.getSymlinkPath());
 			}
 		}
 
