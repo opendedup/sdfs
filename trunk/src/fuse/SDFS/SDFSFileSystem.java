@@ -511,7 +511,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				from = from.substring(mountPoint.length());
 				this.resolvePath(from);
 				src = new File(mountedVolume + from);
-			} else {
+			} else if(!Main.allowExternalSymlinks) {
+				SDFSLogger.getLog().error(
+						"external symlinks are not allowed " + from + " to " + to);
+				throw new FuseException().initErrno(FuseException.EACCES);
+			}
+			else {
 				src = new File(from);
 			}
 			File dst = new File(mountedVolume + to);
