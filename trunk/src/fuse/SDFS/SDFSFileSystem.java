@@ -505,11 +505,16 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int symlink(String from, String to) throws FuseException {
 
 		try {
-			if(from.startsWith(this.mountPoint))
+			File src = null;
+			if(from.startsWith(this.mountPoint)) {
 				from = from.substring(mountPoint.length());
-			this.resolvePath(from);
+				this.resolvePath(from);
+				src = new File(mountedVolume + from);
+			} else {
+				src = new File(from);
+			}
 			File dst = new File(mountedVolume + to);
-			File src = new File(mountedVolume + from);
+			
 			if (dst.exists()) {
 				throw new FuseException().initErrno(FuseException.EPERM);
 			}
