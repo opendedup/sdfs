@@ -1,6 +1,6 @@
 Version 1.1.6
 	Fixes:
-	* Cloud Storage increments lenght correctly now. 
+	* Cloud Storage increments length correctly now. 
 	* Fixed Symlink issues
 	Enhancements
 	* Refactored cloud storage options. Changed all cloud provider specific options to generic options "cloud-access-key,cloud-bucket-name,cloud-compress,cloud-secret-key"
