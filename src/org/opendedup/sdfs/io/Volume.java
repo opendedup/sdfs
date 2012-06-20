@@ -50,7 +50,16 @@ public class Volume implements java.io.Serializable {
 	private boolean closedGracefully = false;
 	private long readOperations;
 	private long writeOperations;
+	private boolean allowExternalSymlinks = true;
 	
+
+	public boolean isAllowExternalSymlinks() {
+		return allowExternalSymlinks;
+	}
+
+	public void setAllowExternalSymlinks(boolean allowExternalSymlinks) {
+		this.allowExternalSymlinks = allowExternalSymlinks;
+	}
 
 	public String getName() {
 		return name;
@@ -88,6 +97,9 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("closed-gracefully"))
 			Main.closedGracefully = Boolean.parseBoolean(vol
 					.getAttribute("closed-gracefully"));
+		if (vol.hasAttribute("allow-external-links"))
+			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
+					.getAttribute("allow-external-links"));
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -201,6 +213,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
+		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		return root;
 	}
 
@@ -224,6 +237,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("writeops", Long.toString(this.writeOperations));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
+		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		return doc;
 	}
 

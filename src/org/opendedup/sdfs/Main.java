@@ -32,6 +32,7 @@ public class Main {
 	public static String sdfsCliPassword = "";
 	
 	public static String sdfsCliSalt = "";
+	public static boolean allowExternalSymlinks = true;
 	
 	public static boolean sdfsCliRequireAuth = false;
 	public static int sdfsCliPort = 6442;

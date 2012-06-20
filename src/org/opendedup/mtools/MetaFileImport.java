@@ -48,52 +48,56 @@ public class MetaFileImport {
 
 	private void checkDedupFile(File metaFile) throws IOException {
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
-		String dfGuid = mf.getDfGuid();
-		File mapFile = new File(Main.dedupDBStore + File.separator
-				+ dfGuid.substring(0, 2) + File.separator + dfGuid
-				+ File.separator + dfGuid + ".map");
-		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
-		try {
-			byte[] val = new byte[0];
-			mp.iterInit();
-			boolean corruption = false;
-			long corruptBlocks = 0;
-			while (val != null) {
-				val = mp.nextValue();
-				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val);
-					if (!ck.isLocalData()) {
-						boolean exists = HCServiceProxy
-								.hashExists(ck.getHash());
-						if (!exists) {
-							SDFSLogger.getLog().debug(
-									"file ["
-											+ mapFile
-											+ "] could not find "
-											+ StringUtils.getHexString(ck
-													.getHash()));
-							corruption = true;
-							corruptBlocks++;
+		if (!mf.isSymlink()) {
+			String dfGuid = mf.getDfGuid();
+			File mapFile = new File(Main.dedupDBStore + File.separator
+					+ dfGuid.substring(0, 2) + File.separator + dfGuid
+					+ File.separator + dfGuid + ".map");
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
+			try {
+				byte[] val = new byte[0];
+				mp.iterInit();
+				boolean corruption = false;
+				long corruptBlocks = 0;
+				while (val != null) {
+					val = mp.nextValue();
+					if (val != null) {
+						SparseDataChunk ck = new SparseDataChunk(val);
+						if (!ck.isLocalData()) {
+							boolean exists = HCServiceProxy.hashExists(ck
+									.getHash());
+							if (!exists) {
+								SDFSLogger.getLog().debug(
+										"file ["
+												+ mapFile
+												+ "] could not find "
+												+ StringUtils.getHexString(ck
+														.getHash()));
+								corruption = true;
+								corruptBlocks++;
+							}
 						}
 					}
 				}
+				if (corruption) {
+					if (this.corruptFiles.size() > 1000)
+						throw new IOException(
+								"Unable to continue MetaFile Import because there are too many missing blocks");
+					this.corruptFiles.add(mf);
+					SDFSLogger.getLog()
+							.info("map file " + mapFile.getPath()
+									+ " is suspect, [" + corruptBlocks
+									+ "] missing blocks found.");
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog()
+						.warn("error while checking file [" + mapFile.getPath()
+								+ "]", e);
+				throw new IOException(e);
+			} finally {
+				mp.close();
+				mp = null;
 			}
-			if (corruption) {
-				if (this.corruptFiles.size() > 1000)
-					throw new IOException(
-							"Unable to continue MetaFile Import because there are too many missing blocks");
-				this.corruptFiles.add(mf);
-				SDFSLogger.getLog().info(
-						"map file " + mapFile.getPath() + " is suspect, ["
-								+ corruptBlocks + "] missing blocks found.");
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn(
-					"error while checking file [" + mapFile.getPath() + "]", e);
-			throw new IOException(e);
-		} finally {
-			mp.close();
-			mp = null;
 		}
 		this.files++;
 	}
