@@ -246,6 +246,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public static MetaDataDedupFile getFile(String path) {
 		File f = new File(path);
 		MetaDataDedupFile mf = null;
+		Path p = Paths.get(path);
+		if(Files.isSymbolicLink(p)) {
+			mf = new MetaDataDedupFile();
+			mf.path = path;
+			mf.symlink = true;
+			try {
+				mf.symlinkPath = Files.readSymbolicLink(p).toFile().getPath();
+			} catch (IOException e) {
+				SDFSLogger.getLog().warn(e);
+			}
+		}
 		if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 		} else {

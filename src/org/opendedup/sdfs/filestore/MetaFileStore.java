@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -91,32 +92,19 @@ public class MetaFileStore {
 
 	public static MetaDataDedupFile getMF(File f) {
 		getMFLock.lock();
-		boolean symlink = false;
-		String symlinkPath = null;
 		try {
-			Path p = Paths.get(f.getPath());
-			if (Files.isSymbolicLink(p)) {
-				try {
-					symlinkPath = f.getPath();
-					symlink = true;
-					f = Files.readSymbolicLink(p).toFile();
-				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"unable to get symlink " + f.getPath(), e);
-				}
-			}
+
 			if (f.isDirectory()) {
 				return MetaDataDedupFile.getFile(f.getPath());
 			}
-			MetaDataDedupFile mf = (MetaDataDedupFile) pathMap.get(f.getPath());
+			MetaDataDedupFile mf = null;
+
+			mf = (MetaDataDedupFile) pathMap.get(f.getPath());
 			if (mf == null) {
 				mf = MetaDataDedupFile.getFile(f.getPath());
 				cacheMF(mf);
 			}
-			if(symlink) {
-				mf.setSymlink(true);
-				mf.setSymlinkPath(symlinkPath);
-			}
+
 			return mf;
 		} finally {
 			getMFLock.unlock();
@@ -154,14 +142,36 @@ public class MetaFileStore {
 	 */
 	public static MetaDataDedupFile snapshot(String origionalPath,
 			String snapPath, boolean overwrite) throws IOException {
-		MetaDataDedupFile mf = getMF(new File(origionalPath));
-		if (mf == null)
-			throw new IOException(
-					origionalPath
-							+ " does not exist. Cannot take a snapshot of a non-existent file.");
-		synchronized (mf) {
-			MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
-			return _mf;
+		Path p = Paths.get(origionalPath);
+		if (Files.isSymbolicLink(p)) {
+			MetaDataDedupFile mf = getMF(new File(origionalPath));
+			File dst = new File(snapPath);
+			File src = new File(mf.getPath());
+			if (dst.exists() && !overwrite) {
+				throw new IOException(snapPath + " already exists");
+			}
+			Path srcP = Paths.get(src.getPath());
+			Path dstP = Paths.get(dst.getPath());
+			try {
+				Files.createSymbolicLink(dstP, srcP);
+			} catch (IOException e) {
+				SDFSLogger.getLog()
+						.error("error symlinking " + origionalPath + " to "
+								+ snapPath, e);
+			}
+
+			return mf;
+		} else {
+
+			MetaDataDedupFile mf = getMF(new File(origionalPath));
+			if (mf == null)
+				throw new IOException(
+						origionalPath
+								+ " does not exist. Cannot take a snapshot of a non-existent file.");
+			synchronized (mf) {
+				MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
+				return _mf;
+			}
 		}
 	}
 
