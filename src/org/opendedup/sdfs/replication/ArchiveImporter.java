@@ -60,19 +60,24 @@ public class ArchiveImporter {
 	}
 
 	public static void rollBackImport(String path) {
-		MetaDataDedupFile mf = MetaFileStore.getMF(path);
-		if (mf.isDirectory()) {
-			String[] files = mf.list();
-			for (int i = 0; i < files.length; i++) {
-				MetaDataDedupFile _mf = MetaFileStore.getMF(files[i]);
-				if (_mf.isDirectory())
-					rollBackImport(_mf.getPath());
-				else {
-					MetaFileStore.removeMetaFile(_mf.getPath());
+		try {
+			MetaDataDedupFile mf = MetaFileStore.getMF(path);
+			if (mf.isDirectory()) {
+				String[] files = mf.list();
+				for (int i = 0; i < files.length; i++) {
+					MetaDataDedupFile _mf = MetaFileStore.getMF(files[i]);
+					if (_mf.isDirectory())
+						rollBackImport(_mf.getPath());
+					else {
+						MetaFileStore.removeMetaFile(_mf.getPath());
+					}
 				}
 			}
+			MetaFileStore.removeMetaFile(mf.getPath());
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn(
+					"unable to remove " + path + " during rollback ");
 		}
-		MetaFileStore.removeMetaFile(mf.getPath());
 	}
 
 	public static void commitImport(String dest, String sdest)

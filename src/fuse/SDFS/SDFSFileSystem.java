@@ -205,24 +205,21 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				Path p = null;
 				try {
 					p = Paths.get(f.getPath());
-					if (f.isDirectory()) {
+					if (ftype == FuseFtype.TYPE_DIR) {
 						int uid = (Integer) Files.getAttribute(p, "unix:uid");
 						int gid = (Integer) Files.getAttribute(p, "unix:gid");
 						int mode = (Integer) Files.getAttribute(p, "unix:mode");
-						MetaDataDedupFile mf = MetaFileStore.getMF(f);
+						MetaDataDedupFile mf = MetaFileStore.getFolder(f);
 						int atime = (int) (mf.getLastAccessed() / 1000L);
 						int mtime = (int) (mf.lastModified() / 1000L);
 						int ctime = (int) (mf.getTimeStamp() / 1000L);
 
-						int fileLength = 0;
-						if (f.list() != null)
-							fileLength = f.list().length;
+						long fileLength = f.length();
 						getattrSetter.set(mf.getGUID().hashCode(), mode, 1,
 								uid, gid, 0, fileLength * NAME_LENGTH,
 								(fileLength * NAME_LENGTH + BLOCK_SIZE - 1)
 										/ BLOCK_SIZE, atime, mtime, ctime);
 					} else {
-						p = Paths.get(f.getPath());
 						MetaDataDedupFile mf = MetaFileStore.getMF(f);
 						int uid = mf.getOwner_id();
 						int gid = mf.getGroup_id();
