@@ -2,15 +2,18 @@ Version 1.1.6
 	Fixes:
 	* Cloud Storage increments length correctly now. 
 	* Fixed Symlink issues
+	* Was exiting on NullPointerException for replication rollback
 	Enhancements
 	* Refactored cloud storage options. Changed all cloud provider specific options to generic options "cloud-access-key,cloud-bucket-name,cloud-compress,cloud-secret-key"
 	* Changed CSByteArrayLongMap claimed array from byte array to bitmap
 	* Added Murmur3 hash at a an option for hashing keys
-	* Changed hash-length mkfs option to hash-type. This option has to possible values tiger16|tiger24|murmur3_128
+	* Changed hash-length mkfs option to hash-type. This option has to possible values tiger16|tiger24|murmur3_128. Murmur has is a newer hashing computation that can 
+	improve IO performance by as much as 40%.You cannot change the hash on an existing volume.
 	* Added azure as a cloud storage provider.
 	* Added progress bar to loading, DSE Compaction, and Consistancy Check
 	* Added attribute to volume tag within xml configuration "allow-external-links" that allows/disallows symlinks from external filesystems. By default this is set 
 	to true.
+	* Improved getattr performance. Removed file.list for folder size and redundant lookups if it is a folder/file
 Version 1.1.5
 	Fixes :
 	* Replication null pointer error for files without data

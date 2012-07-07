@@ -110,6 +110,15 @@ public class MetaFileStore {
 			getMFLock.unlock();
 		}
 	}
+	
+	public static MetaDataDedupFile getFolder(File f) {
+		getMFLock.lock();
+		try {
+				return MetaDataDedupFile.getFile(f.getPath());
+		}finally {
+			getMFLock.unlock();
+		}
+	}
 
 	public static MetaDataDedupFile getMF(String filePath) {
 		return getMF(new File(filePath));
