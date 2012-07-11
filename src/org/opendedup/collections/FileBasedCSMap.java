@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.AbstractMap;
 import org.opendedup.collections.HashtableFullException;
@@ -23,6 +24,7 @@ import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -33,6 +35,8 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private final ReentrantLock arlock = new ReentrantLock();
 	private final ReentrantLock iolock = new ReentrantLock();
 	private String fileName;
+	private String origFileName;
+	long compactKsz = 0;
 	private FileByteArrayLongMap[] maps = null;
 	// private boolean removingChunks = false;
 	// private static int freeSlotsLength = 3000000;
@@ -45,10 +49,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private BitSet freeSlots = null;
 	private byte[] FREE = new byte[HashFunctionPool.hashLength];
 	private boolean firstGCRun = true;
+	private SyncThread st = null;
 
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		
+
 		maps = new FileByteArrayLongMap[256];
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
@@ -59,22 +64,14 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException(e);
 		}
 		this.closed = false;
-		new SyncThread(this);
+		st = new SyncThread(this);
 	}
 
 	public FileByteArrayLongMap getMap(byte[] hash) throws IOException {
-		int hashb = 0;
-		if (Main.compressedIndex) {
-			hashb = ByteBuffer.wrap(hash).getShort(hash.length - 2);
-			if (hashb < 0) {
-				hashb = ((hashb * -1) + 32766);
-			}
-		} else {
-			hashb = hash[2];
-			if (hashb < 0) {
-				hashb = ((hashb * -1) -1);
-			}
 
+		int hashb = hash[2];
+		if (hashb < 0) {
+			hashb = ((hashb * -1) - 1);
 		}
 		int hashRoute = hashb;
 
@@ -138,7 +135,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		long endPos = 0;
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		File bsf = new File(this.fileName + "freebit.map");
-		if(!bsf.exists()) {
+		if (!bsf.exists()) {
 			SDFSLogger.getLog().debug("Looks like a new HashStore");
 			this.freeSlots = new BitSet();
 		} else {
@@ -146,17 +143,20 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			try {
 				FileInputStream fin = new FileInputStream(bsf);
 				ObjectInputStream oon = new ObjectInputStream(fin);
-				this.freeSlots = (BitSet)oon.readObject();
+				this.freeSlots = (BitSet) oon.readObject();
 				oon.close();
 				fin.close();
 				bsf.delete();
-			}catch(Exception e) {
-				SDFSLogger.getLog().error("Unable to load bitset from " + bsf.getPath(),e);
+			} catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"Unable to load bitset from " + bsf.getPath(), e);
 			}
-			SDFSLogger.getLog().info("Loaded [" + this.freeSlots.cardinality() + "] free slots");
+			SDFSLogger.getLog().info(
+					"Loaded [" + this.freeSlots.cardinality() + "] free slots");
 		}
 		System.out.println("Loading Hashtable Entries");
 		long rsz = 0;
+		CommandLineProgressBar bar = new CommandLineProgressBar("Loading Hashes",this.maps.length,System.out);
 		for (int i = 0; i < this.maps.length; i++) {
 			int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 			// SDFSLogger.getLog().debug("will create byte array of size "
@@ -164,18 +164,20 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			ram = ram + (sz * (HashFunctionPool.hashLength + 8));
 			String fp = this.fileName + "-" + i;
 			FileByteArrayLongMap m = new FileByteArrayLongMap(fp, sz,
-					(short)HashFunctionPool.hashLength);
+					(short) HashFunctionPool.hashLength);
 			long mep = m.setUp();
-			if(mep > endPos)
+			if (mep > endPos)
 				endPos = mep;
 			maps[i] = m;
 			rsz = rsz + m.size();
+			bar.update(i);
 		}
-		System.out.println("");
-		System.out.println(" Loaded " + rsz);
+		bar.finish();
+		System.out.println("Loaded entries " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);
-		System.out.println();
-		HashChunkService.getChuckStore().setSize(endPos + HashFunctionPool.hashLength);
+		HashChunkService.getChuckStore().setSize(
+				endPos + HashFunctionPool.hashLength);
+		this.closed = false;
 		return size;
 	}
 
@@ -218,7 +220,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				if (maps[i] != null) {
 					maps[i].iterInit();
 					long fPos = maps[i].removeNextOldRecord(time);
-					while (fPos >= 0) {
+					while (fPos != -1) {
 						this.addFreeSlot(fPos);
 						rem++;
 						fPos = maps[i].removeNextOldRecord(time);
@@ -310,12 +312,30 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return added;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.opendedup.collections.AbstractHashesMap#update(org.opendedup.sdfs
+	 * .filestore.ChunkData)
+	 */
+	@Override
 	public boolean update(ChunkData cm) throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.fileName + "] is close");
-		}
-		return false;
+			this.arlock.lock();
+			try {
+				boolean added = false;
+				if(this.containsKey(cm.getHash())) {
+					cm.persistData(true);
+					added = this.getMap(cm.getHash()).update(cm.getHash(), cm.getcPos());
+				}	
+				if(added) {	
+					this.compactKsz++;
+				}
+				return added;
+			} finally {
+				this.arlock.unlock();
 
+			}
 	}
 
 	public long get(byte[] key) throws IOException {
@@ -323,7 +343,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		return this.getMap(key).get(key);
-
 	}
 
 	public byte[] getData(byte[] key) throws IOException {
@@ -386,9 +405,9 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			}
 			for (int i = 0; i < this.maps.length; i++) {
 				try {
-				this.maps[i].sync();
-				}catch(	IOException e) {
-					SDFSLogger.getLog().warn("Unable to sync table " + i,e);
+					this.maps[i].sync();
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn("Unable to sync table " + i, e);
 				}
 			}
 			// this.flushBuffer(true);
@@ -401,23 +420,34 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	public void close() {
 		this.arlock.lock();
 		this.iolock.lock();
+		this.syncLock.lock();
 		this.closed = true;
+		try {
+			st.close();
+		} catch (Exception e) {
+		}
 		for (int i = 0; i < this.maps.length; i++) {
 			this.maps[i].close();
+			this.maps[i] = null;
 		}
 		try {
 			File outFile = new File(this.fileName + "freebit.map");
-		    FileOutputStream fos = new FileOutputStream(outFile);
-		    ObjectOutputStream oos = new ObjectOutputStream(fos);
-		    oos.writeObject(this.freeSlots);
-		    oos.flush();
-		    fos.flush();
-		    fos.close();
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("unable to serialize free bits bitmap " + this.fileName + "freebit.map",e );
+			FileOutputStream fos = new FileOutputStream(outFile);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(this.freeSlots);
+			oos.flush();
+			oos.close();
+			fos.flush();
+			fos.close();
+			this.freeSlots.clear();
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"unable to serialize free bits bitmap " + this.fileName
+							+ "freebit.map", e);
 		}
 		this.arlock.unlock();
 		this.iolock.unlock();
+		this.syncLock.unlock();
 		SDFSLogger.getLog().info("Hashtable [" + this.fileName + "] closed");
 	}
 
@@ -465,20 +495,44 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public void initCompact() {
-		// TODO Auto-generated method stub
+	public void initCompact() throws IOException {
+		this.close();
+		this.origFileName = fileName;
+		String parent = new File(this.fileName).getParentFile().getPath();
+		String fname = new File(this.fileName).getName();
+		this.fileName = parent + ".compact" + File.separator + fname;
+		File f = new File(this.fileName).getParentFile();
+		if (f.exists()) {
+			FileUtils.deleteDirectory(f);
+		}
+		FileUtils
+				.copyDirectory(new File(parent), new File(parent + ".compact"));
 		
+		try {
+			this.init(maxSz, this.fileName);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+
 	}
 
 	@Override
-	public void commitCompact(boolean force) {
-		// TODO Auto-generated method stub
+	public void commitCompact(boolean force) throws IOException {
+		this.freeSlots.clear();
+		this.close();
+		FileUtils.deleteDirectory(new File(this.origFileName).getParentFile());
+		SDFSLogger.getLog().info("Deleted " + new File(this.origFileName).getParent());
+		new File(this.fileName).getParentFile().renameTo(new File(this.origFileName).getParentFile());
+		SDFSLogger.getLog().info("moved " + new File(this.fileName).getParent() + " to " + new File(this.origFileName).getParent());
+		FileUtils.deleteDirectory(new File(this.fileName).getParentFile());
+		SDFSLogger.getLog().info("deleted " + new File(this.fileName).getParent());
 		
+
 	}
 
 	@Override
 	public void rollbackCompact() throws IOException {
-		// TODO Auto-generated method stub
-		
+		FileUtils.deleteDirectory(new File(this.fileName));
+
 	}
 }

@@ -28,7 +28,6 @@ import org.opendedup.util.SDFSLogger;
 public class FileByteArrayLongMap {
 	MappedByteBuffer keys = null;
 	private int size = 0;
-	private int entries = 0;
 	private String path = null;
 	private FileChannel kFC = null;
 	private RandomAccessFile vRaf = null;
@@ -70,6 +69,7 @@ public class FileByteArrayLongMap {
 			keys.get(key);
 			iterPos++;
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+				this.mapped.set(iterPos);
 				return key;
 			}
 		}
@@ -111,8 +111,9 @@ public class FileByteArrayLongMap {
 				if (val >= 0) {
 					boolean claimed = claims.get(iterPos);
 					if (clearClaim) {
+						this.mapped.set(iterPos);
 						claims.clear(iterPos);
-						this.tRaf.seek(iterPos*8);
+						this.tRaf.seek(iterPos * 8);
 						this.tRaf.writeLong(System.currentTimeMillis());
 					}
 					if (claimed)
@@ -125,6 +126,14 @@ public class FileByteArrayLongMap {
 			}
 		}
 		return -1;
+	}
+	
+	private void recreateMap() {
+		this.mapped.clear();
+		this.iterInit();
+		byte [] key = this.nextKey();
+		while(key !=null)
+			this.nextKey();
 	}
 
 	public long getBigestKey() throws IOException {
@@ -167,19 +176,6 @@ public class FileByteArrayLongMap {
 		RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 		_bpos.setLength(8);
 		bgst = _bpos.readLong();
-		if (bgst < 0) {
-			SDFSLogger.getLog()
-					.info("Hashtable " + path
-							+ " did not close correctly. scanning ");
-			bgst = this.getBigestKey();
-		}
-
-		_bpos.seek(0);
-		_bpos.writeLong(-1);
-		_bpos.close();
-		keys = kFC.map(MapMode.READ_WRITE, 0, size * FREE.length);
-		keys.load();
-		claims = new BitSet(size);
 		if (newInstance) {
 			mapped = new BitSet(size);
 		} else {
@@ -193,8 +189,26 @@ public class FileByteArrayLongMap {
 			}
 			f.delete();
 		}
+		if (bgst < 0) {
+			SDFSLogger.getLog()
+					.info("Hashtable " + path
+							+ " did not close correctly. scanning ");
+			bgst = this.getBigestKey();
+			this.recreateMap();
+		}
+
+		_bpos.seek(0);
+		_bpos.writeLong(-1);
+		_bpos.close();
+		keys = kFC.map(MapMode.READ_WRITE, 0, size * FREE.length);
+		keys.load();
+		claims = new BitSet(size);
+		claims.clear();
+		
 		return bgst;
 	}
+
+	
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -254,7 +268,7 @@ public class FileByteArrayLongMap {
 			if (pos == -1) {
 				return false;
 			} else {
-				keys.position(pos);
+				// keys.position(pos);
 				if (value > bgst)
 					bgst = value;
 				pos = (pos / FREE.length) * 8;
@@ -262,6 +276,7 @@ public class FileByteArrayLongMap {
 				this.vRaf.writeLong(value);
 				pos = (pos / 8);
 				this.claims.set(pos);
+				this.mapped.set(pos);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 				return true;
@@ -302,7 +317,6 @@ public class FileByteArrayLongMap {
 				this.mapped.clear(pos);
 				// this.store.position(pos);
 				// this.store.put((byte)0);
-				this.entries = entries - 1;
 				return true;
 			}
 		} catch (Exception e) {
@@ -321,20 +335,20 @@ public class FileByteArrayLongMap {
 		int result = hash + 1;
 		return result;
 	}
-
+	
 	/**
-	 * Locates the index of <tt>obj</tt>.
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
-	 */
-	protected int index(byte[] key) {
-		ByteBuffer buf = ByteBuffer.wrap(key);
+     * Locates the index of <tt>obj</tt>.
+     *
+     * @param obj an <code>Object</code> value
+     * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
+     */
+    protected int index(byte[] key) {
+
+        // From here on we know obj to be non-null
+    	ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -347,48 +361,51 @@ public class FileByteArrayLongMap {
 			return -1;
 		}
 
-		// NOTE: here it has to be REMOVED or FULL (some user-given value)
-		if (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)) {
-			// see Knuth, p. 529
-			final int probe = (1 + (hash % (size - 2))) * FREE.length;
-			int z = 0;
-			do {
-				z++;
-				index += (probe); // add the step
-				index %= (size * FREE.length); // for wraparound
-				cur = new byte[FREE.length];
-				keys.position(index);
-				keys.get(cur);
-				if (z > size) {
-					SDFSLogger.getLog().info(
-							"entries exhaused size=" + this.size + " entries="
-									+ this.entries);
-					return -1;
-				}
-			} while (!Arrays.equals(cur, FREE)
-					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
-		}
+        return indexRehashed(key, index, hash, cur);
+    }
 
-		return Arrays.equals(cur, FREE) ? -1 : index;
-	}
+    /**
+     * Locates the index of non-null <tt>obj</tt>.
+     *
+     * @param obj   target key, know to be non-null
+     * @param index we start from
+     * @param hash
+     * @param cur
+     * @return
+     */
+    private int indexRehashed(byte [] key, int index, int hash, byte [] cur) {
 
-	/**
-	 * Locates the index at which <tt>obj</tt> can be inserted. if there is
-	 * already a value equal()ing <tt>obj</tt> in the set, returns that value's
-	 * index as <tt>-index - 1</tt>.
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return the index of a FREE slot at which obj can be inserted or, if obj
-	 *         is already stored in the hash, the negative value of that index,
-	 *         minus 1: -index -1.
-	 */
-	protected int insertionIndex(byte[] key) {
-		ByteBuffer buf = ByteBuffer.wrap(key);
+        // NOTE: here it has to be REMOVED or FULL (some user-given value)
+        // see Knuth, p. 529
+    	int length = size * FREE.length;
+    	int probe = (1 + (hash % (size - 2))) * FREE.length;
+
+        final int loopIndex = index;
+
+        do {
+            index -= probe;
+            if (index < 0) {
+                index += length;
+            }
+            keys.position(index);
+			keys.get(cur);
+            //
+			if (Arrays.equals(cur, FREE)) {
+                return -1;
+			}
+            //
+            if (Arrays.equals(cur, key))
+                return index;
+        } while (index != loopIndex);
+
+        return -1;
+    }
+    
+    protected int insertionIndex(byte [] key) {
+    	ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
-		int hash = buf.getInt() & 0x7fffffff;
+    	int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -397,63 +414,72 @@ public class FileByteArrayLongMap {
 			return index; // empty, all done
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
-		} else { // already FULL or REMOVED, must probe
-			// compute the double hash
-			final int probe = (1 + (hash % (size - 2))) * FREE.length;
+		} 
+        return insertKeyRehash(key, index, hash, cur);
+    }
 
-			// if the slot we landed on is FULL (but not removed), probe
-			// until we find an empty slot, a REMOVED slot, or an element
-			// equal to the one we are trying to insert.
-			// finding an empty slot means that the value is not present
-			// and that we should use that slot as the insertion point;
-			// finding a REMOVED slot means that we need to keep searching,
-			// however we want to remember the offset of that REMOVED slot
-			// so we can reuse it in case a "new" insertion (i.e. not an update)
-			// is possible.
-			// finding a matching value means that we've found that our desired
-			// key is already in the table
-			if (!Arrays.equals(cur, REMOVED)) {
-				// starting at the natural offset, probe until we find an
-				// offset that isn't full.
-				do {
-					index += (probe); // add the step
-					index %= (size * FREE.length); // for wraparound
-					cur = new byte[FREE.length];
-					keys.position(index);
-					keys.get(cur);
-				} while (!Arrays.equals(cur, FREE)
-						&& !Arrays.equals(cur, REMOVED)
-						&& !Arrays.equals(cur, key));
-			}
+    /**
+     * Looks for a slot using double hashing for a non-null key values and inserts the value
+     * in the slot
+     *
+     * @param key   non-null key value
+     * @param index natural index
+     * @param hash
+     * @param cur   value of first matched slot
+     * @return
+     */
+    private int insertKeyRehash(byte [] key, int index, int hash, byte [] cur) {
+        final int length = size * FREE.length;
+    	final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
-			// if the index we found was removed: continue probing until we
-			// locate a free location or an element which equal()s the
-			// one we have.
-			if (Arrays.equals(cur, REMOVED)) {
-				int firstRemoved = index;
-				while (!Arrays.equals(cur, FREE)
-						&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur,
-								key))) {
-					index += (probe); // add the step
-					index %= (size * FREE.length); // for wraparound
-					cur = new byte[FREE.length];
-					keys.position(index);
-					keys.get(cur);
-				}
-				// NOTE: cur cannot == REMOVED in this block
-				return (!Arrays.equals(cur, FREE)) ? -index - 1 : firstRemoved;
-			}
-			// if it's full, the key is already stored
-			// NOTE: cur cannot equal REMOVE here (would have retuned already
-			// (see above)
-			return (!Arrays.equals(cur, FREE)) ? -index - 1 : index;
-		}
-	}
+        final int loopIndex = index;
+        int firstRemoved = -1;
+
+        /**
+         * Look until FREE slot or we start to loop
+         */
+        do {
+            // Identify first removed slot
+            if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
+                firstRemoved = index;
+
+            index -= probe;
+            if (index < 0) {
+                index += length;
+            }
+            keys.position(index);
+    		keys.get(cur);
+
+            // A FREE slot stops the search
+            if (Arrays.equals(cur, FREE)) {
+                if (firstRemoved != -1) {
+                    return firstRemoved;
+                } else {
+                    return index;
+                }
+            }
+
+            if (Arrays.equals(cur, key)) {
+                return -index - 1;
+            }
+
+            // Detect loop
+        } while (index != loopIndex);
+
+        // We inspected all reachable slots and did not find a FREE one
+        // If we found a REMOVED slot we return the first one found
+        if (firstRemoved != -1) {
+            return firstRemoved;
+        }
+
+        // Can a resizing strategy be found that resizes the set?
+        throw new IllegalStateException("No free or removed slots available. Key set full?!!");
+    }
 
 	public boolean put(byte[] key, long value) {
 		try {
 			this.hashlock.lock();
-			if (entries >= size)
+			if (this.mapped.cardinality() >= size)
 				throw new IOException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
@@ -473,7 +499,6 @@ public class FileByteArrayLongMap {
 			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			this.entries = entries + 1;
 			return pos > -1 ? true : false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
@@ -484,7 +509,7 @@ public class FileByteArrayLongMap {
 	}
 
 	public int getEntries() {
-		return this.entries;
+		return this.mapped.cardinality();
 	}
 
 	public long get(byte[] key) {
@@ -636,18 +661,19 @@ public class FileByteArrayLongMap {
 				+ " ms " + vals);
 	}
 
-	public synchronized int claimRecords() throws IOException {
+	public synchronized long claimRecords() throws IOException {
 		if (this.closed)
 			throw new IOException("Hashtable " + this.path + " is close");
-		int k = 0;
+		long k = 0;
 		try {
 			this.iterInit();
 			while (iterPos < size) {
 				this.hashlock.lock();
 				try {
 					boolean claimed = claims.get(iterPos);
+					claims.clear(iterPos);
 					if (claimed) {
-						claims.clear(iterPos);
+						this.mapped.set(iterPos);
 						this.tRaf.seek(iterPos * 8);
 						this.tRaf.writeLong(System.currentTimeMillis());
 						k++;
@@ -662,7 +688,7 @@ public class FileByteArrayLongMap {
 		}
 		return k;
 	}
-	
+
 	public void sync() throws SyncFailedException, IOException {
 		keys.force();
 		vRaf.getFD().sync();
@@ -682,24 +708,22 @@ public class FileByteArrayLongMap {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				if (mapped.get(iterPos)) {
+				if (this.mapped.get(iterPos)) {
 					this.tRaf.seek(iterPos * 8);
 					long tm = this.tRaf.readLong();
 					if (tm < time) {
-						boolean claimed = this.claims.get(iterPos);
+						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
 							keys.position(iterPos * FREE.length);
 							keys.put(REMOVED);
 							this.vRaf.seek(iterPos * 8);
 							val = this.vRaf.readLong();
-							long fp = val * -1;
 							this.vRaf.seek(iterPos * 8);
-							this.vRaf.writeLong(fp);
+							this.vRaf.writeLong(0);
 							this.tRaf.seek(iterPos * 8);
-							this.tRaf.writeLong(-1);
+							this.tRaf.writeLong(0);
 							this.claims.clear(iterPos);
 							this.mapped.clear(iterPos);
-							this.entries = entries - 1;
 							return val;
 						}
 					}
