@@ -72,7 +72,8 @@ public class FileByteArrayLongMap {
 				this.mapped.set(iterPos);
 				return key;
 			}
-		}
+			
+		} 
 		return null;
 	}
 
@@ -127,13 +128,14 @@ public class FileByteArrayLongMap {
 		}
 		return -1;
 	}
-	
+
 	private void recreateMap() {
-		this.mapped.clear();
+		mapped = new BitSet(size);
 		this.iterInit();
-		byte [] key = this.nextKey();
-		while(key !=null)
-			this.nextKey();
+		byte[] key = this.nextKey();
+		while (key != null)
+			key = this.nextKey();
+		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path);
 	}
 
 	public long getBigestKey() throws IOException {
@@ -176,39 +178,44 @@ public class FileByteArrayLongMap {
 		RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 		_bpos.setLength(8);
 		bgst = _bpos.readLong();
+		boolean closedCorrectly = true;
 		if (newInstance) {
 			mapped = new BitSet(size);
 		} else {
 			File f = new File(path + ".vmp");
-			FileInputStream fin = new FileInputStream(f);
-			ObjectInputStream oon = new ObjectInputStream(fin);
-			try {
-				mapped = (BitSet) oon.readObject();
-			} catch (ClassNotFoundException e) {
-				throw new IOException(e);
+			if (!f.exists())
+				closedCorrectly = false;
+			else {
+				FileInputStream fin = new FileInputStream(f);
+				ObjectInputStream oon = new ObjectInputStream(fin);
+				try {
+					mapped = (BitSet) oon.readObject();
+				} catch (Exception e) {
+					closedCorrectly = false;
+				}
+				f.delete();
 			}
-			f.delete();
 		}
+		keys = kFC.map(MapMode.READ_WRITE, 0, size * FREE.length);
+		keys.load();
 		if (bgst < 0) {
 			SDFSLogger.getLog()
 					.info("Hashtable " + path
 							+ " did not close correctly. scanning ");
 			bgst = this.getBigestKey();
-			this.recreateMap();
-		}
 
+		}
+		if (!closedCorrectly)
+			this.recreateMap();
 		_bpos.seek(0);
 		_bpos.writeLong(-1);
 		_bpos.close();
-		keys = kFC.map(MapMode.READ_WRITE, 0, size * FREE.length);
-		keys.load();
+
 		claims = new BitSet(size);
 		claims.clear();
-		
+
 		return bgst;
 	}
-
-	
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -335,17 +342,18 @@ public class FileByteArrayLongMap {
 		int result = hash + 1;
 		return result;
 	}
-	
-	/**
-     * Locates the index of <tt>obj</tt>.
-     *
-     * @param obj an <code>Object</code> value
-     * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
-     */
-    protected int index(byte[] key) {
 
-        // From here on we know obj to be non-null
-    	ByteBuffer buf = ByteBuffer.wrap(key);
+	/**
+	 * Locates the index of <tt>obj</tt>.
+	 * 
+	 * @param obj
+	 *            an <code>Object</code> value
+	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
+	 */
+	protected int index(byte[] key) {
+
+		// From here on we know obj to be non-null
+		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
@@ -361,50 +369,52 @@ public class FileByteArrayLongMap {
 			return -1;
 		}
 
-        return indexRehashed(key, index, hash, cur);
-    }
+		return indexRehashed(key, index, hash, cur);
+	}
 
-    /**
-     * Locates the index of non-null <tt>obj</tt>.
-     *
-     * @param obj   target key, know to be non-null
-     * @param index we start from
-     * @param hash
-     * @param cur
-     * @return
-     */
-    private int indexRehashed(byte [] key, int index, int hash, byte [] cur) {
+	/**
+	 * Locates the index of non-null <tt>obj</tt>.
+	 * 
+	 * @param obj
+	 *            target key, know to be non-null
+	 * @param index
+	 *            we start from
+	 * @param hash
+	 * @param cur
+	 * @return
+	 */
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) {
 
-        // NOTE: here it has to be REMOVED or FULL (some user-given value)
-        // see Knuth, p. 529
-    	int length = size * FREE.length;
-    	int probe = (1 + (hash % (size - 2))) * FREE.length;
+		// NOTE: here it has to be REMOVED or FULL (some user-given value)
+		// see Knuth, p. 529
+		int length = size * FREE.length;
+		int probe = (1 + (hash % (size - 2))) * FREE.length;
 
-        final int loopIndex = index;
+		final int loopIndex = index;
 
-        do {
-            index -= probe;
-            if (index < 0) {
-                index += length;
-            }
-            keys.position(index);
-			keys.get(cur);
-            //
-			if (Arrays.equals(cur, FREE)) {
-                return -1;
+		do {
+			index -= probe;
+			if (index < 0) {
+				index += length;
 			}
-            //
-            if (Arrays.equals(cur, key))
-                return index;
-        } while (index != loopIndex);
+			keys.position(index);
+			keys.get(cur);
+			//
+			if (Arrays.equals(cur, FREE)) {
+				return -1;
+			}
+			//
+			if (Arrays.equals(cur, key))
+				return index;
+		} while (index != loopIndex);
 
-        return -1;
-    }
-    
-    protected int insertionIndex(byte [] key) {
-    	ByteBuffer buf = ByteBuffer.wrap(key);
+		return -1;
+	}
+
+	protected int insertionIndex(byte[] key) {
+		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
-    	int hash = buf.getInt() & 0x7fffffff;
+		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
@@ -414,67 +424,71 @@ public class FileByteArrayLongMap {
 			return index; // empty, all done
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
-		} 
-        return insertKeyRehash(key, index, hash, cur);
-    }
+		}
+		return insertKeyRehash(key, index, hash, cur);
+	}
 
-    /**
-     * Looks for a slot using double hashing for a non-null key values and inserts the value
-     * in the slot
-     *
-     * @param key   non-null key value
-     * @param index natural index
-     * @param hash
-     * @param cur   value of first matched slot
-     * @return
-     */
-    private int insertKeyRehash(byte [] key, int index, int hash, byte [] cur) {
-        final int length = size * FREE.length;
-    	final int probe = (1 + (hash % (size - 2))) * FREE.length;
+	/**
+	 * Looks for a slot using double hashing for a non-null key values and
+	 * inserts the value in the slot
+	 * 
+	 * @param key
+	 *            non-null key value
+	 * @param index
+	 *            natural index
+	 * @param hash
+	 * @param cur
+	 *            value of first matched slot
+	 * @return
+	 */
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) {
+		final int length = size * FREE.length;
+		final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
-        final int loopIndex = index;
-        int firstRemoved = -1;
+		final int loopIndex = index;
+		int firstRemoved = -1;
 
-        /**
-         * Look until FREE slot or we start to loop
-         */
-        do {
-            // Identify first removed slot
-            if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
-                firstRemoved = index;
+		/**
+		 * Look until FREE slot or we start to loop
+		 */
+		do {
+			// Identify first removed slot
+			if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
+				firstRemoved = index;
 
-            index -= probe;
-            if (index < 0) {
-                index += length;
-            }
-            keys.position(index);
-    		keys.get(cur);
+			index -= probe;
+			if (index < 0) {
+				index += length;
+			}
+			keys.position(index);
+			keys.get(cur);
 
-            // A FREE slot stops the search
-            if (Arrays.equals(cur, FREE)) {
-                if (firstRemoved != -1) {
-                    return firstRemoved;
-                } else {
-                    return index;
-                }
-            }
+			// A FREE slot stops the search
+			if (Arrays.equals(cur, FREE)) {
+				if (firstRemoved != -1) {
+					return firstRemoved;
+				} else {
+					return index;
+				}
+			}
 
-            if (Arrays.equals(cur, key)) {
-                return -index - 1;
-            }
+			if (Arrays.equals(cur, key)) {
+				return -index - 1;
+			}
 
-            // Detect loop
-        } while (index != loopIndex);
+			// Detect loop
+		} while (index != loopIndex);
 
-        // We inspected all reachable slots and did not find a FREE one
-        // If we found a REMOVED slot we return the first one found
-        if (firstRemoved != -1) {
-            return firstRemoved;
-        }
+		// We inspected all reachable slots and did not find a FREE one
+		// If we found a REMOVED slot we return the first one found
+		if (firstRemoved != -1) {
+			return firstRemoved;
+		}
 
-        // Can a resizing strategy be found that resizes the set?
-        throw new IllegalStateException("No free or removed slots available. Key set full?!!");
-    }
+		// Can a resizing strategy be found that resizes the set?
+		throw new IllegalStateException(
+				"No free or removed slots available. Key set full?!!");
+	}
 
 	public boolean put(byte[] key, long value) {
 		try {

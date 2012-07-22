@@ -311,11 +311,11 @@ public class ByteArrayLongMap {
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
 	 */
 	protected int index(byte[] key) {
+		// From here on we know obj to be non-null
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -328,48 +328,53 @@ public class ByteArrayLongMap {
 			return -1;
 		}
 
-		// NOTE: here it has to be REMOVED or FULL (some user-given value)
-		if (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)) {
-			// see Knuth, p. 529
-			final int probe = (1 + (hash % (size - 2))) * FREE.length;
-			int z = 0;
-			do {
-				z++;
-				index += (probe); // add the step
-				index %= (size * FREE.length); // for wraparound
-				cur = new byte[FREE.length];
-				keys.position(index);
-				keys.get(cur);
-				if (z > size) {
-					SDFSLogger.getLog().info(
-							"entries exhaused size=" + this.size + " entries="
-									+ this.entries);
-					return -1;
-				}
-			} while (!Arrays.equals(cur, FREE)
-					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
-		}
-
-		return Arrays.equals(cur, FREE) ? -1 : index;
+		return indexRehashed(key, index, hash, cur);
 	}
 
 	/**
-	 * Locates the index at which <tt>obj</tt> can be inserted. if there is
-	 * already a value equal()ing <tt>obj</tt> in the set, returns that value's
-	 * index as <tt>-index - 1</tt>.
+	 * Locates the index of non-null <tt>obj</tt>.
 	 * 
 	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return the index of a FREE slot at which obj can be inserted or, if obj
-	 *         is already stored in the hash, the negative value of that index,
-	 *         minus 1: -index -1.
+	 *            target key, know to be non-null
+	 * @param index
+	 *            we start from
+	 * @param hash
+	 * @param cur
+	 * @return
 	 */
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) {
+
+		// NOTE: here it has to be REMOVED or FULL (some user-given value)
+		// see Knuth, p. 529
+		int length = size * FREE.length;
+		int probe = (1 + (hash % (size - 2))) * FREE.length;
+
+		final int loopIndex = index;
+
+		do {
+			index -= probe;
+			if (index < 0) {
+				index += length;
+			}
+			keys.position(index);
+			keys.get(cur);
+			//
+			if (Arrays.equals(cur, FREE)) {
+				return -1;
+			}
+			//
+			if (Arrays.equals(cur, key))
+				return index;
+		} while (index != loopIndex);
+
+		return -1;
+	}
+
 	protected int insertionIndex(byte[] key) {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
-		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -378,57 +383,70 @@ public class ByteArrayLongMap {
 			return index; // empty, all done
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
-		} else { // already FULL or REMOVED, must probe
-			// compute the double hash
-			final int probe = (1 + (hash % (size - 2))) * FREE.length;
-
-			// if the slot we landed on is FULL (but not removed), probe
-			// until we find an empty slot, a REMOVED slot, or an element
-			// equal to the one we are trying to insert.
-			// finding an empty slot means that the value is not present
-			// and that we should use that slot as the insertion point;
-			// finding a REMOVED slot means that we need to keep searching,
-			// however we want to remember the offset of that REMOVED slot
-			// so we can reuse it in case a "new" insertion (i.e. not an update)
-			// is possible.
-			// finding a matching value means that we've found that our desired
-			// key is already in the table
-			if (!Arrays.equals(cur, REMOVED)) {
-				// starting at the natural offset, probe until we find an
-				// offset that isn't full.
-				do {
-					index += (probe); // add the step
-					index %= (size * FREE.length); // for wraparound
-					cur = new byte[FREE.length];
-					keys.position(index);
-					keys.get(cur);
-				} while (!Arrays.equals(cur, FREE)
-						&& !Arrays.equals(cur, REMOVED)
-						&& !Arrays.equals(cur, key));
-			}
-
-			// if the index we found was removed: continue probing until we
-			// locate a free location or an element which equal()s the
-			// one we have.
-			if (Arrays.equals(cur, REMOVED)) {
-				int firstRemoved = index;
-				while (!Arrays.equals(cur, FREE)
-						&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur,
-								key))) {
-					index += (probe); // add the step
-					index %= (size * FREE.length); // for wraparound
-					cur = new byte[FREE.length];
-					keys.position(index);
-					keys.get(cur);
-				}
-				// NOTE: cur cannot == REMOVED in this block
-				return (!Arrays.equals(cur, FREE)) ? -index - 1 : firstRemoved;
-			}
-			// if it's full, the key is already stored
-			// NOTE: cur cannot equal REMOVE here (would have retuned already
-			// (see above)
-			return (!Arrays.equals(cur, FREE)) ? -index - 1 : index;
 		}
+		return insertKeyRehash(key, index, hash, cur);
+	}
+
+	/**
+	 * Looks for a slot using double hashing for a non-null key values and
+	 * inserts the value in the slot
+	 * 
+	 * @param key
+	 *            non-null key value
+	 * @param index
+	 *            natural index
+	 * @param hash
+	 * @param cur
+	 *            value of first matched slot
+	 * @return
+	 */
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) {
+		final int length = size * FREE.length;
+		final int probe = (1 + (hash % (size - 2))) * FREE.length;
+
+		final int loopIndex = index;
+		int firstRemoved = -1;
+
+		/**
+		 * Look until FREE slot or we start to loop
+		 */
+		do {
+			// Identify first removed slot
+			if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
+				firstRemoved = index;
+
+			index -= probe;
+			if (index < 0) {
+				index += length;
+			}
+			keys.position(index);
+			keys.get(cur);
+
+			// A FREE slot stops the search
+			if (Arrays.equals(cur, FREE)) {
+				if (firstRemoved != -1) {
+					return firstRemoved;
+				} else {
+					return index;
+				}
+			}
+
+			if (Arrays.equals(cur, key)) {
+				return -index - 1;
+			}
+
+			// Detect loop
+		} while (index != loopIndex);
+
+		// We inspected all reachable slots and did not find a FREE one
+		// If we found a REMOVED slot we return the first one found
+		if (firstRemoved != -1) {
+			return firstRemoved;
+		}
+
+		// Can a resizing strategy be found that resizes the set?
+		throw new IllegalStateException(
+				"No free or removed slots available. Key set full?!!");
 	}
 
 	public boolean put(byte[] key, long value, byte storeID) {
