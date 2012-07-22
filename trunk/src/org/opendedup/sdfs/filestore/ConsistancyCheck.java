@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.SDFSLogger;
@@ -18,7 +19,7 @@ public class ConsistancyCheck {
 					.println("Running Consistancy Check on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
 			SDFSEvent.mountWarnEvent("Running Consistancy Check on DSE, this may take a while");
-			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",store.size(),System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",store.size()/Main.CHUNK_LENGTH,System.out);
 			long currentCount = 0;
 			while (data != null) {
 				count++;

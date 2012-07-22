@@ -26,7 +26,7 @@ public class DSECompaction {
 					.println("Running Compaction on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Compaction on DSE, this may take a while");
 			SDFSEvent.mountWarnEvent("Running Compaction on DSE, this may take a while");
-			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",ostore.size(),System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",ostore.size()/Main.CHUNK_LENGTH,System.out);
 			long currentCount = 0;
 			while (data != null) {
 				count++;
@@ -47,7 +47,7 @@ public class DSECompaction {
 			bar.finish();
 			System.out.println("Finished");
 			System.out.println("Succesfully Ran Compaction for ["
-					+ records + "] records");
+					+ records + "] records out of [" + currentCount + "]");
 			SDFSLogger
 					.getLog()
 					.warn("Succesfully Ran Compaction for [" + records
@@ -57,6 +57,7 @@ public class DSECompaction {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"Unable to finish compaction because", e);
+			System.err.println("Unable to finish compaction because" +e.toString());
 			throw new IOException("Unable to finish compaction");
 		}
 	}
@@ -66,9 +67,6 @@ public class DSECompaction {
 		SDFSLogger.infoConsoleMsg("Initiating Compaction Process");
 		SDFSLogger.infoConsoleMsg("Step 1 of 4 - Running Garbage Collection");
 		long z =ManualGC.clearChunks(1);
-		
-		if(z > 0)
-			throw new IOException("Unexpected result from garbage collection run. Records should not be claimed but " + z + " were");
 		SDFSLogger.infoConsoleMsg("Step 2 of 4 - Running Garbage Collection again");
 		z =ManualGC.clearChunksMills(1000);
 		SDFSLogger.infoConsoleMsg("Cleared [" + z + "] records during garbage collection");
@@ -78,14 +76,14 @@ public class DSECompaction {
 		FileChunkStore nstore = new FileChunkStore(newStorePath.getPath());
 		try {
 			runCheck(map,nstore,ostore);
+			SDFSLogger.infoConsoleMsg("Step 4 of 4 - Committing FileStore Changes");
+			map.commitCompact(Main.forceCompact);
 		}catch(IOException e) {
 			nstore.close();
 			newStorePath.delete();
 			map.rollbackCompact();
 			throw e;
 		}
-		map.commitCompact(Main.forceCompact);
-		SDFSLogger.infoConsoleMsg("Step 4 of 4 - Committing FileStore Changes");
 		long osz = ostore.size();
 		long nsz = nstore.size();
 		String ostorePath = ostore.f.getPath();

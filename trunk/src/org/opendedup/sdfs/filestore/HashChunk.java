@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author Sam Silverberg A HashChunk is used by the chunk store as a container
@@ -10,7 +12,11 @@ package org.opendedup.sdfs.filestore;
  * @see TCHashStore
  * 
  */
-public class HashChunk {
+public class HashChunk implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -719101848617839457L;
 	// The name of the hash chunk. This is the md5 or sha hash
 	private byte[] name;
 	// the start position to read or write from the byte array. This always 0
