@@ -2,6 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
@@ -124,6 +125,22 @@ public class HCServiceProxy {
 			}
 		}
 		return doop;
+	}
+	
+	public static boolean localHashExists(byte[] hash) throws IOException, HashtableFullException {
+		boolean exists = false;
+		if (Main.chunkStoreLocal) {
+			exists = HashChunkService.localHashExists(hash);
+
+		} return exists;
+	}
+	
+	public static void fetchChunks(ArrayList<String> hashes) throws IOException, HashtableFullException {
+		if (Main.chunkStoreLocal) {
+			HashChunkService.remoteFetchChunks(hashes);
+		} else {
+			throw new IllegalStateException("not implemented for remote chunkstores");
+		}
 	}
 
 	public static boolean hashExists(byte[] hash) throws IOException, HashtableFullException {

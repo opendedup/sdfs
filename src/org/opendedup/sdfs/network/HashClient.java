@@ -14,10 +14,12 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HCServer;
 
 public class HashClient {
@@ -178,6 +180,12 @@ public class HashClient {
 		FetchChunkCmd cmd = new FetchChunkCmd(hash, server.isCompress());
 		this.executeCmd(cmd);
 		return cmd.getChunk();
+	}
+	
+	public ArrayList<HashChunk> fetchChunks(ArrayList<String> al) throws IOException {
+		BulkFetchChunkCmd cmd = new BulkFetchChunkCmd(al);
+		this.executeCmd(cmd);
+		return cmd.getChunks();
 	}
 
 	public boolean hashExists(byte[] hash,short hops) throws IOException {

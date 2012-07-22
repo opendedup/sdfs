@@ -3,6 +3,7 @@ Version 1.1.6
 	* Cloud Storage increments length correctly now. 
 	* Fixed Symlink issues
 	* Was exiting on NullPointerException for replication rollback
+	* Force Compact (--forcecompact) option typo fixed
 	Enhancements
 	* Refactored cloud storage options. Changed all cloud provider specific options to generic options "cloud-access-key,cloud-bucket-name,cloud-compress,cloud-secret-key"
 	* Changed CSByteArrayLongMap claimed array from byte array to bitmap

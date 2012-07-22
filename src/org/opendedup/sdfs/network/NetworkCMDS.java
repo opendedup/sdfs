@@ -38,5 +38,6 @@ public class NetworkCMDS {
 	public static final byte STORE_MAX_SIZE_CMD = 10;
 	public static final byte STORE_SIZE_CMD = 11;
 	public static final byte STORE_PAGE_SIZE = 12;
+	public static final byte BULK_FETCH_CMD = 13;
 
 }

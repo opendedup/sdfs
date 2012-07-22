@@ -33,7 +33,7 @@ public class ArchiveImporter {
 		try {
 			MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
 					+ File.separator + sdest);
-			if (imp.getCorruptFiles().size() > 0) {
+			if (imp.isCorrupt()) {
 				SDFSLogger.getLog().warn("Import failed for " + srcArchive);
 				SDFSLogger.getLog().warn("rolling back import");
 				rollBackImport(Main.volume.getPath() + File.separator + sdest);
@@ -50,11 +50,11 @@ public class ArchiveImporter {
 					throw e;
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().warn("rolling back import");
 			rollBackImport(Main.volume.getPath() + File.separator + sdest);
 			SDFSLogger.getLog().warn("Import rolled back");
-			throw e;
+			throw new IOException(e);
 		}
 
 	}

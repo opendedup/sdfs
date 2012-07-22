@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
-
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -22,11 +21,10 @@ public class SDFSService {
 	private SDFSGCScheduler gc = null;
 	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
-	private NetworkDSEServer ndServer= null;
-	
+	private NetworkDSEServer ndServer = null;
 
 	public SDFSService(String configFile, String routingFile) {
-		
+
 		this.configFile = configFile;
 		this.routingFile = routingFile;
 		System.out.println("Running SDFS Version " + Main.version);
@@ -37,10 +35,11 @@ public class SDFSService {
 	}
 
 	public void start() throws Exception {
-		
+
 		Config.parseSDFSConfigFile(this.configFile);
 		MgmtWebServer.start();
-		SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
+		SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version
+				+ "] Mounting Volume from " + this.configFile);
 		if (this.routingFile != null)
 			Config.parserRoutingFile(routingFile);
 		else if (!Main.chunkStoreLocal) {
@@ -48,25 +47,34 @@ public class SDFSService {
 					+ File.separator + "routing-config.xml");
 		}
 		try {
-			if(Main.volume.getName() == null)
+			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
 			Main.volume.setClosedGracefully(false);
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
+		Main.wth = new VolumeConfigWriterThread(configFile);
 		if (Main.chunkStoreLocal) {
-			HashChunkService.init();
-			if (Main.enableNetworkChunkStore) {
-				ndServer = new NetworkDSEServer();
-				new Thread(ndServer).start();
-			} 
-				
-			
+			try {
+				HashChunkService.init();
+				if (Main.enableNetworkChunkStore) {
+					ndServer = new NetworkDSEServer();
+					new Thread(ndServer).start();
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("Unable to initialize volume ", e);
+				System.err.println("Unable to initialize Hash Chunk Service");
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			if (Main.runCompact) {
+				this.stop();
+				System.exit(0);
+			}
+
 			this.stGC = new StandAloneGCScheduler();
 		}
-		
-		Main.wth = new VolumeConfigWriterThread(configFile);
 
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
@@ -81,7 +89,9 @@ public class SDFSService {
 		if (!Main.chunkStoreLocal) {
 			gc.stopSchedules();
 		} else {
+			try {
 			this.stGC.close();
+			}catch(Exception e) {}
 		}
 		SDFSLogger.getLog().info("Flushing and Closing Write Caches");
 		DedupFileStore.close();
@@ -100,7 +110,7 @@ public class SDFSService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			Process p = Runtime.getRuntime().exec(
 					"umount " + Main.volumeMountPoint);
@@ -114,7 +124,7 @@ public class SDFSService {
 			if (Main.enableNetworkChunkStore) {
 				ndServer.close();
 			} else {
-				
+
 			}
 		}
 		try {
