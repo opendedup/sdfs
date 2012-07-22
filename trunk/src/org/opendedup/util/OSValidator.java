@@ -53,7 +53,6 @@ public class OSValidator {
 			return System.getenv("programfiles") + File.separator + "sdfs"
 					+ File.separator;
 		}
-
 	}
 
 	public static String getConfigPath() {
