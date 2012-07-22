@@ -84,7 +84,7 @@ public class MountSDFS {
 		String volname = "SDFS";
 		if (cmd.hasOption("c")) {
 			Main.runCompact = true;
-			if(cmd.hasOption("force-compact"))
+			if(cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
 		if (cmd.hasOption("r")) {
