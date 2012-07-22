@@ -247,19 +247,18 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		File f = new File(path);
 		MetaDataDedupFile mf = null;
 		Path p = Paths.get(path);
-		if(Files.isSymbolicLink(p)) {
+		if (Files.isSymbolicLink(p)) {
 			mf = new MetaDataDedupFile();
 			mf.path = path;
 			mf.symlink = true;
 			try {
 				mf.symlinkPath = Files.readSymbolicLink(p).toFile().getPath();
-				if(new File(mf.symlinkPath).isDirectory())
+				if (new File(mf.symlinkPath).isDirectory())
 					mf.directory = true;
 			} catch (IOException e) {
 				SDFSLogger.getLog().warn(e);
 			}
-		}
-		else if (!f.exists() || f.isDirectory()) {
+		} else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 		} else {
 			ObjectInputStream in = null;
@@ -529,26 +528,31 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						File sdbdirectory = new File(Main.dedupDBStore
 								+ File.separator + file.dfGuid.substring(0, 2)
 								+ File.separator + file.dfGuid);
-						Path sdbf = new File(sdbdirectory.getPath()
-								+ File.separator + file.dfGuid + ".map")
-								.toPath();
-						Path sdbc = new File(sdbdirectory.getPath()
-								+ File.separator + file.dfGuid + ".chk")
-								.toPath();
-						File ddbdir = new File(npath + File.separator + "ddb"
-								+ File.separator + file.dfGuid.substring(0, 2)
-								+ File.separator + file.dfGuid);
-						ddbdir.mkdirs();
-						Path ddbf = new File(ddbdir.getPath() + File.separator
-								+ file.dfGuid + ".map").toPath();
-						Path ddbc = new File(ddbdir.getPath() + File.separator
-								+ file.dfGuid + ".chk").toPath();
-						Files.copy(sdbf, ddbf,
-								StandardCopyOption.REPLACE_EXISTING,
-								StandardCopyOption.COPY_ATTRIBUTES);
-						Files.copy(sdbc, ddbc,
-								StandardCopyOption.REPLACE_EXISTING,
-								StandardCopyOption.COPY_ATTRIBUTES);
+						if (sdbdirectory.exists()) {
+							Path sdbf = new File(sdbdirectory.getPath()
+									+ File.separator + file.dfGuid + ".map")
+									.toPath();
+							Path sdbc = new File(sdbdirectory.getPath()
+									+ File.separator + file.dfGuid + ".chk")
+									.toPath();
+							File ddbdir = new File(npath + File.separator
+									+ "ddb" + File.separator
+									+ file.dfGuid.substring(0, 2)
+									+ File.separator + file.dfGuid);
+							ddbdir.mkdirs();
+							Path ddbf = new File(ddbdir.getPath()
+									+ File.separator + file.dfGuid + ".map")
+									.toPath();
+							Path ddbc = new File(ddbdir.getPath()
+									+ File.separator + file.dfGuid + ".chk")
+									.toPath();
+							Files.copy(sdbf, ddbf,
+									StandardCopyOption.REPLACE_EXISTING,
+									StandardCopyOption.COPY_ATTRIBUTES);
+							Files.copy(sdbc, ddbc,
+									StandardCopyOption.REPLACE_EXISTING,
+									StandardCopyOption.COPY_ATTRIBUTES);
+						}
 					}
 				}
 			}

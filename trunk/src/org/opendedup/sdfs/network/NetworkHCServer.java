@@ -24,7 +24,7 @@ public class NetworkHCServer {
 
 	// This chat server can accept up to 10 clients' connections
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws IOException {
 		// The default port
 
 		if (args.length < 1) {
@@ -46,8 +46,7 @@ public class NetworkHCServer {
 
 	}
 
-	public static void init() {
-
+	public static void init() throws IOException {
 		HashChunkService.init();
 		// Initialization section:
 		// Try to open a server socket on port port_number (default 2222)

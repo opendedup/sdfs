@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 import org.opendedup.util.SDFSLogger;
@@ -60,17 +61,7 @@ public class HashChunkService {
 		}
 		try {
 			hs = new HashStore();
-			if(Main.runCompact) {
-				try {
-				DSECompaction.runCheck(hs.bdb,(FileChunkStore)HashChunkService.getChuckStore());
-				SDFSLogger.getLog().info("Finished compaction - exiting");
-				System.exit(0);
-				}catch(Exception e) {
-					SDFSLogger.getLog().error("failed to compact - exiting",e);
-					System.exit(-1);
-				}
-				
-			}
+			
 			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
 				csGC = new ChunkStoreGCScheduler();
 			}
@@ -123,6 +114,26 @@ public class HashChunkService {
 		} else {
 			dupsFound++;
 			return true;
+		}
+	}
+	
+	public static boolean localHashExists(byte[] hash) throws IOException {
+		return hs.hashExists(hash);
+	}
+	
+	public static void remoteFetchChunks(ArrayList<String> al) throws IOException, HashtableFullException {
+		if (Main.upStreamDSEHostEnabled) {
+			HashClient hc = null;
+			try {
+				hc = hcPool.borrowObject();
+				ArrayList<HashChunk> hck = hc.fetchChunks(al);
+				for(int i=0;i<hck.size();i++) {
+					HashChunk _hc = hck.get(i);
+					writeChunk(_hc.getName(), _hc.getData(), 0, _hc.getData().length, false);
+				}
+			} finally {
+				hcPool.returnObject(hc);
+			}
 		}
 	}
 
@@ -226,8 +237,12 @@ public class HashChunkService {
 
 	}
 
-	public static void init() {
-
+	public static void init() throws IOException {
+		if(Main.runCompact) {
+			DSECompaction.runCheck(hs.bdb,(FileChunkStore)HashChunkService.getChuckStore());
+			SDFSLogger.getLog().info("Finished compaction");
+			
+		}
 	}
 
 }

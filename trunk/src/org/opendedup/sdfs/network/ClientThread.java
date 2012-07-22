@@ -3,13 +3,19 @@ package org.opendedup.sdfs.network;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
@@ -33,6 +39,7 @@ class ClientThread extends Thread {
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
+	private static int MAX_SZ = (20*1024*1024)/Main.CHUNK_LENGTH;
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -188,6 +195,77 @@ class ClientThread extends Thread {
 						} catch (NullPointerException e) {
 							SDFSLogger.getLog().warn(
 									"chunk " + StringUtils.getHexString(hash)
+											+ " does not exist");
+							try {
+								writelock.lock();
+								os.writeInt(-1);
+								os.flush();
+								writelock.unlock();
+							} catch (IOException e1) {
+								if (writelock.isLocked())
+									writelock.unlock();
+								throw new IOException(e1.toString());
+							} finally {
+
+							}
+						}
+					}
+					if (cmd == NetworkCMDS.BULK_FETCH_CMD) {
+						int len = is.readInt();
+						byte[] sh = new byte[len];
+						is.readFully(sh);
+						sh = CompressionUtils.decompressZLIB(sh);
+						ObjectInputStream obj_in = new ObjectInputStream(new ByteArrayInputStream(sh));
+						@SuppressWarnings("unchecked")
+						ArrayList<String> hashes = (ArrayList<String>)obj_in.readObject();
+						String hash = null;
+						if(hashes.size() > MAX_SZ){
+							SDFSLogger.getLog().warn(
+									"requested hash list to long " + hashes.size() + " > " + MAX_SZ);
+							try {
+								writelock.lock();
+								os.writeInt(-1);
+								os.flush();
+								writelock.unlock();
+							} catch (IOException e1) {
+								if (writelock.isLocked())
+									writelock.unlock();
+								throw new IOException(e1.toString());
+							} finally {
+
+							}
+						}
+						ArrayList<HashChunk> chunks = new ArrayList<HashChunk>(hashes.size());
+						try {
+							for(int i = 0;i<hashes.size();i++) {
+								hash = hashes.get(i);
+								HashChunk dChunk = HashChunkService.fetchChunk(StringUtils.getHexBytes(hash));
+								chunks.add(i, dChunk);
+							}
+							ByteArrayOutputStream bos = new ByteArrayOutputStream();
+							ObjectOutputStream obj_out = new ObjectOutputStream(bos);
+							obj_out.writeObject(chunks);
+							byte [] b = CompressionUtils.compressZLIB(bos.toByteArray());
+							//byte [] b =bos.toByteArray();
+							writelock.lock();
+							try {
+								os.writeInt(b.length);
+								os.write(b);
+								os.flush();
+								SDFSLogger.getLog().debug("wrote " + b.length + " entries " + chunks.size());
+							} finally {
+								writelock.unlock();
+								bos.close();
+								obj_out.close();
+								obj_in.close();
+								chunks.clear();
+								chunks = null;
+							}
+							
+
+						} catch (NullPointerException e) {
+							SDFSLogger.getLog().warn(
+									"chunk " + hash
 											+ " does not exist");
 							try {
 								writelock.lock();

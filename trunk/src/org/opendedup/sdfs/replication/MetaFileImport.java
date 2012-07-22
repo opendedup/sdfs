@@ -2,9 +2,9 @@ package org.opendedup.sdfs.replication;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
@@ -17,22 +17,32 @@ import org.opendedup.util.StringUtils;
 
 public class MetaFileImport {
 	private long files = 0;
-	private List<MetaDataDedupFile> corruptFiles = new ArrayList<MetaDataDedupFile>();
+	private ArrayList<String> hashes = null;
+	private static int MAX_SZ = ((10*1024*1024)/Main.CHUNK_LENGTH);
+	boolean corruption = false;
+	private long entries = 0;
 
 	public MetaFileImport(String path) throws IOException {
-		SDFSLogger.getLog().info("Starting MetaFile FDISK");
+		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
+		hashes = new ArrayList<String>();
 		long start = System.currentTimeMillis();
 		File f = new File(path);
+		
 		this.traverse(f);
+		if(hashes.size() != 0) {
+			try {
+				HCServiceProxy.fetchChunks(hashes);
+			} catch(Exception e) {
+				SDFSLogger.getLog().error("Corruption Suspected on import",e);
+				corruption = true;
+			}
+		}
 		SDFSLogger.getLog().info(
 				"took [" + (System.currentTimeMillis() - start) / 1000
-						+ "] seconds to import [" + files + "]. Found ["
-						+ this.corruptFiles.size() + "] corrupt files");
+						+ "] seconds to import [" + files + "] files and [" + entries + "] blocks.");
 	}
 
-	public List<MetaDataDedupFile> getCorruptFiles() {
-		return this.corruptFiles;
-	}
+	
 
 	private void traverse(File dir) throws IOException {
 
@@ -46,6 +56,10 @@ public class MetaFileImport {
 			this.checkDedupFile(dir);
 		}
 	}
+	
+	public boolean isCorrupt() {
+		return this.corruption;
+	}
 
 	private void checkDedupFile(File metaFile) throws IOException {
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
@@ -55,46 +69,44 @@ public class MetaFileImport {
 					+ dfGuid.substring(0, 2) + File.separator + dfGuid
 					+ File.separator + dfGuid + ".map");
 			if (!mapFile.exists()) {
-				SDFSLogger.getLog().error(
+				SDFSLogger.getLog().warn(
 						mapFile.getPath() + " does not exist!");
-				throw new IOException(mapFile.getPath() + " does not exist!");
+				return;
 			}
 			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
 			try {
 				byte[] val = new byte[0];
 				mp.iterInit();
-				boolean corruption = false;
-				long corruptBlocks = 0;
 				while (val != null) {
 					val = mp.nextValue();
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						if (!ck.isLocalData()) {
-							boolean exists = HCServiceProxy.hashExists(ck
+							boolean exists = HCServiceProxy.localHashExists(ck
 									.getHash());
 							if (!exists) {
-								SDFSLogger.getLog().debug(
-										"file ["
-												+ mapFile
-												+ "] could not find "
-												+ StringUtils.getHexString(ck
-														.getHash()));
-								corruption = true;
-								corruptBlocks++;
+								hashes.add(StringUtils.getHexString(ck.getHash()));
+								entries ++;
+							}
+							if(hashes.size()>=MAX_SZ) {
+								try {
+									SDFSLogger.getLog().debug("fetching " + hashes.size() + " blocks");
+									HCServiceProxy.fetchChunks(hashes);
+									SDFSLogger.getLog().debug("fetched " + hashes.size() + " blocks");
+									hashes = null;
+									hashes = new ArrayList<String>();
+								} catch(Exception e) {
+									SDFSLogger.getLog().error("Corruption Suspected on import",e);
+									corruption = true;
+								}
 							}
 						}
 					}
 				}
 				if (corruption) {
 					MetaFileStore.removeMetaFile(mf.getPath());
-					if (this.corruptFiles.size() > 1000)
 						throw new IOException(
 								"Unable to continue MetaFile Import because there are too many missing blocks");
-					this.corruptFiles.add(mf);
-					SDFSLogger.getLog()
-							.info("map file " + mapFile.getPath()
-									+ " is suspect, [" + corruptBlocks
-									+ "] missing blocks found.");
 
 				} else {
 					Main.volume.addVirtualBytesWritten(mf.length());
