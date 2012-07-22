@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -43,6 +41,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private byte[] FREE = new byte[pageSize];
 	private FileChannel iterFC = null;
 	private AbstractHashEngine hc = null;
+	private SyncThread th = null;
 
 	/**
 	 * 
@@ -66,11 +65,12 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			th = new SyncThread(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public FileChunkStore(String fpath) {
 		SDFSLogger.getLog().info("Opening Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
@@ -88,6 +88,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			th = new SyncThread(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -103,16 +104,20 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			fc.force(true);
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 
 		try {
 			fc.close();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 		}
 		fc = null;
 
+	}
+
+	protected void sync() throws IOException {
+		fc.force(true);
 	}
 
 	/*
@@ -140,7 +145,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#size()
 	 */
 	public long size() {
-		return this.currentLength/Main.chunkStorePageSize;
+		return this.currentLength;
 	}
 
 	/*
@@ -249,9 +254,8 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf.close();
 	}
 
-
-
 	public void close() {
+		th.close();
 		try {
 			this.closed = true;
 			this.closeStore();
@@ -307,7 +311,7 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if(iterFC.position() >= iterFC.size())
+		if (iterFC.position() >= iterFC.size())
 			return null;
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 		long pos = -1;
@@ -315,45 +319,82 @@ public class FileChunkStore implements AbstractChunkStore {
 			pos = iterFC.position();
 			iterFC.read(fbuf);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to fetch chunk at position " + iterFC.position(), e);
+			SDFSLogger.getLog()
+					.error("unable to fetch chunk at position "
+							+ iterFC.position(), e);
 			throw new IOException(e);
 		} finally {
 			try {
 			} catch (Exception e) {
 			}
 		}
-		byte [] hash = hc.getHash(fbuf.array());
-		ChunkData chk = new ChunkData(hash,pos);
+		byte[] hash = hc.getHash(fbuf.array());
+		ChunkData chk = new ChunkData(hash, pos);
 		chk.setChunk(fbuf.array());
 		return chk;
-			
+
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
+
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {
 			hc = HashFunctionPool.getHashEngine();
 			this.iterFC = chunkDataWriter.getChannel();
 			this.iterFC.position(0);
-		}catch(Exception e) {
-			throw new IOException( e);
-		}finally {
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
 			this.iterlock.unlock();
 		}
 	}
-	
+
 	@Override
 	public void compact() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	private class SyncThread implements Runnable {
+		FileChunkStore store = null;
+		int interval = 2 * 1000;
+		Thread th = null;
+
+		SyncThread(FileChunkStore store) {
+			this.store = store;
+			Thread th = new Thread(this);
+			th.start();
+		}
+
+		@Override
+		public void run() {
+			while (!store.closed) {
+				try {
+					store.sync();
+					Thread.sleep(interval);
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn("Unable to flush FileChunkStore ",
+							e);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+
+		}
+
+		public void close() {
+			try {
+				th.interrupt();
+			} catch (Exception e) {
+			}
+		}
 	}
 
 }
