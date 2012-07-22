@@ -256,12 +256,13 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			kRaf.seek(0);
 			int count = 0;
 			long entries = kRaf.length() / ChunkData.RAWDL;
-			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Hashes",entries,System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar(
+					"Loading Hashes", entries, System.out);
 			while (kFc.position() < kRaf.length()) {
 				count++;
 				if (count > 100000) {
 					count = 0;
-					bar.update(kFc.position()/ChunkData.RAWDL);
+					bar.update(kFc.position() / ChunkData.RAWDL);
 				}
 
 				byte[] raw = new byte[ChunkData.RAWDL];
@@ -293,7 +294,12 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 								freeSl++;
 							} else {
 								boolean added = this.put(cm, false);
-								SDFSLogger.getLog().debug("added " + StringUtils.getHexString(cm.getHash()) + " position is " + cm.getcPos());
+								SDFSLogger.getLog().debug(
+										"added "
+												+ StringUtils.getHexString(cm
+														.getHash())
+												+ " position is "
+												+ cm.getcPos());
 								if (added)
 									this.kSz++;
 								if (value > endPos)
@@ -957,10 +963,17 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.arlock.lock();
 		this.iolock.lock();
 		try {
-			this.kFc.close();
-			this.kRaf.close();
+			try {
+				this.kFc.close();
+			} catch (Exception e) {
+			}
+			try {
+				this.kRaf.close();
+			} catch (Exception e) {
+			}
 			this.kFc = null;
 			this.kRaf = null;
+
 			File _fs = new File(fileName);
 			_fs.delete();
 			SDFSLogger.getLog().error("rolled back compacting");
