@@ -26,10 +26,10 @@ public class PFullGC implements GCControllerImpl {
 			SDFSEvent task = SDFSEvent.gcInfoEvent("Percentage Full Exceeded : Running Orphaned Block Collection");
 			task.longMsg = "Running Garbage Collection because percentage full is " + this.calcPFull() + " and threshold is " +this.nextPFull;
 			try {
-			ManualGC.clearChunks(5);
-			Thread.sleep(5*60*1000);
+			ManualGC.clearChunks(1);
+			Thread.sleep(1*60*1000);
 			Main.firstRun = false;
-			ManualGC.clearChunks(5);
+			ManualGC.clearChunks(1);
 			this.prevPFull = calcPFull();
 			this.nextPFull = this.calcNxtRun();
 			SDFSLogger.getLog().info(
@@ -57,9 +57,12 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	private double calcNxtRun() {
-		double next = this.calcPFull() + Main.gcPFIncrement;
+		double next = this.calcPFull();
 		if (next >= .92)
-			next = (double) .91;
+			return .90;
+		else {
+			next = Math.ceil(next * 100.0)/100;
+		}
 		return next;
 	}
 
