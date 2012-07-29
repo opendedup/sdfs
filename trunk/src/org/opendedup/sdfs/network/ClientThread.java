@@ -39,7 +39,7 @@ class ClientThread extends Thread {
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	private static int MAX_SZ = (20*1024*1024)/Main.CHUNK_LENGTH;
+	private static int MAX_SZ = (40*1024*1024)/Main.CHUNK_LENGTH;
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -147,34 +147,11 @@ class ClientThread extends Thread {
 							dChunk = HashChunkService.fetchChunk(hash);
 							if (cmd == NetworkCMDS.FETCH_COMPRESSED_CMD
 									&& !dChunk.isCompressed()) {
-								/*
-								 * byte[] cChunk = CompressionUtils
-								 * .compress(dChunk.getData()); try {
-								 * writelock.lock(); os.writeInt(cChunk.length);
-								 * os.write(cChunk); os.flush();
-								 * writelock.unlock(); } catch (IOException e) {
-								 * if(writelock.isLocked()) writelock.unlock();
-								 * throw new IOException(e.toString()); }
-								 * finally {
-								 * 
-								 * }
-								 */
+								
 								throw new Exception("not implemented");
 							} else if (cmd == NetworkCMDS.FETCH_CMD
 									&& dChunk.isCompressed()) {
-								/*
-								 * byte[] cChunk = CompressionUtils
-								 * .decompress(dChunk.getData());
-								 * 
-								 * try { writelock.lock();
-								 * os.writeInt(cChunk.length); os.write(cChunk);
-								 * os.flush(); writelock.unlock(); } catch
-								 * (IOException e) { if(writelock.isLocked())
-								 * writelock.unlock(); throw new
-								 * IOException(e.toString()); } finally {
-								 * 
-								 * }
-								 */
+								
 								throw new IOException("Not implemented");
 							} else {
 								try {
@@ -214,7 +191,7 @@ class ClientThread extends Thread {
 						int len = is.readInt();
 						byte[] sh = new byte[len];
 						is.readFully(sh);
-						sh = CompressionUtils.decompressZLIB(sh);
+						sh = CompressionUtils.decompressSnappy(sh);
 						ObjectInputStream obj_in = new ObjectInputStream(new ByteArrayInputStream(sh));
 						@SuppressWarnings("unchecked")
 						ArrayList<String> hashes = (ArrayList<String>)obj_in.readObject();
@@ -245,7 +222,7 @@ class ClientThread extends Thread {
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();
 							ObjectOutputStream obj_out = new ObjectOutputStream(bos);
 							obj_out.writeObject(chunks);
-							byte [] b = CompressionUtils.compressZLIB(bos.toByteArray());
+							byte [] b = CompressionUtils.compressSnappy(bos.toByteArray());
 							//byte [] b =bos.toByteArray();
 							writelock.lock();
 							try {

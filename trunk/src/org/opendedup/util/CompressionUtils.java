@@ -1,6 +1,9 @@
 package org.opendedup.util;
 
+import org.xerial.snappy.Snappy;
+
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 
 import java.util.zip.DataFormatException;
@@ -57,6 +60,20 @@ public class CompressionUtils {
 		// Get the decompressed data
 		byte[] decompressedData = bos.toByteArray();
 		return decompressedData;
+	}
+	
+	public static byte[] compressSnappy(byte[] input) throws IOException {
+		return Snappy.compress(input);
+	}
+
+	public static byte[] decompressSnappy(byte[] input) throws IOException {
+		return Snappy.uncompress(input);
+	}
+	
+	public static void main(String [] args) throws IOException {
+		String t = "This is a test";
+		
+		System.out.println(new String(decompressSnappy(compressSnappy(t.getBytes()))));
 	}
 
 }

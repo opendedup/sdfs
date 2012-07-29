@@ -30,7 +30,7 @@ public class BulkFetchChunkCmd implements IOCmd {
 		bos = new ByteArrayOutputStream();
 		ObjectOutputStream obj_out = new ObjectOutputStream(bos);
 		obj_out.writeObject(hashes);
-		byte [] sh = CompressionUtils.compressZLIB(bos.toByteArray());       
+		byte [] sh = CompressionUtils.compressSnappy(bos.toByteArray());       
 		//byte [] sh = bos.toByteArray();  
 		os.write(NetworkCMDS.BULK_FETCH_CMD);
 		os.writeInt(sh.length);
@@ -44,7 +44,7 @@ public class BulkFetchChunkCmd implements IOCmd {
 		}
 		byte [] us = new byte [size];
 		is.readFully(us);
-		us = CompressionUtils.decompressZLIB(us);
+		us = CompressionUtils.decompressSnappy(us);
 		ByteArrayInputStream bin = new ByteArrayInputStream(us);
 		ObjectInputStream obj_in = new ObjectInputStream(bin);
 		try {
