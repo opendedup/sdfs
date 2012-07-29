@@ -18,7 +18,7 @@ import org.opendedup.util.StringUtils;
 public class MetaFileImport {
 	private long files = 0;
 	private ArrayList<String> hashes = null;
-	private static int MAX_SZ = ((10*1024*1024)/Main.CHUNK_LENGTH);
+	private static int MAX_SZ = ((30*1024*1024)/Main.CHUNK_LENGTH);
 	boolean corruption = false;
 	private long entries = 0;
 
@@ -69,8 +69,6 @@ public class MetaFileImport {
 					+ dfGuid.substring(0, 2) + File.separator + dfGuid
 					+ File.separator + dfGuid + ".map");
 			if (!mapFile.exists()) {
-				SDFSLogger.getLog().warn(
-						mapFile.getPath() + " does not exist!");
 				return;
 			}
 			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");

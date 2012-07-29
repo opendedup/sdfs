@@ -61,7 +61,7 @@ public class PFullGC implements GCControllerImpl {
 		if (next >= .92)
 			return .90;
 		else {
-			next = Math.ceil(next * 100.0)/100;
+			next = Math.ceil(next * 100.0)/10;
 		}
 		return next;
 	}

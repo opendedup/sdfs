@@ -5,6 +5,7 @@ import java.io.*;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
@@ -13,48 +14,56 @@ public class ArchiveImporter {
 
 	public static void importArchive(String srcArchive, String dest)
 			throws IOException {
-		File f = new File(srcArchive);
-		String sdest = dest + "." + RandomGUID.getGuid();
-		SDFSLogger.getLog().info("Importing " + srcArchive + " to " + dest);
-		if (!f.exists())
-			throw new IOException("File does not exist " + srcArchive);
-		TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
-		TFile srcFiles = srcFilesRoot.listFiles()[0];
-		TFile dstFiles = new TFile(Main.volume.getPath() + File.separator
-				+ sdest);
-		srcFiles.cp_rp(dstFiles);
-		srcFiles = new TFile(new File(srcArchive + "/ddb/"));
-		File ddb = new File(Main.dedupDBStore + File.separator);
-		if (!ddb.exists())
-			ddb.mkdirs();
-		dstFiles = new TFile(Main.dedupDBStore + File.separator);
-		srcFiles.cp_rp(dstFiles);
-		TFile.umount(srcFiles.getInnerArchive());
 		try {
-			MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
-					+ File.separator + sdest);
-			if (imp.isCorrupt()) {
-				SDFSLogger.getLog().warn("Import failed for " + srcArchive);
+			GCMain.gclock.lock();
+
+			File f = new File(srcArchive);
+			String sdest = dest + "." + RandomGUID.getGuid();
+			SDFSLogger.getLog().info("Importing " + srcArchive + " to " + dest);
+			if (!f.exists())
+				throw new IOException("File does not exist " + srcArchive);
+			TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
+			TFile srcFiles = srcFilesRoot.listFiles()[0];
+			TFile dstFiles = new TFile(Main.volume.getPath() + File.separator
+					+ sdest);
+			srcFiles.cp_rp(dstFiles);
+			srcFiles = new TFile(new File(srcArchive + "/ddb/"));
+			File ddb = new File(Main.dedupDBStore + File.separator);
+			if (!ddb.exists())
+				ddb.mkdirs();
+			dstFiles = new TFile(Main.dedupDBStore + File.separator);
+			srcFiles.cp_rp(dstFiles);
+			TFile.umount(srcFiles.getInnerArchive());
+			try {
+				MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
+						+ File.separator + sdest);
+				if (imp.isCorrupt()) {
+					SDFSLogger.getLog().warn("Import failed for " + srcArchive);
+					SDFSLogger.getLog().warn("rolling back import");
+					rollBackImport(Main.volume.getPath() + File.separator
+							+ sdest);
+					SDFSLogger.getLog().warn("Import rolled back");
+					throw new IOException(
+							"uable to import files: There are files that are missing blocks");
+				} else {
+					try {
+						commitImport(Main.volume.getPath() + File.separator
+								+ dest, Main.volume.getPath() + File.separator
+								+ sdest);
+					} catch (IOException e) {
+						rollBackImport(Main.volume.getPath() + File.separator
+								+ sdest);
+						throw e;
+					}
+				}
+			} catch (Exception e) {
 				SDFSLogger.getLog().warn("rolling back import");
 				rollBackImport(Main.volume.getPath() + File.separator + sdest);
 				SDFSLogger.getLog().warn("Import rolled back");
-				throw new IOException(
-						"uable to import files: There are files that are missing blocks");
-			} else {
-				try {
-					commitImport(Main.volume.getPath() + File.separator + dest,
-							Main.volume.getPath() + File.separator + sdest);
-				} catch (IOException e) {
-					rollBackImport(Main.volume.getPath() + File.separator
-							+ sdest);
-					throw e;
-				}
+				throw new IOException(e);
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("rolling back import");
-			rollBackImport(Main.volume.getPath() + File.separator + sdest);
-			SDFSLogger.getLog().warn("Import rolled back");
-			throw new IOException(e);
+		} finally {
+			GCMain.gclock.unlock();
 		}
 
 	}
