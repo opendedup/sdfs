@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -68,8 +67,15 @@ public class MetaFileStore {
 	}
 
 	public static void rename(String src, String dst, MetaDataDedupFile mf) {
-		pathMap.remove(src);
-		pathMap.put(dst, mf);
+		getMFLock.lock();
+		try {
+			SDFSLogger.getLog().info("removing [" + dst +"] and replacing with [" + src + "]");
+			pathMap.remove(src);
+			pathMap.remove(dst);
+			pathMap.put(dst, mf);
+		} finally {
+			getMFLock.unlock();
+		}
 	}
 
 	/**
@@ -110,12 +116,12 @@ public class MetaFileStore {
 			getMFLock.unlock();
 		}
 	}
-	
+
 	public static MetaDataDedupFile getFolder(File f) {
 		getMFLock.lock();
 		try {
-				return MetaDataDedupFile.getFile(f.getPath());
-		}finally {
+			return MetaDataDedupFile.getFile(f.getPath());
+		} finally {
 			getMFLock.unlock();
 		}
 	}
@@ -213,10 +219,9 @@ public class MetaFileStore {
 	 * @param guid
 	 *            the guid for the MetaDataDedupFile
 	 */
-	private static ReentrantLock removeMFLock = new ReentrantLock();
 
 	public static boolean removeMetaFile(String path) {
-		removeMFLock.lock();
+		getMFLock.lock();
 		try {
 			MetaDataDedupFile mf = null;
 			boolean deleted = false;
@@ -295,7 +300,7 @@ public class MetaFileStore {
 			mf = null;
 			return deleted;
 		} finally {
-			removeMFLock.unlock();
+			getMFLock.unlock();
 		}
 	}
 

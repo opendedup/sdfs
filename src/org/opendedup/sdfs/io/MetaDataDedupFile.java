@@ -777,8 +777,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else if (f.isDirectory()) {
 			return f.renameTo(new File(dest));
 		} else {
+			if(f.exists()) {
+				SDFSLogger.getLog().info("destination file exists, deleting");
+				MetaFileStore.removeMetaFile(dest);
+			}
 			boolean rename = f.renameTo(new File(dest));
 			if (rename) {
+				SDFSLogger.getLog().info("FileSystem rename succesful");
 				MetaFileStore.rename(this.path, dest, this);
 				this.path = dest;
 				this.unmarshal();
