@@ -442,6 +442,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = null;
 			
 			try {
+				SDFSLogger.getLog().debug("renaming [" + from + "] to [" +to +"]");
 				f = resolvePath(from);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.renameTo(this.mountedVolume + to);
@@ -553,6 +554,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// SDFSLogger.getLog().info("18");
 		// Thread.currentThread().setName("19 "+Long.toString(System.currentTimeMillis()));
 		try {
+			SDFSLogger.getLog().debug("removing " + path);
 			if (this.getFtype(path) == FuseFtype.TYPE_SYMLINK) {
 				File f = new File(mountedVolume + path);
 				if (!f.delete())
