@@ -1,3 +1,9 @@
+Version 1.1.7
+	Fixes:
+	* Critical issue with linux MV command
+	Enhancements
+	* snappy compression is used for replication
+	* increased replication buffer
 Version 1.1.6
 	Fixes:
 	* Cloud Storage increments length correctly now. 
