@@ -53,7 +53,12 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if(cmd.hasOption("import-archive")) {
-			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),quiet);
+			String server = cmd.getOptionValue("replication-master");
+			String password = cmd.getOptionValue("replication-master-password");
+			int port = 2222;
+			if(cmd.hasOption("replication-master-port"))
+				port = Integer.parseInt(cmd.getOptionValue("replication-master-port"));
+			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),server,password,port,quiet);
 		}
 		if (cmd.hasOption("archive-out")) {
 			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"));
@@ -170,7 +175,25 @@ public class SDFSCmdline {
 				.withLongOpt("import-archive")
 				.withDescription(
 						"Imports an archive created using archive out.\n e.g. --import-archive <archive created with archive-out> "
-								+ "--file-path=<relative-folder-destination> ")
+								+ "--file-path=<relative-folder-destination> --replication-master=<server-ip> --replication-master-password=<server-password>")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-master")
+				.withDescription(
+						"The server associated with the archive imported "
+								+ "--replication-master=<server-ip> ")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-master-port")
+				.withDescription(
+						"The server port associated with the archive imported. This will default to \"2222\" "
+								+ "--replication-master-port=<tcp port> ")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-master-password")
+				.withDescription(
+						"The server password associated with the archive imported "
+								+ "--replication-master-password=<server-password> ")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")
