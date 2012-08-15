@@ -471,43 +471,30 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void copyTo(String npath, boolean overwrite) throws IOException {
 		String snaptoPath = new File(npath + File.separator + "files")
-				.getPath();
+				.getPath() + File.separator;
 		SDFSLogger.getLog().info("Copying to " + snaptoPath);
 		File f = new File(snaptoPath);
 		if (f.exists() && !overwrite)
 			throw new IOException("path exists [" + snaptoPath
 					+ "]Cannot overwrite existing data ");
 
-		if (!this.isDirectory()) {
+		SDFSLogger.getLog().debug("is snapshot dir");
+		if (!f.exists())
+			f.mkdirs();
+		String cpCmd = "cp -rf --preserve=mode,ownership,timestamps "
+				+ this.path + " " + snaptoPath;
+		Process p = Runtime.getRuntime().exec(cpCmd);
+		try {
+			int ecode = p.waitFor();
+			if (ecode != 0)
+				throw new IOException("unable to copy " + this.path
+						+ " cp exit code is " + ecode);
 
-			if (!f.getParentFile().exists())
-				f.getParentFile().mkdirs();
-
-			Path p = f.toPath();
-			Files.copy(new File(this.path).toPath(), p,
-					StandardCopyOption.REPLACE_EXISTING,
-					StandardCopyOption.COPY_ATTRIBUTES);
-
-			this.getDedupFile().copyTo(npath);
-		} else {
-			SDFSLogger.getLog().debug("is snapshot dir");
-			if (!f.exists())
-				f.mkdirs();
-			String cpCmd = "cp -rf --preserve=mode,ownership,timestamps "
-					+ this.path + " " + snaptoPath;
-			Process p = Runtime.getRuntime().exec(cpCmd);
-			try {
-				int ecode = p.waitFor();
-				if (ecode != 0)
-					throw new IOException("unable to copy " + this.path
-							+ " cp exit code is " + ecode);
-
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
-			MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
-			dmf.copyDir(npath);
+		} catch (Exception e) {
+			throw new IOException(e);
 		}
+		MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
+		dmf.copyDir(npath);
 	}
 
 	private void copyDir(String npath) throws IOException {
@@ -777,13 +764,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else if (f.isDirectory()) {
 			return f.renameTo(new File(dest));
 		} else {
-			if(f.exists()) {
-				SDFSLogger.getLog().info("destination file exists, deleting");
+			if (f.exists()) {
+				SDFSLogger.getLog().debug("destination file exists, deleting");
 				MetaFileStore.removeMetaFile(dest);
 			}
 			boolean rename = f.renameTo(new File(dest));
 			if (rename) {
-				SDFSLogger.getLog().info("FileSystem rename succesful");
+				SDFSLogger.getLog().debug("FileSystem rename succesful");
 				MetaFileStore.rename(this.path, dest, this);
 				this.path = dest;
 				this.unmarshal();

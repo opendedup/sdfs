@@ -10,7 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessImportArchiveCmd {
-	public static void runCmd(String archive, String path,String server,String password,int port,boolean quiet) throws IOException {
+	public static void runCmd(String archive, String path,String server,String password,int port,boolean quiet,int maxSz) throws IOException {
 			SDFSLogger.getBasicLog().debug("importing ["+archive+"] destination is ["+path+"]" + " server is [" + server +"] server password is [" + password + "] server port is [" + port + "]");
 			archive = URLEncoder.encode(archive, "UTF-8");
 			path = URLEncoder.encode(path, "UTF-8");
@@ -18,7 +18,7 @@ public class ProcessImportArchiveCmd {
 			password = URLEncoder.encode(password, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			formatter.format("file=%s&cmd=importarchive&options=%s&server=%s&spasswd=%s&port=%s", archive, path,server,password,Integer.toString(port));
+			formatter.format("file=%s&cmd=importarchive&options=%s&server=%s&spasswd=%s&port=%s&maxsz=%s", archive, path,server,password,Integer.toString(port),Integer.toString(maxSz));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			if (root.getAttribute("status").equals("failed"))

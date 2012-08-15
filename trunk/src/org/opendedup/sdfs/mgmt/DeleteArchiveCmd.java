@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.RandomGUID;
+import org.opendedup.util.SDFSLogger;
 
 public class DeleteArchiveCmd implements XtendedCmd {
 
@@ -19,6 +20,7 @@ public class DeleteArchiveCmd implements XtendedCmd {
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
 			boolean removed = f.delete();
+			SDFSLogger.getLog().debug("deleted archive " + file);
 			if(removed)
 				return "removed [" + file + "]";
 			else

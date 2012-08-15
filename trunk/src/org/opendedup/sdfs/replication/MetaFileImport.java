@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+import java.io.Serializable;
 
 
 import java.io.IOException;
@@ -15,31 +16,45 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
-public class MetaFileImport {
-	private long files = 0;
-	private ArrayList<String> hashes = null;
-	private static int MAX_SZ = ((30*1024*1024)/Main.CHUNK_LENGTH);
+public class MetaFileImport implements Serializable{
+	private static final long serialVersionUID = 2281680761909041919L;
+	private long filesProcessed = 0;
+	private transient ArrayList<String> hashes = null;
+	private int MAX_SZ = ((30*1024*1024)/Main.CHUNK_LENGTH);
 	boolean corruption = false;
 	private long entries = 0;
+	private long bytesTransmitted;
+	private long virtualBytesTransmitted;
+	private String server = null;
+	private transient String password= null;
+	private int port = 2222;
+	long startTime = 0;
+	long endTime = 0;
 
-	public MetaFileImport(String path) throws IOException {
+	public MetaFileImport(String path,String server,String password,int port,int maxSz) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
+		if(maxSz >0)
+			MAX_SZ = (maxSz * 1024*1024)/Main.CHUNK_LENGTH;
 		hashes = new ArrayList<String>();
-		long start = System.currentTimeMillis();
+		startTime = System.currentTimeMillis();
 		File f = new File(path);
-		
+		this.server = server;
+		this.password = password;
+		this.port = port;
 		this.traverse(f);
 		if(hashes.size() != 0) {
 			try {
-				HCServiceProxy.fetchChunks(hashes);
+				HCServiceProxy.fetchChunks(hashes,server,password,port);
+				this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 			} catch(Exception e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import",e);
 				corruption = true;
 			}
 		}
+		endTime = System.currentTimeMillis();
 		SDFSLogger.getLog().info(
-				"took [" + (System.currentTimeMillis() - start) / 1000
-						+ "] seconds to import [" + files + "] files and [" + entries + "] blocks.");
+				"took [" + (System.currentTimeMillis() - startTime) / 1000
+						+ "] seconds to import [" + filesProcessed + "] files and [" + entries + "] blocks.");
 	}
 
 	
@@ -63,6 +78,7 @@ public class MetaFileImport {
 
 	private void checkDedupFile(File metaFile) throws IOException {
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
+		mf.getIOMonitor().clearAllCounters();
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
 			File mapFile = new File(Main.dedupDBStore + File.separator
@@ -82,15 +98,20 @@ public class MetaFileImport {
 						if (!ck.isLocalData()) {
 							boolean exists = HCServiceProxy.localHashExists(ck
 									.getHash());
+							mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH);
 							if (!exists) {
 								hashes.add(StringUtils.getHexString(ck.getHash()));
-								entries ++;
+								entries++;
+								mf.getIOMonitor().addActualBytesWritten(Main.CHUNK_LENGTH);
+							} else {
+								mf.getIOMonitor().addDulicateBlock();
 							}
 							if(hashes.size()>=MAX_SZ) {
 								try {
 									SDFSLogger.getLog().debug("fetching " + hashes.size() + " blocks");
-									HCServiceProxy.fetchChunks(hashes);
+									HCServiceProxy.fetchChunks(hashes,server,password,port);
 									SDFSLogger.getLog().debug("fetched " + hashes.size() + " blocks");
+									this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 									hashes = null;
 									hashes = new ArrayList<String>();
 								} catch(Exception e) {
@@ -101,16 +122,13 @@ public class MetaFileImport {
 						}
 					}
 				}
+				Main.volume.updateCurrentSize(mf.length());
 				if (corruption) {
 					MetaFileStore.removeMetaFile(mf.getPath());
 						throw new IOException(
 								"Unable to continue MetaFile Import because there are too many missing blocks");
 
-				} else {
-					Main.volume.addVirtualBytesWritten(mf.length());
-					Main.volume.updateCurrentSize(mf.getIOMonitor()
-							.getVirtualBytesWritten());
-				}
+				} 
 			} catch (Exception e) {
 				SDFSLogger.getLog()
 						.warn("error while checking file [" + mapFile.getPath()
@@ -119,9 +137,69 @@ public class MetaFileImport {
 			} finally {
 				mp.close();
 				mp = null;
+				this.virtualBytesTransmitted = this.virtualBytesTransmitted + mf.length();
+				
 			}
 		}
-		this.files++;
+		this.filesProcessed++;
 
+	}
+	
+	public long getFilesProcessed() {
+		return filesProcessed;
+	}
+
+
+
+	public int getMAX_SZ() {
+		return MAX_SZ;
+	}
+
+
+
+	public boolean isCorruption() {
+		return corruption;
+	}
+
+
+
+	public long getEntries() {
+		return entries;
+	}
+
+
+
+	public long getBytesTransmitted() {
+		return bytesTransmitted;
+	}
+
+
+
+	public long getVirtualBytesTransmitted() {
+		return virtualBytesTransmitted;
+	}
+
+
+
+	public String getServer() {
+		return server;
+	}
+
+
+
+	public int getPort() {
+		return port;
+	}
+
+
+
+	public long getStartTime() {
+		return startTime;
+	}
+
+
+
+	public long getEndTime() {
+		return endTime;
 	}
 }

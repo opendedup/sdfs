@@ -6,20 +6,20 @@ import org.opendedup.sdfs.replication.ArchiveImporter;
 import org.opendedup.util.SDFSLogger;
 
 
-public class ImportArchiveCmd implements XtendedCmd {
+public class ImportArchiveCmd {
 
-	@Override
-	public String getResult(String archive, String dest) throws IOException {
-		return importArchive(archive,dest);
+
+	public String getResult(String archive, String dest,String server,String password,int port,int maxSz) throws IOException {
+		return importArchive(archive,dest,server,password,port,maxSz);
 	}
 
-	private String importArchive(String archive,String dest)
+	private String importArchive(String archive,String dest,String server,String password,int port,int maxSz)
 			throws IOException {
+		String sc = " not successful";
 		try {
-			ArchiveImporter.importArchive(archive, dest);
-			String st ="import archive ["
-									+ archive + "] " + "Destination [" + dest
-									+ "]";
+			String st =ArchiveImporter.importArchive(archive, dest,server,password,port,maxSz);
+			sc = "successful";
+			SDFSLogger.getLog().info("Exited Replication task [" +sc +"]");
 			return st;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
@@ -30,6 +30,9 @@ public class ImportArchiveCmd implements XtendedCmd {
 					"Unable to import archive ["
 							+ archive + "] " + "Destination [" + dest
 							+ "] because :" + e.toString());
+		}
+		finally {
+			SDFSLogger.getLog().info("Exited Replication task [" +sc +"]");
 		}
 	}
 

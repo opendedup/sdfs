@@ -301,6 +301,7 @@ public class DSEConfigWriter {
 				Boolean.toString(this.chunk_store_pre_allocate));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
 		cs.setAttribute("eviction-age",
 				Integer.toString(this.remove_if_older_than));

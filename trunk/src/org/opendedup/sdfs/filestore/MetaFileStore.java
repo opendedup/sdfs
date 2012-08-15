@@ -69,7 +69,7 @@ public class MetaFileStore {
 	public static void rename(String src, String dst, MetaDataDedupFile mf) {
 		getMFLock.lock();
 		try {
-			SDFSLogger.getLog().info("removing [" + dst +"] and replacing with [" + src + "]");
+			SDFSLogger.getLog().debug("removing [" + dst +"] and replacing with [" + src + "]");
 			pathMap.remove(src);
 			pathMap.remove(dst);
 			pathMap.put(dst, mf);
@@ -184,8 +184,8 @@ public class MetaFileStore {
 						origionalPath
 								+ " does not exist. Cannot take a snapshot of a non-existent file.");
 			synchronized (mf) {
-				MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
-				return _mf;
+					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
+					return _mf;
 			}
 		}
 	}

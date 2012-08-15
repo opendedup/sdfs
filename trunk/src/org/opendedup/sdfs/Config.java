@@ -123,6 +123,8 @@ public class Config {
 				Main.chunkStoreEncryptionKey = cbe
 						.getAttribute("encryption-key");
 			}
+			if (cbe.hasAttribute("max-repl-batch-sz"))
+				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
@@ -281,6 +283,9 @@ public class Config {
 				Main.chunkStoreConfig = (Element) localChunkStore
 						.getElementsByTagName("extended-config").item(0);
 			}
+			if (localChunkStore.hasAttribute("max-repl-batch-sz"))
+				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore
+						.getAttribute("max-repl-batch-sz"));
 
 			Main.evictionAge = Integer.parseInt(localChunkStore
 					.getAttribute("eviction-age"));

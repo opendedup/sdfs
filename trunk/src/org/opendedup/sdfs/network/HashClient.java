@@ -31,12 +31,13 @@ public class HashClient {
 	private boolean closed = false;
 	private HCServer server;
 	private String name = "";
+	private String password = "";
 
 	private ReentrantLock lock = new ReentrantLock();
 
 	// private LRUMap existsBuffers = new LRUMap(10);
 
-	public HashClient(HCServer server, String name) {
+	public HashClient(HCServer server, String name,String password) {
 		this.server = server;
 		this.name = name;
 		this.openConnection();
@@ -70,7 +71,7 @@ public class HashClient {
 					clientSocket.getInputStream()));
 			// Read the Header Line
 			inReader.readLine();
-			String passwdMessage = Main.upStreamPassword
+			String passwdMessage = password
 			+ "\r\n";
 			os.write(passwdMessage.getBytes());
 			os.flush();
@@ -78,6 +79,7 @@ public class HashClient {
 			if(auth == 0)
 				throw new IOException("unable to authenticate chech upstream password");
 			this.closed = false;
+			SDFSLogger.getLog().debug("hashclient connection established " + clientSocket.toString());
 		} catch (UnknownHostException e) {
 			SDFSLogger.getLog().fatal("Don't know about host " + server);
 			this.closed = true;

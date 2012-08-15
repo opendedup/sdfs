@@ -358,7 +358,7 @@ public class LongByteArrayMap implements AbstractMap {
 		FileChannel dstC = null;
 		try {
 			this.sync();
-			SDFSLogger.getLog().info("copying to " + destFilePath);
+			SDFSLogger.getLog().debug("copying to " + destFilePath);
 			File dest = new File(destFilePath);
 			File src = new File(this.filePath);
 			if (dest.exists())

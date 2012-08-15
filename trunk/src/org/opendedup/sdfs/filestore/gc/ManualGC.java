@@ -1,6 +1,6 @@
 package org.opendedup.sdfs.filestore.gc;
 
-import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.ThreadedFDisk;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -24,7 +24,7 @@ public class ManualGC {
 				GCMain.lock();
 				long tm = System.currentTimeMillis();
 				SDFSEvent.gcInfoEvent("SDFS Volume Cleanup Initiated");
-				new FDisk();
+				new ThreadedFDisk();
 				if (Main.chunkStoreLocal) {
 					HashChunkService.processHashClaims();
 					return HashChunkService.removeStailHashes(tm

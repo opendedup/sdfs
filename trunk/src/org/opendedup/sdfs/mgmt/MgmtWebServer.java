@@ -64,6 +64,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("deletefile")) {
 						try {
@@ -75,6 +76,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}else if (cmd.equalsIgnoreCase("deletearchive")) {
 						try {
@@ -86,6 +88,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} 
 					else if (cmd.equalsIgnoreCase("makefolder")) {
@@ -98,6 +101,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}
 
@@ -119,6 +123,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("dse-info")) {
 						try {
@@ -130,6 +135,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
@@ -141,6 +147,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} 
 					else if (cmd.equalsIgnoreCase("debug-info")) {
@@ -153,6 +160,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}else if (cmd.equalsIgnoreCase("events")) {
 						try {
@@ -164,6 +172,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}
 					else if (cmd.equalsIgnoreCase("volume-info")) {
@@ -176,6 +185,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("changepassword")) {
 						try {
@@ -186,6 +196,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("snapshot")) {
 						try {
@@ -196,15 +207,23 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("importarchive")) {
 						try {
-							String msg = new ImportArchiveCmd().getResult(file,cmdOptions);
-							result = "<result status=\"success\" msg=\"" + msg
-									+ "\"/>";
+							String server = request.getQuery().get("server");
+							String password = request.getQuery().get("spasswd");
+							int port = Integer.parseInt(request.getQuery().get("port"));
+							int maxSz = 30;
+							if(request.getQuery().containsKey("maxsz"))
+								maxSz = Integer.parseInt(request.getQuery().get("maxsz"));
+							String msg = new ImportArchiveCmd().getResult(file,cmdOptions,server,password,port,maxSz);
+							result = "<result status=\"success\" msg=\"replication finished successfully\">";
+							result = result + msg + "</result>";
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
@@ -215,6 +234,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}
 
@@ -228,6 +248,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("flush")) {
 						try {
@@ -238,6 +259,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("expandvolume")) {
 						try {
@@ -249,6 +271,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("volumeconfigpath")) {
 						try {
@@ -258,6 +281,7 @@ public class MgmtWebServer implements Container {
 						} catch (java.lang.NullPointerException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("makevmdk")) {
 						try {
@@ -268,6 +292,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("dedup")) {
 						try {
@@ -278,6 +303,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("cleanstore")) {
 						try {
@@ -288,6 +314,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result = "<result status=\"failed\" msg=\""
 									+ e.getMessage() + "\"/>";
+							SDFSLogger.getLog().warn(e);
 						}
 					}
 				}

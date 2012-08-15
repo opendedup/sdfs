@@ -135,9 +135,9 @@ public class HCServiceProxy {
 		} return exists;
 	}
 	
-	public static void fetchChunks(ArrayList<String> hashes) throws IOException, HashtableFullException {
+	public static void fetchChunks(ArrayList<String> hashes,String server,String password,int port) throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
-			HashChunkService.remoteFetchChunks(hashes);
+			HashChunkService.remoteFetchChunks(hashes,server,password,port);
 		} else {
 			throw new IllegalStateException("not implemented for remote chunkstores");
 		}

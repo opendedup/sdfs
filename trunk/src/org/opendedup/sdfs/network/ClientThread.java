@@ -39,7 +39,7 @@ class ClientThread extends Thread {
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	private static int MAX_SZ = (40*1024*1024)/Main.CHUNK_LENGTH;
+	private static int MAX_BATCH_SZ = (Main.MAX_REPL_BATCH_SZ*1024*1024)/Main.CHUNK_LENGTH;
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -83,7 +83,7 @@ class ClientThread extends Thread {
 			while (true) {
 					byte cmd = is.readByte();
 					if (cmd == NetworkCMDS.QUIT_CMD) {
-						SDFSLogger.getLog().info(
+						SDFSLogger.getLog().debug(
 								"Quiting Client Network Thread");
 						break;
 					}
@@ -196,9 +196,9 @@ class ClientThread extends Thread {
 						@SuppressWarnings("unchecked")
 						ArrayList<String> hashes = (ArrayList<String>)obj_in.readObject();
 						String hash = null;
-						if(hashes.size() > MAX_SZ){
+						if(hashes.size() > MAX_BATCH_SZ){
 							SDFSLogger.getLog().warn(
-									"requested hash list to long " + hashes.size() + " > " + MAX_SZ);
+									"requested hash list to long " + hashes.size() + " > " + MAX_BATCH_SZ);
 							try {
 								writelock.lock();
 								os.writeInt(-1);
