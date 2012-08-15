@@ -494,6 +494,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
 		cs.setAttribute("chunk-store-read-cache",
 				Integer.toString(this.chunk_store_read_cache));
+		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("chunk-store-dirty-timeout",
 				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -991,7 +992,7 @@ public class VolumeConfigWriter {
 		long _mem = ((long) (_dmem * 100));
 		if (_mem > 2000)
 			_mem = 2000;
-		return _mem;
+		return _mem+Main.MAX_REPL_BATCH_SZ;
 	}
 
 }

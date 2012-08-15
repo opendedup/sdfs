@@ -289,17 +289,19 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						if (!corrupt) {
 							long value = cm.getcPos();
 							if (cm.ismDelete()) {
-								SDFSLogger.getLog().debug("chunk is deleted");
+								//SDFSLogger.getLog().debug("chunk is deleted");
 								this.addFreeSlot(cm.getcPos());
 								freeSl++;
 							} else {
 								boolean added = this.put(cm, false);
+								/*
 								SDFSLogger.getLog().debug(
 										"added "
 												+ StringUtils.getHexString(cm
 														.getHash())
 												+ " position is "
 												+ cm.getcPos());
+								*/
 								if (added)
 									this.kSz++;
 								if (value > endPos)

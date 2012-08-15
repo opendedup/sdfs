@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.replication;
 
 import de.schlichtherle.truezip.file.TFile;
+
 import java.io.*;
 
 import org.opendedup.sdfs.Main;
@@ -12,14 +13,14 @@ import org.opendedup.util.SDFSLogger;
 
 public class ArchiveImporter {
 
-	public static void importArchive(String srcArchive, String dest)
+	public static String importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz)
 			throws IOException {
 		try {
 			GCMain.gclock.lock();
 
 			File f = new File(srcArchive);
 			String sdest = dest + "." + RandomGUID.getGuid();
-			SDFSLogger.getLog().info("Importing " + srcArchive + " to " + dest);
+			SDFSLogger.getLog().info("Importing " + srcArchive + " from " +server+":" + port+ " to " + dest);
 			if (!f.exists())
 				throw new IOException("File does not exist " + srcArchive);
 			TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
@@ -36,7 +37,7 @@ public class ArchiveImporter {
 			TFile.umount(srcFiles.getInnerArchive());
 			try {
 				MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
-						+ File.separator + sdest);
+						+ File.separator + sdest,server,password,port,maxSz);
 				if (imp.isCorrupt()) {
 					SDFSLogger.getLog().warn("Import failed for " + srcArchive);
 					SDFSLogger.getLog().warn("rolling back import");
@@ -46,15 +47,25 @@ public class ArchiveImporter {
 					throw new IOException(
 							"uable to import files: There are files that are missing blocks");
 				} else {
-					try {
 						commitImport(Main.volume.getPath() + File.separator
 								+ dest, Main.volume.getPath() + File.separator
 								+ sdest);
-					} catch (IOException e) {
-						rollBackImport(Main.volume.getPath() + File.separator
-								+ sdest);
-						throw e;
-					}
+						StringBuffer sb = new StringBuffer();
+						sb.append("<replication-import ");
+						sb.append("src=\""+srcArchive+ "\" ");
+						sb.append("dest=\""+dest+ "\" ");
+						sb.append("srcserver=\""+server+ "\" ");
+						sb.append("srcserverport=\""+port+ "\" ");
+						sb.append("batchsize=\""+maxSz+ "\" ");
+						sb.append("filesimported=\""+imp.getFilesProcessed()+ "\" ");
+						sb.append("bytesimported=\""+imp.getBytesTransmitted()+ "\" ");
+						sb.append("entriesimported=\""+imp.getEntries()+ "\" ");
+						sb.append("virtualbytesimported=\""+imp.getVirtualBytesTransmitted()+ "\" ");
+						sb.append("starttime=\""+imp.getStartTime()+ "\" ");
+						sb.append("endtime=\""+imp.getEndTime()+ "\" ");
+						sb.append("volume=\""+Main.volume.getName()+ "\" ");
+						sb.append("/>");
+						return sb.toString();
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("rolling back import");

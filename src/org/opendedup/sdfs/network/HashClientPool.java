@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServer;
 import org.opendedup.util.SDFSLogger;
 
@@ -102,7 +103,7 @@ public class HashClientPool {
 	}
 
 	public HashClient makeObject() {
-		HashClient hc = new HashClient(this.server, "server");
+		HashClient hc = new HashClient(this.server, "server",Main.upStreamPassword);
 		hc.openConnection();
 		return hc;
 	}

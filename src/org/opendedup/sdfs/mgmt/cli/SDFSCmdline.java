@@ -56,9 +56,12 @@ public class SDFSCmdline {
 			String server = cmd.getOptionValue("replication-master");
 			String password = cmd.getOptionValue("replication-master-password");
 			int port = 2222;
+			int maxSz = -1;
 			if(cmd.hasOption("replication-master-port"))
 				port = Integer.parseInt(cmd.getOptionValue("replication-master-port"));
-			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),server,password,port,quiet);
+			if(cmd.hasOption("replication-batch-size"))
+				maxSz = Integer.parseInt(cmd.getOptionValue("replication-batch-size"));
+			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),server,password,port,quiet,maxSz);
 		}
 		if (cmd.hasOption("archive-out")) {
 			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"));
@@ -182,6 +185,13 @@ public class SDFSCmdline {
 				.withDescription(
 						"The server associated with the archive imported "
 								+ "--replication-master=<server-ip> ")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("replication-batch-size")
+				.withDescription(
+						"The size,in MB, of the batch that the relication client will request from the replication master. If ignored or set to <1 it will default " +
+						"to the what ever is on the replication client volume as the default. This is currently 30 MB. This will default to \"-1\" "
+								+ "--replication-batch-size=<size in MB> ")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-master-port")

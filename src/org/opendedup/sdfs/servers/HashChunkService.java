@@ -121,20 +121,19 @@ public class HashChunkService {
 		return hs.hashExists(hash);
 	}
 	
-	public static void remoteFetchChunks(ArrayList<String> al) throws IOException, HashtableFullException {
-		if (Main.upStreamDSEHostEnabled) {
-			HashClient hc = null;
+	public static void remoteFetchChunks(ArrayList<String> al,String server,String password,int port) throws IOException, HashtableFullException {
+			HCServer hserver = new HCServer(server,port,false,false);
+			HashClient hc = new HashClient(hserver,"replication",password);
 			try {
-				hc = hcPool.borrowObject();
+				
 				ArrayList<HashChunk> hck = hc.fetchChunks(al);
 				for(int i=0;i<hck.size();i++) {
 					HashChunk _hc = hck.get(i);
 					writeChunk(_hc.getName(), _hc.getData(), 0, _hc.getData().length, false);
 				}
 			} finally {
-				hcPool.returnObject(hc);
+				hc.close();
 			}
-		}
 	}
 
 	public static boolean hashExists(byte[] hash, short hops)

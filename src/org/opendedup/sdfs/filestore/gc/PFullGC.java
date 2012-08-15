@@ -63,6 +63,8 @@ public class PFullGC implements GCControllerImpl {
 		else {
 			next = Math.ceil(next * 100.0)/10;
 		}
+		if(next == 0)
+			next = .1;
 		return next;
 	}
 

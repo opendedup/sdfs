@@ -36,7 +36,6 @@ public class FDisk {
 	}
 
 	private void traverse(File dir) throws IOException {
-
 		if (dir.isDirectory()) {
 			try {
 				String[] children = dir.list();
