@@ -8,9 +8,9 @@ import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class GetDSE implements XtendedCmd {
+public class GetDSE {
 
-	public String getResult(String cmd, String file) throws IOException {
+	public Element getResult(String cmd, String file) throws IOException {
 		try {
 			Document doc = XMLUtils.getXMLDoc("dse");
 			Element root = doc.getDocumentElement();
@@ -26,7 +26,7 @@ public class GetDSE implements XtendedCmd {
 					Long.toString(HashChunkService.getFreeBlocks()));
 			root.setAttribute("page-size",
 					Long.toString(HashChunkService.getPageSize()));
-			return XMLUtils.toXMLString(doc);
+			return (Element)root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fulfill request on file " + file, e);

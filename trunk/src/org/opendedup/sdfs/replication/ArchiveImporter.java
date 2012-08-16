@@ -2,7 +2,11 @@ package org.opendedup.sdfs.replication;
 
 import de.schlichtherle.truezip.file.TFile;
 
+
 import java.io.*;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -10,10 +14,13 @@ import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class ArchiveImporter {
 
-	public static String importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz)
+	public static Element importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz)
 			throws IOException {
 		try {
 			GCMain.gclock.lock();
@@ -50,22 +57,30 @@ public class ArchiveImporter {
 						commitImport(Main.volume.getPath() + File.separator
 								+ dest, Main.volume.getPath() + File.separator
 								+ sdest);
-						StringBuffer sb = new StringBuffer();
-						sb.append("<replication-import ");
-						sb.append("src=\""+srcArchive+ "\" ");
-						sb.append("dest=\""+dest+ "\" ");
-						sb.append("srcserver=\""+server+ "\" ");
-						sb.append("srcserverport=\""+port+ "\" ");
-						sb.append("batchsize=\""+maxSz+ "\" ");
-						sb.append("filesimported=\""+imp.getFilesProcessed()+ "\" ");
-						sb.append("bytesimported=\""+imp.getBytesTransmitted()+ "\" ");
-						sb.append("entriesimported=\""+imp.getEntries()+ "\" ");
-						sb.append("virtualbytesimported=\""+imp.getVirtualBytesTransmitted()+ "\" ");
-						sb.append("starttime=\""+imp.getStartTime()+ "\" ");
-						sb.append("endtime=\""+imp.getEndTime()+ "\" ");
-						sb.append("volume=\""+Main.volume.getName()+ "\" ");
-						sb.append("/>");
-						return sb.toString();
+						DocumentBuilderFactory factory = DocumentBuilderFactory
+								.newInstance();
+						DocumentBuilder builder;
+						builder = factory.newDocumentBuilder();
+
+						DOMImplementation impl = builder.getDOMImplementation();
+						// Document.
+						Document doc = impl.createDocument(null, "replication-import", null);
+						// Root element.
+						Element root = doc.getDocumentElement();
+						root.setAttribute("src", srcArchive);
+						root.setAttribute("dest", dest);
+						root.setAttribute("srcserver", server);
+						root.setAttribute("srcserverport", Integer.toString(port));
+						root.setAttribute("batchsize", Integer.toString(maxSz));
+						root.setAttribute("filesimported", Long.toString(imp.getFilesProcessed()));
+						root.setAttribute("bytesimported", Long.toString(imp.getBytesTransmitted()));
+						root.setAttribute("entriesimported", Long.toString(imp.getEntries()));
+						root.setAttribute("virtualbytesimported", Long.toString(imp.getVirtualBytesTransmitted()));
+						root.setAttribute("starttime", Long.toString(imp.getStartTime()));
+						root.setAttribute("endtime", Long.toString(imp.getEndTime()));
+						root.setAttribute("volume", Main.volume.getName());
+						root.setAttribute("volumeconfig", Main.wth.getConfigFilePath());
+						return (Element)root.cloneNode(true);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("rolling back import");

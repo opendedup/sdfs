@@ -108,6 +108,15 @@ public class IOMonitor implements java.io.Serializable {
 		this.virtualBytesWritten = 0;
 		this.updateLock.unlock();
 	}
+	
+	public void clearFileCounters() {
+		this.updateLock.lock();
+		this.bytesRead = 0;
+		this.duplicateBlocks = 0;
+		this.actualBytesWritten = 0;
+		this.virtualBytesWritten = 0;
+		this.updateLock.unlock();
+	}
 
 	public void addDulicateBlock() {
 		this.updateLock.lock();

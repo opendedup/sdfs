@@ -78,7 +78,7 @@ public class MetaFileImport implements Serializable{
 
 	private void checkDedupFile(File metaFile) throws IOException {
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
-		mf.getIOMonitor().clearAllCounters();
+		mf.getIOMonitor().clearFileCounters();
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
 			File mapFile = new File(Main.dedupDBStore + File.separator

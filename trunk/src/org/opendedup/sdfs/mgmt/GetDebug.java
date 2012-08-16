@@ -19,9 +19,9 @@ import java.lang.management.ManagementFactory;
 
 import java.io.File;
 
-public class GetDebug implements XtendedCmd {
+public class GetDebug {
 
-	public String getResult(String cmd, String file) throws IOException {
+	public Element getResult(String cmd, String file) throws IOException {
 		try {
 			Document doc = XMLUtils.getXMLDoc("debug");
 			Element root = doc.getDocumentElement();
@@ -49,7 +49,7 @@ public class GetDebug implements XtendedCmd {
 			
 			
 			
-			return XMLUtils.toXMLString(doc);
+			return (Element)root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fulfill request on file " + file, e);
