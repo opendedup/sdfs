@@ -11,9 +11,9 @@ import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class GetAttributes implements XtendedCmd {
+public class GetAttributes {
 
-	public String getResult(String cmd, String file) throws IOException {
+	public Element getResult(String cmd, String file) throws IOException {
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
 		if (!f.exists())
@@ -29,7 +29,7 @@ public class GetAttributes implements XtendedCmd {
 					Element fe = mf.toXML(doc);
 					root.appendChild(fe);
 				}
-				return XMLUtils.toXMLString(doc);
+				return (Element)root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);
@@ -44,7 +44,7 @@ public class GetAttributes implements XtendedCmd {
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
 				root.appendChild(fe);
-				return XMLUtils.toXMLString(doc);
+				return (Element)root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);

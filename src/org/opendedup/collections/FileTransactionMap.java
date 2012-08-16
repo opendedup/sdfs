@@ -3,22 +3,20 @@ package org.opendedup.collections;
 import java.io.IOException;
 
 
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.BitSet;
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.HashFunctions;
 import org.opendedup.util.SDFSLogger;
 
 //import com.ning.compress.lzf.LZFDecoder;
 //import com.ning.compress.lzf.LZFEncoder;
 
-public class ByteArrayLongMap {
+public class FileTransactionMap {
 	ByteBuffer values = null;
-	private BitSet claims = null;
 	ByteBuffer keys = null;
 	byte[] compValues = null;
 	byte[] compClaims = null;
@@ -27,19 +25,18 @@ public class ByteArrayLongMap {
 	private int entries = 0;
 
 	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
-	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
-	
+	public static byte[] FREE = new byte[Main.CHUNK_LENGTH];
+	public static byte[] REMOVED = new byte[Main.CHUNK_LENGTH];
 	private int iterPos = 0;
 
 	static {
-		FREE = new byte[HashFunctionPool.hashLength];
-		REMOVED = new byte[HashFunctionPool.hashLength];
+		FREE = new byte[Main.CHUNK_LENGTH];
+		REMOVED = new byte[Main.CHUNK_LENGTH];
 		Arrays.fill(FREE, (byte) 0);
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public ByteArrayLongMap(int size, short arraySize) throws IOException {
+	public FileTransactionMap(int size, short arraySize) throws IOException {
 		this.size = size;
 		this.setUp();
 	}
@@ -54,8 +51,6 @@ public class ByteArrayLongMap {
 
 	public byte[] nextKey() {
 		while (iterPos < size) {
-			this.hashlock.lock();
-			try {
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
 			keys.get(key);
@@ -63,61 +58,8 @@ public class ByteArrayLongMap {
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 				return key;
 			}
-			}finally {
-				this.hashlock.unlock();
-			}
 		}
 		return null;
-	}
-
-	public byte[] nextClaimedKey(boolean clearClaim) {
-		while (iterPos < size) {
-			this.hashlock.lock();
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * FREE.length);
-			try {
-				keys.get(key);
-				iterPos++;
-				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					boolean claimed = claims.get(iterPos - 1);
-					if (clearClaim) {
-						claims.clear(iterPos - 1);
-					}
-					if (claimed)
-						return key;
-				}
-			} catch (Exception e) {
-
-			} finally {
-				this.hashlock.unlock();
-			}
-		}
-		return null;
-	}
-
-	public long nextClaimedValue(boolean clearClaim) {
-		while (iterPos < size) {
-			long val = -1;
-			this.hashlock.lock();
-			values.position(iterPos * 8);
-			try {
-				val = values.getLong();
-				if (val >= 0) {
-					boolean claimed = claims.get(iterPos);
-					if (clearClaim) {
-						claims.clear(iterPos);
-					}
-					if (claimed)
-						return val;
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("error getting next claimed value at [" + iterPos + "]", e);
-			} finally {
-				iterPos++;
-				this.hashlock.unlock();
-			}
-		}
-		return -1;
 	}
 
 	/**
@@ -129,10 +71,10 @@ public class ByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public int setUp() throws IOException {
+		int kSz = 0;
 		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
-			claims = new BitSet(size);
 		} else {
 			byte[] keyB = new byte[size * FREE.length];
 			byte[] valueB = new byte[size * 8];
@@ -145,8 +87,8 @@ public class ByteArrayLongMap {
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
-			claims.clear();
 			// store.put((byte) 0);
+			kSz++;
 		}
 		this.compress();
 		this.derefByteArray();
@@ -162,7 +104,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			//keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
 			//values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
-			
 		}
 	}
 
@@ -170,7 +111,6 @@ public class ByteArrayLongMap {
 		if (Main.compressedIndex) {
 			keys = null;
 			values = null;
-			claims = null;
 		}
 	}
 
@@ -194,11 +134,10 @@ public class ByteArrayLongMap {
 			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
-				int pos = (index / FREE.length);
-				this.claims.set(pos);
 				return true;
 			}
 			return false;
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
@@ -208,51 +147,34 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	/**
-	 * Searches the set for <tt>obj</tt>
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return a <code>boolean</code> value
-	 */
-	public boolean isClaimed(byte[] key) {
+	public boolean update(byte[] key, long value, byte storeID)
+			throws IOException {
 		try {
 			this.hashlock.lock();
 			this.decompress();
-			int index = index(key);
-			if (index >= 0) {
-				int pos = (index / FREE.length);
-				boolean cl = this.claims.get(pos);
-				if (cl)
-					return true;
-			}
-			return false;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
-			return false;
-		} finally {
-			this.derefByteArray();
-			this.hashlock.unlock();
-		}
-	}
-
-	public boolean update(byte[] key, long value)
-			throws KeyNotFoundException {
-		try {
-			this.hashlock.lock();
 			int pos = this.index(key);
 			if (pos == -1) {
-				throw new KeyNotFoundException();
+				return false;
 			} else {
+				try {
 					keys.position(pos);
 					pos = (pos / FREE.length) * 8;
 					this.values.position(pos);
 					this.values.putLong(value);
-					pos = (pos / 8);
-					this.claims.set(pos);
+					// this.store.position(pos);
+					// this.store.put(storeID);
 					return true;
+				} catch (Exception e) {
+					throw e;
+				} finally {
+					this.compress();
+				}
 			}
-		}  finally {
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("error getting record", e);
+			return false;
+		} finally {
+			this.derefByteArray();
 			this.hashlock.unlock();
 		}
 	}
@@ -262,29 +184,22 @@ public class ByteArrayLongMap {
 			this.hashlock.lock();
 			this.decompress();
 			int pos = this.index(key);
-			boolean claimed = this.claims.get(pos / FREE.length);
-			if (pos == -1) {
-				return false;
-			} else if (claimed) {
-				return false;
-			} else {
-				try {
-					keys.position(pos);
-					keys.put(REMOVED);
-					pos = (pos / FREE.length) * 8;
-					this.values.position(pos);
-					this.values.putLong(-1);
-					pos = (pos / 8);
-					this.claims.clear(pos);
-					// this.store.position(pos);
-					// this.store.put((byte)0);
-					this.entries = entries - 1;
-					return true;
-				} catch (Exception e) {
-					throw e;
-				} finally {
-					this.compress();
-				}
+
+			try {
+				keys.position(pos);
+				keys.put(REMOVED);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.position(pos);
+				this.values.putLong(-1);
+				// this.store.position(pos);
+				// this.store.put((byte)0);
+				this.entries = entries - 1;
+				return true;
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				this.compress();
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -312,11 +227,11 @@ public class ByteArrayLongMap {
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
 	 */
 	protected int index(byte[] key) {
-		// From here on we know obj to be non-null
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
+		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -329,53 +244,48 @@ public class ByteArrayLongMap {
 			return -1;
 		}
 
-		return indexRehashed(key, index, hash, cur);
+		// NOTE: here it has to be REMOVED or FULL (some user-given value)
+		if (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)) {
+			// see Knuth, p. 529
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
+			int z = 0;
+			do {
+				z++;
+				index += (probe); // add the step
+				index %= (size * FREE.length); // for wraparound
+				cur = new byte[FREE.length];
+				keys.position(index);
+				keys.get(cur);
+				if (z > size) {
+					SDFSLogger.getLog().info(
+							"entries exhaused size=" + this.size + " entries="
+									+ this.entries);
+					return -1;
+				}
+			} while (!Arrays.equals(cur, FREE)
+					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
+		}
+
+		return Arrays.equals(cur, FREE) ? -1 : index;
 	}
 
 	/**
-	 * Locates the index of non-null <tt>obj</tt>.
+	 * Locates the index at which <tt>obj</tt> can be inserted. if there is
+	 * already a value equal()ing <tt>obj</tt> in the set, returns that value's
+	 * index as <tt>-index - 1</tt>.
 	 * 
 	 * @param obj
-	 *            target key, know to be non-null
-	 * @param index
-	 *            we start from
-	 * @param hash
-	 * @param cur
-	 * @return
+	 *            an <code>Object</code> value
+	 * @return the index of a FREE slot at which obj can be inserted or, if obj
+	 *         is already stored in the hash, the negative value of that index,
+	 *         minus 1: -index -1.
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) {
-
-		// NOTE: here it has to be REMOVED or FULL (some user-given value)
-		// see Knuth, p. 529
-		int length = size * FREE.length;
-		int probe = (1 + (hash % (size - 2))) * FREE.length;
-
-		final int loopIndex = index;
-
-		do {
-			index -= probe;
-			if (index < 0) {
-				index += length;
-			}
-			keys.position(index);
-			keys.get(cur);
-			//
-			if (Arrays.equals(cur, FREE)) {
-				return -1;
-			}
-			//
-			if (Arrays.equals(cur, key))
-				return index;
-		} while (index != loopIndex);
-
-		return -1;
-	}
-
 	protected int insertionIndex(byte[] key) {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash) * FREE.length;
+		// int stepSize = hashFunc2(hash);
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
@@ -384,70 +294,57 @@ public class ByteArrayLongMap {
 			return index; // empty, all done
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
-		}
-		return insertKeyRehash(key, index, hash, cur);
-	}
+		} else { // already FULL or REMOVED, must probe
+			// compute the double hash
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
-	/**
-	 * Looks for a slot using double hashing for a non-null key values and
-	 * inserts the value in the slot
-	 * 
-	 * @param key
-	 *            non-null key value
-	 * @param index
-	 *            natural index
-	 * @param hash
-	 * @param cur
-	 *            value of first matched slot
-	 * @return
-	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) {
-		final int length = size * FREE.length;
-		final int probe = (1 + (hash % (size - 2))) * FREE.length;
-
-		final int loopIndex = index;
-		int firstRemoved = -1;
-
-		/**
-		 * Look until FREE slot or we start to loop
-		 */
-		do {
-			// Identify first removed slot
-			if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
-				firstRemoved = index;
-
-			index -= probe;
-			if (index < 0) {
-				index += length;
+			// if the slot we landed on is FULL (but not removed), probe
+			// until we find an empty slot, a REMOVED slot, or an element
+			// equal to the one we are trying to insert.
+			// finding an empty slot means that the value is not present
+			// and that we should use that slot as the insertion point;
+			// finding a REMOVED slot means that we need to keep searching,
+			// however we want to remember the offset of that REMOVED slot
+			// so we can reuse it in case a "new" insertion (i.e. not an update)
+			// is possible.
+			// finding a matching value means that we've found that our desired
+			// key is already in the table
+			if (!Arrays.equals(cur, REMOVED)) {
+				// starting at the natural offset, probe until we find an
+				// offset that isn't full.
+				do {
+					index += (probe); // add the step
+					index %= (size * FREE.length); // for wraparound
+					cur = new byte[FREE.length];
+					keys.position(index);
+					keys.get(cur);
+				} while (!Arrays.equals(cur, FREE)
+						&& !Arrays.equals(cur, REMOVED)
+						&& !Arrays.equals(cur, key));
 			}
-			keys.position(index);
-			keys.get(cur);
 
-			// A FREE slot stops the search
-			if (Arrays.equals(cur, FREE)) {
-				if (firstRemoved != -1) {
-					return firstRemoved;
-				} else {
-					return index;
+			// if the index we found was removed: continue probing until we
+			// locate a free location or an element which equal()s the
+			// one we have.
+			if (Arrays.equals(cur, REMOVED)) {
+				int firstRemoved = index;
+				while (!Arrays.equals(cur, FREE)
+						&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur,
+								key))) {
+					index += (probe); // add the step
+					index %= (size * FREE.length); // for wraparound
+					cur = new byte[FREE.length];
+					keys.position(index);
+					keys.get(cur);
 				}
+				// NOTE: cur cannot == REMOVED in this block
+				return (!Arrays.equals(cur, FREE)) ? -index - 1 : firstRemoved;
 			}
-
-			if (Arrays.equals(cur, key)) {
-				return -index - 1;
-			}
-
-			// Detect loop
-		} while (index != loopIndex);
-
-		// We inspected all reachable slots and did not find a FREE one
-		// If we found a REMOVED slot we return the first one found
-		if (firstRemoved != -1) {
-			return firstRemoved;
+			// if it's full, the key is already stored
+			// NOTE: cur cannot equal REMOVE here (would have retuned already
+			// (see above)
+			return (!Arrays.equals(cur, FREE)) ? -index - 1 : index;
 		}
-
-		// Can a resizing strategy be found that resizes the set?
-		throw new IllegalStateException(
-				"No free or removed slots available. Key set full?!!");
 	}
 
 	public boolean put(byte[] key, long value, byte storeID) {
@@ -468,7 +365,6 @@ public class ByteArrayLongMap {
 				this.values.position(pos);
 				this.values.putLong(value);
 				pos = (pos / 8);
-				this.claims.set(pos);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 				this.entries = entries + 1;
@@ -492,12 +388,6 @@ public class ByteArrayLongMap {
 	}
 
 	public long get(byte[] key) {
-		return this.get(key, true);
-	}
-	
-	
-
-	public long get(byte[] key, boolean claim) {
 		try {
 			this.hashlock.lock();
 			this.decompress();
@@ -510,10 +400,6 @@ public class ByteArrayLongMap {
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long val = this.values.getLong();
-				if (claim) {
-					pos = (pos / 8);
-					this.claims.set(pos);
-				}
 				return val;
 			}
 		} catch (Exception e) {
@@ -530,5 +416,63 @@ public class ByteArrayLongMap {
 		return this.size;
 	}
 
-	
+	public static void main(String[] args) throws Exception {
+		FileTransactionMap b = new FileTransactionMap(1000000, (short) 16);
+		long start = System.currentTimeMillis();
+		Random rnd = new Random();
+		byte[] hash = null;
+		long val = -33;
+		byte[] hash1 = null;
+		long val1 = -33;
+		for (int i = 0; i < 60000; i++) {
+			byte[] z = new byte[64];
+			rnd.nextBytes(z);
+			hash = HashFunctions.getMD5ByteHash(z);
+			val = rnd.nextLong();
+			if (i == 55379) {
+				val1 = val;
+				hash1 = hash;
+			}
+			if (val < 0)
+				val = val * -1;
+			boolean k = b.put(hash, val, (byte) 1);
+			if (k == false)
+				System.out.println("Unable to add this " + k);
+
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
+		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
+				+ " ms at pos " + b.get(hash1));
+		b.iterInit();
+		int vals = 0;
+		byte[] key = new byte[16];
+		start = System.currentTimeMillis();
+		while (key != null) {
+			key = b.nextKey();
+			if (Arrays.equals(key, hash1))
+				System.out.println("found it! at " + vals);
+			vals++;
+		}
+
+		System.out.println("Took " + (System.currentTimeMillis() - start)
+				+ " ms " + vals);
+		b.iterInit();
+		key = new byte[16];
+		start = System.currentTimeMillis();
+		vals = 0;
+		while (key != null) {
+			if (Arrays.equals(key, hash1))
+				System.out.println("found it! at " + vals);
+			vals++;
+		}
+		System.out.println("Took " + (System.currentTimeMillis() - start)
+				+ " ms " + vals);
+		b.iterInit();
+		start = System.currentTimeMillis();
+		vals = 0;
+
+		System.out.println("Took " + (System.currentTimeMillis() - start)
+				+ " ms " + vals);
+	}
 }

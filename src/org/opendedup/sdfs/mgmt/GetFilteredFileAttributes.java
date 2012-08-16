@@ -20,7 +20,7 @@ public class GetFilteredFileAttributes {
 	public boolean includeFiles;
 	public boolean includeFolders;
 	public int level;
-	public String getResult(String cmd, String file,boolean includeFiles, boolean includeFolders, int level) throws IOException {
+	public Element getResult(String cmd, String file,boolean includeFiles, boolean includeFolders, int level) throws IOException {
 		this.level = level;
 		this.includeFiles = includeFiles;
 		this.includeFolders = includeFolders;
@@ -34,7 +34,8 @@ public class GetFilteredFileAttributes {
 				Element root = doc.getDocumentElement();
 				root.setAttribute("file-name", "SDFS Root");
 				this.traverse(doc, root,f);
-				return XMLUtils.toXMLString(doc);
+				
+				return (Element)root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);
@@ -49,7 +50,7 @@ public class GetFilteredFileAttributes {
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
 				root.appendChild(fe);
-				return XMLUtils.toXMLString(doc);
+				return (Element)root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);
