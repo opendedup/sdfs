@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
@@ -18,9 +17,6 @@ import org.opendedup.util.SDFSLogger;
 public class FileTransactionMap {
 	ByteBuffer values = null;
 	ByteBuffer keys = null;
-	byte[] compValues = null;
-	byte[] compClaims = null;
-	byte[] compKeys = null;
 	private int size = 0;
 	private int entries = 0;
 
@@ -71,24 +67,14 @@ public class FileTransactionMap {
 	 * @throws IOException
 	 */
 	public int setUp() throws IOException {
-		int kSz = 0;
-		if (!Main.compressedIndex) {
-			keys = ByteBuffer.allocateDirect(size * FREE.length);
-			values = ByteBuffer.allocateDirect(size * 8);
-		} else {
-			byte[] keyB = new byte[size * FREE.length];
-			byte[] valueB = new byte[size * 8];
-			byte[] claimsB = new byte[size];
-			//this.compKeys = LZFEncoder.encode(keyB);
-			//this.compValues = LZFEncoder.encode(valueB);
-			//this.compClaims = LZFEncoder.encode(claimsB);
-		}
+		keys = ByteBuffer.allocateDirect(size * FREE.length);
+		values = ByteBuffer.allocateDirect(size * 8);
+
 		this.decompress();
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
 			// store.put((byte) 0);
-			kSz++;
 		}
 		this.compress();
 		this.derefByteArray();
@@ -102,8 +88,8 @@ public class FileTransactionMap {
 
 	private void decompress() throws IOException {
 		if (Main.compressedIndex) {
-			//keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
-			//values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
+			// keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
+			// values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
 		}
 	}
 
@@ -116,8 +102,8 @@ public class FileTransactionMap {
 
 	private void compress() throws IOException {
 		if (Main.compressedIndex) {
-			//compKeys = LZFEncoder.encode(keys.array());
-			//compValues = LZFEncoder.encode(values.array());
+			// compKeys = LZFEncoder.encode(keys.array());
+			// compValues = LZFEncoder.encode(values.array());
 		}
 	}
 

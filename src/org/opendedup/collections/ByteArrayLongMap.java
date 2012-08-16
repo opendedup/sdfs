@@ -20,8 +20,6 @@ public class ByteArrayLongMap {
 	ByteBuffer values = null;
 	private BitSet claims = null;
 	ByteBuffer keys = null;
-	byte[] compValues = null;
-	byte[] compClaims = null;
 	byte[] compKeys = null;
 	private int size = 0;
 	private int entries = 0;
@@ -134,9 +132,6 @@ public class ByteArrayLongMap {
 			values = ByteBuffer.allocateDirect(size * 8);
 			claims = new BitSet(size);
 		} else {
-			byte[] keyB = new byte[size * FREE.length];
-			byte[] valueB = new byte[size * 8];
-			byte[] claimsB = new byte[size];
 			//this.compKeys = LZFEncoder.encode(keyB);
 			//this.compValues = LZFEncoder.encode(valueB);
 			//this.compClaims = LZFEncoder.encode(claimsB);
