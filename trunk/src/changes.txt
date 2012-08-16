@@ -1,8 +1,15 @@
 Version 1.1.8
 	Fixes:
-	* Fixed critical issue with replication of folders with non-english characters
+	* Fixed critical issue with replication of folders with special or non-english characters
+	* Fixed reporting of deduplication rate and capacity for replication on a file basis.
 	Enhancements:
 	* Added ability to replicate individual files.
+	* Added ability to change replication batch size with parameter "replication.batchsize" within the replication properties file
+	* Added parameter replication.master.dataport to the replication properties file
+	* Replication master information no longer needs to be set when volume is create on the slave. The replication master information is
+	  now set within the replication properties file. This means the slave can now replicate from multiple masters.
+	* Added replication.copies paramenter to allow a maximum number of replication copies kept on  the slave. This will use First In First Out.
+	  It must be used in combination with the replication.slave.folder option %d. If set to -1 it is ignored 
 Version 1.1.7
 	Fixes:
 	* Critical issue with linux MV command
