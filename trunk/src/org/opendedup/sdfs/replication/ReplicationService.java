@@ -385,7 +385,7 @@ public class ReplicationService implements Serializable {
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			System.out.printf("Deleting File [%s] ", file);
+			SDFSLogger.getLog().debug("Deleting File ["+file+"] ");
 			formatter.format("file=%s&cmd=%s&options=%s", file, "deletefile",
 					"");
 			Document doc = getResponse(this.localServer, this.localServerPort,
