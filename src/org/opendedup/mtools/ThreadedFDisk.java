@@ -23,7 +23,7 @@ public class ThreadedFDisk {
 	private final ReentrantLock zLock = new ReentrantLock();
 
 	public ThreadedFDisk() throws IOException {
-		SDFSLogger.getLog().info("Starting FDISK");
+		SDFSLogger.getLog().info("Starting Threaded FDISK");
 		long start = System.currentTimeMillis();
 		for(int i = 0;i<Main.writeThreads;i++) {
 			CheckFileThread th = new CheckFileThread();

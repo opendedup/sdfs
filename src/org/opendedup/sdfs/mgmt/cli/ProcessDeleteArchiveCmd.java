@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.util.Formatter;
 
 import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
+import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,8 +18,7 @@ public class ProcessDeleteArchiveCmd {
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			System.out.printf("Deleting File [%s] ",
-					file);
+			SDFSLogger.getLog().debug("Deleting File ["+file+"] ");
 			formatter.format("file=%s&cmd=%s&options=%s", file, "deletearchive",
 					"");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
