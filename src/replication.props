@@ -1,20 +1,53 @@
 #Replication master settings
-replication.master=192.168.0.201
+#IP address of the server where the master volume is located
+replication.master=master-ip
+
+#Number of copies of the replicated folder to keep. This will use First In First Out.
+#It must be used in combination with the replication.slave.folder option %d. If set to -1 it is ignored
+replication.copies=-1
+
+#the password of the master. This defaults to "admin"
 replication.master.password=admin
+
+#The sdfscli port on the master server. This defaults to 6442
 replication.master.port=6442
-replication.master.folder=nfs
+
+#The sdfs master DSE port. This defaults to 2222
+repliction.master.dataport=2222
+
+#The folder within the volume that should be replicated. If you would like to replicate the entire volume use "/"
+replication.master.folder=/
 
 #Replication slave settings
+#The local ip address that the sdfscli is listening on for the slave volume.
 replication.slave=localhost
+
+#the password used on the sdfscli for the slave volume. This defaults to admin
 replication.slave.password=admin
-replication.slave.port=6443
+
+#The tcp port the sdfscli is listening on for the slave
+replication.slave.port=6442
+
 #The folder where you would like to replicate to wild cards are %d (date as yyMMddHHmmss) %h (remote host) 
-replication.slave.folder=root_backup-%h-%d
+#the slave folder to replicated to e.g. backup-%h-%d will output "backup-<master-name>-<timestamp>
+replication.slave.folder=backup-%h-%d
+
+#The batch size the replication slave requests data from the server in MB. This defaults to 30MB but can be anything up to 128 MB.
+replication.batchsize=-1
 
 #Replication service settings
+#The folder where the SDFS master snapshot will be downloaded to on the slave. The snapshot tar archive is deleted after import.
 archive.staging=/tmp
+
+#The log file that will output replication status
 logfile=/var/log/sdfs/replication.log
-#Schedule chron = as a cron job, single = run one time
+
+#Schedule cron = as a cron job, single = run one time
 schedule.type=cron
+
 #Every 30 minutes take a look at http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-06 for scheduling tutorial
 schedule.cron=0 0/30 * * * ?
+
+#The folder where job history will be persisted. This defaults to a folder call "replhistory" under the same directory where this file is located.
+
+#job.history.folder=/etc/sdfs/replhistory
