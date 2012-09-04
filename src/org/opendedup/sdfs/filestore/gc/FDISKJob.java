@@ -2,6 +2,8 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
 
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.mtools.FDisk;
@@ -23,7 +25,8 @@ public class FDISKJob implements Job {
 				throw new JobExecutionException(e1);
 			}
 			try {
-				new FDisk();
+				SDFSEvent evt = SDFSEvent.gcInfoEvent("Running GC on " + Main.volume.getName());
+				new FDisk(evt);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to finish executing fdisk", e);
 			} finally {

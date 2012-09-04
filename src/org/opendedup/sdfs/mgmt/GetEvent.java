@@ -8,14 +8,14 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
-public class GetEvents {
+public class GetEvent {
 
-	public Element getResult(String cmd, String file) throws IOException {
+	public Element getResult(String uuid) throws IOException {
 		try {
-			return SDFSEvent.getXMLEvents();
+			return SDFSEvent.getXMLEvent(uuid);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"unable to fulfill request on file " + file, e);
+					"unable to fulfill request on uuid " + uuid, e);
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 		}

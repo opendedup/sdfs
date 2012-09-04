@@ -65,18 +65,22 @@ public class DSECompaction {
 	public static synchronized void runCheck(AbstractHashesMap map,
 			FileChunkStore ostore) throws IOException {
 		SDFSLogger.infoConsoleMsg("Initiating Compaction Process");
-		SDFSLogger.infoConsoleMsg("Step 1 of 4 - Running Garbage Collection");
-		long z =ManualGC.clearChunks(1);
-		SDFSLogger.infoConsoleMsg("Step 2 of 4 - Running Garbage Collection again");
-		z =ManualGC.clearChunksMills(1000);
+		SDFSLogger.infoConsoleMsg("Step 1 of 3 - Running Garbage Collection");
+		long z = 0;
+		try {
+			z = ManualGC.clearChunks(1);
+		} catch (InterruptedException e1) {
+			SDFSLogger.infoConsoleMsg("Unable to finish becasue interrupted");
+			System.exit(-1);
+		}
 		SDFSLogger.infoConsoleMsg("Cleared [" + z + "] records during garbage collection");
-		SDFSLogger.infoConsoleMsg("Step 3 of 4 - Initializing Compaction");
+		SDFSLogger.infoConsoleMsg("Step 2 of 3 - Initializing Compaction");
 		map.initCompact();
 		File newStorePath = new File(ostore.f.getPath()+".new");
 		FileChunkStore nstore = new FileChunkStore(newStorePath.getPath());
 		try {
 			runCheck(map,nstore,ostore);
-			SDFSLogger.infoConsoleMsg("Step 4 of 4 - Committing FileStore Changes");
+			SDFSLogger.infoConsoleMsg("Step 3 of 3 - Committing FileStore Changes");
 			map.commitCompact(Main.forceCompact);
 		}catch(IOException e) {
 			nstore.close();

@@ -19,6 +19,7 @@ import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
@@ -172,10 +173,13 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	 * @see org.opendedup.collections.AbstractHashesMap#claimRecords()
 	 */
 	@Override
-	public synchronized void claimRecords() throws IOException {
+	public synchronized void claimRecords(SDFSEvent evt) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		SDFSLogger.getLog().info("claiming records");
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
+		tEvt.maxCt = this.getSize();
+		evt.children.add(tEvt);
 		long startTime = System.currentTimeMillis();
 		long timeStamp = startTime + 30 * 1000;
 		int z = 0;
@@ -185,7 +189,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				maps[i].iterInit();
 				long val = 0;
 				while (val != -1 && !this.closed) {
-
+					tEvt.curCt++;
 					try {
 						this.iolock.lock();
 						val = maps[i].nextClaimedValue(true);
@@ -218,6 +222,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		} finally {
 			this.iolock.unlock();
 		}
+		tEvt.endEvent("processed [" + z + "] claimed records");
 		SDFSLogger.getLog().info(
 				"processed [" + z + "] claimed records in ["
 						+ (System.currentTimeMillis() - startTime) + "] ms");
@@ -352,17 +357,22 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	public int getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
-
-	public synchronized long removeRecords(long time, boolean forceRun)
+	@Override
+	public synchronized long removeRecords(long time, boolean forceRun,SDFSEvent evt)
 			throws IOException {
 		SDFSLogger.getLog().info(
 				"Garbage collection starting for records older than "
 						+ new Date(time));
+		SDFSEvent tEvt = SDFSEvent.removeInfoEvent("Garbage collection older than "
+				+ new Date(time));
+		tEvt.maxCt = this.size;
+		evt.children.add(tEvt);
 		long rem = 0;
 		if (forceRun)
 			this.firstGCRun = false;
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
+			tEvt.endEvent("Garbage collection aborted because it is the first run", SDFSEvent.WARN);
 			throw new IOException(
 					"Garbage collection aborted because it is the first run");
 		} else {
@@ -378,6 +388,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 					rbuf.clear();
 					try {
 						long fp = (long) i * (long) ChunkData.RAWDL;
+						tEvt.curCt = i;
 						this.iolock.lock();
 						int l = 0;
 						try {
@@ -428,6 +439,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				// this.removingChunks = false;
 				SDFSLogger.getLog().info(
 						"Removed [" + rem + "] records. Free slots ["
+								+ this.freeSlots.cardinality() + "]");
+				tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
 								+ this.freeSlots.cardinality() + "]");
 
 			}

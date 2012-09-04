@@ -12,6 +12,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.DOMImplementation;
@@ -20,7 +21,7 @@ import org.w3c.dom.Element;
 
 public class ArchiveImporter {
 
-	public static Element importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz)
+	public static Element importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz,SDFSEvent evt)
 			throws IOException {
 		try {
 			GCMain.gclock.lock();
@@ -44,9 +45,10 @@ public class ArchiveImporter {
 			TFile.umount(srcFiles.getInnerArchive());
 			try {
 				MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
-						+ File.separator + sdest,server,password,port,maxSz);
+						+ File.separator + sdest,server,password,port,maxSz,evt);
 				if (imp.isCorrupt()) {
-					SDFSLogger.getLog().warn("Import failed for " + srcArchive);
+					evt.endEvent("Import failed for " + srcArchive + " because not all the data could be imported from " + server,SDFSEvent.WARN);
+					SDFSLogger.getLog().warn("Import failed for " + srcArchive + " because not all the data could be imported from " + server);
 					SDFSLogger.getLog().warn("rolling back import");
 					rollBackImport(Main.volume.getPath() + File.separator
 							+ sdest);
@@ -80,12 +82,15 @@ public class ArchiveImporter {
 						root.setAttribute("endtime", Long.toString(imp.getEndTime()));
 						root.setAttribute("volume", Main.volume.getName());
 						root.setAttribute("volumeconfig", Main.wth.getConfigFilePath());
+						evt.endEvent(srcArchive + " from " +server+":" + port+ " to " + dest + " imported successfully");
 						return (Element)root.cloneNode(true);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("rolling back import");
 				rollBackImport(Main.volume.getPath() + File.separator + sdest);
 				SDFSLogger.getLog().warn("Import rolled back");
+				if(!evt.isDone())
+					evt.endEvent("Import failed and was rolled back",SDFSEvent.ERROR,e);
 				throw new IOException(e);
 			}
 		} finally {

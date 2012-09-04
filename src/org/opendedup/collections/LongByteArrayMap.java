@@ -71,6 +71,10 @@ public class LongByteArrayMap implements AbstractMap {
 			iterlock.unlock();
 		}
 	}
+	
+	public long getIterFPos() {
+		return this.iterPos * (long) arrayLength;
+	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
 

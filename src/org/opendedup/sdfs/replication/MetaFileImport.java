@@ -12,7 +12,9 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.FileCounts;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
@@ -30,14 +32,20 @@ public class MetaFileImport implements Serializable{
 	private int port = 2222;
 	long startTime = 0;
 	long endTime = 0;
+	long sparseFileSize = 0;
+	SDFSEvent levt = null;
 
-	public MetaFileImport(String path,String server,String password,int port,int maxSz) throws IOException {
+	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
+		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
+		levt.children.add(levt);
+		
 		if(maxSz >0)
 			MAX_SZ = (maxSz * 1024*1024)/Main.CHUNK_LENGTH;
 		hashes = new ArrayList<String>();
 		startTime = System.currentTimeMillis();
 		File f = new File(path);
+		levt.maxCt = FileCounts.getDBFileSize(f, false);
 		this.server = server;
 		this.password = password;
 		this.port = port;
@@ -52,6 +60,8 @@ public class MetaFileImport implements Serializable{
 			}
 		}
 		endTime = System.currentTimeMillis();
+		levt.endEvent("took [" + (System.currentTimeMillis() - startTime) / 1000
+						+ "] seconds to import [" + filesProcessed + "] files and [" + entries + "] blocks.");
 		SDFSLogger.getLog().info(
 				"took [" + (System.currentTimeMillis() - startTime) / 1000
 						+ "] seconds to import [" + filesProcessed + "] files and [" + entries + "] blocks.");
@@ -90,8 +100,11 @@ public class MetaFileImport implements Serializable{
 			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
 			try {
 				byte[] val = new byte[0];
+				long prevpos =  0;
 				mp.iterInit();
 				while (val != null) {
+					levt.curCt += (mp.getIterFPos()-prevpos);
+					prevpos = mp.getIterFPos();
 					val = mp.nextValue();
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
@@ -133,6 +146,8 @@ public class MetaFileImport implements Serializable{
 				SDFSLogger.getLog()
 						.warn("error while checking file [" + mapFile.getPath()
 								+ "]", e);
+				levt.endEvent("error while checking file [" + mapFile.getPath()
+								+ "]",SDFSEvent.WARN, e);
 				throw new IOException(e);
 			} finally {
 				mp.close();
