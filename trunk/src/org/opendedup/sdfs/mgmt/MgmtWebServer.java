@@ -332,15 +332,30 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cleanstore")) {
 						try {
-							String msg = new CleanStoreCmd().getResult(
+							Element msg = new CleanStoreCmd().getResult(
 									cmdOptions, null);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", msg);
+							doc.adoptNode(msg);
+							result.appendChild(msg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
+					}
+						else if (cmd.equalsIgnoreCase("event")) {
+							try {
+								String uuid = request.getQuery().get("uuid");
+								Element msg = new GetEvent().getResult(
+										uuid);
+								result.setAttribute("status", "success");
+								doc.adoptNode(msg);
+								result.appendChild(msg);
+							} catch (IOException e) {
+								result.setAttribute("status", "failed");
+								result.setAttribute("msg", e.toString());
+								SDFSLogger.getLog().warn(e);
+							}
 					}
 				}
 				String rsString = XMLUtils.toXMLString(doc);

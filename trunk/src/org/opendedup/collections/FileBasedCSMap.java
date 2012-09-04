@@ -23,6 +23,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
@@ -100,21 +101,27 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.size;
 	}
 
-	public synchronized void claimRecords() throws IOException {
+	public synchronized void claimRecords(SDFSEvent evt) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		SDFSLogger.getLog().info("claiming records");
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
+		tEvt.maxCt = this.maps.length;
+		evt.children.add(tEvt);
 		long claims = 0;
 		for (int i = 0; i < maps.length; i++) {
+			tEvt.curCt++;
 			try {
 				maps[i].iterInit();
 				claims = claims + maps[i].claimRecords();
 			} catch (Exception e) {
+				tEvt.endEvent("Unable to claim records for " + i + " because : [" + e.toString() + "]",SDFSEvent.ERROR);
 				SDFSLogger.getLog()
 						.error("Unable to claim records for " + i, e);
 				throw new IOException(e);
 			}
 		}
+		tEvt.endEvent("claimed [" + claims + "] records");
 		SDFSLogger.getLog().info("claimed [" + claims + "] records");
 	}
 
@@ -200,23 +207,32 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.freeSlots.cardinality();
 	}
 
-	public synchronized long removeRecords(long time, boolean forceRun)
+	public synchronized long removeRecords(long time, boolean forceRun,SDFSEvent evt)
 			throws IOException {
 		SDFSLogger.getLog().info(
 				"Garbage collection starting for records older than "
 						+ new Date(time));
+		SDFSLogger.getLog().info(
+				"Garbage collection starting for records older than "
+						+ new Date(time));
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Garbage collection starting for records older than "
+				+ new Date(time) +" from [" + this.fileName + "]");
+		tEvt.maxCt = this.maps.length;
 		long rem = 0;
 		if (forceRun)
 			this.firstGCRun = false;
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
+			tEvt.endEvent("Garbage collection aborted because it is the first run", SDFSEvent.WARN);
 			throw new IOException(
 					"Garbage collection aborted because it is the first run");
+			
 		} else {
 			if (this.isClosed())
 				throw new IOException("Hashtable " + this.fileName
 						+ " is close");
 			for (int i = 0; i < maps.length; i++) {
+				tEvt.curCt++;
 				if (maps[i] != null) {
 					maps[i].iterInit();
 					long fPos = maps[i].removeNextOldRecord(time);
@@ -228,6 +244,8 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				}
 			}
 		}
+		tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
+						+ this.freeSlots.cardinality() + "]");
 		SDFSLogger.getLog().info(
 				"Removed [" + rem + "] records. Free slots ["
 						+ this.freeSlots.cardinality() + "]");
@@ -488,8 +506,8 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
 		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
 				+ " ms at pos " + b.get(hash1));
-		b.claimRecords();
-		b.removeRecords(10, true);
+		b.claimRecords(SDFSEvent.gcInfoEvent("testing 123"));
+		b.removeRecords(10, true,SDFSEvent.gcInfoEvent("testing 123"));
 		b.close();
 
 	}

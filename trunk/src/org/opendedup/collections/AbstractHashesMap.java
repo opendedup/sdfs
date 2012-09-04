@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.IOException;
 
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface AbstractHashesMap {
 
@@ -14,7 +15,7 @@ public interface AbstractHashesMap {
 
 	public abstract long getMaxSize();
 
-	public abstract void claimRecords() throws IOException;
+	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -42,7 +43,7 @@ public interface AbstractHashesMap {
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
 
-	public abstract long removeRecords(long ms, boolean forceRun)
+	public abstract long removeRecords(long ms, boolean forceRun,SDFSEvent evt)
 			throws IOException;
 
 	public abstract void sync() throws IOException;

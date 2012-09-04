@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
 
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -23,8 +24,9 @@ public class ChunkClaimJob implements Job {
 			}
 			try {
 				long tm = System.currentTimeMillis() - (5 * 60 * 1000);
-				HashChunkService.processHashClaims();
-				HashChunkService.removeStailHashes(tm, true);
+				SDFSEvent evt = SDFSEvent.gcInfoEvent("Running Scheduled Chunk Claim Job");
+				HashChunkService.processHashClaims(evt);
+				HashChunkService.removeStailHashes(tm, true,evt);
 			} catch (Exception e) {
 				throw new JobExecutionException(e);
 			} finally {

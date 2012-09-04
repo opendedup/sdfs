@@ -16,6 +16,7 @@ import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class HashChunkService {
 
@@ -178,13 +179,13 @@ public class HashChunkService {
 		return hashRoute;
 	}
 
-	public static void processHashClaims() throws IOException {
-		hs.processHashClaims();
+	public static void processHashClaims(SDFSEvent evt) throws IOException {
+		hs.processHashClaims(evt);
 	}
 
-	public static long removeStailHashes(long ms, boolean forceRun)
+	public static long removeStailHashes(long ms, boolean forceRun,SDFSEvent evt)
 			throws IOException {
-		return hs.evictChunks(ms, forceRun);
+		return hs.evictChunks(ms, forceRun,evt);
 	}
 
 	public static void commitChunks() {

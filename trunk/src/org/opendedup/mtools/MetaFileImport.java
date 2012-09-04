@@ -10,6 +10,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -18,7 +19,7 @@ public class MetaFileImport {
 	private long files = 0;
 	private List<MetaDataDedupFile> corruptFiles = new ArrayList<MetaDataDedupFile>();
 
-	public MetaFileImport(String path) throws IOException {
+	public MetaFileImport(String path,SDFSEvent evt) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK");
 		long start = System.currentTimeMillis();
 		File f = new File(path);

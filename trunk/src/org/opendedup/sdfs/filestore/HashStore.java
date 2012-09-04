@@ -10,6 +10,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -223,12 +224,12 @@ public class HashStore {
 		return hs;
 	}
 
-	public void processHashClaims() throws IOException {
-		this.bdb.claimRecords();
+	public void processHashClaims(SDFSEvent evt) throws IOException {
+		this.bdb.claimRecords(evt);
 	}
 
-	public long evictChunks(long time, boolean forceRun) throws IOException {
-		return this.bdb.removeRecords(time, forceRun);
+	public long evictChunks(long time, boolean forceRun,SDFSEvent evt) throws IOException {
+		return this.bdb.removeRecords(time, forceRun,evt);
 	}
 
 	/**

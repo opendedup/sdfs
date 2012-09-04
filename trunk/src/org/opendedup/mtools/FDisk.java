@@ -9,17 +9,23 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.FileCounts;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 public class FDisk {
 	private long files = 0;
 	private long corruptFiles = 0;
+	private SDFSEvent fEvt = null;
 
-	public FDisk() throws IOException {
+	public FDisk(SDFSEvent evt) throws IOException {
+		File f = new File(Main.dedupDBStore);
+		fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file count = " + FileCounts.getCount(f, false) + " file size = " +FileCounts.getSize(f, false));
+		evt.children.add(fEvt);
+		fEvt.maxCt = FileCounts.getSize(f, false);
 		SDFSLogger.getLog().info("Starting FDISK");
 		long start = System.currentTimeMillis();
-		File f = new File(Main.dedupDBStore);
+		
 		try {
 			this.traverse(f);
 			SDFSLogger.getLog().info(
@@ -29,8 +35,12 @@ public class FDisk {
 			if(this.corruptFiles > 0) {
 				SDFSEvent.gcWarnEvent(this.corruptFiles + " Corrupt Files found during FDisk task.");
 			}
+			fEvt.endEvent("took [" + (System.currentTimeMillis() - start) / 1000
+					+ "] seconds to check [" + files + "]. Found ["
+					+ this.corruptFiles + "] corrupt files");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
+			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 			throw new IOException(e);
 		}
 	}
@@ -55,12 +65,15 @@ public class FDisk {
 
 	private void checkDedupFile(File mapFile) throws IOException {
 		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
+		long prevpos =  0;
 		try {
 			byte[] val = new byte[0];
 			mp.iterInit();
 			boolean corruption = false;
 			long corruptBlocks = 0;
 			while (val != null) {
+				fEvt.curCt += (mp.getIterFPos()-prevpos);
+				prevpos = mp.getIterFPos();
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
