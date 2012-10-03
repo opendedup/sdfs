@@ -429,7 +429,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private WritableCacheBuffer marshalWriteBuffer(long chunkPos,
-			boolean newChunk) throws IOException {
+			boolean newChunk) throws IOException, FileClosedException {
 
 		WritableCacheBuffer writeBuffer = null;
 		DedupChunk ck = null;
@@ -857,7 +857,10 @@ public class SparseDedupFile implements DedupFile {
 			}
 		} catch (IOException e) {
 			
-		} finally {
+		} catch (FileClosedException e) {
+			
+		}
+		finally {
 			try {
 				this.unRegisterChannel(ch, -1);
 			} catch (Exception e) {
@@ -867,9 +870,9 @@ public class SparseDedupFile implements DedupFile {
 		}
 	}
 
-	private void pushLocalDataToChunkStore() throws IOException {
+	private void pushLocalDataToChunkStore() throws IOException, FileClosedException {
 		if (this.closed) {
-			throw new IOException("file already closed");
+			throw new FileClosedException("file already closed");
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
@@ -912,9 +915,9 @@ public class SparseDedupFile implements DedupFile {
 						+ "] new duplicate blocks");
 	}
 
-	private void checkForDups() throws IOException {
+	private void checkForDups() throws IOException, FileClosedException {
 		if (this.closed) {
-			throw new IOException("file already closed");
+			throw new FileClosedException("file already closed");
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
@@ -976,9 +979,9 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
-	public DedupChunk getHash(long location, boolean create) throws IOException {
+	public DedupChunk getHash(long location, boolean create) throws IOException, FileClosedException {
 		if (this.closed) {
-			throw new IOException("file already closed");
+			throw new FileClosedException("file already closed");
 		}
 		long place = this.getChuckPosition(location);
 		DedupChunk ck = null;

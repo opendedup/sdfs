@@ -245,9 +245,10 @@ public class DedupFileChannel {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos, newBuf);
 							writeBuffer.write(b, startPos);
-						} catch (BufferClosedException e) {
+						} 
+						catch (BufferClosedException e) {
 							writeBuffer = null;
-							SDFSLogger.getLog().info("trying to write again");
+							SDFSLogger.getLog().debug("trying to write again");
 						}
 					}
 					write = write + bytesLeft;
@@ -275,7 +276,7 @@ public class DedupFileChannel {
 							writeBuffer = df.getWriteBuffer(filePos, newBuf);
 							writeBuffer.write(b, startPos);
 						} catch (BufferClosedException e) {
-							SDFSLogger.getLog().info("strying to write again");
+							SDFSLogger.getLog().debug("strying to write again");
 							writeBuffer = null;
 						}
 					}
