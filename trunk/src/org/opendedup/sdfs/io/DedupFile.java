@@ -205,7 +205,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract DedupChunk getHash(long location, boolean create)
-			throws IOException;
+			throws IOException, FileClosedException;
 
 	/**
 	 * 
