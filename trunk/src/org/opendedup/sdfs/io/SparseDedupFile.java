@@ -37,8 +37,10 @@ public class SparseDedupFile implements DedupFile {
 	public long lastSync = 0;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
-	private static HashFunctionPool hashPool = new HashFunctionPool(Main.writeThreads + 1);
-	protected static transient final ThreadPool pool = new ThreadPool(Main.writeThreads + 1, 8192);
+	private static HashFunctionPool hashPool = new HashFunctionPool(
+			Main.writeThreads + 1);
+	protected static transient final ThreadPool pool = new ThreadPool(
+			Main.writeThreads + 1, 8192);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock writeBufferLock = new ReentrantLock();
@@ -107,18 +109,17 @@ public class SparseDedupFile implements DedupFile {
 			_df = new SparseDedupFile(snapmf);
 			this.writeBufferLock.lock();
 			File _directory = new File(Main.dedupDBStore + File.separator
-					+ _df.GUID.substring(0, 2) + File.separator
-					+ _df.GUID);
+					+ _df.GUID.substring(0, 2) + File.separator + _df.GUID);
 			File _dbf = new File(_directory.getPath() + File.separator
 					+ _df.GUID + ".map");
 			File _dbc = new File(_directory.getPath() + File.separator
 					+ _df.GUID + ".chk");
-			SDFSLogger.getLog().debug("Snap folder is "+_directory);
-			SDFSLogger.getLog().debug("Snap map is "+_dbf);
-			SDFSLogger.getLog().debug("Snap chunk is "+_dbc);
+			SDFSLogger.getLog().debug("Snap folder is " + _directory);
+			SDFSLogger.getLog().debug("Snap map is " + _dbf);
+			SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
 			bdb.copy(_dbf.getPath());
 			chunkStore.copy(_dbc.getPath());
-			
+
 			snapmf.setDedupFile(_df);
 			return _df;
 		} catch (Exception e) {
@@ -128,29 +129,29 @@ public class SparseDedupFile implements DedupFile {
 			this.writeBufferLock.unlock();
 			if (ch != null)
 				this.unRegisterChannel(ch, -1);
-			if(_ch != null)
+			if (_ch != null)
 				_df.unRegisterChannel(_ch, -1);
 			ch = null;
 		}
 	}
-	
+
 	protected void putBufferIntoFlush(WritableCacheBuffer wbuffer) {
-		//this.writeBufferLock.lock();
+		// this.writeBufferLock.lock();
 		try {
 			this.writeBuffers.remove(wbuffer.getFilePosition());
 			this.flushingBuffers.put(wbuffer.getFilePosition(), wbuffer);
-		}finally {
-			//this.writeBufferLock.unlock();
+		} finally {
+			// this.writeBufferLock.unlock();
 		}
 	}
-	
+
 	protected void putBufferIntoWrite(WritableCacheBuffer wbuffer) {
-		//this.writeBufferLock.lock();
+		// this.writeBufferLock.lock();
 		try {
 			this.flushingBuffers.remove(wbuffer.getFilePosition());
 			this.writeBuffers.put(wbuffer.getFilePosition(), wbuffer);
-		}finally {
-			//this.writeBufferLock.unlock();
+		} finally {
+			// this.writeBufferLock.unlock();
 		}
 	}
 
@@ -201,7 +202,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException(
 					"unable to create blank file " + mf.getPath(), e);
 		} finally {
-			
+
 		}
 	}
 
@@ -300,7 +301,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public void writeCache(WritableCacheBuffer writeBuffer) throws IOException,
-			HashtableFullException,FileClosedException {
+			HashtableFullException, FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
@@ -368,7 +369,7 @@ public class SparseDedupFile implements DedupFile {
 	// private ReentrantLock updatelock = new ReentrantLock();
 
 	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
-			boolean doop) throws FileClosedException,IOException {
+			boolean doop) throws FileClosedException, IOException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
@@ -485,7 +486,7 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getNumberofChunks()
 	 */
-	public long getNumberofChunks() throws IOException, FileClosedException{
+	public long getNumberofChunks() throws IOException, FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException();
 		}
@@ -506,26 +507,23 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#sync()
 	 */
 	public void sync() throws FileClosedException, IOException {
-		if (this.closed) {
+		this.syncLock.lock();
+		try {
+			if (this.closed) {
 				throw new FileClosedException("file already closed");
-				
-		}
 
-		if (Main.safeSync) {
-			this.syncLock.lock();
+			}
 
-			try {
+			if (Main.safeSync) {
+
 				this.bdb.sync();
 				Object[] buffers = null;
-				try {
-					this.writeBufferLock.lock();
-					SDFSLogger.getLog().debug(
-							"Flushing Cache of for " + mf.getPath()
-									+ " of size " + this.writeBuffers.size());
-					buffers = this.writeBuffers.values().toArray();
-				} finally {
-					this.writeBufferLock.unlock();
-				}
+				this.writeBufferLock.lock();
+				SDFSLogger.getLog().debug(
+						"Flushing Cache of for " + mf.getPath() + " of size "
+								+ this.writeBuffers.size());
+				buffers = this.writeBuffers.values().toArray();
+
 				for (int i = 0; i < buffers.length; i++) {
 					WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
 					try {
@@ -534,31 +532,33 @@ public class SparseDedupFile implements DedupFile {
 
 					}
 				}
-			} catch (Exception e) {
-				throw new IOException(e);
-			} finally {
-				this.syncLock.unlock();
+
+			} else {
+				try {
+					this.writeCache();
+					/*
+					 * Object[] buffers = null; this.writeBufferLock.lock(); try
+					 * { SDFSLogger.getLog().debug( "Flushing Cache for " +
+					 * mf.getPath() + " of size " + this.writeBuffers.size());
+					 * if (this.writeBuffers.size() > 0) { buffers =
+					 * this.writeBuffers.values().toArray(); } } finally {
+					 * this.writeBufferLock.unlock(); } int z = 0; if (buffers
+					 * != null) { for (int i = 0; i < buffers.length; i++) {
+					 * WritableCacheBuffer buf = (WritableCacheBuffer)
+					 * buffers[i]; try { buf.flush(); } catch
+					 * (BufferClosedException e) { SDFSLogger.getLog().debug(
+					 * "while closing position " + buf.getFilePosition(), e); }
+					 * z++; } } SDFSLogger.getLog().debug("Flushed " + z +
+					 * "with sync");
+					 */
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 			}
-		} else {
-			try {
-				this.writeCache();
-				/*
-				 * Object[] buffers = null; this.writeBufferLock.lock(); try {
-				 * SDFSLogger.getLog().debug( "Flushing Cache for " +
-				 * mf.getPath() + " of size " + this.writeBuffers.size()); if
-				 * (this.writeBuffers.size() > 0) { buffers =
-				 * this.writeBuffers.values().toArray(); } } finally {
-				 * this.writeBufferLock.unlock(); } int z = 0; if (buffers !=
-				 * null) { for (int i = 0; i < buffers.length; i++) {
-				 * WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-				 * try { buf.flush(); } catch (BufferClosedException e) {
-				 * SDFSLogger.getLog().debug( "while closing position " +
-				 * buf.getFilePosition(), e); } z++; } }
-				 * SDFSLogger.getLog().debug("Flushed " + z + "with sync");
-				 */
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
+			this.syncLock.unlock();
 		}
 	}
 
@@ -583,13 +583,11 @@ public class SparseDedupFile implements DedupFile {
 				DedupFileChannel channel = new DedupFileChannel(mf, flags);
 				this.buffers.add(channel);
 				return channel;
-			}  finally {
+			} finally {
 				channelLock.unlock();
 			}
 		}
 	}
-	
-	
 
 	/*
 	 * (non-Javadoc)
@@ -608,9 +606,12 @@ public class SparseDedupFile implements DedupFile {
 					if (this.buffers.size() == 0) {
 						this.forceClose();
 					}
-				}
-				else {
-					SDFSLogger.getLog().warn("unregister of filechannel for [" + this.mf.getPath() + "] failed because flags mismatch flags [" + flags + "!=" + channel.getFlags() + "]");
+				} else {
+					SDFSLogger.getLog().warn(
+							"unregister of filechannel for ["
+									+ this.mf.getPath()
+									+ "] failed because flags mismatch flags ["
+									+ flags + "!=" + channel.getFlags() + "]");
 				}
 			} catch (Exception e) {
 			} finally {
@@ -618,7 +619,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -645,7 +646,7 @@ public class SparseDedupFile implements DedupFile {
 				if (this.isClosed() || this.buffers.size() == 0)
 					this.initDB();
 				this.buffers.add(channel);
-			}  finally {
+			} finally {
 				channelLock.unlock();
 			}
 		}
@@ -664,7 +665,7 @@ public class SparseDedupFile implements DedupFile {
 			channelLock.unlock();
 		}
 	}
-	
+
 	public int openChannelsSize() {
 		channelLock.lock();
 		try {
@@ -690,7 +691,7 @@ public class SparseDedupFile implements DedupFile {
 			if (!this.closed) {
 				SDFSLogger.getLog().debug("Closing [" + mf.getPath() + "]");
 				if (Main.safeClose) {
-					
+
 					try {
 						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
 						for (int i = 0; i < this.buffers.size(); i++) {
@@ -856,11 +857,10 @@ public class SparseDedupFile implements DedupFile {
 						(long) -1, Main.CHUNK_LENGTH);
 			}
 		} catch (IOException e) {
-			
+
 		} catch (FileClosedException e) {
-			
-		}
-		finally {
+
+		} finally {
 			try {
 				this.unRegisterChannel(ch, -1);
 			} catch (Exception e) {
@@ -870,7 +870,8 @@ public class SparseDedupFile implements DedupFile {
 		}
 	}
 
-	private void pushLocalDataToChunkStore() throws IOException, FileClosedException {
+	private void pushLocalDataToChunkStore() throws IOException,
+			FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
@@ -979,7 +980,8 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
-	public DedupChunk getHash(long location, boolean create) throws IOException, FileClosedException {
+	public DedupChunk getHash(long location, boolean create)
+			throws IOException, FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
@@ -1069,8 +1071,8 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private DedupChunk createNewChunk(long location) {
-		DedupChunk ck = new DedupChunk(new byte[HashFunctionPool.hashLength], location,
-				Main.CHUNK_LENGTH, true);
+		DedupChunk ck = new DedupChunk(new byte[HashFunctionPool.hashLength],
+				location, Main.CHUNK_LENGTH, true);
 		return ck;
 	}
 

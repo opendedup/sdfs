@@ -337,7 +337,7 @@ public class WritableCacheBuffer extends DedupChunk {
 				WritableCacheBuffer _wb = this.df.flushingBuffers.remove(this
 						.getFilePosition());
 				if (_wb == null) {
-					SDFSLogger.getLog().info(
+					SDFSLogger.getLog().debug(
 							this.getFilePosition()
 									+ " not found in flushing buffer");
 				}
