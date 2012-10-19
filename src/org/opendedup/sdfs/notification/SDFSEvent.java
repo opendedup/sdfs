@@ -176,7 +176,10 @@ public class SDFSEvent {
 		sb.append(",");
 		sb.append(this.longMsg);
 		sb.append(",");
-		sb.append(Double.toString(this.curCt / this.maxCt));
+		if(this.maxCt == 0 || this.curCt == 0)
+			sb.append("0");
+		else
+			sb.append(Double.toString(this.curCt / this.maxCt));
 		sb.append(",");
 		sb.append(this.curCt);
 		sb.append(",");
