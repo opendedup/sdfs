@@ -1,3 +1,12 @@
+Version 1.1.9
+	Fixes:
+	* Fixed concurrency issue that caused error under high IO.
+	* Fixed erronious errors during compaction on volumes where replication is enabled
+	Enhancements
+	* Added replication commanline status output
+	* Added status output for all post mount commands
+
+
 Version 1.1.8
 	Fixes:
 	* Fixed critical issue with replication of folders with special or non-english characters

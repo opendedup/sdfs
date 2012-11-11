@@ -58,9 +58,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private boolean flushing = false;
 	private SyncThread sth = null;
 	private boolean compacting = false;
+	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database");
 
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
+		Main.mountEvent.children.add(loadEvent);
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
 		else
@@ -250,6 +252,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.freeSlots.clear();
 		long start = System.currentTimeMillis();
 		int freeSl = 0;
+		
 		if (exists) {
 			this.closed = false;
 			SDFSLogger.getLog().info(
@@ -261,6 +264,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			kRaf.seek(0);
 			int count = 0;
 			long entries = kRaf.length() / ChunkData.RAWDL;
+			this.loadEvent.maxCt = entries;
 			CommandLineProgressBar bar = new CommandLineProgressBar(
 					"Loading Hashes", entries, System.out);
 			while (kFc.position() < kRaf.length()) {
@@ -268,6 +272,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				if (count > 100000) {
 					count = 0;
 					bar.update(kFc.position() / ChunkData.RAWDL);
+					this.loadEvent.curCt = kFc.position() / ChunkData.RAWDL;
 				}
 
 				byte[] raw = new byte[ChunkData.RAWDL];
@@ -318,6 +323,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 				}
 			}
+			
 			bar.finish();
 		}
 		System.out.println();
@@ -331,6 +337,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						+ "] free slots available are [" + freeSl
 						+ "] free slots added [" + this.freeSlots.cardinality()
 						+ "] end file position is [" + endPos + "]!");
+		this.loadEvent.endEvent("Finished Loading Hash Database in ["
+				+ (System.currentTimeMillis() - start) / 100
+				+ "] seconds");
 
 		return size;
 	}
@@ -926,7 +935,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				File _fs = new File(fileName);
 				_fs.delete();
 				SDFSLogger.getLog().error("rolled back compacting");
-				throw new IOException("compacting failed");
+				throw new IOException("compacting failed because records=" + this.kSz
+								+ " compacted records=" + this.compactKsz);
 			} else if (force && this.compactKsz != (this.kSz)) {
 				SDFSLogger.getLog().warn(
 						"compacting sizes are not the same records=" + this.kSz

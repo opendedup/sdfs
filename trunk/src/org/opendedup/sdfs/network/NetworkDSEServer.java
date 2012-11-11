@@ -26,7 +26,8 @@ public class NetworkDSEServer implements Runnable {
 			serverSocket.bind(addr);
 			SDFSLogger.getLog().info("listening on " + addr.toString());
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("unable to open network ports : " + e.getMessage());
+			System.err.println("check logs for more details");
 			SDFSLogger.getLog().fatal("unable to open network ports", e);
 			System.exit(-1);
 		}

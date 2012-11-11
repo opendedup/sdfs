@@ -38,7 +38,7 @@ public class SDFSService {
 
 		Config.parseSDFSConfigFile(this.configFile);
 		MgmtWebServer.start();
-		SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version
+		Main.mountEvent = SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
 		if (this.routingFile != null)
 			Config.parserRoutingFile(routingFile);
@@ -58,7 +58,7 @@ public class SDFSService {
 		if (Main.chunkStoreLocal) {
 			try {
 				HashChunkService.init();
-				if (Main.enableNetworkChunkStore) {
+				if (Main.enableNetworkChunkStore && !Main.runCompact) {
 					ndServer = new NetworkDSEServer();
 					new Thread(ndServer).start();
 				}
@@ -79,7 +79,7 @@ public class SDFSService {
 		if (!Main.chunkStoreLocal) {
 			gc = new SDFSGCScheduler();
 		}
-		SDFSEvent.mountInfoEvent("Mounted Volume Successfully");
+		Main.mountEvent.endEvent("Volume Mounted");
 	}
 
 	public void stop() {
@@ -121,7 +121,7 @@ public class SDFSService {
 			SDFSLogger.getLog().info(
 					"######### Shutting down HashStore ###################");
 			HashChunkService.close();
-			if (Main.enableNetworkChunkStore) {
+			if (Main.enableNetworkChunkStore && !Main.runCompact) {
 				ndServer.close();
 			} else {
 
@@ -136,5 +136,4 @@ public class SDFSService {
 		SDFSEvent.mountInfoEvent("Volume Unmounted");
 		SDFSLogger.getLog().info("SDFS is Shut Down");
 	}
-
 }

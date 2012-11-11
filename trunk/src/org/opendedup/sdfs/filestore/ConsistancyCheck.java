@@ -18,8 +18,10 @@ public class ConsistancyCheck {
 			System.out
 					.println("Running Consistancy Check on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
-			SDFSEvent.mountWarnEvent("Running Consistancy Check on DSE, this may take a while");
+			SDFSEvent evt = SDFSEvent.consistancyCheckEvent("Running Consistancy Check on DSE, this may take a while");
+			Main.mountEvent.children.add(evt);
 			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",store.size()/Main.CHUNK_LENGTH,System.out);
+			evt.maxCt = store.size()/Main.CHUNK_LENGTH;
 			long currentCount = 0;
 			while (data != null) {
 				count++;
@@ -32,6 +34,7 @@ public class ConsistancyCheck {
 					map.put(data);
 					recordsRecovered++;
 				}
+				evt.curCt = currentCount;
 				data = store.getNextChunck();
 				currentCount++;
 			}
@@ -44,7 +47,7 @@ public class ConsistancyCheck {
 					.getLog()
 					.warn("Succesfully Ran Consistance Check for [" + records
 							+ "] records, recovered [" + recordsRecovered + "]");
-			SDFSEvent.mountWarnEvent("Succesfully Ran Consistance Check for [" + records
+			evt.endEvent("Succesfully Ran Consistance Check for [" + records
 					+ "] records, recovered [" + recordsRecovered + "]");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
