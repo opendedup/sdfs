@@ -1,11 +1,18 @@
 Version 1.1.9
 	Fixes:
 	* Fixed concurrency issue that caused error under high IO.
-	* Fixed erronious errors during compaction on volumes where replication is enabled
+	* Fixed erroneous errors during compaction on volumes where replication is enabled
 	Enhancements
-	* Added replication commanline status output
+	* Added replication command line status output
 	* Added status output for all post mount commands
-
+	* Added experimental file based chunk store that adds all unique chunks as individual files instead of to one big file. the 
+	  file based chunk store also allows for compression and encryption. To enable this chunkstore use 
+	  "--chunkstore-class=org.opendedup.sdfs.filestore.FileBasedChunkStore" during mkfs.sdfs. Compression, if enabled, uses
+	  Snappy (http://code.google.com/p/snappy/). To enable compression use --chunk-store-compress="true".
+	* Added experimental support for file based hash table. This hash table requires less memory and mounts faster
+	  at the expense of read and write speed. It uses mapped files to store hash keys. To enable this hashstore use
+	  "--chunk-store-hashdb-class=org.opendedup.collections.FileBasedCSMap" during mkfs.sdfs.
+	* Changes mkfs.sdfs syntax from --cloud-compress to --chunk-store-compress.
 
 Version 1.1.8
 	Fixes:

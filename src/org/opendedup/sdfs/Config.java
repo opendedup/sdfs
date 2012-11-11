@@ -123,6 +123,10 @@ public class Config {
 				Main.chunkStoreEncryptionKey = cbe
 						.getAttribute("encryption-key");
 			}
+			if (cbe.hasAttribute("compress")) {
+				Main.cloudCompress = Boolean.parseBoolean(cbe
+						.getAttribute("compress"));
+			}
 			if (cbe.hasAttribute("max-repl-batch-sz"))
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();

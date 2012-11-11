@@ -86,6 +86,7 @@ public class VolumeConfigWriter {
 	String hashType = HashFunctionPool.TIGER_16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
+	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
 	String sdfsCliListenAddr = "localhost";
@@ -219,6 +220,10 @@ public class VolumeConfigWriter {
 			this.chunk_store_hashdb_location = cmd
 					.getOptionValue("chunk-store-hashdb-location");
 		}
+		if (cmd.hasOption("chunk-store-hashdb-class")) {
+			this.hash_db_class = cmd
+					.getOptionValue("chunk-store-hashdb-class");
+		}
 		if (cmd.hasOption("chunk-store-pre-allocate")) {
 			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-pre-allocate"));
@@ -302,9 +307,6 @@ public class VolumeConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("cloud-compress"))
-				this.cloudCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("cloud-compress"));
 		} else if (this.gsEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
 					&& cmd.hasOption("cloud-access-key")
@@ -320,9 +322,6 @@ public class VolumeConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("cloud-compress"))
-				this.cloudCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("cloud-compress"));
 		}
 
 		else if (this.azureEnabled) {
@@ -340,10 +339,11 @@ public class VolumeConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("cloud-compress"))
-				this.cloudCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("cloud-compress"));
+			
 		}
+		if (cmd.hasOption("chunk-store-compress"))
+			this.cloudCompress = Boolean.parseBoolean(cmd
+					.getOptionValue("chunk-store-compress"));
 
 		if (cmd.hasOption("chunk-store-gc-schedule")) {
 			this.chunk_gc_schedule = cmd
@@ -499,6 +499,8 @@ public class VolumeConfigWriter {
 				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
+		cs.setAttribute("hashdb-class", this.hash_db_class);
+		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("enable", Boolean.toString(networkEnable));
@@ -804,6 +806,11 @@ public class VolumeConfigWriter {
 								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
 				.hasArg().withArgName("HOURS").create());
 		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-hashdb-class")
+				.withDescription(
+						"The class used to store hash values \n Defaults to: \n " + Main.hashesDBClass)
+				.hasArg().withArgName("class name").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-size")
 				.withDescription(
 						"The size in MB,TB,GB of the Dedup Storeage Engine. "
@@ -866,9 +873,9 @@ public class VolumeConfigWriter {
 						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
 				.hasArg().withArgName("Unique Cloud Bucket Name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("cloud-compress")
+				.withLongOpt("chunk-store-compress")
 				.withDescription(
-						"Compress chunks before they are sent to the Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+						"Compress chunks before they are stored. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("gs-enabled")

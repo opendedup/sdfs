@@ -85,7 +85,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 					data = EncryptUtils.decrypt(data);
 				}
 				if (Main.cloudCompress) {
-					data = CompressionUtils.decompressZLIB(data);
+					data = CompressionUtils.decompressSnappy(data);
 				}
 				return data;
 			}
@@ -137,7 +137,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 					StandardOpenOption.READ);
 
 			if (Main.cloudCompress)
-				chunk = CompressionUtils.compressZLIB(chunk);
+				chunk = CompressionUtils.compressSnappy(chunk);
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
 			buff = ByteBuffer.wrap(chunk);
