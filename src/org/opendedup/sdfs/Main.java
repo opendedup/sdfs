@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 import org.w3c.dom.Element;
 
@@ -42,6 +43,8 @@ public class Main {
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 	
+	public static SDFSEvent mountEvent = null;
+	
 	/**
 	 * Upstream DSE Host for cache misses and replication
 	 */
@@ -78,7 +81,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.1.8.1";
+	public static String version = "1.1.9";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

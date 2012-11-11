@@ -34,6 +34,8 @@ public class SDFSEvent {
 	public static final Type REMOVER = new Type("Remove Records");
 	public static final Type AIMPORT = new Type("Replication Meta-Data Import");
 	public static final Type MOUNT = new Type("Mount Volume");
+	public static final Type LHASHDB = new Type("Loading Hash Database Task");
+	public static final Type FSCK = new Type("Consistancy Check");
 	public static final Type MIMPORT = new Type("Replication Block Data" 
 			+ " Import");
 	public static final Type FIXDSE = new Type("Volume Recovery Task");
@@ -82,6 +84,18 @@ public class SDFSEvent {
 
 	public static SDFSEvent archiveImportEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(), shortMsg);
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent consistancyCheckEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(), shortMsg);
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent loadHashDBEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(LHASHDB, Main.volume.getName(), shortMsg);
 		event.level = INFO;
 		return event;
 	}

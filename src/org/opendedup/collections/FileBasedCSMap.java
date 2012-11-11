@@ -51,10 +51,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private byte[] FREE = new byte[HashFunctionPool.hashLength];
 	private boolean firstGCRun = true;
 	private SyncThread st = null;
+	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database");
 
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-
+		Main.mountEvent.children.add(loadEvent);
 		maps = new FileByteArrayLongMap[256];
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
@@ -164,7 +165,9 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		System.out.println("Loading Hashtable Entries");
 		long rsz = 0;
 		CommandLineProgressBar bar = new CommandLineProgressBar("Loading Hashes",this.maps.length,System.out);
+		this.loadEvent.maxCt = this.maps.length;
 		for (int i = 0; i < this.maps.length; i++) {
+			this.loadEvent.curCt = this.loadEvent.curCt + 1;
 			int sz = NextPrime.getNextPrimeI((int) (size / maps.length));
 			// SDFSLogger.getLog().debug("will create byte array of size "
 			// + sz + " propsize was " + propsize);
@@ -180,6 +183,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			bar.update(i);
 		}
 		bar.finish();
+		this.loadEvent.endEvent("Loaded entries " + rsz);
 		System.out.println("Loaded entries " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);
 		HashChunkService.getChuckStore().setSize(
