@@ -15,6 +15,7 @@ import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.EvictionListener;
@@ -156,9 +157,11 @@ public class MetaFileStore {
 	 * @throws IOException
 	 */
 	public static MetaDataDedupFile snapshot(String origionalPath,
-			String snapPath, boolean overwrite) throws IOException {
+			String snapPath, boolean overwrite, SDFSEvent evt) throws IOException {
+		try {
 		Path p = Paths.get(origionalPath);
 		if (Files.isSymbolicLink(p)) {
+			
 			MetaDataDedupFile mf = getMF(new File(origionalPath));
 			File dst = new File(snapPath);
 			File src = new File(mf.getPath());
@@ -184,9 +187,12 @@ public class MetaFileStore {
 						origionalPath
 								+ " does not exist. Cannot take a snapshot of a non-existent file.");
 			synchronized (mf) {
-					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite);
+					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite,evt);
 					return _mf;
 			}
+		}
+		}finally {
+			evt.endEvent("Snapshot complete from " +  origionalPath + " to " + snapPath );
 		}
 	}
 

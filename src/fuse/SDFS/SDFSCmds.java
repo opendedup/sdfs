@@ -14,6 +14,7 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
@@ -336,7 +337,8 @@ public class SDFSCmds {
 			return "ERROR Snapshot Failed: destination [" + dstPath
 					+ "] already exists";
 		try {
-			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false);
+			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false, SDFSEvent.snapEvent("Taking Snapshot of [" + srcPath
+					+ "] " + "Destination [" + dstPath + "]", f));
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
 		} catch (IOException e) {

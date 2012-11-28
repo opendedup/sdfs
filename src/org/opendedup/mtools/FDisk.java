@@ -21,7 +21,7 @@ public class FDisk {
 	public FDisk(SDFSEvent evt) throws IOException {
 		File f = new File(Main.dedupDBStore);
 		fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file count = " + FileCounts.getCount(f, false) + " file size = " +FileCounts.getSize(f, false));
-		evt.children.add(fEvt);
+		evt.addChild(fEvt);
 		fEvt.maxCt = FileCounts.getSize(f, false);
 		SDFSLogger.getLog().info("Starting FDISK");
 		long start = System.currentTimeMillis();
@@ -32,9 +32,7 @@ public class FDisk {
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check [" + files + "]. Found ["
 							+ this.corruptFiles + "] corrupt files");
-			if(this.corruptFiles > 0) {
-				SDFSEvent.gcWarnEvent(this.corruptFiles + " Corrupt Files found during FDisk task.");
-			}
+			
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start) / 1000
 					+ "] seconds to check [" + files + "]. Found ["
 					+ this.corruptFiles + "] corrupt files");

@@ -9,12 +9,11 @@ public class PFullGC implements GCControllerImpl {
 
 	double prevPFull = 0;
 	double nextPFull = 0;
-	
 
 	public PFullGC() {
 		this.prevPFull = calcPFull();
-		this.nextPFull = Math.ceil(this.prevPFull * 10)/10;
-		
+		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
+
 		SDFSLogger.getLog().info(
 				"Current DSE Percentage Full is [" + this.prevPFull
 						+ "] will run GC when [" + this.nextPFull + "]");
@@ -23,26 +22,31 @@ public class PFullGC implements GCControllerImpl {
 	@Override
 	public void runGC() {
 		if (this.calcPFull() >= this.nextPFull) {
-			SDFSEvent task = SDFSEvent.gcInfoEvent("Percentage Full Exceeded : Running Orphaned Block Collection");
-			task.longMsg = "Running Garbage Collection because percentage full is " + this.calcPFull() + " and threshold is " +this.nextPFull;
+			SDFSEvent task = SDFSEvent
+					.gcInfoEvent("Percentage Full Exceeded : Running Orphaned Block Collection");
+			task.longMsg = "Running Garbage Collection because percentage full is "
+					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
-			ManualGC.clearChunks(1);
-			Thread.sleep(1*60*1000);
-			Main.firstRun = false;
-			ManualGC.clearChunks(1);
-			this.prevPFull = calcPFull();
-			this.nextPFull = this.calcNxtRun();
-			SDFSLogger.getLog().info(
-					"Current DSE Percentage Full is [" + this.prevPFull
-							+ "] will run GC when [" + this.nextPFull + "]");
-			task = SDFSEvent.gcInfoEvent("Garbage Collection Succeeded");
-			task.shortMsg = "Garbage Collection Succeeded";
-			task.longMsg = "Current DSE Percentage Full is [" + this.prevPFull
-							+ "] will run GC when [" + this.nextPFull + "]";
-			}catch(Exception e) {
-				SDFSLogger.getLog().error("Garbage Collection failed",e);
-				task = SDFSEvent.gcErrorEvent("Garbage Collection failed");
-				task.longMsg = "Garbage Collection failed because " + e.getMessage();
+				ManualGC.clearChunks(1);
+				Thread.sleep(1 * 60 * 1000);
+				Main.firstRun = false;
+				ManualGC.clearChunks(1);
+				this.prevPFull = calcPFull();
+				this.nextPFull = this.calcNxtRun();
+				SDFSLogger.getLog()
+						.info("Current DSE Percentage Full is ["
+								+ this.prevPFull + "] will run GC when ["
+								+ this.nextPFull + "]");
+				task.endEvent("Garbage Collection Succeeded");
+				task.shortMsg = "Garbage Collection Succeeded";
+				task.longMsg = "Current DSE Percentage Full is ["
+						+ this.prevPFull + "] will run GC when ["
+						+ this.nextPFull + "]";
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("Garbage Collection failed", e);
+				task.endEvent(
+						"Garbage Collection failed because " + e.getMessage(),
+						SDFSEvent.ERROR);
 			}
 		}
 	}
@@ -61,9 +65,9 @@ public class PFullGC implements GCControllerImpl {
 		if (next >= .92)
 			return .90;
 		else {
-			next = Math.ceil(next * 100.0)/10;
+			next = Math.ceil(next * 100.0) / 10;
 		}
-		if(next == 0)
+		if (next == 0)
 			next = .1;
 		return next;
 	}

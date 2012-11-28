@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class DeleteFileCmd implements XtendedCmd {
 
@@ -18,10 +19,15 @@ public class DeleteFileCmd implements XtendedCmd {
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
 			boolean removed = MetaFileStore.removeMetaFile(internalPath);
-			if(removed)
+			if(removed) {
+				SDFSEvent.deleteFileEvent(f);
 				return "removed [" + file + "]";
-			else
+				
+			}
+			else {
+				SDFSEvent.deleteFileFailedEvent(f);
 				return "failed to remove [" + file + "]";
+			}
 		}
 	}
 

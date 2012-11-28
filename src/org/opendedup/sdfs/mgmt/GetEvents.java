@@ -10,12 +10,12 @@ import org.w3c.dom.Element;
 
 public class GetEvents {
 
-	public Element getResult(String cmd, String file) throws IOException {
+	public Element getResult() throws IOException {
 		try {
 			return SDFSEvent.getXMLEvents();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"unable to fulfill request on file " + file, e);
+					"unable to fulfill request ", e);
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 		}

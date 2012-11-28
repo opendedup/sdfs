@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.SDFSLogger;
 
 public class FlushBuffersCmd implements XtendedCmd {
@@ -20,6 +21,7 @@ public class FlushBuffersCmd implements XtendedCmd {
 							+ "] is a directory. This command cannot be executed on directories");
 		else if (cmd.equalsIgnoreCase("file")) {
 			try {
+				
 				MetaFileStore.getMF(f.getPath()).getDedupFile().writeCache();
 				return "SUCCESS Flush File : Write Cache Flushed for " + file;
 			} catch (Exception e) {
@@ -28,11 +30,14 @@ public class FlushBuffersCmd implements XtendedCmd {
 				throw new IOException(errorMsg + " because: " + e.toString());
 			}
 		} else if (cmd.equalsIgnoreCase("all")) {
+			SDFSEvent evt = SDFSEvent.flushAllBuffers();
 			try {
 				DedupFileStore.flushAllFiles();
+				evt.endEvent("SUCCESS Flush All Files : Write Cache Flushed");
 				return "SUCCESS Flush All Files : Write Cache Flushed";
 			} catch (Exception e) {
 				String errorMsg = "ERROR Flush All Files Failed : ";
+				evt.endEvent("ERROR Flush All Files Failed",SDFSEvent.WARN,e);
 				SDFSLogger.getLog().error(errorMsg, e);
 				throw new IOException("ERROR Flush All Files Failed : "
 						+ errorMsg + " because: " + e.toString());
