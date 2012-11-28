@@ -25,6 +25,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.monitor.IOMonitor;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -368,7 +369,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite)
+	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite, SDFSEvent evt)
 			throws IOException {
 		if (!this.isDirectory()) {
 			SDFSLogger.getLog().debug("is snapshot file");
@@ -441,6 +442,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					.getVirtualBytesWritten());
 			_mf.setVmdk(this.isVmdk());
 			_mf.unmarshal();
+			evt.curCt = evt.curCt+1;
 			return _mf;
 		} else {
 			SDFSLogger.getLog().debug("is snapshot dir");
@@ -452,7 +454,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				MetaDataDedupFile file = files[i];
 				String newPath = snaptoPath + File.separator
 						+ file.getPath().substring(trimlen);
-				file.snapshot(newPath, overwrite);
+				file.snapshot(newPath, overwrite,evt);
 			}
 			return MetaFileStore.getMF(snaptoPath);
 		}

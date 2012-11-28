@@ -55,7 +55,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		Main.mountEvent.children.add(loadEvent);
+		Main.mountEvent.addChild(loadEvent);
 		maps = new FileByteArrayLongMap[256];
 		this.size = (long) (maxSize);
 		this.maxSz = maxSize;
@@ -108,7 +108,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		SDFSLogger.getLog().info("claiming records");
 		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
 		tEvt.maxCt = this.maps.length;
-		evt.children.add(tEvt);
+		evt.addChild(tEvt);
 		long claims = 0;
 		for (int i = 0; i < maps.length; i++) {
 			tEvt.curCt++;

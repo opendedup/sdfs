@@ -223,10 +223,12 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("snapshot")) {
 						try {
-							String msg = new SnapshotCmd().getResult(
+							Element msg = new SnapshotCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", msg);
+							result.setAttribute("msg", "replication finished successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -348,6 +350,18 @@ public class MgmtWebServer implements Container {
 								String uuid = request.getQuery().get("uuid");
 								Element msg = new GetEvent().getResult(
 										uuid);
+								result.setAttribute("status", "success");
+								doc.adoptNode(msg);
+								result.appendChild(msg);
+							} catch (IOException e) {
+								result.setAttribute("status", "failed");
+								result.setAttribute("msg", e.toString());
+								SDFSLogger.getLog().warn(e);
+							}
+					}
+						else if (cmd.equalsIgnoreCase("events")) {
+							try {
+								Element msg = new GetEvents().getResult();
 								result.setAttribute("status", "success");
 								doc.adoptNode(msg);
 								result.appendChild(msg);

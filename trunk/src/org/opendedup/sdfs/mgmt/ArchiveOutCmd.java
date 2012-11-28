@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
 
@@ -32,7 +33,8 @@ public class ArchiveOutCmd implements XtendedCmd {
         SDFSLogger.getLog().debug("Replication staging = " +nf.getPath());
 		try {
 			SDFSLogger.getLog().debug("Created replication snapshot");
-			MetaDataDedupFile mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false);
+			SDFSEvent sevt = SDFSEvent.snapEvent("Creating Snapshot of " +f.getPath() +" for achive out.",f);
+			MetaDataDedupFile mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false,sevt);
 			SDFSLogger.getLog().debug("Created replication snapshot");
 			
 			mf.copyTo(nf.getPath(), true);

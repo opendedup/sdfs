@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.notification;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,6 +11,7 @@ import java.util.LinkedHashMap;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.FileCounts;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
@@ -21,22 +24,26 @@ public class SDFSEvent {
 	public String shortMsg = null;
 	public String longMsg = "";
 	public String target = null;
-	public long maxCt = 0;
+	public long maxCt = 1;
 	public long curCt = 1;
 	public long startTime;
 	public long endTime = -1;
 	public String uid = null;
-	public ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
+	private ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
+	public String puid;
 	public static final Type GC = new Type("Garbage Collection");
+	public static final Type FLUSHALL = new Type("Flush All Buffers");
 	public static final Type FDISK = new Type("File Check");
 	public static final Type WAIT = new Type("Waiting to Run Again");
 	public static final Type CLAIMR = new Type("Claim Records");
 	public static final Type REMOVER = new Type("Remove Records");
 	public static final Type AIMPORT = new Type("Replication Meta-Data Import");
 	public static final Type MOUNT = new Type("Mount Volume");
+	public static final Type COMPACT = new Type("Compaction");
+	public static final Type UMOUNT = new Type("Unmount Volume");
 	public static final Type LHASHDB = new Type("Loading Hash Database Task");
 	public static final Type FSCK = new Type("Consistancy Check");
-	public static final Type MIMPORT = new Type("Replication Block Data" 
+	public static final Type MIMPORT = new Type("Replication Block Data"
 			+ " Import");
 	public static final Type FIXDSE = new Type("Volume Recovery Task");
 	public static final Type SNAP = new Type("Take Snapshot");
@@ -46,8 +53,8 @@ public class SDFSEvent {
 	public static final Level WARN = new Level("warning");
 	public static final Level ERROR = new Level("error");
 	private static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
-			100, .075F, false);
-	
+			50, .075F, false);
+
 	SimpleDateFormat format = new SimpleDateFormat(
 			"EEE MMM dd HH:mm:ss zzz yyyy");
 
@@ -67,51 +74,117 @@ public class SDFSEvent {
 		this.endTime = System.currentTimeMillis();
 	}
 	
-	public boolean isDone() {
-		return this.endTime >0;
+	public void addChild(SDFSEvent evt) {
+		evt.puid = this.uid;
+		this.children.add(evt);
 	}
-	
-	public void endEvent(String msg, Level level,Exception e) {
+
+	public boolean isDone() {
+		return this.endTime > 0;
+	}
+
+	public void endEvent(String msg, Level level, Exception e) {
 		this.shortMsg = msg + " Exception : " + e.toString();
 		this.level = level;
 		this.endTime = System.currentTimeMillis();
+		this.curCt = this.maxCt;
 	}
 
 	public void endEvent(String msg) {
 		this.shortMsg = msg;
 		this.endTime = System.currentTimeMillis();
+		this.level = SDFSEvent.INFO;
+		this.curCt = this.maxCt;
 	}
 
 	public static SDFSEvent archiveImportEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(), shortMsg);
+		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(),
+				shortMsg);
 		event.level = INFO;
 		return event;
 	}
 	
+	public static SDFSEvent umountEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(UMOUNT, Main.volume.getName(),
+				shortMsg);
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent compactEvent() {
+		SDFSEvent event = new SDFSEvent(COMPACT, Main.volume.getName(),
+				"Running Compaction on DSE, this may take a while");
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent mountEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(MOUNT, Main.volume.getName(),
+				shortMsg);
+		event.level = INFO;
+		return event;
+	}
+
 	public static SDFSEvent consistancyCheckEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(), shortMsg);
+		SDFSEvent event = new SDFSEvent(FSCK, Main.volume.getName(),
+				shortMsg);
 		event.level = INFO;
 		return event;
 	}
-	
+
 	public static SDFSEvent loadHashDBEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(LHASHDB, Main.volume.getName(), shortMsg);
+		SDFSEvent event = new SDFSEvent(LHASHDB, Main.volume.getName(),
+				shortMsg);
 		event.level = INFO;
 		return event;
 	}
 	
+	public static SDFSEvent flushAllBuffers() {
+		SDFSEvent event = new SDFSEvent(FLUSHALL, Main.volume.getName(),
+				"Flushing all buffers");
+		event.level = INFO;
+		return event;
+	}
+
+	public static SDFSEvent snapEvent(String shortMsg, File src)
+			throws IOException {
+
+		SDFSEvent event = new SDFSEvent(SNAP, Main.volume.getName(), shortMsg);
+		if (src.isDirectory())
+			event.maxCt = FileCounts.getCount(src, true);
+		else
+			event.maxCt = 1;
+		event.level = INFO;
+		return event;
+	}
+
 	public static SDFSEvent metaImportEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MIMPORT, Main.volume.getName(), shortMsg);
+		SDFSEvent event = new SDFSEvent(MIMPORT, Main.volume.getName(),
+				shortMsg);
 		event.level = INFO;
 		return event;
 	}
 	
+	public static SDFSEvent deleteFileEvent(File f) {
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, Main.volume.getName(),
+				"File " + f.getPath() + " deleted");
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent deleteFileFailedEvent(File f) {
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, Main.volume.getName(),
+				"File " + f.getPath() + " delete failed");
+		event.level = WARN;
+		return event;
+	}
+
 	public static SDFSEvent claimInfoEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(CLAIMR, Main.volume.getName(), shortMsg);
 		event.level = INFO;
 		return event;
 	}
-	
+
 	public static SDFSEvent waitEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(WAIT, Main.volume.getName(), shortMsg);
 		event.level = INFO;
@@ -130,39 +203,10 @@ public class SDFSEvent {
 		event.level = INFO;
 		return event;
 	}
+
 	public static SDFSEvent fdiskInfoEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(FDISK, Main.volume.getName(), shortMsg);
 		event.level = INFO;
-		return event;
-	}
-
-	public static SDFSEvent gcErrorEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(GC, Main.volume.getName(), shortMsg);
-		event.level = ERROR;
-		return event;
-	}
-
-	public static SDFSEvent gcWarnEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(GC, Main.volume.getName(), shortMsg);
-		event.level = ERROR;
-		return event;
-	}
-
-	public static SDFSEvent mountInfoEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MOUNT, Main.volume.getName(), shortMsg);
-		event.level = INFO;
-		return event;
-	}
-
-	public static SDFSEvent mountErrorEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MOUNT, Main.volume.getName(), shortMsg);
-		event.level = ERROR;
-		return event;
-	}
-
-	public static SDFSEvent mountWarnEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MOUNT, Main.volume.getName(), shortMsg);
-		event.level = WARN;
 		return event;
 	}
 
@@ -190,7 +234,7 @@ public class SDFSEvent {
 		sb.append(",");
 		sb.append(this.longMsg);
 		sb.append(",");
-		if(this.maxCt == 0 || this.curCt == 0)
+		if (this.maxCt == 0 || this.curCt == 0)
 			sb.append("0");
 		else
 			sb.append(Double.toString(this.curCt / this.maxCt));
@@ -217,11 +261,16 @@ public class SDFSEvent {
 		root.setAttribute("target", this.target);
 		root.setAttribute("short-msg", this.shortMsg);
 		root.setAttribute("long-msg", this.longMsg);
-		root.setAttribute("percent-complete",
-				Double.toString((this.curCt / this.maxCt)));
+		try {
+			root.setAttribute("percent-complete",
+					Double.toString((this.curCt / this.maxCt)));
+		} catch (Exception e) {
+			root.setAttribute("percent-complete", "0");
+		}
 		root.setAttribute("max-count", Long.toString(this.maxCt));
 		root.setAttribute("current-count", Long.toString(this.curCt));
 		root.setAttribute("uuid", this.uid);
+		root.setAttribute("parent-uid", this.puid);
 		for (int i = 0; i < this.children.size(); i++) {
 			Element el = this.children.get(i).toXML();
 			doc.adoptNode(el);
@@ -229,7 +278,28 @@ public class SDFSEvent {
 		}
 		return (Element) root.cloneNode(true);
 	}
-	
+
+	public static SDFSEvent fromXML(Element el) {
+		SDFSEvent evt = new SDFSEvent(new Type(el.getAttribute("type")),
+				el.getAttribute("target"), el.getAttribute("short-msg"));
+		evt.maxCt = Long.parseLong(el.getAttribute("max-count"));
+		evt.curCt = Long.parseLong(el.getAttribute("current-count"));
+		evt.uid = el.getAttribute("uuid");
+		evt.level = new Level(el.getAttribute("level"));
+		evt.startTime = Long.parseLong(el.getAttribute("start-timestamp"));
+		evt.endTime = Long.parseLong(el.getAttribute("end-timestamp"));
+		evt.puid = el.getAttribute("parent-uid");
+		int le = el.getElementsByTagName("event").getLength();
+		if (le > 0) {
+			for (int i = 0; i < le; i++) {
+				Element _el = (Element) el.getElementsByTagName("event")
+						.item(i);
+				evt.children.add(fromXML(_el));
+			}
+		}
+		return evt;
+
+	}
 
 	public static String getEvents() {
 		Iterator<SDFSEvent> iter = SDFSEvent.tasks.values().iterator();
@@ -240,13 +310,14 @@ public class SDFSEvent {
 		}
 		return sb.toString();
 	}
-	
-	public static Element getXMLEvent(String uuid) throws ParserConfigurationException {
-		if(tasks.containsKey(uuid))
+
+	public static Element getXMLEvent(String uuid)
+			throws ParserConfigurationException {
+		if (tasks.containsKey(uuid))
 			return tasks.get(uuid).toXML();
 		else
 			throw new NullPointerException(uuid + " could not be found");
-		
+
 	}
 
 	public static Element getXMLEvents() throws ParserConfigurationException {

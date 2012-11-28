@@ -19,7 +19,7 @@ public class ConsistancyCheck {
 					.println("Running Consistancy Check on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
 			SDFSEvent evt = SDFSEvent.consistancyCheckEvent("Running Consistancy Check on DSE, this may take a while");
-			Main.mountEvent.children.add(evt);
+			Main.mountEvent.addChild(evt);
 			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",store.size()/Main.CHUNK_LENGTH,System.out);
 			evt.maxCt = store.size()/Main.CHUNK_LENGTH;
 			long currentCount = 0;

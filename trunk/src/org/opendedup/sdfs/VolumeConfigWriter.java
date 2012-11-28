@@ -505,6 +505,7 @@ public class VolumeConfigWriter {
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("enable", Boolean.toString(networkEnable));
 		network.setAttribute("port", Integer.toString(this.network_port));
+		
 		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
 		network.setAttribute("upstream-enabled",
 				Boolean.toString(this.upstreamEnabled));

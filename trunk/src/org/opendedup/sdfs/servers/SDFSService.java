@@ -38,7 +38,7 @@ public class SDFSService {
 
 		Config.parseSDFSConfigFile(this.configFile);
 		MgmtWebServer.start();
-		Main.mountEvent = SDFSEvent.mountInfoEvent("SDFS Version [" + Main.version
+		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
 		if (this.routingFile != null)
 			Config.parserRoutingFile(routingFile);
@@ -83,7 +83,7 @@ public class SDFSService {
 	}
 
 	public void stop() {
-		SDFSEvent.mountWarnEvent("Unmounting Volume");
+		SDFSEvent evt = SDFSEvent.umountEvent("Unmounting Volume");
 		SDFSLogger.getLog().info("Shutting Down SDFS");
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
 		if (!Main.chunkStoreLocal) {
@@ -133,7 +133,7 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
-		SDFSEvent.mountInfoEvent("Volume Unmounted");
+		evt.endEvent("Volume Unmounted");
 		SDFSLogger.getLog().info("SDFS is Shut Down");
 	}
 }

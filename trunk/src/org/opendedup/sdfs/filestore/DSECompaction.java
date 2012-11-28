@@ -16,6 +16,7 @@ import org.opendedup.util.StorageUnit;
 public class DSECompaction {
 	public static synchronized void runCheck(AbstractHashesMap map,
 			AbstractChunkStore nstore,AbstractChunkStore ostore) throws IOException {
+		SDFSEvent evt = SDFSEvent.compactEvent();
 		try {
 			
 			ostore.iterationInit();
@@ -25,8 +26,9 @@ public class DSECompaction {
 			System.out
 					.println("Running Compaction on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Compaction on DSE, this may take a while");
-			SDFSEvent.mountWarnEvent("Running Compaction on DSE, this may take a while");
+			
 			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",ostore.size()/Main.CHUNK_LENGTH,System.out);
+			evt.maxCt = ostore.size()/Main.CHUNK_LENGTH;
 			long currentCount = 0;
 			while (data != null) {
 				count++;
@@ -42,6 +44,7 @@ public class DSECompaction {
 					records++;
 				} 
 				data = ostore.getNextChunck();
+				evt.curCt = currentCount;
 				currentCount++;
 			}
 			bar.finish();
@@ -52,12 +55,13 @@ public class DSECompaction {
 					.getLog()
 					.warn("Succesfully Ran Compaction for [" + records
 							+ "] records");
-			SDFSEvent.mountWarnEvent("Succesfully Ran Compaction for [" + records
+			evt.endEvent("Succesfully Ran Compaction for [" + records
 					+ "] records");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"Unable to finish compaction because", e);
 			System.err.println("Unable to finish compaction because" +e.toString());
+			evt.endEvent("Unable to finish compaction",SDFSEvent.WARN,e);
 			throw new IOException("Unable to finish compaction");
 		}
 	}

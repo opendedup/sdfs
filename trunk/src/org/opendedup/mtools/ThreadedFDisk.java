@@ -49,10 +49,7 @@ public class ThreadedFDisk {
 				"took [" + (System.currentTimeMillis() - start) / 1000
 						+ "] seconds to check [" + files + "]. Found ["
 						+ this.corruptFiles + "] corrupt files");
-		if (this.corruptFiles > 0) {
-			SDFSEvent.gcWarnEvent(this.corruptFiles
-					+ " Corrupt Files found during FDisk task.");
-		}
+		
 	}
 
 	private void traverse(File dir) throws IOException {

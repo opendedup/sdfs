@@ -31,7 +31,7 @@ public class ManualGC {
 			if (Main.firstRun) {
 				SDFSEvent wevt = SDFSEvent.waitEvent("Waiting 10 Seconds to run again");
 				wevt.maxCt = 10;
-				evt.children.add(wevt);
+				evt.addChild(wevt);
 				for(int i = 0;i<10;i++) {
 				Thread.sleep(1000);
 				wevt.curCt++;
