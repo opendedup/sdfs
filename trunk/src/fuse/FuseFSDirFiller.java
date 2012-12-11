@@ -23,6 +23,7 @@ public class FuseFSDirFiller extends ArrayList<FuseFSDirEnt> implements
 	//
 	// FuseDirFiller implementation
 
+	@Override
 	public void add(String name, long inode, int mode) {
 		FuseFSDirEnt dirEntry = new FuseFSDirEnt();
 
@@ -58,6 +59,7 @@ public class FuseFSDirFiller extends ArrayList<FuseFSDirEnt> implements
 	 * 
 	 * @return a string representation of this collection.
 	 */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 

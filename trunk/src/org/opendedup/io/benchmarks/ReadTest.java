@@ -51,8 +51,8 @@ public class ReadTest implements Runnable {
 
 	public float results() {
 		long size = new File(path).length();
-		float mb = (float) (size / (1024 * 1024));
-		float seconds = (float) (duration / 1000);
+		float mb = (size / (1024 * 1024));
+		float seconds = (duration / 1000);
 		float mbps = mb / seconds;
 		return mbps;
 	}

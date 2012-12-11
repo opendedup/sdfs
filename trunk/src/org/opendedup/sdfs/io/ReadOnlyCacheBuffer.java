@@ -28,7 +28,7 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 	}
 
 	private byte[] readBlockFile(Path blockFile) throws IOException {
-		SeekableByteChannel fc = (SeekableByteChannel) Files.newByteChannel(
+		SeekableByteChannel fc = Files.newByteChannel(
 				blockFile, StandardOpenOption.READ);
 		byte[] b = new byte[(int) fc.size()];
 		ByteBuffer buf = ByteBuffer.wrap(b);
@@ -38,6 +38,7 @@ public class ReadOnlyCacheBuffer extends DedupChunk {
 		return buf.array();
 	}
 
+	@Override
 	public byte[] getChunk() throws IOException, BufferClosedException {
 		if (Main.safeSync) {
 			StringBuffer sb = new StringBuffer();

@@ -11,6 +11,7 @@ import org.opendedup.util.SDFSLogger;
 
 public class DeleteArchiveCmd implements XtendedCmd {
 
+	@Override
 	public String getResult(String cmd, String file) throws IOException {
 		if(file.contains(".."))
 			throw new IOException("requeste file " + file + " does not exist");

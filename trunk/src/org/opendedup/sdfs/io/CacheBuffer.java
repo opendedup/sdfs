@@ -78,6 +78,7 @@ public class CacheBuffer extends DedupChunk {
 	/**
 	 * @return the chunk of data that is cached
 	 */
+	@Override
 	public byte[] getChunk() {
 		return chunk;
 	}
@@ -112,6 +113,7 @@ public class CacheBuffer extends DedupChunk {
 		this.dirty = dirty;
 	}
 
+	@Override
 	public String toString() {
 		return this.getHash() + ":" + this.getFilePosition() + ":"
 				+ this.getLength() + ":" + this.getEndPosition();

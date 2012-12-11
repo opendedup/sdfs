@@ -20,6 +20,7 @@ public class FuseDirEnt extends FuseFtype {
 	// CHANGE-22: inode added
 	public int inode;
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(isPrefixed ? ", " : " ").append("name='").append(name)
 				.append("'").append("inode='").append(inode).append("'");

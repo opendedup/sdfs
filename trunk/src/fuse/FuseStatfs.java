@@ -24,18 +24,20 @@ public class FuseStatfs extends Struct implements FuseStatfsSetter {
 	/**
 	 * FuseStatfsSetter implementation
 	 */
+	@Override
 	public void set(int blockSize, int blocks, int blocksFree, int blocksAvail,
 			int files, int filesFree, int namelen) {
 		this.blockSize = blockSize;
 		this.blocks = blocks;
 		this.blocksFree = blocksFree;
 		this.blocksAvail = (blocksAvail >= 0) ? blocksAvail
-				: (int) ((long) blocksFree * 20L / 19L);
+				: (int) (blocksFree * 20L / 19L);
 		this.files = files;
 		this.filesFree = filesFree;
 		this.namelen = namelen;
 	}
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

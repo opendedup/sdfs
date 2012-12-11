@@ -2,6 +2,7 @@ Version 1.1.9
 	Fixes:
 	* Fixed concurrency issue that caused error under high IO.
 	* Fixed erroneous errors during compaction on volumes where replication is enabled
+	* Fixed S3 errors during volume creation
 	Enhancements
 	* Added replication command line status output
 	* Added status output for all post mount commands

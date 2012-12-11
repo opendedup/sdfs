@@ -55,16 +55,19 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		this.init(null);
 	}
 
+	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public long bytesWritten() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public void close() {
 
 	}
@@ -74,6 +77,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString = this.getHashName(hash);
 		try {
@@ -96,12 +100,14 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
 	private static ReentrantLock reservePositionlock = new ReentrantLock();
 
+	@Override
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
@@ -113,13 +119,16 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public void setName(String name) {
 	}
 
+	@Override
 	public long size() {
 		return this.currentLength;
 	}
 
+	@Override
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 

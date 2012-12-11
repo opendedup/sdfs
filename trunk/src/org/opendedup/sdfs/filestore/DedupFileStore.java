@@ -38,6 +38,7 @@ public class DedupFileStore {
 			.listener(new EvictionListener<String, DedupFile>() {
 				// This method is called just after a new entry has been
 				// added
+				@Override
 				public void onEviction(String key, DedupFile file) {
 					file.forceClose();
 				}
@@ -82,7 +83,7 @@ public class DedupFileStore {
 
 					}
 				} else {
-					df = (DedupFile) openFile.get(mf.getDfGuid());
+					df = openFile.get(mf.getDfGuid());
 					if (df == null) {
 						df = new SparseDedupFile(mf);
 
@@ -138,7 +139,7 @@ public class DedupFileStore {
 			if (oldmf.getDfGuid() == null)
 				return null;
 			else {
-				DedupFile df = (SparseDedupFile) openFile
+				DedupFile df = openFile
 						.get(oldmf.getDfGuid());
 				if (df == null) {
 					df = new SparseDedupFile(oldmf);

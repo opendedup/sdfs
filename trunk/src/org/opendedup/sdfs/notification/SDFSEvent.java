@@ -210,6 +210,7 @@ public class SDFSEvent {
 		return event;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(this.uid);
@@ -339,6 +340,7 @@ public class SDFSEvent {
 			this.type = type;
 		}
 
+		@Override
 		public String toString() {
 			return this.type;
 		}
@@ -351,6 +353,7 @@ public class SDFSEvent {
 			this.type = type;
 		}
 
+		@Override
 		public String toString() {
 			return this.type;
 		}

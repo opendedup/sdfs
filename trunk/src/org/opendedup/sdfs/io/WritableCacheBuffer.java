@@ -167,6 +167,7 @@ public class WritableCacheBuffer extends DedupChunk {
 		return endPosition;
 	}
 
+	@Override
 	public byte[] getChunk() throws IOException, BufferClosedException {
 		this.lock.lock();
 		if (this.closed)
@@ -269,11 +270,13 @@ public class WritableCacheBuffer extends DedupChunk {
 		this.lock.unlock();
 	}
 
+	@Override
 	public String toString() {
 		return this.getHash() + ":" + this.getFilePosition() + ":"
 				+ this.getLength() + ":" + this.getEndPosition();
 	}
 
+	@Override
 	public void open() {
 		try {
 			this.lock.lock();
@@ -383,6 +386,7 @@ public class WritableCacheBuffer extends DedupChunk {
 		}
 	}
 
+	@Override
 	public void destroy() {
 		if (raf != null) {
 			try {
@@ -413,6 +417,7 @@ public class WritableCacheBuffer extends DedupChunk {
 		this.prevDoop = prevDoop;
 	}
 
+	@Override
 	public int hashCode() {
 		this.lock.lock();
 		try {

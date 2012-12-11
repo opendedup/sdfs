@@ -36,6 +36,7 @@ public class FuseFSFillDir extends Struct implements FuseFillDir {
 	 * @return true if successfull (allways if buffering) or false if buffer
 	 *         full (in streaming mode)
 	 */
+	@Override
 	public boolean fill(String name, long inode, int mode, long nextOffset) {
 		// encode into native ByteBuffer terminated with (byte)0
 		ByteBuffer bb = cs.encode(name);
@@ -75,6 +76,7 @@ public class FuseFSFillDir extends Struct implements FuseFillDir {
 	//
 	// Struct subclass
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

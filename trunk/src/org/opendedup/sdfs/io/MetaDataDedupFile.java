@@ -938,6 +938,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return new File(this.path).hashCode();
 	}
@@ -961,6 +962,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return lastAccessed;
 	}
 
+	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
 		this.timeStamp = in.readLong();

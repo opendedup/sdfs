@@ -15,6 +15,7 @@ public class MultiSnapshotCmd implements XtendedCmd {
 		this.snaps = snaps;
 	}
 
+	@Override
 	public String getResult(String cmd, String file) throws IOException {
 		return takeSnapshot(file, cmd);
 	}

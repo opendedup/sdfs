@@ -125,6 +125,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#getName()
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -135,6 +136,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see
 	 * com.annesam.sdfs.filestore.AbstractChunkStore#setName(java.lang.String)
 	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -144,6 +146,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#size()
 	 */
+	@Override
 	public long size() {
 		return this.currentLength;
 	}
@@ -153,6 +156,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#bytesRead()
 	 */
+	@Override
 	public long bytesRead() {
 		return this.bytesRead();
 	}
@@ -162,6 +166,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#bytesWritten()
 	 */
+	@Override
 	public long bytesWritten() {
 		return this.bytesWritten();
 	}
@@ -174,6 +179,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see
 	 * com.annesam.sdfs.filestore.AbstractChunkStore#reserveWritePosition(int)
 	 */
+	@Override
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
@@ -184,6 +190,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		return pos;
 	}
 
+	@Override
 	public void claimChunk(byte[] hash, long pos) throws IOException {
 		/*
 		 * RandomAccessFile raf = new RandomAccessFile(this.meta_location,
@@ -197,6 +204,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		 */
 	}
 
+	@Override
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 		if (this.closed)
@@ -254,6 +262,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		raf.close();
 	}
 
+	@Override
 	public void close() {
 		th.close();
 		try {
@@ -337,6 +346,7 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	private ReentrantLock iterlock = new ReentrantLock();
 
+	@Override
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {

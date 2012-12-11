@@ -737,6 +737,7 @@ public class ByteBufferBitSet implements Cloneable, java.io.Serializable {
 	 * 
 	 * @return the hash code value for this bit set
 	 */
+	@Override
 	public int hashCode() {
 		long h = 1234;
 		for (int i = wordsInUse; --i >= 0;)

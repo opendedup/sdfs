@@ -11,10 +11,12 @@ public class FuseSize extends Struct implements FuseSizeSetter {
 	//
 	// FuseSizeSetter implementation
 
+	@Override
 	public void setSize(int size) {
 		this.size = size;
 	}
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

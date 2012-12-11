@@ -19,7 +19,7 @@ public class NextPrime {
 		for (long i = input;; i += 2) {
 			root = (long) Math.sqrt(i);
 			for (long j = 3; j <= root; j++) {
-				if (i == (long) (i / j) * j) {
+				if (i == (i / j) * j) {
 					isPrime = false;
 					break;
 				}
@@ -50,7 +50,7 @@ public class NextPrime {
 		for (long i = input;; i += 2) {
 			root = (long) Math.sqrt(i);
 			for (long j = 3; j <= root; j++) {
-				if (i == (long) (i / j) * j) {
+				if (i == (i / j) * j) {
 					isPrime = false;
 					break;
 				}

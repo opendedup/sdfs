@@ -19,6 +19,7 @@ public class TigerHashEngine implements AbstractHashEngine {
 		hc = MessageDigest.getInstance("Tiger", "BC");
 	}
 
+	@Override
 	public byte[] getHash(byte[] data) {
 		byte[] hash = hc.digest(data);
 		hc.reset();
@@ -30,6 +31,7 @@ public class TigerHashEngine implements AbstractHashEngine {
 		return 24;
 	}
 
+	@Override
 	public void destroy() {
 		hc.reset();
 		hc = null;

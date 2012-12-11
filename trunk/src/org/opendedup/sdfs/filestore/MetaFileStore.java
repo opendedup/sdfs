@@ -43,6 +43,7 @@ public class MetaFileStore {
 			.listener(new EvictionListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
+				@Override
 				public void onEviction(String key, MetaDataDedupFile file) {
 					file.unmarshal();
 				}
@@ -106,7 +107,7 @@ public class MetaFileStore {
 			}
 			MetaDataDedupFile mf = null;
 
-			mf = (MetaDataDedupFile) pathMap.get(f.getPath());
+			mf = pathMap.get(f.getPath());
 			if (mf == null) {
 				mf = MetaDataDedupFile.getFile(f.getPath());
 				cacheMF(mf);

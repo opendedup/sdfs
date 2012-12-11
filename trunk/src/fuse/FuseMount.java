@@ -85,6 +85,7 @@ public class FuseMount {
 		final Filesystem3ToFuseFSAdapter fuseFS = new Filesystem3ToFuseFSAdapter(
 				filesystem3, log);
 		Thread fuseThread = new Thread(group, new Runnable() {
+			@Override
 			public void run() {
 				try {
 					log.info("Mounted filesystem");

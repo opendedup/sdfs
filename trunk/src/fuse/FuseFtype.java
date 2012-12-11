@@ -14,6 +14,7 @@ import fuse.util.Struct;
 public class FuseFtype extends Struct implements FuseFtypeConstants {
 	public int mode;
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ")
 				.append("mode=").append(Integer.toOctalString(mode))

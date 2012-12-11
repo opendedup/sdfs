@@ -61,9 +61,9 @@ public class CAPIGenerator {
 					instanceFieldsList.add(field);
 			}
 		}
-		Field[] staticFields = (Field[]) staticFieldsList
+		Field[] staticFields = staticFieldsList
 				.toArray(new Field[staticFieldsList.size()]);
-		Field[] instanceFields = (Field[]) instanceFieldsList
+		Field[] instanceFields = instanceFieldsList
 				.toArray(new Field[instanceFieldsList.size()]);
 
 		// obtain all public constructors and give them C names
@@ -80,7 +80,7 @@ public class CAPIGenerator {
 								constructor.getParameterTypes()));
 			}
 		}
-		constructors = (Constructor[]) constructorsList
+		constructors = constructorsList
 				.toArray(new Constructor[constructorsList.size()]);
 
 		// split all public methods into static and instance methods and give
@@ -104,9 +104,9 @@ public class CAPIGenerator {
 								method.getParameterTypes()));
 			}
 		}
-		Method[] staticMethods = (Method[]) staticMethodsList
+		Method[] staticMethods = staticMethodsList
 				.toArray(new Method[staticMethodsList.size()]);
-		Method[] instanceMethods = (Method[]) instanceMethodsList
+		Method[] instanceMethods = instanceMethodsList
 				.toArray(new Method[instanceMethodsList.size()]);
 
 		// before we begin, we output header

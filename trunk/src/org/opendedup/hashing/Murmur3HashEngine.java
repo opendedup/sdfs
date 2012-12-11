@@ -9,6 +9,7 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	public Murmur3HashEngine() throws NoSuchAlgorithmException {
 	}
 
+	@Override
 	public byte[] getHash(byte[] data) {
 		byte[] hash = MurmurHash3.murmur128(data, seed);
 		return hash;
@@ -19,6 +20,7 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 		return 16;
 	}
 
+	@Override
 	public void destroy() {
 	}
 }

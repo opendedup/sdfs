@@ -80,6 +80,7 @@ public class PasswordEntry extends Struct {
 	 *            are their other attributes before this?
 	 * @return true.
 	 */
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

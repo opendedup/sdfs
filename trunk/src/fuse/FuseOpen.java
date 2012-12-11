@@ -27,6 +27,7 @@ public class FuseOpen extends Struct implements FuseOpenSetter {
 	 * @param fh
 	 *            the filehandle to return from <code>open()<code> method.
 	 */
+	@Override
 	public void setFh(Object fh) {
 		this.fh = fh;
 	}
@@ -34,10 +35,12 @@ public class FuseOpen extends Struct implements FuseOpenSetter {
 	/**
 	 * Sets/gets the direct_io FUSE option for this opened file
 	 */
+	@Override
 	public boolean isDirectIO() {
 		return directIO;
 	}
 
+	@Override
 	public void setDirectIO(boolean directIO) {
 		this.directIO = directIO;
 	}
@@ -45,14 +48,17 @@ public class FuseOpen extends Struct implements FuseOpenSetter {
 	/**
 	 * Sets/gets keep_cache FUSE option for this opened file
 	 */
+	@Override
 	public boolean isKeepCache() {
 		return keepCache;
 	}
 
+	@Override
 	public void setKeepCache(boolean keepCache) {
 		this.keepCache = keepCache;
 	}
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

@@ -65,6 +65,7 @@ public class Partition {
 		this.type = type;
 	}
 
+	@Override
 	public String toString() {
 		return this.device + " " + this.blocks + " " + this.start + " "
 				+ this.end + " " + this.type + " " + this.System;

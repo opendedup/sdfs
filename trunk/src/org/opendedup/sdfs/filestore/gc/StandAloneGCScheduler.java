@@ -18,6 +18,7 @@ public class StandAloneGCScheduler implements Runnable {
 		th.start();
 	}
 
+	@Override
 	public void run() {
 		while (!closed) {
 			gcController.runGC();

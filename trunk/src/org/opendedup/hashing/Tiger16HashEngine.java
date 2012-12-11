@@ -13,6 +13,7 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 		md = JacksumAPI.getChecksumInstance("tiger128");
 	}
 
+	@Override
 	public byte[] getHash(byte[] data) {
 		md.update(data);
 		byte[] hash = md.getByteArray();
@@ -25,6 +26,7 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 		return 16;
 	}
 
+	@Override
 	public void destroy() {
 		md.reset();
 		md = null;
