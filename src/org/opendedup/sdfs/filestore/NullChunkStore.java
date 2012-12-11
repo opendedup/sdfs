@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 public class NullChunkStore implements AbstractChunkStore {
 
+	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
 		return 0;

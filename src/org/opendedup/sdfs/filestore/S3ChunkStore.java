@@ -85,16 +85,19 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public long bytesWritten() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	@Override
 	public void close() {
 
 	}
@@ -104,6 +107,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		String hashString = this.getHashName(hash);
 		RestS3Service s3Service = null;
@@ -130,12 +134,14 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
 	private static ReentrantLock reservePositionlock = new ReentrantLock();
 
+	@Override
 	public long reserveWritePosition(int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
@@ -147,15 +153,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
 	public void setName(String name) {
 
 	}
 
+	@Override
 	public long size() {
 		// TODO Auto-generated method stub
 		return this.currentLength;
 	}
 
+	@Override
 	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
 			throws IOException {
 

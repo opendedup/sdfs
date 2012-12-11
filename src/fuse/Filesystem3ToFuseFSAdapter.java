@@ -57,6 +57,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	//
 	// FuseFS implementation
 
+	@Override
 	public int getattr(ByteBuffer path, FuseGetattrSetter getattrSetter) {
 		String pathStr = cs.decode(path).toString();
 
@@ -72,6 +73,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int readlink(ByteBuffer path, ByteBuffer link) {
 		String pathStr = cs.decode(path).toString();
 
@@ -105,6 +107,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int getdir(ByteBuffer path, FuseFSDirFiller dirFiller) {
 		String pathStr = cs.decode(path).toString();
 
@@ -120,6 +123,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int mknod(ByteBuffer path, int mode, int rdev) {
 		String pathStr = cs.decode(path).toString();
 
@@ -135,6 +139,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int mkdir(ByteBuffer path, int mode) {
 		String pathStr = cs.decode(path).toString();
 
@@ -150,6 +155,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int unlink(ByteBuffer path) {
 		String pathStr = cs.decode(path).toString();
 
@@ -164,6 +170,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int rmdir(ByteBuffer path) {
 		String pathStr = cs.decode(path).toString();
 
@@ -178,6 +185,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int symlink(ByteBuffer from, ByteBuffer to) {
 		String fromStr = cs.decode(from).toString();
 		String toStr = cs.decode(to).toString();
@@ -193,6 +201,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int rename(ByteBuffer from, ByteBuffer to) {
 		String fromStr = cs.decode(from).toString();
 		String toStr = cs.decode(to).toString();
@@ -208,6 +217,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int link(ByteBuffer from, ByteBuffer to) {
 		String fromStr = cs.decode(from).toString();
 		String toStr = cs.decode(to).toString();
@@ -223,6 +233,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int chmod(ByteBuffer path, int mode) {
 		String pathStr = cs.decode(path).toString();
 
@@ -238,6 +249,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int chown(ByteBuffer path, int uid, int gid) {
 		String pathStr = cs.decode(path).toString();
 
@@ -253,6 +265,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int truncate(ByteBuffer path, long size) {
 		String pathStr = cs.decode(path).toString();
 
@@ -267,13 +280,14 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int utime(ByteBuffer path, int atime, int mtime) {
 		String pathStr = cs.decode(path).toString();
 
 		if (log != null && log.isDebugEnabled()) {
 			log.debug("utime: path=" + pathStr + ", atime=" + atime + " ("
-					+ new Date((long) atime * 1000L) + "), mtime=" + mtime
-					+ " (" + new Date((long) mtime * 1000L) + ")");
+					+ new Date(atime * 1000L) + "), mtime=" + mtime
+					+ " (" + new Date(mtime * 1000L) + ")");
 		}
 
 		try {
@@ -283,6 +297,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int statfs(FuseStatfsSetter statfsSetter) {
 		if (log != null && log.isDebugEnabled()) {
 			log.debug("statfs");
@@ -295,6 +310,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int open(ByteBuffer path, int flags, FuseOpenSetter openSetter) {
 		String pathStr = cs.decode(path).toString();
 
@@ -309,6 +325,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int read(ByteBuffer path, Object fh, ByteBuffer buf, long offset) {
 		String pathStr = cs.decode(path).toString();
 
@@ -324,6 +341,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int write(ByteBuffer path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) {
 		String pathStr = cs.decode(path).toString();
@@ -341,6 +359,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int flush(ByteBuffer path, Object fh) {
 		String pathStr = cs.decode(path).toString();
 
@@ -355,6 +374,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int release(ByteBuffer path, Object fh, int flags) {
 		String pathStr = cs.decode(path).toString();
 
@@ -370,6 +390,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int fsync(ByteBuffer path, Object fh, boolean isDatasync) {
 		String pathStr = cs.decode(path).toString();
 
@@ -389,6 +410,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	//
 	// extended attribute support is optional
 
+	@Override
 	public int getxattrsize(ByteBuffer path, ByteBuffer name,
 			FuseSizeSetter sizeSetter) {
 		if (xattrSupport == null) {
@@ -411,6 +433,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int getxattr(ByteBuffer path, ByteBuffer name, ByteBuffer value,
 			int position) {
 		if (xattrSupport == null) {
@@ -442,8 +465,9 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		CharsetEncoder enc = cs.newEncoder();
 		int size = 0;
 
+		@Override
 		public void add(String xattrName) {
-			size += (int) ((float) xattrName.length() * enc
+			size += (int) (xattrName.length() * enc
 					.averageBytesPerChar()) + 1;
 		}
 	}
@@ -451,6 +475,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	//
 	// estimate the byte size of attribute names list...
 
+	@Override
 	public int listxattrsize(ByteBuffer path, FuseSizeSetter sizeSetter) {
 		if (xattrSupport == null) {
 			return handleErrno(Errno.ENOTSUPP);
@@ -492,6 +517,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 			this.list = list;
 		}
 
+		@Override
 		public void add(String xattrName) {
 			if (boe == null) // don't need to bother any more if there was an
 								// exception already
@@ -509,6 +535,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		//
 		// for debugging
 
+		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 
@@ -549,6 +576,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	//
 	// list attributes into given ByteBuffer...
 
+	@Override
 	public int listxattr(ByteBuffer path, final ByteBuffer list) {
 		if (xattrSupport == null) {
 			return handleErrno(Errno.ENOTSUPP);
@@ -577,6 +605,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		return handleErrno(errno, lister);
 	}
 
+	@Override
 	public int setxattr(ByteBuffer path, ByteBuffer name, ByteBuffer value,
 			int flags, int position) {
 		if (xattrSupport == null) {
@@ -599,6 +628,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int removexattr(ByteBuffer path, ByteBuffer name) {
 		if (xattrSupport == null) {
 			return handleErrno(Errno.ENOTSUPP);
@@ -619,6 +649,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	// Lifecycle support is optional
+	@Override
 	public int init() {
 		if (lifecycleSupport == null) {
 			return handleErrno(Errno.ENOTSUPP);
@@ -635,6 +666,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
+	@Override
 	public int destroy() {
 		if (lifecycleSupport == null) {
 			return handleErrno(Errno.ENOTSUPP);

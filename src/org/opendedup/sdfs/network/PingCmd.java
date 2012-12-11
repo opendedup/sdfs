@@ -11,6 +11,7 @@ public class PingCmd implements IOCmd {
 	public PingCmd() {
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.writeInt(NetworkCMDS.PING_CMD);
@@ -22,6 +23,7 @@ public class PingCmd implements IOCmd {
 		return this.response;
 	}
 
+	@Override
 	public byte getCmdID() {
 		// TODO Auto-generated method stub
 		return NetworkCMDS.PING_CMD;

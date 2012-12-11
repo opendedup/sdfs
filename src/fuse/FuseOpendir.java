@@ -25,10 +25,12 @@ public class FuseOpendir extends Struct implements FuseOpendirSetter {
 	 * @param fh
 	 *            the filehandle to return from <code>opendir()<code> method.
 	 */
+	@Override
 	public void setFh(Object fh) {
 		this.fh = fh;
 	}
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

@@ -29,6 +29,7 @@ public class HCServiceProxy {
 			.listener(new EvictionListener<String, ByteCache>() {
 				// This method is called just after a new entry has been
 				// added
+				@Override
 				public void onEviction(String key, ByteCache writeBuffer) {
 				}
 			}
@@ -73,7 +74,7 @@ public class HCServiceProxy {
 	}
 
 	private static HashClient getReadHashClient(String name) throws Exception {
-		HashClient hc = (HashClient) dseRoutes.get(name).borrowObject();
+		HashClient hc = dseRoutes.get(name).borrowObject();
 		return hc;
 	}
 
@@ -83,7 +84,7 @@ public class HCServiceProxy {
 	}
 
 	private static HashClient getWriteHashClient(String name) throws Exception {
-		HashClient hc = (HashClient) dseRoutes.get(name).borrowObject();
+		HashClient hc = dseRoutes.get(name).borrowObject();
 		return hc;
 	}
 
@@ -201,7 +202,7 @@ public class HCServiceProxy {
 			boolean reading = false;
 			ByteCache cache = null;
 			try {
-				cache = (ByteCache) readBuffers.get(hashStr);
+				cache = readBuffers.get(hashStr);
 				if (cache != null) {
 					return cache.getCache();
 				}
@@ -240,7 +241,7 @@ public class HCServiceProxy {
 				}
 			}
 			try {
-				cache = (ByteCache) readBuffers.get(hashStr);
+				cache = readBuffers.get(hashStr);
 				if (cache != null) {
 					readingBuffers.remove(hashStr);
 					return cache.getCache();

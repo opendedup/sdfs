@@ -73,7 +73,7 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 	
 	public long getIterFPos() {
-		return this.iterPos * (long) arrayLength;
+		return this.iterPos * arrayLength;
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
@@ -81,7 +81,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public long nextKey() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = (long) (iterPos * (long) arrayLength);
+			long _cpos = (iterPos * arrayLength);
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -98,7 +98,7 @@ public class LongByteArrayMap implements AbstractMap {
 									* arrayLength, e1);
 				} finally {
 					iterPos++;
-					_cpos = (long) (iterPos * (long) arrayLength);
+					_cpos = (iterPos * arrayLength);
 				}
 			}
 			if ((iterPos * arrayLength) != flen)
@@ -115,7 +115,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] nextValue() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = (long) (iterPos * (long) arrayLength);
+			long _cpos = (iterPos * arrayLength);
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -126,7 +126,7 @@ public class LongByteArrayMap implements AbstractMap {
 					}
 				} finally {
 					iterPos++;
-					_cpos = (long) (iterPos * (long) arrayLength);
+					_cpos = (iterPos * arrayLength);
 				}
 			}
 			if ((iterPos * arrayLength) < pbdb.size()) {
@@ -150,6 +150,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#isClosed()
 	 */
+	@Override
 	public boolean isClosed() {
 		return this.closed;
 	}
@@ -326,6 +327,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#sync()
 	 */
+	@Override
 	public void sync() throws IOException {
 		/*
 		 * FileChannel _bdb = null; try { _bdb = (FileChannel)
@@ -342,6 +344,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#vanish()
 	 */
+	@Override
 	public void vanish() throws IOException {
 		this.hashlock.lock();
 		try {
@@ -413,6 +416,7 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#close()
 	 */
+	@Override
 	public void close() {
 		this.hashlock.lock();
 		dbFile = null;

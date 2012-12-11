@@ -119,6 +119,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		return b;
 	}
 
+	@Override
 	public boolean isClosed() {
 		return this.closed;
 	}

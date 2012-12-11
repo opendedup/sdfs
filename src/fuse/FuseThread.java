@@ -16,6 +16,7 @@ public class FuseThread implements Runnable {
 
 	public native void clearThread();
 
+	@Override
 	public void run() {
 		System.out.println("Starting Thread " + this.origTh.getName());
 		long dur = 5 * 1000;
@@ -29,6 +30,7 @@ public class FuseThread implements Runnable {
 							+ this.origTh.getName());
 					this.origTh.setName("OldThread-" + tm);
 					Thread th = new Thread(this.origTh) {
+						@Override
 						public void run() {
 							System.out.println("Stopped");
 						}

@@ -250,7 +250,7 @@ public class SDFSCmdline {
 	}
 
 	public static void main(String[] args) throws Exception {
-		LogManager.getRootLogger().setLevel((Level)Level.INFO);
+		LogManager.getRootLogger().setLevel(Level.INFO);
 		BasicConfigurator.configure();
 		try {
 			parseCmdLine(args);

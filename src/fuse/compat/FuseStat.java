@@ -25,6 +25,7 @@ public class FuseStat extends FuseFtype implements FuseFtypeConstants {
 	// inode support fix by Edwin Olson <eolson@mit.edu>
 	public long inode;
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
@@ -85,6 +84,7 @@ public class ThreadedFDisk {
 			_th = new Thread(this);
 			_th.start();
 		}
+		@Override
 		public void run() {
 			while (!closed) {
 				try {

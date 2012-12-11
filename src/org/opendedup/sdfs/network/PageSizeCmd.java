@@ -10,6 +10,7 @@ public class PageSizeCmd implements IOCmd {
 	public PageSizeCmd() {
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.write(NetworkCMDS.STORE_PAGE_SIZE);
@@ -21,6 +22,7 @@ public class PageSizeCmd implements IOCmd {
 		return this.pageSize;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.STORE_PAGE_SIZE;
 	}

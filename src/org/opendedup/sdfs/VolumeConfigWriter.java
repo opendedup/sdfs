@@ -305,6 +305,12 @@ public class VolumeConfigWriter {
 				System.out.println("Error : Unable to create volume");
 				System.out
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+				System.out
+				.println(cmd.getOptionValue("cloud-access-key"));
+				System.out
+				.println(cmd.getOptionValue("cloud-secret-key"));
+				System.out
+				.println(cmd.getOptionValue("cloud-bucket-name"));
 				System.exit(-1);
 			}
 		} else if (this.gsEnabled) {
@@ -951,7 +957,7 @@ public class VolumeConfigWriter {
 
 	public static void main(String[] args) {
 		try {
-			System.out.println("Attempting to create volume ...");
+			System.out.println("Attempting to create SDFS volume ...");
 			File f = new File(OSValidator.getConfigPath());
 			if (!f.exists())
 				f.mkdirs();

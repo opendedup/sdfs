@@ -159,7 +159,7 @@ public class HashStore {
 			directory.mkdirs();
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
-		long entries = ((Main.chunkStoreAllocationSize / (long) Main.chunkStorePageSize)) + 8000;
+		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		try {
 			SDFSLogger.getLog().info("Loading hashdb class " + Main.hashesDBClass);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)

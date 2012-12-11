@@ -10,6 +10,7 @@ public class StoreSizeCmd implements IOCmd {
 	public StoreSizeCmd() {
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.write(NetworkCMDS.STORE_SIZE_CMD);
@@ -21,6 +22,7 @@ public class StoreSizeCmd implements IOCmd {
 		return this.storeSize;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.STORE_SIZE_CMD;
 	}

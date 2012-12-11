@@ -25,6 +25,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		this.fs2 = fs2;
 	}
 
+	@Override
 	public int getattr(String path, FuseGetattrSetter getattrSetter)
 			throws FuseException {
 		FuseStat stat = fs2.getattr(path);
@@ -36,12 +37,14 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		return 0;
 	}
 
+	@Override
 	public int chmod(String path, int mode) throws FuseException {
 		fs2.chmod(path, mode);
 
 		return 0;
 	}
 
+	@Override
 	public int chown(String path, int uid, int gid) throws FuseException {
 		fs2.chown(path, uid, gid);
 
@@ -49,6 +52,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	}
 
 	// called on every filehandle close, fh is filehandle passed from open
+	@Override
 	public int flush(String path, Object fh) throws FuseException {
 		fs2.flush(path, (fh == null) ? 0L : ((Long) fh).longValue());
 
@@ -58,6 +62,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	// Synchronize file contents, fh is filehandle passed from open,
 	// isDatasync indicates that only the user data should be flushed, not the
 	// meta data
+	@Override
 	public int fsync(String path, Object fh, boolean isDatasync)
 			throws FuseException {
 		fs2.fsync(path, (fh == null) ? 0L : ((Long) fh).longValue(), isDatasync);
@@ -65,6 +70,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		return 0;
 	}
 
+	@Override
 	public int getdir(String path, FuseDirFiller filler) throws FuseException {
 		for (FuseDirEnt entry : fs2.getdir(path))
 			filler.add(entry.name, entry.inode, entry.mode);
@@ -72,18 +78,21 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		return 0;
 	}
 
+	@Override
 	public int link(String from, String to) throws FuseException {
 		fs2.link(from, to);
 
 		return 0;
 	}
 
+	@Override
 	public int mkdir(String path, int mode) throws FuseException {
 		fs2.mkdir(path, mode);
 
 		return 0;
 	}
 
+	@Override
 	public int mknod(String path, int mode, int rdev) throws FuseException {
 		fs2.mknod(path, mode, rdev);
 
@@ -92,6 +101,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 
 	// if open returns a filehandle by calling FuseOpenSetter.setFh() method, it
 	// will be passed to every method that supports 'fh' argument
+	@Override
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
 		openSetter.setFh(new Long(fs2.open(path, flags)));
@@ -100,6 +110,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	}
 
 	// fh is filehandle passed from open
+	@Override
 	public int read(String path, Object fh, ByteBuffer buf, long offset)
 			throws FuseException {
 		fs2.read(path, (fh == null) ? 0L : ((Long) fh).longValue(), buf, offset);
@@ -107,6 +118,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		return 0;
 	}
 
+	@Override
 	public int readlink(String path, CharBuffer link) throws FuseException {
 		link.put(fs2.readlink(path));
 
@@ -114,24 +126,28 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	}
 
 	// called when last filehandle is closed, fh is filehandle passed from open
+	@Override
 	public int release(String path, Object fh, int flags) throws FuseException {
 		fs2.release(path, (fh == null) ? 0L : ((Long) fh).longValue(), flags);
 
 		return 0;
 	}
 
+	@Override
 	public int rename(String from, String to) throws FuseException {
 		fs2.rename(from, to);
 
 		return 0;
 	}
 
+	@Override
 	public int rmdir(String path) throws FuseException {
 		fs2.rmdir(path);
 
 		return 0;
 	}
 
+	@Override
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
 		FuseStatfs statfs = fs2.statfs();
 
@@ -142,24 +158,28 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		return 0;
 	}
 
+	@Override
 	public int symlink(String from, String to) throws FuseException {
 		fs2.symlink(from, to);
 
 		return 0;
 	}
 
+	@Override
 	public int truncate(String path, long size) throws FuseException {
 		fs2.truncate(path, size);
 
 		return 0;
 	}
 
+	@Override
 	public int unlink(String path) throws FuseException {
 		fs2.unlink(path);
 
 		return 0;
 	}
 
+	@Override
 	public int utime(String path, int atime, int mtime) throws FuseException {
 		fs2.utime(path, atime, mtime);
 
@@ -168,6 +188,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 
 	// fh is filehandle passed from open,
 	// isWritepage indicates that write was caused by a writepage
+	@Override
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
 		fs2.write(path, (fh == null) ? 0L : ((Long) fh).longValue(),

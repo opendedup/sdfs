@@ -10,6 +10,7 @@ public class MaxStoreSizeCmd implements IOCmd {
 	public MaxStoreSizeCmd() {
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.write(NetworkCMDS.STORE_MAX_SIZE_CMD);
@@ -21,6 +22,7 @@ public class MaxStoreSizeCmd implements IOCmd {
 		return this.maxStoreSize;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.STORE_MAX_SIZE_CMD;
 	}

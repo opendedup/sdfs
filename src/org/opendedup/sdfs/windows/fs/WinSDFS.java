@@ -163,6 +163,7 @@ public class WinSDFS implements DokanOperations {
 		return nextHandleNo++;
 	}
 
+	@Override
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode,
 			int creationDisposition, int flagsAndAttributes, DokanFileInfo arg5)
 			throws DokanOperationException {
@@ -239,6 +240,7 @@ public class WinSDFS implements DokanOperations {
 		throw new DokanOperationException(1);
 	}
 
+	@Override
 	public long onOpenDirectory(String pathName, DokanFileInfo arg1)
 			throws DokanOperationException {
 		// log("[onOpenDirectory] " + pathName);
@@ -252,6 +254,7 @@ public class WinSDFS implements DokanOperations {
 			throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
 	}
 
+	@Override
 	public void onCreateDirectory(String pathName, DokanFileInfo file)
 			throws DokanOperationException {
 		if (Main.volume.isFull())
@@ -266,10 +269,12 @@ public class WinSDFS implements DokanOperations {
 		f.mkdir();
 	}
 
+	@Override
 	public void onCleanup(String arg0, DokanFileInfo arg2)
 			throws DokanOperationException {
 	}
 
+	@Override
 	public void onCloseFile(String path, DokanFileInfo arg1)
 			throws DokanOperationException {
 		// log("[onClose] " + path);
@@ -280,6 +285,7 @@ public class WinSDFS implements DokanOperations {
 		}
 	}
 
+	@Override
 	public int onReadFile(String fileName, ByteBuffer buf, long offset,
 			DokanFileInfo arg3) throws DokanOperationException {
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
@@ -294,6 +300,7 @@ public class WinSDFS implements DokanOperations {
 		}
 	}
 
+	@Override
 	public int onWriteFile(String fileName, ByteBuffer buf, long offset,
 			DokanFileInfo arg3) throws DokanOperationException {
 		if (Main.volume.isFull())
@@ -310,6 +317,7 @@ public class WinSDFS implements DokanOperations {
 		return buf.capacity();
 	}
 
+	@Override
 	public void onSetEndOfFile(String fileName, long length, DokanFileInfo arg2)
 			throws DokanOperationException {
 		// log("[onSetEndOfFile] " + fileName);
@@ -322,6 +330,7 @@ public class WinSDFS implements DokanOperations {
 		}
 	}
 
+	@Override
 	public void onFlushFileBuffers(String fileName, DokanFileInfo arg1)
 			throws DokanOperationException {
 		DedupFileChannel ch = this.getFileChannel(fileName, arg1.handle);
@@ -334,6 +343,7 @@ public class WinSDFS implements DokanOperations {
 
 	}
 
+	@Override
 	public ByHandleFileInformation onGetFileInformation(String fileName,
 			DokanFileInfo arg1) throws DokanOperationException {
 		log.debug("[onGetFileInformation] " + fileName);
@@ -349,6 +359,7 @@ public class WinSDFS implements DokanOperations {
 		return fi.toByHandleFileInformation();
 	}
 
+	@Override
 	public Win32FindData[] onFindFiles(String pathName, DokanFileInfo arg1)
 			throws DokanOperationException {
 		// log("[onFindFiles] " + pathName);
@@ -373,11 +384,13 @@ public class WinSDFS implements DokanOperations {
 		}
 	}
 
+	@Override
 	public Win32FindData[] onFindFilesWithPattern(String arg0, String arg1,
 			DokanFileInfo arg2) throws DokanOperationException {
 		return null;
 	}
 
+	@Override
 	public void onSetFileAttributes(String fileName, int fileAttributes,
 			DokanFileInfo arg2) throws DokanOperationException {
 		// log("[onSetFileAttributes] " + fileName);
@@ -388,6 +401,7 @@ public class WinSDFS implements DokanOperations {
 		 */
 	}
 
+	@Override
 	public void onSetFileTime(String fileName, long creationTime, long atime,
 			long mtime, DokanFileInfo arg4) throws DokanOperationException {
 		// log("[onSetFileTime] " + fileName);
@@ -397,6 +411,7 @@ public class WinSDFS implements DokanOperations {
 		mf.setLastModified(mtime * 1000L);
 	}
 
+	@Override
 	public void onDeleteFile(String fileName, DokanFileInfo arg1)
 			throws DokanOperationException {
 		// log("[onDeleteFile] " + fileName);
@@ -420,6 +435,7 @@ public class WinSDFS implements DokanOperations {
 		//
 	}
 
+	@Override
 	public void onDeleteDirectory(String path, DokanFileInfo arg1)
 			throws DokanOperationException {
 		// log("[onDeleteDirectory] " + path);
@@ -430,6 +446,7 @@ public class WinSDFS implements DokanOperations {
 		}
 	}
 
+	@Override
 	public void onMoveFile(String from, String to, boolean replaceExisiting,
 			DokanFileInfo arg3) throws DokanOperationException {
 		// log("==> [onMoveFile] " + from + " -> " + to +
@@ -461,16 +478,19 @@ public class WinSDFS implements DokanOperations {
 		// log("<== [onMoveFile]");
 	}
 
+	@Override
 	public void onLockFile(String fileName, long arg1, long arg2,
 			DokanFileInfo arg3) throws DokanOperationException {
 		// log("[onLockFile] " + fileName);
 	}
 
+	@Override
 	public void onUnlockFile(String fileName, long arg1, long arg2,
 			DokanFileInfo arg3) throws DokanOperationException {
 		// log("[onUnlockFile] " + fileName);
 	}
 
+	@Override
 	public DokanDiskFreeSpace onGetDiskFreeSpace(DokanFileInfo arg0)
 			throws DokanOperationException {
 		DokanDiskFreeSpace free = new DokanDiskFreeSpace();
@@ -482,6 +502,7 @@ public class WinSDFS implements DokanOperations {
 		return free;
 	}
 
+	@Override
 	public DokanVolumeInformation onGetVolumeInformation(String arg0,
 			DokanFileInfo arg1) throws DokanOperationException {
 		DokanVolumeInformation info = new DokanVolumeInformation();
@@ -493,6 +514,7 @@ public class WinSDFS implements DokanOperations {
 		return info;
 	}
 
+	@Override
 	public void onUnmount(DokanFileInfo arg0) throws DokanOperationException {
 		// log("[onUnmount]");
 		Dokan.removeMountPoint(driveLetter);

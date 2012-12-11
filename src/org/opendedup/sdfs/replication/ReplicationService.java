@@ -427,6 +427,7 @@ public class ReplicationService implements Serializable {
 			return new Date(timeStamp);
 		}
 
+		@Override
 		public String toString() {
 			return "jobhistory=" + timeStamp + ":" + slaveFolder + ":"
 					+ xmlFile + ":" + success;

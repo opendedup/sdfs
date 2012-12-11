@@ -52,6 +52,7 @@ class Tiger_Hash implements Cloneable {
 		this.c = src.c;
 	}
 
+	@Override
 	public Object clone() {
 		return new Tiger_Hash(this);
 	}

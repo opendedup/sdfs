@@ -8,6 +8,7 @@ import org.opendedup.util.SDFSLogger;
 
 public class ExpandVolumeCmd implements XtendedCmd {
 
+	@Override
 	public String getResult(String cmd, String sizeStr) throws IOException {
 		try {
 			Main.volume.setCapacity(sizeStr);

@@ -106,6 +106,7 @@ public class NetworkHCServer {
 }
 
 class ShutdownHook extends Thread {
+	@Override
 	public void run() {
 		System.out.println("#### Shutting down StorageHub ####");
 

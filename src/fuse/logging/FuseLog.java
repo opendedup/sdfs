@@ -45,74 +45,92 @@ public class FuseLog implements Log {
 	//
 	// implementation of Log interface
 
+	@Override
 	public boolean isDebugEnabled() {
 		return levels.isDebugEnabled(name);
 	}
 
+	@Override
 	public boolean isErrorEnabled() {
 		return levels.isErrorEnabled(name);
 	}
 
+	@Override
 	public boolean isFatalEnabled() {
 		return levels.isFatalEnabled(name);
 	}
 
+	@Override
 	public boolean isInfoEnabled() {
 		return levels.isInfoEnabled(name);
 	}
 
+	@Override
 	public boolean isTraceEnabled() {
 		return levels.isTraceEnabled(name);
 	}
 
+	@Override
 	public boolean isWarnEnabled() {
 		return levels.isWarnEnabled(name);
 	}
 
+	@Override
 	public void trace(Object object) {
 		_log(LEVEL_TRACE, trace, object, null);
 	}
 
+	@Override
 	public void trace(Object object, Throwable throwable) {
 		_log(LEVEL_TRACE, trace, object, throwable);
 	}
 
+	@Override
 	public void debug(Object object) {
 		_log(LEVEL_DEBUG, debug, object, null);
 	}
 
+	@Override
 	public void debug(Object object, Throwable throwable) {
 		_log(LEVEL_DEBUG, debug, object, throwable);
 	}
 
+	@Override
 	public void info(Object object) {
 		_log(LEVEL_INFO, info, object, null);
 	}
 
+	@Override
 	public void info(Object object, Throwable throwable) {
 		_log(LEVEL_INFO, info, object, throwable);
 	}
 
+	@Override
 	public void warn(Object object) {
 		_log(LEVEL_WARN, warn, object, null);
 	}
 
+	@Override
 	public void warn(Object object, Throwable throwable) {
 		_log(LEVEL_WARN, warn, object, throwable);
 	}
 
+	@Override
 	public void error(Object object) {
 		_log(LEVEL_ERROR, error, object, null);
 	}
 
+	@Override
 	public void error(Object object, Throwable throwable) {
 		_log(LEVEL_ERROR, error, object, throwable);
 	}
 
+	@Override
 	public void fatal(Object object) {
 		_log(LEVEL_FATAL, fatal, object, null);
 	}
 
+	@Override
 	public void fatal(Object object, Throwable throwable) {
 		_log(LEVEL_FATAL, fatal, object, throwable);
 	}
@@ -199,7 +217,7 @@ public class FuseLog implements Log {
 
 		private int getLevelValue(String name) {
 			while (true) {
-				Integer levelValue = (Integer) name2levelMap.get(name);
+				Integer levelValue = name2levelMap.get(name);
 				if (levelValue != null)
 					return levelValue.intValue();
 

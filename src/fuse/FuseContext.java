@@ -21,6 +21,7 @@ public class FuseContext extends Struct {
 		return fuseContext;
 	}
 
+	@Override
 	protected boolean appendAttributes(StringBuilder buff, boolean isPrefixed) {
 		buff.append(super.appendAttributes(buff, isPrefixed) ? ", " : " ");
 

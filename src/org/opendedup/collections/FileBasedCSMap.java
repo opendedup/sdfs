@@ -53,11 +53,12 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private SyncThread st = null;
 	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database");
 
+	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
 		Main.mountEvent.addChild(loadEvent);
 		maps = new FileByteArrayLongMap[256];
-		this.size = (long) (maxSize);
+		this.size = (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;
 		try {
@@ -81,27 +82,33 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return m;
 	}
 
+	@Override
 	public long getAllocatedRam() {
 		return this.ram;
 	}
 
+	@Override
 	public boolean isClosed() {
 		return this.closed;
 	}
 
+	@Override
 	public long getSize() {
 		return this.kSz;
 	}
 
+	@Override
 	public long getUsedSize() {
 
 		return kSz * Main.CHUNK_LENGTH;
 	}
 
+	@Override
 	public long getMaxSize() {
 		return this.size;
 	}
 
+	@Override
 	public synchronized void claimRecords(SDFSEvent evt) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -200,6 +207,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	 * @return a <code>boolean</code> value
 	 * @throws IOException
 	 */
+	@Override
 	public boolean containsKey(byte[] key) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -207,10 +215,12 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.getMap(key).containsKey(key);
 	}
 
+	@Override
 	public int getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
 
+	@Override
 	public synchronized long removeRecords(long time, boolean forceRun,SDFSEvent evt)
 			throws IOException {
 		SDFSLogger.getLog().info(
@@ -256,6 +266,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return rem;
 	}
 
+	@Override
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
@@ -283,7 +294,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			int slot = this.freeSlots.nextSetBit(0);
 			if (slot != -1) {
 				this.freeSlots.clear(slot);
-				return (long) ((long) slot * (long) Main.CHUNK_LENGTH);
+				return ((long) slot * (long) Main.CHUNK_LENGTH);
 			} else
 				return slot;
 		} finally {
@@ -305,6 +316,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
+	@Override
 	public boolean put(ChunkData cm, boolean persist) throws IOException,
 			HashtableFullException {
 		// persist = false;
@@ -360,6 +372,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			}
 	}
 
+	@Override
 	public long get(byte[] key) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -367,6 +380,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.getMap(key).get(key);
 	}
 
+	@Override
 	public byte[] getData(byte[] key) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -382,6 +396,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
+	@Override
 	public boolean remove(ChunkData cm) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
@@ -418,6 +433,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 	private ReentrantLock syncLock = new ReentrantLock();
 
+	@Override
 	public void sync() throws IOException {
 		syncLock.lock();
 		try {
@@ -439,6 +455,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
+	@Override
 	public void close() {
 		this.arlock.lock();
 		this.iolock.lock();

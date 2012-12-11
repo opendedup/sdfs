@@ -19,9 +19,9 @@ public class FileUtils {
 	public static void main(String[] args) throws IOException {
 		File f = new File(args[0]);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) Files
+		PosixFileAttributeView view = Files
 				.getFileAttributeView(p, PosixFileAttributeView.class);
-		PosixFileAttributes attrs1 = (PosixFileAttributes) view
+		PosixFileAttributes attrs1 = view
 				.readAttributes();
 		Set<PosixFilePermission> perms = attrs1.permissions();
 		Iterator<PosixFilePermission> iter = perms.iterator();
@@ -143,7 +143,7 @@ public class FileUtils {
 			set.add(PosixFilePermission.OTHERS_EXECUTE);
 		File f = new File(path);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) Files
+		PosixFileAttributeView view = Files
 				.getFileAttributeView(p, PosixFileAttributeView.class);
 		view.setPermissions(set);
 	}
@@ -151,10 +151,10 @@ public class FileUtils {
 	public static int getFilePermissions(String path) throws IOException {
 		File f = new File(path);
 		Path p = f.toPath();
-		PosixFileAttributeView view = (PosixFileAttributeView) Files
+		PosixFileAttributeView view = Files
 				.getFileAttributeView(p, PosixFileAttributeView.class);
 
-		PosixFileAttributes attrs1 = (PosixFileAttributes) view
+		PosixFileAttributes attrs1 = view
 				.readAttributes();
 		String mode = PosixFilePermissions.toString(attrs1.permissions());
 		String mm = parseFilePermissions(mode.substring(0, 3)) + ""

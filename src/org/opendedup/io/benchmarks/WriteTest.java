@@ -64,8 +64,8 @@ public class WriteTest implements Runnable {
 	}
 
 	public float results() {
-		float mb = (float) (size * 1024);
-		float seconds = (float) (duration / 1000);
+		float mb = (size * 1024);
+		float seconds = (duration / 1000);
 		float mbps = mb / seconds;
 		return mbps;
 	}

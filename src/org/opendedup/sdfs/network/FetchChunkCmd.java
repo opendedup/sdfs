@@ -18,6 +18,7 @@ public class FetchChunkCmd implements IOCmd {
 		this.compress = compress;
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		if (compress)
@@ -51,6 +52,7 @@ public class FetchChunkCmd implements IOCmd {
 		return this.chunk;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.FETCH_CMD;
 	}

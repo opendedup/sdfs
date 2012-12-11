@@ -10,6 +10,7 @@
 package fuse.util;
 
 public abstract class Struct implements Cloneable {
+	@Override
 	public Object clone() {
 		try {
 			return super.clone();
@@ -19,6 +20,7 @@ public abstract class Struct implements Cloneable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getName());
 

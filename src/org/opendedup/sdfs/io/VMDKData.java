@@ -163,6 +163,7 @@ public class VMDKData implements java.io.Serializable, Cloneable {
 		return (VMDKData) CloneMagic.clone(this);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("# Disk DescriptorFile \n");

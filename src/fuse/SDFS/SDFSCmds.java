@@ -20,6 +20,7 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.VMDKParser;
 
+import fuse.Errno;
 import fuse.FuseException;
 import fuse.XattrLister;
 
@@ -147,7 +148,7 @@ public class SDFSCmds {
 
 			String id = tokens[tokens.length - 1];
 			if (cmdStatus.containsKey(id)) {
-				String msg = (String) cmdStatus.get(id);
+				String msg = cmdStatus.get(id);
 				return msg;
 			} else
 				return "no status found for id=" + id;
@@ -206,13 +207,13 @@ public class SDFSCmds {
 			if (command.equalsIgnoreCase("user.cmd.snapshot")) {
 				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
-							.initErrno(FuseException.ENOSPC);
+							.initErrno(Errno.ENOSPC);
 				status = takeSnapshot(path, args[1]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.vmdk.make")) {
 				if (Main.volume.isFull())
 					throw new FuseException("Volume Full")
-							.initErrno(FuseException.ENOSPC);
+							.initErrno(Errno.ENOSPC);
 				status = this.makeVMDK(path, args[1], args[2]);
 			}
 			if (command.equalsIgnoreCase("user.cmd.ids.clearstatus")) {

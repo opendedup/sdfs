@@ -23,6 +23,7 @@ public class BulkFetchChunkCmd implements IOCmd {
 		this.hashes = hashes;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
@@ -69,6 +70,7 @@ public class BulkFetchChunkCmd implements IOCmd {
 		return this.chunks;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.FETCH_CMD;
 	}

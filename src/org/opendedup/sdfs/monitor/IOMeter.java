@@ -19,6 +19,7 @@ public class IOMeter implements Runnable {
 		this.fileName = fileName;
 	}
 
+	@Override
 	public void run() {
 		BufferedOutputStream out = null;
 		double lastMBRead = 0;
@@ -33,7 +34,7 @@ public class IOMeter implements Runnable {
 					Thread.sleep(sleeptime * 1000);
 					double difMBRead = (HashChunkService.getKBytesRead() - lastMBRead) / 1024;
 					double difMBWrite = (HashChunkService.getKBytesWrite() - lastMBWrite) / 1024;
-					double dedupRate = ((double) HashChunkService
+					double dedupRate = (HashChunkService
 							.getDupsFound() / ((double) HashChunkService
 							.getDupsFound() + (double) HashChunkService
 							.getChunksWritten()));

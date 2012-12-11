@@ -31,14 +31,14 @@ public class MurmurHash3 {
 
    static long getblock(byte[] key, int i) {
       return
-           (((long) key[i + 0] & 0x00000000000000FFL) << 0)
-         | (((long) key[i + 1] & 0x00000000000000FFL) << 8)
-         | (((long) key[i + 2] & 0x00000000000000FFL) << 16)
-         | (((long) key[i + 3] & 0x00000000000000FFL) << 24)
-         | (((long) key[i + 4] & 0x00000000000000FFL) << 32)
-         | (((long) key[i + 5] & 0x00000000000000FFL) << 40)
-         | (((long) key[i + 6] & 0x00000000000000FFL) << 48)
-         | (((long) key[i + 7] & 0x00000000000000FFL) << 56);
+           ((key[i + 0] & 0x00000000000000FFL) << 0)
+         | ((key[i + 1] & 0x00000000000000FFL) << 8)
+         | ((key[i + 2] & 0x00000000000000FFL) << 16)
+         | ((key[i + 3] & 0x00000000000000FFL) << 24)
+         | ((key[i + 4] & 0x00000000000000FFL) << 32)
+         | ((key[i + 5] & 0x00000000000000FFL) << 40)
+         | ((key[i + 6] & 0x00000000000000FFL) << 48)
+         | ((key[i + 7] & 0x00000000000000FFL) << 56);
    }
 
    static void bmix(State state) {

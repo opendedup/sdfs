@@ -14,6 +14,7 @@ public class HashExistsCmd implements IOCmd {
 		this.hops = hops;
 	}
 
+	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.write(NetworkCMDS.HASH_EXISTS_CMD);
@@ -32,6 +33,7 @@ public class HashExistsCmd implements IOCmd {
 		return this.exists;
 	}
 
+	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.HASH_EXISTS_CMD;
 	}
