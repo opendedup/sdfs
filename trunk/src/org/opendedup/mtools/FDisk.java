@@ -51,7 +51,7 @@ public class FDisk {
 					traverse(new File(dir, children[i]));
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error traversing " + dir.getPath(),
+				SDFSLogger.getLog().debug("error traversing " + dir.getPath(),
 						e);
 			}
 		} else {
@@ -92,7 +92,7 @@ public class FDisk {
 						"map file " + mapFile.getPath() + " is suspect, [" + corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn(
+			SDFSLogger.getLog().debug(
 					"error while checking file [" + mapFile.getPath() + "]", e);
 			throw new IOException(e);
 		} finally {

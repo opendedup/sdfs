@@ -193,7 +193,7 @@ public class MetaFileStore {
 			}
 		}
 		}finally {
-			evt.endEvent("Snapshot complete from " +  origionalPath + " to " + snapPath );
+			
 		}
 	}
 

@@ -68,6 +68,8 @@ public class Config {
 				Main.upStreamPassword = network
 						.getAttribute("upstream-password");
 			}
+			if(network.hasAttribute("use-ssl"))
+				Main.serverUseSSL = Boolean.parseBoolean(network.getAttribute("use-ssl"));
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
@@ -263,7 +265,7 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
-
+		
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
@@ -326,6 +328,8 @@ public class Config {
 							.getAttribute("upstream-password");
 				}
 			}
+			if(networkcs.hasAttribute("use-ssl"))
+				Main.serverUseSSL = Boolean.parseBoolean(networkcs.getAttribute("use-ssl"));
 			SDFSLogger.getLog().info(
 					"######### Will allocate " + Main.chunkStoreAllocationSize
 							+ " in chunkstore ##############");

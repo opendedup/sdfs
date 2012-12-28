@@ -289,6 +289,7 @@ public class DSEConfigWriter {
 		network.setAttribute("upstream-host", this.upstreamHost);
 		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
 		network.setAttribute("upstream-password", this.upstreamPassword);
+		network.setAttribute("use-ssl", "true");
 		root.appendChild(network);
 		Element loc = xmldoc.createElement("locations");
 		loc.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
