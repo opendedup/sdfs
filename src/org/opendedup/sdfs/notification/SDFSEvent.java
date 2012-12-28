@@ -29,6 +29,7 @@ public class SDFSEvent {
 	public long startTime;
 	public long endTime = -1;
 	public String uid = null;
+	public String extendedInfo = null;
 	private ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
 	public String puid;
 	public static final Type GC = new Type("Garbage Collection");
@@ -38,6 +39,7 @@ public class SDFSEvent {
 	public static final Type CLAIMR = new Type("Claim Records");
 	public static final Type REMOVER = new Type("Remove Records");
 	public static final Type AIMPORT = new Type("Replication Meta-Data Import");
+	public static final Type AOUT = new Type("Replication Archive Out");
 	public static final Type MOUNT = new Type("Mount Volume");
 	public static final Type COMPACT = new Type("Compaction");
 	public static final Type UMOUNT = new Type("Unmount Volume");
@@ -84,6 +86,10 @@ public class SDFSEvent {
 	}
 
 	public void endEvent(String msg, Level level, Exception e) {
+		for(int i  = 0;i<this.children.size();i++) {
+			if(this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent(msg,level,e);
+		}
 		this.shortMsg = msg + " Exception : " + e.toString();
 		this.level = level;
 		this.endTime = System.currentTimeMillis();
@@ -91,6 +97,10 @@ public class SDFSEvent {
 	}
 
 	public void endEvent(String msg) {
+		for(int i  = 0;i<this.children.size();i++) {
+			if(this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent(msg);
+		}
 		this.shortMsg = msg;
 		this.endTime = System.currentTimeMillis();
 		this.level = SDFSEvent.INFO;
@@ -106,6 +116,13 @@ public class SDFSEvent {
 	
 	public static SDFSEvent umountEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(UMOUNT, Main.volume.getName(),
+				shortMsg);
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent archiveOutEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(AOUT, Main.volume.getName(),
 				shortMsg);
 		event.level = INFO;
 		return event;
@@ -243,6 +260,8 @@ public class SDFSEvent {
 		sb.append(this.curCt);
 		sb.append(",");
 		sb.append(this.maxCt);
+		sb.append(",");
+		sb.append(this.extendedInfo);
 		return sb.toString();
 
 	}
@@ -272,6 +291,7 @@ public class SDFSEvent {
 		root.setAttribute("current-count", Long.toString(this.curCt));
 		root.setAttribute("uuid", this.uid);
 		root.setAttribute("parent-uid", this.puid);
+		root.setAttribute("extended-info", this.extendedInfo);
 		for (int i = 0; i < this.children.size(); i++) {
 			Element el = this.children.get(i).toXML();
 			doc.adoptNode(el);
@@ -290,6 +310,7 @@ public class SDFSEvent {
 		evt.startTime = Long.parseLong(el.getAttribute("start-timestamp"));
 		evt.endTime = Long.parseLong(el.getAttribute("end-timestamp"));
 		evt.puid = el.getAttribute("parent-uid");
+		evt.extendedInfo = el.getAttribute("extended-info");
 		int le = el.getElementsByTagName("event").getLength();
 		if (le > 0) {
 			for (int i = 0; i < le; i++) {

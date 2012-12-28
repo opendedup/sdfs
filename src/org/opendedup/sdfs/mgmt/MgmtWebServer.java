@@ -69,20 +69,21 @@ public class MgmtWebServer implements Container {
 					SDFSLogger.getLog().warn(
 							"could not authenticate user  to cli");
 				}
-			} else
+			} else {
 				auth = true;
+			}
 			if (cmdReq) {
 				if (auth) {
 					if (cmd == null) {
 						result.setAttribute("status", "failed");
 						result.setAttribute("msg", "no command specified");
-					}
-					else if (cmd.equalsIgnoreCase("info")) {
+					} else if (cmd.equalsIgnoreCase("info")) {
 						try {
 							Element msg = new GetAttributes().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -95,32 +96,34 @@ public class MgmtWebServer implements Container {
 							String msg = new DeleteFileCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("deletearchive")) {
+					} else if (cmd.equalsIgnoreCase("deletearchive")) {
 						try {
 							String msg = new DeleteArchiveCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("makefolder")) {
+					} else if (cmd.equalsIgnoreCase("makefolder")) {
 						try {
 							String msg = new MakeFolderCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -142,7 +145,8 @@ public class MgmtWebServer implements Container {
 									.getResult(cmdOptions, file, includeFiles,
 											includeFolders, level);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -154,57 +158,57 @@ public class MgmtWebServer implements Container {
 							Element msg = new GetDSE().getResult(cmdOptions,
 									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("open-files")) {
+					} else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
-							Element msg = new GetOpenFiles().getResult(cmdOptions,
-									file);
+							Element msg = new GetOpenFiles().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("debug-info")) {
+					} else if (cmd.equalsIgnoreCase("debug-info")) {
 						try {
 							Element msg = new GetDebug().getResult(cmdOptions,
 									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}/*else if (cmd.equalsIgnoreCase("events")) {
-						try {
-							String msg = new GetEvents().getResult(cmdOptions,
-									file);
-							result = "<result status=\"success\" msg=\"command completed successfully\">";
-							result = result + msg;
-							result = result + "</result>";
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
-						}
-					}*/
+					}/*
+					 * else if (cmd.equalsIgnoreCase("events")) { try { String
+					 * msg = new GetEvents().getResult(cmdOptions, file); result
+					 * =
+					 * "<result status=\"success\" msg=\"command completed successfully\">"
+					 * ; result = result + msg; result = result + "</result>"; }
+					 * catch (IOException e) { result.setAttribute("status",
+					 * "failed"); result.setAttribute("msg", e.toString());
+					 * SDFSLogger.getLog().warn(e); } }
+					 */
 					else if (cmd.equalsIgnoreCase("volume-info")) {
 						try {
 							Element msg = new GetVolume().getResult(cmdOptions,
 									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -227,7 +231,8 @@ public class MgmtWebServer implements Container {
 							Element msg = new SnapshotCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "replication finished successfully");
+							result.setAttribute("msg",
+									"replication finished successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -239,14 +244,19 @@ public class MgmtWebServer implements Container {
 						try {
 							String server = request.getQuery().get("server");
 							String password = request.getQuery().get("spasswd");
-							int port = Integer.parseInt(request.getQuery().get("port"));
+							int port = Integer.parseInt(request.getQuery().get(
+									"port"));
 							int maxSz = 30;
-							if(request.getQuery().containsKey("maxsz"))
-								maxSz = Integer.parseInt(request.getQuery().get("maxsz"));
-							Element msg = new ImportArchiveCmd().getResult(file,cmdOptions,server,password,port,maxSz);
-							
+							if (request.getQuery().containsKey("maxsz"))
+								maxSz = Integer.parseInt(request.getQuery()
+										.get("maxsz"));
+							Element msg = new ImportArchiveCmd().getResult(
+									file, cmdOptions, server, password, port,
+									maxSz);
+
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "replication finished successfully");
+							result.setAttribute("msg",
+									"replication started successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -256,10 +266,13 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
-							String msg = new ArchiveOutCmd().getResult(
+							Element msg = new ArchiveOutCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", msg);
+							result.setAttribute("msg",
+									"archive out started successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -305,7 +318,8 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("volumeconfigpath")) {
 						try {
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", Main.wth.getConfigFilePath());
+							result.setAttribute("msg",
+									Main.wth.getConfigFilePath());
 						} catch (java.lang.NullPointerException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -345,38 +359,35 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-						else if (cmd.equalsIgnoreCase("event")) {
-							try {
-								String uuid = request.getQuery().get("uuid");
-								Element msg = new GetEvent().getResult(
-										uuid);
-								result.setAttribute("status", "success");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn(e);
-							}
-					}
-						else if (cmd.equalsIgnoreCase("events")) {
-							try {
-								Element msg = new GetEvents().getResult();
-								result.setAttribute("status", "success");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn(e);
-							}
+					} else if (cmd.equalsIgnoreCase("event")) {
+						try {
+							String uuid = request.getQuery().get("uuid");
+							Element msg = new GetEvent().getResult(uuid);
+							result.setAttribute("status", "success");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} else if (cmd.equalsIgnoreCase("events")) {
+						try {
+							Element msg = new GetEvents().getResult();
+							result.setAttribute("status", "success");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
 					}
 				}
 				String rsString = XMLUtils.toXMLString(doc);
 				PrintStream body = response.getPrintStream();
 				long time = System.currentTimeMillis();
-				
+
 				SDFSLogger.getLog().debug(rsString);
 				response.set("Content-Type", "text/xml");
 				response.set("Server", "SDFS Management Server");

@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HashChunkService;
@@ -73,7 +74,9 @@ class ClientThread extends Thread {
 			os.write(versionMessage.getBytes());
 			os.flush();
 			String cPasswd = reader.readLine();
-			if(cPasswd.trim().equals(Main.sdfsCliPassword)) {
+			String phash = HashFunctions.getSHAHash(cPasswd.trim()
+					.getBytes(), Main.sdfsCliSalt.getBytes());
+			if (phash.equals(Main.sdfsCliPassword)) {
 				os.writeInt(0);
 				os.flush();
 				throw new IOException("Authentication failed");

@@ -126,7 +126,6 @@ public class HashChunkService {
 			HCServer hserver = new HCServer(server,port,false,false);
 			HashClient hc = new HashClient(hserver,"replication",password);
 			try {
-				
 				ArrayList<HashChunk> hck = hc.fetchChunks(al);
 				for(int i=0;i<hck.size();i++) {
 					HashChunk _hc = hck.get(i);

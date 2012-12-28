@@ -506,6 +506,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
+		
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
@@ -519,6 +520,7 @@ public class VolumeConfigWriter {
 		network.setAttribute("upstream-host-port",
 				Integer.toString(this.upstreamPort));
 		network.setAttribute("upstream-password", this.upstreamPassword);
+		network.setAttribute("use-ssl", "true");
 		cs.appendChild(network);
 		Element launchParams = xmldoc.createElement("launch-params");
 		launchParams.setAttribute("class-path", Main.classPath);

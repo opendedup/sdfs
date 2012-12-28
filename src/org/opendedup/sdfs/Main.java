@@ -253,6 +253,13 @@ public class Main {
 	 * This is used on the chunk store.
 	 */
 	public static String serverHostName = "0.0.0.0";
+	
+	/**
+	 * The host name or IP that the chunk store network port will listen on.
+	 * This is used on the chunk store.
+	 */
+	public static boolean serverUseSSL = false;
+	
 	/**
 	 * The maximum number of results that a specific query will return if H2 is
 	 * being used. This is used on the chunk store and the client.

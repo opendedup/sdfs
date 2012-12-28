@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
@@ -26,6 +27,9 @@ public class GetDSE {
 					Long.toString(HashChunkService.getFreeBlocks()));
 			root.setAttribute("page-size",
 					Long.toString(HashChunkService.getPageSize()));
+			root.setAttribute("listen-port",Integer.toString(Main.serverPort));
+			root.setAttribute("listen-hostname",Main.serverHostName);
+			root.setAttribute("listen-encrypted",Boolean.toString(Main.serverUseSSL));
 			return (Element)root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
