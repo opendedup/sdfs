@@ -16,10 +16,12 @@ public class ImportArchiveCmd implements Runnable {
 	String password;
 	int port;
 	int maxSz;
+	boolean useSSL;
 	SDFSEvent evt;
 
 	public Element getResult(String archive, String dest, String server,
-			String password, int port, int maxSz) throws IOException {
+			String password, int port, int maxSz,boolean useSSL) throws IOException {
+		this.useSSL = useSSL;
 		return importArchive(archive, dest, server, password, port, maxSz);
 	}
 
@@ -50,7 +52,7 @@ public class ImportArchiveCmd implements Runnable {
 		try {
 
 			ArchiveImporter.importArchive(archive, dest, server, password,
-					port, maxSz, evt);
+					port, maxSz, evt,useSSL);
 			sc = "successful";
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

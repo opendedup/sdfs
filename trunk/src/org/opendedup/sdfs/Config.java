@@ -462,10 +462,21 @@ public class Config {
 			SDFSLogger.getLog().info(
 					"Connection to  Servers [" + server.getLength() + "]");
 			Element _server = (Element) server.item(s);
-			HCServer hcs = new HCServer(_server.getAttribute("host").trim(),
+			HCServer hcs = null;
+			if(_server.hasAttribute("use-ssl")) {
+				
+				hcs = new HCServer(_server.getAttribute("host").trim(),
 					Integer.parseInt(_server.getAttribute("port").trim()),
 					Boolean.parseBoolean(_server.getAttribute("use-udp")),
-					Boolean.parseBoolean(_server.getAttribute("compress")));
+					Boolean.parseBoolean(_server.getAttribute("compress")),Boolean.parseBoolean(_server.getAttribute("use-ssl"))
+					);
+			} else {
+				hcs = new HCServer(_server.getAttribute("host").trim(),
+						Integer.parseInt(_server.getAttribute("port").trim()),
+						Boolean.parseBoolean(_server.getAttribute("use-udp")),
+						Boolean.parseBoolean(_server.getAttribute("compress")),false)
+						;
+			}
 			try {
 				HCServiceProxy.dseServers.put(
 						_server.getAttribute("name").trim(),

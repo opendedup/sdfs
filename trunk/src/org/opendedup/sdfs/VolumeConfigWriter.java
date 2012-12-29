@@ -229,19 +229,6 @@ public class VolumeConfigWriter {
 					.getOptionValue("chunk-store-pre-allocate"));
 		}
 
-		if (cmd.hasOption("sdfscli-password")) {
-			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
-		}
-		if (cmd.hasOption("sdfscli-require-auth")) {
-			this.sdfsCliRequireAuth = true;
-		}
-		if (cmd.hasOption("sdfscli-listen-port")) {
-			this.sdfsCliPort = Integer.parseInt(cmd
-					.getOptionValue("sdfscli-listen-port"));
-		}
-		if (cmd.hasOption("sdfscli-listen-addr"))
-			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
-
 		if (cmd.hasOption("chunk-read-ahead-pages")) {
 			this.chunk_read_ahead_pages = Short.parseShort(cmd
 					.getOptionValue("chunk-read-ahead-pages"));
@@ -401,6 +388,19 @@ public class VolumeConfigWriter {
 			this.sdfsCliListenAddr = "0.0.0.0";
 			this.networkEnable = true;
 		}
+		if (cmd.hasOption("sdfscli-password")) {
+			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
+		}
+		if (cmd.hasOption("sdfscli-require-auth")) {
+			this.sdfsCliRequireAuth = true;
+		}
+		if (cmd.hasOption("sdfscli-listen-port")) {
+			this.sdfsCliPort = Integer.parseInt(cmd
+					.getOptionValue("sdfscli-listen-port"));
+		}
+		if (cmd.hasOption("sdfscli-listen-addr"))
+			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
+		
 		if (cmd.hasOption("enable-replication-slave")) {
 			if (!cmd.hasOption("replication-master"))
 				throw new Exception("replication-master must be specified");

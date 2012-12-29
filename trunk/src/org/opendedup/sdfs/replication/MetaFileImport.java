@@ -30,16 +30,17 @@ public class MetaFileImport implements Serializable{
 	private String server = null;
 	private transient String password= null;
 	private int port = 2222;
+	private boolean useSSL;
 	long startTime = 0;
 	long endTime = 0;
 	long sparseFileSize = 0;
 	SDFSEvent levt = null;
 
-	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt) throws IOException {
+	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
 		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
 		levt.addChild(levt);
-		
+		this.useSSL = useSSL;
 		if(maxSz >0)
 			MAX_SZ = (maxSz * 1024*1024)/Main.CHUNK_LENGTH;
 		hashes = new ArrayList<String>();
@@ -52,7 +53,7 @@ public class MetaFileImport implements Serializable{
 		this.traverse(f);
 		if(hashes.size() != 0) {
 			try {
-				HCServiceProxy.fetchChunks(hashes,server,password,port);
+				HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
 				this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 			} catch(Exception e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import",e);
@@ -122,7 +123,7 @@ public class MetaFileImport implements Serializable{
 							if(hashes.size()>=MAX_SZ) {
 								try {
 									SDFSLogger.getLog().debug("fetching " + hashes.size() + " blocks");
-									HCServiceProxy.fetchChunks(hashes,server,password,port);
+									HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
 									SDFSLogger.getLog().debug("fetched " + hashes.size() + " blocks");
 									this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 									hashes = null;
