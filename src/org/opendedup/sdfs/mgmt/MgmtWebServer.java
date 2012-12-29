@@ -247,12 +247,15 @@ public class MgmtWebServer implements Container {
 							int port = Integer.parseInt(request.getQuery().get(
 									"port"));
 							int maxSz = 30;
+							boolean useSSL = false;
 							if (request.getQuery().containsKey("maxsz"))
 								maxSz = Integer.parseInt(request.getQuery()
 										.get("maxsz"));
+							if (request.getQuery().containsKey("useSSL"))
+								useSSL = Boolean.parseBoolean(request.getQuery().get("useSSL"));
 							Element msg = new ImportArchiveCmd().getResult(
 									file, cmdOptions, server, password, port,
-									maxSz);
+									maxSz,useSSL);
 
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",

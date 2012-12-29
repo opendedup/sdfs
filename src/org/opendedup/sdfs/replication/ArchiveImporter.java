@@ -21,7 +21,7 @@ import org.w3c.dom.Element;
 
 public class ArchiveImporter {
 
-	public static Element importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz,SDFSEvent evt)
+	public static Element importArchive(String srcArchive, String dest, String server, String password, int port,int maxSz,SDFSEvent evt,boolean useSSL)
 			throws IOException {
 		try {
 			GCMain.gclock.lock();
@@ -45,7 +45,7 @@ public class ArchiveImporter {
 			TFile.umount(srcFiles.getInnerArchive());
 			try {
 				MetaFileImport imp = new MetaFileImport(Main.volume.getPath()
-						+ File.separator + sdest,server,password,port,maxSz,evt);
+						+ File.separator + sdest,server,password,port,maxSz,evt,useSSL);
 				if (imp.isCorrupt()) {
 					evt.endEvent("Import failed for " + srcArchive + " because not all the data could be imported from " + server,SDFSEvent.WARN);
 					SDFSLogger.getLog().warn("Import failed for " + srcArchive + " because not all the data could be imported from " + server);

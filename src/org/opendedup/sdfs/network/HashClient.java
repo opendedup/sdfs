@@ -14,8 +14,16 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
@@ -37,7 +45,7 @@ public class HashClient {
 
 	// private LRUMap existsBuffers = new LRUMap(10);
 
-	public HashClient(HCServer server, String name,String password) {
+	public HashClient(HCServer server, String name, String password) {
 		this.server = server;
 		this.name = name;
 		this.openConnection();
@@ -60,7 +68,35 @@ public class HashClient {
 			SDFSLogger.getLog().debug(
 					"Connecting to server " + server.getHostName()
 							+ " on port " + server.getPort());
-			clientSocket = new Socket(server.getHostName(), server.getPort());
+			if (server.isSSL()) {
+				TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+					@Override
+					public void checkClientTrusted(
+							final X509Certificate[] chain, final String authType) {
+					}
+
+					@Override
+					public void checkServerTrusted(
+							final X509Certificate[] chain, final String authType) {
+					}
+
+					@Override
+					public X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+				} };
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+				sslContext.init(null, trustAllCerts,
+						new java.security.SecureRandom());
+				// Create an ssl socket factory with our all-trusting manager
+				SSLSocketFactory sslSocketFactory = sslContext
+						.getSocketFactory();
+				clientSocket = sslSocketFactory.createSocket(
+						server.getHostName(), server.getPort());
+			} else {
+				clientSocket = new Socket(server.getHostName(),
+						server.getPort());
+			}
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
 			os = new DataOutputStream(new BufferedOutputStream(
@@ -71,15 +107,17 @@ public class HashClient {
 					clientSocket.getInputStream()));
 			// Read the Header Line
 			inReader.readLine();
-			String passwdMessage = password
-			+ "\r\n";
+			String passwdMessage = password + "\r\n";
 			os.write(passwdMessage.getBytes());
 			os.flush();
 			int auth = is.readInt();
-			if(auth == 0)
-				throw new IOException("unable to authenticate chech upstream password");
+			if (auth == 0)
+				throw new IOException(
+						"unable to authenticate chech upstream password");
 			this.closed = false;
-			SDFSLogger.getLog().debug("hashclient connection established " + clientSocket.toString());
+			SDFSLogger.getLog().debug(
+					"hashclient connection established "
+							+ clientSocket.toString());
 		} catch (UnknownHostException e) {
 			SDFSLogger.getLog().fatal("Don't know about host " + server);
 			this.closed = true;
@@ -183,15 +221,16 @@ public class HashClient {
 		this.executeCmd(cmd);
 		return cmd.getChunk();
 	}
-	
-	public ArrayList<HashChunk> fetchChunks(ArrayList<String> al) throws IOException {
+
+	public ArrayList<HashChunk> fetchChunks(ArrayList<String> al)
+			throws IOException {
 		BulkFetchChunkCmd cmd = new BulkFetchChunkCmd(al);
 		this.executeCmd(cmd);
 		return cmd.getChunks();
 	}
 
-	public boolean hashExists(byte[] hash,short hops) throws IOException {
-		HashExistsCmd cmd = new HashExistsCmd(hash,hops);
+	public boolean hashExists(byte[] hash, short hops) throws IOException {
+		HashExistsCmd cmd = new HashExistsCmd(hash, hops);
 		if (server.isUseUDP()) {
 			try {
 				this.executeUDPCmd(cmd);

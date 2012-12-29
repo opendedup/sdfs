@@ -74,7 +74,7 @@ public class HashChunkService {
 			try {
 				hcPool = new HashClientPool(new HCServer(
 						Main.upStreamDSEHostName, Main.upStreamDSEPort, false,
-						false), "upstream", 24);
+						false,Main.serverUseSSL), "upstream", 24);
 			} catch (IOException e) {
 				System.err.println("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
 				SDFSLogger.getLog().error("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort, e);
@@ -122,8 +122,8 @@ public class HashChunkService {
 		return hs.hashExists(hash);
 	}
 	
-	public static void remoteFetchChunks(ArrayList<String> al,String server,String password,int port) throws IOException, HashtableFullException {
-			HCServer hserver = new HCServer(server,port,false,false);
+	public static void remoteFetchChunks(ArrayList<String> al,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
+			HCServer hserver = new HCServer(server,port,false,false,useSSL);
 			HashClient hc = new HashClient(hserver,"replication",password);
 			try {
 				ArrayList<HashChunk> hck = hc.fetchChunks(al);
