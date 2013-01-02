@@ -58,12 +58,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private boolean flushing = false;
 	private SyncThread sth = null;
 	private boolean compacting = false;
-	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database");
+	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database",Main.mountEvent);
 
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		Main.mountEvent.addChild(loadEvent);
 		if (Main.compressedIndex)
 			maps = new ByteArrayLongMap[65535];
 		else
@@ -181,9 +180,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		SDFSLogger.getLog().info("claiming records");
-		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]",evt);
 		tEvt.maxCt = this.getSize();
-		evt.addChild(tEvt);
 		long startTime = System.currentTimeMillis();
 		long timeStamp = startTime + 30 * 1000;
 		int z = 0;
@@ -375,9 +373,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				"Garbage collection starting for records older than "
 						+ new Date(time));
 		SDFSEvent tEvt = SDFSEvent.removeInfoEvent("Garbage collection older than "
-				+ new Date(time));
+				+ new Date(time),evt);
 		tEvt.maxCt = this.size;
-		evt.addChild(tEvt);
 		long rem = 0;
 		if (forceRun)
 			this.firstGCRun = false;

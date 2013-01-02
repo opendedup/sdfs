@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import java.io.IOException;
+
 import org.opendedup.mtools.FDisk;
 
 
@@ -11,11 +13,11 @@ import org.opendedup.util.SDFSLogger;
 public class ManualGC {
 
 	public static SDFSEvent evt = null;
-	public static long clearChunks(int minutes) throws InterruptedException {
+	public static long clearChunks(int minutes) throws InterruptedException, IOException {
 		return clearChunksMills((long)minutes * 60 *1000);
 	}
 	
-	public static long clearChunksMills(long milliseconds) throws InterruptedException {
+	public static long clearChunksMills(long milliseconds) throws InterruptedException, IOException {
 		GCMain.gclock.lock();
 		if (GCMain.isLocked()) {
 
@@ -29,9 +31,8 @@ public class ManualGC {
 			evt.curCt = 0;
 			runGC(milliseconds);
 			if (Main.firstRun) {
-				SDFSEvent wevt = SDFSEvent.waitEvent("Waiting 10 Seconds to run again");
+				SDFSEvent wevt = SDFSEvent.waitEvent("Waiting 10 Seconds to run again",evt);
 				wevt.maxCt = 10;
-				evt.addChild(wevt);
 				for(int i = 0;i<10;i++) {
 				Thread.sleep(1000);
 				wevt.curCt++;

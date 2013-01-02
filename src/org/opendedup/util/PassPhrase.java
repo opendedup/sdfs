@@ -56,7 +56,7 @@ public class PassPhrase {
 			'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
 			'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
 			'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '@', '1', 'l', '$','^','?','#','!','%','*','(',')'};
+			'2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '_', '1', 'l','='};
 
 	/* Generate a Password object with a random password. */
 	public static String getNext() {
