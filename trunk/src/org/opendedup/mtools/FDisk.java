@@ -20,8 +20,7 @@ public class FDisk {
 
 	public FDisk(SDFSEvent evt) throws IOException {
 		File f = new File(Main.dedupDBStore);
-		fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file count = " + FileCounts.getCount(f, false) + " file size = " +FileCounts.getSize(f, false));
-		evt.addChild(fEvt);
+		fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file count = " + FileCounts.getCount(f, false) + " file size = " +FileCounts.getSize(f, false),evt);
 		fEvt.maxCt = FileCounts.getSize(f, false);
 		SDFSLogger.getLog().info("Starting FDISK");
 		long start = System.currentTimeMillis();

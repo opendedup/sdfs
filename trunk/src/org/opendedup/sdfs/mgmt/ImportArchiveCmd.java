@@ -43,7 +43,6 @@ public class ImportArchiveCmd implements Runnable {
 		} catch (ParserConfigurationException e) {
 			throw new IOException(e);
 		}
-
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class ImportArchiveCmd implements Runnable {
 			ArchiveImporter.importArchive(archive, dest, server, password,
 					port, maxSz, evt,useSSL);
 			sc = "successful";
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().error(
 					"Unable to import archive [" + archive + "] "
 							+ "Destination [" + dest + "] because :"

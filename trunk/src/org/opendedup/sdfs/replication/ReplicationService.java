@@ -40,8 +40,11 @@ public class ReplicationService implements Serializable {
 	public String remoteServer;
 	public transient String remoteServerPassword;
 	public String remoteServerFolder;
+	public String remoteServerVolume;
 	public int remoteServerDataPort;
 	public int remoteServerPort;
+	public boolean useSSL;
+	public boolean useMGR;
 	public String archiveFolder;
 
 	public String localServer;
@@ -92,6 +95,10 @@ public class ReplicationService implements Serializable {
 				"replication.master.port", "6442"));
 		this.remoteServerDataPort = Integer.parseInt(properties.getProperty(
 				"replication.master.dataport", "2222"));
+		this.useSSL = Boolean.parseBoolean(properties.getProperty(
+				"replication.master.useSSL", "false"));
+		this.useMGR = Boolean.parseBoolean(properties.getProperty(
+				"replication.master.usemgr", "false"));
 		this.archiveFolder = properties.getProperty("archive.staging",
 				System.getProperty("java.io.tmpdir"));
 		this.localServer = properties.getProperty("replication.slave");
@@ -218,7 +225,6 @@ public class ReplicationService implements Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to persist results", e);
 		}
-
 	}
 
 	private synchronized Document getResponse(String server, int port,

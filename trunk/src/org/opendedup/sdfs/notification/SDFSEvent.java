@@ -76,7 +76,9 @@ public class SDFSEvent {
 		this.endTime = System.currentTimeMillis();
 	}
 	
-	public void addChild(SDFSEvent evt) {
+	public void addChild(SDFSEvent evt) throws IOException {
+		if(evt.uid.equalsIgnoreCase(this.uid))
+			throw new IOException("Cannot add child with same event id");
 		evt.puid = this.uid;
 		this.children.add(evt);
 	}
@@ -142,16 +144,22 @@ public class SDFSEvent {
 		return event;
 	}
 
-	public static SDFSEvent consistancyCheckEvent(String shortMsg) {
+	public static SDFSEvent consistancyCheckEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(FSCK, Main.volume.getName(),
 				shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}
 
-	public static SDFSEvent loadHashDBEvent(String shortMsg) {
+	public static SDFSEvent loadHashDBEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(LHASHDB, Main.volume.getName(),
 				shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}
@@ -175,9 +183,12 @@ public class SDFSEvent {
 		return event;
 	}
 
-	public static SDFSEvent metaImportEvent(String shortMsg) {
+	public static SDFSEvent metaImportEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(MIMPORT, Main.volume.getName(),
 				shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}
@@ -196,22 +207,31 @@ public class SDFSEvent {
 		return event;
 	}
 
-	public static SDFSEvent claimInfoEvent(String shortMsg) {
+	public static SDFSEvent claimInfoEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(CLAIMR, Main.volume.getName(), shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}
 
-	public static SDFSEvent waitEvent(String shortMsg) {
+	public static SDFSEvent waitEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(WAIT, Main.volume.getName(), shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}
 
-	public static SDFSEvent removeInfoEvent(String shortMsg) {
+	public static SDFSEvent removeInfoEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(REMOVER, Main.volume.getName(),
 				shortMsg);
 		event.level = INFO;
+		try {
+		evt.addChild(event);
+		}catch(Exception e) {}
 		return event;
 	}
 
@@ -221,8 +241,11 @@ public class SDFSEvent {
 		return event;
 	}
 
-	public static SDFSEvent fdiskInfoEvent(String shortMsg) {
+	public static SDFSEvent fdiskInfoEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(FDISK, Main.volume.getName(), shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
 		event.level = INFO;
 		return event;
 	}

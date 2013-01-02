@@ -38,8 +38,7 @@ public class MetaFileImport implements Serializable{
 
 	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
-		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
-		levt.addChild(levt);
+		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ,evt);
 		this.useSSL = useSSL;
 		if(maxSz >0)
 			MAX_SZ = (maxSz * 1024*1024)/Main.CHUNK_LENGTH;
