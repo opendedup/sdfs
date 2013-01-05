@@ -43,14 +43,16 @@ public class Volume implements java.io.Serializable {
 	private final ReentrantLock rbLock = new ReentrantLock();
 	private final ReentrantLock wbLock = new ReentrantLock();
 	private long absoluteLength = -1;
-	private long duplicateBytes = 0;
-	private long virtualBytesWritten = 0;
-	private long readBytes = 0;
-	private long actualWriteBytes = 0;
+	private double duplicateBytes = 0;
+	private double virtualBytesWritten = 0;
+	private double readBytes = 0;
+	private double actualWriteBytes = 0;
 	private boolean closedGracefully = false;
-	private long readOperations;
-	private long writeOperations;
+	private double readOperations;
+	private double writeOperations;
 	private boolean allowExternalSymlinks = true;
+	private boolean useDSESize = false;
+	private boolean useDSECapacity = false;
 	
 
 	public boolean isAllowExternalSymlinks() {
@@ -80,6 +82,10 @@ public class Volume implements java.io.Serializable {
 		this.capacity = StringUtils.parseSize(capString);
 		if(vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
+		if(vol.hasAttribute("use-dse-size"))
+			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
+		if(vol.hasAttribute("use-dse-capacity"))
+			this.useDSECapacity = Boolean.parseBoolean(vol.getAttribute("use-dse-capacity"));
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
 		if (vol.hasAttribute("duplicate-bytes"))
 			this.addDuplicateBytes(Long.parseLong(vol
@@ -109,7 +115,11 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public long getCapacity() {
-		return capacity;
+		if(this.useDSECapacity)
+			return HashChunkService.getMaxSize()
+					* HashChunkService.getPageSize();
+		else
+			return capacity;
 	}
 
 	public void setCapacity(long capacity) throws Exception {
@@ -208,12 +218,14 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("capacity", this.capString);
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage * 100));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
-		root.setAttribute("read-bytes", Long.toString(this.readBytes));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("duplicate-bytes", Double.toString(this.duplicateBytes));
+		root.setAttribute("read-bytes", Double.toString(this.readBytes));
+		root.setAttribute("write-bytes", Double.toString(this.actualWriteBytes));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
+		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		return root;
 	}
 
@@ -221,20 +233,20 @@ public class Volume implements java.io.Serializable {
 		Document doc = XMLUtils.getXMLDoc("volume");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("path", path);
-		root.setAttribute("current-size", Long.toString(this.currentSize));
-		root.setAttribute("capacity", Long.toString(this.capacity));
+		root.setAttribute("current-size", Double.toString(this.currentSize));
+		root.setAttribute("capacity", Double.toString(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
-		root.setAttribute("read-bytes", Long.toString(this.readBytes));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("duplicate-bytes", Double.toString(this.duplicateBytes));
+		root.setAttribute("read-bytes", Double.toString(this.readBytes));
+		root.setAttribute("write-bytes", Double.toString(this.actualWriteBytes));
 		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",
 				Long.toString(HashChunkService.getSize()
 						* HashChunkService.getPageSize()));
-		root.setAttribute("readops", Long.toString(this.readOperations));
-		root.setAttribute("writeops", Long.toString(this.writeOperations));
+		root.setAttribute("readops", Double.toString(this.readOperations));
+		root.setAttribute("writeops", Double.toString(this.writeOperations));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
@@ -250,7 +262,7 @@ public class Volume implements java.io.Serializable {
 		this.vbLock.unlock();
 	}
 
-	public long getVirtualBytesWritten() {
+	public double getVirtualBytesWritten() {
 		return virtualBytesWritten;
 	}
 
@@ -262,7 +274,7 @@ public class Volume implements java.io.Serializable {
 		this.dbLock.unlock();
 	}
 
-	public long getDuplicateBytes() {
+	public double getDuplicateBytes() {
 		return duplicateBytes;
 	}
 
@@ -275,7 +287,7 @@ public class Volume implements java.io.Serializable {
 		this.rbLock.unlock();
 	}
 
-	public long getReadBytes() {
+	public double getReadBytes() {
 		return readBytes;
 	}
 
@@ -287,7 +299,7 @@ public class Volume implements java.io.Serializable {
 		this.wbLock.unlock();
 	}
 
-	public long getActualWriteBytes() {
+	public double getActualWriteBytes() {
 		return actualWriteBytes;
 	}
 }
