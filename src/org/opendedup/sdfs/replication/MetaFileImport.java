@@ -12,6 +12,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.notification.BlockImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
@@ -33,8 +34,7 @@ public class MetaFileImport implements Serializable{
 	private boolean useSSL;
 	long startTime = 0;
 	long endTime = 0;
-	long sparseFileSize = 0;
-	SDFSEvent levt = null;
+	BlockImportEvent levt = null;
 
 	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
@@ -54,6 +54,7 @@ public class MetaFileImport implements Serializable{
 			try {
 				HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
 				this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
+				levt.bytesImported = this.bytesTransmitted;
 			} catch(Exception e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import",e);
 				corruption = true;
@@ -115,6 +116,7 @@ public class MetaFileImport implements Serializable{
 							if (!exists) {
 								hashes.add(StringUtils.getHexString(ck.getHash()));
 								entries++;
+								levt.blocksImported = entries;
 								mf.getIOMonitor().addActualBytesWritten(Main.CHUNK_LENGTH);
 							} else {
 								mf.getIOMonitor().addDulicateBlock();
@@ -125,6 +127,7 @@ public class MetaFileImport implements Serializable{
 									HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
 									SDFSLogger.getLog().debug("fetched " + hashes.size() + " blocks");
 									this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
+									levt.bytesImported = this.bytesTransmitted;
 									hashes = null;
 									hashes = new ArrayList<String>();
 								} catch(Exception e) {
@@ -153,10 +156,12 @@ public class MetaFileImport implements Serializable{
 				mp.close();
 				mp = null;
 				this.virtualBytesTransmitted = this.virtualBytesTransmitted + mf.length();
+				levt.virtualDataImported = this.virtualBytesTransmitted;
 				
 			}
 		}
 		this.filesProcessed++;
+		levt.filesImported = this.filesProcessed;
 
 	}
 	

@@ -183,8 +183,8 @@ public class SDFSEvent {
 		return event;
 	}
 
-	public static SDFSEvent metaImportEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(MIMPORT, Main.volume.getName(),
+	public static BlockImportEvent metaImportEvent(String shortMsg,SDFSEvent evt) {
+		BlockImportEvent event = new BlockImportEvent(Main.volume.getName(),
 				shortMsg);
 		try {
 			evt.addChild(event);
@@ -324,8 +324,18 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent fromXML(Element el) {
-		SDFSEvent evt = new SDFSEvent(new Type(el.getAttribute("type")),
+		SDFSEvent evt = null;
+		if(el.getAttribute("type").equalsIgnoreCase(MIMPORT.type)) {
+			BlockImportEvent _evt = new BlockImportEvent(el.getAttribute("target"), el.getAttribute("short-msg"));
+			_evt.blocksImported = Long.parseLong(el.getAttribute("blocks-imported"));
+			_evt.bytesImported = Long.parseLong(el.getAttribute("bytes-imported"));
+			_evt.filesImported = Long.parseLong(el.getAttribute("files-imported"));
+			_evt.virtualDataImported = Long.parseLong(el.getAttribute("virtual-data-imported"));
+			evt = _evt;
+		}else {
+		evt = new SDFSEvent(new Type(el.getAttribute("type")),
 				el.getAttribute("target"), el.getAttribute("short-msg"));
+		}
 		evt.maxCt = Long.parseLong(el.getAttribute("max-count"));
 		evt.curCt = Long.parseLong(el.getAttribute("current-count"));
 		evt.uid = el.getAttribute("uuid");
@@ -390,7 +400,7 @@ public class SDFSEvent {
 		}
 	}
 
-	private static class Type {
+	public static class Type {
 		private String type = "";
 
 		protected Type(String type) {

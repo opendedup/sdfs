@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
-import java.io.IOException;
+import java.io.IOException
+;
 
 
 import org.apache.log4j.ConsoleAppender;
