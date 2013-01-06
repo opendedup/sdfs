@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.VMDKData;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.VMDKParser;
 
 public class DiskUtils {

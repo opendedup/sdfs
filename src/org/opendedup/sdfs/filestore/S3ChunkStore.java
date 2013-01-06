@@ -13,10 +13,10 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 

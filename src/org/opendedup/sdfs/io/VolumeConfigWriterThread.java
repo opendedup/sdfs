@@ -4,9 +4,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.SDFSLogger;
 
 public class VolumeConfigWriterThread implements Runnable {
 	private String configFile = null;

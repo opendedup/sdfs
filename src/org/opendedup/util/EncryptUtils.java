@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.HashFunctions;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 public class EncryptUtils {

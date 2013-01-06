@@ -2,18 +2,18 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
+
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.SDFSGCScheduler;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
-import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.SDFSLogger;
 
 public class SDFSService {
 	String configFile;
@@ -54,7 +54,6 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
-		Main.wth = new VolumeConfigWriterThread(configFile);
 		if (Main.chunkStoreLocal) {
 			try {
 				HashChunkService.init();
@@ -105,12 +104,6 @@ public class SDFSService {
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
 		MgmtWebServer.stop();
-		try {
-			Main.wth.stop();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		try {
 			Process p = Runtime.getRuntime().exec(
 					"umount " + Main.volumeMountPoint);

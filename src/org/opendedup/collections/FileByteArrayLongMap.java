@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 
 public class FileByteArrayLongMap {
 	MappedByteBuffer keys = null;

@@ -5,15 +5,17 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -53,6 +55,11 @@ public class Volume implements java.io.Serializable {
 	private boolean allowExternalSymlinks = true;
 	private boolean useDSESize = false;
 	private boolean useDSECapacity = false;
+	private boolean usePerfMon = false;
+	private String perfMonFile = "/var/log/sdfs/perf.json";
+	private VolumeConfigWriterThread writer = null;
+	private VolumeIOMeter ioMeter = null;
+	private String configPath = null;
 	
 
 	public boolean isAllowExternalSymlinks() {
@@ -71,7 +78,8 @@ public class Volume implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Volume(Element vol) throws IOException {
+	public Volume(Element vol,String path) throws IOException {
+		this.configPath = path;
 		pathF = new File(vol.getAttribute("path"));
 
 		SDFSLogger.getLog().info("Mounting volume " + pathF.getPath());
@@ -86,6 +94,12 @@ public class Volume implements java.io.Serializable {
 			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
 		if(vol.hasAttribute("use-dse-capacity"))
 			this.useDSECapacity = Boolean.parseBoolean(vol.getAttribute("use-dse-capacity"));
+		if(vol.hasAttribute("use-perf-mon"))
+			this.usePerfMon = Boolean.parseBoolean(vol.getAttribute("use-perf-mon"));
+		if(vol.hasAttribute("perf-mon-file"))
+			this.perfMonFile = vol.getAttribute("perf-mon-file");
+		else
+			this.perfMonFile = "/var/log/sdfs/volume-" +this.name + "-perf.json";
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
 		if (vol.hasAttribute("duplicate-bytes"))
 			this.addDuplicateBytes(Long.parseLong(vol
@@ -112,6 +126,14 @@ public class Volume implements java.io.Serializable {
 					"Setting maximum capacity to " + this.absoluteLength);
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
+		this.startThreads();
+	}
+	
+	private void startThreads() {
+		this.writer = new VolumeConfigWriterThread(this.configPath);
+		if(this.usePerfMon)
+			this.ioMeter = new VolumeIOMeter(this);
+		
 	}
 
 	public long getCapacity() {
@@ -127,7 +149,7 @@ public class Volume implements java.io.Serializable {
 			throw new IOException("Cannot resize volume to something less than current size. Current Size [" + this.currentSize + "] requested capacity [" + capacity + "]");
 		this.capacity = capacity;
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
-		Main.wth.writeConfig();
+		writer.writeConfig();
 		
 	}
 	
@@ -181,19 +203,52 @@ public class Volume implements java.io.Serializable {
 	public boolean isClosedGracefully() {
 		return closedGracefully;
 	}
+	
+	public void setUsePerfMon(boolean use) {
+		if(this.usePerfMon == true && use == false) {
+			this.ioMeter.close();
+			this.ioMeter = null;
+		}
+		else if(this.usePerfMon == false && use == true) {
+			this.ioMeter = new VolumeIOMeter(this);
+		}
+		this.usePerfMon = use;
+	}
+
+	public String getConfigPath() {
+		return configPath;
+	}
 
 	public void setClosedGracefully(boolean closedGracefully) {
 		this.closedGracefully = closedGracefully;
+		if(this.closedGracefully) {
+			this.writer.stop();
+			if(this.usePerfMon)
+				this.ioMeter.close();
+		}
+			
 	}
 
 	public long getTotalBlocks() {
-		return (this.capacity / this.blockSize);
+		return (this.getCapacity() / this.blockSize);
 	}
 
 	public long getUsedBlocks() {
-		return (this.currentSize / this.blockSize);
+		return (this.getCurrentSize() / this.blockSize);
 	}
 	
+	public double getReadOperations() {
+		return readOperations;
+	}
+
+	public double getWriteOperations() {
+		return writeOperations;
+	}
+
+	public String getPerfMonFile() {
+		return perfMonFile;
+	}
+
 	public void addWIO() {
 		if(this.writeOperations == Long.MAX_VALUE)
 			this.writeOperations = 0;
@@ -226,6 +281,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
 		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
+		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
+		root.setAttribute("perf-mon-file", this.perfMonFile);
 		return root;
 	}
 
@@ -250,6 +307,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
+		root.setAttribute("perf-mon-file", this.perfMonFile);
 		return doc;
 	}
 
@@ -265,7 +324,7 @@ public class Volume implements java.io.Serializable {
 	public double getVirtualBytesWritten() {
 		return virtualBytesWritten;
 	}
-
+	
 	public void addDuplicateBytes(long duplicateBytes) {
 		this.dbLock.lock();
 		this.duplicateBytes += duplicateBytes;

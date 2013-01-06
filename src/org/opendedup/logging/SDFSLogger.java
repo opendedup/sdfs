@@ -1,4 +1,4 @@
-package org.opendedup.util;
+package org.opendedup.logging;
 
 import java.io.IOException
 ;

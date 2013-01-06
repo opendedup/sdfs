@@ -2,11 +2,11 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

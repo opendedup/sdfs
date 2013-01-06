@@ -13,11 +13,11 @@ import java.security.NoSuchProviderException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.PassPhrase;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 

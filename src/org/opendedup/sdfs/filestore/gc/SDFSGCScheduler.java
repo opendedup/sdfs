@@ -1,8 +1,8 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Properties;
-import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;

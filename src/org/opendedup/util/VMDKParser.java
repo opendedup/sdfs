@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.BufferClosedException;

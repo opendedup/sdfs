@@ -5,11 +5,11 @@ import java.io.IOException;
 
 import org.opendedup.collections.AbstractHashesMap;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StorageUnit;
 
 

@@ -19,9 +19,9 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.FindOpenPort;
-import org.opendedup.util.SDFSLogger;
 
 import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;

@@ -1,7 +1,7 @@
 package fuse.SDFS;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.servers.SDFSService;
-import org.opendedup.util.SDFSLogger;
 
 class ShutdownHook extends Thread {
 	private SDFSService service;

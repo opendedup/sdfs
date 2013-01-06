@@ -12,9 +12,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
 /**

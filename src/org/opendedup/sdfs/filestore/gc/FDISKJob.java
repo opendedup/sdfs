@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

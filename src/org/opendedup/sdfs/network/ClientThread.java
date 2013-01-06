@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.hashing.HashFunctions;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HashChunkService;

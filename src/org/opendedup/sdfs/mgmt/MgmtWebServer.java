@@ -1,11 +1,11 @@
 package org.opendedup.sdfs.mgmt;
 
 import org.opendedup.hashing.HashFunctions;
+import org.opendedup.logging.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
 
 import org.opendedup.util.FindOpenPort;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.simpleframework.http.core.Container;
 import org.simpleframework.transport.connect.Connection;
@@ -322,7 +322,7 @@ public class MgmtWebServer implements Container {
 						try {
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									Main.wth.getConfigFilePath());
+									Main.volume.getConfigPath());
 						} catch (java.lang.NullPointerException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());

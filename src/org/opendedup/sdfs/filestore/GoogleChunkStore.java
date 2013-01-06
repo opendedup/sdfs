@@ -10,10 +10,10 @@ import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.GoogleStorageService;
 import org.jets3t.service.model.GSObject;
 import org.jets3t.service.security.GSCredentials;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 

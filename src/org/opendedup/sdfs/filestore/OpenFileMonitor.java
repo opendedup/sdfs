@@ -2,8 +2,8 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 

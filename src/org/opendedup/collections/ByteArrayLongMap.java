@@ -10,8 +10,8 @@ import java.util.BitSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.SDFSLogger;
 
 //import com.ning.compress.lzf.LZFDecoder;
 //import com.ning.compress.lzf.LZFEncoder;

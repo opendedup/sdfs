@@ -4,10 +4,10 @@ import java.io.IOException;
 
 
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

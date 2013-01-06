@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.replication.ArchiveImporter;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
 public class ImportArchiveCmd implements Runnable {

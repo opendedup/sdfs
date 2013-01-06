@@ -8,13 +8,13 @@ import java.io.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -81,7 +81,7 @@ public class ArchiveImporter {
 						root.setAttribute("starttime", Long.toString(imp.getStartTime()));
 						root.setAttribute("endtime", Long.toString(imp.getEndTime()));
 						root.setAttribute("volume", Main.volume.getName());
-						root.setAttribute("volumeconfig", Main.wth.getConfigFilePath());
+						root.setAttribute("volumeconfig", Main.volume.getConfigPath());
 						evt.endEvent(srcArchive + " from " +server+":" + port+ " to " + dest + " imported successfully");
 						return (Element)root.cloneNode(true);
 				}
