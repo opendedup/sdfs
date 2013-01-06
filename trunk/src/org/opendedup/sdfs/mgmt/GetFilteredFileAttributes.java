@@ -5,10 +5,10 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;

@@ -12,8 +12,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.SDFSLogger;
 
 public class LargeLongByteArrayMap implements AbstractMap {
 

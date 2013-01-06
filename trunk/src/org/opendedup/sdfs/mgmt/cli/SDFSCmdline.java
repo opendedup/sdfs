@@ -10,7 +10,7 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 
 public class SDFSCmdline {
 	public static void parseCmdLine(String[] args) throws Exception {

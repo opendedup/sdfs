@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.SDFSLogger;
 
 import sun.nio.ch.FileChannelImpl;
 

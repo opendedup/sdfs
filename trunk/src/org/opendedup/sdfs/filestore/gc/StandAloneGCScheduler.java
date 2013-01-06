@@ -1,7 +1,7 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.util.SDFSLogger;
 
 public class StandAloneGCScheduler implements Runnable {
 	private GCControllerImpl gcController = null;

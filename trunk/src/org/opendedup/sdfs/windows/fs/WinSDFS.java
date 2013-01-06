@@ -62,11 +62,11 @@ import net.decasdev.dokan.Win32FindData;
 import net.decasdev.dokan.WinError;
 
 import org.apache.log4j.Logger;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.util.SDFSLogger;
 
 public class WinSDFS implements DokanOperations {
 	/** fileName -> MemFileInfo */

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class ThreadPool {

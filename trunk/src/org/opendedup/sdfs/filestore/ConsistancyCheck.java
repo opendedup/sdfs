@@ -1,10 +1,10 @@
 package org.opendedup.sdfs.filestore;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
-import org.opendedup.util.SDFSLogger;
 
 public class ConsistancyCheck {
 	public static synchronized void runCheck(AbstractHashesMap map,

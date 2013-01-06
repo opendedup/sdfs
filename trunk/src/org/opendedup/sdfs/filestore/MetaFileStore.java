@@ -11,8 +11,8 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.SDFSLogger;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;

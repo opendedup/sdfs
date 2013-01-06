@@ -15,7 +15,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
 
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 
 public class Utils {
 	public static void deleteBucketAWS(String bucketName, String awsAccessKey,

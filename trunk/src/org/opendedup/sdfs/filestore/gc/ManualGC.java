@@ -2,13 +2,13 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
 
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.SDFSLogger;
 
 public class ManualGC {
 

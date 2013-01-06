@@ -35,8 +35,8 @@ import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.util.SDFSLogger;
 
 public class MetaDataFileInfo {
 	static long nextFileIndex = 2;

@@ -21,13 +21,13 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {

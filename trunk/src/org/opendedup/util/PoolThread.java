@@ -4,9 +4,9 @@ import java.util.concurrent.BlockingQueue;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.collections.QuickList;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class PoolThread extends Thread {

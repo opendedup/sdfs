@@ -7,10 +7,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 public class ThreadedFDisk {

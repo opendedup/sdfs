@@ -10,9 +10,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.SDFSLogger;
 
 public class BulkFetchChunkCmd implements IOCmd {
 	ArrayList<String> hashes;

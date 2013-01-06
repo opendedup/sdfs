@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.HashFunctions;
-import org.opendedup.util.SDFSLogger;
 
 //import com.ning.compress.lzf.LZFDecoder;
 //import com.ning.compress.lzf.LZFEncoder;

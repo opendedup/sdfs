@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.DSECompaction;

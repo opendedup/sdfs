@@ -4,8 +4,8 @@ import java.net.URLEncoder;
 
 import java.util.Formatter;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

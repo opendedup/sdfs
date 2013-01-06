@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HashChunkService;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 /**

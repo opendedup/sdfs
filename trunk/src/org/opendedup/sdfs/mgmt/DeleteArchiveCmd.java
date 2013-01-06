@@ -5,9 +5,9 @@ import java.io.File;
 
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.SDFSLogger;
 
 public class DeleteArchiveCmd implements XtendedCmd {
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 
 public class DirectBufPool {
 

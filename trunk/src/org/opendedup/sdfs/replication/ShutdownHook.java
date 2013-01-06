@@ -1,6 +1,6 @@
 package org.opendedup.sdfs.replication;
 
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 
 class ShutdownHook extends Thread {
 	ReplicationScheduler sched;

@@ -15,11 +15,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.servers.HCServer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -247,7 +247,7 @@ public class Config {
 				.getAttribute("max-file-inactive")) * 1000;
 		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
-		Main.volume = new Volume(volume);
+		Main.volume = new Volume(volume,fileName);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
 				.item(0);
 		Main.defaultGroup = Integer.parseInt(permissions

@@ -3,10 +3,10 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

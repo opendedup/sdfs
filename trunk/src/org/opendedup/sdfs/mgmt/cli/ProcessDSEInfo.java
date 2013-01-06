@@ -3,7 +3,7 @@ package org.opendedup.sdfs.mgmt.cli;
 import java.text.DecimalFormat;
 import java.util.Formatter;
 
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

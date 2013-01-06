@@ -4,13 +4,13 @@ import java.io.File;
 
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.SDFSLogger;
 import org.w3c.dom.Element;
 
 import de.schlichtherle.truezip.file.TFile;

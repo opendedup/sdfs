@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.SDFSLogger;
 import org.opendedup.util.StringUtils;
 
 public class MetaFileImport {

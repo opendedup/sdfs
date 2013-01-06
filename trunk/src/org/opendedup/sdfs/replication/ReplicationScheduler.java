@@ -2,7 +2,7 @@ package org.opendedup.sdfs.replication;
 
 import java.util.Properties;
 
-import org.opendedup.util.SDFSLogger;
+import org.opendedup.logging.SDFSLogger;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;

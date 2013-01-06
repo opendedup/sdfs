@@ -2,7 +2,12 @@ package org.opendedup.logging;
 
 public class JSONLayoutException extends RuntimeException{
 
-    public JSONLayoutException(String message, Throwable t){
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public JSONLayoutException(String message, Throwable t){
         super(message,t);
     }
 

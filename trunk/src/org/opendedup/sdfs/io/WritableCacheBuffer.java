@@ -8,9 +8,9 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.util.SDFSLogger;
 
 import org.opendedup.hashing.MurmurHash3;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
