@@ -9,9 +9,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.StringUtils;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
@@ -22,6 +24,7 @@ public class HCServiceProxy {
 
 	public static HashMap<String, HashClientPool> dseServers = new HashMap<String, HashClientPool>();
 	public static HashMap<String, HashClientPool> dseRoutes = new HashMap<String, HashClientPool>();
+	private static HashChunkServiceInterface hcService = null;
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
 	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>()
 			.concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
@@ -42,16 +45,47 @@ public class HCServiceProxy {
 	private static ReentrantLock readlock = new ReentrantLock();
 
 	// private static boolean initialized = false;
+	
+	static {
+		hcService = new HashChunkService();
+		try {
+		hcService.init();
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",e);
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	public static void processHashClaims(SDFSEvent evt) throws IOException {
+		hcService.processHashClaims(evt);
+	}
+	
+	public static boolean hashExists(byte[] hash, short hops)
+			throws IOException, HashtableFullException {
+		return hcService.hashExists(hash, hops);
+	}
+	
+	public static HashChunk fetchHashChunk(byte[] hash) throws IOException {
+		return hcService.fetchChunk(hash);
+	}
+
+	public static long removeStailHashes(long ms, boolean forceRun,
+			SDFSEvent evt) throws IOException {
+		return hcService.removeStailHashes(ms, forceRun, evt);
+	}
 
 	public static long getChunksFetched() {
 		return -1;
 	}
 
-	private static long dupsFound;
+	public static synchronized void init() {
+	}
+
 
 	public static long getSize() {
 		if (Main.chunkStoreLocal) {
-			return HashChunkService.getSize();
+			return HCServiceProxy.hcService.getSize();
 		} else {
 			return -2;
 		}
@@ -59,15 +93,28 @@ public class HCServiceProxy {
 
 	public static long getMaxSize() {
 		if (Main.chunkStoreLocal) {
-			return HashChunkService.getMaxSize();
+			return HCServiceProxy.hcService.getMaxSize();
 		} else {
 			return -1;
 		}
 	}
+	
+	public static long getFreeBlocks() {
+		if (Main.chunkStoreLocal) {
+			return HCServiceProxy.hcService.getFreeBlocks();
+		} else {
+			return -1;
+		}
+	}
+	
+	public static AbstractChunkStore getChunkStore() {
+		
+		return hcService.getChuckStore();
+	}
 
 	public static int getPageSize() {
 		if (Main.chunkStoreLocal) {
-			return HashChunkService.getPageSize();
+			return HCServiceProxy.hcService.getPageSize();
 		} else {
 			return -1;
 		}
@@ -93,9 +140,9 @@ public class HCServiceProxy {
 			HashtableFullException {
 		boolean doop = false;
 		if (Main.chunkStoreLocal) {
-			// doop = HashChunkService.hashExists(hash);
+			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (!doop && sendChunk) {
-				doop = HashChunkService.writeChunk(hash, aContents, 0,
+				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
 
 			}
@@ -105,7 +152,7 @@ public class HCServiceProxy {
 			HashClient hc = null;
 			try {
 				hc = getWriteHashClient(db);
-				doop = hc.hashExists(hash,(short)0);
+				doop = hc.hashExists(hash, (short) 0);
 				if (!doop && sendChunk) {
 					try {
 						hc.writeChunk(hash, aContents, 0, len);
@@ -127,27 +174,34 @@ public class HCServiceProxy {
 		}
 		return doop;
 	}
-	
-	public static boolean localHashExists(byte[] hash) throws IOException, HashtableFullException {
+
+	public static boolean localHashExists(byte[] hash) throws IOException,
+			HashtableFullException {
 		boolean exists = false;
 		if (Main.chunkStoreLocal) {
-			exists = HashChunkService.localHashExists(hash);
+			exists = HCServiceProxy.hcService.localHashExists(hash);
 
-		} return exists;
+		}
+		return exists;
 	}
-	
-	public static void fetchChunks(ArrayList<String> hashes,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
+
+	public static void fetchChunks(ArrayList<String> hashes, String server,
+			String password, int port, boolean useSSL) throws IOException,
+			HashtableFullException {
 		if (Main.chunkStoreLocal) {
-			HashChunkService.remoteFetchChunks(hashes,server,password,port,useSSL);
+			HCServiceProxy.hcService.remoteFetchChunks(hashes, server,
+					password, port, useSSL);
 		} else {
-			throw new IllegalStateException("not implemented for remote chunkstores");
+			throw new IllegalStateException(
+					"not implemented for remote chunkstores");
 		}
 	}
 
-	public static boolean hashExists(byte[] hash) throws IOException, HashtableFullException {
+	public static boolean hashExists(byte[] hash) throws IOException,
+			HashtableFullException {
 		boolean exists = false;
 		if (Main.chunkStoreLocal) {
-			exists = HashChunkService.hashExists(hash,(short)0);
+			exists = HCServiceProxy.hcService.hashExists(hash, (short) 0);
 
 		} else {
 			String hashStr = StringUtils.getHexString(hash);
@@ -169,7 +223,7 @@ public class HCServiceProxy {
 				throw new IOException(e1);
 			}
 			try {
-				exists = hc.hashExists(hash,(short)0);
+				exists = hc.hashExists(hash, (short) 0);
 				if (exists) {
 					// existingHashes.put(hashStr, hashStr);
 				}
@@ -195,7 +249,7 @@ public class HCServiceProxy {
 
 	public static byte[] fetchChunk(byte[] hash) throws IOException {
 		if (Main.chunkStoreLocal) {
-			HashChunk hc = HashChunkService.fetchChunk(hash);
+			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
 			return hc.getData();
 		} else {
 			String hashStr = StringUtils.getHexString(hash);
@@ -278,23 +332,27 @@ public class HCServiceProxy {
 	}
 
 	public static long getChunksRead() {
-		return -1;
+		return hcService.getChunksRead();
 	}
 
-	public static long getChunksWritten() {
-		return -1;
+	public static double getChunksWritten() {
+		return hcService.getChunksWritten();
 	}
 
 	public static double getKBytesRead() {
-		return -1;
+		return hcService.getKBytesRead();
 	}
 
 	public static double getKBytesWrite() {
-		return -1;
+		return hcService.getKBytesWrite();
 	}
 
 	public static long getDupsFound() {
-		return dupsFound;
+		return hcService.getDupsFound();
+	}
+
+	public static void close() {
+		hcService.close();
 	}
 
 }

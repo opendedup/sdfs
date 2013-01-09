@@ -25,6 +25,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
@@ -52,6 +53,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private boolean firstGCRun = true;
 	private SyncThread st = null;
 	private SDFSEvent loadEvent =SDFSEvent.loadHashDBEvent("Loading Hash Database",Main.mountEvent);
+	private long endPos = 0;
 
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
@@ -78,6 +80,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		int hashRoute = hashb;
 
 		FileByteArrayLongMap m = maps[hashRoute];
+		
 		return m;
 	}
 
@@ -145,7 +148,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (!_fs.getParentFile().exists()) {
 			_fs.getParentFile().mkdirs();
 		}
-		long endPos = 0;
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		File bsf = new File(this.fileName + "freebit.map");
 		if (!bsf.exists()) {
@@ -191,10 +193,14 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		this.loadEvent.endEvent("Loaded entries " + rsz);
 		System.out.println("Loaded entries " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);
-		HashChunkService.getChuckStore().setSize(
-				endPos + HashFunctionPool.hashLength);
+		this.kSz =rsz;
 		this.closed = false;
 		return size;
+	}
+	
+	@Override
+	public long endStartingPosition() {
+		return this.endPos;
 	}
 
 	/**
@@ -221,9 +227,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public synchronized long removeRecords(long time, boolean forceRun,SDFSEvent evt)
 			throws IOException {
-		SDFSLogger.getLog().info(
-				"Garbage collection starting for records older than "
-						+ new Date(time));
 		SDFSLogger.getLog().info(
 				"Garbage collection starting for records older than "
 						+ new Date(time));
@@ -356,7 +359,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			this.arlock.lock();
 			try {
 				boolean added = false;
-				if(this.containsKey(cm.getHash())) {
+				if(!this.isClaimed(cm)) {
 					cm.persistData(true);
 					added = this.getMap(cm.getHash()).update(cm.getHash(), cm.getcPos());
 				}	
@@ -364,10 +367,16 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					this.compactKsz++;
 				}
 				return added;
+			} catch (KeyNotFoundException e) {
+				return false;
 			} finally {
 				this.arlock.unlock();
 
 			}
+	}
+	
+	private boolean isClaimed(ChunkData cm) throws KeyNotFoundException, IOException {
+		return this.getMap(cm.getHash()).isClaimed(cm.getHash());
 	}
 
 	@Override

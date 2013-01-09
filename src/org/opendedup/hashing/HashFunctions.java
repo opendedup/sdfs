@@ -2,6 +2,7 @@ package org.opendedup.hashing;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +18,7 @@ import java.util.Random;
 import java.util.zip.Adler32;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.ElapsedTime;
 import org.opendedup.util.StringUtils;
 
@@ -244,7 +245,7 @@ public class HashFunctions {
 			rnd.nextBytes(b);
 
 			byte[] hash = HashFunctions.getMD5ByteHash(b);
-			HashChunkService.writeChunk(hash, b, 0, b.length, false);
+			HCServiceProxy.writeChunk(hash, b, 0, b.length, false);
 		}
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");

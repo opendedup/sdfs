@@ -24,6 +24,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.sdfs.servers.HashChunkService;
 
 import sun.security.x509.CertAndKeyGen;
@@ -65,7 +66,7 @@ public class NetworkHCServer {
 	}
 
 	public static void init() throws IOException {
-		HashChunkService.init();
+		HCServiceProxy.init();
 		// Initialization section:
 		// Try to open a server socket on port port_number (default 2222)
 		// Note that we can't choose a port less than 1023 if we are not
@@ -162,7 +163,7 @@ public class NetworkHCServer {
 		} catch (Exception e) {
 		}
 		System.out.println("#### Shutting down HashStore ####");
-		HashChunkService.close();
+		HCServiceProxy.close();
 		System.out.println("#### Shut down completed ####");
 	}
 }

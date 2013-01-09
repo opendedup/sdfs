@@ -15,6 +15,25 @@ public enum StorageUnit {
 		this.divider = divider;
 	}
 
+	public static StorageUnit of(final double number) {
+		final double n = number > 0 ? -number : number;
+		if (n > -(1L << 10)) {
+			return BYTE;
+		} else if (n > -(1L << 20)) {
+			return KILOBYTE;
+		} else if (n > -(1L << 30)) {
+			return MEGABYTE;
+		} else if (n > -(1L << 40)) {
+			return GIGABYTE;
+		} else if (n > -(1L << 50)) {
+			return TERABYTE;
+		} else if (n > -(1L << 60)) {
+			return PETABYTE;
+		} else { // n >= Long.MIN_VALUE
+			return EXABYTE;
+		}
+	}
+	
 	public static StorageUnit of(final long number) {
 		final long n = number > 0 ? -number : number;
 		if (n > -(1L << 10)) {
@@ -34,8 +53,12 @@ public enum StorageUnit {
 		}
 	}
 
+	public String format(double number) {
+		return nf.format(number / divider) + " " + symbol;
+	}
+	
 	public String format(long number) {
-		return nf.format((double) number / divider) + " " + symbol;
+		return nf.format(number / divider) + " " + symbol;
 	}
 
 	private static java.text.NumberFormat nf = java.text.NumberFormat

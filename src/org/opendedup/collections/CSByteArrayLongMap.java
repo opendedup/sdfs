@@ -21,6 +21,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
@@ -59,6 +60,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private SyncThread sth = null;
 	private boolean compacting = false;
 	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database",Main.mountEvent);
+	private long endPos;
 
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
@@ -245,7 +247,6 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		if (!_fs.getParentFile().exists()) {
 			_fs.getParentFile().mkdirs();
 		}
-		long endPos = 0;
 		kRaf = new RandomAccessFile(fileName, this.fileParams);
 		// kRaf.setLength(ChunkMetaData.RAWDL * size);
 		kFc = (FileChannelImpl) kRaf.getChannel();
@@ -327,7 +328,6 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 			bar.finish();
 		}
 		System.out.println();
-		HashChunkService.getChuckStore().setSize(endPos);
 		SDFSLogger.getLog().info(
 				"########## Finished Loading Hash Database in ["
 						+ (System.currentTimeMillis() - start) / 100
@@ -342,6 +342,10 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				+ "] seconds");
 
 		return size;
+	}
+	@Override
+	public long endStartingPosition() {
+		return this.endPos;
 	}
 
 	/*

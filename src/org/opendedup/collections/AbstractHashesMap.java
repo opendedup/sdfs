@@ -6,6 +6,8 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface AbstractHashesMap {
+	
+	public abstract long endStartingPosition();
 
 	public abstract long getAllocatedRam();
 

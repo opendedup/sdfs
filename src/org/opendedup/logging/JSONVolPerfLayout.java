@@ -72,14 +72,14 @@ public class JSONVolPerfLayout extends Layout {
         if (mdcKeys.length > 0) {
             event.getMDCCopy();
 
-            g.writeObjectFieldStart("MDC");
+            //g.writeObjectFieldStart("MDC");
             for (String s : mdcKeys) {
                 Object mdc = event.getMDC(s);
                 if (mdc != null) {
                     g.writeStringField(s, mdc.toString());
                 }
             }
-            g.writeEndObject();
+            //g.writeEndObject();
         }
     }
 

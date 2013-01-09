@@ -6,6 +6,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
@@ -15,7 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -45,10 +46,10 @@ public class Volume implements java.io.Serializable {
 	private final ReentrantLock rbLock = new ReentrantLock();
 	private final ReentrantLock wbLock = new ReentrantLock();
 	private long absoluteLength = -1;
-	private double duplicateBytes = 0;
+	private long duplicateBytes = 0;
 	private double virtualBytesWritten = 0;
 	private double readBytes = 0;
-	private double actualWriteBytes = 0;
+	private long actualWriteBytes = 0;
 	private boolean closedGracefully = false;
 	private double readOperations;
 	private double writeOperations;
@@ -90,6 +91,8 @@ public class Volume implements java.io.Serializable {
 		this.capacity = StringUtils.parseSize(capString);
 		if(vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
+		else
+			this.name = pathF.getParentFile().getName();
 		if(vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
 		if(vol.hasAttribute("use-dse-capacity"))
@@ -102,13 +105,13 @@ public class Volume implements java.io.Serializable {
 			this.perfMonFile = "/var/log/sdfs/volume-" +this.name + "-perf.json";
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
 		if (vol.hasAttribute("duplicate-bytes"))
-			this.addDuplicateBytes(Long.parseLong(vol
-					.getAttribute("duplicate-bytes")));
+			this.duplicateBytes = Long.parseLong(vol
+					.getAttribute("duplicate-bytes"));
 		if (vol.hasAttribute("read-bytes"))
-			this.addReadBytes(Long.parseLong(vol.getAttribute("read-bytes")));
+			this.readBytes= Double.parseDouble(vol.getAttribute("read-bytes"));
 		if (vol.hasAttribute("write-bytes"))
-			this.addActualWriteBytes(Long.parseLong(vol
-					.getAttribute("write-bytes")));
+			this.actualWriteBytes = Long.parseLong(vol
+					.getAttribute("write-bytes"));
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full")) / 100;
@@ -138,8 +141,8 @@ public class Volume implements java.io.Serializable {
 
 	public long getCapacity() {
 		if(this.useDSECapacity)
-			return HashChunkService.getMaxSize()
-					* HashChunkService.getPageSize();
+			return HCServiceProxy.getMaxSize()
+					* HCServiceProxy.getPageSize();
 		else
 			return capacity;
 	}
@@ -159,7 +162,11 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public long getCurrentSize() {
-		return currentSize;
+		if(this.useDSESize)
+			return HCServiceProxy.getSize()
+					* HCServiceProxy.getPageSize();
+		else
+			return currentSize;
 	}
 
 	public String getPath() {
@@ -269,13 +276,14 @@ public class Volume implements java.io.Serializable {
 			throws ParserConfigurationException {
 		Element root = doc.createElement("volume");
 		root.setAttribute("path", path);
+		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize));
 		root.setAttribute("capacity", this.capString);
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage * 100));
-		root.setAttribute("duplicate-bytes", Double.toString(this.duplicateBytes));
+		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes));
-		root.setAttribute("write-bytes", Double.toString(this.actualWriteBytes));
+		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
@@ -290,18 +298,19 @@ public class Volume implements java.io.Serializable {
 		Document doc = XMLUtils.getXMLDoc("volume");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("path", path);
-		root.setAttribute("current-size", Double.toString(this.currentSize));
-		root.setAttribute("capacity", Double.toString(this.capacity));
+		root.setAttribute("name", this.name);
+		root.setAttribute("current-size", Long.toString(this.currentSize));
+		root.setAttribute("capacity", Long.toString(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Double.toString(this.duplicateBytes));
+		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes));
-		root.setAttribute("write-bytes", Double.toString(this.actualWriteBytes));
+		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
 		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",
-				Long.toString(HashChunkService.getSize()
-						* HashChunkService.getPageSize()));
+				Long.toString(HCServiceProxy.getSize()
+						* HCServiceProxy.getPageSize()));
 		root.setAttribute("readops", Double.toString(this.readOperations));
 		root.setAttribute("writeops", Double.toString(this.writeOperations));
 		root.setAttribute("closed-gracefully",

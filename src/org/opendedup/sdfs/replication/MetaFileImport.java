@@ -29,14 +29,17 @@ public class MetaFileImport implements Serializable{
 	private long bytesTransmitted;
 	private long virtualBytesTransmitted;
 	private String server = null;
+	private String path = null;
 	private transient String password= null;
 	private int port = 2222;
 	private boolean useSSL;
 	long startTime = 0;
 	long endTime = 0;
 	BlockImportEvent levt = null;
+	private boolean closed = false;
+	
 
-	public MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
+	protected MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
 		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ,evt);
 		this.useSSL = useSSL;
@@ -49,7 +52,17 @@ public class MetaFileImport implements Serializable{
 		this.server = server;
 		this.password = password;
 		this.port = port;
-		this.traverse(f);
+		this.path = path;
+		
+	}
+	
+	public void close() {
+		this.closed = true;
+	}
+	
+	public void runImport() throws IOException, ReplicationCanceledException {
+		SDFSLogger.getLog().info("Running Import of " + path);
+		this.traverse(new File(this.path));
 		if(hashes.size() != 0) {
 			try {
 				HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
@@ -70,8 +83,9 @@ public class MetaFileImport implements Serializable{
 
 	
 
-	private void traverse(File dir) throws IOException {
-
+	private void traverse(File dir) throws IOException, ReplicationCanceledException {
+		if(this.closed)
+			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		if (dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
@@ -87,7 +101,9 @@ public class MetaFileImport implements Serializable{
 		return this.corruption;
 	}
 
-	private void checkDedupFile(File metaFile) throws IOException {
+	private void checkDedupFile(File metaFile) throws IOException, ReplicationCanceledException {
+		if(this.closed)
+			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
 		mf.getIOMonitor().clearFileCounters();
 		String dfGuid = mf.getDfGuid();
@@ -104,6 +120,8 @@ public class MetaFileImport implements Serializable{
 				long prevpos =  0;
 				mp.iterInit();
 				while (val != null) {
+					if(this.closed)
+						throw new ReplicationCanceledException("MetaFile Import Canceled");
 					levt.curCt += (mp.getIterFPos()-prevpos);
 					prevpos = mp.getIterFPos();
 					val = mp.nextValue();

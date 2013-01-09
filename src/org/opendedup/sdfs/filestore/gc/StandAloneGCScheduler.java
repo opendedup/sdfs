@@ -7,6 +7,7 @@ public class StandAloneGCScheduler implements Runnable {
 	private GCControllerImpl gcController = null;
 	private boolean closed = false;
 	Thread th = null;
+	SDFSGCScheduler gcSched = null;
 
 	public StandAloneGCScheduler() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
@@ -16,6 +17,7 @@ public class StandAloneGCScheduler implements Runnable {
 				"Using " + Main.gcClass + " for DSE Garbage Collection");
 		th = new Thread(this);
 		th.start();
+		gcSched = new SDFSGCScheduler();
 	}
 
 	@Override
@@ -31,6 +33,7 @@ public class StandAloneGCScheduler implements Runnable {
 	}
 
 	public void close() {
+		gcSched.stopSchedules();
 		this.closed = true;
 		th.interrupt();
 	}

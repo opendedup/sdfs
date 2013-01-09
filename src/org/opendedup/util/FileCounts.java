@@ -10,6 +10,8 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
+import de.schlichtherle.truezip.file.TFile;
+
 public class FileCounts {
 
 	public static long getSize(File file, boolean followSymlinks)
@@ -56,7 +58,7 @@ public class FileCounts {
 				for (int i = 0; i < files.length; i++) {
 					// Recursive call
 					try {
-						size += getSize(files[i], followSymlinks);
+						size += getDBFileSize(files[i], followSymlinks);
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("Unable to get "
 								+ files[i].getPath(),e);
@@ -105,6 +107,51 @@ public class FileCounts {
 			}
 		}
 		return count;
+	}
+	
+	public static long getCount(TFile file) {
+		long count = 0;
+		boolean symlink = false;
+		if (!symlink) {
+			try {
+		if (file.isDirectory()) {
+			// All files and subdirectories
+			TFile[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isFile())
+					count++;
+				else
+					count = count + getCount(files[i]);
+			}
+		}
+			}catch(Exception e) {
+				SDFSLogger.getLog().warn("Unable to count "
+								+ file.getPath(),e);
+			}
+		}
+		return count;
+	}
+	public static long getSize(TFile file) {
+		long size = 0;
+		boolean symlink = false;
+		if (!symlink) {
+			try {
+		if (file.isDirectory()) {
+			// All files and subdirectories
+			TFile[] files = file.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isFile())
+					size += files[i].length();
+				else
+					size += getSize(files[i]);
+			}
+		}
+			}catch(Exception e) {
+				SDFSLogger.getLog().warn("Unable to count "
+								+ file.getPath(),e);
+			}
+		}
+		return size;
 	}
 
 	public static void main(String[] args) throws IOException {
