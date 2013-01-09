@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -45,10 +47,15 @@ public class HashClient {
 
 	// private LRUMap existsBuffers = new LRUMap(10);
 
-	public HashClient(HCServer server, String name, String password) {
+	public HashClient(HCServer server, String name, String password) throws IOException {
 		this.server = server;
 		this.name = name;
-		this.openConnection();
+		try {
+			this.openConnection();
+		}  catch (Exception e) {
+			SDFSLogger.getLog().fatal("unable to open connection", e);
+			throw new IOException("unable to open connection");
+		}
 	}
 
 	public String getName() {
@@ -59,7 +66,7 @@ public class HashClient {
 		return this.closed;
 	}
 
-	public synchronized void openConnection() {
+	public synchronized void openConnection() throws IOException {
 		// System.out.println("Opening Connection to " + server.getHostName());
 		// Initialization section:
 		// Try to open a socket on a given host and port
@@ -119,18 +126,26 @@ public class HashClient {
 					"hashclient connection established "
 							+ clientSocket.toString());
 		} catch (UnknownHostException e) {
-			SDFSLogger.getLog().fatal("Don't know about host " + server);
+			SDFSLogger.getLog().fatal("Don't know about host " + server.getHostName() + server.getPort());
 			this.closed = true;
+			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"Couldn't get I/O for the connection to the host", e);
 			this.closed = true;
+			throw new IOException("Couldn't get I/O for the connection to the host " + server.getHostName() + server.getPort());
 		}
 	}
 
 	public void executeCmd(IOCmd cmd) throws IOException {
-		if (this.closed)
+		if (this.closed) {
+			try {
 			this.openConnection();
+			}catch(Exception e) {
+				SDFSLogger.getLog().fatal("unable to execute command", e);
+				throw new IOException(e);
+			}
+		}
 		lock.lock();
 		try {
 

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.net.InetSocketAddress;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -9,7 +10,7 @@ import java.util.Iterator;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 
 /**
  * 
@@ -101,8 +102,7 @@ public class NioUDPServer implements Runnable {
 									buf.clear();
 									boolean exists = false;
 									if (cmd == NetworkCMDS.HASH_EXISTS_CMD)
-										exists = HashChunkService
-												.hashExists(hash,(short)0);
+										exists = HCServiceProxy.hashExists(hash,(short)0);
 									// boolean exists = true;
 									if (exists)
 										resp.putShort((short) 1);

@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.zip.Adler32;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.sdfs.servers.HashChunkService;
 
 /**
@@ -241,7 +242,7 @@ public class HashFunctions {
 			rnd.nextBytes(b);
 
 			byte[] hash = HashFunctions.getMD5ByteHash(b);
-			HashChunkService.writeChunk(hash, b, 0, b.length, false);
+			HCServiceProxy.writeChunk(hash, b, 0, b.length, false);
 		}
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");

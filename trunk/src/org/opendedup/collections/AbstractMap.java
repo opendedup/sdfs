@@ -11,5 +11,6 @@ public interface AbstractMap {
 	public abstract void vanish() throws IOException;
 
 	public abstract void close();
+	
 
 }

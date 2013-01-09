@@ -10,11 +10,11 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 
-public class SDFSGCScheduler {
+public class SDFSFDiskScheduler {
 
 	Scheduler sched = null;
 
-	public SDFSGCScheduler() {
+	public SDFSFDiskScheduler() {
 		try {
 			Properties props = new Properties();
 			props.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
@@ -27,11 +27,11 @@ public class SDFSGCScheduler {
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
-			JobDetail ccjobDetail = new JobDetail("gc", null, GCJob.class);
-			CronTrigger cctrigger = new CronTrigger("gcTrigger", "group1",
+			JobDetail ccjobDetail = new JobDetail("fdisk", null, FDISKJob.class);
+			CronTrigger cctrigger = new CronTrigger("fdiskTrigger", "group1",
 					Main.fDkiskSchedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);
-			SDFSLogger.getLog().info("Stand Along Garbage Collection Jobs Scheduled will run first at " + cctrigger.getNextFireTime().toString());
+			SDFSLogger.getLog().info("Garbage Collection Jobs Scheduled");
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"Unable to schedule SDFS Garbage Collection", e);
@@ -40,7 +40,7 @@ public class SDFSGCScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob("gc", "gcTrigger");
+			sched.unscheduleJob("fdisk", "fdiskTrigger");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();

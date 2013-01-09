@@ -52,6 +52,9 @@ public class SDFSCmdline {
 			ProcessDebugInfo.runCmd();
 			System.exit(0);
 		}
+		if(cmd.hasOption("perfmon-on")) {
+			ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
+		}
 		if(cmd.hasOption("import-archive")) {
 			String server = cmd.getOptionValue("replication-master");
 			String password = cmd.getOptionValue("replication-master-password");
@@ -134,6 +137,9 @@ public class SDFSCmdline {
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("port")
 				.withDescription("SDFS CLI Interface tcp listening port for volume.").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("perfmon-on")
+				.withDescription("Turn on or off the volume performance monitor.").hasArg(true).withArgName("true|false")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("file-info")

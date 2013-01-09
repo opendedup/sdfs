@@ -1,6 +1,8 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
@@ -8,7 +10,7 @@ import org.opendedup.mtools.FDisk;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 
 public class ManualGC {
 
@@ -18,12 +20,8 @@ public class ManualGC {
 	}
 	
 	public static long clearChunksMills(long milliseconds) throws InterruptedException, IOException {
-		GCMain.gclock.lock();
-		if (GCMain.isLocked()) {
-
-			GCMain.gclock.unlock();
-			return -1;
-		} else {
+		WriteLock l = GCMain.gclock.writeLock();
+		l.lock();
 			try {
 			long rm = 0;
 			evt = SDFSEvent.gcInfoEvent("SDFS Volume Cleanup Initiated for " + Main.volume.getName());
@@ -44,24 +42,23 @@ public class ManualGC {
 			evt.endEvent("SDFS Volume Cleanup Finished for " + Main.volume.getName());
 			return rm;
 			}finally {
-				GCMain.gclock.unlock();
+				l.unlock();
 			}
-		}
 	}
 	
 	private static long runGC(long milliseconds) {
 		long rm = 0;
 		try {
-			GCMain.lock();
+			
 			long tm = System.currentTimeMillis();
 			
 			new FDisk(evt);
 			evt.curCt = 33;
 			if (Main.chunkStoreLocal) {
-				HashChunkService.processHashClaims(evt);
+				HCServiceProxy.processHashClaims(evt);
 				evt.curCt = 66;
-				rm = HashChunkService.removeStailHashes(tm
-						- milliseconds, true,evt);
+				rm = HCServiceProxy.removeStailHashes(tm
+						- milliseconds, false,evt);
 			}
 			
 		} catch (Exception e) {
@@ -69,7 +66,6 @@ public class ManualGC {
 					e);
 			evt.endEvent("SDFS Volume Cleanup Failed because " + e.getMessage(), SDFSEvent.ERROR);
 		} finally {
-			GCMain.unlock();
 		}
 		return rm;
 	}

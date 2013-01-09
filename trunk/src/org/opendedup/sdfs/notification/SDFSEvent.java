@@ -38,7 +38,8 @@ public class SDFSEvent {
 	public static final Type WAIT = new Type("Waiting to Run Again");
 	public static final Type CLAIMR = new Type("Claim Records");
 	public static final Type REMOVER = new Type("Remove Records");
-	public static final Type AIMPORT = new Type("Replication Meta-Data Import");
+	public static final Type AIMPORT = new Type("Replication Meta-Data File Import");
+	public static final Type IMPORT = new Type("Replication Import");
 	public static final Type AOUT = new Type("Replication Archive Out");
 	public static final Type MOUNT = new Type("Mount Volume");
 	public static final Type COMPACT = new Type("Compaction");
@@ -51,6 +52,7 @@ public class SDFSEvent {
 	public static final Type SNAP = new Type("Take Snapshot");
 	public static final Type EXPANDVOL = new Type("Expand Volume");
 	public static final Type DELFILE = new Type("Delete File");
+	public static final Type PERFMON = new Type("Performance Monitor");
 	public static final Level INFO = new Level("info");
 	public static final Level WARN = new Level("warning");
 	public static final Level ERROR = new Level("error");
@@ -109,8 +111,25 @@ public class SDFSEvent {
 		this.curCt = this.maxCt;
 	}
 
-	public static SDFSEvent archiveImportEvent(String shortMsg) {
+	public static SDFSEvent archiveImportEvent(String shortMsg,SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(),
+				shortMsg);
+		try {
+			evt.addChild(event);
+			}catch(Exception e) {}
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent importEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(IMPORT, Main.volume.getName(),
+				shortMsg);
+		event.level = INFO;
+		return event;
+	}
+	
+	public static SDFSEvent perfMonEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(PERFMON, Main.volume.getName(),
 				shortMsg);
 		event.level = INFO;
 		return event;

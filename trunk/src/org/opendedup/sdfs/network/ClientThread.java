@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.io.BufferedInputStream;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -21,7 +22,7 @@ import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -95,7 +96,7 @@ class ClientThread extends Thread {
 						short hops = is.readShort();
 						byte[] hash = new byte[is.readShort()];
 						is.readFully(hash);
-						boolean exists = HashChunkService.hashExists(hash,hops);
+						boolean exists = HCServiceProxy.hashExists(hash,hops);
 						
 						try {
 							writelock.lock();
@@ -122,10 +123,10 @@ class ClientThread extends Thread {
 						is.readFully(chunkBytes);
 						boolean done = false;
 						if (cmd == NetworkCMDS.WRITE_COMPRESSED_CMD) {
-							done = HashChunkService.writeChunk(hash,
+							done = HCServiceProxy.writeChunk(hash,
 									chunkBytes, len, len, true);
 						} else {
-							done = HashChunkService.writeChunk(hash,
+							done = HCServiceProxy.writeChunk(hash,
 									chunkBytes, len, len, false);
 						}
 						
@@ -148,7 +149,7 @@ class ClientThread extends Thread {
 						is.readFully(hash);
 						HashChunk dChunk = null;
 						try {
-							dChunk = HashChunkService.fetchChunk(hash);
+							dChunk = HCServiceProxy.fetchHashChunk(hash);
 							if (cmd == NetworkCMDS.FETCH_COMPRESSED_CMD
 									&& !dChunk.isCompressed()) {
 								
@@ -220,7 +221,8 @@ class ClientThread extends Thread {
 						try {
 							for(int i = 0;i<hashes.size();i++) {
 								hash = hashes.get(i);
-								HashChunk dChunk = HashChunkService.fetchChunk(StringUtils.getHexBytes(hash));
+								HashChunk dChunk = HCServiceProxy.fetchHashChunk(StringUtils.getHexBytes(hash));
+								
 								chunks.add(i, dChunk);
 							}
 							ByteArrayOutputStream bos = new ByteArrayOutputStream();

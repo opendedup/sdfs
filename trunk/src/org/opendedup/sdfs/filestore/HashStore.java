@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -12,7 +13,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HashChunkServiceInterface;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -38,6 +39,7 @@ public class HashStore {
 	// A lookup table for the specific hash store based on the first byte of the
 	// hash.
 	public AbstractHashesMap bdb = null;
+	HashChunkServiceInterface hcs = null;
 	// the name of the hash store. This is usually associate with the first byte
 	// of all possible hashes. There should
 	// be 256 total hash stores.
@@ -73,11 +75,12 @@ public class HashStore {
 	 *            the name of the hash store.
 	 * @throws IOException
 	 */
-	public HashStore() throws IOException {
+	public HashStore(HashChunkServiceInterface hcs) throws IOException {
 		this.name = "sdfs";
-
+		this.hcs = hcs;
 		try {
 			this.connectDB();
+			hcs.getChuckStore().setSize(bdb.endStartingPosition());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -181,7 +184,7 @@ public class HashStore {
 		if (!Main.closedGracefully) {
 			SDFSLogger.getLog().info(
 					"DSE did not close gracefully, running consistancy check");
-			ConsistancyCheck.runCheck(bdb, HashChunkService.getChuckStore());
+			ConsistancyCheck.runCheck(bdb, hcs.getChuckStore());
 		}
 	}
 

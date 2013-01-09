@@ -40,7 +40,7 @@ public class HashClientPool {
 		}
 	}
 
-	public void activateObject(HashClient hc) {
+	public void activateObject(HashClient hc) throws IOException {
 		if (hc.isClosed()) {
 			hc.openConnection();
 		}
@@ -102,7 +102,7 @@ public class HashClientPool {
 		}
 	}
 
-	public HashClient makeObject() {
+	public HashClient makeObject() throws IOException {
 		HashClient hc = new HashClient(this.server, "server",Main.upStreamPassword);
 		hc.openConnection();
 		return hc;

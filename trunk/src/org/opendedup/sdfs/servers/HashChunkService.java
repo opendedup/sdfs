@@ -18,31 +18,31 @@ import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-public class HashChunkService {
+public class HashChunkService implements HashChunkServiceInterface{
 
-	private static double kBytesRead;
-	private static double kBytesWrite;
-	private static final long KBYTE = 1024L;
-	private static long chunksRead;
-	private static long chunksWritten;
-	private static long chunksFetched;
-	private static double kBytesFetched;
-	private static int unComittedChunks;
-	private static int MAX_UNCOMITTEDCHUNKS = 100;
-	private static HashStore hs = null;
-	private static AbstractChunkStore fileStore = null;
-	private static ChunkStoreGCScheduler csGC = null;
-	private static HashClientPool hcPool = null;
+	private double kBytesRead;
+	private double kBytesWrite;
+	private final long KBYTE = 1024L;
+	private long chunksRead;
+	private long chunksWritten;
+	private long chunksFetched;
+	private double kBytesFetched;
+	private int unComittedChunks;
+	private int MAX_UNCOMITTEDCHUNKS = 100;
+	private HashStore hs = null;
+	private AbstractChunkStore fileStore = null;
+	private ChunkStoreGCScheduler csGC = null;
+	private HashClientPool hcPool = null;
 
 	/**
 	 * @return the chunksFetched
 	 */
-	public static long getChunksFetched() {
+	public long getChunksFetched() {
 		return chunksFetched;
 
 	}
 
-	static {
+	public HashChunkService() {
 		try {
 			fileStore = (AbstractChunkStore) Class
 					.forName(Main.chunkStoreClass).newInstance();
@@ -61,8 +61,7 @@ public class HashChunkService {
 			System.exit(-1);
 		}
 		try {
-			hs = new HashStore();
-			
+			hs = new HashStore(this);
 			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
 				csGC = new ChunkStoreGCScheduler();
 			}
@@ -87,13 +86,13 @@ public class HashChunkService {
 		}
 	}
 
-	private static long dupsFound;
+	private long dupsFound;
 
-	public static AbstractChunkStore getChuckStore() {
+	public AbstractChunkStore getChuckStore() {
 		return fileStore;
 	}
 
-	public static boolean writeChunk(byte[] hash, byte[] aContents,
+	public boolean writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean compressed) throws IOException,
 			HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
@@ -118,11 +117,11 @@ public class HashChunkService {
 		}
 	}
 	
-	public static boolean localHashExists(byte[] hash) throws IOException {
+	public boolean localHashExists(byte[] hash) throws IOException {
 		return hs.hashExists(hash);
 	}
 	
-	public static void remoteFetchChunks(ArrayList<String> al,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
+	public void remoteFetchChunks(ArrayList<String> al,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
 			HCServer hserver = new HCServer(server,port,false,false,useSSL);
 			HashClient hc = new HashClient(hserver,"replication",password);
 			try {
@@ -136,7 +135,7 @@ public class HashChunkService {
 			}
 	}
 
-	public static boolean hashExists(byte[] hash, short hops)
+	public boolean hashExists(byte[] hash, short hops)
 			throws IOException, HashtableFullException {
 		boolean exists = hs.hashExists(hash);
 		if (hops < Main.maxUpStreamDSEHops) {
@@ -161,7 +160,7 @@ public class HashChunkService {
 		return exists;
 	}
 
-	public static HashChunk fetchChunk(byte[] hash) throws IOException {
+	public HashChunk fetchChunk(byte[] hash) throws IOException {
 		HashChunk hashChunk = hs.getHashChunk(hash);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
@@ -169,7 +168,7 @@ public class HashChunkService {
 		return hashChunk;
 	}
 
-	public static byte getHashRoute(byte[] hash) {
+	public byte getHashRoute(byte[] hash) {
 		byte hashRoute = (byte) (hash[1] / (byte) 16);
 		if (hashRoute < 0) {
 			hashRoute += 1;
@@ -178,57 +177,57 @@ public class HashChunkService {
 		return hashRoute;
 	}
 
-	public static void processHashClaims(SDFSEvent evt) throws IOException {
+	public void processHashClaims(SDFSEvent evt) throws IOException {
 		hs.processHashClaims(evt);
 	}
 
-	public static long removeStailHashes(long ms, boolean forceRun,SDFSEvent evt)
+	public long removeStailHashes(long ms, boolean forceRun,SDFSEvent evt)
 			throws IOException {
 		return hs.evictChunks(ms, forceRun,evt);
 	}
 
-	public static void commitChunks() {
+	public void commitChunks() {
 		// H2HashStore.commitTransactions();
 		unComittedChunks = 0;
 	}
 
-	public static long getSize() {
+	public long getSize() {
 		return hs.getEntries();
 	}
 
-	public static long getFreeBlocks() {
+	public long getFreeBlocks() {
 		return hs.getFreeBlocks();
 	}
 
-	public static long getMaxSize() {
+	public long getMaxSize() {
 		return hs.getMaxEntries();
 	}
 
-	public static int getPageSize() {
+	public int getPageSize() {
 		return Main.chunkStorePageSize;
 	}
 
-	public static long getChunksRead() {
+	public long getChunksRead() {
 		return chunksRead;
 	}
 
-	public static long getChunksWritten() {
+	public long getChunksWritten() {
 		return chunksWritten;
 	}
 
-	public static double getKBytesRead() {
+	public double getKBytesRead() {
 		return kBytesRead;
 	}
 
-	public static double getKBytesWrite() {
+	public double getKBytesWrite() {
 		return kBytesWrite;
 	}
 
-	public static long getDupsFound() {
+	public long getDupsFound() {
 		return dupsFound;
 	}
 
-	public static void close() {
+	public void close() {
 		fileStore.close();
 		if (csGC != null)
 			csGC.stopSchedules();
@@ -236,9 +235,9 @@ public class HashChunkService {
 
 	}
 
-	public static void init() throws IOException {
+	public void init() throws IOException {
 		if(Main.runCompact) {
-			DSECompaction.runCheck(hs.bdb,(FileChunkStore)HashChunkService.getChuckStore());
+			DSECompaction.runCheck(hs.bdb,(FileChunkStore)this.getChuckStore());
 			SDFSLogger.getLog().info("Finished compaction");
 			
 		}

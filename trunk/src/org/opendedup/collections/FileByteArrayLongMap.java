@@ -248,8 +248,9 @@ public class FileByteArrayLongMap {
 	 * @param obj
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
+	 * @throws KeyNotFoundException 
 	 */
-	public boolean isClaimed(byte[] key) {
+	public boolean isClaimed(byte[] key) throws KeyNotFoundException {
 		try {
 			this.hashlock.lock();
 			int index = index(key);
@@ -258,10 +259,9 @@ public class FileByteArrayLongMap {
 				boolean cl = this.claims.get(pos);
 				if (cl)
 					return true;
+			} else {
+				throw new KeyNotFoundException(key);
 			}
-			return false;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
 			this.hashlock.unlock();

@@ -102,6 +102,10 @@ public class VolumeConfigWriter {
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	boolean networkEnable = false;
+	private boolean useDSESize = true;
+	private boolean useDSECapacity = true;
+	private boolean usePerfMon = true;
+	private String perfMonFile = "/var/log/sdfs/perf.json";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -118,6 +122,7 @@ public class VolumeConfigWriter {
 			System.exit(-1);
 		}
 		volume_name = cmd.getOptionValue("volume-name");
+		this.perfMonFile = "/var/log/sdfs/volume-" +volume_name + "-perf.json";
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
 		base_path = OSValidator.getProgramBasePath() + "volumes"
 				+ File.separator + volume_name;
@@ -417,6 +422,23 @@ public class VolumeConfigWriter {
 			throw new IOException("Volume [" + this.volume_name
 					+ "] already exists");
 		}
+		if(cmd.hasOption("report-dse-size")) {
+			try {
+			Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("report-dse-size"));
+			this.useDSECapacity = rp;
+			this.useDSESize = rp;
+			}catch(Throwable e) {
+				System.err.println("value for report-dse-size must be true or false");
+			}
+		}
+		if(cmd.hasOption("use-perf-mon")) {
+			try {
+				Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("use-perf-mon"));
+				this.usePerfMon = rp;
+				}catch(Throwable e) {
+					System.err.println("value for use-perf-mon must be true or false");
+				}
+		}
 	}
 
 	public void writeConfigFile() throws ParserConfigurationException,
@@ -475,12 +497,17 @@ public class VolumeConfigWriter {
 		perm.setAttribute("default-owner", this.owner);
 		root.appendChild(perm);
 		Element vol = xmldoc.createElement("volume");
+		vol.setAttribute("name", this.volume_name);
 		vol.setAttribute("capacity", this.volume_capacity);
 		vol.setAttribute("current-size", "0");
 		vol.setAttribute("path", this.base_path + File.separator + "files");
 		vol.setAttribute("maximum-percentage-full",
 				Double.toString(this.max_percent_full));
 		vol.setAttribute("closed-gracefully", "true");
+		vol.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
+		vol.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
+		vol.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
+		vol.setAttribute("perf-mon-file", this.perfMonFile);
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -954,6 +981,18 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The Replication master sdfscli password. Defaults to \"admin\"")
 				.hasArg().withArgName("STRING").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("report-dse-size")
+				.withDescription(
+						"If set to \"true\" this volume will report capacity and used as the actual"+
+				"capacity and used statistics from the DSE. If this value is set to \"false\" it will"+
+								"report as virtual size of the volume and files. Defaults to \"true\"")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("use-perf-mon")
+				.withDescription(
+						"If set to \"true\" this volume will log io statistics to /etc/sdfs/ directory. Defaults to \"true\"")
+				.hasArg().withArgName("true|false").create());
 		return options;
 	}
 
@@ -977,6 +1016,7 @@ public class VolumeConfigWriter {
 		} catch (Exception e) {
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());
+			e.printStackTrace();
 			System.exit(-1);
 		}
 		System.exit(0);

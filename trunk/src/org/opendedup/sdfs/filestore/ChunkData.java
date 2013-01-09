@@ -8,7 +8,7 @@ import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 
 /**
@@ -116,7 +116,7 @@ public class ChunkData {
 	public void persistData(boolean clear) throws IOException {
 		if (this.chunk != null) {
 			if(writeStore == null)
-				writeStore = HashChunkService.getChuckStore();
+				writeStore = HCServiceProxy.getChunkStore();
 			if (cPos == -1) {
 				this.cPos = writeStore.reserveWritePosition(cLen);
 			}
@@ -137,7 +137,7 @@ public class ChunkData {
 		this.mDelete = mDelete;
 		if (this.mDelete && Main.cloudChunkStore) {
 			try {
-				HashChunkService.getChuckStore().deleteChunk(this.hash, 0, 0);
+				HCServiceProxy.getChunkStore().deleteChunk(this.hash, 0, 0);
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(
 						"Unable to remove hash ["
@@ -184,7 +184,7 @@ public class ChunkData {
 
 	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
 		try {
-			return HashChunkService.getChuckStore().getChunk(hash, pos,
+			return HCServiceProxy.getChunkStore().getChunk(hash, pos,
 					Main.chunkStorePageSize);
 		} catch (IOException e) {
 			if (Arrays.areEqual(hash, blankHash))
@@ -197,7 +197,7 @@ public class ChunkData {
 
 	public byte[] getData() throws IOException {
 		if (this.chunk == null) {
-			return HashChunkService.getChuckStore().getChunk(hash, this.cPos,
+			return HCServiceProxy.getChunkStore().getChunk(hash, this.cPos,
 					this.cLen);
 		} else
 			return chunk;

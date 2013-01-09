@@ -267,7 +267,18 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("archiveout")) {
+					} else if (cmd.equalsIgnoreCase("cancelimport")) {
+						try {
+							String uuid = request.getQuery().get("uuid");
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									new CancelImportArchiveCmd().getResult(uuid));
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
 							Element msg = new ArchiveOutCmd().getResult(
 									cmdOptions, file);
@@ -350,7 +361,13 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cleanstore")) {
+					}else if(cmd.equalsIgnoreCase("perfmon")) {
+						String msg = new SetEnablePerfMonCmd().getResult(
+								cmdOptions, file);
+						result.setAttribute("status", "success");
+						result.setAttribute("msg", msg);
+					}
+					else if (cmd.equalsIgnoreCase("cleanstore")) {
 						try {
 							Element msg = new CleanStoreCmd().getResult(
 									cmdOptions, null);

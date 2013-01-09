@@ -36,13 +36,12 @@ public class DSECompaction {
 					count = 0;
 					bar.update(currentCount);
 				}
-				
-				if (map.containsKey(data.getHash())) {
 					data.setcPos(-1);
 					data.setWriteStore(nstore);
-					map.update(data);
-					records++;
-				} 
+					if(map.update(data))
+						records++;
+					else
+						SDFSLogger.getLog().debug("Duplicate block found");
 				data = ostore.getNextChunck();
 				evt.curCt = currentCount;
 				currentCount++;
@@ -97,9 +96,9 @@ public class DSECompaction {
 		String ostorePath = ostore.f.getPath();
 		ostore.close();
 		nstore.close();
-		File f = new File(ostorePath);
-		f.delete();
-		newStorePath.renameTo(f);
+		//File f = new File(ostorePath);
+		//f.delete();
+		//newStorePath.renameTo(f);
 		SDFSLogger.infoConsoleMsg("Finished Compaction - Commited FileStore Changes");
 		StorageUnit unit = StorageUnit.of(osz-nsz);
 		SDFSLogger.infoConsoleMsg("Saved " + unit.format(osz-nsz));

@@ -1,9 +1,10 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import org.opendedup.logging.SDFSLogger;
+
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HashChunkService;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 
 public class PFullGC implements GCControllerImpl {
 
@@ -28,9 +29,6 @@ public class PFullGC implements GCControllerImpl {
 					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
 				ManualGC.clearChunks(1);
-				Thread.sleep(1 * 60 * 1000);
-				Main.firstRun = false;
-				ManualGC.clearChunks(1);
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				SDFSLogger.getLog()
@@ -53,9 +51,9 @@ public class PFullGC implements GCControllerImpl {
 
 	private double calcPFull() {
 		double pFull = 0;
-		if (HashChunkService.getSize() > 0) {
-			pFull = (double) HashChunkService.getSize()
-					/ (double) HashChunkService.getMaxSize();
+		if (HCServiceProxy.getSize() > 0) {
+			pFull = (double) HCServiceProxy.getSize()
+					/ (double) HCServiceProxy.getMaxSize();
 		}
 		return pFull;
 	}
