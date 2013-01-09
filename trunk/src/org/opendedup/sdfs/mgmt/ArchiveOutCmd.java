@@ -90,7 +90,7 @@ public class ArchiveOutCmd implements Runnable {
 				src.cp_rp(dest);
 				SDFSLogger.getLog().debug(
 						"created archive " + nf.getPath() + ".tar.gz");
-				TFile.umount(dest, true);
+				TFile.umount(dest.getInnerArchive(), true);
 				eevt.curCt = 3;
 				evt.curCt = 4;
 				eevt.endEvent("Archiving out " + srcPath + " successful");

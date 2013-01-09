@@ -40,6 +40,8 @@ public interface HashChunkServiceInterface {
 			SDFSEvent evt) throws IOException;
 
 	public abstract void commitChunks();
+	
+	public abstract void runConsistancyCheck();
 
 	public abstract long getSize();
 

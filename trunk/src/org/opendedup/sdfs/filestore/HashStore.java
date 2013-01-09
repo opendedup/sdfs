@@ -181,11 +181,7 @@ public class HashStore {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		}
-		if (!Main.closedGracefully) {
-			SDFSLogger.getLog().info(
-					"DSE did not close gracefully, running consistancy check");
-			ConsistancyCheck.runCheck(bdb, hcs.getChuckStore());
-		}
+		
 	}
 
 	/**
