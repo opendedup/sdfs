@@ -10,6 +10,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.ConsistancyCheck;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
@@ -50,6 +51,9 @@ public class HCServiceProxy {
 		hcService = new HashChunkService();
 		try {
 		hcService.init();
+		if (!Main.closedGracefully) {
+			hcService.runConsistancyCheck();
+		}
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",e);
 			e.printStackTrace();

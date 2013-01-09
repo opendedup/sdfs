@@ -9,6 +9,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.ConsistancyCheck;
 import org.opendedup.sdfs.filestore.DSECompaction;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -241,6 +242,14 @@ public class HashChunkService implements HashChunkServiceInterface{
 			SDFSLogger.getLog().info("Finished compaction");
 			
 		}
+	}
+
+	@Override
+	public void runConsistancyCheck() {
+		SDFSLogger.getLog().info(
+				"DSE did not close gracefully, running consistancy check");
+		ConsistancyCheck.runCheck(hs.bdb, getChuckStore());
+		
 	}
 
 }
