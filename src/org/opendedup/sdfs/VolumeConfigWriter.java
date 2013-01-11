@@ -69,7 +69,7 @@ public class VolumeConfigWriter {
 	long chunk_store_allocation_size = 0;
 	Short chunk_read_ahead_pages = 4;
 	String chunk_gc_schedule = "0 0 0/4 * * ?";
-	String fdisk_schedule = "0 0 0/2 * * ?";
+	String fdisk_schedule = "0 59 23 * * ?";
 	int remove_if_older_than = 6;
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;

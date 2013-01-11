@@ -22,31 +22,31 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ArchiveImporter {
-	
+
 	private boolean closed = false;
-	private static ConcurrentHashMap<String,ArchiveImporter> runningJobs = new ConcurrentHashMap<String,ArchiveImporter>();
+	private static ConcurrentHashMap<String, ArchiveImporter> runningJobs = new ConcurrentHashMap<String, ArchiveImporter>();
 	SDFSEvent ievt = null;
 	MetaFileImport imp = null;
-	
+
 	public static void stopJob(String id) {
-		runningJobs.get(id).close();			
+		runningJobs.get(id).close();
 	}
-	
+
 	public void close() {
 		this.closed = true;
-		if(this.imp != null)
+		if (this.imp != null)
 			imp.close();
 	}
 
-	public Element importArchive(String srcArchive, String dest,
-			String server, String password, int port, int maxSz, SDFSEvent evt,
-			boolean useSSL) throws IOException {
-		ievt = SDFSEvent.archiveImportEvent("Importing " + srcArchive + " from " + server + ":"
-				+ port + " to " + dest,evt);
+	public Element importArchive(String srcArchive, String dest, String server,
+			String password, int port, int maxSz, SDFSEvent evt, boolean useSSL)
+			throws Exception {
+		ievt = SDFSEvent.archiveImportEvent("Importing " + srcArchive
+				+ " from " + server + ":" + port + " to " + dest, evt);
 		ReadLock l = GCMain.gclock.readLock();
 		l.lock();
 		try {
-			runningJobs.put(evt.uid, this);			
+			runningJobs.put(evt.uid, this);
 			File f = new File(srcArchive);
 			String sdest = dest + "." + RandomGUID.getGuid();
 			try {
@@ -59,9 +59,16 @@ public class ArchiveImporter {
 				ievt.maxCt = FileCounts.getSize(srcRoot);
 				SDFSLogger.getLog().info("Tar file size is " + ievt.maxCt);
 				TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
-				TFile srcFiles = srcFilesRoot.listFiles()[0];
-				File dstFiles = new File(Main.volume.getPath()
-						+ File.separator + sdest);
+				TFile srcFiles = null;
+				try {
+					srcFiles = srcFilesRoot.listFiles()[0];
+				} catch (Exception e) {
+					SDFSLogger.getLog().error(
+							"Replication archive is corrupt " + srcArchive, e);
+					throw e;
+				}
+				File dstFiles = new File(Main.volume.getPath() + File.separator
+						+ sdest);
 				this.export(srcFiles, dstFiles);
 				srcFiles = new TFile(new File(srcArchive + "/ddb/"));
 				File ddb = new File(Main.dedupDBStore + File.separator);
@@ -71,9 +78,8 @@ public class ArchiveImporter {
 				this.export(srcFiles, dstFiles);
 				TFile.umount(srcFiles.getInnerArchive());
 
-				imp = new MetaFileImport(Main.volume.getPath()
-						+ File.separator + sdest, server, password, port,
-						maxSz, evt, useSSL);
+				imp = new MetaFileImport(Main.volume.getPath() + File.separator
+						+ sdest, server, password, port, maxSz, evt, useSSL);
 				imp.runImport();
 				if (imp.isCorrupt()) {
 					// evt.endEvent("Import failed for " + srcArchive +
@@ -130,14 +136,14 @@ public class ArchiveImporter {
 					return (Element) root.cloneNode(true);
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn("rolling back import ");
+				SDFSLogger.getLog().warn("rolling back import ", e);
 				rollBackImport(Main.volume.getPath() + File.separator + sdest);
 				SDFSLogger.getLog().warn("Import rolled back");
-				
+
 				if (!evt.isDone())
 					evt.endEvent("Import failed and was rolled back ",
 							SDFSEvent.ERROR, e);
-				throw new IOException(e);
+				throw e;
 			}
 		} finally {
 			runningJobs.remove(evt.uid);
@@ -150,7 +156,7 @@ public class ArchiveImporter {
 		try {
 			path = new File(path).getPath();
 			MetaDataDedupFile mf = MetaFileStore.getMF(path);
-			
+
 			if (mf.isDirectory()) {
 				String[] files = mf.list();
 				for (int i = 0; i < files.length; i++) {
@@ -165,12 +171,11 @@ public class ArchiveImporter {
 			MetaFileStore.removeMetaFile(mf.getPath());
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
-					"unable to remove " + path + " during rollback ",e);
+					"unable to remove " + path + " during rollback ", e);
 		}
 	}
 
-	public void commitImport(String dest, String sdest)
-			throws IOException {
+	public void commitImport(String dest, String sdest) throws IOException {
 		File f = new File(dest);
 		if (f.exists()) {
 			try {
@@ -201,28 +206,30 @@ public class ArchiveImporter {
 
 	}
 
-	public void export(TFile file, File dst) throws ReplicationCanceledException, IOException {
+	public void export(TFile file, File dst)
+			throws ReplicationCanceledException, IOException {
 		if (!closed) {
-				if (file.isDirectory()) {
-					dst.mkdirs();
-					// All files and subdirectories
-					TFile[] files = file.listFiles();
-					for (int i = 0; i < files.length; i++) {
-						File dstF = new File(dst, files[i].getName());
-						if (files[i].isFile()) {
-							files[i].cp_rp(dstF);
-							ievt.curCt += dstF.length();
-						} else {
-							export(files[i], dstF);
-						}
+			if (file.isDirectory()) {
+				dst.mkdirs();
+				// All files and subdirectories
+				TFile[] files = file.listFiles();
+				for (int i = 0; i < files.length; i++) {
+					File dstF = new File(dst, files[i].getName());
+					if (files[i].isFile()) {
+						files[i].cp_rp(dstF);
+						ievt.curCt += dstF.length();
+					} else {
+						export(files[i], dstF);
 					}
-				} else {
-					dst.getParentFile().mkdirs();
-					
 				}
-			
+			} else {
+				dst.getParentFile().mkdirs();
+
+			}
+
 		} else {
-			throw new ReplicationCanceledException("replication job was canceled");
+			throw new ReplicationCanceledException(
+					"replication job was canceled");
 		}
 	}
 
