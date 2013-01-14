@@ -112,7 +112,7 @@ public class HashStore {
 	 * @return the total number of free blocks available for re-use
 	 * 
 	 */
-	public int getFreeBlocks() {
+	public long getFreeBlocks() {
 		return bdb.getFreeBlocks();
 	}
 

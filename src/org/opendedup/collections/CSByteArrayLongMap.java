@@ -367,7 +367,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	 * @see org.opendedup.collections.AbstractHashesMap#getFreeBlocks()
 	 */
 	@Override
-	public int getFreeBlocks() {
+	public long getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
 	@Override

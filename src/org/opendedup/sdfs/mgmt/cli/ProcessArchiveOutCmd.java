@@ -89,7 +89,7 @@ public class ProcessArchiveOutCmd {
 					bar.update(pc);
 				}
 				if (!evt.getAttribute("end-timestamp").equals("-1")) {
-					if(evt.getAttribute("level").equalsIgnoreCase("info"))
+					if(evt.getAttribute("level").equalsIgnoreCase("info") || evt.getAttribute("level").equalsIgnoreCase("running"))
 						System.out.println(evt.getAttribute("type")
 								+ " Task Completed : "
 								+ evt.getAttribute("short-msg"));

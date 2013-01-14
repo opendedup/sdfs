@@ -11,8 +11,8 @@ public class BlockImportEvent extends SDFSEvent {
 	public long filesImported;
 	public long virtualDataImported;
 	
-	protected BlockImportEvent(String target, String shortMsg) {
-		super(MIMPORT, target, shortMsg);
+	protected BlockImportEvent(String target, String shortMsg,Level level) {
+		super(MIMPORT, target, shortMsg,level);
 	}
 	
 	@Override
