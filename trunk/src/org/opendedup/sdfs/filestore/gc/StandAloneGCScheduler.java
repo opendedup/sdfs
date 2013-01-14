@@ -8,6 +8,10 @@ public class StandAloneGCScheduler implements Runnable {
 	private boolean closed = false;
 	Thread th = null;
 	SDFSGCScheduler gcSched = null;
+	
+	public void recalcScheduler() {
+		gcController.reCalc();
+	}
 
 	public StandAloneGCScheduler() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
@@ -16,6 +20,12 @@ public class StandAloneGCScheduler implements Runnable {
 		SDFSLogger.getLog().info(
 				"Using " + Main.gcClass + " for DSE Garbage Collection");
 		th = new Thread(this);
+		try {
+			th.setPriority(Thread.MAX_PRIORITY);
+		}catch(Throwable e) {
+			SDFSLogger.getLog().info("unable to set priority for Standalone GC Sceduler ");
+		}
+		SDFSLogger.getLog().info("GC Thread priority is " +th.getPriority());
 		th.start();
 		gcSched = new SDFSGCScheduler();
 	}
@@ -25,7 +35,7 @@ public class StandAloneGCScheduler implements Runnable {
 		while (!closed) {
 			gcController.runGC();
 			try {
-				Thread.sleep(60 * 1000);
+				Thread.sleep(30 * 1000);
 			} catch (InterruptedException e) {
 				closed = true;
 			}

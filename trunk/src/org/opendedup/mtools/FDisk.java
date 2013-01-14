@@ -20,24 +20,34 @@ public class FDisk {
 
 	public FDisk(SDFSEvent evt) throws IOException {
 		File f = new File(Main.dedupDBStore);
-		fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file count = " + FileCounts.getCount(f, false) + " file size = " +FileCounts.getSize(f, false),evt);
+		if (!f.exists()) {
+			SDFSEvent.fdiskInfoEvent(
+					"FDisk Will not start because the volume has not been written too",
+					evt).endEvent("FDisk Will not start because the volume has not been written too");
+			throw new IOException("FDisk Will not start because the volume has not been written too");
+		}
+		fEvt = SDFSEvent.fdiskInfoEvent(
+				"Starting FDISK for " + Main.volume.getName()
+						+ " file count = " + FileCounts.getCount(f, false)
+						+ " file size = " + FileCounts.getSize(f, false), evt);
 		fEvt.maxCt = FileCounts.getSize(f, false);
 		SDFSLogger.getLog().info("Starting FDISK");
 		long start = System.currentTimeMillis();
-		
+
 		try {
 			this.traverse(f);
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check [" + files + "]. Found ["
 							+ this.corruptFiles + "] corrupt files");
-			
-			fEvt.endEvent("took [" + (System.currentTimeMillis() - start) / 1000
-					+ "] seconds to check [" + files + "]. Found ["
+
+			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
+					/ 1000 + "] seconds to check [" + files + "]. Found ["
 					+ this.corruptFiles + "] corrupt files");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
-			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
+			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
+					SDFSEvent.ERROR);
 			throw new IOException(e);
 		}
 	}
@@ -62,14 +72,14 @@ public class FDisk {
 
 	private void checkDedupFile(File mapFile) throws IOException {
 		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
-		long prevpos =  0;
+		long prevpos = 0;
 		try {
 			byte[] val = new byte[0];
 			mp.iterInit();
 			boolean corruption = false;
 			long corruptBlocks = 0;
 			while (val != null) {
-				fEvt.curCt += (mp.getIterFPos()-prevpos);
+				fEvt.curCt += (mp.getIterFPos() - prevpos);
 				prevpos = mp.getIterFPos();
 				val = mp.nextValue();
 				if (val != null) {
@@ -78,9 +88,14 @@ public class FDisk {
 						boolean exists = HCServiceProxy
 								.hashExists(ck.getHash());
 						if (!exists) {
-							SDFSLogger.getLog().debug("file ["+ mapFile +"] could not find " + StringUtils.getHexString(ck.getHash()));
+							SDFSLogger.getLog().debug(
+									"file ["
+											+ mapFile
+											+ "] could not find "
+											+ StringUtils.getHexString(ck
+													.getHash()));
 							corruption = true;
-							corruptBlocks ++;
+							corruptBlocks++;
 						}
 					}
 				}
@@ -88,7 +103,8 @@ public class FDisk {
 			if (corruption) {
 				this.corruptFiles++;
 				SDFSLogger.getLog().info(
-						"map file " + mapFile.getPath() + " is suspect, [" + corruptBlocks + "] missing blocks found.");
+						"map file " + mapFile.getPath() + " is suspect, ["
+								+ corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug(

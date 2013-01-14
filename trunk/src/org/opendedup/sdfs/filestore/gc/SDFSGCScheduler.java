@@ -22,7 +22,7 @@ public class SDFSGCScheduler {
 					"org.quartz.simpl.SimpleThreadPool");
 			props.setProperty("org.quartz.threadPool.threadCount", "1");
 			props.setProperty("org.quartz.threadPool.threadPriority",
-					Integer.toString(Thread.NORM_PRIORITY));
+					Integer.toString(8));
 			SDFSLogger.getLog().info("Scheduling FDISK Jobs for SDFS");
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();

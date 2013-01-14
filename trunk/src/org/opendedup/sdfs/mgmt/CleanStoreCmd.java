@@ -28,7 +28,7 @@ public class CleanStoreCmd implements Runnable {
 			long chunks = ManualGC.clearChunks(minutes);
 			
 
-			SDFSLogger.getLog().error(
+			SDFSLogger.getLog().info(
 					"cleanded dedup storage engine of [" + chunks
 							+ "] records not claimed in  [" + minutes + "] ");
 		} catch (Exception e) {

@@ -19,7 +19,6 @@ public class SDFSService {
 	String configFile;
 
 	private SDFSFDiskScheduler gc = null;
-	private StandAloneGCScheduler stGC = null;
 	private String routingFile;
 	private NetworkDSEServer ndServer = null;
 
@@ -73,7 +72,7 @@ public class SDFSService {
 				System.exit(0);
 			}
 
-			this.stGC = new StandAloneGCScheduler();
+			Main.pFullSched= new StandAloneGCScheduler();
 		}
 
 		if (!Main.chunkStoreLocal) {
@@ -90,7 +89,8 @@ public class SDFSService {
 			gc.stopSchedules();
 		} else {
 			try {
-			this.stGC.close();
+				Main.pFullSched.close();
+				Main.pFullSched = null;
 			}catch(Exception e) {}
 		}
 		SDFSLogger.getLog().info("Flushing and Closing Write Caches");

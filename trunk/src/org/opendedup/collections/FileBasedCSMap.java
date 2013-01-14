@@ -25,8 +25,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.sdfs.servers.HashChunkService;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.StringUtils;
@@ -220,7 +218,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public int getFreeBlocks() {
+	public long getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
 
@@ -252,6 +250,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					maps[i].iterInit();
 					long fPos = maps[i].removeNextOldRecord(time);
 					while (fPos != -1) {
+						this.kSz--;
 						this.addFreeSlot(fPos);
 						rem++;
 						fPos = maps[i].removeNextOldRecord(time);

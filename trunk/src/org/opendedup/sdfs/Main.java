@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 
+import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
@@ -25,6 +26,8 @@ public class Main {
 	public static boolean firstRun = true;
 
 	public static boolean logToConsole = false;
+	
+	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	
