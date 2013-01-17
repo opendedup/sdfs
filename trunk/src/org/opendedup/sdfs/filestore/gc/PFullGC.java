@@ -2,7 +2,7 @@ package org.opendedup.sdfs.filestore.gc;
 
 import org.opendedup.logging.SDFSLogger;
 
-import org.opendedup.sdfs.Main;
+
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
