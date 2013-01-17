@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +18,6 @@ import java.util.zip.Adler32;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.sdfs.servers.HashChunkService;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
