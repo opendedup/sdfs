@@ -1,12 +1,12 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
+
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class GCMain {
 	public static final ReentrantReadWriteLock gclock = new ReentrantReadWriteLock();
-	/*
 	public static final ReentrantLock gcRunningLock = new ReentrantLock();
 	private static boolean gcRunning = false;
 	
@@ -38,7 +38,6 @@ public class GCMain {
 			gcRunningLock.unlock();
 		}
 	}
-	*/
 	
 
 }

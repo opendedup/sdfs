@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,7 +26,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.sdfs.servers.HashChunkService;
 
 import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;

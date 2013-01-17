@@ -96,9 +96,9 @@ public class DSECompaction {
 		String ostorePath = ostore.f.getPath();
 		ostore.close();
 		nstore.close();
-		//File f = new File(ostorePath);
-		//f.delete();
-		//newStorePath.renameTo(f);
+		File f = new File(ostorePath);
+		f.delete();
+		newStorePath.renameTo(f);
 		SDFSLogger.infoConsoleMsg("Finished Compaction - Commited FileStore Changes");
 		StorageUnit unit = StorageUnit.of(osz-nsz);
 		SDFSLogger.infoConsoleMsg("Saved " + unit.format(osz-nsz));
