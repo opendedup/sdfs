@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -23,13 +24,17 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.ThreadPool;
 import org.opendedup.util.VMDKParser;
-
+/*
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
+*/
 public class SparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
-	private transient MetaDataDedupFile mf;
-	private transient ArrayList<DedupFileChannel> buffers = new ArrayList<DedupFileChannel>();
+	private transient final MetaDataDedupFile mf;
+	private transient final ArrayList<DedupFileChannel> buffers = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
 	private transient String chunkStorePath = null;
@@ -37,21 +42,44 @@ public class SparseDedupFile implements DedupFile {
 	public long lastSync = 0;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
-	private static HashFunctionPool hashPool = new HashFunctionPool(
+	private static final HashFunctionPool hashPool = new HashFunctionPool(
 			Main.writeThreads + 1);
 	protected static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, 128);
+			Main.writeThreads + 1, 1024);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock writeBufferLock = new ReentrantLock();
 	private final ReentrantLock syncLock = new ReentrantLock();
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
-	protected transient ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
-			556, .75f, Main.writeThreads + 1);
+	protected transient final ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
+			1024, .75f, Main.writeThreads + 1);
+	/*
+	private transient ConcurrentLinkedHashMap<Long, WritableCacheBuffer> writeBuffers = new Builder<Long, WritableCacheBuffer>()
+			.concurrencyLevel(Main.writeThreads)
+			.maximumWeightedCapacity(maxWriteBuffers + 1)
+			.listener(new EvictionListener<Long, WritableCacheBuffer>() {
+				// This method is called just after a new entry has been
+				// added
+				@Override
+				public void onEviction(Long key, WritableCacheBuffer writeBuffer) {
+					if (writeBuffer != null) {
+						try {
+							writeBuffer.flush();
+						} catch (Exception e) {
+							SDFSLogger.getLog().debug(
+									"while closing position "
+											+ writeBuffer.getFilePosition(), e);
+						}
+					}
+				}
+			}).build();
+	*/		
 	@SuppressWarnings("serial")
-	private transient LRUMap writeBuffers = new LRUMap(maxWriteBuffers + 1,
+	
+	private final transient LRUMap writeBuffers = new LRUMap(maxWriteBuffers + 1,
 			false) {
+		
 		@Override
 		protected boolean removeLRU(AbstractLinkedMap.LinkEntry eldest) {
 			if (size() >= maxWriteBuffers) {
@@ -137,16 +165,14 @@ public class SparseDedupFile implements DedupFile {
 			ch = null;
 		}
 	}
-
+	private final ReentrantLock flock = new ReentrantLock();
 	protected void putBufferIntoFlush(WritableCacheBuffer wbuffer) {
-		// this.writeBufferLock.lock();
+		this.flock.lock();
 		try {
 			this.writeBuffers.remove(wbuffer.getFilePosition());
 			this.flushingBuffers.put(wbuffer.getFilePosition(), wbuffer);
-			if(this.flushingBuffers.size() > 512)
-				SDFSLogger.getLog().info("Size is " + this.flushingBuffers.size());
 		} finally {
-			// this.writeBufferLock.unlock();
+			this.flock.unlock();
 		}
 	}
 
