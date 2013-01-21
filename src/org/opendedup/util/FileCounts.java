@@ -19,7 +19,7 @@ public class FileCounts {
 		// Store the total size of all files
 		long size = 0;
 		boolean symlink = false;
-		if (!followSymlinks)
+		if (!OSValidator.isWindows() && !followSymlinks)
 			symlink = Files.readAttributes(file.toPath(),
 					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 					.isSymbolicLink();
@@ -47,7 +47,7 @@ public class FileCounts {
 	public static long getDBFileSize(File metaFile,boolean followSymlinks) throws IOException {
 		long size = 0;
 		boolean symlink = false;
-		if (!followSymlinks)
+		if (!OSValidator.isWindows() && !followSymlinks)
 			symlink = Files.readAttributes(metaFile.toPath(),
 					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 					.isSymbolicLink();
@@ -85,7 +85,7 @@ public class FileCounts {
 		// Store the total size of all files
 		long count = 0;
 		boolean symlink = false;
-		if (!followSymlinks)
+		if (!OSValidator.isWindows() && !followSymlinks)
 			symlink = Files.readAttributes(file.toPath(),
 					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 					.isSymbolicLink();

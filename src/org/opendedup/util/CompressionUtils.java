@@ -1,6 +1,8 @@
 package org.opendedup.util;
 
-import org.xerial.snappy.Snappy;
+import org.opendedup.logging.SDFSLogger;
+
+import org.iq80.snappy.Snappy;
 
 import java.io.ByteArrayOutputStream;
 
@@ -14,6 +16,12 @@ import java.util.zip.Inflater;
 //import org.h2.compress.LZFOutputStream;
 
 public class CompressionUtils {
+	static {
+		byte[] b; 
+			b = Snappy.compress(new byte[4096]);
+			Snappy.uncompress(b, 0,b.length);
+		
+	}
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression
@@ -67,12 +75,11 @@ public class CompressionUtils {
 	}
 
 	public static byte[] decompressSnappy(byte[] input) throws IOException {
-		return Snappy.uncompress(input);
+		return Snappy.uncompress(input,0,input.length);
 	}
 	
 	public static void main(String [] args) throws IOException {
 		String t = "This is a test";
-		
 		System.out.println(new String(decompressSnappy(compressSnappy(t.getBytes()))));
 	}
 

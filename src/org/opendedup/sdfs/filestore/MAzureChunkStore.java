@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.ByteArrayInputStream;
 
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -61,13 +62,11 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	@Override
 	public long bytesRead() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public long bytesWritten() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -77,7 +76,6 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	}
 
 	public void expandFile(long length) throws IOException {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -105,10 +103,13 @@ public class MAzureChunkStore implements AbstractChunkStore {
 					data = CompressionUtils.decompressZLIB(data);
 					
 				}
+				if (metaData.containsKey("scompress")
+						&& metaData.get("scompress").equalsIgnoreCase("true")) {
+					data = CompressionUtils.decompressSnappy(data);
+				}
 				return data;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			SDFSLogger.getLog()
 					.error("unable to fetch block [" + hash + "]", e);
 			throw new IOException(e);
@@ -156,10 +157,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 				HashMap<String, String> metaData = new HashMap<String, String>();
 				
 				if (Main.cloudCompress) {
-					chunk = CompressionUtils.compressZLIB(chunk);
-					metaData.put("compress", "true");
+					chunk = CompressionUtils.compressSnappy(chunk);
+					metaData.put("scompress", "true");
 				} else {
-					metaData.put("compress", "false");
+					metaData.put("scompress", "false");
 				}
 				if (Main.chunkStoreEncryptionEnabled) {
 					chunk = EncryptUtils.encrypt(chunk);

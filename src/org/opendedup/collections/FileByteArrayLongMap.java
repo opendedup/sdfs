@@ -25,7 +25,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 
-public class FileByteArrayLongMap {
+public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
 	private int size = 0;
 	private String path = null;
@@ -56,12 +56,20 @@ public class FileByteArrayLongMap {
 
 	private ReentrantLock iterlock = new ReentrantLock();
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#iterInit()
+	 */
+	@Override
 	public void iterInit() {
 		this.iterlock.lock();
 		this.iterPos = 0;
 		this.iterlock.unlock();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#nextKey()
+	 */
+	@Override
 	public byte[] nextKey() {
 		while (iterPos < size) {
 			byte[] key = new byte[FREE.length];
@@ -77,6 +85,10 @@ public class FileByteArrayLongMap {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#nextClaimedKey(boolean)
+	 */
+	@Override
 	public byte[] nextClaimedKey(boolean clearClaim) {
 		while (iterPos < size) {
 			byte[] key = new byte[FREE.length];
@@ -102,6 +114,10 @@ public class FileByteArrayLongMap {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#nextClaimedValue(boolean)
+	 */
+	@Override
 	public long nextClaimedValue(boolean clearClaim) throws IOException {
 		while (iterPos < size) {
 			long val = -1;
@@ -138,6 +154,10 @@ public class FileByteArrayLongMap {
 		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#getBigestKey()
+	 */
+	@Override
 	public long getBigestKey() throws IOException {
 		this.iterInit();
 		long _bgst = 0;
@@ -157,14 +177,10 @@ public class FileByteArrayLongMap {
 		return _bgst;
 	}
 
-	/**
-	 * initializes the Object set of this hash table.
-	 * 
-	 * @param initialCapacity
-	 *            an <code>int</code> value
-	 * @return an <code>int</code> value
-	 * @throws IOException
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#setUp()
 	 */
+	@Override
 	public long setUp() throws IOException {
 		File posFile = new File(path + ".pos");
 		boolean newInstance = !posFile.exists();
@@ -217,13 +233,10 @@ public class FileByteArrayLongMap {
 		return bgst;
 	}
 
-	/**
-	 * Searches the set for <tt>obj</tt>
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return a <code>boolean</code> value
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
+	@Override
 	public boolean containsKey(byte[] key) {
 		try {
 			this.hashlock.lock();
@@ -242,14 +255,10 @@ public class FileByteArrayLongMap {
 		}
 	}
 
-	/**
-	 * Searches the set for <tt>obj</tt>
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return a <code>boolean</code> value
-	 * @throws KeyNotFoundException 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#isClaimed(byte[])
 	 */
+	@Override
 	public boolean isClaimed(byte[] key) throws KeyNotFoundException {
 		try {
 			this.hashlock.lock();
@@ -268,6 +277,10 @@ public class FileByteArrayLongMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#update(byte[], long)
+	 */
+	@Override
 	public boolean update(byte[] key, long value) throws IOException {
 		try {
 			this.hashlock.lock();
@@ -296,6 +309,10 @@ public class FileByteArrayLongMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#remove(byte[])
+	 */
+	@Override
 	public boolean remove(byte[] key) throws IOException {
 		try {
 			this.hashlock.lock();
@@ -338,6 +355,10 @@ public class FileByteArrayLongMap {
 		return hash % size;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#hashFunc3(int)
+	 */
+	@Override
 	public int hashFunc3(int hash) {
 		int result = hash + 1;
 		return result;
@@ -490,6 +511,10 @@ public class FileByteArrayLongMap {
 				"No free or removed slots available. Key set full?!!");
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
+	 */
+	@Override
 	public boolean put(byte[] key, long value) {
 		try {
 			this.hashlock.lock();
@@ -522,14 +547,26 @@ public class FileByteArrayLongMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#getEntries()
+	 */
+	@Override
 	public int getEntries() {
 		return this.mapped.cardinality();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#get(byte[])
+	 */
+	@Override
 	public long get(byte[] key) {
 		return this.get(key, true);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#get(byte[], boolean)
+	 */
+	@Override
 	public long get(byte[] key, boolean claim) {
 		try {
 			this.hashlock.lock();
@@ -558,10 +595,18 @@ public class FileByteArrayLongMap {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#size()
+	 */
+	@Override
 	public int size() {
 		return this.mapped.cardinality();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#close()
+	 */
+	@Override
 	public void close() {
 		this.hashlock.lock();
 		this.closed = true;
@@ -609,7 +654,7 @@ public class FileByteArrayLongMap {
 	}
 
 	public static void main(String[] args) throws Exception {
-		FileByteArrayLongMap b = new FileByteArrayLongMap(
+		AbstractShard b = new FileByteArrayLongMap(
 				"/opt/sdfs/hashesaaa", 10000000, (short) 16);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
@@ -675,6 +720,10 @@ public class FileByteArrayLongMap {
 				+ " ms " + vals);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#claimRecords()
+	 */
+	@Override
 	public synchronized long claimRecords() throws IOException {
 		if (this.closed)
 			throw new IOException("Hashtable " + this.path + " is close");
@@ -703,6 +752,10 @@ public class FileByteArrayLongMap {
 		return k;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#sync()
+	 */
+	@Override
 	public void sync() throws SyncFailedException, IOException {
 		keys.force();
 		vRaf.getFD().sync();
@@ -717,6 +770,10 @@ public class FileByteArrayLongMap {
 		fout.close();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.AbstractShard#removeNextOldRecord(long)
+	 */
+	@Override
 	public synchronized long removeNextOldRecord(long time) throws IOException {
 		while (iterPos < size) {
 			long val = -1;
