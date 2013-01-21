@@ -29,6 +29,10 @@ public class MountSDFS {
 				true,
 				"sdfs volume configuration file to mount \ne.g. "
 						+ OSValidator.getConfigPath() + "dedup-volume-cfg.xml");
+		options.addOption("c", false,
+				"sdfs volume will be compacted and then exit");
+		options.addOption("forcecompact", false,
+				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -53,6 +57,11 @@ public class MountSDFS {
 		} else {
 			fal.add(cmd.getOptionValue("m"));
 			Main.volumeMountPoint = cmd.getOptionValue("m");
+		}
+		if (cmd.hasOption("c")) {
+			Main.runCompact = true;
+			if(cmd.hasOption("forcecompact"))
+				Main.forceCompact = true;
 		}
 		if (cmd.hasOption("r")) {
 			File f = new File(cmd.getOptionValue("r").trim());
@@ -98,7 +107,11 @@ public class MountSDFS {
 			printHelp(options);
 			System.exit(-1);
 		}
-
+		File cf = new File(volumeConfigFile);
+		String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";
+		Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
+		File lf = new File(Main.logPath);
+		lf.getParentFile().mkdirs();
 		SDFSService sdfsService = new SDFSService(volumeConfigFile,
 				routingConfigFile);
 
@@ -130,7 +143,7 @@ public class MountSDFS {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter
 				.printHelp(
-						"mount.sdfs -f -o <fuse options> -m <mount point> "
+						"mount.sdfs -m <mount point> "
 								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> ",
 						options);
 	}

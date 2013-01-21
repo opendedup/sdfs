@@ -1,20 +1,12 @@
 package org.opendedup.collections;
 
-import java.io.File;
-
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.SyncFailedException;
+
+
 
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
@@ -24,20 +16,22 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 
-public class FCByteArrayLongMap implements AbstractShard {
-	//MappedByteBuffer keys = null;
+public class FCByteArrayLongMap2 {
+	ByteBuffer claims = null;
 	private int size = 0;
+	private int entries = 0;
 	private String path = null;
 	private FileChannel kFC = null;
-	private RandomAccessFile vRaf = null;
+	private FileChannel vFC = null;
 	private RandomAccessFile tRaf = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	private int iterPos = 0;
 	private boolean closed = false;
-	private BitSet claims = null;
-	private BitSet mapped = null;
+	ByteBuffer valueBuf = ByteBuffer.allocateDirect(8);
+	ByteBuffer keyBuf = ByteBuffer.wrap(new byte[HashFunctionPool.hashLength]);
+	BitSet map = null;
 	long bgst = 0;
 
 	static {
@@ -47,10 +41,12 @@ public class FCByteArrayLongMap implements AbstractShard {
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public FCByteArrayLongMap(String path, int size, short arraySize)
+	public FCByteArrayLongMap2(String path, int size, short arraySize)
 			throws IOException {
 		this.size = size;
 		this.path = path;
+		map = new BitSet(size);
+		map.clear();
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
@@ -61,33 +57,45 @@ public class FCByteArrayLongMap implements AbstractShard {
 		this.iterlock.unlock();
 	}
 
-	public byte[] nextKey() throws IOException {
+	public byte[] nextKey() {
 		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
-			kFC.read(ByteBuffer.wrap(key), iterPos * FREE.length);
-			iterPos++;
+			this.hashlock.lock();
+			try{
+			this.keyBuf.position(0);
+			this.kFC.read(this.keyBuf, iterPos * FREE.length);
+			byte [] key = keyBuf.array();
+			
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				this.mapped.set(iterPos);
 				return key;
 			}
-			
-		} 
+			}catch(IOException e){
+				SDFSLogger.getLog().error("Unable to iterate through hashes",e);
+			}
+			finally {
+				iterPos++;
+				this.hashlock.unlock();
+			}
+		}
 		return null;
 	}
 
 	public byte[] nextClaimedKey(boolean clearClaim) {
 		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
+
 			this.hashlock.lock();
 			try {
-				kFC.read(ByteBuffer.wrap(key), iterPos * FREE.length);
+				this.keyBuf.position(0);
+				this.kFC.read(this.keyBuf, iterPos * FREE.length);
+				byte [] key = keyBuf.array();
 				iterPos++;
 				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					boolean claimed = claims.get(iterPos - 1);
+					claims.position(iterPos - 1);
+					byte claimed = claims.get();
 					if (clearClaim) {
-						claims.clear(iterPos - 1);
+						claims.position(iterPos - 1);
+						claims.put((byte) 0);
 					}
-					if (claimed)
+					if (claimed == 1)
 						return key;
 				}
 			} catch (Exception e) {
@@ -100,24 +108,28 @@ public class FCByteArrayLongMap implements AbstractShard {
 	}
 
 	public long nextClaimedValue(boolean clearClaim) throws IOException {
+		
 		while (iterPos < size) {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				vRaf.seek(iterPos * 8);
-				val = vRaf.readLong();
+				valueBuf.position(0);
+				vFC.read(valueBuf,iterPos * 8);
+				valueBuf.position(0);
+				val = valueBuf.getLong();
 				if (val >= 0) {
-					boolean claimed = claims.get(iterPos);
+					claims.position(iterPos);
+					byte claimed = claims.get();
 					if (clearClaim) {
-						this.mapped.set(iterPos);
-						claims.clear(iterPos);
-						this.tRaf.seek(iterPos * 8);
+						claims.position(iterPos);
+						claims.put((byte) 0);
+						this.tRaf.seek(iterPos);
 						this.tRaf.writeLong(System.currentTimeMillis());
 					}
-					if (claimed)
+					if (claimed == 1)
 						return val;
 				}
-
+				
 			} finally {
 				iterPos++;
 				this.hashlock.unlock();
@@ -125,16 +137,13 @@ public class FCByteArrayLongMap implements AbstractShard {
 		}
 		return -1;
 	}
-
-	private void recreateMap() throws IOException {
-		mapped = new BitSet(size);
-		this.iterInit();
-		byte[] key = this.nextKey();
-		while (key != null)
-			key = this.nextKey();
-		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path);
+	
+	public void sync() throws IOException{
+		this.kFC.force(true);
+		this.vFC.force(true);
+		this.tRaf.getFD().sync();
 	}
-
+	
 	public long getBigestKey() throws IOException {
 		this.iterInit();
 		long _bgst = 0;
@@ -142,8 +151,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 			this.hashlock.lock();
 			while (iterPos < size) {
 				long val = -1;
-				vRaf.seek(iterPos * 8);
-				val = vRaf.readLong();
+				valueBuf.position(0);
+				vFC.read(valueBuf, iterPos * 8);
+				valueBuf.position(0);
+				val = valueBuf.getLong();
 				iterPos++;
 				if (val > _bgst)
 					_bgst = val;
@@ -163,53 +174,25 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @throws IOException
 	 */
 	public long setUp() throws IOException {
-		File posFile = new File(path + ".pos");
-		boolean newInstance = !posFile.exists();
-		vRaf = new RandomAccessFile(path + ".pos", "rw");
+		RandomAccessFile kRaf = new RandomAccessFile(path + ".keys", "rw");
+		kRaf.setLength(size * FREE.length);
+		RandomAccessFile vRaf = new RandomAccessFile(path + ".pos", "rw");
 		vRaf.setLength(size * 8);
 		tRaf = new RandomAccessFile(path + ".ctimes", "rw");
 		tRaf.setLength(size * 8);
-		this.kFC = FileChannel.open(Paths.get(path + ".keys"),
-				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
-				StandardOpenOption.WRITE, StandardOpenOption.READ);
+		this.kFC = kRaf.getChannel();
+		this.vFC = vRaf.getChannel();
 		RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 		_bpos.setLength(8);
 		bgst = _bpos.readLong();
-		boolean closedCorrectly = true;
-		if (newInstance) {
-			mapped = new BitSet(size);
-		} else {
-			File f = new File(path + ".vmp");
-			if (!f.exists())
-				closedCorrectly = false;
-			else {
-				FileInputStream fin = new FileInputStream(f);
-				ObjectInputStream oon = new ObjectInputStream(fin);
-				try {
-					mapped = (BitSet) oon.readObject();
-				} catch (Exception e) {
-					closedCorrectly = false;
-				}
-				f.delete();
-			}
-		}
-		
-		if (bgst < 0) {
-			SDFSLogger.getLog()
-					.info("Hashtable " + path
-							+ " did not close correctly. scanning ");
+		if(bgst < 0) {
+			SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
 			bgst = this.getBigestKey();
-
 		}
-		if (!closedCorrectly)
-			this.recreateMap();
 		_bpos.seek(0);
 		_bpos.writeLong(-1);
 		_bpos.close();
-
-		claims = new BitSet(size);
-		claims.clear();
-
+		claims = ByteBuffer.allocateDirect(size);
 		return bgst;
 	}
 
@@ -226,12 +209,14 @@ public class FCByteArrayLongMap implements AbstractShard {
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
-				this.claims.set(pos);
+				this.claims.position(pos);
+				this.claims.put((byte) 1);
 				return true;
 			}
 			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
+			
 			return false;
 		} finally {
 			this.hashlock.unlock();
@@ -253,14 +238,15 @@ public class FCByteArrayLongMap implements AbstractShard {
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
-				boolean cl = this.claims.get(pos);
-				if (cl)
+				this.claims.position(pos);
+				byte cl = this.claims.get();
+				if (cl == 1)
 					return true;
 			} else {
 				throw new KeyNotFoundException(key);
 			}
 			return false;
-		} finally {
+		}  finally {
 			this.hashlock.unlock();
 		}
 	}
@@ -272,15 +258,17 @@ public class FCByteArrayLongMap implements AbstractShard {
 			if (pos == -1) {
 				return false;
 			} else {
-				// keys.position(pos);
-				if (value > bgst)
+				valueBuf.position(0);
+				valueBuf.putLong(value);
+				valueBuf.position(0);
+				if(value > bgst)
 					bgst = value;
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				this.vRaf.writeLong(value);
+				this.vFC.write(valueBuf,pos);
 				pos = (pos / 8);
-				this.claims.set(pos);
-				this.mapped.set(pos);
+				this.claims.position(pos);
+				this.claims.put((byte) 1);
+				this.map.set(pos);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 				return true;
@@ -297,28 +285,32 @@ public class FCByteArrayLongMap implements AbstractShard {
 		try {
 			this.hashlock.lock();
 			int pos = this.index(key);
-
+			this.claims.position(pos / FREE.length);
+			byte claimed = this.claims.get();
 			if (pos == -1) {
 				return false;
-			}
-			boolean claimed = this.claims.get(pos);
-			if (claimed) {
+			} else if (claimed == 1) {
 				return false;
 			} else {
-				kFC.write(ByteBuffer.wrap(REMOVED), pos);
+				this.keyBuf.position(0);
+				this.keyBuf.put(REMOVED);
+				this.keyBuf.position(0);
+				this.kFC.write(this.keyBuf, pos);
+				valueBuf.position(0);
+				valueBuf.putLong(-1);
+				valueBuf.position(0);
+				
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				long fp = vRaf.readLong();
-				fp = fp * -1;
-				this.vRaf.seek(pos);
-				this.vRaf.writeLong(fp);
+				this.vFC.write(valueBuf,pos);
 				this.tRaf.seek(pos);
-				this.tRaf.writeLong(0);
+				this.tRaf.write(-1);
 				pos = (pos / 8);
-				this.claims.clear(pos);
-				this.mapped.clear(pos);
+				this.claims.position(pos);
+				this.claims.put((byte) 0);
+				
 				// this.store.position(pos);
 				// this.store.put((byte)0);
+				this.entries = entries - 1;
 				return true;
 			}
 		} catch (Exception e) {
@@ -347,164 +339,161 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @throws IOException 
 	 */
 	protected int index(byte[] key) throws IOException {
-
-		// From here on we know obj to be non-null
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
-		int index = this.hashFunc1(hash) * FREE.length;
-		byte[] cur = new byte[FREE.length];
-		kFC.read(ByteBuffer.wrap(cur), index);
+		int bindex = this.hashFunc1(hash);
+		int index = bindex * FREE.length;
+		// int stepSize = hashFunc2(hash);
+		if(!map.get(bindex))
+			return -1;
+		this.keyBuf.position(0);
+		this.kFC.read(keyBuf, index);
+		byte[] cur =keyBuf.array();
+
 		if (Arrays.equals(cur, key)) {
 			return index;
 		}
 
-		if (Arrays.equals(cur, FREE)) {
-			return -1;
+		// NOTE: here it has to be REMOVED or FULL (some user-given value)
+		if (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)) {
+			// see Knuth, p. 529
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
+			int z = 0;
+			do {
+				z++;
+				index += (probe); // add the step
+				index %= (size * FREE.length); // for wraparound
+				bindex = index/FREE.length;
+				if(!map.get(bindex))
+					return -1;
+				this.keyBuf.position(0);
+				this.kFC.read(keyBuf, index);
+				cur =keyBuf.array();
+				if (z > size) {
+					SDFSLogger.getLog().info(
+							"entries exhaused size=" + this.size + " entries="
+									+ this.entries);
+					return -1;
+				}
+			} while (!Arrays.equals(cur, FREE)
+					&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur, key)));
 		}
 
-		return indexRehashed(key, index, hash, cur);
+		return Arrays.equals(cur, FREE) ? -1 : index;
 	}
 
 	/**
-	 * Locates the index of non-null <tt>obj</tt>.
+	 * Locates the index at which <tt>obj</tt> can be inserted. if there is
+	 * already a value equal()ing <tt>obj</tt> in the set, returns that value's
+	 * index as <tt>-index - 1</tt>.
 	 * 
 	 * @param obj
-	 *            target key, know to be non-null
-	 * @param index
-	 *            we start from
-	 * @param hash
-	 * @param cur
-	 * @return
+	 *            an <code>Object</code> value
+	 * @return the index of a FREE slot at which obj can be inserted or, if obj
+	 *         is already stored in the hash, the negative value of that index,
+	 *         minus 1: -index -1.
 	 * @throws IOException 
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
-
-		// NOTE: here it has to be REMOVED or FULL (some user-given value)
-		// see Knuth, p. 529
-		int length = size * FREE.length;
-		int probe = (1 + (hash % (size - 2))) * FREE.length;
-
-		final int loopIndex = index;
-
-		do {
-			index -= probe;
-			if (index < 0) {
-				index += length;
-			}
-			kFC.read(ByteBuffer.wrap(cur), index);
-			//
-			if (Arrays.equals(cur, FREE)) {
-				return -1;
-			}
-			//
-			if (Arrays.equals(cur, key))
-				return index;
-		} while (index != loopIndex);
-
-		return -1;
-	}
-
 	protected int insertionIndex(byte[] key) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
-		int index = this.hashFunc1(hash) * FREE.length;
-		byte[] cur = new byte[FREE.length];
-		kFC.read(ByteBuffer.wrap(cur), index);
+		int bindex = this.hashFunc1(hash);
+		int index = bindex * FREE.length;
+		// int stepSize = hashFunc2(hash);
+		this.keyBuf.position(0);
+		this.kFC.read(keyBuf, index);
+		byte[] cur =keyBuf.array();
 
-		if (Arrays.equals(cur, FREE)) {
+		if (!map.get(bindex)) {
 			return index; // empty, all done
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
-		}
-		return insertKeyRehash(key, index, hash, cur);
-	}
+		} else { // already FULL or REMOVED, must probe
+			// compute the double hash
+			final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
-	/**
-	 * Looks for a slot using double hashing for a non-null key values and
-	 * inserts the value in the slot
-	 * 
-	 * @param key
-	 *            non-null key value
-	 * @param index
-	 *            natural index
-	 * @param hash
-	 * @param cur
-	 *            value of first matched slot
-	 * @return
-	 * @throws IOException 
-	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) throws IOException {
-		final int length = size * FREE.length;
-		final int probe = (1 + (hash % (size - 2))) * FREE.length;
-
-		final int loopIndex = index;
-		int firstRemoved = -1;
-
-		/**
-		 * Look until FREE slot or we start to loop
-		 */
-		do {
-			// Identify first removed slot
-			if (Arrays.equals(cur, REMOVED) && firstRemoved == -1)
-				firstRemoved = index;
-
-			index -= probe;
-			if (index < 0) {
-				index += length;
+			// if the slot we landed on is FULL (but not removed), probe
+			// until we find an empty slot, a REMOVED slot, or an element
+			// equal to the one we are trying to insert.
+			// finding an empty slot means that the value is not present
+			// and that we should use that slot as the insertion point;
+			// finding a REMOVED slot means that we need to keep searching,
+			// however we want to remember the offset of that REMOVED slot
+			// so we can reuse it in case a "new" insertion (i.e. not an update)
+			// is possible.
+			// finding a matching value means that we've found that our desired
+			// key is already in the table
+			if (!Arrays.equals(cur, REMOVED)) {
+				// starting at the natural offset, probe until we find an
+				// offset that isn't full.
+				do {
+					index += (probe); // add the step
+					index %= (size * FREE.length); // for wraparound
+					bindex = index/FREE.length;
+					if(!map.get(bindex))
+						return index;
+					this.keyBuf.position(0);
+					this.kFC.read(keyBuf, index);
+					cur =keyBuf.array();
+				} while (!Arrays.equals(cur, FREE)
+						&& !Arrays.equals(cur, REMOVED)
+						&& !Arrays.equals(cur, key));
 			}
-			kFC.read(ByteBuffer.wrap(cur), index);
 
-			// A FREE slot stops the search
-			if (Arrays.equals(cur, FREE)) {
-				if (firstRemoved != -1) {
-					return firstRemoved;
-				} else {
-					return index;
+			// if the index we found was removed: continue probing until we
+			// locate a free location or an element which equal()s the
+			// one we have.
+			if (Arrays.equals(cur, REMOVED)) {
+				int firstRemoved = index;
+				while (!Arrays.equals(cur, FREE)
+						&& (Arrays.equals(cur, REMOVED) || !Arrays.equals(cur,
+								key))) {
+					index += (probe); // add the step
+					index %= (size * FREE.length); // for wraparound
+					bindex = index/FREE.length;
+					if(!map.get(bindex))
+						return index;
+					this.keyBuf.position(0);
+					this.kFC.read(keyBuf, index);
+					cur =keyBuf.array();
 				}
+				// NOTE: cur cannot == REMOVED in this block
+				return (!Arrays.equals(cur, FREE)) ? -index - 1 : firstRemoved;
 			}
-
-			if (Arrays.equals(cur, key)) {
-				return -index - 1;
-			}
-
-			// Detect loop
-		} while (index != loopIndex);
-
-		// We inspected all reachable slots and did not find a FREE one
-		// If we found a REMOVED slot we return the first one found
-		if (firstRemoved != -1) {
-			return firstRemoved;
+			// if it's full, the key is already stored
+			// NOTE: cur cannot equal REMOVE here (would have retuned already
+			// (see above)
+			return (!Arrays.equals(cur, FREE)) ? -index - 1 : index;
 		}
-
-		// Can a resizing strategy be found that resizes the set?
-		throw new IllegalStateException(
-				"No free or removed slots available. Key set full?!!");
 	}
 
 	public boolean put(byte[] key, long value) {
 		try {
 			this.hashlock.lock();
-			if (this.mapped.cardinality() >= size)
+			if (entries >= size)
 				throw new IOException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0)
 				return false;
-			this.kFC.write(ByteBuffer.wrap(key), pos);
-
-			if (value > bgst)
-				bgst = value;
+			this.kFC.write(ByteBuffer.wrap(key),pos);
+			valueBuf.position(0);
+			valueBuf.putLong(value);
+			valueBuf.position(0);
 			pos = (pos / FREE.length) * 8;
-			this.vRaf.seek(pos);
-			this.vRaf.writeLong(value);
+			this.vFC.write(valueBuf,pos);
 			pos = (pos / 8);
-			this.claims.set(pos);
-			this.mapped.set(pos);
+			this.claims.position(pos);
+			this.claims.put((byte) 1);
+			this.map.set(pos);
+			if(value > bgst)
+				bgst = value;
 			// this.store.position(pos);
 			// this.store.put(storeID);
+			this.entries = entries + 1;
 			return pos > -1 ? true : false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
@@ -515,7 +504,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 	}
 
 	public int getEntries() {
-		return this.mapped.cardinality();
+		return this.entries;
 	}
 
 	public long get(byte[] key) {
@@ -531,15 +520,17 @@ public class FCByteArrayLongMap implements AbstractShard {
 			if (pos == -1) {
 				return -1;
 			} else {
+				valueBuf.position(0);
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				long val = this.vRaf.readLong();
+				this.vFC.read(valueBuf,pos);
+				valueBuf.position(0);
+				long val = valueBuf.getLong();
 				if (claim) {
 					pos = (pos / 8);
-					this.claims.set(pos);
+					this.claims.position(pos);
+					this.claims.put((byte) 1);
 				}
 				return val;
-
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -551,15 +542,15 @@ public class FCByteArrayLongMap implements AbstractShard {
 	}
 
 	public int size() {
-		return this.mapped.cardinality();
+		return this.size;
 	}
 
 	public void close() {
 		this.hashlock.lock();
 		this.closed = true;
 		try {
-			this.vRaf.getFD().sync();
-			this.vRaf.close();
+			this.vFC.force(true);
+			this.vFC.close();
 		} catch (Exception e) {
 
 		}
@@ -576,18 +567,6 @@ public class FCByteArrayLongMap implements AbstractShard {
 
 		}
 		try {
-			File f = new File(path + ".vmp");
-			FileOutputStream fout = new FileOutputStream(f);
-			ObjectOutputStream oon = new ObjectOutputStream(fout);
-			oon.writeObject(mapped);
-			oon.flush();
-			oon.close();
-			fout.flush();
-			fout.close();
-		} catch (Exception e) {
-
-		}
-		try {
 			RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 			_bpos.seek(0);
 			_bpos.writeLong(bgst);
@@ -595,13 +574,13 @@ public class FCByteArrayLongMap implements AbstractShard {
 		} catch (Exception e) {
 
 		}
-
+		
 		this.hashlock.unlock();
 		SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
 	public static void main(String[] args) throws Exception {
-		FCByteArrayLongMap b = new FCByteArrayLongMap(
+		FCByteArrayLongMap2 b = new FCByteArrayLongMap2(
 				"/opt/sdfs/hashesaaa", 10000000, (short) 16);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
@@ -667,27 +646,30 @@ public class FCByteArrayLongMap implements AbstractShard {
 				+ " ms " + vals);
 	}
 
-	public synchronized long claimRecords() throws IOException {
+	public synchronized int claimRecords() throws IOException {
 		if (this.closed)
 			throw new IOException("Hashtable " + this.path + " is close");
-		long k = 0;
+		int k = 0;
 		try {
 			this.iterInit();
-			while (iterPos < size) {
-				this.hashlock.lock();
-				try {
-					boolean claimed = claims.get(iterPos);
-					claims.clear(iterPos);
-					if (claimed) {
-						this.mapped.set(iterPos);
-						this.tRaf.seek(iterPos * 8);
-						this.tRaf.writeLong(System.currentTimeMillis());
-						k++;
+			long val = 0;
+
+			while (val != -1 && !this.closed) {
+				k++;
+				if (k > 310) {
+					k = 0;
+					try {
+					} catch (Exception e) {
 					}
-				} finally {
-					iterPos++;
-					this.hashlock.unlock();
 				}
+				try {
+					val = this.nextClaimedValue(true);
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn(
+							"Unable to get claimed value for map " + this.path,
+							e);
+				}
+
 			}
 		} catch (NullPointerException e) {
 
@@ -695,44 +677,44 @@ public class FCByteArrayLongMap implements AbstractShard {
 		return k;
 	}
 
-	public void sync() throws SyncFailedException, IOException {
-		this.kFC.force(false);
-		vRaf.getFD().sync();
-		tRaf.getFD().sync();
-		File f = new File(path + ".vmp");
-		FileOutputStream fout = new FileOutputStream(f);
-		ObjectOutputStream oon = new ObjectOutputStream(fout);
-		oon.writeObject(mapped);
-		oon.flush();
-		oon.close();
-		fout.flush();
-		fout.close();
-	}
-
-	public synchronized long removeNextOldRecord(long time) throws IOException {
+	public synchronized long removeNextOldRecord(long time)
+			throws IOException {
 		while (iterPos < size) {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				if (this.mapped.get(iterPos)) {
-					this.tRaf.seek(iterPos * 8);
-					long tm = this.tRaf.readLong();
-					if (tm < time) {
-						boolean claimed = claims.get(iterPos);
-						if (!claimed) {
-							this.kFC.write(ByteBuffer.wrap(REMOVED), iterPos * FREE.length);
-							this.vRaf.seek(iterPos * 8);
-							val = this.vRaf.readLong();
-							this.vRaf.seek(iterPos * 8);
-							this.vRaf.writeLong(0);
-							this.tRaf.seek(iterPos * 8);
-							this.tRaf.writeLong(0);
-							this.claims.clear(iterPos);
-							this.mapped.clear(iterPos);
+				valueBuf.position(0);
+				this.vFC.read(valueBuf,iterPos * 8);
+				valueBuf.position(0);
+				val = valueBuf.getLong();
+				if (val >= 0) {
+						this.tRaf.seek(iterPos);
+						long tm = this.tRaf.readLong();
+					if (tm < time && tm > 0) {
+						int pos = iterPos / 8;
+						this.claims.position(pos);
+						byte claimed = this.claims.get();
+						if (claimed == 0) {
+							pos = pos * FREE.length;
+							this.kFC.write(ByteBuffer.wrap(REMOVED),pos);
+							pos = (pos / FREE.length) * 8;
+							valueBuf.position(0);
+							valueBuf.putLong(-1);
+							valueBuf.position(0);
+							this.vFC.write(valueBuf,pos);
+							pos = (pos / 8);
+							this.claims.position(pos);
+							this.claims.put((byte) 0);
+							this.tRaf.seek(pos);
+							this.tRaf.write(-1);
+							// this.store.position(pos);
+							// this.store.put((byte)0);
+							this.entries = entries - 1;
 							return val;
 						}
 					}
 				}
+				
 			} finally {
 				iterPos++;
 				this.hashlock.unlock();

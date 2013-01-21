@@ -61,7 +61,7 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	String volume_capacity = null;
-	double max_percent_full = -1;
+	double max_percent_full = .95;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
@@ -83,7 +83,7 @@ public class VolumeConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 
-	String hashType = HashFunctionPool.TIGER_16;
+	String hashType = HashFunctionPool.MURMUR3_16;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
@@ -122,7 +122,9 @@ public class VolumeConfigWriter {
 			System.exit(-1);
 		}
 		volume_name = cmd.getOptionValue("volume-name");
-		this.perfMonFile = "/var/log/sdfs/volume-" +volume_name + "-perf.json";
+		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + "volume-" +volume_name + "-perf.json";
+		if(OSValidator.isWindows())
+			hash_db_class = "org.opendedup.collections.FileBasedCSMap";
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
 		base_path = OSValidator.getProgramBasePath() + "volumes"
 				+ File.separator + volume_name;
@@ -353,7 +355,7 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
 			this.max_percent_full = Double.parseDouble(cmd
-					.getOptionValue("volume-maximum-full-percentage"));
+					.getOptionValue("volume-maximum-full-percentage"))/100;
 		}
 		if (cmd.hasOption("chunk-store-size")) {
 			this.chunk_store_allocation_size = StringUtils.parseSize(cmd
@@ -784,8 +786,8 @@ public class VolumeConfigWriter {
 				.withLongOpt("volume-maximum-full-percentage")
 				.withDescription(
 						"The maximum percentage of the volume capacity, as set by volume-capacity, before the volume starts"
-								+ "reporting that the disk is full. If the number is negative then it will be infinite. "
-								+ " \n e.g. --volume-maximum-full-percentage=100")
+								+ "reporting that the disk is full. If the number is negative then it will be infinite. This defaults to 95 "
+								+ " \n e.g. --volume-maximum-full-percentage=95")
 				.hasArg().withArgName("PERCENTAGE").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-local")
@@ -861,7 +863,7 @@ public class VolumeConfigWriter {
 								+ HashFunctionPool.TIGER_24
 								+ " "
 								+ HashFunctionPool.MURMUR3_16
-								+ " This Defaults to " + HashFunctionPool.TIGER_16).hasArg()
+								+ " This Defaults to " + HashFunctionPool.MURMUR3_16).hasArg()
 				.withArgName(HashFunctionPool.TIGER_16
 						+ "|"
 						+ HashFunctionPool.TIGER_24

@@ -27,6 +27,7 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.StringUtils;
 
 public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
@@ -37,7 +38,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private String fileName;
 	private String origFileName;
 	long compactKsz = 0;
-	private FileByteArrayLongMap[] maps = null;
+	private AbstractShard[] maps = null;
 	// private boolean removingChunks = false;
 	// private static int freeSlotsLength = 3000000;
 	// The amount of memory available for free slots.
@@ -56,7 +57,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		maps = new FileByteArrayLongMap[256];
+		maps = new AbstractShard[256];
 		this.size = (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;
@@ -69,7 +70,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		st = new SyncThread(this);
 	}
 
-	public FileByteArrayLongMap getMap(byte[] hash) throws IOException {
+	public AbstractShard getMap(byte[] hash) throws IOException {
 
 		int hashb = hash[2];
 		if (hashb < 0) {
@@ -77,7 +78,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		}
 		int hashRoute = hashb;
 
-		FileByteArrayLongMap m = maps[hashRoute];
+		AbstractShard m = maps[hashRoute];
 		
 		return m;
 	}
@@ -178,7 +179,12 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			// + sz + " propsize was " + propsize);
 			ram = ram + (sz * (HashFunctionPool.hashLength + 8));
 			String fp = this.fileName + "-" + i;
-			FileByteArrayLongMap m = new FileByteArrayLongMap(fp, sz,
+			AbstractShard m = null;
+			if(OSValidator.isWindows())
+				m = new FCByteArrayLongMap(fp, sz,
+						(short) HashFunctionPool.hashLength);
+			else
+				m = new FileByteArrayLongMap(fp, sz,
 					(short) HashFunctionPool.hashLength);
 			long mep = m.setUp();
 			if (mep > endPos)
@@ -425,7 +431,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					this.kSz--;
 				} catch (Exception e) {
 				} finally {
-
 					this.arlock.unlock();
 				}
 

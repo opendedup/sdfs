@@ -78,7 +78,7 @@ public class PFullGC implements GCControllerImpl {
 		this.prevPFull = calcPFull();
 		this.nextPFull = this.calcNxtRun();
 		SDFSLogger.getLog()
-		.info("Current DSE Percentage Full is ["
+		.debug("Current DSE Percentage Full is ["
 				+ this.prevPFull + "] will run GC when ["
 				+ this.nextPFull + "]");
 	}
