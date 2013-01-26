@@ -34,6 +34,8 @@ public class ChunkData {
 	private long cPos = 0;
 	private byte[] chunk = null;
 	private AbstractChunkStore writeStore = null;
+	public boolean recoverd = false;
+	
 
 	private static byte[] blankHash = null;;
 

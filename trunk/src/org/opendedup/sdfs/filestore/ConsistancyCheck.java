@@ -12,6 +12,7 @@ public class ConsistancyCheck {
 		try {
 			store.iterationInit();
 			ChunkData data = store.getNextChunck();
+			data.recoverd = true;
 			long records = 0;
 			long recordsRecovered = 0;
 			int count = 0;
@@ -35,6 +36,7 @@ public class ConsistancyCheck {
 				}
 				evt.curCt = currentCount;
 				data = store.getNextChunck();
+				data.recoverd = true;
 				currentCount++;
 			}
 			bar.finish();

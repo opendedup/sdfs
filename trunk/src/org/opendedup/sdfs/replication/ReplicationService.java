@@ -30,6 +30,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
+import org.opendedup.sdfs.mgmt.cli.ProcessArchiveOutCmd;
+import org.opendedup.sdfs.mgmt.cli.ProcessImportArchiveCmd;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -150,10 +153,10 @@ public class ReplicationService implements Serializable {
 			this.mLocalServerFolder = localServerFolder.replaceAll("%d", tmStr)
 					.replaceAll("%h", remoteServer);
 
-			Document doc = localArchiveImport(localServer, localServerPort,
+			localArchiveImport(localServer, localServerPort,
 					localServerPassword, archive, this.mLocalServerFolder,
 					remoteServer, remoteServerPassword, remoteServerDataPort);
-			this.persistResults(doc);
+			this.persistResults();
 
 		} finally {
 			if (archive != null) {
@@ -164,7 +167,7 @@ public class ReplicationService implements Serializable {
 		}
 	}
 
-	private synchronized void persistResults(Document impResults) {
+	private synchronized void persistResults() {
 
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -190,13 +193,15 @@ public class ReplicationService implements Serializable {
 					Integer.toString(this.remoteServerDataPort));
 			root.setAttribute("master-folder", this.remoteServerFolder);
 			root.setAttribute("slave-folder", this.mLocalServerFolder);
+			/*
 			root.setAttribute("result", impResults.getDocumentElement()
 					.getAttribute("status"));
 			root.setAttribute("result-msg", impResults.getDocumentElement()
 					.getAttribute("msg"));
+					*/
 			root.setAttribute("schedule-type", schedType);
 			root.setAttribute("cron-string", schedt);
-
+			/*
 			if (impResults.getDocumentElement()
 					.getElementsByTagName("replication-import").item(0) != null) {
 				Element iEl = (Element) impResults.getDocumentElement()
@@ -205,6 +210,7 @@ public class ReplicationService implements Serializable {
 				doc.adoptNode(iEl);
 				root.appendChild(iEl);
 			}
+			*/
 			SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd-HH-mm-ss");
 			String tmStr = df.format(new Date());
 			// Prepare the DOM document for writing
@@ -271,59 +277,23 @@ public class ReplicationService implements Serializable {
 		}
 	}
 
-	private Document localArchiveImport(String server, int port,
+	private void localArchiveImport(String server, int port,
 			String password, String archive, String path, String rserver,
 			String rpasswd, int rport) throws IOException {
-		SDFSLogger.getLog().debug(
-				"importing [" + archive + "] destination is [" + path + "]");
-		archive = URLEncoder.encode(archive, "UTF-8");
-		path = URLEncoder.encode(path, "UTF-8");
-		StringBuilder sb = new StringBuilder();
-		Formatter formatter = new Formatter(sb);
-		formatter
-				.format("file=%s&cmd=importarchive&options=%s&server=%s&spasswd=%s&port=%s&maxsz=%s",
-						archive, path, rserver, rpasswd,
-						Integer.toString(rport), Integer.toString(this.maxSz));
-		Document doc = getResponse(server, port, password, sb.toString());
-		Element root = doc.getDocumentElement();
-		if (root.getAttribute("status").equals("failed"))
-			SDFSLogger.getLog().error("msg");
-		String status = root.getAttribute("status");
-		String msg = root.getAttribute("msg");
-		SDFSLogger.getLog().info(
-				"Import [" + status + "] returned [" + msg + "]");
-
-		return doc;
+		MgmtServerConnection.server = server;
+		MgmtServerConnection.password = password;
+		MgmtServerConnection.port = port;
+		ProcessImportArchiveCmd.runCmd(archive, path, rserver, rpasswd, rport, false, maxSz);
 
 	}
 
 	private String getRemoteArchive(String server, int port, String password,
 			String tempDir, String file) throws IOException {
+		MgmtServerConnection.server = server;
+		MgmtServerConnection.password = password;
+		MgmtServerConnection.port = port;
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
-		file = URLEncoder.encode(file, "UTF-8");
-		StringBuilder sb = new StringBuilder();
-		Formatter formatter = new Formatter(sb);
-		formatter.format("file=%s&cmd=archiveout&options=iloveanne", file);
-		Document doc = getResponse(server, port, password, sb.toString());
-		Element root = doc.getDocumentElement();
-		String status = root.getAttribute("status");
-		String msg = root.getAttribute("msg");
-		SDFSLogger.getLog().debug("getting " + msg);
-		InputStream in = connectAndGet(server, port, password, "", msg);
-		File outFile = new File(tempDir + File.separator + msg);
-		FileOutputStream out = new FileOutputStream(outFile);
-		byte[] buf = new byte[32768];
-		int len;
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
-		}
-		in.close();
-		out.close();
-		SDFSLogger.getLog().debug(
-				"Copy Out [" + status + "] returned [" + msg + "]");
-		if (status.equalsIgnoreCase("failed"))
-			throw new IOException("archive failed because " + msg);
-		return outFile.getPath();
+		return ProcessArchiveOutCmd.runCmd(file,tempDir);
 
 	}
 

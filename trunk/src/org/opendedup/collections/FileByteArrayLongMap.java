@@ -27,11 +27,13 @@ import org.opendedup.logging.SDFSLogger;
 
 public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
+	MappedByteBuffer values = null;
+	MappedByteBuffer times = null;
 	private int size = 0;
 	private String path = null;
 	private FileChannel kFC = null;
-	private RandomAccessFile vRaf = null;
-	private RandomAccessFile tRaf = null;
+	private FileChannel vRaf = null;
+	private FileChannel tRaf = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
@@ -123,15 +125,15 @@ public class FileByteArrayLongMap implements AbstractShard {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				vRaf.seek(iterPos * 8);
-				val = vRaf.readLong();
+				values.position(iterPos * 8);
+				val = values.getLong();
 				if (val >= 0) {
 					boolean claimed = claims.get(iterPos);
 					if (clearClaim) {
 						this.mapped.set(iterPos);
 						claims.clear(iterPos);
-						this.tRaf.seek(iterPos * 8);
-						this.tRaf.writeLong(System.currentTimeMillis());
+						this.times.position(iterPos * 8);
+						this.times.putLong(System.currentTimeMillis());
 					}
 					if (claimed)
 						return val;
@@ -165,8 +167,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.hashlock.lock();
 			while (iterPos < size) {
 				long val = -1;
-				vRaf.seek(iterPos * 8);
-				val = vRaf.readLong();
+				values.position(iterPos * 8);
+				val = values.getLong();
 				iterPos++;
 				if (val > _bgst)
 					_bgst = val;
@@ -184,10 +186,14 @@ public class FileByteArrayLongMap implements AbstractShard {
 	public long setUp() throws IOException {
 		File posFile = new File(path + ".pos");
 		boolean newInstance = !posFile.exists();
-		vRaf = new RandomAccessFile(path + ".pos", "rw");
-		vRaf.setLength(size * 8);
-		tRaf = new RandomAccessFile(path + ".ctimes", "rw");
-		tRaf.setLength(size * 8);
+		vRaf = FileChannel.open(Paths.get(path + ".pos"),
+				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
+				StandardOpenOption.WRITE, StandardOpenOption.READ);
+		
+		tRaf = FileChannel.open(Paths.get(path + ".ctimes"),
+				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
+				StandardOpenOption.WRITE, StandardOpenOption.READ);
+		
 		this.kFC = FileChannel.open(Paths.get(path + ".keys"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
@@ -214,6 +220,10 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 		keys = kFC.map(MapMode.READ_WRITE, 0, size * FREE.length);
 		keys.load();
+		this.values = vRaf.map(MapMode.READ_WRITE, 0, size * 8);
+		values.load();
+		this.times = tRaf.map(MapMode.READ_WRITE, 0, size * 8);
+		times.load();
 		if (bgst < 0) {
 			SDFSLogger.getLog()
 					.info("Hashtable " + path
@@ -292,8 +302,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 				if (value > bgst)
 					bgst = value;
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				this.vRaf.writeLong(value);
+				this.values.position(pos);
+				this.values.putLong(value);
 				pos = (pos / 8);
 				this.claims.set(pos);
 				this.mapped.set(pos);
@@ -329,13 +339,13 @@ public class FileByteArrayLongMap implements AbstractShard {
 				keys.put(REMOVED);
 
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				long fp = vRaf.readLong();
+				this.values.position(pos);
+				long fp = values.getLong();
 				fp = fp * -1;
-				this.vRaf.seek(pos);
-				this.vRaf.writeLong(fp);
-				this.tRaf.seek(pos);
-				this.tRaf.writeLong(0);
+				this.values.position(pos);
+				this.values.putLong(fp);
+				this.times.position(pos);
+				this.times.putLong(0);
 				pos = (pos / 8);
 				this.claims.clear(pos);
 				this.mapped.clear(pos);
@@ -358,7 +368,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 	/* (non-Javadoc)
 	 * @see org.opendedup.collections.AbstractShard#hashFunc3(int)
 	 */
-	@Override
 	public int hashFunc3(int hash) {
 		int result = hash + 1;
 		return result;
@@ -531,8 +540,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 			if (value > bgst)
 				bgst = value;
 			pos = (pos / FREE.length) * 8;
-			this.vRaf.seek(pos);
-			this.vRaf.writeLong(value);
+			this.values.position(pos);
+			this.values.putLong(value);
 			pos = (pos / 8);
 			this.claims.set(pos);
 			this.mapped.set(pos);
@@ -577,8 +586,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 				return -1;
 			} else {
 				pos = (pos / FREE.length) * 8;
-				this.vRaf.seek(pos);
-				long val = this.vRaf.readLong();
+				this.values.position(pos);
+				long val = this.values.getLong();
 				if (claim) {
 					pos = (pos / 8);
 					this.claims.set(pos);
@@ -611,7 +620,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 		this.hashlock.lock();
 		this.closed = true;
 		try {
-			this.vRaf.getFD().sync();
+			this.vRaf.force(true);
 			this.vRaf.close();
 		} catch (Exception e) {
 
@@ -623,7 +632,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 		}
 		try {
-			this.tRaf.getFD().sync();
+			this.tRaf.force(true);
 			this.tRaf.close();
 		} catch (Exception e) {
 
@@ -737,8 +746,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 					claims.clear(iterPos);
 					if (claimed) {
 						this.mapped.set(iterPos);
-						this.tRaf.seek(iterPos * 8);
-						this.tRaf.writeLong(System.currentTimeMillis());
+						this.times.position(iterPos * 8);
+						this.times.putLong(System.currentTimeMillis());
 						k++;
 					}
 				} finally {
@@ -758,8 +767,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 	@Override
 	public void sync() throws SyncFailedException, IOException {
 		keys.force();
-		vRaf.getFD().sync();
-		tRaf.getFD().sync();
+		vRaf.force(true);
+		tRaf.force(true);
 		File f = new File(path + ".vmp");
 		FileOutputStream fout = new FileOutputStream(f);
 		ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -773,6 +782,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	/* (non-Javadoc)
 	 * @see org.opendedup.collections.AbstractShard#removeNextOldRecord(long)
 	 */
+	
 	@Override
 	public synchronized long removeNextOldRecord(long time) throws IOException {
 		while (iterPos < size) {
@@ -780,19 +790,19 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.hashlock.lock();
 			try {
 				if (this.mapped.get(iterPos)) {
-					this.tRaf.seek(iterPos * 8);
-					long tm = this.tRaf.readLong();
+					this.times.position(iterPos * 8);
+					long tm = this.times.getLong();
 					if (tm < time) {
 						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
 							keys.position(iterPos * FREE.length);
 							keys.put(REMOVED);
-							this.vRaf.seek(iterPos * 8);
-							val = this.vRaf.readLong();
-							this.vRaf.seek(iterPos * 8);
-							this.vRaf.writeLong(0);
-							this.tRaf.seek(iterPos * 8);
-							this.tRaf.writeLong(0);
+							this.values.position(iterPos * 8);
+							val = this.values.getLong();
+							this.values.position(iterPos * 8);
+							this.values.putLong(0);
+							this.times.position(iterPos * 8);
+							this.times.putLong(0);
 							this.claims.clear(iterPos);
 							this.mapped.clear(iterPos);
 							return val;

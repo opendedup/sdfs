@@ -114,7 +114,10 @@ public class Volume implements java.io.Serializable {
 					.getAttribute("write-bytes"));
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
-					.getAttribute("maximum-percentage-full")) / 100;
+					.getAttribute("maximum-percentage-full"));
+			if(this.fullPercentage > 1)
+				this.fullPercentage =this.fullPercentage/100;
+			SDFSLogger.getLog().info("Volume write threshold is " + this.fullPercentage);
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
 		}
 		if (vol.hasAttribute("closed-gracefully"))
@@ -132,6 +135,10 @@ public class Volume implements java.io.Serializable {
 		this.startThreads();
 	}
 	
+	public Volume() {
+		// TODO Auto-generated constructor stub
+	}
+
 	private void startThreads() {
 		this.writer = new VolumeConfigWriterThread(this.configPath);
 		if(this.usePerfMon)
@@ -280,7 +287,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("current-size", Long.toString(this.currentSize));
 		root.setAttribute("capacity", this.capString);
 		root.setAttribute("maximum-percentage-full",
-				Double.toString(this.fullPercentage * 100));
+				Double.toString(this.fullPercentage));
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));

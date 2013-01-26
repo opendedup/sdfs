@@ -1,3 +1,34 @@
+Version 1.2.1
+	Fixes:
+	* Free space calculation was causing problems with new volumes in 1.2.0 not being able to be more than .95 full.
+	Enhancements:
+	* Changed syncthread within hashstore to flush to filesystem based on OS parameters. This should reduce CPU utilization
+	by 15%.
+Version 1.2.0
+	Fixes:
+	* Memory leak during high utilization on slow disk
+	* Deadlock under high concurrency when snapshot systems
+	* Snappy compression error within replication process and FileBasedChunkStore
+	* FileBasedChunkStore issues have been addressed
+	* Garbage collection performance within hashtables was not collecting duplicated chunks if there were two blocks 
+	  with stored in the chunkstore.
+	* PFull garbage collection was calculating next run incorrectly
+	* Fixes to allow for Windows port of SDFS to run with 1.2.0
+	* Will disallow write access on volumes over 95% full
+	* Fixed replication status output.
+	Enhancements
+	* Better Performance with default parameters. By default SDFS will use the murmur3 hashing for all new volumes.
+	* Default volume write block when volume is 95% full.
+	* New Volumes will by default report dse capacity as volume capacity and current size.
+	* SSL transport is now used by new volumes for DSE block transfer/replication traffic. To see if the master dse is 
+	  using ssl run sdfscli --password xxx --dse-info. Look at the output of option "DSE Listen SSL". This defualts to 
+	  true for all new volumes. 
+	* Added the replication.properties option replication.master.useSSL. If set to true SSL will be used by the slave when
+	  connecting to the master dse port. By default this option is set to false.
+	* Enhanced performance monitoring can be enabled from the sdfscli --perfmon-on = true
+	* Changed SDFS java start parameters to "-XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 
+	  -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true"
+	* Added scheduled GC that will run every night at 23:59.
 Version 1.1.9
 	Fixes:
 	* Fixed concurrency issue that caused error under high IO.

@@ -14,7 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessArchiveOutCmd {
-	public static void runCmd(String file) throws IOException {
+	public static String runCmd(String file,String dir) throws IOException {
 			SDFSLogger.getLog().debug("archive a copy of ["+file+"]");
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
@@ -109,7 +109,10 @@ public class ProcessArchiveOutCmd {
 
 			}
 			InputStream in = MgmtServerConnection.connectAndGet("", f.getName());
-			FileOutputStream out = new FileOutputStream(f.getName());
+			File nf = new File(dir+File.separator+f.getName());
+			if(!nf.getParentFile().exists())
+				nf.getParentFile().mkdirs();
+			FileOutputStream out = new FileOutputStream(nf.getPath());
 			byte[] buf = new byte[32768];
 			int len;
 			while ((len = in.read(buf)) > 0) {
@@ -117,7 +120,7 @@ public class ProcessArchiveOutCmd {
 			}
 			in.close();
 			out.close();
-			
+			return nf.getPath();
 
 	}
 

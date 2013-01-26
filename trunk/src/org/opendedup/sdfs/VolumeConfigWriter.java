@@ -104,7 +104,7 @@ public class VolumeConfigWriter {
 	boolean networkEnable = false;
 	private boolean useDSESize = true;
 	private boolean useDSECapacity = true;
-	private boolean usePerfMon = true;
+	private boolean usePerfMon = false;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 
 	public void parseCmdLine(String[] args) throws Exception {
