@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -58,7 +57,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	private boolean flushing = false;
 	private SyncThread sth = null;
 	private boolean compacting = false;
-	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database",Main.mountEvent);
+	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent(
+			"Loading Hash Database", Main.mountEvent);
 	private long endPos;
 
 	@Override
@@ -181,7 +181,9 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		SDFSLogger.getLog().info("claiming records");
-		SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]",evt);
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent(
+				"Claiming Records [" + this.getSize() + "] from ["
+						+ this.fileName + "]", evt);
 		tEvt.maxCt = this.getSize();
 		long startTime = System.currentTimeMillis();
 		long timeStamp = startTime + 30 * 1000;
@@ -252,7 +254,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		this.freeSlots.clear();
 		long start = System.currentTimeMillis();
 		int freeSl = 0;
-		
+
 		if (exists) {
 			this.closed = false;
 			SDFSLogger.getLog().info(
@@ -299,19 +301,16 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						if (!corrupt) {
 							long value = cm.getcPos();
 							if (cm.ismDelete()) {
-								//SDFSLogger.getLog().debug("chunk is deleted");
+								// SDFSLogger.getLog().debug("chunk is deleted");
 								this.addFreeSlot(cm.getcPos());
 								freeSl++;
 							} else {
 								boolean added = this.put(cm, false);
 								/*
-								SDFSLogger.getLog().debug(
-										"added "
-												+ StringUtils.getHexString(cm
-														.getHash())
-												+ " position is "
-												+ cm.getcPos());
-								*/
+								 * SDFSLogger.getLog().debug( "added " +
+								 * StringUtils.getHexString(cm .getHash()) +
+								 * " position is " + cm.getcPos());
+								 */
 								if (added)
 									this.kSz++;
 								if (value > endPos)
@@ -323,7 +322,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 				}
 			}
-			
+
 			bar.finish();
 		}
 		System.out.println();
@@ -337,11 +336,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						+ "] free slots added [" + this.freeSlots.cardinality()
 						+ "] end file position is [" + endPos + "]!");
 		this.loadEvent.endEvent("Finished Loading Hash Database in ["
-				+ (System.currentTimeMillis() - start) / 100
-				+ "] seconds");
+				+ (System.currentTimeMillis() - start) / 100 + "] seconds");
 
 		return size;
 	}
+
 	@Override
 	public long endStartingPosition() {
 		return this.endPos;
@@ -369,21 +368,24 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 	public long getFreeBlocks() {
 		return this.freeSlots.cardinality();
 	}
+
 	@Override
-	public synchronized long removeRecords(long time, boolean forceRun,SDFSEvent evt)
-			throws IOException {
+	public synchronized long removeRecords(long time, boolean forceRun,
+			SDFSEvent evt) throws IOException {
 		SDFSLogger.getLog().info(
 				"Garbage collection starting for records older than "
 						+ new Date(time));
-		SDFSEvent tEvt = SDFSEvent.removeInfoEvent("Garbage collection older than "
-				+ new Date(time),evt);
+		SDFSEvent tEvt = SDFSEvent.removeInfoEvent(
+				"Garbage collection older than " + new Date(time), evt);
 		tEvt.maxCt = this.size;
 		long rem = 0;
 		if (forceRun)
 			this.firstGCRun = false;
 		if (this.firstGCRun) {
 			this.firstGCRun = false;
-			tEvt.endEvent("Garbage collection aborted because it is the first run", SDFSEvent.WARN);
+			tEvt.endEvent(
+					"Garbage collection aborted because it is the first run",
+					SDFSEvent.WARN);
 			throw new IOException(
 					"Garbage collection aborted because it is the first run");
 		} else {
@@ -452,7 +454,7 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 						"Removed [" + rem + "] records. Free slots ["
 								+ this.freeSlots.cardinality() + "]");
 				tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
-								+ this.freeSlots.cardinality() + "]");
+						+ this.freeSlots.cardinality() + "]");
 
 			}
 			return rem;
@@ -563,8 +565,10 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		// if (persist)
 		// this.flushFullBuffer();
 		if (persist) {
-			cm.setcPos(this.getFreeSlot());
-			cm.persistData(true);
+			if (!cm.recoverd) {
+				cm.setcPos(this.getFreeSlot());
+				cm.persistData(true);
+			}
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos(),
 					(byte) 1);
 			if (added) {
@@ -938,8 +942,8 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 				File _fs = new File(fileName);
 				_fs.delete();
 				SDFSLogger.getLog().error("rolled back compacting");
-				throw new IOException("compacting failed because records=" + this.kSz
-								+ " compacted records=" + this.compactKsz);
+				throw new IOException("compacting failed because records="
+						+ this.kSz + " compacted records=" + this.compactKsz);
 			} else if (force && this.compactKsz != (this.kSz)) {
 				SDFSLogger.getLog().warn(
 						"compacting sizes are not the same records=" + this.kSz

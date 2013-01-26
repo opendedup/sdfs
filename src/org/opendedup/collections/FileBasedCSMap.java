@@ -67,7 +67,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException(e);
 		}
 		this.closed = false;
-		st = new SyncThread(this);
+		//st = new SyncThread(this);
 	}
 
 	public AbstractShard getMap(byte[] hash) throws IOException {
@@ -335,8 +335,10 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		// if (persist)
 		// this.flushFullBuffer();
 		if (persist) {
+			if(!cm.recoverd) {
 			cm.setcPos(this.getFreeSlot());
 			cm.persistData(true);
+			}
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 			if (added) {
 				this.arlock.lock();

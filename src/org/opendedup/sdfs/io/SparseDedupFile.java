@@ -732,10 +732,11 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public void forceClose() {
+		this.syncLock.lock();
 		this.writeBufferLock.lock();
 		this.initLock.lock();
 		this.channelLock.lock();
-		this.syncLock.lock();
+		
 		try {
 			if (!this.closed) {
 				SDFSLogger.getLog().debug("Closing [" + mf.getPath() + "]");

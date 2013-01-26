@@ -66,7 +66,9 @@ public class ManualGC {
 					e);
 			evt.endEvent("SDFS Volume Cleanup Failed because " + e.getMessage(), SDFSEvent.ERROR);
 		} finally {
-			Main.pFullSched.recalcScheduler();
+			try {
+				Main.pFullSched.recalcScheduler();
+			}catch(Exception e) {}
 		}
 		return rm;
 	}

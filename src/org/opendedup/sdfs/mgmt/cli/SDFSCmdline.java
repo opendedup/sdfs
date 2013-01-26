@@ -67,7 +67,7 @@ public class SDFSCmdline {
 			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),server,password,port,quiet,maxSz);
 		}
 		if (cmd.hasOption("archive-out")) {
-			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"));
+			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"),".");
 		}
 
 		if (cmd.hasOption("snapshot")) {

@@ -64,6 +64,10 @@ public class ConcurrentHopscotchHashMap<K, V> {
 
 	static final class Segment<K, V> extends ReentrantLock {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4476725515973126431L;
 		volatile int _timestamp;
 		int _bucketk_mask;
 		long[] _table_hash_delta;
@@ -143,6 +147,7 @@ public class ConcurrentHopscotchHashMap<K, V> {
 			} while (true);
 		}
 
+		@SuppressWarnings("unchecked")
 		V get(final K key, final int hash) {
 			// go over the list and look for key
 			int start_timestamp = 0;
@@ -188,6 +193,7 @@ public class ConcurrentHopscotchHashMap<K, V> {
 			} while (true);
 		}
 
+		@SuppressWarnings("unchecked")
 		V put(final K key, final int hash, final V value) {
 			lock();
 			try {
@@ -449,6 +455,7 @@ public class ConcurrentHopscotchHashMap<K, V> {
 			}// for on list
 		}
 
+		@SuppressWarnings("unchecked")
 		V remove(final K key, final int hash) {
 			lock();
 			try {
@@ -575,6 +582,7 @@ public class ConcurrentHopscotchHashMap<K, V> {
 
 	// public operations ---------------------------
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ConcurrentHopscotchHashMap(final long initialCapacity,
 			final int concurrencyLevel) {
 		// check for the validity of the algorithems
