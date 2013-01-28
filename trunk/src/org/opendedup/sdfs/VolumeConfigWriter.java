@@ -427,10 +427,18 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("report-dse-size")) {
 			try {
 			Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("report-dse-size"));
-			this.useDSECapacity = rp;
+			//this.useDSECapacity = rp;
 			this.useDSESize = rp;
 			}catch(Throwable e) {
 				System.err.println("value for report-dse-size must be true or false");
+			}
+		}if(cmd.hasOption("report-dse-capacity")) {
+			try {
+			Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("report-dse-capacity"));
+			this.useDSECapacity = rp;
+			//this.useDSESize = rp;
+			}catch(Throwable e) {
+				System.err.println("value for report-dse-capacity must be true or false");
 			}
 		}
 		if(cmd.hasOption("use-perf-mon")) {
@@ -986,14 +994,21 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("report-dse-size")
 				.withDescription(
-						"If set to \"true\" this volume will report capacity and used as the actual"+
-				"capacity and used statistics from the DSE. If this value is set to \"false\" it will"+
+						"If set to \"true\" this volume will used as the actual"+
+				" used statistics from the DSE. If this value is set to \"false\" it will"+
+								"report as virtual size of the volume and files. Defaults to \"true\"")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("report-dse-capacity")
+				.withDescription(
+						"If set to \"true\" this volume will report capacity the actual"+
+				"capacity statistics from the DSE. If this value is set to \"false\" it will"+
 								"report as virtual size of the volume and files. Defaults to \"true\"")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("use-perf-mon")
 				.withDescription(
-						"If set to \"true\" this volume will log io statistics to /etc/sdfs/ directory. Defaults to \"true\"")
+						"If set to \"true\" this volume will log io statistics to /etc/sdfs/ directory. Defaults to \"false\"")
 				.hasArg().withArgName("true|false").create());
 		return options;
 	}

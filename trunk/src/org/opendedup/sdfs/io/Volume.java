@@ -143,7 +143,6 @@ public class Volume implements java.io.Serializable {
 		this.writer = new VolumeConfigWriterThread(this.configPath);
 		if(this.usePerfMon)
 			this.ioMeter = new VolumeIOMeter(this);
-		
 	}
 
 	public long getCapacity() {
