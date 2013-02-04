@@ -24,7 +24,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 public class HCServiceProxy {
 
 	public static HashMap<String, HashClientPool> dseServers = new HashMap<String, HashClientPool>();
-	public static HashMap<String, HashClientPool> dseRoutes = new HashMap<String, HashClientPool>();
+	static HashClientPool p = null;
 	private static HashChunkServiceInterface hcService = null;
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
 	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>()
@@ -124,21 +124,6 @@ public class HCServiceProxy {
 		}
 	}
 
-	private static HashClient getReadHashClient(String name) throws Exception {
-		HashClient hc = dseRoutes.get(name).borrowObject();
-		return hc;
-	}
-
-	private static void returnObject(String name, HashClient hc)
-			throws IOException {
-		dseRoutes.get(name).returnObject(hc);
-	}
-
-	private static HashClient getWriteHashClient(String name) throws Exception {
-		HashClient hc = dseRoutes.get(name).borrowObject();
-		return hc;
-	}
-
 	public static boolean writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean sendChunk) throws IOException,
 			HashtableFullException {
@@ -151,11 +136,9 @@ public class HCServiceProxy {
 
 			}
 		} else {
-			byte[] hashRoute = { hash[0] };
-			String db = StringUtils.getHexString(hashRoute);
 			HashClient hc = null;
 			try {
-				hc = getWriteHashClient(db);
+				hc = p.borrowObject();
 				doop = hc.hashExists(hash, (short) 0);
 				if (!doop && sendChunk) {
 					try {
@@ -173,7 +156,7 @@ public class HCServiceProxy {
 				throw new IOException("Unable to write chunk " + hash);
 			} finally {
 				if (hc != null)
-					returnObject(db, hc);
+					p.returnObject(hc);
 			}
 		}
 		return doop;
@@ -215,12 +198,9 @@ public class HCServiceProxy {
 			/*
 			 * if (existingHashes.containsKey(hashStr)) { return true; }
 			 */
-			String db = null;
 			HashClient hc = null;
 			try {
-				byte[] hashRoute = { hash[0] };
-				db = StringUtils.getHexString(hashRoute);
-				hc = getWriteHashClient(db);
+				hc = p.borrowObject();
 			} catch (Exception e1) {
 				SDFSLogger.getLog().fatal(
 						"unable to execute find hash for " + hashStr);
@@ -235,7 +215,7 @@ public class HCServiceProxy {
 				throw new IOException(e);
 			} finally {
 				try {
-					returnObject(db, hc);
+					p.returnObject(hc);
 				} catch (Exception e) {
 					SDFSLogger
 							.getLog()
@@ -306,12 +286,9 @@ public class HCServiceProxy {
 				}
 			} catch (Exception e) {
 			}
-			String db = null;
 			HashClient hc = null;
 			try {
-				byte[] hashRoute = { hash[0] };
-				db = StringUtils.getHexString(hashRoute);
-				hc = getReadHashClient(db);
+				hc = p.borrowObject();
 				byte[] data = hc.fetchChunk(hash);
 				ByteCache _b = new ByteCache(data);
 				readlock.lock();
@@ -327,7 +304,7 @@ public class HCServiceProxy {
 				throw new IOException("Unable to fetch buffer " + hashStr);
 			} finally {
 				if (hc != null)
-					returnObject(db, hc);
+					p.returnObject(hc);
 				if (readlock.isLocked())
 					readlock.unlock();
 			}

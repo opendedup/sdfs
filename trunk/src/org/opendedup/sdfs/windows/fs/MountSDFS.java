@@ -20,9 +20,6 @@ public class MountSDFS {
 		Options options = new Options();
 		options.addOption("m", true,
 				"the drive letter for SDFS file system \n e.g. \'S\'");
-		options.addOption("r", true,
-				"path to chunkstore routing file. \n Will default to: \n"
-						+ OSValidator.getConfigPath() + "routing-config.xml");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption(
 				"vc",
@@ -40,7 +37,6 @@ public class MountSDFS {
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
 		String volumeConfigFile = null;
-		String routingConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
@@ -62,15 +58,6 @@ public class MountSDFS {
 			Main.runCompact = true;
 			if(cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
-		}
-		if (cmd.hasOption("r")) {
-			File f = new File(cmd.getOptionValue("r").trim());
-			if (!f.exists()) {
-				System.out.println("Routing configuration file " + f.getPath()
-						+ " does not exist");
-				System.exit(-1);
-			}
-			routingConfigFile = f.getPath();
 		}
 
 		if (cmd.hasOption("v")) {
@@ -112,8 +99,7 @@ public class MountSDFS {
 		Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,
-				routingConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile);
 
 		try {
 			sdfsService.start();

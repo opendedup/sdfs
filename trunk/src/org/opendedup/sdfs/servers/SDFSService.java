@@ -19,17 +19,13 @@ public class SDFSService {
 	String configFile;
 
 	private SDFSFDiskScheduler gc = null;
-	private String routingFile;
 	private NetworkDSEServer ndServer = null;
 
-	public SDFSService(String configFile, String routingFile) {
+	public SDFSService(String configFile) {
 
 		this.configFile = configFile;
-		this.routingFile = routingFile;
 		System.out.println("Running SDFS Version " + Main.version);
-		if (routingFile != null)
-			SDFSLogger.getLog().info(
-					"reading routing config file = " + this.routingFile);
+
 		System.out.println("reading config file = " + this.configFile);
 	}
 
@@ -39,9 +35,8 @@ public class SDFSService {
 		MgmtWebServer.start();
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
-		if (this.routingFile != null)
-			Config.parserRoutingFile(routingFile);
-		else if (!Main.chunkStoreLocal) {
+
+		if (!Main.chunkStoreLocal) {
 			Config.parserRoutingFile(OSValidator.getConfigPath()
 					+ File.separator + "routing-config.xml");
 		}
