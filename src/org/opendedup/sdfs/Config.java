@@ -493,14 +493,6 @@ public class Config {
 			SDFSLogger.getLog().info(
 					"Added Server " + _server.getAttribute("name"));
 		}
-		Element _c = (Element) doc.getElementsByTagName("chunks").item(0);
-		NodeList chunks = _c.getElementsByTagName("chunk");
-		for (int s = 0; s < chunks.getLength(); s++) {
-			Element chunk = (Element) chunks.item(s);
-			HCServiceProxy.dseRoutes.put(chunk.getAttribute("name").trim(),
-					HCServiceProxy.dseServers.get(chunk.getAttribute("server")
-							.trim()));
-		}
 	}
 
 	public static synchronized void parserLaunchConfig(String fileName)
