@@ -49,6 +49,27 @@ public class Main {
 	public static SDFSEvent mountEvent = null;
 	
 	/**
+	 * DSE Host for front end file systems
+	 */
+	public static String DSERemoteHostName = null;
+	
+	/**
+	 * DSE Host port for front end file systems
+	 */
+	public static int DSERemotePort = 2222;
+	
+	/**
+	 * DSE Host use SSL for front end file systems
+	 */
+	public static boolean DSERemoteUseSSL = true;
+	
+	/**
+	 * DSE Host use SSL for front end file systems
+	 */
+	public static boolean DSERemoteCompress = false;
+	
+	
+	/**
 	 * Upstream DSE Host for cache misses and replication
 	 */
 	public static String upStreamDSEHostName = null;
@@ -384,22 +405,6 @@ public class Main {
 	 */
 	public static int chunkStorePageSize = 4096;
 
-	/**
-	 * The number of pages to read ahead during a normal read. This will usually
-	 * speed up reads quite a bit.
-	 */
-	public static int chunkStoreReadAheadPages = 4;
-
-	/**
-	 * The size (MB) of pages (HashChunks) to cache for reading.
-	 */
-	public static int chunkStorePageCache = 5;
-
-	/**
-	 * The time in milliseconds for a page cache to timeout while waiting for a
-	 * chunck to be read.
-	 */
-	public static int chunkStoreDirtyCacheTimeout = 1000;
 
 	/**
 	 * If the Dedup Storage Engine is remote or local

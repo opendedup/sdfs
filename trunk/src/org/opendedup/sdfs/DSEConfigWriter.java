@@ -66,8 +66,6 @@ public class DSEConfigWriter {
 	String cloudAccessKey = "";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
-	int chunk_store_read_cache = Main.chunkStorePageCache;
-	int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean cloudCompress = Main.cloudCompress;
@@ -138,18 +136,12 @@ public class DSEConfigWriter {
 			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
-		if (cmd.hasOption("read-cache")) {
-			this.chunk_store_read_cache = Integer.parseInt(cmd
-					.getOptionValue("read-cache"));
-		}
+		
 		if (cmd.hasOption("encrypt")) {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("encrypt"));
 		}
-		if (cmd.hasOption("dirty-timeout")) {
-			this.chunk_store_dirty_timeout = Integer.parseInt(cmd
-					.getOptionValue("dirty-timeout"));
-		}
+		
 		if (this.awsEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
 					&& cmd.hasOption("cloud-access-key")
@@ -310,10 +302,6 @@ public class DSEConfigWriter {
 				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
-		cs.setAttribute("chunk-store-read-cache",
-				Integer.toString(this.chunk_store_read_cache));
-		cs.setAttribute("chunk-store-dirty-timeout",
-				Integer.toString(this.chunk_store_dirty_timeout));
 		cs.setAttribute("hash-type", this.hashType);
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
