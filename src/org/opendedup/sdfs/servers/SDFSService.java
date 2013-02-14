@@ -1,6 +1,6 @@
 package org.opendedup.sdfs.servers;
 
-import java.io.File;
+
 
 
 import org.opendedup.logging.SDFSLogger;
@@ -13,7 +13,6 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.OSValidator;
 
 public class SDFSService {
 	String configFile;
@@ -35,11 +34,6 @@ public class SDFSService {
 		MgmtWebServer.start();
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
-
-		if (!Main.chunkStoreLocal) {
-			Config.parserRoutingFile(OSValidator.getConfigPath()
-					+ File.separator + "routing-config.xml");
-		}
 		try {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);

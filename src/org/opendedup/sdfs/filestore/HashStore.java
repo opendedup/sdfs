@@ -46,8 +46,7 @@ public class HashStore {
 	private String name;
 	// Lock for hash queries
 	// private ReentrantLock cacheLock = new ReentrantLock();
-	int mapSize = (Main.chunkStorePageCache * 1024 * 1024)
-			/ Main.chunkStorePageSize;
+	
 
 	// The chunk store used to store the actual deduped data;
 	// private AbstractChunkStore chunkStore = null;
@@ -87,8 +86,7 @@ public class HashStore {
 		// this.initChunkStore();
 		SDFSLogger.getLog().info(
 				"Cache Size = " + Main.chunkStorePageSize
-						+ " and Dirty Timeout = "
-						+ Main.chunkStoreDirtyCacheTimeout);
+						);
 		SDFSLogger.getLog().info("Total Entries " + +bdb.getSize());
 		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;

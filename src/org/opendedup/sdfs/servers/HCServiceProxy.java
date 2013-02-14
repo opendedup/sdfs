@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,7 +22,6 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
-	public static HashMap<String, HashClientPool> dseServers = new HashMap<String, HashClientPool>();
 	static HashClientPool p = null;
 	private static HashChunkServiceInterface hcService = null;
 	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
@@ -46,30 +44,37 @@ public class HCServiceProxy {
 	private static ReentrantLock readlock = new ReentrantLock();
 
 	// private static boolean initialized = false;
-	
+
 	static {
 		hcService = new HashChunkService();
 		try {
-		hcService.init();
-		if (!Main.closedGracefully) {
-			hcService.runConsistancyCheck();
-		}
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",e);
+			hcService.init();
+			if (!Main.closedGracefully) {
+				hcService.runConsistancyCheck();
+			}
+			if (Main.DSERemoteHostName != null) {
+				HCServer s = new HCServer(Main.DSERemoteHostName,
+						Main.DSERemotePort, false, Main.DSERemoteCompress,
+						Main.DSERemoteUseSSL);
+				p = new HashClientPool(s, "server", 16);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",
+					e);
 			e.printStackTrace();
 			System.exit(-1);
 		}
 	}
-	
+
 	public static void processHashClaims(SDFSEvent evt) throws IOException {
 		hcService.processHashClaims(evt);
 	}
-	
+
 	public static boolean hashExists(byte[] hash, short hops)
 			throws IOException, HashtableFullException {
 		return hcService.hashExists(hash, hops);
 	}
-	
+
 	public static HashChunk fetchHashChunk(byte[] hash) throws IOException {
 		return hcService.fetchChunk(hash);
 	}
@@ -86,7 +91,6 @@ public class HCServiceProxy {
 	public static synchronized void init() {
 	}
 
-
 	public static long getSize() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.getSize();
@@ -102,7 +106,7 @@ public class HCServiceProxy {
 			return -1;
 		}
 	}
-	
+
 	public static long getFreeBlocks() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.getFreeBlocks();
@@ -110,9 +114,9 @@ public class HCServiceProxy {
 			return -1;
 		}
 	}
-	
+
 	public static AbstractChunkStore getChunkStore() {
-		
+
 		return hcService.getChuckStore();
 	}
 
