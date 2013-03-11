@@ -31,6 +31,7 @@ package org.opendedup.collections;
 ////////////////////////////////////////////////////////////////////////////////
 //package xbird.util.concurrent.map;
 
+
 import java.io.File;
 
 import java.io.IOException;
@@ -1618,11 +1619,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 	}
 
 	@Override
-	public long getFreeBlocks() {
-		return this.freeSlots.cardinality();
-	}
-
-	@Override
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
@@ -1632,6 +1628,7 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 		added = this.put(cm, true);
 		return added;
 	}
+	
 
 	@Override
 	public boolean put(ChunkData cm, boolean persist) throws IOException,

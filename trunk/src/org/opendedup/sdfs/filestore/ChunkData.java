@@ -47,10 +47,10 @@ public class ChunkData {
 			e.printStackTrace();
 		}
 	}
-
-	public ChunkData(long cPos) {
+	
+	public ChunkData(long cPos,byte  [] hash) { 
 		this.cPos = cPos;
-		this.mDelete = true;
+		this.hash = hash;
 	}
 
 	public ChunkData(byte[] rawData) {
@@ -119,13 +119,10 @@ public class ChunkData {
 		if (this.chunk != null) {
 			if(writeStore == null)
 				writeStore = HCServiceProxy.getChunkStore();
-			if (cPos == -1) {
-				this.cPos = writeStore.reserveWritePosition(cLen);
-			}
 			if (this.mDelete) {
 				chunk = new byte[cLen];
 			}
-			writeStore.writeChunk(hash, chunk, cLen, cPos);
+			this.cPos = writeStore.writeChunk(hash, chunk, cLen);
 			if (clear)
 				this.chunk = null;
 		}
@@ -135,17 +132,20 @@ public class ChunkData {
 		return mDelete;
 	}
 
-	public void setmDelete(boolean mDelete) {
+	public boolean setmDelete(boolean mDelete) {
 		this.mDelete = mDelete;
-		if (this.mDelete && Main.cloudChunkStore) {
+		if (this.mDelete) {
 			try {
-				HCServiceProxy.getChunkStore().deleteChunk(this.hash, 0, 0);
+				HCServiceProxy.getChunkStore().deleteChunk(this.hash, this.cPos, 0);
+				return true;
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(
 						"Unable to remove hash ["
 								+ StringUtils.getHexString(this.hash) + "]", e);
+				return false;
 			}
-		}
+		} 
+		return false;
 	}
 	
 	protected void setChunk(byte [] chk) {

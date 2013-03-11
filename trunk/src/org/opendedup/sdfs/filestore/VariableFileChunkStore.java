@@ -8,7 +8,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.util.OpenBitSet;
@@ -17,44 +16,40 @@ import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.FactorTest;
 import org.opendedup.util.OpenBitSetSerialize;
 import org.w3c.dom.Element;
 
-/**
- * 
- * @author Sam Silverberg This chunk store saves chunks into a single contiguous
- *         file. It performs well on most file systems. This chunkstore is used
- *         by default. The chunkstore is called by the hashstore to save or
- *         retrieve deduped chunks. Chunk block meta data is as follows: [mark
- *         of deletion (1 byte)|hash lenth(2 bytes)|hash(32 bytes)|date added (8
- *         bytes)|date last accessed (8 bytes)| chunk len (4 bytes)|chunk
- *         position (8 bytes)]
- **/
-public class FileChunkStore implements AbstractChunkStore {
-	private int pageSize = Main.chunkStorePageSize;
+
+public class VariableFileChunkStore implements AbstractChunkStore {
+	private final long pageSize = (long)Main.chunkStorePageSize;
+	private final long internalPageSize = 4L+8L+1L;
 	private boolean closed = false;
+	private static File chunk_location = new File(Main.chunkStore);
+	private int[] storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
+	private FileChunkStore[] st = new FileChunkStore[storeLengths.length];
 	private FileChannel fc = null;
 	private RandomAccessFile chunkDataWriter = null;
+	private OpenBitSet freeSlots = null;
 	File f;
 	Path p;
 	private long currentLength = 0L;
 	private String name;
-	private OpenBitSet freeSlots = null;
-	private byte[] FREE = new byte[pageSize];
+
+	private byte[] FREE = new byte[(int)pageSize];
 	private FileChannel iterFC = null;
 	private AbstractHashEngine hc = null;
-	private SyncThread th = null;
 	private File bsf;
-	
-	
+
 	/**
 	 * 
 	 * @param name
 	 *            the name of the chunk store.
 	 */
-	public FileChunkStore() {
-		SDFSLogger.getLog().info("Opening Chunk Store");
+	public VariableFileChunkStore() {
+		SDFSLogger.getLog().info("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
 			File chunk_location = new File(Main.chunkStore);
@@ -88,116 +83,60 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
-			th = new SyncThread(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			if (!chunk_location.exists()) {
+				chunk_location.mkdirs();
+			}
+			for (int i = 0; i < storeLengths.length; i++) {
+				File f = new File(chunk_location + File.separator + "chunks-"
+						+ storeLengths[i]);
+				FileChunkStore store = new FileChunkStore(f.getPath(),
+						storeLengths[i]);
+				st[i] = store;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public FileChunkStore(String fpath) {
-		SDFSLogger.getLog().info("Opening Chunk Store " + fpath);
-		File pf = new File(fpath).getParentFile();
-		Arrays.fill(FREE, (byte) 0);
-		try {
-			SDFSLogger.getLog().info("Loading freebits bitset");
-			bsf = new File(pf.getPath() + File.separator + "freebit.map");
-			if (!bsf.exists()) {
-				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
-				this.freeSlots = new OpenBitSet();
-			} else {
-				SDFSLogger.getLog().info("Loading freeslots from " + bsf.getPath());
-				try {
-					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
-					bsf.delete();
-				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"Unable to load bitset from " + bsf.getPath(), e);
-				}
-				SDFSLogger.getLog().info(
-						"Loaded [" + this.freeSlots.cardinality() + "] free slots");
-			}
-			f = new File(fpath);
-			if (!f.getParentFile().exists())
-				f.getParentFile().mkdirs();
-			this.name = "chunks";
-			p = f.toPath();
-			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength = chunkDataWriter.length();
-			this.closed = false;
-			fc = chunkDataWriter.getChannel();
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
-			th = new SyncThread(this);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public FileChunkStore(String fpath,int chunkLength) {
-		SDFSLogger.getLog().info("Opening Chunk Store [" + fpath + "] with chunksize of " +chunkLength);
-		this.pageSize = chunkLength;
-		 FREE = new byte[pageSize];
-		Arrays.fill(FREE, (byte) 0);
-		try {
-			SDFSLogger.getLog().info("Loading freebits bitset");
-			bsf = new File(fpath + "freebit.map");
-			if (!bsf.exists()) {
-				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
-				this.freeSlots = new OpenBitSet();
-			} else {
-				SDFSLogger.getLog().info("Loading freeslots from " + bsf.getPath());
-				try {
-					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
-					bsf.delete();
-				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"Unable to load bitset from " + bsf.getPath(), e);
-				}
-				SDFSLogger.getLog().info(
-						"Loaded [" + this.freeSlots.cardinality() + "] free slots");
-			}
-			f = new File(fpath + ".chk");
-			if (!f.getParentFile().exists())
-				f.getParentFile().mkdirs();
-			this.name = "chunks";
-			p = f.toPath();
-			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength = chunkDataWriter.length();
-			this.closed = false;
-			fc = chunkDataWriter.getChannel();
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
-			th = new SyncThread(this);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#closeStore()
 	 */
 	public void closeStore() {
-
+		for(FileChunkStore store : st) {
 		try {
-			fc.force(true);
+			store.close();
 
 		} catch (Exception e) {
 		}
-
-		try {
-			fc.close();
-
-		} catch (Exception e) {
-		}
-		fc = null;
 		try {
 			OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
 			SDFSLogger.getLog().info("Persisted Free Slots");
 			this.freeSlots.clear(0, this.freeSlots.capacity());
 		}catch(Exception e) {}
+
+		}
+
 	}
 
 	protected void sync() throws IOException {
-		fc.force(true);
+		for(FileChunkStore store : st) {
+			try {
+				store.sync();
+
+			} catch (Exception e) {
+			}
+
+			}
+		try {
+			this.fc.force(true);
+		} catch (Exception e) {
+		}
 	}
 
 	/*
@@ -250,13 +189,12 @@ public class FileChunkStore implements AbstractChunkStore {
 	public long bytesWritten() {
 		return this.bytesWritten();
 	}
-	
-	@Override
-	public long getFreeBlocks() {
-		return this.freeSlots.cardinality();
-	}
 
 	private static ReentrantLock reservePositionlock = new ReentrantLock();
+	
+	private FileChunkStore getStore(int sz) {
+		return this.st[FactorTest.closest2Pos(sz, this.storeLengths)];
+	}
 
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
@@ -264,27 +202,42 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		ByteBuffer buf = null;
-		long pos = -1;
 		try {
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
+			buf = ByteBuffer.allocate((int)this.internalPageSize);
+			byte[] data = CompressionUtils.compressSnappy(chunk);
+			boolean compress = true;
+			if(data.length > chunk.length) {
+				data = chunk;
+				compress = false;
+			}
+			FileChunkStore store = this.getStore(data.length);
+			long ipos = store.writeChunk(hash, data, data.length);
 			reservePositionlock.lock();
-			pos = this.freeSlots.nextSetBit(0);
+			long pos = this.freeSlots.nextSetBit(0);
 			if(pos < 0) {
 				pos = this.currentLength;
-				this.currentLength = this.currentLength + pageSize;
+				this.currentLength = this.currentLength + this.internalPageSize;
 			} else {
 				this.freeSlots.clear(pos);
-				pos = pos * this.pageSize;
+				pos = pos * this.internalPageSize;
 			}
 			reservePositionlock.unlock();
-			buf = ByteBuffer.wrap(chunk);
+			
+			byte comp = 1;
+			if(!compress)
+				comp = 0;
+			buf.putLong(ipos);
+			buf.putInt(data.length);
+			buf.put(comp);
+			buf.position(0);
 			fc.write(buf, pos);
 			return pos;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
-					"unable to write data at position " + pos, e);
-			throw new IOException("unable to write data at position " + pos);
+					"unable to write data ", e);
+			throw new IOException("unable to write data ");
 		} finally {
 			buf = null;
 			hash = null;
@@ -299,7 +252,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
 
-		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
+		ByteBuffer fbuf = ByteBuffer.wrap(new byte[Main.chunkStorePageSize]);
 
 		try {
 			fc.read(fbuf, start);
@@ -321,29 +274,21 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		this.freeSlots.set(start/this.pageSize);
-		/*
-		RandomAccessFile raf = new RandomAccessFile(f, "rw");
-		raf.seek(start);
-		raf.write(0);
-		raf.close();
-		*/
 	}
 
 	@Override
 	public void close() {
-		th.close();
 		try {
 			this.closed = true;
 			this.closeStore();
 
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			raf.getChannel().force(true);
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("while closing filechunkstore ", e);
 		}
 	}
-
-	
 
 	@Override
 	public void init(Element config) {
@@ -361,7 +306,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	public ChunkData getNextChunck() throws IOException {
 		if (iterFC.position() >= iterFC.size())
 			return null;
-		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
+		ByteBuffer fbuf = ByteBuffer.wrap(new byte[Main.chunkStorePageSize]);
 		long pos = -1;
 		try {
 			pos = iterFC.position();
@@ -405,40 +350,11 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	}
 
-	private class SyncThread implements Runnable {
-		FileChunkStore store = null;
-		int interval = 2 * 1000;
-		Thread th = null;
-
-		SyncThread(FileChunkStore store) {
-			this.store = store;
-			Thread th = new Thread(this);
-			th.start();
-		}
-
-		@Override
-		public void run() {
-			while (!store.closed) {
-				try {
-					store.sync();
-					Thread.sleep(interval);
-				} catch (IOException e) {
-					SDFSLogger.getLog().warn("Unable to flush FileChunkStore ",
-							e);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-
-		}
-
-		public void close() {
-			try {
-				th.interrupt();
-			} catch (Exception e) {
-			}
-			
-		}
+	@Override
+	public long getFreeBlocks() {
+		return this.freeSlots.cardinality();
 	}
+
+	
 
 }

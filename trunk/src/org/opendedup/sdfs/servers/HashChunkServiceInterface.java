@@ -45,8 +45,6 @@ public interface HashChunkServiceInterface {
 
 	public abstract long getSize();
 
-	public abstract long getFreeBlocks();
-
 	public abstract long getMaxSize();
 
 	public abstract int getPageSize();

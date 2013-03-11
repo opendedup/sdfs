@@ -230,7 +230,7 @@ public class DedupFileChannel {
 					/*
 					 * if (endPos == Main.CHUNK_LENGTH) newBuf = true;
 					 */
-					WritableCacheBuffer writeBuffer = null;
+					DedupChunkInterface writeBuffer = null;
 					byte[] b = new byte[bytesLeft];
 					try {
 						buf.get(b);
@@ -260,7 +260,7 @@ public class DedupFileChannel {
 					/*
 					 * if (_len == Main.CHUNK_LENGTH) newBuf = true;
 					 */
-					WritableCacheBuffer writeBuffer = null;
+					DedupChunkInterface writeBuffer = null;
 					byte[] b = new byte[_len];
 					try {
 						buf.get(b);
@@ -427,7 +427,7 @@ public class DedupFileChannel {
 			}
 			int read = 0;
 			while (bytesLeft > 0) {
-				DedupChunk readBuffer = null;
+				DedupChunkInterface readBuffer = null;
 				try {
 					readBuffer = df.getReadBuffer(currentLocation);
 				}  catch (FileClosedException e) {

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -10,7 +11,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -25,11 +25,9 @@ import com.microsoft.windowsazure.services.core.storage.StorageException;
 
 public class FileBasedChunkStore implements AbstractChunkStore {
 	private String name;
-	private boolean closed = false;
 	boolean compress = false;
 	boolean encrypt = false;
 	private long currentLength = 0L;
-	private static final int pageSize = Main.chunkStorePageSize;
 	private static File chunk_location = new File(Main.chunkStore);
 
 	public FileBasedChunkStore() {
@@ -108,20 +106,6 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 
-	private static ReentrantLock reservePositionlock = new ReentrantLock();
-
-	@Override
-	public long reserveWritePosition(int len) throws IOException {
-		if (this.closed)
-			throw new IOException("ChunkStore is closed");
-		reservePositionlock.lock();
-		long pos = this.currentLength;
-		this.currentLength = this.currentLength + pageSize;
-		reservePositionlock.unlock();
-		return pos;
-
-	}
-
 	@Override
 	public void setName(String name) {
 
@@ -134,7 +118,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
+	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
 		Path p = Paths.get(this.getHashPath(hash));
 		FileChannel fc = null;
@@ -151,6 +135,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 				chunk = EncryptUtils.encrypt(chunk);
 			buff = ByteBuffer.wrap(chunk);
 			fc.write(buff);
+			return 0L;
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -185,25 +170,6 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 		} else {
 			return StringUtils.getHexString(hash);
 		}
-	}
-
-	@Override
-	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void claimChunk(byte[] hash, long start) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean moveChunk(byte[] hash, long origLoc, long newLoc)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -261,8 +227,14 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 		byte[] hash = HashFunctionPool.getHashEngine().getHash(
 				testTxt.getBytes());
 		store.deleteChunk(hash, 0, 0);
-		store.writeChunk(hash, testTxt.getBytes(), 0, 0);
+		store.writeChunk(hash, testTxt.getBytes(), 0);
 		System.out.println(new String(store.getChunk(hash, 0, 0)));
 	}
+
+	@Override
+	public long getFreeBlocks() {
+		return 0;
+	}
+
 
 }
