@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 
 public interface AbstractChunkStore {
 
+	public abstract long getFreeBlocks();
 	/**
 	 * Closes the chunk store, if this is required
 	 */
@@ -78,7 +79,7 @@ public interface AbstractChunkStore {
 	 * @return the position with the chunk store where the chunk will be written
 	 * @throws IOException
 	 */
-	public abstract long reserveWritePosition(int len) throws IOException;
+	//public abstract long reserveWritePosition(int len) throws IOException;
 
 	/**
 	 * writes the chunk to the chunk store
@@ -94,8 +95,7 @@ public interface AbstractChunkStore {
 	 *            stored at
 	 * @throws IOException
 	 */
-	public abstract void writeChunk(byte[] hash, byte[] chunk, int len,
-			long start) throws IOException;
+	public abstract long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException;
 
 	/**
 	 * gets a chunk of data from the chunk store
@@ -123,14 +123,6 @@ public interface AbstractChunkStore {
 	 */
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
-			throws IOException;
-
-	public abstract void claimChunk(byte[] hash, long start) throws IOException;
-
-	public abstract void addChunkStoreListener(
-			AbstractChunkStoreListener listener);
-
-	public abstract boolean moveChunk(byte[] hash, long origLoc, long newLoc)
 			throws IOException;
 
 	public abstract ChunkData getNextChunck() throws IOException;

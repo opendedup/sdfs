@@ -2,21 +2,22 @@ package org.opendedup.util;
 
 import java.util.concurrent.BlockingQueue;
 
+
 import java.util.concurrent.locks.ReentrantLock;
 
 
 import org.opendedup.collections.QuickList;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
+import org.opendedup.sdfs.io.DedupChunkInterface;
 
 public class PoolThread extends Thread {
 
-	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
+	private BlockingQueue<DedupChunkInterface> taskQueue = null;
 	private boolean isStopped = false;
-	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
+	private final QuickList<DedupChunkInterface> tasks = new QuickList<DedupChunkInterface>(
 			60);
 
-	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
+	public PoolThread(BlockingQueue<DedupChunkInterface> queue) {
 		taskQueue = queue;
 	}
 
@@ -27,7 +28,7 @@ public class PoolThread extends Thread {
 				tasks.clear();
 				int ts = taskQueue.drainTo(tasks, 40);
 				for (int i = 0; i < ts; i++) {
-					WritableCacheBuffer runnable = tasks.get(i);
+					DedupChunkInterface runnable = tasks.get(i);
 					try {
 						runnable.close();
 					} catch (Exception e) {

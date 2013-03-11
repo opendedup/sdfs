@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.filestore.ChunkData;
 
 public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
@@ -341,6 +342,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long fp = values.getLong();
+				ChunkData ck = new ChunkData(fp,key);
+				if(ck.setmDelete(true)) {
 				fp = fp * -1;
 				this.values.position(pos);
 				this.values.putLong(fp);
@@ -352,6 +355,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 				// this.store.position(pos);
 				// this.store.put((byte)0);
 				return true;
+				}else
+					return false;
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -795,10 +800,15 @@ public class FileByteArrayLongMap implements AbstractShard {
 					if (tm < time) {
 						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
+							byte[] key = new byte[FREE.length];
+							keys.position(iterPos * FREE.length);
+							keys.get(key);
 							keys.position(iterPos * FREE.length);
 							keys.put(REMOVED);
 							this.values.position(iterPos * 8);
 							val = this.values.getLong();
+							ChunkData ck = new ChunkData(val,key);
+							ck.setmDelete(true);
 							this.values.position(iterPos * 8);
 							this.values.putLong(0);
 							this.times.position(iterPos * 8);

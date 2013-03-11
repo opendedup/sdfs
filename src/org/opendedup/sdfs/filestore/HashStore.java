@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -103,15 +104,6 @@ public class HashStore {
 
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
-	}
-
-	/**
-	 * 
-	 * @return the total number of free blocks available for re-use
-	 * 
-	 */
-	public long getFreeBlocks() {
-		return bdb.getFreeBlocks();
 	}
 
 	/**

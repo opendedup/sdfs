@@ -46,11 +46,7 @@ public class NullChunkStore implements AbstractChunkStore {
 		return "null";
 	}
 
-	@Override
-	public long reserveWritePosition(int len) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
 
 	@Override
 	public void setName(String name) {
@@ -64,37 +60,13 @@ public class NullChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
-	@Override
-	public void writeChunk(byte[] hash, byte[] chunk, int len, long start)
-			throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void addChunkStoreListener(AbstractChunkStoreListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void claimChunk(byte[] hash, long start) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean moveChunk(byte[] hash, long origLoc, long newLoc)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
@@ -125,6 +97,19 @@ public class NullChunkStore implements AbstractChunkStore {
 	public void compact() throws IOException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public long getFreeBlocks() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long writeChunk(byte[] hash, byte[] chunk, int len)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 

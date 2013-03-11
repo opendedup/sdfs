@@ -46,7 +46,7 @@ public interface DedupFile {
 	 * @return the write buffer for the give position
 	 * @throws IOException
 	 */
-	public abstract WritableCacheBuffer getWriteBuffer(long position,
+	public abstract DedupChunkInterface getWriteBuffer(long position,
 			boolean newBuf) throws FileClosedException,IOException;
 
 	/**
@@ -57,7 +57,7 @@ public interface DedupFile {
 	 * @return the specific read buffer.
 	 * @throws IOException
 	 */
-	public abstract DedupChunk getReadBuffer(long position) throws FileClosedException,IOException;
+	public abstract DedupChunkInterface getReadBuffer(long position) throws FileClosedException,IOException;
 
 	/**
 	 * Clones the DedupFile
@@ -98,7 +98,7 @@ public interface DedupFile {
 	 *            written
 	 * @throws IOException
 	 */
-	public abstract void writeCache(WritableCacheBuffer writeBuffer)
+	public abstract void writeCache(DedupChunkInterface writeBuffer)
 			throws FileClosedException,IOException, HashtableFullException;
 
 	/**
@@ -204,7 +204,7 @@ public interface DedupFile {
 	 * @return the DedupChunk of null if create is false and chunk is not found
 	 * @throws IOException
 	 */
-	public abstract DedupChunk getHash(long location, boolean create)
+	public abstract DedupChunkInterface getHash(long location, boolean create)
 			throws IOException, FileClosedException;
 
 	/**
@@ -244,5 +244,11 @@ public interface DedupFile {
 	public abstract boolean hasOpenChannels();
 
 	public abstract void truncate(long length) throws IOException;
+	
+	public abstract void putBufferIntoWrite(DedupChunkInterface buf);
+	
+	public abstract void putBufferIntoFlush(DedupChunkInterface buf);
+	
+	public abstract DedupChunkInterface removeFlushingBuffer(long pos);
 
 }

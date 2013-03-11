@@ -3,21 +3,22 @@ package org.opendedup.util;
 import java.util.ArrayList;
 
 
+
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
+import org.opendedup.sdfs.io.DedupChunkInterface;
 
 public class ThreadPool {
 
-	private LinkedBlockingQueue<WritableCacheBuffer> taskQueue = null;
+	private LinkedBlockingQueue<DedupChunkInterface> taskQueue = null;
 	private List<PoolThread> threads = new ArrayList<PoolThread>();
 	private boolean isStopped = false;
 
 	public ThreadPool(int noOfThreads, int maxNoOfTasks) {
-		taskQueue = new LinkedBlockingQueue<WritableCacheBuffer>(maxNoOfTasks);
+		taskQueue = new LinkedBlockingQueue<DedupChunkInterface>(maxNoOfTasks);
 
 		for (int i = 0; i < noOfThreads; i++) {
 			threads.add(new PoolThread(taskQueue));
@@ -27,7 +28,7 @@ public class ThreadPool {
 		}
 	}
 
-	public void execute(WritableCacheBuffer task) {
+	public void execute(DedupChunkInterface task) {
 		if (this.isStopped) {
 			SDFSLogger.getLog().warn(
 					"threadpool is stopped will not execute task");

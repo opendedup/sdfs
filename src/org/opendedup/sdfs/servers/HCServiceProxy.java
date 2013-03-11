@@ -109,7 +109,7 @@ public class HCServiceProxy {
 
 	public static long getFreeBlocks() {
 		if (Main.chunkStoreLocal) {
-			return HCServiceProxy.hcService.getFreeBlocks();
+			return HCServiceProxy.getChunkStore().getFreeBlocks();
 		} else {
 			return -1;
 		}
