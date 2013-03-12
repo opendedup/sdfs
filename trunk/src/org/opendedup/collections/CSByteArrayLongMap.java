@@ -330,7 +330,6 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 		SDFSLogger.getLog().info(
 				"loaded [" + kSz + "] into the hashtable [" + this.fileName
 						+ "] free slots available are [" + freeSl
-						+ "] free slots added [" + HCServiceProxy.getFreeBlocks()
 						+ "] end file position is [" + endPos + "]!");
 		this.loadEvent.endEvent("Finished Loading Hash Database in ["
 				+ (System.currentTimeMillis() - start) / 100 + "] seconds");

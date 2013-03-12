@@ -395,7 +395,7 @@ public class SparseDedupFile implements DedupFile {
 										+ mf.getPath(), e);
 					}
 				}
-
+				this.updateMap(writeBuffer, hash, doop);
 				if (doop && !writeBuffer.isPrevDoop())
 					mf.getIOMonitor().addDulicateBlock();
 			} catch (Exception e) {
@@ -413,7 +413,7 @@ public class SparseDedupFile implements DedupFile {
 
 	// private ReentrantLock updatelock = new ReentrantLock();
 
-	private void updateMap(WritableCacheBuffer writeBuffer, byte[] hash,
+	private void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
 			boolean doop) throws FileClosedException, IOException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
@@ -481,9 +481,9 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			WritableCacheBuffer writeBuffer = null;
 
-			if (newChunk)
+			if (newChunk) {
 				ck = createNewChunk(chunkPos);
-			else
+			}else
 				ck = this.getHash(chunkPos, true);
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(ck.getHash(), chunkPos,
@@ -1071,6 +1071,7 @@ public class SparseDedupFile implements DedupFile {
 				ck.setDoop(pck.isDoop());
 				pck = null;
 			}
+			
 			b = null;
 			if (ck == null && create == true) {
 				return createNewChunk(place);

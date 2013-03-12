@@ -201,8 +201,9 @@ public class ChunkData {
 		if (this.chunk == null) {
 			return HCServiceProxy.getChunkStore().getChunk(hash, this.cPos,
 					this.cLen);
-		} else
+		} else {
 			return chunk;
+		}
 	}
 
 	public long getAdded() {
