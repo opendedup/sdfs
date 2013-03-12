@@ -298,8 +298,9 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
-
-		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
+		if(len ==0 || len==-1)
+			len = pageSize;
+		ByteBuffer fbuf = ByteBuffer.wrap(new byte[len]);
 
 		try {
 			fc.read(fbuf, start);
@@ -397,12 +398,6 @@ public class FileChunkStore implements AbstractChunkStore {
 		} finally {
 			this.iterlock.unlock();
 		}
-	}
-
-	@Override
-	public void compact() throws IOException {
-		// TODO Auto-generated method stub
-
 	}
 
 	private class SyncThread implements Runnable {

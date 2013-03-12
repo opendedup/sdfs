@@ -206,11 +206,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 
 	}
 
-	@Override
-	public void compact() throws IOException {
-		// TODO Auto-generated method stub
 
-	}
 
 	public static void main(String[] args) throws IOException,
 			NoSuchAlgorithmException, NoSuchProviderException {

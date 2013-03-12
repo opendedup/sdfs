@@ -373,7 +373,6 @@ public class LongByteArrayMap implements AbstractMap {
 			else
 				dest.getParentFile().mkdirs();
 			if (OSValidator.isWindows()) {
-				SDFSLogger.getLog().info("Snapping on windows volume");
 				srcC = (FileChannel) Files.newByteChannel(
 						Paths.get(src.getPath()), StandardOpenOption.READ,
 						StandardOpenOption.SPARSE);

@@ -270,12 +270,6 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void compact() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public long getFreeBlocks() {
 		// TODO Auto-generated method stub
 		return 0;

@@ -23,7 +23,6 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
  */
 public class WritableCacheBuffer implements DedupChunkInterface {
 
-	private static final long serialVersionUID = 8325202759315844948L;
 	private byte[] buf = null;
 	private boolean dirty = false;
 
