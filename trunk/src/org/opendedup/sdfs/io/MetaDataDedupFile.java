@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -49,7 +50,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	transient public static final String separator = File.separator;
 	transient public static final char pathSeparatorChar = File.pathSeparatorChar;
 	transient public static final char separatorChar = File.separatorChar;
-	protected long timeStamp = 0;
+	private long timeStamp = 0;
 	private long length = 0;
 	private String path = "";
 	private long lastModified = 0;
@@ -75,6 +76,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean symlink = false;
 	private String symlinkPath = null;
 	private String version = Main.version;
+	private static ArrayList<MetaFileEventListener> mfListeners = new ArrayList<MetaFileEventListener>();
+	
+	public static void addMetaFileListener(MetaFileEventListener l) {
+		mfListeners.add(l);
+	}
+	
+	public static void removeMetaFileListener(MetaFileEventListener l) {
+		mfListeners.remove(l);
+	}
+	
+	public static ArrayList<MetaFileEventListener> getMetaFileListeners() {
+		return mfListeners;
+	}
 
 	/**
 	 * 
@@ -336,10 +350,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			getDFLock.lock();
 			if (this.dfGuid == null) {
 				DedupFile df = DedupFileStore.getDedupFile(this);
-				this.dfGuid = df.getGUID();
-				SDFSLogger.getLog().debug(
-						"No DF EXISTS .... Set dedup file for "
-								+ this.getPath() + " to " + this.dfGuid);
+				this.setDfGuid(df.getGUID());
 				this.sync();
 				return df;
 			} else {
@@ -348,6 +359,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} finally {
 			getDFLock.unlock();
 		}
+	}
+	
+	public void setDfGuid(String guid) {
+		this.dfGuid = guid;
 	}
 
 	/**

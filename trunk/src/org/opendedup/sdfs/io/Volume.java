@@ -7,6 +7,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +62,6 @@ public class Volume implements java.io.Serializable {
 	private VolumeConfigWriterThread writer = null;
 	private VolumeIOMeter ioMeter = null;
 	private String configPath = null;
-	
 
 	public boolean isAllowExternalSymlinks() {
 		return allowExternalSymlinks;

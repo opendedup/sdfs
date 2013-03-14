@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -32,7 +33,6 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
  * 
  */
 public class MetaFileStore {
-
 	// private static String dbURL =
 	// "jdbc:derby:myDB;create=true;user=me;password=mine";
 

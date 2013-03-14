@@ -420,7 +420,6 @@ public class SparseDedupFile implements DedupFile {
 		}
 		SparseDataChunk chunk = null;
 		try {
-			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
 
 			if (mf.isDedup() || doop) {

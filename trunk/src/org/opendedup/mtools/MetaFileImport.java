@@ -54,7 +54,7 @@ public class MetaFileImport {
 			File mapFile = new File(Main.dedupDBStore + File.separator
 					+ dfGuid.substring(0, 2) + File.separator + dfGuid
 					+ File.separator + dfGuid + ".map");
-			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				mp.iterInit();

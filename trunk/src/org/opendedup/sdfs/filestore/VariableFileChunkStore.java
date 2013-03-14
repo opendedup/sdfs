@@ -169,7 +169,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long size() {
-		return this.currentLength;
+		return (this.currentLength/this.iPageSize)*this.pageSize;
 	}
 
 	/*

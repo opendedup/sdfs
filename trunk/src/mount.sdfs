@@ -1,3 +1,4 @@
+export MALLOC_CHECK_=0
 /usr/share/sdfs/jre1.7.0/bin/java -Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
  -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
   -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true \
