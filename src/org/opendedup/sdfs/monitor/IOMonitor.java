@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.monitor;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,8 +20,21 @@ public class IOMonitor implements java.io.Serializable {
 	private long readOperations;
 	private long writeOperations;
 	private final ReentrantLock updateLock = new ReentrantLock();
+	private static ArrayList<IOMonitorListener> iofListeners = new ArrayList<IOMonitorListener>();
 
 	public IOMonitor() {
+	}
+	
+	public static void addIOMonListener(IOMonitorListener l) {
+		iofListeners.add(l);
+	}
+	
+	public static void removeIOMonListener(IOMonitorListener l) {
+		iofListeners.remove(l);
+	}
+	
+	public static ArrayList<IOMonitorListener> getIOMonListeners() {
+		return iofListeners;
 	}
 
 	public long getVirtualBytesWritten() {

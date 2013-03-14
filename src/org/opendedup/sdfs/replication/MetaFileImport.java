@@ -114,7 +114,7 @@ public class MetaFileImport implements Serializable{
 			if (!mapFile.exists()) {
 				return;
 			}
-			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				long prevpos =  0;

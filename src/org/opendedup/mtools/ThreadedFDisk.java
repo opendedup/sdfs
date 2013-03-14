@@ -107,7 +107,7 @@ public class ThreadedFDisk {
 		
 		private void checkDedupFile(File mapFile) throws IOException {
 			cLock.lock();
-			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath(), "r");
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				mp.iterInit();

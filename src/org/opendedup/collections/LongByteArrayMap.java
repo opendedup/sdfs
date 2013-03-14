@@ -12,9 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
-import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -23,7 +23,7 @@ import org.opendedup.util.OSValidator;
 import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements AbstractMap {
-
+	private static ArrayList<LongByteArrayMapListener> mapListener = new ArrayList<LongByteArrayMapListener>();
 	// RandomAccessFile bdbf = null;
 	private static final int arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
 	String filePath = null;
@@ -46,20 +46,24 @@ public class LongByteArrayMap implements AbstractMap {
 		FREE = new byte[arrayLength];
 		Arrays.fill(FREE, (byte) 0);
 	}
+	
+	public static void addMapListener(LongByteArrayMapListener l) {
+		mapListener.add(l);
+	}
+	
+	public static void removeMapListener(LongByteArrayMapListener l) {
+		mapListener.remove(l);
+	}
+	
+	public static ArrayList<LongByteArrayMapListener> getMapListeners() {
+		return mapListener;
+	}
 
 	// private boolean smallMemory = false;
 	public LongByteArrayMap(String filePath) throws IOException {
 		this.filePath = filePath;
 		this.openFile();
-		new SyncThread(this);
 
-	}
-
-	public LongByteArrayMap(String filePath, String fileParams)
-			throws IOException {
-		this.filePath = filePath;
-		this.openFile();
-		new SyncThread(this);
 	}
 
 	public void iterInit() throws IOException {
