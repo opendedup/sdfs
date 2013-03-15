@@ -78,7 +78,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				try {
-					mf.setMode(mode);
+					mf.setMode(mode, true);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new FuseException("access denied for " + path)
@@ -111,8 +111,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				try {
-					mf.setOwner_id(uid);
-					mf.setGroup_id(gid);
+					mf.setOwner_id(uid, true);
+					mf.setGroup_id(gid, true);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new FuseException("access denied for " + path)
@@ -218,7 +218,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						MetaDataDedupFile mf = MetaFileStore.getFolder(f);
 						int atime = (int) (mf.getLastAccessed() / 1000L);
 						int mtime = (int) (mf.lastModified() / 1000L);
-						int ctime = (int) (mf.getTimeStamp() / 1000L);
+						int ctime = (int) (0 / 1000L);
 
 						long fileLength = f.length();
 						getattrSetter.set(mf.getGUID().hashCode(), mode, 1,
@@ -231,7 +231,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						int gid = mf.getGroup_id();
 						int mode = mf.getMode();
 						int atime = (int) (mf.getLastAccessed() / 1000L);
-						int ctime = (int) (mf.getTimeStamp() / 1000L);
+						int ctime = (int) (0 / 1000L);
 						int mtime = (int) (mf.lastModified() / 1000L);
 						long fileLength = mf.length();
 						long actualBytes = (mf.getIOMonitor()
@@ -366,7 +366,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 				}
 				try {
-					mf.setMode(mode);
+					mf.setMode(mode, true);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new FuseException("access denied for " + path)
@@ -460,7 +460,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				SDFSLogger.getLog().debug("renaming [" + from + "] to [" +to +"]");
 				f = resolvePath(from);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.renameTo(this.mountedVolume + to);
+				mf.renameTo(this.mountedVolume + to, true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to rename " + from + " to " + to, e);
@@ -488,7 +488,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				if (f.getName().equals(".") || f.getName().equals(".."))
 					return 0;
 				else {
-					if (MetaFileStore.removeMetaFile(f.getPath()))
+					if (MetaFileStore.removeMetaFile(f.getPath(), true))
 						return 0;
 					else {
 						SDFSLogger.getLog().debug(
@@ -583,7 +583,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				File f = this.resolvePath(path);
 				try {
-					if (MetaFileStore.removeMetaFile(f.getPath()))
+					if (MetaFileStore.removeMetaFile(f.getPath(), true))
 						return 0;
 					else {
 						SDFSLogger.getLog().warn(
@@ -608,8 +608,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = this.resolvePath(path);
 			if (f.isFile()) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.setLastAccessed(atime * 1000L);
-				mf.setLastModified(mtime * 1000L);
+				mf.setLastAccessed(atime * 1000L, true);
+				mf.setLastModified(mtime * 1000L, true);
 			} else {
 				Path p = f.toPath();
 				try {
@@ -829,7 +829,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				File f = this.resolvePath(path);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.addXAttribute(name, valStr);
+				mf.addXAttribute(name, valStr, true);
 			}
 		} finally {
 		}
@@ -881,7 +881,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				File f = this.resolvePath(path);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.addXAttribute(name, valStr);
+				mf.addXAttribute(name, valStr, true);
 			}
 		} finally {
 

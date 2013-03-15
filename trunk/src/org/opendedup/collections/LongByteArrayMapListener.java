@@ -6,4 +6,5 @@ public interface LongByteArrayMapListener {
 	void onRemoveEvent(long position,LongByteArrayMap src);
 	void onTruncateEvent(long position,LongByteArrayMap src);
 	void onVanishEvent(LongByteArrayMap src);
+	void onSync(LongByteArrayMap src);
 }

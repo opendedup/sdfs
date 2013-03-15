@@ -57,7 +57,7 @@ public class MetaDataFileInfo {
 		fileIndex = getNextFileIndex();
 		if (isDirectory)
 			fileAttribute |= FILE_ATTRIBUTE_DIRECTORY;
-		creationTime = FileTimeUtils.toFileTime(new Date(mf.getTimeStamp()));
+		creationTime = FileTimeUtils.toFileTime(new Date(0));
 		lastAccessTime = FileTimeUtils
 				.toFileTime(new Date(mf.getLastAccessed()));
 		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));

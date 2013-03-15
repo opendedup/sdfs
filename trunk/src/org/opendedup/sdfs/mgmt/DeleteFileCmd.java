@@ -19,7 +19,7 @@ public class DeleteFileCmd implements XtendedCmd {
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
-			boolean removed = MetaFileStore.removeMetaFile(internalPath);
+			boolean removed = MetaFileStore.removeMetaFile(internalPath, true);
 			if(removed) {
 				SDFSEvent.deleteFileEvent(f);
 				return "removed [" + file + "]";

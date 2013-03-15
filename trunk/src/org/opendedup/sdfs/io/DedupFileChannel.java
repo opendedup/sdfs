@@ -71,7 +71,7 @@ public class DedupFileChannel {
 		truncateLock.lock();
 		try {
 			if (siz < mf.length()) {
-				df.truncate(siz);
+				df.truncate(siz, true);
 				/*
 				 * WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz); int
 				 * endPos = (int) (siz - writeBuffer.getFilePosition());
@@ -86,8 +86,8 @@ public class DedupFileChannel {
 				 */
 
 			}
-			mf.setLastAccessed(System.currentTimeMillis());
-			mf.setLength(siz, true);
+			mf.setLastAccessed(System.currentTimeMillis(), true);
+			mf.setLength(siz, true, true);
 		} finally {
 			truncateLock.unlock();
 		}
@@ -161,7 +161,7 @@ public class DedupFileChannel {
 	public void force(boolean metaData) throws IOException, FileClosedException {
 		// FixMe Does not persist chunks. This may be an issue.
 		try {
-			df.sync();
+			df.sync(true);
 		} catch (FileClosedException e) {
 			SDFSLogger.getLog().warn(
 					mf.getPath() + " is closed but still writing");
@@ -174,7 +174,7 @@ public class DedupFileChannel {
 				this.closeLock.unlock();
 			}
 		}
-		mf.sync();
+		mf.sync(true);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 	public void setLastModified(long lastModified) throws IOException {
-		mf.setLastModified(lastModified);
+		mf.setLastModified(lastModified, true);
 	}
 
 	/**
@@ -286,9 +286,9 @@ public class DedupFileChannel {
 				}
 				this.currentPosition = _cp;
 				if (_cp > mf.length()) {
-					mf.setLength(_cp, false);
+					mf.setLength(_cp, false, true);
 				}
-				mf.setLastModified(System.currentTimeMillis());
+				mf.setLastModified(System.currentTimeMillis(), true);
 			}
 		} catch (FileClosedException e) {
 			SDFSLogger.getLog().warn(
@@ -358,8 +358,8 @@ public class DedupFileChannel {
 				try {
 					if (this.writtenTo && Main.safeSync) {
 						df.writeCache();
-						mf.sync();
-						df.sync();
+						mf.sync(true);
+						df.sync(true);
 
 					}
 				} catch (Exception e) {
@@ -383,8 +383,8 @@ public class DedupFileChannel {
 			try {
 				if (this.writtenTo && Main.safeSync) {
 					df.writeCache();
-					mf.sync();
-					df.sync();
+					mf.sync(true);
+					df.sync(true);
 
 				}
 			} catch (Exception e) {
@@ -467,14 +467,14 @@ public class DedupFileChannel {
 					}
 					if ((endPos) <= readBuffer.getLength()) {
 						buf.put(_rb, startPos, bytesLeft);
-						mf.getIOMonitor().addBytesRead(bytesLeft);
+						mf.getIOMonitor().addBytesRead(bytesLeft, true);
 						read = read + bytesLeft;
 						bytesLeft = 0;
 					} else {
 						int _len = readBuffer.getLength() - startPos;
 
 						buf.put(_rb, startPos, _len);
-						mf.getIOMonitor().addBytesRead(_len);
+						mf.getIOMonitor().addBytesRead(_len, true);
 						currentLocation = currentLocation + _len;
 						bytesLeft = bytesLeft - _len;
 						read = read + _len;
@@ -504,7 +504,7 @@ public class DedupFileChannel {
 				if (currentLocation == mf.length()) {
 					return read;
 				}
-				mf.setLastAccessed(System.currentTimeMillis());
+				mf.setLastAccessed(System.currentTimeMillis(), true);
 				this.currentPosition = currentLocation;
 			}
 			return read;
@@ -556,7 +556,7 @@ public class DedupFileChannel {
 		}
 			break;
 		}
-		mf.setLastAccessed(System.currentTimeMillis());
+		mf.setLastAccessed(System.currentTimeMillis(), true);
 		// Return the new file position
 		return this.position();
 	}
@@ -596,7 +596,7 @@ public class DedupFileChannel {
 	 */
 	public DedupFileLock tryLock(long position, long size, boolean shared)
 			throws IOException {
-		return df.addLock(this, position, size, shared);
+		return df.addLock(this, position, size, shared, true);
 	}
 
 	/**
@@ -606,7 +606,7 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 */
 	public DedupFileLock tryLock() throws IOException {
-		return df.addLock(this, 0, mf.length(), false);
+		return df.addLock(this, 0, mf.length(), false, true);
 	}
 
 	/**
@@ -617,7 +617,7 @@ public class DedupFileChannel {
 	 */
 	public void removeLock(DedupFileLock lock) {
 		lock.release();
-		df.removeLock(lock);
+		df.removeLock(lock, true);
 	}
 
 	public int getFlags() {

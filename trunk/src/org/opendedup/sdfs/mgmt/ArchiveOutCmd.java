@@ -80,9 +80,9 @@ public class ArchiveOutCmd implements Runnable {
 				SDFSLogger.getLog().debug("Created replication snapshot");
 				eevt.maxCt = 3;
 				eevt.curCt = 0;
-				mf.copyTo(nf.getPath(), true);
+				mf.copyTo(nf.getPath(), true, true);
 				eevt.curCt = 1;
-				MetaFileStore.removeMetaFile(af.getPath());
+				MetaFileStore.removeMetaFile(af.getPath(), true);
 				eevt.curCt = 2;
 				SDFSLogger.getLog().debug("Copied out replication snapshot");
 				TFile dest = new TFile(nf.getPath() + ".tar.gz");

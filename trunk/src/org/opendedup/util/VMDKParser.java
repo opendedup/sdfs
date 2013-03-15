@@ -68,18 +68,18 @@ public class VMDKParser {
 		ByteBuffer b = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
 		byte[] strB = sb.toString().getBytes();
 		b.put(strB);
-		vmd.setLength(strB.length, true);
+		vmd.setLength(strB.length, true, true);
 		vmd.getDedupFile().getWriteBuffer(0, true).write(b.array(), 0);
 		vmd.getDedupFile().writeCache();
-		vmd.sync();
+		vmd.sync(true);
 		vmd.getDedupFile().writeCache();
 		MetaDataDedupFile vmdk = MetaFileStore.getMF(path + File.separator
 				+ fileName + "-flat.vmdk");
-		vmdk.setLength(size, true);
-		vmdk.getIOMonitor().setActualBytesWritten(0);
-		vmdk.getIOMonitor().setBytesRead(0);
-		vmdk.getIOMonitor().setDuplicateBlocks(0);
-		vmdk.sync();
+		vmdk.setLength(size, true, true);
+		vmdk.getIOMonitor().setActualBytesWritten(0, true);
+		vmdk.getIOMonitor().setBytesRead(0, true);
+		vmdk.getIOMonitor().setDuplicateBlocks(0, true);
+		vmdk.sync(true);
 		ch.getDedupFile().unRegisterChannel(ch, -1);
 		SDFSLogger.getLog().info(
 				"Created vmdk of size " + vmdk.length() + " at " + path

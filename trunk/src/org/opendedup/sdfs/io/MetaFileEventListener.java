@@ -3,6 +3,7 @@ package org.opendedup.sdfs.io;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface MetaFileEventListener {
+	void onCreate(boolean dedup,MetaDataDedupFile mf);
 	void onDedupChange(boolean dedup,MetaDataDedupFile mf);
 	void onDedupFileChange(String guid,MetaDataDedupFile mf);
 	void onExecutableChange(boolean executable,MetaDataDedupFile mf);
@@ -31,4 +32,6 @@ public interface MetaFileEventListener {
 	void onMkDir(MetaDataDedupFile mf);
 	void onMkDirs(MetaDataDedupFile mf);
 	void onDfGuidChange(String guid,MetaDataDedupFile mf);
+	void onAddXAttribute(String name, String value,MetaDataDedupFile mf);
+	void onCopyTo(String npath, boolean overwrite,MetaDataDedupFile mf);
 }

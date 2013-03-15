@@ -180,6 +180,11 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	@Override
 	public void vanish() throws IOException {
+		vanish(true);
+	}
+
+	@Override
+	public void vanish(boolean propigateEvent) throws IOException {
 		this.close();
 		RandomAccessFile bdbf = null;
 		try {

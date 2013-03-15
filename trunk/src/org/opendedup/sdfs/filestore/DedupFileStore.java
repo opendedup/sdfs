@@ -145,7 +145,7 @@ public class DedupFileStore {
 					df = new SparseDedupFile(oldmf);
 				}
 				try {
-					return df.snapshot(newmf);
+					return df.snapshot(newmf, true);
 				} catch (Exception e) {
 					throw new IOException(e);
 				}

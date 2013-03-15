@@ -72,9 +72,9 @@ public class OpenFileMonitor implements Runnable {
 						} else {
 							try {
 								DedupFileStore.getDedupFile(df.getMetaFile())
-										.sync();
+										.sync(true);
 								DedupFileStore.getDedupFile(df.getMetaFile())
-										.getMetaFile().sync();
+										.getMetaFile().sync(true);
 							} catch (Exception e) {
 
 							}
