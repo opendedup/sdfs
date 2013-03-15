@@ -105,7 +105,7 @@ public class MetaFileImport implements Serializable{
 		if(this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
-		mf.getIOMonitor().clearFileCounters();
+		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
 			File mapFile = new File(Main.dedupDBStore + File.separator
@@ -130,14 +130,14 @@ public class MetaFileImport implements Serializable{
 						if (!ck.isLocalData()) {
 							boolean exists = HCServiceProxy.localHashExists(ck
 									.getHash());
-							mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH);
+							mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH, true);
 							if (!exists) {
 								hashes.add(StringUtils.getHexString(ck.getHash()));
 								entries++;
 								levt.blocksImported = entries;
-								mf.getIOMonitor().addActualBytesWritten(Main.CHUNK_LENGTH);
+								mf.getIOMonitor().addActualBytesWritten(Main.CHUNK_LENGTH, true);
 							} else {
-								mf.getIOMonitor().addDulicateBlock();
+								mf.getIOMonitor().addDulicateBlock(true);
 							}
 							if(hashes.size()>=MAX_SZ) {
 								try {
@@ -156,9 +156,9 @@ public class MetaFileImport implements Serializable{
 						}
 					}
 				}
-				Main.volume.updateCurrentSize(mf.length());
+				Main.volume.updateCurrentSize(mf.length(), true);
 				if (corruption) {
-					MetaFileStore.removeMetaFile(mf.getPath());
+					MetaFileStore.removeMetaFile(mf.getPath(), true);
 						throw new IOException(
 								"Unable to continue MetaFile Import because there are too many missing blocks");
 

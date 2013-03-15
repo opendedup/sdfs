@@ -14,7 +14,7 @@ public class SetEnablePerfMonCmd implements XtendedCmd {
 		try {
 			boolean dedup = Boolean.parseBoolean(cmd);
 			
-			Main.volume.setUsePerfMon(dedup);
+			Main.volume.setUsePerfMon(dedup, true);
 			if(dedup)
 				SDFSEvent.perfMonEvent("Enabled performance montitor").endEvent("Enabled performance monitor");
 			else

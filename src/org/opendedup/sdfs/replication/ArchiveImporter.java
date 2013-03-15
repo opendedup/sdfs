@@ -164,11 +164,11 @@ public class ArchiveImporter {
 					if (_mf.isDirectory())
 						rollBackImport(_mf.getPath());
 					else {
-						MetaFileStore.removeMetaFile(_mf.getPath());
+						MetaFileStore.removeMetaFile(_mf.getPath(), true);
 					}
 				}
 			}
-			MetaFileStore.removeMetaFile(mf.getPath());
+			MetaFileStore.removeMetaFile(mf.getPath(), true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to remove " + path + " during rollback ", e);
@@ -180,7 +180,7 @@ public class ArchiveImporter {
 		if (f.exists()) {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(dest);
-				MetaFileStore.removeMetaFile(mf.getPath());
+				MetaFileStore.removeMetaFile(mf.getPath(), true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to commit replication while removing old data in ["
@@ -192,7 +192,7 @@ public class ArchiveImporter {
 		}
 		try {
 			MetaDataDedupFile nmf = MetaFileStore.getMF(sdest);
-			nmf.renameTo(dest);
+			nmf.renameTo(dest, true);
 			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

@@ -1,17 +1,17 @@
 package org.opendedup.sdfs.monitor;
 
 public interface IOMonitorListener {
-	void actualBytesWrittenChanged(int bytes,IOMonitor mon);
-	void bytesReadChanged(int bytes,IOMonitor mon);
-	void duplicateBlockChanged(IOMonitor mon);
-	void rioChanged(IOMonitor mon);
-	void virtualBytesWrittenChanged(int bytes,IOMonitor mon);
-	void wioChanged(IOMonitor mon);
-	void clearAllCountersExecuted(IOMonitor mon);
-	void clearFileCountersExecuted(IOMonitor mon);
-	void removeDuplicateBlockChanged(IOMonitor mon);
-	void actualBytesWrittenChanged(long bytes,IOMonitor mon);
-	void bytesReadChanged(long bytes,IOMonitor mon);
-	void duplicateBlockChanged(long bytes,IOMonitor mon);
-	void virtualBytesWrittenChanged(long bytes,IOMonitor mon); 
+	void actualBytesWrittenChanged(long total,int change,IOMonitor mon);
+	void bytesReadChanged(long total,int change,IOMonitor mon);
+	void duplicateBlockChanged(long total,IOMonitor mon);
+	void rioChanged(long total,IOMonitor mon);
+	void virtualBytesWrittenChanged(long total,int change,IOMonitor mon);
+	void wioChanged(long total,IOMonitor mon);
+	void clearAllCountersExecuted(long total,IOMonitor mon);
+	void clearFileCountersExecuted(long total,IOMonitor mon);
+	void removeDuplicateBlockChanged(long total,IOMonitor mon);
+	void actualBytesWrittenChanged(long total,long change,IOMonitor mon);
+	void bytesReadChanged(long total,long change,IOMonitor mon);
+	void duplicateBlockChanged(long total,long change,IOMonitor mon);
+	void virtualBytesWrittenChanged(long total,long change,IOMonitor mon); 
 }

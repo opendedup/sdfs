@@ -831,6 +831,11 @@ public class CSByteArrayLongMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public void vanish() throws IOException {
+		vanish(true);
+	}
+
+	@Override
+	public void vanish(boolean propigateEvent) throws IOException {
 		// TODO Auto-generated method stub
 	}
 

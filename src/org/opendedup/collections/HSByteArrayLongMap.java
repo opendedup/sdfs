@@ -1937,6 +1937,11 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 
 	@Override
 	public void vanish() throws IOException {
+		vanish(true);
+	}
+
+	@Override
+	public void vanish(boolean propigateEvent) throws IOException {
 		for (Segment seg : _segments) {
 			seg.clear();
 		}

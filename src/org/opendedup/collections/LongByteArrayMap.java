@@ -221,6 +221,10 @@ public class LongByteArrayMap implements AbstractMap {
 	 */
 
 	public void put(long pos, byte[] data) throws IOException {
+		put(pos, data, true);
+	}
+
+	public void put(long pos, byte[] data, boolean propigateEvent) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
@@ -241,6 +245,10 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public void truncate(long length) throws IOException {
+		truncate(length, true);
+	}
+
+	public void truncate(long length, boolean propigateEvent) throws IOException {
 		this.hashlock.lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
@@ -270,6 +278,15 @@ public class LongByteArrayMap implements AbstractMap {
 	 * @see com.annesam.collections.AbstractMap#remove(long)
 	 */
 	public void remove(long pos) throws IOException {
+		remove(pos, true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.annesam.collections.AbstractMap#remove(long)
+	 */
+	public void remove(long pos, boolean propigateEvent) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
@@ -350,6 +367,16 @@ public class LongByteArrayMap implements AbstractMap {
 	 */
 	@Override
 	public void vanish() throws IOException {
+		vanish(true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.annesam.collections.AbstractMap#vanish()
+	 */
+	@Override
+	public void vanish(boolean propigateEvent) throws IOException {
 		this.hashlock.lock();
 		try {
 			if (!this.isClosed())
@@ -364,6 +391,10 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public void copy(String destFilePath) throws IOException {
+		copy(destFilePath, true);
+	}
+
+	public void copy(String destFilePath, boolean propigateEvent) throws IOException {
 		this.hashlock.lock();
 		FileChannel srcC = null;
 		FileChannel dstC = null;
