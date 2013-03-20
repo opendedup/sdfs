@@ -152,6 +152,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 		return false;
 	}
+	
+	public byte[] getReadChunk() throws IOException {
+		this.lock.lock();
+		try {
+			this.initBuffer();
+			return buf;
+		} finally {
+			this.lock.unlock();
+		}
+	}
 
 	private void initBuffer() {
 		if (this.buf == null) {
@@ -325,10 +335,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			if (this.closed || this.flushing) {
 				this.closed = false;
 				this.flushing = false;
-				df.putBufferIntoWrite(this);
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("Error while opening");
+			SDFSLogger.getLog().fatal("Error while opening",e);
 			throw new IllegalArgumentException("error");
 		} finally {
 			this.lock.unlock();
@@ -381,15 +390,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				SDFSLogger.getLog().info(
 						this.getFilePosition() + " already closed");
 			} else {
-
 				this.df.writeCache(this);
-				DedupChunkInterface _wb = df.removeFlushingBuffer(this
-						.getFilePosition());
-				if (_wb == null) {
-					SDFSLogger.getLog().debug(
-							this.getFilePosition()
-									+ " not found in flushing buffer");
-				}
+				df.removeFromFlush(this.getFilePosition());
 				this.closed = true;
 				this.flushing = false;
 			}

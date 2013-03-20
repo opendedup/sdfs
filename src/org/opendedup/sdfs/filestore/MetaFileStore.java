@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -71,7 +70,8 @@ public class MetaFileStore {
 	public static void rename(String src, String dst, MetaDataDedupFile mf) {
 		getMFLock.lock();
 		try {
-			SDFSLogger.getLog().debug("removing [" + dst +"] and replacing with [" + src + "]");
+			SDFSLogger.getLog().debug(
+					"removing [" + dst + "] and replacing with [" + src + "]");
 			pathMap.remove(src);
 			pathMap.remove(dst);
 			pathMap.put(dst, mf);
@@ -99,24 +99,22 @@ public class MetaFileStore {
 	private static ReentrantLock getMFLock = new ReentrantLock();
 
 	public static MetaDataDedupFile getMF(File f) {
-		getMFLock.lock();
-		try {
+		MetaDataDedupFile mf = null;
 
-			if (f.isDirectory()) {
-				return MetaDataDedupFile.getFile(f.getPath());
-			}
-			MetaDataDedupFile mf = null;
+		mf = pathMap.get(f.getPath());
 
-			mf = pathMap.get(f.getPath());
-			if (mf == null) {
+		if (mf == null) {
+			getMFLock.lock();
+			try {
 				mf = MetaDataDedupFile.getFile(f.getPath());
 				cacheMF(mf);
+			} finally {
+				getMFLock.unlock();
 			}
-
-			return mf;
-		} finally {
-			getMFLock.unlock();
 		}
+
+		return mf;
+
 	}
 
 	public static MetaDataDedupFile getFolder(File f) {
@@ -158,10 +156,10 @@ public class MetaFileStore {
 	 * @throws IOException
 	 */
 	public static MetaDataDedupFile snapshot(String origionalPath,
-			String snapPath, boolean overwrite, SDFSEvent evt) throws IOException {
-				return snapshot(origionalPath, snapPath, overwrite, evt,
-						true);
-			}
+			String snapPath, boolean overwrite, SDFSEvent evt)
+			throws IOException {
+		return snapshot(origionalPath, snapPath, overwrite, evt, true);
+	}
 
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
@@ -172,47 +170,50 @@ public class MetaFileStore {
 	 *            the path of the destination
 	 * @param overwrite
 	 *            whether or not to overwrite the destination if it exists
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @return the destination file.
 	 * @throws IOException
 	 */
 	public static MetaDataDedupFile snapshot(String origionalPath,
-			String snapPath, boolean overwrite, SDFSEvent evt, boolean propigateEvent) throws IOException {
+			String snapPath, boolean overwrite, SDFSEvent evt,
+			boolean propigateEvent) throws IOException {
 		try {
-		Path p = Paths.get(origionalPath);
-		if (Files.isSymbolicLink(p)) {
-			
-			MetaDataDedupFile mf = getMF(new File(origionalPath));
-			File dst = new File(snapPath);
-			File src = new File(mf.getPath());
-			if (dst.exists() && !overwrite) {
-				throw new IOException(snapPath + " already exists");
-			}
-			Path srcP = Paths.get(src.getPath());
-			Path dstP = Paths.get(dst.getPath());
-			try {
-				Files.createSymbolicLink(dstP, srcP);
-			} catch (IOException e) {
-				SDFSLogger.getLog()
-						.error("error symlinking " + origionalPath + " to "
-								+ snapPath, e);
-			}
+			Path p = Paths.get(origionalPath);
+			if (Files.isSymbolicLink(p)) {
 
-			return mf;
-		} else {
+				MetaDataDedupFile mf = getMF(new File(origionalPath));
+				File dst = new File(snapPath);
+				File src = new File(mf.getPath());
+				if (dst.exists() && !overwrite) {
+					throw new IOException(snapPath + " already exists");
+				}
+				Path srcP = Paths.get(src.getPath());
+				Path dstP = Paths.get(dst.getPath());
+				try {
+					Files.createSymbolicLink(dstP, srcP);
+				} catch (IOException e) {
+					SDFSLogger.getLog().error(
+							"error symlinking " + origionalPath + " to "
+									+ snapPath, e);
+				}
 
-			MetaDataDedupFile mf = getMF(new File(origionalPath));
-			if (mf == null)
-				throw new IOException(
-						origionalPath
-								+ " does not exist. Cannot take a snapshot of a non-existent file.");
-			synchronized (mf) {
-					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite,evt);
+				return mf;
+			} else {
+
+				MetaDataDedupFile mf = getMF(new File(origionalPath));
+				if (mf == null)
+					throw new IOException(
+							origionalPath
+									+ " does not exist. Cannot take a snapshot of a non-existent file.");
+				synchronized (mf) {
+					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite,
+							evt);
 					return _mf;
+				}
 			}
-		}
-		}finally {
-			
+		} finally {
+
 		}
 	}
 
@@ -245,7 +246,7 @@ public class MetaFileStore {
 	 * @param guid
 	 *            the guid for the MetaDataDedupFile
 	 */
-	
+
 	public static boolean removeMetaFile(String path) {
 		return removeMetaFile(path, true);
 	}
@@ -274,7 +275,8 @@ public class MetaFileStore {
 					File[] files = ps.listFiles();
 
 					for (int i = 0; i < files.length; i++) {
-						boolean sd = removeMetaFile(files[i].getPath(), propigateEvent);
+						boolean sd = removeMetaFile(files[i].getPath(),
+								propigateEvent);
 						files[i].delete();
 						if (!sd) {
 							SDFSLogger.getLog().warn(
@@ -296,11 +298,13 @@ public class MetaFileStore {
 					Main.volume.updateCurrentSize(-1 * mf.length(), true);
 					try {
 						Main.volume.addActualWriteBytes(-1
-								* mf.getIOMonitor().getActualBytesWritten(), true);
+								* mf.getIOMonitor().getActualBytesWritten(),
+								true);
 						Main.volume.addDuplicateBytes(-1
 								* mf.getIOMonitor().getDuplicateBlocks(), true);
 						Main.volume.addVirtualBytesWritten(-1
-								* mf.getIOMonitor().getVirtualBytesWritten(), true);
+								* mf.getIOMonitor().getVirtualBytesWritten(),
+								true);
 					} catch (Exception e) {
 
 					}
@@ -339,7 +343,7 @@ public class MetaFileStore {
 		try {
 			commit();
 		} catch (Exception e) {
-			
+
 		}
 		SDFSLogger.getLog().info("metafilestore closed");
 	}

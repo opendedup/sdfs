@@ -69,6 +69,18 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public byte[] getHash() {
 		return hash;
 	}
+	
+	public byte[] getReadChunk() throws IOException {
+		this.lock.lock();
+		try {
+			if (data != null)
+				return data;
+			else
+				return HCServiceProxy.fetchChunk(hash);
+		} finally {
+			this.lock.unlock();
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getLength()

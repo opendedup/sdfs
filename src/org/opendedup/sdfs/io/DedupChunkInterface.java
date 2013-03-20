@@ -22,6 +22,8 @@ public interface DedupChunkInterface {
 	 * @return the file position within the DedupFile
 	 */
 	public abstract long getFilePosition();
+	
+	public abstract byte [] getReadChunk()throws IOException;
 
 	/**
 	 * 

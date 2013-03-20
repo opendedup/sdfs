@@ -21,7 +21,7 @@ public class JgroupsMetaFileEventSource implements MetaFileEventListener {
 		ch=new JChannel("/home/samsilverberg/workspace_sdfs/sdfs/src/jgroups.cfg.xml"); 
 		ch.setDiscardOwnMessages(true);
         ch.connect("metafile-" +this.vol.getUuid());
-        disp=new MessageDispatcher(channel, null, null, this);
+        //disp=new MessageDispatcher(ch, null, null, this);
 	}
 
 	@Override
