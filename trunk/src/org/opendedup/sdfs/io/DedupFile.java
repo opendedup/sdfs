@@ -16,28 +16,8 @@ import org.opendedup.collections.HashtableFullException;
  * 
  */
 public interface DedupFile {
-
-	/**
-	 * Creates a blank dedup file of a specific length
-	 * 
-	 * @param len
-	 *            the length of the file
-	 * @throws IOException
-	 */
-	public abstract void createBlankFile(long len) throws IOException;
-
-
-	/**
-	 * Creates a blank dedup file of a specific length
-	 * 
-	 * @param len
-	 *            the length of the file
-	 * @param propigateEvent TODO
-	 * @throws IOException
-	 */
-	public abstract void createBlankFile(long len, boolean propigateEvent) throws IOException;
 	
-
+	public abstract void removeFromFlush(long pos);
 	/**
 	 * 
 	 * @return true if the dedup file is closed
@@ -166,7 +146,7 @@ public interface DedupFile {
 	 * 
 	 * @throws IOException
 	 */
-	public abstract void sync() throws FileClosedException, IOException;
+	public abstract void sync(boolean force) throws FileClosedException, IOException;
 
 
 	/**
@@ -175,7 +155,7 @@ public interface DedupFile {
 	 * 
 	 * @throws IOException
 	 */
-	public abstract void sync(boolean propigateEvent) throws FileClosedException, IOException;
+	public abstract void sync(boolean force,boolean propigateEvent) throws FileClosedException, IOException;
 
 	/**
 	 * Creates a DedupFileChannel for writing data to this DedupFile
@@ -349,10 +329,8 @@ public interface DedupFile {
 
 	public abstract void truncate(long length, boolean propigateEvent) throws IOException;
 	
-	public abstract void putBufferIntoWrite(DedupChunkInterface buf);
-	
 	public abstract void putBufferIntoFlush(DedupChunkInterface buf);
 	
-	public abstract DedupChunkInterface removeFlushingBuffer(long pos);
+	
 
 }
