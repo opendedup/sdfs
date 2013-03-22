@@ -11,7 +11,7 @@ import org.opendedup.sdfs.Main;
 public class VolumeConfigWriterThread implements Runnable {
 	private String configFile = null;
 	private Thread th = null;
-	private long duration = 15 * 1000;
+	private long duration = 60 * 1000;
 	boolean closed = false;
 
 	public VolumeConfigWriterThread(String configFile) {

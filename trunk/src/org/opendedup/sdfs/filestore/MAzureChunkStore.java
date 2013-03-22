@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 
 
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +44,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	boolean compress = false;
 	boolean encrypt = false;
 	private long currentLength = 0L;
+	
 
 	
 	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
@@ -222,16 +224,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	}
 
-	@Override
-	public ChunkData getNextChunck() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	@Override
 	public void iterationInit() {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 	public static void main(String[] args) throws IOException,
@@ -256,6 +252,12 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	public long getFreeBlocks() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public ChunkData getNextChunck() throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
