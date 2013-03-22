@@ -360,8 +360,10 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				throw new BufferClosedException("Buffer Closed");
 			}
 			this.flushing = true;
-			this.df.putBufferIntoFlush(this);
-			SparseDedupFile.pool.execute(this);
+			if(this.isDirty()) {
+				this.df.putBufferIntoFlush(this);
+				SparseDedupFile.pool.execute(this);
+			}
 		} finally {
 			this.lock.unlock();
 		}

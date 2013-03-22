@@ -37,8 +37,7 @@ public interface DedupFile {
 	 * @return the write buffer for the give position
 	 * @throws IOException
 	 */
-	public abstract DedupChunkInterface getWriteBuffer(long position,
-			boolean newBuf) throws FileClosedException,IOException;
+	public abstract DedupChunkInterface getWriteBuffer(long position) throws FileClosedException,IOException;
 
 	/**
 	 * 
@@ -52,6 +51,8 @@ public interface DedupFile {
 	
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
 	boolean doop) throws FileClosedException, IOException;
+	
+	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
 
 
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
@@ -329,7 +330,6 @@ public interface DedupFile {
 
 	public abstract void truncate(long length, boolean propigateEvent) throws IOException;
 	
-	public abstract void putBufferIntoFlush(DedupChunkInterface buf);
 	
 	
 

@@ -764,7 +764,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return time when file was last modified
 	 */
+	/**
+	 * 
+	 * @return time when file was last modified
+	 */
 	public long lastModified() {
+		if(this.dfGuid != null)
+			return lastModified;
 		if (this.isDirectory())
 			return new File(this.path).lastModified();
 		return lastModified;

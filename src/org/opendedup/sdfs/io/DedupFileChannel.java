@@ -226,7 +226,6 @@ public class DedupFileChannel {
 				// If the writebuffer can fit what is left, write it and
 				// quit.
 				if ((endPos) <= Main.CHUNK_LENGTH) {
-					boolean newBuf = false;
 					/*
 					 * if (endPos == Main.CHUNK_LENGTH) newBuf = true;
 					 */
@@ -243,7 +242,7 @@ public class DedupFileChannel {
 					}
 					while (writeBuffer == null) {
 						try {
-							writeBuffer = df.getWriteBuffer(filePos, newBuf);
+							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
 						} catch (BufferClosedException e) {
 							writeBuffer = null;
@@ -255,7 +254,6 @@ public class DedupFileChannel {
 					bytesLeft = 0;
 				} else {
 					int _len = Main.CHUNK_LENGTH - startPos;
-					boolean newBuf = false;
 					/*
 					 * if (_len == Main.CHUNK_LENGTH) newBuf = true;
 					 */
@@ -272,7 +270,7 @@ public class DedupFileChannel {
 					}
 					while (writeBuffer == null) {
 						try {
-							writeBuffer = df.getWriteBuffer(filePos, newBuf);
+							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
 						} catch (BufferClosedException e) {
 							SDFSLogger.getLog().debug("trying to write again");
