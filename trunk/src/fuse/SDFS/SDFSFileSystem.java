@@ -48,7 +48,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private SDFSCmds sdfsCmds;
 
 	private ConcurrentLinkedHashMap<String, File> pathMap = new Builder<String, File>()
-			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(100)
+			.concurrencyLevel(72).maximumWeightedCapacity(100)
 			.listener(new EvictionListener<String, File>() {
 				// This method is called just after a new entry has been
 				// added

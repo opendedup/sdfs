@@ -417,18 +417,25 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private ReentrantLock getDFLock = new ReentrantLock();
 
 	public DedupFile getDedupFile() throws IOException {
-		try {
+		if (this.dfGuid == null) {
 			getDFLock.lock();
-			if (this.dfGuid == null) {
-				DedupFile df = DedupFileStore.getDedupFile(this);
-				this.setDfGuid(df.getGUID(), true);
-				this.sync(true);
-				return df;
-			} else {
-				return DedupFileStore.getDedupFile(this);
+			try {
+				if (this.dfGuid == null) {
+			DedupFile df = DedupFileStore.getDedupFile(this);
+			this.dfGuid = df.getGUID();
+			SDFSLogger.getLog().debug(
+					"No DF EXISTS .... Set dedup file for "
+							+ this.getPath() + " to " + this.dfGuid);
+			this.sync();
+			return df;
+				}else {
+					return DedupFileStore.getDedupFile(this);
+				}
+			}finally {
+				getDFLock.unlock();
 			}
-		} finally {
-			getDFLock.unlock();
+		} else {
+			return DedupFileStore.getDedupFile(this);
 		}
 	}
 	
