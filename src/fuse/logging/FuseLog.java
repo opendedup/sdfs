@@ -47,7 +47,8 @@ public class FuseLog implements Log {
 
 	@Override
 	public boolean isDebugEnabled() {
-		return levels.isDebugEnabled(name);
+		return false;
+		//return levels.isDebugEnabled(name);
 	}
 
 	@Override

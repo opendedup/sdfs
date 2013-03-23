@@ -50,7 +50,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private SyncThread th = null;
 	private File bsf;
 	private RAFPool pool = null;
-	private int cacheSize = 10485760 / Main.CHUNK_LENGTH;
+	private int cacheSize = 104857600 / Main.CHUNK_LENGTH;
 	
 	LoadingCache<Long, byte []> chunks = CacheBuilder.newBuilder()
 			.maximumSize(cacheSize).concurrencyLevel(72)

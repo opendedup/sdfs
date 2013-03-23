@@ -66,7 +66,7 @@ public class DedupFileStore {
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
-		getDFLock.lock();
+
 		try {
 			if (!closing) {
 				SDFSLogger.getLog().debug(
@@ -74,19 +74,40 @@ public class DedupFileStore {
 								+ mf.getDfGuid());
 				DedupFile df = null;
 				if (mf.getDfGuid() == null) {
+					getDFLock.lock();
+					SDFSLogger.getLog().info("in create df for " + mf.getPath());
 					try {
-						df = new SparseDedupFile(mf);
-
+						if (mf.getDfGuid() == null) {
+							df = new SparseDedupFile(mf);
+						} else {
+							df = openFile.get(mf.getDfGuid());
+							if (df == null) {
+								df = openFile.get(mf.getDfGuid());
+								if (df == null) {
+									df = new SparseDedupFile(mf);
+								}
+							}
+						}
 						SDFSLogger.getLog().debug(
 								"creating new dedup file for " + mf.getPath());
 					} catch (Exception e) {
 
+					} finally {
+						getDFLock.unlock();
 					}
 				} else {
 					df = openFile.get(mf.getDfGuid());
 					if (df == null) {
-						df = new SparseDedupFile(mf);
-
+						getDFLock.lock();
+						try {
+							SDFSLogger.getLog().info("in add df for " + mf.getPath());
+						df = openFile.get(mf.getDfGuid());
+						if (df == null) {
+							df = new SparseDedupFile(mf);
+						}
+						}finally {
+							getDFLock.unlock();
+						}
 					}
 				}
 				if (df == null) {
@@ -98,7 +119,7 @@ public class DedupFileStore {
 				throw new IOException("DedupFileStore is closed");
 			}
 		} finally {
-			getDFLock.unlock();
+
 		}
 	}
 

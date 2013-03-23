@@ -842,9 +842,10 @@ public class SparseDedupFile implements DedupFile {
 				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath, -1,
 						Main.CHUNK_LENGTH);
 				this.bdb = new LongByteArrayMap(this.databasePath);
-				DedupFileStore.addOpenDedupFile(this);
+				
 				this.closed = false;
 			}
+			DedupFileStore.addOpenDedupFile(this);
 		} catch (IOException e) {
 			throw e;
 		} finally {
