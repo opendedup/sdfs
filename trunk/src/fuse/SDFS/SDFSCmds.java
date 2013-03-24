@@ -2,6 +2,7 @@ package fuse.SDFS;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,7 +19,6 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.VMDKParser;
 
 import fuse.Errno;
 import fuse.FuseException;
@@ -40,12 +40,12 @@ public class SDFSCmds {
 			"user.cmd.ids.status", "user.cmd.file.flush", "user.cmd.flush.all",
 			"user.sdfs.file.isopen", "user.sdfs.ActualBytesWritten",
 			"user.sdfs.VirtualBytesWritten", "user.sdfs.BytesRead",
-			"user.sdfs.DuplicateData", "user.sdfs.VMDK", "user.sdfs.fileGUID",
+			"user.sdfs.DuplicateData", "user.sdfs.fileGUID",
 			"user.sdfs.dfGUID", "user.sdfs.dedupAll", "user.dse.size",
 			"user.dse.maxsize" };
 
 	public static final String[] cmdDes = { "", "", "", "", "", "", "", "", "",
-			"", "", "", "", "", "", "", "", "", "", "" };
+			"", "", "", "", "", "", "", "", "", ""};
 
 	/*
 	 * public static final String[] cmdDes = {
@@ -121,9 +121,6 @@ public class SDFSCmds {
 			}
 			if (command.equalsIgnoreCase("user.sdfs.DuplicateData")) {
 				return Long.toString(mf.getIOMonitor().getDuplicateBlocks());
-			}
-			if (command.equalsIgnoreCase("user.sdfs.VMDK")) {
-				return Boolean.toString(mf.isVmdk());
 			}
 			if (command.equalsIgnoreCase("user.sdfs.fileGUID")) {
 				return mf.getGUID();
@@ -210,12 +207,6 @@ public class SDFSCmds {
 							.initErrno(Errno.ENOSPC);
 				status = takeSnapshot(path, args[1]);
 			}
-			if (command.equalsIgnoreCase("user.cmd.vmdk.make")) {
-				if (Main.volume.isFull())
-					throw new FuseException("Volume Full")
-							.initErrno(Errno.ENOSPC);
-				status = this.makeVMDK(path, args[1], args[2]);
-			}
 			if (command.equalsIgnoreCase("user.cmd.ids.clearstatus")) {
 				cmdStatus.clear();
 				status = "all status messages cleared";
@@ -264,39 +255,7 @@ public class SDFSCmds {
 		}
 	}
 
-	private synchronized String makeVMDK(String path, String fileName,
-			String size) {
-		String internalPath = this.mountedVolume + File.separator + path;
-		String externalPath = this.mountPoint + File.separator + path;
-		File parentDir = new File(internalPath);
-		if (!parentDir.isDirectory())
-			return "ERROR VMDK Creation Failed : ["
-					+ externalPath
-					+ "] is not a directory. This command can only be executed on directories";
-		File dst = new File(internalPath + File.separator + fileName);
-		if (dst.exists())
-			return "ERROR VMDK Creation Failed : [" + externalPath
-					+ File.separator + fileName + "] already exists";
-		try {
-			String units = size.substring(size.length() - 2);
-			int sz = Integer.parseInt(size.substring(0, size.length() - 2));
-			long fSize = 0;
-			if (units.equalsIgnoreCase("TB"))
-				fSize = sz * tbc;
-			if (units.equalsIgnoreCase("GB"))
-				fSize = sz * gbc;
-			if (units.equalsIgnoreCase("MB"))
-				fSize = sz * mbc;
-			VMDKParser.writeFile(internalPath, fileName, fSize);
-			return "SUCCESS VMDK Creation Success : VMDK Created in "
-					+ externalPath + File.separator + fileName;
-		} catch (Exception e) {
-			String errorMsg = "ERROR VMDK Creation Failed : for "
-					+ externalPath + File.separator + fileName + " " + size;
-			log.error(errorMsg, e);
-			return errorMsg + " because: " + e.toString();
-		}
-	}
+	
 
 	private String optimize(String srcPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);

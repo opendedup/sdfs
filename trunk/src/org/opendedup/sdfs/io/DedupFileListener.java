@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 public interface DedupFileListener {
+	void onCreate(DedupFile file);
 	void onCopyTo(String dst, DedupFile file);
 	void onAddLock(long position,long len, boolean shared,DedupFileLock lock,DedupFile file);
 	void onCreateBlankFile(long size, DedupFile file);

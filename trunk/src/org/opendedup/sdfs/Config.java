@@ -105,10 +105,7 @@ public class Config {
 				Main.hashType = cbe.getAttribute("hash-type");
 				SDFSLogger.getLog().info(
 						"Setting hash engine to " + Main.hashType);
-			}
-			Main.evictionAge = Integer.parseInt(cbe
-					.getAttribute("eviction-age"));
-			
+			}	
 			if (cbe.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe
 						.getAttribute("encrypt"));
@@ -227,8 +224,7 @@ public class Config {
 		Main.multiReadTimeout = Integer.parseInt(cache
 				.getAttribute("multi-read-timeout"));
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
-		Main.systemReadCacheSize = Integer.parseInt(cache
-				.getAttribute("system-read-cache"));
+		
 		Main.maxWriteBuffers = Integer.parseInt(cache
 				.getAttribute("max-file-write-buffers"));
 		Main.maxOpenFiles = Integer.parseInt(cache
@@ -282,9 +278,6 @@ public class Config {
 			if (localChunkStore.hasAttribute("max-repl-batch-sz"))
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore
 						.getAttribute("max-repl-batch-sz"));
-
-			Main.evictionAge = Integer.parseInt(localChunkStore
-					.getAttribute("eviction-age"));
 			if (localChunkStore.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean
 						.parseBoolean("encrypt");

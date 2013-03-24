@@ -339,17 +339,6 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("makevmdk")) {
-						try {
-							String msg = new MakeVMDKCmd().getResult(
-									cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", msg);
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
-						}
 					} else if (cmd.equalsIgnoreCase("dedup")) {
 						try {
 							String msg = new SetDedupAllCmd().getResult(

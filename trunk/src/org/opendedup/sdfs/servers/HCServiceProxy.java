@@ -1,10 +1,9 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
+
+
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
@@ -14,34 +13,12 @@ import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.StringUtils;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class HCServiceProxy {
 
 	static HashClientPool p = null;
 	private static HashChunkServiceInterface hcService = null;
-	private static int cacheLenth = 10485760 / Main.CHUNK_LENGTH;
-	private static ConcurrentLinkedHashMap<String, ByteCache> readBuffers = new Builder<String, ByteCache>()
-			.concurrencyLevel(Main.writeThreads).initialCapacity(cacheLenth)
-			.maximumWeightedCapacity(cacheLenth)
-			.listener(new EvictionListener<String, ByteCache>() {
-				// This method is called just after a new entry has been
-				// added
-				@Override
-				public void onEviction(String key, ByteCache writeBuffer) {
-				}
-			}
 
-			).build();
-
-	private static HashMap<String, byte[]> readingBuffers = new HashMap<String, byte[]>();
-	// private static LRUMap existingHashes = new
-	// LRUMap(Main.systemReadCacheSize);
-	private static ReentrantLock readlock = new ReentrantLock();
 
 	// private static boolean initialized = false;
 
@@ -155,7 +132,6 @@ public class HCServiceProxy {
 					}
 				}
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				SDFSLogger.getLog().fatal("Unable to write chunk " + hash, e1);
 				throw new IOException("Unable to write chunk " + hash);
 			} finally {
@@ -195,122 +171,37 @@ public class HCServiceProxy {
 			exists = HCServiceProxy.hcService.hashExists(hash, (short) 0);
 
 		} else {
-			String hashStr = StringUtils.getHexString(hash);
-			if (readBuffers.containsKey(hashStr)) {
-				return true;
-			}
-			/*
-			 * if (existingHashes.containsKey(hashStr)) { return true; }
-			 */
 			HashClient hc = null;
 			try {
 				hc = p.borrowObject();
-			} catch (Exception e1) {
-				SDFSLogger.getLog().fatal(
-						"unable to execute find hash for " + hashStr);
-				throw new IOException(e1);
-			}
-			try {
 				exists = hc.hashExists(hash, (short) 0);
 				if (exists) {
 					// existingHashes.put(hashStr, hashStr);
 				}
-			} catch (IOException e) {
-				throw new IOException(e);
 			} finally {
-				try {
 					p.returnObject(hc);
-				} catch (Exception e) {
-					SDFSLogger
-							.getLog()
-							.fatal("unable to return network thread object to pool",
-									e);
-				}
 			}
 		}
 		return exists;
 	}
 
-	public static boolean cacheContains(String hashStr) {
-		return readBuffers.containsKey(hashStr);
-	}
+	
 
 	public static byte[] fetchChunk(byte[] hash) throws IOException {
 		if (Main.chunkStoreLocal) {
 			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
 			return hc.getData();
 		} else {
-			String hashStr = StringUtils.getHexString(hash);
-			boolean reading = false;
-			ByteCache cache = null;
-			try {
-				cache = readBuffers.get(hashStr);
-				if (cache != null) {
-					return cache.getCache();
-				}
-			} catch (Exception e) {
-			}
-
-			try {
-				readlock.lock();
-				reading = readingBuffers.containsKey(hashStr);
-				if (!reading) {
-					readingBuffers.put(hashStr, hash);
-				}
-			} catch (Exception e) {
-			} finally {
-				readlock.unlock();
-			}
-			if (reading) {
-				int z = 0;
-				while (readingBuffers.containsKey(hashStr)) {
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						break;
-					}
-					z++;
-					if (readBuffers.containsKey(hashStr)) {
-						readingBuffers.remove(hashStr);
-						break;
-					} else if (z > Main.multiReadTimeout) {
-						if (Main.multiReadTimeout > 0)
-							SDFSLogger.getLog().info(
-									"Timeout waiting for read " + hashStr);
-						readingBuffers.remove(hashStr);
-						break;
-					}
-				}
-			}
-			try {
-				cache = readBuffers.get(hashStr);
-				if (cache != null) {
-					readingBuffers.remove(hashStr);
-					return cache.getCache();
-				}
-			} catch (Exception e) {
-			}
+			
 			HashClient hc = null;
 			try {
 				hc = p.borrowObject();
 				byte[] data = hc.fetchChunk(hash);
-				ByteCache _b = new ByteCache(data);
-				readlock.lock();
-				readBuffers.put(hashStr, _b);
-				readingBuffers.remove(hashStr);
-				// kBytesFetched = kBytesFetched + (data.length / KBYTE);
-				// chunksFetched++;
 
 				return data;
-			} catch (Exception e) {
-				SDFSLogger.getLog()
-						.warn("Unable to fetch buffer " + hashStr, e);
-				throw new IOException("Unable to fetch buffer " + hashStr);
-			} finally {
+			}  finally {
 				if (hc != null)
 					p.returnObject(hc);
-				if (readlock.isLocked())
-					readlock.unlock();
 			}
 		}
 

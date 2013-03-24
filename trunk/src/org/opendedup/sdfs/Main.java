@@ -125,7 +125,7 @@ public class Main {
 
 	// public static String hashesDBClass =
 	// "com.opendedup.collections.FileBasedCSMap";
-	public static String hashesDBClass = "org.opendedup.collections.CSByteArrayLongMap";
+	public static String hashesDBClass = "org.opendedup.collections.FileBasedCSMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
@@ -193,11 +193,7 @@ public class Main {
 	 * is used on the client.
 	 */
 	public static int PING_TIME = 15 * 1000;
-	/**
-	 * The number of chunks to keep in memory on the client for reading. The
-	 * chunks are cached in an LRU hash table. This is used on the client.
-	 */
-	public static int systemReadCacheSize = 5000;
+	
 	/**
 	 * The maximum number of writable chunks @see
 	 * com.annesam.sdfs.io.WritableCacheBuffer to keep in memory for a specific
@@ -438,7 +434,7 @@ public class Main {
 	 * Age, if older than, that data will be evicted from the Dedup Storage
 	 * Engine
 	 */
-	public static int evictionAge = 3;
+	//public static int evictionAge = 3;
 	/**
 	 * Compressed Index
 	 */

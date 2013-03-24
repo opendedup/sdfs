@@ -3,7 +3,7 @@ package org.opendedup.sdfs.io;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface MetaFileEventListener {
-	void onCreate(boolean dedup,MetaDataDedupFile mf);
+	void onCreate(MetaDataDedupFile mf);
 	void onDedupChange(boolean dedup,MetaDataDedupFile mf);
 	void onDedupFileChange(String guid,MetaDataDedupFile mf);
 	void onExecutableChange(boolean executable,MetaDataDedupFile mf);
