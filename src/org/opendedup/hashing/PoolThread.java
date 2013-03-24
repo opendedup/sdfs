@@ -1,4 +1,4 @@
-package org.opendedup.util;
+package org.opendedup.hashing;
 
 import java.util.concurrent.BlockingQueue;
 

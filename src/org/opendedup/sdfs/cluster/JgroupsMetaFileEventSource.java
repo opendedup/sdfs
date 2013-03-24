@@ -1,9 +1,7 @@
 package org.opendedup.sdfs.cluster;
 
 import org.jgroups.JChannel;
-import org.jgroups.Message;
-import org.jgroups.ReceiverAdapter;
-import org.jgroups.View;
+
 import org.jgroups.blocks.MessageDispatcher;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.MetaFileEventListener;
@@ -211,7 +209,7 @@ public class JgroupsMetaFileEventSource implements MetaFileEventListener {
 	}
 
 	@Override
-	public void onCreate(boolean dedup, MetaDataDedupFile mf) {
+	public void onCreate(MetaDataDedupFile mf) {
 		// TODO Auto-generated method stub
 		
 	}

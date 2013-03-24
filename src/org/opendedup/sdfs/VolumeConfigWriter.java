@@ -172,10 +172,6 @@ public class VolumeConfigWriter {
 			this.write_threads = Short.parseShort(cmd
 					.getOptionValue("io-write-threads"));
 		}
-		if (cmd.hasOption("io-dedup-files")) {
-			this.dedup_files = Boolean.parseBoolean(cmd
-					.getOptionValue("io-dedup-files"));
-		}
 		if (cmd.hasOption("io-multi-read-timeout")) {
 			this.multi_read_timeout = Integer.parseInt(cmd
 					.getOptionValue("io-multi-read-timeout"));
@@ -747,7 +743,7 @@ public class VolumeConfigWriter {
 				.withLongOpt("io-claim-chunks-schedule")
 				.withDescription(
 						"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
-								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 0 0/1 * * ?")
+								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 59 23 * * ?")
 				.hasArg().withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("permissions-file")

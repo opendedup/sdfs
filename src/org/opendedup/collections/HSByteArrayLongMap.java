@@ -34,6 +34,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -58,8 +59,8 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CommandLineProgressBar;
-import org.opendedup.util.OpenBitSetSerialize;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 
@@ -1254,7 +1255,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 	private boolean closed = true;
 	private boolean firstGCRun = true;
 	private SyncThread st = null;
-	private OpenBitSet freeSlots = null;
 	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent(
 			"Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
@@ -1562,34 +1562,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 		return this.size;
 	}
 
-	private void addFreeSlot(long position) {
-		this.lock();
-		try {
-			int pos = (int) (position / Main.CHUNK_LENGTH);
-			if (pos >= 0)
-				this.freeSlots.set(pos);
-			else if (pos < 0) {
-				SDFSLogger.getLog().info("Position is less than 0 " + pos);
-			}
-		} finally {
-			this.unlock();
-		}
-	}
-
-	protected long getFreeSlot() {
-		this.lock();
-		try {
-			int slot = this.freeSlots.nextSetBit(0);
-			if (slot != -1) {
-				this.freeSlots.clear(slot);
-				return ((long) slot * (long) Main.CHUNK_LENGTH);
-			} else
-				return slot;
-		} finally {
-			this.unlock();
-		}
-	}
-
 	@Override
 	public void claimRecords(SDFSEvent evt) throws IOException {
 		if (this.isClosed())
@@ -1642,14 +1614,12 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 		// this.flushFullBuffer();
 		if (persist) {
 			if (!cm.recoverd) {
-				cm.setcPos(this.getFreeSlot());
 				cm.persistData(true);
 			}
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 			if (added) {
 
 			} else {
-				this.addFreeSlot(cm.getcPos());
 				cm = null;
 			}
 		} else {
@@ -1710,10 +1680,7 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 					throw new IOException("hashtable [" + this.fileName
 							+ "] is close");
 				}
-				try {
-					this.addFreeSlot(cm.getcPos());
-				} catch (Exception e) {
-				}
+				
 
 				return true;
 			}
@@ -1756,7 +1723,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 					_segments[i].iterInit();
 					long fPos = _segments[i].removeNextOldRecord(time);
 					while (fPos != -1) {
-						this.addFreeSlot(fPos);
 						rem++;
 						fPos = _segments[i].removeNextOldRecord(time);
 					}
@@ -1764,10 +1730,10 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 			}
 		}
 		tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
-				+ this.freeSlots.cardinality() + "]");
+				+ HCServiceProxy.getFreeBlocks() + "]");
 		SDFSLogger.getLog().info(
 				"Removed [" + rem + "] records. Free slots ["
-						+ this.freeSlots.cardinality() + "]");
+						+ HCServiceProxy.getFreeBlocks() + "]");
 		return rem;
 	}
 
@@ -1795,7 +1761,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 
 	@Override
 	public void commitCompact(boolean force) throws IOException {
-		this.freeSlots.clear(0, this.freeSlots.size());
 		this.close();
 		FileUtils.deleteDirectory(new File(this.origFileName).getParentFile());
 		SDFSLogger.getLog().info(
@@ -1836,20 +1801,18 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 			File bsf = new File(path + "ofreebit.map");
 			if (!bsf.exists()) {
 				SDFSLogger.getLog().debug("Looks like a new HashStore");
-				this.freeSlots = new OpenBitSet();
 			} else {
 				SDFSLogger.getLog().info(
 						"Loading freeslots from " + bsf.getPath());
 				try {
 
-					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
 					bsf.delete();
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
 							"Unable to load bitset from " + bsf.getPath(), e);
 				}
 				SDFSLogger.getLog().info(
-						"Loaded [" + this.freeSlots.cardinality()
+						"Loaded [" + HCServiceProxy.getFreeBlocks()
 								+ "] free slots");
 			}
 			System.out.println("Loading Hashtable Entries");
@@ -1959,15 +1922,6 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 		try {
 			for (Segment seg : _segments) {
 				seg.close();
-			}
-			try {
-				File outFile = new File(this.fileName + "ofreebit.map");
-				OpenBitSetSerialize.writeOut(outFile.getPath(), this.freeSlots);
-				this.freeSlots.clear(0, this.freeSlots.size());
-			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to serialize free bits bitmap " + this.fileName
-								+ "ofreebit.map", e);
 			}
 		} finally {
 			this.unlock();

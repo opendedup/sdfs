@@ -75,7 +75,6 @@ public class DedupFileStore {
 				DedupFile df = null;
 				if (mf.getDfGuid() == null) {
 					getDFLock.lock();
-					SDFSLogger.getLog().info("in create df for " + mf.getPath());
 					try {
 						if (mf.getDfGuid() == null) {
 							df = new SparseDedupFile(mf);
@@ -100,7 +99,6 @@ public class DedupFileStore {
 					if (df == null) {
 						getDFLock.lock();
 						try {
-							SDFSLogger.getLog().info("in add df for " + mf.getPath());
 						df = openFile.get(mf.getDfGuid());
 						if (df == null) {
 							df = new SparseDedupFile(mf);

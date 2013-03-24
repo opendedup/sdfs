@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -16,25 +17,18 @@ import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.ThreadPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
-import org.opendedup.util.ThreadPool;
-import org.opendedup.util.VMDKParser;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-
-/*
- import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
- import com.googlecode.concurrentlinkedhashmap.EvictionListener;
- import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
- */
 
 public class SparseDedupFile implements DedupFile {
 
@@ -329,21 +323,6 @@ public class SparseDedupFile implements DedupFile {
 					}
 					if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk()) {
 						mf.getIOMonitor().removeDuplicateBlock(true);
-					}
-				}
-				if (writeBuffer.getFilePosition() == 0
-						&& mf.getPath().endsWith(".vmdk")) {
-					try {
-						VMDKData data = VMDKParser.parserVMDKFile(writeBuffer
-								.getFlushedBuffer());
-						if (data != null) {
-							mf.setVmdk(true);
-							SDFSLogger.getLog().debug(data.toString());
-						}
-					} catch (Exception e) {
-						SDFSLogger.getLog().warn(
-								"Unable to parse vmdk header for  "
-										+ mf.getPath(), e);
 					}
 				}
 
@@ -702,20 +681,6 @@ public class SparseDedupFile implements DedupFile {
 				}
 				try {
 					int nwb = this.writeCache();
-					Object[] buffers = this.flushingBuffers.values().toArray();
-
-					nwb = 0;
-					for (int i = 0; i < buffers.length; i++) {
-						WritableCacheBuffer buf = (WritableCacheBuffer) buffers[i];
-						try {
-							buf.close();
-						} catch (Exception e) {
-							SDFSLogger.getLog().debug(
-									"while closing position "
-											+ buf.getFilePosition(), e);
-						}
-						nwb++;
-					}
 					SDFSLogger.getLog().debug("Flushed " + nwb + " buffers");
 
 				} catch (Exception e) {
