@@ -43,7 +43,8 @@ public class RemoveChunksCmd implements IOClientCmd {
 		}
 		byte[] b = new byte[1 + 8 + 1 + 4 + ob.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.put(NetworkCMDS.RUN_FDISK);
+		buf.put(NetworkCMDS.RUN_REMOVE);
+		buf.putLong(time);
 		if(force)
 			buf.put((byte)1);
 		else
@@ -84,7 +85,7 @@ public class RemoveChunksCmd implements IOClientCmd {
 
 	@Override
 	public byte getCmdID() {
-		return NetworkCMDS.RUN_FDISK;
+		return NetworkCMDS.RUN_REMOVE;
 	}
 	
 	public long removedHashesCount() {

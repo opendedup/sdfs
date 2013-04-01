@@ -8,8 +8,8 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -65,6 +65,7 @@ public class Volume implements java.io.Serializable {
 	private VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
+	private byte clusterCopies = 2;
 
 	protected boolean volumeFull = false;
 
@@ -135,6 +136,12 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));
+		if(vol.hasAttribute("cluster-block-copies")) {
+			this.clusterCopies = Byte.valueOf(vol.getAttribute("cluster-block-copies"));
+			if(this.clusterCopies >7) {
+				this.clusterCopies = 7;
+			}
+		}
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -311,6 +318,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("perf-mon-file", this.perfMonFile);
+		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		return root;
 	}
 
@@ -339,6 +347,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("perf-mon-file", this.perfMonFile);
+		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		return doc;
 	}
 
@@ -398,5 +407,13 @@ public class Volume implements java.io.Serializable {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+	}
+
+	public byte getClusterCopies() {
+		return clusterCopies;
+	}
+
+	public void setClusterCopies(byte clusterCopies) {
+		this.clusterCopies = clusterCopies;
 	}
 }

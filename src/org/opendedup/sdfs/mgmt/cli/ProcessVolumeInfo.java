@@ -49,6 +49,8 @@ public class ProcessVolumeInfo {
 						StorageUnit.of(aWriteBites).format(aWriteBites));
 				System.out.printf("Volume Data Read : %s\n",
 						StorageUnit.of(readBytes).format(readBytes));
+				System.out.printf("Cluster Block Copies : %s\n",
+						dse.getAttribute("cluster-block-copies"));
 				if (dedupSz == 0 || aWriteBites == 0) {
 					System.out
 							.printf("Volume Virtual Dedup Rate (Dup/Total Bytes Written) : %d%%\n",

@@ -58,7 +58,8 @@ public class HCServiceProxy {
 		if(Main.chunkStoreLocal)
 			hcService.processHashClaims(evt);
 		else {
-			new ClaimHashesCmd(evt);
+			new ClaimHashesCmd(evt).executeCmd(socket);
+			
 		}
 	}
 
@@ -77,6 +78,7 @@ public class HCServiceProxy {
 			return hcService.removeStailHashes(ms, forceRun, evt);
 		else {
 			RemoveChunksCmd cmd = new RemoveChunksCmd(ms,forceRun,evt);
+			cmd.executeCmd(socket);
 			return cmd.removedHashesCount();
 		}
 			
@@ -99,10 +101,8 @@ public class HCServiceProxy {
 
 	public static long getMaxSize() {
 		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().debug("local returning maximum size");
 			return HCServiceProxy.hcService.getMaxSize();
 		} else {
-			SDFSLogger.getLog().debug("remote returning maximum size");
 			return socket.getMaxSize();
 		}
 	}
@@ -142,7 +142,7 @@ public class HCServiceProxy {
 		} else {
 			try {
 				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, aContents.length,
-						false, (byte)1);
+						false, Main.volume.getClusterCopies());
 				cmd.executeCmd(socket);
 				return cmd.reponse();
 			} catch (Exception e1) {

@@ -2,8 +2,8 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
+
 import java.io.IOException;
-import java.net.InetAddress;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -111,6 +111,7 @@ public class VolumeConfigWriter {
 	private byte clusterMemberID = 0;
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	private boolean clusterEnabled = false;
+	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 
 	public void parseCmdLine(String[] args) throws Exception {
@@ -514,6 +515,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
 		vol.setAttribute("cluster-id",this.clusterID);
+		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -1013,6 +1015,7 @@ public class VolumeConfigWriter {
 						options);
 	}
 
+	@SuppressWarnings("unused")
 	private static long calcMem(long dseSize, int blocksz) {
 		double mem = (dseSize / blocksz) * 25;
 		mem = (mem / 1024) / 1024;
