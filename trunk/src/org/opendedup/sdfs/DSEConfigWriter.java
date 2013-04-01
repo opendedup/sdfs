@@ -2,8 +2,8 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
+
 import java.io.IOException;
-import java.net.InetAddress;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,11 +26,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
-import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;

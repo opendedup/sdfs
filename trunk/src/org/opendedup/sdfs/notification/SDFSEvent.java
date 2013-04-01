@@ -415,7 +415,12 @@ java.io.Serializable {
 		return (Element) root.cloneNode(true);
 	}
 
-	public static class Level {
+	public static class Level implements
+	java.io.Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2246117933197717794L;
 		private String type = "";
 
 		protected Level(String type) {
@@ -428,7 +433,12 @@ java.io.Serializable {
 		}
 	}
 
-	public static class Type {
+	public static class Type implements
+	java.io.Serializable{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private String type = "";
 
 		protected Type(String type) {

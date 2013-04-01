@@ -67,10 +67,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		channel.connect(clusterID);
 		server = new DSEServer(channel.getAddressAsString(), id, false);
 		server.address = channel.getAddress();
-		this.serverState.put(channel.getAddress(), server);
 		channel.getState(null, 10000);
-
-		// new StateHandler().start();
+		if(servers[this.id] != null) {
+			String err = "Duplicate ID found [" + this.id + "] with " + servers[this.id].address;
+			SDFSLogger.getLog().fatal(err);
+			throw new IOException(err);
+		}
 		th = new Thread(this);
 		th.start();
 		SDFSLogger.getLog().info("Started Cluster DSE Listener");
@@ -271,6 +273,13 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			synchronized (serverState) {
 				serverState.clear();
 				serverState.putAll(list);
+				synchronized (servers) {
+					Iterator<DSEServer> iter = serverState.values().iterator();
+					while (iter.hasNext()) {
+						DSEServer s = iter.next();
+						servers[s.id] = s;
+					}
+				}
 			}
 			SDFSLogger.getLog().debug(
 					"received state (" + list.size() + " state");

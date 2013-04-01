@@ -6,6 +6,10 @@ import org.w3c.dom.Element;
 
 public class BlockImportEvent extends SDFSEvent {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public long blocksImported;
 	public long bytesImported;
 	public long filesImported;

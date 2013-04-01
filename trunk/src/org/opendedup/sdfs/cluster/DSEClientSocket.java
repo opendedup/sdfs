@@ -25,6 +25,7 @@ import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.DSEServer;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -194,6 +195,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 				}
 			}
+			if(serverState.size() < Main.volume.getClusterCopies())
+				SDFSLogger.getLog().warn("Will not be able to fulfill block redundancy requirements. Current number of DSE Servers is less than " +Main.volume.getClusterCopies());
 		}
 		SDFSLogger.getLog().debug(
 				server + " - size : " + serverState.size()

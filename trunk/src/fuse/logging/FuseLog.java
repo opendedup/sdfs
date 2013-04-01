@@ -187,6 +187,7 @@ public class FuseLog implements Log {
 			}
 		}
 
+		@SuppressWarnings("unused")
 		boolean isDebugEnabled(String name) {
 			return getLevelValue(name) <= LEVEL_DEBUG;
 		}

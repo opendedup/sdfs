@@ -2,6 +2,7 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -15,7 +16,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-import com.sun.org.apache.xml.internal.serializer.utils.Utils;
 
 public class ClaimHashesCmd implements IOClientCmd {
 	boolean exists = false;
