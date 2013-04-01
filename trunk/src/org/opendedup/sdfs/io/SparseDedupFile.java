@@ -310,10 +310,13 @@ public class SparseDedupFile implements DedupFile {
 			}
 			boolean doop = false;
 			try {
-				doop = HCServiceProxy.writeChunk(hash,
+				byte [] hashloc = HCServiceProxy.writeChunk(hash,
 						writeBuffer.getFlushedBuffer(),
 						writeBuffer.getLength(), writeBuffer.capacity(),
 						mf.isDedup());
+				if(hashloc[0] == 1)
+					doop = true;
+				writeBuffer.setHashLoc(hashloc);
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
 				if (!doop) {
@@ -363,10 +366,10 @@ public class SparseDedupFile implements DedupFile {
 
 			if (mf.isDedup() || doop) {
 				chunk = new SparseDataChunk(doop, hash, false,
-						System.currentTimeMillis());
+						writeBuffer.getHashLoc());
 			} else {
 				chunk = new SparseDataChunk(doop, hash, true,
-						System.currentTimeMillis());
+						writeBuffer.getHashLoc());
 				this.chunkStore.put(filePosition,
 						writeBuffer.getFlushedBuffer());
 			}
@@ -416,7 +419,7 @@ public class SparseDedupFile implements DedupFile {
 				ck = this.getHash(chunkPos, true);
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(ck.getHash(), chunkPos,
-						ck.getLength(), this);
+						ck.getLength(), this,ck.getHashLoc());
 			} else {
 				writeBuffer = new WritableCacheBuffer(ck, this);
 				writeBuffer.setPrevDoop(ck.isDoop());
@@ -871,13 +874,16 @@ public class SparseDedupFile implements DedupFile {
 				WritableCacheBuffer writeBuffer = null;
 				if (pck.isLocalData() && mf.isDedup()) {
 					byte[] chunk = chunkStore.get(l);
-					boolean doop = HCServiceProxy.writeChunk(pck.getHash(),
+					byte [] hashloc = HCServiceProxy.writeChunk(pck.getHash(),
 							chunk, Main.CHUNK_LENGTH, Main.CHUNK_LENGTH,
 							mf.isDedup());
-
+					boolean doop = false;
+					if(hashloc[0]==1)
+						doop = true;
 					DedupChunk ck = new DedupChunk(pck.getHash(), chunk, l,
-							Main.CHUNK_LENGTH);
+							Main.CHUNK_LENGTH,pck.getHashLoc());
 					writeBuffer = new WritableCacheBuffer(ck, this);
+					writeBuffer.setHashLoc(hashloc);
 					this.updateMap(writeBuffer, writeBuffer.getHash(), doop);
 					ck = null;
 					chunk = null;
@@ -920,8 +926,9 @@ public class SparseDedupFile implements DedupFile {
 				pos = l;
 				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
 				if (pck.isLocalData()) {
-					boolean doop = HCServiceProxy.hashExists(pck.getHash());
-					if (doop) {
+					byte [] exists = HCServiceProxy.hashExists(pck
+							.getHash());
+					if (exists[0]!= -1) {
 						doops++;
 						pck.setLocalData(false);
 						this.bdb.put(l, pck.getBytes());
@@ -983,11 +990,11 @@ public class SparseDedupFile implements DedupFile {
 				boolean dataEmpty = !pck.isLocalData();
 				if (dataEmpty) {
 					ck = new DedupChunk(pck.getHash(), place,
-							Main.CHUNK_LENGTH, false);
+							Main.CHUNK_LENGTH, false,pck.getHashLoc());
 				} else {
 					byte dk[] = chunkStore.get(place);
 					ck = new DedupChunk(pck.getHash(), dk, place,
-							Main.CHUNK_LENGTH);
+							Main.CHUNK_LENGTH,pck.getHashLoc());
 				}
 				ck.setDoop(pck.isDoop());
 				pck = null;
@@ -1066,7 +1073,7 @@ public class SparseDedupFile implements DedupFile {
 
 	private DedupChunk createNewChunk(long location) {
 		DedupChunk ck = new DedupChunk(new byte[HashFunctionPool.hashLength],
-				location, Main.CHUNK_LENGTH, true);
+				location, Main.CHUNK_LENGTH, true,new byte[8]);
 		return ck;
 	}
 

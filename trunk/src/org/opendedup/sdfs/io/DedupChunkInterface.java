@@ -10,7 +10,10 @@ public interface DedupChunkInterface {
 	 */
 
 	public abstract byte[] getHash();
-
+	
+	public abstract byte [] getHashLoc();
+	
+	public abstract void setHashLoc(byte [] hashloc);
 	/**
 	 * 
 	 * @return gets the lenth of the DedupChunk

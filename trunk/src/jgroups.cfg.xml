@@ -1,3 +1,4 @@
+
 <config xmlns="urn:org:jgroups"
 
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -88,15 +89,13 @@
 
             min_interval="10000"/>
 
-    <FD_SOCK/>
-
-    <FD_ALL/>
+    <FD_ALL interval="1000" timeout="2000"/>
 
     <VERIFY_SUSPECT timeout="1500"  />
 
     <BARRIER />
 
-    <pbcast.NAKACK use_stats_for_retransmission="false"
+    <pbcast.NAKACK 
 
                    exponential_backoff="0"
 
@@ -129,3 +128,5 @@
     <pbcast.STATE_TRANSFER />
 
 </config>
+
+           

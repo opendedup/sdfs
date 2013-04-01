@@ -375,7 +375,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public IOMonitor getIOMonitor() {
 		if (monitor == null)
-			monitor = new IOMonitor();
+			monitor = new IOMonitor(this);
 		return monitor;
 	}
 
@@ -690,7 +690,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (!f.exists()) {
 			SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
 			this.guid = UUID.randomUUID().toString();
-			monitor = new IOMonitor();
+			monitor = new IOMonitor(this);
 			this.owner_id = Main.defaultOwner;
 			this.group_id = Main.defaultGroup;
 			this.permissions = Main.defaultFilePermissions;
@@ -1120,6 +1120,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
+		SDFSLogger.getLog().debug("reading in file " + this.path);
 		in.readLong();
 		this.length = in.readLong();
 		this.lastModified = in.readLong();
@@ -1150,7 +1151,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else {
 			byte[] mlb = new byte[ml];
 			in.read(mlb);
-			this.monitor = new IOMonitor();
+			this.monitor = new IOMonitor(this);
 			monitor.fromByteArray(mlb);
 		}
 		this.vmdk = in.readBoolean();
@@ -1177,6 +1178,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
+		SDFSLogger.getLog().debug("writing out file " + this.path);
 		out.writeLong(-1);
 		out.writeLong(length);
 		out.writeLong(lastModified);
@@ -1216,7 +1218,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		byte[] vb = this.version.getBytes();
 		out.writeInt(vb.length);
 		out.write(vb);
-
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException,

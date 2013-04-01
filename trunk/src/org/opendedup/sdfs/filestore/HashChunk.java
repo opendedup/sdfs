@@ -1,6 +1,9 @@
 package org.opendedup.sdfs.filestore;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 /**
  * 
@@ -12,11 +15,10 @@ import java.io.Serializable;
  * @see TCHashStore
  * 
  */
-public class HashChunk implements Serializable {
+public class HashChunk implements Externalizable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -719101848617839457L;
 	// The name of the hash chunk. This is the md5 or sha hash
 	private byte[] name;
 	// the start position to read or write from the byte array. This always 0
@@ -131,6 +133,28 @@ public class HashChunk implements Serializable {
 	@Override
 	public String toString() {
 		return name + " start=" + this.start + " len=" + this.len;
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		this.compressed = in.readBoolean();
+		short hl = in.readShort();
+		this.name = new byte[hl];
+		in.read(name);
+		this.len = in.readInt();
+		this.data = new byte[len];
+		in.read(data);
+		
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeBoolean(compressed);
+		out.writeShort((short)this.name.length);
+		out.write(this.name);
+		out.writeInt(data.length);
+		out.write(data);
 	}
 
 }

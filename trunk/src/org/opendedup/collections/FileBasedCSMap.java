@@ -243,6 +243,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				}
 			}
 		}
+		tEvt.actionCount = rem;
 		tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
 				+ HCServiceProxy.getFreeBlocks() + "]");
 		SDFSLogger.getLog().info(

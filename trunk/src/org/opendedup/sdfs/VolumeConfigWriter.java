@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,6 +29,7 @@ import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
+import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -105,6 +107,10 @@ public class VolumeConfigWriter {
 	private boolean useDSESize = true;
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
+	private String clusterID = RandomGUID.getGuid();
+	private byte clusterMemberID = 0;
+	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
+	private boolean clusterEnabled = false;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 
 	public void parseCmdLine(String[] args) throws Exception {
@@ -507,6 +513,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		vol.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
+		vol.setAttribute("cluster-id",this.clusterID);
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -528,7 +535,10 @@ public class VolumeConfigWriter {
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
-		
+		cs.setAttribute("cluster-id", this.clusterID);
+		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
+		cs.setAttribute("cluster-config", this.clusterConfig);
+		cs.setAttribute("cluster-enabled", Boolean.toString(this.clusterEnabled));
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
@@ -544,16 +554,6 @@ public class VolumeConfigWriter {
 		network.setAttribute("upstream-password", this.upstreamPassword);
 		network.setAttribute("use-ssl", "true");
 		cs.appendChild(network);
-		Element launchParams = xmldoc.createElement("launch-params");
-		launchParams.setAttribute("class-path", Main.classPath);
-		launchParams.setAttribute("java-path", Main.javaPath);
-		long mem = calcMem(this.chunk_store_allocation_size,
-				this.chunk_size * 1024);
-		long xmn = calcXmn(this.chunk_store_allocation_size,
-				this.chunk_size * 1024);
-		launchParams.setAttribute("java-options", Main.javaOptions + " -Xmx"
-				+ mem + "m -Xmn" + xmn + "m");
-		root.appendChild(launchParams);
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth",
 				Boolean.toString(this.sdfsCliRequireAuth));

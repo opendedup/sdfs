@@ -11,7 +11,8 @@ public class SparseDataChunk {
 	private boolean doop;
 	private byte[] hash;
 	private boolean localData = false;
-	private long timeAdded = 0;
+	//private long timeAdded = 0;
+	private byte [] hashlocs;
 	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
@@ -32,15 +33,16 @@ public class SparseDataChunk {
 			this.localData = false;
 		else
 			this.localData = true;
-		this.timeAdded = buf.getLong();
+		hashlocs = new byte [8];
+		buf.get(hashlocs);
 	}
 
 	public SparseDataChunk(boolean doop, byte[] hash, boolean localData,
-			long timeAdded) {
+			byte [] hashlocs) {
 		this.doop = doop;
 		this.hash = hash;
 		this.localData = localData;
-		this.timeAdded = timeAdded;
+		this.hashlocs = hashlocs;
 	}
 
 	public boolean isDoop() {
@@ -62,7 +64,7 @@ public class SparseDataChunk {
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
-		buf.putLong(this.timeAdded);
+		buf.put(this.hashlocs);
 		return buf.array();
 	}
 
@@ -73,9 +75,9 @@ public class SparseDataChunk {
 	public void setLocalData(boolean local) {
 		this.localData = local;
 	}
-
-	public long getTimeAdded() {
-		return timeAdded;
+	
+	public byte [] getHashLoc() {
+		return this.hashlocs;
 	}
 
 }

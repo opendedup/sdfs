@@ -36,8 +36,10 @@ public class ConsistancyCheck {
 				}
 				evt.curCt = currentCount;
 				data = store.getNextChunck();
-				data.recoverd = true;
-				currentCount++;
+				if(data != null) {
+					data.recoverd = true;
+					currentCount++;
+				}
 			}
 			bar.finish();
 			System.out.println("Finished");

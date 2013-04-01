@@ -60,7 +60,6 @@ public class ManualGC {
 				rm = HCServiceProxy.removeStailHashes(tm
 						- milliseconds, false,evt);
 			}
-			
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection",
 					e);

@@ -119,6 +119,10 @@ public class Config {
 			if (cbe.hasAttribute("max-repl-batch-sz"))
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
+			if(cbe.hasAttribute("cluster-id"))
+				Main.DSEClusterID = cbe.getAttribute("cluster-id");
+			if(cbe.hasAttribute("cluster-member-id"))
+				Main.DSEClusterMemberID = Byte.parseByte(cbe.getAttribute("cluster-member-id"));
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
@@ -148,14 +152,18 @@ public class Config {
 				SDFSLogger.getLog().info(
 						"creating chunk store at " + Main.chunkStore);
 				f.mkdirs();
+				if(!f.mkdirs())
+					throw new IOException("Unable to create " +f.getPath());
 			}
 
 			f = new File(Main.hashDBStore);
 			if (!f.exists()) {
 				SDFSLogger.getLog().info(
 						"creating hash database store at " + Main.chunkStore);
-				f.mkdirs();
+				if(!f.mkdirs())
+					throw new IOException("Unable to create " +f.getPath());
 			}
+			
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -251,7 +259,10 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
-		
+		if(localChunkStore.hasAttribute("cluster-id"))
+			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
+		if(localChunkStore.hasAttribute("cluster-member-id"))
+			Main.DSEClusterMemberID = Byte.parseByte(localChunkStore.getAttribute("cluster-member-id"));
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");

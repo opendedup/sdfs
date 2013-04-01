@@ -21,6 +21,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private boolean writable = false;
 	private boolean doop = false;
 	private ReentrantLock lock = new ReentrantLock();
+	private byte [] hashloc;
 
 	public DedupChunk(long position) {
 		this.position = position;
@@ -35,13 +36,15 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(byte[] hash, long position, int length, boolean newChunk) {
+	public DedupChunk(byte[] hash, long position, int length, boolean newChunk,byte [] hashloc) {
 		this.hash = hash;
 		this.length = length;
 		this.position = position;
 		this.newChunk = newChunk;
 		if (this.isNewChunk())
 			data = new byte[this.length];
+		else
+			this.hashloc = hashloc;
 	}
 
 	/**
@@ -53,12 +56,13 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(byte[] hash, byte[] data, long position, int length) {
+	public DedupChunk(byte[] hash, byte[] data, long position, int length,byte [] hashloc) {
 		this.hash = hash;
 		this.data = data;
 		this.length = length;
 		this.position = position;
 		this.newChunk = false;
+		this.hashloc = hashloc;
 	}
 
 	/* (non-Javadoc)
@@ -76,7 +80,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 			if (data != null)
 				return data;
 			else
-				return HCServiceProxy.fetchChunk(hash);
+				return HCServiceProxy.fetchChunk(hash,hashloc);
 		} finally {
 			this.lock.unlock();
 		}
@@ -133,7 +137,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 				return data;
 			}
 			else {
-				return HCServiceProxy.fetchChunk(hash);
+				return HCServiceProxy.fetchChunk(hash,hashloc);
 			}
 		} finally {
 			this.lock.unlock();
@@ -284,6 +288,16 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public void setPrevDoop(boolean prevDoop) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public byte[] getHashLoc() {
+		return this.hashloc;
+	}
+
+	@Override
+	public void setHashLoc(byte[] hashloc) {
+		this.hashloc = hashloc;
 	}
 
 }
