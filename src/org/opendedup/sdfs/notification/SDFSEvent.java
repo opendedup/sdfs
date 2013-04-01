@@ -19,7 +19,12 @@ import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class SDFSEvent {
+public class SDFSEvent implements
+java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7418485011806466368L;
 	public Type type = null;
 	public Level level;
 	public String shortMsg = null;
@@ -29,37 +34,38 @@ public class SDFSEvent {
 	public long curCt = 1;
 	public long startTime;
 	public long endTime = -1;
+	public long actionCount = 0;
 	public String uid = null;
 	public String extendedInfo = "";
 	private ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
 	public String puid;
-	public static final Type GC = new Type("Garbage Collection");
-	public static final Type FLUSHALL = new Type("Flush All Buffers");
-	public static final Type FDISK = new Type("File Check");
-	public static final Type WAIT = new Type("Waiting to Run Again");
-	public static final Type CLAIMR = new Type("Claim Records");
-	public static final Type REMOVER = new Type("Remove Records");
-	public static final Type AIMPORT = new Type("Replication Meta-Data File Import");
-	public static final Type IMPORT = new Type("Replication Import");
-	public static final Type AOUT = new Type("Replication Archive Out");
-	public static final Type MOUNT = new Type("Mount Volume");
-	public static final Type COMPACT = new Type("Compaction");
-	public static final Type UMOUNT = new Type("Unmount Volume");
-	public static final Type LHASHDB = new Type("Loading Hash Database Task");
-	public static final Type FSCK = new Type("Consistancy Check");
-	public static final Type MIMPORT = new Type("Replication Block Data"
+	public transient static final Type GC = new Type("Garbage Collection");
+	public transient static final Type FLUSHALL = new Type("Flush All Buffers");
+	public transient static final Type FDISK = new Type("File Check");
+	public transient static final Type WAIT = new Type("Waiting to Run Again");
+	public transient static final Type CLAIMR = new Type("Claim Records");
+	public transient static final Type REMOVER = new Type("Remove Records");
+	public transient static final Type AIMPORT = new Type("Replication Meta-Data File Import");
+	public transient static final Type IMPORT = new Type("Replication Import");
+	public transient static final Type AOUT = new Type("Replication Archive Out");
+	public transient static final Type MOUNT = new Type("Mount Volume");
+	public transient static final Type COMPACT = new Type("Compaction");
+	public transient static final Type UMOUNT = new Type("Unmount Volume");
+	public transient static final Type LHASHDB = new Type("Loading Hash Database Task");
+	public transient static final Type FSCK = new Type("Consistancy Check");
+	public transient static final Type MIMPORT = new Type("Replication Block Data"
 			+ " Import");
-	public static final Type FIXDSE = new Type("Volume Recovery Task");
-	public static final Type SNAP = new Type("Take Snapshot");
-	public static final Type EXPANDVOL = new Type("Expand Volume");
-	public static final Type DELFILE = new Type("Delete File");
-	public static final Type PERFMON = new Type("Performance Monitor");
-	public static final Type TEST = new Type("Testing 123");
-	public static final Level RUNNING = new Level("running");
-	public static final Level INFO = new Level("info");
-	public static final Level WARN = new Level("warning");
-	public static final Level ERROR = new Level("error");
-	private static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
+	public transient static final Type FIXDSE = new Type("Volume Recovery Task");
+	public transient static final Type SNAP = new Type("Take Snapshot");
+	public transient static final Type EXPANDVOL = new Type("Expand Volume");
+	public transient static final Type DELFILE = new Type("Delete File");
+	public transient static final Type PERFMON = new Type("Performance Monitor");
+	public transient static final Type TEST = new Type("Testing 123");
+	public transient static final Level RUNNING = new Level("running");
+	public transient static final Level INFO = new Level("info");
+	public transient static final Level WARN = new Level("warning");
+	public transient static final Level ERROR = new Level("error");
+	private transient static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
 			50, .075F, false);
 
 	SimpleDateFormat format = new SimpleDateFormat(
@@ -91,6 +97,10 @@ public class SDFSEvent {
 		evt.puid = this.uid;
 		this.children.add(evt);
 	}
+	
+	public ArrayList<SDFSEvent> getChildren() {
+		return this.children;
+	}
 
 	public boolean isDone() {
 		return this.endTime > 0;
@@ -121,7 +131,7 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent archiveImportEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(AIMPORT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(AIMPORT, getTarget(),
 				shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
@@ -130,7 +140,7 @@ public class SDFSEvent {
 	}
 	
 	public static SDFSEvent importEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(IMPORT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(),
 				shortMsg,RUNNING);
 		return event;
 	}
@@ -142,37 +152,37 @@ public class SDFSEvent {
 	}
 	
 	public static SDFSEvent perfMonEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(PERFMON, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(PERFMON, getTarget(),
 				shortMsg,RUNNING);
 		return event;
 	}
 	
 	public static SDFSEvent umountEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(UMOUNT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(UMOUNT, getTarget(),
 				shortMsg,RUNNING);
 		return event;
 	}
 	
 	public static SDFSEvent archiveOutEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(AOUT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(AOUT, getTarget(),
 				shortMsg,RUNNING);
 		return event;
 	}
 	
 	public static SDFSEvent compactEvent() {
-		SDFSEvent event = new SDFSEvent(COMPACT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(COMPACT, getTarget(),
 				"Running Compaction on DSE, this may take a while",RUNNING);
 		return event;
 	}
 	
 	public static SDFSEvent mountEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MOUNT, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(MOUNT, getTarget(),
 				shortMsg,RUNNING);
 		return event;
 	}
 
 	public static SDFSEvent consistancyCheckEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(FSCK, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(FSCK, getTarget(),
 				shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
@@ -181,7 +191,7 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent loadHashDBEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(LHASHDB, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(LHASHDB, getTarget(),
 				shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
@@ -190,7 +200,7 @@ public class SDFSEvent {
 	}
 	
 	public static SDFSEvent flushAllBuffers() {
-		SDFSEvent event = new SDFSEvent(FLUSHALL, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(FLUSHALL, getTarget(),
 				"Flushing all buffers",RUNNING);
 		return event;
 	}
@@ -198,7 +208,7 @@ public class SDFSEvent {
 	public static SDFSEvent snapEvent(String shortMsg, File src)
 			throws IOException {
 
-		SDFSEvent event = new SDFSEvent(SNAP, Main.volume.getName(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(SNAP, getTarget(), shortMsg,RUNNING);
 		if (src.isDirectory())
 			event.maxCt = FileCounts.getCount(src, true);
 		else
@@ -207,7 +217,7 @@ public class SDFSEvent {
 	}
 
 	public static BlockImportEvent metaImportEvent(String shortMsg,SDFSEvent evt) {
-		BlockImportEvent event = new BlockImportEvent(Main.volume.getName(),
+		BlockImportEvent event = new BlockImportEvent(getTarget(),
 				shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
@@ -216,7 +226,7 @@ public class SDFSEvent {
 	}
 	
 	public static SDFSEvent deleteFileEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(),
 				"File " + f.getPath() + " deleted",RUNNING);
 		event.endEvent(
 				"File " + f.getPath() + " deleted",INFO);
@@ -224,14 +234,14 @@ public class SDFSEvent {
 	}
 	
 	public static SDFSEvent deleteFileFailedEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(),
 				"File " + f.getPath() + " delete failed",WARN);
 		event.endEvent("File " + f.getPath() + " delete failed",WARN);
 		return event;
 	}
 
 	public static SDFSEvent claimInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(CLAIMR, Main.volume.getName(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(CLAIMR, getTarget(), shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
 			}catch(Exception e) {}
@@ -239,7 +249,7 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent waitEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(WAIT, Main.volume.getName(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(WAIT, getTarget(), shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
 			}catch(Exception e) {}
@@ -247,7 +257,7 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent removeInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(REMOVER, Main.volume.getName(),
+		SDFSEvent event = new SDFSEvent(REMOVER, getTarget(),
 				shortMsg,RUNNING);
 		event.level = INFO;
 		try {
@@ -257,12 +267,12 @@ public class SDFSEvent {
 	}
 
 	public static SDFSEvent gcInfoEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(GC, Main.volume.getName(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(GC, getTarget(), shortMsg,RUNNING);
 		return event;
 	}
 
 	public static SDFSEvent fdiskInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(FDISK, Main.volume.getName(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg,RUNNING);
 		try {
 			evt.addChild(event);
 			}catch(Exception e) {}
@@ -429,6 +439,13 @@ public class SDFSEvent {
 		public String toString() {
 			return this.type;
 		}
+	}
+	
+	public static String getTarget() {
+		if(Main.standAloneDSE)
+			return "Storage node " + Main.DSEClusterMemberID;
+		else 
+			return Main.volume.getName();
 	}
 
 }

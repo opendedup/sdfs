@@ -48,10 +48,17 @@ public class Main {
 	
 	public static SDFSEvent mountEvent = null;
 	
+	public static String DSEClusterID = "test";
+	public static byte DSEClusterMemberID = 0;
+	public static int ClusterRSPTimeout = 500;
+	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
+	public static boolean DSEClusterEnabled = false;
 	/**
 	 * DSE Host for front end file systems
 	 */
 	public static String DSERemoteHostName = null;
+	
+	public static boolean standAloneDSE = false;
 	
 	/**
 	 * DSE Host port for front end file systems
@@ -105,7 +112,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "1.2.1";
+	public static String version = "2.0";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

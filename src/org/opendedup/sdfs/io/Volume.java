@@ -9,6 +9,7 @@ import java.io.File;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -99,8 +100,8 @@ public class Volume implements java.io.Serializable {
 			this.name = pathF.getParentFile().getName();
 		if(vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
-		if(vol.hasAttribute("uuid"))
-			this.uuid = vol.getAttribute("uuid");
+		if(vol.hasAttribute("cluster-id"))
+			this.uuid = vol.getAttribute("cluster-id");
 		else
 			this.uuid = RandomGUID.getGuid();
 		if(vol.hasAttribute("use-dse-capacity"))
@@ -304,7 +305,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
-		root.setAttribute("uuid", this.uuid);
+		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
 		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
@@ -336,7 +337,7 @@ public class Volume implements java.io.Serializable {
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
-		root.setAttribute("uuid", this.uuid);
+		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("perf-mon-file", this.perfMonFile);
 		return doc;
 	}

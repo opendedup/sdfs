@@ -240,6 +240,7 @@ public class HashStore {
 				ChunkData cm = new ChunkData(chunk.getName(),
 						Main.chunkStorePageSize, chunk.getData());
 				written = bdb.put(cm);
+				//SDFSLogger.getLog().debug("wrote hash " + StringUtils.getHexString(chunk.getName()) + " = " +written);
 
 			} catch (IOException e) {
 				SDFSLogger.getLog().fatal(

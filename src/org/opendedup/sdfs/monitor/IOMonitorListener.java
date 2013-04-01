@@ -14,4 +14,12 @@ public interface IOMonitorListener {
 	void bytesReadChanged(long total,long change,IOMonitor mon);
 	void duplicateBlockChanged(long total,long change,IOMonitor mon);
 	void virtualBytesWrittenChanged(long total,long change,IOMonitor mon); 
+	void riopsChanged(int iops,int changed,IOMonitor mon); 
+	void wiopsChanged(int iops,int changed,IOMonitor mon); 
+	void iopsChanged(int iops,int changed,IOMonitor mon); 
+	void rmbpsChanged(long mbps,int changed,IOMonitor mon); 
+	void wmbpsChanged(long mbps,int changed,IOMonitor mon); 
+	void mbpsChanged(long mbps,int changed,IOMonitor mon); 
+	void qosChanged(int old,int newQos,IOMonitor mon);
+	void ioProfileChanged(String old,String newProf,IOMonitor mon);
 }

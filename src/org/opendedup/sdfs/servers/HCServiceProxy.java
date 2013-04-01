@@ -1,6 +1,9 @@
 package org.opendedup.sdfs.servers;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+
 import java.util.ArrayList;
 
 
@@ -8,32 +11,40 @@ import java.util.ArrayList;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.cluster.DSEClientSocket;
+import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
+import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
+import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
+import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
+import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.network.HashClient;
-import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class HCServiceProxy {
 
-	static HashClientPool p = null;
-	private static HashChunkServiceInterface hcService = null;
 
+	private static HashChunkServiceInterface hcService = null;
+	private static DSEClientSocket socket = null;
 
 	// private static boolean initialized = false;
 
 	static {
-		hcService = new HashChunkService();
 		try {
-			hcService.init();
-			if (!Main.closedGracefully) {
-				hcService.runConsistancyCheck();
+			if(Main.chunkStoreLocal) {
+				SDFSLogger.getLog().info("Starting local chunkstore");
+				hcService = new HashChunkService();
+				hcService.init();
+				File file = new File(Main.hashDBStore + File.separator + ".lock");
+				if (!Main.closedGracefully || file.exists()) {
+					hcService.runConsistancyCheck();
+				} 
+				touchRunFile();
 			}
-			if (Main.DSERemoteHostName != null) {
-				HCServer s = new HCServer(Main.DSERemoteHostName,
-						Main.DSERemotePort, false, Main.DSERemoteCompress,
-						Main.DSERemoteUseSSL);
-				p = new HashClientPool(s, "server", 16);
+			
+			else {
+				SDFSLogger.getLog().info("Starting clustered Volume with id=" + Main.DSEClusterID + " config="+ Main.DSEClusterConfig);
+				socket = new DSEClientSocket(Main.DSEClusterConfig,Main.DSEClusterID);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",
@@ -44,7 +55,11 @@ public class HCServiceProxy {
 	}
 
 	public static void processHashClaims(SDFSEvent evt) throws IOException {
-		hcService.processHashClaims(evt);
+		if(Main.chunkStoreLocal)
+			hcService.processHashClaims(evt);
+		else {
+			new ClaimHashesCmd(evt);
+		}
 	}
 
 	public static boolean hashExists(byte[] hash, short hops)
@@ -58,7 +73,13 @@ public class HCServiceProxy {
 
 	public static long removeStailHashes(long ms, boolean forceRun,
 			SDFSEvent evt) throws IOException {
-		return hcService.removeStailHashes(ms, forceRun, evt);
+		if(Main.chunkStoreLocal)
+			return hcService.removeStailHashes(ms, forceRun, evt);
+		else {
+			RemoveChunksCmd cmd = new RemoveChunksCmd(ms,forceRun,evt);
+			return cmd.removedHashesCount();
+		}
+			
 	}
 
 	public static long getChunksFetched() {
@@ -72,15 +93,17 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.getSize();
 		} else {
-			return -2;
+			return socket.getCurrentSize();
 		}
 	}
 
 	public static long getMaxSize() {
 		if (Main.chunkStoreLocal) {
+			SDFSLogger.getLog().debug("local returning maximum size");
 			return HCServiceProxy.hcService.getMaxSize();
 		} else {
-			return -1;
+			SDFSLogger.getLog().debug("remote returning maximum size");
+			return socket.getMaxSize();
 		}
 	}
 
@@ -88,7 +111,7 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.getChunkStore().getFreeBlocks();
 		} else {
-			return -1;
+			return socket.getFreeBlocks();
 		}
 	}
 
@@ -101,45 +124,37 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.getPageSize();
 		} else {
-			return -1;
+			return Main.CHUNK_LENGTH;
 		}
 	}
 
-	public static boolean writeChunk(byte[] hash, byte[] aContents,
+	public static byte [] writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean sendChunk) throws IOException,
 			HashtableFullException {
 		boolean doop = false;
+		byte [] b = new byte[8];
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (!doop && sendChunk) {
 				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
-
 			}
 		} else {
-			HashClient hc = null;
 			try {
-				hc = p.borrowObject();
-				doop = hc.hashExists(hash, (short) 0);
-				if (!doop && sendChunk) {
-					try {
-						hc.writeChunk(hash, aContents, 0, len);
-					} catch (Exception e) {
-						SDFSLogger.getLog().warn("unable to use hashclient", e);
-						hc.close();
-						hc.openConnection();
-						hc.writeChunk(hash, aContents, 0, len);
-					}
-				}
+				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, aContents.length,
+						false, (byte)1);
+				cmd.executeCmd(socket);
+				return cmd.reponse();
 			} catch (Exception e1) {
 				SDFSLogger.getLog().fatal("Unable to write chunk " + hash, e1);
 				throw new IOException("Unable to write chunk " + hash);
 			} finally {
-				if (hc != null)
-					p.returnObject(hc);
+				
 			}
-		}
-		return doop;
+		}if(doop)
+			b[0] = 1;
+			
+		return b;
 	}
 
 	public static boolean localHashExists(byte[] hash) throws IOException,
@@ -164,45 +179,34 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static boolean hashExists(byte[] hash) throws IOException,
+	public static byte [] hashExists(byte[] hash) throws IOException,
 			HashtableFullException {
-		boolean exists = false;
+		byte [] exists = new byte[8];
 		if (Main.chunkStoreLocal) {
-			exists = HCServiceProxy.hcService.hashExists(hash, (short) 0);
-
-		} else {
-			HashClient hc = null;
-			try {
-				hc = p.borrowObject();
-				exists = hc.hashExists(hash, (short) 0);
-				if (exists) {
-					// existingHashes.put(hashStr, hashStr);
-				}
-			} finally {
-					p.returnObject(hc);
+			if(HCServiceProxy.hcService.hashExists(hash, (short) 0))
+				return exists;
+			else {
+				exists[0] = -1;
+				return exists;
 			}
+				
+		} else {
+			HashExistsCmd cmd = new HashExistsCmd(hash,false);
+			cmd.executeCmd(socket);
+			return cmd.getResponse();
 		}
-		return exists;
 	}
 
 	
 
-	public static byte[] fetchChunk(byte[] hash) throws IOException {
+	public static byte[] fetchChunk(byte[] hash,byte [] hashloc) throws IOException {
 		if (Main.chunkStoreLocal) {
 			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
 			return hc.getData();
 		} else {
-			
-			HashClient hc = null;
-			try {
-				hc = p.borrowObject();
-				byte[] data = hc.fetchChunk(hash);
-
-				return data;
-			}  finally {
-				if (hc != null)
-					p.returnObject(hc);
-			}
+			FetchChunkCmd cmd = new FetchChunkCmd(hash,hashloc);
+			cmd.executeCmd(socket);
+			return cmd.getChunk();
 		}
 
 	}
@@ -229,6 +233,25 @@ public class HCServiceProxy {
 
 	public static void close() {
 		hcService.close();
+		File file = new File(Main.hashDBStore + File.separator + ".lock");
+		file.delete();
+	}
+	
+	private static void touchRunFile()
+	{
+		File file = new File(Main.hashDBStore + File.separator + ".lock");
+	    try
+	    {
+	    	
+	        if (!file.exists())
+	            new FileOutputStream(file).close();
+	        file.setLastModified(System.currentTimeMillis());
+	        SDFSLogger.getLog().warn("Write lock file " + file.getPath());
+	    }
+	    catch (IOException e)
+	    {
+	    	SDFSLogger.getLog().warn("unable to create lock file " + file.getPath(),e);
+	    }
 	}
 
 }

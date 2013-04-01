@@ -44,17 +44,19 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	boolean rafInit = false;
 	boolean prevDoop = false;
 	private boolean safeSync = Main.safeSync;
+	private byte [] hashloc;
 
 	static {
 
 	}
 
 	protected WritableCacheBuffer(byte[] hash, long startPos, int length,
-			DedupFile df) throws IOException {
+			DedupFile df,byte [] hashloc) throws IOException {
 		this.hash = hash;
 		this.length = length;
 		this.position = startPos;
 		this.newChunk = true;
+		this.hashloc = hashloc;
 		this.df = df;
 		buf = new byte[Main.CHUNK_LENGTH];
 		if (safeSync) {
@@ -108,6 +110,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.position = dk.getFilePosition();
 		this.length = dk.getLength();
 		this.newChunk = dk.isNewChunk();
+		this.hashloc = dk.getHashLoc();
 		this.df = df;
 		if (this.isNewChunk())
 			buf = new byte[Main.CHUNK_LENGTH];
@@ -166,7 +169,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private void initBuffer() {
 		if (this.buf == null) {
 			try {
-				buf = HCServiceProxy.fetchChunk(this.getHash());
+				buf = HCServiceProxy.fetchChunk(this.getHash(),this.hashloc);
 				if (buf.length > Main.CHUNK_LENGTH) {
 					SDFSLogger.getLog().info(
 							"Alert ! returned chunk to large " + buf.length
@@ -576,6 +579,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	@Override
 	public boolean isDoop() {
 		return this.doop;
+	}
+	
+	@Override
+	public byte[] getHashLoc() {
+		return this.hashloc;
+	}
+
+	@Override
+	public void setHashLoc(byte[] hashloc) {
+		this.hashloc = hashloc;
 	}
 
 }

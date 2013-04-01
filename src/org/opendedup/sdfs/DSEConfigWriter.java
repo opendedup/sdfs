@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,9 +26,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
+import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -69,11 +72,18 @@ public class DSEConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 	boolean cloudCompress = Main.cloudCompress;
-	String hashType = HashFunctionPool.TIGER_16;
+	String hashType = HashFunctionPool.MURMUR3_16;
 	boolean upstreamEnabled = false;
 	String upstreamHost = null;
 	int upstreamPort = 2222;
 	String upstreamPassword = "admin";
+	private String clusterID = "sdfs-cluster";
+	private byte clusterMemberID = 0;
+	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
+	private boolean clusterEnabled = false;
+	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
+	String hash_db_class = Main.hashesDBClass;
+	
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -290,19 +300,29 @@ public class DSEConfigWriter {
 		Element cs = xmldoc.createElement("chunk-store");
 
 		cs.setAttribute("page-size", Integer.toString(this.chunk_size * 1024));
+		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("pre-allocate",
 				Boolean.toString(this.chunk_store_pre_allocate));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
-		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
 		cs.setAttribute("eviction-age",
 				Integer.toString(this.remove_if_older_than));
 		cs.setAttribute("read-ahead-pages",
 				Short.toString(this.chunk_read_ahead_pages));
+		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
+		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
+		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
+		cs.setAttribute("chunkstore-class", this.chunk_store_class);
+		cs.setAttribute("hashdb-class", this.hash_db_class);
+		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("hash-type", this.hashType);
+		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
+		cs.setAttribute("cluster-config", this.clusterConfig);
+		cs.setAttribute("cluster-enabled", Boolean.toString(this.clusterEnabled));
+		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");

@@ -123,11 +123,15 @@ class ClientThread extends Thread {
 						is.readFully(chunkBytes);
 						boolean done = false;
 						if (cmd == NetworkCMDS.WRITE_COMPRESSED_CMD) {
-							done = HCServiceProxy.writeChunk(hash,
+							byte [] b = HCServiceProxy.writeChunk(hash,
 									chunkBytes, len, len, true);
+							if(b[0] == 1)
+								done = true;
 						} else {
-							done = HCServiceProxy.writeChunk(hash,
+							byte [] b= HCServiceProxy.writeChunk(hash,
 									chunkBytes, len, len, false);
+							if(b[0] == 1)
+								done = true;
 						}
 						
 						try {

@@ -118,9 +118,9 @@ public class ThreadedFDisk {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						if (!ck.isLocalData()) {
-							boolean exists = HCServiceProxy
-									.hashExists(ck.getHash());
-							if (!exists) {
+							byte [] exists = HCServiceProxy.hashExists(ck
+									.getHash());
+							if (exists[0]== -1) {
 								SDFSLogger.getLog().debug("file ["+ mapFile +"] could not find " + StringUtils.getHexString(ck.getHash()));
 								corruption = true;
 								corruptBlocks ++;

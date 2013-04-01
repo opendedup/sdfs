@@ -85,9 +85,9 @@ public class FDisk {
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
-						boolean exists = HCServiceProxy
+						byte [] exists = HCServiceProxy
 								.hashExists(ck.getHash());
-						if (!exists) {
+						if (exists[0]== -1) {
 							SDFSLogger.getLog().debug(
 									"file ["
 											+ mapFile
