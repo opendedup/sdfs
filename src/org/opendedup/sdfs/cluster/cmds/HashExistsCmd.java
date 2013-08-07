@@ -1,7 +1,10 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jgroups.Address;
 import org.jgroups.Message;
@@ -9,7 +12,6 @@ import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.jgroups.blocks.RspFilter;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 
 public class HashExistsCmd implements IOClientCmd {
@@ -18,81 +20,118 @@ public class HashExistsCmd implements IOClientCmd {
 	RequestOptions opts = null;
 	byte[] resp = new byte[8];
 	boolean waitforall = false;
+	byte numtowaitfor = 1;
+	boolean meetsRudundancy = false;
+	//int rsz = 0;
 
-	public HashExistsCmd(byte[] hash, boolean waitforall) {
+	public HashExistsCmd(byte[] hash, boolean waitforall,byte numtowaitfor) {
 		this.hash = hash;
 		this.waitforall = waitforall;
-		
+		resp[0] = -1;
+		this.numtowaitfor = numtowaitfor;
 	}
 
 	@Override
 	public void executeCmd(final DSEClientSocket soc) throws IOException {
 		if (waitforall)
 			opts = new RequestOptions(ResponseMode.GET_ALL,
-					Main.ClusterRSPTimeout,false,
+					0, true,
 
 					new RspFilter() {
-
+						private final ReentrantLock lock = new ReentrantLock();
 						int pos = 1;
 
 						public boolean needMoreResponses() {
-							return true;
+							
+								return true;
 						}
 
 						@Override
 						public boolean isAcceptable(Object response,
 								Address arg1) {
-							boolean rsp = ((Boolean) response).booleanValue();
-							if (rsp) {
-								synchronized(resp) {
-									resp[0] = 1;
-									resp[pos] = soc.serverState.get(arg1).id;
-									pos++;
-									exists = true;
+							
+							if (response instanceof Boolean) {
+								boolean rsp = ((Boolean) response)
+										.booleanValue();
+								if (rsp) {
+									lock.lock();
+										resp[0] = 1;
+										resp[pos] = soc.serverState.get(arg1).id;
+										pos++;
+										exists = true;
+									lock.unlock();
+								} else {
+									lock.lock();
+										if (resp[0] == -1)
+											resp[0] = 0;
+									lock.unlock();
 								}
+								return rsp;
+							} else {
+								
+								return false;
 							}
-							return rsp;
 						}
 
 					});
-		else
-			opts = new RequestOptions(ResponseMode.GET_ALL,
-					Main.ClusterRSPTimeout, false,
+		else {
+			opts = new RequestOptions(ResponseMode.GET_FIRST,
+					0, true,
 
 					new RspFilter() {
+					private final ReentrantLock lock = new ReentrantLock();
 
 						int pos = 1;
-
+						@Override
 						public boolean needMoreResponses() {
-							return !exists;
+								return !meetsRudundancy;
 						}
 
 						@Override
 						public boolean isAcceptable(Object response,
 								Address arg1) {
-							boolean rsp = ((Boolean) response).booleanValue();
-							if (rsp) {
-								synchronized(resp) {
-									resp[0] = 1;
-									resp[pos] = soc.serverState.get(arg1).id;
-									pos++;
-									exists = rsp;
+							if (response instanceof Boolean) {
+								boolean rsp = ((Boolean) response)
+										.booleanValue();
+								if (rsp) {
+									lock.lock();
+										resp[0] = 1;
+										resp[pos] = soc.serverState.get(arg1).id;
+										
+										if(pos >= numtowaitfor)
+											meetsRudundancy = true;
+										pos++;
+										exists = rsp;
+									lock.unlock();
+								} else {
+									
+									lock.lock();
+										if (resp[0] == -1)
+											resp[0] = 0;
+									lock.unlock();
 								}
+								return rsp;
+							} else {
+								
+								return false;
 							}
-							return rsp;
 						}
 
 					});
+		}
+		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		opts.setFlags(Message.Flag.OOB);
 		byte[] b = new byte[1 + 2 + 2 + hash.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.HASH_EXISTS_CMD);
-		buf.putShort((short)0);
 		buf.putShort((short) hash.length);
 		buf.put(hash);
 		try {
-			soc.disp.castMessage(soc.getServers(), new Message(null,
-					null, buf.array()), opts);
-			
+			List<Address> servers = soc.getServers();
+			soc.disp.castMessage(servers,
+					new Message(null, null, buf.array()), opts);
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while getting hash", e);
 			throw new IOException(e);
@@ -102,13 +141,17 @@ public class HashExistsCmd implements IOClientCmd {
 	public byte[] getHash() {
 		return this.hash;
 	}
-	
+
 	public byte[] getResponse() {
 		return this.resp;
 	}
 
 	public boolean exists() {
 		return this.exists;
+	}
+	
+	public boolean meetsRedundancyRequirements() {
+		return this.meetsRudundancy;
 	}
 
 	@Override

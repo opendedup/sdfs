@@ -37,10 +37,8 @@ public class WriteHashCmd implements IOCmd {
 	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
-		if (compress)
-			os.write(NetworkCMDS.WRITE_COMPRESSED_CMD);
-		else
-			os.write(NetworkCMDS.WRITE_HASH_CMD);
+
+		os.write(NetworkCMDS.WRITE_HASH_CMD);
 		os.writeShort(hash.length);
 		os.write(hash);
 		os.writeInt(len);
@@ -57,6 +55,11 @@ public class WriteHashCmd implements IOCmd {
 	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.WRITE_HASH_CMD;
+	}
+
+	@Override
+	public Boolean getResult() {
+		return this.written;
 	}
 
 }

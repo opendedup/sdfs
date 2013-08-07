@@ -2,8 +2,10 @@ package fuse.SDFS;
 
 import java.io.File;
 
+
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,7 +24,7 @@ import fuse.FuseMount;
 
 public class MountSDFS {
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
-
+	
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
@@ -46,6 +48,8 @@ public class MountSDFS {
 				"sdfs volume will be compacted and then exit");
 		options.addOption("forcecompact", false,
 				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
+		options.addOption("rv", true, "comma separated list of remote volumes that should also be accounted for when doing garbage collection. " +
+				"If not entered the volume will attempt to identify other volumes in the cluster.");
 		options.addOption("h", false, "displays available options");
 		return options;
 	}
@@ -57,6 +61,7 @@ public class MountSDFS {
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
+		ArrayList<String> volumes = new ArrayList<String>();
 		fal.add("-f");
 		if (cmd.hasOption("h")) {
 			printHelp(options);
@@ -67,6 +72,12 @@ public class MountSDFS {
 		}
 		if (cmd.hasOption("s")) {
 			fal.add("-s");
+		}
+		if(cmd.hasOption("rv")) {
+			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),",");
+			while(st.hasMoreTokens()) {
+				volumes.add(st.nextToken());
+			}
 		}
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
@@ -125,7 +136,7 @@ public class MountSDFS {
 		if (OSValidator.isWindows())
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
-		SDFSService sdfsService = new SDFSService(volumeConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile,volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
@@ -145,7 +156,7 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("direct_io,big_writes,allow_other,fsname=sdfs:"+volumeConfigFile+":"+ Main.sdfsCliPort);
+			fal.add("big_writes,allow_other,fsname=sdfs:"+volumeConfigFile+":"+ Main.sdfsCliPort);
 		}
 		try {
 			String[] sFal = new String[fal.size()];
@@ -167,7 +178,7 @@ public class MountSDFS {
 		formatter
 				.printHelp(
 						"mount.sdfs -o <fuse options> -m <mount point> "
-								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port>",
+								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
 						options);
 	}
 

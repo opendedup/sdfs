@@ -3,12 +3,14 @@ package org.opendedup.sdfs.servers;
 
 
 
+import java.util.ArrayList;
+
 import org.opendedup.logging.SDFSLogger;
+
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.filestore.gc.SDFSFDiskScheduler;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
@@ -17,12 +19,13 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 public class SDFSService {
 	String configFile;
 
-	private SDFSFDiskScheduler gc = null;
 	private NetworkDSEServer ndServer = null;
+	private ArrayList<String> volumes;
 
-	public SDFSService(String configFile) {
+	public SDFSService(String configFile,ArrayList<String> volumes) {
 
 		this.configFile = configFile;
+		this.volumes = volumes;
 		System.out.println("Running SDFS Version " + Main.version);
 
 		System.out.println("reading config file = " + this.configFile);
@@ -42,7 +45,7 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
-		HCServiceProxy.init();
+		HCServiceProxy.init(volumes);
 		if (Main.chunkStoreLocal) {
 			try {
 				
@@ -64,9 +67,7 @@ public class SDFSService {
 			Main.pFullSched= new StandAloneGCScheduler();
 		}
 
-		if (!Main.chunkStoreLocal) {
-			gc = new SDFSFDiskScheduler();
-		}
+		
 		Main.mountEvent.endEvent("Volume Mounted");
 	}
 
@@ -74,14 +75,11 @@ public class SDFSService {
 		SDFSEvent evt = SDFSEvent.umountEvent("Unmounting Volume");
 		SDFSLogger.getLog().info("Shutting Down SDFS");
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
-		if (!Main.chunkStoreLocal) {
-			gc.stopSchedules();
-		} else {
+		
 			try {
 				Main.pFullSched.close();
 				Main.pFullSched = null;
 			}catch(Exception e) {}
-		}
 		SDFSLogger.getLog().info("Flushing and Closing Write Caches");
 		DedupFileStore.close();
 		SDFSLogger.getLog().info("Write Caches Flushed and Closed");

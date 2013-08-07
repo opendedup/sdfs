@@ -35,6 +35,7 @@ java.io.Serializable {
 	public long startTime;
 	public long endTime = -1;
 	public long actionCount = 0;
+	public boolean success= true;
 	public String uid = null;
 	public String extendedInfo = "";
 	private ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
@@ -42,6 +43,7 @@ java.io.Serializable {
 	public transient static final Type GC = new Type("Garbage Collection");
 	public transient static final Type FLUSHALL = new Type("Flush All Buffers");
 	public transient static final Type FDISK = new Type("File Check");
+	public transient static final Type CRCK = new Type("Cluster Redundancy Check");
 	public transient static final Type WAIT = new Type("Waiting to Run Again");
 	public transient static final Type CLAIMR = new Type("Claim Records");
 	public transient static final Type REMOVER = new Type("Remove Records");
@@ -115,6 +117,7 @@ java.io.Serializable {
 		this.level = level;
 		this.endTime = System.currentTimeMillis();
 		this.curCt = this.maxCt;
+		this.success = false;
 		SDFSEventLogger.log(this);
 	}
 
@@ -278,6 +281,11 @@ java.io.Serializable {
 			}catch(Exception e) {}
 		return event;
 	}
+	
+	public static SDFSEvent crckInfoEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg,RUNNING);
+		return event;
+	}
 
 	@Override
 	public String toString() {
@@ -314,6 +322,8 @@ java.io.Serializable {
 		sb.append(this.maxCt);
 		sb.append(",");
 		sb.append(this.extendedInfo);
+		sb.append(",");
+		sb.append(this.success);
 		return sb.toString();
 
 	}
@@ -344,6 +354,7 @@ java.io.Serializable {
 		root.setAttribute("uuid", this.uid);
 		root.setAttribute("parent-uid", this.puid);
 		root.setAttribute("extended-info", this.extendedInfo);
+		root.setAttribute("success", Boolean.toString(this.success));
 		for (int i = 0; i < this.children.size(); i++) {
 			Element el = this.children.get(i).toXML();
 			doc.adoptNode(el);
@@ -372,6 +383,7 @@ java.io.Serializable {
 		evt.endTime = Long.parseLong(el.getAttribute("end-timestamp"));
 		evt.puid = el.getAttribute("parent-uid");
 		evt.extendedInfo = el.getAttribute("extended-info");
+		evt.success = Boolean.parseBoolean(el.getAttribute("success"));
 		int le = el.getElementsByTagName("event").getLength();
 		if (le > 0) {
 			for (int i = 0; i < le; i++) {

@@ -49,7 +49,7 @@ public interface AbstractShard {
 
 	public abstract boolean remove(byte[] key) throws IOException;
 
-	public abstract boolean put(byte[] key, long value);
+	public abstract boolean put(byte[] key, long value) throws HashtableFullException;
 
 	public abstract int getEntries();
 

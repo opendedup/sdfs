@@ -75,4 +75,9 @@ public class BulkFetchChunkCmd implements IOCmd {
 		return NetworkCMDS.FETCH_CMD;
 	}
 
+	@Override
+	public ArrayList<HashChunk> getResult() {
+		return this.chunks;
+	}
+
 }

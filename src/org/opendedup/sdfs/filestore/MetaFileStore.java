@@ -32,10 +32,6 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
  * 
  */
 public class MetaFileStore {
-	// private static String dbURL =
-	// "jdbc:derby:myDB;create=true;user=me;password=mine";
-
-	// A quick lookup table for path to MetaDataDedupFile
 
 	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>()
 			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(5000)

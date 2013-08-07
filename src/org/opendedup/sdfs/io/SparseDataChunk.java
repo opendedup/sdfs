@@ -52,6 +52,10 @@ public class SparseDataChunk {
 	public byte[] getHash() {
 		return hash;
 	}
+	
+	public void setHashLoc(byte [] hashlocs) {
+		this.hashlocs = hashlocs;
+	}
 
 	public byte[] getBytes() {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);

@@ -27,7 +27,7 @@ public interface HashChunkServiceInterface {
 			String password, int port, boolean useSSL) throws IOException,
 			HashtableFullException;
 
-	public abstract boolean hashExists(byte[] hash, short hops)
+	public abstract boolean hashExists(byte[] hash)
 			throws IOException, HashtableFullException;
 
 	public abstract HashChunk fetchChunk(byte[] hash) throws IOException;

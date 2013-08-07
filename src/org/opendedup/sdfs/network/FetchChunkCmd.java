@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -29,11 +30,13 @@ public class FetchChunkCmd implements IOCmd {
 		os.write(hash);
 		os.flush();
 		int size = is.readInt();
-		if(size != Main.CHUNK_LENGTH)
-			throw new IOException("invalid chunk length " +size);
 		if (size == -1) {
-			chunk = new byte[0];
-		} else if(size != Main.CHUNK_LENGTH)
+			throw new IOException("could not find chunk " + StringUtils.getHexString(hash));
+			
+		}
+			if(size != Main.CHUNK_LENGTH)
+			throw new IOException("invalid chunk length " +size);
+	    else if(size != Main.CHUNK_LENGTH)
 			throw new IOException("invalid chunk length " +size);
 		else {
 			chunk = new byte[size];
@@ -55,6 +58,11 @@ public class FetchChunkCmd implements IOCmd {
 	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.FETCH_CMD;
+	}
+
+	@Override
+	public byte[] getResult() {
+		return this.chunk;
 	}
 
 }

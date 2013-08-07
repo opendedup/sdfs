@@ -1,6 +1,8 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
+
+
 import java.util.ArrayList;
 
 
@@ -14,9 +16,7 @@ import org.opendedup.sdfs.filestore.DSECompaction;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
-import org.opendedup.sdfs.filestore.gc.ChunkStoreGCScheduler;
 import org.opendedup.sdfs.network.HashClient;
-import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class HashChunkService implements HashChunkServiceInterface{
@@ -32,8 +32,7 @@ public class HashChunkService implements HashChunkServiceInterface{
 	private int MAX_UNCOMITTEDCHUNKS = 100;
 	private HashStore hs = null;
 	private AbstractChunkStore fileStore = null;
-	private ChunkStoreGCScheduler csGC = null;
-	private HashClientPool hcPool = null;
+	//private HashClientPool hcPool = null;
 
 	/**
 	 * @return the chunksFetched
@@ -63,27 +62,9 @@ public class HashChunkService implements HashChunkServiceInterface{
 		}
 		try {
 			hs = new HashStore(this);
-			if (!Main.chunkStoreLocal && Main.enableNetworkChunkStore) {
-				csGC = new ChunkStoreGCScheduler();
-			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to start hashstore", e);
 			System.exit(-1);
-		}
-		if (Main.upStreamDSEHostEnabled) {
-			try {
-				hcPool = new HashClientPool(new HCServer(
-						Main.upStreamDSEHostName, Main.upStreamDSEPort, false,
-						false,Main.serverUseSSL), "upstream", 24);
-			} catch (IOException e) {
-				System.err.println("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
-				SDFSLogger.getLog().error("warning unable to connect to upstream server " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort, e);
-				System.err.println("Disabling upstream host " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
-				Main.upStreamDSEHostEnabled = false;
-				SDFSLogger.getLog().warn("Disabling upstream host " + Main.upStreamDSEHostName + ":" +Main.upStreamDSEPort);
-				//e.printStackTrace();
-				//System.exit(-1);
-			}
 		}
 	}
 
@@ -124,7 +105,7 @@ public class HashChunkService implements HashChunkServiceInterface{
 	
 	public void remoteFetchChunks(ArrayList<String> al,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
 			HCServer hserver = new HCServer(server,port,false,false,useSSL);
-			HashClient hc = new HashClient(hserver,"replication",password);
+			HashClient hc = new HashClient(hserver,"replication",password,(byte)0,null);
 			try {
 				ArrayList<HashChunk> hck = hc.fetchChunks(al);
 				for(int i=0;i<hck.size();i++) {
@@ -136,28 +117,9 @@ public class HashChunkService implements HashChunkServiceInterface{
 			}
 	}
 
-	public boolean hashExists(byte[] hash, short hops)
+	public boolean hashExists(byte[] hash)
 			throws IOException, HashtableFullException {
 		boolean exists = hs.hashExists(hash);
-		if (hops < Main.maxUpStreamDSEHops) {
-			if (!exists && Main.upStreamDSEHostEnabled) {
-				HashClient hc = null;
-				try {
-					hc = hcPool.borrowObject();
-
-					exists = hc.hashExists(hash, hops++);
-					if (exists) {
-						byte[] b = hc.fetchChunk(hash);
-						writeChunk(hash, b, 0, hash.length, false);
-					}
-				} finally {
-					hcPool.returnObject(hc);
-				}
-			}
-			
-		}else {
-			SDFSLogger.getLog().info("hops reached " + hops);
-		}
 		return exists;
 	}
 
@@ -226,8 +188,6 @@ public class HashChunkService implements HashChunkServiceInterface{
 
 	public void close() {
 		fileStore.close();
-		if (csGC != null)
-			csGC.stopSchedules();
 		hs.close();
 
 	}

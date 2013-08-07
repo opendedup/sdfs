@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.jgroups.Address;
 import org.jgroups.Message;
+import org.jgroups.TimeoutException;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.jgroups.util.Rsp;
@@ -24,8 +25,10 @@ public class FetchChunkCmd implements IOClientCmd {
 	public FetchChunkCmd(byte[] hash, byte[] hashlocs) {
 		this.hash = hash;
 		this.hashlocs = hashlocs;
-		opts = new RequestOptions(ResponseMode.GET_FIRST,
-				Main.ClusterRSPTimeout);
+		opts = new RequestOptions(ResponseMode.GET_ALL,Main.ClusterRSPTimeout);
+		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		opts.setFlags(Message.Flag.OOB);
+		opts.setAnycasting(true);
 	}
 
 	@Override
@@ -50,12 +53,15 @@ public class FetchChunkCmd implements IOClientCmd {
 				RspList<Object> lst = soc.disp.castMessage(al, new Message(
 						null, null, buf.array()), opts);
 				Rsp<Object> rsp = lst.get(addr);
-				if(!rsp.hasException()) {
+				if(!rsp.hasException() && !rsp.wasSuspected()) {
 					this.chunk = (byte[])rsp.getValue();
 				} else {
 					pos ++;
 				}
-			} catch (Exception e) {
+			}catch(TimeoutException e) {
+				pos ++;
+			}
+			catch (Exception e) {
 				SDFSLogger.getLog().error("error while getting hash", e);
 				throw new IOException(e);
 			}

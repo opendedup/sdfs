@@ -66,7 +66,7 @@ public class MetaFileImport {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						if (!ck.isLocalData()) {
 							byte [] exists = HCServiceProxy.hashExists(ck
-									.getHash());
+									.getHash(),false);
 							if (exists[0]== -1) {
 								SDFSLogger.getLog().debug(
 										"file ["

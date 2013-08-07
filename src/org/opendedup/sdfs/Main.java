@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -31,11 +32,9 @@ public class Main {
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	
-	public static String sdfsCliUserName = "admin";
+	public static String sdfsPassword = "";
 	
-	public static String sdfsCliPassword = "";
-	
-	public static String sdfsCliSalt = "";
+	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
 	
 	public static boolean sdfsCliRequireAuth = false;
@@ -43,6 +42,7 @@ public class Main {
 	public static boolean sdfsCliEnabled  = true;
 	public static String sdfsCliListenAddr = "localhost";
 	public static boolean runCompact = false;
+
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 	
@@ -75,30 +75,10 @@ public class Main {
 	 */
 	public static boolean DSERemoteCompress = false;
 	
+	public static String DSEPassword = "admin";
 	
-	/**
-	 * Upstream DSE Host for cache misses and replication
-	 */
-	public static String upStreamDSEHostName = null;
-	
-	/**
-	 * Upstream DSE Host Port for cache misses and replication
-	 */
-	public static int upStreamDSEPort = 2222;
-	
-	/**
-	 * Upstream Secondary DSE Host for cache
-	 */
-	public static boolean upStreamDSEHostEnabled = false;
-	/**
-	 * Maximum number op upstream hops
-	 */
-	public static short maxUpStreamDSEHops = 3;
-	/**
-	 * Maximum number op upstream hops
-	 */
-	public static String upStreamPassword = "admin";
-	
+	public static String DSEClusterNodeRack = "rack1";
+	public static String DSEClusterNodeLocation = "pdx";
 	
 	/**
 	 * Class path when launching sdfs
@@ -112,7 +92,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "2.0";
+	public static String version = "2.0RC1";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -260,16 +240,7 @@ public class Main {
 	 * is mounted. This is used on the client.
 	 */
 	public static int defaultGroup = 0;
-	/**
-	 * The timeout from a udp client request before the request fails over to a
-	 * TCP request. This is used on the client.
-	 */
-	public static int UDPClientTimeOut = 2000;
-	/**
-	 * Specifies if the client and chunk store can use UDP for communication.
-	 * This is used on the client and the chunk store.
-	 */
-	public static boolean useUDP = false;
+	
 	/**
 	 * The port the chunk store uses to listen of TCP and UDP connections. This
 	 * is used on the chunk store.
@@ -364,33 +335,6 @@ public class Main {
 	 * Compress AWS data using zlib
 	 */
 	public static boolean cloudCompress = true;
-	/**
-	 * The time out on the client to wait for a read or write command to finish
-	 * for the same hash. This is used to limit the communication between the
-	 * client and the chunk store when specific sections of the same chunk are
-	 * requested through separate read threads. It is epecially useful when AWS
-	 * is used to store chunks since it multiple simultainous requests for the
-	 * same chunk will cost in IO throughput and money. This is used on the
-	 * client.
-	 */
-	public static int multiReadTimeout = 1000;
-
-	/**
-	 * Pre-Allocates space for the TC datables on the chunk store. This is
-	 * specified per hash store and not for all hashes held. Typically this
-	 * number should be (maximum number of hashes held)/256 . Setting this too
-	 * high will impact initial storage needed to preallocate space for the TC
-	 * databases. Setting this number too low will impact performance. The total
-	 * number of hashes needed can be computed by (expected total
-	 * capacity)/(average chunk size). This is set on the chunk store.
-	 */
-	public static int entriesPerDB = 30000000;
-
-	/**
-	 * Determines whether the chunk store will be pre-allocated or not.
-	 */
-
-	public static boolean preAllocateChunkStore = true;
 
 	/**
 	 * PreAllocates the size of the Dedup Storage Engine
@@ -423,19 +367,14 @@ public class Main {
 	/**
 	 * hash type can be tiger or murmur
 	 */
-	public static String hashType = "tiger";
+	public static String hashType = HashFunctionPool.MURMUR3_16;
 	/**
 	 * FDisk Schedule in cron format
 	 * 
 	 * @see org.opendedup.sdfs.FDISKJob
 	 */
-	public static String fDkiskSchedule = "0 0 0/1 * * ?";
-	/**
-	 * Remove chunks schedule
-	 * 
-	 * @see org.opendedup.sdfs.RemoveChunksJob
-	 */
-	public static String gcChunksSchedule = "0 0 0/2 * * ?";
+	public static String fDkiskSchedule = "0 59 23 * * ?";
+
 
 	/**
 	 * Age, if older than, that data will be evicted from the Dedup Storage

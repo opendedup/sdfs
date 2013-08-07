@@ -33,15 +33,16 @@ import org.opendedup.util.StringUtils;
  *         accepted.
  */
 
-class ClientThread extends Thread {
+public class ClientThread extends Thread {
 
 	// DataInputStream is = null;
-	
+
 	Socket clientSocket = null;
 	private ReentrantLock writelock = new ReentrantLock();
 
 	private static ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	private static int MAX_BATCH_SZ = (Main.MAX_REPL_BATCH_SZ*1024*1024)/Main.CHUNK_LENGTH;
+	private static int MAX_BATCH_SZ = (Main.MAX_REPL_BATCH_SZ * 1024 * 1024)
+			/ Main.CHUNK_LENGTH;
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -67,225 +68,223 @@ class ClientThread extends Thread {
 			reader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()), 32768 * 2);
 			is = new DataInputStream(new BufferedInputStream(
-					clientSocket.getInputStream(), 32768 * 2));
+					clientSocket.getInputStream(), 8192));
 			os = new DataOutputStream(new BufferedOutputStream(
-					clientSocket.getOutputStream()));
+					clientSocket.getOutputStream(), 8192));
 			String versionMessage = "SDFS version " + Main.PROTOCOL_VERSION
 					+ "\r\n";
 			os.write(versionMessage.getBytes());
 			os.flush();
 			String cPasswd = reader.readLine();
-			String phash = HashFunctions.getSHAHash(cPasswd.trim()
-					.getBytes(), Main.sdfsCliSalt.getBytes());
-			if (phash.equals(Main.sdfsCliPassword)) {
+			String phash = HashFunctions.getSHAHash(cPasswd.trim().getBytes(),
+					Main.sdfsPasswordSalt.getBytes());
+			if (phash.equals(Main.sdfsPassword)) {
 				os.writeInt(0);
 				os.flush();
 				throw new IOException("Authentication failed");
-			}else {
+			} else {
 				os.writeInt(1);
 				os.flush();
 			}
 			while (true) {
-					byte cmd = is.readByte();
-					if (cmd == NetworkCMDS.QUIT_CMD) {
-						SDFSLogger.getLog().debug(
-								"Quiting Client Network Thread");
-						break;
-					}
-					if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
-						short hops = is.readShort();
-						byte[] hash = new byte[is.readShort()];
-						is.readFully(hash);
-						boolean exists = HCServiceProxy.hashExists(hash,hops);
-						
-						try {
-							writelock.lock();
-							os.writeBoolean(exists);
-							os.flush();
+				byte cmd = is.readByte();
+				if (cmd == NetworkCMDS.QUIT_CMD) {
+					SDFSLogger.getLog().debug("Quiting Client Network Thread");
+					break;
+				}
+				if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
+					byte[] hash = new byte[is.readShort()];
+					is.readFully(hash);
+					boolean exists = HCServiceProxy.hashExists(hash);
+
+					try {
+						writelock.lock();
+						os.writeBoolean(exists);
+						os.flush();
+						writelock.unlock();
+					} catch (IOException e) {
+						if (writelock.isLocked())
 							writelock.unlock();
-						} catch (IOException e) {
-							if (writelock.isLocked())
-								writelock.unlock();
-							throw new IOException(e);
-						} finally {
-
-						}
+						throw new IOException(e);
+					} finally {
 
 					}
-					if (cmd == NetworkCMDS.WRITE_HASH_CMD
-							|| cmd == NetworkCMDS.WRITE_COMPRESSED_CMD) {
-						byte[] hash = new byte[is.readShort()];
-						is.readFully(hash);
-						int len = is.readInt();
-						if(len != Main.CHUNK_LENGTH)
-							throw new IOException("invalid chunk length " +len);
-						byte[] chunkBytes = new byte[len];
-						is.readFully(chunkBytes);
-						boolean done = false;
-						if (cmd == NetworkCMDS.WRITE_COMPRESSED_CMD) {
-							byte [] b = HCServiceProxy.writeChunk(hash,
-									chunkBytes, len, len, true);
-							if(b[0] == 1)
-								done = true;
+
+				}
+				if (cmd == NetworkCMDS.WRITE_HASH_CMD) {
+					byte[] hash = new byte[is.readShort()];
+					is.readFully(hash);
+					int len = is.readInt();
+					if (len != Main.CHUNK_LENGTH)
+						throw new IOException("invalid chunk length " + len);
+					byte[] chunkBytes = new byte[len];
+					is.readFully(chunkBytes);
+					boolean done = false;
+					byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, len,
+							len, true);
+					
+					if (b[0] == 1)
+						done = true;
+
+					try {
+						writelock.lock();
+						os.writeBoolean(done);
+						os.flush();
+						writelock.unlock();
+					} catch (IOException e) {
+						if (writelock.isLocked())
+							writelock.unlock();
+						throw new IOException(e);
+					} finally {
+
+					}
+				}
+				if (cmd == NetworkCMDS.FETCH_CMD
+						|| cmd == NetworkCMDS.FETCH_COMPRESSED_CMD) {
+					byte[] hash = new byte[is.readShort()];
+					is.readFully(hash);
+					HashChunk dChunk = null;
+					try {
+						dChunk = HCServiceProxy.fetchHashChunk(hash);
+						if (cmd == NetworkCMDS.FETCH_COMPRESSED_CMD
+								&& !dChunk.isCompressed()) {
+
+							throw new Exception("not implemented");
+						} else if (cmd == NetworkCMDS.FETCH_CMD
+								&& dChunk.isCompressed()) {
+
+							throw new IOException("Not implemented");
 						} else {
-							byte [] b= HCServiceProxy.writeChunk(hash,
-									chunkBytes, len, len, false);
-							if(b[0] == 1)
-								done = true;
+							try {
+								writelock.lock();
+								os.writeInt(dChunk.getData().length);
+								os.write(dChunk.getData());
+								os.flush();
+								writelock.unlock();
+							} catch (IOException e) {
+								if (writelock.isLocked())
+									writelock.unlock();
+								throw new IOException(e);
+							} finally {
+
+							}
 						}
-						
+
+					} catch (NullPointerException e) {
+						SDFSLogger.getLog().warn(
+								"chunk " + StringUtils.getHexString(hash)
+										+ " does not exist");
 						try {
 							writelock.lock();
-							os.writeBoolean(done);
+							os.writeInt(-1);
 							os.flush();
 							writelock.unlock();
-						} catch (IOException e) {
+						} catch (IOException e1) {
 							if (writelock.isLocked())
 								writelock.unlock();
-							throw new IOException(e);
+							throw new IOException(e1.toString());
 						} finally {
 
 						}
 					}
-					if (cmd == NetworkCMDS.FETCH_CMD
-							|| cmd == NetworkCMDS.FETCH_COMPRESSED_CMD) {
-						byte[] hash = new byte[is.readShort()];
-						is.readFully(hash);
-						HashChunk dChunk = null;
-						try {
-							dChunk = HCServiceProxy.fetchHashChunk(hash);
-							if (cmd == NetworkCMDS.FETCH_COMPRESSED_CMD
-									&& !dChunk.isCompressed()) {
-								
-								throw new Exception("not implemented");
-							} else if (cmd == NetworkCMDS.FETCH_CMD
-									&& dChunk.isCompressed()) {
-								
-								throw new IOException("Not implemented");
-							} else {
-								try {
-									writelock.lock();
-									os.writeInt(dChunk.getData().length);
-									os.write(dChunk.getData());
-									os.flush();
-									writelock.unlock();
-								} catch (IOException e) {
-									if (writelock.isLocked())
-										writelock.unlock();
-									throw new IOException(e);
-								} finally {
-
-								}
-							}
-
-						} catch (NullPointerException e) {
-							SDFSLogger.getLog().warn(
-									"chunk " + StringUtils.getHexString(hash)
-											+ " does not exist");
-							try {
-								writelock.lock();
-								os.writeInt(-1);
-								os.flush();
-								writelock.unlock();
-							} catch (IOException e1) {
-								if (writelock.isLocked())
-									writelock.unlock();
-								throw new IOException(e1.toString());
-							} finally {
-
-							}
-						}
-					}
-					if (cmd == NetworkCMDS.BULK_FETCH_CMD) {
-						int len = is.readInt();
-						byte[] sh = new byte[len];
-						is.readFully(sh);
-						sh = CompressionUtils.decompressSnappy(sh);
-						ObjectInputStream obj_in = new ObjectInputStream(new ByteArrayInputStream(sh));
-						@SuppressWarnings("unchecked")
-						ArrayList<String> hashes = (ArrayList<String>)obj_in.readObject();
-						String hash = null;
-						if(hashes.size() > MAX_BATCH_SZ){
-							SDFSLogger.getLog().warn(
-									"requested hash list to long " + hashes.size() + " > " + MAX_BATCH_SZ);
-							try {
-								writelock.lock();
-								os.writeInt(-1);
-								os.flush();
-								writelock.unlock();
-							} catch (IOException e1) {
-								if (writelock.isLocked())
-									writelock.unlock();
-								throw new IOException(e1.toString());
-							} finally {
-
-							}
-						}
-						ArrayList<HashChunk> chunks = new ArrayList<HashChunk>(hashes.size());
-						try {
-							for(int i = 0;i<hashes.size();i++) {
-								hash = hashes.get(i);
-								HashChunk dChunk = HCServiceProxy.fetchHashChunk(StringUtils.getHexBytes(hash));
-								
-								chunks.add(i, dChunk);
-							}
-							ByteArrayOutputStream bos = new ByteArrayOutputStream();
-							ObjectOutputStream obj_out = new ObjectOutputStream(bos);
-							obj_out.writeObject(chunks);
-							byte [] b = CompressionUtils.compressSnappy(bos.toByteArray());
-							//byte [] b =bos.toByteArray();
-							writelock.lock();
-							try {
-								os.writeInt(b.length);
-								os.write(b);
-								os.flush();
-								SDFSLogger.getLog().debug("wrote " + b.length + " entries " + chunks.size());
-							} finally {
-								writelock.unlock();
-								bos.close();
-								obj_out.close();
-								obj_in.close();
-								chunks.clear();
-								chunks = null;
-							}
-							
-
-						} catch (NullPointerException e) {
-							SDFSLogger.getLog().warn(
-									"chunk " + hash
-											+ " does not exist");
-							try {
-								writelock.lock();
-								os.writeInt(-1);
-								os.flush();
-								writelock.unlock();
-							} catch (IOException e1) {
-								if (writelock.isLocked())
-									writelock.unlock();
-								throw new IOException(e1.toString());
-							} finally {
-
-							}
-						}
-					}
-					if (cmd == NetworkCMDS.PING_CMD) {
+				}
+				if (cmd == NetworkCMDS.BULK_FETCH_CMD) {
+					int len = is.readInt();
+					byte[] sh = new byte[len];
+					is.readFully(sh);
+					sh = CompressionUtils.decompressSnappy(sh);
+					ObjectInputStream obj_in = new ObjectInputStream(
+							new ByteArrayInputStream(sh));
+					@SuppressWarnings("unchecked")
+					ArrayList<String> hashes = (ArrayList<String>) obj_in
+							.readObject();
+					String hash = null;
+					if (hashes.size() > MAX_BATCH_SZ) {
+						SDFSLogger.getLog().warn(
+								"requested hash list to long " + hashes.size()
+										+ " > " + MAX_BATCH_SZ);
 						try {
 							writelock.lock();
-							os.writeShort(NetworkCMDS.PING_CMD);
+							os.writeInt(-1);
 							os.flush();
 							writelock.unlock();
-						} catch (IOException e) {
+						} catch (IOException e1) {
 							if (writelock.isLocked())
 								writelock.unlock();
-							throw new IOException(e);
+							throw new IOException(e1.toString());
 						} finally {
 
 						}
 					}
+					ArrayList<HashChunk> chunks = new ArrayList<HashChunk>(
+							hashes.size());
+					try {
+						for (int i = 0; i < hashes.size(); i++) {
+							hash = hashes.get(i);
+							HashChunk dChunk = HCServiceProxy
+									.fetchHashChunk(StringUtils
+											.getHexBytes(hash));
+
+							chunks.add(i, dChunk);
+						}
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						ObjectOutputStream obj_out = new ObjectOutputStream(bos);
+						obj_out.writeObject(chunks);
+						byte[] b = CompressionUtils.compressSnappy(bos
+								.toByteArray());
+						// byte [] b =bos.toByteArray();
+						writelock.lock();
+						try {
+							os.writeInt(b.length);
+							os.write(b);
+							os.flush();
+							SDFSLogger.getLog().debug(
+									"wrote " + b.length + " entries "
+											+ chunks.size());
+						} finally {
+							writelock.unlock();
+							bos.close();
+							obj_out.close();
+							obj_in.close();
+							chunks.clear();
+							chunks = null;
+						}
+
+					} catch (NullPointerException e) {
+						SDFSLogger.getLog().warn(
+								"chunk " + hash + " does not exist");
+						try {
+							writelock.lock();
+							os.writeInt(-1);
+							os.flush();
+							writelock.unlock();
+						} catch (IOException e1) {
+							if (writelock.isLocked())
+								writelock.unlock();
+							throw new IOException(e1.toString());
+						} finally {
+
+						}
+					}
+				}
+				if (cmd == NetworkCMDS.PING_CMD) {
+					try {
+						writelock.lock();
+						os.writeShort(NetworkCMDS.PING_CMD);
+						os.flush();
+						writelock.unlock();
+					} catch (IOException e) {
+						if (writelock.isLocked())
+							writelock.unlock();
+						throw new IOException(e);
+					} finally {
+
+					}
+				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("connection failed ",e);
-			
+			SDFSLogger.getLog().debug("connection failed ", e);
+
 		} finally {
 			try {
 				reader.close();
@@ -303,7 +302,7 @@ class ClientThread extends Thread {
 				clientSocket.close();
 			} catch (Exception e1) {
 			}
-		
+
 			try {
 				clientSocket.close();
 			} catch (IOException e1) {

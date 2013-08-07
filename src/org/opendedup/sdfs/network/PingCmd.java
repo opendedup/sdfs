@@ -29,4 +29,9 @@ public class PingCmd implements IOCmd {
 		return NetworkCMDS.PING_CMD;
 	}
 
+	@Override
+	public Short getResult() {
+		return this.response;
+	}
+
 }

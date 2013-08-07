@@ -29,7 +29,7 @@ public class LongByteArrayMap implements AbstractMap {
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
-	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	public static byte[] FREE = new byte[arrayLength];
 	public long iterPos = 0;
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
@@ -127,7 +127,7 @@ public class LongByteArrayMap implements AbstractMap {
 					byte[] val = buf.array();
 					if (!Arrays.equals(val, FREE)) {
 						return val;
-					}
+					} 
 				} finally {
 					iterPos++;
 					_cpos = (iterPos * arrayLength);

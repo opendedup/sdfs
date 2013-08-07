@@ -43,5 +43,9 @@ public class NetworkCMDS {
 	public static final byte RUN_FDISK=15;
 	public static final byte RUN_CLAIM = 16;
 	public static final byte RUN_REMOVE = 17;
+	public static final byte LIST_VOLUMES = 18;
+	public static final byte RM_VOLUME = 19;
+	public static final byte ADD_VOLUME = 20;
+	public static final byte BATCH_HASH_EXISTS_CMD = 1;
 
 }

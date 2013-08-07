@@ -53,7 +53,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		maps = new AbstractShard[256];
+		maps = new AbstractShard[128];
 		this.size = (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;

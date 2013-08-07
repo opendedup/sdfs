@@ -5,5 +5,6 @@ public interface GCControllerImpl {
 	public void runGC();
 	
 	public void reCalc();
+	
 
 }

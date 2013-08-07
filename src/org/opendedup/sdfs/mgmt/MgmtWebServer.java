@@ -62,8 +62,8 @@ public class MgmtWebServer implements Container {
 				String password = request.getQuery().get("password");
 				if (password != null) {
 					String hash = HashFunctions.getSHAHash(password.trim()
-							.getBytes(), Main.sdfsCliSalt.getBytes());
-					if (hash.equals(Main.sdfsCliPassword))
+							.getBytes(), Main.sdfsPasswordSalt.getBytes());
+					if (hash.equals(Main.sdfsPassword))
 						auth = true;
 				} else {
 					SDFSLogger.getLog().warn(
@@ -166,7 +166,47 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("open-files")) {
+					}else if (cmd.equalsIgnoreCase("cluster-dse-info")) {
+						try {
+							Element msg = new GetClusterDSE().getResult(cmdOptions,
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}else if (cmd.equalsIgnoreCase("cluster-volumes")) {
+						try {
+							Element msg = new GetRemoteVolumes().getResult(cmdOptions,
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("cluster-volume-remove")) {
+						try {
+							new RemoveRemoteVolume().getResult(cmdOptions,
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
 							Element msg = new GetOpenFiles().getResult(
 									cmdOptions, file);
@@ -368,7 +408,20 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("event")) {
+					}else if (cmd.equalsIgnoreCase("redundancyck")) {
+						try {
+							Element msg = new ClusterRedundancyCmd().getResult(
+									cmdOptions, null);
+							result.setAttribute("status", "success");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("event")) {
 						try {
 							String uuid = request.getQuery().get("uuid");
 							Element msg = new GetEvent().getResult(uuid);
@@ -397,7 +450,7 @@ public class MgmtWebServer implements Container {
 				PrintStream body = response.getPrintStream();
 				long time = System.currentTimeMillis();
 
-				SDFSLogger.getLog().debug(rsString);
+				//SDFSLogger.getLog().debug(rsString);
 				response.set("Content-Type", "text/xml");
 				response.set("Server", "SDFS Management Server");
 				response.setDate("Date", time);

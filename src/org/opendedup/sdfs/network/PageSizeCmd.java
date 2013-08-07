@@ -27,4 +27,9 @@ public class PageSizeCmd implements IOCmd {
 		return NetworkCMDS.STORE_PAGE_SIZE;
 	}
 
+	@Override
+	public Integer getResult() {
+		return this.pageSize;
+	}
+
 }
