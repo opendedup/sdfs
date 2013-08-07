@@ -44,8 +44,24 @@ public class SDFSCmdline {
 			ProcessDSEInfo.runCmd();
 			System.exit(0);
 		}
+		if (cmd.hasOption("cluster-dse-info")) {
+			ProcessClusterDSEInfo.runCmd();
+			System.exit(0);
+		}
+		if (cmd.hasOption("cluster-volumes")) {
+			ProcessClusterVolumesList.runCmd();
+			System.exit(0);
+		}
+		if (cmd.hasOption("cluster-volume-remove")) {
+			ProcessClusterVolumeRemove.runCmd(cmd.getOptionValue("cluster-volume-remove"));
+			System.exit(0);
+		}
 		if (cmd.hasOption("volume-info")) {
 			ProcessVolumeInfo.runCmd();
+			System.exit(0);
+		}
+		if (cmd.hasOption("cluster-redundancy-check")) {
+			ProcessClusterRedundancyCheck.runCmd();
 			System.exit(0);
 		}
 		if (cmd.hasOption("debug-info")) {
@@ -153,6 +169,11 @@ public class SDFSCmdline {
 						"Returns Dedup Storage Engine Statitics. "
 								+ "\n e.g. --dse-info").hasArg(false).create());
 		options.addOption(OptionBuilder
+				.withLongOpt("cluster-dse-info")
+				.withDescription(
+						"Returns Dedup Storage Engine Statitics for all Storage Nodes in the cluster. "
+								+ "\n e.g. --dse-info").hasArg(false).create());
+		options.addOption(OptionBuilder
 				.withLongOpt("debug-info")
 				.withDescription(
 						"Returns Debug Information. " + "\n e.g. --debug-info")
@@ -164,6 +185,18 @@ public class SDFSCmdline {
 								+ "\n e.g. --volume-info").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder
+				.withLongOpt("cluster-volumes")
+				.withDescription(
+						"Returns A List of SDFS Volumes in the cluster. "
+								+ "\n e.g. --cluster-volumes").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-volume-remove")
+				.withDescription(
+						"Removes an unassociated volume in the cluster. "
+								+ "\n e.g. --cluster-volume-remove <vol-name>").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder
 				.withLongOpt("snapshot")
 				.withDescription(
 						"Creates a snapshot for a particular file or folder.\n e.g. --snapshot "
@@ -173,6 +206,11 @@ public class SDFSCmdline {
 				.withLongOpt("debug")
 				.withDescription(
 						"makes output more verbose")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-redundancy-check")
+				.withDescription(
+						"makes sure that the storage cluster maintains the required number of copies for each block of data")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("archive-out")

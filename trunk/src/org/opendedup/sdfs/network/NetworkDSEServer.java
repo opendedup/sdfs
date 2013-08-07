@@ -30,7 +30,6 @@ public class NetworkDSEServer implements Runnable {
 	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
 	public boolean closed = false;
-	private static NioUDPServer udpServer = null;
 
 	@Override
 	public void run() {
@@ -93,9 +92,7 @@ public class NetworkDSEServer implements Runnable {
 				SDFSLogger.getLog().info(
 						"listening on encryted channel " + addr.toString());
 			} else {
-				if (Main.useUDP) {
-					udpServer = new NioUDPServer();
-				}
+				
 				serverSocket = new ServerSocket();
 				serverSocket.bind(addr);
 				SDFSLogger.getLog().info(
@@ -138,11 +135,7 @@ public class NetworkDSEServer implements Runnable {
 			serverSocket.close();
 		} catch (Exception e) {
 		}
-		try {
-
-			udpServer.close();
-		} catch (Exception e) {
-		}
+		
 
 		System.out.println("#### Network Service Shut down completed ####");
 	}

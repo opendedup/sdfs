@@ -102,7 +102,7 @@ public class NioUDPServer implements Runnable {
 									buf.clear();
 									boolean exists = false;
 									if (cmd == NetworkCMDS.HASH_EXISTS_CMD)
-										exists = HCServiceProxy.hashExists(hash,(short)0);
+										exists = HCServiceProxy.hashExists(hash);
 									// boolean exists = true;
 									if (exists)
 										resp.putShort((short) 1);

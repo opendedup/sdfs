@@ -19,6 +19,11 @@ public class FDisk {
 	private SDFSEvent fEvt = null;
 
 	public FDisk(SDFSEvent evt) throws IOException {
+		init(evt);
+	}
+	
+	
+	public void init(SDFSEvent evt) throws IOException {
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
 			SDFSEvent.fdiskInfoEvent(
@@ -31,7 +36,7 @@ public class FDisk {
 						+ " file count = " + FileCounts.getCount(f, false)
 						+ " file size = " + FileCounts.getSize(f, false), evt);
 		fEvt.maxCt = FileCounts.getSize(f, false);
-		SDFSLogger.getLog().info("Starting FDISK");
+		SDFSLogger.getLog().info("Starting FDISK for " +Main.volume.getName());
 		long start = System.currentTimeMillis();
 
 		try {
@@ -86,7 +91,7 @@ public class FDisk {
 					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
 						byte [] exists = HCServiceProxy
-								.hashExists(ck.getHash());
+								.hashExists(ck.getHash(),false,Main.volume.getClusterCopies());
 						if (exists[0]== -1) {
 							SDFSLogger.getLog().debug(
 									"file ["

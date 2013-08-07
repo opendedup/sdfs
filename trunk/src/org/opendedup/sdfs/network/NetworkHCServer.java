@@ -14,6 +14,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.net.ssl.KeyManager;
@@ -39,8 +40,6 @@ public class NetworkHCServer {
 	static Socket clientSocket = null;
 	static ServerSocket serverSocket = null;
 
-	private static NioUDPServer udpServer = null;
-
 	// This chat server can accept up to 10 clients' connections
 
 	public static void main(String args[]) throws IOException {
@@ -59,14 +58,14 @@ public class NetworkHCServer {
 						"exiting because of an error with the config file");
 				System.exit(-1);
 			}
-			init();
+			init(new ArrayList<String>());
 
 		}
 
 	}
 
-	public static void init() throws IOException {
-		HCServiceProxy.init();
+	public static void init(ArrayList<String> volumes) throws IOException {
+		HCServiceProxy.init(volumes);
 		// Initialization section:
 		// Try to open a server socket on port port_number (default 2222)
 		// Note that we can't choose a port less than 1023 if we are not
@@ -117,9 +116,6 @@ public class NetworkHCServer {
 				serverSocket.bind(addr);
 				SDFSLogger.getLog().info("listening on encryted channel " + addr.toString());
 			} else {
-			if (Main.useUDP) {
-				udpServer = new NioUDPServer();
-			}
 			serverSocket = new ServerSocket();
 			serverSocket.bind(addr);
 			SDFSLogger.getLog().info("listening on unencryted channel " + addr.toString());
@@ -157,11 +153,7 @@ public class NetworkHCServer {
 			serverSocket.close();
 		} catch (Exception e) {
 		}
-		try {
-
-			udpServer.close();
-		} catch (Exception e) {
-		}
+		
 		System.out.println("#### Shutting down HashStore ####");
 		HCServiceProxy.close();
 		System.out.println("#### Shut down completed ####");

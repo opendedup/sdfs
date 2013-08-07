@@ -411,6 +411,7 @@ public class DedupFileChannel {
 	public int read(ByteBuffer buf, int bufPos, int siz, long filePos)
 			throws IOException {
 		// this.addAio();
+		//SDFSLogger.getLog().debug("reading at " + filePos + " " +buf.capacity() + " bytes");
 		try {
 			if (filePos >= mf.length()) {
 				return -1;

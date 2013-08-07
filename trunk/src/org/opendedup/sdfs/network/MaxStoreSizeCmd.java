@@ -27,4 +27,9 @@ public class MaxStoreSizeCmd implements IOCmd {
 		return NetworkCMDS.STORE_MAX_SIZE_CMD;
 	}
 
+	@Override
+	public Long getResult() {
+		return this.maxStoreSize;
+	}
+
 }

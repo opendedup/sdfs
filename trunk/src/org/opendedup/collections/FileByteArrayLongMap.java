@@ -529,11 +529,11 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public boolean put(byte[] key, long value) {
+	public boolean put(byte[] key, long value) throws HashtableFullException {
 		try {
 			this.hashlock.lock();
 			if (this.mapped.cardinality() >= size)
-				throw new IOException(
+				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
@@ -553,9 +553,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 			// this.store.position(pos);
 			// this.store.put(storeID);
 			return pos > -1 ? true : false;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error inserting record", e);
-			return false;
 		} finally {
 			this.hashlock.unlock();
 		}

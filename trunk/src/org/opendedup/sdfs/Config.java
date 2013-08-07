@@ -53,18 +53,7 @@ public class Config {
 					.item(0);
 			Main.serverHostName = network.getAttribute("hostname");
 			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
-			Main.useUDP = Boolean.parseBoolean(network.getAttribute("use-udp"));
 			Main.enableNetworkChunkStore = true;
-			if (network.hasAttribute("upstream-enabled")) {
-				Main.upStreamDSEHostEnabled = Boolean.parseBoolean(network
-						.getAttribute("upstream-enabled"));
-				Main.upStreamDSEHostName = network
-						.getAttribute("upstream-host");
-				Main.upStreamDSEPort = Integer.parseInt(network
-						.getAttribute("upstream-host-port"));
-				Main.upStreamPassword = network
-						.getAttribute("upstream-password");
-			}
 			if(network.hasAttribute("use-ssl"))
 				Main.serverUseSSL = Boolean.parseBoolean(network.getAttribute("use-ssl"));
 			Element locations = (Element) doc.getElementsByTagName("locations")
@@ -84,22 +73,20 @@ public class Config {
 				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName(
 						"extended-config").item(0);
 			}
-			Main.preAllocateChunkStore = Boolean.parseBoolean(cbe
-					.getAttribute("pre-allocate"));
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
-			
-			Main.gcChunksSchedule = cbe.getAttribute("chunk-gc-schedule");
+			if (cbe.hasAttribute("gc-class"))
+				Main.gcClass = cbe.getAttribute("gc-class");
+			Main.fDkiskSchedule = cbe.getAttribute("chunk-gc-schedule");
 			if (cbe.hasAttribute("hash-size")) {
 				short hsz = Short.parseShort(cbe.getAttribute("hash-size"));
 				if (hsz == 16)
 					Main.hashType = HashFunctionPool.TIGER_16;
 				if (hsz == 24)
 					Main.hashType = HashFunctionPool.TIGER_24;
-				SDFSLogger.getLog().info(
-						"Setting hash engine to " + Main.hashType);
+				SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 			}
 			if (cbe.hasAttribute("hash-type")) {
 				Main.hashType = cbe.getAttribute("hash-type");
@@ -123,6 +110,18 @@ public class Config {
 				Main.DSEClusterID = cbe.getAttribute("cluster-id");
 			if(cbe.hasAttribute("cluster-member-id"))
 				Main.DSEClusterMemberID = Byte.parseByte(cbe.getAttribute("cluster-member-id"));
+			if(cbe.hasAttribute("cluster-config"))
+				Main.DSEClusterConfig = cbe.getAttribute("cluster-config");
+			if(cbe.hasAttribute("sdfs-password")) {
+				Main.sdfsPassword = cbe.getAttribute("dse-password");
+				Main.sdfsPasswordSalt = cbe.getAttribute("dse-password-salt");
+			}
+			if(cbe.hasAttribute("cluster-node-rack")) {
+				Main.DSEClusterNodeRack = cbe.getAttribute("cluster-node-rack");
+			}
+			if(cbe.hasAttribute("cluster-node-location")) {
+				Main.DSEClusterNodeLocation = cbe.getAttribute("cluster-node-location");
+			}
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
@@ -152,8 +151,7 @@ public class Config {
 				SDFSLogger.getLog().info(
 						"creating chunk store at " + Main.chunkStore);
 				f.mkdirs();
-				if(!f.mkdirs())
-					throw new IOException("Unable to create " +f.getPath());
+				
 			}
 
 			f = new File(Main.hashDBStore);
@@ -229,8 +227,6 @@ public class Config {
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-		Main.multiReadTimeout = Integer.parseInt(cache
-				.getAttribute("multi-read-timeout"));
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 		
 		Main.maxWriteBuffers = Integer.parseInt(cache
@@ -239,7 +235,7 @@ public class Config {
 				.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
-		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
+		Main.fDkiskSchedule = cache.getAttribute("chunk-gc-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume,fileName);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
@@ -263,17 +259,19 @@ public class Config {
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
 		if(localChunkStore.hasAttribute("cluster-member-id"))
 			Main.DSEClusterMemberID = Byte.parseByte(localChunkStore.getAttribute("cluster-member-id"));
+		if(localChunkStore.hasAttribute("cluster-config"))
+			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
+		if(localChunkStore.hasAttribute("cluster-dse-password"))
+			Main.DSEPassword = localChunkStore.getAttribute("cluster-dse-password");
+		if (localChunkStore.hasAttribute("gc-class"))
+			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
-			if (localChunkStore.hasAttribute("gc-name"))
-				Main.gcClass = localChunkStore.getAttribute("gc-name");
 			// Main.chunkStoreMetaData =
 			// localChunkStore.getAttribute("chunk-store-metadata");
 			Main.chunkStoreAllocationSize = Long.parseLong(localChunkStore
 					.getAttribute("allocation-size"));
-			Main.gcChunksSchedule = localChunkStore
-					.getAttribute("chunk-gc-schedule");
 			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
 			if (localChunkStore.hasAttribute("chunkstore-class"))
 				Main.chunkStoreClass = localChunkStore
@@ -296,38 +294,14 @@ public class Config {
 						.getAttribute("encryption-key");
 			}
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
-			Main.preAllocateChunkStore = Boolean.parseBoolean(localChunkStore
-					.getAttribute("pre-allocate"));
-			
 			Element networkcs = (Element) doc.getElementsByTagName("network")
 					.item(0);
 			if (networkcs != null) {
 				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
 						.getAttribute("enable"));
 				Main.serverHostName = networkcs.getAttribute("hostname");
-				Main.useUDP = Boolean.parseBoolean(networkcs
-						.getAttribute("use-udp"));
 				Main.serverPort = Integer.parseInt(networkcs
 						.getAttribute("port"));
-				if (networkcs.hasAttribute("upstream-enabled")) {
-					Main.upStreamDSEHostEnabled = Boolean
-							.parseBoolean(networkcs
-									.getAttribute("upstream-enabled"));
-					Main.upStreamDSEHostName = networkcs
-							.getAttribute("upstream-host");
-					Main.upStreamDSEPort = Integer.parseInt(networkcs
-							.getAttribute("upstream-host-port"));
-					Main.upStreamPassword = networkcs
-							.getAttribute("upstream-password");
-				}
-			}
-			Element remotedse = (Element) doc.getElementsByTagName("remote-dse")
-					.item(0);
-			if (remotedse != null) {
-				Main.DSERemoteHostName = remotedse.getAttribute("hostname");
-				Main.DSERemotePort = Integer.parseInt(remotedse.getAttribute("port"));
-				Main.DSERemoteCompress = Boolean.parseBoolean(remotedse.getAttribute("compress"));
-				Main.DSERemoteUseSSL = Boolean.parseBoolean(remotedse.getAttribute("use-ssl"));
 			}
 			if(networkcs.hasAttribute("use-ssl"))
 				Main.serverUseSSL = Boolean.parseBoolean(networkcs.getAttribute("use-ssl"));
@@ -367,8 +341,8 @@ public class Config {
 						.item(0);
 				Main.sdfsCliEnabled = Boolean.parseBoolean(cli
 						.getAttribute("enable"));
-				Main.sdfsCliPassword = cli.getAttribute("password");
-				Main.sdfsCliSalt = cli.getAttribute("salt");
+				Main.sdfsPassword = cli.getAttribute("password");
+				Main.sdfsPasswordSalt = cli.getAttribute("salt");
 				Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
 				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
 						.getAttribute("enable-auth"));
@@ -405,8 +379,8 @@ public class Config {
 		if (cliSz > 0) {
 			Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
 			cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
-			cli.setAttribute("password", Main.sdfsCliPassword);
-			cli.setAttribute("salt", Main.sdfsCliSalt);
+			cli.setAttribute("password", Main.sdfsPassword);
+			cli.setAttribute("salt", Main.sdfsPasswordSalt);
 			cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 			cli.setAttribute("enable-auth",
 					Boolean.toString(Main.sdfsCliRequireAuth));

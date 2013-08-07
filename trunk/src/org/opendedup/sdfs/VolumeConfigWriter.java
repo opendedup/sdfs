@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,7 +30,6 @@ import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
-import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -51,11 +51,8 @@ public class VolumeConfigWriter {
 	boolean safe_sync = false;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	boolean dedup_files = true;
-	int multi_read_timeout = 1000;
-	int system_read_cache = 1000;
 	short chunk_size = 128;
 	int max_file_write_buffers = 24;
-	int file_read_cache = 5;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
 	String filePermissions = "0644";
@@ -63,16 +60,14 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	String volume_capacity = null;
+	String clusterDSEPassword = "admin";
 	double max_percent_full = .95;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
-	boolean chunk_store_pre_allocate = false;
 	long chunk_store_allocation_size = 0;
-	Short chunk_read_ahead_pages = 4;
-	String chunk_gc_schedule = "0 0 0/4 * * ?";
+	//String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 59 23 * * ?";
-	int remove_if_older_than = 6;
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
@@ -96,23 +91,18 @@ public class VolumeConfigWriter {
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
 
-	boolean upstreamEnabled = false;
-	String upstreamHost = null;
-	String upstreamPassword = "admin";
-	int upstreamPort = 2222;
-	boolean use_udp = false;
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	boolean networkEnable = false;
 	private boolean useDSESize = true;
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
-	private String clusterID = RandomGUID.getGuid();
+	private String clusterID = "sdfs-cluster";
 	private byte clusterMemberID = 0;
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	private boolean clusterEnabled = false;
-	private byte clusterCopies = 2;
+	private byte clusterCopies = 1;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
+	private boolean clusterRackAware = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -179,14 +169,6 @@ public class VolumeConfigWriter {
 			this.write_threads = Short.parseShort(cmd
 					.getOptionValue("io-write-threads"));
 		}
-		if (cmd.hasOption("io-multi-read-timeout")) {
-			this.multi_read_timeout = Integer.parseInt(cmd
-					.getOptionValue("io-multi-read-timeout"));
-		}
-		if (cmd.hasOption("io-system-read-cache")) {
-			this.system_read_cache = Integer.parseInt(cmd
-					.getOptionValue("io-system-read-cache"));
-		}
 		if (cmd.hasOption("io-chunk-size")) {
 			this.chunk_size = Short.parseShort(cmd
 					.getOptionValue("io-chunk-size"));
@@ -200,10 +182,6 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-max-open-files")) {
 			this.max_open_files = Integer.parseInt(cmd
 					.getOptionValue("io-max-open-files"));
-		}
-		if (cmd.hasOption("io-file-read-cache")) {
-			this.file_read_cache = Integer.parseInt(cmd
-					.getOptionValue("io-file-read-cache"));
 		}
 		if (cmd.hasOption("io-meta-file-cache")) {
 			this.meta_file_cache = Integer.parseInt(cmd
@@ -233,21 +211,6 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-hashdb-class")) {
 			this.hash_db_class = cmd
 					.getOptionValue("chunk-store-hashdb-class");
-		}
-		if (cmd.hasOption("chunk-store-pre-allocate")) {
-			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
-					.getOptionValue("chunk-store-pre-allocate"));
-		}
-
-		if (cmd.hasOption("chunk-read-ahead-pages")) {
-			this.chunk_read_ahead_pages = Short.parseShort(cmd
-					.getOptionValue("chunk-read-ahead-pages"));
-		} else {
-			if (this.chunk_size < 32) {
-				this.chunk_read_ahead_pages = (short) (32 / this.chunk_size);
-			} else {
-				this.chunk_read_ahead_pages = 1;
-			}
 		}
 		if (cmd.hasOption("chunk-store-local")) {
 			this.chunk_store_local = Boolean.parseBoolean((cmd
@@ -340,15 +303,6 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-compress"))
 			this.cloudCompress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
-
-		if (cmd.hasOption("chunk-store-gc-schedule")) {
-			this.chunk_gc_schedule = cmd
-					.getOptionValue("chunk-store-gc-schedule");
-		}
-		if (cmd.hasOption("chunk-store-eviction")) {
-			this.remove_if_older_than = Integer.parseInt(cmd
-					.getOptionValue("chunk-store-eviction"));
-		}
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
 			this.max_percent_full = Double.parseDouble(cmd
 					.getOptionValue("volume-maximum-full-percentage"))/100;
@@ -363,9 +317,6 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("dse-enable-network")) {
 			this.networkEnable = true;
 		}
-		if (cmd.hasOption("dse-enable-udp")) {
-			this.use_udp = true;
-		}
 		if (cmd.hasOption("dse-listen-ip")) {
 			this.list_ip = cmd.getOptionValue("dse-listen-ip");
 			this.networkEnable = true;
@@ -374,18 +325,20 @@ public class VolumeConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
-		if (cmd.hasOption("dse-upstream-enabled")) {
-			if (!cmd.hasOption("dse-upstream-host")) {
-				throw new Exception("dse-upstream-host must be specified");
-			} else {
-				this.upstreamHost = cmd.getOptionValue("dse-upstream-host");
-				if (cmd.hasOption("dse-upstream-host-port"))
-					this.upstreamPort = Integer.parseInt(cmd
-							.getOptionValue("dse-upstream-host-port"));
-			}
+		
+		if (cmd.hasOption("cluster-dse-password"))
+			this.clusterDSEPassword = cmd.getOptionValue("cluster-dse-password");
+		if(cmd.hasOption("cluster-id"))
+			this.clusterID = cmd.getOptionValue("cluster-id");
+		if(cmd.hasOption("cluster-config"))
+			this.clusterConfig = cmd.getOptionValue("cluster-config");
+		if(cmd.hasOption("cluster-block-replicas")) {
+			this.clusterCopies = Byte.parseByte(cmd.getOptionValue("cluster-block-replicas"));
+			if(this.clusterCopies > 7)
+				System.err.println("You can only specify up to 7 replica copies of unique blocks");
 		}
-		if (cmd.hasOption("dse-upstream-password"))
-			this.upstreamPassword = cmd.getOptionValue("dse-upstream-password");
+		if(cmd.hasOption("cluster-rack-aware"))
+			this.clusterRackAware = Boolean.parseBoolean(cmd.getOptionValue("cluster-rack-aware"));
 		if (cmd.hasOption("enable-replication-master")) {
 			this.sdfsCliRequireAuth = true;
 			this.sdfsCliListenAddr = "0.0.0.0";
@@ -403,16 +356,6 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
-		
-		if (cmd.hasOption("enable-replication-slave")) {
-			if (!cmd.hasOption("replication-master"))
-				throw new Exception("replication-master must be specified");
-			this.upstreamHost = cmd.getOptionValue("replication-master");
-			this.upstreamEnabled = true;
-		}
-		if (cmd.hasOption("replication-master-password"))
-			this.upstreamPassword = cmd
-					.getOptionValue("replication-master-password");
 
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
@@ -477,20 +420,14 @@ public class VolumeConfigWriter {
 		io.setAttribute("log-level", "1");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
-		io.setAttribute("file-read-cache",
-				Integer.toString(this.file_read_cache));
 		io.setAttribute("max-file-inactive", "900");
 		io.setAttribute("max-file-write-buffers",
 				Integer.toString(this.max_file_write_buffers));
 		io.setAttribute("max-open-files", Integer.toString(this.max_open_files));
 		io.setAttribute("meta-file-cache",
 				Integer.toString(this.meta_file_cache));
-		io.setAttribute("multi-read-timeout",
-				Integer.toString(this.multi_read_timeout));
 		io.setAttribute("safe-close", Boolean.toString(this.safe_close));
 		io.setAttribute("safe-sync", Boolean.toString(this.safe_sync));
-		io.setAttribute("system-read-cache",
-				Integer.toString(this.system_read_cache));
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("hash-type", this.hashType);
@@ -516,20 +453,14 @@ public class VolumeConfigWriter {
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
 		vol.setAttribute("cluster-id",this.clusterID);
 		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
+		vol.setAttribute("cluster-rack-aware", Boolean.toString(clusterRackAware));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
-		cs.setAttribute("pre-allocate",
-				Boolean.toString(this.chunk_store_pre_allocate));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
-		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
-		cs.setAttribute("eviction-age",
-				Integer.toString(this.remove_if_older_than));
 		cs.setAttribute("gc-class", this.gc_class);
-		cs.setAttribute("read-ahead-pages",
-				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
@@ -540,21 +471,13 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
 		cs.setAttribute("cluster-config", this.clusterConfig);
-		cs.setAttribute("cluster-enabled", Boolean.toString(this.clusterEnabled));
+		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("enable", Boolean.toString(networkEnable));
 		network.setAttribute("port", Integer.toString(this.network_port));
-		
-		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
-		network.setAttribute("upstream-enabled",
-				Boolean.toString(this.upstreamEnabled));
-		network.setAttribute("upstream-host", this.upstreamHost);
-		network.setAttribute("upstream-host-port",
-				Integer.toString(this.upstreamPort));
-		network.setAttribute("upstream-password", this.upstreamPassword);
-		network.setAttribute("use-ssl", "true");
+		network.setAttribute("use-ssl", "false");
 		cs.appendChild(network);
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth",
@@ -703,16 +626,6 @@ public class VolumeConfigWriter {
 								+ "basis by using the command \"setfattr -n user.cmd.dedupAll -v 556:false <path to file on sdfs volume>\"\n Defaults to: \n true")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("io-multi-read-timeout")
-				.withDescription(
-						"Timeout to try to read from cache before it request data from the chunkstore. \n Defaults to: \n 1000")
-				.hasArg().withArgName("NUMBER").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("io-system-read-cache")
-				.withDescription(
-						"Size, in number of chunks, that read chunks will be cached into memory. \n Defaults to: \n 1000")
-				.hasArg().withArgName("NUMBER").create());
-		options.addOption(OptionBuilder
 				.withLongOpt("io-chunk-size")
 				.withDescription(
 						"The unit size, in kB, of chunks stored. Set this to 4 if you would like to dedup VMDK files inline.\n Defaults to: \n 128")
@@ -723,12 +636,6 @@ public class VolumeConfigWriter {
 						"The amount of memory to have available for reading and writing per file. Each buffer in the size"
 								+ " of io-chunk-size. \n Defaults to: \n 24")
 				.hasArg().withArgName("SIZE in MB").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("io-file-read-cache")
-				.withDescription(
-						"The number of memory buffers to have available for reading per file. Each buffer in the size"
-								+ " of io-chunk-size. \n Defaults to: \n 5")
-				.hasArg().withArgName("NUMBER").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("io-max-open-files")
 				.withDescription(
@@ -744,8 +651,8 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("io-claim-chunks-schedule")
 				.withDescription(
-						"The schedule, in cron format, to claim deduped chunks with the Dedup Storage Engine. "
-								+ "This should happen more frequently than the chunk-store-gc-schedule. \n Defaults to: \n 0 59 23 * * ?")
+						"The schedule, in cron format, to claim deduped chunks with the Volume(s). "
+								+ " \n Defaults to: \n 0 59 23 * * ?")
 				.hasArg().withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("permissions-file")
@@ -901,11 +808,6 @@ public class VolumeConfigWriter {
 						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("dse-enable-udp")
-				.withDescription(
-						"Enable udp for some communication between Volume and DSE. Defaults to false")
-				.create());
-		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-ip")
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
@@ -913,51 +815,17 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-port")
 				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dse-upstream-enabled")
-				.withDescription(
-						"Enable Upstream Dedup Storage Engine communication")
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("dse-upstream-host")
-				.withDescription("Host name or IPv4 Address of upstream dse").hasArg()
-				.withArgName("FQDN or IPv4 Address").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dse-upstream-host-port")
-				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dse-upstream-password")
-				.withDescription(
-						"SDFSCLI Password of upstream host. Defaults to \"admin\"")
-				.hasArg().withArgName("STRING").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dse-listen-port")
-				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
+						"TCP Port to listen on for incoming connections. Defaults to 2222")
+				.hasArg().withArgName("TCP Port").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-network")
 				.withDescription(
-						"Enable Network Services for Dedup Storage Enginge to serve outside hosts")
+						"Enable Network Services for Dedup Storage Enginge to serve remote hosts")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-replication-master")
 				.withDescription("Enable this volume as a replication master")
 				.create());
-		options.addOption(OptionBuilder.withLongOpt("enable-replication-slave")
-				.withDescription("Enable this volume as a replication slave")
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("replication-master")
-				.withDescription("The Replication master for this slave")
-				.hasArg().withArgName("FQDN or IPv4 Address").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("replication-master-password")
-				.withDescription(
-						"The Replication master sdfscli password. Defaults to \"admin\"")
-				.hasArg().withArgName("STRING").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("report-dse-size")
 				.withDescription(
@@ -977,6 +845,36 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"If set to \"true\" this volume will log io statistics to /etc/sdfs/ directory. Defaults to \"false\"")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-id")
+				.withDescription(
+						"The name used to identify the cluster group. This defaults to sdfs-cluster. This name should be the same on all members of this cluster")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-config")
+				.withDescription(
+						"The jgroups configuration used to configure this cluster node. This defaults to \"/etc/sdfs/jgroups.cfg.xml\". ")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-dse-password")
+				.withDescription(
+						"The jgroups configuration used to configure this cluster node. This defaults to \"/etc/sdfs/jgroups.cfg.xml\". ")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-block-replicas")
+				.withDescription(
+						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to" +
+						"\"2\" the volume will attempt to write any unique block to \"2\" DSE nodes, if available.  This defaults to \"1\". ")
+				.hasArg().withArgName("Value [1-7]").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-rack-aware")
+				.withDescription(
+						"If set to true, the clustered volume will be rack aware and make the best effort to distribute blocks to multiple racks" +
+						" based on the cluster-block-replicas. As an example, if cluster-block replicas is set to \"2\" and cluster-rack-aware is set to \"true\"" +
+						" any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node " +
+						" for this cluster.")
+				.hasArg().withArgName("true|false").create());
+				
 		return options;
 	}
 

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.network;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,10 +17,12 @@ public class HashClientPool {
 	private LinkedBlockingQueue<HashClient> passiveObjects = null;
 	private ArrayList<HashClient> activeObjects = new ArrayList<HashClient>();
 	private ReentrantLock alock = new ReentrantLock();
+	private byte id;
 
-	public HashClientPool(HCServer server, String name, int size)
+	public HashClientPool(HCServer server, String name, int size,byte id)
 			throws IOException {
 		this.server = server;
+		this.id = id;
 		this.poolSize = size;
 		passiveObjects = new LinkedBlockingQueue<HashClient>(this.poolSize);
 		this.populatePool();
@@ -52,12 +55,11 @@ public class HashClientPool {
 
 	public HashClient borrowObject() throws IOException {
 		HashClient hc = null;
-		try {
-			hc = this.passiveObjects.take();
-		} catch (Exception e) {
-			throw new IOException(e);
-		} finally {
-		}
+			try {
+				hc = this.passiveObjects.take();
+			} catch (InterruptedException e1) {
+				
+			}
 		if (hc == null) {
 			hc = this.makeObject();
 		}
@@ -90,8 +92,12 @@ public class HashClientPool {
 			alock.unlock();
 		}
 		try {
-			if (this.passiveObjects.size() < this.poolSize)
-				this.passiveObjects.put(hc);
+			if (this.passiveObjects.size() < this.poolSize) {
+				if(!hc.isClosed())
+					this.passiveObjects.put(hc);
+				else
+					this.passiveObjects.put(this.makeObject());
+			}
 			else
 				hc.close();
 		} catch (Exception e) {
@@ -103,13 +109,23 @@ public class HashClientPool {
 	}
 
 	public HashClient makeObject() throws IOException {
-		HashClient hc = new HashClient(this.server, "server",Main.upStreamPassword);
+		HashClient hc = new HashClient(this.server, "server",Main.DSEPassword,this.id,this);
 		hc.openConnection();
 		return hc;
 	}
 
 	public void destroyObject(HashClient hc) {
 		hc.close();
+	}
+	
+	public void close() throws IOException, InterruptedException {
+		if(this.activeObjects.size() > 0) 
+			throw new IOException("Cannot close because writes still occuring");
+			HashClient hc = passiveObjects.poll();
+			while(hc != null) {
+				hc.close();
+				hc = passiveObjects.poll();
+			}
 	}
 
 }

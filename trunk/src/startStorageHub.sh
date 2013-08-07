@@ -1,5 +1,6 @@
 java \
-  -Xmx2g -Xms2g -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+AggressiveOpts  \
-  -XX:+UseCompressedOops \
- -classpath /home/samsilverberg/workspace_sdfs/sdfs/bin/:/home/samsilverberg/java_api/sdfs-bin/lib/* \
+   -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
+  -server -XX:+UseCompressedOops -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 \
+  -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true \
+  -classpath ./bin/:./lib/* \
    org.opendedup.sdfs.network.ClusteredHCServer "$@"

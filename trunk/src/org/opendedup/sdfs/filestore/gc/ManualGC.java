@@ -1,10 +1,12 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
+import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.ThreadedFDisk;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -19,18 +21,37 @@ public class ManualGC {
 		return clearChunksMills((long) minutes * 60 * 1000);
 	}
 
-	public static long clearChunksMills(long milliseconds)
+	public static synchronized long clearChunksMills(long milliseconds)
 			throws InterruptedException, IOException {
-		WriteLock l = GCMain.gclock.writeLock();
+		Lock l = null;
+		if (Main.chunkStoreLocal) {
+			l = GCMain.gclock.writeLock();
+
+		} else {
+			l = HCServiceProxy.cs.getLock("fdisk");
+		}
 		l.lock();
 		try {
+
 			long rm = 0;
-			evt = SDFSEvent.gcInfoEvent("SDFS Volume Cleanup Initiated for "
-					+ Main.volume.getName());
+			if (Main.chunkStoreLocal)
+				evt = SDFSEvent
+						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
+								+ Main.volume.getName());
+			else
+				evt = SDFSEvent
+						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
+								+ Main.DSEClusterID);
 			evt.maxCt = 100;
 			evt.curCt = 0;
-			runGC(milliseconds);
+			try {
+				runGC(milliseconds);
+			} catch (IOException e) {
+				if (!Main.firstRun)
+					throw e;
+			}
 			if (Main.firstRun) {
+				SDFSLogger.getLog().info("Waiting 10 Seconds to run again");
 				SDFSEvent wevt = SDFSEvent.waitEvent(
 						"Waiting 10 Seconds to run again", evt);
 				wevt.maxCt = 10;
@@ -50,12 +71,16 @@ public class ManualGC {
 		}
 	}
 
-	private static long runGC(long milliseconds) {
+	private static long runGC(long milliseconds) throws IOException {
 		long rm = 0;
 		try {
-			
+
 			long tm = System.currentTimeMillis();
-			new FDisk(evt);
+			if (Main.chunkStoreLocal) {
+				new FDisk(evt);
+			} else {
+				HCServiceProxy.runFDisk(evt);
+			}
 			evt.curCt = 33;
 			HCServiceProxy.processHashClaims(evt);
 			evt.curCt = 66;
@@ -66,6 +91,8 @@ public class ManualGC {
 			evt.endEvent(
 					"SDFS Volume Cleanup Failed because " + e.getMessage(),
 					SDFSEvent.ERROR);
+			evt.success = false;
+			throw new IOException(e);
 		} finally {
 			try {
 				Main.pFullSched.recalcScheduler();

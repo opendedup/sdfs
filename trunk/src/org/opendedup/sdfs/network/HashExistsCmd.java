@@ -7,18 +7,15 @@ import java.io.IOException;
 public class HashExistsCmd implements IOCmd {
 	byte[] hash;
 	boolean exists = false;
-	short hops = 0;
 
-	public HashExistsCmd(byte[] hash,short hops) {
+	public HashExistsCmd(byte[] hash) {
 		this.hash = hash;
-		this.hops = hops;
 	}
 
 	@Override
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
 		os.write(NetworkCMDS.HASH_EXISTS_CMD);
-		os.writeShort(hops);
 		os.writeShort(hash.length);
 		os.write(hash);
 		os.flush();
@@ -36,6 +33,11 @@ public class HashExistsCmd implements IOCmd {
 	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.HASH_EXISTS_CMD;
+	}
+
+	@Override
+	public Boolean getResult() {
+		return this.exists;
 	}
 
 }

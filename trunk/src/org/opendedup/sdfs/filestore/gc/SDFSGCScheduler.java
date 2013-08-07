@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.util.Properties;
 
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.quartz.CronTrigger;
@@ -31,7 +32,7 @@ public class SDFSGCScheduler {
 			CronTrigger cctrigger = new CronTrigger("gcTrigger", "group1",
 					Main.fDkiskSchedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);
-			SDFSLogger.getLog().info("Stand Along Garbage Collection Jobs Scheduled will run first at " + cctrigger.getNextFireTime().toString());
+			SDFSLogger.getLog().info("Stand Alone Garbage Collection Jobs Scheduled will run first at " + cctrigger.getNextFireTime().toString());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"Unable to schedule SDFS Garbage Collection", e);
@@ -40,10 +41,10 @@ public class SDFSGCScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob("gc", "gcTrigger");
+			sched.unscheduleJob("gc", null);
+			sched.deleteJob("gc", null);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			SDFSLogger.getLog().error("unable to stop schedule",e);
 		}
 	}
 

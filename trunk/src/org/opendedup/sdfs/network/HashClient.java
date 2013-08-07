@@ -1,36 +1,28 @@
 package org.opendedup.sdfs.network;
 
 import java.io.BufferedInputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HCServer;
 
-public class HashClient {
+public class HashClient implements Runnable {
 
 	private Socket clientSocket = null;
 	private DataOutputStream os = null;
@@ -40,17 +32,23 @@ public class HashClient {
 	private HCServer server;
 	private String name = "";
 	private String password = "";
-
-	private ReentrantLock lock = new ReentrantLock();
-
+	private IOCmd ncmd = null;
+	private Object result = null;
+	private AsyncCmdListener listener;
+	private byte id;
+	private HashClientPool pool;
+	
 	// private LRUMap existsBuffers = new LRUMap(10);
 
-	public HashClient(HCServer server, String name, String password) throws IOException {
+	public HashClient(HCServer server, String name, String password, byte id,
+			HashClientPool pool) throws IOException {
 		this.server = server;
 		this.name = name;
+		this.id = id;
+		this.pool = pool;
 		try {
 			this.openConnection();
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to open connection", e);
 			throw new IOException("unable to open connection");
 		}
@@ -96,18 +94,21 @@ public class HashClient {
 				// Create an ssl socket factory with our all-trusting manager
 				SSLSocketFactory sslSocketFactory = sslContext
 						.getSocketFactory();
-				clientSocket = sslSocketFactory.createSocket(
-						server.getHostName(), server.getPort());
+				clientSocket = sslSocketFactory.createSocket();
 			} else {
-				clientSocket = new Socket(server.getHostName(),
-						server.getPort());
+				clientSocket = new Socket();
 			}
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(true);
+			clientSocket.setReceiveBufferSize(64 * 1024);
+			clientSocket.setSendBufferSize(64 * 1024);
+			clientSocket.setPerformancePreferences(0, 1, 2);
+			clientSocket.connect(new InetSocketAddress(server.getHostName(),
+					server.getPort()));
 			os = new DataOutputStream(new BufferedOutputStream(
-					clientSocket.getOutputStream(), Main.CHUNK_LENGTH + 34));
+					clientSocket.getOutputStream(), 8192));
 			is = new DataInputStream(new BufferedInputStream(
-					clientSocket.getInputStream(), Main.CHUNK_LENGTH + 34));
+					clientSocket.getInputStream(), 8192));
 			inReader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()));
 			// Read the Header Line
@@ -124,27 +125,30 @@ public class HashClient {
 					"hashclient connection established "
 							+ clientSocket.toString());
 		} catch (UnknownHostException e) {
-			SDFSLogger.getLog().fatal("Don't know about host " + server.getHostName() + server.getPort());
+			SDFSLogger.getLog().fatal(
+					"Don't know about host " + server.getHostName()
+							+ server.getPort());
 			this.closed = true;
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"Couldn't get I/O for the connection to the host", e);
 			this.closed = true;
-			throw new IOException("Couldn't get I/O for the connection to the host " + server.getHostName() + server.getPort());
+			throw new IOException(
+					"Couldn't get I/O for the connection to the host "
+							+ server.getHostName() + server.getPort());
 		}
 	}
 
 	public void executeCmd(IOCmd cmd) throws IOException {
 		if (this.closed) {
 			try {
-			this.openConnection();
-			}catch(Exception e) {
+				this.openConnection();
+			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to execute command", e);
 				throw new IOException(e);
 			}
 		}
-		lock.lock();
 		try {
 
 			cmd.executeCmd(is, os);
@@ -157,37 +161,10 @@ public class HashClient {
 				SDFSLogger.getLog().fatal("unable to execute command", e);
 				throw new IOException("unable to execute command");
 			}
-		} finally {
-			lock.unlock();
 		}
 	}
 
-	private void executeUDPCmd(IOCmd cmd) throws SocketTimeoutException,
-			IOException {
-		DatagramSocket socket = new DatagramSocket();
-		socket.setSoTimeout(Main.UDPClientTimeOut);
-		byte[] b = new byte[33];
-		ByteBuffer buf = ByteBuffer.wrap(b);
-		if (cmd.getCmdID() == NetworkCMDS.HASH_EXISTS_CMD) {
-			HashExistsCmd hcmd = (HashExistsCmd) cmd;
-			buf.put(NetworkCMDS.HASH_EXISTS_CMD);
-			buf.put(hcmd.getHash());
-			InetSocketAddress addr = new InetSocketAddress(
-					server.getHostName(), server.getPort());
-			DatagramPacket packet = new DatagramPacket(buf.array(), b.length,
-					addr);
-			socket.send(packet);
-			packet = new DatagramPacket(new byte[2], 2, addr);
-			socket.receive(packet);
-			buf = ByteBuffer.wrap(packet.getData());
-			short exists = buf.getShort();
-			if (exists == 0)
-				hcmd.exists = false;
-			else
-				hcmd.exists = true;
-		}
-		b = null;
-	}
+	
 
 	public void close() {
 		try {
@@ -229,6 +206,12 @@ public class HashClient {
 		return cmd.wasWritten();
 	}
 
+	public void writeChunkAsync(byte[] hash, byte[] aContents, int position,
+			int len, AsyncCmdListener l) throws IOException {
+		this.listener = l;
+		this.ncmd = new WriteHashCmd(hash, aContents, len, server.isCompress());
+	}
+
 	public byte[] fetchChunk(byte[] hash) throws IOException {
 		FetchChunkCmd cmd = new FetchChunkCmd(hash, server.isCompress());
 		this.executeCmd(cmd);
@@ -242,18 +225,10 @@ public class HashClient {
 		return cmd.getChunks();
 	}
 
-	public boolean hashExists(byte[] hash, short hops) throws IOException {
-		HashExistsCmd cmd = new HashExistsCmd(hash, hops);
-		if (server.isUseUDP()) {
-			try {
-				this.executeUDPCmd(cmd);
-			} catch (IOException e) {
-				System.out.println("trying tcp");
-				this.executeCmd(cmd);
-			}
-		} else {
+	public boolean hashExists(byte[] hash) throws IOException {
+		HashExistsCmd cmd = new HashExistsCmd(hash);
+		
 			this.executeCmd(cmd);
-		}
 		return cmd.exists();
 	}
 
@@ -261,5 +236,34 @@ public class HashClient {
 		PingCmd cmd = new PingCmd();
 		this.executeCmd(cmd);
 	}
+
+	@Override
+	public void run() {
+			try {
+				this.executeCmd(ncmd);
+				this.result = ncmd.getResult();
+				this.listener.commandResponse(this.result, this);
+				//SDFSLogger.getLog().debug("thread ran result is " + (Boolean)this.result);
+
+			} catch (Exception e) {
+				this.listener.commandException(e);
+			} finally {
+				try {
+					this.pool.returnObject(this);
+				} catch (IOException e) {
+					SDFSLogger.getLog().error("unable to return hashclient", e);
+				}
+			}
+	}
+
+	public Object getResult() {
+		return this.result;
+	}
+
+	public byte getId() {
+		return id;
+	}
+	
+	
 
 }

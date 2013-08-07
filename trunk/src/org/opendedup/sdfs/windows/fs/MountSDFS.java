@@ -3,6 +3,7 @@ package org.opendedup.sdfs.windows.fs;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -30,6 +31,8 @@ public class MountSDFS {
 				"sdfs volume will be compacted and then exit");
 		options.addOption("forcecompact", false,
 				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
+		options.addOption("rv", true, "comma separated list of remote volumes that should also be accounted for when doing garbage collection. " +
+				"If not entered the volume will attempt to identify other volumes in the cluster.");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -41,6 +44,7 @@ public class MountSDFS {
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
+		ArrayList<String> volumes = new ArrayList<String>();
 		fal.add("-f");
 		if (cmd.hasOption("h")) {
 			printHelp(options);
@@ -58,6 +62,12 @@ public class MountSDFS {
 			Main.runCompact = true;
 			if(cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
+		}
+		if(cmd.hasOption("rv")) {
+			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),",");
+			while(st.hasMoreTokens()) {
+				volumes.add(st.nextToken());
+			}
 		}
 
 		if (cmd.hasOption("v")) {
@@ -99,7 +109,7 @@ public class MountSDFS {
 		Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
-		SDFSService sdfsService = new SDFSService(volumeConfigFile);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile,volumes);
 
 		try {
 			sdfsService.start();

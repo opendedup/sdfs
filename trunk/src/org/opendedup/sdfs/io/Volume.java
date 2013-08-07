@@ -66,6 +66,7 @@ public class Volume implements java.io.Serializable {
 	private String configPath = null;
 	private String uuid = null;
 	private byte clusterCopies = 2;
+	private boolean clusterRackAware = false;
 
 	protected boolean volumeFull = false;
 
@@ -141,6 +142,9 @@ public class Volume implements java.io.Serializable {
 			if(this.clusterCopies >7) {
 				this.clusterCopies = 7;
 			}
+		}
+		if(vol.hasAttribute("cluster-rack-aware")) {
+			this.clusterRackAware = Boolean.parseBoolean(vol.getAttribute("cluster-rack-aware"));
 		}
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
@@ -319,6 +323,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("perf-mon-file", this.perfMonFile);
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
+		root.setAttribute("cluster-rack-aware", Boolean.toString(this.clusterRackAware));		
 		return root;
 	}
 
@@ -348,6 +353,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("perf-mon-file", this.perfMonFile);
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
+		root.setAttribute("cluster-rack-aware", Boolean.toString(this.clusterRackAware));
 		return doc;
 	}
 
@@ -415,5 +421,13 @@ public class Volume implements java.io.Serializable {
 
 	public void setClusterCopies(byte clusterCopies) {
 		this.clusterCopies = clusterCopies;
+	}
+
+	public boolean isClusterRackAware() {
+		return clusterRackAware;
+	}
+
+	public void setClusterRackAware(boolean clusterRackAware) {
+		this.clusterRackAware = clusterRackAware;
 	}
 }

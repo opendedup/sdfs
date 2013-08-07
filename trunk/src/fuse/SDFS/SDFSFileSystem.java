@@ -422,7 +422,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("unable to read file " + path, e);
 			throw new FuseException("error opening " + path)
-					.initErrno(Errno.EACCES);
+					.initErrno(Errno.ENODATA);
 		} finally {
 		}
 		return 0;
@@ -645,8 +645,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
-		// SDFSLogger.getLog().info("19");
+		//SDFSLogger.getLog().debug("writing " + buf.capacity());
 		// Thread.currentThread().setName("21 "+Long.toString(System.currentTimeMillis()));
+		
 		try {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);

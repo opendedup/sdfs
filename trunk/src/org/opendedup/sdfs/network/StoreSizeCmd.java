@@ -27,4 +27,9 @@ public class StoreSizeCmd implements IOCmd {
 		return NetworkCMDS.STORE_SIZE_CMD;
 	}
 
+	@Override
+	public Long getResult() {
+		return this.storeSize;
+	}
+
 }

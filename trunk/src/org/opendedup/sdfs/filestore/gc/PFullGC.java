@@ -1,8 +1,11 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import java.util.concurrent.locks.Lock;
+
 import org.opendedup.logging.SDFSLogger;
 
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -51,12 +54,21 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	private double calcPFull() {
+		Lock l = null;
+		try {
+		if(!Main.chunkStoreLocal) {
+				l = HCServiceProxy.cs.getLock("fdisk");
+		}
 		double pFull = 0;
 		if (HCServiceProxy.getSize() > 0) {
 			pFull = (double) HCServiceProxy.getSize()
 					/ (double) HCServiceProxy.getMaxSize();
 		}
 		return pFull;
+		}finally {
+			if(l !=null)
+				l.unlock();
+		}
 	}
 	
 	

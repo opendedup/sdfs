@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -26,6 +27,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
@@ -53,15 +55,11 @@ public class DSEConfigWriter {
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
-	boolean chunk_store_pre_allocate = false;
-	boolean use_udp = false;
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	long chunk_store_allocation_size = 0;
-	Short chunk_read_ahead_pages = 4;
 	short chunk_size = 128;
-	String chunk_gc_schedule = "0 0 0/4 * * ?";
-	int remove_if_older_than = 6;
+	String chunk_gc_schedule = "0 59 23 * * ?";
 	boolean awsEnabled = false;
 	boolean azureEnabled = false;
 	String cloudAccessKey = "";
@@ -71,17 +69,16 @@ public class DSEConfigWriter {
 	boolean chunk_store_encrypt = false;
 	boolean cloudCompress = Main.cloudCompress;
 	String hashType = HashFunctionPool.MURMUR3_16;
-	boolean upstreamEnabled = false;
-	String upstreamHost = null;
-	int upstreamPort = 2222;
-	String upstreamPassword = "admin";
 	private String clusterID = "sdfs-cluster";
-	private byte clusterMemberID = 0;
+	private byte clusterMemberID = 1;
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	private boolean clusterEnabled = false;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String hash_db_class = Main.hashesDBClass;
-	
+	String sdfsCliPassword = "admin";
+	String sdfsCliSalt = HashFunctions.getRandomString(6);
+	String clusterRack = "rack1";
+	String clusterNodeLocation = "pdx";
+	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -98,13 +95,14 @@ public class DSEConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity")) {
+		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity") || !cmd.hasOption("listen-ip")) {
 			System.out
-					.println("--dse-name and --dse-capacity are required options");
+					.println("--dse-name, --dse-capacity, and --listen-ip are required options");
 			printHelp(options);
 			System.exit(-1);
 		}
 		dse_name = cmd.getOptionValue("dse-name");
+		this.list_ip = cmd.getOptionValue("listen-ip");
 		base_path = OSValidator.getProgramBasePath() + "dse" + File.separator
 				+ dse_name;
 		if (cmd.hasOption("base-path")) {
@@ -121,20 +119,6 @@ public class DSEConfigWriter {
 		if (cmd.hasOption("hashdb-location")) {
 			this.chunk_store_hashdb_location = cmd
 					.getOptionValue("hashdb-location");
-		}
-		if (cmd.hasOption("pre-allocate")) {
-			this.chunk_store_pre_allocate = Boolean.parseBoolean(cmd
-					.getOptionValue("pre-allocate"));
-		}
-		if (cmd.hasOption("read-ahead-pages")) {
-			this.chunk_read_ahead_pages = Short.parseShort(cmd
-					.getOptionValue("read-ahead-pages"));
-		} else {
-			if (this.chunk_size < 32) {
-				this.chunk_read_ahead_pages = (short) (32 / this.chunk_size);
-			} else {
-				this.chunk_read_ahead_pages = 1;
-			}
 		}
 		if (cmd.hasOption("aws-enabled")) {
 			this.awsEnabled = Boolean.parseBoolean(cmd
@@ -205,10 +189,6 @@ public class DSEConfigWriter {
 		if (cmd.hasOption("gc-schedule")) {
 			this.chunk_gc_schedule = cmd.getOptionValue("gc-schedule");
 		}
-		if (cmd.hasOption("eviction")) {
-			this.remove_if_older_than = Integer.parseInt(cmd
-					.getOptionValue("eviction"));
-		}
 		if (cmd.hasOption("dse-capacity")) {
 
 			long sz = StringUtils.parseSize(cmd.getOptionValue("dse-capacity"));
@@ -216,13 +196,6 @@ public class DSEConfigWriter {
 		}
 		if (cmd.hasOption("page-size")) {
 			this.chunk_size = Short.parseShort(cmd.getOptionValue("page-size"));
-		}
-		if (cmd.hasOption("enable-udp")) {
-			this.use_udp = Boolean.parseBoolean(cmd
-					.getOptionValue("enable-udp"));
-		}
-		if (cmd.hasOption("listen-ip")) {
-			this.list_ip = cmd.getOptionValue("listen-ip");
 		}
 		if (cmd.hasOption("hash-type")) {
 			String ht = cmd.getOptionValue("hash-type");
@@ -242,17 +215,19 @@ public class DSEConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
-		if(cmd.hasOption("upstream-enabled")) {
-			if(!cmd.hasOption("upstream-host")) {
-				throw new Exception("upstream-host must be specified");
-			} else {
-				this.upstreamHost = cmd.getOptionValue("upstream-host");
-				if(cmd.hasOption("upstream-host-port"))
-					this.upstreamPort = Integer.parseInt(cmd.getOptionValue("upstream-host-port"));
-			}
-		}
-		if(cmd.hasOption("upstream-password"))
-			this.upstreamPassword = cmd.getOptionValue("upstream-password");
+		if(cmd.hasOption("cluster-dse-password"))
+			this.sdfsCliPassword = cmd.getOptionValue("cluster-dse-password");
+		if(cmd.hasOption("cluster-name"))
+			this.clusterID = cmd.getOptionValue("cluster-name");
+		if(cmd.hasOption("cluster-node-id"))
+			this.clusterMemberID = Byte.parseByte(cmd.getOptionValue("cluster-node-id"));
+		if(cmd.hasOption("cluster-config-path"))
+			this.clusterConfig = cmd.getOptionValue("cluster-config-path");
+		if(cmd.hasOption("cluster-node-location"))
+			this.clusterNodeLocation = cmd.getOptionValue("cluster-node-location");
+		if(cmd.hasOption("cluster-node-rack"))
+			this.clusterRack = cmd.getOptionValue("cluster-node-rack");
+			
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
 		if (file.exists()) {
@@ -284,12 +259,7 @@ public class DSEConfigWriter {
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("port", Integer.toString(this.network_port));
-		network.setAttribute("use-udp", Boolean.toString(this.use_udp));
-		network.setAttribute("upstream-enabled", Boolean.toString(this.upstreamEnabled));
-		network.setAttribute("upstream-host", this.upstreamHost);
-		network.setAttribute("upstream-host-port", Integer.toString(this.upstreamPort));
-		network.setAttribute("upstream-password", this.upstreamPassword);
-		network.setAttribute("use-ssl", "true");
+		network.setAttribute("use-ssl", "false");
 		root.appendChild(network);
 		Element loc = xmldoc.createElement("locations");
 		loc.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -299,15 +269,9 @@ public class DSEConfigWriter {
 
 		cs.setAttribute("page-size", Integer.toString(this.chunk_size * 1024));
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
-		cs.setAttribute("pre-allocate",
-				Boolean.toString(this.chunk_store_pre_allocate));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
-		cs.setAttribute("eviction-age",
-				Integer.toString(this.remove_if_older_than));
-		cs.setAttribute("read-ahead-pages",
-				Short.toString(this.chunk_read_ahead_pages));
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
@@ -315,11 +279,24 @@ public class DSEConfigWriter {
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
-		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("hash-type", this.hashType);
+		cs.setAttribute("cluster-id", this.clusterID);
+		cs.setAttribute("gc-class", this.gc_class);
+		
 		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
 		cs.setAttribute("cluster-config", this.clusterConfig);
-		cs.setAttribute("cluster-enabled", Boolean.toString(this.clusterEnabled));
+		cs.setAttribute("cluster-node-rack", this.clusterRack);
+		cs.setAttribute("cluster-node-location", this.clusterNodeLocation);
+		try {
+			cs.setAttribute("dse-password", HashFunctions.getSHAHash(
+					this.sdfsCliPassword.getBytes(),
+					this.sdfsCliSalt.getBytes()));
+		} catch (Exception e) {
+			System.out.println("unable to create password ");
+			e.printStackTrace();
+			throw new IOException(e);
+		}
+		cs.setAttribute("dse-password-salt", this.sdfsCliSalt);
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
@@ -398,42 +375,17 @@ public class DSEConfigWriter {
 								+ File.separator + "hdb").hasArg()
 				.withArgName("PATH").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("pre-allocate")
-				.withDescription(
-						"Pre-allocate the chunk store if true."
-								+ " \nDefaults to: \n false").hasArg()
-				.withArgName("true|false").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("read-ahead-pages")
-				.withDescription(
-						"The number of pages to read ahead when doing a disk read on the chunk store."
-								+ " \nDefaults to: \n 128/io-chunk-size or 1 if greater than 128")
-				.hasArg().withArgName("NUMBER").create());
-		options.addOption(OptionBuilder
 				.withLongOpt("gc-schedule")
 				.withDescription(
 						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
+								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 59 23 * * ?")
 				.hasArg().withArgName("CRON Schedule").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("eviction")
-				.withDescription(
-						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
-				.hasArg().withArgName("HOURS").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-capacity")
 				.withDescription(
 						"The size in bytes of the Dedup Storeage Engine. "
 								+ "This . \n Defaults to: \n The size of the Volume")
 				.hasArg().withArgName("BYTES").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("read-cache")
-				.withDescription(
-						"The size in MB of the Dedup Storeage Engine's read cache. Its useful to set this if you have high number of reads"
-								+ " for AWS/Cloud storage "
-								+ "This . \n Defaults to: \n 5MB").hasArg()
-				.withArgName("Megabytes").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("hash-type")
 				.withDescription(
@@ -456,13 +408,6 @@ public class DSEConfigWriter {
 								+ " For AWS this is a good option to enable. The default for this is"
 								+ " false").hasArg().withArgName("true|false")
 				.create());
-		options.addOption(OptionBuilder
-				.withLongOpt("dirty-timeout")
-				.withDescription(
-						"The timeout, in milliseconds, for a previous read for the same chunk to finish within the Dedup Storage Engine. "
-								+ "For AWS with slow links you may want to set this to a higher number. The default for this is"
-								+ " 1000 ms.").hasArg()
-				.withArgName("Milliseconds").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
@@ -505,37 +450,45 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-ip")
 				.withDescription(
-						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
+						"Host name or IPv4 Address to listen on for incoming connections. This is a required option.")
 				.hasArg().withArgName("IPv4 Address").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-port")
 				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
+						"TCP Port to listen on for incoming connections. Defaults to 2222")
 				.hasArg().withArgName("IP Port").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("upstream-enabled")
+				.withLongOpt("dse-password")
 				.withDescription(
-						"Enable Upstream Dedup Storage Engine communication").create());
+						"The password used to remotely connect to the TCP server on this system. This does not authenticate cluster connections just fetches and writes.")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("upstream-host")
+				.withLongOpt("cluster-id")
 				.withDescription(
-						"Host name or IPv4 Address ")
-				.hasArg().withArgName("FQDN or IPv4 Address").create());
+						"The name used to identify the cluster group. This defaults to sdfs-cluster. This name should be the same on all members of this cluster")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("upstream-password")
+				.withLongOpt("cluster-node-id")
 				.withDescription(
-						"SDFSCLI Password of upstream host")
-				.hasArg().withArgName("STRING").create());
+						"The unique id [1-200] used to identify this node within the cluster group. This defaults to 1 but should be incremented for each new DSE member of the cluster." +
+						" As an example, if this is the second DSE within the cluster, the id should be \"2\"")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("upstream-host-port")
+				.withLongOpt("cluster-config")
 				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
+						"The jgroups configuration used to configure this cluster node. This defaults to \"/etc/sdfs/jgroups.cfg.xml\". ")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("listen-port")
+				.withLongOpt("cluster-node-location")
 				.withDescription(
-						"TCP and UDP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
+						"The location where this cluster node is located.")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-node-rack")
+				.withDescription(
+						"The rack where this cluster node is located.This is used to make sure that redundant blocks are not all copied to the name rack. To make the cluster rack aware, " +
+						"also set the --cluster-rack-aware=true.")
+				.hasArg().withArgName("String").create());
 		return options;
 	}
 
@@ -568,7 +521,7 @@ public class DSEConfigWriter {
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.setWidth(175);
-		formatter.printHelp("mkfs.sdfs --dse-name=sdfs --dse-capacity=100GB",
+		formatter.printHelp("mkdse --dse-name=sdfs --dse-capacity=100GB --listen-ip=192.168.0.10",
 				options);
 	}
 
