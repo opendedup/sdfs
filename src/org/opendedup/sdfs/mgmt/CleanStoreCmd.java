@@ -29,8 +29,8 @@ public class CleanStoreCmd implements Runnable {
 			
 
 			SDFSLogger.getLog().info(
-					"cleanded dedup storage engine of [" + chunks
-							+ "] records not claimed in  [" + minutes + "] ");
+					"Expunged [" + chunks
+							+ "] unclaimed chunks in  [" + minutes + "] ");
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()

@@ -2,8 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -66,7 +64,7 @@ public class VolumeConfigWriter {
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
 	long chunk_store_allocation_size = 0;
-	//String chunk_gc_schedule = "0 0 0/4 * * ?";
+	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 59 23 * * ?";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
@@ -75,8 +73,8 @@ public class VolumeConfigWriter {
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	boolean cloudCompress = Main.cloudCompress;
-	//int chunk_store_read_cache = Main.chunkStorePageCache;
-	//int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
+	// int chunk_store_read_cache = Main.chunkStorePageCache;
+	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
 
@@ -112,15 +110,27 @@ public class VolumeConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (!cmd.hasOption("volume-name") || !cmd.hasOption("volume-capacity")) {
+		if (cmd.hasOption("chunk-store-local")) {
+			this.chunk_store_local = Boolean.parseBoolean((cmd
+					.getOptionValue("chunk-store-local")));
+		}
+		if (!cmd.hasOption("volume-name")) {
+			System.out
+					.println("--volume-name and --volume-capacity are required options");
+			printHelp(options);
+			System.exit(-1);
+		}
+		if (this.chunk_store_local && !cmd.hasOption("volume-capacity")) {
 			System.out
 					.println("--volume-name and --volume-capacity are required options");
 			printHelp(options);
 			System.exit(-1);
 		}
 		volume_name = cmd.getOptionValue("volume-name");
-		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + "volume-" +volume_name + "-perf.json";
-		if(OSValidator.isWindows())
+		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator
+				+ "logs" + File.separator + "volume-" + volume_name
+				+ "-perf.json";
+		if (OSValidator.isWindows())
 			hash_db_class = "org.opendedup.collections.FileBasedCSMap";
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
 		base_path = OSValidator.getProgramBasePath() + "volumes"
@@ -209,13 +219,9 @@ public class VolumeConfigWriter {
 					.getOptionValue("chunk-store-hashdb-location");
 		}
 		if (cmd.hasOption("chunk-store-hashdb-class")) {
-			this.hash_db_class = cmd
-					.getOptionValue("chunk-store-hashdb-class");
+			this.hash_db_class = cmd.getOptionValue("chunk-store-hashdb-class");
 		}
-		if (cmd.hasOption("chunk-store-local")) {
-			this.chunk_store_local = Boolean.parseBoolean((cmd
-					.getOptionValue("chunk-store-local")));
-		}
+
 		if (cmd.hasOption("aws-enabled")) {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
@@ -224,7 +230,7 @@ public class VolumeConfigWriter {
 			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("azure-enabled"));
 		}
-		
+
 		if (cmd.hasOption("chunk-store-encrypt")) {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-encrypt"));
@@ -258,12 +264,9 @@ public class VolumeConfigWriter {
 				System.out.println("Error : Unable to create volume");
 				System.out
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
-				System.out
-				.println(cmd.getOptionValue("cloud-access-key"));
-				System.out
-				.println(cmd.getOptionValue("cloud-secret-key"));
-				System.out
-				.println(cmd.getOptionValue("cloud-bucket-name"));
+				System.out.println(cmd.getOptionValue("cloud-access-key"));
+				System.out.println(cmd.getOptionValue("cloud-secret-key"));
+				System.out.println(cmd.getOptionValue("cloud-bucket-name"));
 				System.exit(-1);
 			}
 		} else if (this.gsEnabled) {
@@ -298,14 +301,14 @@ public class VolumeConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			
+
 		}
 		if (cmd.hasOption("chunk-store-compress"))
 			this.cloudCompress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
 			this.max_percent_full = Double.parseDouble(cmd
-					.getOptionValue("volume-maximum-full-percentage"))/100;
+					.getOptionValue("volume-maximum-full-percentage")) / 100;
 		}
 		if (cmd.hasOption("chunk-store-size")) {
 			this.chunk_store_allocation_size = StringUtils.parseSize(cmd
@@ -325,20 +328,24 @@ public class VolumeConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
-		
+
 		if (cmd.hasOption("cluster-dse-password"))
-			this.clusterDSEPassword = cmd.getOptionValue("cluster-dse-password");
-		if(cmd.hasOption("cluster-id"))
+			this.clusterDSEPassword = cmd
+					.getOptionValue("cluster-dse-password");
+		if (cmd.hasOption("cluster-id"))
 			this.clusterID = cmd.getOptionValue("cluster-id");
-		if(cmd.hasOption("cluster-config"))
+		if (cmd.hasOption("cluster-config"))
 			this.clusterConfig = cmd.getOptionValue("cluster-config");
-		if(cmd.hasOption("cluster-block-replicas")) {
-			this.clusterCopies = Byte.parseByte(cmd.getOptionValue("cluster-block-replicas"));
-			if(this.clusterCopies > 7)
-				System.err.println("You can only specify up to 7 replica copies of unique blocks");
+		if (cmd.hasOption("cluster-block-replicas")) {
+			this.clusterCopies = Byte.parseByte(cmd
+					.getOptionValue("cluster-block-replicas"));
+			if (this.clusterCopies > 7)
+				System.err
+						.println("You can only specify up to 7 replica copies of unique blocks");
 		}
-		if(cmd.hasOption("cluster-rack-aware"))
-			this.clusterRackAware = Boolean.parseBoolean(cmd.getOptionValue("cluster-rack-aware"));
+		if (cmd.hasOption("cluster-rack-aware"))
+			this.clusterRackAware = Boolean.parseBoolean(cmd
+					.getOptionValue("cluster-rack-aware"));
 		if (cmd.hasOption("enable-replication-master")) {
 			this.sdfsCliRequireAuth = true;
 			this.sdfsCliListenAddr = "0.0.0.0";
@@ -363,30 +370,37 @@ public class VolumeConfigWriter {
 			throw new IOException("Volume [" + this.volume_name
 					+ "] already exists");
 		}
-		if(cmd.hasOption("report-dse-size")) {
+		if (cmd.hasOption("report-dse-size")) {
 			try {
-			Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("report-dse-size"));
-			//this.useDSECapacity = rp;
-			this.useDSESize = rp;
-			}catch(Throwable e) {
-				System.err.println("value for report-dse-size must be true or false");
-			}
-		}if(cmd.hasOption("report-dse-capacity")) {
-			try {
-			Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("report-dse-capacity"));
-			this.useDSECapacity = rp;
-			//this.useDSESize = rp;
-			}catch(Throwable e) {
-				System.err.println("value for report-dse-capacity must be true or false");
+				Boolean rp = Boolean.parseBoolean(cmd
+						.getOptionValue("report-dse-size"));
+				// this.useDSECapacity = rp;
+				this.useDSESize = rp;
+			} catch (Throwable e) {
+				System.err
+						.println("value for report-dse-size must be true or false");
 			}
 		}
-		if(cmd.hasOption("use-perf-mon")) {
+		if (cmd.hasOption("report-dse-capacity")) {
 			try {
-				Boolean rp = Boolean.parseBoolean(cmd.getOptionValue("use-perf-mon"));
+				Boolean rp = Boolean.parseBoolean(cmd
+						.getOptionValue("report-dse-capacity"));
+				this.useDSECapacity = rp;
+				// this.useDSESize = rp;
+			} catch (Throwable e) {
+				System.err
+						.println("value for report-dse-capacity must be true or false");
+			}
+		}
+		if (cmd.hasOption("use-perf-mon")) {
+			try {
+				Boolean rp = Boolean.parseBoolean(cmd
+						.getOptionValue("use-perf-mon"));
 				this.usePerfMon = rp;
-				}catch(Throwable e) {
-					System.err.println("value for use-perf-mon must be true or false");
-				}
+			} catch (Throwable e) {
+				System.err
+						.println("value for use-perf-mon must be true or false");
+			}
 		}
 	}
 
@@ -447,13 +461,15 @@ public class VolumeConfigWriter {
 		vol.setAttribute("maximum-percentage-full",
 				Double.toString(this.max_percent_full));
 		vol.setAttribute("closed-gracefully", "true");
-		vol.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
+		vol.setAttribute("use-dse-capacity",
+				Boolean.toString(this.useDSECapacity));
 		vol.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		vol.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
-		vol.setAttribute("cluster-id",this.clusterID);
+		vol.setAttribute("cluster-id", this.clusterID);
 		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		vol.setAttribute("cluster-rack-aware", Boolean.toString(clusterRackAware));
+		vol.setAttribute("cluster-rack-aware",
+				Boolean.toString(clusterRackAware));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -464,7 +480,8 @@ public class VolumeConfigWriter {
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
-		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
+		cs.setAttribute("max-repl-batch-sz",
+				Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
@@ -652,8 +669,8 @@ public class VolumeConfigWriter {
 				.withLongOpt("io-claim-chunks-schedule")
 				.withDescription(
 						"The schedule, in cron format, to claim deduped chunks with the Volume(s). "
-								+ " \n Defaults to: \n 0 59 23 * * ?")
-				.hasArg().withArgName("CRON Schedule").create());
+								+ " \n Defaults to: \n 0 59 23 * * ?").hasArg()
+				.withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("permissions-file")
 				.withDescription(
@@ -742,8 +759,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-hashdb-class")
 				.withDescription(
-						"The class used to store hash values \n Defaults to: \n " + Main.hashesDBClass)
-				.hasArg().withArgName("class name").create());
+						"The class used to store hash values \n Defaults to: \n "
+								+ Main.hashesDBClass).hasArg()
+				.withArgName("class name").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-size")
 				.withDescription(
@@ -759,12 +777,13 @@ public class VolumeConfigWriter {
 								+ HashFunctionPool.TIGER_24
 								+ " "
 								+ HashFunctionPool.MURMUR3_16
-								+ " This Defaults to " + HashFunctionPool.MURMUR3_16).hasArg()
-				.withArgName(HashFunctionPool.TIGER_16
-						+ "|"
-						+ HashFunctionPool.TIGER_24
-						+ "|"
-						+ HashFunctionPool.MURMUR3_16).create());
+								+ " This Defaults to "
+								+ HashFunctionPool.MURMUR3_16)
+				.hasArg()
+				.withArgName(
+						HashFunctionPool.TIGER_16 + "|"
+								+ HashFunctionPool.TIGER_24 + "|"
+								+ HashFunctionPool.MURMUR3_16).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-encrypt")
 				.withDescription(
@@ -829,16 +848,16 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("report-dse-size")
 				.withDescription(
-						"If set to \"true\" this volume will used as the actual"+
-				" used statistics from the DSE. If this value is set to \"false\" it will"+
-								"report as virtual size of the volume and files. Defaults to \"true\"")
+						"If set to \"true\" this volume will used as the actual"
+								+ " used statistics from the DSE. If this value is set to \"false\" it will"
+								+ "report as virtual size of the volume and files. Defaults to \"true\"")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("report-dse-capacity")
 				.withDescription(
-						"If set to \"true\" this volume will report capacity the actual"+
-				"capacity statistics from the DSE. If this value is set to \"false\" it will"+
-								"report as virtual size of the volume and files. Defaults to \"true\"")
+						"If set to \"true\" this volume will report capacity the actual"
+								+ "capacity statistics from the DSE. If this value is set to \"false\" it will"
+								+ "report as virtual size of the volume and files. Defaults to \"true\"")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("use-perf-mon")
@@ -863,18 +882,18 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-block-replicas")
 				.withDescription(
-						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to" +
-						"\"2\" the volume will attempt to write any unique block to \"2\" DSE nodes, if available.  This defaults to \"1\". ")
+						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to"
+								+ "\"2\" the volume will attempt to write any unique block to \"2\" DSE nodes, if available.  This defaults to \"1\". ")
 				.hasArg().withArgName("Value [1-7]").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-rack-aware")
 				.withDescription(
-						"If set to true, the clustered volume will be rack aware and make the best effort to distribute blocks to multiple racks" +
-						" based on the cluster-block-replicas. As an example, if cluster-block replicas is set to \"2\" and cluster-rack-aware is set to \"true\"" +
-						" any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node " +
-						" for this cluster.")
-				.hasArg().withArgName("true|false").create());
-				
+						"If set to true, the clustered volume will be rack aware and make the best effort to distribute blocks to multiple racks"
+								+ " based on the cluster-block-replicas. As an example, if cluster-block replicas is set to \"2\" and cluster-rack-aware is set to \"true\""
+								+ " any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node "
+								+ " for this cluster.").hasArg()
+				.withArgName("true|false").create());
+
 		return options;
 	}
 
@@ -931,7 +950,7 @@ public class VolumeConfigWriter {
 		long _mem = ((long) (_dmem * 100));
 		if (_mem > 2000)
 			_mem = 2000;
-		return _mem+Main.MAX_REPL_BATCH_SZ;
+		return _mem + Main.MAX_REPL_BATCH_SZ;
 	}
 
 }

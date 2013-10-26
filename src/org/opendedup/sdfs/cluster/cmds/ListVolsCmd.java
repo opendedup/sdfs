@@ -46,7 +46,7 @@ public class ListVolsCmd implements IOPeerCmd {
 				}
 				else {
 					if(rsp.getValue() != null) {
-						SDFSLogger.getLog().debug("FDisks completed for " +rsp.getSender() + " returned=" +rsp.getValue());
+						SDFSLogger.getLog().debug("List completed for " +rsp.getSender() + " returned=" +rsp.getValue());
 						@SuppressWarnings("unchecked")
 						ArrayList<String> rst = (ArrayList<String>)rsp.getValue();
 						for(String vol: rst) {

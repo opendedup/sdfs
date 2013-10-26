@@ -46,6 +46,6 @@ public class NetworkCMDS {
 	public static final byte LIST_VOLUMES = 18;
 	public static final byte RM_VOLUME = 19;
 	public static final byte ADD_VOLUME = 20;
-	public static final byte BATCH_HASH_EXISTS_CMD = 1;
+	public static final byte BATCH_HASH_EXISTS_CMD = 21;
 
 }

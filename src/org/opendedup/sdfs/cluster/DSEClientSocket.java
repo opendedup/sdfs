@@ -223,6 +223,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = null;
 			break;
 		}
+		case NetworkCMDS.HASH_EXISTS_CMD : {
+			rtrn = new Boolean(false);
+			break;
+		}
 		}
 		return rtrn;
 	}
