@@ -14,12 +14,14 @@ import java.util.concurrent.ExecutionException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 //import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
+import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
@@ -27,6 +29,7 @@ import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
+import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 import com.google.common.cache.CacheBuilder;
@@ -254,7 +257,7 @@ public class HCServiceProxy {
 		return exists;
 	}
 	
-	public static void runFDisk(SDFSEvent evt) throws IOException {
+	public static void runFDisk(SDFSEvent evt) throws FDiskException, IOException {
 		if(Main.chunkStoreLocal)
 			new FDisk(evt);
 		else {
@@ -296,6 +299,17 @@ public class HCServiceProxy {
 					Main.volume.getClusterCopies());
 			cmd.executeCmd(socket);
 			return cmd.getResponse();
+		}
+	}
+	
+	public static ArrayList<SparseDataChunk> batchHashExists(ArrayList<SparseDataChunk> hashes) throws IOException {
+		if (Main.chunkStoreLocal) {
+			throw new IOException("not implemented for localstore");
+
+		} else {
+			BatchHashExistsCmd cmd = new BatchHashExistsCmd(hashes);
+			cmd.executeCmd(socket);
+			return cmd.getHashes();
 		}
 	}
 	

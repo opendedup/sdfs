@@ -3,6 +3,7 @@ package org.opendedup.sdfs.cluster;
 import java.io.DataInputStream;
 
 
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.DSEServer;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -189,6 +191,18 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
 				rtrn = new Boolean(HCServiceProxy.hashExists(hash));
+				break;
+			}
+			case NetworkCMDS.BATCH_HASH_EXISTS_CMD: {
+				byte[] arb = new byte[buf.getInt()];
+				buf.get(arb);
+				@SuppressWarnings("unchecked")
+				ArrayList<SparseDataChunk> chunks = (ArrayList<SparseDataChunk>) Util.objectFromByteBuffer(arb);
+				ArrayList<Boolean> rsults = new ArrayList<Boolean>(chunks.size());
+				for(int i = 0;i<chunks.size();i++) {
+					rsults.add(i,new Boolean(HCServiceProxy.hashExists(chunks.get(i).getHash())));
+				}
+				rtrn = rsults;
 				break;
 			}
 			case NetworkCMDS.WRITE_HASH_CMD: {

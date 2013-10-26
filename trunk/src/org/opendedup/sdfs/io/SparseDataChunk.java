@@ -1,19 +1,23 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import java.nio.ByteBuffer;
 
 import org.opendedup.hashing.HashFunctionPool;
 
-public class SparseDataChunk {
 
+public class SparseDataChunk implements Serializable {
+
+
+	private static final long serialVersionUID = 2355100719332694545L;
 	private boolean doop;
 	private byte[] hash;
 	private boolean localData = false;
-	//private long timeAdded = 0;
-	private byte [] hashlocs;
+	int currentpos = 1;
 	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
+	private byte [] hashlocs;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
 		if (rawData.length != RAWDL)
@@ -54,6 +58,7 @@ public class SparseDataChunk {
 	}
 	
 	public void setHashLoc(byte [] hashlocs) {
+		this.currentpos = 1;
 		this.hashlocs = hashlocs;
 	}
 
@@ -68,7 +73,7 @@ public class SparseDataChunk {
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
-		buf.put(this.hashlocs);
+		buf.put(hashlocs);
 		return buf.array();
 	}
 
@@ -81,7 +86,32 @@ public class SparseDataChunk {
 	}
 	
 	public byte [] getHashLoc() {
+		if(this.hashlocs[1] > 0)
+			this.hashlocs[0] = 0;
 		return this.hashlocs;
+	}
+	
+	public synchronized void addHashLoc(byte loc) {
+		if(currentpos <this.hashlocs.length) {
+			this.hashlocs[currentpos] = loc;
+			currentpos++;
+		}
+	}
+	
+	public int getCopies() {
+		int ncopies = 0;
+		for (int i = 1; i < 8; i++) {
+			if (hashlocs[i] > (byte) 0) {
+				ncopies++;
+			}
+		}
+		return ncopies;
+	}
+	
+	public void resetHashLoc() {
+		hashlocs = new byte [8];
+		hashlocs[0] = -1;
+		currentpos=1;
 	}
 
 }

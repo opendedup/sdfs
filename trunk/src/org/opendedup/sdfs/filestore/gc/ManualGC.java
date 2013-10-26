@@ -49,6 +49,11 @@ public class ManualGC {
 			} catch (IOException e) {
 				if (!Main.firstRun)
 					throw e;
+			}finally {
+				try {
+					Main.pFullSched.recalcScheduler();
+				} catch (Exception e) {
+				}
 			}
 			if (Main.firstRun) {
 				SDFSLogger.getLog().info("Waiting 10 Seconds to run again");
@@ -60,7 +65,14 @@ public class ManualGC {
 					wevt.curCt++;
 				}
 				wevt.endEvent("Done Waiting");
+				try {
 				rm = rm + runGC(10 * 1000);
+				}finally {
+					try {
+						Main.pFullSched.recalcScheduler();
+					} catch (Exception e) {
+					}
+				}
 				Main.firstRun = false;
 			}
 			evt.endEvent("SDFS Volume Cleanup Finished for "
@@ -73,9 +85,10 @@ public class ManualGC {
 
 	private static long runGC(long milliseconds) throws IOException {
 		long rm = 0;
+		long tm = System.currentTimeMillis();
 		try {
 
-			long tm = System.currentTimeMillis();
+			
 			if (Main.chunkStoreLocal) {
 				new FDisk(evt);
 			} else {
@@ -84,8 +97,7 @@ public class ManualGC {
 			evt.curCt = 33;
 			HCServiceProxy.processHashClaims(evt);
 			evt.curCt = 66;
-			rm = HCServiceProxy
-					.removeStailHashes(tm - milliseconds, false, evt);
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
 			evt.endEvent(
@@ -93,11 +105,13 @@ public class ManualGC {
 					SDFSEvent.ERROR);
 			evt.success = false;
 			throw new IOException(e);
-		} finally {
-			try {
-				Main.pFullSched.recalcScheduler();
-			} catch (Exception e) {
-			}
+		}
+		try {
+			rm = HCServiceProxy
+					.removeStailHashes(tm - milliseconds, false, evt);
+		}
+		finally {
+			
 		}
 		return rm;
 	}
