@@ -751,12 +751,6 @@ public class VolumeConfigWriter {
 								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 0 0/2 * * ?")
 				.hasArg().withArgName("CRON Schedule").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("chunk-store-eviction")
-				.withDescription(
-						"The duration, in hours, that chunks will be removed from Dedup Storage Engine if unclaimed. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 6")
-				.hasArg().withArgName("HOURS").create());
-		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-hashdb-class")
 				.withDescription(
 						"The class used to store hash values \n Defaults to: \n "
