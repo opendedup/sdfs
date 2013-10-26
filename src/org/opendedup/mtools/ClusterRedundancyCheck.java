@@ -226,6 +226,7 @@ public class ClusterRedundancyCheck {
 					}
 				}
 			}
+			
 			if(chunks.size() > 0) {
 				corruptBlocks += batchCheck(chunks,mp,prevpos);
 			}

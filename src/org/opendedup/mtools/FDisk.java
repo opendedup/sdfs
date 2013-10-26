@@ -24,7 +24,6 @@ public class FDisk {
 		init(evt);
 	}
 	
-	
 	public void init(SDFSEvent evt) throws FDiskException {
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
