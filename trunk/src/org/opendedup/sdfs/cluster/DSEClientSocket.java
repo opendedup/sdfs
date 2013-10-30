@@ -35,7 +35,6 @@ import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
-import org.opendedup.mtools.ThreadedFDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.DSEServer;
@@ -89,9 +88,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		disp.setMessageListener(this);
 		channel.connect(clusterID);
 		for (String vol : remoteVolumes) {
-			if(vol != null) {
-			volumes.put(vol, null);
-			new AddVolCmd(vol).executeCmd(this);
+			if (vol != null) {
+				volumes.put(vol, null);
+				new AddVolCmd(vol).executeCmd(this);
 			}
 		}
 		server = new DSEServer(channel.getAddressAsString(), (byte) 0,
@@ -103,11 +102,12 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		this.addSelfToState();
 		channel.getState(null, 10000);
 		SDFSLogger.getLog().info(
-				"Started Cluster DSE Listener dse server cluster size is "
+				"Started Cluster DSE Listener dse client cluster size is "
 						+ this.sal.size());
-		if(this.sal.size() == 0) {
+		if (this.sal.size() == 0) {
+			SDFSLogger.getLog().fatal("No DSE Servers found. Exiting");
 			throw new IOException("No DSE Servers found");
-		}	
+		}
 		lock_service = new LockService(channel);
 	}
 
@@ -168,9 +168,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						l.unlock();
 					}
 				}
-				//SDFSLogger.getLog().debug(
-				//		s + " - hashmap size : " + serverState.size()
-				//				+ " sorted arraylist size : " + sal.size());
+				// SDFSLogger.getLog().debug(
+				// s + " - hashmap size : " + serverState.size()
+				// + " sorted arraylist size : " + sal.size());
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("Unable to update dse state ", e);
 				throw new IOException(e);
@@ -207,8 +207,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			String volume = new String(sb);
 			synchronized (volumes) {
 				if (!this.volumes.containsKey(volume))
-					if(volume != null)
-					this.volumes.put(volume, null);
+					if (volume != null)
+						this.volumes.put(volume, null);
 			}
 			rtrn = new Boolean(true);
 			break;
@@ -223,8 +223,17 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = null;
 			break;
 		}
-		case NetworkCMDS.HASH_EXISTS_CMD : {
+		case NetworkCMDS.HASH_EXISTS_CMD: {
 			rtrn = new Boolean(false);
+			break;
+		}
+		case NetworkCMDS.FIND_GC_MASTER_CMD: {
+			this.gcUpdateLock.lock();
+			try {
+				rtrn = new Boolean(this.gcscheduler != null);
+			} finally {
+				this.gcUpdateLock.unlock();
+			}
 			break;
 		}
 		}
@@ -233,8 +242,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 	@SuppressWarnings("unchecked")
 	public List<Address> getServers() {
-		synchronized(saal) {
-			return (List<Address>)saal.clone();
+		synchronized (saal) {
+			return (List<Address>) saal.clone();
 		}
 	}
 
@@ -377,7 +386,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 	}
 
-	private void startGC() throws InstantiationException,
+	public void startGC() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
 		this.gcUpdateLock.lock();
 		try {
@@ -388,7 +397,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 	}
 
-	private void stopGC() {
+	public void stopGC() {
 		this.gcUpdateLock.lock();
 		try {
 			if (this.gcscheduler != null)
@@ -407,15 +416,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		Address first = new_view.getMembers().get(0);
 		if (first.equals(this.channel.getAddress())) {
-			try {
-				this.startGC();
-			} catch (Exception e) {
-				SDFSLogger.getLog().info(
-						"unable to start garbage collection scheduler", e);
-			}
+
 			this.peermaster = true;
 		} else {
-			this.stopGC();
 			this.peermaster = false;
 		}
 		SDFSLogger.getLog().debug(
@@ -441,8 +444,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					nal.remove(s);
 					l.unlock();
 					synchronized (volumes) {
-						if(s.volumeName  != null)
-						volumes.put(s.volumeName, null);
+						if (s.volumeName != null)
+							volumes.put(s.volumeName, null);
 					}
 					try {
 						pools[s.id].close();
@@ -513,7 +516,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					nal.add(s);
 					l.unlock();
 					synchronized (volumes) {
-						if(s.volumeName != null)
+						if (s.volumeName != null)
 							volumes.put(s.volumeName, s.address);
 					}
 				}
@@ -586,7 +589,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				} finally {
 					l.unlock();
 				}
-				
+
 				l = this.nl.writeLock();
 				l.lock();
 				try {
@@ -597,8 +600,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (s.serverType == DSEServer.CLIENT) {
 							nal.add(s);
 							synchronized (volumes) {
-								if(s.volumeName != null)
-								volumes.put(s.volumeName, s.address);
+								if (s.volumeName != null)
+									volumes.put(s.volumeName, s.address);
 							}
 						}
 					}
@@ -707,9 +710,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					saal.remove(server.address);
 					saal.add(server.address);
 					Collections.sort(sal, new CustomComparator());
-				}finally {
-						l.unlock();
-					}
+				} finally {
+					l.unlock();
+				}
 				l = this.pl.writeLock();
 				l.lock();
 				try {
@@ -718,7 +721,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 								"creating pool for " + server.id);
 						pools[server.id] = server.createPool();
 					}
-				}finally {
+				} finally {
 					l.unlock();
 				}
 
@@ -728,12 +731,12 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				try {
 					nal.remove(server);
 					nal.add(server);
-				}finally {
+				} finally {
 					l.unlock();
 				}
 				synchronized (volumes) {
-					if(server.volumeName != null)
-					volumes.put(server.volumeName, server.address);
+					if (server.volumeName != null)
+						volumes.put(server.volumeName, server.address);
 				}
 			}
 		}
@@ -748,7 +751,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			@SuppressWarnings("unchecked")
 			ArrayList<DSEServer> clone = (ArrayList<DSEServer>) sal.clone();
 			sn = clone;
-		}finally {
+		} finally {
 			l.unlock();
 		}
 		return sn;
@@ -763,7 +766,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			@SuppressWarnings("unchecked")
 			ArrayList<DSEServer> clone = (ArrayList<DSEServer>) nal.clone();
 			sn = clone;
-		}finally {
+		} finally {
 			l.unlock();
 		}
 		return sn;
@@ -803,6 +806,11 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				addr = volumes.get(volumeName);
 		}
 		return addr;
+	}
+
+	@Override
+	public DSEServer getServer() {
+		return this.server;
 	}
 
 }

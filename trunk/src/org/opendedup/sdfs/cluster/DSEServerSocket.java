@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 
 
 
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.DSEServer;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+//import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -63,7 +64,6 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	final HashMap<String, Address> volumes = new HashMap<String, Address>();
 	LockService lock_service = null;
 	private boolean peermaster = false;
-	StandAloneGCScheduler gcscheduler = null;
 	public final ReentrantLock gcUpdateLock = new ReentrantLock();
 
 	public DSEServerSocket(String config, String clusterID, byte id,
@@ -290,6 +290,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				rtrn = new Boolean(true);
 				break;
 			}
+			case NetworkCMDS.FIND_GC_MASTER_CMD: {
+				rtrn = new Boolean(false);
+				break;
+			}
 			}
 			return rtrn;
 		} catch (Exception e) {
@@ -311,44 +315,11 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 
 	}
 
-	private void startGC() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException {
-		this.gcUpdateLock.lock();
-		try {
-			if (this.gcscheduler == null)
-				this.gcscheduler = new StandAloneGCScheduler();
-		} finally {
-			this.gcUpdateLock.unlock();
-		}
-	}
-
-	private void stopGC() {
-		this.gcUpdateLock.lock();
-		try {
-			if (this.gcscheduler != null)
-				this.gcscheduler.close();
-			this.gcscheduler = null;
-		} finally {
-			this.gcUpdateLock.unlock();
-		}
-	}
+	
 
 	public void viewAccepted(View new_view) {
 		if (new_view instanceof MergeView) {
 			lock_service.unlockAll();
-		}
-		Address first = new_view.getMembers().get(0);
-		if (first.equals(this.channel.getAddress())) {
-			try {
-				this.startGC();
-			} catch (Exception e) {
-				SDFSLogger.getLog().info(
-						"unable to start garbage collection scheduler", e);
-			}
-			this.peermaster = true;
-		} else {
-			this.stopGC();
-			this.peermaster = false;
 		}
 		SDFSLogger.getLog().debug(
 				"** view: " + new_view + " peer master = "
@@ -570,6 +541,11 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				addr = volumes.get(volumeName);
 		}
 		return addr;
+	}
+	
+	@Override
+	public DSEServer getServer() {
+		return this.server;
 	}
 
 }

@@ -56,6 +56,7 @@ public class FDisk {
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
 					SDFSEvent.ERROR);
 			throw new FDiskException(e);
+			
 		}
 	}
 

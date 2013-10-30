@@ -9,6 +9,7 @@ import org.opendedup.sdfs.cluster.cmds.DSEServer;
 
 public interface ClusterSocket {
 	public abstract List<DSEServer> getStorageNodes();
+	public abstract DSEServer getServer();
 	public abstract List<DSEServer> getNameNodes();
 	public abstract List<String> getVolumes();
 	public abstract Address getAddressForVol(String volumeName);

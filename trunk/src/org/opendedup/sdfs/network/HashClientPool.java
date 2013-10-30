@@ -78,15 +78,13 @@ public class HashClientPool {
 		return hc;
 	}
 
-	public void returnObject(HashClient hc) throws IOException {
+	public void returnObject(HashClient hc)  {
 		alock.lock();
 		try {
 
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
-			e.printStackTrace();
-			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
-			throw new IOException(e.toString());
+			SDFSLogger.getLog().error("Unable to get object out of active pool ", e);
 
 		} finally {
 			alock.unlock();
@@ -101,8 +99,7 @@ public class HashClientPool {
 			else
 				hc.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
-			throw new IOException(e.toString());
+			SDFSLogger.getLog().warn("Unable to get object out of pool ", e);
 
 		} finally {
 		}

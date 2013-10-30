@@ -5,9 +5,8 @@ import java.io.IOException;
 
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
@@ -16,13 +15,13 @@ import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 
-public class ListVolsCmd implements IOPeerCmd {
+public class FindGCMasterCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private ArrayList<String> results = new ArrayList<String>();
+	private Address gcMaster = null;
 	
 
-	public ListVolsCmd() {
+	public FindGCMasterCmd() {
 		opts = new RequestOptions(ResponseMode.GET_ALL,
 				0);
 		
@@ -32,26 +31,29 @@ public class ListVolsCmd implements IOPeerCmd {
 	public void executeCmd(final ClusterSocket soc) throws IOException {
 		byte[] b = new byte[1];
 		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.put(NetworkCMDS.LIST_VOLUMES);
+		buf.put(NetworkCMDS.FIND_GC_MASTER_CMD);
 		try {
 			RspList<Object> lst = soc.getDispatcher().castMessage(null, new Message(null,
 					null, buf.array()), opts);
 			for(Rsp<Object> rsp : lst) {
 				if(rsp.hasException()) {
-					SDFSLogger.getLog().error("List Volume Exception thrown for " + rsp.getSender());
-					throw rsp.getException();
+					SDFSLogger.getLog().error("FIND_GC_MASTER_CMD Exception thrown for " + rsp.getSender());
+					//throw rsp.getException();
 				} else if(rsp.wasSuspected() | rsp.wasUnreachable()) {
-					SDFSLogger.getLog().error("List Volume Host unreachable Exception thrown for " + rsp.getSender());
+					SDFSLogger.getLog().error("FIND_GC_MASTER_CMD Host unreachable Exception thrown for " + rsp.getSender());
+					//throw new IOException("FIND_GC_MASTER_CMD Host unreachable Exception thrown for " + rsp.getSender());
 				}
 				else {
 					if(rsp.getValue() != null) {
-						SDFSLogger.getLog().debug("List completed for " +rsp.getSender() + " returned=" +rsp.getValue());
-						@SuppressWarnings("unchecked")
-						ArrayList<String> rst = (ArrayList<String>)rsp.getValue();
-						for(String vol: rst) {
-							if(!this.results.contains(vol))
-								this.results.add(vol);
+						SDFSLogger.getLog().debug("FIND_GC_MASTER_CMD completed for " +rsp.getSender() + " returned=" +rsp.getValue());
+						boolean m = (Boolean)rsp.getValue();
+						if(m) {
+							if(this.gcMaster != null)
+								throw new IOException("FIND_GC_MASTER_CMD already identified at [" +gcMaster.toString() + "] but has also been identified at [" +rsp.getSender()+"].");
+							else
+								this.gcMaster = rsp.getSender();
 						}
+							
 					}
 				}
 			}
@@ -64,11 +66,11 @@ public class ListVolsCmd implements IOPeerCmd {
 
 	@Override
 	public byte getCmdID() {
-		return NetworkCMDS.RUN_FDISK;
+		return NetworkCMDS.FIND_GC_MASTER_CMD;
 	}
 	
-	public List<String> getResults() {
-		return this.results;
+	public Address getResults() {
+		return this.gcMaster;
 	}
 
 }
