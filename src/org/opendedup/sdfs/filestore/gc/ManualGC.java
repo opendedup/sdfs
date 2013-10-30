@@ -89,7 +89,7 @@ public class ManualGC {
 		try {
 
 			
-			if (Main.chunkStoreLocal) {
+			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				new FDisk(evt);
 			} else {
 				HCServiceProxy.runFDisk(evt);

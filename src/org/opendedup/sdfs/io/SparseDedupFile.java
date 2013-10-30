@@ -321,6 +321,8 @@ public class SparseDedupFile implements DedupFile {
 						writeBuffer.getFlushedBuffer(),
 						writeBuffer.getLength(), writeBuffer.capacity(),
 						mf.isDedup());
+				if(hashloc[1] == 0)
+					throw new IOException("unable to write chunk hash location at 1 = " + hashloc[1]);
 				if (hashloc[0] == 1)
 					doop = true;
 				writeBuffer.setHashLoc(hashloc);

@@ -37,7 +37,7 @@ public class HashClient implements Runnable {
 	private AsyncCmdListener listener;
 	private byte id;
 	private HashClientPool pool;
-	
+
 	// private LRUMap existsBuffers = new LRUMap(10);
 
 	public HashClient(HCServer server, String name, String password, byte id,
@@ -136,7 +136,7 @@ public class HashClient implements Runnable {
 			this.closed = true;
 			throw new IOException(
 					"Couldn't get I/O for the connection to the host "
-							+ server.getHostName() + server.getPort());
+							+ server.getHostName() + ":" + server.getPort());
 		}
 	}
 
@@ -145,7 +145,9 @@ public class HashClient implements Runnable {
 			try {
 				this.openConnection();
 			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("unable to execute command", e);
+				SDFSLogger.getLog().fatal(
+						"unable to open connection to "
+								+ clientSocket.toString(), e);
 				throw new IOException(e);
 			}
 		}
@@ -158,13 +160,13 @@ public class HashClient implements Runnable {
 				this.openConnection();
 				cmd.executeCmd(is, os);
 			} catch (Exception e1) {
-				SDFSLogger.getLog().fatal("unable to execute command", e);
+				SDFSLogger.getLog().fatal(
+						"unable to execute command " + clientSocket.toString(),
+						e);
 				throw new IOException("unable to execute command");
 			}
 		}
 	}
-
-	
 
 	public void close() {
 		try {
@@ -227,8 +229,8 @@ public class HashClient implements Runnable {
 
 	public boolean hashExists(byte[] hash) throws IOException {
 		HashExistsCmd cmd = new HashExistsCmd(hash);
-		
-			this.executeCmd(cmd);
+
+		this.executeCmd(cmd);
 		return cmd.exists();
 	}
 
@@ -239,21 +241,18 @@ public class HashClient implements Runnable {
 
 	@Override
 	public void run() {
-			try {
-				this.executeCmd(ncmd);
-				this.result = ncmd.getResult();
-				this.listener.commandResponse(this.result, this);
-				//SDFSLogger.getLog().debug("thread ran result is " + (Boolean)this.result);
+		try {
+			this.executeCmd(ncmd);
+			this.result = ncmd.getResult();
+			this.listener.commandResponse(this.result, this);
+			// SDFSLogger.getLog().debug("thread ran result is " +
+			// (Boolean)this.result);
 
-			} catch (Exception e) {
-				this.listener.commandException(e);
-			} finally {
-				try {
-					this.pool.returnObject(this);
-				} catch (IOException e) {
-					SDFSLogger.getLog().error("unable to return hashclient", e);
-				}
-			}
+		} catch (Exception e) {
+			this.listener.commandException(e);
+		} finally {
+			this.pool.returnObject(this);
+		}
 	}
 
 	public Object getResult() {
@@ -263,7 +262,5 @@ public class HashClient implements Runnable {
 	public byte getId() {
 		return id;
 	}
-	
-	
 
 }

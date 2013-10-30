@@ -96,6 +96,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 				@Override
 				public void commandException(Exception e) {
 					lock.lock();
+					try {
 					dn++;
 					exdn++;
 					if(dn >=sz) {
@@ -103,7 +104,9 @@ public class DirectWriteHashCmd implements IOClientCmd {
 							this.notify();
 						}
 					}
+					}finally {
 					lock.unlock();
+					}
 
 				}
 
@@ -134,7 +137,6 @@ public class DirectWriteHashCmd implements IOClientCmd {
 				hc.writeChunkAsync(this.hash, this.aContents, 0,
 						this.aContents.length, l);
 				executor.execute(hc);
-
 			}
 			if(dn < sz) {
 					synchronized(l) {
@@ -142,7 +144,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					}
 			}
 			if(dn < sz)
-				throw new IOException("thread timed out before write was complete ");
+				SDFSLogger.getLog().warn("thread timed out before write was complete ");
 			if (this.ignoredhosts != null) {
 				for (byte bz : ignoredhosts) {
 					if (bz != (byte) 0) {
@@ -161,6 +163,14 @@ public class DirectWriteHashCmd implements IOClientCmd {
 
 	public byte[] reponse() {
 		return this.resp;
+	}
+	
+	public byte getExDn() {
+		return this.exdn;
+	}
+	
+	public byte getDn() {
+		return this.dn;
 	}
 
 	@Override
