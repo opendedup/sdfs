@@ -59,8 +59,23 @@ public class StringUtils {
 		}
 		return fSize;
 	}
+	
+	public static int getSpecialCharacterCount(String s) {
+	     if (s == null || s.trim().isEmpty()) {
+	         return 0;
+	     }
+	     int theCount = 0;
+	     String specialChars = "/*!@#$%^&*()\"{}[]|\\?/<>,.';:+~`";
+	     for (int i = 0; i < s.length(); i++) {
+	         if (specialChars.contains(s.substring(i, i+1))) {
+	             theCount++;
+	         }
+	     }
+	     return theCount;
+	 }
 
-	public static void main(String[] args) throws IOException {
-		System.out.println("Volume = " + parseSize("1TB"));
+	public static void main(String[] args) {
+		System.out.println("Volume = ");
+		System.out.println("Volume = " + getSpecialCharacterCount("zzzzzz!'"));
 	}
 }

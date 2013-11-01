@@ -1,7 +1,8 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
-import java.util.List;
+
+import java.util.Set;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -21,7 +22,7 @@ public class GetRemoteVolumes {
 			Element root = doc.getDocumentElement();
 			ListVolsCmd rcmd = new ListVolsCmd();
 			rcmd.executeCmd(HCServiceProxy.cs);
-			List<String> vols = rcmd.getResults();
+			Set<String> vols = rcmd.getResults().keySet();
 			for(String vol:vols) {
 				Element ve = doc.createElement("volume");
 				ve.setAttribute("name", vol);

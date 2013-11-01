@@ -59,7 +59,7 @@ public class DSEConfigWriter {
 	String list_ip = "0.0.0.0";
 	long chunk_store_allocation_size = 0;
 	short chunk_size = 128;
-	String chunk_gc_schedule = "0 59 23 * * ?";
+	String fdisk_schedule = "0 59 23 * * ?";
 	boolean awsEnabled = false;
 	boolean azureEnabled = false;
 	String cloudAccessKey = "";
@@ -187,7 +187,7 @@ public class DSEConfigWriter {
 						.getOptionValue("cloud-compress"));
 		}
 		if (cmd.hasOption("gc-schedule")) {
-			this.chunk_gc_schedule = cmd.getOptionValue("gc-schedule");
+			this.fdisk_schedule = cmd.getOptionValue("gc-schedule");
 		}
 		if (cmd.hasOption("dse-capacity")) {
 
@@ -271,7 +271,7 @@ public class DSEConfigWriter {
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
-		cs.setAttribute("chunk-gc-schedule", this.chunk_gc_schedule);
+		cs.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);

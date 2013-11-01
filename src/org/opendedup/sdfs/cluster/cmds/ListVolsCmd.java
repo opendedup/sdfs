@@ -4,10 +4,12 @@ import java.io.IOException;
 
 
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
+import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
@@ -19,7 +21,7 @@ import org.opendedup.sdfs.cluster.ClusterSocket;
 public class ListVolsCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private ArrayList<String> results = new ArrayList<String>();
+	private HashMap<String,Address> results = new HashMap<String,Address>();
 	
 
 	public ListVolsCmd() {
@@ -49,8 +51,12 @@ public class ListVolsCmd implements IOPeerCmd {
 						@SuppressWarnings("unchecked")
 						ArrayList<String> rst = (ArrayList<String>)rsp.getValue();
 						for(String vol: rst) {
-							if(!this.results.contains(vol))
-								this.results.add(vol);
+							if(!this.results.containsKey(vol)) {
+								FindVolOwnerCmd cmd =  new FindVolOwnerCmd(vol);
+								cmd.executeCmd(soc);
+								Address addr = cmd.getResults();
+								this.results.put(vol, addr);
+							}
 						}
 					}
 				}
@@ -64,10 +70,10 @@ public class ListVolsCmd implements IOPeerCmd {
 
 	@Override
 	public byte getCmdID() {
-		return NetworkCMDS.RUN_FDISK;
+		return NetworkCMDS.LIST_VOLUMES;
 	}
 	
-	public List<String> getResults() {
+	public HashMap<String,Address> getResults() {
 		return this.results;
 	}
 
