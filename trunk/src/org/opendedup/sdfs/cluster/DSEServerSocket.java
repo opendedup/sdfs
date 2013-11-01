@@ -294,6 +294,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				rtrn = new Boolean(false);
 				break;
 			}
+			case NetworkCMDS.STOP_GC_MASTER_CMD: {
+				rtrn = new Boolean(false);
+				break;
+			}
 			}
 			return rtrn;
 		} catch (Exception e) {

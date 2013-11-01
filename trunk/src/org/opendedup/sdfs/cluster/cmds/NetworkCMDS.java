@@ -48,5 +48,6 @@ public class NetworkCMDS {
 	public static final byte ADD_VOLUME = 20;
 	public static final byte BATCH_HASH_EXISTS_CMD = 21;
 	public static final byte FIND_GC_MASTER_CMD = 22;
-
+	public static final byte STOP_GC_MASTER_CMD = 23;
+	public static final byte FIND_VOLUME_OWNER = 24;
 }

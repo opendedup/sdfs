@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -38,6 +39,8 @@ import org.opendedup.mtools.FDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.DSEServer;
+import org.opendedup.sdfs.cluster.cmds.FindGCMasterCmd;
+import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.network.HashClientPool;
@@ -194,9 +197,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			byte[] sb = new byte[buf.getInt()];
 			buf.get(sb);
 			String volume = new String(sb);
-			Address addr = this.volumes.get(volume);
-			if (addr != null)
-				throw new IOException("Volume is mounted by " + addr);
+
+			if (volume.equals(server.volumeName))
+				throw new IOException("Volume is mounted by " + server.address);
 			this.volumes.remove(volume);
 			rtrn = new Boolean(true);
 			break;
@@ -235,6 +238,28 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				this.gcUpdateLock.unlock();
 			}
 			break;
+		}
+		case NetworkCMDS.STOP_GC_MASTER_CMD: {
+			this.gcUpdateLock.lock();
+			try {
+				if (this.gcscheduler != null) {
+					this.stopGC();
+					rtrn = new Boolean(true);
+				} else
+					rtrn = new Boolean(false);
+			} finally {
+				this.gcUpdateLock.unlock();
+			}
+			break;
+		}
+		case NetworkCMDS.FIND_VOLUME_OWNER: {
+			byte[] sb = new byte[buf.getInt()];
+			buf.get(sb);
+			String volume = new String(sb);
+			if (volume.equals(server.volumeName))
+				rtrn = new Boolean(true);
+			else
+				rtrn = new Boolean(false);
 		}
 		}
 		return rtrn;
@@ -387,11 +412,21 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	}
 
 	public void startGC() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException {
+			IllegalAccessException, ClassNotFoundException, IOException {
 		this.gcUpdateLock.lock();
 		try {
+			synchronized (volumes) {
+				ListVolsCmd cmd = new ListVolsCmd();
+				cmd.executeCmd(this);
+				HashMap<String,Address> m = cmd.getResults();
+				Set<String> vols = m.keySet();
+				for(String vol : vols) {
+					volumes.put(vol, m.get(vol));
+				}
+			}
 			if (this.gcscheduler == null)
 				this.gcscheduler = new StandAloneGCScheduler();
+			SDFSLogger.getLog().info("Promoted to GC Master");
 		} finally {
 			this.gcUpdateLock.unlock();
 		}
@@ -402,12 +437,14 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		try {
 			if (this.gcscheduler != null)
 				this.gcscheduler.close();
+			SDFSLogger.getLog().info("Demoted from GC Master");
 			this.gcscheduler = null;
 		} finally {
 			this.gcUpdateLock.unlock();
 		}
 	}
 
+	@Override
 	public void viewAccepted(View new_view) {
 
 		if (new_view instanceof MergeView) {
@@ -416,7 +453,19 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		Address first = new_view.getMembers().get(0);
 		if (first.equals(this.channel.getAddress())) {
-
+			Lock l = this.lock_service.getLock("gc");
+			try {
+				l.lock();
+				FindGCMasterCmd m = new FindGCMasterCmd();
+				m.executeCmd(this);
+				if (m.getResults() == null)
+					this.startGC();
+				SDFSLogger.getLog().error("Started GC");
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to start gc", e);
+			} finally {
+				l.unlock();
+			}
 			this.peermaster = true;
 		} else {
 			this.peermaster = false;

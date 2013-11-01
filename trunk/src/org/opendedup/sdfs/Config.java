@@ -79,7 +79,7 @@ public class Config {
 					.getAttribute("page-size"));
 			if (cbe.hasAttribute("gc-class"))
 				Main.gcClass = cbe.getAttribute("gc-class");
-			Main.fDkiskSchedule = cbe.getAttribute("chunk-gc-schedule");
+			Main.fDkiskSchedule = cbe.getAttribute("claim-hash-schedule");
 			if (cbe.hasAttribute("hash-size")) {
 				short hsz = Short.parseShort(cbe.getAttribute("hash-size"));
 				if (hsz == 16)
@@ -169,6 +169,43 @@ public class Config {
 			throw new IOException(e);
 		}
 	}
+	
+	/**
+	 * parse the client side config file
+	 * 
+	 * @param fileName
+	 * @throws Exception
+	 */
+	public synchronized static void parseGCConfigFile(String fileName)
+			throws Exception {
+		File file = new File(fileName);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(file);
+		doc.getDocumentElement().normalize();
+
+		String version = "0.8.12";
+		SDFSLogger.getLog().info("Running SDFS Version " + Main.version);
+		if (doc.getDocumentElement().hasAttribute("version")) {
+			version = doc.getDocumentElement().getAttribute("version");
+			Main.version = version;
+		}
+
+		Main.version = version;
+		SDFSLogger.getLog().info(
+				"Parsing gc " + doc.getDocumentElement().getNodeName()
+						+ " version " + version);
+		Element gc = (Element) doc.getElementsByTagName("gc").item(0);
+		if (gc.hasAttribute("log-level")) {
+			SDFSLogger.setLevel(Integer.parseInt(gc
+					.getAttribute("log-level")));
+		}
+		Main.fDkiskSchedule = gc.getAttribute("claim-hash-schedule");
+		Main.DSEClusterConfig = gc.getAttribute("cluster-config");
+		Main.DSEClusterID = gc.getAttribute("cluster-id");
+		Main.DSEPassword = gc.getAttribute("cluster-dse-password");
+		Main.DSEClusterVolumeList = gc.getAttribute("volume-list-file");
+	}
 
 	/**
 	 * parse the client side config file
@@ -235,7 +272,7 @@ public class Config {
 				.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
-		Main.fDkiskSchedule = cache.getAttribute("chunk-gc-schedule");
+		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume,fileName);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
@@ -257,8 +294,6 @@ public class Config {
 				.getAttribute("enabled"));
 		if(localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
-		if(localChunkStore.hasAttribute("cluster-member-id"))
-			Main.DSEClusterMemberID = Byte.parseByte(localChunkStore.getAttribute("cluster-member-id"));
 		if(localChunkStore.hasAttribute("cluster-config"))
 			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
 		if(localChunkStore.hasAttribute("cluster-dse-password"))

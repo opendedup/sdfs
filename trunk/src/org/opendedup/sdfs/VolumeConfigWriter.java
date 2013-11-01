@@ -2,6 +2,7 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -11,8 +12,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -66,6 +65,7 @@ public class VolumeConfigWriter {
 	long chunk_store_allocation_size = 0;
 	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 59 23 * * ?";
+	String volume_list_file = "/etc/sdfs/volume-list.xml";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
@@ -96,7 +96,6 @@ public class VolumeConfigWriter {
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
 	private String clusterID = "sdfs-cluster";
-	private byte clusterMemberID = 0;
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	private byte clusterCopies = 1;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
@@ -127,6 +126,12 @@ public class VolumeConfigWriter {
 			System.exit(-1);
 		}
 		volume_name = cmd.getOptionValue("volume-name");
+		if(StringUtils.getSpecialCharacterCount(volume_name)>0) {
+			System.out
+			.println("--volume-name cannot contain any special characters");
+			System.exit(-1);
+		}
+			
 		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator
 				+ "logs" + File.separator + "volume-" + volume_name
 				+ "-perf.json";
@@ -332,8 +337,15 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("cluster-dse-password"))
 			this.clusterDSEPassword = cmd
 					.getOptionValue("cluster-dse-password");
-		if (cmd.hasOption("cluster-id"))
+		if (cmd.hasOption("cluster-id")) {
 			this.clusterID = cmd.getOptionValue("cluster-id");
+			if(StringUtils.getSpecialCharacterCount(this.clusterID)>0) {
+				System.out
+				.println("--cluster-id cannot contain any special characters");
+				System.exit(-1);
+			}
+				
+		}
 		if (cmd.hasOption("cluster-config"))
 			this.clusterConfig = cmd.getOptionValue("cluster-config");
 		if (cmd.hasOption("cluster-block-replicas")) {
@@ -486,7 +498,6 @@ public class VolumeConfigWriter {
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
 		cs.setAttribute("cluster-id", this.clusterID);
-		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
@@ -551,10 +562,57 @@ public class VolumeConfigWriter {
 					.newTransformer();
 			xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			xformer.transform(source, result);
-		} catch (TransformerConfigurationException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (TransformerException e) {
+			System.exit(-1);
+		}
+
+	}
+
+	public void writeGCConfigFile() throws ParserConfigurationException,
+			IOException {
+		File dir = new File(OSValidator.getConfigPath());
+		if (!dir.exists()) {
+			System.out.println("making" + dir.getAbsolutePath());
+			dir.mkdirs();
+		}
+		File file = new File(OSValidator.getConfigPath() + this.clusterID
+				+ "-gc-cfg.xml");
+		File vlf = new File(OSValidator.getConfigPath() + this.clusterID
+				+ "-volume-list.xml");
+		// Create XML DOM document (Memory consuming).
+		Document xmldoc = null;
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		DOMImplementation impl = builder.getDOMImplementation();
+		// Document.
+		xmldoc = impl.createDocument(null, "subsystem-config", null);
+		// Root element.
+
+		Element root = xmldoc.getDocumentElement();
+		root.setAttribute("version", Main.version);
+		Element io = xmldoc.createElement("gc");
+		io.setAttribute("log-level", "1");
+		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
+		io.setAttribute("cluster-id", this.clusterID);
+		io.setAttribute("cluster-config", this.clusterConfig);
+		io.setAttribute("cluster-dse-password", this.clusterDSEPassword);
+		io.setAttribute("volume-list-file", vlf.getPath());
+		root.appendChild(io);
+		try {
+			// Prepare the DOM document for writing
+			Source source = new DOMSource(xmldoc);
+
+			Result result = new StreamResult(file);
+
+			// Write the DOM document to the file
+			Transformer xformer = TransformerFactory.newInstance()
+					.newTransformer();
+			xformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			xformer.transform(source, result);
+		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -887,7 +945,6 @@ public class VolumeConfigWriter {
 								+ " any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node "
 								+ " for this cluster.").hasArg()
 				.withArgName("true|false").create());
-
 		return options;
 	}
 
@@ -908,6 +965,22 @@ public class VolumeConfigWriter {
 							+ OSValidator.getConfigPath()
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
+			if (!wr.chunk_store_local) {
+				File _f = new File(OSValidator.getConfigPath() + wr.clusterID
+						+ "-gc-cfg.xml");
+				if (_f.exists())
+					System.out
+							.println("Existing Garbage Collection Service Configuration File already created at ["
+									+ OSValidator.getConfigPath()
+									+ wr.clusterID + "-gc-cfg.xml]");
+				else {
+					wr.writeGCConfigFile();
+					System.out
+							.println("New Garbage Collection Service Configuration File Created at ["
+									+ OSValidator.getConfigPath()
+									+ wr.clusterID + "-gc-cfg.xml]");
+				}
+			}
 		} catch (Exception e) {
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());

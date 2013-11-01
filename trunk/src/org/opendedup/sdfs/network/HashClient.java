@@ -46,6 +46,7 @@ public class HashClient implements Runnable {
 		this.name = name;
 		this.id = id;
 		this.pool = pool;
+		this.password = password;
 		try {
 			this.openConnection();
 		} catch (Exception e) {
@@ -160,7 +161,7 @@ public class HashClient implements Runnable {
 				this.openConnection();
 				cmd.executeCmd(is, os);
 			} catch (Exception e1) {
-				SDFSLogger.getLog().fatal(
+				SDFSLogger.getLog().debug(
 						"unable to execute command " + clientSocket.toString(),
 						e);
 				throw new IOException("unable to execute command");

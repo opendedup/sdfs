@@ -1,9 +1,6 @@
 package org.opendedup.sdfs.cluster.cmds;
 
-import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
