@@ -17,6 +17,7 @@ import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
+import org.opendedup.sdfs.cluster.DSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 

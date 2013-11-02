@@ -5,7 +5,6 @@ import java.util.concurrent.locks.Lock;
 
 import org.jgroups.Address;
 import org.jgroups.blocks.MessageDispatcher;
-import org.opendedup.sdfs.cluster.cmds.DSEServer;
 
 public interface ClusterSocket {
 	public abstract List<DSEServer> getStorageNodes();
