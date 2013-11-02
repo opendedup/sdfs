@@ -459,7 +459,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 	}
 
-	private void stopGC() {
+	public void stopGC() {
 		this.gcUpdateLock.lock();
 		try {
 			if (this.gcscheduler != null)
