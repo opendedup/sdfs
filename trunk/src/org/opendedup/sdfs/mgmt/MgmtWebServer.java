@@ -206,6 +206,32 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					}
+					else if (cmd.equalsIgnoreCase("cluster-volume-add")) {
+						try {
+							new AddRemoteVolume().getResult(cmdOptions,
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
+						try {
+							new PromoteToGCMaster().getResult(cmdOptions,
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
 					else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
 							Element msg = new GetOpenFiles().getResult(

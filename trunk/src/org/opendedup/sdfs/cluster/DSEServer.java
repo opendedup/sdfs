@@ -1,4 +1,4 @@
-package org.opendedup.sdfs.cluster.cmds;
+package org.opendedup.sdfs.cluster;
 
 import java.io.Externalizable;
 import java.io.IOException;

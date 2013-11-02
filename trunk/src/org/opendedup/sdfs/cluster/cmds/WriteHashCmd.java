@@ -14,6 +14,7 @@ import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
+import org.opendedup.sdfs.cluster.DSEServer;
 
 public class WriteHashCmd implements IOClientCmd {
 	byte[] hash;

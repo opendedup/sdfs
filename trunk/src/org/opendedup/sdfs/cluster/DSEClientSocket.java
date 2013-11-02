@@ -2,6 +2,7 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
 
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,10 +39,10 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
-import org.opendedup.sdfs.cluster.cmds.DSEServer;
 import org.opendedup.sdfs.cluster.cmds.FindGCMasterCmd;
 import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
+import org.opendedup.sdfs.cluster.cmds.StopGCMasterCmd;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -89,11 +90,20 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		disp = new MessageDispatcher(channel, null, null, this);
 		disp.setMembershipListener(this);
 		disp.setMessageListener(this);
-		channel.connect(clusterID);
-		for (String vol : remoteVolumes) {
-			if (vol != null) {
-				volumes.put(vol, null);
-				new AddVolCmd(vol).executeCmd(this);
+		synchronized (volumes) {
+			channel.connect(clusterID);
+			for (String vol : remoteVolumes) {
+				if (vol != null) {
+					volumes.put(vol, null);
+					new AddVolCmd(vol).executeCmd(this);
+				}
+			}
+			ListVolsCmd cmd = new ListVolsCmd();
+			cmd.executeCmd(this);
+			HashMap<String, Address> m = cmd.getResults();
+			Set<String> vols = m.keySet();
+			for (String vol : vols) {
+				volumes.put(vol, m.get(vol));
 			}
 		}
 		server = new DSEServer(channel.getAddressAsString(), (byte) 0,
@@ -410,17 +420,34 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		// TODO Auto-generated method stub
 
 	}
+	
+	public void startGC() throws IOException{
+		Lock l = this.lock_service.getLock("gc");
+		try {
+			l.lock();
+			StopGCMasterCmd m = new StopGCMasterCmd();
+			m.executeCmd(this);
+			SDFSLogger.getLog().info("Stopped GC Master on " + m.getResults());
+			this._startGC();
+			SDFSLogger.getLog().error("Started GC");
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to start gc", e);
+		} finally {
+			l.unlock();
+		}
+		
+	}
 
-	public void startGC() throws InstantiationException,
+	private void _startGC() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException, IOException {
 		this.gcUpdateLock.lock();
 		try {
 			synchronized (volumes) {
 				ListVolsCmd cmd = new ListVolsCmd();
 				cmd.executeCmd(this);
-				HashMap<String,Address> m = cmd.getResults();
+				HashMap<String, Address> m = cmd.getResults();
 				Set<String> vols = m.keySet();
-				for(String vol : vols) {
+				for (String vol : vols) {
 					volumes.put(vol, m.get(vol));
 				}
 			}
@@ -432,7 +459,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 	}
 
-	public void stopGC() {
+	private void stopGC() {
 		this.gcUpdateLock.lock();
 		try {
 			if (this.gcscheduler != null)
@@ -459,7 +486,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				FindGCMasterCmd m = new FindGCMasterCmd();
 				m.executeCmd(this);
 				if (m.getResults() == null)
-					this.startGC();
+					this._startGC();
 				SDFSLogger.getLog().error("Started GC");
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to start gc", e);
