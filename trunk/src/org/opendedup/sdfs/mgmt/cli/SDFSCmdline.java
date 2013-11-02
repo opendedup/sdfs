@@ -56,6 +56,14 @@ public class SDFSCmdline {
 			ProcessClusterVolumeRemove.runCmd(cmd.getOptionValue("cluster-volume-remove"));
 			System.exit(0);
 		}
+		if (cmd.hasOption("cluster-volume-add")) {
+			ProcessClusterVolumeAdd.runCmd(cmd.getOptionValue("cluster-volume-add"));
+			System.exit(0);
+		}
+		if (cmd.hasOption("cluster-make-gc-master")) {
+			ProcessClusterPromoteToGC.runCmd();
+			System.exit(0);
+		}
 		if (cmd.hasOption("volume-info")) {
 			ProcessVolumeInfo.runCmd();
 			System.exit(0);
@@ -143,7 +151,7 @@ public class SDFSCmdline {
 				.withDescription("SDFS host location.").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("expandvolume")
-				.withDescription("Expand the volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.").hasArg(true)
+				.withDescription("Expand the local volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("change-password")
 				.withDescription("Change the administrative password.").hasArg(true)
@@ -195,6 +203,18 @@ public class SDFSCmdline {
 				.withDescription(
 						"Removes an unassociated volume in the cluster. "
 								+ "\n e.g. --cluster-volume-remove <vol-name>").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-volume-add")
+				.withDescription(
+						"Adds an unassociated volume in the cluster. "
+								+ "\n e.g. --cluster-volume-add <vol-name>").hasArg(true)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-make-gc-master")
+				.withDescription(
+						"Makes this host the current Garbage Collection Coordinator. "
+								+ "\n e.g. --cluster-make-gc-master").hasArg(true)
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("snapshot")
