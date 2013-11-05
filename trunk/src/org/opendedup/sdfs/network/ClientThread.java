@@ -67,10 +67,8 @@ public class ClientThread extends Thread {
 			// is = new DataInputStream(clientSocket.getInputStream());
 			reader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()), 32768 * 2);
-			is = new DataInputStream(new BufferedInputStream(
-					clientSocket.getInputStream(), 8192));
-			os = new DataOutputStream(new BufferedOutputStream(
-					clientSocket.getOutputStream(), 8192));
+			is = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream(),32768));
+			os = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(),32768));
 			String versionMessage = "SDFS version " + Main.PROTOCOL_VERSION
 					+ "\r\n";
 			os.write(versionMessage.getBytes());

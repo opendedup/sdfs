@@ -90,22 +90,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		disp = new MessageDispatcher(channel, null, null, this);
 		disp.setMembershipListener(this);
 		disp.setMessageListener(this);
-		synchronized (volumes) {
-			channel.connect(clusterID);
-			for (String vol : remoteVolumes) {
-				if (vol != null) {
-					volumes.put(vol, null);
-					new AddVolCmd(vol).executeCmd(this);
-				}
-			}
-			ListVolsCmd cmd = new ListVolsCmd();
-			cmd.executeCmd(this);
-			HashMap<String, Address> m = cmd.getResults();
-			Set<String> vols = m.keySet();
-			for (String vol : vols) {
-				volumes.put(vol, m.get(vol));
-			}
-		}
+		channel.connect(clusterID);
+		/*
+		
+		*/
 		server = new DSEServer(channel.getAddressAsString(), (byte) 0,
 				DSEServer.CLIENT);
 		server.address = channel.getAddress();
@@ -122,6 +110,31 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			throw new IOException("No DSE Servers found");
 		}
 		lock_service = new LockService(channel);
+		SDFSLogger.getLog().debug("finding all volumes");
+		try {
+
+			for (String vol : remoteVolumes) {
+				if (vol != null) {
+					synchronized (volumes) {
+						volumes.put(vol, null);
+					}
+					new AddVolCmd(vol).executeCmd(this);
+				}
+			}
+			ListVolsCmd cmd = new ListVolsCmd();
+			cmd.executeCmd(this);
+			HashMap<String, Address> m = cmd.getResults();
+			Set<String> vols = m.keySet();
+			for (String vol : vols) {
+				synchronized (volumes) {
+					volumes.put(vol, m.get(vol));
+				}
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to list volumes", e);
+		}
+		SDFSLogger.getLog().debug("found [" + volumes.size() + "] volumes");
+
 	}
 
 	public void close() {
@@ -314,7 +327,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (!ignoreHost(s, ignoredHosts)
 								&& !usedRacks.contains(s.rack)) {
 							usedRacks.add(s.rack);
-							al.add(pools[s.id]);
+							if(!pools[s.id].isSuspect())
+								al.add(pools[s.id]);
 						}
 					}
 				} else {
@@ -323,7 +337,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (!ignoreHost(s, ignoredHosts)
 								&& !usedRacks.contains(s.rack)) {
 							usedRacks.add(s.rack);
-							al.add(pools[s.id]);
+							if(!pools[s.id].isSuspect())
+								al.add(pools[s.id]);
 						}
 					}
 				}
@@ -420,8 +435,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		// TODO Auto-generated method stub
 
 	}
-	
-	public void startGC() throws IOException{
+
+	public void startGC() throws IOException {
 		Lock l = this.lock_service.getLock("gc");
 		try {
 			l.lock();
@@ -429,28 +444,55 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			m.executeCmd(this);
 			SDFSLogger.getLog().info("Stopped GC Master on " + m.getResults());
 			this._startGC();
-			SDFSLogger.getLog().error("Started GC");
+			SDFSLogger.getLog().info("Started GC");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to start gc", e);
 		} finally {
 			l.unlock();
 		}
-		
+
+	}
+
+	public void startGCIfNone() {
+		if (this.lock_service != null) {
+			Lock l = this.lock_service.getLock("gc");
+			try {
+				SDFSLogger.getLog().debug("Cheching if GC Master exists");
+				l.lock();
+				FindGCMasterCmd f = new FindGCMasterCmd();
+				f.executeCmd(this);
+				if (f.getResults() == null) {
+					this._startGC();
+					SDFSLogger.getLog().info("Started GC");
+				} else {
+					SDFSLogger.getLog().debug(
+							"Did not start GC because already exists at "
+									+ f.getResults());
+				}
+
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to start gc", e);
+			} finally {
+				l.unlock();
+			}
+		}
 	}
 
 	private void _startGC() throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException, IOException {
 		this.gcUpdateLock.lock();
 		try {
-			synchronized (volumes) {
-				ListVolsCmd cmd = new ListVolsCmd();
-				cmd.executeCmd(this);
-				HashMap<String, Address> m = cmd.getResults();
-				Set<String> vols = m.keySet();
-				for (String vol : vols) {
+
+			ListVolsCmd cmd = new ListVolsCmd();
+			cmd.executeCmd(this);
+			HashMap<String, Address> m = cmd.getResults();
+			Set<String> vols = m.keySet();
+			for (String vol : vols) {
+				synchronized (volumes) {
 					volumes.put(vol, m.get(vol));
 				}
 			}
+
 			if (this.gcscheduler == null)
 				this.gcscheduler = new StandAloneGCScheduler();
 			SDFSLogger.getLog().info("Promoted to GC Master");
@@ -471,6 +513,22 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 	}
 
+	private void populateVolumeList() {
+		try {
+			ListVolsCmd cmd = new ListVolsCmd();
+			cmd.executeCmd(this);
+			HashMap<String, Address> m = cmd.getResults();
+			Set<String> vols = m.keySet();
+			for (String vol : vols) {
+				synchronized (volumes) {
+					volumes.put(vol, m.get(vol));
+				}
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to populate volume list.", e);
+		}
+	}
+
 	@Override
 	public void viewAccepted(View new_view) {
 
@@ -480,28 +538,22 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		Address first = new_view.getMembers().get(0);
 		if (first.equals(this.channel.getAddress())) {
-			Lock l = this.lock_service.getLock("gc");
-			try {
-				l.lock();
-				FindGCMasterCmd m = new FindGCMasterCmd();
-				m.executeCmd(this);
-				if (m.getResults() == null)
-					this._startGC();
-				SDFSLogger.getLog().error("Started GC");
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to start gc", e);
-			} finally {
-				l.unlock();
-			}
 			this.peermaster = true;
 		} else {
 			this.peermaster = false;
 		}
+		this.startGCIfNone();
+		this.populateVolumeList();
 		SDFSLogger.getLog().debug(
-				"** view: " + new_view + " peer master = "
+				"**client view: " + new_view + " peer master = "
 						+ Boolean.toString(this.peermaster));
 		synchronized (serverState) {
 			Iterator<Address> iter = serverState.keySet().iterator();
+			
+			boolean ccp = false;
+				if(sal.size() < Main.volume.getClusterCopies())
+					ccp = true;
+			
 			while (iter.hasNext()) {
 				Address addr = iter.next();
 				if (!new_view.containsMember(addr)) {
@@ -536,11 +588,16 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					}
 				}
 			}
-			if (serverState.size() < Main.volume.getClusterCopies())
+			if (sal.size() < Main.volume.getClusterCopies())
 				SDFSLogger
 						.getLog()
 						.warn("Will not be able to fulfill block redundancy requirements. Current number of DSE Servers is less than "
 								+ Main.volume.getClusterCopies());
+			else if(ccp)
+				SDFSLogger
+				.getLog()
+				.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is [" +sal.size() + "] and cluster write requirement is "
+						+ Main.volume.getClusterCopies());
 		}
 		SDFSLogger.getLog().debug(
 				server + " - size : " + serverState.size()
@@ -620,10 +677,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			@SuppressWarnings("unchecked")
 			HashMap<Address, DSEServer> list = (HashMap<Address, DSEServer>) Util
 					.objectFromStream(new DataInputStream(input));
+			boolean ccp = false;
 			synchronized (serverState) {
+				if(sal.size() < Main.volume.getClusterCopies())
+					ccp = true;
 				serverState.clear();
 				serverState.putAll(list);
-
+				
 				Iterator<DSEServer> iter = serverState.values().iterator();
 				while (iter.hasNext()) {
 					DSEServer s = iter.next();
@@ -689,6 +749,11 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 							.getLog()
 							.warn("Will not be able to fulfill block redundancy requirements. Current number of DSE Servers is less than "
 									+ Main.volume.getClusterCopies());
+				else if(ccp)
+					SDFSLogger
+					.getLog()
+					.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is [" +sal.size() + "] and cluster write requirement is "
+							+ Main.volume.getClusterCopies());
 			}
 			SDFSLogger.getLog().debug(
 					"received state (" + list.size() + " state");
@@ -759,6 +824,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 	public void addSelfToState() throws IOException {
 		synchronized (serverState) {
+			
 			serverState.put(server.address, server);
 			if (server.serverType == DSEServer.SERVER) {
 				Lock l = this.ssl.writeLock();

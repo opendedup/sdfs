@@ -32,8 +32,8 @@ public class SDFSService {
 	}
 
 	public void start() throws Exception {
-
 		Config.parseSDFSConfigFile(this.configFile);
+		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
 		MgmtWebServer.start();
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
@@ -45,7 +45,9 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
+		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
+		SDFSLogger.getLog().debug("HCServiceProxy Started");
 		if (Main.chunkStoreLocal) {
 			try {
 				
@@ -69,6 +71,7 @@ public class SDFSService {
 
 		
 		Main.mountEvent.endEvent("Volume Mounted");
+		SDFSLogger.getLog().debug("############### SDFSService Started ##################");
 	}
 
 	public void stop() {

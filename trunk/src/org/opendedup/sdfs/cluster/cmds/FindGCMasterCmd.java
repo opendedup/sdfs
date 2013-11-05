@@ -46,7 +46,8 @@ public class FindGCMasterCmd implements IOPeerCmd {
 				else {
 					if(rsp.getValue() != null) {
 						SDFSLogger.getLog().debug("FIND_GC_MASTER_CMD completed for " +rsp.getSender() + " returned=" +rsp.getValue());
-						boolean m = (Boolean)rsp.getValue();
+						Boolean bm = (Boolean)rsp.getValue();
+						boolean m = bm.booleanValue();
 						if(m) {
 							if(this.gcMaster != null)
 								throw new IOException("FIND_GC_MASTER_CMD already identified at [" +gcMaster.toString() + "] but has also been identified at [" +rsp.getSender()+"].");

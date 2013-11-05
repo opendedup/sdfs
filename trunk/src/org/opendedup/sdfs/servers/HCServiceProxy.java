@@ -19,14 +19,13 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
-import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
+import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 //import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
-import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
+import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
-import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.SparseDataChunk;
@@ -47,7 +46,7 @@ public class HCServiceProxy {
 			.build(new CacheLoader<ByteArrayWrapper, byte[]>() {
 				public byte[] load(ByteArrayWrapper key) throws IOException {
 
-					DirectFetchChunkCmd cmd = new DirectFetchChunkCmd(key.data,
+					FetchChunkCmd cmd = new FetchChunkCmd(key.data,
 							key.hashloc);
 					cmd.executeCmd(socket);
 					return cmd.getChunk();
@@ -113,6 +112,7 @@ public class HCServiceProxy {
 				socket = new DSEClientSocket(Main.DSEClusterConfig,
 						Main.DSEClusterID,volumes);
 				cs= socket;
+				socket.startGCIfNone();
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",
@@ -184,29 +184,34 @@ public class HCServiceProxy {
 						Main.volume.getClusterCopies());
 				hcmd.executeCmd(socket);
 				if (hcmd.meetsRedundancyRequirements()) {
-					//SDFSLogger.getLog().debug("found all");
+					SDFSLogger.getLog().debug("found all");
 					return hcmd.getResponse();
 				}
 				else if (hcmd.exists()) {
-					DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
-							aContents.length, false,
-							Main.volume.getClusterCopies(), hcmd.getResponse());
+					byte [] ignoredHosts = new byte[hcmd.responses()];
+					for(int i = 0; i<hcmd.responses();i++)
+						ignoredHosts[i] = hcmd.getResponse()[i+1];
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents,
+							 false,
+							Main.volume.getClusterCopies(), ignoredHosts);
 					cmd.executeCmd(socket);
-					//SDFSLogger.getLog().debug("wrote data when found some but not all");
+					SDFSLogger.getLog().debug("wrote data when found some but not all");
 					return cmd.reponse();
 				} else {
-					DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
-							aContents.length, false,
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents,
+							 false,
 							Main.volume.getClusterCopies());
 					cmd.executeCmd(socket);
-					//SDFSLogger.getLog().debug("wrote data when found none");
-					if(cmd.getExDn() > 0) {
-						SDFSLogger.getLog().warn("Was unable to write to all storage nodes, trying again");
+					SDFSLogger.getLog().debug("wrote data when found none");
+					
+					//if(cmd.getExDn() > 0) {
+					//	SDFSLogger.getLog().warn("Was unable to write to all storage nodes.");
+						/*
 						cmd = new DirectWriteHashCmd(hash, aContents,
 								aContents.length, false,
 								Main.volume.getClusterCopies(), cmd.reponse());
-					}
-						
+								*/
+					//}
 					return cmd.reponse();
 				}
 			} catch (Exception e1) {

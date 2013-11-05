@@ -94,6 +94,8 @@ public class NetworkDSEServer implements Runnable {
 			} else {
 				
 				serverSocket = new ServerSocket();
+				//serverSocket.setReceiveBufferSize(128 * 1024);
+				
 				serverSocket.bind(addr);
 				SDFSLogger.getLog().info(
 						"listening on unencryted channel " + addr.toString());
@@ -116,7 +118,8 @@ public class NetworkDSEServer implements Runnable {
 			try {
 				clientSocket = serverSocket.accept();
 				clientSocket.setKeepAlive(true);
-				clientSocket.setTcpNoDelay(true);
+				clientSocket.setTcpNoDelay(false);
+				//clientSocket.setSendBufferSize(128 * 1024);
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
 				if (!serverSocket.isClosed())

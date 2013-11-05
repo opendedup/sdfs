@@ -29,7 +29,6 @@ public class PingThread implements Runnable {
 				break;
 			}
 		}
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
 	}
 
