@@ -62,7 +62,7 @@ public class ListVolsCmd implements IOPeerCmd {
 				}
 			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().error("error while running fdisk", e);
+			SDFSLogger.getLog().error("error while running list volumes", e);
 			throw new IOException(e);
 		}
 	}

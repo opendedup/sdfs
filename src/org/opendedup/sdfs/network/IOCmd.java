@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public interface IOCmd {
 	public abstract void executeCmd(DataInputStream is, DataOutputStream os)
-			throws IOException;
+			throws IOException,IOCmdException;
 
 	public abstract byte getCmdID();
 	public abstract Object getResult();

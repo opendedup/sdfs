@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.filestore.gc;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -17,10 +18,14 @@ public class PFullGC implements GCControllerImpl {
 	public PFullGC() {
 		this.prevPFull = calcPFull();
 		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
-
+		double pFull = (this.prevPFull * 100);
+		double nFull = (this.nextPFull * 100);
+		DecimalFormat twoDForm = new DecimalFormat("#.##");
+		pFull = Double.valueOf(twoDForm.format(pFull));
+		nFull = Double.valueOf(twoDForm.format(nFull));
 		SDFSLogger.getLog().info(
-				"Current DSE Percentage Full is [" + this.prevPFull
-						+ "] will run GC when [" + this.nextPFull + "]");
+				"Current DSE Percentage Full is [" + pFull
+						+ "] will run GC when [" + nFull + "]");
 	}
 
 	@Override
@@ -34,15 +39,18 @@ public class PFullGC implements GCControllerImpl {
 				ManualGC.clearChunks(1);
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
-				SDFSLogger.getLog()
-				.info("Current DSE Percentage Full is ["
-						+ this.prevPFull + "] will run GC when ["
-						+ this.nextPFull + "]");
+				double pFull = (this.prevPFull * 100);
+				double nFull = (this.nextPFull * 100);
+				DecimalFormat twoDForm = new DecimalFormat("#.##");
+				pFull = Double.valueOf(twoDForm.format(pFull));
+				nFull = Double.valueOf(twoDForm.format(nFull));
+				SDFSLogger.getLog().info(
+						"Current DSE Percentage Full is [" + pFull
+								+ "] will run GC when [" + nFull + "]");
 				task.endEvent("Garbage Collection Succeeded");
 				task.shortMsg = "Garbage Collection Succeeded";
-				task.longMsg = "Current DSE Percentage Full is ["
-						+ this.prevPFull + "] will run GC when ["
-						+ this.nextPFull + "]";
+				task.longMsg = "Current DSE Percentage Full is [" + pFull
+						+ "] will run GC when [" + nFull + "]";
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("Garbage Collection failed", e);
 				task.endEvent(

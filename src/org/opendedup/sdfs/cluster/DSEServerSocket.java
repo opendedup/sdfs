@@ -189,7 +189,13 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			case NetworkCMDS.HASH_EXISTS_CMD: {
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
+				try {
 				rtrn = new Boolean(HCServiceProxy.hashExists(hash));
+				
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("unable to find if hash exists",e);
+					return new Boolean(false);
+				}
 				break;
 			}
 			case NetworkCMDS.BATCH_HASH_EXISTS_CMD: {
@@ -199,7 +205,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				ArrayList<SparseDataChunk> chunks = (ArrayList<SparseDataChunk>) Util.objectFromByteBuffer(arb);
 				ArrayList<Boolean> rsults = new ArrayList<Boolean>(chunks.size());
 				for(int i = 0;i<chunks.size();i++) {
+					try {
 					rsults.add(i,new Boolean(HCServiceProxy.hashExists(chunks.get(i).getHash())));
+					}catch(Exception e) {
+						SDFSLogger.getLog().warn("unable to find if hash exists",e);
+						rsults.add(i,new Boolean(false));
+					}
 				}
 				rtrn = rsults;
 				break;
@@ -325,7 +336,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			lock_service.unlockAll();
 		}
 		SDFSLogger.getLog().debug(
-				"** view: " + new_view + " peer master = "
+				"**server view: " + new_view + " peer master = "
 						+ Boolean.toString(this.peermaster));
 		synchronized (serverState) {
 			Iterator<Address> iter = serverState.keySet().iterator();

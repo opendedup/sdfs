@@ -2,7 +2,6 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
-import java.nio.ByteBuffer;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.opendedup.logging.SDFSLogger;
@@ -29,18 +28,11 @@ public class DirectFetchChunkCmd implements IOClientCmd {
 
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
-		byte[] b = new byte[1 + 2 + hash.length];
-		// SDFSLogger.getLog().debug("Fetching " +
-		// StringUtils.getHexString(hash));
-		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.put(NetworkCMDS.FETCH_CMD);
-		buf.putShort((short) hash.length);
-		buf.put(hash);
 		int pos = 1;
 		while (chunk == null) {
 			HashClientPool pool = soc.getPool(hashlocs, pos);
-			pos++;
-			if (pool != null && hashlocs[pos - 1] != 0) {
+			
+			if (pool != null && hashlocs[pos] != 0) {
 				HashClient cl = null;
 				try {
 					cl = pool.borrowObject();
@@ -48,12 +40,19 @@ public class DirectFetchChunkCmd implements IOClientCmd {
 
 				} catch (Exception e) {
 					SDFSLogger.getLog().debug("error while getting hash", e);
+					
 					// throw new IOException(e);
 				} finally {
-					if (cl != null)
-						pool.returnObject(cl);
+					if (cl != null) {
+						try {
+							pool.returnObject(cl);
+						}catch(Exception e) {
+							SDFSLogger.getLog().debug("error while getting hash and returning to pool", e);
+						}
+					}
 				}
 			}
+			pos++;
 			if (pos > 7)
 				throw new IOException(
 						"No Storage Servers available to fulfill request");

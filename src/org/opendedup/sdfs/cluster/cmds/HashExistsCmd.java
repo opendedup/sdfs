@@ -22,7 +22,7 @@ public class HashExistsCmd implements IOClientCmd {
 	boolean waitforall = false;
 	byte numtowaitfor = 1;
 	boolean meetsRudundancy = false;
-	//int rsz = 0;
+	int csz = 0;
 
 	public HashExistsCmd(byte[] hash, boolean waitforall,byte numtowaitfor) {
 		this.hash = hash;
@@ -58,6 +58,7 @@ public class HashExistsCmd implements IOClientCmd {
 										resp[0] = 1;
 										resp[pos] = soc.serverState.get(arg1).id;
 										pos++;
+										csz++;
 										exists = true;
 									lock.unlock();
 								} else {
@@ -100,6 +101,7 @@ public class HashExistsCmd implements IOClientCmd {
 										
 										if(pos >= numtowaitfor)
 											meetsRudundancy = true;
+										csz++;
 										pos++;
 										exists = rsp;
 									lock.unlock();
@@ -110,9 +112,8 @@ public class HashExistsCmd implements IOClientCmd {
 											resp[0] = 0;
 									lock.unlock();
 								}
-								return rsp;
+								return true;
 							} else {
-								
 								return false;
 							}
 						}
@@ -148,6 +149,10 @@ public class HashExistsCmd implements IOClientCmd {
 
 	public boolean exists() {
 		return this.exists;
+	}
+	
+	public int responses() {
+		return this.csz;
 	}
 	
 	public boolean meetsRedundancyRequirements() {

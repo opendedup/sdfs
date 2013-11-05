@@ -18,14 +18,20 @@ public class HashClientPool {
 	private ArrayList<HashClient> activeObjects = new ArrayList<HashClient>();
 	private ReentrantLock alock = new ReentrantLock();
 	private byte id;
+	private boolean suspect = false;
 
-	public HashClientPool(HCServer server, String name, int size,byte id)
+	public HashClientPool(HCServer server, String name, int size, byte id)
 			throws IOException {
 		this.server = server;
 		this.id = id;
 		this.poolSize = size;
 		passiveObjects = new LinkedBlockingQueue<HashClient>(this.poolSize);
 		this.populatePool();
+
+	}
+
+	public boolean isSuspect() {
+		return this.suspect;
 	}
 
 	public void populatePool() throws IOException {
@@ -53,13 +59,17 @@ public class HashClientPool {
 		return false;
 	}
 
-	public HashClient borrowObject() throws IOException {
+	public HashClient borrowObject() throws IOException,
+			HashClientSuspectException {
+		if (suspect)
+			throw new HashClientSuspectException(server);
 		HashClient hc = null;
-			try {
-				hc = this.passiveObjects.take();
-			} catch (InterruptedException e1) {
-				
-			}
+
+		try {
+			hc = this.passiveObjects.take();
+		} catch (InterruptedException e1) {
+
+		}
 		if (hc == null) {
 			hc = this.makeObject();
 		}
@@ -78,35 +88,65 @@ public class HashClientPool {
 		return hc;
 	}
 
-	public void returnObject(HashClient hc)  {
+	public void returnObject(HashClient hc) {
 		alock.lock();
 		try {
 
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of active pool ", e);
+			SDFSLogger.getLog().error(
+					"Unable to get object out of active pool ", e);
 
 		} finally {
 			alock.unlock();
 		}
 		try {
-			if (this.passiveObjects.size() < this.poolSize) {
-				if(!hc.isClosed())
-					this.passiveObjects.put(hc);
-				else
-					this.passiveObjects.put(this.makeObject());
-			}
-			else
+			if (hc.isSuspect()) {
 				hc.close();
+				if (this.passiveObjects.size() == 0
+						&& this.activeObjects.size() == 0) {
+					this.suspect = true;
+					SDFSLogger.getLog().warn(
+							"DSEServer " + server.getHostName() + ":"
+									+ server.getPort() + " is suspect");
+				}
+
+			} else if (this.passiveObjects.size() < this.poolSize) {
+
+				if (!hc.isClosed())
+					this.passiveObjects.put(hc);
+				else {
+					try {
+						if(!this.suspect)
+							
+							
+							this.passiveObjects.put(this.makeObject());
+					} catch (Exception e) {
+						this.suspect = true;
+						SDFSLogger
+								.getLog()
+								.warn("unable to create connection to put into pool. Server is probably down.");
+						try {
+							hc.close();
+						} catch (Exception e1) {
+						}
+					}
+				}
+			} else
+				try {
+					hc.close();
+				} catch (Exception e1) {
+				}
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("Unable to get object out of pool ", e);
+			SDFSLogger.getLog().warn("Unable to return object out of pool ", e);
 
 		} finally {
 		}
 	}
 
 	public HashClient makeObject() throws IOException {
-		HashClient hc = new HashClient(this.server, "server",Main.DSEPassword,this.id,this);
+		HashClient hc = new HashClient(this.server, "server", Main.DSEPassword,
+				this.id, this);
 		hc.openConnection();
 		return hc;
 	}
@@ -114,15 +154,15 @@ public class HashClientPool {
 	public void destroyObject(HashClient hc) {
 		hc.close();
 	}
-	
+
 	public void close() throws IOException, InterruptedException {
-		if(this.activeObjects.size() > 0) 
+		if (this.activeObjects.size() > 0)
 			throw new IOException("Cannot close because writes still occuring");
-			HashClient hc = passiveObjects.poll();
-			while(hc != null) {
-				hc.close();
-				hc = passiveObjects.poll();
-			}
+		HashClient hc = passiveObjects.poll();
+		while (hc != null) {
+			hc.close();
+			hc = passiveObjects.poll();
+		}
 	}
 
 }

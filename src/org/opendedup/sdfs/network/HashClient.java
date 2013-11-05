@@ -37,6 +37,7 @@ public class HashClient implements Runnable {
 	private AsyncCmdListener listener;
 	private byte id;
 	private HashClientPool pool;
+	private boolean suspect = false;
 
 	// private LRUMap existsBuffers = new LRUMap(10);
 
@@ -53,6 +54,10 @@ public class HashClient implements Runnable {
 			SDFSLogger.getLog().fatal("unable to open connection", e);
 			throw new IOException("unable to open connection");
 		}
+	}
+
+	public boolean isSuspect() {
+		return this.suspect;
 	}
 
 	public String getName() {
@@ -100,16 +105,16 @@ public class HashClient implements Runnable {
 				clientSocket = new Socket();
 			}
 			clientSocket.setKeepAlive(true);
-			clientSocket.setTcpNoDelay(true);
-			clientSocket.setReceiveBufferSize(64 * 1024);
-			clientSocket.setSendBufferSize(64 * 1024);
+			clientSocket.setTcpNoDelay(false);
+			//clientSocket.setReceiveBufferSize(128 * 1024);
+			//clientSocket.setSendBufferSize(128 * 1024);
 			clientSocket.setPerformancePreferences(0, 1, 2);
+
 			clientSocket.connect(new InetSocketAddress(server.getHostName(),
 					server.getPort()));
-			os = new DataOutputStream(new BufferedOutputStream(
-					clientSocket.getOutputStream(), 8192));
-			is = new DataInputStream(new BufferedInputStream(
-					clientSocket.getInputStream(), 8192));
+			clientSocket.setSoTimeout(3000);
+			os = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(),32768));
+			is = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream(),32768));
 			inReader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()));
 			// Read the Header Line
@@ -153,17 +158,21 @@ public class HashClient implements Runnable {
 			}
 		}
 		try {
-
 			cmd.executeCmd(is, os);
 		} catch (Exception e) {
-			this.closed = true;
-			try {
-				this.openConnection();
-				cmd.executeCmd(is, os);
-			} catch (Exception e1) {
-				SDFSLogger.getLog().debug(
-						"unable to execute command " + clientSocket.toString(),
-						e);
+			if (e instanceof java.net.SocketTimeoutException) {
+				this.suspect = true;
+				try {
+					this.close();
+				} catch (Exception e1) {
+				}
+				throw new IOException("unable to execute command because connection timed out");
+			} else {
+				this.closed = true;
+				try {
+					this.close();
+				} catch (Exception e1) {
+				}
 				throw new IOException("unable to execute command");
 			}
 		}

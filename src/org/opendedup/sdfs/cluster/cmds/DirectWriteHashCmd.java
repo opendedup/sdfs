@@ -121,7 +121,6 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					pos++;
 					dn++;
 					if(dn >=sz) {
-							
 							synchronized(this) {
 								this.notify();
 							}
