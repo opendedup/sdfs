@@ -37,7 +37,8 @@ public class ProcessClusterDSEInfo {
 								ASCIITable.ALIGN_RIGHT),
 						new ASCIITableHeader("Listen Port",
 								ASCIITable.ALIGN_RIGHT),
-						new ASCIITableHeader("Uses SSL", ASCIITable.ALIGN_RIGHT),
+						new ASCIITableHeader("Rack", ASCIITable.ALIGN_RIGHT),
+						new ASCIITableHeader("Location", ASCIITable.ALIGN_RIGHT)
 
 				};
 
@@ -68,7 +69,7 @@ public class ProcessClusterDSEInfo {
 							StorageUnit.of(maxSz).format(maxSz),
 							Double.toString(pFull), Integer.toString(pageSize),
 							Long.toString(freeBlocks), Integer.toString(port),
-							dse.getAttribute("listen-encrypted") };
+							dse.getAttribute("rack"),dse.getAttribute("location") };
 					data[i] = row;
 				}
 				ASCIITable.getInstance().printTable(headerObjs, data);

@@ -49,8 +49,11 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
+		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 	}
 
@@ -75,15 +78,16 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
+		opts = new RequestOptions(ResponseMode.GET_ALL, 0,false);
+		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.NO_FC);
-		//opts.setFlags(Message.Flag.OOB);
+		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 	}
 
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
+		//SDFSLogger.getLog().info("writing to " + this.numberOfCopies);
 		if (this.numberOfCopies > 7)
 			this.numberOfCopies = 7;
 		int stateSz = soc.serverState.size();
@@ -111,11 +115,10 @@ public class WriteHashCmd implements IOClientCmd {
 					if (svr != null) {
 
 						if (response.hasException()) {
-							SDFSLogger.getLog().warn(
+							SDFSLogger.getLog().debug(
 									"remote exception found "
 											+ response.getException()
 													.getMessage());
-							throw (new IOException(response.getException()));
 						} else if (response.wasSuspected()
 								|| response.wasUnreachable()) {
 

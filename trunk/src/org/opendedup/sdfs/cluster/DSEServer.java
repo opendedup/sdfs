@@ -50,7 +50,6 @@ public class DSEServer implements Externalizable {
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
 		in.readByte();
-		
 		this.hostName = (String) in.readObject();
 		this.id = in.readByte();
 		this.serverType = in.readInt();

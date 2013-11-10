@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 
 
 
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,7 +113,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		this.addSelfToState();
 		th = new Thread(this);
 		th.start();
-		NetworkUnicastServer.init();
+		//NetworkUnicastServer.init();
 		SDFSLogger.getLog().info("Started Cluster DSE Listener");
 	}
 
@@ -473,14 +474,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	@Override
 	public void run() {
 		while (!closed) {
-
 			try {
 				server.address = channel.getAddress();
 				server.currentSize = HCServiceProxy.getSize();
 				server.maxSize = HCServiceProxy.getMaxSize();
 				server.freeBlocks = HCServiceProxy.getFreeBlocks();
 				server.pageSize = HCServiceProxy.getPageSize();
-				server.address = channel.getAddress();
 				server.useSSL = Main.serverUseSSL;
 				server.dseport = Main.serverPort;
 				server.location = Main.DSEClusterNodeLocation;

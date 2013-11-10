@@ -180,6 +180,7 @@ public class HCServiceProxy {
 			}
 		} else {
 			try {
+				SDFSLogger.getLog().debug("looking for hash");
 				HashExistsCmd hcmd = new HashExistsCmd(hash, false,
 						Main.volume.getClusterCopies());
 				hcmd.executeCmd(socket);

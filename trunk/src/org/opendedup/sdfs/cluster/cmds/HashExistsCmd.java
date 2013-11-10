@@ -2,6 +2,7 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,7 +36,7 @@ public class HashExistsCmd implements IOClientCmd {
 	public void executeCmd(final DSEClientSocket soc) throws IOException {
 		if (waitforall)
 			opts = new RequestOptions(ResponseMode.GET_ALL,
-					0, true,
+					300, true,
 
 					new RspFilter() {
 						private final ReentrantLock lock = new ReentrantLock();
@@ -76,8 +77,8 @@ public class HashExistsCmd implements IOClientCmd {
 
 					});
 		else {
-			opts = new RequestOptions(ResponseMode.GET_FIRST,
-					0, true,
+			opts = new RequestOptions(ResponseMode.GET_ALL,
+					300, false,
 
 					new RspFilter() {
 					private final ReentrantLock lock = new ReentrantLock();
@@ -91,7 +92,7 @@ public class HashExistsCmd implements IOClientCmd {
 						@Override
 						public boolean isAcceptable(Object response,
 								Address arg1) {
-							if (response instanceof Boolean) {
+							try {
 								boolean rsp = ((Boolean) response)
 										.booleanValue();
 								if (rsp) {
@@ -99,8 +100,10 @@ public class HashExistsCmd implements IOClientCmd {
 										resp[0] = 1;
 										resp[pos] = soc.serverState.get(arg1).id;
 										
-										if(pos >= numtowaitfor)
+										if(pos >= numtowaitfor) {
+											//SDFSLogger.getLog().info("meets requirements");
 											meetsRudundancy = true;
+										}
 										csz++;
 										pos++;
 										exists = rsp;
@@ -113,16 +116,19 @@ public class HashExistsCmd implements IOClientCmd {
 									lock.unlock();
 								}
 								return true;
-							} else {
-								return false;
-							}
+							
+						}catch(Exception e) {
+							SDFSLogger.getLog().warn("malformed hashexists msg from " + arg1.toString(),e);
+							return false;
+						}
 						}
 
 					});
 		}
-		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.OOB);
+		opts.setAnycasting(true);
 		byte[] b = new byte[1 + 2 + 2 + hash.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.HASH_EXISTS_CMD);
