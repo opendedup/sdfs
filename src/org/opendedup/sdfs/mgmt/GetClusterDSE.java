@@ -31,8 +31,10 @@ public class GetClusterDSE {
 				el.setAttribute("free-blocks", Long.toString(s.freeBlocks));
 				el.setAttribute("page-size", Long.toString(s.pageSize));
 				el.setAttribute("listen-port", Integer.toString(s.dseport));
-				el.setAttribute("listen-hostname", s.hostName);
+				el.setAttribute("listen-hostname", s.address.toString());
 				el.setAttribute("listen-encrypted", Boolean.toString(s.useSSL));
+				el.setAttribute("rack", s.rack);
+				el.setAttribute("location", s.location);
 				root.appendChild(el);
 			}
 			return (Element) root.cloneNode(true);

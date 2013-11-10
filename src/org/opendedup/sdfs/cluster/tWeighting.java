@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-class Weighting {
+class tWeighting {
 
 	int value;
 	int weighting;
 
-	public Weighting(int v, int w) {
+	public tWeighting(int v, int w) {
 		this.value = v;
 		this.weighting = w;
 	}
 
-	public static int weightedRandom(List<Weighting> weightingOptions) {
+	public static int weightedRandom(List<tWeighting> weightingOptions) {
 
 		// determine sum of all weightings
 		int total = 0;
-		for (Weighting w : weightingOptions) {
+		for (tWeighting w : weightingOptions) {
 			total += w.weighting;
 		}
 
@@ -27,22 +27,21 @@ class Weighting {
 
 		// loop thru our weightings until we arrive at the correct one
 		int current = 0;
-		for (Weighting w : weightingOptions) {
+		for (tWeighting w : weightingOptions) {
 			current += w.weighting;
 			if (random < current)
 				return w.value;
 		}
-
 		// shouldn't happen.
 		return -1;
 	}
 
 	public static void main(String[] args) {
 
-		List<Weighting> weightings = new ArrayList<Weighting>();
-		weightings.add(new Weighting(0, 7));
-		weightings.add(new Weighting(1, 1));
-		weightings.add(new Weighting(2, 2));
+		List<tWeighting> weightings = new ArrayList<tWeighting>();
+		weightings.add(new tWeighting(0, 10));
+		weightings.add(new tWeighting(1, 1));
+		weightings.add(new tWeighting(2, 2));
 		int zct = 0;
 		int oct = 0;
 		int tct = 0;
@@ -59,4 +58,5 @@ class Weighting {
 		System.out.println(oct);
 		System.out.println(tct);
 	}
+	
 }

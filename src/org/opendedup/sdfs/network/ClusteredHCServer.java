@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.network;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEServerSocket;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.OSValidator;
 
 public class ClusteredHCServer {
 
@@ -61,6 +63,8 @@ public class ClusteredHCServer {
 				Runtime.getRuntime().addShutdownHook(shutdownHook);
 				Main.standAloneDSE = true;
 				Main.chunkStoreLocal = true;
+				if (OSValidator.isUnix())
+					Main.logPath = "/var/log/sdfs/" + new File(cmd.getOptionValue("c")).getName() + ".log";
 				boolean debug = cmd.hasOption("d");
 				if (debug) {
 					SDFSLogger.setLevel(0);

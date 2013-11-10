@@ -66,7 +66,7 @@ public class ListVolsCmd implements IOPeerCmd {
 			throw new IOException(e);
 		}
 	}
-	
+
 
 	@Override
 	public byte getCmdID() {
