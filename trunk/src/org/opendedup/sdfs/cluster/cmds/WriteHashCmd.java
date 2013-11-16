@@ -13,6 +13,7 @@ import org.jgroups.blocks.ResponseMode;
 import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
 
@@ -28,7 +29,8 @@ public class WriteHashCmd implements IOClientCmd {
 	RequestOptions opts = null;
 	byte[] ignoredhosts = null;
 
-	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress, byte numberOfCopies) throws IOException {
+	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress,
+			byte numberOfCopies) throws IOException {
 		this.hash = hash;
 		this.compress = compress;
 		this.numberOfCopies = numberOfCopies;
@@ -48,17 +50,17 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
+		opts = new RequestOptions(ResponseMode.GET_ALL,Main.ClusterRSPTimeout * 2,true);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.OOB);
+		// opts.setFlags(Message.Flag.DONT_BUNDLE);
+		// opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 	}
 
-	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress, byte numberOfCopies, byte[] ignoredHosts)
-			throws IOException {
+	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress,
+			byte numberOfCopies, byte[] ignoredHosts) throws IOException {
 		this.hash = hash;
 		this.compress = compress;
 		this.numberOfCopies = numberOfCopies;
@@ -78,7 +80,8 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL, 0,false);
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout * 2,
+				true);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
@@ -87,7 +90,7 @@ public class WriteHashCmd implements IOClientCmd {
 
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
-		//SDFSLogger.getLog().info("writing to " + this.numberOfCopies);
+		// SDFSLogger.getLog().info("writing to " + this.numberOfCopies);
 		if (this.numberOfCopies > 7)
 			this.numberOfCopies = 7;
 		int stateSz = soc.serverState.size();
@@ -123,11 +126,17 @@ public class WriteHashCmd implements IOClientCmd {
 								|| response.wasUnreachable()) {
 
 						} else {
-							boolean done = (Boolean) response.getValue();
-							if (done)
-								resp[0] = 1;
-							resp[pos] = svr.id;
-							pos++;
+							try {
+								boolean done = (Boolean) response.getValue();
+								if (done)
+									resp[0] = 1;
+								resp[pos] = svr.id;
+								pos++;
+							} catch (Exception e) {
+								SDFSLogger.getLog().warn(
+										"unable to write to "
+												+ response.getSender(), e);
+							}
 						}
 
 					} else {
@@ -157,7 +166,6 @@ public class WriteHashCmd implements IOClientCmd {
 	public byte[] reponse() {
 		return this.resp;
 	}
-	
 
 	@Override
 	public byte getCmdID() {

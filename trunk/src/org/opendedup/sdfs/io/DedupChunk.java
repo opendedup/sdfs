@@ -299,5 +299,10 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public void setHashLoc(byte[] hashloc) {
 		this.hashloc = hashloc;
 	}
+	
+	@Override
+	public boolean isBatchProcessed() {
+		return false;
+	}
 
 }

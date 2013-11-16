@@ -13,6 +13,7 @@ import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.jgroups.blocks.RspFilter;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 
 public class HashExistsCmd implements IOClientCmd {
@@ -36,7 +37,7 @@ public class HashExistsCmd implements IOClientCmd {
 	public void executeCmd(final DSEClientSocket soc) throws IOException {
 		if (waitforall)
 			opts = new RequestOptions(ResponseMode.GET_ALL,
-					300, true,
+					Main.ClusterRSPTimeout, true,
 
 					new RspFilter() {
 						private final ReentrantLock lock = new ReentrantLock();
@@ -78,7 +79,7 @@ public class HashExistsCmd implements IOClientCmd {
 					});
 		else {
 			opts = new RequestOptions(ResponseMode.GET_ALL,
-					300, false,
+					Main.ClusterRSPTimeout, false,
 
 					new RspFilter() {
 					private final ReentrantLock lock = new ReentrantLock();

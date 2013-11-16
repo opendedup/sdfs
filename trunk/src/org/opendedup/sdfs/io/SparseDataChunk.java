@@ -18,6 +18,7 @@ public class SparseDataChunk implements Serializable {
 	int currentpos = 1;
 	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
 	private byte [] hashlocs;
+	private long fpos;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
 		if (rawData.length != RAWDL)
@@ -112,6 +113,14 @@ public class SparseDataChunk implements Serializable {
 		hashlocs = new byte [8];
 		hashlocs[0] = -1;
 		currentpos=1;
+	}
+
+	public long getFpos() {
+		return fpos;
+	}
+
+	public void setFpos(long fpos) {
+		this.fpos = fpos;
 	}
 
 }

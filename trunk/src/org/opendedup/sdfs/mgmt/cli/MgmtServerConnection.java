@@ -7,7 +7,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.w3c.dom.Document;
 
 public class MgmtServerConnection {
@@ -15,6 +18,14 @@ public class MgmtServerConnection {
 	public static String server = "localhost";
 	public static String userName = "admin";
 	public static String password = null;
+	public static boolean useSSL = true;
+	
+	static {
+		Protocol easyhttps = new Protocol("https", new EasySSLProtocolSocketFactory(),443);
+		Protocol.registerProtocol( "https", easyhttps );
+	}
+	
+	
 	public static Document getResponse(String url) throws IOException {
 
 		try {
@@ -27,8 +38,14 @@ public class MgmtServerConnection {
 			throw new IOException(e);
 		}
 	}
+	
+	
 
-	public static InputStream connectAndGet(String url,String file) {
+	public static InputStream connectAndGet(String url,String file) throws IOException {
+		return connectAndGet(url,file,useSSL);
+	}
+	
+	public static InputStream connectAndGet(String url,String file, boolean useSSL) throws IOException {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "SDFS Client");
 		if(userName != null && password != null)
@@ -36,9 +53,12 @@ public class MgmtServerConnection {
 				url = "username="+userName+"&password="+password;
 			else
 				url = url + "&username="+userName+"&password="+password;
-		String req = "http://"+server+":"+port +"/"+file+ "?" + url;
+		String prot = "http";
+		if(useSSL) {
+			prot = "https";
+		}
+		String req = prot +"://"+server+":"+port +"/"+file+ "?" + url;
 		GetMethod method = new GetMethod(req);
-		try {
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)
 				throw new IOException("Unable to process command "
@@ -46,15 +66,7 @@ public class MgmtServerConnection {
 						+ returnCode + " return msg was "
 						+ method.getResponseBodyAsString());
 			return method.getResponseBodyAsStream();
-		} catch (Exception e) {
-			System.err
-					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
-			System.err
-			.println("Error Request : " + req);
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
+		
 	}
 	
 	public static Document getResponse(String server,int port,String password,String url) throws IOException {
@@ -62,7 +74,7 @@ public class MgmtServerConnection {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(connectAndGet(server,port,password,url,""));
+			Document doc = db.parse(connectAndGet(server,port,password,url,"",useSSL));
 			doc.getDocumentElement().normalize();
 			return doc;
 		} catch (Exception e) {
@@ -70,7 +82,7 @@ public class MgmtServerConnection {
 		}
 	}
 
-	public static InputStream connectAndGet(String server,int port,String password,String url,String file) {
+	public static InputStream connectAndGet(String server,int port,String password,String url,String file,boolean useSSL) throws HttpException, IOException {
 		HttpClient client = new HttpClient();
 		client.getParams().setParameter("http.useragent", "SDFS Client");
 		if(userName != null && password != null)
@@ -78,9 +90,13 @@ public class MgmtServerConnection {
 				url = "username="+userName+"&password="+password;
 			else
 				url = url + "&username="+userName+"&password="+password;
-		String req = "http://"+server+":"+port +"/"+file+ "?" + url;
+		String prot = "http";
+		if(useSSL) {
+			prot = "https";
+			
+		}
+		String req = prot +"://"+server+":"+port +"/"+file+ "?" + url;
 		GetMethod method = new GetMethod(req);
-		try {
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)
 				throw new IOException("Unable to process command "
@@ -88,15 +104,6 @@ public class MgmtServerConnection {
 						+ returnCode + " return msg was "
 						+ method.getResponseBodyAsString());
 			return method.getResponseBodyAsStream();
-		} catch (Exception e) {
-			System.err
-					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
-			System.err
-			.println("Error Request : " + req);
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
 	}
 
 	public static void main(String[] args) throws IOException {

@@ -4,6 +4,7 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
@@ -79,7 +80,7 @@ public class FDisk {
 	}
 	
 	private int batchCheck(ArrayList<SparseDataChunk> chunks) throws IOException {
-		ArrayList<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for(SparseDataChunk ck : pchunks) {
 			byte [] exists = ck.getHashLoc();

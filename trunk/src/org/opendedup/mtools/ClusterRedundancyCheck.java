@@ -5,6 +5,7 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
@@ -23,10 +24,13 @@ public class ClusterRedundancyCheck {
 	private long failedRendundantBlocks = 0;
 	SDFSEvent fEvt = null;
 	private static final int MAX_BATCH_SIZE=100; 
-
-	public ClusterRedundancyCheck(SDFSEvent fEvt) throws IOException {
+	
+	public ClusterRedundancyCheck(SDFSEvent fEvt, File f) throws IOException { 
+		init(fEvt,f);
+	}
+	
+	private void init(SDFSEvent fEvt, File f) throws IOException {
 		this.fEvt = fEvt;
-		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
 			fEvt.endEvent("Cluster Redundancy Check Will not start because the volume has not been written too");
 			throw new IOException(
@@ -69,6 +73,12 @@ public class ClusterRedundancyCheck {
 		}
 	}
 
+	public ClusterRedundancyCheck(SDFSEvent fEvt) throws IOException {
+		//this.fEvt = fEvt;
+		File f = new File(Main.dedupDBStore);
+		init(fEvt,f);
+	}
+
 	private void traverse(File dir) throws IOException {
 		if (dir.isDirectory()) {
 			try {
@@ -87,8 +97,8 @@ public class ClusterRedundancyCheck {
 		}
 	}
 	
-	private int batchCheck(ArrayList<SparseDataChunk> chunks,LongByteArrayMap mp,long prevpos) throws IOException, HashtableFullException {
-		ArrayList<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+	private int batchCheck(ArrayList<SparseDataChunk> chunks,LongByteArrayMap mp) throws IOException, HashtableFullException {
+		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for(SparseDataChunk ck : pchunks) {
 			byte [] exists = ck.getHashLoc();
@@ -132,8 +142,7 @@ public class ClusterRedundancyCheck {
 					if (!brequals(currenthl, exists)) {
 						ck.setHashLoc(exists);
 					}
-					mp.put((prevpos / LongByteArrayMap.FREE.length)
-							* Main.CHUNK_LENGTH, ck.getBytes());
+					mp.put(ck.getFpos(), ck.getBytes());
 					}catch(IOException e) {
 						this.failedRendundantBlocks++;
 					}
@@ -158,6 +167,8 @@ public class ClusterRedundancyCheck {
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
+					ck.setFpos((prevpos / LongByteArrayMap.FREE.length)
+							* Main.CHUNK_LENGTH);
 					if (!ck.isLocalData()) {
 						if(Main.chunkStoreLocal) {
 						byte[] exists = HCServiceProxy.hashExists(ck.getHash(),
@@ -207,8 +218,7 @@ public class ClusterRedundancyCheck {
 								if (!brequals(currenthl, exists)) {
 									ck.setHashLoc(exists);
 								}
-								mp.put((prevpos / LongByteArrayMap.FREE.length)
-										* Main.CHUNK_LENGTH, ck.getBytes());
+								mp.put(ck.getFpos(), ck.getBytes());
 								}catch(IOException e) {
 									this.failedRendundantBlocks++;
 								}
@@ -219,7 +229,7 @@ public class ClusterRedundancyCheck {
 					} else {
 						chunks.add(ck);
 						if(chunks.size() >= MAX_BATCH_SIZE) {
-							corruptBlocks += batchCheck(chunks,mp,prevpos);
+							corruptBlocks += batchCheck(chunks,mp);
 							chunks = new ArrayList<SparseDataChunk>(MAX_BATCH_SIZE);
 						}
 					}
@@ -228,7 +238,7 @@ public class ClusterRedundancyCheck {
 			}
 			
 			if(chunks.size() > 0) {
-				corruptBlocks += batchCheck(chunks,mp,prevpos);
+				corruptBlocks += batchCheck(chunks,mp);
 			}
 			if (corruptBlocks > 0) {
 				this.corruptFiles++;

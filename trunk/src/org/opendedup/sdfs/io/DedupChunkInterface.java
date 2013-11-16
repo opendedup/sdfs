@@ -88,6 +88,8 @@ public interface DedupChunkInterface {
 	public boolean isClosed();
 	
 	public void flush() throws BufferClosedException;
+	
+	public boolean isBatchProcessed();
 
 	/**
 	 * Writes to the given target array

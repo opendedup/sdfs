@@ -27,6 +27,10 @@ public class MountSDFS {
 				true,
 				"sdfs volume configuration file to mount \ne.g. "
 						+ OSValidator.getConfigPath() + "dedup-volume-cfg.xml");
+		options.addOption(
+				"nossl",
+				false,
+				"If set ssl will not be used sdfscli traffic.");
 		options.addOption("c", false,
 				"sdfs volume will be compacted and then exit");
 		options.addOption("forcecompact", false,
@@ -40,6 +44,7 @@ public class MountSDFS {
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
 		String volumeConfigFile = null;
+		boolean useSSL = true;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
@@ -97,6 +102,9 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
+		if(cmd.hasOption("nossl")) {
+				useSSL = false;
+		}
 
 		if (volumeConfigFile == null) {
 			System.out
@@ -112,7 +120,7 @@ public class MountSDFS {
 		SDFSService sdfsService = new SDFSService(volumeConfigFile,volumes);
 
 		try {
-			sdfsService.start();
+			sdfsService.start(useSSL);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

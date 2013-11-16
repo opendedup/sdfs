@@ -26,6 +26,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.network.ClientThread;
+import org.opendedup.util.FindOpenPort;
 
 import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;
@@ -47,6 +48,7 @@ public class NetworkUnicastServer {
 		// Note that we can't choose a port less than 1023 if we are not
 		// privileged users (root)
 		try {
+			
 			InetSocketAddress addr = new InetSocketAddress(Main.serverHostName,
 					Main.serverPort);
 			if(Main.serverUseSSL) {

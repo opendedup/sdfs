@@ -26,6 +26,7 @@ public class DSEServer implements Externalizable {
 	public String location;
 	public String rack;
 	public String volumeName;
+	public transient int weight;
 	public static final int SERVER = 0;
 	public static final int CLIENT = 1;
 	public static final int LISTENER = 2;
@@ -43,7 +44,7 @@ public class DSEServer implements Externalizable {
 	public HashClientPool createPool() throws IOException {
 		HCServer _server = new HCServer(this.hostName, this.dseport, false,
 				false, this.useSSL);
-		return new HashClientPool(_server,this.address.toString(),10,this.id);
+		return new HashClientPool(_server,this.address.toString(),5,this.id);
 	}
 
 	@Override

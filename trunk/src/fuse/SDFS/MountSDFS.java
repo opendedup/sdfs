@@ -51,6 +51,10 @@ public class MountSDFS {
 		options.addOption("rv", true, "comma separated list of remote volumes that should also be accounted for when doing garbage collection. " +
 				"If not entered the volume will attempt to identify other volumes in the cluster.");
 		options.addOption("h", false, "displays available options");
+		options.addOption(
+				"nossl",
+				false,
+				"If set ssl will not be used sdfscli traffic.");
 		return options;
 	}
 
@@ -59,6 +63,7 @@ public class MountSDFS {
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
+		boolean useSSL = true;
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
 		ArrayList<String> volumes = new ArrayList<String>();
@@ -122,6 +127,9 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
+		if(cmd.hasOption("nossl")) {
+			useSSL = false;
+	}
 
 		
 
@@ -141,7 +149,7 @@ public class MountSDFS {
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start();
+			sdfsService.start(useSSL);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

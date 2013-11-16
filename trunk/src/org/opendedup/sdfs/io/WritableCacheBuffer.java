@@ -45,6 +45,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	boolean prevDoop = false;
 	private boolean safeSync = Main.safeSync;
 	private byte [] hashloc;
+	private boolean batchprocessed;
 
 	static {
 
@@ -392,7 +393,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				SDFSLogger.getLog().debug(
 						"####" + this.getFilePosition() + " not flushing");
 			else if (this.closed) {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						this.getFilePosition() + " already closed");
 			} else {
 				this.df.writeCache(this);
@@ -407,12 +408,44 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			this.lock.unlock();
 		}
 	}
+	
+	public void startClose() {
+		this.lock.lock();
+		this.batchprocessed = true;
+	}
+	
+	public boolean isBatchProcessed() {
+		return this.batchprocessed;
+	}
+	
+	
+	public void endClose() throws IOException {
+		try {
+			if (!this.flushing)
+				SDFSLogger.getLog().debug(
+						"####" + this.getFilePosition() + " not flushing");
+			else if (this.closed) {
+				SDFSLogger.getLog().debug(
+						this.getFilePosition() + " already closed");
+			} else {
+				this.df.writeCache(this);
+				df.removeFromFlush(this.getFilePosition());
+				this.closed = true;
+				this.flushing = false;
+			}
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
+			this.batchprocessed = false;
+			this.lock.unlock();
+		}
+	}
 
 	public byte[] getFlushedBuffer() throws BufferClosedException {
 		this.lock.lock();
 		try {
 			if (this.closed) {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						this.getFilePosition() + " already closed");
 				throw new BufferClosedException("Buffer Closed");
 			}
@@ -589,6 +622,10 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	@Override
 	public void setHashLoc(byte[] hashloc) {
 		this.hashloc = hashloc;
+	}
+	
+	public void setHash(byte[] hash) {
+		this.hash = hash;
 	}
 
 }
