@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -52,13 +51,13 @@ public class FileChunkStore implements AbstractChunkStore {
 	private File bsf;
 	private RAFPool pool = null;
 	private int cacheSize = 104857600 / Main.CHUNK_LENGTH;
-	
-	LoadingCache<Long, byte []> chunks = CacheBuilder.newBuilder()
+
+	LoadingCache<Long, byte[]> chunks = CacheBuilder.newBuilder()
 			.maximumSize(cacheSize).concurrencyLevel(72)
-			.build(new CacheLoader<Long, byte []>() {
-				public byte [] load(Long key) throws IOException {
+			.build(new CacheLoader<Long, byte[]>() {
+				public byte[] load(Long key) throws IOException {
 					byte[] b = new byte[pageSize];
-					
+
 					RandomAccessFile rf = pool.borrowObject();
 					try {
 						rf.seek(key);
@@ -73,8 +72,7 @@ public class FileChunkStore implements AbstractChunkStore {
 						} catch (Exception e) {
 						}
 					}
-					
-						
+
 					return b;
 				}
 			});
@@ -351,7 +349,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		} catch (ExecutionException e) {
 			SDFSLogger.getLog().error("Unable to get block at " + start, e);
 			throw new IOException(e);
-		} 
+		}
 	}
 
 	@Override

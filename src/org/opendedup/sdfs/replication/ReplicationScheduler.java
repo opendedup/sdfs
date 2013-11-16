@@ -13,7 +13,7 @@ import org.quartz.impl.StdSchedulerFactory;
 public class ReplicationScheduler {
 	Scheduler sched = null;
 
-	public ReplicationScheduler(String schedule,ReplicationService service) {
+	public ReplicationScheduler(String schedule, ReplicationService service) {
 		try {
 			Properties props = new Properties();
 			props.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
@@ -28,15 +28,15 @@ public class ReplicationScheduler {
 			sched.start();
 			JobDataMap dataMap = new JobDataMap();
 			dataMap.put("service", service);
-			JobDetail ccjobDetail = new JobDetail("replication", null, ReplicationJob.class);
+			JobDetail ccjobDetail = new JobDetail("replication", null,
+					ReplicationJob.class);
 			ccjobDetail.setJobDataMap(dataMap);
-			CronTrigger cctrigger = new CronTrigger("replicationTrigger", "group1",
-					schedule);
+			CronTrigger cctrigger = new CronTrigger("replicationTrigger",
+					"group1", schedule);
 			sched.scheduleJob(ccjobDetail, cctrigger);
 			SDFSLogger.getLog().info("Replication Job Scheduled");
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal(
-					"Unable to schedule Replication Job", e);
+			SDFSLogger.getLog().fatal("Unable to schedule Replication Job", e);
 		}
 	}
 

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -76,15 +75,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String symlinkPath = null;
 	private String version = Main.version;
 	private static ArrayList<MetaFileEventListener> mfListeners = new ArrayList<MetaFileEventListener>();
-	
+
 	public static void addMetaFileListener(MetaFileEventListener l) {
 		mfListeners.add(l);
 	}
-	
+
 	public static void removeMetaFileListener(MetaFileEventListener l) {
 		mfListeners.remove(l);
 	}
-	
+
 	public static ArrayList<MetaFileEventListener> getMetaFileListeners() {
 		return mfListeners;
 	}
@@ -124,19 +123,20 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setDedup(boolean dedupNow) throws IOException,
 			HashtableFullException {
-				setDedup(dedupNow, true);
-			}
+		setDedup(dedupNow, true);
+	}
 
 	/**
 	 * 
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @param dedup
 	 *            if true all chunks will be deduped, Otherwise chunks will be
 	 *            deduped opportunistically.
 	 * @throws IOException
 	 */
-	public void setDedup(boolean dedupNow, boolean propigateEvent) throws IOException,
-			HashtableFullException {
+	public void setDedup(boolean dedupNow, boolean propigateEvent)
+			throws IOException, HashtableFullException {
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
@@ -169,7 +169,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the name of the attribute
 	 * @param value
 	 *            the value of the attribute
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void addXAttribute(String name, String value, boolean propigateEvent) {
 		extendedAttrs.put(name, value);
@@ -224,7 +225,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param permissions
 	 *            sets permissions
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void setPermissions(int permissions, boolean propigateEvent) {
 		this.permissions = permissions;
@@ -257,10 +259,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param owner_id
 	 *            sets the file owner id
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @throws IOException
 	 */
-	public void setOwner_id(int owner_id, boolean propigateEvent) throws IOException {
+	public void setOwner_id(int owner_id, boolean propigateEvent)
+			throws IOException {
 		this.owner_id = owner_id;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id));
@@ -293,10 +297,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param group_id
 	 *            sets the group owner id
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @throws IOException
 	 */
-	public void setGroup_id(int group_id, boolean propigateEvent) throws IOException {
+	public void setGroup_id(int group_id, boolean propigateEvent)
+			throws IOException {
 		this.group_id = group_id;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id));
@@ -323,7 +329,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param vmdk
 	 *            flags this file as a vmdk if true
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void setVmdk(boolean vmdk, boolean propigateEvent) {
 		this.vmdk = vmdk;
@@ -421,24 +428,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			getDFLock.lock();
 			try {
 				if (this.dfGuid == null) {
-			DedupFile df = DedupFileStore.getDedupFile(this);
-			this.dfGuid = df.getGUID();
-			SDFSLogger.getLog().debug(
-					"No DF EXISTS .... Set dedup file for "
-							+ this.getPath() + " to " + this.dfGuid);
-			this.sync();
-			return df;
-				}else {
+					DedupFile df = DedupFileStore.getDedupFile(this);
+					this.dfGuid = df.getGUID();
+					SDFSLogger.getLog().debug(
+							"No DF EXISTS .... Set dedup file for "
+									+ this.getPath() + " to " + this.dfGuid);
+					this.sync();
+					return df;
+				} else {
 					return DedupFileStore.getDedupFile(this);
 				}
-			}finally {
+			} finally {
 				getDFLock.unlock();
 			}
 		} else {
 			return DedupFileStore.getDedupFile(this);
 		}
 	}
-	
+
 	public void setDfGuid(String guid) {
 		setDfGuid(guid, true);
 	}
@@ -466,10 +473,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite, SDFSEvent evt)
-			throws IOException {
-				return snapshot(snaptoPath, overwrite, evt, true);
-			}
+	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
+			SDFSEvent evt) throws IOException {
+		return snapshot(snaptoPath, overwrite, evt, true);
+	}
 
 	/**
 	 * Clones a file and the underlying DedupFile
@@ -479,12 +486,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param overwrite
 	 *            if true, it will overwrite the destination file if it alreay
 	 *            exists
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite, SDFSEvent evt, boolean propigateEvent)
-			throws IOException {
+	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
+			SDFSEvent evt, boolean propigateEvent) throws IOException {
 		if (!this.isDirectory()) {
 			SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
@@ -545,9 +553,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			_mf.getIOMonitor().setVirtualBytesWritten(
 					this.getIOMonitor().getVirtualBytesWritten(), true);
-			_mf.getIOMonitor().setDuplicateBlocks(
-					this.getIOMonitor().getDuplicateBlocks()
-							+ this.getIOMonitor().getActualBytesWritten(), true);
+			_mf.getIOMonitor()
+					.setDuplicateBlocks(
+							this.getIOMonitor().getDuplicateBlocks()
+									+ this.getIOMonitor()
+											.getActualBytesWritten(), true);
 			Main.volume.addDuplicateBytes(this.getIOMonitor()
 					.getDuplicateBlocks()
 					+ this.getIOMonitor().getActualBytesWritten(), true);
@@ -555,7 +565,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					.getVirtualBytesWritten(), true);
 			_mf.setVmdk(this.isVmdk(), true);
 			_mf.unmarshal();
-			evt.curCt = evt.curCt+1;
+			evt.curCt = evt.curCt + 1;
 			return _mf;
 		} else {
 			SDFSLogger.getLog().debug("is snapshot dir");
@@ -567,7 +577,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				MetaDataDedupFile file = files[i];
 				String newPath = snaptoPath + File.separator
 						+ file.getPath().substring(trimlen);
-				file.snapshot(newPath, overwrite,evt, propigateEvent);
+				file.snapshot(newPath, overwrite, evt, propigateEvent);
 			}
 			return MetaFileStore.getMF(snaptoPath);
 		}
@@ -590,17 +600,20 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	/**
 	 * Clones a file and the underlying DedupFile
+	 * 
 	 * @param overwrite
 	 *            if true, it will overwrite the destination file if it alreay
 	 *            exists
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @param snaptoPath
 	 *            the path to clone to
 	 * 
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public void copyTo(String npath, boolean overwrite, boolean propigateEvent) throws IOException {
+	public void copyTo(String npath, boolean overwrite, boolean propigateEvent)
+			throws IOException {
 		String snaptoPath = new File(npath + File.separator + "files")
 				.getPath() + File.separator;
 		SDFSLogger.getLog().info("Copying to " + snaptoPath);
@@ -723,10 +736,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		try {
 			File f = new File(this.path);
 			if (!f.isDirectory()) {
-				
 
 				try {
-					if (f.getParentFile() == null || !f.getParentFile().exists())
+					if (f.getParentFile() == null
+							|| !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
 					out = new ObjectOutputStream(
 							new FileOutputStream(this.path));
@@ -776,7 +789,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return time when file was last modified
 	 */
 	public long lastModified() {
-		if(this.dfGuid != null)
+		if (this.dfGuid != null)
 			return lastModified;
 		if (this.isDirectory())
 			return new File(this.path).lastModified();
@@ -812,7 +825,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param hidden
 	 *            true if hidden
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void setHidden(boolean hidden, boolean propigateEvent) {
 		this.hidden = hidden;
@@ -841,7 +855,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @param df
 	 *            the DedupFile that will be referenced within this file
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	protected void setDedupFile(DedupFile df, boolean propigateEvent) {
 		this.dfGuid = df.getGUID();
@@ -947,7 +962,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return this.write;
 	}
 
-	public boolean setExecutable(boolean executable, boolean ownerOnly, boolean propigateEvent) {
+	public boolean setExecutable(boolean executable, boolean ownerOnly,
+			boolean propigateEvent) {
 		this.execute = executable;
 		this.ownerExecOnly = ownerOnly;
 		this.unmarshal();
@@ -960,7 +976,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return true;
 	}
 
-	public boolean setWritable(boolean writable, boolean ownerOnly, boolean propigateEvent) {
+	public boolean setWritable(boolean writable, boolean ownerOnly,
+			boolean propigateEvent) {
 		this.write = writable;
 		this.ownerWriteOnly = ownerOnly;
 		this.unmarshal();
@@ -973,7 +990,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return true;
 	}
 
-	public boolean setReadable(boolean readable, boolean ownerOnly, boolean propigateEvent) {
+	public boolean setReadable(boolean readable, boolean ownerOnly,
+			boolean propigateEvent) {
 		this.read = readable;
 		this.ownerReadOnly = ownerOnly;
 		this.unmarshal();
@@ -1008,7 +1026,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param lastModified
 	 *            the lastModified to set
 	 */
-	
+
 	public boolean setLastModified(long lastModified) {
 		return setLastModified(lastModified, true);
 	}
@@ -1016,7 +1034,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	/**
 	 * @param lastModified
 	 *            the lastModified to set
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 
 	public boolean setLastModified(long lastModified, boolean propigateEvent) {
@@ -1041,7 +1060,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	/**
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @param length
 	 *            the length to set
 	 */
@@ -1090,7 +1110,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	/**
 	 * writes all the metadata and the Dedup blocks to the dedup chunk service
-	 * @param propigateEvent TODO
+	 * 
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
 		this.unmarshal();
@@ -1107,7 +1129,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	/**
 	 * 
 	 * @param lastAccessed
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		this.lastAccessed = lastAccessed;

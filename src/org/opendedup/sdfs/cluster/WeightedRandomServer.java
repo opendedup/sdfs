@@ -22,20 +22,23 @@ public class WeightedRandomServer implements ServerWeighting {
 		for (DSEServer w : servers) {
 			totsz += w.maxSize - w.currentSize;
 		}
-		if(totsz > 0) {
-		for (DSEServer w : servers) {
-			long avail = w.maxSize - w.currentSize;
-			if(avail > 0) {
-				double pt = (double)avail/totsz;
-				w.weight = (int) Math.ceil((pt) * 100);
-				SDFSLogger.getLog().debug("pt = " + pt + " avail = " + avail + " tot = " +totsz + " weight = " + w.weight);
-				this.total += w.weight;
+		if (totsz > 0) {
+			for (DSEServer w : servers) {
+				long avail = w.maxSize - w.currentSize;
+				if (avail > 0) {
+					double pt = (double) avail / totsz;
+					w.weight = (int) Math.ceil((pt) * 100);
+					SDFSLogger.getLog().debug(
+							"pt = " + pt + " avail = " + avail + " tot = "
+									+ totsz + " weight = " + w.weight);
+					this.total += w.weight;
+				}
 			}
+			Collections.sort(servers, new CustomComparator());
+			arsz = servers.size();
 		}
-		Collections.sort(servers, new CustomComparator());
-		arsz = servers.size();
-		}
-		SDFSLogger.getLog().debug("Created new weighted random with total " + total);
+		SDFSLogger.getLog().debug(
+				"Created new weighted random with total " + total);
 	}
 
 	@Override
@@ -106,7 +109,7 @@ public class WeightedRandomServer implements ServerWeighting {
 		}
 		return lst;
 	}
-	
+
 	@Override
 	public List<DSEServer> getServers(int sz, byte[] ignoredHosts) {
 		int random = rnd.nextInt(total);
@@ -165,7 +168,7 @@ public class WeightedRandomServer implements ServerWeighting {
 			return false;
 		}
 	}
-	
+
 	private class CustomComparator implements Comparator<DSEServer> {
 		@Override
 		public int compare(DSEServer o1, DSEServer o2) {

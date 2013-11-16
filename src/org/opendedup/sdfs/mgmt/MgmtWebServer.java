@@ -342,9 +342,9 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
-						byte [] rb = com.google.common.io.BaseEncoding.base64Url().decode(file);
-						byte[] rslt = new BatchGetBlocksCmd().getResult(rb
-								);
+						byte[] rb = com.google.common.io.BaseEncoding
+								.base64Url().decode(file);
+						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.set("Content-Type", "application/octet-stream");
 						response.set("Server", "SDFS Management Server");
@@ -558,19 +558,25 @@ public class MgmtWebServer implements Container {
 		}
 	}
 
-	public static void start(boolean useSSL) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException, KeyManagementException {
+	public static void start(boolean useSSL) throws InvalidKeyException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			NoSuchProviderException, SignatureException, IOException,
+			UnrecoverableKeyException, KeyManagementException {
 		if (Main.sdfsCliEnabled) {
-			if(useSSL) {
-				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+			if (useSSL) {
+				String keydir = new File(Main.volume.getPath()).getParent()
+						+ File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";
-				if(!new File(key).exists()) {
+				if (!new File(key).exists()) {
 					KeyGenerator.generateKey(new File(key));
 				}
-				FileInputStream keyFile = new FileInputStream(key); 
-				KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+				FileInputStream keyFile = new FileInputStream(key);
+				KeyStore keyStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
 				keyStore.load(keyFile, "sdfs".toCharArray());
 				// init KeyManagerFactory
-				KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory keyManagerFactory = KeyManagerFactory
+						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
 				KeyManager keyManagers[] = keyManagerFactory.getKeyManagers();
@@ -578,34 +584,36 @@ public class MgmtWebServer implements Container {
 				SSLContext sslContext = SSLContext.getDefault();
 				sslContext.init(keyManagers, null, new SecureRandom());
 				// get the socket factory
-				//SSLServerSocketFactory socketFactory = sslContext.getServerSocketFactory();
+				// SSLServerSocketFactory socketFactory =
+				// sslContext.getServerSocketFactory();
 				Container container = new MgmtWebServer();
 				connection = new SocketConnection(container);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 				SocketAddress address = new InetSocketAddress(
 						Main.sdfsCliListenAddr, Main.sdfsCliPort);
-				connection.connect(address,sslContext);
+				connection.connect(address, sslContext);
 				SDFSLogger.getLog().info(
 						"###################### SDFSCLI SSL Management WebServer Started at "
 								+ address.toString()
 								+ " #########################");
 			} else {
-			try {
-				Container container = new MgmtWebServer();
-				connection = new SocketConnection(container);
-				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
-				SocketAddress address = new InetSocketAddress(
-						Main.sdfsCliListenAddr, Main.sdfsCliPort);
-				connection.connect(address);
-				SDFSLogger.getLog().info(
-						"###################### SDFSCLI Management WebServer Started at "
-								+ address.toString()
-								+ " #########################");
-			} catch (IOException e) {
-				SDFSLogger.getLog().error(
-						"unable to start Web Management Server", e);
+				try {
+					Container container = new MgmtWebServer();
+					connection = new SocketConnection(container);
+					Main.sdfsCliPort = FindOpenPort
+							.pickFreePort(Main.sdfsCliPort);
+					SocketAddress address = new InetSocketAddress(
+							Main.sdfsCliListenAddr, Main.sdfsCliPort);
+					connection.connect(address);
+					SDFSLogger.getLog().info(
+							"###################### SDFSCLI Management WebServer Started at "
+									+ address.toString()
+									+ " #########################");
+				} catch (IOException e) {
+					SDFSLogger.getLog().error(
+							"unable to start Web Management Server", e);
+				}
 			}
-		}
 		}
 	}
 

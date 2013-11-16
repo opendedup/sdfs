@@ -102,8 +102,6 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		return this.name;
 	}
 
-	
-
 	@Override
 	public void setName(String name) {
 	}

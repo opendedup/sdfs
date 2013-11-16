@@ -23,7 +23,7 @@ public class MultiCastFetchChunkCmd implements IOClientCmd {
 	public MultiCastFetchChunkCmd(byte[] hash, byte[] hashlocs) {
 		this.hash = hash;
 		this.hashlocs = hashlocs;
-		opts = new RequestOptions(ResponseMode.GET_ALL,0);
+		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
@@ -32,7 +32,8 @@ public class MultiCastFetchChunkCmd implements IOClientCmd {
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
 		byte[] b = new byte[1 + 2 + hash.length];
-		//SDFSLogger.getLog().debug("Fetching " + StringUtils.getHexString(hash));
+		// SDFSLogger.getLog().debug("Fetching " +
+		// StringUtils.getHexString(hash));
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.FETCH_CMD);
 		buf.putShort((short) hash.length);
@@ -51,10 +52,10 @@ public class MultiCastFetchChunkCmd implements IOClientCmd {
 				RspList<Object> lst = soc.disp.castMessage(al, new Message(
 						null, null, buf.array()), opts);
 				Rsp<Object> rsp = lst.get(addr);
-				if(!rsp.hasException() && !rsp.wasSuspected()) {
-					this.chunk = (byte[])rsp.getValue();
+				if (!rsp.hasException() && !rsp.wasSuspected()) {
+					this.chunk = (byte[]) rsp.getValue();
 				} else {
-					pos ++;
+					pos++;
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("error while getting hash", e);

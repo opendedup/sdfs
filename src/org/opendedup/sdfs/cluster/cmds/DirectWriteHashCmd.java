@@ -32,10 +32,11 @@ public class DirectWriteHashCmd implements IOClientCmd {
 	byte exdn = 0;
 	int pos = 1;
 	byte sz = 0;
-	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
+	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
+			2);
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 70, 10,
-	        TimeUnit.SECONDS, worksQueue, executionHandler);
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 70,
+			10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
 		executor.allowCoreThreadTimeOut(true);
 	}
@@ -90,22 +91,22 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					this.numberOfCopies, ignoredhosts);
 
 			sz = (byte) pools.size();
-			
+
 			AsyncCmdListener l = new AsyncCmdListener() {
 
 				@Override
 				public void commandException(Exception e) {
 					lock.lock();
 					try {
-					dn++;
-					exdn++;
-					if(dn >=sz) {
-						synchronized(this) {
-							this.notify();
+						dn++;
+						exdn++;
+						if (dn >= sz) {
+							synchronized (this) {
+								this.notify();
+							}
 						}
-					}
-					}finally {
-					lock.unlock();
+					} finally {
+						lock.unlock();
 					}
 
 				}
@@ -113,20 +114,20 @@ public class DirectWriteHashCmd implements IOClientCmd {
 				@Override
 				public void commandResponse(Object result, HashClient client) {
 					lock.lock();
-					try{
-					boolean done = (Boolean) result;
-					if (!done)
-						resp[0] = (byte) 1;
-					resp[pos] = client.getId();
-					pos++;
-					dn++;
-					if(dn >=sz) {
-							
-							synchronized(this) {
+					try {
+						boolean done = (Boolean) result;
+						if (!done)
+							resp[0] = (byte) 1;
+						resp[pos] = client.getId();
+						pos++;
+						dn++;
+						if (dn >= sz) {
+
+							synchronized (this) {
 								this.notify();
 							}
-					}
-					}finally {
+						}
+					} finally {
 						lock.unlock();
 					}
 				}
@@ -138,13 +139,14 @@ public class DirectWriteHashCmd implements IOClientCmd {
 						this.aContents.length, l);
 				executor.execute(hc);
 			}
-			if(dn < sz) {
-					synchronized(l) {
-						l.wait(10000);
-					}
+			if (dn < sz) {
+				synchronized (l) {
+					l.wait(10000);
+				}
 			}
-			if(dn < sz)
-				SDFSLogger.getLog().warn("thread timed out before write was complete ");
+			if (dn < sz)
+				SDFSLogger.getLog().warn(
+						"thread timed out before write was complete ");
 			if (this.ignoredhosts != null) {
 				for (byte bz : ignoredhosts) {
 					if (bz != (byte) 0) {
@@ -164,11 +166,11 @@ public class DirectWriteHashCmd implements IOClientCmd {
 	public byte[] reponse() {
 		return this.resp;
 	}
-	
+
 	public byte getExDn() {
 		return this.exdn;
 	}
-	
+
 	public byte getDn() {
 		return this.dn;
 	}
@@ -177,28 +179,34 @@ public class DirectWriteHashCmd implements IOClientCmd {
 	public byte getCmdID() {
 		return NetworkCMDS.WRITE_HASH_CMD;
 	}
-	
+
 	public static class BlockPolicy implements RejectedExecutionHandler {
 
-	    /**
-	     * Creates a <tt>BlockPolicy</tt>.
-	     */
-	    public BlockPolicy() { }
+		/**
+		 * Creates a <tt>BlockPolicy</tt>.
+		 */
+		public BlockPolicy() {
+		}
 
-	    /**
-	     * Puts the Runnable to the blocking queue, effectively blocking
-	     * the delegating thread until space is available.
-	     * @param r the runnable task requested to be executed
-	     * @param e the executor attempting to execute this task
-	     */
-	    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-	        try {
-	            e.getQueue().put( r );
-	        }
-	        catch (InterruptedException e1) {
-	            SDFSLogger.getLog().error( "Work discarded, thread was interrupted while waiting for space to schedule: {}", e1);
-	        }
-	    }
+		/**
+		 * Puts the Runnable to the blocking queue, effectively blocking the
+		 * delegating thread until space is available.
+		 * 
+		 * @param r
+		 *            the runnable task requested to be executed
+		 * @param e
+		 *            the executor attempting to execute this task
+		 */
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+			try {
+				e.getQueue().put(r);
+			} catch (InterruptedException e1) {
+				SDFSLogger
+						.getLog()
+						.error("Work discarded, thread was interrupted while waiting for space to schedule: {}",
+								e1);
+			}
+		}
 	}
 
 }

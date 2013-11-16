@@ -117,9 +117,8 @@ public class HashClientPool {
 					this.passiveObjects.put(hc);
 				else {
 					try {
-						if(!this.suspect)
-							
-							
+						if (!this.suspect)
+
 							this.passiveObjects.put(this.makeObject());
 					} catch (Exception e) {
 						this.suspect = true;

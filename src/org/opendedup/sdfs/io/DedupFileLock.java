@@ -36,11 +36,11 @@ public class DedupFileLock {
 		this.valid = true;
 
 	}
-	
+
 	public String getHost() {
 		return this.host;
 	}
-	
+
 	public void setHost(String host) {
 		this.host = host;
 	}

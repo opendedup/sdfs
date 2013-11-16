@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.io;
 
-
 /**
  * 
  * @author Sam Silverberg This exception is thrown if a WritableCacheBuffer has
@@ -13,7 +12,7 @@ public class FileClosedException extends Exception {
 	public FileClosedException(String msg) {
 		super(msg);
 	}
-	
+
 	public FileClosedException() {
 		super();
 	}

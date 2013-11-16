@@ -21,7 +21,8 @@ public class SnapshotCmd implements Runnable {
 		this.srcPath = file;
 		this.dstPath = cmd;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
-		evt = SDFSEvent.snapEvent("Snapshot Intiated for " +this.srcPath + " to " + this.dstPath,f);
+		evt = SDFSEvent.snapEvent("Snapshot Intiated for " + this.srcPath
+				+ " to " + this.dstPath, f);
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -35,18 +36,17 @@ public class SnapshotCmd implements Runnable {
 			throws IOException {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		File nf = new File(Main.volume.getPath() + File.separator + dstPath);
-		
-			
+
 		try {
-			if(!f.exists())
+			if (!f.exists())
 				throw new IOException("Path not found [" + srcPath + "]");
-			if(nf.exists())
+			if (nf.exists())
 				throw new IOException("Path already exists [" + dstPath + "]");
-			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false,evt);
-			return "Took snapshot of Source [" + srcPath
-					+ "] " + " to Destination [" + dstPath + "]";
+			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false, evt);
+			return "Took snapshot of Source [" + srcPath + "] "
+					+ " to Destination [" + dstPath + "]";
 		} catch (Exception e) {
-			
+
 			throw new IOException(e);
 		}
 	}
@@ -54,17 +54,16 @@ public class SnapshotCmd implements Runnable {
 	@Override
 	public void run() {
 		try {
-			takeSnapshot(this.srcPath,this.dstPath);
+			takeSnapshot(this.srcPath, this.dstPath);
 		} catch (IOException e) {
 			SDFSLogger.getLog().error(
-					"Unable to take snapshot Source ["
-							+ srcPath + "] " + "Destination [" + dstPath
-							+ "] because :" + e.getMessage(), e);
-			evt.endEvent("Unable to take snapshot Source ["
-					+ srcPath + "] " + "Destination [" + dstPath
-					+ "]",SDFSEvent.ERROR, e);
+					"Unable to take snapshot Source [" + srcPath + "] "
+							+ "Destination [" + dstPath + "] because :"
+							+ e.getMessage(), e);
+			evt.endEvent("Unable to take snapshot Source [" + srcPath + "] "
+					+ "Destination [" + dstPath + "]", SDFSEvent.ERROR, e);
 		}
-		
+
 	}
 
 }

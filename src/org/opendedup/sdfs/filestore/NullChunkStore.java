@@ -46,8 +46,6 @@ public class NullChunkStore implements AbstractChunkStore {
 		return "null";
 	}
 
-	
-
 	@Override
 	public void setName(String name) {
 		// TODO Auto-generated method stub
@@ -59,8 +57,6 @@ public class NullChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
@@ -105,6 +101,5 @@ public class NullChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
 
 }

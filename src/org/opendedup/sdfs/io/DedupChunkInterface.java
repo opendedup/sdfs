@@ -10,10 +10,11 @@ public interface DedupChunkInterface {
 	 */
 
 	public abstract byte[] getHash();
-	
-	public abstract byte [] getHashLoc();
-	
-	public abstract void setHashLoc(byte [] hashloc);
+
+	public abstract byte[] getHashLoc();
+
+	public abstract void setHashLoc(byte[] hashloc);
+
 	/**
 	 * 
 	 * @return gets the lenth of the DedupChunk
@@ -25,8 +26,8 @@ public interface DedupChunkInterface {
 	 * @return the file position within the DedupFile
 	 */
 	public abstract long getFilePosition();
-	
-	public abstract byte [] getReadChunk()throws IOException;
+
+	public abstract byte[] getReadChunk() throws IOException;
 
 	/**
 	 * 
@@ -72,7 +73,6 @@ public interface DedupChunkInterface {
 
 	public abstract boolean isDoop();
 
-	
 	public abstract int getBytesWritten();
 
 	public abstract DedupFile getDedupFile();
@@ -82,13 +82,13 @@ public interface DedupChunkInterface {
 	public abstract int capacity();
 
 	public abstract long getEndPosition();
-	
+
 	public byte[] getFlushedBuffer() throws BufferClosedException;
-	
+
 	public boolean isClosed();
-	
+
 	public void flush() throws BufferClosedException;
-	
+
 	public boolean isBatchProcessed();
 
 	/**
@@ -121,13 +121,10 @@ public interface DedupChunkInterface {
 
 	public abstract void persist();
 
-
 	public abstract boolean isPrevDoop();
 
 	public abstract void setPrevDoop(boolean prevDoop);
 
 	public abstract int hashCode();
-
-
 
 }

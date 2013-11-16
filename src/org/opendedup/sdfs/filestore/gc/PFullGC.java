@@ -5,7 +5,6 @@ import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -58,28 +57,26 @@ public class PFullGC implements GCControllerImpl {
 						SDFSEvent.ERROR);
 			}
 		}
-		
+
 	}
 
 	private double calcPFull() {
 		Lock l = null;
 		try {
-		if(!Main.chunkStoreLocal) {
+			if (!Main.chunkStoreLocal) {
 				l = HCServiceProxy.cs.getLock("fdisk");
-		}
-		double pFull = 0;
-		if (HCServiceProxy.getSize() > 0) {
-			pFull = (double) HCServiceProxy.getSize()
-					/ (double) HCServiceProxy.getMaxSize();
-		}
-		return pFull;
-		}finally {
-			if(l !=null)
+			}
+			double pFull = 0;
+			if (HCServiceProxy.getSize() > 0) {
+				pFull = (double) HCServiceProxy.getSize()
+						/ (double) HCServiceProxy.getMaxSize();
+			}
+			return pFull;
+		} finally {
+			if (l != null)
 				l.unlock();
 		}
 	}
-	
-	
 
 	private double calcNxtRun() {
 		double next = this.calcPFull();
@@ -97,15 +94,14 @@ public class PFullGC implements GCControllerImpl {
 	public void reCalc() {
 		this.prevPFull = calcPFull();
 		this.nextPFull = this.calcNxtRun();
-		SDFSLogger.getLog()
-		.debug("Current DSE Percentage Full is ["
-				+ this.prevPFull + "] will run GC when ["
-				+ this.nextPFull + "]");
+		SDFSLogger.getLog().debug(
+				"Current DSE Percentage Full is [" + this.prevPFull
+						+ "] will run GC when [" + this.nextPFull + "]");
 	}
-	
-	public static void main(String [] args) {
+
+	public static void main(String[] args) {
 		double num = 0.800338958916741818D;
-		
+
 		System.out.println(Math.ceil(num * 10.0) / 10);
 	}
 

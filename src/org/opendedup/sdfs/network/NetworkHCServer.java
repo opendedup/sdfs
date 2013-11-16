@@ -22,7 +22,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
@@ -73,35 +72,45 @@ public class NetworkHCServer {
 		try {
 			InetSocketAddress addr = new InetSocketAddress(Main.serverHostName,
 					Main.serverPort);
-			if(Main.serverUseSSL) {
+			if (Main.serverUseSSL) {
 				String keydir = Main.hashDBStore + File.separator + "keys";
 				String key = keydir + File.separator + "dse_server.keystore";
-				if(!new File(key).exists()) {
+				if (!new File(key).exists()) {
 					new File(keydir).mkdirs();
-				 KeyStore keyStore = KeyStore.getInstance("JKS");
-			        keyStore.load(null, null);
+					KeyStore keyStore = KeyStore.getInstance("JKS");
+					keyStore.load(null, null);
 
-			        CertAndKeyGen keypair = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
+					CertAndKeyGen keypair = new CertAndKeyGen("RSA",
+							"SHA1WithRSA", null);
 
-			        X500Name x500Name = new X500Name(InetAddress.getLocalHost().getCanonicalHostName(), "sdfs_dse", "opendedup", "portland", "or", "US");
+					X500Name x500Name = new X500Name(InetAddress.getLocalHost()
+							.getCanonicalHostName(), "sdfs_dse", "opendedup",
+							"portland", "or", "US");
 
-			        keypair.generate(1024);
-			        PrivateKey privKey = keypair.getPrivateKey();
+					keypair.generate(1024);
+					PrivateKey privKey = keypair.getPrivateKey();
 
-			        X509Certificate[] chain = new X509Certificate[1];
+					X509Certificate[] chain = new X509Certificate[1];
 
-			        chain[0] = keypair.getSelfCertificate(x500Name, new Date(), (long) 1096 * 24 * 60 * 60);
+					chain[0] = keypair.getSelfCertificate(x500Name, new Date(),
+							(long) 1096 * 24 * 60 * 60);
 
-			        keyStore.setKeyEntry("sdfs", privKey, "sdfs".toCharArray(), chain);
+					keyStore.setKeyEntry("sdfs", privKey, "sdfs".toCharArray(),
+							chain);
 
-			        keyStore.store(new FileOutputStream(key), "sdfs".toCharArray());
-			        SDFSLogger.getLog().info("generated certificate for ssl communication at " + key);
+					keyStore.store(new FileOutputStream(key),
+							"sdfs".toCharArray());
+					SDFSLogger.getLog().info(
+							"generated certificate for ssl communication at "
+									+ key);
 				}
-				FileInputStream keyFile = new FileInputStream(key); 
-				KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+				FileInputStream keyFile = new FileInputStream(key);
+				KeyStore keyStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
 				keyStore.load(keyFile, "sdfs".toCharArray());
 				// init KeyManagerFactory
-				KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+				KeyManagerFactory keyManagerFactory = KeyManagerFactory
+						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
 				KeyManager keyManagers[] = keyManagerFactory.getKeyManagers();
@@ -109,16 +118,19 @@ public class NetworkHCServer {
 				SSLContext sslContext = SSLContext.getDefault();
 				sslContext.init(keyManagers, null, new SecureRandom());
 				// get the socket factory
-				SSLServerSocketFactory socketFactory = sslContext.getServerSocketFactory();
+				SSLServerSocketFactory socketFactory = sslContext
+						.getServerSocketFactory();
 
 				// and finally, get the socket
 				serverSocket = socketFactory.createServerSocket();
 				serverSocket.bind(addr);
-				SDFSLogger.getLog().info("listening on encryted channel " + addr.toString());
+				SDFSLogger.getLog().info(
+						"listening on encryted channel " + addr.toString());
 			} else {
-			serverSocket = new ServerSocket();
-			serverSocket.bind(addr);
-			SDFSLogger.getLog().info("listening on unencryted channel " + addr.toString());
+				serverSocket = new ServerSocket();
+				serverSocket.bind(addr);
+				SDFSLogger.getLog().info(
+						"listening on unencryted channel " + addr.toString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -153,7 +165,7 @@ public class NetworkHCServer {
 			serverSocket.close();
 		} catch (Exception e) {
 		}
-		
+
 		System.out.println("#### Shutting down HashStore ####");
 		HCServiceProxy.close();
 		System.out.println("#### Shut down completed ####");

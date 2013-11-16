@@ -26,11 +26,10 @@ public class CleanStoreCmd implements Runnable {
 		try {
 
 			long chunks = ManualGC.clearChunks(minutes);
-			
 
 			SDFSLogger.getLog().info(
-					"Expunged [" + chunks
-							+ "] unclaimed chunks in  [" + minutes + "] ");
+					"Expunged [" + chunks + "] unclaimed chunks in  ["
+							+ minutes + "] ");
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()

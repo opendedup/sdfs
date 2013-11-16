@@ -616,7 +616,7 @@ public class ConcurrentHopscotchHashMap<K, V> {
 
 		// initialize the segmens
 		final long initCapacity = nearestPowerOfTwo(initialCapacity);
-		final int segmentCapacity = (int)(initCapacity / numSegments);
+		final int segmentCapacity = (int) (initCapacity / numSegments);
 		for (int iSeg = 0; iSeg < numSegments; ++iSeg) {
 			_segments[iSeg] = new Segment(segmentCapacity);
 		}
@@ -725,6 +725,5 @@ public class ConcurrentHopscotchHashMap<K, V> {
 	// general
 	public void clear() {
 	}
-	
-	
+
 }

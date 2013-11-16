@@ -30,7 +30,7 @@ public class ProcessCleanStore {
 			int curevt = 0;
 			CommandLineProgressBar bar = null;
 			while (!closed) {
-				
+
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
 				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
@@ -77,24 +77,24 @@ public class ProcessCleanStore {
 						}
 
 					} catch (Exception e) {
-						//e.printStackTrace();
+						// e.printStackTrace();
 					}
 				}
 				if (!evt.getAttribute("end-timestamp").equals("-1")) {
-					if(evt.getAttribute("level").equals(SDFSEvent.INFO.toString()))
-					System.out.println(evt.getAttribute("type")
-							+ " Task Completed Successfully : "
-							+ evt.getAttribute("short-msg"));
+					if (evt.getAttribute("level").equals(
+							SDFSEvent.INFO.toString()))
+						System.out.println(evt.getAttribute("type")
+								+ " Task Completed Successfully : "
+								+ evt.getAttribute("short-msg"));
 					else
-					System.out.println(evt.getAttribute("type")
-							+ " Task Failed : "
-							+ evt.getAttribute("short-msg"));
+						System.out.println(evt.getAttribute("type")
+								+ " Task Failed : "
+								+ evt.getAttribute("short-msg"));
 					closed = true;
 				}
-				//System.out.println(evt.getAttribute("level"));
-				if(!closed)
-				Thread.sleep(1000);
-				
+				// System.out.println(evt.getAttribute("level"));
+				if (!closed)
+					Thread.sleep(1000);
 
 			}
 		} catch (Exception e) {

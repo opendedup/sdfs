@@ -29,7 +29,7 @@ public class GetAttributes {
 					Element fe = mf.toXML(doc);
 					root.appendChild(fe);
 				}
-				return (Element)root.cloneNode(true);
+				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);
@@ -44,7 +44,7 @@ public class GetAttributes {
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
 				root.appendChild(fe);
-				return (Element)root.cloneNode(true);
+				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);

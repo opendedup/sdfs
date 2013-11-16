@@ -2,9 +2,6 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
-
-
-
 import java.nio.ByteBuffer;
 
 import org.opendedup.sdfs.Main;
@@ -14,21 +11,23 @@ import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
 import org.rabinfingerprint.polynomial.Polynomial;
 
 public class EnhancedFingerFactory {
-	
+
 	private final RabinFingerprintLong finger;
 	private final RabinFingerprintLongWindowed fingerWindow;
 	private final ChunkBoundaryDetector boundaryDetector;
 	private final static int MIN_CHUNK_SIZE = 4096;
 	private final static int MAX_CHUNK_SIZE = Main.CHUNK_LENGTH;
 
-	public EnhancedFingerFactory(Polynomial p, long bytesPerWindow, ChunkBoundaryDetector boundaryDetector) {
+	public EnhancedFingerFactory(Polynomial p, long bytesPerWindow,
+			ChunkBoundaryDetector boundaryDetector) {
 		this.finger = new RabinFingerprintLong(p);
 		this.fingerWindow = new RabinFingerprintLongWindowed(p, bytesPerWindow);
 		this.boundaryDetector = boundaryDetector;
 	}
-	
+
 	public static interface EnhancedChunkVisitor {
-		public void visit(long fingerprint, long chunkStart, long chunkEnd,byte [] chunk);
+		public void visit(long fingerprint, long chunkStart, long chunkEnd,
+				byte[] chunk);
 	}
 
 	private RabinFingerprintLong newFingerprint() {
@@ -48,7 +47,8 @@ public class EnhancedFingerFactory {
 	 * rearranged or partially corrupted, the untouched chunks can be
 	 * efficiently discovered.
 	 */
-	public void getChunkFingerprints(byte [] barray, EnhancedChunkVisitor visitor) throws IOException {
+	public void getChunkFingerprints(byte[] barray, EnhancedChunkVisitor visitor)
+			throws IOException {
 		// windowing fingerprinter for finding chunk boundaries. this is only
 		// reset at the beginning of the file
 		final RabinFingerprintLong window = newWindowedFingerprint();
@@ -80,23 +80,25 @@ public class EnhancedFingerFactory {
 			 * window), we store the current chunk fingerprint and reset the
 			 * chunk fingerprinter.
 			 */
-			
-			if (boundaryDetector.isBoundary(window) && chunkLength > MIN_CHUNK_SIZE) {
-				byte [] c = new byte[chunkLength];
+
+			if (boundaryDetector.isBoundary(window)
+					&& chunkLength > MIN_CHUNK_SIZE) {
+				byte[] c = new byte[chunkLength];
 				buf.position(0);
 				buf.get(c);
 				// store last chunk offset
 				chunkLength = 0;
-				visitor.visit(finger.getFingerprintLong(), chunkStart, chunkEnd,c);
+				visitor.visit(finger.getFingerprintLong(), chunkStart,
+						chunkEnd, c);
 				chunkStart = chunkEnd;
 				finger.reset();
 				buf.clear();
-			}
-			else if(chunkLength >= MAX_CHUNK_SIZE) {
-				byte [] c = new byte[chunkLength];
+			} else if (chunkLength >= MAX_CHUNK_SIZE) {
+				byte[] c = new byte[chunkLength];
 				buf.position(0);
 				buf.get(c);
-				visitor.visit(finger.getFingerprintLong(), chunkStart, chunkEnd,c);
+				visitor.visit(finger.getFingerprintLong(), chunkStart,
+						chunkEnd, c);
 				finger.reset();
 				buf.clear();
 				// store last chunk offset
@@ -105,10 +107,10 @@ public class EnhancedFingerFactory {
 			}
 		}
 
-		byte [] c = new byte[chunkLength];
+		byte[] c = new byte[chunkLength];
 		buf.position(0);
 		buf.get(c);
-		visitor.visit(finger.getFingerprintLong(), chunkStart, chunkEnd,c);
+		visitor.visit(finger.getFingerprintLong(), chunkStart, chunkEnd, c);
 		finger.reset();
 		buf.clear();
 	}

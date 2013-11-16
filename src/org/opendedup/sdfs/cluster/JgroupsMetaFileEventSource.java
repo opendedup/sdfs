@@ -9,16 +9,17 @@ import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class JgroupsMetaFileEventSource implements MetaFileEventListener {
-	
+
 	private JChannel ch = null;
 	private Volume vol = null;
-	MessageDispatcher  disp;
-	
+	MessageDispatcher disp;
+
 	public JgroupsMetaFileEventSource(Volume vol) throws Exception {
 		this.vol = vol;
-		ch=new JChannel("/home/samsilverberg/workspace_sdfs/sdfs/src/jgroups.cfg.xml"); 
+		ch = new JChannel(
+				"/home/samsilverberg/workspace_sdfs/sdfs/src/jgroups.cfg.xml");
 		ch.setDiscardOwnMessages(true);
-        ch.connect("metafile-" +this.vol.getUuid());
+		ch.connect("metafile-" + this.vol.getUuid());
 	}
 
 	@Override
@@ -210,7 +211,7 @@ public class JgroupsMetaFileEventSource implements MetaFileEventListener {
 	@Override
 	public void onCreate(MetaDataDedupFile mf) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

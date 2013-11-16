@@ -16,19 +16,19 @@ public class GetRemoteVolumes {
 
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
-			if(Main.chunkStoreLocal)
+			if (Main.chunkStoreLocal)
 				throw new IOException("Chunk Store is local");
 			Document doc = XMLUtils.getXMLDoc("remote-volumes");
 			Element root = doc.getDocumentElement();
 			ListVolsCmd rcmd = new ListVolsCmd();
 			rcmd.executeCmd(HCServiceProxy.cs);
 			Set<String> vols = rcmd.getResults().keySet();
-			for(String vol:vols) {
+			for (String vol : vols) {
 				Element ve = doc.createElement("volume");
 				ve.setAttribute("name", vol);
 				root.appendChild(ve);
 			}
-			return (Element)root.cloneNode(true);
+			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fulfill request on file " + file, e);

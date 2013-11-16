@@ -185,7 +185,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	public long endStartingPosition() {
 		return this.endPos;
 	}
-	
 
 	/**
 	 * Searches the set for <tt>obj</tt>

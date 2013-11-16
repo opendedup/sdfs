@@ -50,7 +50,8 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL,Main.ClusterRSPTimeout * 2,true);
+		opts = new RequestOptions(ResponseMode.GET_ALL,
+				Main.ClusterRSPTimeout * 2, true);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
@@ -80,8 +81,8 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout * 2,
-				true);
+		opts = new RequestOptions(ResponseMode.GET_ALL,
+				Main.ClusterRSPTimeout * 2, true);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);

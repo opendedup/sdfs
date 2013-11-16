@@ -20,19 +20,20 @@ public class BatchGetBlocksCmd {
 	private static int MAX_BATCH_SZ = (Main.MAX_REPL_BATCH_SZ * 1024 * 1024)
 			/ Main.CHUNK_LENGTH;
 
-	public byte[] getResult(byte [] b) throws IOException, ClassNotFoundException {
+	public byte[] getResult(byte[] b) throws IOException,
+			ClassNotFoundException {
 		return archiveOut(b);
 	}
 
-	private synchronized byte[] archiveOut(byte [] sh) throws IOException,
+	private synchronized byte[] archiveOut(byte[] sh) throws IOException,
 			ClassNotFoundException {
-		
+
 		sh = CompressionUtils.decompressSnappy(sh);
 		ObjectInputStream obj_in = new ObjectInputStream(
 				new ByteArrayInputStream(sh));
 		@SuppressWarnings("unchecked")
 		ArrayList<byte[]> hashes = (ArrayList<byte[]>) obj_in.readObject();
-		byte [] hash = null;
+		byte[] hash = null;
 		if (hashes.size() > MAX_BATCH_SZ) {
 			SDFSLogger.getLog().warn(
 					"requested hash list to long " + hashes.size() + " > "

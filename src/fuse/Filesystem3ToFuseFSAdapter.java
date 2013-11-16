@@ -286,8 +286,8 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 
 		if (log != null && log.isDebugEnabled()) {
 			log.debug("utime: path=" + pathStr + ", atime=" + atime + " ("
-					+ new Date(atime * 1000L) + "), mtime=" + mtime
-					+ " (" + new Date(mtime * 1000L) + ")");
+					+ new Date(atime * 1000L) + "), mtime=" + mtime + " ("
+					+ new Date(mtime * 1000L) + ")");
 		}
 
 		try {
@@ -467,8 +467,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 
 		@Override
 		public void add(String xattrName) {
-			size += (int) (xattrName.length() * enc
-					.averageBytesPerChar()) + 1;
+			size += (int) (xattrName.length() * enc.averageBytesPerChar()) + 1;
 		}
 	}
 
@@ -706,8 +705,6 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		return errno;
 
 	}
-
-	
 
 	private int handleException(Exception e) {
 		int errno;

@@ -1,7 +1,7 @@
 package org.opendedup.sdfs.network;
 
 public class IOCmdException extends Exception {
-	
+
 	/**
 	 * 
 	 */

@@ -67,8 +67,10 @@ public class ClientThread extends Thread {
 			// is = new DataInputStream(clientSocket.getInputStream());
 			reader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()), 32768 * 2);
-			is = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream(),32768));
-			os = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(),32768));
+			is = new DataInputStream(new BufferedInputStream(
+					clientSocket.getInputStream(), 32768));
+			os = new DataOutputStream(new BufferedOutputStream(
+					clientSocket.getOutputStream(), 32768));
 			String versionMessage = "SDFS version " + Main.PROTOCOL_VERSION
 					+ "\r\n";
 			os.write(versionMessage.getBytes());
@@ -120,7 +122,7 @@ public class ClientThread extends Thread {
 					boolean done = false;
 					byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, len,
 							len, true);
-					
+
 					if (b[0] == 1)
 						done = true;
 

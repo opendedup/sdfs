@@ -44,7 +44,8 @@ public class S3ServicePool {
 		}
 	}
 
-	public RestS3Service borrowObject() throws IOException, InterruptedException {
+	public RestS3Service borrowObject() throws IOException,
+			InterruptedException {
 		RestS3Service hc = this.passiveObjects.take();
 		this.alock.lock();
 		this.activeObjects.add(hc);
@@ -78,9 +79,12 @@ public class S3ServicePool {
 	}
 
 	public RestS3Service makeObject() throws S3ServiceException {
-		Jets3tProperties jProps = Jets3tProperties.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
-		jProps.setProperty("httpclient.max-connections", Integer.toString(this.poolSize));
-		RestS3Service s3Service = new RestS3Service(awsCredentials,null,null,jProps);
+		Jets3tProperties jProps = Jets3tProperties
+				.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
+		jProps.setProperty("httpclient.max-connections",
+				Integer.toString(this.poolSize));
+		RestS3Service s3Service = new RestS3Service(awsCredentials, null, null,
+				jProps);
 		return s3Service;
 	}
 

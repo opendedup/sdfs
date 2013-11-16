@@ -43,8 +43,8 @@ public class StringUtils {
 
 	public static long parseSize(String capString) throws IOException {
 		String units = capString.substring(capString.length() - 2);
-		float sz = Float
-				.parseFloat(capString.substring(0, capString.length() - 2));
+		float sz = Float.parseFloat(capString.substring(0,
+				capString.length() - 2));
 		long fSize = 0;
 		if (units.equalsIgnoreCase("TB"))
 			fSize = (long) (sz * tbc);
@@ -59,20 +59,20 @@ public class StringUtils {
 		}
 		return fSize;
 	}
-	
+
 	public static int getSpecialCharacterCount(String s) {
-	     if (s == null || s.trim().isEmpty()) {
-	         return 0;
-	     }
-	     int theCount = 0;
-	     String specialChars = "/*!@#$%^&*()\"{}[]|\\?/<>,.';:+~`";
-	     for (int i = 0; i < s.length(); i++) {
-	         if (specialChars.contains(s.substring(i, i+1))) {
-	             theCount++;
-	         }
-	     }
-	     return theCount;
-	 }
+		if (s == null || s.trim().isEmpty()) {
+			return 0;
+		}
+		int theCount = 0;
+		String specialChars = "/*!@#$%^&*()\"{}[]|\\?/<>,.';:+~`";
+		for (int i = 0; i < s.length(); i++) {
+			if (specialChars.contains(s.substring(i, i + 1))) {
+				theCount++;
+			}
+		}
+		return theCount;
+	}
 
 	public static void main(String[] args) {
 		System.out.println("Volume = ");

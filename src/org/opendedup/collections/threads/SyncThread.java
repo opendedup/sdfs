@@ -30,7 +30,8 @@ public class SyncThread implements Runnable {
 	public void close() {
 		try {
 			th.interrupt();
-		}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 	}
 
 }

@@ -2,12 +2,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
-
 
 import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.logging.SDFSLogger;
@@ -44,7 +42,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	boolean rafInit = false;
 	boolean prevDoop = false;
 	private boolean safeSync = Main.safeSync;
-	private byte [] hashloc;
+	private byte[] hashloc;
 	private boolean batchprocessed;
 
 	static {
@@ -52,7 +50,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	}
 
 	protected WritableCacheBuffer(byte[] hash, long startPos, int length,
-			DedupFile df,byte [] hashloc) throws IOException {
+			DedupFile df, byte[] hashloc) throws IOException {
 		this.hash = hash;
 		this.length = length;
 		this.position = startPos;
@@ -89,7 +87,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return b;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getBytesWritten()
 	 */
 	@Override
@@ -97,7 +97,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return bytesWritten;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getDedupFile()
 	 */
 	@Override
@@ -132,7 +134,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.setWritable(true);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#sync()
 	 */
 	@Override
@@ -156,7 +160,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 		return false;
 	}
-	
+
 	public byte[] getReadChunk() throws IOException {
 		this.lock.lock();
 		try {
@@ -170,7 +174,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private void initBuffer() {
 		if (this.buf == null) {
 			try {
-				buf = HCServiceProxy.fetchChunk(this.getHash(),this.hashloc);
+				buf = HCServiceProxy.fetchChunk(this.getHash(), this.hashloc);
 				if (buf.length > Main.CHUNK_LENGTH) {
 					SDFSLogger.getLog().info(
 							"Alert ! returned chunk to large " + buf.length
@@ -185,7 +189,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#capacity()
 	 */
 	@Override
@@ -202,7 +208,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getEndPosition()
 	 */
 	@Override
@@ -210,7 +218,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return endPosition;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getChunk()
 	 */
 	@Override
@@ -228,7 +238,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#write(byte[], int)
 	 */
 
@@ -274,7 +286,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#truncate(int)
 	 */
 	@Override
@@ -297,7 +311,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isDirty()
 	 */
 	@Override
@@ -310,7 +326,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setDirty(boolean)
 	 */
 	@Override
@@ -320,7 +338,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.lock.unlock();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#toString()
 	 */
 	@Override
@@ -329,7 +349,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				+ this.getLength() + ":" + this.getEndPosition();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#open()
 	 */
 	@Override
@@ -341,7 +363,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				this.flushing = false;
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("Error while opening",e);
+			SDFSLogger.getLog().fatal("Error while opening", e);
 			throw new IllegalArgumentException("error");
 		} finally {
 			this.lock.unlock();
@@ -364,7 +386,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				throw new BufferClosedException("Buffer Closed");
 			}
 			this.flushing = true;
-			if(this.isDirty()) {
+			if (this.isDirty()) {
 				this.df.putBufferIntoFlush(this);
 				SparseDedupFile.pool.execute(this);
 			}
@@ -382,7 +404,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#close()
 	 */
 	@Override
@@ -408,17 +432,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			this.lock.unlock();
 		}
 	}
-	
+
 	public void startClose() {
 		this.lock.lock();
 		this.batchprocessed = true;
 	}
-	
+
 	public boolean isBatchProcessed() {
 		return this.batchprocessed;
 	}
-	
-	
+
 	public void endClose() throws IOException {
 		try {
 			if (!this.flushing)
@@ -458,7 +481,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#persist()
 	 */
 	@Override
@@ -476,7 +501,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#destroy()
 	 */
 	@Override
@@ -501,7 +528,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isPrevDoop()
 	 */
 	@Override
@@ -509,7 +538,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return prevDoop;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setPrevDoop(boolean)
 	 */
 	@Override
@@ -517,20 +548,24 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.prevDoop = prevDoop;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#hashCode()
 	 */
 	@Override
 	public int hashCode() {
 		this.lock.lock();
 		try {
-			return MurmurHash3.MurmurHash3_x64_32(buf,6442);
+			return MurmurHash3.MurmurHash3_x64_32(buf, 6442);
 		} finally {
 			this.lock.unlock();
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getHash()
 	 */
 	@Override
@@ -538,7 +573,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return this.hash;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getLength()
 	 */
 	@Override
@@ -546,7 +583,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return this.length;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getFilePosition()
 	 */
 	@Override
@@ -554,16 +593,20 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return this.position;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setLength(int)
 	 */
 	@Override
 	public void setLength(int length) {
 		this.length = length;
-		
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isNewChunk()
 	 */
 	@Override
@@ -571,25 +614,31 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return this.newChunk;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setNewChunk(boolean)
 	 */
 	@Override
 	public void setNewChunk(boolean newChunk) {
 		this.newChunk = newChunk;
-		
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setWritable(boolean)
 	 */
 	@Override
 	public void setWritable(boolean writable) {
 		this.writable = writable;
-		
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isWritable()
 	 */
 	@Override
@@ -597,23 +646,27 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		return this.writable;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setDoop(boolean)
 	 */
 	@Override
 	public void setDoop(boolean doop) {
 		this.doop = doop;
-		
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isDoop()
 	 */
 	@Override
 	public boolean isDoop() {
 		return this.doop;
 	}
-	
+
 	@Override
 	public byte[] getHashLoc() {
 		return this.hashloc;
@@ -623,7 +676,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	public void setHashLoc(byte[] hashloc) {
 		this.hashloc = hashloc;
 	}
-	
+
 	public void setHash(byte[] hash) {
 		this.hash = hash;
 	}

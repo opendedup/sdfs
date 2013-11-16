@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore.gc;
 
 import org.opendedup.logging.SDFSLogger;
 
-
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -32,9 +31,9 @@ public class ClusteredPFullGC implements GCControllerImpl {
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				SDFSLogger.getLog()
-				.info("Current DSE Percentage Full is ["
-						+ this.prevPFull + "] will run GC when ["
-						+ this.nextPFull + "]");
+						.info("Current DSE Percentage Full is ["
+								+ this.prevPFull + "] will run GC when ["
+								+ this.nextPFull + "]");
 				task.endEvent("Garbage Collection Succeeded");
 				task.shortMsg = "Garbage Collection Succeeded";
 				task.longMsg = "Current DSE Percentage Full is ["
@@ -47,7 +46,7 @@ public class ClusteredPFullGC implements GCControllerImpl {
 						SDFSEvent.ERROR);
 			}
 		}
-		
+
 	}
 
 	private double calcPFull() {
@@ -58,8 +57,6 @@ public class ClusteredPFullGC implements GCControllerImpl {
 		}
 		return pFull;
 	}
-	
-	
 
 	private double calcNxtRun() {
 		double next = this.calcPFull();
@@ -77,15 +74,14 @@ public class ClusteredPFullGC implements GCControllerImpl {
 	public void reCalc() {
 		this.prevPFull = calcPFull();
 		this.nextPFull = this.calcNxtRun();
-		SDFSLogger.getLog()
-		.debug("Current DSE Percentage Full is ["
-				+ this.prevPFull + "] will run GC when ["
-				+ this.nextPFull + "]");
+		SDFSLogger.getLog().debug(
+				"Current DSE Percentage Full is [" + this.prevPFull
+						+ "] will run GC when [" + this.nextPFull + "]");
 	}
-	
-	public static void main(String [] args) {
+
+	public static void main(String[] args) {
 		double num = 0.800338958916741818D;
-		
+
 		System.out.println(Math.ceil(num * 10.0) / 10);
 	}
 

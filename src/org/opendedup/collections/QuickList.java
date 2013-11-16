@@ -8,7 +8,6 @@ import java.util.ListIterator;
 
 import org.opendedup.hashing.HashFunctionPool;
 
-
 public class QuickList<E> implements java.util.List<E> {
 
 	private int size = 0;

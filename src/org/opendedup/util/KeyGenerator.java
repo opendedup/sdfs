@@ -20,31 +20,34 @@ import org.opendedup.logging.SDFSLogger;
 import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;
 
-
-
-
 public class KeyGenerator {
-	
-	public static void generateKey(File key) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, NoSuchProviderException, InvalidKeyException, SignatureException   {
-			key.getParentFile().mkdirs();
-		 KeyStore keyStore = KeyStore.getInstance("JKS");
-	        keyStore.load(null, null);
 
-	        CertAndKeyGen keypair = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
+	public static void generateKey(File key) throws KeyStoreException,
+			NoSuchAlgorithmException, CertificateException, IOException,
+			NoSuchProviderException, InvalidKeyException, SignatureException {
+		key.getParentFile().mkdirs();
+		KeyStore keyStore = KeyStore.getInstance("JKS");
+		keyStore.load(null, null);
 
-	        X500Name x500Name = new X500Name(InetAddress.getLocalHost().getCanonicalHostName(), "sdfs", "opendedup", "portland", "or", "US");
+		CertAndKeyGen keypair = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
 
-	        keypair.generate(1024);
-	        PrivateKey privKey = keypair.getPrivateKey();
+		X500Name x500Name = new X500Name(InetAddress.getLocalHost()
+				.getCanonicalHostName(), "sdfs", "opendedup", "portland", "or",
+				"US");
 
-	        X509Certificate[] chain = new X509Certificate[1];
+		keypair.generate(1024);
+		PrivateKey privKey = keypair.getPrivateKey();
 
-	        chain[0] = keypair.getSelfCertificate(x500Name, new Date(), (long) 1096 * 24 * 60 * 60);
+		X509Certificate[] chain = new X509Certificate[1];
 
-	        keyStore.setKeyEntry("sdfs", privKey, "sdfs".toCharArray(), chain);
+		chain[0] = keypair.getSelfCertificate(x500Name, new Date(),
+				(long) 1096 * 24 * 60 * 60);
 
-	        keyStore.store(new FileOutputStream(key), "sdfs".toCharArray());
-	        SDFSLogger.getLog().info("generated certificate for ssl communication at " + key);
+		keyStore.setKeyEntry("sdfs", privKey, "sdfs".toCharArray(), chain);
+
+		keyStore.store(new FileOutputStream(key), "sdfs".toCharArray());
+		SDFSLogger.getLog().info(
+				"generated certificate for ssl communication at " + key);
 
 	}
 

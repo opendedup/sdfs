@@ -64,7 +64,9 @@ public class ClusteredHCServer {
 				Main.standAloneDSE = true;
 				Main.chunkStoreLocal = true;
 				if (OSValidator.isUnix())
-					Main.logPath = "/var/log/sdfs/" + new File(cmd.getOptionValue("c")).getName() + ".log";
+					Main.logPath = "/var/log/sdfs/"
+							+ new File(cmd.getOptionValue("c")).getName()
+							+ ".log";
 				boolean debug = cmd.hasOption("d");
 				if (debug) {
 					SDFSLogger.setLevel(0);
@@ -124,7 +126,7 @@ public class ClusteredHCServer {
 		// privileged users (root)
 
 		socket = new DSEServerSocket(Main.DSEClusterConfig, Main.DSEClusterID,
-				Main.DSEClusterMemberID,volumes);
+				Main.DSEClusterMemberID, volumes);
 		HCServiceProxy.cs = socket;
 	}
 

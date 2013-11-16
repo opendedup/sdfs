@@ -99,11 +99,11 @@ public class DedupFileStore {
 					if (df == null) {
 						getDFLock.lock();
 						try {
-						df = openFile.get(mf.getDfGuid());
-						if (df == null) {
-							df = new SparseDedupFile(mf);
-						}
-						}finally {
+							df = openFile.get(mf.getDfGuid());
+							if (df == null) {
+								df = new SparseDedupFile(mf);
+							}
+						} finally {
 							getDFLock.unlock();
 						}
 					}
@@ -130,13 +130,13 @@ public class DedupFileStore {
 	 */
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
-				SDFSLogger.getLog().debug("adding dedupfile");
-				if (openFile.size() >= Main.maxOpenFiles)
-					throw new IOException("maximum number of files reached ["
-							+ Main.maxOpenFiles + "]. Too many open files");
-				openFile.put(df.getGUID(), df);
-				SDFSLogger.getLog().debug(
-						"dedupfile cache size is " + openFile.size());
+			SDFSLogger.getLog().debug("adding dedupfile");
+			if (openFile.size() >= Main.maxOpenFiles)
+				throw new IOException("maximum number of files reached ["
+						+ Main.maxOpenFiles + "]. Too many open files");
+			openFile.put(df.getGUID(), df);
+			SDFSLogger.getLog().debug(
+					"dedupfile cache size is " + openFile.size());
 		} else {
 			throw new IOException("DedupFileStore is closed");
 		}
@@ -158,8 +158,7 @@ public class DedupFileStore {
 			if (oldmf.getDfGuid() == null)
 				return null;
 			else {
-				DedupFile df = openFile
-						.get(oldmf.getDfGuid());
+				DedupFile df = openFile.get(oldmf.getDfGuid());
 				if (df == null) {
 					df = new SparseDedupFile(oldmf);
 				}
@@ -181,7 +180,7 @@ public class DedupFileStore {
 	 * @param mf
 	 */
 	public static void removeOpenDedupFile(String guid) {
-			openFile.remove(guid);
+		openFile.remove(guid);
 	}
 
 	/**
@@ -194,7 +193,7 @@ public class DedupFileStore {
 	public static boolean fileOpen(MetaDataDedupFile mf) {
 		try {
 			return openFile.containsKey(mf.getDfGuid());
-		}catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			return false;
 		}
 	}

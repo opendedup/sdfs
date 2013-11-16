@@ -106,15 +106,17 @@ public class HashClient implements Runnable {
 			}
 			clientSocket.setKeepAlive(true);
 			clientSocket.setTcpNoDelay(false);
-			//clientSocket.setReceiveBufferSize(128 * 1024);
-			//clientSocket.setSendBufferSize(128 * 1024);
+			// clientSocket.setReceiveBufferSize(128 * 1024);
+			// clientSocket.setSendBufferSize(128 * 1024);
 			clientSocket.setPerformancePreferences(0, 1, 2);
 
 			clientSocket.connect(new InetSocketAddress(server.getHostName(),
 					server.getPort()));
 			clientSocket.setSoTimeout(3000);
-			os = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(),32768));
-			is = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream(),32768));
+			os = new DataOutputStream(new BufferedOutputStream(
+					clientSocket.getOutputStream(), 32768));
+			is = new DataInputStream(new BufferedInputStream(
+					clientSocket.getInputStream(), 32768));
 			inReader = new BufferedReader(new InputStreamReader(
 					clientSocket.getInputStream()));
 			// Read the Header Line
@@ -166,7 +168,8 @@ public class HashClient implements Runnable {
 					this.close();
 				} catch (Exception e1) {
 				}
-				throw new IOException("unable to execute command because connection timed out");
+				throw new IOException(
+						"unable to execute command because connection timed out");
 			} else {
 				this.closed = true;
 				try {

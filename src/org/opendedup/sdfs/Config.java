@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -54,8 +53,9 @@ public class Config {
 			Main.serverHostName = network.getAttribute("hostname");
 			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
 			Main.enableNetworkChunkStore = true;
-			if(network.hasAttribute("use-ssl"))
-				Main.serverUseSSL = Boolean.parseBoolean(network.getAttribute("use-ssl"));
+			if (network.hasAttribute("use-ssl"))
+				Main.serverUseSSL = Boolean.parseBoolean(network
+						.getAttribute("use-ssl"));
 			Element locations = (Element) doc.getElementsByTagName("locations")
 					.item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
@@ -86,13 +86,14 @@ public class Config {
 					Main.hashType = HashFunctionPool.TIGER_16;
 				if (hsz == 24)
 					Main.hashType = HashFunctionPool.TIGER_24;
-				SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
+				SDFSLogger.getLog().info(
+						"Setting hash engine to " + Main.hashType);
 			}
 			if (cbe.hasAttribute("hash-type")) {
 				Main.hashType = cbe.getAttribute("hash-type");
 				SDFSLogger.getLog().info(
 						"Setting hash engine to " + Main.hashType);
-			}	
+			}
 			if (cbe.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe
 						.getAttribute("encrypt"));
@@ -104,23 +105,26 @@ public class Config {
 						.getAttribute("compress"));
 			}
 			if (cbe.hasAttribute("max-repl-batch-sz"))
-				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe.getAttribute("max-repl-batch-sz"));
+				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe
+						.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
-			if(cbe.hasAttribute("cluster-id"))
+			if (cbe.hasAttribute("cluster-id"))
 				Main.DSEClusterID = cbe.getAttribute("cluster-id");
-			if(cbe.hasAttribute("cluster-member-id"))
-				Main.DSEClusterMemberID = Byte.parseByte(cbe.getAttribute("cluster-member-id"));
-			if(cbe.hasAttribute("cluster-config"))
+			if (cbe.hasAttribute("cluster-member-id"))
+				Main.DSEClusterMemberID = Byte.parseByte(cbe
+						.getAttribute("cluster-member-id"));
+			if (cbe.hasAttribute("cluster-config"))
 				Main.DSEClusterConfig = cbe.getAttribute("cluster-config");
-			if(cbe.hasAttribute("sdfs-password")) {
+			if (cbe.hasAttribute("sdfs-password")) {
 				Main.sdfsPassword = cbe.getAttribute("dse-password");
 				Main.sdfsPasswordSalt = cbe.getAttribute("dse-password-salt");
 			}
-			if(cbe.hasAttribute("cluster-node-rack")) {
+			if (cbe.hasAttribute("cluster-node-rack")) {
 				Main.DSEClusterNodeRack = cbe.getAttribute("cluster-node-rack");
 			}
-			if(cbe.hasAttribute("cluster-node-location")) {
-				Main.DSEClusterNodeLocation = cbe.getAttribute("cluster-node-location");
+			if (cbe.hasAttribute("cluster-node-location")) {
+				Main.DSEClusterNodeLocation = cbe
+						.getAttribute("cluster-node-location");
 			}
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
@@ -151,17 +155,16 @@ public class Config {
 				SDFSLogger.getLog().info(
 						"creating chunk store at " + Main.chunkStore);
 				f.mkdirs();
-				
+
 			}
 
 			f = new File(Main.hashDBStore);
 			if (!f.exists()) {
 				SDFSLogger.getLog().info(
 						"creating hash database store at " + Main.chunkStore);
-				if(!f.mkdirs())
-					throw new IOException("Unable to create " +f.getPath());
+				if (!f.mkdirs())
+					throw new IOException("Unable to create " + f.getPath());
 			}
-			
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -169,7 +172,7 @@ public class Config {
 			throw new IOException(e);
 		}
 	}
-	
+
 	/**
 	 * parse the client side config file
 	 * 
@@ -197,8 +200,7 @@ public class Config {
 						+ " version " + version);
 		Element gc = (Element) doc.getElementsByTagName("gc").item(0);
 		if (gc.hasAttribute("log-level")) {
-			SDFSLogger.setLevel(Integer.parseInt(gc
-					.getAttribute("log-level")));
+			SDFSLogger.setLevel(Integer.parseInt(gc.getAttribute("log-level")));
 		}
 		Main.fDkiskSchedule = gc.getAttribute("claim-hash-schedule");
 		Main.DSEClusterConfig = gc.getAttribute("cluster-config");
@@ -265,7 +267,7 @@ public class Config {
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
-		
+
 		Main.maxWriteBuffers = Integer.parseInt(cache
 				.getAttribute("max-file-write-buffers"));
 		Main.maxOpenFiles = Integer.parseInt(cache
@@ -274,7 +276,7 @@ public class Config {
 				.getAttribute("max-file-inactive")) * 1000;
 		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
-		Main.volume = new Volume(volume,fileName);
+		Main.volume = new Volume(volume, fileName);
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
 				.item(0);
 		Main.defaultGroup = Integer.parseInt(permissions
@@ -292,12 +294,14 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
-		if(localChunkStore.hasAttribute("cluster-id"))
+		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
-		if(localChunkStore.hasAttribute("cluster-config"))
-			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
-		if(localChunkStore.hasAttribute("cluster-dse-password"))
-			Main.DSEPassword = localChunkStore.getAttribute("cluster-dse-password");
+		if (localChunkStore.hasAttribute("cluster-config"))
+			Main.DSEClusterConfig = localChunkStore
+					.getAttribute("cluster-config");
+		if (localChunkStore.hasAttribute("cluster-dse-password"))
+			Main.DSEPassword = localChunkStore
+					.getAttribute("cluster-dse-password");
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		if (Main.chunkStoreLocal) {
@@ -338,14 +342,15 @@ public class Config {
 				Main.serverPort = Integer.parseInt(networkcs
 						.getAttribute("port"));
 			}
-			if(networkcs.hasAttribute("use-ssl"))
-				Main.serverUseSSL = Boolean.parseBoolean(networkcs.getAttribute("use-ssl"));
+			if (networkcs.hasAttribute("use-ssl"))
+				Main.serverUseSSL = Boolean.parseBoolean(networkcs
+						.getAttribute("use-ssl"));
 			SDFSLogger.getLog().info(
 					"######### Will allocate " + Main.chunkStoreAllocationSize
 							+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			if (awsSz > 0) {
-				
+
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName(
 						"aws").item(0);
@@ -360,8 +365,8 @@ public class Config {
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure-store")
-						.item(0);
+				Element azure = (Element) doc.getElementsByTagName(
+						"azure-store").item(0);
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");

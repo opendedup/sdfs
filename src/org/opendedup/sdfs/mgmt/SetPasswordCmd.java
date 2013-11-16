@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt;
 
-
 import java.io.IOException;
 
 import org.opendedup.hashing.HashFunctions;
@@ -10,20 +9,20 @@ import org.opendedup.sdfs.Main;
 public class SetPasswordCmd implements XtendedCmd {
 
 	@Override
-	public String getResult(String oldUserName,String newPassword) throws IOException {
+	public String getResult(String oldUserName, String newPassword)
+			throws IOException {
 		return setPassword(newPassword);
 	}
 
-	private String setPassword(String newPassword)
-			throws IOException {
-		
-		
+	private String setPassword(String newPassword) throws IOException {
+
 		String oldSalt = Main.sdfsPasswordSalt;
-		String oldPassword = Main.sdfsPassword;	
+		String oldPassword = Main.sdfsPassword;
 		try {
-			
+
 			String salt = HashFunctions.getRandomString(6);
-			String password = HashFunctions.getSHAHash(newPassword.getBytes(), salt.getBytes());
+			String password = HashFunctions.getSHAHash(newPassword.getBytes(),
+					salt.getBytes());
 			Main.sdfsPassword = password;
 			Main.sdfsPasswordSalt = salt;
 			return "password changed";
@@ -32,8 +31,7 @@ public class SetPasswordCmd implements XtendedCmd {
 					"password could not be changed" + e.toString(), e);
 			Main.sdfsPassword = oldPassword;
 			Main.sdfsPasswordSalt = oldSalt;
-			throw new IOException(
-					"password could not be changed");
+			throw new IOException("password could not be changed");
 		}
 	}
 

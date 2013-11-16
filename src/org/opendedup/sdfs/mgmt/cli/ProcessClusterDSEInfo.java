@@ -69,12 +69,13 @@ public class ProcessClusterDSEInfo {
 							StorageUnit.of(maxSz).format(maxSz),
 							Double.toString(pFull), Integer.toString(pageSize),
 							Long.toString(freeBlocks), Integer.toString(port),
-							dse.getAttribute("rack"),dse.getAttribute("location") };
+							dse.getAttribute("rack"),
+							dse.getAttribute("location") };
 					data[i] = row;
 				}
 				ASCIITable.getInstance().printTable(headerObjs, data);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

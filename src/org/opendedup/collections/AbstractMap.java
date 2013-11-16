@@ -13,6 +13,5 @@ public interface AbstractMap {
 	public abstract void vanish(boolean propigateEvent) throws IOException;
 
 	public abstract void close();
-	
 
 }

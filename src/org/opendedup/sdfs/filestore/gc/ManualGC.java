@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
 
-
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -49,7 +48,7 @@ public class ManualGC {
 			} catch (IOException e) {
 				if (!Main.firstRun)
 					throw e;
-			}finally {
+			} finally {
 				try {
 					Main.pFullSched.recalcScheduler();
 				} catch (Exception e) {
@@ -66,8 +65,8 @@ public class ManualGC {
 				}
 				wevt.endEvent("Done Waiting");
 				try {
-				rm = rm + runGC(10 * 1000);
-				}finally {
+					rm = rm + runGC(10 * 1000);
+				} finally {
 					try {
 						Main.pFullSched.recalcScheduler();
 					} catch (Exception e) {
@@ -88,7 +87,6 @@ public class ManualGC {
 		long tm = System.currentTimeMillis();
 		try {
 
-			
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				new FDisk(evt);
 			} else {
@@ -97,7 +95,7 @@ public class ManualGC {
 			evt.curCt = 33;
 			HCServiceProxy.processHashClaims(evt);
 			evt.curCt = 66;
-			
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
 			evt.endEvent(
@@ -109,9 +107,8 @@ public class ManualGC {
 		try {
 			rm = HCServiceProxy
 					.removeStailHashes(tm - milliseconds, false, evt);
-		}
-		finally {
-			
+		} finally {
+
 		}
 		return rm;
 	}

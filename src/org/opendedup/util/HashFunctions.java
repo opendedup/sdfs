@@ -223,11 +223,11 @@ public class HashFunctions {
 		 * 
 		 * ?
 		 */
-		String rndStr =  getRandomString(12);
-		
+		String rndStr = getRandomString(12);
+
 		System.out.println(rndStr);
-		String auth =getSHAHash("admin".getBytes(),"test".getBytes());
-		if(auth.equals(getSHAHash("admin".getBytes(),"test".getBytes())))
+		String auth = getSHAHash("admin".getBytes(), "test".getBytes());
+		if (auth.equals(getSHAHash("admin".getBytes(), "test".getBytes())))
 			System.out.println(auth);
 		else
 			System.out.println("failed");
@@ -256,7 +256,7 @@ public class HashFunctions {
 		return StringUtils.getHexString(digest.digest(input));
 	}
 
-	public static String getSHAHash(byte[] input,byte[] salt)
+	public static String getSHAHash(byte[] input, byte[] salt)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException,
 			NoSuchProviderException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");

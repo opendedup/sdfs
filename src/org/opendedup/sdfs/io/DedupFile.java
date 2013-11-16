@@ -16,8 +16,9 @@ import org.opendedup.collections.HashtableFullException;
  * 
  */
 public interface DedupFile {
-	
+
 	public abstract void removeFromFlush(long pos);
+
 	/**
 	 * 
 	 * @return true if the dedup file is closed
@@ -37,7 +38,8 @@ public interface DedupFile {
 	 * @return the write buffer for the give position
 	 * @throws IOException
 	 */
-	public abstract DedupChunkInterface getWriteBuffer(long position) throws FileClosedException,IOException;
+	public abstract DedupChunkInterface getWriteBuffer(long position)
+			throws FileClosedException, IOException;
 
 	/**
 	 * 
@@ -47,17 +49,18 @@ public interface DedupFile {
 	 * @return the specific read buffer.
 	 * @throws IOException
 	 */
-	public abstract DedupChunkInterface getReadBuffer(long position) throws FileClosedException,IOException;
-	
+	public abstract DedupChunkInterface getReadBuffer(long position)
+			throws FileClosedException, IOException;
+
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-	boolean doop) throws FileClosedException, IOException;
-	
+			boolean doop) throws FileClosedException, IOException;
+
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
 
-
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			boolean doop, boolean propigateEvent) throws FileClosedException, IOException;
-	
+			boolean doop, boolean propigateEvent) throws FileClosedException,
+			IOException;
+
 	/**
 	 * Clones the DedupFile
 	 * 
@@ -69,34 +72,34 @@ public interface DedupFile {
 	public abstract DedupFile snapshot(MetaDataDedupFile mf)
 			throws IOException, HashtableFullException;
 
+	/**
+	 * Clones the DedupFile
+	 * 
+	 * @param mf
+	 *            the MetaDataDedupFile to clone
+	 * @param propigateEvent
+	 *            TODO
+	 * @return the cloned DedupFile
+	 * @throws IOException
+	 */
+	public abstract DedupFile snapshot(MetaDataDedupFile mf,
+			boolean propigateEvent) throws IOException, HashtableFullException;
 
 	/**
 	 * Clones the DedupFile
 	 * 
 	 * @param mf
 	 *            the MetaDataDedupFile to clone
-	 * @param propigateEvent TODO
 	 * @return the cloned DedupFile
 	 * @throws IOException
 	 */
-	public abstract DedupFile snapshot(MetaDataDedupFile mf, boolean propigateEvent)
-			throws IOException, HashtableFullException;
-	
+	public abstract void copyTo(String path) throws IOException;
+
 	/**
 	 * Clones the DedupFile
 	 * 
-	 * @param mf
-	 *            the MetaDataDedupFile to clone
-	 * @return the cloned DedupFile
-	 * @throws IOException
-	 */
-	public abstract void copyTo(String path)
-			throws IOException;
-
-
-	/**
-	 * Clones the DedupFile
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @param mf
 	 *            the MetaDataDedupFile to clone
 	 * 
@@ -113,10 +116,11 @@ public interface DedupFile {
 	 */
 	public abstract boolean delete();
 
-
 	/**
 	 * Deletes the DedupFile and all on disk references
-	 * @param propigateEvent TODO
+	 * 
+	 * @param propigateEvent
+	 *            TODO
 	 * 
 	 * @return true if deleted
 	 */
@@ -133,30 +137,34 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void writeCache(DedupChunkInterface writeBuffer)
-			throws FileClosedException,IOException, HashtableFullException;
+			throws FileClosedException, IOException, HashtableFullException;
 
 	/**
 	 * 
 	 * @return the number of chunks in the DedupFile
 	 * @throws IOException
 	 */
-	public abstract long getNumberofChunks() throws FileClosedException,IOException;
+	public abstract long getNumberofChunks() throws FileClosedException,
+			IOException;
 
 	/**
 	 * Flushes all write buffers to disk
 	 * 
 	 * @throws IOException
 	 */
-	public abstract void sync(boolean force) throws FileClosedException, IOException;
-
+	public abstract void sync(boolean force) throws FileClosedException,
+			IOException;
 
 	/**
 	 * Flushes all write buffers to disk
-	 * @param propigateEvent TODO
+	 * 
+	 * @param propigateEvent
+	 *            TODO
 	 * 
 	 * @throws IOException
 	 */
-	public abstract void sync(boolean force,boolean propigateEvent) throws FileClosedException, IOException;
+	public abstract void sync(boolean force, boolean propigateEvent)
+			throws FileClosedException, IOException;
 
 	/**
 	 * Creates a DedupFileChannel for writing data to this DedupFile
@@ -172,10 +180,10 @@ public interface DedupFile {
 	 * @param channel
 	 *            the channel to remove
 	 */
-	public abstract void unRegisterChannel(DedupFileChannel channel,int flags);
-	
-	public abstract void registerChannel(DedupFileChannel channel) throws IOException;
+	public abstract void unRegisterChannel(DedupFileChannel channel, int flags);
 
+	public abstract void registerChannel(DedupFileChannel channel)
+			throws IOException;
 
 	/**
 	 * 
@@ -211,12 +219,12 @@ public interface DedupFile {
 	 */
 	public abstract void removeLock(DedupFileLock lock);
 
-
 	/**
 	 * 
 	 * @param lock
 	 *            to remove from the file
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 */
 	public abstract void removeLock(DedupFileLock lock, boolean propigateEvent);
 
@@ -237,7 +245,6 @@ public interface DedupFile {
 	public abstract DedupFileLock addLock(DedupFileChannel ch, long position,
 			long len, boolean shared) throws IOException;
 
-
 	/**
 	 * Tries to lock a file at a specific position
 	 * 
@@ -247,14 +254,16 @@ public interface DedupFile {
 	 *            the position to lock the file at.
 	 * @param shared
 	 *            if the lock is shared or not
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @param size
 	 *            the size of the data to be locked
 	 * @return true if it is locked
 	 * @throws IOException
 	 */
 	public abstract DedupFileLock addLock(DedupFileChannel ch, long position,
-			long len, boolean shared, boolean propigateEvent) throws IOException;
+			long len, boolean shared, boolean propigateEvent)
+			throws IOException;
 
 	/**
 	 * 
@@ -287,16 +296,17 @@ public interface DedupFile {
 	 */
 	public abstract void removeHash(long location) throws IOException;
 
-
 	/**
 	 * 
 	 * @param location
 	 *            the location where to remove the hash from. This is often used
 	 *            when truncating a file
-	 * @param propigateEvent TODO
+	 * @param propigateEvent
+	 *            TODO
 	 * @throws IOException
 	 */
-	public abstract void removeHash(long location, boolean propigateEvent) throws IOException;
+	public abstract void removeHash(long location, boolean propigateEvent)
+			throws IOException;
 
 	/**
 	 * 
@@ -327,10 +337,7 @@ public interface DedupFile {
 
 	public abstract void truncate(long length) throws IOException;
 
-
-	public abstract void truncate(long length, boolean propigateEvent) throws IOException;
-	
-	
-	
+	public abstract void truncate(long length, boolean propigateEvent)
+			throws IOException;
 
 }

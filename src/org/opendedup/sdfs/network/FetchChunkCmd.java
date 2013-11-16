@@ -31,10 +31,11 @@ public class FetchChunkCmd implements IOCmd {
 		os.flush();
 		int size = is.readInt();
 		if (size == -1) {
-			throw new IOException("could not find chunk " + StringUtils.getHexString(hash));
+			throw new IOException("could not find chunk "
+					+ StringUtils.getHexString(hash));
 		}
-		if(size != Main.CHUNK_LENGTH)
-			throw new IOException("invalid chunk length " +size);
+		if (size != Main.CHUNK_LENGTH)
+			throw new IOException("invalid chunk length " + size);
 		else {
 			chunk = new byte[size];
 		}

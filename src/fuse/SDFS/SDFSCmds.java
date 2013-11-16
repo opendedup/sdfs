@@ -2,7 +2,6 @@ package fuse.SDFS;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,7 +44,7 @@ public class SDFSCmds {
 			"user.dse.maxsize" };
 
 	public static final String[] cmdDes = { "", "", "", "", "", "", "", "", "",
-			"", "", "", "", "", "", "", "", "", ""};
+			"", "", "", "", "", "", "", "", "", "" };
 
 	/*
 	 * public static final String[] cmdDes = {
@@ -255,8 +254,6 @@ public class SDFSCmds {
 		}
 	}
 
-	
-
 	private String optimize(String srcPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
@@ -297,8 +294,12 @@ public class SDFSCmds {
 			return "ERROR Snapshot Failed: destination [" + dstPath
 					+ "] already exists";
 		try {
-			MetaFileStore.snapshot(f.getPath(), nf.getPath(), false, SDFSEvent.snapEvent("Taking Snapshot of [" + srcPath
-					+ "] " + "Destination [" + dstPath + "]", f));
+			MetaFileStore.snapshot(
+					f.getPath(),
+					nf.getPath(),
+					false,
+					SDFSEvent.snapEvent("Taking Snapshot of [" + srcPath + "] "
+							+ "Destination [" + dstPath + "]", f));
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
 		} catch (IOException e) {

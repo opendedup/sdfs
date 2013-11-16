@@ -33,7 +33,7 @@ public enum StorageUnit {
 			return EXABYTE;
 		}
 	}
-	
+
 	public static StorageUnit of(final long number) {
 		final long n = number > 0 ? -number : number;
 		if (n > -(1L << 10)) {
@@ -56,7 +56,7 @@ public enum StorageUnit {
 	public String format(double number) {
 		return nf.format(number / divider) + " " + symbol;
 	}
-	
+
 	public String format(long number) {
 		return nf.format(number / divider) + " " + symbol;
 	}

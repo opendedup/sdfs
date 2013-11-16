@@ -7,9 +7,7 @@ import java.nio.ByteBuffer;
 
 import org.opendedup.hashing.HashFunctionPool;
 
-
 public class SparseDataChunk implements Serializable {
-
 
 	private static final long serialVersionUID = 2355100719332694545L;
 	private boolean doop;
@@ -17,7 +15,7 @@ public class SparseDataChunk implements Serializable {
 	private boolean localData = false;
 	int currentpos = 1;
 	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
-	private byte [] hashlocs;
+	private byte[] hashlocs;
 	private long fpos;
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
@@ -38,12 +36,12 @@ public class SparseDataChunk implements Serializable {
 			this.localData = false;
 		else
 			this.localData = true;
-		hashlocs = new byte [8];
+		hashlocs = new byte[8];
 		buf.get(hashlocs);
 	}
 
 	public SparseDataChunk(boolean doop, byte[] hash, boolean localData,
-			byte [] hashlocs) {
+			byte[] hashlocs) {
 		this.doop = doop;
 		this.hash = hash;
 		this.localData = localData;
@@ -57,8 +55,8 @@ public class SparseDataChunk implements Serializable {
 	public byte[] getHash() {
 		return hash;
 	}
-	
-	public void setHashLoc(byte [] hashlocs) {
+
+	public void setHashLoc(byte[] hashlocs) {
 		this.currentpos = 1;
 		this.hashlocs = hashlocs;
 	}
@@ -85,20 +83,20 @@ public class SparseDataChunk implements Serializable {
 	public void setLocalData(boolean local) {
 		this.localData = local;
 	}
-	
-	public byte [] getHashLoc() {
-		if(this.hashlocs[1] > 0)
+
+	public byte[] getHashLoc() {
+		if (this.hashlocs[1] > 0)
 			this.hashlocs[0] = 0;
 		return this.hashlocs;
 	}
-	
+
 	public synchronized void addHashLoc(byte loc) {
-		if(currentpos <this.hashlocs.length) {
+		if (currentpos < this.hashlocs.length) {
 			this.hashlocs[currentpos] = loc;
 			currentpos++;
 		}
 	}
-	
+
 	public int getCopies() {
 		int ncopies = 0;
 		for (int i = 1; i < 8; i++) {
@@ -108,11 +106,11 @@ public class SparseDataChunk implements Serializable {
 		}
 		return ncopies;
 	}
-	
+
 	public void resetHashLoc() {
-		hashlocs = new byte [8];
+		hashlocs = new byte[8];
 		hashlocs[0] = -1;
-		currentpos=1;
+		currentpos = 1;
 	}
 
 	public long getFpos() {

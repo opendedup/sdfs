@@ -20,7 +20,8 @@ public class ImportArchiveCmd implements Runnable {
 	SDFSEvent evt;
 
 	public Element getResult(String archive, String dest, String server,
-			String password, int port, int maxSz,boolean useSSL) throws IOException {
+			String password, int port, int maxSz, boolean useSSL)
+			throws IOException {
 		this.useSSL = useSSL;
 		return importArchive(archive, dest, server, password, port, maxSz);
 	}
@@ -34,10 +35,10 @@ public class ImportArchiveCmd implements Runnable {
 		this.port = port;
 		this.maxSz = maxSz;
 
-		evt = SDFSEvent.importEvent("Importing " + archive + " from "
-				+ server + ":" + port + " to " + dest);
+		evt = SDFSEvent.importEvent("Importing " + archive + " from " + server
+				+ ":" + port + " to " + dest);
 		evt.curCt = 0;
-		evt.maxCt =2;
+		evt.maxCt = 2;
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -46,15 +47,14 @@ public class ImportArchiveCmd implements Runnable {
 			throw new IOException(e);
 		}
 	}
-	
 
 	@Override
 	public void run() {
 		String sc = " not successful";
 		try {
 
-			new ArchiveImporter().importArchive(archive, dest, server, password,
-					port, maxSz, evt,useSSL);
+			new ArchiveImporter().importArchive(archive, dest, server,
+					password, port, maxSz, evt, useSSL);
 			sc = "successful";
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(

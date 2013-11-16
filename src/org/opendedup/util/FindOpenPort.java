@@ -58,8 +58,8 @@ public class FindOpenPort {
 		return port;
 
 	}
-	 
-	public static void main(String [] args) {
+
+	public static void main(String[] args) {
 		System.out.println(pickFreePort(6442));
 	}
 

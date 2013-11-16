@@ -2,7 +2,6 @@ package fuse.SDFS;
 
 import java.io.File;
 
-
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -24,21 +23,15 @@ import fuse.FuseMount;
 
 public class MountSDFS {
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
-	
+
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
 				"o",
 				true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
-		options.addOption(
-				"d",
-				false,
-				"debug output");
-		options.addOption(
-				"s",
-				false,
-				"Run single threaded");
+		options.addOption("d", false, "debug output");
+		options.addOption("s", false, "Run single threaded");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -46,14 +39,17 @@ public class MountSDFS {
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("c", false,
 				"sdfs volume will be compacted and then exit");
-		options.addOption("forcecompact", false,
-				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
-		options.addOption("rv", true, "comma separated list of remote volumes that should also be accounted for when doing garbage collection. " +
-				"If not entered the volume will attempt to identify other volumes in the cluster.");
-		options.addOption("h", false, "displays available options");
 		options.addOption(
-				"nossl",
+				"forcecompact",
 				false,
+				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
+		options.addOption(
+				"rv",
+				true,
+				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
+						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
+		options.addOption("h", false, "displays available options");
+		options.addOption("nossl", false,
 				"If set ssl will not be used sdfscli traffic.");
 		return options;
 	}
@@ -78,9 +74,10 @@ public class MountSDFS {
 		if (cmd.hasOption("s")) {
 			fal.add("-s");
 		}
-		if(cmd.hasOption("rv")) {
-			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),",");
-			while(st.hasMoreTokens()) {
+		if (cmd.hasOption("rv")) {
+			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
+					",");
+			while (st.hasMoreTokens()) {
 				volumes.add(st.nextToken());
 			}
 		}
@@ -95,7 +92,7 @@ public class MountSDFS {
 		String volname = "SDFS";
 		if (cmd.hasOption("c")) {
 			Main.runCompact = true;
-			if(cmd.hasOption("forcecompact"))
+			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
 		if (cmd.hasOption("v")) {
@@ -127,11 +124,9 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		if(cmd.hasOption("nossl")) {
+		if (cmd.hasOption("nossl")) {
 			useSSL = false;
-	}
-
-		
+		}
 
 		if (volumeConfigFile == null) {
 			System.out
@@ -144,7 +139,7 @@ public class MountSDFS {
 		if (OSValidator.isWindows())
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,volumes);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
@@ -164,17 +159,17 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("big_writes,allow_other,fsname=sdfs:"+volumeConfigFile+":"+ Main.sdfsCliPort);
+			fal.add("big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
+					+ ":" + Main.sdfsCliPort);
 		}
 		try {
 			String[] sFal = new String[fal.size()];
 			fal.toArray(sFal);
 			for (int i = 0; i < sFal.length; i++) {
-				SDFSLogger.getLog().info("Mount Option : " +sFal[i]);
+				SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
 			}
-			FuseMount.mount(
-					sFal,
-					new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
+			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
+					Main.volumeMountPoint), log);
 			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();

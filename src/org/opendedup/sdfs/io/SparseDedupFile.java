@@ -309,10 +309,12 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				byte[] hashloc = null;
 				boolean doop = false;
-				byte [] hash = null;
+				byte[] hash = null;
 				if (writeBuffer.isBatchProcessed()) {
 					hash = writeBuffer.getHash();
-					hashloc = HCServiceProxy.writeChunk(hash, writeBuffer.getFlushedBuffer(), writeBuffer.getHashLoc());
+					hashloc = HCServiceProxy.writeChunk(hash,
+							writeBuffer.getFlushedBuffer(),
+							writeBuffer.getHashLoc());
 				} else {
 					AbstractHashEngine hc = hashPool.borrowObject();
 					try {
@@ -322,13 +324,11 @@ public class SparseDedupFile implements DedupFile {
 					} finally {
 						hashPool.returnObject(hc);
 					}
-					
 
 					hashloc = HCServiceProxy.writeChunk(hash,
 							writeBuffer.getFlushedBuffer(),
 							writeBuffer.getLength(), writeBuffer.capacity(),
 							mf.isDedup());
-					
 
 				}
 				if (hashloc[1] == 0)
@@ -341,13 +341,11 @@ public class SparseDedupFile implements DedupFile {
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
 				if (!doop) {
-					if (writeBuffer.isNewChunk()
-							|| writeBuffer.isPrevDoop()) {
+					if (writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
 						mf.getIOMonitor().addActualBytesWritten(
 								writeBuffer.capacity(), true);
 					}
-					if (writeBuffer.isPrevDoop()
-							&& !writeBuffer.isNewChunk()) {
+					if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk()) {
 						mf.getIOMonitor().removeDuplicateBlock(true);
 					}
 				}

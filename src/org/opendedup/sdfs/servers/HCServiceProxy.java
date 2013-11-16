@@ -22,6 +22,7 @@ import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 //import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
+import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
@@ -45,11 +46,18 @@ public class HCServiceProxy {
 			.newBuilder().maximumSize(cacheSize).concurrencyLevel(72)
 			.build(new CacheLoader<ByteArrayWrapper, byte[]>() {
 				public byte[] load(ByteArrayWrapper key) throws IOException {
+					if (Main.DSEClusterDirectIO) {
+						DirectFetchChunkCmd cmd = new DirectFetchChunkCmd(
+								key.data, key.hashloc);
+						cmd.executeCmd(socket);
+						return cmd.getChunk();
+					} else {
+						FetchChunkCmd cmd = new FetchChunkCmd(key.data,
+								key.hashloc);
+						cmd.executeCmd(socket);
+						return cmd.getChunk();
+					}
 
-					DirectFetchChunkCmd cmd = new DirectFetchChunkCmd(key.data,
-							key.hashloc);
-					cmd.executeCmd(socket);
-					return cmd.getChunk();
 				}
 			});
 
@@ -169,6 +177,8 @@ public class HCServiceProxy {
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
 			byte[] hashloc) throws IOException {
+		if (Main.DSEClusterDirectIO)
+			directWriteChunk(hash, aContents, hashloc);
 		int ncopies = 0;
 		for (int i = 1; i < 8; i++) {
 			if (hashloc[i] > (byte) 0) {
@@ -197,31 +207,44 @@ public class HCServiceProxy {
 
 	}
 
-	/*
-	 * public static byte[] writeChunk(byte[] hash, byte[] aContents, byte[]
-	 * hashloc) throws IOException { int ncopies = 0; for (int i = 1; i < 8;
-	 * i++) { if (hashloc[i] > (byte) 0) { ncopies++; } } if (ncopies >=
-	 * Main.volume.getClusterCopies()) { return hashloc; } else if (ncopies > 0)
-	 * { byte[] ignoredHosts = new byte[ncopies]; for (int i = 0; i < ncopies;
-	 * i++) ignoredHosts[i] = hashloc[i + 1]; DirectWriteHashCmd cmd = new
-	 * DirectWriteHashCmd(hash, aContents, aContents.length, false,
-	 * Main.volume.getClusterCopies(), ignoredHosts); cmd.executeCmd(socket); //
-	 * SDFSLogger.getLog().debug("wrote data when found some but not all");
-	 * return cmd.reponse();
-	 * 
-	 * } else { DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
-	 * aContents.length, false, Main.volume.getClusterCopies());
-	 * cmd.executeCmd(socket);
-	 * //SDFSLogger.getLog().debug("wrote data when found none");
-	 * if(cmd.getExDn() > 0) { SDFSLogger.getLog().warn(
-	 * "Was unable to write to all storage nodes, trying again"); cmd = new
-	 * DirectWriteHashCmd(hash, aContents, aContents.length, false,
-	 * Main.volume.getClusterCopies(), cmd.reponse()); }
-	 * 
-	 * return cmd.reponse(); }
-	 * 
-	 * }
-	 */
+	public static byte[] directWriteChunk(byte[] hash, byte[] aContents,
+			byte[] hashloc) throws IOException {
+		int ncopies = 0;
+		for (int i = 1; i < 8; i++) {
+			if (hashloc[i] > (byte) 0) {
+				ncopies++;
+			}
+		}
+		if (ncopies >= Main.volume.getClusterCopies()) {
+			return hashloc;
+		} else if (ncopies > 0) {
+			byte[] ignoredHosts = new byte[ncopies];
+			for (int i = 0; i < ncopies; i++)
+				ignoredHosts[i] = hashloc[i + 1];
+			DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
+					aContents.length, false, Main.volume.getClusterCopies(),
+					ignoredHosts);
+			cmd.executeCmd(socket); //
+			SDFSLogger.getLog().debug("wrote data when found some but not all");
+			return cmd.reponse();
+
+		} else {
+			DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
+					aContents.length, false, Main.volume.getClusterCopies());
+			cmd.executeCmd(socket);
+			// SDFSLogger.getLog().debug("wrote data when found none");
+			if (cmd.getExDn() > 0) {
+				SDFSLogger
+						.getLog()
+						.warn("Was unable to write to all storage nodes, trying again");
+				cmd = new DirectWriteHashCmd(hash, aContents, aContents.length,
+						false, Main.volume.getClusterCopies(), cmd.reponse());
+			}
+
+			return cmd.reponse();
+		}
+
+	}
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean sendChunk) throws IOException,
