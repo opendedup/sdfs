@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.ClusterRedundancyCheck;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
@@ -80,6 +81,7 @@ public class ArchiveImporter {
 
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
 						+ sdest, server, password, port, maxSz, evt, useSSL);
+				
 				imp.runImport();
 				if (imp.isCorrupt()) {
 					// evt.endEvent("Import failed for " + srcArchive +
@@ -98,6 +100,9 @@ public class ArchiveImporter {
 					throw new IOException(
 							"uable to import files: There are files that are missing blocks");
 				} else {
+					if(!Main.chunkStoreLocal);
+						new ClusterRedundancyCheck(ievt,new File(Main.volume.getPath() + File.separator
+								+ sdest));
 					commitImport(Main.volume.getPath() + File.separator + dest,
 							Main.volume.getPath() + File.separator + sdest);
 					DocumentBuilderFactory factory = DocumentBuilderFactory

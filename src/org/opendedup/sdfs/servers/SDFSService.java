@@ -31,10 +31,10 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start() throws Exception {
+	public void start(boolean useSSL) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
 		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
-		MgmtWebServer.start();
+		MgmtWebServer.start(useSSL);
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
 		try {

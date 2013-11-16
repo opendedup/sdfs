@@ -40,7 +40,7 @@ class tWeighting {
 
 		List<tWeighting> weightings = new ArrayList<tWeighting>();
 		weightings.add(new tWeighting(0, 10));
-		weightings.add(new tWeighting(1, 1));
+		weightings.add(new tWeighting(1, 5));
 		weightings.add(new tWeighting(2, 2));
 		int zct = 0;
 		int oct = 0;

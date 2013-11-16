@@ -19,12 +19,12 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.io.SparseDataChunk;
 
-public class BatchHashExistsCmd implements IOClientCmd {
-	List<SparseDataChunk> hashes;
+public class BatchWriteHashCmd implements IOClientCmd {
+	ArrayList<SparseDataChunk> hashes;
 	boolean exists = false;
 	RequestOptions opts = null;
 
-	public BatchHashExistsCmd(List<SparseDataChunk> hashes) {
+	public BatchWriteHashCmd(ArrayList<SparseDataChunk> hashes) {
 		this.hashes = hashes;
 
 	}
@@ -34,7 +34,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 		opts = new RequestOptions(ResponseMode.GET_ALL,
 				Main.ClusterRSPTimeout, true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.NO_FC);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
 		try {
 		byte [] ar =Util.objectToByteBuffer(hashes);
@@ -47,8 +47,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 			RspList<Object> lst=soc.disp.castMessage(servers,
 					new Message(null, null, buf.array()), opts);
 			for(SparseDataChunk ck : hashes) {
-				if(ck != null)
-					ck.resetHashLoc();
+				ck.resetHashLoc();
 			}
 			for(Rsp<Object> rsp : lst) {
 				if(rsp.hasException()) {
@@ -66,8 +65,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 						for(int i = 0; i< rst.size(); i++) {
 							boolean exists = rst.get(i);
 							if(exists) {
-								if(hashes.get(i) != null)
-									this.hashes.get(i).addHashLoc(id);
+								this.hashes.get(i).addHashLoc(id);
 							}
 						}
 					}
@@ -80,7 +78,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 		}
 	}
 
-	public List<SparseDataChunk> getHashes() {
+	public ArrayList<SparseDataChunk> getHashes() {
 		return this.hashes;
 	}
 	

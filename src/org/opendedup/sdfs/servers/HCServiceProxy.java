@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -19,9 +18,10 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
-import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
+import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 //import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
+import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
@@ -46,7 +46,7 @@ public class HCServiceProxy {
 			.build(new CacheLoader<ByteArrayWrapper, byte[]>() {
 				public byte[] load(ByteArrayWrapper key) throws IOException {
 
-					FetchChunkCmd cmd = new FetchChunkCmd(key.data,
+					DirectFetchChunkCmd cmd = new DirectFetchChunkCmd(key.data,
 							key.hashloc);
 					cmd.executeCmd(socket);
 					return cmd.getChunk();
@@ -55,7 +55,8 @@ public class HCServiceProxy {
 
 	// private static boolean initialized = false;
 
-	public static synchronized void processHashClaims(SDFSEvent evt) throws IOException {
+	public static synchronized void processHashClaims(SDFSEvent evt)
+			throws IOException {
 		if (Main.chunkStoreLocal)
 			hcService.processHashClaims(evt);
 		else {
@@ -72,10 +73,9 @@ public class HCServiceProxy {
 	public static HashChunk fetchHashChunk(byte[] hash) throws IOException {
 		return hcService.fetchChunk(hash);
 	}
-	
 
-	public static synchronized long removeStailHashes(long ms, boolean forceRun,
-			SDFSEvent evt) throws IOException {
+	public static synchronized long removeStailHashes(long ms,
+			boolean forceRun, SDFSEvent evt) throws IOException {
 		if (Main.chunkStoreLocal)
 			return hcService.removeStailHashes(ms, forceRun, evt);
 		else {
@@ -110,8 +110,8 @@ public class HCServiceProxy {
 								+ Main.DSEClusterID + " config="
 								+ Main.DSEClusterConfig);
 				socket = new DSEClientSocket(Main.DSEClusterConfig,
-						Main.DSEClusterID,volumes);
-				cs= socket;
+						Main.DSEClusterID, volumes);
+				cs = socket;
 				socket.startGCIfNone();
 			}
 		} catch (Exception e) {
@@ -168,6 +168,62 @@ public class HCServiceProxy {
 	}
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
+			byte[] hashloc) throws IOException {
+		int ncopies = 0;
+		for (int i = 1; i < 8; i++) {
+			if (hashloc[i] > (byte) 0) {
+				ncopies++;
+			}
+		}
+		if (ncopies >= Main.volume.getClusterCopies()) {
+			return hashloc;
+		} else if (ncopies > 0) {
+			byte[] ignoredHosts = new byte[ncopies];
+			for (int i = 0; i < ncopies; i++)
+				ignoredHosts[i] = hashloc[i + 1];
+			WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+					Main.volume.getClusterCopies(), ignoredHosts);
+			cmd.executeCmd(socket);
+			SDFSLogger.getLog().debug("wrote data when found some but not all");
+			return cmd.reponse();
+		} else {
+			WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+					Main.volume.getClusterCopies());
+			cmd.executeCmd(socket);
+			SDFSLogger.getLog().debug("wrote data when found none");
+
+			return cmd.reponse();
+		}
+
+	}
+
+	/*
+	 * public static byte[] writeChunk(byte[] hash, byte[] aContents, byte[]
+	 * hashloc) throws IOException { int ncopies = 0; for (int i = 1; i < 8;
+	 * i++) { if (hashloc[i] > (byte) 0) { ncopies++; } } if (ncopies >=
+	 * Main.volume.getClusterCopies()) { return hashloc; } else if (ncopies > 0)
+	 * { byte[] ignoredHosts = new byte[ncopies]; for (int i = 0; i < ncopies;
+	 * i++) ignoredHosts[i] = hashloc[i + 1]; DirectWriteHashCmd cmd = new
+	 * DirectWriteHashCmd(hash, aContents, aContents.length, false,
+	 * Main.volume.getClusterCopies(), ignoredHosts); cmd.executeCmd(socket); //
+	 * SDFSLogger.getLog().debug("wrote data when found some but not all");
+	 * return cmd.reponse();
+	 * 
+	 * } else { DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
+	 * aContents.length, false, Main.volume.getClusterCopies());
+	 * cmd.executeCmd(socket);
+	 * //SDFSLogger.getLog().debug("wrote data when found none");
+	 * if(cmd.getExDn() > 0) { SDFSLogger.getLog().warn(
+	 * "Was unable to write to all storage nodes, trying again"); cmd = new
+	 * DirectWriteHashCmd(hash, aContents, aContents.length, false,
+	 * Main.volume.getClusterCopies(), cmd.reponse()); }
+	 * 
+	 * return cmd.reponse(); }
+	 * 
+	 * }
+	 */
+
+	public static byte[] writeChunk(byte[] hash, byte[] aContents,
 			int position, int len, boolean sendChunk) throws IOException,
 			HashtableFullException {
 		boolean doop = false;
@@ -187,32 +243,30 @@ public class HCServiceProxy {
 				if (hcmd.meetsRedundancyRequirements()) {
 					SDFSLogger.getLog().debug("found all");
 					return hcmd.getResponse();
-				}
-				else if (hcmd.exists()) {
-					byte [] ignoredHosts = new byte[hcmd.responses()];
-					for(int i = 0; i<hcmd.responses();i++)
-						ignoredHosts[i] = hcmd.getResponse()[i+1];
-					WriteHashCmd cmd = new WriteHashCmd(hash, aContents,
-							 false,
+				} else if (hcmd.exists()) {
+					byte[] ignoredHosts = new byte[hcmd.responses()];
+					for (int i = 0; i < hcmd.responses(); i++)
+						ignoredHosts[i] = hcmd.getResponse()[i + 1];
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies(), ignoredHosts);
 					cmd.executeCmd(socket);
-					SDFSLogger.getLog().debug("wrote data when found some but not all");
+					SDFSLogger.getLog().debug(
+							"wrote data when found some but not all");
 					return cmd.reponse();
 				} else {
-					WriteHashCmd cmd = new WriteHashCmd(hash, aContents,
-							 false,
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies());
 					cmd.executeCmd(socket);
 					SDFSLogger.getLog().debug("wrote data when found none");
-					
-					//if(cmd.getExDn() > 0) {
-					//	SDFSLogger.getLog().warn("Was unable to write to all storage nodes.");
-						/*
-						cmd = new DirectWriteHashCmd(hash, aContents,
-								aContents.length, false,
-								Main.volume.getClusterCopies(), cmd.reponse());
-								*/
-					//}
+
+					// if(cmd.getExDn() > 0) {
+					// SDFSLogger.getLog().warn("Was unable to write to all storage nodes.");
+					/*
+					 * cmd = new DirectWriteHashCmd(hash, aContents,
+					 * aContents.length, false, Main.volume.getClusterCopies(),
+					 * cmd.reponse());
+					 */
+					// }
 					return cmd.reponse();
 				}
 			} catch (Exception e1) {
@@ -240,12 +294,19 @@ public class HCServiceProxy {
 						Main.CHUNK_LENGTH, false);
 			}
 		} else {
+
 			try {
-				WriteHashCmd cmd = new WriteHashCmd(hash, aContents,
-						false,
-						Main.volume.getClusterCopies(), ignoredHosts);
-				cmd.executeCmd(socket);
-				return cmd.reponse();
+				if (ignoredHosts != null) {
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+							Main.volume.getClusterCopies(), ignoredHosts);
+					cmd.executeCmd(socket);
+					return cmd.reponse();
+				} else {
+					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+							Main.volume.getClusterCopies());
+					cmd.executeCmd(socket);
+					return cmd.reponse();
+				}
 			} catch (Exception e1) {
 				// SDFSLogger.getLog().fatal("Unable to write chunk " + hash,
 				// e1);
@@ -269,32 +330,30 @@ public class HCServiceProxy {
 		}
 		return exists;
 	}
-	
-	public static void runFDisk(SDFSEvent evt) throws FDiskException, IOException {
-		if(Main.chunkStoreLocal)
+
+	public static void runFDisk(SDFSEvent evt) throws FDiskException,
+			IOException {
+		if (Main.chunkStoreLocal)
 			new FDisk(evt);
 		else {
 			FDiskCmd cmd = new FDiskCmd();
 			cmd.executeCmd(cs);
 			List<SDFSEvent> events = cmd.getResults();
-			for(SDFSEvent event:events) {
+			for (SDFSEvent event : events) {
 				evt.addChild(event.getChildren().get(0));
 			}
-			
+
 		}
 	}
 
-	public static void fetchChunks(ArrayList<String> hashes, String server,
-			String password, int port, boolean useSSL) throws IOException,
-			HashtableFullException {
-		if (Main.chunkStoreLocal) {
-			HCServiceProxy.hcService.remoteFetchChunks(hashes, server,
-					password, port, useSSL);
-		} else {
-			throw new IllegalStateException(
-					"not implemented for remote chunkstores");
-		}
-	}
+	/*
+	 * public static void fetchChunks(ArrayList<String> hashes, String server,
+	 * String password, int port, boolean useSSL) throws IOException,
+	 * HashtableFullException { if (Main.chunkStoreLocal) {
+	 * HCServiceProxy.hcService.remoteFetchChunks(hashes, server, password,
+	 * port, useSSL); } else { throw new IllegalStateException(
+	 * "not implemented for remote chunkstores"); } }
+	 */
 
 	public static byte[] hashExists(byte[] hash, boolean findAll)
 			throws IOException, HashtableFullException {
@@ -314,8 +373,9 @@ public class HCServiceProxy {
 			return cmd.getResponse();
 		}
 	}
-	
-	public static ArrayList<SparseDataChunk> batchHashExists(ArrayList<SparseDataChunk> hashes) throws IOException {
+
+	public static List<SparseDataChunk> batchHashExists(
+			List<SparseDataChunk> hashes) throws IOException {
 		if (Main.chunkStoreLocal) {
 			throw new IOException("not implemented for localstore");
 
@@ -325,9 +385,9 @@ public class HCServiceProxy {
 			return cmd.getHashes();
 		}
 	}
-	
-	public static byte[] hashExists(byte[] hash, boolean findAll,byte numtowaitfor)
-			throws IOException, HashtableFullException {
+
+	public static byte[] hashExists(byte[] hash, boolean findAll,
+			byte numtowaitfor) throws IOException, HashtableFullException {
 		byte[] exists = new byte[8];
 		if (Main.chunkStoreLocal) {
 			if (HCServiceProxy.hcService.hashExists(hash))
@@ -338,8 +398,7 @@ public class HCServiceProxy {
 			}
 
 		} else {
-			HashExistsCmd cmd = new HashExistsCmd(hash, findAll,
-					numtowaitfor);
+			HashExistsCmd cmd = new HashExistsCmd(hash, findAll, numtowaitfor);
 			cmd.executeCmd(socket);
 			return cmd.getResponse();
 		}
@@ -353,7 +412,7 @@ public class HCServiceProxy {
 		} else {
 			ByteArrayWrapper wrapper = new ByteArrayWrapper(hash, hashloc);
 			try {
-				byte [] _bz = chunks.get(wrapper);
+				byte[] _bz = chunks.get(wrapper);
 				byte[] bz = org.bouncycastle.util.Arrays.clone(_bz);
 				return bz;
 			} catch (ExecutionException e) {

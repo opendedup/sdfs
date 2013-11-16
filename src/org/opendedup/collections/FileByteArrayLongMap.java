@@ -78,12 +78,13 @@ public class FileByteArrayLongMap implements AbstractShard {
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
 			keys.get(key);
-			iterPos++;
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 				this.mapped.set(iterPos);
 				return key;
+			} else {
+				this.mapped.clear(iterPos);
 			}
-			
+			iterPos++;
 		} 
 		return null;
 	}
@@ -150,11 +151,12 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 	private void recreateMap() {
 		mapped = new BitSet(size);
+		mapped.clear();
 		this.iterInit();
 		byte[] key = this.nextKey();
 		while (key != null)
 			key = this.nextKey();
-		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path);
+		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + mapped.cardinality());
 	}
 
 	/* (non-Javadoc)

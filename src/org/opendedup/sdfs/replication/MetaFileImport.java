@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
 import java.io.Serializable;
 
 
@@ -13,6 +14,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -22,7 +24,7 @@ import org.opendedup.util.StringUtils;
 public class MetaFileImport implements Serializable{
 	private static final long serialVersionUID = 2281680761909041919L;
 	private long filesProcessed = 0;
-	private transient ArrayList<String> hashes = null;
+	private transient ArrayList<byte[]> hashes = null;
 	private int MAX_SZ = ((30*1024*1024)/Main.CHUNK_LENGTH);
 	boolean corruption = false;
 	private long entries = 0;
@@ -32,20 +34,20 @@ public class MetaFileImport implements Serializable{
 	private String path = null;
 	private transient String password= null;
 	private int port = 2222;
-	private boolean useSSL;
 	long startTime = 0;
 	long endTime = 0;
 	BlockImportEvent levt = null;
 	private boolean closed = false;
+	private boolean useSSL;
 	
 
 	protected MetaFileImport(String path,String server,String password,int port,int maxSz,SDFSEvent evt,boolean useSSL) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
 		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ,evt);
-		this.useSSL = useSSL;
+		//this.useSSL = useSSL;
 		if(maxSz >0)
 			MAX_SZ = (maxSz * 1024*1024)/Main.CHUNK_LENGTH;
-		hashes = new ArrayList<String>();
+		hashes = new ArrayList<byte[]>();
 		startTime = System.currentTimeMillis();
 		File f = new File(path);
 		levt.maxCt = FileCounts.getDBFileSize(f, false);
@@ -53,6 +55,7 @@ public class MetaFileImport implements Serializable{
 		this.password = password;
 		this.port = port;
 		this.path = path;
+		this.useSSL = useSSL;
 		
 	}
 	
@@ -65,7 +68,7 @@ public class MetaFileImport implements Serializable{
 		this.traverse(new File(this.path));
 		if(hashes.size() != 0) {
 			try {
-				HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
+				ProcessBatchGetBlocks.runCmd(hashes,server,port,password,useSSL);
 				this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 				levt.bytesImported = this.bytesTransmitted;
 			} catch(Exception e) {
@@ -132,7 +135,7 @@ public class MetaFileImport implements Serializable{
 									.getHash());
 							mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH, true);
 							if (!exists) {
-								hashes.add(StringUtils.getHexString(ck.getHash()));
+								hashes.add(ck.getHash());
 								entries++;
 								levt.blocksImported = entries;
 								mf.getIOMonitor().addActualBytesWritten(Main.CHUNK_LENGTH, true);
@@ -142,12 +145,12 @@ public class MetaFileImport implements Serializable{
 							if(hashes.size()>=MAX_SZ) {
 								try {
 									SDFSLogger.getLog().debug("fetching " + hashes.size() + " blocks");
-									HCServiceProxy.fetchChunks(hashes,server,password,port,useSSL);
+									ProcessBatchGetBlocks.runCmd(hashes,server,port,password,useSSL);
 									SDFSLogger.getLog().debug("fetched " + hashes.size() + " blocks");
 									this.bytesTransmitted = this.bytesTransmitted + (hashes.size() * Main.CHUNK_LENGTH);
 									levt.bytesImported = this.bytesTransmitted;
 									hashes = null;
-									hashes = new ArrayList<String>();
+									hashes = new ArrayList<byte[]>();
 								} catch(Exception e) {
 									SDFSLogger.getLog().error("Corruption Suspected on import",e);
 									corruption = true;

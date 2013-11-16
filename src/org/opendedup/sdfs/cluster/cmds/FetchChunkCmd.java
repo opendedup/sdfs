@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 import org.jgroups.Address;
 import org.jgroups.Message;
@@ -24,8 +26,9 @@ public class FetchChunkCmd implements IOClientCmd {
 
 	public FetchChunkCmd(byte[] hash, byte[] hashlocs) {
 		this.hash = hash;
-		this.hashlocs = hashlocs;
-		opts = new RequestOptions(ResponseMode.GET_ALL,Main.ClusterRSPTimeout);
+		this.hashlocs = Arrays.copyOfRange(hashlocs, 1, hashlocs.length);
+		shuffleArray(this.hashlocs);
+		opts = new RequestOptions(ResponseMode.GET_ALL,Main.ClusterRSPTimeout,false);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
@@ -40,7 +43,7 @@ public class FetchChunkCmd implements IOClientCmd {
 		buf.put(NetworkCMDS.FETCH_CMD);
 		buf.putShort((short) hash.length);
 		buf.put(hash);
-		int pos = 1;
+		int pos = 0;
 		while (chunk == null) {
 			Address addr = null;
 			try {
@@ -74,5 +77,19 @@ public class FetchChunkCmd implements IOClientCmd {
 	public byte getCmdID() {
 		return NetworkCMDS.FETCH_CMD;
 	}
+	
+	private static Random rnd = new Random();
+	static void shuffleArray(byte[] ar)
+	  {
+	    
+	    for (int i = ar.length - 1; i > 1; i--)
+	    {
+	      int index = rnd.nextInt(i + 1);
+	      // Simple swap
+	      byte a = ar[index];
+	      ar[index] = ar[i];
+	      ar[i] = a;
+	    }
+	  }
 
 }

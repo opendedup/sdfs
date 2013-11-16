@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,7 @@ import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.cluster.cmds.StopGCMasterCmd;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class DSEClientSocket implements RequestHandler, MembershipListener,
@@ -59,8 +61,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	public DSEServer server = null;
 	public DSEServer[] servers = new DSEServer[200];
 	private ReentrantReadWriteLock ssl = new ReentrantReadWriteLock();
-	//public HashClientPool[] pools = new HashClientPool[200];
-	//private ReentrantReadWriteLock pl = new ReentrantReadWriteLock();
+	public HashClientPool[] pools = new HashClientPool[200];
+	private ReentrantReadWriteLock pl = new ReentrantReadWriteLock();
 	private ArrayList<DSEServer> sal = new ArrayList<DSEServer>();
 	private ArrayList<Address> saal = new ArrayList<Address>();
 	private ReentrantReadWriteLock sl = new ReentrantReadWriteLock();
@@ -74,6 +76,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	private boolean peermaster = false;
 	StandAloneGCScheduler gcscheduler = null;
 	public final ReentrantLock gcUpdateLock = new ReentrantLock();
+	public WeightedRandomServer wr = null;
 
 	public DSEClientSocket(String config, String clusterID,
 			ArrayList<String> remoteVolumes) throws Exception {
@@ -135,11 +138,99 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		SDFSLogger.getLog().debug("found [" + volumes.size() + "] volumes");
 
 	}
+	
+	public HashClientPool getPool(byte[] slist, int start) throws IOException {
+		ReadLock l = this.pl.readLock();
+		l.lock();
+		try {
+			for (int i = start; i < slist.length; i++) {
+				if (slist[i] > 0) {
+					HashClientPool svr = pools[slist[i]];
+					if (svr != null)
+						return svr;
+				}
+			}
+		} finally {
+			l.unlock();
+		}
+		throw new IOException("no pools available to fulfill request");
+	}
+	
+	public List<HashClientPool> getServerPools(byte max, byte[] ignoredHosts) {
+		ArrayList<HashClientPool> al = new ArrayList<HashClientPool>();
+		ReadLock l = this.sl.readLock();
+		l.lock();
+		try {
+			List<DSEServer> ss = this.wr.getServers(max, ignoredHosts);
+			for(DSEServer s : ss) {
+				al.add(pools[s.id]);
+			}
+			/*
+			if (Main.volume.isClusterRackAware() && sal.size() > 1) {
+				HashSet<String> usedRacks = new HashSet<String>();
+				if (sal.size() < max) {
+					for (DSEServer s : sal) {
+						if (!ignoreHost(s, ignoredHosts)
+								&& !usedRacks.contains(s.rack)) {
+							usedRacks.add(s.rack);
+							if(!pools[s.id].isSuspect())
+								al.add(pools[s.id]);
+						}
+					}
+				} else {
+					for (int i = 0; i < max; i++) {
+						DSEServer s = sal.get(i);
+						if (!ignoreHost(s, ignoredHosts)
+								&& !usedRacks.contains(s.rack)) {
+							usedRacks.add(s.rack);
+							if(!pools[s.id].isSuspect())
+								al.add(pools[s.id]);
+						}
+					}
+				}
+			}
+			if (al.size() < max) {
+				if (sal.size() < max) {
+					for (DSEServer s : sal) {
+						if (!ignoreHost(s, ignoredHosts))
+							al.add(pools[s.id]);
+					}
+				} else {
+					for (int i = 0; i < max; i++) {
+						DSEServer s = sal.get(i);
+						if (!ignoreHost(s, ignoredHosts))
+							al.add(pools[s.id]);
+					}
+				}
+			}
+			*/
+		} finally {
+			l.unlock();
+		}
+		return al;
+	}
+	
+	private boolean ignoreHost(DSEServer s, byte[] ignoredHosts) {
+		if (ignoredHosts == null)
+			return false;
+		else {
+			for (byte b : ignoredHosts) {
+				if (b == s.id)
+					return true;
+			}
+			return false;
+		}
+	}
 
 	public void close() {
 		this.closed = true;
 		channel.close();
 		disp.stop();
+	}
+	
+	private void setServerWeighting() {
+		this.wr = new WeightedRandomServer();
+		this.wr.init(sal);
 	}
 
 	public Object handle(Message msg) throws Exception {
@@ -176,8 +267,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						saal.remove(s.address);
 						saal.add(s.address);
 						Collections.sort(sal, new CustomComparator());
+						setServerWeighting();
 						l.unlock();
-						/*
 						l = this.pl.writeLock();
 						l.lock();
 						if (pools[s.id] == null) {
@@ -186,7 +277,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 							pools[s.id] = s.createPool();
 						}
 						l.unlock();
-						*/
 					} else if (s.serverType == DSEServer.CLIENT) {
 						WriteLock l = this.nl.writeLock();
 						l.lock();
@@ -240,6 +330,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = new Boolean(true);
 			break;
 		}
+		
 		case NetworkCMDS.RUN_CLAIM: {
 			SDFSLogger.getLog().debug("recieved claim chunks cmd");
 			rtrn = null;
@@ -297,6 +388,14 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	}
 
 	public List<Address> getServers(byte max, byte[] ignoredHosts) {
+		ReadLock l = this.sl.readLock();
+	l.lock();
+	try {
+		return this.wr.getAddresses(max, ignoredHosts);
+	}finally {
+		l.unlock();
+	}
+		/*
 		ArrayList<Address> al = new ArrayList<Address>();
 		ReadLock l = this.sl.readLock();
 		l.lock();
@@ -314,19 +413,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		l.unlock();
 		return al;
-	}
-
-	
-	private boolean ignoreHost(DSEServer s, byte[] ignoredHosts) {
-		if (ignoredHosts == null)
-			return false;
-		else {
-			for (byte b : ignoredHosts) {
-				if (b == s.id)
-					return true;
-			}
-			return false;
-		}
+		*/
 	}
 
 	public Address getServer(byte[] slist, int start) throws IOException {
@@ -505,6 +592,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l.lock();
 					sal.remove(s);
 					saal.remove(s.address);
+					setServerWeighting();
 					l.unlock();
 					l = this.nl.writeLock();
 					l.lock();
@@ -514,7 +602,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (s.volumeName != null)
 							volumes.put(s.volumeName, null);
 					}
-					/*
 					try {
 						pools[s.id].close();
 
@@ -526,7 +613,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						pools[s.id] = null;
 						l.unlock();
 					}
-					*/
 				}
 			}
 			if (sal.size() < Main.volume.getClusterCopies())
@@ -575,8 +661,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					saal.remove(s.address);
 					saal.add(s.address);
 					Collections.sort(sal, new CustomComparator());
+					setServerWeighting();
 					l.unlock();
-					/*
 					l = this.pl.writeLock();
 					l.lock();
 					if (pools[s.id] == null) {
@@ -584,7 +670,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						pools[s.id] = s.createPool();
 					}
 					l.unlock();
-					*/
 				} else if (s.serverType == DSEServer.CLIENT) {
 					l = this.nl.writeLock();
 					l.lock();
@@ -634,7 +719,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l.lock();
 					try {
 						servers[s.id] = s;
-						/*
 						Lock _pl = this.pl.writeLock();
 						_pl.lock();
 						try {
@@ -648,7 +732,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						} finally {
 							_pl.unlock();
 						}
-						*/
 
 					} finally {
 						l.unlock();
@@ -667,6 +750,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						}
 					}
 					Collections.sort(sal, new CustomComparator());
+					setServerWeighting();
 				} finally {
 					l.unlock();
 				}
@@ -797,10 +881,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					saal.remove(server.address);
 					saal.add(server.address);
 					Collections.sort(sal, new CustomComparator());
+					setServerWeighting();
 				} finally {
 					l.unlock();
 				}
-				/*
 				l = this.pl.writeLock();
 				l.lock();
 				try {
@@ -812,7 +896,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				} finally {
 					l.unlock();
 				}
-				*/
 
 			} else if (server.serverType == DSEServer.CLIENT) {
 				Lock l = this.nl.writeLock();

@@ -1,30 +1,43 @@
 package org.opendedup.sdfs.mgmt;
 
-import org.opendedup.hashing.HashFunctions;
-import org.opendedup.logging.SDFSLogger;
-
-import org.opendedup.sdfs.Main;
-
-import org.opendedup.util.FindOpenPort;
-import org.opendedup.util.XMLUtils;
-import org.simpleframework.http.core.Container;
-import org.simpleframework.transport.connect.Connection;
-import org.simpleframework.transport.connect.SocketConnection;
-import org.simpleframework.http.Path;
-import org.simpleframework.http.Response;
-import org.simpleframework.http.Request;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.opendedup.hashing.HashFunctions;
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
+import org.opendedup.util.FindOpenPort;
+import org.opendedup.util.KeyGenerator;
+import org.opendedup.util.XMLUtils;
+import org.simpleframework.http.Path;
+import org.simpleframework.http.Request;
+import org.simpleframework.http.Response;
+import org.simpleframework.http.core.Container;
+import org.simpleframework.transport.connect.Connection;
+import org.simpleframework.transport.connect.SocketConnection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -166,10 +179,10 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("cluster-dse-info")) {
+					} else if (cmd.equalsIgnoreCase("cluster-dse-info")) {
 						try {
-							Element msg = new GetClusterDSE().getResult(cmdOptions,
-									file);
+							Element msg = new GetClusterDSE().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -179,10 +192,10 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("cluster-volumes")) {
+					} else if (cmd.equalsIgnoreCase("cluster-volumes")) {
 						try {
-							Element msg = new GetRemoteVolumes().getResult(cmdOptions,
-									file);
+							Element msg = new GetRemoteVolumes().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -192,11 +205,10 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if (cmd.equalsIgnoreCase("cluster-volume-remove")) {
+					} else if (cmd.equalsIgnoreCase("cluster-volume-remove")) {
 						try {
-							new RemoveRemoteVolume().getResult(cmdOptions,
-									file);
+							new RemoveRemoteVolume()
+									.getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -205,11 +217,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if (cmd.equalsIgnoreCase("cluster-volume-add")) {
+					} else if (cmd.equalsIgnoreCase("cluster-volume-add")) {
 						try {
-							new AddRemoteVolume().getResult(cmdOptions,
-									file);
+							new AddRemoteVolume().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -218,11 +228,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
+					} else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
 						try {
-							new PromoteToGCMaster().getResult(cmdOptions,
-									file);
+							new PromoteToGCMaster().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -231,8 +239,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if (cmd.equalsIgnoreCase("open-files")) {
+					} else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
 							Element msg = new GetOpenFiles().getResult(
 									cmdOptions, file);
@@ -318,10 +325,11 @@ public class MgmtWebServer implements Container {
 								maxSz = Integer.parseInt(request.getQuery()
 										.get("maxsz"));
 							if (request.getQuery().containsKey("useSSL"))
-								useSSL = Boolean.parseBoolean(request.getQuery().get("useSSL"));
+								useSSL = Boolean.parseBoolean(request
+										.getQuery().get("useSSL"));
 							Element msg = new ImportArchiveCmd().getResult(
 									file, cmdOptions, server, password, port,
-									maxSz,useSSL);
+									maxSz, useSSL);
 
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
@@ -333,18 +341,30 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
+					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
+						byte [] rb = com.google.common.io.BaseEncoding.base64Url().decode(file);
+						byte[] rslt = new BatchGetBlocksCmd().getResult(rb
+								);
+						long time = System.currentTimeMillis();
+						response.set("Content-Type", "application/octet-stream");
+						response.set("Server", "SDFS Management Server");
+						response.setDate("Date", time);
+						response.setDate("Last-Modified", time);
+						response.getByteChannel().write(ByteBuffer.wrap(rslt));
+						response.getByteChannel().close();
 					} else if (cmd.equalsIgnoreCase("cancelimport")) {
 						try {
 							String uuid = request.getQuery().get("uuid");
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									new CancelImportArchiveCmd().getResult(uuid));
+									new CancelImportArchiveCmd()
+											.getResult(uuid));
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("archiveout")) {
+					} else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
 							Element msg = new ArchiveOutCmd().getResult(
 									cmdOptions, file);
@@ -416,13 +436,12 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if(cmd.equalsIgnoreCase("perfmon")) {
+					} else if (cmd.equalsIgnoreCase("perfmon")) {
 						String msg = new SetEnablePerfMonCmd().getResult(
 								cmdOptions, file);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", msg);
-					}
-					else if (cmd.equalsIgnoreCase("cleanstore")) {
+					} else if (cmd.equalsIgnoreCase("cleanstore")) {
 						try {
 							Element msg = new CleanStoreCmd().getResult(
 									cmdOptions, null);
@@ -434,7 +453,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("redundancyck")) {
+					} else if (cmd.equalsIgnoreCase("redundancyck")) {
 						try {
 							Element msg = new ClusterRedundancyCmd().getResult(
 									cmdOptions, null);
@@ -446,8 +465,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("event")) {
+					} else if (cmd.equalsIgnoreCase("event")) {
 						try {
 							String uuid = request.getQuery().get("uuid");
 							Element msg = new GetEvent().getResult(uuid);
@@ -472,17 +490,19 @@ public class MgmtWebServer implements Container {
 						}
 					}
 				}
-				String rsString = XMLUtils.toXMLString(doc);
-				PrintStream body = response.getPrintStream();
-				long time = System.currentTimeMillis();
+				if (!cmd.equalsIgnoreCase("batchgetblocks")) {
+					String rsString = XMLUtils.toXMLString(doc);
+					PrintStream body = response.getPrintStream();
+					long time = System.currentTimeMillis();
 
-				//SDFSLogger.getLog().debug(rsString);
-				response.set("Content-Type", "text/xml");
-				response.set("Server", "SDFS Management Server");
-				response.setDate("Date", time);
-				response.setDate("Last-Modified", time);
-				body.println(rsString);
-				body.close();
+					// SDFSLogger.getLog().debug(rsString);
+					response.set("Content-Type", "text/xml");
+					response.set("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					body.println(rsString);
+					body.close();
+				}
 			} else {
 				if (!auth) {
 					PrintStream body = response.getPrintStream();
@@ -538,8 +558,38 @@ public class MgmtWebServer implements Container {
 		}
 	}
 
-	public static void start() {
+	public static void start(boolean useSSL) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException, KeyManagementException {
 		if (Main.sdfsCliEnabled) {
+			if(useSSL) {
+				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+				String key = keydir + File.separator + "volume.keystore";
+				if(!new File(key).exists()) {
+					KeyGenerator.generateKey(new File(key));
+				}
+				FileInputStream keyFile = new FileInputStream(key); 
+				KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+				keyStore.load(keyFile, "sdfs".toCharArray());
+				// init KeyManagerFactory
+				KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
+				// init KeyManager
+				KeyManager keyManagers[] = keyManagerFactory.getKeyManagers();
+				// init the SSL context
+				SSLContext sslContext = SSLContext.getDefault();
+				sslContext.init(keyManagers, null, new SecureRandom());
+				// get the socket factory
+				//SSLServerSocketFactory socketFactory = sslContext.getServerSocketFactory();
+				Container container = new MgmtWebServer();
+				connection = new SocketConnection(container);
+				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
+				SocketAddress address = new InetSocketAddress(
+						Main.sdfsCliListenAddr, Main.sdfsCliPort);
+				connection.connect(address,sslContext);
+				SDFSLogger.getLog().info(
+						"###################### SDFSCLI SSL Management WebServer Started at "
+								+ address.toString()
+								+ " #########################");
+			} else {
 			try {
 				Container container = new MgmtWebServer();
 				connection = new SocketConnection(container);
@@ -555,6 +605,7 @@ public class MgmtWebServer implements Container {
 				SDFSLogger.getLog().error(
 						"unable to start Web Management Server", e);
 			}
+		}
 		}
 	}
 

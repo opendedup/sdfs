@@ -42,7 +42,7 @@ public class SparseDedupFile implements DedupFile {
 	public long lastSync = 0;
 	LongByteArrayMap bdb = null;
 	MessageDigest digest = null;
-	private static final HashFunctionPool hashPool = new HashFunctionPool(
+	public static final HashFunctionPool hashPool = new HashFunctionPool(
 			Main.writeThreads + 1);
 	protected static transient final ThreadPool pool = new ThreadPool(
 			Main.writeThreads + 1, 1024);
@@ -306,34 +306,48 @@ public class SparseDedupFile implements DedupFile {
 		if (writeBuffer == null)
 			return;
 		if (writeBuffer.isDirty()) {
-			AbstractHashEngine hc = hashPool.borrowObject();
-			byte[] hash = null;
 			try {
-				hash = hc.getHash(writeBuffer.getFlushedBuffer());
-			} catch (Exception e) {
-				throw new IOException(e);
-			} finally {
-				hashPool.returnObject(hc);
-			}
-			boolean doop = false;
-			try {
-				byte[] hashloc = HCServiceProxy.writeChunk(hash,
-						writeBuffer.getFlushedBuffer(),
-						writeBuffer.getLength(), writeBuffer.capacity(),
-						mf.isDedup());
-				if(hashloc[1] == 0)
-					throw new IOException("unable to write chunk hash location at 1 = " + hashloc[1]);
+				byte[] hashloc = null;
+				boolean doop = false;
+				byte [] hash = null;
+				if (writeBuffer.isBatchProcessed()) {
+					hash = writeBuffer.getHash();
+					hashloc = HCServiceProxy.writeChunk(hash, writeBuffer.getFlushedBuffer(), writeBuffer.getHashLoc());
+				} else {
+					AbstractHashEngine hc = hashPool.borrowObject();
+					try {
+						hash = hc.getHash(writeBuffer.getFlushedBuffer());
+					} catch (Exception e) {
+						throw new IOException(e);
+					} finally {
+						hashPool.returnObject(hc);
+					}
+					
+
+					hashloc = HCServiceProxy.writeChunk(hash,
+							writeBuffer.getFlushedBuffer(),
+							writeBuffer.getLength(), writeBuffer.capacity(),
+							mf.isDedup());
+					
+
+				}
+				if (hashloc[1] == 0)
+					throw new IOException(
+							"unable to write chunk hash location at 1 = "
+									+ hashloc[1]);
 				if (hashloc[0] == 1)
 					doop = true;
 				writeBuffer.setHashLoc(hashloc);
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
 				if (!doop) {
-					if (writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
+					if (writeBuffer.isNewChunk()
+							|| writeBuffer.isPrevDoop()) {
 						mf.getIOMonitor().addActualBytesWritten(
 								writeBuffer.capacity(), true);
 					}
-					if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk()) {
+					if (writeBuffer.isPrevDoop()
+							&& !writeBuffer.isNewChunk()) {
 						mf.getIOMonitor().removeDuplicateBlock(true);
 					}
 				}

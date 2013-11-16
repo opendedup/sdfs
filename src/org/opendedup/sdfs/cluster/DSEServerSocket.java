@@ -41,6 +41,7 @@ import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.StringUtils;
 
 public class DSEServerSocket implements RequestHandler, MembershipListener,
@@ -90,6 +91,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			new AddVolCmd(vol).executeCmd(this);
 			}
 		}
+		Main.serverPort = FindOpenPort.pickFreePort(Main.serverPort);
+		
 		server = new DSEServer(Main.serverHostName, id, DSEServer.SERVER);
 		server.address = channel.getAddress();
 		server.currentSize = HCServiceProxy.getSize();
@@ -113,8 +116,9 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		this.addSelfToState();
 		th = new Thread(this);
 		th.start();
-		//NetworkUnicastServer.init();
+		NetworkUnicastServer.init();
 		SDFSLogger.getLog().info("Started Cluster DSE Listener");
+		
 	}
 
 	public void close() {
@@ -203,11 +207,14 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] arb = new byte[buf.getInt()];
 				buf.get(arb);
 				@SuppressWarnings("unchecked")
-				ArrayList<SparseDataChunk> chunks = (ArrayList<SparseDataChunk>) Util.objectFromByteBuffer(arb);
+				List<SparseDataChunk> chunks = (List<SparseDataChunk>) Util.objectFromByteBuffer(arb);
 				ArrayList<Boolean> rsults = new ArrayList<Boolean>(chunks.size());
 				for(int i = 0;i<chunks.size();i++) {
 					try {
-					rsults.add(i,new Boolean(HCServiceProxy.hashExists(chunks.get(i).getHash())));
+						if(chunks.get(i) != null)
+							rsults.add(i,new Boolean(HCServiceProxy.hashExists(chunks.get(i).getHash())));
+						else
+							rsults.add(i,new Boolean(false));
 					}catch(Exception e) {
 						SDFSLogger.getLog().warn("unable to find if hash exists",e);
 						rsults.add(i,new Boolean(false));
