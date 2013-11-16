@@ -58,5 +58,5 @@ class tWeighting {
 		System.out.println(oct);
 		System.out.println(tct);
 	}
-	
+
 }

@@ -2,10 +2,6 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
 
-
-
-
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,20 +75,20 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		SDFSLogger.getLog().info(
 				"Starting Cluster DSE Listener cluserID=" + this.clusterID
 						+ " nodeID=" + id + " configPath=" + this.config);
-		
+
 		channel = new JChannel(config);
 		disp = new MessageDispatcher(channel, null, null, this);
 		disp.setMembershipListener(this);
 		disp.setMessageListener(this);
 		channel.connect(clusterID);
 		for (String vol : remoteVolumes) {
-			if(vol != null) {
-			volumes.put(vol, null);
-			new AddVolCmd(vol).executeCmd(this);
+			if (vol != null) {
+				volumes.put(vol, null);
+				new AddVolCmd(vol).executeCmd(this);
 			}
 		}
 		Main.serverPort = FindOpenPort.pickFreePort(Main.serverPort);
-		
+
 		server = new DSEServer(Main.serverHostName, id, DSEServer.SERVER);
 		server.address = channel.getAddress();
 		server.currentSize = HCServiceProxy.getSize();
@@ -116,15 +112,17 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		this.addSelfToState();
 		th = new Thread(this);
 		th.start();
-		NetworkUnicastServer.init();
+		if (Main.DSEClusterDirectIO)
+			NetworkUnicastServer.init();
 		SDFSLogger.getLog().info("Started Cluster DSE Listener");
-		
+
 	}
 
 	public void close() {
 		this.closed = true;
 		try {
-			NetworkUnicastServer.close();
+			if (Main.DSEClusterDirectIO)
+				NetworkUnicastServer.close();
 		} catch (Exception e) {
 		}
 		try {
@@ -176,14 +174,14 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 								nal.add(s);
 							}
 							synchronized (volumes) {
-								if(s.volumeName != null)
-								volumes.put(s.volumeName, msg.src());
+								if (s.volumeName != null)
+									volumes.put(s.volumeName, msg.src());
 							}
 						}
 					}
-					//SDFSLogger.getLog().debug(
-					//		s + " - hashmap size : " + serverState.size()
-					//				+ " sorted arraylist size : " + sal.size());
+					// SDFSLogger.getLog().debug(
+					// s + " - hashmap size : " + serverState.size()
+					// + " sorted arraylist size : " + sal.size());
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("Unable to update dse state ", e);
 					throw new IOException(e);
@@ -195,10 +193,11 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
 				try {
-				rtrn = new Boolean(HCServiceProxy.hashExists(hash));
-				
-				}catch(Exception e) {
-					SDFSLogger.getLog().warn("unable to find if hash exists",e);
+					rtrn = new Boolean(HCServiceProxy.hashExists(hash));
+
+				} catch (Exception e) {
+					SDFSLogger.getLog()
+							.warn("unable to find if hash exists", e);
 					return new Boolean(false);
 				}
 				break;
@@ -207,17 +206,24 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] arb = new byte[buf.getInt()];
 				buf.get(arb);
 				@SuppressWarnings("unchecked")
-				List<SparseDataChunk> chunks = (List<SparseDataChunk>) Util.objectFromByteBuffer(arb);
-				ArrayList<Boolean> rsults = new ArrayList<Boolean>(chunks.size());
-				for(int i = 0;i<chunks.size();i++) {
+				List<SparseDataChunk> chunks = (List<SparseDataChunk>) Util
+						.objectFromByteBuffer(arb);
+				ArrayList<Boolean> rsults = new ArrayList<Boolean>(
+						chunks.size());
+				for (int i = 0; i < chunks.size(); i++) {
 					try {
-						if(chunks.get(i) != null)
-							rsults.add(i,new Boolean(HCServiceProxy.hashExists(chunks.get(i).getHash())));
+						if (chunks.get(i) != null)
+							rsults.add(
+									i,
+									new Boolean(
+											HCServiceProxy.hashExists(chunks
+													.get(i).getHash())));
 						else
-							rsults.add(i,new Boolean(false));
-					}catch(Exception e) {
-						SDFSLogger.getLog().warn("unable to find if hash exists",e);
-						rsults.add(i,new Boolean(false));
+							rsults.add(i, new Boolean(false));
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"unable to find if hash exists", e);
+						rsults.add(i, new Boolean(false));
 					}
 				}
 				rtrn = rsults;
@@ -270,7 +276,9 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			case NetworkCMDS.RUN_REMOVE: {
 				SDFSLogger.getLog().debug("recieved remove chunks cmd");
 				long timestamp = buf.getLong();
-				SDFSLogger.getLog().debug("recieved remove chunks cmd after [" + new Date(timestamp) + "]");
+				SDFSLogger.getLog().debug(
+						"recieved remove chunks cmd after ["
+								+ new Date(timestamp) + "]");
 				byte fb = buf.get();
 				boolean force = false;
 				if (fb == 1)
@@ -337,8 +345,6 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 
 	}
 
-	
-
 	public void viewAccepted(View new_view) {
 		if (new_view instanceof MergeView) {
 			lock_service.unlockAll();
@@ -363,8 +369,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					}
 					if (s.serverType == DSEServer.CLIENT) {
 						synchronized (volumes) {
-							if(s.volumeName != null)
-							volumes.put(s.volumeName, null);
+							if (s.volumeName != null)
+								volumes.put(s.volumeName, null);
 						}
 					}
 				}
@@ -435,8 +441,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 						if (s.serverType == DSEServer.CLIENT) {
 							nal.add(s);
 							synchronized (volumes) {
-								if(s.volumeName != null)
-								volumes.put(s.volumeName, s.address);
+								if (s.volumeName != null)
+									volumes.put(s.volumeName, s.address);
 							}
 						}
 					}
@@ -562,7 +568,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		}
 		return addr;
 	}
-	
+
 	@Override
 	public DSEServer getServer() {
 		return this.server;

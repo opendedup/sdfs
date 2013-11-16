@@ -12,7 +12,7 @@ public class DeleteFileCmd implements XtendedCmd {
 
 	@Override
 	public String getResult(String cmd, String file) throws IOException {
-		if(file.contains(".."))
+		if (file.contains(".."))
 			throw new IOException("requeste file " + file + " does not exist");
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
@@ -20,12 +20,11 @@ public class DeleteFileCmd implements XtendedCmd {
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
 			boolean removed = MetaFileStore.removeMetaFile(internalPath, true);
-			if(removed) {
+			if (removed) {
 				SDFSEvent.deleteFileEvent(f);
 				return "removed [" + file + "]";
-				
-			}
-			else {
+
+			} else {
 				SDFSEvent.deleteFileFailedEvent(f);
 				return "failed to remove [" + file + "]";
 			}

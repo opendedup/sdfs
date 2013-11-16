@@ -2,9 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
 
-
-
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -45,17 +42,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private long currentLength = 0L;
 	private int cacheSize = 10485760 / Main.CHUNK_LENGTH;
 
-	LoadingCache<String, byte []> chunks = CacheBuilder.newBuilder()
+	LoadingCache<String, byte[]> chunks = CacheBuilder.newBuilder()
 			.maximumSize(cacheSize).concurrencyLevel(72)
-			.build(new CacheLoader<String, byte []>() {
-				public byte [] load(String hashString) throws IOException {
-					
+			.build(new CacheLoader<String, byte[]>() {
+				public byte[] load(String hashString) throws IOException {
+
 					RestS3Service s3Service = null;
 					try {
 						s3Service = pool.borrowObject();
 						S3Object obj = s3Service.getObject(name, hashString);
 						byte[] data = new byte[(int) obj.getContentLength()];
-						DataInputStream in = new DataInputStream(obj.getDataInputStream());
+						DataInputStream in = new DataInputStream(obj
+								.getDataInputStream());
 						in.readFully(data);
 						obj.closeDataInputStream();
 						if (encrypt)
@@ -65,7 +63,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 						return data;
 					} catch (Exception e) {
 						SDFSLogger.getLog()
-								.error("unable to fetch block [" + hashString + "]", e);
+								.error("unable to fetch block [" + hashString
+										+ "]", e);
 						throw new IOException("unable to read " + hashString);
 					} finally {
 						pool.returnObject(s3Service);
@@ -142,10 +141,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		try {
-		String hashString = this.getHashName(hash);
-		byte[] _bz = this.chunks.get(hashString);
-		byte[] bz = Arrays.clone(_bz);
-		return bz;
+			String hashString = this.getHashName(hash);
+			byte[] _bz = this.chunks.get(hashString);
+			byte[] bz = Arrays.clone(_bz);
+			return bz;
 		} catch (ExecutionException e) {
 			SDFSLogger.getLog().error("Unable to get block at " + start, e);
 			throw new IOException(e);
@@ -157,7 +156,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public String getName() {
 		return this.name;
 	}
-
 
 	@Override
 	public void setName(String name) {

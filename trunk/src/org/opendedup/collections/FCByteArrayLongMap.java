@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,7 +25,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 public class FCByteArrayLongMap implements AbstractShard {
-	//MappedByteBuffer keys = null;
+	// MappedByteBuffer keys = null;
 	private int size = 0;
 	private String path = null;
 	private FileChannel kFC = null;
@@ -71,8 +70,8 @@ public class FCByteArrayLongMap implements AbstractShard {
 				this.mapped.set(iterPos);
 				return key;
 			}
-			
-		} 
+
+		}
 		return null;
 	}
 
@@ -194,7 +193,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 				f.delete();
 			}
 		}
-		
+
 		if (bgst < 0) {
 			SDFSLogger.getLog()
 					.info("Hashtable " + path
@@ -245,10 +244,11 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @param obj
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
-	 * @throws KeyNotFoundException 
-	 * @throws IOException 
+	 * @throws KeyNotFoundException
+	 * @throws IOException
 	 */
-	public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
+	public boolean isClaimed(byte[] key) throws KeyNotFoundException,
+			IOException {
 		try {
 			this.hashlock.lock();
 			int index = index(key);
@@ -310,21 +310,21 @@ public class FCByteArrayLongMap implements AbstractShard {
 				pos = (pos / FREE.length) * 8;
 				this.vRaf.seek(pos);
 				long fp = vRaf.readLong();
-				ChunkData ck = new ChunkData(fp,key);
-				if(ck.setmDelete(true)) {
-				fp = fp * -1;
-				this.vRaf.seek(pos);
-				this.vRaf.writeLong(fp);
-				this.tRaf.seek(pos);
-				this.tRaf.writeLong(0);
-				pos = (pos / 8);
-				this.claims.clear(pos);
-				this.mapped.clear(pos);
-				
-				// this.store.position(pos);
-				// this.store.put((byte)0);
-				return true;
-				}else 
+				ChunkData ck = new ChunkData(fp, key);
+				if (ck.setmDelete(true)) {
+					fp = fp * -1;
+					this.vRaf.seek(pos);
+					this.vRaf.writeLong(fp);
+					this.tRaf.seek(pos);
+					this.tRaf.writeLong(0);
+					pos = (pos / 8);
+					this.claims.clear(pos);
+					this.mapped.clear(pos);
+
+					// this.store.position(pos);
+					// this.store.put((byte)0);
+					return true;
+				} else
 					return false;
 			}
 		} catch (Exception e) {
@@ -350,7 +350,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @param obj
 	 *            an <code>Object</code> value
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	protected int index(byte[] key) throws IOException {
 
@@ -382,9 +382,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @param hash
 	 * @param cur
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
+			throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -439,9 +440,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 	 * @param cur
 	 *            value of first matched slot
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) throws IOException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur)
+			throws IOException {
 		final int length = size * FREE.length;
 		final int probe = (1 + (hash % (size - 2))) * FREE.length;
 
@@ -607,8 +609,8 @@ public class FCByteArrayLongMap implements AbstractShard {
 	}
 
 	public static void main(String[] args) throws Exception {
-		FCByteArrayLongMap b = new FCByteArrayLongMap(
-				"/opt/sdfs/hashesaaa", 10000000, (short) 16);
+		FCByteArrayLongMap b = new FCByteArrayLongMap("/opt/sdfs/hashesaaa",
+				10000000, (short) 16);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
 		byte[] hash = null;
@@ -727,11 +729,13 @@ public class FCByteArrayLongMap implements AbstractShard {
 						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
 							byte[] key = new byte[FREE.length];
-							kFC.read(ByteBuffer.wrap(key), iterPos * FREE.length);
-							this.kFC.write(ByteBuffer.wrap(REMOVED), iterPos * FREE.length);
+							kFC.read(ByteBuffer.wrap(key), iterPos
+									* FREE.length);
+							this.kFC.write(ByteBuffer.wrap(REMOVED), iterPos
+									* FREE.length);
 							this.vRaf.seek(iterPos * 8);
 							val = this.vRaf.readLong();
-							ChunkData ck = new ChunkData(val,key);
+							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
 							this.vRaf.seek(iterPos * 8);
 							this.vRaf.writeLong(0);
@@ -741,8 +745,8 @@ public class FCByteArrayLongMap implements AbstractShard {
 							this.mapped.clear(iterPos);
 							return val;
 						}
-						}
-					
+					}
+
 				}
 			} finally {
 				iterPos++;

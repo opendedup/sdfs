@@ -35,20 +35,20 @@ public class ChunkData {
 	private byte[] chunk = null;
 	private AbstractChunkStore writeStore = null;
 	public boolean recoverd = false;
-	
 
 	private static byte[] blankHash = null;;
 
 	static {
 		Arrays.fill(BLANKCM, (byte) 0);
 		try {
-			blankHash = HashFunctionPool.getHashEngine().getHash(new byte[Main.chunkStorePageSize]);
+			blankHash = HashFunctionPool.getHashEngine().getHash(
+					new byte[Main.chunkStorePageSize]);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public ChunkData(long cPos,byte  [] hash) { 
+
+	public ChunkData(long cPos, byte[] hash) {
 		this.cPos = cPos;
 		this.hash = hash;
 	}
@@ -99,7 +99,7 @@ public class ChunkData {
 
 	public ByteBuffer getMetaDataBytes() {
 		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
-		if(this.mDelete)
+		if (this.mDelete)
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
@@ -117,7 +117,7 @@ public class ChunkData {
 
 	public void persistData(boolean clear) throws IOException {
 		if (this.chunk != null) {
-			if(writeStore == null)
+			if (writeStore == null)
 				writeStore = HCServiceProxy.getChunkStore();
 			if (this.mDelete) {
 				chunk = new byte[cLen];
@@ -136,7 +136,8 @@ public class ChunkData {
 		this.mDelete = mDelete;
 		if (this.mDelete) {
 			try {
-				HCServiceProxy.getChunkStore().deleteChunk(this.hash, this.cPos, 0);
+				HCServiceProxy.getChunkStore().deleteChunk(this.hash,
+						this.cPos, 0);
 				return true;
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(
@@ -144,11 +145,11 @@ public class ChunkData {
 								+ StringUtils.getHexString(this.hash) + "]", e);
 				return false;
 			}
-		} 
+		}
 		return false;
 	}
-	
-	protected void setChunk(byte [] chk) {
+
+	protected void setChunk(byte[] chk) {
 		this.chunk = chk;
 	}
 

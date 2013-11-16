@@ -15,21 +15,24 @@ public class GetOpenFiles {
 
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
-			
+
 			Document doc = XMLUtils.getXMLDoc("open-files");
 			Element root = doc.getDocumentElement();
 			DedupFile[] files = DedupFileStore.getArray();
 			root.setAttribute("size", Integer.toString(files.length));
-				for (int i = 0; i < files.length; i++) {
-					SparseDedupFile df = (SparseDedupFile)files[i];
-						Element el = doc.createElement("file");
-						el.setAttribute("name", df.getMetaFile().getPath());
-						el.setAttribute("last-accessed", Long.toString(MetaFileStore.getMF(df.getMetaFile().getPath())
-					.getLastAccessed()));
-						el.setAttribute("open-channels", Integer.toString(df.openChannelsSize()));
-						root.appendChild(el);
-				}
-			return (Element)root.cloneNode(true);
+			for (int i = 0; i < files.length; i++) {
+				SparseDedupFile df = (SparseDedupFile) files[i];
+				Element el = doc.createElement("file");
+				el.setAttribute("name", df.getMetaFile().getPath());
+				el.setAttribute(
+						"last-accessed",
+						Long.toString(MetaFileStore.getMF(
+								df.getMetaFile().getPath()).getLastAccessed()));
+				el.setAttribute("open-channels",
+						Integer.toString(df.openChannelsSize()));
+				root.appendChild(el);
+			}
+			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fulfill request on file " + file, e);

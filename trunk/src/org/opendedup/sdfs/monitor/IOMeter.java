@@ -35,8 +35,7 @@ public class IOMeter implements Runnable {
 					Thread.sleep(sleeptime * 1000);
 					double difMBRead = (HCServiceProxy.getKBytesRead() - lastMBRead) / 1024;
 					double difMBWrite = (HCServiceProxy.getKBytesWrite() - lastMBWrite) / 1024;
-					double dedupRate = (HCServiceProxy
-							.getDupsFound() / ((double) HCServiceProxy
+					double dedupRate = (HCServiceProxy.getDupsFound() / ((double) HCServiceProxy
 							.getDupsFound() + (double) HCServiceProxy
 							.getChunksWritten()));
 					lastMBWrite = HCServiceProxy.getKBytesWrite();

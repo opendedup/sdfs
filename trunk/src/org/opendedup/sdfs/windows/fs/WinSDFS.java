@@ -75,7 +75,7 @@ public class WinSDFS implements DokanOperations {
 	public static final int FILE_FILE_COMPRESSION = 0x00000010;
 	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
 	public static final int FILE_UNICODE_ON_DISK = 0x00000004;
-	
+
 	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES
 			| FILE_UNICODE_ON_DISK | FILE_SUPPORTS_SPARSE_FILES;
 	final static int volumeSerialNumber = 64426442;

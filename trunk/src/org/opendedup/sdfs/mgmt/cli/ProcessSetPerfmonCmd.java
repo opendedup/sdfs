@@ -9,8 +9,7 @@ import org.w3c.dom.Element;
 public class ProcessSetPerfmonCmd {
 	public static void runCmd(String option) {
 		try {
-			System.out.printf("Setting perfmon [%s]\n",
-					option);
+			System.out.printf("Setting perfmon [%s]\n", option);
 			option = URLEncoder.encode(option, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);

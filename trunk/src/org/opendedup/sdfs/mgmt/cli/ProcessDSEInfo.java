@@ -45,7 +45,8 @@ public class ProcessDSEInfo {
 						freeBlocks);
 				System.out.printf("DSE Listen Port : %s\n", port);
 				System.out.printf("DSE Listen Host : %s\n", host);
-				System.out.printf("DSE Listen SSL : %s\n", dse.getAttribute("listen-encrypted"));
+				System.out.printf("DSE Listen SSL : %s\n",
+						dse.getAttribute("listen-encrypted"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

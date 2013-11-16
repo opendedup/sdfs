@@ -30,7 +30,8 @@ public class ProcessVolumeInfo {
 						.getAttribute("duplicate-bytes"));
 				long aWriteBites = Long.parseLong(dse
 						.getAttribute("write-bytes"));
-				double readBytes = Double.parseDouble(dse.getAttribute("read-bytes"));
+				double readBytes = Double.parseDouble(dse
+						.getAttribute("read-bytes"));
 				long dseSz = Long.parseLong(dse.getAttribute("dse-size"));
 				long totalBytes = dedupSz + aWriteBites;
 				System.out.printf("Volume Capacity : %s\n",

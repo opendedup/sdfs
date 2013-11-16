@@ -9,8 +9,7 @@ import org.w3c.dom.Element;
 public class ProcessXpandVolumeCmd {
 	public static void runCmd(String size) {
 		try {
-			System.out.printf("expanding volume to [%s]\n",
-					size);
+			System.out.printf("expanding volume to [%s]\n", size);
 			size = URLEncoder.encode(size, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);

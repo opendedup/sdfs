@@ -2,11 +2,8 @@ package org.opendedup.hashing;
 
 import java.util.ArrayList;
 
-
-
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
@@ -41,9 +38,9 @@ public class ThreadPool {
 			SDFSLogger.getLog().warn("thread interrupted", e);
 		}
 	}
-	
+
 	public synchronized void flush() {
-		while(!this.taskQueue.isEmpty()) {
+		while (!this.taskQueue.isEmpty()) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {

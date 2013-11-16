@@ -11,8 +11,8 @@ import java.util.Set;
 
 public class ISCSITargetExplorer {
 
-
-	public static synchronized void export(String iscsiRootPath, String fileName, String network,long length, String iqn)
+	public static synchronized void export(String iscsiRootPath,
+			String fileName, String network, long length, String iqn)
 			throws IOException {
 		try {
 			File f = new File(iscsiRootPath);
@@ -20,35 +20,43 @@ public class ISCSITargetExplorer {
 				f.mkdirs();
 				Set<PosixFilePermission> perms = PosixFilePermissions
 						.fromString("rwxrwxrwx");
-				try{
+				try {
 					Files.setPosixFilePermissions(f.toPath(), perms);
-				}catch(Exception e) {
-					System.out.println("Error creating nfs folder" + e.getMessage());
+				} catch (Exception e) {
+					System.out.println("Error creating nfs folder"
+							+ e.getMessage());
 				}
 			}
-			String tcmProc = "tcm_node --fileio fileio_0/"+fileName + " " + iscsiRootPath+ "/" +fileName + " " + length;
-			String addLunProc = "lio_node --addlun " + iqn + " 1 0 " + fileName + " " + "fileio_0/" + fileName;
-			String addNetProc = "lio_node --addnp " + iqn + " 1 " +network+ ":3260";
-			String addPermProc = "lio_node --permissive "+iqn+" 1";
+			String tcmProc = "tcm_node --fileio fileio_0/" + fileName + " "
+					+ iscsiRootPath + "/" + fileName + " " + length;
+			String addLunProc = "lio_node --addlun " + iqn + " 1 0 " + fileName
+					+ " " + "fileio_0/" + fileName;
+			String addNetProc = "lio_node --addnp " + iqn + " 1 " + network
+					+ ":3260";
+			String addPermProc = "lio_node --permissive " + iqn + " 1";
 			String iqn2 = iqn.replaceAll(":", "\\:");
-			String addRWProc = "/sys/kernel/config/target/iscsi/"+iqn2+"/tpgt_1/attrib/demo_mode_write_protect";
-			String disAuthProc= "lio_node --disableauth="+iqn+" 1";
-			String enProc = "lio_node  --enabletpg "+ iqn+ " 1";
+			String addRWProc = "/sys/kernel/config/target/iscsi/" + iqn2
+					+ "/tpgt_1/attrib/demo_mode_write_protect";
+			String disAuthProc = "lio_node --disableauth=" + iqn + " 1";
+			String enProc = "lio_node  --enabletpg " + iqn + " 1";
 			Process p = Runtime.getRuntime().exec(tcmProc);
 			if (p.waitFor() != 0) {
 				throw new IOException("unable to execute \"" + tcmProc + "\"");
 			}
 			p = Runtime.getRuntime().exec(addLunProc);
 			if (p.waitFor() != 0) {
-				throw new IOException("unable to execute \"" + addLunProc + "\"");
+				throw new IOException("unable to execute \"" + addLunProc
+						+ "\"");
 			}
 			p = Runtime.getRuntime().exec(addNetProc);
 			if (p.waitFor() != 0) {
-				throw new IOException("unable to execute \"" + addNetProc + "\"");
+				throw new IOException("unable to execute \"" + addNetProc
+						+ "\"");
 			}
 			p = Runtime.getRuntime().exec(addPermProc);
 			if (p.waitFor() != 0) {
-				throw new IOException("unable to execute \"" + addPermProc + "\"");
+				throw new IOException("unable to execute \"" + addPermProc
+						+ "\"");
 			}
 			FileOutputStream out = new FileOutputStream(addRWProc);
 			DataOutputStream dout = new DataOutputStream(out);
@@ -57,7 +65,8 @@ public class ISCSITargetExplorer {
 			out.flush();
 			p = Runtime.getRuntime().exec(disAuthProc);
 			if (p.waitFor() != 0) {
-				throw new IOException("unable to execute \"" + disAuthProc + "\"");
+				throw new IOException("unable to execute \"" + disAuthProc
+						+ "\"");
 			}
 			p = Runtime.getRuntime().exec(enProc);
 			if (p.waitFor() != 0) {
@@ -67,8 +76,9 @@ public class ISCSITargetExplorer {
 			throw new IOException(e);
 		}
 	}
-	
-	public static synchronized void unexport(String iscsiRootPath, String fileName, String network,long length, String iqn)
+
+	public static synchronized void unexport(String iscsiRootPath,
+			String fileName, String network, long length, String iqn)
 			throws IOException {
 		try {
 			File f = new File(iscsiRootPath);
@@ -76,15 +86,16 @@ public class ISCSITargetExplorer {
 				f.mkdirs();
 				Set<PosixFilePermission> perms = PosixFilePermissions
 						.fromString("rwxrwxrwx");
-				try{
+				try {
 					Files.setPosixFilePermissions(f.toPath(), perms);
-				}catch(Exception e) {
-					System.out.println("Error creating nfs folder" + e.getMessage());
+				} catch (Exception e) {
+					System.out.println("Error creating nfs folder"
+							+ e.getMessage());
 				}
 			}
 			String delIqn = "lio_node --deliqn " + iqn;
 			String delTcm = "tcm_node --freedev " + "fileio_0/" + fileName;
-			String disProc = "lio_node  --deltpg "+ iqn+ " 1";
+			String disProc = "lio_node  --deltpg " + iqn + " 1";
 			Process p = Runtime.getRuntime().exec(disProc);
 			if (p.waitFor() != 0) {
 				throw new IOException("unable to execute \"" + disProc + "\"");
@@ -101,17 +112,19 @@ public class ISCSITargetExplorer {
 			throw new IOException(e);
 		}
 	}
-	
+
 	public static synchronized boolean available(String iqn) {
 		return new File("/sys/kernel/config/target/iscsi/" + iqn).exists();
 	}
 
-	public static void main(String [] args) throws NumberFormatException, IOException {
-		if(args[0].equalsIgnoreCase("up"))
-			export(args[1],args[2],args[3],Long.parseLong(args[4]),args[5]);
-		else if(args[0].equalsIgnoreCase("down"))
-			unexport(args[1],args[2],args[3],Long.parseLong(args[4]),args[5]);
-		else if(args[0].equalsIgnoreCase("avail"))
+	public static void main(String[] args) throws NumberFormatException,
+			IOException {
+		if (args[0].equalsIgnoreCase("up"))
+			export(args[1], args[2], args[3], Long.parseLong(args[4]), args[5]);
+		else if (args[0].equalsIgnoreCase("down"))
+			unexport(args[1], args[2], args[3], Long.parseLong(args[4]),
+					args[5]);
+		else if (args[0].equalsIgnoreCase("avail"))
 			System.out.println(available(args[1]));
 		else {
 			System.out.println("invalid arguement " + args[0]);

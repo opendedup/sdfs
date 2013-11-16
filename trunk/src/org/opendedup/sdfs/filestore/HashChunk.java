@@ -145,13 +145,13 @@ public class HashChunk implements Externalizable {
 		this.len = in.readInt();
 		this.data = new byte[len];
 		in.read(data);
-		
+
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeBoolean(compressed);
-		out.writeShort((short)this.name.length);
+		out.writeShort((short) this.name.length);
 		out.write(this.name);
 		out.writeInt(data.length);
 		out.write(data);

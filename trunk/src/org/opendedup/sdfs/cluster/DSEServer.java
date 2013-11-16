@@ -30,9 +30,9 @@ public class DSEServer implements Externalizable {
 	public static final int SERVER = 0;
 	public static final int CLIENT = 1;
 	public static final int LISTENER = 2;
-	
+
 	public DSEServer() {
-		
+
 	}
 
 	public DSEServer(String hostName, byte id, int serverType) {
@@ -44,7 +44,7 @@ public class DSEServer implements Externalizable {
 	public HashClientPool createPool() throws IOException {
 		HCServer _server = new HCServer(this.hostName, this.dseport, false,
 				false, this.useSSL);
-		return new HashClientPool(_server,this.address.toString(),5,this.id);
+		return new HashClientPool(_server, this.address.toString(), 5, this.id);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class DSEServer implements Externalizable {
 		this.dseport = in.readInt();
 		this.useSSL = in.readBoolean();
 		this.location = (String) in.readObject();
-		this.rack = (String)in.readObject();
+		this.rack = (String) in.readObject();
 	}
 
 	@Override
@@ -86,10 +86,10 @@ public class DSEServer implements Externalizable {
 	public byte[] getBytes() throws Exception {
 		byte[] b = hostName.getBytes();
 		byte[] addr = Util.objectToByteBuffer(address);
-		byte [] lb = this.location.getBytes();
-		byte [] rb = this.rack.getBytes();
+		byte[] lb = this.location.getBytes();
+		byte[] rb = this.rack.getBytes();
 		byte[] bz = new byte[1 + 4 + b.length + 1 + 4 + 4 + addr.length + 8 + 8
-				+ 8 + 4 + 4 + 1 + 4+lb.length + 4+rb.length];
+				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length];
 
 		ByteBuffer buf = ByteBuffer.wrap(bz);
 		buf.put(NetworkCMDS.UPDATE_DSE);
@@ -108,7 +108,7 @@ public class DSEServer implements Externalizable {
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
-		
+
 		buf.putInt(lb.length);
 		buf.put(lb);
 		buf.putInt(rb.length);
@@ -137,19 +137,19 @@ public class DSEServer implements Externalizable {
 			this.useSSL = true;
 		byte[] lb = new byte[buf.getInt()];
 		buf.get(lb);
-		byte [] rb = new byte[buf.getInt()];
+		byte[] rb = new byte[buf.getInt()];
 		buf.get(rb);
-		this.location = new  String(lb);
+		this.location = new String(lb);
 		this.rack = new String(rb);
 	}
 
 	public String toString() {
-		return this.hostName + " id=" + this.id + " serverType=" + this.serverType
-				+ " address=[" + this.address + "] maxsz=" + this.maxSize
-				+ " currentsize=" + this.currentSize + " freeblocks="
-				+ this.freeBlocks + " dseport=" + this.dseport + " usessl=" + this.useSSL;
+		return this.hostName + " id=" + this.id + " serverType="
+				+ this.serverType + " address=[" + this.address + "] maxsz="
+				+ this.maxSize + " currentsize=" + this.currentSize
+				+ " freeblocks=" + this.freeBlocks + " dseport=" + this.dseport
+				+ " usessl=" + this.useSSL;
 	}
-	
 
 	public int hashCode() {
 		return this.id;

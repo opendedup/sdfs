@@ -2,7 +2,6 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,40 +30,47 @@ public class BatchWriteHashCmd implements IOClientCmd {
 
 	@Override
 	public void executeCmd(final DSEClientSocket soc) throws IOException {
-		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout, true);
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
+				true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.NO_FC);
+		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
 		try {
-		byte [] ar =Util.objectToByteBuffer(hashes);
-		byte[] b = new byte[1 + 4 + ar.length];
-		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.put(NetworkCMDS.BATCH_HASH_EXISTS_CMD);
-		buf.putInt(ar.length);
-		buf.put(ar);
+			byte[] ar = Util.objectToByteBuffer(hashes);
+			byte[] b = new byte[1 + 4 + ar.length];
+			ByteBuffer buf = ByteBuffer.wrap(b);
+			buf.put(NetworkCMDS.BATCH_HASH_EXISTS_CMD);
+			buf.putInt(ar.length);
+			buf.put(ar);
 			List<Address> servers = soc.getServers();
-			RspList<Object> lst=soc.disp.castMessage(servers,
-					new Message(null, null, buf.array()), opts);
-			for(SparseDataChunk ck : hashes) {
+			RspList<Object> lst = soc.disp.castMessage(servers, new Message(
+					null, null, buf.array()), opts);
+			for (SparseDataChunk ck : hashes) {
 				ck.resetHashLoc();
 			}
-			for(Rsp<Object> rsp : lst) {
-				if(rsp.hasException()) {
-					SDFSLogger.getLog().error("Batch Hash Exists Exception thrown for " + rsp.getSender());
+			for (Rsp<Object> rsp : lst) {
+				if (rsp.hasException()) {
+					SDFSLogger.getLog().error(
+							"Batch Hash Exists Exception thrown for "
+									+ rsp.getSender());
 					throw rsp.getException();
-				} else if(rsp.wasSuspected() | rsp.wasUnreachable()) {
-					SDFSLogger.getLog().error("Batch Hash Exists Host unreachable Exception thrown for " + rsp.getSender());
-				}
-				else {
-					if(rsp.getValue() != null) {
-						SDFSLogger.getLog().debug("Batch Hash Exists completed for " +rsp.getSender() + " returned=" +rsp.getValue());
+				} else if (rsp.wasSuspected() | rsp.wasUnreachable()) {
+					SDFSLogger.getLog().error(
+							"Batch Hash Exists Host unreachable Exception thrown for "
+									+ rsp.getSender());
+				} else {
+					if (rsp.getValue() != null) {
+						SDFSLogger.getLog().debug(
+								"Batch Hash Exists completed for "
+										+ rsp.getSender() + " returned="
+										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
-						ArrayList<Boolean> rst = (ArrayList<Boolean>)rsp.getValue();
+						ArrayList<Boolean> rst = (ArrayList<Boolean>) rsp
+								.getValue();
 						byte id = soc.serverState.get(rsp.getSender()).id;
-						for(int i = 0; i< rst.size(); i++) {
+						for (int i = 0; i < rst.size(); i++) {
 							boolean exists = rst.get(i);
-							if(exists) {
+							if (exists) {
 								this.hashes.get(i).addHashLoc(id);
 							}
 						}
@@ -81,7 +87,6 @@ public class BatchWriteHashCmd implements IOClientCmd {
 	public ArrayList<SparseDataChunk> getHashes() {
 		return this.hashes;
 	}
-	
 
 	@Override
 	public byte getCmdID() {

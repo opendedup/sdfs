@@ -26,10 +26,12 @@ public class ProcessDebugInfo {
 						debug.getAttribute("active-threads"));
 				if (OSValidator.isUnix()) {
 					DecimalFormat zDForm = new DecimalFormat("#");
-					double tcp = Double.parseDouble(debug.getAttribute("total-cpu-load")) *100;
-					double pcp = Double.parseDouble(debug.getAttribute("sdfs-cpu-load")) *100;
-					System.out.printf("CPU Load : %s\n",
-							zDForm.format(tcp) + "%");
+					double tcp = Double.parseDouble(debug
+							.getAttribute("total-cpu-load")) * 100;
+					double pcp = Double.parseDouble(debug
+							.getAttribute("sdfs-cpu-load")) * 100;
+					System.out.printf("CPU Load : %s\n", zDForm.format(tcp)
+							+ "%");
 					System.out.printf("SDFS CPU Load : %s\n",
 							zDForm.format(pcp) + "%");
 

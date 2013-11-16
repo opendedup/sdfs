@@ -2,8 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -95,7 +93,8 @@ public class DSEConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity") || !cmd.hasOption("listen-ip")) {
+		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity")
+				|| !cmd.hasOption("listen-ip")) {
 			System.out
 					.println("--dse-name, --dse-capacity, and --listen-ip are required options");
 			printHelp(options);
@@ -128,12 +127,12 @@ public class DSEConfigWriter {
 			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
-		
+
 		if (cmd.hasOption("encrypt")) {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("encrypt"));
 		}
-		
+
 		if (this.awsEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
 					&& cmd.hasOption("cloud-access-key")
@@ -143,19 +142,19 @@ public class DSEConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
-				if(!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
 							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if(!S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
+				if (!S3ChunkStore.checkBucketUnique(cloudAccessKey,
+						cloudSecretKey, cloudBucketName)) {
 					System.out.println("Error : Unable to create volume");
-					System.out
-							.println("cloud-bucket-name is not unique");
+					System.out.println("cloud-bucket-name is not unique");
 					System.exit(-1);
 				}
-					
+
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -165,8 +164,8 @@ public class DSEConfigWriter {
 			if (cmd.hasOption("cloud-compress"))
 				this.cloudCompress = Boolean.parseBoolean(cmd
 						.getOptionValue("cloud-compress"));
-		} 
-		
+		}
+
 		else if (this.azureEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
 					&& cmd.hasOption("cloud-access-key")
@@ -215,19 +214,21 @@ public class DSEConfigWriter {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
 		}
-		if(cmd.hasOption("cluster-dse-password"))
+		if (cmd.hasOption("cluster-dse-password"))
 			this.sdfsCliPassword = cmd.getOptionValue("cluster-dse-password");
-		if(cmd.hasOption("cluster-name"))
+		if (cmd.hasOption("cluster-name"))
 			this.clusterID = cmd.getOptionValue("cluster-name");
-		if(cmd.hasOption("cluster-node-id"))
-			this.clusterMemberID = Byte.parseByte(cmd.getOptionValue("cluster-node-id"));
-		if(cmd.hasOption("cluster-config-path"))
+		if (cmd.hasOption("cluster-node-id"))
+			this.clusterMemberID = Byte.parseByte(cmd
+					.getOptionValue("cluster-node-id"));
+		if (cmd.hasOption("cluster-config-path"))
 			this.clusterConfig = cmd.getOptionValue("cluster-config-path");
-		if(cmd.hasOption("cluster-node-location"))
-			this.clusterNodeLocation = cmd.getOptionValue("cluster-node-location");
-		if(cmd.hasOption("cluster-node-rack"))
+		if (cmd.hasOption("cluster-node-location"))
+			this.clusterNodeLocation = cmd
+					.getOptionValue("cluster-node-location");
+		if (cmd.hasOption("cluster-node-rack"))
 			this.clusterRack = cmd.getOptionValue("cluster-node-rack");
-			
+
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
 		if (file.exists()) {
@@ -275,14 +276,15 @@ public class DSEConfigWriter {
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
-		cs.setAttribute("max-repl-batch-sz", Integer.toString(Main.MAX_REPL_BATCH_SZ));
+		cs.setAttribute("max-repl-batch-sz",
+				Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
 		cs.setAttribute("hash-type", this.hashType);
 		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("gc-class", this.gc_class);
-		
+
 		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-node-rack", this.clusterRack);
@@ -395,12 +397,13 @@ public class DSEConfigWriter {
 								+ HashFunctionPool.TIGER_24
 								+ " "
 								+ HashFunctionPool.MURMUR3_16
-								+ " This Defaults to " + HashFunctionPool.TIGER_16).hasArg()
-				.withArgName(HashFunctionPool.TIGER_16
-						+ "|"
-						+ HashFunctionPool.TIGER_24
-						+ "|"
-						+ HashFunctionPool.MURMUR3_16).create());
+								+ " This Defaults to "
+								+ HashFunctionPool.TIGER_16)
+				.hasArg()
+				.withArgName(
+						HashFunctionPool.TIGER_16 + "|"
+								+ HashFunctionPool.TIGER_24 + "|"
+								+ HashFunctionPool.MURMUR3_16).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("encrypt")
 				.withDescription(
@@ -446,7 +449,8 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-udp")
 				.withDescription(
-						"Enable udp for some communication between Volume and DSE. Defaults to false").create());
+						"Enable udp for some communication between Volume and DSE. Defaults to false")
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-ip")
 				.withDescription(
@@ -470,8 +474,8 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-node-id")
 				.withDescription(
-						"The unique id [1-200] used to identify this node within the cluster group. This defaults to 1 but should be incremented for each new DSE member of the cluster." +
-						" As an example, if this is the second DSE within the cluster, the id should be \"2\"")
+						"The unique id [1-200] used to identify this node within the cluster group. This defaults to 1 but should be incremented for each new DSE member of the cluster."
+								+ " As an example, if this is the second DSE within the cluster, the id should be \"2\"")
 				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-config")
@@ -486,8 +490,8 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-node-rack")
 				.withDescription(
-						"The rack where this cluster node is located.This is used to make sure that redundant blocks are not all copied to the name rack. To make the cluster rack aware, " +
-						"also set the --cluster-rack-aware=true.")
+						"The rack where this cluster node is located.This is used to make sure that redundant blocks are not all copied to the name rack. To make the cluster rack aware, "
+								+ "also set the --cluster-rack-aware=true.")
 				.hasArg().withArgName("String").create());
 		return options;
 	}
@@ -521,8 +525,10 @@ public class DSEConfigWriter {
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.setWidth(175);
-		formatter.printHelp("mkdse --dse-name=sdfs --dse-capacity=100GB --listen-ip=192.168.0.10",
-				options);
+		formatter
+				.printHelp(
+						"mkdse --dse-name=sdfs --dse-capacity=100GB --listen-ip=192.168.0.10",
+						options);
 	}
 
 }

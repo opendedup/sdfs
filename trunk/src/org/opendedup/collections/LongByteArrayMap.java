@@ -46,15 +46,15 @@ public class LongByteArrayMap implements AbstractMap {
 		FREE = new byte[arrayLength];
 		Arrays.fill(FREE, (byte) 0);
 	}
-	
+
 	public static void addMapListener(LongByteArrayMapListener l) {
 		mapListener.add(l);
 	}
-	
+
 	public static void removeMapListener(LongByteArrayMapListener l) {
 		mapListener.remove(l);
 	}
-	
+
 	public static ArrayList<LongByteArrayMapListener> getMapListeners() {
 		return mapListener;
 	}
@@ -75,7 +75,7 @@ public class LongByteArrayMap implements AbstractMap {
 			iterlock.unlock();
 		}
 	}
-	
+
 	public long getIterFPos() {
 		return this.iterPos * arrayLength;
 	}
@@ -127,7 +127,7 @@ public class LongByteArrayMap implements AbstractMap {
 					byte[] val = buf.array();
 					if (!Arrays.equals(val, FREE)) {
 						return val;
-					} 
+					}
 				} finally {
 					iterPos++;
 					_cpos = (iterPos * arrayLength);
@@ -224,7 +224,8 @@ public class LongByteArrayMap implements AbstractMap {
 		put(pos, data, true);
 	}
 
-	public void put(long pos, byte[] data, boolean propigateEvent) throws IOException {
+	public void put(long pos, byte[] data, boolean propigateEvent)
+			throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
@@ -248,7 +249,8 @@ public class LongByteArrayMap implements AbstractMap {
 		truncate(length, true);
 	}
 
-	public void truncate(long length, boolean propigateEvent) throws IOException {
+	public void truncate(long length, boolean propigateEvent)
+			throws IOException {
 		this.hashlock.lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
@@ -394,7 +396,8 @@ public class LongByteArrayMap implements AbstractMap {
 		copy(destFilePath, true);
 	}
 
-	public void copy(String destFilePath, boolean propigateEvent) throws IOException {
+	public void copy(String destFilePath, boolean propigateEvent)
+			throws IOException {
 		this.hashlock.lock();
 		FileChannel srcC = null;
 		FileChannel dstC = null;
@@ -417,14 +420,15 @@ public class LongByteArrayMap implements AbstractMap {
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
 				SDFSLogger.getLog().debug("snapping on unix/linux volume");
-				String cpCmd = 
-					"cp --sparse=always " + src.getPath() + " "
-					+ dest.getPath();
+				String cpCmd = "cp --sparse=always " + src.getPath() + " "
+						+ dest.getPath();
 				SDFSLogger.getLog().debug(cpCmd);
 				Process p = Runtime.getRuntime().exec(cpCmd);
 				int exitValue = p.waitFor();
-				if(exitValue != 0) {
-					throw new IOException("unable to copy " + src.getPath() + " to  " + dest.getPath() + " exit value was " + exitValue);
+				if (exitValue != 0) {
+					throw new IOException("unable to copy " + src.getPath()
+							+ " to  " + dest.getPath() + " exit value was "
+							+ exitValue);
 				}
 				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}

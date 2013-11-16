@@ -2,8 +2,6 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -27,7 +25,7 @@ public class ByteArrayLongMap {
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
-	
+
 	private int iterPos = 0;
 
 	static {
@@ -54,14 +52,14 @@ public class ByteArrayLongMap {
 		while (iterPos < size) {
 			this.hashlock.lock();
 			try {
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * FREE.length);
-			keys.get(key);
-			iterPos++;
-			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				return key;
-			}
-			}finally {
+				byte[] key = new byte[FREE.length];
+				keys.position(iterPos * FREE.length);
+				keys.get(key);
+				iterPos++;
+				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+					return key;
+				}
+			} finally {
 				this.hashlock.unlock();
 			}
 		}
@@ -109,7 +107,9 @@ public class ByteArrayLongMap {
 						return val;
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error getting next claimed value at [" + iterPos + "]", e);
+				SDFSLogger.getLog()
+						.error("error getting next claimed value at ["
+								+ iterPos + "]", e);
 			} finally {
 				iterPos++;
 				this.hashlock.unlock();
@@ -132,9 +132,9 @@ public class ByteArrayLongMap {
 			values = ByteBuffer.allocateDirect(size * 8);
 			claims = new BitSet(size);
 		} else {
-			//this.compKeys = LZFEncoder.encode(keyB);
-			//this.compValues = LZFEncoder.encode(valueB);
-			//this.compClaims = LZFEncoder.encode(claimsB);
+			// this.compKeys = LZFEncoder.encode(keyB);
+			// this.compValues = LZFEncoder.encode(valueB);
+			// this.compClaims = LZFEncoder.encode(claimsB);
 		}
 		this.decompress();
 		for (int i = 0; i < size; i++) {
@@ -155,9 +155,9 @@ public class ByteArrayLongMap {
 
 	private void decompress() throws IOException {
 		if (Main.compressedIndex) {
-			//keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
-			//values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
-			
+			// keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
+			// values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
+
 		}
 	}
 
@@ -171,8 +171,8 @@ public class ByteArrayLongMap {
 
 	private void compress() throws IOException {
 		if (Main.compressedIndex) {
-			//compKeys = LZFEncoder.encode(keys.array());
-			//compValues = LZFEncoder.encode(values.array());
+			// compKeys = LZFEncoder.encode(keys.array());
+			// compValues = LZFEncoder.encode(values.array());
 		}
 	}
 
@@ -231,23 +231,22 @@ public class ByteArrayLongMap {
 		}
 	}
 
-	public boolean update(byte[] key, long value)
-			throws KeyNotFoundException {
+	public boolean update(byte[] key, long value) throws KeyNotFoundException {
 		try {
 			this.hashlock.lock();
 			int pos = this.index(key);
 			if (pos == -1) {
 				throw new KeyNotFoundException();
 			} else {
-					keys.position(pos);
-					pos = (pos / FREE.length) * 8;
-					this.values.position(pos);
-					this.values.putLong(value);
-					pos = (pos / 8);
-					this.claims.set(pos);
-					return true;
+				keys.position(pos);
+				pos = (pos / FREE.length) * 8;
+				this.values.position(pos);
+				this.values.putLong(value);
+				pos = (pos / 8);
+				this.claims.set(pos);
+				return true;
 			}
-		}  finally {
+		} finally {
 			this.hashlock.unlock();
 		}
 	}
@@ -489,8 +488,6 @@ public class ByteArrayLongMap {
 	public long get(byte[] key) {
 		return this.get(key, true);
 	}
-	
-	
 
 	public long get(byte[] key, boolean claim) {
 		try {
@@ -525,5 +522,4 @@ public class ByteArrayLongMap {
 		return this.size;
 	}
 
-	
 }

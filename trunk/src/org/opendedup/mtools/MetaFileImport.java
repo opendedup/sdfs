@@ -19,7 +19,7 @@ public class MetaFileImport {
 	private long files = 0;
 	private List<MetaDataDedupFile> corruptFiles = new ArrayList<MetaDataDedupFile>();
 
-	public MetaFileImport(String path,SDFSEvent evt) throws IOException {
+	public MetaFileImport(String path, SDFSEvent evt) throws IOException {
 		SDFSLogger.getLog().info("Starting MetaFile FDISK");
 		long start = System.currentTimeMillis();
 		File f = new File(path);
@@ -65,9 +65,9 @@ public class MetaFileImport {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						if (!ck.isLocalData()) {
-							byte [] exists = HCServiceProxy.hashExists(ck
-									.getHash(),false);
-							if (exists[0]== -1) {
+							byte[] exists = HCServiceProxy.hashExists(
+									ck.getHash(), false);
+							if (exists[0] == -1) {
 								SDFSLogger.getLog().debug(
 										"file ["
 												+ mapFile

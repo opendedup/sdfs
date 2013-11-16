@@ -2,7 +2,6 @@ package org.opendedup.mtools;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +22,12 @@ public class ClusterRedundancyCheck {
 	private long newRendundantBlocks = 0;
 	private long failedRendundantBlocks = 0;
 	SDFSEvent fEvt = null;
-	private static final int MAX_BATCH_SIZE=100; 
-	
-	public ClusterRedundancyCheck(SDFSEvent fEvt, File f) throws IOException { 
-		init(fEvt,f);
+	private static final int MAX_BATCH_SIZE = 100;
+
+	public ClusterRedundancyCheck(SDFSEvent fEvt, File f) throws IOException {
+		init(fEvt, f);
 	}
-	
+
 	private void init(SDFSEvent fEvt, File f) throws IOException {
 		this.fEvt = fEvt;
 		if (!f.exists()) {
@@ -74,9 +73,9 @@ public class ClusterRedundancyCheck {
 	}
 
 	public ClusterRedundancyCheck(SDFSEvent fEvt) throws IOException {
-		//this.fEvt = fEvt;
+		// this.fEvt = fEvt;
 		File f = new File(Main.dedupDBStore);
-		init(fEvt,f);
+		init(fEvt, f);
 	}
 
 	private void traverse(File dir) throws IOException {
@@ -96,22 +95,22 @@ public class ClusterRedundancyCheck {
 			}
 		}
 	}
-	
-	private int batchCheck(ArrayList<SparseDataChunk> chunks,LongByteArrayMap mp) throws IOException, HashtableFullException {
+
+	private int batchCheck(ArrayList<SparseDataChunk> chunks,
+			LongByteArrayMap mp) throws IOException, HashtableFullException {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
-		for(SparseDataChunk ck : pchunks) {
-			byte [] exists = ck.getHashLoc();
+		for (SparseDataChunk ck : pchunks) {
+			byte[] exists = ck.getHashLoc();
 			if (exists[0] == -1) {
 				SDFSLogger.getLog().debug(
 						" could not find "
-								+ StringUtils.getHexString(ck
-										.getHash()));
+								+ StringUtils.getHexString(ck.getHash()));
 				corruptBlocks++;
 			} else {
 				byte[] currenthl = ck.getHashLoc();
 				exists[0] = currenthl[0];
-					try {
+				try {
 					int ncopies = 0;
 					for (int i = 1; i < 8; i++) {
 						if (exists[i] > (byte) 0) {
@@ -119,19 +118,17 @@ public class ClusterRedundancyCheck {
 						}
 					}
 					if (ncopies < Main.volume.getClusterCopies()) {
-						byte[] nb = HCServiceProxy.fetchChunk(
-								ck.getHash(), exists);
-						exists = HCServiceProxy.writeChunk(
-								ck.getHash(), nb, 0, nb.length,
-								true,exists);
+						byte[] nb = HCServiceProxy.fetchChunk(ck.getHash(),
+								exists);
+						exists = HCServiceProxy.writeChunk(ck.getHash(), nb, 0,
+								nb.length, true, exists);
 						ncopies = 0;
 						for (int i = 1; i < 8; i++) {
 							if (exists[i] > (byte) 0) {
 								ncopies++;
 							}
 						}
-						if (ncopies >= Main.volume
-								.getClusterCopies()) {
+						if (ncopies >= Main.volume.getClusterCopies()) {
 							this.newRendundantBlocks++;
 						} else
 							this.failedRendundantBlocks++;
@@ -143,10 +140,9 @@ public class ClusterRedundancyCheck {
 						ck.setHashLoc(exists);
 					}
 					mp.put(ck.getFpos(), ck.getBytes());
-					}catch(IOException e) {
-						this.failedRendundantBlocks++;
-					}
-				
+				} catch (IOException e) {
+					this.failedRendundantBlocks++;
+				}
 
 			}
 		}
@@ -157,7 +153,8 @@ public class ClusterRedundancyCheck {
 		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 		long prevpos = 0;
 		try {
-			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(MAX_BATCH_SIZE);
+			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(
+					MAX_BATCH_SIZE);
 			byte[] val = new byte[0];
 			mp.iterInit();
 			long corruptBlocks = 0;
@@ -170,81 +167,88 @@ public class ClusterRedundancyCheck {
 					ck.setFpos((prevpos / LongByteArrayMap.FREE.length)
 							* Main.CHUNK_LENGTH);
 					if (!ck.isLocalData()) {
-						if(Main.chunkStoreLocal) {
-						byte[] exists = HCServiceProxy.hashExists(ck.getHash(),
-								true);
+						if (Main.chunkStoreLocal) {
+							byte[] exists = HCServiceProxy.hashExists(
+									ck.getHash(), true);
 
-						if (exists[0] == -1) {
-							SDFSLogger.getLog().debug(
-									"file ["
-											+ mapFile
-											+ "] could not find "
-											+ StringUtils.getHexString(ck
-													.getHash()));
-							corruptBlocks++;
-						} else {
-							byte[] currenthl = ck.getHashLoc();
-							exists[0] = currenthl[0];
+							if (exists[0] == -1) {
+								SDFSLogger.getLog().debug(
+										"file ["
+												+ mapFile
+												+ "] could not find "
+												+ StringUtils.getHexString(ck
+														.getHash()));
+								corruptBlocks++;
+							} else {
+								byte[] currenthl = ck.getHashLoc();
+								exists[0] = currenthl[0];
 								try {
-								int ncopies = 0;
-								for (int i = 1; i < 8; i++) {
-									if (exists[i] > (byte) 0) {
-										ncopies++;
-									}
-								}
-								if (ncopies < Main.volume.getClusterCopies() && ncopies < HCServiceProxy.cs.getStorageNodes().size()) {
-									byte[] nb = HCServiceProxy.fetchChunk(
-											ck.getHash(), exists);
-									exists = HCServiceProxy.writeChunk(
-											ck.getHash(), nb, 0, nb.length,
-											true,exists);
-									ncopies = 0;
+									int ncopies = 0;
 									for (int i = 1; i < 8; i++) {
 										if (exists[i] > (byte) 0) {
 											ncopies++;
 										}
 									}
-									if (ncopies >= Main.volume
-											.getClusterCopies()) {
-										this.newRendundantBlocks++;
-									} else
+									if (ncopies < Main.volume
+											.getClusterCopies()
+											&& ncopies < HCServiceProxy.cs
+													.getStorageNodes().size()) {
+										byte[] nb = HCServiceProxy.fetchChunk(
+												ck.getHash(), exists);
+										exists = HCServiceProxy.writeChunk(
+												ck.getHash(), nb, 0, nb.length,
+												true, exists);
+										ncopies = 0;
+										for (int i = 1; i < 8; i++) {
+											if (exists[i] > (byte) 0) {
+												ncopies++;
+											}
+										}
+										if (ncopies >= Main.volume
+												.getClusterCopies()) {
+											this.newRendundantBlocks++;
+										} else
+											this.failedRendundantBlocks++;
+
+									} else if (ncopies < Main.volume
+											.getClusterCopies()
+											&& ncopies >= HCServiceProxy.cs
+													.getStorageNodes().size()) {
 										this.failedRendundantBlocks++;
+									}
+									exists[0] = currenthl[0];
 
-								} else if (ncopies < Main.volume.getClusterCopies() && ncopies >= HCServiceProxy.cs.getStorageNodes().size()) {
+									if (!brequals(currenthl, exists)) {
+										ck.setHashLoc(exists);
+									}
+									mp.put(ck.getFpos(), ck.getBytes());
+								} catch (IOException e) {
 									this.failedRendundantBlocks++;
 								}
-								exists[0] = currenthl[0];
 
-								if (!brequals(currenthl, exists)) {
-									ck.setHashLoc(exists);
-								}
-								mp.put(ck.getFpos(), ck.getBytes());
-								}catch(IOException e) {
-									this.failedRendundantBlocks++;
-								}
-							
+							}
 
+						} else {
+							chunks.add(ck);
+							if (chunks.size() >= MAX_BATCH_SIZE) {
+								corruptBlocks += batchCheck(chunks, mp);
+								chunks = new ArrayList<SparseDataChunk>(
+										MAX_BATCH_SIZE);
+							}
 						}
-
-					} else {
-						chunks.add(ck);
-						if(chunks.size() >= MAX_BATCH_SIZE) {
-							corruptBlocks += batchCheck(chunks,mp);
-							chunks = new ArrayList<SparseDataChunk>(MAX_BATCH_SIZE);
-						}
-					}
 					}
 				}
 			}
-			
-			if(chunks.size() > 0) {
-				corruptBlocks += batchCheck(chunks,mp);
+
+			if (chunks.size() > 0) {
+				corruptBlocks += batchCheck(chunks, mp);
 			}
 			if (corruptBlocks > 0) {
 				this.corruptFiles++;
 				SDFSLogger.getLog().info(
-						"************** map file " + mapFile.getPath() + " is suspect, ["
-								+ corruptBlocks + "] missing blocks found.***************");
+						"************** map file " + mapFile.getPath()
+								+ " is suspect, [" + corruptBlocks
+								+ "] missing blocks found.***************");
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug(

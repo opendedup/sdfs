@@ -27,10 +27,11 @@ public class GetDSE {
 					Long.toString(HCServiceProxy.getFreeBlocks()));
 			root.setAttribute("page-size",
 					Long.toString(HCServiceProxy.getPageSize()));
-			root.setAttribute("listen-port",Integer.toString(Main.serverPort));
-			root.setAttribute("listen-hostname",Main.serverHostName);
-			root.setAttribute("listen-encrypted",Boolean.toString(Main.serverUseSSL));
-			return (Element)root.cloneNode(true);
+			root.setAttribute("listen-port", Integer.toString(Main.serverPort));
+			root.setAttribute("listen-hostname", Main.serverHostName);
+			root.setAttribute("listen-encrypted",
+					Boolean.toString(Main.serverUseSSL));
+			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fulfill request on file " + file, e);

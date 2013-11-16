@@ -2,7 +2,6 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,7 +25,7 @@ public class HashExistsCmd implements IOClientCmd {
 	boolean meetsRudundancy = false;
 	int csz = 0;
 
-	public HashExistsCmd(byte[] hash, boolean waitforall,byte numtowaitfor) {
+	public HashExistsCmd(byte[] hash, boolean waitforall, byte numtowaitfor) {
 		this.hash = hash;
 		this.waitforall = waitforall;
 		resp[0] = -1;
@@ -44,34 +43,34 @@ public class HashExistsCmd implements IOClientCmd {
 						int pos = 1;
 
 						public boolean needMoreResponses() {
-							
-								return true;
+
+							return true;
 						}
 
 						@Override
 						public boolean isAcceptable(Object response,
 								Address arg1) {
-							
+
 							if (response instanceof Boolean) {
 								boolean rsp = ((Boolean) response)
 										.booleanValue();
 								if (rsp) {
 									lock.lock();
-										resp[0] = 1;
-										resp[pos] = soc.serverState.get(arg1).id;
-										pos++;
-										csz++;
-										exists = true;
+									resp[0] = 1;
+									resp[pos] = soc.serverState.get(arg1).id;
+									pos++;
+									csz++;
+									exists = true;
 									lock.unlock();
 								} else {
 									lock.lock();
-										if (resp[0] == -1)
-											resp[0] = 0;
+									if (resp[0] == -1)
+										resp[0] = 0;
 									lock.unlock();
 								}
 								return rsp;
 							} else {
-								
+
 								return false;
 							}
 						}
@@ -82,12 +81,13 @@ public class HashExistsCmd implements IOClientCmd {
 					Main.ClusterRSPTimeout, false,
 
 					new RspFilter() {
-					private final ReentrantLock lock = new ReentrantLock();
+						private final ReentrantLock lock = new ReentrantLock();
 
 						int pos = 1;
+
 						@Override
 						public boolean needMoreResponses() {
-								return !meetsRudundancy;
+							return !meetsRudundancy;
 						}
 
 						@Override
@@ -98,36 +98,38 @@ public class HashExistsCmd implements IOClientCmd {
 										.booleanValue();
 								if (rsp) {
 									lock.lock();
-										resp[0] = 1;
-										resp[pos] = soc.serverState.get(arg1).id;
-										
-										if(pos >= numtowaitfor) {
-											//SDFSLogger.getLog().info("meets requirements");
-											meetsRudundancy = true;
-										}
-										csz++;
-										pos++;
-										exists = rsp;
+									resp[0] = 1;
+									resp[pos] = soc.serverState.get(arg1).id;
+
+									if (pos >= numtowaitfor) {
+										// SDFSLogger.getLog().info("meets requirements");
+										meetsRudundancy = true;
+									}
+									csz++;
+									pos++;
+									exists = rsp;
 									lock.unlock();
 								} else {
-									
+
 									lock.lock();
-										if (resp[0] == -1)
-											resp[0] = 0;
+									if (resp[0] == -1)
+										resp[0] = 0;
 									lock.unlock();
 								}
 								return true;
-							
-						}catch(Exception e) {
-							SDFSLogger.getLog().warn("malformed hashexists msg from " + arg1.toString(),e);
-							return false;
-						}
+
+							} catch (Exception e) {
+								SDFSLogger.getLog().warn(
+										"malformed hashexists msg from "
+												+ arg1.toString(), e);
+								return false;
+							}
 						}
 
 					});
 		}
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		// opts.setFlags(Message.Flag.DONT_BUNDLE);
+		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 		byte[] b = new byte[1 + 2 + 2 + hash.length];
@@ -137,8 +139,8 @@ public class HashExistsCmd implements IOClientCmd {
 		buf.put(hash);
 		try {
 			List<Address> servers = soc.getServers();
-			soc.disp.castMessage(servers,
-					new Message(null, null, buf.array()), opts);
+			soc.disp.castMessage(servers, new Message(null, null, buf.array()),
+					opts);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while getting hash", e);
@@ -157,11 +159,11 @@ public class HashExistsCmd implements IOClientCmd {
 	public boolean exists() {
 		return this.exists;
 	}
-	
+
 	public int responses() {
 		return this.csz;
 	}
-	
+
 	public boolean meetsRedundancyRequirements() {
 		return this.meetsRudundancy;
 	}

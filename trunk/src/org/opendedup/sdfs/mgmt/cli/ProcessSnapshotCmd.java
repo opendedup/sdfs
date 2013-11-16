@@ -22,11 +22,10 @@ public class ProcessSnapshotCmd {
 			Element root = doc.getDocumentElement();
 			Element evt = (Element) root.getElementsByTagName("event").item(0);
 			String uuid = evt.getAttribute("uuid");
-			long maxcount = Long.parseLong(evt
-					.getAttribute("max-count"));
+			long maxcount = Long.parseLong(evt.getAttribute("max-count"));
 			CommandLineProgressBar bar = null;
-			bar = new CommandLineProgressBar(
-					evt.getAttribute("type"), maxcount, System.out);
+			bar = new CommandLineProgressBar(evt.getAttribute("type"),
+					maxcount, System.out);
 			boolean closed = false;
 			int le = 0;
 			int curevt = 0;
@@ -39,7 +38,7 @@ public class ProcessSnapshotCmd {
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);
-				
+
 				if (le != evt.getElementsByTagName("event").getLength())
 					System.out.println();
 				le = evt.getElementsByTagName("event").getLength();
@@ -80,14 +79,14 @@ public class ProcessSnapshotCmd {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
-				else {
-					long pc = Long.parseLong(evt
-							.getAttribute("current-count"));
+				} else {
+					long pc = Long.parseLong(evt.getAttribute("current-count"));
 					bar.update(pc);
 				}
 				if (!evt.getAttribute("end-timestamp").equals("-1")) {
-					if(evt.getAttribute("level").equalsIgnoreCase("info") || evt.getAttribute("level").equalsIgnoreCase("running"))
+					if (evt.getAttribute("level").equalsIgnoreCase("info")
+							|| evt.getAttribute("level").equalsIgnoreCase(
+									"running"))
 						System.out.println(evt.getAttribute("type")
 								+ " Task Completed : "
 								+ evt.getAttribute("short-msg"));

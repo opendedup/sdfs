@@ -18,11 +18,11 @@ public class RAFPool {
 	private ArrayList<RandomAccessFile> activeObjects = new ArrayList<RandomAccessFile>();
 	private ReentrantLock alock = new ReentrantLock();
 
-	public RAFPool(File f, int size)
-			throws IOException {
-		this.f =f;
+	public RAFPool(File f, int size) throws IOException {
+		this.f = f;
 		this.poolSize = size;
-		passiveObjects = new LinkedBlockingQueue<RandomAccessFile>(this.poolSize);
+		passiveObjects = new LinkedBlockingQueue<RandomAccessFile>(
+				this.poolSize);
 		this.populatePool();
 	}
 
@@ -40,8 +40,6 @@ public class RAFPool {
 			}
 		}
 	}
-
-	
 
 	public RandomAccessFile borrowObject() throws IOException {
 		RandomAccessFile hc = null;
@@ -101,15 +99,15 @@ public class RAFPool {
 	public void destroyObject(RandomAccessFile hc) throws IOException {
 		hc.close();
 	}
-	
+
 	public void close() throws IOException, InterruptedException {
-		if(this.activeObjects.size() > 0)
+		if (this.activeObjects.size() > 0)
 			throw new IOException("Cannot close because writes still occuring");
-			RandomAccessFile hc = passiveObjects.poll();
-			while(hc != null) {
-				hc.close();
-				hc = passiveObjects.poll();
-			}
+		RandomAccessFile hc = passiveObjects.poll();
+		while (hc != null) {
+			hc.close();
+			hc = passiveObjects.poll();
+		}
 	}
 
 }

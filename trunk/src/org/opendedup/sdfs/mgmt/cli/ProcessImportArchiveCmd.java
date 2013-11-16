@@ -64,7 +64,7 @@ public class ProcessImportArchiveCmd {
 				System.out.println();
 			le = evt.getElementsByTagName("event").getLength();
 			if (le > 0) {
-				curevt = evt.getElementsByTagName("event").getLength() -1;
+				curevt = evt.getElementsByTagName("event").getLength() - 1;
 				Element sevt = (Element) evt.getElementsByTagName("event")
 						.item(curevt);
 				try {
@@ -76,7 +76,8 @@ public class ProcessImportArchiveCmd {
 						smaxcount = Long.parseLong(sevt
 								.getAttribute("max-count"));
 						bar = new CommandLineProgressBar(
-								sevt.getAttribute("type"), smaxcount, System.out);
+								sevt.getAttribute("type"), smaxcount,
+								System.out);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

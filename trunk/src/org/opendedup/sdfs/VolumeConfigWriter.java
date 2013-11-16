@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -126,12 +125,12 @@ public class VolumeConfigWriter {
 			System.exit(-1);
 		}
 		volume_name = cmd.getOptionValue("volume-name");
-		if(StringUtils.getSpecialCharacterCount(volume_name)>0) {
+		if (StringUtils.getSpecialCharacterCount(volume_name) > 0) {
 			System.out
-			.println("--volume-name cannot contain any special characters");
+					.println("--volume-name cannot contain any special characters");
 			System.exit(-1);
 		}
-			
+
 		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator
 				+ "logs" + File.separator + "volume-" + volume_name
 				+ "-perf.json";
@@ -339,12 +338,12 @@ public class VolumeConfigWriter {
 					.getOptionValue("cluster-dse-password");
 		if (cmd.hasOption("cluster-id")) {
 			this.clusterID = cmd.getOptionValue("cluster-id");
-			if(StringUtils.getSpecialCharacterCount(this.clusterID)>0) {
+			if (StringUtils.getSpecialCharacterCount(this.clusterID) > 0) {
 				System.out
-				.println("--cluster-id cannot contain any special characters");
+						.println("--cluster-id cannot contain any special characters");
 				System.exit(-1);
 			}
-				
+
 		}
 		if (cmd.hasOption("cluster-config"))
 			this.clusterConfig = cmd.getOptionValue("cluster-config");

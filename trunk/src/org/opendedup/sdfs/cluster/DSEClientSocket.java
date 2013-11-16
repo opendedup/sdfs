@@ -2,8 +2,6 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
 
-
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -138,7 +135,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		SDFSLogger.getLog().debug("found [" + volumes.size() + "] volumes");
 
 	}
-	
+
 	public HashClientPool getPool(byte[] slist, int start) throws IOException {
 		ReadLock l = this.pl.readLock();
 		l.lock();
@@ -155,71 +152,35 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		throw new IOException("no pools available to fulfill request");
 	}
-	
+
 	public List<HashClientPool> getServerPools(byte max, byte[] ignoredHosts) {
 		ArrayList<HashClientPool> al = new ArrayList<HashClientPool>();
 		ReadLock l = this.sl.readLock();
 		l.lock();
 		try {
 			List<DSEServer> ss = this.wr.getServers(max, ignoredHosts);
-			for(DSEServer s : ss) {
+			for (DSEServer s : ss) {
 				al.add(pools[s.id]);
 			}
 			/*
-			if (Main.volume.isClusterRackAware() && sal.size() > 1) {
-				HashSet<String> usedRacks = new HashSet<String>();
-				if (sal.size() < max) {
-					for (DSEServer s : sal) {
-						if (!ignoreHost(s, ignoredHosts)
-								&& !usedRacks.contains(s.rack)) {
-							usedRacks.add(s.rack);
-							if(!pools[s.id].isSuspect())
-								al.add(pools[s.id]);
-						}
-					}
-				} else {
-					for (int i = 0; i < max; i++) {
-						DSEServer s = sal.get(i);
-						if (!ignoreHost(s, ignoredHosts)
-								&& !usedRacks.contains(s.rack)) {
-							usedRacks.add(s.rack);
-							if(!pools[s.id].isSuspect())
-								al.add(pools[s.id]);
-						}
-					}
-				}
-			}
-			if (al.size() < max) {
-				if (sal.size() < max) {
-					for (DSEServer s : sal) {
-						if (!ignoreHost(s, ignoredHosts))
-							al.add(pools[s.id]);
-					}
-				} else {
-					for (int i = 0; i < max; i++) {
-						DSEServer s = sal.get(i);
-						if (!ignoreHost(s, ignoredHosts))
-							al.add(pools[s.id]);
-					}
-				}
-			}
-			*/
+			 * if (Main.volume.isClusterRackAware() && sal.size() > 1) {
+			 * HashSet<String> usedRacks = new HashSet<String>(); if (sal.size()
+			 * < max) { for (DSEServer s : sal) { if (!ignoreHost(s,
+			 * ignoredHosts) && !usedRacks.contains(s.rack)) {
+			 * usedRacks.add(s.rack); if(!pools[s.id].isSuspect())
+			 * al.add(pools[s.id]); } } } else { for (int i = 0; i < max; i++) {
+			 * DSEServer s = sal.get(i); if (!ignoreHost(s, ignoredHosts) &&
+			 * !usedRacks.contains(s.rack)) { usedRacks.add(s.rack);
+			 * if(!pools[s.id].isSuspect()) al.add(pools[s.id]); } } } } if
+			 * (al.size() < max) { if (sal.size() < max) { for (DSEServer s :
+			 * sal) { if (!ignoreHost(s, ignoredHosts)) al.add(pools[s.id]); } }
+			 * else { for (int i = 0; i < max; i++) { DSEServer s = sal.get(i);
+			 * if (!ignoreHost(s, ignoredHosts)) al.add(pools[s.id]); } } }
+			 */
 		} finally {
 			l.unlock();
 		}
 		return al;
-	}
-	
-	private boolean ignoreHost(DSEServer s, byte[] ignoredHosts) {
-		if (ignoredHosts == null)
-			return false;
-		else {
-			for (byte b : ignoredHosts) {
-				if (b == s.id)
-					return true;
-			}
-			return false;
-		}
 	}
 
 	public void close() {
@@ -227,7 +188,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		channel.close();
 		disp.stop();
 	}
-	
+
 	private void setServerWeighting() {
 		this.wr = new WeightedRandomServer();
 		this.wr.init(sal);
@@ -271,7 +232,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						l.unlock();
 						l = this.pl.writeLock();
 						l.lock();
-						if (pools[s.id] == null) {
+						if (pools[s.id] == null && Main.DSEClusterDirectIO) {
 							SDFSLogger.getLog().debug(
 									"creating pool for " + s.id);
 							pools[s.id] = s.createPool();
@@ -330,7 +291,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = new Boolean(true);
 			break;
 		}
-		
+
 		case NetworkCMDS.RUN_CLAIM: {
 			SDFSLogger.getLog().debug("recieved claim chunks cmd");
 			rtrn = null;
@@ -389,31 +350,20 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 	public List<Address> getServers(byte max, byte[] ignoredHosts) {
 		ReadLock l = this.sl.readLock();
-	l.lock();
-	try {
-		return this.wr.getAddresses(max, ignoredHosts);
-	}finally {
-		l.unlock();
-	}
-		/*
-		ArrayList<Address> al = new ArrayList<Address>();
-		ReadLock l = this.sl.readLock();
 		l.lock();
-		if (sal.size() < max) {
-			for (DSEServer s : sal) {
-				if (!ignoreHost(s, ignoredHosts))
-					al.add(s.address);
-			}
-		} else {
-			for (int i = 0; i < max; i++) {
-				DSEServer s = sal.get(i);
-				if (!ignoreHost(s, ignoredHosts))
-					al.add(s.address);
-			}
+		try {
+			return this.wr.getAddresses(max, ignoredHosts);
+		} finally {
+			l.unlock();
 		}
-		l.unlock();
-		return al;
-		*/
+		/*
+		 * ArrayList<Address> al = new ArrayList<Address>(); ReadLock l =
+		 * this.sl.readLock(); l.lock(); if (sal.size() < max) { for (DSEServer
+		 * s : sal) { if (!ignoreHost(s, ignoredHosts)) al.add(s.address); } }
+		 * else { for (int i = 0; i < max; i++) { DSEServer s = sal.get(i); if
+		 * (!ignoreHost(s, ignoredHosts)) al.add(s.address); } } l.unlock();
+		 * return al;
+		 */
 	}
 
 	public Address getServer(byte[] slist, int start) throws IOException {
@@ -447,8 +397,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		else
 			return al;
 	}
-
-	
 
 	@Override
 	public void block() {
@@ -575,11 +523,11 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						+ Boolean.toString(this.peermaster));
 		synchronized (serverState) {
 			Iterator<Address> iter = serverState.keySet().iterator();
-			
+
 			boolean ccp = false;
-				if(sal.size() < Main.volume.getClusterCopies())
-					ccp = true;
-			
+			if (sal.size() < Main.volume.getClusterCopies())
+				ccp = true;
+
 			while (iter.hasNext()) {
 				Address addr = iter.next();
 				if (!new_view.containsMember(addr)) {
@@ -602,16 +550,20 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (s.volumeName != null)
 							volumes.put(s.volumeName, null);
 					}
-					try {
-						pools[s.id].close();
-
-					} catch (Exception e) {
-						SDFSLogger.getLog().debug("unable to shutdown pool", e);
-					} finally {
+					if (Main.DSEClusterDirectIO) {
 						l = this.pl.writeLock();
-						l.lock();
-						pools[s.id] = null;
-						l.unlock();
+						try {
+
+							l.lock();
+							pools[s.id].close();
+
+						} catch (Exception e) {
+							SDFSLogger.getLog().debug(
+									"unable to shutdown pool", e);
+						} finally {
+							pools[s.id] = null;
+							l.unlock();
+						}
 					}
 				}
 			}
@@ -620,11 +572,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						.getLog()
 						.warn("Will not be able to fulfill block redundancy requirements. Current number of DSE Servers is less than "
 								+ Main.volume.getClusterCopies());
-			else if(ccp)
+			else if (ccp)
 				SDFSLogger
-				.getLog()
-				.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is [" +sal.size() + "] and cluster write requirement is "
-						+ Main.volume.getClusterCopies());
+						.getLog()
+						.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is ["
+								+ sal.size()
+								+ "] and cluster write requirement is "
+								+ Main.volume.getClusterCopies());
 		}
 		SDFSLogger.getLog().debug(
 				server + " - size : " + serverState.size()
@@ -665,8 +619,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l.unlock();
 					l = this.pl.writeLock();
 					l.lock();
-					if (pools[s.id] == null) {
+					if (pools[s.id] == null && Main.DSEClusterDirectIO) {
 						SDFSLogger.getLog().debug("creating pool for " + s.id);
+
 						pools[s.id] = s.createPool();
 					}
 					l.unlock();
@@ -682,8 +637,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					}
 				}
 			}
-			SDFSLogger.getLog().info("in receive  " + 
-					server + " - size : " + serverState.size());
+			SDFSLogger.getLog()
+					.info("in receive  " + server + " - size : "
+							+ serverState.size());
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to get recieve msg", e);
 		}
@@ -707,11 +663,11 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					.objectFromStream(new DataInputStream(input));
 			boolean ccp = false;
 			synchronized (serverState) {
-				if(sal.size() < Main.volume.getClusterCopies())
+				if (sal.size() < Main.volume.getClusterCopies())
 					ccp = true;
 				serverState.clear();
 				serverState.putAll(list);
-				
+
 				Iterator<DSEServer> iter = serverState.values().iterator();
 				while (iter.hasNext()) {
 					DSEServer s = iter.next();
@@ -722,7 +678,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						Lock _pl = this.pl.writeLock();
 						_pl.lock();
 						try {
-							if (pools[s.id] == null) {
+							if (pools[s.id] == null && Main.DSEClusterDirectIO) {
 								pools[s.id] = s.createPool();
 							} else {
 								SDFSLogger.getLog().debug(
@@ -778,11 +734,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 							.getLog()
 							.warn("Will not be able to fulfill block redundancy requirements. Current number of DSE Servers is less than "
 									+ Main.volume.getClusterCopies());
-				else if(ccp)
+				else if (ccp)
 					SDFSLogger
-					.getLog()
-					.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is [" +sal.size() + "] and cluster write requirement is "
-							+ Main.volume.getClusterCopies());
+							.getLog()
+							.info("Will now be able to fulfill block redundancy requirements. Current number of DSE Servers is ["
+									+ sal.size()
+									+ "] and cluster write requirement is "
+									+ Main.volume.getClusterCopies());
 			}
 			SDFSLogger.getLog().debug(
 					"received state (" + list.size() + " state");
@@ -853,7 +811,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 	public void addSelfToState() throws IOException {
 		synchronized (serverState) {
-			
+
 			serverState.put(server.address, server);
 			if (server.serverType == DSEServer.SERVER) {
 				Lock l = this.ssl.writeLock();

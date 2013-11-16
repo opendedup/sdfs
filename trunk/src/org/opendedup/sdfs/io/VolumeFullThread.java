@@ -28,13 +28,14 @@ public class VolumeFullThread implements Runnable {
 		}
 
 	}
-	
+
 	public synchronized boolean isFull() throws Exception {
 		long avail = vol.pathF.getUsableSpace();
-		if(avail < Volume.minFree) {
-			SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail + "]");
+		if (avail < Volume.minFree) {
+			SDFSLogger.getLog().warn(
+					"Drive is almost full space left is [" + avail + "]");
 			return true;
-			
+
 		}
 		if (vol.fullPercentage < 0 || vol.currentSize == 0)
 			return false;

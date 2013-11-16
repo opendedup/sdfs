@@ -27,13 +27,13 @@ public class BulkFetchChunkCmd implements IOCmd {
 	@SuppressWarnings("unchecked")
 	public void executeCmd(DataInputStream is, DataOutputStream os)
 			throws IOException {
-		
+
 		ByteArrayOutputStream bos = null;
 		bos = new ByteArrayOutputStream();
 		ObjectOutputStream obj_out = new ObjectOutputStream(bos);
 		obj_out.writeObject(hashes);
-		byte [] sh = CompressionUtils.compressSnappy(bos.toByteArray());       
-		//byte [] sh = bos.toByteArray();  
+		byte[] sh = CompressionUtils.compressSnappy(bos.toByteArray());
+		// byte [] sh = bos.toByteArray();
 		SDFSLogger.getLog().debug("Sent bulkfetch [" + sh.length + "]");
 		os.write(NetworkCMDS.BULK_FETCH_CMD);
 		os.writeInt(sh.length);
@@ -48,15 +48,16 @@ public class BulkFetchChunkCmd implements IOCmd {
 		if (size == -1) {
 			throw new IOException("One of the Requested hashes does not exist.");
 		}
-		byte [] us = new byte [size];
+		byte[] us = new byte[size];
 		is.readFully(us);
 		SDFSLogger.getLog().debug("Recieved bulkfetch [" + us.length + "]");
 		us = CompressionUtils.decompressSnappy(us);
-		SDFSLogger.getLog().debug("Recieved bulkfetch uncompressed [" + us.length + "]");
+		SDFSLogger.getLog().debug(
+				"Recieved bulkfetch uncompressed [" + us.length + "]");
 		ByteArrayInputStream bin = new ByteArrayInputStream(us);
 		ObjectInputStream obj_in = new ObjectInputStream(bin);
 		try {
-			chunks = (ArrayList<HashChunk>)obj_in.readObject();
+			chunks = (ArrayList<HashChunk>) obj_in.readObject();
 		} catch (ClassNotFoundException e) {
 			throw new IOException(e);
 		} finally {

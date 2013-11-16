@@ -152,8 +152,9 @@ public class IOMonitor implements java.io.Serializable {
 	}
 
 	public byte[] toByteArray() {
-		byte [] ip = this.iopProfile.getBytes();
-		ByteBuffer buf = ByteBuffer.wrap(new byte[8+8+8+8+4 + ip.length +4+4+4+4+8+8+8+4]);
+		byte[] ip = this.iopProfile.getBytes();
+		ByteBuffer buf = ByteBuffer.wrap(new byte[8 + 8 + 8 + 8 + 4 + ip.length
+				+ 4 + 4 + 4 + 4 + 8 + 8 + 8 + 4]);
 		buf.putLong(this.virtualBytesWritten);
 		buf.putLong(this.actualBytesWritten);
 		buf.putLong(this.bytesRead);
@@ -204,9 +205,11 @@ public class IOMonitor implements java.io.Serializable {
 		root.setAttribute("max-readops", Integer.toString(this.riops));
 		root.setAttribute("max-writeops", Integer.toString(this.wiops));
 		root.setAttribute("max-iops", Integer.toString(this.iops));
-		root.setAttribute("max-readmbps", Long.toString(this.rbps/(1024*1024)));
-		root.setAttribute("max-writembps", Long.toString(this.wbps/(1024*1024)));
-		root.setAttribute("max-mbps", Long.toString(this.bps/(1024*1024)));
+		root.setAttribute("max-readmbps",
+				Long.toString(this.rbps / (1024 * 1024)));
+		root.setAttribute("max-writembps",
+				Long.toString(this.wbps / (1024 * 1024)));
+		root.setAttribute("max-mbps", Long.toString(this.bps / (1024 * 1024)));
 		root.setAttribute("io-qos", Integer.toString(this.qos));
 		root.setAttribute("io-profile", this.iopProfile);
 		return root;
@@ -253,7 +256,7 @@ public class IOMonitor implements java.io.Serializable {
 	public void setIops(int iops, boolean propigateEvent) {
 		this.iops = iops;
 	}
-	
+
 	public int getQos() {
 		return iops;
 	}

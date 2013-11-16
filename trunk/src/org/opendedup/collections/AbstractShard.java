@@ -9,7 +9,8 @@ public interface AbstractShard {
 
 	public abstract byte[] nextKey() throws IOException;
 
-	public abstract byte[] nextClaimedKey(boolean clearClaim) throws IOException;
+	public abstract byte[] nextClaimedKey(boolean clearClaim)
+			throws IOException;
 
 	public abstract long nextClaimedValue(boolean clearClaim)
 			throws IOException;
@@ -41,15 +42,17 @@ public interface AbstractShard {
 	 * @param obj
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
-	 * @throws KeyNotFoundException 
+	 * @throws KeyNotFoundException
 	 */
-	public abstract boolean isClaimed(byte[] key) throws KeyNotFoundException,IOException;
+	public abstract boolean isClaimed(byte[] key) throws KeyNotFoundException,
+			IOException;
 
 	public abstract boolean update(byte[] key, long value) throws IOException;
 
 	public abstract boolean remove(byte[] key) throws IOException;
 
-	public abstract boolean put(byte[] key, long value) throws HashtableFullException;
+	public abstract boolean put(byte[] key, long value)
+			throws HashtableFullException;
 
 	public abstract int getEntries();
 

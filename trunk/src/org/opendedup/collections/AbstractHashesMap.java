@@ -6,7 +6,7 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface AbstractHashesMap {
-	
+
 	public abstract long endStartingPosition();
 
 	public abstract long getAllocatedRam();
@@ -43,18 +43,18 @@ public interface AbstractHashesMap {
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
 
-	public abstract long removeRecords(long ms, boolean forceRun,SDFSEvent evt)
+	public abstract long removeRecords(long ms, boolean forceRun, SDFSEvent evt)
 			throws IOException;
 
 	public abstract void sync() throws IOException;
 
 	public abstract void close();
-	
-	public abstract void initCompact()throws IOException;
-	
-	public abstract void commitCompact(boolean force)throws IOException;
-	
-	public abstract void rollbackCompact()throws IOException;
+
+	public abstract void initCompact() throws IOException;
+
+	public abstract void commitCompact(boolean force) throws IOException;
+
+	public abstract void rollbackCompact() throws IOException;
 
 	public abstract void init(long maxSize, String fileName)
 			throws IOException, HashtableFullException;

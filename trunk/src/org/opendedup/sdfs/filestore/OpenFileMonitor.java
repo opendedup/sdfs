@@ -61,7 +61,11 @@ public class OpenFileMonitor implements Runnable {
 								if (df != null) {
 									DedupFileStore.getDedupFile(
 											df.getMetaFile()).forceClose();
-									SDFSLogger.getLog().debug("Closing [" +df.getMetaFile().getPath() + "] because its stale");
+									SDFSLogger.getLog().debug(
+											"Closing ["
+													+ df.getMetaFile()
+															.getPath()
+													+ "] because its stale");
 								}
 							} catch (Exception e) {
 								SDFSLogger
@@ -81,8 +85,10 @@ public class OpenFileMonitor implements Runnable {
 						}
 					} catch (NoSuchFileException e) {
 						try {
-							SDFSLogger.getLog().warn("OpenFile Monitor could not find file " + df.getMetaFile().getPath());
-							//df.forceClose();
+							SDFSLogger.getLog().warn(
+									"OpenFile Monitor could not find file "
+											+ df.getMetaFile().getPath());
+							// df.forceClose();
 						} catch (Exception e1) {
 
 						}

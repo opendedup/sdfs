@@ -2,9 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -47,7 +44,6 @@ public class HashStore {
 	private String name;
 	// Lock for hash queries
 	// private ReentrantLock cacheLock = new ReentrantLock();
-	
 
 	// The chunk store used to store the actual deduped data;
 	// private AbstractChunkStore chunkStore = null;
@@ -85,9 +81,7 @@ public class HashStore {
 			e.printStackTrace();
 		}
 		// this.initChunkStore();
-		SDFSLogger.getLog().info(
-				"Cache Size = " + Main.chunkStorePageSize
-						);
+		SDFSLogger.getLog().info("Cache Size = " + Main.chunkStorePageSize);
 		SDFSLogger.getLog().info("Total Entries " + +bdb.getSize());
 		SDFSLogger.getLog().info("Added " + this.name);
 		this.closed = false;
@@ -154,7 +148,8 @@ public class HashStore {
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		try {
-			SDFSLogger.getLog().info("Loading hashdb class " + Main.hashesDBClass);
+			SDFSLogger.getLog().info(
+					"Loading hashdb class " + Main.hashesDBClass);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath());
@@ -171,7 +166,7 @@ public class HashStore {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.exit(-1);
 		}
-		
+
 	}
 
 	/**
@@ -217,8 +212,9 @@ public class HashStore {
 		this.bdb.claimRecords(evt);
 	}
 
-	public long evictChunks(long time, boolean forceRun,SDFSEvent evt) throws IOException {
-		return this.bdb.removeRecords(time, forceRun,evt);
+	public long evictChunks(long time, boolean forceRun, SDFSEvent evt)
+			throws IOException {
+		return this.bdb.removeRecords(time, forceRun, evt);
 	}
 
 	/**
@@ -240,7 +236,8 @@ public class HashStore {
 				ChunkData cm = new ChunkData(chunk.getName(),
 						Main.chunkStorePageSize, chunk.getData());
 				written = bdb.put(cm);
-				//SDFSLogger.getLog().debug("wrote hash " + StringUtils.getHexString(chunk.getName()) + " = " +written);
+				// SDFSLogger.getLog().debug("wrote hash " +
+				// StringUtils.getHexString(chunk.getName()) + " = " +written);
 
 			} catch (IOException e) {
 				SDFSLogger.getLog().fatal(

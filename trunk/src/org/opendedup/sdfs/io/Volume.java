@@ -2,13 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
-
-
-
-
-
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,7 +26,8 @@ public class Volume implements java.io.Serializable {
 	static long tbc = 1099511627776L;
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
-	static final long minFree = 2147483648L; //Leave at least 2 GB Free on the drive.
+	static final long minFree = 2147483648L; // Leave at least 2 GB Free on the
+												// drive.
 	private static final long serialVersionUID = 5505952237500542215L;
 	private final ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
@@ -74,19 +68,20 @@ public class Volume implements java.io.Serializable {
 		return allowExternalSymlinks;
 	}
 
-	public void setAllowExternalSymlinks(boolean allowExternalSymlinks, boolean propigateEvent) {
+	public void setAllowExternalSymlinks(boolean allowExternalSymlinks,
+			boolean propigateEvent) {
 		this.allowExternalSymlinks = allowExternalSymlinks;
 	}
 
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public Volume(Element vol,String path) throws IOException {
+	public Volume(Element vol, String path) throws IOException {
 		this.configPath = path;
 		pathF = new File(vol.getAttribute("path"));
 
@@ -96,39 +91,44 @@ public class Volume implements java.io.Serializable {
 		this.path = pathF.getPath();
 		capString = vol.getAttribute("capacity");
 		this.capacity = StringUtils.parseSize(capString);
-		if(vol.hasAttribute("name"))
+		if (vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
 		else
 			this.name = pathF.getParentFile().getName();
-		if(vol.hasAttribute("use-dse-size"))
-			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
-		if(vol.hasAttribute("cluster-id"))
+		if (vol.hasAttribute("use-dse-size"))
+			this.useDSESize = Boolean.parseBoolean(vol
+					.getAttribute("use-dse-size"));
+		if (vol.hasAttribute("cluster-id"))
 			this.uuid = vol.getAttribute("cluster-id");
 		else
 			this.uuid = RandomGUID.getGuid();
-		if(vol.hasAttribute("use-dse-capacity"))
-			this.useDSECapacity = Boolean.parseBoolean(vol.getAttribute("use-dse-capacity"));
-		if(vol.hasAttribute("use-perf-mon"))
-			this.usePerfMon = Boolean.parseBoolean(vol.getAttribute("use-perf-mon"));
-		if(vol.hasAttribute("perf-mon-file"))
+		if (vol.hasAttribute("use-dse-capacity"))
+			this.useDSECapacity = Boolean.parseBoolean(vol
+					.getAttribute("use-dse-capacity"));
+		if (vol.hasAttribute("use-perf-mon"))
+			this.usePerfMon = Boolean.parseBoolean(vol
+					.getAttribute("use-perf-mon"));
+		if (vol.hasAttribute("perf-mon-file"))
 			this.perfMonFile = vol.getAttribute("perf-mon-file");
 		else
-			this.perfMonFile = "/var/log/sdfs/volume-" +this.name + "-perf.json";
+			this.perfMonFile = "/var/log/sdfs/volume-" + this.name
+					+ "-perf.json";
 		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
 		if (vol.hasAttribute("duplicate-bytes"))
 			this.duplicateBytes = Long.parseLong(vol
 					.getAttribute("duplicate-bytes"));
 		if (vol.hasAttribute("read-bytes"))
-			this.readBytes= Double.parseDouble(vol.getAttribute("read-bytes"));
+			this.readBytes = Double.parseDouble(vol.getAttribute("read-bytes"));
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes = Long.parseLong(vol
 					.getAttribute("write-bytes"));
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));
-			if(this.fullPercentage > 1)
-				this.fullPercentage =this.fullPercentage/100;
-			SDFSLogger.getLog().info("Volume write threshold is " + this.fullPercentage);
+			if (this.fullPercentage > 1)
+				this.fullPercentage = this.fullPercentage / 100;
+			SDFSLogger.getLog().info(
+					"Volume write threshold is " + this.fullPercentage);
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
 		}
 		if (vol.hasAttribute("closed-gracefully"))
@@ -137,14 +137,16 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));
-		if(vol.hasAttribute("cluster-block-copies")) {
-			this.clusterCopies = Byte.valueOf(vol.getAttribute("cluster-block-copies"));
-			if(this.clusterCopies >7) {
+		if (vol.hasAttribute("cluster-block-copies")) {
+			this.clusterCopies = Byte.valueOf(vol
+					.getAttribute("cluster-block-copies"));
+			if (this.clusterCopies > 7) {
 				this.clusterCopies = 7;
 			}
 		}
-		if(vol.hasAttribute("cluster-rack-aware")) {
-			this.clusterRackAware = Boolean.parseBoolean(vol.getAttribute("cluster-rack-aware"));
+		if (vol.hasAttribute("cluster-rack-aware")) {
+			this.clusterRackAware = Boolean.parseBoolean(vol
+					.getAttribute("cluster-rack-aware"));
 		}
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
@@ -154,7 +156,7 @@ public class Volume implements java.io.Serializable {
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
 	}
-	
+
 	public Volume() {
 		// TODO Auto-generated constructor stub
 	}
@@ -162,36 +164,38 @@ public class Volume implements java.io.Serializable {
 	private void startThreads() {
 		this.writer = new VolumeConfigWriterThread(this.configPath);
 		new VolumeFullThread(this);
-		if(this.usePerfMon)
+		if (this.usePerfMon)
 			this.ioMeter = new VolumeIOMeter(this);
 	}
 
 	public long getCapacity() {
-		if(this.useDSECapacity)
-			return HCServiceProxy.getMaxSize()
-					* HCServiceProxy.getPageSize();
+		if (this.useDSECapacity)
+			return HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize();
 		else
 			return capacity;
 	}
 
-	public void setCapacity(long capacity, boolean propigateEvent) throws Exception {
-		if(capacity <= this.currentSize)
-			throw new IOException("Cannot resize volume to something less than current size. Current Size [" + this.currentSize + "] requested capacity [" + capacity + "]");
+	public void setCapacity(long capacity, boolean propigateEvent)
+			throws Exception {
+		if (capacity <= this.currentSize)
+			throw new IOException(
+					"Cannot resize volume to something less than current size. Current Size ["
+							+ this.currentSize + "] requested capacity ["
+							+ capacity + "]");
 		this.capacity = capacity;
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
 		writer.writeConfig();
-		
+
 	}
-	
+
 	public void setCapacity(String capString) throws Exception {
 		this.setCapacity(StringUtils.parseSize(capString), true);
 		this.capString = capString;
 	}
 
 	public long getCurrentSize() {
-		if(this.useDSESize)
-			return HCServiceProxy.getSize()
-					* HCServiceProxy.getPageSize();
+		if (this.useDSESize)
+			return HCServiceProxy.getSize() * HCServiceProxy.getPageSize();
 		else
 			return currentSize;
 	}
@@ -201,21 +205,15 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public boolean isFull() {
-		return
-				this.volumeFull;
-				/*
-		long avail = pathF.getUsableSpace();
-		if(avail < minFree) {
-			SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail + "]");
-			return true;
-			
-		}
-		if (this.fullPercentage < 0 || this.currentSize == 0)
-			return false;
-		else {
-			return (this.currentSize > this.absoluteLength);
-		}
-		*/
+		return this.volumeFull;
+		/*
+		 * long avail = pathF.getUsableSpace(); if(avail < minFree) {
+		 * SDFSLogger.getLog().warn("Drive is almost full space left is [" +
+		 * avail + "]"); return true;
+		 * 
+		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false;
+		 * else { return (this.currentSize > this.absoluteLength); }
+		 */
 	}
 
 	public void setPath(String path) {
@@ -240,13 +238,12 @@ public class Volume implements java.io.Serializable {
 	public boolean isClosedGracefully() {
 		return closedGracefully;
 	}
-	
+
 	public void setUsePerfMon(boolean use, boolean propigateEvent) {
-		if(this.usePerfMon == true && use == false) {
+		if (this.usePerfMon == true && use == false) {
 			this.ioMeter.close();
 			this.ioMeter = null;
-		}
-		else if(this.usePerfMon == false && use == true) {
+		} else if (this.usePerfMon == false && use == true) {
 			this.ioMeter = new VolumeIOMeter(this);
 		}
 		this.usePerfMon = use;
@@ -258,12 +255,12 @@ public class Volume implements java.io.Serializable {
 
 	public void setClosedGracefully(boolean closedGracefully) {
 		this.closedGracefully = closedGracefully;
-		if(this.closedGracefully) {
+		if (this.closedGracefully) {
 			this.writer.stop();
-			if(this.usePerfMon)
+			if (this.usePerfMon)
 				this.ioMeter.close();
 		}
-			
+
 	}
 
 	public long getTotalBlocks() {
@@ -273,7 +270,7 @@ public class Volume implements java.io.Serializable {
 	public long getUsedBlocks() {
 		return (this.getCurrentSize() / this.blockSize);
 	}
-	
+
 	public double getReadOperations() {
 		return readOperations;
 	}
@@ -287,13 +284,13 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addWIO(boolean propigateEvent) {
-		if(this.writeOperations == Long.MAX_VALUE)
+		if (this.writeOperations == Long.MAX_VALUE)
 			this.writeOperations = 0;
 		this.writeOperations++;
 	}
-	
+
 	public void addRIO(boolean propigateEvent) {
-		if(this.readOperations == Long.MAX_VALUE)
+		if (this.readOperations == Long.MAX_VALUE)
 			this.readOperations = 0;
 		this.readOperations++;
 	}
@@ -317,13 +314,16 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("cluster-id", this.uuid);
-		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
-		root.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
+		root.setAttribute("allow-external-links",
+				Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("use-dse-capacity",
+				Boolean.toString(this.useDSECapacity));
 		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("perf-mon-file", this.perfMonFile);
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		root.setAttribute("cluster-rack-aware", Boolean.toString(this.clusterRackAware));		
+		root.setAttribute("cluster-rack-aware",
+				Boolean.toString(this.clusterRackAware));
 		return root;
 	}
 
@@ -348,16 +348,19 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("writeops", Double.toString(this.writeOperations));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
-		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("allow-external-links",
+				Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("perf-mon-file", this.perfMonFile);
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		root.setAttribute("cluster-rack-aware", Boolean.toString(this.clusterRackAware));
+		root.setAttribute("cluster-rack-aware",
+				Boolean.toString(this.clusterRackAware));
 		return doc;
 	}
 
-	public void addVirtualBytesWritten(long virtualBytesWritten, boolean propigateEvent) {
+	public void addVirtualBytesWritten(long virtualBytesWritten,
+			boolean propigateEvent) {
 		this.vbLock.lock();
 		this.addWIO(true);
 		this.virtualBytesWritten += virtualBytesWritten;
@@ -369,7 +372,7 @@ public class Volume implements java.io.Serializable {
 	public double getVirtualBytesWritten() {
 		return virtualBytesWritten;
 	}
-	
+
 	public void addDuplicateBytes(long duplicateBytes, boolean propigateEvent) {
 		this.dbLock.lock();
 		this.duplicateBytes += duplicateBytes;

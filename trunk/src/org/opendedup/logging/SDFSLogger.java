@@ -1,8 +1,6 @@
 package org.opendedup.logging;
 
-import java.io.IOException
-;
-
+import java.io.IOException;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.RollingFileAppender;
@@ -36,12 +34,12 @@ public class SDFSLogger {
 	public static Logger getLog() {
 		return log;
 	}
-	
+
 	public static void infoConsoleMsg(String msg) {
 		System.out.println(msg);
 		log.info(msg);
 	}
-	
+
 	public static Logger getBasicLog() {
 		return basicLog;
 	}

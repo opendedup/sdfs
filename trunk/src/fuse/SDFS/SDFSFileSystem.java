@@ -645,9 +645,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
-		//SDFSLogger.getLog().debug("writing " + buf.capacity());
+		// SDFSLogger.getLog().debug("writing " + buf.capacity());
 		// Thread.currentThread().setName("21 "+Long.toString(System.currentTimeMillis()));
-		
+
 		try {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);

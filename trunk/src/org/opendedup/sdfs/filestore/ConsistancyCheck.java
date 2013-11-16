@@ -18,10 +18,15 @@ public class ConsistancyCheck {
 			int count = 0;
 			System.out
 					.println("Running Consistancy Check on DSE, this may take a while");
-			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
-			SDFSEvent evt = SDFSEvent.consistancyCheckEvent("Running Consistancy Check on DSE, this may take a while",Main.mountEvent);
-			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE",store.size()/Main.CHUNK_LENGTH,System.out);
-			evt.maxCt = store.size()/Main.CHUNK_LENGTH;
+			SDFSLogger.getLog().warn(
+					"Running Consistancy Check on DSE, this may take a while");
+			SDFSEvent evt = SDFSEvent.consistancyCheckEvent(
+					"Running Consistancy Check on DSE, this may take a while",
+					Main.mountEvent);
+			CommandLineProgressBar bar = new CommandLineProgressBar(
+					"Scanning DSE", store.size() / Main.CHUNK_LENGTH,
+					System.out);
+			evt.maxCt = store.size() / Main.CHUNK_LENGTH;
 			long currentCount = 0;
 			while (data != null) {
 				count++;
@@ -36,7 +41,7 @@ public class ConsistancyCheck {
 				}
 				evt.curCt = currentCount;
 				data = store.getNextChunck();
-				if(data != null) {
+				if (data != null) {
 					data.recoverd = true;
 					currentCount++;
 				}
@@ -57,7 +62,5 @@ public class ConsistancyCheck {
 					"Unable to recover records because " + e.toString(), e);
 		}
 	}
-	
-	
 
 }

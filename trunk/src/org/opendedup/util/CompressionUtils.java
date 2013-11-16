@@ -15,10 +15,10 @@ import java.util.zip.Inflater;
 
 public class CompressionUtils {
 	static {
-		byte[] b; 
-			b = Snappy.compress(new byte[4096]);
-			Snappy.uncompress(b, 0,b.length);
-		
+		byte[] b;
+		b = Snappy.compress(new byte[4096]);
+		Snappy.uncompress(b, 0, b.length);
+
 	}
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
@@ -67,18 +67,19 @@ public class CompressionUtils {
 		byte[] decompressedData = bos.toByteArray();
 		return decompressedData;
 	}
-	
+
 	public static byte[] compressSnappy(byte[] input) throws IOException {
 		return Snappy.compress(input);
 	}
 
 	public static byte[] decompressSnappy(byte[] input) throws IOException {
-		return Snappy.uncompress(input,0,input.length);
+		return Snappy.uncompress(input, 0, input.length);
 	}
-	
-	public static void main(String [] args) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		String t = "This is a test";
-		System.out.println(new String(decompressSnappy(compressSnappy(t.getBytes()))));
+		System.out.println(new String(decompressSnappy(compressSnappy(t
+				.getBytes()))));
 	}
 
 }

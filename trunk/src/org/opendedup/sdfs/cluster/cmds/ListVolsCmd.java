@@ -2,9 +2,6 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
-
-
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,13 +18,11 @@ import org.opendedup.sdfs.cluster.ClusterSocket;
 public class ListVolsCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private HashMap<String,Address> results = new HashMap<String,Address>();
-	
+	private HashMap<String, Address> results = new HashMap<String, Address>();
 
 	public ListVolsCmd() {
-		opts = new RequestOptions(ResponseMode.GET_ALL,
-				0);
-		
+		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
+
 	}
 
 	@Override
@@ -36,23 +31,29 @@ public class ListVolsCmd implements IOPeerCmd {
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.LIST_VOLUMES);
 		try {
-			RspList<Object> lst = soc.getDispatcher().castMessage(null, new Message(null,
-					null, buf.array()), opts);
-			for(Rsp<Object> rsp : lst) {
-				if(rsp.hasException()) {
-					SDFSLogger.getLog().error("List Volume Exception thrown for " + rsp.getSender());
+			RspList<Object> lst = soc.getDispatcher().castMessage(null,
+					new Message(null, null, buf.array()), opts);
+			for (Rsp<Object> rsp : lst) {
+				if (rsp.hasException()) {
+					SDFSLogger.getLog().error(
+							"List Volume Exception thrown for "
+									+ rsp.getSender());
 					throw rsp.getException();
-				} else if(rsp.wasSuspected() | rsp.wasUnreachable()) {
-					SDFSLogger.getLog().error("List Volume Host unreachable Exception thrown for " + rsp.getSender());
-				}
-				else {
-					if(rsp.getValue() != null) {
-						SDFSLogger.getLog().debug("List completed for " +rsp.getSender() + " returned=" +rsp.getValue());
+				} else if (rsp.wasSuspected() | rsp.wasUnreachable()) {
+					SDFSLogger.getLog().error(
+							"List Volume Host unreachable Exception thrown for "
+									+ rsp.getSender());
+				} else {
+					if (rsp.getValue() != null) {
+						SDFSLogger.getLog().debug(
+								"List completed for " + rsp.getSender()
+										+ " returned=" + rsp.getValue());
 						@SuppressWarnings("unchecked")
-						ArrayList<String> rst = (ArrayList<String>)rsp.getValue();
-						for(String vol: rst) {
-							if(!this.results.containsKey(vol)) {
-								FindVolOwnerCmd cmd =  new FindVolOwnerCmd(vol);
+						ArrayList<String> rst = (ArrayList<String>) rsp
+								.getValue();
+						for (String vol : rst) {
+							if (!this.results.containsKey(vol)) {
+								FindVolOwnerCmd cmd = new FindVolOwnerCmd(vol);
 								cmd.executeCmd(soc);
 								Address addr = cmd.getResults();
 								this.results.put(vol, addr);
@@ -67,13 +68,12 @@ public class ListVolsCmd implements IOPeerCmd {
 		}
 	}
 
-
 	@Override
 	public byte getCmdID() {
 		return NetworkCMDS.LIST_VOLUMES;
 	}
-	
-	public HashMap<String,Address> getResults() {
+
+	public HashMap<String, Address> getResults() {
 		return this.results;
 	}
 

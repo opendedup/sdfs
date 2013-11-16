@@ -2,10 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
 import java.util.ArrayList;
-
-
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
@@ -19,7 +16,7 @@ import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-public class HashChunkService implements HashChunkServiceInterface{
+public class HashChunkService implements HashChunkServiceInterface {
 
 	private double kBytesRead;
 	private double kBytesWrite;
@@ -32,7 +29,8 @@ public class HashChunkService implements HashChunkServiceInterface{
 	private int MAX_UNCOMITTEDCHUNKS = 100;
 	private HashStore hs = null;
 	private AbstractChunkStore fileStore = null;
-	//private HashClientPool hcPool = null;
+
+	// private HashClientPool hcPool = null;
 
 	/**
 	 * @return the chunksFetched
@@ -74,8 +72,8 @@ public class HashChunkService implements HashChunkServiceInterface{
 		return fileStore;
 	}
 
-	public boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean compressed) throws IOException,
+	public boolean writeChunk(byte[] hash, byte[] aContents, int position,
+			int len, boolean compressed) throws IOException,
 			HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
@@ -98,27 +96,31 @@ public class HashChunkService implements HashChunkServiceInterface{
 			return true;
 		}
 	}
-	
+
 	public boolean localHashExists(byte[] hash) throws IOException {
 		return hs.hashExists(hash);
 	}
-	
-	public void remoteFetchChunks(ArrayList<String> al,String server,String password,int port,boolean useSSL) throws IOException, HashtableFullException {
-			HCServer hserver = new HCServer(server,port,false,false,useSSL);
-			HashClient hc = new HashClient(hserver,"replication",password,(byte)0,null);
-			try {
-				ArrayList<HashChunk> hck = hc.fetchChunks(al);
-				for(int i=0;i<hck.size();i++) {
-					HashChunk _hc = hck.get(i);
-					writeChunk(_hc.getName(), _hc.getData(), 0, _hc.getData().length, false);
-				}
-			} finally {
-				hc.close();
+
+	public void remoteFetchChunks(ArrayList<String> al, String server,
+			String password, int port, boolean useSSL) throws IOException,
+			HashtableFullException {
+		HCServer hserver = new HCServer(server, port, false, false, useSSL);
+		HashClient hc = new HashClient(hserver, "replication", password,
+				(byte) 0, null);
+		try {
+			ArrayList<HashChunk> hck = hc.fetchChunks(al);
+			for (int i = 0; i < hck.size(); i++) {
+				HashChunk _hc = hck.get(i);
+				writeChunk(_hc.getName(), _hc.getData(), 0,
+						_hc.getData().length, false);
 			}
+		} finally {
+			hc.close();
+		}
 	}
 
-	public boolean hashExists(byte[] hash)
-			throws IOException, HashtableFullException {
+	public boolean hashExists(byte[] hash) throws IOException,
+			HashtableFullException {
 		boolean exists = hs.hashExists(hash);
 		return exists;
 	}
@@ -144,9 +146,9 @@ public class HashChunkService implements HashChunkServiceInterface{
 		hs.processHashClaims(evt);
 	}
 
-	public long removeStailHashes(long ms, boolean forceRun,SDFSEvent evt)
+	public long removeStailHashes(long ms, boolean forceRun, SDFSEvent evt)
 			throws IOException {
-		return hs.evictChunks(ms, forceRun,evt);
+		return hs.evictChunks(ms, forceRun, evt);
 	}
 
 	public void commitChunks() {
@@ -193,10 +195,11 @@ public class HashChunkService implements HashChunkServiceInterface{
 	}
 
 	public void init() throws IOException {
-		if(Main.runCompact) {
-			DSECompaction.runCheck(hs.bdb,(FileChunkStore)this.getChuckStore());
+		if (Main.runCompact) {
+			DSECompaction.runCheck(hs.bdb,
+					(FileChunkStore) this.getChuckStore());
 			SDFSLogger.getLog().info("Finished compaction");
-			
+
 		}
 	}
 
@@ -205,7 +208,7 @@ public class HashChunkService implements HashChunkServiceInterface{
 		SDFSLogger.getLog().info(
 				"DSE did not close gracefully, running consistancy check");
 		ConsistancyCheck.runCheck(hs.bdb, getChuckStore());
-		
+
 	}
 
 }

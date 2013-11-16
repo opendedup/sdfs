@@ -27,16 +27,19 @@ public class MountSDFS {
 				true,
 				"sdfs volume configuration file to mount \ne.g. "
 						+ OSValidator.getConfigPath() + "dedup-volume-cfg.xml");
-		options.addOption(
-				"nossl",
-				false,
+		options.addOption("nossl", false,
 				"If set ssl will not be used sdfscli traffic.");
 		options.addOption("c", false,
 				"sdfs volume will be compacted and then exit");
-		options.addOption("forcecompact", false,
+		options.addOption(
+				"forcecompact",
+				false,
 				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
-		options.addOption("rv", true, "comma separated list of remote volumes that should also be accounted for when doing garbage collection. " +
-				"If not entered the volume will attempt to identify other volumes in the cluster.");
+		options.addOption(
+				"rv",
+				true,
+				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
+						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -65,12 +68,13 @@ public class MountSDFS {
 		}
 		if (cmd.hasOption("c")) {
 			Main.runCompact = true;
-			if(cmd.hasOption("forcecompact"))
+			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
-		if(cmd.hasOption("rv")) {
-			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),",");
-			while(st.hasMoreTokens()) {
+		if (cmd.hasOption("rv")) {
+			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
+					",");
+			while (st.hasMoreTokens()) {
 				volumes.add(st.nextToken());
 			}
 		}
@@ -102,8 +106,8 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		if(cmd.hasOption("nossl")) {
-				useSSL = false;
+		if (cmd.hasOption("nossl")) {
+			useSSL = false;
 		}
 
 		if (volumeConfigFile == null) {
@@ -113,11 +117,13 @@ public class MountSDFS {
 			System.exit(-1);
 		}
 		File cf = new File(volumeConfigFile);
-		String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";
-		Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
+		String fn = cf.getName().substring(0, cf.getName().lastIndexOf("."))
+				+ ".log";
+		Main.logPath = OSValidator.getProgramBasePath() + File.separator
+				+ "logs" + File.separator + fn;
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
-		SDFSService sdfsService = new SDFSService(volumeConfigFile,volumes);
+		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 
 		try {
 			sdfsService.start(useSSL);

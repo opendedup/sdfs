@@ -92,10 +92,10 @@ public class NetworkDSEServer implements Runnable {
 				SDFSLogger.getLog().info(
 						"listening on encryted channel " + addr.toString());
 			} else {
-				
+
 				serverSocket = new ServerSocket();
-				//serverSocket.setReceiveBufferSize(128 * 1024);
-				
+				// serverSocket.setReceiveBufferSize(128 * 1024);
+
 				serverSocket.bind(addr);
 				SDFSLogger.getLog().info(
 						"listening on unencryted channel " + addr.toString());
@@ -119,7 +119,7 @@ public class NetworkDSEServer implements Runnable {
 				clientSocket = serverSocket.accept();
 				clientSocket.setKeepAlive(true);
 				clientSocket.setTcpNoDelay(false);
-				//clientSocket.setSendBufferSize(128 * 1024);
+				// clientSocket.setSendBufferSize(128 * 1024);
 				new ClientThread(clientSocket).start();
 			} catch (IOException e) {
 				if (!serverSocket.isClosed())
@@ -138,7 +138,6 @@ public class NetworkDSEServer implements Runnable {
 			serverSocket.close();
 		} catch (Exception e) {
 		}
-		
 
 		System.out.println("#### Network Service Shut down completed ####");
 	}

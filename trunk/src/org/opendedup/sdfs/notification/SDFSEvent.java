@@ -19,8 +19,7 @@ import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class SDFSEvent implements
-java.io.Serializable {
+public class SDFSEvent implements java.io.Serializable {
 	/**
 	 * 
 	 */
@@ -35,7 +34,7 @@ java.io.Serializable {
 	public long startTime;
 	public long endTime = -1;
 	public long actionCount = 0;
-	public boolean success= true;
+	public boolean success = true;
 	public String uid = null;
 	public String extendedInfo = "";
 	private ArrayList<SDFSEvent> children = new ArrayList<SDFSEvent>();
@@ -43,20 +42,24 @@ java.io.Serializable {
 	public transient static final Type GC = new Type("Garbage Collection");
 	public transient static final Type FLUSHALL = new Type("Flush All Buffers");
 	public transient static final Type FDISK = new Type("File Check");
-	public transient static final Type CRCK = new Type("Cluster Redundancy Check");
+	public transient static final Type CRCK = new Type(
+			"Cluster Redundancy Check");
 	public transient static final Type WAIT = new Type("Waiting to Run Again");
 	public transient static final Type CLAIMR = new Type("Claim Records");
 	public transient static final Type REMOVER = new Type("Remove Records");
-	public transient static final Type AIMPORT = new Type("Replication Meta-Data File Import");
+	public transient static final Type AIMPORT = new Type(
+			"Replication Meta-Data File Import");
 	public transient static final Type IMPORT = new Type("Replication Import");
-	public transient static final Type AOUT = new Type("Replication Archive Out");
+	public transient static final Type AOUT = new Type(
+			"Replication Archive Out");
 	public transient static final Type MOUNT = new Type("Mount Volume");
 	public transient static final Type COMPACT = new Type("Compaction");
 	public transient static final Type UMOUNT = new Type("Unmount Volume");
-	public transient static final Type LHASHDB = new Type("Loading Hash Database Task");
+	public transient static final Type LHASHDB = new Type(
+			"Loading Hash Database Task");
 	public transient static final Type FSCK = new Type("Consistancy Check");
-	public transient static final Type MIMPORT = new Type("Replication Block Data"
-			+ " Import");
+	public transient static final Type MIMPORT = new Type(
+			"Replication Block Data" + " Import");
 	public transient static final Type FIXDSE = new Type("Volume Recovery Task");
 	public transient static final Type SNAP = new Type("Take Snapshot");
 	public transient static final Type EXPANDVOL = new Type("Expand Volume");
@@ -73,7 +76,7 @@ java.io.Serializable {
 	SimpleDateFormat format = new SimpleDateFormat(
 			"EEE MMM dd HH:mm:ss zzz yyyy");
 
-	protected SDFSEvent(Type type, String target, String shortMsg,Level level) {
+	protected SDFSEvent(Type type, String target, String shortMsg, Level level) {
 		this.type = type;
 		this.target = target;
 		this.startTime = System.currentTimeMillis();
@@ -82,7 +85,7 @@ java.io.Serializable {
 		tasks.put(uid, this);
 		this.level = level;
 		SDFSEventLogger.log(this);
-		
+
 	}
 
 	public void endEvent(String msg, Level level) {
@@ -92,14 +95,14 @@ java.io.Serializable {
 		this.endTime = System.currentTimeMillis();
 		SDFSEventLogger.log(this);
 	}
-	
+
 	public void addChild(SDFSEvent evt) throws IOException {
-		if(evt.uid.equalsIgnoreCase(this.uid))
+		if (evt.uid.equalsIgnoreCase(this.uid))
 			throw new IOException("Cannot add child with same event id");
 		evt.puid = this.uid;
 		this.children.add(evt);
 	}
-	
+
 	public ArrayList<SDFSEvent> getChildren() {
 		return this.children;
 	}
@@ -109,9 +112,9 @@ java.io.Serializable {
 	}
 
 	public void endEvent(String msg, Level level, Exception e) {
-		for(int i  = 0;i<this.children.size();i++) {
-			if(this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent(msg,level,e);
+		for (int i = 0; i < this.children.size(); i++) {
+			if (this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent(msg, level, e);
 		}
 		this.shortMsg = msg + " Exception : " + e.toString();
 		this.level = level;
@@ -122,8 +125,8 @@ java.io.Serializable {
 	}
 
 	public void endEvent(String msg) {
-		for(int i  = 0;i<this.children.size();i++) {
-			if(this.children.get(i).endTime == -1)
+		for (int i = 0; i < this.children.size(); i++) {
+			if (this.children.get(i).endTime == -1)
 				this.children.get(i).endEvent(msg);
 		}
 		this.shortMsg = msg;
@@ -133,85 +136,79 @@ java.io.Serializable {
 		SDFSEventLogger.log(this);
 	}
 
-	public static SDFSEvent archiveImportEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(AIMPORT, getTarget(),
-				shortMsg,RUNNING);
+	public static SDFSEvent archiveImportEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(AIMPORT, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
-	
+
 	public static SDFSEvent importEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(),
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent testEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(TEST, "atestvolume",
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(TEST, "atestvolume", shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent perfMonEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(PERFMON, getTarget(),
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(PERFMON, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent umountEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(UMOUNT, getTarget(),
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(UMOUNT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent archiveOutEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(AOUT, getTarget(),
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(AOUT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent compactEvent() {
 		SDFSEvent event = new SDFSEvent(COMPACT, getTarget(),
-				"Running Compaction on DSE, this may take a while",RUNNING);
+				"Running Compaction on DSE, this may take a while", RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent mountEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(MOUNT, getTarget(),
-				shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(MOUNT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
 
-	public static SDFSEvent consistancyCheckEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(FSCK, getTarget(),
-				shortMsg,RUNNING);
+	public static SDFSEvent consistancyCheckEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(FSCK, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
 
-	public static SDFSEvent loadHashDBEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(LHASHDB, getTarget(),
-				shortMsg,RUNNING);
+	public static SDFSEvent loadHashDBEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(LHASHDB, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
-	
+
 	public static SDFSEvent flushAllBuffers() {
 		SDFSEvent event = new SDFSEvent(FLUSHALL, getTarget(),
-				"Flushing all buffers",RUNNING);
+				"Flushing all buffers", RUNNING);
 		return event;
 	}
 
 	public static SDFSEvent snapEvent(String shortMsg, File src)
 			throws IOException {
 
-		SDFSEvent event = new SDFSEvent(SNAP, getTarget(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(SNAP, getTarget(), shortMsg, RUNNING);
 		if (src.isDirectory())
 			event.maxCt = FileCounts.getCount(src, true);
 		else
@@ -219,71 +216,75 @@ java.io.Serializable {
 		return event;
 	}
 
-	public static BlockImportEvent metaImportEvent(String shortMsg,SDFSEvent evt) {
-		BlockImportEvent event = new BlockImportEvent(getTarget(),
-				shortMsg,RUNNING);
+	public static BlockImportEvent metaImportEvent(String shortMsg,
+			SDFSEvent evt) {
+		BlockImportEvent event = new BlockImportEvent(getTarget(), shortMsg,
+				RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
-	
+
 	public static SDFSEvent deleteFileEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(),
-				"File " + f.getPath() + " deleted",RUNNING);
-		event.endEvent(
-				"File " + f.getPath() + " deleted",INFO);
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File "
+				+ f.getPath() + " deleted", RUNNING);
+		event.endEvent("File " + f.getPath() + " deleted", INFO);
 		return event;
 	}
-	
+
 	public static SDFSEvent deleteFileFailedEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(),
-				"File " + f.getPath() + " delete failed",WARN);
-		event.endEvent("File " + f.getPath() + " delete failed",WARN);
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File "
+				+ f.getPath() + " delete failed", WARN);
+		event.endEvent("File " + f.getPath() + " delete failed", WARN);
 		return event;
 	}
 
-	public static SDFSEvent claimInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(CLAIMR, getTarget(), shortMsg,RUNNING);
+	public static SDFSEvent claimInfoEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(CLAIMR, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
 
-	public static SDFSEvent waitEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(WAIT, getTarget(), shortMsg,RUNNING);
+	public static SDFSEvent waitEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(WAIT, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
 
-	public static SDFSEvent removeInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(REMOVER, getTarget(),
-				shortMsg,RUNNING);
+	public static SDFSEvent removeInfoEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(REMOVER, getTarget(), shortMsg, RUNNING);
 		event.level = INFO;
 		try {
-		evt.addChild(event);
-		}catch(Exception e) {}
+			evt.addChild(event);
+		} catch (Exception e) {
+		}
 		return event;
 	}
 
 	public static SDFSEvent gcInfoEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(GC, getTarget(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(GC, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
 
-	public static SDFSEvent fdiskInfoEvent(String shortMsg,SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg,RUNNING);
+	public static SDFSEvent fdiskInfoEvent(String shortMsg, SDFSEvent evt) {
+		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
-			}catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		return event;
 	}
-	
+
 	public static SDFSEvent crckInfoEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg,RUNNING);
+		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
 
@@ -365,16 +366,23 @@ java.io.Serializable {
 
 	public static SDFSEvent fromXML(Element el) {
 		SDFSEvent evt = null;
-		if(el.getAttribute("type").equalsIgnoreCase(MIMPORT.type)) {
-			BlockImportEvent _evt = new BlockImportEvent(el.getAttribute("target"), el.getAttribute("short-msg"),new Level(el.getAttribute("level")));
-			_evt.blocksImported = Long.parseLong(el.getAttribute("blocks-imported"));
-			_evt.bytesImported = Long.parseLong(el.getAttribute("bytes-imported"));
-			_evt.filesImported = Long.parseLong(el.getAttribute("files-imported"));
-			_evt.virtualDataImported = Long.parseLong(el.getAttribute("virtual-data-imported"));
+		if (el.getAttribute("type").equalsIgnoreCase(MIMPORT.type)) {
+			BlockImportEvent _evt = new BlockImportEvent(
+					el.getAttribute("target"), el.getAttribute("short-msg"),
+					new Level(el.getAttribute("level")));
+			_evt.blocksImported = Long.parseLong(el
+					.getAttribute("blocks-imported"));
+			_evt.bytesImported = Long.parseLong(el
+					.getAttribute("bytes-imported"));
+			_evt.filesImported = Long.parseLong(el
+					.getAttribute("files-imported"));
+			_evt.virtualDataImported = Long.parseLong(el
+					.getAttribute("virtual-data-imported"));
 			evt = _evt;
-		}else {
-		evt = new SDFSEvent(new Type(el.getAttribute("type")),
-				el.getAttribute("target"), el.getAttribute("short-msg"),new Level(el.getAttribute("level")));
+		} else {
+			evt = new SDFSEvent(new Type(el.getAttribute("type")),
+					el.getAttribute("target"), el.getAttribute("short-msg"),
+					new Level(el.getAttribute("level")));
 		}
 		evt.maxCt = Long.parseLong(el.getAttribute("max-count"));
 		evt.curCt = Long.parseLong(el.getAttribute("current-count"));
@@ -427,8 +435,7 @@ java.io.Serializable {
 		return (Element) root.cloneNode(true);
 	}
 
-	public static class Level implements
-	java.io.Serializable{
+	public static class Level implements java.io.Serializable {
 		/**
 		 * 
 		 */
@@ -445,8 +452,7 @@ java.io.Serializable {
 		}
 	}
 
-	public static class Type implements
-	java.io.Serializable{
+	public static class Type implements java.io.Serializable {
 		/**
 		 * 
 		 */
@@ -462,11 +468,11 @@ java.io.Serializable {
 			return this.type;
 		}
 	}
-	
+
 	public static String getTarget() {
-		if(Main.standAloneDSE)
+		if (Main.standAloneDSE)
 			return "Storage node " + Main.DSEClusterMemberID;
-		else 
+		else
 			return Main.volume.getName();
 	}
 

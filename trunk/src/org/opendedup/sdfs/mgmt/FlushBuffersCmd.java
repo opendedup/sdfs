@@ -21,7 +21,7 @@ public class FlushBuffersCmd implements XtendedCmd {
 							+ "] is a directory. This command cannot be executed on directories");
 		else if (cmd.equalsIgnoreCase("file")) {
 			try {
-				
+
 				MetaFileStore.getMF(f.getPath()).getDedupFile().writeCache();
 				return "SUCCESS Flush File : Write Cache Flushed for " + file;
 			} catch (Exception e) {
@@ -37,7 +37,7 @@ public class FlushBuffersCmd implements XtendedCmd {
 				return "SUCCESS Flush All Files : Write Cache Flushed";
 			} catch (Exception e) {
 				String errorMsg = "ERROR Flush All Files Failed : ";
-				evt.endEvent("ERROR Flush All Files Failed",SDFSEvent.WARN,e);
+				evt.endEvent("ERROR Flush All Files Failed", SDFSEvent.WARN, e);
 				SDFSLogger.getLog().error(errorMsg, e);
 				throw new IOException("ERROR Flush All Files Failed : "
 						+ errorMsg + " because: " + e.toString());

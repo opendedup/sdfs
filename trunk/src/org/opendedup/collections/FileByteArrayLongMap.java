@@ -59,7 +59,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 	private ReentrantLock iterlock = new ReentrantLock();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#iterInit()
 	 */
 	@Override
@@ -69,7 +71,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		this.iterlock.unlock();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#nextKey()
 	 */
 	@Override
@@ -85,11 +89,13 @@ public class FileByteArrayLongMap implements AbstractShard {
 				this.mapped.clear(iterPos);
 			}
 			iterPos++;
-		} 
+		}
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#nextClaimedKey(boolean)
 	 */
 	@Override
@@ -118,7 +124,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#nextClaimedValue(boolean)
 	 */
 	@Override
@@ -156,10 +164,14 @@ public class FileByteArrayLongMap implements AbstractShard {
 		byte[] key = this.nextKey();
 		while (key != null)
 			key = this.nextKey();
-		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + mapped.cardinality());
+		SDFSLogger.getLog().warn(
+				"Recovered Hashmap " + this.path + " entries = "
+						+ mapped.cardinality());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#getBigestKey()
 	 */
 	@Override
@@ -182,7 +194,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return _bgst;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#setUp()
 	 */
 	@Override
@@ -192,11 +206,11 @@ public class FileByteArrayLongMap implements AbstractShard {
 		vRaf = FileChannel.open(Paths.get(path + ".pos"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
-		
+
 		tRaf = FileChannel.open(Paths.get(path + ".ctimes"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
-		
+
 		this.kFC = FileChannel.open(Paths.get(path + ".keys"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
@@ -246,7 +260,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return bgst;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
 	@Override
@@ -268,7 +284,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#isClaimed(byte[])
 	 */
 	@Override
@@ -290,7 +308,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#update(byte[], long)
 	 */
 	@Override
@@ -322,7 +342,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#remove(byte[])
 	 */
 	@Override
@@ -344,20 +366,20 @@ public class FileByteArrayLongMap implements AbstractShard {
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long fp = values.getLong();
-				ChunkData ck = new ChunkData(fp,key);
-				if(ck.setmDelete(true)) {
-				fp = fp * -1;
-				this.values.position(pos);
-				this.values.putLong(fp);
-				this.times.position(pos);
-				this.times.putLong(0);
-				pos = (pos / 8);
-				this.claims.clear(pos);
-				this.mapped.clear(pos);
-				// this.store.position(pos);
-				// this.store.put((byte)0);
-				return true;
-				}else
+				ChunkData ck = new ChunkData(fp, key);
+				if (ck.setmDelete(true)) {
+					fp = fp * -1;
+					this.values.position(pos);
+					this.values.putLong(fp);
+					this.times.position(pos);
+					this.times.putLong(0);
+					pos = (pos / 8);
+					this.claims.clear(pos);
+					this.mapped.clear(pos);
+					// this.store.position(pos);
+					// this.store.put((byte)0);
+					return true;
+				} else
 					return false;
 			}
 		} catch (Exception e) {
@@ -372,7 +394,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return hash % size;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#hashFunc3(int)
 	 */
 	public int hashFunc3(int hash) {
@@ -527,7 +551,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 				"No free or removed slots available. Key set full?!!");
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
@@ -560,7 +586,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#getEntries()
 	 */
 	@Override
@@ -568,7 +596,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return this.mapped.cardinality();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#get(byte[])
 	 */
 	@Override
@@ -576,7 +606,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return this.get(key, true);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#get(byte[], boolean)
 	 */
 	@Override
@@ -608,7 +640,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#size()
 	 */
 	@Override
@@ -616,7 +650,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return this.mapped.cardinality();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#close()
 	 */
 	@Override
@@ -667,8 +703,8 @@ public class FileByteArrayLongMap implements AbstractShard {
 	}
 
 	public static void main(String[] args) throws Exception {
-		AbstractShard b = new FileByteArrayLongMap(
-				"/opt/sdfs/hashesaaa", 10000000, (short) 16);
+		AbstractShard b = new FileByteArrayLongMap("/opt/sdfs/hashesaaa",
+				10000000, (short) 16);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
 		byte[] hash = null;
@@ -733,7 +769,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 				+ " ms " + vals);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#claimRecords()
 	 */
 	@Override
@@ -765,7 +803,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 		return k;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#sync()
 	 */
 	@Override
@@ -783,10 +823,12 @@ public class FileByteArrayLongMap implements AbstractShard {
 		fout.close();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.AbstractShard#removeNextOldRecord(long)
 	 */
-	
+
 	@Override
 	public synchronized long removeNextOldRecord(long time) throws IOException {
 		while (iterPos < size) {
@@ -806,7 +848,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 							keys.put(REMOVED);
 							this.values.position(iterPos * 8);
 							val = this.values.getLong();
-							ChunkData ck = new ChunkData(val,key);
+							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
 							this.values.position(iterPos * 8);
 							this.values.putLong(0);

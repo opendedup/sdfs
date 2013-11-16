@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
@@ -22,67 +21,66 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
-	//public static VolumeConfigWriterThread wth = null;
-	
-	
-	
+	// public static VolumeConfigWriterThread wth = null;
+
 	public static boolean firstRun = true;
 
 	public static boolean logToConsole = false;
-	
+
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
-	
+
 	public static String sdfsPassword = "";
-	
+
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
-	
+
 	public static boolean sdfsCliRequireAuth = false;
 	public static int sdfsCliPort = 6442;
-	public static boolean sdfsCliEnabled  = true;
+	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
 	public static boolean runCompact = false;
 
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
-	
+
 	public static SDFSEvent mountEvent = null;
-	
+
 	public static String DSEClusterID = "sdfs-cluster";
 	public static byte DSEClusterMemberID = 0;
 	public static int ClusterRSPTimeout = 500;
 	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	public static boolean DSEClusterEnabled = false;
 	public static String DSEClusterVolumeList = "/etc/sdfs/cluster-volumes.xml";
+	public static boolean DSEClusterDirectIO = true;
 	/**
 	 * DSE Host for front end file systems
 	 */
 	public static String DSERemoteHostName = null;
-	
+
 	public static boolean standAloneDSE = false;
-	
+
 	/**
 	 * DSE Host port for front end file systems
 	 */
 	public static int DSERemotePort = 2222;
-	
+
 	/**
 	 * DSE Host use SSL for front end file systems
 	 */
 	public static boolean DSERemoteUseSSL = true;
-	
+
 	/**
 	 * DSE Host use SSL for front end file systems
 	 */
 	public static boolean DSERemoteCompress = false;
-	
+
 	public static String DSEPassword = "admin";
-	
+
 	public static String DSEClusterNodeRack = "rack1";
 	public static String DSEClusterNodeLocation = "pdx";
-	
+
 	/**
 	 * Class path when launching sdfs
 	 */
@@ -183,7 +181,7 @@ public class Main {
 	 * is used on the client.
 	 */
 	public static int PING_TIME = 15 * 1000;
-	
+
 	/**
 	 * The maximum number of writable chunks @see
 	 * com.annesam.sdfs.io.WritableCacheBuffer to keep in memory for a specific
@@ -243,7 +241,7 @@ public class Main {
 	 * is mounted. This is used on the client.
 	 */
 	public static int defaultGroup = 0;
-	
+
 	/**
 	 * The port the chunk store uses to listen of TCP and UDP connections. This
 	 * is used on the chunk store.
@@ -254,13 +252,13 @@ public class Main {
 	 * This is used on the chunk store.
 	 */
 	public static String serverHostName = "0.0.0.0";
-	
+
 	/**
 	 * The host name or IP that the chunk store network port will listen on.
 	 * This is used on the chunk store.
 	 */
 	public static boolean serverUseSSL = false;
-	
+
 	/**
 	 * The maximum number of results that a specific query will return if H2 is
 	 * being used. This is used on the chunk store and the client.
@@ -270,17 +268,17 @@ public class Main {
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
-	
+
 	/**
 	 * 
 	 */
 	public static double gcPFIncrement = .05;
-	
+
 	/**
 	 * The Volume mount point. This is used on the client.
 	 */
 	public static String volumeMountPoint;
-	
+
 	/**
 	 * Enable the DSE Network Server
 	 */
@@ -326,14 +324,13 @@ public class Main {
 	 * The awsSecretKey. This is used on the client.
 	 */
 	public static String cloudSecretKey = null;
-	
-	/**Azure login info**/
+
+	/** Azure login info **/
 	public static boolean AZUREChunkStore = false;
 	public static String AZURE_ACCOUNT_NAME = "MyAccountName";
 	public static String AZURE_ACCOUNT_KEY = "MyAccountKey";
 	public static String AZURE_BLOB_HOST_NAME = null;
-	
-	
+
 	/**
 	 * Compress AWS data using zlib
 	 */
@@ -355,7 +352,6 @@ public class Main {
 	 */
 	public static int chunkStorePageSize = 4096;
 
-
 	/**
 	 * If the Dedup Storage Engine is remote or local
 	 */
@@ -365,7 +361,6 @@ public class Main {
 	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean enableNetworkChunkStore = false;
-
 
 	/**
 	 * hash type can be tiger or murmur
@@ -378,12 +373,11 @@ public class Main {
 	 */
 	public static String fDkiskSchedule = "0 59 23 * * ?";
 
-
 	/**
 	 * Age, if older than, that data will be evicted from the Dedup Storage
 	 * Engine
 	 */
-	//public static int evictionAge = 3;
+	// public static int evictionAge = 3;
 	/**
 	 * Compressed Index
 	 */

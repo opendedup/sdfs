@@ -7,7 +7,8 @@ public class HCServer {
 	boolean compress;
 	boolean useSSL;
 
-	public HCServer(String hostName, int port, boolean useUDP, boolean compress,boolean useSSL) {
+	public HCServer(String hostName, int port, boolean useUDP,
+			boolean compress, boolean useSSL) {
 		this.hostName = hostName;
 		this.port = port;
 		this.useUDP = useUDP;
@@ -30,7 +31,7 @@ public class HCServer {
 	public int getPort() {
 		return port;
 	}
-	
+
 	public boolean isSSL() {
 		return this.useSSL;
 	}

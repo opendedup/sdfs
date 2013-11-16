@@ -1,7 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
-
 import java.util.Formatter;
 
 import org.w3c.dom.Document;
@@ -19,11 +17,11 @@ public class ProcessClusterVolumesList {
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));
 			else {
-				Element dse = (Element) root.getElementsByTagName("remote-volumes")
-						.item(0);
+				Element dse = (Element) root.getElementsByTagName(
+						"remote-volumes").item(0);
 				NodeList nl = dse.getElementsByTagName("volume");
-				for(int i = 0;i<nl.getLength();i++) {
-					Element el = (Element)nl.item(i);
+				for (int i = 0; i < nl.getLength(); i++) {
+					Element el = (Element) nl.item(i);
 					System.out.println(el.getAttribute("name"));
 				}
 			}

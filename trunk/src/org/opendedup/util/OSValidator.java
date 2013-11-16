@@ -28,7 +28,6 @@ public class OSValidator {
 		return (os.indexOf("win") >= 0);
 
 	}
-	
 
 	public static boolean isMac() {
 

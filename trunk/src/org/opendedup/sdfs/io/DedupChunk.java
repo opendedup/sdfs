@@ -21,7 +21,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private boolean writable = false;
 	private boolean doop = false;
 	private ReentrantLock lock = new ReentrantLock();
-	private byte [] hashloc;
+	private byte[] hashloc;
 
 	public DedupChunk(long position) {
 		this.position = position;
@@ -36,7 +36,8 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(byte[] hash, long position, int length, boolean newChunk,byte [] hashloc) {
+	public DedupChunk(byte[] hash, long position, int length, boolean newChunk,
+			byte[] hashloc) {
 		this.hash = hash;
 		this.length = length;
 		this.position = position;
@@ -56,7 +57,8 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(byte[] hash, byte[] data, long position, int length,byte [] hashloc) {
+	public DedupChunk(byte[] hash, byte[] data, long position, int length,
+			byte[] hashloc) {
 		this.hash = hash;
 		this.data = data;
 		this.length = length;
@@ -65,7 +67,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		this.hashloc = hashloc;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getHash()
 	 */
 
@@ -73,20 +77,22 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public byte[] getHash() {
 		return hash;
 	}
-	
+
 	public byte[] getReadChunk() throws IOException {
 		this.lock.lock();
 		try {
 			if (data != null)
 				return data;
 			else
-				return HCServiceProxy.fetchChunk(hash,hashloc);
+				return HCServiceProxy.fetchChunk(hash, hashloc);
 		} finally {
 			this.lock.unlock();
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getLength()
 	 */
 	@Override
@@ -94,7 +100,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return length;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getFilePosition()
 	 */
 	@Override
@@ -102,7 +110,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return position;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#setLength(int)
 	 */
 	@Override
@@ -110,7 +120,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		this.length = length;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#isNewChunk()
 	 */
 	@Override
@@ -118,7 +130,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return newChunk;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#setNewChunk(boolean)
 	 */
 	@Override
@@ -126,7 +140,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		this.newChunk = newChunk;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getChunk()
 	 */
 	@Override
@@ -135,16 +151,17 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		try {
 			if (data != null) {
 				return data;
-			}
-			else {
-				return HCServiceProxy.fetchChunk(hash,hashloc);
+			} else {
+				return HCServiceProxy.fetchChunk(hash, hashloc);
 			}
 		} finally {
 			this.lock.unlock();
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#setWritable(boolean)
 	 */
 	@Override
@@ -152,7 +169,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		this.writable = writable;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#isWritable()
 	 */
 
@@ -161,15 +180,19 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return writable;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#destroy()
 	 */
 	@Override
 	public void destroy() {
-		
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#setDoop(boolean)
 	 */
 	@Override
@@ -177,7 +200,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		this.doop = doop;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#isDoop()
 	 */
 	@Override
@@ -185,7 +210,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return doop;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#open()
 	 */
 	@Override
@@ -238,20 +265,20 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	@Override
 	public void flush() throws BufferClosedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void write(byte[] b, int pos) throws BufferClosedException,
 			IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void truncate(int len) throws BufferClosedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -263,19 +290,19 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	@Override
 	public void setDirty(boolean dirty) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void persist() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -287,7 +314,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	@Override
 	public void setPrevDoop(boolean prevDoop) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -299,7 +326,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public void setHashLoc(byte[] hashloc) {
 		this.hashloc = hashloc;
 	}
-	
+
 	@Override
 	public boolean isBatchProcessed() {
 		return false;

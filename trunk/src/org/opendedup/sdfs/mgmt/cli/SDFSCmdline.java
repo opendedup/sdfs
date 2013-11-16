@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
 import org.apache.commons.cli.CommandLine;
 
 import org.apache.commons.cli.HelpFormatter;
@@ -22,23 +21,26 @@ public class SDFSCmdline {
 			System.exit(1);
 		}
 		boolean quiet = false;
-		if(cmd.hasOption("debug"))
+		if (cmd.hasOption("debug"))
 			SDFSLogger.setLevel(0);
-		if(cmd.hasOption("nossl"))
+		if (cmd.hasOption("nossl"))
 			MgmtServerConnection.useSSL = false;
-		if(cmd.hasOption("server"))
+		if (cmd.hasOption("server"))
 			MgmtServerConnection.server = cmd.getOptionValue("server");
-		if(cmd.hasOption("password"))
+		if (cmd.hasOption("password"))
 			MgmtServerConnection.password = cmd.getOptionValue("password");
-		if(cmd.hasOption("port"))
-			MgmtServerConnection.port = Integer.parseInt(cmd.getOptionValue("port"));
-		
+		if (cmd.hasOption("port"))
+			MgmtServerConnection.port = Integer.parseInt(cmd
+					.getOptionValue("port"));
+
 		if (cmd.hasOption("file-info")) {
 			if (cmd.hasOption("file-path")) {
 				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
 
 			} else {
-				SDFSLogger.getBasicLog().warn("file info request failed. --file-path option is required");
+				SDFSLogger
+						.getBasicLog()
+						.warn("file info request failed. --file-path option is required");
 			}
 			System.exit(0);
 		}
@@ -55,11 +57,13 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if (cmd.hasOption("cluster-volume-remove")) {
-			ProcessClusterVolumeRemove.runCmd(cmd.getOptionValue("cluster-volume-remove"));
+			ProcessClusterVolumeRemove.runCmd(cmd
+					.getOptionValue("cluster-volume-remove"));
 			System.exit(0);
 		}
 		if (cmd.hasOption("cluster-volume-add")) {
-			ProcessClusterVolumeAdd.runCmd(cmd.getOptionValue("cluster-volume-add"));
+			ProcessClusterVolumeAdd.runCmd(cmd
+					.getOptionValue("cluster-volume-add"));
 			System.exit(0);
 		}
 		if (cmd.hasOption("cluster-make-gc-master")) {
@@ -78,22 +82,27 @@ public class SDFSCmdline {
 			ProcessDebugInfo.runCmd();
 			System.exit(0);
 		}
-		if(cmd.hasOption("perfmon-on")) {
+		if (cmd.hasOption("perfmon-on")) {
 			ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
 		}
-		if(cmd.hasOption("import-archive")) {
+		if (cmd.hasOption("import-archive")) {
 			String server = cmd.getOptionValue("replication-master");
 			String password = cmd.getOptionValue("replication-master-password");
 			int port = 2222;
 			int maxSz = -1;
-			if(cmd.hasOption("replication-master-port"))
-				port = Integer.parseInt(cmd.getOptionValue("replication-master-port"));
-			if(cmd.hasOption("replication-batch-size"))
-				maxSz = Integer.parseInt(cmd.getOptionValue("replication-batch-size"));
-			ProcessImportArchiveCmd.runCmd(cmd.getOptionValue("import-archive"), cmd.getOptionValue("file-path"),server,password,port,quiet,maxSz);
+			if (cmd.hasOption("replication-master-port"))
+				port = Integer.parseInt(cmd
+						.getOptionValue("replication-master-port"));
+			if (cmd.hasOption("replication-batch-size"))
+				maxSz = Integer.parseInt(cmd
+						.getOptionValue("replication-batch-size"));
+			ProcessImportArchiveCmd.runCmd(
+					cmd.getOptionValue("import-archive"),
+					cmd.getOptionValue("file-path"), server, password, port,
+					quiet, maxSz);
 		}
 		if (cmd.hasOption("archive-out")) {
-			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"),".");
+			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"), ".");
 		}
 
 		if (cmd.hasOption("snapshot")) {
@@ -101,7 +110,9 @@ public class SDFSCmdline {
 				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),
 						cmd.getOptionValue("snapshot-path"));
 			} else {
-				SDFSLogger.getBasicLog().warn("snapshot request failed. --file-path and --snapshot-path options are required");
+				SDFSLogger
+						.getBasicLog()
+						.warn("snapshot request failed. --file-path and --snapshot-path options are required");
 			}
 			System.exit(0);
 		}
@@ -110,7 +121,8 @@ public class SDFSCmdline {
 				ProcessFlushBuffersCmd.runCmd("file",
 						cmd.getOptionValue("file-path"));
 			} else {
-				SDFSLogger.getBasicLog().warn("flush file request failed. --file-path");
+				SDFSLogger.getBasicLog().warn(
+						"flush file request failed. --file-path");
 			}
 			System.exit(0);
 		}
@@ -123,7 +135,9 @@ public class SDFSCmdline {
 				ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"),
 						cmd.getOptionValue("dedup-file"));
 			} else {
-				SDFSLogger.getBasicLog().warn("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
+				SDFSLogger
+						.getBasicLog()
+						.warn("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
 			}
 			System.exit(0);
 		}
@@ -133,8 +147,7 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if (cmd.hasOption("change-password")) {
-			ProcessSetPasswordCmd.runCmd(cmd
-					.getOptionValue("change-password"));
+			ProcessSetPasswordCmd.runCmd(cmd.getOptionValue("change-password"));
 			System.exit(0);
 		}
 		if (cmd.hasOption("expandvolume")) {
@@ -150,23 +163,30 @@ public class SDFSCmdline {
 				.withDescription("Display these options.").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("server")
-				.withDescription("SDFS host location.").hasArg(true)
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("expandvolume")
-				.withDescription("Expand the local volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.").hasArg(true)
-				.create());
+				.withDescription("SDFS host location.").hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("expandvolume")
+				.withDescription(
+						"Expand the local volume, online, to a size in MB,GB, or TB \n e.g expandvolume=100GB. \nValues can be in MB,GB,TB.")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder.withLongOpt("change-password")
-				.withDescription("Change the administrative password.").hasArg(true)
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("password")
-				.withDescription("password to authenticate to SDFS CLI Interface for volume.").hasArg(true)
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("port")
-				.withDescription("SDFS CLI Interface tcp listening port for volume.").hasArg(true)
-				.create());
-		options.addOption(OptionBuilder.withLongOpt("perfmon-on")
-				.withDescription("Turn on or off the volume performance monitor.").hasArg(true).withArgName("true|false")
-				.create());
+				.withDescription("Change the administrative password.")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("password")
+				.withDescription(
+						"password to authenticate to SDFS CLI Interface for volume.")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("port")
+				.withDescription(
+						"SDFS CLI Interface tcp listening port for volume.")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("perfmon-on")
+				.withDescription(
+						"Turn on or off the volume performance monitor.")
+				.hasArg(true).withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("file-info")
 				.withDescription(
@@ -204,31 +224,29 @@ public class SDFSCmdline {
 				.withLongOpt("cluster-volume-remove")
 				.withDescription(
 						"Removes an unassociated volume in the cluster. "
-								+ "\n e.g. --cluster-volume-remove <vol-name>").hasArg(true)
-				.create());
+								+ "\n e.g. --cluster-volume-remove <vol-name>")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-volume-add")
 				.withDescription(
 						"Adds an unassociated volume in the cluster. "
-								+ "\n e.g. --cluster-volume-add <vol-name>").hasArg(true)
-				.create());
+								+ "\n e.g. --cluster-volume-add <vol-name>")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-make-gc-master")
 				.withDescription(
 						"Makes this host the current Garbage Collection Coordinator. "
-								+ "\n e.g. --cluster-make-gc-master").hasArg(true)
-				.create());
+								+ "\n e.g. --cluster-make-gc-master")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("snapshot")
 				.withDescription(
 						"Creates a snapshot for a particular file or folder.\n e.g. --snapshot "
 								+ "--file-path=<source-file> --snapshot-path=<snapshot-destination> ")
 				.hasArg(false).create());
-		options.addOption(OptionBuilder
-				.withLongOpt("debug")
-				.withDescription(
-						"makes output more verbose")
-				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("debug")
+				.withDescription("makes output more verbose").hasArg(false)
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-redundancy-check")
 				.withDescription(
@@ -238,8 +256,7 @@ public class SDFSCmdline {
 				.withLongOpt("archive-out")
 				.withDescription(
 						"Creates an archive tar for a particular file or folder and outputs the location.\n e.g. --archive-out "
-								+ "<source-file> ")
-				.hasArg(true).create());
+								+ "<source-file> ").hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("import-archive")
 				.withDescription(
@@ -255,8 +272,8 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-batch-size")
 				.withDescription(
-						"The size,in MB, of the batch that the relication client will request from the replication master. If ignored or set to <1 it will default " +
-						"to the what ever is on the replication client volume as the default. This is currently 30 MB. This will default to \"-1\" "
+						"The size,in MB, of the batch that the relication client will request from the replication master. If ignored or set to <1 it will default "
+								+ "to the what ever is on the replication client volume as the default. This is currently 30 MB. This will default to \"-1\" "
 								+ "--replication-batch-size=<size in MB> ")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
@@ -280,8 +297,8 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder
 				.withLongOpt("nossl")
 				.withDescription(
-						"If set, tries to connect to volume without ssl").hasArg(false)
-				.create());
+						"If set, tries to connect to volume without ssl")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-all-buffers")
 				.withDescription(
@@ -329,7 +346,7 @@ public class SDFSCmdline {
 			SDFSLogger.getBasicLog().warn(e.toString());
 			printHelp(buildOptions());
 		} catch (Exception e) {
-			SDFSLogger.getBasicLog().error("An error occured",e);
+			SDFSLogger.getBasicLog().error("An error occured", e);
 			System.exit(-1);
 		}
 	}

@@ -2,7 +2,6 @@ package org.opendedup.sdfs.replication;
 
 import java.io.File;
 
-
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.io.FileInputStream;
@@ -194,23 +193,19 @@ public class ReplicationService implements Serializable {
 			root.setAttribute("master-folder", this.remoteServerFolder);
 			root.setAttribute("slave-folder", this.mLocalServerFolder);
 			/*
-			root.setAttribute("result", impResults.getDocumentElement()
-					.getAttribute("status"));
-			root.setAttribute("result-msg", impResults.getDocumentElement()
-					.getAttribute("msg"));
-					*/
+			 * root.setAttribute("result", impResults.getDocumentElement()
+			 * .getAttribute("status")); root.setAttribute("result-msg",
+			 * impResults.getDocumentElement() .getAttribute("msg"));
+			 */
 			root.setAttribute("schedule-type", schedType);
 			root.setAttribute("cron-string", schedt);
 			/*
-			if (impResults.getDocumentElement()
-					.getElementsByTagName("replication-import").item(0) != null) {
-				Element iEl = (Element) impResults.getDocumentElement()
-						.getElementsByTagName("replication-import").item(0)
-						.cloneNode(true);
-				doc.adoptNode(iEl);
-				root.appendChild(iEl);
-			}
-			*/
+			 * if (impResults.getDocumentElement()
+			 * .getElementsByTagName("replication-import").item(0) != null) {
+			 * Element iEl = (Element) impResults.getDocumentElement()
+			 * .getElementsByTagName("replication-import").item(0)
+			 * .cloneNode(true); doc.adoptNode(iEl); root.appendChild(iEl); }
+			 */
 			SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd-HH-mm-ss");
 			String tmStr = df.format(new Date());
 			// Prepare the DOM document for writing
@@ -277,13 +272,14 @@ public class ReplicationService implements Serializable {
 		}
 	}
 
-	private void localArchiveImport(String server, int port,
-			String password, String archive, String path, String rserver,
-			String rpasswd, int rport) throws IOException {
+	private void localArchiveImport(String server, int port, String password,
+			String archive, String path, String rserver, String rpasswd,
+			int rport) throws IOException {
 		MgmtServerConnection.server = server;
 		MgmtServerConnection.password = password;
 		MgmtServerConnection.port = port;
-		ProcessImportArchiveCmd.runCmd(archive, path, rserver, rpasswd, rport, false, maxSz);
+		ProcessImportArchiveCmd.runCmd(archive, path, rserver, rpasswd, rport,
+				false, maxSz);
 
 	}
 
@@ -293,7 +289,7 @@ public class ReplicationService implements Serializable {
 		MgmtServerConnection.password = password;
 		MgmtServerConnection.port = port;
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
-		return ProcessArchiveOutCmd.runCmd(file,tempDir);
+		return ProcessArchiveOutCmd.runCmd(file, tempDir);
 
 	}
 
@@ -361,7 +357,7 @@ public class ReplicationService implements Serializable {
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			SDFSLogger.getLog().debug("Deleting File ["+file+"] ");
+			SDFSLogger.getLog().debug("Deleting File [" + file + "] ");
 			formatter.format("file=%s&cmd=%s&options=%s", file, "deletefile",
 					"");
 			Document doc = getResponse(this.localServer, this.localServerPort,

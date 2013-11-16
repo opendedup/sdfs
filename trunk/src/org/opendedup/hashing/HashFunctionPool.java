@@ -2,7 +2,6 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
-
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,7 +17,7 @@ public class HashFunctionPool {
 	public static final String TIGER_24 = "tiger24";
 	public static final String MURMUR3_16 = "murmur3_128";
 	public static int hashLength = 16;
-	
+
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
 			hashLength = Tiger16HashEngine.getHashLenth();
