@@ -24,6 +24,8 @@ public class SDFSCmdline {
 		boolean quiet = false;
 		if(cmd.hasOption("debug"))
 			SDFSLogger.setLevel(0);
+		if(cmd.hasOption("nossl"))
+			MgmtServerConnection.useSSL = false;
 		if(cmd.hasOption("server"))
 			MgmtServerConnection.server = cmd.getOptionValue("server");
 		if(cmd.hasOption("password"))
@@ -274,6 +276,11 @@ public class SDFSCmdline {
 				.withDescription(
 						"Flushes to buffer of a praticular file.\n e.g. --flush-file-buffers "
 								+ "--file-path=<file to flush>").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("nossl")
+				.withDescription(
+						"If set, tries to connect to volume without ssl").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-all-buffers")
