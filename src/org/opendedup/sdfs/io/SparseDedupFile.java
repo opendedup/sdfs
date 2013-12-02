@@ -312,9 +312,15 @@ public class SparseDedupFile implements DedupFile {
 				byte[] hash = null;
 				if (writeBuffer.isBatchProcessed()) {
 					hash = writeBuffer.getHash();
-					hashloc = HCServiceProxy.writeChunk(hash,
-							writeBuffer.getFlushedBuffer(),
-							writeBuffer.getHashLoc());
+					if (writeBuffer.isBatchwritten())
+						hashloc = writeBuffer.getHashLoc();
+					else {
+						hashloc = HCServiceProxy.writeChunk(hash,
+								writeBuffer.getFlushedBuffer(),
+								writeBuffer.getHashLoc());
+						writeBuffer.setHashLoc(hashloc);
+					}
+					
 				} else {
 					AbstractHashEngine hc = hashPool.borrowObject();
 					try {
@@ -329,15 +335,16 @@ public class SparseDedupFile implements DedupFile {
 							writeBuffer.getFlushedBuffer(),
 							writeBuffer.getLength(), writeBuffer.capacity(),
 							mf.isDedup());
+					writeBuffer.setHashLoc(hashloc);
 
 				}
-				if (hashloc[1] == 0)
+				if (hashloc[1] == 0 && !Main.chunkStoreLocal)
 					throw new IOException(
 							"unable to write chunk hash location at 1 = "
 									+ hashloc[1]);
 				if (hashloc[0] == 1)
 					doop = true;
-				writeBuffer.setHashLoc(hashloc);
+				
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
 				if (!doop) {

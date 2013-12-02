@@ -332,4 +332,10 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return false;
 	}
 
+	@Override
+	public boolean isBatchwritten() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

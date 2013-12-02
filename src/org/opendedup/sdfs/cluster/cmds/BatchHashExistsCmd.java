@@ -2,8 +2,8 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jgroups.Address;
@@ -33,8 +33,9 @@ public class BatchHashExistsCmd implements IOClientCmd {
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.NO_FC);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
+		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		try {
 			byte[] ar = Util.objectToByteBuffer(hashes);
 			byte[] b = new byte[1 + 4 + ar.length];
@@ -42,10 +43,11 @@ public class BatchHashExistsCmd implements IOClientCmd {
 			buf.put(NetworkCMDS.BATCH_HASH_EXISTS_CMD);
 			buf.putInt(ar.length);
 			buf.put(ar);
-			List<Address> servers = soc.getServers();
-			RspList<Object> lst = soc.disp.castMessage(servers, new Message(
+			//List<Address> servers = soc.getServers();
+			RspList<Object> lst = soc.disp.castMessage(null, new Message(
 					null, null, buf.array()), opts);
-			for (SparseDataChunk ck : hashes) {
+			for (int i = 0;i< hashes.size();i++) {
+				SparseDataChunk ck = hashes.get(i);
 				if (ck != null)
 					ck.resetHashLoc();
 			}
@@ -66,7 +68,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 										+ rsp.getSender() + " returned="
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
-						ArrayList<Boolean> rst = (ArrayList<Boolean>) rsp
+						List<Boolean> rst = (List<Boolean>) rsp
 								.getValue();
 						byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {

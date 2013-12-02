@@ -49,11 +49,11 @@ public class Main {
 
 	public static String DSEClusterID = "sdfs-cluster";
 	public static byte DSEClusterMemberID = 0;
-	public static int ClusterRSPTimeout = 500;
+	public static int ClusterRSPTimeout = 1000;
 	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	public static boolean DSEClusterEnabled = false;
 	public static String DSEClusterVolumeList = "/etc/sdfs/cluster-volumes.xml";
-	public static boolean DSEClusterDirectIO = true;
+	public static boolean DSEClusterDirectIO = false;
 	/**
 	 * DSE Host for front end file systems
 	 */

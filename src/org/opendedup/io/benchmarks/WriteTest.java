@@ -31,7 +31,7 @@ public class WriteTest implements Runnable {
 	@Override
 	public void run() {
 		try {
-			long len = 1024L * 1024L * 1024L * size;
+			long len = 1024L * 1024L * size;
 			long sz = 0;
 			Path ps = Paths.get(path);
 			Files.deleteIfExists(ps);
@@ -64,7 +64,7 @@ public class WriteTest implements Runnable {
 	}
 
 	public float results() {
-		float mb = (size * 1024);
+		float mb = size;
 		float seconds = (duration / 1000);
 		float mbps = mb / seconds;
 		return mbps;
@@ -171,7 +171,7 @@ public class WriteTest implements Runnable {
 	public static void main(String[] args) throws IOException {
 		if (args.length != 7) {
 			System.out
-					.println("WriteTest <Path to write to> <File Size (GB)> <precent random data (0-100)> <Number of Parallel Runs> <Number of total runs> <Test Name> <Output File>");
+					.println("WriteTest <Path to write to> <File Size (MB)> <precent random data (0-100)> <Number of Parallel Runs> <Number of total runs> <Test Name> <Output File>");
 			System.exit(0);
 		}
 		int r = Integer.parseInt(args[4]);

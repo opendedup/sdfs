@@ -21,8 +21,6 @@ public interface HashChunkServiceInterface {
 			int position, int len, boolean compressed) throws IOException,
 			HashtableFullException;
 
-	public abstract boolean localHashExists(byte[] hash) throws IOException;
-
 	public abstract void remoteFetchChunks(ArrayList<String> al, String server,
 			String password, int port, boolean useSSL) throws IOException,
 			HashtableFullException;

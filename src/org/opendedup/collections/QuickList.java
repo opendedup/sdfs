@@ -1,14 +1,19 @@
 package org.opendedup.collections;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Collection;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.jgroups.util.Util;
 import org.opendedup.hashing.HashFunctionPool;
 
-public class QuickList<E> implements java.util.List<E> {
+public class QuickList<E> implements java.util.List<E>, Externalizable {
 
 	private int size = 0;
 	private int arraySize = 0;
@@ -20,6 +25,10 @@ public class QuickList<E> implements java.util.List<E> {
 	public QuickList(int size) {
 		this.arraySize = size;
 		array = this.newElementArray(this.arraySize);
+	}
+	
+	public QuickList() {
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -173,6 +182,43 @@ public class QuickList<E> implements java.util.List<E> {
 	public List<E> subList(int fromIndex, int toIndex) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void readExternal(ObjectInput arg0) throws IOException,
+			ClassNotFoundException {
+		this.arraySize = arg0.readInt();
+		this.size = arg0.readInt();
+		array = this.newElementArray(this.arraySize);
+		for(int i = 0;i<this.size;i++) {
+			this.array[i] = (E) arg0.readObject();
+		}
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput arg0) throws IOException {
+		arg0.writeInt(arraySize);
+		arg0.writeInt(size);
+		for(int i = 0;i<this.size;i++) {
+			arg0.writeObject(this.array[i]);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void main(String [] args) throws Exception {
+		QuickList<String> l = new QuickList<String>(10);
+		
+		l.add(0,"a");
+		l.add(1,null);
+		l.add(2, "b");
+		l.add(3,"c");
+		byte[] ar = Util.objectToByteBuffer(l);
+		QuickList<String> z = (QuickList<String>) Util.objectFromByteBuffer(ar);
+		for(int i = 0;i<z.size();i++) {
+			System.out.println(z.get(i));
+		}
+		
 	}
 
 }

@@ -81,8 +81,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 					+ "]");
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
-		boolean written = hs.addHashChunk(new HashChunk(hash, 0, len,
-				aContents, compressed));
+		boolean written = hs.addHashChunk(new HashChunk(hash, aContents, compressed));
 		if (written) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -95,10 +94,6 @@ public class HashChunkService implements HashChunkServiceInterface {
 			dupsFound++;
 			return true;
 		}
-	}
-
-	public boolean localHashExists(byte[] hash) throws IOException {
-		return hs.hashExists(hash);
 	}
 
 	public void remoteFetchChunks(ArrayList<String> al, String server,

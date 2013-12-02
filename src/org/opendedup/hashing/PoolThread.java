@@ -1,7 +1,7 @@
 package org.opendedup.hashing;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.util.concurrent.BlockingQueue;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +44,7 @@ public class PoolThread extends Thread {
 					}
 				} else {
 					if (ts > 0) {
-						SparseDataChunk[] cka = new SparseDataChunk[ts];
+						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(ts);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							runnable.startClose();
@@ -55,25 +55,45 @@ public class PoolThread extends Thread {
 								hash = hc.getHash(runnable.getFlushedBuffer());
 								SparseDataChunk ck = new SparseDataChunk(false,
 										hash, false, new byte[8]);
-								cka[i] = ck;
+								runnable.setHash(hash);
+								cks.add(i,ck);
 							} catch (BufferClosedException e) {
-								cka[i] = null;
+								cks.add(i,null);
 							} finally {
 								SparseDedupFile.hashPool.returnObject(hc);
 							}
 
 						}
-
-						ArrayList<SparseDataChunk> cks = new ArrayList<SparseDataChunk>(
-								Arrays.asList(cka));
 						HCServiceProxy.batchHashExists(cks);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							SparseDataChunk ck = cks.get(i);
 							if (ck != null) {
-								runnable.setHash(ck.getHash());
-								runnable.setHashLoc(ck.getHashLoc());
+								if (Arrays.equals(ck.getHash(),
+										runnable.getHash())) {
+									runnable.setHashLoc(ck.getHashLoc());
+									try {
+										runnable.endClose();
+									} catch (Exception e) {
+										SDFSLogger.getLog().warn(
+												"unable to close block", e);
+									}
+								}
+								else {
+									SDFSLogger.getLog().fatal(
+											"there is a hash mismatch!");
+								}
 							}
+						}
+						/*
+						try {
+						HCServiceProxy.batchWriteHash(tasks);
+						}catch (Exception e) {
+							SDFSLogger.getLog().warn(
+									"unable to run batch", e);
+						}
+						for (int i = 0; i < ts; i++) {
+							WritableCacheBuffer runnable = tasks.get(i);
 							try {
 								runnable.endClose();
 							} catch (Exception e) {
@@ -81,6 +101,7 @@ public class PoolThread extends Thread {
 										"unable to close block", e);
 							}
 						}
+						*/
 						cks = null;
 					}
 				}

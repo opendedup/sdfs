@@ -82,13 +82,14 @@ public class FileByteArrayLongMap implements AbstractShard {
 			byte[] key = new byte[FREE.length];
 			keys.position(iterPos * FREE.length);
 			keys.get(key);
+			iterPos++;
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				this.mapped.set(iterPos);
+				this.mapped.set(iterPos-1);
 				return key;
 			} else {
-				this.mapped.clear(iterPos);
+				this.mapped.clear(iterPos-1);
 			}
-			iterPos++;
+			
 		}
 		return null;
 	}

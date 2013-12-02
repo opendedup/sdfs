@@ -43,9 +43,11 @@ public class NetworkUnicastServer {
 		// Note that we can't choose a port less than 1023 if we are not
 		// privileged users (root)
 		try {
-
+			
 			InetSocketAddress addr = new InetSocketAddress(Main.serverHostName,
 					Main.serverPort);
+			SDFSLogger.getLog().info(
+					"############ Will Listen On " + addr.toString() + " ########################");
 			if (Main.serverUseSSL) {
 				String keydir = Main.hashDBStore + File.separator + "keys";
 				String key = keydir + File.separator + "dse_server.keystore";
@@ -102,13 +104,12 @@ public class NetworkUnicastServer {
 				SDFSLogger.getLog().info(
 						"listening on encryted channel " + addr.toString());
 			} else {
-
+				
 				serverSocket = new ServerSocket();
 				serverSocket.setPerformancePreferences(0, 1, 2);
 				serverSocket.setReceiveBufferSize(64 * 1024);
 				serverSocket.bind(addr);
-				SDFSLogger.getLog().info(
-						"listening on unencryted channel " + addr.toString());
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

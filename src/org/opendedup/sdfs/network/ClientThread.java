@@ -10,14 +10,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.util.CompressionUtils;
 
+import org.opendedup.collections.QuickList;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -58,6 +61,7 @@ public class ClientThread extends Thread {
 		clients.remove(client);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		DataOutputStream os = null;
@@ -139,6 +143,58 @@ public class ClientThread extends Thread {
 
 					}
 				}
+				if (cmd == NetworkCMDS.BATCH_WRITE_HASH_CMD) {
+					// long tm = System.currentTimeMillis();
+					byte[] arb = new byte[is.readInt()];
+					is.readFully(arb);
+					ByteArrayInputStream bis = new ByteArrayInputStream(arb);
+					ObjectInput in = null;
+					List<HashChunk> chunks = null;
+					try {
+						in = new ObjectInputStream(bis);
+						chunks = (List<HashChunk>) in.readObject();
+					} finally {
+						bis.close();
+						in.close();
+					}
+					QuickList<Boolean> rsults = new QuickList<Boolean>(
+							chunks.size());
+					for (int i = 0; i < chunks.size(); i++) {
+						try {
+							HashChunk ck = chunks.get(i);
+							if (ck != null) {
+								boolean dup = false;
+								byte[] b = HCServiceProxy.writeChunk(
+										ck.getName(), ck.getData(), 0,
+										ck.getData().length, true);
+								if (b[0] == 1)
+									dup = true;
+								rsults.add(i, Boolean.valueOf(dup));
+							} else
+								rsults.add(i, null);
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn(
+									"unable to find if hash exists", e);
+							rsults.add(i, Boolean.valueOf(false));
+						}
+					}
+					ByteArrayOutputStream bos = null;
+					ObjectOutputStream obj_out = null;
+					byte[] sh = null;
+					try {
+						bos = new ByteArrayOutputStream();
+						obj_out = new ObjectOutputStream(bos);
+						obj_out.writeObject(rsults);
+						sh = bos.toByteArray();
+						os.writeInt(sh.length);
+						os.write(sh);
+						os.flush();
+					} finally {
+						obj_out.close();
+						bos.close();
+					}
+
+				}
 				if (cmd == NetworkCMDS.FETCH_CMD
 						|| cmd == NetworkCMDS.FETCH_COMPRESSED_CMD) {
 					byte[] hash = new byte[is.readShort()];
@@ -195,7 +251,6 @@ public class ClientThread extends Thread {
 					sh = CompressionUtils.decompressSnappy(sh);
 					ObjectInputStream obj_in = new ObjectInputStream(
 							new ByteArrayInputStream(sh));
-					@SuppressWarnings("unchecked")
 					ArrayList<String> hashes = (ArrayList<String>) obj_in
 							.readObject();
 					String hash = null;

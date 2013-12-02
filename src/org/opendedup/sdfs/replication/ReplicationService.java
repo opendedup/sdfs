@@ -43,7 +43,7 @@ public class ReplicationService implements Serializable {
 	public transient String remoteServerPassword;
 	public String remoteServerFolder;
 	public String remoteServerVolume;
-	public int remoteServerDataPort;
+	//public int remoteServerDataPort;
 	public int remoteServerPort;
 	public boolean useSSL;
 	public boolean useMGR;
@@ -95,10 +95,8 @@ public class ReplicationService implements Serializable {
 				"replication.master.folder", "").trim();
 		this.remoteServerPort = Integer.parseInt(properties.getProperty(
 				"replication.master.port", "6442"));
-		this.remoteServerDataPort = Integer.parseInt(properties.getProperty(
-				"replication.master.dataport", "2222"));
 		this.useSSL = Boolean.parseBoolean(properties.getProperty(
-				"replication.master.useSSL", "false"));
+				"replication.master.useSSL", "true"));
 		this.useMGR = Boolean.parseBoolean(properties.getProperty(
 				"replication.master.usemgr", "false"));
 		this.archiveFolder = properties.getProperty("archive.staging",
@@ -154,7 +152,7 @@ public class ReplicationService implements Serializable {
 
 			localArchiveImport(localServer, localServerPort,
 					localServerPassword, archive, this.mLocalServerFolder,
-					remoteServer, remoteServerPassword, remoteServerDataPort);
+					remoteServer, remoteServerPassword, remoteServerPort);
 			this.persistResults();
 
 		} finally {
@@ -188,8 +186,6 @@ public class ReplicationService implements Serializable {
 			root.setAttribute("master", this.remoteServer);
 			root.setAttribute("master-port",
 					Integer.toString(this.remoteServerPort));
-			root.setAttribute("master-data-port",
-					Integer.toString(this.remoteServerDataPort));
 			root.setAttribute("master-folder", this.remoteServerFolder);
 			root.setAttribute("slave-folder", this.mLocalServerFolder);
 			/*

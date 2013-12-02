@@ -1,13 +1,14 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.List;
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
@@ -17,7 +18,7 @@ import org.opendedup.util.CompressionUtils;
 
 public class ProcessBatchGetBlocks {
 	public static void runCmd(ArrayList<byte[]> hashes, String server,
-			int port, String password, boolean useSSL) throws IOException,
+			int port, String password, boolean useSSL) throws Exception,
 			ClassNotFoundException, HashtableFullException {
 		SDFSLogger.getLog().debug("getting hashes [" + hashes.size() + "]");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -27,9 +28,10 @@ public class ProcessBatchGetBlocks {
 				CompressionUtils.compressSnappy(bos.toByteArray()));
 		StringBuilder sb = new StringBuilder();
 		Formatter formatter = new Formatter(sb);
-		formatter.format("file=%s&cmd=archiveout&options=iloveanne", file);
-		InputStream in = MgmtServerConnection.connectAndGet(server, port,
-				password, sb.toString(), "", useSSL);
+		formatter.format("file=%s&cmd=batchgetblocks&options=iloveanne", "ninja");
+		InputStream in = MgmtServerConnection.connectAndPost(server, port,
+				password, sb.toString(), "", file,true);
+		SDFSLogger.getLog().info("reading imported blocks");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[32768];
 		int len;
@@ -41,14 +43,15 @@ public class ProcessBatchGetBlocks {
 		ObjectInputStream obj_in = new ObjectInputStream(
 				new ByteArrayInputStream(sh));
 		@SuppressWarnings("unchecked")
-		ArrayList<HashChunk> hck = (ArrayList<HashChunk>) obj_in.readObject();
+		List<HashChunk> hck = (List<HashChunk>) obj_in.readObject();
 		out.close();
 		obj_in.close();
 		for (int i = 0; i < hck.size(); i++) {
 			HashChunk _hc = hck.get(i);
 			HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(), 0,
-					_hc.getData().length, false, null);
+					_hc.getData().length, true, null);
 		}
+		SDFSLogger.getLog().debug("imported " +hck.size());
 
 	}
 

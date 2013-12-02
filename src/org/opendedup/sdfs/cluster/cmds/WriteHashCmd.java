@@ -51,12 +51,11 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout * 2, true);
-		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		opts.setFlags(Message.Flag.DONT_BUNDLE);
+				Main.ClusterRSPTimeout * 2, false);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
-		// opts.setFlags(Message.Flag.DONT_BUNDLE);
-		// opts.setFlags(Message.Flag.OOB);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
 	}
 
@@ -82,9 +81,10 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout * 2, true);
+				Main.ClusterRSPTimeout * 2, false);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 	}
@@ -126,7 +126,7 @@ public class WriteHashCmd implements IOClientCmd {
 						} else if (response.wasSuspected()
 								|| response.wasUnreachable()) {
 
-						} else {
+						} else  if(response.wasReceived()){
 							try {
 								boolean done = (Boolean) response.getValue();
 								if (done)
@@ -138,7 +138,12 @@ public class WriteHashCmd implements IOClientCmd {
 										"unable to write to "
 												+ response.getSender(), e);
 							}
+						}else {
+							SDFSLogger.getLog().warn(
+									"unable to write to "
+											+ response.getSender());
 						}
+						
 
 					} else {
 						SDFSLogger.getLog().info(

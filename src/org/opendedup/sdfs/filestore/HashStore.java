@@ -194,9 +194,9 @@ public class HashStore {
 		try {
 			byte[] data = bdb.getData(hash);
 			if (data == null && Arrays.equals(hash, blankHash)) {
-				hs = new HashChunk(hash, 0, blankData.length, blankData, false);
+				hs = new HashChunk(hash, blankData, false);
 			}
-			hs = new HashChunk(hash, 0, data.length, data, false);
+			hs = new HashChunk(hash, data, false);
 			// this.cacheBuffers.put(hStr, hs);
 
 		} catch (Exception e) {
