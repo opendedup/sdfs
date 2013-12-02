@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +16,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -343,7 +342,7 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
 						byte[] rb = com.google.common.io.BaseEncoding
-								.base64Url().decode(file);
+								.base64Url().decode(request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.set("Content-Type", "application/octet-stream");
@@ -579,13 +578,9 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-				KeyManager keyManagers[] = keyManagerFactory.getKeyManagers();
-				// init the SSL context
-				SSLContext sslContext = SSLContext.getDefault();
-				sslContext.init(keyManagers, null, new SecureRandom());
-				// get the socket factory
-				// SSLServerSocketFactory socketFactory =
-				// sslContext.getServerSocketFactory();
+		        SSLContext sslContext = SSLContext.getInstance("SSLv3");
+		        // sslContext.init(keyManagerFactory.getKeyManagers(), new TrustManager[]{new NaiveX509TrustManager()}, null);
+		        sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 				Container container = new MgmtWebServer();
 				connection = new SocketConnection(container);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);

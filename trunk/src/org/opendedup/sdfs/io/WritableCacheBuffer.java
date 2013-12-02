@@ -44,6 +44,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private boolean safeSync = Main.safeSync;
 	private byte[] hashloc;
 	private boolean batchprocessed;
+	private boolean batchwritten;
 
 	static {
 
@@ -105,6 +106,23 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	@Override
 	public DedupFile getDedupFile() {
 		return this.df;
+	}
+
+	private int currentPos = 1;
+
+	public void resetHashLoc() {
+		this.hashloc = new byte[8];
+		this.hashloc[0] = -1;
+	}
+
+	public synchronized void addHashLoc(byte loc) {
+		// SDFSLogger.getLog().info("set " + this.currentPos + " to " + loc);
+		if (currentPos < this.hashloc.length) {
+			if (this.hashloc[0] == -1)
+				this.hashloc[0] = 0;
+			this.hashloc[currentPos] = loc;
+			this.currentPos++;
+		}
 	}
 
 	protected WritableCacheBuffer(DedupChunkInterface dk, DedupFile df)
@@ -653,8 +671,10 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	 */
 	@Override
 	public void setDoop(boolean doop) {
-		this.doop = doop;
-
+		if (!this.doop) {
+			this.doop = doop;
+			this.hashloc[0] = 1;
+		}
 	}
 
 	/*
@@ -679,6 +699,14 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 	public void setHash(byte[] hash) {
 		this.hash = hash;
+	}
+
+	public boolean isBatchwritten() {
+		return batchwritten;
+	}
+
+	public void setBatchwritten(boolean batchwritten) {
+		this.batchwritten = batchwritten;
 	}
 
 }

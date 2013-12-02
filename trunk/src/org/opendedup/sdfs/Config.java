@@ -77,6 +77,7 @@ public class Config {
 					.getAttribute("allocation-size"));
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
+			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
 			if (cbe.hasAttribute("gc-class"))
 				Main.gcClass = cbe.getAttribute("gc-class");
 			Main.fDkiskSchedule = cbe.getAttribute("claim-hash-schedule");

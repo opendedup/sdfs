@@ -150,7 +150,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		} finally {
 			l.unlock();
 		}
-		throw new IOException("no pools available to fulfill request");
+		String st = "";
+		for (int i = start; i < slist.length; i++) {
+			st = st + " " + slist[i];
+		}
+		throw new IOException(
+				"no pools available to fulfill request. Requested pools [" + st
+						+ "]");
 	}
 
 	public List<HashClientPool> getServerPools(byte max, byte[] ignoredHosts) {
@@ -253,7 +259,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				SDFSLogger.getLog().error("Unable to update dse state ", e);
 				throw new IOException(e);
 			}
-			rtrn = new Boolean(true);
+			rtrn = Boolean.valueOf(true);
 			break;
 		}
 		case NetworkCMDS.RUN_FDISK: {
@@ -276,7 +282,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			if (volume.equals(server.volumeName))
 				throw new IOException("Volume is mounted by " + server.address);
 			this.volumes.remove(volume);
-			rtrn = new Boolean(true);
+			rtrn = Boolean.valueOf(true);
 			break;
 		}
 		case NetworkCMDS.ADD_VOLUME: {
@@ -288,7 +294,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					if (volume != null)
 						this.volumes.put(volume, null);
 			}
-			rtrn = new Boolean(true);
+			rtrn = Boolean.valueOf(true);
 			break;
 		}
 
@@ -303,13 +309,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			break;
 		}
 		case NetworkCMDS.HASH_EXISTS_CMD: {
-			rtrn = new Boolean(false);
+			rtrn = Boolean.valueOf(false);
 			break;
 		}
 		case NetworkCMDS.FIND_GC_MASTER_CMD: {
 			this.gcUpdateLock.lock();
 			try {
-				rtrn = new Boolean(this.gcscheduler != null);
+				rtrn = Boolean.valueOf(this.gcscheduler != null);
 			} finally {
 				this.gcUpdateLock.unlock();
 			}
@@ -320,9 +326,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			try {
 				if (this.gcscheduler != null) {
 					this.stopGC();
-					rtrn = new Boolean(true);
+					rtrn = Boolean.valueOf(true);
 				} else
-					rtrn = new Boolean(false);
+					rtrn = Boolean.valueOf(false);
 			} finally {
 				this.gcUpdateLock.unlock();
 			}
@@ -333,9 +339,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			buf.get(sb);
 			String volume = new String(sb);
 			if (volume.equals(server.volumeName))
-				rtrn = new Boolean(true);
+				rtrn = Boolean.valueOf(true);
 			else
-				rtrn = new Boolean(false);
+				rtrn = Boolean.valueOf(false);
 		}
 		}
 		return rtrn;
@@ -518,7 +524,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 		this.startGCIfNone();
 		this.populateVolumeList();
-		SDFSLogger.getLog().debug(
+		SDFSLogger.getLog().info(
 				"**client view: " + new_view + " peer master = "
 						+ Boolean.toString(this.peermaster));
 		synchronized (serverState) {
@@ -530,7 +536,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 			while (iter.hasNext()) {
 				Address addr = iter.next();
+				SDFSLogger.getLog().debug("found " + addr + " " + new_view.containsMember(addr));
 				if (!new_view.containsMember(addr)) {
+					SDFSLogger.getLog().debug("removed " + addr + " from state.");
 					DSEServer s = serverState.remove(addr);
 					Lock l = this.ssl.writeLock();
 					l.lock();
@@ -580,7 +588,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 								+ "] and cluster write requirement is "
 								+ Main.volume.getClusterCopies());
 		}
-		SDFSLogger.getLog().debug(
+		SDFSLogger.getLog().info(
 				server + " - size : " + serverState.size()
 						+ " arraylist size : " + sal.size());
 	}

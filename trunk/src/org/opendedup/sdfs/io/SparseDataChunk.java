@@ -1,15 +1,17 @@
 package org.opendedup.sdfs.io;
 
+import java.io.Externalizable;
+
 import java.io.IOException;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import java.nio.ByteBuffer;
 
 import org.opendedup.hashing.HashFunctionPool;
 
-public class SparseDataChunk implements Serializable {
+public class SparseDataChunk implements Externalizable {
 
-	private static final long serialVersionUID = 2355100719332694545L;
 	private boolean doop;
 	private byte[] hash;
 	private boolean localData = false;
@@ -17,6 +19,10 @@ public class SparseDataChunk implements Serializable {
 	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
 	private byte[] hashlocs;
 	private long fpos;
+	
+	public SparseDataChunk() {
+		
+	}
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
 		if (rawData.length != RAWDL)
@@ -67,12 +73,12 @@ public class SparseDataChunk implements Serializable {
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
-		buf.put(hash);
+		buf.put(this.hash);
 		if (localData)
 			buf.put((byte) 1);
 		else
 			buf.put((byte) 0);
-		buf.put(hashlocs);
+		buf.put(this.hashlocs);
 		return buf.array();
 	}
 
@@ -112,6 +118,13 @@ public class SparseDataChunk implements Serializable {
 		hashlocs[0] = -1;
 		currentpos = 1;
 	}
+	
+	public void setDoop(boolean doop) {
+		if(this.doop) {
+			this.doop = doop;
+			this.hashlocs[0] =1;
+		}
+	}
 
 	public long getFpos() {
 		return fpos;
@@ -119,6 +132,29 @@ public class SparseDataChunk implements Serializable {
 
 	public void setFpos(long fpos) {
 		this.fpos = fpos;
+	}
+
+	@Override
+	public void readExternal(ObjectInput arg0) throws IOException,
+			ClassNotFoundException {
+		this.fpos = arg0.readLong();
+		this.doop = arg0.readBoolean();
+		this.currentpos = arg0.readInt();
+		this.localData = arg0.readBoolean();
+		this.hash = new byte [HashFunctionPool.hashLength];
+		arg0.read(hash);
+		this.hashlocs = new byte[8];
+		arg0.read(hashlocs);
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput arg0) throws IOException {
+		arg0.writeLong(this.fpos);
+		arg0.writeBoolean(doop);
+		arg0.writeInt(currentpos);
+		arg0.writeBoolean(this.localData);
+		arg0.write(hash);
+		arg0.write(hashlocs);
 	}
 
 }

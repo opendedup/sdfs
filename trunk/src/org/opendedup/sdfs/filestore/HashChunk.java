@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.opendedup.util.StringUtils;
+
 /**
  * 
  * @author Sam Silverberg A HashChunk is used by the chunk store as a container
@@ -21,14 +23,14 @@ public class HashChunk implements Externalizable {
 	 */
 	// The name of the hash chunk. This is the md5 or sha hash
 	private byte[] name;
-	// the start position to read or write from the byte array. This always 0
-	private long start;
-	// the length of the the data with the byte array
-	private int len;
 	// the data
 	private byte[] data;
 	// whether or not the data is compressed
 	private boolean compressed;
+	
+	public HashChunk() {
+		
+	}
 
 	/**
 	 * Instantiates the HashChunk
@@ -45,11 +47,9 @@ public class HashChunk implements Externalizable {
 	 * @param compressed
 	 *            whether or not the data is compressed
 	 */
-	public HashChunk(byte[] name, long start, int len, byte[] data,
+	public HashChunk(byte[] name, byte[] data,
 			boolean compressed) {
 		this.name = name;
-		this.start = start;
-		this.len = len;
 		this.data = data;
 		this.compressed = compressed;
 	}
@@ -96,43 +96,11 @@ public class HashChunk implements Externalizable {
 		this.name = name;
 	}
 
-	/**
-	 * 
-	 * @return the start position within the array.
-	 */
-	public long getStart() {
-		return start;
-	}
-
-	/**
-	 * 
-	 * @param start
-	 *            sets the start position within the array
-	 */
-	public void setStart(long start) {
-		this.start = start;
-	}
-
-	/**
-	 * 
-	 * @return the lenth of the data within the array
-	 */
-	public int getLen() {
-		return len;
-	}
-
-	/**
-	 * 
-	 * @param len
-	 *            sets the length of data within the array.
-	 */
-	public void setLen(int len) {
-		this.len = len;
-	}
+	
 
 	@Override
 	public String toString() {
-		return name + " start=" + this.start + " len=" + this.len;
+		return StringUtils.getHexString(name);
 	}
 
 	@Override
@@ -142,8 +110,7 @@ public class HashChunk implements Externalizable {
 		short hl = in.readShort();
 		this.name = new byte[hl];
 		in.read(name);
-		this.len = in.readInt();
-		this.data = new byte[len];
+		this.data = new byte[in.readInt()];
 		in.read(data);
 
 	}

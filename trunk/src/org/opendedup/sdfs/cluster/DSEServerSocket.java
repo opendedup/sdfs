@@ -2,9 +2,13 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
 
+
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +32,7 @@ import org.jgroups.blocks.ResponseMode;
 import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
+import org.opendedup.collections.QuickList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
@@ -134,6 +139,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		disp.stop();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object handle(Message msg) throws Exception {
 		try {
 			byte[] buffer = msg.getBuffer();
@@ -186,47 +192,89 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					SDFSLogger.getLog().error("Unable to update dse state ", e);
 					throw new IOException(e);
 				}
-				rtrn = new Boolean(true);
+				rtrn = Boolean.valueOf(true);
 				break;
 			}
 			case NetworkCMDS.HASH_EXISTS_CMD: {
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
 				try {
-					rtrn = new Boolean(HCServiceProxy.hashExists(hash));
+					rtrn = Boolean.valueOf(HCServiceProxy.hashExists(hash));
 
 				} catch (Exception e) {
 					SDFSLogger.getLog()
 							.warn("unable to find if hash exists", e);
-					return new Boolean(false);
+					return Boolean.valueOf(false);
 				}
 				break;
 			}
 			case NetworkCMDS.BATCH_HASH_EXISTS_CMD: {
 				byte[] arb = new byte[buf.getInt()];
 				buf.get(arb);
-				@SuppressWarnings("unchecked")
 				List<SparseDataChunk> chunks = (List<SparseDataChunk>) Util
 						.objectFromByteBuffer(arb);
-				ArrayList<Boolean> rsults = new ArrayList<Boolean>(
+				QuickList<Boolean> rsults = new QuickList<Boolean>(
 						chunks.size());
 				for (int i = 0; i < chunks.size(); i++) {
 					try {
 						if (chunks.get(i) != null)
 							rsults.add(
 									i,
-									new Boolean(
+									Boolean.valueOf(
 											HCServiceProxy.hashExists(chunks
 													.get(i).getHash())));
 						else
-							rsults.add(i, new Boolean(false));
+							rsults.add(i, Boolean.valueOf(false));
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn(
 								"unable to find if hash exists", e);
-						rsults.add(i, new Boolean(false));
+						rsults.add(i, Boolean.valueOf(false));
 					}
 				}
 				rtrn = rsults;
+				break;
+			}
+			case NetworkCMDS.BATCH_WRITE_HASH_CMD: {
+				//long tm = System.currentTimeMillis();
+				byte[] arb = new byte[buf.getInt()];
+				buf.get(arb);
+				ByteArrayInputStream bis = new ByteArrayInputStream(arb);
+				ObjectInput in = null;
+				List<HashChunk> chunks = null;
+				try {
+				  in = new ObjectInputStream(bis);
+				  chunks = (List<HashChunk>)in.readObject(); 
+				} finally {
+				  bis.close();
+				  in.close();
+				}
+				QuickList<Boolean> rsults = new QuickList<Boolean>(
+						chunks.size());
+				for (int i = 0; i < chunks.size(); i++) {
+					try {
+						HashChunk ck = chunks.get(i);
+						if (ck != null) {
+							boolean dup = false;
+							byte[] b = HCServiceProxy.writeChunk(ck.getName(), ck.getData(), 0,
+									ck.getData().length, true);
+							if (b[0] == 1)
+								dup = true;
+							rsults.add(
+									i,
+									Boolean.valueOf(
+											dup));
+						}
+						else
+							rsults.add(i, null);
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"unable to find if hash exists", e);
+						rsults.add(i, Boolean.valueOf(false));
+					}
+				}
+				rtrn = rsults;
+				//tm = System.currentTimeMillis() - tm;
+				//SDFSLogger.getLog().info("ph 1 time was " + tm);
 				break;
 			}
 			case NetworkCMDS.WRITE_HASH_CMD: {
@@ -244,7 +292,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					dup = true;
 				// SDFSLogger.getLog().debug("Writing " +
 				// StringUtils.getHexString(hash) + " done=" +done);
-				rtrn = new Boolean(dup);
+				rtrn = Boolean.valueOf(dup);
 				break;
 			}
 			case NetworkCMDS.FETCH_CMD: {
@@ -302,7 +350,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				if (addr != null)
 					throw new IOException("Volume is mounted by " + addr);
 				this.volumes.remove(volume);
-				rtrn = new Boolean(true);
+				rtrn = Boolean.valueOf(true);
 				break;
 			}
 			case NetworkCMDS.ADD_VOLUME: {
@@ -313,15 +361,15 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					if (!this.volumes.containsKey(volume) && volume != null)
 						this.volumes.put(volume, null);
 				}
-				rtrn = new Boolean(true);
+				rtrn = Boolean.valueOf(true);
 				break;
 			}
 			case NetworkCMDS.FIND_GC_MASTER_CMD: {
-				rtrn = new Boolean(false);
+				rtrn = Boolean.valueOf(false);
 				break;
 			}
 			case NetworkCMDS.STOP_GC_MASTER_CMD: {
-				rtrn = new Boolean(false);
+				rtrn = Boolean.valueOf(false);
 				break;
 			}
 			}

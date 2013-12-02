@@ -51,4 +51,5 @@ public class NetworkCMDS {
 	public static final byte STOP_GC_MASTER_CMD = 23;
 	public static final byte FIND_VOLUME_OWNER = 24;
 	public static final byte GET_VOLUME_INFO = 25;
+	public static final byte BATCH_WRITE_HASH_CMD = 26;
 }

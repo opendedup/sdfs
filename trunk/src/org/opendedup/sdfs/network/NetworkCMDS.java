@@ -40,5 +40,6 @@ public class NetworkCMDS {
 	public static final byte STORE_PAGE_SIZE = 12;
 	public static final byte BULK_FETCH_CMD = 13;
 	public static final byte UPDATE_DSE = 14;
+	public static final byte BATCH_WRITE_HASH_CMD = 26;
 
 }

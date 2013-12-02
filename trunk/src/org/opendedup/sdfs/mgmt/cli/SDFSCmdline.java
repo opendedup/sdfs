@@ -88,7 +88,7 @@ public class SDFSCmdline {
 		if (cmd.hasOption("import-archive")) {
 			String server = cmd.getOptionValue("replication-master");
 			String password = cmd.getOptionValue("replication-master-password");
-			int port = 2222;
+			int port = 6442;
 			int maxSz = -1;
 			if (cmd.hasOption("replication-master-port"))
 				port = Integer.parseInt(cmd
@@ -163,7 +163,7 @@ public class SDFSCmdline {
 				.withDescription("Display these options.").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("server")
-				.withDescription("SDFS host location.").hasArg(true).create());
+				.withDescription("SDFS host location that is the target of this cli command.").hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("expandvolume")
 				.withDescription(
@@ -279,7 +279,7 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-master-port")
 				.withDescription(
-						"The server port associated with the archive imported. This will default to \"2222\" "
+						"The server port associated with the archive imported. This will default to \"6442\" "
 								+ "--replication-master-port=<tcp port> ")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder

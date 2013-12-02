@@ -29,9 +29,10 @@ public class FetchChunkCmd implements IOClientCmd {
 		shuffleArray(this.hashlocs);
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				false);
-		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
 	}
 

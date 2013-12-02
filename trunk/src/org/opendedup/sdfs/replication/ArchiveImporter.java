@@ -101,9 +101,8 @@ public class ArchiveImporter {
 							"uable to import files: There are files that are missing blocks");
 				} else {
 					if (!Main.chunkStoreLocal)
-						;
-					new ClusterRedundancyCheck(ievt, new File(
-							Main.volume.getPath() + File.separator + sdest));
+						new ClusterRedundancyCheck(ievt, new File(
+								Main.volume.getPath() + File.separator + sdest));
 					commitImport(Main.volume.getPath() + File.separator + dest,
 							Main.volume.getPath() + File.separator + sdest);
 					DocumentBuilderFactory factory = DocumentBuilderFactory

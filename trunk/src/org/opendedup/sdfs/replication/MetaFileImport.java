@@ -42,7 +42,7 @@ public class MetaFileImport implements Serializable {
 			int port, int maxSz, SDFSEvent evt, boolean useSSL)
 			throws IOException {
 		SDFSLogger.getLog().info(
-				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ);
+				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ + " use ssl " + useSSL);
 		levt = SDFSEvent.metaImportEvent(
 				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ,
 				evt);
@@ -75,7 +75,7 @@ public class MetaFileImport implements Serializable {
 				this.bytesTransmitted = this.bytesTransmitted
 						+ (hashes.size() * Main.CHUNK_LENGTH);
 				levt.bytesImported = this.bytesTransmitted;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import", e);
 				corruption = true;
 			}
@@ -138,7 +138,7 @@ public class MetaFileImport implements Serializable {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						if (!ck.isLocalData()) {
-							boolean exists = HCServiceProxy.localHashExists(ck
+							boolean exists = HCServiceProxy.hashExists(ck
 									.getHash());
 							mf.getIOMonitor().addVirtualBytesWritten(
 									Main.CHUNK_LENGTH, true);
@@ -166,7 +166,7 @@ public class MetaFileImport implements Serializable {
 									levt.bytesImported = this.bytesTransmitted;
 									hashes = null;
 									hashes = new ArrayList<byte[]>();
-								} catch (Exception e) {
+								} catch (Throwable e) {
 									SDFSLogger
 											.getLog()
 											.error("Corruption Suspected on import",

@@ -23,14 +23,14 @@ import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
-public class BatchWriteHashCmd implements IOClientCmd {
+public class DirectBatchWriteHashCmd implements IOClientCmd {
 	List<WritableCacheBuffer> chunks;
 	QuickList<HashChunk> hk;
 	boolean exists = false;
 	RequestOptions opts = null;
 	int sz = 0;
 
-	public BatchWriteHashCmd(List<WritableCacheBuffer> chunks) {
+	public DirectBatchWriteHashCmd(List<WritableCacheBuffer> chunks) {
 		this.chunks = chunks;
 		sz = chunks.size();
 		hk = new QuickList<HashChunk>(sz);

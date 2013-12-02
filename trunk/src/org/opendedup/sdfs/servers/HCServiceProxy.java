@@ -21,6 +21,7 @@ import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 //import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
+import org.opendedup.sdfs.cluster.cmds.BatchWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
@@ -30,6 +31,7 @@ import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 import com.google.common.cache.CacheBuilder;
@@ -178,31 +180,54 @@ public class HCServiceProxy {
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
 			byte[] hashloc) throws IOException {
 		if (Main.DSEClusterDirectIO)
-			directWriteChunk(hash, aContents, hashloc);
-		int ncopies = 0;
-		for (int i = 1; i < 8; i++) {
-			if (hashloc[i] > (byte) 0) {
-				ncopies++;
+			return directWriteChunk(hash, aContents, hashloc);
+		else {
+			int ncopies = 0;
+			for (int i = 1; i < 8; i++) {
+				if (hashloc[i] > (byte) 0) {
+					ncopies++;
+				}
 			}
-		}
-		if (ncopies >= Main.volume.getClusterCopies()) {
-			return hashloc;
-		} else if (ncopies > 0) {
-			byte[] ignoredHosts = new byte[ncopies];
-			for (int i = 0; i < ncopies; i++)
-				ignoredHosts[i] = hashloc[i + 1];
-			WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
-					Main.volume.getClusterCopies(), ignoredHosts);
-			cmd.executeCmd(socket);
-			SDFSLogger.getLog().debug("wrote data when found some but not all");
-			return cmd.reponse();
-		} else {
-			WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
-					Main.volume.getClusterCopies());
-			cmd.executeCmd(socket);
-			SDFSLogger.getLog().debug("wrote data when found none");
+			if (ncopies >= Main.volume.getClusterCopies()) {
+				return hashloc;
+			} else if (ncopies > 0) {
+				byte[] ignoredHosts = new byte[ncopies];
+				for (int i = 0; i < ncopies; i++)
+					ignoredHosts[i] = hashloc[i + 1];
+				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+						Main.volume.getClusterCopies(), ignoredHosts);
+				int tries = 0;
+				while (true) {
+					try {
+						cmd.executeCmd(socket);
+						break;
+					} catch (IOException e) {
+						tries++;
+						if (tries > 10)
+							throw e;
+					}
+				}
+				SDFSLogger.getLog().debug(
+						"wrote data when found some but not all");
+				return cmd.reponse();
+			} else {
+				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
+						Main.volume.getClusterCopies());
+				int tries = 0;
+				while (true) {
+					try {
+						cmd.executeCmd(socket);
+						break;
+					} catch (IOException e) {
+						tries++;
+						if (tries > 10)
+							throw e;
+					}
+				}
+				SDFSLogger.getLog().debug("wrote data when found none");
 
-			return cmd.reponse();
+				return cmd.reponse();
+			}
 		}
 
 	}
@@ -344,16 +369,6 @@ public class HCServiceProxy {
 		return b;
 	}
 
-	public static boolean localHashExists(byte[] hash) throws IOException,
-			HashtableFullException {
-		boolean exists = false;
-		if (Main.chunkStoreLocal) {
-			exists = HCServiceProxy.hcService.localHashExists(hash);
-
-		}
-		return exists;
-	}
-
 	public static void runFDisk(SDFSEvent evt) throws FDiskException,
 			IOException {
 		if (Main.chunkStoreLocal)
@@ -404,6 +419,18 @@ public class HCServiceProxy {
 
 		} else {
 			BatchHashExistsCmd cmd = new BatchHashExistsCmd(hashes);
+			cmd.executeCmd(socket);
+			return cmd.getHashes();
+		}
+	}
+
+	public static List<WritableCacheBuffer> batchWriteHash(
+			List<WritableCacheBuffer> hashes) throws IOException {
+		if (Main.chunkStoreLocal) {
+			throw new IOException("not implemented for localstore");
+
+		} else {
+			BatchWriteHashCmd cmd = new BatchWriteHashCmd(hashes);
 			cmd.executeCmd(socket);
 			return cmd.getHashes();
 		}
