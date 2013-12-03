@@ -1,6 +1,6 @@
 package org.opendedup.util;
 
-import java.io.*;
+import java.io.ObjectStreamField;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.LongBuffer;

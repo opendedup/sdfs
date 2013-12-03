@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class SDFSVolumeTLogger {
 

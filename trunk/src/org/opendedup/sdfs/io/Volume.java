@@ -1,13 +1,13 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.jgroups.Address;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
@@ -29,7 +29,7 @@ public class Volume implements java.io.Serializable {
 	static final long minFree = 2147483648L; // Leave at least 2 GB Free on the
 												// drive.
 	private static final long serialVersionUID = 5505952237500542215L;
-	private final ReentrantLock updateLock = new ReentrantLock();
+	private final transient ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
 	String name;
 	String capString = null;
@@ -38,10 +38,10 @@ public class Volume implements java.io.Serializable {
 	File pathF;
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
-	private final ReentrantLock dbLock = new ReentrantLock();
-	private final ReentrantLock vbLock = new ReentrantLock();
-	private final ReentrantLock rbLock = new ReentrantLock();
-	private final ReentrantLock wbLock = new ReentrantLock();
+	private transient final ReentrantLock dbLock = new ReentrantLock();
+	private transient final ReentrantLock vbLock = new ReentrantLock();
+	private transient final ReentrantLock rbLock = new ReentrantLock();
+	private transient final ReentrantLock wbLock = new ReentrantLock();
 	long absoluteLength = -1;
 	private long duplicateBytes = 0;
 	private double virtualBytesWritten = 0;
@@ -55,12 +55,13 @@ public class Volume implements java.io.Serializable {
 	private boolean useDSECapacity = false;
 	private boolean usePerfMon = false;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
-	private VolumeConfigWriterThread writer = null;
-	private VolumeIOMeter ioMeter = null;
+	private transient VolumeConfigWriterThread writer = null;
+	private transient VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
 	private byte clusterCopies = 2;
 	private boolean clusterRackAware = false;
+	public Address host = null;
 
 	protected boolean volumeFull = false;
 

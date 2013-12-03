@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
-
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;

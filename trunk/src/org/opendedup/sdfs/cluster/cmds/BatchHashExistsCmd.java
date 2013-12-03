@@ -1,12 +1,9 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
-
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;

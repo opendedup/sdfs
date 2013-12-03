@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.cluster;
 
 import org.jgroups.JChannel;
-
 import org.jgroups.blocks.MessageDispatcher;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.MetaFileEventListener;

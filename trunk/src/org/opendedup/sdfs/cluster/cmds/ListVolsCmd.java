@@ -1,12 +1,10 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
@@ -14,11 +12,12 @@ import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
+import org.opendedup.sdfs.io.Volume;
 
 public class ListVolsCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private HashMap<String, Address> results = new HashMap<String, Address>();
+	private HashMap<String, Volume> results = new HashMap<String, Volume>();
 
 	public ListVolsCmd() {
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
@@ -51,12 +50,12 @@ public class ListVolsCmd implements IOPeerCmd {
 						@SuppressWarnings("unchecked")
 						ArrayList<String> rst = (ArrayList<String>) rsp
 								.getValue();
-						for (String vol : rst) {
-							if (!this.results.containsKey(vol)) {
-								FindVolOwnerCmd cmd = new FindVolOwnerCmd(vol);
+						for (String volStr : rst) {
+							if (!this.results.containsKey(volStr)) {
+								FindVolOwnerCmd cmd = new FindVolOwnerCmd(volStr);
 								cmd.executeCmd(soc);
-								Address addr = cmd.getResults();
-								this.results.put(vol, addr);
+								Volume vol = cmd.getResults();
+								this.results.put(volStr, vol);
 							}
 						}
 					}
@@ -73,7 +72,7 @@ public class ListVolsCmd implements IOPeerCmd {
 		return NetworkCMDS.LIST_VOLUMES;
 	}
 
-	public HashMap<String, Address> getResults() {
+	public HashMap<String, Volume> getResults() {
 		return this.results;
 	}
 

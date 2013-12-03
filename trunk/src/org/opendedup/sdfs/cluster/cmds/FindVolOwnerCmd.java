@@ -1,34 +1,33 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 
-import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
+import org.opendedup.sdfs.io.Volume;
 
 public class FindVolOwnerCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
 	// private ArrayList<String> results = new ArrayList<String>();
-	private String volume;
-	private Address owner = null;
+	private String volumeStr;
+	private Volume vol = null;
 
-	public FindVolOwnerCmd(String volume) {
-		this.volume = volume;
-		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
-
+	public FindVolOwnerCmd(String volumeStr) {
+		this.volumeStr = volumeStr;
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout);
 	}
 
 	@Override
 	public void executeCmd(final ClusterSocket soc) throws IOException {
-		byte[] vb = this.volume.getBytes();
+		byte[] vb = this.volumeStr.getBytes();
 		byte[] b = new byte[1 + 4 + vb.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.FIND_VOLUME_OWNER);
@@ -51,17 +50,8 @@ public class FindVolOwnerCmd implements IOPeerCmd {
 							"FIND_VOLUME_OWNER completed for "
 									+ rsp.getSender() + " returned="
 									+ rsp.getValue());
-					boolean m = (Boolean) rsp.getValue();
-					if (m) {
-						if (this.owner != null)
-							throw new IOException(
-									"VOLUME_OWNER already identified at ["
-											+ owner.toString()
-											+ "] but has also been identified at ["
-											+ rsp.getSender() + "].");
-						else
-							this.owner = rsp.getSender();
-					}
+					vol = (Volume) rsp.getValue();
+					vol.host = rsp.getSender();
 
 				}
 			}
@@ -71,8 +61,8 @@ public class FindVolOwnerCmd implements IOPeerCmd {
 		}
 	}
 
-	public Address getResults() {
-		return this.owner;
+	public Volume getResults() {
+		return this.vol;
 	}
 
 	@Override

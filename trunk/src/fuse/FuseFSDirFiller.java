@@ -1,9 +1,9 @@
 package fuse;
 
-import java.util.ArrayList;
-import java.nio.charset.Charset;
-import java.nio.CharBuffer;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 /**
  * User: peter Date: Nov 4, 2005 Time: 1:36:36 PM

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.network;
 
 import java.io.BufferedInputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -18,14 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.util.CompressionUtils;
-
 import org.opendedup.collections.QuickList;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.StringUtils;
 
 /**

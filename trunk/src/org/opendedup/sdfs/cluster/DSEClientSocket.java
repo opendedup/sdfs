@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +41,7 @@ import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.cluster.cmds.StopGCMasterCmd;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
@@ -65,7 +65,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	private ReentrantReadWriteLock sl = new ReentrantReadWriteLock();
 	private ArrayList<DSEServer> nal = new ArrayList<DSEServer>();
 	private ReentrantReadWriteLock nl = new ReentrantReadWriteLock();
-	final HashMap<String, Address> volumes = new HashMap<String, Address>();
+	final HashMap<String, Volume> volumes = new HashMap<String, Volume>();
 	boolean closed = false;
 	private final String config;
 	private final String clusterID;
@@ -96,7 +96,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		server = new DSEServer(channel.getAddressAsString(), (byte) 0,
 				DSEServer.CLIENT);
 		server.address = channel.getAddress();
-		server.volumeName = Main.volume.getName();
+		server.volume = Main.volume;
 		server.serverType = DSEServer.CLIENT;
 		// serverState.put(channel.getAddress(), server);
 		this.addSelfToState();
@@ -122,7 +122,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			}
 			ListVolsCmd cmd = new ListVolsCmd();
 			cmd.executeCmd(this);
-			HashMap<String, Address> m = cmd.getResults();
+			HashMap<String, Volume> m = cmd.getResults();
 			Set<String> vols = m.keySet();
 			for (String vol : vols) {
 				synchronized (volumes) {
@@ -278,8 +278,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			byte[] sb = new byte[buf.getInt()];
 			buf.get(sb);
 			String volume = new String(sb);
-
-			if (volume.equals(server.volumeName))
+			if (volume.equals(server.volume.getName()))
 				throw new IOException("Volume is mounted by " + server.address);
 			this.volumes.remove(volume);
 			rtrn = Boolean.valueOf(true);
@@ -338,10 +337,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			byte[] sb = new byte[buf.getInt()];
 			buf.get(sb);
 			String volume = new String(sb);
-			if (volume.equals(server.volumeName))
-				rtrn = Boolean.valueOf(true);
+			if (volume.equals(server.volume.getName()))
+				rtrn = Main.volume;
 			else
-				rtrn = Boolean.valueOf(false);
+				rtrn = null;
 		}
 		}
 		return rtrn;
@@ -465,7 +464,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 			ListVolsCmd cmd = new ListVolsCmd();
 			cmd.executeCmd(this);
-			HashMap<String, Address> m = cmd.getResults();
+			HashMap<String, Volume> m = cmd.getResults();
 			Set<String> vols = m.keySet();
 			for (String vol : vols) {
 				synchronized (volumes) {
@@ -497,7 +496,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		try {
 			ListVolsCmd cmd = new ListVolsCmd();
 			cmd.executeCmd(this);
-			HashMap<String, Address> m = cmd.getResults();
+			HashMap<String, Volume> m = cmd.getResults();
 			Set<String> vols = m.keySet();
 			for (String vol : vols) {
 				synchronized (volumes) {
@@ -555,8 +554,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					nal.remove(s);
 					l.unlock();
 					synchronized (volumes) {
-						if (s.volumeName != null)
-							volumes.put(s.volumeName, null);
+						if (s.volume != null)
+							volumes.put(s.volume.getName(), null);
 					}
 					if (Main.DSEClusterDirectIO) {
 						l = this.pl.writeLock();
@@ -640,8 +639,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					nal.add(s);
 					l.unlock();
 					synchronized (volumes) {
-						if (s.volumeName != null)
-							volumes.put(s.volumeName, s.address);
+						if (s.volume != null) {
+							s.volume.host = s.address;
+							volumes.put(s.volume.getName(), s.volume);
+						}
 					}
 				}
 			}
@@ -729,8 +730,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						if (s.serverType == DSEServer.CLIENT) {
 							nal.add(s);
 							synchronized (volumes) {
-								if (s.volumeName != null)
-									volumes.put(s.volumeName, s.address);
+								if (s.volume != null) {
+									s.volume.host = s.address;
+									volumes.put(s.volume.getName(), s.volume);
+								}
 							}
 						}
 					}
@@ -801,7 +804,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		while (!closed) {
 			try {
 				server.address = channel.getAddress();
-				server.volumeName = Main.volume.getName();
+				server.volume = Main.volume;
 				server.serverType = DSEServer.CLIENT;
 				this.addSelfToState();
 				rsp_list = disp.castMessage(null, new Message(null, null,
@@ -873,8 +876,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l.unlock();
 				}
 				synchronized (volumes) {
-					if (server.volumeName != null)
-						volumes.put(server.volumeName, server.address);
+					if (server.volume != null) {
+						server.volume.host = server.address;
+						volumes.put(server.volume.getName(), server.volume);
+					}
 				}
 			}
 		}
@@ -941,7 +946,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		Address addr = null;
 		synchronized (volumes) {
 			if (volumes.containsKey(volumeName))
-				addr = volumes.get(volumeName);
+				addr = volumes.get(volumeName).host;
 		}
 		return addr;
 	}

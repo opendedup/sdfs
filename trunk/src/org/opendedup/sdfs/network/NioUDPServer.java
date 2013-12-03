@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.network;
 
 import java.net.InetSocketAddress;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;

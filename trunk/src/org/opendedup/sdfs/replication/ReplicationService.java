@@ -1,17 +1,16 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.Properties;
 

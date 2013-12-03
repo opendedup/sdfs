@@ -8,11 +8,10 @@
  */
 package fuse.compat;
 
-import fuse.compat.Filesystem1;
+import java.nio.ByteBuffer;
+
 import fuse.FuseException;
 import fuse.FuseStatfs;
-
-import java.nio.ByteBuffer;
 
 /**
  * This is an adapter that adapts the oldest path-only based compatibility

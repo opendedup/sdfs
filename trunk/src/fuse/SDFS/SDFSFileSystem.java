@@ -1,7 +1,6 @@
 package fuse.SDFS;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -19,6 +18,10 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+
 import fuse.Errno;
 import fuse.Filesystem3;
 import fuse.FuseDirFiller;
@@ -30,10 +33,6 @@ import fuse.FuseSizeSetter;
 import fuse.FuseStatfsSetter;
 import fuse.XattrLister;
 import fuse.XattrSupport;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 
 public class SDFSFileSystem implements Filesystem3, XattrSupport {
 

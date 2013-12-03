@@ -1,9 +1,7 @@
 package org.opendedup.hashing;
 
 import java.util.Arrays;
-
 import java.util.concurrent.BlockingQueue;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.QuickList;

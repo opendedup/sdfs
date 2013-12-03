@@ -1,10 +1,8 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
-import java.io.Serializable;
-
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.opendedup.collections.LongByteArrayMap;

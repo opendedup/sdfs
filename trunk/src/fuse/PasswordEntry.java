@@ -1,9 +1,9 @@
 package fuse;
 
-import fuse.util.Struct;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
+import fuse.util.Struct;
 
 /**
  * Looks up a password entry by username or userid.

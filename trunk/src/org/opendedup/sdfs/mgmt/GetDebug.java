@@ -1,6 +1,8 @@
 package org.opendedup.sdfs.mgmt;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -11,10 +13,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.sun.management.UnixOperatingSystemMXBean;
-
-import java.lang.management.ManagementFactory;
-
-import java.io.File;
 
 public class GetDebug {
 

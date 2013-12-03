@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 
 import org.jgroups.Address;
 import org.jgroups.util.Util;
+import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.network.NetworkCMDS;
 import org.opendedup.sdfs.servers.HCServer;
@@ -25,7 +26,7 @@ public class DSEServer implements Externalizable {
 	public int pageSize;
 	public String location;
 	public String rack;
-	public String volumeName;
+	public Volume volume;
 	public transient int weight;
 	public static final int SERVER = 0;
 	public static final int CLIENT = 1;

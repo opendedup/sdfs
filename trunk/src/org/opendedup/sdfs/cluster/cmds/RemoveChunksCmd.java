@@ -1,11 +1,11 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jgroups.Address;
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
@@ -16,8 +16,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
-
-import org.jgroups.Address;
 
 public class RemoveChunksCmd implements IOPeerCmd {
 	boolean exists = false;

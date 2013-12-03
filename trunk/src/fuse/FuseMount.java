@@ -9,12 +9,13 @@
 
 package fuse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import fuse.compat.Filesystem1;
 import fuse.compat.Filesystem1ToFilesystem2Adapter;
 import fuse.compat.Filesystem2;
 import fuse.compat.Filesystem2ToFilesystem3Adapter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class FuseMount {
 	private static final Log log = LogFactory.getLog(FuseMount.class);

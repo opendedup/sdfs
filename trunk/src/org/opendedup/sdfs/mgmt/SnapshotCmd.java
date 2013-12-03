@@ -55,6 +55,8 @@ public class SnapshotCmd implements Runnable {
 	public void run() {
 		try {
 			takeSnapshot(this.srcPath, this.dstPath);
+			evt.endEvent("took snapshot Source [" + srcPath + "] "
+					+ "Destination [" + dstPath + "]");
 		} catch (IOException e) {
 			SDFSLogger.getLog().error(
 					"Unable to take snapshot Source [" + srcPath + "] "

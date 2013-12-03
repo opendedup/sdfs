@@ -1,13 +1,13 @@
 package org.opendedup.logging;
 
 import java.io.IOException;
-
 import java.io.StringWriter;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Layout;
 import org.apache.log4j.spi.LoggingEvent;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 

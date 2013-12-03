@@ -25,7 +25,6 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
-
 import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
 
 import java.util.Date;
