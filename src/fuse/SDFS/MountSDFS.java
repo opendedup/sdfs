@@ -1,7 +1,6 @@
 package fuse.SDFS;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;

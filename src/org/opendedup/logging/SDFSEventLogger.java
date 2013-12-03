@@ -1,14 +1,12 @@
 package org.opendedup.logging;
 
-import java.io.IOException
-
-;
+import java.io.IOException;
 import java.util.Date;
 
-import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.RollingFileAppender;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.slf4j.MDC;

@@ -1,10 +1,8 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,17 +15,16 @@ import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
-import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
-import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
-//import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchWriteHashCmd;
+import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
+import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
-import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
-import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
+import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
+import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.SparseDataChunk;
@@ -297,14 +294,34 @@ public class HCServiceProxy {
 						ignoredHosts[i] = hcmd.getResponse()[i + 1];
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies(), ignoredHosts);
-					cmd.executeCmd(socket);
+					int tries = 0;
+					while (true) {
+						try {
+							cmd.executeCmd(socket);
+							break;
+						} catch (IOException e) {
+							tries++;
+							if (tries > 10)
+								throw e;
+						}
+					}
 					SDFSLogger.getLog().debug(
 							"wrote data when found some but not all");
 					return cmd.reponse();
 				} else {
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies());
-					cmd.executeCmd(socket);
+					int tries = 0;
+					while (true) {
+						try {
+							cmd.executeCmd(socket);
+							break;
+						} catch (IOException e) {
+							tries++;
+							if (tries > 10)
+								throw e;
+						}
+					}
 					SDFSLogger.getLog().debug("wrote data when found none");
 
 					// if(cmd.getExDn() > 0) {

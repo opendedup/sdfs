@@ -1,11 +1,12 @@
 package fuse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import fuse.compat.Filesystem1;
 import fuse.compat.Filesystem1ToFilesystem2Adapter;
 import fuse.compat.Filesystem2;
 import fuse.compat.Filesystem2ToFilesystem3Adapter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Factory object which wraps FileSystem(1,2,3) objects inside the correct

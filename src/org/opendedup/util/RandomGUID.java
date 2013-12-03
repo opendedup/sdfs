@@ -1,7 +1,6 @@
 package org.opendedup.util;
 
 import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;

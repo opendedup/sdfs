@@ -1,9 +1,13 @@
 package fuse.logging;
 
-import org.apache.commons.logging.Log;
-
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
 
 /**
  * User: peter Date: Nov 4, 2005 Time: 8:03:57 PM

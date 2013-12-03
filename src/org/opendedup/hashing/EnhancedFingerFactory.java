@@ -1,7 +1,6 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 
 import org.opendedup.sdfs.Main;

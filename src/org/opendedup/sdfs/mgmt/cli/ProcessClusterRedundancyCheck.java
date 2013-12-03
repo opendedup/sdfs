@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.net.URLEncoder;
-
 import java.util.Formatter;
 
 import org.opendedup.util.CommandLineProgressBar;

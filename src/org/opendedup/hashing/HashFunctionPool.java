@@ -1,7 +1,6 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;

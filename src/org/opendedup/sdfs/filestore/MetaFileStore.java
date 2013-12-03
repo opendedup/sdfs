@@ -1,25 +1,23 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.opendedup.util.OSValidator;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.OSValidator;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
+import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 
 /**
  * 
@@ -193,7 +191,6 @@ public class MetaFileStore {
 							"error symlinking " + origionalPath + " to "
 									+ snapPath, e);
 				}
-
 				return mf;
 			} else {
 

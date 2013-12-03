@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 
 import org.jgroups.Address;

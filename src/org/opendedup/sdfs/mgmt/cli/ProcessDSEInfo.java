@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
-
 import java.util.Formatter;
 
 import org.opendedup.util.StorageUnit;

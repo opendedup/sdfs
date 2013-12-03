@@ -25,7 +25,6 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.CreationDisposition.CREATE_ALWAYS;
-
 import static net.decasdev.dokan.CreationDisposition.CREATE_NEW;
 import static net.decasdev.dokan.CreationDisposition.OPEN_ALWAYS;
 import static net.decasdev.dokan.CreationDisposition.OPEN_EXISTING;

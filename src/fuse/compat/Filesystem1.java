@@ -8,9 +8,11 @@
  */
 package fuse.compat;
 
-import fuse.*;
-
 import java.nio.ByteBuffer;
+
+import fuse.FilesystemConstants;
+import fuse.FuseException;
+import fuse.FuseStatfs;
 
 /**
  * This is an old compatibility API (renamed from fuse.Filesystem) Use

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

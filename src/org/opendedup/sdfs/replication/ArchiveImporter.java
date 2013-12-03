@@ -1,8 +1,7 @@
 package org.opendedup.sdfs.replication;
 
-import de.schlichtherle.truezip.file.TFile;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
@@ -21,6 +20,8 @@ import org.opendedup.util.RandomGUID;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import de.schlichtherle.truezip.file.TFile;
 
 public class ArchiveImporter {
 

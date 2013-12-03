@@ -1,7 +1,7 @@
 package fuse;
 
-import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
 
 /**
  * if fuse.Filesystem[123] implementation also implements this interface, then

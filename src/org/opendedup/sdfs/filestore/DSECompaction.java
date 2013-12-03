@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.opendedup.collections.AbstractHashesMap;
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.gc.ManualGC;

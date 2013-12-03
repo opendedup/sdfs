@@ -1,14 +1,12 @@
 package org.opendedup.util;
 
-import org.iq80.snappy.Snappy;
-
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
-
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
+
+import org.iq80.snappy.Snappy;
 
 //import org.h2.compress.LZFInputStream;
 //import org.h2.compress.LZFOutputStream;

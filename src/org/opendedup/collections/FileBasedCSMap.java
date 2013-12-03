@@ -1,18 +1,13 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
-import org.opendedup.collections.AbstractHashesMap;
-import org.opendedup.collections.AbstractMap;
-import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
