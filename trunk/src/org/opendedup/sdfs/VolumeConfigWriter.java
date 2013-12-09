@@ -46,7 +46,7 @@ public class VolumeConfigWriter {
 	boolean safe_sync = false;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	boolean dedup_files = true;
-	short chunk_size = 128;
+	short chunk_size = 4;
 	int max_file_write_buffers = 24;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
@@ -70,6 +70,7 @@ public class VolumeConfigWriter {
 	String cloudAccessKey = "";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
+	int clusterRSPTimeout = 4000;
 	boolean cloudCompress = Main.cloudCompress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
@@ -95,7 +96,7 @@ public class VolumeConfigWriter {
 	private boolean usePerfMon = false;
 	private String clusterID = "sdfs-cluster";
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	private byte clusterCopies = 1;
+	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 	private boolean clusterRackAware = false;
 
@@ -249,7 +250,7 @@ public class VolumeConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 4;
 				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
@@ -280,7 +281,7 @@ public class VolumeConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 4;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -297,7 +298,7 @@ public class VolumeConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 4;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -478,6 +479,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
 		vol.setAttribute("cluster-id", this.clusterID);
 		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
+		vol.setAttribute("cluster-response-timeout", Integer.toString(chunk_size * 1000));
 		vol.setAttribute("cluster-rack-aware",
 				Boolean.toString(clusterRackAware));
 		root.appendChild(vol);
@@ -498,6 +500,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
+		
 		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
@@ -701,7 +704,7 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("io-chunk-size")
 				.withDescription(
-						"The unit size, in kB, of chunks stored. Set this to 4 if you would like to dedup VMDK files inline.\n Defaults to: \n 128")
+						"The unit size, in kB, of chunks stored. Set this to 4 if you would like to dedup VMDK files inline.\n Defaults to: \n 4")
 				.hasArg().withArgName("SIZE in kB").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("io-max-file-write-buffers")
@@ -933,7 +936,7 @@ public class VolumeConfigWriter {
 				.withLongOpt("cluster-block-replicas")
 				.withDescription(
 						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to"
-								+ "\"2\" the volume will attempt to write any unique block to \"2\" DSE nodes, if available.  This defaults to \"1\". ")
+								+ "\"3\" the volume will attempt to write any unique block to \"3\" DSE nodes, if available.  This defaults to \"2\". ")
 				.hasArg().withArgName("Value [1-7]").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-rack-aware")

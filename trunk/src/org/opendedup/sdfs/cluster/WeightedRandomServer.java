@@ -1,13 +1,13 @@
 package org.opendedup.sdfs.cluster;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 import org.jgroups.Address;
-import org.opendedup.logging.SDFSLogger;
 
 public class WeightedRandomServer implements ServerWeighting {
 	List<DSEServer> servers = null;
@@ -28,17 +28,12 @@ public class WeightedRandomServer implements ServerWeighting {
 				if (avail > 0) {
 					double pt = (double) avail / totsz;
 					w.weight = (int) Math.ceil((pt) * 100);
-					SDFSLogger.getLog().debug(
-							"pt = " + pt + " avail = " + avail + " tot = "
-									+ totsz + " weight = " + w.weight);
 					this.total += w.weight;
 				}
 			}
 			Collections.sort(servers, new CustomComparator());
 			arsz = servers.size();
 		}
-		SDFSLogger.getLog().debug(
-				"Created new weighted random with total " + total);
 	}
 
 	@Override

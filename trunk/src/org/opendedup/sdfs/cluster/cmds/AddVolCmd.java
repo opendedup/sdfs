@@ -9,6 +9,7 @@ import org.jgroups.blocks.ResponseMode;
 import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 
 public class AddVolCmd implements IOPeerCmd {
@@ -19,7 +20,7 @@ public class AddVolCmd implements IOPeerCmd {
 
 	public AddVolCmd(String volume) {
 		this.volume = volume;
-		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout);
 
 	}
 

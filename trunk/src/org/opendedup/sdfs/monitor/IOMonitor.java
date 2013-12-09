@@ -180,6 +180,7 @@ public class IOMonitor implements java.io.Serializable {
 		this.duplicateBlocks = buf.getLong();
 		if ((buf.position() + 1) < buf.capacity()) {
 			byte[] ip = new byte[buf.getInt()];
+			buf.get(ip);
 			this.iopProfile = new String(ip);
 			this.riops = buf.getInt();
 			this.wiops = buf.getInt();

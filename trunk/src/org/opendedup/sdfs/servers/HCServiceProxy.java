@@ -23,6 +23,7 @@ import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
+import org.opendedup.sdfs.cluster.cmds.RedundancyNotMetException;
 import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -83,8 +84,10 @@ public class HCServiceProxy {
 
 	public static synchronized long removeStailHashes(long ms,
 			boolean forceRun, SDFSEvent evt) throws IOException {
-		if (Main.chunkStoreLocal)
-			return hcService.removeStailHashes(ms, forceRun, evt);
+		if (Main.chunkStoreLocal) {
+			long tm = System.currentTimeMillis() - ms;
+			return hcService.removeStailHashes(tm, forceRun, evt);
+		}
 		else {
 			RemoveChunksCmd cmd = new RemoveChunksCmd(ms, forceRun, evt);
 			cmd.executeCmd(cs);
@@ -174,8 +177,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static byte[] writeChunk(byte[] hash, byte[] aContents,
-			byte[] hashloc) throws IOException {
+	private static byte[] _write(byte[] hash, byte[] aContents, byte[] hashloc)
+			throws IOException, RedundancyNotMetException {
 		if (Main.DSEClusterDirectIO)
 			return directWriteChunk(hash, aContents, hashloc);
 		else {
@@ -193,37 +196,41 @@ public class HCServiceProxy {
 					ignoredHosts[i] = hashloc[i + 1];
 				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 						Main.volume.getClusterCopies(), ignoredHosts);
-				int tries = 0;
-				while (true) {
-					try {
-						cmd.executeCmd(socket);
-						break;
-					} catch (IOException e) {
-						tries++;
-						if (tries > 10)
-							throw e;
-					}
-				}
+
+				cmd.executeCmd(socket);
 				SDFSLogger.getLog().debug(
 						"wrote data when found some but not all");
 				return cmd.reponse();
 			} else {
 				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 						Main.volume.getClusterCopies());
-				int tries = 0;
-				while (true) {
-					try {
-						cmd.executeCmd(socket);
-						break;
-					} catch (IOException e) {
-						tries++;
-						if (tries > 10)
-							throw e;
-					}
-				}
+				cmd.executeCmd(socket);
 				SDFSLogger.getLog().debug("wrote data when found none");
 
 				return cmd.reponse();
+			}
+		}
+	}
+
+	public static byte[] writeChunk(byte[] hash, byte[] aContents,
+			byte[] hashloc) throws IOException {
+		
+		int tries = 0;
+		while(true) {
+			try {
+				return _write(hash, aContents, hashloc);
+			} catch(IOException e) {
+				tries++;
+				if(tries > 10) {
+					throw e;
+				}
+			} catch (RedundancyNotMetException e) {
+				tries++;
+				hashloc = e.hashloc;
+				if(tries > 10) {
+					SDFSLogger.getLog().warn("Redundancy Requirements have not been met");
+					//throw e;
+				}
 			}
 		}
 
@@ -414,8 +421,10 @@ public class HCServiceProxy {
 			throws IOException, HashtableFullException {
 		byte[] exists = new byte[8];
 		if (Main.chunkStoreLocal) {
-			if (HCServiceProxy.hcService.hashExists(hash))
+			if (HCServiceProxy.hcService.hashExists(hash)) {
+				exists[0] = 1;
 				return exists;
+			}
 			else {
 				exists[0] = -1;
 				return exists;

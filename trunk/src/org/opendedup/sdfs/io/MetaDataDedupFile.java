@@ -736,12 +736,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (!f.isDirectory()) {
 
 				try {
+					
 					if (f.getParentFile() == null
 							|| !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
 					out = new ObjectOutputStream(
 							new FileOutputStream(this.path));
 					out.writeObject(this);
+					SDFSLogger.getLog().debug("writing out " + f.getPath());
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn(
 							"unable to write file metadata for [" + this.path
@@ -1158,12 +1160,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.dfGuid = null;
 		} else {
 			byte[] dfb = new byte[dfgl];
-			in.read(dfb);
+			in.readFully(dfb);
 			this.dfGuid = new String(dfb);
 		}
 		int gl = in.readInt();
 		byte[] gfb = new byte[gl];
-		in.read(gfb);
+		in.readFully(gfb);
 		this.guid = new String(gfb);
 
 		int ml = in.readInt();
@@ -1171,7 +1173,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.monitor = null;
 		} else {
 			byte[] mlb = new byte[ml];
-			in.read(mlb);
+			in.readFully(mlb);
 			this.monitor = new IOMonitor(this);
 			monitor.fromByteArray(mlb);
 		}
@@ -1181,14 +1183,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		// group id is ignored
 		in.readInt();
 		byte[] hmb = new byte[in.readInt()];
-		in.read(hmb);
+		in.readFully(hmb);
 		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
 		this.dedup = in.readBoolean();
 		try {
 			if (in.available() > 0) {
 				int vlen = in.readInt();
 				byte[] vb = new byte[vlen];
-				in.read(vb);
+				in.readFully(vb);
 				this.version = new String(vb);
 			}
 		} catch (Exception e) {

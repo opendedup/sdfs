@@ -29,10 +29,10 @@ public class BatchHashExistsCmd implements IOClientCmd {
 	public void executeCmd(final DSEClientSocket soc) throws IOException {
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				true);
-		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
 		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
-		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		try {
 			byte[] ar = Util.objectToByteBuffer(hashes);
 			byte[] b = new byte[1 + 4 + ar.length];

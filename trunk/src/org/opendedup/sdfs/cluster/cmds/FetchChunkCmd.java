@@ -29,7 +29,7 @@ public class FetchChunkCmd implements IOClientCmd {
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				false);
 		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
 		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
@@ -62,6 +62,15 @@ public class FetchChunkCmd implements IOClientCmd {
 						&& !rsp.wasUnreachable()) {
 					if (rsp.wasReceived())
 						this.chunk = (byte[]) rsp.getValue();
+					else {
+						SDFSLogger.getLog().warn("There is a possible timeout error with " + addr);
+					}
+				}
+				else if(rsp.hasException()) {
+					SDFSLogger.getLog().warn("error fetching from " + addr,rsp.getException());
+				} else if(rsp.wasSuspected() ||
+						rsp.wasUnreachable()) {
+					SDFSLogger.getLog().warn("host unreachable while fetching " +addr);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while getting hash", e);

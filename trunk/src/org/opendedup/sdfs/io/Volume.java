@@ -26,8 +26,6 @@ public class Volume implements java.io.Serializable {
 	static long tbc = 1099511627776L;
 	static long gbc = 1024 * 1024 * 1024;
 	static int mbc = 1024 * 1024;
-	static final long minFree = 2147483648L; // Leave at least 2 GB Free on the
-												// drive.
 	private static final long serialVersionUID = 5505952237500542215L;
 	private final transient ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
@@ -63,10 +61,27 @@ public class Volume implements java.io.Serializable {
 	private boolean clusterRackAware = false;
 	public Address host = null;
 
-	protected boolean volumeFull = false;
+	private boolean volumeFull = false;
+	private boolean volumeOffLine = false;
+	
+	public void setVolumeFull(boolean full) {
+		this.volumeFull = full;
+	}
 
 	public boolean isAllowExternalSymlinks() {
 		return allowExternalSymlinks;
+	}
+	
+	public boolean isOffLine() {
+		return this.volumeOffLine;
+	}
+	
+	public void setOffLine(boolean offline) {
+		if(offline && !this.volumeOffLine)
+			SDFSLogger.getLog().warn("Setting Volume Offline");
+		if(!offline && this.volumeOffLine)
+			SDFSLogger.getLog().warn("Setting Volume Online");
+		this.volumeOffLine = offline;
 	}
 
 	public void setAllowExternalSymlinks(boolean allowExternalSymlinks,
@@ -149,6 +164,8 @@ public class Volume implements java.io.Serializable {
 			this.clusterRackAware = Boolean.parseBoolean(vol
 					.getAttribute("cluster-rack-aware"));
 		}
+		if(vol.hasAttribute("cluster-response-timeout"))
+			Main.ClusterRSPTimeout = Integer.parseInt(vol.getAttribute("cluster-response-timeout"));
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -315,6 +332,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("cluster-id", this.uuid);
+		root.setAttribute("cluster-response-timeout", Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("allow-external-links",
 				Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-dse-capacity",
@@ -340,6 +358,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("cluster-response-timeout", Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",

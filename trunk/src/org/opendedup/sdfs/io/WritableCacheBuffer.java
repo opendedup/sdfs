@@ -40,7 +40,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	RandomAccessFile raf = null;
 	boolean rafInit = false;
 	boolean prevDoop = false;
-	private boolean safeSync = Main.safeSync;
+	private boolean safeSync = false;
 	private byte[] hashloc;
 	private boolean batchprocessed;
 	private boolean batchwritten;
@@ -314,7 +314,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			this.lock.lock();
 			if (this.closed)
 				throw new BufferClosedException("Buffer Closed");
-			if (!Main.safeSync) {
+			if (!safeSync) {
 				byte[] b = new byte[Main.CHUNK_LENGTH];
 				ByteBuffer _buf = ByteBuffer.wrap(b);
 				_buf.put(buf, 0, len);

@@ -226,7 +226,47 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
+					}else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
+						try {
+							new SetGCSchedule().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("get-gc-schedule")) {
+						try {
+							Element msg =new GetGCSchedule().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+							
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("get-gc-master")) {
+						try {
+							Element msg =new GetGCMaster().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					
+					else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
 						try {
 							new PromoteToGCMaster().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");

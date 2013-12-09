@@ -90,7 +90,7 @@ public class SparseDataChunk implements Externalizable {
 
 	public byte[] getHashLoc() {
 		if (this.hashlocs[1] > 0)
-			this.hashlocs[0] = 0;
+			this.hashlocs[0] = 1;
 		return this.hashlocs;
 	}
 
@@ -142,7 +142,7 @@ public class SparseDataChunk implements Externalizable {
 		this.hash = new byte [HashFunctionPool.hashLength];
 		arg0.read(hash);
 		this.hashlocs = new byte[8];
-		arg0.read(hashlocs);
+		arg0.readFully(hashlocs);
 	}
 
 	@Override

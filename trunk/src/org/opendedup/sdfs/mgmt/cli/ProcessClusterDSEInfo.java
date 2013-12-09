@@ -25,6 +25,7 @@ public class ProcessClusterDSEInfo {
 			else {
 				ASCIITableHeader[] headerObjs = {
 						new ASCIITableHeader("Host Name", ASCIITable.ALIGN_LEFT),
+						new ASCIITableHeader("ID", ASCIITable.ALIGN_LEFT),
 						new ASCIITableHeader("Current Size"),
 						new ASCIITableHeader("Max Size",
 								ASCIITable.ALIGN_CENTER),
@@ -63,7 +64,7 @@ public class ProcessClusterDSEInfo {
 						DecimalFormat twoDForm = new DecimalFormat("#.##");
 						pFull = Double.valueOf(twoDForm.format(pFull));
 					}
-					String[] row = { host,
+					String[] row = { host,dse.getAttribute("id"),
 							StorageUnit.of(currentSz).format(currentSz),
 							StorageUnit.of(maxSz).format(maxSz),
 							Double.toString(pFull), Integer.toString(pageSize),

@@ -9,6 +9,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -21,9 +22,11 @@ public class ClusterRedundancyCheck {
 	private long newRendundantBlocks = 0;
 	private long failedRendundantBlocks = 0;
 	SDFSEvent fEvt = null;
-	private static final int MAX_BATCH_SIZE = 100;
+	private static final int MAX_BATCH_SIZE = 200;
+	private boolean metaTree = false;
 
-	public ClusterRedundancyCheck(SDFSEvent fEvt, File f) throws IOException {
+	public ClusterRedundancyCheck(SDFSEvent fEvt, File f,boolean metaTree) throws IOException {
+		this.metaTree = metaTree;
 		init(fEvt, f);
 	}
 
@@ -41,9 +44,9 @@ public class ClusterRedundancyCheck {
 		}
 		fEvt.shortMsg = "Cluster Redundancy for " + Main.volume.getName()
 				+ " file count = " + FileCounts.getCount(f, false)
-				+ " file size = " + FileCounts.getSize(f, false);
+				+ " file size = " + FileCounts.getSize(f, false) + " file-path=" + f.getPath();
 		fEvt.maxCt = FileCounts.getSize(f, false);
-		SDFSLogger.getLog().info("Starting Cluster Redundancy Check");
+		SDFSLogger.getLog().info("Starting Cluster Redundancy Check on " + f.getPath());
 		long start = System.currentTimeMillis();
 
 		try {
@@ -55,14 +58,14 @@ public class ClusterRedundancyCheck {
 							+ this.newRendundantBlocks
 							+ "] blocks redundant. Failed to make ["
 							+ this.failedRendundantBlocks
-							+ "] blocks redundant.");
+							+ "] blocks redundant for path [" + f.getPath() +"].");
 
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
 					/ 1000 + "] seconds to check [" + files + "]. Found ["
 					+ this.corruptFiles + "] corrupt files. Made ["
 					+ this.newRendundantBlocks
 					+ "] blocks redundant. Failed to make ["
-					+ this.failedRendundantBlocks + "] blocks redundant.");
+					+ this.failedRendundantBlocks + "] blocks redundant for path [" + f.getPath() +"].");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("cluster redundancy failed", e);
 			fEvt.endEvent("cluster redundancy failed because [" + e.toString()
@@ -88,7 +91,22 @@ public class ClusterRedundancyCheck {
 				SDFSLogger.getLog().debug("error traversing " + dir.getPath(),
 						e);
 			}
-		} else {
+		} else if(metaTree) {
+			MetaDataDedupFile mf = MetaDataDedupFile.getFile(dir.getPath());
+			mf.getIOMonitor().clearFileCounters(true);
+			String dfGuid = mf.getDfGuid();
+			SDFSLogger.getLog().debug("checking " + dir.getPath() + " with guid" +dfGuid);
+			if (dfGuid != null) {
+				File mapFile = new File(Main.dedupDBStore + File.separator
+						+ dfGuid.substring(0, 2) + File.separator + dfGuid
+						+ File.separator + dfGuid + ".map");
+				if (!mapFile.exists()) {
+					return;
+				}
+				this.checkDedupFile(mapFile);
+			}
+		}
+		else {
 			if (dir.getPath().endsWith(".map")) {
 				this.checkDedupFile(dir);
 			}
@@ -149,6 +167,7 @@ public class ClusterRedundancyCheck {
 	}
 
 	private void checkDedupFile(File mapFile) throws IOException {
+		SDFSLogger.getLog().debug("Cluster check " +mapFile.getPath());
 		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 		long prevpos = 0;
 		try {

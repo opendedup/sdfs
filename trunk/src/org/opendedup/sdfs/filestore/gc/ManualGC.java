@@ -103,8 +103,9 @@ public class ManualGC {
 			throw new IOException(e);
 		}
 		try {
+			long dur = System.currentTimeMillis() - tm;
 			rm = HCServiceProxy
-					.removeStailHashes(tm - milliseconds, false, evt);
+					.removeStailHashes(dur + milliseconds, false, evt);
 		} finally {
 
 		}

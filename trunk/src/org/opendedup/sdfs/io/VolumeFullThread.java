@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 
 public class VolumeFullThread implements Runnable {
 	private final Volume vol;
@@ -20,7 +21,7 @@ public class VolumeFullThread implements Runnable {
 
 			try {
 				Thread.sleep(duration);
-				vol.volumeFull = this.isFull();
+				vol.setVolumeFull(this.isFull());
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("Unable to check if full.", e);
 				this.closed = true;
@@ -31,16 +32,15 @@ public class VolumeFullThread implements Runnable {
 
 	public synchronized boolean isFull() throws Exception {
 		long avail = vol.pathF.getUsableSpace();
-		if (avail < Volume.minFree) {
+		if (avail < (Main.CHUNK_LENGTH*1024*10)) {
 			SDFSLogger.getLog().warn(
 					"Drive is almost full space left is [" + avail + "]");
 			return true;
-
 		}
 		if (vol.fullPercentage < 0 || vol.currentSize == 0)
 			return false;
 		else {
-			return (vol.currentSize > vol.absoluteLength);
+			return ((vol.getCurrentSize()+Main.CHUNK_LENGTH*1024*10) >= vol.getCapacity());
 		}
 	}
 

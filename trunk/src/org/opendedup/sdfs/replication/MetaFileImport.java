@@ -1,9 +1,11 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
@@ -22,6 +24,7 @@ public class MetaFileImport implements Serializable {
 	private long filesProcessed = 0;
 	private transient ArrayList<byte[]> hashes = null;
 	private int MAX_SZ = ((30 * 1024 * 1024) / Main.CHUNK_LENGTH);
+	private static final int MAX_BATCHHASH_SIZE = 100;
 	boolean corruption = false;
 	private long entries = 0;
 	private long bytesTransmitted;
@@ -106,12 +109,63 @@ public class MetaFileImport implements Serializable {
 	public boolean isCorrupt() {
 		return this.corruption;
 	}
+	
+	private boolean batchCheck(ArrayList<SparseDataChunk> chunks,MetaDataDedupFile mf)
+			throws IOException {
+		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+		if(pchunks.size() != chunks.size()) {
+			SDFSLogger.getLog().warn("requested " + chunks.size() + " but received " + pchunks.size());
+		}
+		boolean corruption = false;
+		for (SparseDataChunk ck : pchunks) {
+			byte[] eb = ck.getHashLoc();
+			boolean exists = false;
+			if(eb[0] == 1)
+				exists = true;
+			mf.getIOMonitor().addVirtualBytesWritten(
+					Main.CHUNK_LENGTH, true);
+			if (!exists) {
+				hashes.add(ck.getHash());
+				entries++;
+				levt.blocksImported = entries;
+				mf.getIOMonitor().addActualBytesWritten(
+						Main.CHUNK_LENGTH, true);
+			} else {
+				mf.getIOMonitor().addDulicateBlock(true);
+			}
+			if (hashes.size() >= MAX_SZ) {
+				try {
+					SDFSLogger.getLog().debug(
+							"fetching " + hashes.size()
+									+ " blocks");
+					ProcessBatchGetBlocks.runCmd(hashes,
+							server, port, password, useSSL);
+					SDFSLogger.getLog().debug(
+							"fetched " + hashes.size()
+									+ " blocks");
+					this.bytesTransmitted = this.bytesTransmitted
+							+ (hashes.size() * Main.CHUNK_LENGTH);
+					levt.bytesImported = this.bytesTransmitted;
+					hashes = null;
+					hashes = new ArrayList<byte[]>();
+				} catch (Throwable e) {
+					SDFSLogger
+							.getLog()
+							.error("Corruption Suspected on import",
+									e);
+					corruption = true;
+				}
+			}
+		}
+		return corruption;
+	}
 
 	private void checkDedupFile(File metaFile) throws IOException,
 			ReplicationCanceledException {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
+		ArrayList<SparseDataChunk> bh = new ArrayList<SparseDataChunk>(MAX_BATCHHASH_SIZE);
 		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
@@ -135,9 +189,12 @@ public class MetaFileImport implements Serializable {
 					val = mp.nextValue();
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
-						if (!ck.isLocalData()) {
-							boolean exists = HCServiceProxy.hashExists(ck
-									.getHash());
+						if (Main.chunkStoreLocal) {
+							byte [] eb = HCServiceProxy.hashExists(ck
+									.getHash(),false);
+							boolean exists = false;
+							if(eb[0] == 1)
+								exists = true;
 							mf.getIOMonitor().addVirtualBytesWritten(
 									Main.CHUNK_LENGTH, true);
 							if (!exists) {
@@ -172,15 +229,28 @@ public class MetaFileImport implements Serializable {
 									corruption = true;
 								}
 							}
+						} else {
+							bh.add(ck);
+							if (bh.size() >= MAX_BATCHHASH_SIZE) {
+								boolean cp = batchCheck(bh,mf);
+								if(cp)
+									corruption = true;
+								bh = new ArrayList<SparseDataChunk>(MAX_BATCHHASH_SIZE);
+							}
+							
 						}
 					}
+				}
+				if (bh.size() > 0) {
+					boolean cp = batchCheck(bh,mf);
+					if(cp)
+						corruption = true;
 				}
 				Main.volume.updateCurrentSize(mf.length(), true);
 				if (corruption) {
 					MetaFileStore.removeMetaFile(mf.getPath(), true);
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
-
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog()

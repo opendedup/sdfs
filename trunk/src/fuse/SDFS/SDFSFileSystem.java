@@ -144,6 +144,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int flush(String path, Object fh) throws FuseException {
+		if(Main.volume.isOffLine())
+			throw new FuseException("volume offline")
+		.initErrno(Errno.ENAVAIL);
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
@@ -159,6 +162,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int fsync(String path, Object fh, boolean isDatasync)
 			throws FuseException {
+		if(Main.volume.isOffLine())
+			throw new FuseException("volume offline")
+		.initErrno(Errno.ENAVAIL);
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
 			ch.force(true);
@@ -326,6 +332,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int mkdir(String path, int mode) throws FuseException {
 		try {
 			File f = new File(this.mountedVolume + path);
+			if(Main.volume.isOffLine())
+				throw new FuseException("volume offline")
+			.initErrno(Errno.ENAVAIL);
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 			if (f.exists()) {
@@ -352,6 +361,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int mknod(String path, int mode, int rdev) throws FuseException {
 		try {
 			File f = new File(this.mountedVolume + path);
+			if(Main.volume.isOffLine())
+				throw new FuseException("volume offline")
+			.initErrno(Errno.ENAVAIL);
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 			if (f.exists()) {
@@ -400,6 +412,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// SDFSLogger.getLog().info("9");
 		// Thread.currentThread().setName("10 " +
 		// Long.toString(System.currentTimeMillis()));
+		if(Main.volume.isOffLine())
+			throw new FuseException("volume offline")
+		.initErrno(Errno.ENAVAIL);
 		try {
 			openSetter.setFh(this.getFileChannel(path, flags));
 		} catch (FuseException e) {
@@ -413,6 +428,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int read(String path, Object fh, ByteBuffer buf, long offset)
 			throws FuseException {
+		if(Main.volume.isOffLine())
+			throw new FuseException("volume offline")
+		.initErrno(Errno.ENAVAIL);
 		try {
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			int read = ch.read(buf, 0, buf.capacity(), offset);
@@ -646,7 +664,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			ByteBuffer buf, long offset) throws FuseException {
 		// SDFSLogger.getLog().debug("writing " + buf.capacity());
 		// Thread.currentThread().setName("21 "+Long.toString(System.currentTimeMillis()));
-
+		if(Main.volume.isOffLine())
+			throw new FuseException("volume offline")
+		.initErrno(Errno.ENAVAIL);
 		try {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
