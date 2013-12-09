@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -268,28 +269,21 @@ public class SparseDedupFile implements DedupFile {
 	public int writeCache() throws IOException, HashtableFullException {
 		this.writeLock.lock();
 		try {
-			Object[] buffers = null;
 			SDFSLogger.getLog().debug(
 					"Flushing Cache of for " + mf.getPath() + " of size "
 							+ this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
-			int z = 0;
-			buffers = this.flushingBuffers.keySet().toArray();
-			for (int i = 0; i < buffers.length; i++) {
-				DedupChunkInterface buf = this.flushingBuffers.get(buffers[i]);
+			int z = this.flushingBuffers.size();
+			for(int i = 0;i<30000;i++) {
+				if(this.flushingBuffers.size() == 0)
+					return z;
 				try {
-					if (buf != null)
-						buf.close();
-				} catch (Exception e) {
-					SDFSLogger.getLog().debug(
-							"while closing position " + buf.getFilePosition(),
-							e);
-				} finally {
-
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					break;
 				}
-				z++;
 			}
-			return z;
+			throw new IOException("WriteCache timed out after 30 seconds. There are still " + this.flushingBuffers.size() + " in flush");
 		} finally {
 			this.writeLock.unlock();
 		}
@@ -319,7 +313,7 @@ public class SparseDedupFile implements DedupFile {
 								writeBuffer.getHashLoc());
 						writeBuffer.setHashLoc(hashloc);
 					}
-					
+
 				} else {
 					AbstractHashEngine hc = hashPool.borrowObject();
 					try {
@@ -343,7 +337,7 @@ public class SparseDedupFile implements DedupFile {
 									+ hashloc[1]);
 				if (hashloc[0] == 1)
 					doop = true;
-				
+
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
 				if (!doop) {

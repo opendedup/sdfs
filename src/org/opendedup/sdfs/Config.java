@@ -304,6 +304,16 @@ public class Config {
 					.getAttribute("cluster-dse-password");
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
+		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
+		Main.sdfsCliEnabled = Boolean.parseBoolean(cli
+				.getAttribute("enable"));
+		Main.sdfsPassword = cli.getAttribute("password");
+		Main.sdfsPasswordSalt = cli.getAttribute("salt");
+		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
+		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
+				.getAttribute("enable-auth"));
+		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
+		SDFSLogger.getLog().debug("listen-address=" +Main.sdfsCliListenAddr);
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
@@ -375,20 +385,8 @@ public class Config {
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 			}
-			int cliSz = doc.getElementsByTagName("sdfscli").getLength();
-			if (cliSz > 0) {
-				Element cli = (Element) doc.getElementsByTagName("sdfscli")
-						.item(0);
-				Main.sdfsCliEnabled = Boolean.parseBoolean(cli
-						.getAttribute("enable"));
-				Main.sdfsPassword = cli.getAttribute("password");
-				Main.sdfsPasswordSalt = cli.getAttribute("salt");
-				Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
-				Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
-						.getAttribute("enable-auth"));
-				Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
-			}
 
+			
 		}
 
 		/*
@@ -415,17 +413,15 @@ public class Config {
 		root.removeChild(volume);
 		volume = Main.volume.toXMLElement(doc);
 		root.appendChild(volume);
-		int cliSz = doc.getElementsByTagName("sdfscli").getLength();
-		if (cliSz > 0) {
-			Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
-			cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
-			cli.setAttribute("password", Main.sdfsPassword);
-			cli.setAttribute("salt", Main.sdfsPasswordSalt);
-			cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
-			cli.setAttribute("enable-auth",
-					Boolean.toString(Main.sdfsCliRequireAuth));
-			cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
-		}
+
+		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
+		cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
+		cli.setAttribute("password", Main.sdfsPassword);
+		cli.setAttribute("salt", Main.sdfsPasswordSalt);
+		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
+		cli.setAttribute("enable-auth",
+				Boolean.toString(Main.sdfsCliRequireAuth));
+		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
 		try {
 			// Prepare the DOM document for writing
 			Source source = new DOMSource(doc);

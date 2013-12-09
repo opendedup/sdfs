@@ -21,6 +21,7 @@ public class GetClusterDSE {
 			List<DSEServer> al = soc.getStorageNodes();
 			for (DSEServer s : al) {
 				Element el = doc.createElement("dse");
+				el.setAttribute("id", Byte.toString(s.id));
 				el.setAttribute("max-size",
 						Long.toString(s.maxSize * HCServiceProxy.getPageSize()));
 				el.setAttribute(

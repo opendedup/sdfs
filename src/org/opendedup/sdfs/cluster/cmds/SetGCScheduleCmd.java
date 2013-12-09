@@ -2,8 +2,6 @@ package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jgroups.Message;
 import org.jgroups.blocks.RequestOptions;
@@ -13,67 +11,52 @@ import org.jgroups.util.RspList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
-import org.opendedup.sdfs.io.Volume;
 
-public class ListVolsCmd implements IOPeerCmd {
+public class SetGCScheduleCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private HashMap<String, Volume> results = new HashMap<String, Volume>();
+	// private ArrayList<String> results = new ArrayList<String>();
+	private String schedule;
 
-	public ListVolsCmd() {
+	public SetGCScheduleCmd(String schedule) {
+		this.schedule = schedule;
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout);
+
 	}
 
 	@Override
 	public void executeCmd(final ClusterSocket soc) throws IOException {
-		byte[] b = new byte[1];
+		byte[] vb = this.schedule.getBytes();
+		byte[] b = new byte[1 + 4 + vb.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
-		buf.put(NetworkCMDS.LIST_VOLUMES);
+		buf.put(NetworkCMDS.SET_GC_SCHEDULE);
+		buf.putInt(vb.length);
+		buf.put(vb);
 		try {
 			RspList<Object> lst = soc.getDispatcher().castMessage(null,
 					new Message(null, null, buf.array()), opts);
 			for (Rsp<Object> rsp : lst) {
 				if (rsp.hasException()) {
 					SDFSLogger.getLog().error(
-							"List Volume Exception thrown for "
+							"Set Schedule Exception thrown for "
 									+ rsp.getSender());
 					throw rsp.getException();
 				} else if (rsp.wasSuspected() | rsp.wasUnreachable()) {
 					SDFSLogger.getLog().error(
-							"List Volume Host unreachable Exception thrown for "
+							"Set Schedule  unreachable for "
 									+ rsp.getSender());
-				} else {
-					if (rsp.getValue() != null) {
-						SDFSLogger.getLog().debug(
-								"List completed for " + rsp.getSender()
-										+ " returned=" + rsp.getValue());
-						@SuppressWarnings("unchecked")
-						ArrayList<String> rst = (ArrayList<String>) rsp
-								.getValue();
-						for (String volStr : rst) {
-							if (!this.results.containsKey(volStr)) {
-								FindVolOwnerCmd cmd = new FindVolOwnerCmd(volStr);
-								cmd.executeCmd(soc);
-								Volume vol = cmd.getResults();
-								this.results.put(volStr, vol);
-							}
-						}
-					}
 				}
+
 			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().error("error while running list volumes", e);
+			SDFSLogger.getLog().error("error while running set schedule", e);
 			throw new IOException(e);
 		}
 	}
 
 	@Override
 	public byte getCmdID() {
-		return NetworkCMDS.LIST_VOLUMES;
-	}
-
-	public HashMap<String, Volume> getResults() {
-		return this.results;
+		return NetworkCMDS.SET_GC_SCHEDULE;
 	}
 
 }

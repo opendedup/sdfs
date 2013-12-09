@@ -46,8 +46,9 @@ public class ClusteredManualGC {
 			evt.curCt = 33;
 			HCServiceProxy.processHashClaims(evt);
 			evt.curCt = 66;
+			long dur = System.currentTimeMillis() - tm;
 			rm = HCServiceProxy
-					.removeStailHashes(tm - milliseconds, false, evt);
+					.removeStailHashes(dur+milliseconds, false, evt);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
 			evt.endEvent(

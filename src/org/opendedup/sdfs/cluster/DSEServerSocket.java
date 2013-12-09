@@ -316,7 +316,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			}
 			case NetworkCMDS.RUN_REMOVE: {
 				SDFSLogger.getLog().debug("recieved remove chunks cmd");
-				long timestamp = buf.getLong();
+				long ms = buf.getLong();
+				long timestamp = System.currentTimeMillis() - ms;
 				SDFSLogger.getLog().debug(
 						"recieved remove chunks cmd after ["
 								+ new Date(timestamp) + "]");

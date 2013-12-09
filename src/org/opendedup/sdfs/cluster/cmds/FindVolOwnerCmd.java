@@ -40,7 +40,7 @@ public class FindVolOwnerCmd implements IOPeerCmd {
 				if (rsp.hasException()) {
 					SDFSLogger.getLog().error(
 							"FIND_VOLUME_OWNER Exception thrown for "
-									+ rsp.getSender());
+									+ rsp.getSender(),rsp.getException());
 				} else if (rsp.wasSuspected() | rsp.wasUnreachable()) {
 					SDFSLogger.getLog().error(
 							"FIND_VOLUME_OWNER Host unreachable for "

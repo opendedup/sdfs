@@ -69,6 +69,19 @@ public class SDFSCmdline {
 			ProcessClusterPromoteToGC.runCmd();
 			System.exit(0);
 		}
+		if (cmd.hasOption("cluster-get-gc-master")) {
+			ProcessGetGCMaster.runCmd();
+			System.exit(0);
+		}
+		if (cmd.hasOption("set-gc-schedule")) {
+			ProcessSetGCSchedule.runCmd(cmd
+					.getOptionValue("set-gc-schedule"));
+			System.exit(0);
+		}
+		if (cmd.hasOption("get-gc-schedule")) {
+			ProcessGetGCSchedule.runCmd();
+			System.exit(0);
+		}
 		if (cmd.hasOption("volume-info")) {
 			ProcessVolumeInfo.runCmd();
 			System.exit(0);
@@ -236,7 +249,22 @@ public class SDFSCmdline {
 				.withDescription(
 						"Makes this host the current Garbage Collection Coordinator. "
 								+ "\n e.g. --cluster-make-gc-master")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cluster-get-gc-master")
+				.withDescription(
+						"Returns the current Garbage Collection Coordinator. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("set-gc-schedule")
+				.withDescription(
+						"Sets the cron schedule for the GC Master. Schedule must be in quotes \n e.g. --set-gc-schedule=\"0 59 23 * * ?\"")
 				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("get-gc-schedule")
+				.withDescription(
+						"Returns the cron schedule for the GC Master.")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("snapshot")
 				.withDescription(

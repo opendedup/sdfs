@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.FindGCMasterCmd;
 import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
+import org.opendedup.sdfs.cluster.cmds.SetGCScheduleCmd;
 import org.opendedup.sdfs.cluster.cmds.StopGCMasterCmd;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
@@ -206,6 +208,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		buf.position(msg.getOffset());
 		byte cmd = buf.get();
 		Object rtrn = null;
+
 		switch (cmd) {
 		case NetworkCMDS.UPDATE_DSE: {
 			try {
@@ -214,7 +217,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 				synchronized (serverState) {
 					serverState.put(msg.getSrc(), s);
-					synchronized (servers) {
+					Lock sl = this.ssl.writeLock();
+					sl.lock();
+					try {
 						DSEServer cs = servers[s.id];
 						if (cs != null && !cs.address.equals(s.address))
 							SDFSLogger
@@ -225,12 +230,15 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 											+ cs.address.toString() + " new="
 											+ s.address.toString());
 						servers[s.id] = s;
+					} finally {
+						sl.unlock();
 					}
 					if (s.serverType == DSEServer.SERVER) {
 						WriteLock l = this.sl.writeLock();
 						l.lock();
 						sal.remove(s);
 						sal.add(s);
+						Main.volume.setOffLine(sal.size() == 0);
 						saal.remove(s.address);
 						saal.add(s.address);
 						Collections.sort(sal, new CustomComparator());
@@ -298,12 +306,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 
 		case NetworkCMDS.RUN_CLAIM: {
-			SDFSLogger.getLog().debug("recieved claim chunks cmd");
 			rtrn = null;
 			break;
 		}
 		case NetworkCMDS.RUN_REMOVE: {
-			SDFSLogger.getLog().debug("recieved remove chunks cmd");
 			rtrn = null;
 			break;
 		}
@@ -334,6 +340,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			break;
 		}
 		case NetworkCMDS.FIND_VOLUME_OWNER: {
+			SDFSLogger.getLog().info("looking for volume");
 			byte[] sb = new byte[buf.getInt()];
 			buf.get(sb);
 			String volume = new String(sb);
@@ -341,6 +348,17 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				rtrn = Main.volume;
 			else
 				rtrn = null;
+			break;
+		}
+		case NetworkCMDS.SET_GC_SCHEDULE: {
+			SDFSLogger.getLog().info("setting schedule");
+			byte[] sb = new byte[buf.getInt()];
+			buf.get(sb);
+			String schedule = new String(sb);
+			SDFSLogger.getLog().info("setting gc schedule to " + schedule);
+			this._changeGCSchedule(schedule);
+			rtrn = schedule;
+			break;
 		}
 		}
 		return rtrn;
@@ -385,17 +403,30 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		} finally {
 			l.unlock();
 		}
-		throw new IOException("no servers available to fulfill request");
+		String servers = "";
+		for (byte b : slist) {
+			servers = servers + " " + b;
+		}
+		throw new IOException(
+				"no servers available to fulfill request. Requested servers are ["
+						+ servers + "] requested start position was [" + start
+						+ "]");
 	}
 
 	public List<Address> getServer(byte[] slist) throws IOException {
 		ArrayList<Address> al = new ArrayList<Address>();
-		for (int i = 1; i < slist.length; i++) {
-			if (slist[i] > 0) {
-				DSEServer svr = servers[slist[i]];
-				if (svr != null)
-					al.add(svr.address);
+		ReadLock l = this.ssl.readLock();
+		l.lock();
+		try {
+			for (int i = 1; i < slist.length; i++) {
+				if (slist[i] > 0) {
+					DSEServer svr = servers[slist[i]];
+					if (svr != null)
+						al.add(svr.address);
+				}
 			}
+		} finally {
+			l.unlock();
 		}
 		if (al.size() == 0)
 			throw new IOException("no servers available to fulfill request");
@@ -441,6 +472,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				FindGCMasterCmd f = new FindGCMasterCmd();
 				f.executeCmd(this);
 				if (f.getResults() == null) {
+					SetGCScheduleCmd cmd = new SetGCScheduleCmd(
+							Main.fDkiskSchedule);
+					cmd.executeCmd(this);
 					this._startGC();
 					SDFSLogger.getLog().info("Started GC");
 				} else {
@@ -451,6 +485,25 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to start gc", e);
+			} finally {
+				l.unlock();
+			}
+		}
+	}
+
+	private void _changeGCSchedule(String schedule)
+			throws InstantiationException, IllegalAccessException,
+			ClassNotFoundException, IOException {
+		Main.fDkiskSchedule = schedule;
+		if (this.gcscheduler != null) {
+			Lock l = this.lock_service.getLock("gc");
+			l.lock();
+			try {
+				SDFSLogger.getLog().info("Restarting to GC Master");
+				this.gcscheduler.close();
+				this.gcscheduler = null;
+				this.gcscheduler = new StandAloneGCScheduler();
+				SDFSLogger.getLog().info("GC Master Restarted");
 			} finally {
 				l.unlock();
 			}
@@ -471,7 +524,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					volumes.put(vol, m.get(vol));
 				}
 			}
-
 			if (this.gcscheduler == null)
 				this.gcscheduler = new StandAloneGCScheduler();
 			SDFSLogger.getLog().info("Promoted to GC Master");
@@ -535,9 +587,11 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 			while (iter.hasNext()) {
 				Address addr = iter.next();
-				SDFSLogger.getLog().debug("found " + addr + " " + new_view.containsMember(addr));
+				SDFSLogger.getLog().debug(
+						"found " + addr + " " + new_view.containsMember(addr));
 				if (!new_view.containsMember(addr)) {
-					SDFSLogger.getLog().debug("removed " + addr + " from state.");
+					SDFSLogger.getLog().debug(
+							"removed " + addr + " from state.");
 					DSEServer s = serverState.remove(addr);
 					Lock l = this.ssl.writeLock();
 					l.lock();
@@ -546,6 +600,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l = this.sl.writeLock();
 					l.lock();
 					sal.remove(s);
+					Main.volume.setOffLine(sal.size() == 0);
 					saal.remove(s.address);
 					setServerWeighting();
 					l.unlock();
@@ -603,22 +658,26 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				serverState.put(msg.getSrc(), s);
 				Lock l = this.ssl.writeLock();
 				l.lock();
-				DSEServer cs = servers[s.id];
-				if (cs != null && !cs.address.equals(s.address))
-					SDFSLogger
-							.getLog()
-							.warn("Two servers have the same id ["
-									+ s.id
-									+ "] but are running on different addresses current="
-									+ cs.address.toString() + " new="
-									+ s.address.toString());
-				servers[s.id] = s;
-				l.unlock();
+				try {
+					DSEServer cs = servers[s.id];
+					if (cs != null && !cs.address.equals(s.address))
+						SDFSLogger
+								.getLog()
+								.warn("Two servers have the same id ["
+										+ s.id
+										+ "] but are running on different addresses current="
+										+ cs.address.toString() + " new="
+										+ s.address.toString());
+					servers[s.id] = s;
+				} finally {
+					l.unlock();
+				}
 				if (s.serverType == DSEServer.SERVER) {
 					l = this.sl.writeLock();
 					l.lock();
 					sal.remove(s);
 					sal.add(s);
+					Main.volume.setOffLine(sal.size() == 0);
 					saal.remove(s.address);
 					saal.add(s.address);
 					Collections.sort(sal, new CustomComparator());
@@ -752,6 +811,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 									+ sal.size()
 									+ "] and cluster write requirement is "
 									+ Main.volume.getClusterCopies());
+				Main.volume.setOffLine(sal.size() == 0);
+
 			}
 			SDFSLogger.getLog().debug(
 					"received state (" + list.size() + " state");
@@ -761,28 +822,46 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	}
 
 	public long getMaxSize() {
-		long sz = 0;
-		for (DSEServer s : sal) {
-			sz = sz + s.maxSize;
-			SDFSLogger.getLog().debug("sz=" + sz);
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.maxSize;
+				SDFSLogger.getLog().debug("sz=" + sz);
+			}
+			return sz;
+		} finally {
+			l.unlock();
 		}
-		return sz;
 	}
 
 	public long getCurrentSize() {
-		long sz = 0;
-		for (DSEServer s : sal) {
-			sz = sz + s.currentSize;
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.currentSize;
+			}
+			return sz;
+		} finally {
+			l.unlock();
 		}
-		return sz;
 	}
 
 	public long getFreeBlocks() {
-		long sz = 0;
-		for (DSEServer s : sal) {
-			sz = sz + s.freeBlocks;
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.freeBlocks;
+			}
+			return sz;
+		} finally {
+			l.unlock();
 		}
-		return sz;
 	}
 
 	private class CustomComparator implements Comparator<DSEServer> {
@@ -850,6 +929,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					saal.remove(server.address);
 					saal.add(server.address);
 					Collections.sort(sal, new CustomComparator());
+					Main.volume.setOffLine(sal.size() == 0);
 					setServerWeighting();
 				} finally {
 					l.unlock();

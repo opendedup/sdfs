@@ -50,11 +50,11 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout * 2, false);
-		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+				Main.ClusterRSPTimeout, false);
+		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		//opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
-		//opts.setFlags(Message.Flag.NO_FC);
+		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
 	}
 
@@ -80,16 +80,17 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout * 2, false);
-		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+				Main.ClusterRSPTimeout, false);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		//opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.NO_FC);
+		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 	}
 
 	@Override
-	public void executeCmd(DSEClientSocket soc) throws IOException {
+	public void executeCmd(DSEClientSocket soc) throws IOException,
+			RedundancyNotMetException {
 		// SDFSLogger.getLog().info("writing to " + this.numberOfCopies);
 		if (this.numberOfCopies > 7)
 			this.numberOfCopies = 7;
@@ -103,68 +104,68 @@ public class WriteHashCmd implements IOClientCmd {
 		buf.put(hash);
 		buf.putInt(len);
 		buf.put(aContents);
-		try {
-			List<Address> addrs = soc.getServers(this.numberOfCopies,
-					ignoredhosts);
-			int pos = 1;
-			if (addrs.size() > 0) {
-				RspList<Object> lst = soc.disp.castMessage(addrs, new Message(
-						null, null, buf.array()), opts);
+		List<Address> addrs = soc.getServers(this.numberOfCopies, ignoredhosts);
+		int written = 0;
+		int pos = 1;
+		if (addrs.size() > 0) {
+			RspList<Object> lst = null;
+			try {
+				lst = soc.disp.castMessage(addrs,
+						new Message(null, null, buf.array()), opts);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+			Collection<Rsp<Object>> responses = lst.values();
 
-				Collection<Rsp<Object>> responses = lst.values();
+			for (Rsp<Object> response : responses) {
+				DSEServer svr = soc.serverState.get(response.getSender());
+				if (svr != null) {
 
-				for (Rsp<Object> response : responses) {
-					DSEServer svr = soc.serverState.get(response.getSender());
-					if (svr != null) {
+					if (response.hasException()) {
+						SDFSLogger.getLog().debug(
+								"remote exception found "
+										+ response.getException().getMessage());
+					} else if (response.wasSuspected()
+							|| response.wasUnreachable()) {
 
-						if (response.hasException()) {
-							SDFSLogger.getLog().debug(
-									"remote exception found "
-											+ response.getException()
-													.getMessage());
-						} else if (response.wasSuspected()
-								|| response.wasUnreachable()) {
-
-						} else  if(response.wasReceived()){
-							try {
-								boolean done = (Boolean) response.getValue();
-								if (done)
-									resp[0] = 1;
-								resp[pos] = svr.id;
-								pos++;
-							} catch (Exception e) {
-								SDFSLogger.getLog().warn(
-										"unable to write to "
-												+ response.getSender(), e);
-							}
-						}else {
+					} else if (response.wasReceived()) {
+						try {
+							boolean done = (Boolean) response.getValue();
+							if (done)
+								resp[0] = 1;
+							resp[pos] = svr.id;
+							pos++;
+							written++;
+						} catch (Exception e) {
 							SDFSLogger.getLog().warn(
 									"unable to write to "
-											+ response.getSender());
+											+ response.getSender(), e);
 						}
-						
-
 					} else {
-						SDFSLogger.getLog().info(
-								"addr " + response.getSender()
-										+ " does not exist in the system");
+						SDFSLogger.getLog().warn(
+								"unable to write to " + response.getSender());
 					}
 
+				} else {
+					SDFSLogger.getLog().info(
+							"addr " + response.getSender()
+									+ " does not exist in the system");
+				}
+
+			}
+		}
+		if (this.ignoredhosts != null) {
+			for (byte bz : ignoredhosts) {
+				if (bz != (byte) 0) {
+					resp[pos] = bz;
+					pos++;
 				}
 			}
-			if (this.ignoredhosts != null) {
-				for (byte bz : ignoredhosts) {
-					if (bz != (byte) 0) {
-						resp[pos] = bz;
-						pos++;
-					}
-				}
-			}
-			if (pos == 1)
-				throw new IOException("unable to write to any storage nodes");
-		} catch (Exception e) {
-			// SDFSLogger.getLog().error("error while writing",e);
-			throw new IOException(e);
+		}
+		if (pos == 1)
+			throw new IOException("unable to write to any storage nodes");
+		if (written < addrs.size()) {
+			throw new RedundancyNotMetException(written, addrs.size(),this.resp);
 		}
 	}
 

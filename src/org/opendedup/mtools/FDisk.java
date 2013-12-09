@@ -18,7 +18,7 @@ public class FDisk {
 	private long files = 0;
 	private long corruptFiles = 0;
 	private SDFSEvent fEvt = null;
-	private static final int MAX_BATCH_SIZE = 100;
+	private static final int MAX_BATCH_SIZE = 200;
 
 	public FDisk(SDFSEvent evt) throws FDiskException {
 		init(evt);

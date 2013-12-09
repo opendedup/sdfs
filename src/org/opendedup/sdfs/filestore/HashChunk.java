@@ -109,10 +109,9 @@ public class HashChunk implements Externalizable {
 		this.compressed = in.readBoolean();
 		short hl = in.readShort();
 		this.name = new byte[hl];
-		in.read(name);
+		in.readFully(name);
 		this.data = new byte[in.readInt()];
-		in.read(data);
-
+		in.readFully(data);
 	}
 
 	@Override

@@ -17,8 +17,9 @@ public class PoolThread extends Thread {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
+	private int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
-			60);
+			maxTasks + 20);
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -29,7 +30,7 @@ public class PoolThread extends Thread {
 		while (!isStopped()) {
 			try {
 				tasks.clear();
-				int ts = taskQueue.drainTo(tasks, 40);
+				int ts = taskQueue.drainTo(tasks, maxTasks);
 				if (Main.chunkStoreLocal) {
 					for (int i = 0; i < ts; i++) {
 						WritableCacheBuffer runnable = tasks.get(i);

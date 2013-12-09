@@ -7,7 +7,7 @@ public class StandAloneGCScheduler implements Runnable {
 	private GCControllerImpl gcController = null;
 	private boolean closed = false;
 	Thread th = null;
-	SDFSGCScheduler gcSched = null;
+	public SDFSGCScheduler gcSched = null;
 
 	public void recalcScheduler() {
 		gcController.reCalc();

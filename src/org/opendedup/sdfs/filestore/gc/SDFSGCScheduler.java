@@ -13,6 +13,7 @@ import org.quartz.impl.StdSchedulerFactory;
 public class SDFSGCScheduler {
 
 	Scheduler sched = null;
+	CronTrigger cctrigger = null;
 
 	public SDFSGCScheduler() {
 		try {
@@ -39,6 +40,15 @@ public class SDFSGCScheduler {
 					"Unable to schedule SDFS Garbage Collection", e);
 		}
 	}
+	
+	public String nextFileTime() {
+		return cctrigger.getNextFireTime().toString();
+	}
+	
+	public String schedule() {
+		return cctrigger.getCronExpression();
+	}
+	
 
 	public void stopSchedules() {
 		try {

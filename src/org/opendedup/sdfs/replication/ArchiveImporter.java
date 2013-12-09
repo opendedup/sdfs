@@ -1,12 +1,15 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.ClusterRedundancyCheck;
@@ -21,7 +24,10 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import de.schlichtherle.truezip.file.TArchiveDetector;
 import de.schlichtherle.truezip.file.TFile;
+import de.schlichtherle.truezip.file.TVFS;
+
 
 public class ArchiveImporter {
 
@@ -47,10 +53,12 @@ public class ArchiveImporter {
 				+ " from " + server + ":" + port + " to " + dest, evt);
 		ReadLock l = GCMain.gclock.readLock();
 		l.lock();
+		TFile fDstFiles = null;
 		try {
 			runningJobs.put(evt.uid, this);
 			File f = new File(srcArchive);
 			String sdest = dest + "." + RandomGUID.getGuid();
+			SDFSLogger.getLog().info("setting up staging at " + sdest);
 			try {
 				SDFSLogger.getLog().info(
 						"Importing " + srcArchive + " from " + server + ":"
@@ -66,20 +74,20 @@ public class ArchiveImporter {
 					srcFiles = srcFilesRoot.listFiles()[0];
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
-							"Replication archive is corrupt " + srcArchive, e);
+							"Replication archive is corrupt " + srcArchive + " size of " + new File(srcArchive).length(), e);
 					throw e;
 				}
-				File dstFiles = new File(Main.volume.getPath() + File.separator
+				fDstFiles = new TFile(Main.volume.getPath() + File.separator
 						+ sdest);
-				this.export(srcFiles, dstFiles);
+				this.export(srcFiles, fDstFiles);
 				srcFiles = new TFile(new File(srcArchive + "/ddb/"));
 				File ddb = new File(Main.dedupDBStore + File.separator);
 				if (!ddb.exists())
 					ddb.mkdirs();
-				dstFiles = new File(Main.dedupDBStore + File.separator);
-				this.export(srcFiles, dstFiles);
-				TFile.umount(srcFiles.getInnerArchive());
-
+				TFile mDstFiles  = new TFile(Main.dedupDBStore + File.separator);
+				this.export(srcFiles, mDstFiles);
+				TVFS.umount(srcRoot.getInnerArchive());
+				
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
 						+ sdest, server, password, port, maxSz, evt, useSSL);
 
@@ -103,7 +111,7 @@ public class ArchiveImporter {
 				} else {
 					if (!Main.chunkStoreLocal)
 						new ClusterRedundancyCheck(ievt, new File(
-								Main.volume.getPath() + File.separator + sdest));
+								Main.volume.getPath() + File.separator + sdest),true);
 					commitImport(Main.volume.getPath() + File.separator + dest,
 							Main.volume.getPath() + File.separator + sdest);
 					DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -152,6 +160,11 @@ public class ArchiveImporter {
 				throw e;
 			}
 		} finally {
+			try {
+				fDstFiles.rm();
+			} catch(Exception e) {
+				SDFSLogger.getLog().debug(e);
+			}
 			runningJobs.remove(evt.uid);
 			l.unlock();
 		}
@@ -199,7 +212,9 @@ public class ArchiveImporter {
 		try {
 			MetaDataDedupFile nmf = MetaFileStore.getMF(sdest);
 			nmf.renameTo(dest, true);
+			MetaFileStore.removeMetaFile(sdest,true);
 			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to commit replication while moving from staing ["
@@ -209,12 +224,14 @@ public class ArchiveImporter {
 							+ sdest + "] to [" + dest + "]");
 
 		}
-
 	}
 
-	public void export(TFile file, File dst)
+	private void export(TFile file, TFile dst)
 			throws ReplicationCanceledException, IOException {
+		SDFSLogger.getLog().debug("extracting " +file.getPath() + " to " + dst.getPath());
 		if (!closed) {
+			TFile.cp_rp(file, dst, TArchiveDetector.NULL);
+			/*
 			if (file.isDirectory()) {
 				dst.mkdirs();
 				// All files and subdirectories
@@ -222,7 +239,7 @@ public class ArchiveImporter {
 				for (int i = 0; i < files.length; i++) {
 					File dstF = new File(dst, files[i].getName());
 					if (files[i].isFile()) {
-						files[i].cp_rp(dstF);
+						files[i].cp_p(dstF);
 						ievt.curCt += dstF.length();
 					} else {
 						export(files[i], dstF);
@@ -232,11 +249,25 @@ public class ArchiveImporter {
 				dst.getParentFile().mkdirs();
 
 			}
+			*/
+			
 
 		} else {
 			throw new ReplicationCanceledException(
 					"replication job was canceled");
 		}
+	}
+	
+	public static void main(String [] args)  {
+		String srcArchive= "/tmp/test.zip";
+		TFile srcRoot = new TFile(new File(srcArchive + "/test/"));
+		System.out.println("Tar file size is " + FileCounts.getSize(srcRoot));
+		TFile [] srcFiles = srcRoot.listFiles();
+		for(TFile f: srcFiles) {
+			System.out.println("file=" + f.getName());
+		}
+		
+		
 	}
 
 }

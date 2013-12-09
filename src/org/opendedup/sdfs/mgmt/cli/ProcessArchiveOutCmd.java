@@ -19,7 +19,7 @@ public class ProcessArchiveOutCmd {
 		file = URLEncoder.encode(file, "UTF-8");
 		StringBuilder sb = new StringBuilder();
 		Formatter formatter = new Formatter(sb);
-		formatter.format("file=%s&cmd=archiveout&options=iloveanne", file);
+		formatter.format("file=%s&cmd=archiveout&options=ilovemg", file);
 		Document doc = MgmtServerConnection.getResponse(sb.toString());
 		Element root = doc.getDocumentElement();
 		Element evt = (Element) root.getElementsByTagName("event").item(0);

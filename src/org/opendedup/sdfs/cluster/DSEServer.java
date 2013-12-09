@@ -31,6 +31,8 @@ public class DSEServer implements Externalizable {
 	public static final int SERVER = 0;
 	public static final int CLIENT = 1;
 	public static final int LISTENER = 2;
+	public boolean readOnly = false;
+	
 
 	public DSEServer() {
 
@@ -64,6 +66,7 @@ public class DSEServer implements Externalizable {
 		this.useSSL = in.readBoolean();
 		this.location = (String) in.readObject();
 		this.rack = (String) in.readObject();
+		this.readOnly = in.readBoolean();
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class DSEServer implements Externalizable {
 		out.writeBoolean(useSSL);
 		out.writeObject(location);
 		out.writeObject(rack);
-
+		out.writeBoolean(this.readOnly);
 	}
 
 	public byte[] getBytes() throws Exception {
@@ -90,7 +93,7 @@ public class DSEServer implements Externalizable {
 		byte[] lb = this.location.getBytes();
 		byte[] rb = this.rack.getBytes();
 		byte[] bz = new byte[1 + 4 + b.length + 1 + 4 + 4 + addr.length + 8 + 8
-				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length];
+				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1];
 
 		ByteBuffer buf = ByteBuffer.wrap(bz);
 		buf.put(NetworkCMDS.UPDATE_DSE);
@@ -114,6 +117,10 @@ public class DSEServer implements Externalizable {
 		buf.put(lb);
 		buf.putInt(rb.length);
 		buf.put(rb);
+		if(this.readOnly)
+			buf.put((byte)1);
+		else
+			buf.put((byte)0);
 		return buf.array();
 	}
 
@@ -142,6 +149,8 @@ public class DSEServer implements Externalizable {
 		buf.get(rb);
 		this.location = new String(lb);
 		this.rack = new String(rb);
+		if(buf.get() == 1)
+			this.readOnly = true;
 	}
 
 	public String toString() {

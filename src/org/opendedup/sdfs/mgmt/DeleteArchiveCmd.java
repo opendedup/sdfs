@@ -15,7 +15,7 @@ public class DeleteArchiveCmd implements XtendedCmd {
 			throw new IOException("requeste file " + file + " does not exist");
 		File vp = new File(Main.volume.getPath()).getParentFile();
 		File f = new File(vp.getPath() + File.separator + "archives"
-				+ File.separator + RandomGUID.getGuid() + ".tar.gz");
+				+ File.separator + RandomGUID.getGuid() + ".zip");
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
