@@ -81,7 +81,8 @@ public class ClusteredHCServer {
 					Config.parseDSEConfigFile(cmd.getOptionValue("c"));
 				} catch (IOException e1) {
 					SDFSLogger.getLog().fatal(
-							"exiting because of an error with the config file");
+							"exiting because of an error with the config file",e1);
+					e1.printStackTrace();
 					System.exit(-1);
 				}
 				try {
