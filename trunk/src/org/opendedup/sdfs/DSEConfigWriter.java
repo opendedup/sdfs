@@ -2,6 +2,7 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,7 +56,7 @@ public class DSEConfigWriter {
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	long chunk_store_allocation_size = 0;
-	short chunk_size = 128;
+	short chunk_size = 4;
 	String fdisk_schedule = "0 59 23 * * ?";
 	boolean awsEnabled = false;
 	boolean azureEnabled = false;
@@ -93,14 +94,17 @@ public class DSEConfigWriter {
 			System.exit(1);
 		}
 		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity")
-				|| !cmd.hasOption("listen-ip")) {
+				|| !cmd.hasOption("cluster-node-id")) {
 			System.out
-					.println("--dse-name, --dse-capacity, and --listen-ip are required options");
+					.println("--dse-name and --dse-capacity --cluster-node-id");
 			printHelp(options);
 			System.exit(-1);
 		}
 		dse_name = cmd.getOptionValue("dse-name");
-		this.list_ip = cmd.getOptionValue("listen-ip");
+		if(!cmd.hasOption("listen-ip"))
+			this.list_ip= InetAddress.getLocalHost().getHostAddress();
+		else
+			this.list_ip = cmd.getOptionValue("listen-ip");
 		base_path = OSValidator.getProgramBasePath() + "dse" + File.separator
 				+ dse_name;
 		if (cmd.hasOption("base-path")) {
@@ -140,7 +144,7 @@ public class DSEConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 4;
 				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
@@ -173,7 +177,7 @@ public class DSEConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 4;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -365,8 +369,8 @@ public class DSEConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("page-size")
 				.withDescription(
-						"The unit size, in kB, of chunks stored. This must match the chunk size for the volumes being stored.\n Defaults to: \n 128")
-				.hasArg().withArgName("SIZE in kB").create());
+						"The unit size, in KB, of chunks stored. This must match the chunk size for the volumes being stored.\n Defaults to: \n 4")
+				.hasArg().withArgName("SIZE in KB").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("hashdb-location")
 				.withDescription(

@@ -22,13 +22,18 @@ public class SDFSService {
 
 		this.configFile = configFile;
 		this.volumes = volumes;
-		System.out.println("Running SDFS Version " + Main.version);
+		System.out.println("Running Program SDFS Version " + Main.version);
 
 		System.out.println("reading config file = " + this.configFile);
 	}
 
 	public void start(boolean useSSL) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
+		if(Main.version.startsWith("0") || Main.version.startsWith("1")) {
+			System.err.println("This version is not backwards compatible with previous versions of SDFS");
+			System.err.println("Exiting");
+			System.exit(-1);
+		}
 		SDFSLogger.getLog().debug(
 				"############# SDFSService Starting ##################");
 		MgmtWebServer.start(useSSL);
