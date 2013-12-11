@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -104,6 +105,8 @@ public class ManualGC {
 		}
 		try {
 			long dur = System.currentTimeMillis() - tm;
+			long nmc = dur+milliseconds;
+			SDFSLogger.getLog().debug("Will Request cluster remove data  not claimed since " + new Date(System.currentTimeMillis()- nmc));
 			rm = HCServiceProxy
 					.removeStailHashes(dur + milliseconds, false, evt);
 		} finally {
