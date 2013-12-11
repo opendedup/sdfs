@@ -328,7 +328,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] ob = new byte[buf.getInt()];
 				buf.get(ob);
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
-				HCServiceProxy.removeStailHashes(timestamp, force, evt);
+				HCServiceProxy.removeStailHashes(ms, force, evt);
 				rtrn = evt;
 				break;
 			}
