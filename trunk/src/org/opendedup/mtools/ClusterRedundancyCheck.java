@@ -181,8 +181,8 @@ public class ClusterRedundancyCheck {
 				prevpos = mp.getIterFPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val);
-					ck.setFpos((prevpos / LongByteArrayMap.FREE.length)
+					SparseDataChunk ck = new SparseDataChunk(val,mp.version);
+					ck.setFpos((prevpos / mp.FREE.length)
 							* Main.CHUNK_LENGTH);
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {

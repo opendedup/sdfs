@@ -387,10 +387,10 @@ public class SparseDedupFile implements DedupFile {
 
 			if (mf.isDedup() || doop) {
 				chunk = new SparseDataChunk(doop, hash, false,
-						writeBuffer.getHashLoc());
+						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
 			} else {
 				chunk = new SparseDataChunk(doop, hash, true,
-						writeBuffer.getHashLoc());
+						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
 				this.chunkStore.put(filePosition,
 						writeBuffer.getFlushedBuffer());
 			}
@@ -899,7 +899,7 @@ public class SparseDedupFile implements DedupFile {
 		long records = 0;
 		while (l > -1) {
 			try {
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.version);
 				WritableCacheBuffer writeBuffer = null;
 				if (pck.isLocalData() && mf.isDedup()) {
 					byte[] chunk = chunkStore.get(l);
@@ -953,7 +953,7 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			while (l > -1) {
 				pos = l;
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.version);
 				if (pck.isLocalData()) {
 					byte[] exists = HCServiceProxy.hashExists(pck.getHash(),
 							false);
@@ -1014,7 +1014,7 @@ public class SparseDedupFile implements DedupFile {
 			// this.addReadAhead(place);
 			byte[] b = this.bdb.get(place);
 			if (b != null) {
-				SparseDataChunk pck = new SparseDataChunk(b);
+				SparseDataChunk pck = new SparseDataChunk(b,this.bdb.version);
 				// ByteString data = pck.getData();
 				boolean dataEmpty = !pck.isLocalData();
 				if (dataEmpty) {

@@ -6,6 +6,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 
+import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 
 public class SparseDataChunk implements Externalizable {
@@ -14,19 +15,27 @@ public class SparseDataChunk implements Externalizable {
 	private byte[] hash;
 	private boolean localData = false;
 	int currentpos = 1;
-	public static final int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8;
+	private int RAWDL = 1 + HashFunctionPool.hashLength + 1 + 8 + 8;
 	private byte[] hashlocs;
 	private long fpos;
+	private byte version = 1;
+	private long timestamp = 0;
 	
 	public SparseDataChunk() {
 		
 	}
 
-	public SparseDataChunk(byte[] rawData) throws IOException {
+	public SparseDataChunk(byte[] rawData, byte version) throws IOException {
+		this.version = version;
+		if(version == 0)
+			this.RAWDL = LongByteArrayMap._FREE.length;
+		else if(version ==1)
+			this.RAWDL = LongByteArrayMap._V1FREE.length;
 		if (rawData.length != RAWDL)
 			throw new IOException(
 					"possible data corruption: byte array length "
 							+ rawData.length + " does not equal " + RAWDL);
+		
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		byte b = buf.get();
 		if (b == 0)
@@ -42,14 +51,24 @@ public class SparseDataChunk implements Externalizable {
 			this.localData = true;
 		hashlocs = new byte[8];
 		buf.get(hashlocs);
+		if(this.version > 0) {
+			this.version = buf.get();
+			this.timestamp = buf.getLong();
+		}
 	}
 
 	public SparseDataChunk(boolean doop, byte[] hash, boolean localData,
-			byte[] hashlocs) {
+			byte[] hashlocs,byte version,long timestamp) {
+		this.version = version;
+		if(version == 0)
+			this.RAWDL = LongByteArrayMap._FREE.length;
+		else if(version ==1)
+			this.RAWDL = LongByteArrayMap._V1FREE.length;
 		this.doop = doop;
 		this.hash = hash;
 		this.localData = localData;
 		this.hashlocs = hashlocs;
+		this.timestamp = timestamp;
 	}
 
 	public boolean isDoop() {
@@ -77,6 +96,10 @@ public class SparseDataChunk implements Externalizable {
 		else
 			buf.put((byte) 0);
 		buf.put(this.hashlocs);
+		if(this.version >0) {
+			buf.putShort(this.version);
+			buf.putLong(this.timestamp);
+		}
 		return buf.array();
 	}
 
@@ -143,6 +166,10 @@ public class SparseDataChunk implements Externalizable {
 		arg0.read(hash);
 		this.hashlocs = new byte[8];
 		arg0.readFully(hashlocs);
+		if(arg0.available() > 0) {
+			this.version = arg0.readByte();
+			this.timestamp = arg0.readLong();
+		}
 	}
 
 	@Override
@@ -153,6 +180,10 @@ public class SparseDataChunk implements Externalizable {
 		arg0.writeBoolean(this.localData);
 		arg0.write(hash);
 		arg0.write(hashlocs);
+		if(this.version > 0) {
+			arg0.writeByte(this.version);
+			arg0.writeLong(timestamp);
+		}
 	}
 
 }
