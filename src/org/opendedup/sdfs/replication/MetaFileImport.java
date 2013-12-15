@@ -188,7 +188,7 @@ public class MetaFileImport implements Serializable {
 					prevpos = mp.getIterFPos();
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val);
+						SparseDataChunk ck = new SparseDataChunk(val,mp.version);
 						if (Main.chunkStoreLocal) {
 							byte [] eb = HCServiceProxy.hashExists(ck
 									.getHash(),false);

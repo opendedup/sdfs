@@ -23,12 +23,17 @@ import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements AbstractMap {
 	private static ArrayList<LongByteArrayMapListener> mapListener = new ArrayList<LongByteArrayMapListener>();
+	private static final byte swversion = 1;
 	// RandomAccessFile bdbf = null;
-	private static final int arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
+	private static final int _arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
+	private static final int _v1arrayLength = 1 + HashFunctionPool.hashLength + 1 + 1+8+8;
+	private static final int _v1offset = 64;
+	private static final short magicnumber = 6442;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
-	public static byte[] FREE = new byte[arrayLength];
+	public static byte[] _FREE = new byte[_arrayLength];
+	public static byte[] _V1FREE = new byte[_v1arrayLength];
 	public long iterPos = 0;
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
@@ -39,11 +44,17 @@ public class LongByteArrayMap implements AbstractMap {
 	// FileChannel iterbdb = null;
 	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
+	private int offset = _v1offset;
+	private int arrayLength = _v1arrayLength;
+	public byte version = swversion;
+	public byte [] FREE;
 	long flen = 0;
 
 	static {
-		FREE = new byte[arrayLength];
-		Arrays.fill(FREE, (byte) 0);
+		_FREE = new byte[_arrayLength];
+		_V1FREE = new byte[_v1arrayLength];
+		Arrays.fill(_FREE, (byte) 0);
+		Arrays.fill(_V1FREE, (byte) 0);
 	}
 
 	public static void addMapListener(LongByteArrayMapListener l) {
@@ -76,7 +87,7 @@ public class LongByteArrayMap implements AbstractMap {
 	}
 
 	public long getIterFPos() {
-		return this.iterPos * arrayLength;
+		return (this.iterPos * arrayLength) + this.offset;
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
@@ -84,7 +95,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public long nextKey() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = (iterPos * arrayLength);
+			long _cpos = getIterFPos();
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -101,10 +112,10 @@ public class LongByteArrayMap implements AbstractMap {
 									* arrayLength, e1);
 				} finally {
 					iterPos++;
-					_cpos = (iterPos * arrayLength);
+					_cpos = getIterFPos();
 				}
 			}
-			if ((iterPos * arrayLength) != flen)
+			if ((iterPos * arrayLength)+ this.offset != flen)
 				throw new IOException("did not reach end of file for ["
 						+ this.filePath + "] len=" + iterPos * arrayLength
 						+ " file len =" + flen);
@@ -118,7 +129,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] nextValue() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = (iterPos * arrayLength);
+			long _cpos = getIterFPos();
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -129,10 +140,10 @@ public class LongByteArrayMap implements AbstractMap {
 					}
 				} finally {
 					iterPos++;
-					_cpos = (iterPos * arrayLength);
+					_cpos = (iterPos * arrayLength)+ this.offset;
 				}
 			}
-			if ((iterPos * arrayLength) < pbdb.size()) {
+			if (getIterFPos() < pbdb.size()) {
 				this.hashlock.lock();
 				try {
 					flen = this.pbdb.size();
@@ -157,6 +168,18 @@ public class LongByteArrayMap implements AbstractMap {
 	public boolean isClosed() {
 		return this.closed;
 	}
+	
+	private void intVersion () {
+		if(version == 0) {
+			this.FREE = _FREE;
+			this.offset = 0;
+			this.arrayLength = _arrayLength;
+		} if(version == 1) {
+			this.FREE = _V1FREE;
+			this.offset = 64;
+			this.arrayLength = _v1arrayLength;
+		}
+	}
 
 	private void openFile() throws IOException {
 		if (this.closed) {
@@ -174,18 +197,30 @@ public class LongByteArrayMap implements AbstractMap {
 							StandardOpenOption.CREATE,
 							StandardOpenOption.WRITE, StandardOpenOption.READ,
 							StandardOpenOption.SPARSE);
+					ByteBuffer buf = ByteBuffer.allocate(3);
+					buf.putShort(magicnumber);
+					buf.put(swversion);
+					bdb.position(0);
+					bdb.write(buf);
 					bdb.position(1024);
 					bdb.close();
-
 					flen = 0;
 				} else {
-
+					
 					flen = dbFile.length();
 				}
 				rf = new RandomAccessFile(filePath, "rw");
 				pbdb = (FileChannelImpl) Files.newByteChannel(bdbf,
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
+				ByteBuffer buf = ByteBuffer.allocate(3);
+				pbdb.read(buf);
+				if(buf.getShort() == magicnumber) {
+					this.version = buf.get();
+				} else {
+					this.version = 0;
+				}
+				this.intVersion();
 				// initiall allocate 32k
 				this.closed = false;
 			} catch (Exception e) {
@@ -197,19 +232,8 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	private long calcMapFilePos(long fpos) throws IOException {
-		long pos = (fpos / Main.CHUNK_LENGTH) * FREE.length;
-		/*
-		 * if (pos > Integer.MAX_VALUE) throw new IOException(
-		 * "Requested file position " + fpos +
-		 * " is larger than the maximum length of a file for this file system "
-		 * + (Integer.MAX_VALUE * Main.CHUNK_LENGTH) / FREE.length);
-		 */
-		return pos;
-	}
-
 	private long getMapFilePosition(long pos) throws IOException {
-		long propLen = this.calcMapFilePos(pos);
+		long propLen = ((pos / Main.CHUNK_LENGTH) * FREE.length) + this.offset;
 		return propLen;
 	}
 

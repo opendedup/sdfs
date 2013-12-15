@@ -53,7 +53,7 @@ public class PoolThread extends Thread {
 							try {
 								hash = hc.getHash(runnable.getFlushedBuffer());
 								SparseDataChunk ck = new SparseDataChunk(false,
-										hash, false, new byte[8]);
+										hash, false, new byte[8],(byte)0,0);
 								runnable.setHash(hash);
 								cks.add(i,ck);
 							} catch (BufferClosedException e) {

@@ -196,7 +196,7 @@ public class ThreadedFDisk {
 					prevpos = mp.getIterFPos();
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val);
+						SparseDataChunk ck = new SparseDataChunk(val,mp.version);
 						if (!ck.isLocalData()) {
 							byte[] exists = HCServiceProxy.hashExists(
 									ck.getHash(), false,
