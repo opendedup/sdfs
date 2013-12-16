@@ -67,14 +67,9 @@ public class FDisk {
 
 	private void traverse(File dir) throws IOException {
 		if (dir.isDirectory()) {
-			try {
-				String[] children = dir.list();
-				for (int i = 0; i < children.length; i++) {
-					traverse(new File(dir, children[i]));
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().debug("error traversing " + dir.getPath(),
-						e);
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++) {
+				traverse(new File(dir, children[i]));
 			}
 		} else {
 			if (dir.getPath().endsWith(".map")) {
@@ -110,11 +105,11 @@ public class FDisk {
 			mp.iterInit();
 			long corruptBlocks = 0;
 			while (val != null) {
-				fEvt.curCt += (mp.getIterFPos() - prevpos);
-				prevpos = mp.getIterFPos();
+				fEvt.curCt += (mp.getIterPos() - prevpos);
+				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val,mp.version);
+					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 

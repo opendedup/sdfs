@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -17,13 +18,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
 import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements AbstractMap {
 	private static ArrayList<LongByteArrayMapListener> mapListener = new ArrayList<LongByteArrayMapListener>();
-	private static final byte swversion = 1;
+	private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
 	private static final int _arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
 	private static final int _v1arrayLength = 1 + HashFunctionPool.hashLength + 1 + 1+8+8;
@@ -68,13 +71,19 @@ public class LongByteArrayMap implements AbstractMap {
 	public static ArrayList<LongByteArrayMapListener> getMapListeners() {
 		return mapListener;
 	}
-
-	// private boolean smallMemory = false;
+	
 	public LongByteArrayMap(String filePath) throws IOException {
 		this.filePath = filePath;
-		this.openFile();
+		this.openFile(swversion);
 
 	}
+	
+	// private boolean smallMemory = false;
+	public LongByteArrayMap(String filePath, byte version) throws IOException {
+			this.filePath = filePath;
+			this.openFile(version);
+
+		}
 
 	public void iterInit() throws IOException {
 		iterlock.lock();
@@ -86,8 +95,12 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	public long getIterFPos() {
+	private long getInternalIterFPos() {
 		return (this.iterPos * arrayLength) + this.offset;
+	}
+	
+	public long getIterPos() {
+		return (this.iterPos * arrayLength);
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
@@ -95,7 +108,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public long nextKey() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = getIterFPos();
+			long _cpos = getInternalIterFPos();
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -112,7 +125,7 @@ public class LongByteArrayMap implements AbstractMap {
 									* arrayLength, e1);
 				} finally {
 					iterPos++;
-					_cpos = getIterFPos();
+					_cpos = getInternalIterFPos();
 				}
 			}
 			if ((iterPos * arrayLength)+ this.offset != flen)
@@ -129,7 +142,7 @@ public class LongByteArrayMap implements AbstractMap {
 	public byte[] nextValue() throws IOException {
 		iterlock.lock();
 		try {
-			long _cpos = getIterFPos();
+			long _cpos = getInternalIterFPos();
 			while (_cpos < flen) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
@@ -143,7 +156,7 @@ public class LongByteArrayMap implements AbstractMap {
 					_cpos = (iterPos * arrayLength)+ this.offset;
 				}
 			}
-			if (getIterFPos() < pbdb.size()) {
+			if (getInternalIterFPos() < pbdb.size()) {
 				this.hashlock.lock();
 				try {
 					flen = this.pbdb.size();
@@ -181,7 +194,7 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	private void openFile() throws IOException {
+	private void openFile(byte version) throws IOException {
 		if (this.closed) {
 			this.hashlock.lock();
 			bdbf = Paths.get(filePath);
@@ -197,11 +210,13 @@ public class LongByteArrayMap implements AbstractMap {
 							StandardOpenOption.CREATE,
 							StandardOpenOption.WRITE, StandardOpenOption.READ,
 							StandardOpenOption.SPARSE);
-					ByteBuffer buf = ByteBuffer.allocate(3);
-					buf.putShort(magicnumber);
-					buf.put(swversion);
-					bdb.position(0);
-					bdb.write(buf);
+					if(version>0) {
+						ByteBuffer buf = ByteBuffer.allocate(3);
+						buf.putShort(magicnumber);
+						buf.put(version);
+						bdb.position(0);
+						bdb.write(buf);
+					}
 					bdb.position(1024);
 					bdb.close();
 					flen = 0;
@@ -215,6 +230,7 @@ public class LongByteArrayMap implements AbstractMap {
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				ByteBuffer buf = ByteBuffer.allocate(3);
 				pbdb.read(buf);
+				buf.position(0);
 				if(buf.getShort() == magicnumber) {
 					this.version = buf.get();
 				} else {
@@ -471,6 +487,16 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.unlock();
 		}
 	}
+	
+	public long size() {
+		this.hashlock.lock();
+		try {
+		long sz = (this.dbFile.length() - this.offset)/this.arrayLength;
+		return sz;
+		}finally {
+			this.hashlock.unlock();
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -495,6 +521,48 @@ public class LongByteArrayMap implements AbstractMap {
 			this.rf.close();
 		} catch (Exception e) {
 		}
+	}
+	
+	public static LongByteArrayMap convertToV1(LongByteArrayMap map,SDFSEvent evt) throws IOException {
+		LongByteArrayMap m = new LongByteArrayMap(map.filePath +"-new",(byte)1);
+		File of = map.dbFile;
+		File nf = new File(map.filePath +"-new");
+		map.hashlock.lock();
+		try {
+			map.iterInit();
+			evt.maxCt = map.size();
+			byte [] val = map.nextValue();
+			while(val != null) {
+				evt.curCt++;
+				SparseDataChunk ck = new SparseDataChunk(val);
+				SparseDataChunk _ck = new SparseDataChunk(ck.isDoop(), ck.getHash(), ck.isLocalData(),
+						ck.getHashLoc(),m.version,System.currentTimeMillis());
+				long fpose = (map.getIterPos() /map.arrayLength)* Main.CHUNK_LENGTH;
+				m.put(fpose, _ck.getBytes());
+				val = map.nextValue();
+				
+			}
+			m.close();
+			map.close();
+			of.delete();
+			Files.move(nf.toPath(), of.toPath());
+			m = new LongByteArrayMap(of.getPath(),(byte)1);
+			evt.endEvent("Complete migration.");
+		} catch(IOException e) {
+			evt.endEvent("Unable to complete migration because : " +e.getMessage(), SDFSEvent.ERROR);
+			throw e;
+		}
+		finally {
+			try {
+				m.close();
+			}catch(Exception e) {
+				SDFSLogger.getLog().debug("unable to close map file", e);
+			}
+			
+			nf.delete();
+			map.hashlock.unlock();
+		}
+		return m;
 	}
 
 }

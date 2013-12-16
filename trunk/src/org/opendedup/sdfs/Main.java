@@ -30,6 +30,7 @@ public class Main {
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
+	public static byte MAPVERSION = 0;
 
 	public static String sdfsPassword = "";
 

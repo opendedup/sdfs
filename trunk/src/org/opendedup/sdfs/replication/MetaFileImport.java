@@ -184,11 +184,11 @@ public class MetaFileImport implements Serializable {
 					if (this.closed)
 						throw new ReplicationCanceledException(
 								"MetaFile Import Canceled");
-					levt.curCt += (mp.getIterFPos() - prevpos);
-					prevpos = mp.getIterFPos();
+					levt.curCt += (mp.getIterPos() - prevpos);
+					prevpos = mp.getIterPos();
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val,mp.version);
+						SparseDataChunk ck = new SparseDataChunk(val);
 						if (Main.chunkStoreLocal) {
 							byte [] eb = HCServiceProxy.hashExists(ck
 									.getHash(),false);

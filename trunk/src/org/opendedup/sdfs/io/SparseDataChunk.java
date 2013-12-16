@@ -20,13 +20,17 @@ public class SparseDataChunk implements Externalizable {
 	private long fpos;
 	private byte version = 1;
 	private long timestamp = 0;
+	private static final long serialVersionUID= -2782607786999940224L;
 	
 	public SparseDataChunk() {
 		
 	}
 
-	public SparseDataChunk(byte[] rawData, byte version) throws IOException {
-		this.version = version;
+	public SparseDataChunk(byte[] rawData) throws IOException {
+		if(rawData.length == LongByteArrayMap._FREE.length)
+			this.version = 0;
+		if(rawData.length == LongByteArrayMap._V1FREE.length)
+			this.version = 1;
 		if(version == 0)
 			this.RAWDL = LongByteArrayMap._FREE.length;
 		else if(version ==1)

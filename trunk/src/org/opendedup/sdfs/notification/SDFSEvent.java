@@ -66,6 +66,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type DELFILE = new Type("Delete File");
 	public transient static final Type PERFMON = new Type("Performance Monitor");
 	public transient static final Type TEST = new Type("Testing 123");
+	public transient static final Type CONVMAP = new Type("CONVMAP");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
@@ -147,6 +148,11 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static SDFSEvent importEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
+		return event;
+	}
+	
+	public static SDFSEvent convMapEvent(String shortMsg,String file) {
+		SDFSEvent event = new SDFSEvent(CONVMAP, file, shortMsg, RUNNING);
 		return event;
 	}
 
