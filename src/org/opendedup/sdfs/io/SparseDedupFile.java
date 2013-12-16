@@ -384,8 +384,9 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
-
+			if(this.bdb.version >0) {
 			if (mf.isDedup() || doop) {
+				
 				chunk = new SparseDataChunk(doop, hash, false,
 						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
 			} else {
@@ -393,6 +394,18 @@ public class SparseDedupFile implements DedupFile {
 						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
 				this.chunkStore.put(filePosition,
 						writeBuffer.getFlushedBuffer());
+			}
+			}else {
+				if (mf.isDedup() || doop) {
+					
+					chunk = new SparseDataChunk(doop, hash, false,
+							writeBuffer.getHashLoc(),this.bdb.version,0);
+				} else {
+					chunk = new SparseDataChunk(doop, hash, true,
+							writeBuffer.getHashLoc(),this.bdb.version,0);
+					this.chunkStore.put(filePosition,
+							writeBuffer.getFlushedBuffer());
+				}
 			}
 			bdb.put(filePosition, chunk.getBytes());
 		} catch (Exception e) {
@@ -899,7 +912,7 @@ public class SparseDedupFile implements DedupFile {
 		long records = 0;
 		while (l > -1) {
 			try {
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.version);
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
 				WritableCacheBuffer writeBuffer = null;
 				if (pck.isLocalData() && mf.isDedup()) {
 					byte[] chunk = chunkStore.get(l);
@@ -953,7 +966,7 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			while (l > -1) {
 				pos = l;
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.version);
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
 				if (pck.isLocalData()) {
 					byte[] exists = HCServiceProxy.hashExists(pck.getHash(),
 							false);
@@ -1014,7 +1027,7 @@ public class SparseDedupFile implements DedupFile {
 			// this.addReadAhead(place);
 			byte[] b = this.bdb.get(place);
 			if (b != null) {
-				SparseDataChunk pck = new SparseDataChunk(b,this.bdb.version);
+				SparseDataChunk pck = new SparseDataChunk(b);
 				// ByteString data = pck.getData();
 				boolean dataEmpty = !pck.isLocalData();
 				if (dataEmpty) {

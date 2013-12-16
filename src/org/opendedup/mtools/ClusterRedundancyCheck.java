@@ -177,11 +177,11 @@ public class ClusterRedundancyCheck {
 			mp.iterInit();
 			long corruptBlocks = 0;
 			while (val != null) {
-				fEvt.curCt += (mp.getIterFPos() - prevpos);
-				prevpos = mp.getIterFPos();
+				fEvt.curCt += (mp.getIterPos() - prevpos);
+				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val,mp.version);
+					SparseDataChunk ck = new SparseDataChunk(val);
 					ck.setFpos((prevpos / mp.FREE.length)
 							* Main.CHUNK_LENGTH);
 					if (!ck.isLocalData()) {
