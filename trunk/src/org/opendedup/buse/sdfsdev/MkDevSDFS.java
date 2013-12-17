@@ -17,16 +17,18 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 
-import fuse.FuseMount;
-
 public class MkDevSDFS {
 
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
-				"m",
+				"osdev",
 				true,
-				"The device to map to. \n e.g. /dev/nbd0");
+				"The os device to map to. \n e.g. /dev/nbd0");
+		options.addOption(
+				"blockdev",
+				true,
+				"The sdfs block device to map to. \n e.g. dev0");
 		options.addOption("d", false, "verbose debug output");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("vc", true,
@@ -129,11 +131,12 @@ public class MkDevSDFS {
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
-				cmd.getOptionValue("m"));
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		
 		try {
-			SDFSBlockDev dev = new SDFSBlockDev(cmd.getOptionValue("dev"),Main.volume.getPath(),Main.volume.getCapacity());
+			SDFSBlockDev dev = new SDFSBlockDev(cmd.getOptionValue("blockdev"),cmd.getOptionValue("osdev"),Main.volume.getPath(),Main.volume.getCapacity());
+			ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
+					cmd.getOptionValue("m"),dev);
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
 			dev.startBlockDev();
 			System.exit(0);
 		} catch (Exception e) {
@@ -145,7 +148,7 @@ public class MkDevSDFS {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter
 				.printHelp(
-						"mksdfsdev -dev <device name e.g. /dev/nbd0> "
+						"mksdfsdev -osdev <device name e.g. /dev/nbd0> -blockdev <sdfs blockdevice to map to> "
 								+ "-[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
 						options);
 	}

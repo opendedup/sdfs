@@ -173,7 +173,8 @@ public class DedupFileChannel {
 				this.closeLock.unlock();
 			}
 		}
-		mf.sync();
+		if(!mf.isDev())
+			mf.sync();
 	}
 
 	/**

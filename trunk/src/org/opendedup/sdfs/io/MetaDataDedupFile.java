@@ -72,6 +72,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean symlink = false;
 	private String symlinkPath = null;
 	private String version = Main.version;
+	private boolean blkdev = false;
 	private static ArrayList<MetaFileEventListener> mfListeners = new ArrayList<MetaFileEventListener>();
 
 	public static void addMetaFileListener(MetaFileEventListener l) {
@@ -84,6 +85,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public static ArrayList<MetaFileEventListener> getMetaFileListeners() {
 		return mfListeners;
+	}
+	
+	public boolean isDev() {
+		return this.blkdev;
+	}
+	
+	public void setDev(boolean dev) {
+		this.blkdev = dev;
 	}
 
 	/**

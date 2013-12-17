@@ -6,10 +6,12 @@ import org.opendedup.sdfs.servers.SDFSService;
 class ShutdownHook extends Thread {
 	private SDFSService service;
 	private String mountPoint;
+	private SDFSBlockDev dev;
 
-	public ShutdownHook(SDFSService service, String mountPoint) {
+	public ShutdownHook(SDFSService service, String mountPoint,SDFSBlockDev dev) {
 		this.service = service;
 		this.mountPoint = mountPoint;
+		this.dev = dev;
 	}
 
 	@Override
@@ -17,6 +19,7 @@ class ShutdownHook extends Thread {
 
 		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
+		dev.close();
 		service.stop();
 		SDFSLogger.getLog().info("All Data Flushed");
 		try {
