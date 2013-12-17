@@ -219,8 +219,11 @@ public class DedupFileStore {
 		SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
-			df.forceClose();
-			SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
+			if (df != null) {
+				df.forceClose();
+				SDFSLogger.getLog().debug(
+						"Closed " + df.getMetaFile().getPath());
+			}
 		}
 	}
 

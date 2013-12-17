@@ -966,6 +966,7 @@ public class VolumeConfigWriter {
 							+ OSValidator.getConfigPath()
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
+			/*
 			if (!wr.chunk_store_local) {
 				File _f = new File(OSValidator.getConfigPath() + wr.clusterID
 						+ "-gc-cfg.xml");
@@ -982,6 +983,7 @@ public class VolumeConfigWriter {
 									+ wr.clusterID + "-gc-cfg.xml]");
 				}
 			}
+			*/
 		} catch (Exception e) {
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());

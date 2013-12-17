@@ -19,8 +19,8 @@ public class BUSEMkDev {
 		threadGroup.setDaemon(true);
 
 		log.info("Mounted filesystem");
-		ShutdownHook t = new ShutdownHook(dev,buse);
-		Runtime.getRuntime().addShutdownHook(t);
+		//ShutdownHook t = new ShutdownHook(dev,buse);
+		//Runtime.getRuntime().addShutdownHook(t);
 		int z = mkdev(dev, sz, blksz,buse, readonly, threadGroup);
 		
 		log.info("Filesystem is unmounted");
