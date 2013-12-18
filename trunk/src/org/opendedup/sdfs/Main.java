@@ -22,6 +22,8 @@ public class Main {
 		}
 	}
 	// public static VolumeConfigWriterThread wth = null;
+	
+	public static boolean blockDev = false;
 
 	public static boolean firstRun = true;
 

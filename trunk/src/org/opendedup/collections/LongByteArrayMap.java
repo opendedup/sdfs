@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -391,6 +392,8 @@ public class LongByteArrayMap implements AbstractMap {
 	 */
 	@Override
 	public void sync() throws IOException {
+		this.pbdb.force(false);
+		
 		/*
 		 * FileChannel _bdb = null; try { _bdb = (FileChannel)
 		 * bdbf.newByteChannel(StandardOpenOption.WRITE,

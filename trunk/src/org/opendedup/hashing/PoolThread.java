@@ -31,6 +31,7 @@ public class PoolThread extends Thread {
 			try {
 				tasks.clear();
 				int ts = taskQueue.drainTo(tasks, maxTasks);
+				if (ts > 0) {
 				if (Main.chunkStoreLocal) {
 					for (int i = 0; i < ts; i++) {
 						WritableCacheBuffer runnable = tasks.get(i);
@@ -42,7 +43,7 @@ public class PoolThread extends Thread {
 						}
 					}
 				} else {
-					if (ts > 0) {
+					
 						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(ts);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
@@ -103,8 +104,12 @@ public class PoolThread extends Thread {
 						*/
 						cks = null;
 					}
-				}
 				Thread.sleep(1);
+				}
+				else {
+					Thread.sleep(10);
+				}
+				
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to execute thread", e);
 			}
