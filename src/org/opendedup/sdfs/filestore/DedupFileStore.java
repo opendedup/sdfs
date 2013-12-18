@@ -47,7 +47,7 @@ public class DedupFileStore {
 	 * files from the openFile hashmap.
 	 */
 	static {
-		if (Main.maxInactiveFileTime > 0) {
+		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(60000,
 					Main.maxInactiveFileTime);
 		}

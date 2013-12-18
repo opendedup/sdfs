@@ -19,6 +19,12 @@ class ShutdownHook extends Thread {
 
 		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
+		try {
+			Process p = Runtime.getRuntime().exec("umount " + dev.devicePath);
+			p.waitFor();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		dev.close();
 		service.stop();
 		SDFSLogger.getLog().info("All Data Flushed");

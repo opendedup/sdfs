@@ -119,6 +119,7 @@ public class MkDevSDFS {
 		if (OSValidator.isWindows())
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
+		Main.blockDev = true;
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
