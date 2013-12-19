@@ -3,6 +3,7 @@ package org.opendedup.sdfs.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -63,6 +64,7 @@ public class Volume implements java.io.Serializable {
 
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
+	private ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
 	
 	public void setVolumeFull(boolean full) {
 		this.volumeFull = full;
@@ -343,6 +345,11 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		for(BlockDev blk : this.devices) {
+			Element el = blk.getElement();
+			doc.adoptNode(el);
+			root.appendChild(el);
+		}
 		return root;
 	}
 
@@ -376,6 +383,11 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		for(BlockDev blk : this.devices) {
+			Element el = blk.getElement();
+			doc.adoptNode(el);
+			root.appendChild(el);
+		}
 		return doc;
 	}
 
