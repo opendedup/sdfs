@@ -13,7 +13,7 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
-public class SDFSBlockDev implements BUSE {
+public class SDFSBlockDev implements BUSE, Runnable {
 
 	ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	long sz;
@@ -127,6 +127,16 @@ public class SDFSBlockDev implements BUSE {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to close " + this.devicePath, e);
 		}
+	}
+
+	@Override
+	public void run() {
+		try {
+		this.startBlockDev();
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("Block Device Stopping " + this.devicePath,e);
+		}
+		SDFSLogger.getLog().warn("Block Device Stopped " + this.devicePath);
 	}
 
 }

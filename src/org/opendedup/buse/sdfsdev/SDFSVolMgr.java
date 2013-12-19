@@ -17,7 +17,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 
-public class MkDevSDFS {
+public class SDFSVolMgr {
 
 	public static Options buildOptions() {
 		Options options = new Options();
