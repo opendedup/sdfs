@@ -10,8 +10,11 @@ import org.opendedup.buse.driver.*;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.BlockDev;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+
+import com.google.common.eventbus.EventBus;
 
 public class SDFSBlockDev implements BUSE, Runnable {
 
@@ -20,10 +23,13 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	String devicePath;
 	String internalFPath;
 	DedupFileChannel ch;
-	
-	public SDFSBlockDev(String blockDev,String devicePath, String internalPath, long sz) throws IOException {
-		this.devicePath = devicePath;
-		this.sz = sz;
+	EventBus eventBus = new EventBus();
+	BlockDev dev;
+	public SDFSBlockDev(BlockDev dev) throws IOException {
+		this.dev = dev;
+		eventBus.register(dev);
+		this.devicePath = dev.getDevPath();
+		this.sz = dev.getSize();
 		File f = new File(devicePath);
 		if(!f.exists()) {
 			Process p = Runtime.getRuntime().exec("modprobe nbd");
@@ -35,7 +41,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		}
 		if(!f.exists())
 			throw new IOException("device " + devicePath + " not found.");
-		File df = new File(internalPath + "/" + blockDev);
+		File df = new File(dev.getInternalPath());
 		this.internalFPath = df.getPath();
 		if(!df.exists())
 			df.getParentFile().mkdirs();
@@ -116,12 +122,19 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		return 0;
 	}
 
-	public void startBlockDev() throws Exception { 
+	private void startBlockDev() throws Exception { 
 		BUSEMkDev.mkdev(this.devicePath, this.sz, 4096, this, false);
+		
 	}
 
 	@Override
 	public void close() {
+		try {
+			Process p = Runtime.getRuntime().exec("umount " + this.devicePath);
+			p.waitFor();
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to unmount vols for " + this.devicePath, e);
+		}
 		try {
 			BUSEMkDev.closeDev(devicePath);
 		} catch (Exception e) {
@@ -132,11 +145,15 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	@Override
 	public void run() {
 		try {
+			this.eventBus.post(new BlockDeviceOpenEvent(this.dev));
 		this.startBlockDev();
 		}catch(Exception e) {
 			SDFSLogger.getLog().warn("Block Device Stopping " + this.devicePath,e);
 		}
-		SDFSLogger.getLog().warn("Block Device Stopped " + this.devicePath);
+		finally {
+			this.eventBus.post(new BlockDeviceClosedEvent(this.dev));
+			SDFSLogger.getLog().warn("Block Device Stopped " + this.devicePath);
+		}
 	}
 
 }
