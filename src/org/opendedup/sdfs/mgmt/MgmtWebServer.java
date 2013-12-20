@@ -18,6 +18,7 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -226,7 +227,70 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
+					}else if(cmd.equalsIgnoreCase("blockdev-add")) {
+						try {
+							Element el = new BlockDeviceAdd().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
+							result.appendChild(doc.adoptNode(el));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if(cmd.equalsIgnoreCase("blockdev-rm")) {
+						try {
+							Element el = new BlockDeviceRm().getResult(request.getQuery().get("devname"));
+							result.appendChild(doc.adoptNode(el));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if(cmd.equalsIgnoreCase("blockdev-start")) {
+						try {
+							Element el = new BlockDeviceStart().getResult(request.getQuery().get("devname"));
+							result.appendChild(doc.adoptNode(el));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if(cmd.equalsIgnoreCase("blockdev-stop")) {
+						try {
+							Element el = new BlockDeviceStop().getResult(request.getQuery().get("devname"));
+							result.appendChild(doc.adoptNode(el));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if(cmd.equalsIgnoreCase("blockdev-list")) {
+						try {
+							List<Element> els = new BlockDeviceList().getResult();
+							for(Element el : els) {
+								result.appendChild(doc.adoptNode(el));
+							}
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if(cmd.equalsIgnoreCase("blockdev-update")) {
+						try {
+							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
+							result.appendChild(doc.adoptNode(el));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					
+					else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");

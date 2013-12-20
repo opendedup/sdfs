@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
+import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -24,14 +26,11 @@ public class Volume implements java.io.Serializable {
 	/**
 	 * Represents the mounted volume associated with file system
 	 */
-	static long tbc = 1099511627776L;
-	static long gbc = 1024 * 1024 * 1024;
-	static int mbc = 1024 * 1024;
+
 	private static final long serialVersionUID = 5505952237500542215L;
 	private final transient ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
 	String name;
-	String capString = null;
 	long currentSize;
 	String path;
 	File pathF;
@@ -64,8 +63,8 @@ public class Volume implements java.io.Serializable {
 
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
-	private ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
-	
+	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
+
 	public void setVolumeFull(boolean full) {
 		this.volumeFull = full;
 	}
@@ -73,15 +72,38 @@ public class Volume implements java.io.Serializable {
 	public boolean isAllowExternalSymlinks() {
 		return allowExternalSymlinks;
 	}
-	
+
+	public void closeAllDevices() {
+		for (BlockDev dev : devices) {
+			try {
+				dev.stopDev();
+			} catch (IOException e) {
+
+			}
+		}
+	}
+
+	public void startAllOnStartupDevices() {
+		synchronized (devices) {
+			for (BlockDev dev : devices) {
+				try {
+					if (dev.startOnInit)
+						dev.startDev();
+				} catch (IOException e) {
+
+				}
+			}
+		}
+	}
+
 	public boolean isOffLine() {
 		return this.volumeOffLine;
 	}
-	
+
 	public void setOffLine(boolean offline) {
-		if(offline && !this.volumeOffLine)
+		if (offline && !this.volumeOffLine)
 			SDFSLogger.getLog().warn("Setting Volume Offline");
-		if(!offline && this.volumeOffLine)
+		if (!offline && this.volumeOffLine)
 			SDFSLogger.getLog().warn("Setting Volume Online");
 		this.volumeOffLine = offline;
 	}
@@ -107,8 +129,7 @@ public class Volume implements java.io.Serializable {
 		if (!pathF.exists())
 			pathF.mkdirs();
 		this.path = pathF.getPath();
-		capString = vol.getAttribute("capacity");
-		this.capacity = StringUtils.parseSize(capString);
+		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
 		if (vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
 		else
@@ -166,8 +187,9 @@ public class Volume implements java.io.Serializable {
 			this.clusterRackAware = Boolean.parseBoolean(vol
 					.getAttribute("cluster-rack-aware"));
 		}
-		if(vol.hasAttribute("cluster-response-timeout"))
-			Main.ClusterRSPTimeout = Integer.parseInt(vol.getAttribute("cluster-response-timeout"));
+		if (vol.hasAttribute("cluster-response-timeout"))
+			Main.ClusterRSPTimeout = Integer.parseInt(vol
+					.getAttribute("cluster-response-timeout"));
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -175,10 +197,86 @@ public class Volume implements java.io.Serializable {
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
+		if (Main.blockDev)
+			this.startAllOnStartupDevices();
 	}
 
 	public Volume() {
 		// TODO Auto-generated constructor stub
+	}
+
+	public synchronized void addBlockDev(BlockDev dev) throws Exception {
+		synchronized (devices) {
+			if (dev.devPath == null)
+				dev.devPath = this.getFreeDevice();
+			for (BlockDev _dev : this.devices) {
+				if (dev.devName.equalsIgnoreCase(_dev.devName))
+					throw new IOException("Device Name [" + dev.devName
+							+ "] already exists");
+				if (dev.devPath.equalsIgnoreCase(_dev.devPath))
+					throw new IOException("Device Path [" + dev.devPath
+							+ "] already exists");
+				if (dev.internalPath.equalsIgnoreCase(_dev.internalPath))
+					throw new IOException("Device Internal Path ["
+							+ dev.internalPath + "] already exists");
+			}
+			this.devices.add(dev);
+			if (dev.startOnInit) {
+				dev.startDev();
+			}
+			this.writer.writeConfig();
+		}
+	}
+
+	public synchronized BlockDev removeBlockDev(String devName) throws Exception {
+		synchronized (devices) {
+			for (BlockDev _dev : this.devices) {
+				if (_dev.devName.equalsIgnoreCase(devName)) {
+					try {
+						_dev.stopDev();
+					} catch (IOException e) {
+						SDFSLogger.getLog().debug(
+								"issue while stopping device during removal ",
+								e);
+					}
+					this.devices.remove(_dev);
+					this.writer.writeConfig();
+					return _dev;
+				}
+			}
+		}
+		throw new IOException("Device not found [" + devName + "]");
+	}
+	
+	public synchronized BlockDev getBlockDev(String devName) throws IOException {
+		synchronized (devices) {
+			for (BlockDev _dev : this.devices) {
+				if (_dev.devName.equalsIgnoreCase(devName)) {
+						return _dev;
+				}
+			}
+		}
+		throw new IOException("Device not found [" + devName + "]");
+	}
+	
+	public void writeUpdate() throws Exception {
+		this.writer.writeConfig();
+	}
+
+	private synchronized String getFreeDevice() throws IOException {
+		for (int i = 0; i < 128; i++) {
+			String blkDevP = "/dev/nbd" + i;
+			boolean found = false;
+			for (BlockDev _dev : this.devices) {
+				if (_dev.devPath.equalsIgnoreCase(blkDevP)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				return blkDevP;
+		}
+		throw new IOException("no free block devices found");
 	}
 
 	private void startThreads() {
@@ -210,7 +308,6 @@ public class Volume implements java.io.Serializable {
 
 	public void setCapacity(String capString) throws Exception {
 		this.setCapacity(StringUtils.parseSize(capString), true);
-		this.capString = capString;
 	}
 
 	public long getCurrentSize() {
@@ -325,7 +422,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize));
-		root.setAttribute("capacity", this.capString);
+		root.setAttribute("capacity",
+				StorageUnit.of(this.capacity).format(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
@@ -334,7 +432,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("cluster-id", this.uuid);
-		root.setAttribute("cluster-response-timeout", Integer.toString(Main.ClusterRSPTimeout));
+		root.setAttribute("cluster-response-timeout",
+				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("allow-external-links",
 				Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-dse-capacity",
@@ -345,7 +444,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
-		for(BlockDev blk : this.devices) {
+		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
 			root.appendChild(el);
@@ -365,7 +464,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes));
 		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
-		root.setAttribute("cluster-response-timeout", Integer.toString(Main.ClusterRSPTimeout));
+		root.setAttribute("cluster-response-timeout",
+				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",
@@ -383,7 +483,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
-		for(BlockDev blk : this.devices) {
+		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
 			root.appendChild(el);

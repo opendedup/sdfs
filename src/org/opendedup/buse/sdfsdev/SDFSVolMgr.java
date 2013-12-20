@@ -21,14 +21,6 @@ public class SDFSVolMgr {
 
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(
-				"osdev",
-				true,
-				"The os device to map to. \n e.g. /dev/nbd0");
-		options.addOption(
-				"blockdev",
-				true,
-				"The sdfs block device to map to. \n e.g. dev0");
 		options.addOption("d", false, "verbose debug output");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("vc", true,
@@ -134,12 +126,8 @@ public class SDFSVolMgr {
 		}
 		
 		try {
-			SDFSBlockDev dev = new SDFSBlockDev(cmd.getOptionValue("blockdev"),cmd.getOptionValue("osdev"),Main.volume.getPath(),Main.volume.getCapacity());
-			ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
-					cmd.getOptionValue("m"),dev);
+			ShutdownHook shutdownHook = new ShutdownHook(sdfsService,Main.volume);
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
-			dev.startBlockDev();
-			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,7 +137,7 @@ public class SDFSVolMgr {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter
 				.printHelp(
-						"mksdfsdev -osdev <device name e.g. /dev/nbd0> -blockdev <sdfs blockdevice to map to> "
+						"startvolmgr "
 								+ "-[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
 						options);
 	}
