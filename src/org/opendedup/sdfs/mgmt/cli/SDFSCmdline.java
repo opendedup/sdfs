@@ -166,6 +166,39 @@ public class SDFSCmdline {
 			ProcessXpandVolumeCmd.runCmd(cmd.getOptionValue("expandvolume"));
 			System.exit(0);
 		}
+		if (cmd.hasOption("blkdev-add")) {
+			String [] vals = cmd.getOptionValues("blkdev-add");
+			if(vals.length != 3) {
+				System.err.println("device-name size start-on-vol-startup are required options");
+				System.exit(-1);
+			}
+				
+			ProcessBlockDeviceAdd.runCmd(vals[0],vals[1],Boolean.parseBoolean(vals[2]));
+			System.exit(0);
+		}
+		if (cmd.hasOption("blkdev-rm")) {
+			String val = cmd.getOptionValue("blkdev-rm");
+			ProcessBlockDeviceRm.runCmd(val);
+			System.exit(0);
+		}
+		if (cmd.hasOption("blkdev-start")) {
+			String val = cmd.getOptionValue("blkdev-start");
+			ProcessBlockDeviceStart.runCmd(val);
+			System.exit(0);
+		}
+		if (cmd.hasOption("blkdev-stop")) {
+			String val = cmd.getOptionValue("blkdev-stop");
+			ProcessBlockDeviceStop.runCmd(val);
+			System.exit(0);
+		}
+		if (cmd.hasOption("blkdev-list")) {
+			ProcessBlockDeviceList.runCmd();
+			System.exit(0);
+		}
+		if (cmd.hasOption("shutdown")) {
+			ProcessShutdown.runCmd();
+			System.exit(0);
+		}
 	}
 
 	@SuppressWarnings("static-access")
@@ -254,6 +287,11 @@ public class SDFSCmdline {
 				.withLongOpt("cluster-get-gc-master")
 				.withDescription(
 						"Returns the current Garbage Collection Coordinator. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("shutdown")
+				.withDescription(
+						"Shuts down the volume")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("set-gc-schedule")
@@ -355,6 +393,27 @@ public class SDFSCmdline {
 						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
 								+ "if the dedup storage engine is local and not in network mode")
 				.hasArg().withArgName("minutes").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("blkdev-add")
+				.withDescription(
+						"Creates a virtual block device inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
+				.hasArgs(3).withArgName("device-name size start-on-vol-startup").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("blkdev-rm")
+				.withDescription(
+						"Removes a virtual block device from the volume.This will delete the block device and de-reference all data in the volume.").hasArg().withArgName("device-name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("blkdev-stop")
+				.withDescription(
+						"Stops an active virtual block device within the volume.").hasArg().withArgName("device-name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("blkdev-start")
+				.withDescription(
+						"Starts an inactive virtual block device within the volume.").hasArg().withArgName("device-name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("blkdev-list")
+				.withDescription(
+						"Lists all block devices within the volume.").create());
 		return options;
 	}
 

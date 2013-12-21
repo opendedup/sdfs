@@ -20,6 +20,7 @@ import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class Volume implements java.io.Serializable {
 
@@ -121,7 +122,7 @@ public class Volume implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Volume(Element vol, String path) throws IOException {
+	public Volume(Element vol,String path) throws IOException {
 		this.configPath = path;
 		pathF = new File(vol.getAttribute("path"));
 
@@ -197,12 +198,23 @@ public class Volume implements java.io.Serializable {
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
-		if (Main.blockDev)
-			this.startAllOnStartupDevices();
+		if (Main.blockDev) {
+			NodeList lst = vol.getElementsByTagName("blockdev");
+			for (int i = 0; i < lst.getLength(); i++) {
+				Element el = (Element) lst.item(i);
+				BlockDev dev = new BlockDev(el);
+				this.devices.add(dev);
+			}
+		}
 	}
 
 	public Volume() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public void init() {
+		if(Main.blockDev)
+			this.startAllOnStartupDevices();
 	}
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {
@@ -222,7 +234,11 @@ public class Volume implements java.io.Serializable {
 			}
 			this.devices.add(dev);
 			if (dev.startOnInit) {
+				try {
 				dev.startDev();
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("unable to start device",e);
+				}
 			}
 			this.writer.writeConfig();
 		}

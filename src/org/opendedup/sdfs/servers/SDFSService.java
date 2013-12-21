@@ -72,6 +72,7 @@ public class SDFSService {
 		}
 
 		Main.mountEvent.endEvent("Volume Mounted");
+		Main.volume.init();
 		SDFSLogger.getLog().debug(
 				"############### SDFSService Started ##################");
 	}
