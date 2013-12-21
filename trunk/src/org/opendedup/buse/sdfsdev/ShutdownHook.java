@@ -11,6 +11,7 @@ class ShutdownHook extends Thread {
 
 	public ShutdownHook(SDFSService service, Volume vol) {
 		this.vol = vol;
+		this.service = service;
 	}
 
 	@Override
@@ -18,8 +19,12 @@ class ShutdownHook extends Thread {
 
 		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
-		vol.closeAllDevices();
-		service.stop();
+		try {
+			vol.closeAllDevices();
+			service.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
 	}
 }

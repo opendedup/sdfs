@@ -3,11 +3,12 @@ package org.opendedup.sdfs.mgmt.cli;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
+import org.opendedup.sdfs.io.BlockDev;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessBlockDeviceStart {
-	public static void runCmd(String devName,String size) {
+	public static void runCmd(String devName) {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
@@ -15,6 +16,8 @@ public class ProcessBlockDeviceStart {
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
+			if(root.getAttribute("status").equalsIgnoreCase("success"))
+				System.out.println(BlockDev.toExternalTxt((Element)root.getElementsByTagName("blockdev").item(0)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

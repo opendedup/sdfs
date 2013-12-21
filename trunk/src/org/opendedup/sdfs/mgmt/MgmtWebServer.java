@@ -89,7 +89,12 @@ public class MgmtWebServer implements Container {
 					if (cmd == null) {
 						result.setAttribute("status", "failed");
 						result.setAttribute("msg", "no command specified");
-					} else if (cmd.equalsIgnoreCase("info")) {
+					}else if(cmd.equalsIgnoreCase("shutdown")) {
+						new Shutdown().getResult();
+						result.setAttribute("status", "success");
+						result.setAttribute("msg", "shutting down volume manager");
+					}
+					else if (cmd.equalsIgnoreCase("info")) {
 						try {
 							Element msg = new GetAttributes().getResult(
 									cmdOptions, file);
@@ -230,6 +235,10 @@ public class MgmtWebServer implements Container {
 					}else if(cmd.equalsIgnoreCase("blockdev-add")) {
 						try {
 							Element el = new BlockDeviceAdd().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
+							
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"successfully added block device [" + request.getQuery().get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -240,6 +249,9 @@ public class MgmtWebServer implements Container {
 					else if(cmd.equalsIgnoreCase("blockdev-rm")) {
 						try {
 							Element el = new BlockDeviceRm().getResult(request.getQuery().get("devname"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"successfully removed block device [" + request.getQuery().get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -250,6 +262,9 @@ public class MgmtWebServer implements Container {
 					else if(cmd.equalsIgnoreCase("blockdev-start")) {
 						try {
 							Element el = new BlockDeviceStart().getResult(request.getQuery().get("devname"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"successfully started block device [" + request.getQuery().get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -260,6 +275,9 @@ public class MgmtWebServer implements Container {
 					else if(cmd.equalsIgnoreCase("blockdev-stop")) {
 						try {
 							Element el = new BlockDeviceStop().getResult(request.getQuery().get("devname"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"successfully stopped block device [" + request.getQuery().get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -269,6 +287,9 @@ public class MgmtWebServer implements Container {
 					}
 					else if(cmd.equalsIgnoreCase("blockdev-list")) {
 						try {
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
 							List<Element> els = new BlockDeviceList().getResult();
 							for(Element el : els) {
 								result.appendChild(doc.adoptNode(el));
@@ -282,6 +303,9 @@ public class MgmtWebServer implements Container {
 					else if(cmd.equalsIgnoreCase("blockdev-update")) {
 						try {
 							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"successfully updated block device [" + request.getQuery().get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");

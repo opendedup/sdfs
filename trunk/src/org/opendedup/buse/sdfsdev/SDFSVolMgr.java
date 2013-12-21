@@ -128,7 +128,7 @@ public class SDFSVolMgr {
 		try {
 			ShutdownHook shutdownHook = new ShutdownHook(sdfsService,Main.volume);
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
