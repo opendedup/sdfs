@@ -39,6 +39,8 @@ public class SDFSVolMgr {
 		options.addOption("h", false, "displays available options");
 		options.addOption("nossl", false,
 				"If set ssl will not be used sdfscli traffic.");
+		options.addOption("nocheck", false,
+				"Will disable block consistancy check on startup.");
 		return options;
 	}
 
@@ -62,6 +64,9 @@ public class SDFSVolMgr {
 			}
 		}
 		String volname = "SDFS";
+		if(cmd.hasOption("nocheck")) {
+			Main.runConsistancyCheck = false;
+		}
 		if (cmd.hasOption("c")) {
 			Main.runCompact = true;
 			if (cmd.hasOption("forcecompact"))

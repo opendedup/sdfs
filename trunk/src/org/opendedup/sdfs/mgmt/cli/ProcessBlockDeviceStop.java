@@ -17,7 +17,7 @@ public class ProcessBlockDeviceStop {
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
 			if(root.getAttribute("status").equalsIgnoreCase("success"))
-				System.out.println(BlockDev.toExternalTxt((Element)root.getFirstChild()));
+				System.out.println(BlockDev.toExternalTxt((Element)root.getElementsByTagName("blockdev").item(0)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

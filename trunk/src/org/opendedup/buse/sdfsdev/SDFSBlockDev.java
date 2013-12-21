@@ -129,13 +129,14 @@ public class SDFSBlockDev implements BUSE, Runnable {
 
 	@Override
 	public void close() {
-		eventBus.post(new BlockDeviceBeforeClosedEvent(this.dev));
+		
 		try {
 			Process p = Runtime.getRuntime().exec("umount " + this.devicePath);
 			p.waitFor();
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("unable to unmount vols for " + this.devicePath, e);
 		}
+		eventBus.post(new BlockDeviceBeforeClosedEvent(this.dev));
 		try {
 			
 			BUSEMkDev.closeDev(devicePath);

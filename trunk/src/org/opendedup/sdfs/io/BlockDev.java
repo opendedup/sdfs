@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -92,24 +93,18 @@ public class BlockDev {
 				"Stopping [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
-		Process p;
+		String sh = "/bin/sh";
+		String cop = "-c";
+		String cmd = "dmsetup remove -f " + this.devName;
+		String[] exe = new String[] { sh, cop, cmd };
 		try {
-			String sh = "/bin/sh";
-			String cop = "-c";
-			String cmd = "dmsetup remove -f " + this.devName;
-			String[] exe = new String[] {sh, cop, cmd};
-			p = Runtime.getRuntime().exec("umount /dev/mapper/" + this.devName);
-			p.waitFor();
-			p = Runtime.getRuntime().exec(exe);
+			runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
-					"Removed Mapped device at /dev/mapper/" + this.devName
-							+ " with exit value " + p.waitFor());
-		} catch (IOException e) {
-			SDFSLogger.getLog().error(
-					"error while mapping device " + this.devName, e);
-		} catch (InterruptedException e) {
-			SDFSLogger.getLog().error(
-					"error while mapping device " + this.devName, e);
+					"Remove references to /dev/mapper/" + this.devName);
+		} catch (Exception e) {
+			SDFSLogger.getLog().info(
+					"Failed to remove references to /dev/mapper/"
+							+ this.devName, e);
 		}
 	}
 
@@ -149,25 +144,35 @@ public class BlockDev {
 		dev = new SDFSBlockDev(this);
 		Thread th = new Thread(dev);
 		th.start();
-		Process p;
+		String sh = "/bin/sh";
+		String cop = "-c";
+		String cmd = "dmsetup remove -f " + this.devName;
+		String[] exe = new String[] { sh, cop, cmd };
 		try {
-			long bsz = this.size/512L;
-					String sh = "/bin/sh";
-					String cop = "-c";
-					String cmd = "echo 0 " + bsz + " linear " + this.devPath + " 0 | dmsetup create " + this.devName + " >test.txt";
-					String[] exe = new String[] {sh, cop, cmd};
-					SDFSLogger.getLog().info(
-							"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath + " 0 | dmsetup create " + this.devName + "\"");
-					p = Runtime.getRuntime().exec(exe);
-					SDFSLogger.getLog().info(
-							"Mapped device to /dev/mapper/" + this.devName
-									+ " with exit value " + p.waitFor());
-		} catch (IOException e) {
-			SDFSLogger.getLog().error(
-					"error while mapping device " + this.devName, e);
-		} catch (InterruptedException e) {
-			SDFSLogger.getLog().error(
-					"error while mapping device " + this.devName, e);
+			runProcess(exe, 1000);
+			SDFSLogger.getLog().info(
+					"Remove old references to /dev/mapper/" + this.devName);
+		} catch (Exception e) {
+			SDFSLogger.getLog().info(
+					"Failed to remove old references to /dev/mapper/"
+							+ this.devName, e);
+		}
+		long bsz = this.size / 512L;
+		sh = "/bin/sh";
+		cop = "-c";
+		cmd = "echo 0 " + bsz + " linear " + this.devPath
+				+ " 0 | dmsetup create " + this.devName;
+		exe = new String[] { sh, cop, cmd };
+		SDFSLogger.getLog().info(
+				"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath
+						+ " 0 | dmsetup create " + this.devName + "\"");
+		try {
+			runProcess(exe, 1000);
+			SDFSLogger.getLog().info(
+					"Mapped device to /dev/mapper/" + this.devName);
+		} catch (Exception e) {
+			SDFSLogger.getLog().info(
+					"Failed to map device to /dev/mapper/" + this.devName, e);
 		}
 
 	}
@@ -216,5 +221,49 @@ public class BlockDev {
 		st = st + "Stopped : " + el.getAttribute("stopped") + "\n";
 		return st;
 
+	}
+
+	private int runProcess(String[] pstr, int timeout) throws TimeoutException,
+			InterruptedException, IOException {
+		String cmdStr = "";
+		for (String st : pstr) {
+			cmdStr = cmdStr + " " + st;
+		}
+		SDFSLogger.getLog().info("Executing [" + cmdStr + "]");
+		Process p = Runtime.getRuntime().exec(pstr);
+		Worker worker = new Worker(p);
+		worker.start();
+		try {
+			worker.join(timeout);
+			if (worker.exit != null) {
+				SDFSLogger.getLog().info(
+						"[" + cmdStr + "] returned " + worker.exit);
+				return worker.exit;
+			} else
+				throw new TimeoutException();
+		} catch (InterruptedException ex) {
+			worker.interrupt();
+			Thread.currentThread().interrupt();
+			throw ex;
+		} finally {
+			p.destroy();
+		}
+	}
+
+	private static class Worker extends Thread {
+		private final Process process;
+		private Integer exit;
+
+		private Worker(Process process) {
+			this.process = process;
+		}
+
+		public void run() {
+			try {
+				exit = process.waitFor();
+			} catch (InterruptedException ignore) {
+				return;
+			}
+		}
 	}
 }
