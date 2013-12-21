@@ -108,7 +108,7 @@ public class HCServiceProxy {
 				hcService.init();
 				File file = new File(Main.hashDBStore + File.separator
 						+ ".lock");
-				if (!Main.closedGracefully || file.exists()) {
+				if (Main.runConsistancyCheck && (!Main.closedGracefully || file.exists())) {
 					hcService.runConsistancyCheck();
 				}
 				touchRunFile();

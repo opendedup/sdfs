@@ -22,6 +22,7 @@ public class Main {
 		}
 	}
 	// public static VolumeConfigWriterThread wth = null;
+	public static boolean runConsistancyCheck = true;
 	
 	public static boolean blockDev = false;
 

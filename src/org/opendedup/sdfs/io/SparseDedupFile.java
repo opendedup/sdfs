@@ -57,7 +57,7 @@ public class SparseDedupFile implements DedupFile {
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers)
-			.expireAfterAccess(2, TimeUnit.SECONDS)
+			.expireAfterAccess(5, TimeUnit.SECONDS)
 			.concurrencyLevel(Main.writeThreads * 3)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(
