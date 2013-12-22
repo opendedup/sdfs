@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 
+import org.opendedup.buse.sdfsdev.VolumeShutdownHook;
 import org.opendedup.logging.SDFSLogger;
 
 
@@ -17,6 +18,7 @@ public class Shutdown implements Runnable {
 	public void run() {
 		try {
 			Thread.sleep(10*1000);
+			VolumeShutdownHook.shutdown();
 		} catch (InterruptedException e) {
 
 		}
