@@ -12,6 +12,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.opendedup.buse.driver.BUSEMkDev;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
@@ -117,6 +118,7 @@ public class SDFSVolMgr {
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
 		Main.blockDev = true;
+		BUSEMkDev.init();
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
@@ -131,7 +133,7 @@ public class SDFSVolMgr {
 		}
 		
 		try {
-			ShutdownHook shutdownHook = new ShutdownHook(sdfsService,Main.volume);
+			VolumeShutdownHook shutdownHook = new VolumeShutdownHook(sdfsService,Main.volume);
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
 		} catch (Throwable e) {
 			e.printStackTrace();

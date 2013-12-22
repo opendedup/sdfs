@@ -25,6 +25,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	DedupFileChannel ch;
 	EventBus eventBus = new EventBus();
 	BlockDev dev;
+	private boolean closed = true;
 	public SDFSBlockDev(BlockDev dev) throws IOException {
 		this.dev = dev;
 		eventBus.register(dev);
@@ -123,7 +124,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	}
 
 	private void startBlockDev() throws Exception { 
-		BUSEMkDev.mkdev(this.devicePath, this.sz, 4096, this, false);
+		BUSEMkDev.startdev(this.devicePath, this.sz, 4096, this, false);
 		
 	}
 
@@ -136,10 +137,16 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("unable to unmount vols for " + this.devicePath, e);
 		}
-		eventBus.post(new BlockDeviceBeforeClosedEvent(this.dev));
+			eventBus.post(new BlockDeviceBeforeClosedEvent(this.dev));
 		try {
-			
 			BUSEMkDev.closeDev(devicePath);
+			for(int i = 0;i<300;i++) {
+				if(this.closed)
+					return;
+				else
+					Thread.sleep(100);
+			}
+			SDFSLogger.getLog().warn("timed out waiting for close");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to close " + this.devicePath, e);
 		}
@@ -148,12 +155,14 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	@Override
 	public void run() {
 		try {
+			this.closed = false;
 			this.eventBus.post(new BlockDeviceOpenEvent(this.dev));
-		this.startBlockDev();
+			this.startBlockDev();
 		}catch(Exception e) {
 			SDFSLogger.getLog().warn("Block Device Stopping " + this.devicePath,e);
 		}
 		finally {
+			this.closed = true;
 			this.eventBus.post(new BlockDeviceClosedEvent(this.dev));
 			SDFSLogger.getLog().warn("Block Device Stopped " + this.devicePath);
 		}
