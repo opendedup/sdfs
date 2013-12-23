@@ -288,6 +288,42 @@ public class LongByteArrayMap implements AbstractMap {
 	public void truncate(long length) throws IOException {
 		truncate(length, true);
 	}
+	
+	public synchronized void trim(long pos,int len) {		
+		double spos = Math.ceil(((double)pos / (double)Main.CHUNK_LENGTH));
+		long ep = pos + len;
+		double epos = Math.floor(((double)ep / (double)Main.CHUNK_LENGTH));
+		long ls = ((long)spos * (long)FREE.length) + (long)this.offset;
+		long es = ((long)epos* (long)FREE.length) + (long)this.offset;
+		if(es <= ls)
+			return;
+		else {
+			SDFSLogger.getLog().info("will trim from " + ls + " to " + es);
+			FileChannel _bdb = null;
+			ByteBuffer buff = ByteBuffer.wrap(this.FREE);
+			try {
+				_bdb = (FileChannel) Files.newByteChannel(bdbf,
+						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+						StandardOpenOption.READ, StandardOpenOption.SPARSE);
+				_bdb.position(ls);
+				while(_bdb.position() < es) {
+					buff.position(0);
+					_bdb.write(buff);
+				}
+				SDFSLogger.getLog().info("trimed from " + ls + " to " + _bdb.position());
+			}
+			
+			catch (Exception e) {
+				SDFSLogger.getLog().error("error while trim from " + ls + " to " + es,e);
+			} finally {
+				try {
+					_bdb.close();
+				} catch (Exception e) {
+				}
+			}
+			
+		}
+	}
 
 	public void truncate(long length, boolean propigateEvent)
 			throws IOException {

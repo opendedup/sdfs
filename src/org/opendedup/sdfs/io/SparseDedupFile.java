@@ -1141,4 +1141,10 @@ public class SparseDedupFile implements DedupFile {
 		this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
 
 	}
+
+	@Override
+	public void trim(long start, int len) {
+		this.bdb.trim(start, len);
+		
+	}
 }

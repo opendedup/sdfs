@@ -18,6 +18,8 @@ import org.opendedup.collections.HashtableFullException;
 public interface DedupFile {
 
 	public abstract void removeFromFlush(long pos);
+	
+	public abstract void trim(long start,int len);
 
 	/**
 	 * 

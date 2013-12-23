@@ -117,9 +117,8 @@ public class SDFSBlockDev implements BUSE, Runnable {
 
 	@Override
 	public int trim(long from, int len) {
-		/*
 		SDFSLogger.getLog().debug("trim request from=" + from + " len=" + len);
-		*/
+		ch.trim(from, len);
 		return 0;
 	}
 

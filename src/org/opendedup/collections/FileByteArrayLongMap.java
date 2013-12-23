@@ -82,12 +82,12 @@ public class FileByteArrayLongMap implements AbstractShard {
 			keys.get(key);
 			iterPos++;
 			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				this.mapped.set(iterPos-1);
+				this.mapped.set(iterPos - 1);
 				return key;
 			} else {
-				this.mapped.clear(iterPos-1);
+				this.mapped.clear(iterPos - 1);
 			}
-			
+
 		}
 		return null;
 	}
@@ -224,9 +224,10 @@ public class FileByteArrayLongMap implements AbstractShard {
 			if (!f.exists())
 				closedCorrectly = false;
 			else {
-				FileInputStream fin = new FileInputStream(f);
-				ObjectInputStream oon = new ObjectInputStream(fin);
 				try {
+					FileInputStream fin = new FileInputStream(f);
+					ObjectInputStream oon = new ObjectInputStream(fin);
+
 					mapped = (BitSet) oon.readObject();
 				} catch (Exception e) {
 					closedCorrectly = false;

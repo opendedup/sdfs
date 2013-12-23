@@ -13,8 +13,7 @@ public class BlockDeviceStart {
 		if(!Main.blockDev)
 			throw new IOException("Block devices not supported on this volume");
 		else {
-			BlockDev dev = Main.volume.getBlockDev(devName);
-			dev.startDev();
+			BlockDev dev = Main.volume.startDev(devName);
 			return dev.getElement();
 		}
 	}
