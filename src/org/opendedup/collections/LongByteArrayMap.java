@@ -25,7 +25,7 @@ import org.opendedup.util.OSValidator;
 
 import sun.nio.ch.FileChannelImpl;
 
-public class LongByteArrayMap implements AbstractMap {
+public class LongByteArrayMap implements DataMapInterface {
 	private static ArrayList<LongByteArrayMapListener> mapListener = new ArrayList<LongByteArrayMapListener>();
 	private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
@@ -50,8 +50,8 @@ public class LongByteArrayMap implements AbstractMap {
 	RandomAccessFile rf = null;
 	private int offset = _v1offset;
 	private int arrayLength = _v1arrayLength;
-	public byte version = swversion;
-	public byte [] FREE;
+	private byte version = swversion;
+	private byte [] FREE;
 	long flen = 0;
 
 	static {
@@ -85,7 +85,19 @@ public class LongByteArrayMap implements AbstractMap {
 			this.openFile(version);
 
 		}
+	
+	public byte getVersion() {
+		return this.version;
+	}
+	
+	public byte[] getFree() {
+		return this.FREE;
+	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#iterInit()
+	 */
+	@Override
 	public void iterInit() throws IOException {
 		iterlock.lock();
 		try {
@@ -100,12 +112,20 @@ public class LongByteArrayMap implements AbstractMap {
 		return (this.iterPos * arrayLength) + this.offset;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#getIterPos()
+	 */
+	@Override
 	public long getIterPos() {
 		return (this.iterPos * arrayLength);
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#nextKey()
+	 */
+	@Override
 	public long nextKey() throws IOException {
 		iterlock.lock();
 		try {
@@ -140,6 +160,10 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#nextValue()
+	 */
+	@Override
 	public byte[] nextValue() throws IOException {
 		iterlock.lock();
 		try {
@@ -173,10 +197,9 @@ public class LongByteArrayMap implements AbstractMap {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#isClosed()
+	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#isClosed()
 	 */
 	@Override
 	public boolean isClosed() {
@@ -254,17 +277,11 @@ public class LongByteArrayMap implements AbstractMap {
 		return propLen;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#put(long, byte[])
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#put(long, byte[])
 	 */
-
-	public void put(long pos, byte[] data) throws IOException {
-		put(pos, data, true);
-	}
-
-	public void put(long pos, byte[] data, boolean propigateEvent)
+	@Override
+	public void put(long pos, byte[] data)
 			throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
@@ -284,12 +301,13 @@ public class LongByteArrayMap implements AbstractMap {
 		// rf.write(data);
 		pbdb.write(ByteBuffer.wrap(data), fpos);
 	}
-
-	public void truncate(long length) throws IOException {
-		truncate(length, true);
-	}
 	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#trim(long, int)
+	 */
+	@Override
 	public synchronized void trim(long pos,int len) {		
+		
 		double spos = Math.ceil(((double)pos / (double)Main.CHUNK_LENGTH));
 		long ep = pos + len;
 		double epos = Math.floor(((double)ep / (double)Main.CHUNK_LENGTH));
@@ -298,7 +316,7 @@ public class LongByteArrayMap implements AbstractMap {
 		if(es <= ls)
 			return;
 		else {
-			SDFSLogger.getLog().info("will trim from " + ls + " to " + es);
+			SDFSLogger.getLog().debug("will trim from " + ls + " to " + es);
 			FileChannel _bdb = null;
 			ByteBuffer buff = ByteBuffer.wrap(this.FREE);
 			try {
@@ -310,7 +328,7 @@ public class LongByteArrayMap implements AbstractMap {
 					buff.position(0);
 					_bdb.write(buff);
 				}
-				SDFSLogger.getLog().info("trimed from " + ls + " to " + _bdb.position());
+				SDFSLogger.getLog().debug("trimed from " + ls + " to " + _bdb.position());
 			}
 			
 			catch (Exception e) {
@@ -325,7 +343,11 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	public void truncate(long length, boolean propigateEvent)
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#truncate(long)
+	 */
+	@Override
+	public void truncate(long length)
 			throws IOException {
 		this.hashlock.lock();
 		long fpos = 0;
@@ -355,16 +377,11 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#remove(long)
 	 */
-	public void remove(long pos) throws IOException {
-		remove(pos, true);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#remove(long)
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#remove(long)
 	 */
-	public void remove(long pos, boolean propigateEvent) throws IOException {
+	@Override
+	public void remove(long pos) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
@@ -393,6 +410,10 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#get(long)
 	 */
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#get(long)
+	 */
+	@Override
 	public byte[] get(long pos) throws IOException {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
@@ -421,10 +442,9 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#sync()
+	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#sync()
 	 */
 	@Override
 	public void sync() throws IOException {
@@ -445,18 +465,13 @@ public class LongByteArrayMap implements AbstractMap {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#vanish()
 	 */
-	@Override
-	public void vanish() throws IOException {
-		vanish(true);
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#vanish()
+
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#vanish()
 	 */
 	@Override
-	public void vanish(boolean propigateEvent) throws IOException {
+	public void vanish() throws IOException {
 		this.hashlock.lock();
 		try {
 			if (!this.isClosed())
@@ -469,12 +484,13 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.unlock();
 		}
 	}
+	
 
-	public void copy(String destFilePath) throws IOException {
-		copy(destFilePath, true);
-	}
-
-	public void copy(String destFilePath, boolean propigateEvent)
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#copy(java.lang.String)
+	 */
+	@Override
+	public void copy(String destFilePath)
 			throws IOException {
 		this.hashlock.lock();
 		FileChannel srcC = null;
@@ -527,6 +543,10 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#size()
+	 */
+	@Override
 	public long size() {
 		this.hashlock.lock();
 		try {
@@ -536,11 +556,9 @@ public class LongByteArrayMap implements AbstractMap {
 			this.hashlock.unlock();
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.annesam.collections.AbstractMap#close()
+	
+	/* (non-Javadoc)
+	 * @see org.opendedup.collections.DataMap#close()
 	 */
 	@Override
 	public void close() {
@@ -562,7 +580,7 @@ public class LongByteArrayMap implements AbstractMap {
 		}
 	}
 	
-	public static LongByteArrayMap convertToV1(LongByteArrayMap map,SDFSEvent evt) throws IOException {
+	public static DataMapInterface convertToV1(LongByteArrayMap map,SDFSEvent evt) throws IOException {
 		LongByteArrayMap m = new LongByteArrayMap(map.filePath +"-new",(byte)1);
 		File of = map.dbFile;
 		File nf = new File(map.filePath +"-new");

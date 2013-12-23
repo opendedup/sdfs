@@ -159,6 +159,7 @@ public class BlockDev {
 			throw new IOException("Device [" + this.devName
 					+ "] already started");
 		}
+		this.devPath = dp;
 		dev = new SDFSBlockDev(this);
 		Thread th = new Thread(dev);
 		th.start();

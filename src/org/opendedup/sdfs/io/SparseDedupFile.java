@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
@@ -40,7 +41,7 @@ public class SparseDedupFile implements DedupFile {
 	private transient String chunkStorePath = null;
 	private DedupFileChannel staticChannel = null;
 	public long lastSync = 0;
-	LongByteArrayMap bdb = null;
+	DataMapInterface bdb = null;
 	MessageDigest digest = null;
 	public static final HashFunctionPool hashPool = new HashFunctionPool(
 			Main.writeThreads + 1);
@@ -384,14 +385,14 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
-			if(this.bdb.version >0) {
+			if(this.bdb.getVersion() >0) {
 			if (mf.isDedup() || doop) {
 				
 				chunk = new SparseDataChunk(doop, hash, false,
-						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
+						writeBuffer.getHashLoc(),this.bdb.getVersion(),System.currentTimeMillis());
 			} else {
 				chunk = new SparseDataChunk(doop, hash, true,
-						writeBuffer.getHashLoc(),this.bdb.version,System.currentTimeMillis());
+						writeBuffer.getHashLoc(),this.bdb.getVersion(),System.currentTimeMillis());
 				this.chunkStore.put(filePosition,
 						writeBuffer.getFlushedBuffer());
 			}
@@ -399,10 +400,10 @@ public class SparseDedupFile implements DedupFile {
 				if (mf.isDedup() || doop) {
 					
 					chunk = new SparseDataChunk(doop, hash, false,
-							writeBuffer.getHashLoc(),this.bdb.version,0);
+							writeBuffer.getHashLoc(),this.bdb.getVersion(),0);
 				} else {
 					chunk = new SparseDataChunk(doop, hash, true,
-							writeBuffer.getHashLoc(),this.bdb.version,0);
+							writeBuffer.getHashLoc(),this.bdb.getVersion(),0);
 					this.chunkStore.put(filePosition,
 							writeBuffer.getFlushedBuffer());
 				}

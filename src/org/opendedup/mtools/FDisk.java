@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -95,7 +96,7 @@ public class FDisk {
 	}
 
 	private void checkDedupFile(File mapFile) throws IOException {
-		LongByteArrayMap mp = null;
+		DataMapInterface mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
 			long prevpos = 0;
