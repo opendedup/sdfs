@@ -1,15 +1,15 @@
 package org.opendedup.collections;
 
 public interface LongByteArrayMapListener {
-	void onCopyEvent(String target, LongByteArrayMap src);
+	void onCopyEvent(String target, DataMapInterface src);
 
-	void onPutEvent(long position, byte[] data, LongByteArrayMap src);
+	void onPutEvent(long position, byte[] data, DataMapInterface src);
 
-	void onRemoveEvent(long position, LongByteArrayMap src);
+	void onRemoveEvent(long position, DataMapInterface src);
 
-	void onTruncateEvent(long position, LongByteArrayMap src);
+	void onTruncateEvent(long position, DataMapInterface src);
 
-	void onVanishEvent(LongByteArrayMap src);
+	void onVanishEvent(DataMapInterface src);
 
-	void onSync(LongByteArrayMap src);
+	void onSync(DataMapInterface src);
 }

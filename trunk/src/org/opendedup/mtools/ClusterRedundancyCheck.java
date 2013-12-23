@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
@@ -114,7 +115,7 @@ public class ClusterRedundancyCheck {
 	}
 
 	private int batchCheck(ArrayList<SparseDataChunk> chunks,
-			LongByteArrayMap mp) throws IOException, HashtableFullException {
+			DataMapInterface mp) throws IOException, HashtableFullException {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for (SparseDataChunk ck : pchunks) {
@@ -182,7 +183,7 @@ public class ClusterRedundancyCheck {
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
-					ck.setFpos((prevpos / mp.FREE.length)
+					ck.setFpos((prevpos / mp.getFree().length)
 							* Main.CHUNK_LENGTH);
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {

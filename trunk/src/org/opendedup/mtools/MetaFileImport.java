@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -53,7 +54,7 @@ public class MetaFileImport {
 			File mapFile = new File(Main.dedupDBStore + File.separator
 					+ dfGuid.substring(0, 2) + File.separator + dfGuid
 					+ File.separator + dfGuid + ".map");
-			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
+			DataMapInterface mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				mp.iterInit();
