@@ -595,4 +595,8 @@ public class DedupFileChannel {
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}
+	
+	public void trim(long start,int len) {
+		df.trim(start, len);
+	}
 }

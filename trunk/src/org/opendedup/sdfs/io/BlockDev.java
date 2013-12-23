@@ -27,6 +27,7 @@ public class BlockDev {
 	long size;
 	boolean startOnInit;
 	boolean stopped = true;
+	String mappedDev;
 
 	SDFSBlockDev dev = null;
 
@@ -43,7 +44,7 @@ public class BlockDev {
 
 	public BlockDev(Element el) throws IOException {
 		this.devName = el.getAttribute("devname");
-		this.devPath = el.getAttribute("devpath");
+		//this.devPath = el.getAttribute("devpath");
 		this.size = StringUtils.parseSize(el.getAttribute("size"));
 		this.internalPath = el.getAttribute("internal-path");
 		if (el.hasAttribute("uuid"))
@@ -85,6 +86,7 @@ public class BlockDev {
 				"Stopped [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
+		this.devPath = null;
 	}
 
 	@Subscribe
@@ -118,6 +120,8 @@ public class BlockDev {
 			SDFSLogger.getLog().info(
 					"Failed to remove references to /dev/mapper/"
 							+ this.devName, e);
+		}finally {
+			this.mappedDev = null;
 		}
 	}
 
@@ -140,6 +144,7 @@ public class BlockDev {
 		root.setAttribute("start-on-init", Boolean.toString(this.startOnInit));
 		root.setAttribute("uuid", this.uuid);
 		root.setAttribute("stopped", Boolean.toString(this.stopped));
+		root.setAttribute("mappeddev", this.mappedDev);
 		return doc;
 	}
 
@@ -149,7 +154,7 @@ public class BlockDev {
 				.cloneNode(true);
 	}
 
-	public void startDev() throws IOException {
+	public void startDev(String dp) throws IOException {
 		if (!this.isStopped()) {
 			throw new IOException("Device [" + this.devName
 					+ "] already started");
@@ -183,6 +188,7 @@ public class BlockDev {
 			ProcessWorker.runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
 					"Mapped device to /dev/mapper/" + this.devName);
+			this.mappedDev = "/dev/mapper/" + this.devName;
 		} catch (Exception e) {
 			SDFSLogger.getLog().info(
 					"Failed to map device to /dev/mapper/" + this.devName, e);
@@ -228,6 +234,7 @@ public class BlockDev {
 				+ "]=============\n";
 		st = st + "Device Name : " + el.getAttribute("devname") + "\n";
 		st = st + "Block Device : " + el.getAttribute("devpath") + "\n";
+		st = st + "Block Device Path : " + el.getAttribute("mappeddev") + "\n";
 		st = st + "Size : " + el.getAttribute("size") + "\n";
 		st = st + "UUID : " + el.getAttribute("uuid") + "\n";
 		st = st + "Start on Init : " + el.getAttribute("start-on-init") + "\n";

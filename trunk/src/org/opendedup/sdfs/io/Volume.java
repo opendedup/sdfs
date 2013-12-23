@@ -89,7 +89,7 @@ public class Volume implements java.io.Serializable {
 			for (BlockDev dev : devices) {
 				try {
 					if (dev.startOnInit)
-						dev.startDev();
+						dev.startDev(this.getFreeDevice());
 				} catch (IOException e) {
 
 				}
@@ -219,8 +219,6 @@ public class Volume implements java.io.Serializable {
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {
 		synchronized (devices) {
-			if (dev.devPath == null)
-				dev.devPath = this.getFreeDevice();
 			for (BlockDev _dev : this.devices) {
 				if (dev.devName.equalsIgnoreCase(_dev.devName))
 					throw new IOException("Device Name [" + dev.devName
@@ -235,7 +233,7 @@ public class Volume implements java.io.Serializable {
 			this.devices.add(dev);
 			if (dev.startOnInit) {
 				try {
-				dev.startDev();
+				dev.startDev(this.getFreeDevice());
 				}catch(Exception e) {
 					SDFSLogger.getLog().warn("unable to start device",e);
 				}
@@ -284,7 +282,7 @@ public class Volume implements java.io.Serializable {
 			String blkDevP = "/dev/nbd" + i;
 			boolean found = false;
 			for (BlockDev _dev : this.devices) {
-				if (_dev.devPath.equalsIgnoreCase(blkDevP)) {
+				if (_dev.devPath != null &&_dev.devPath.equalsIgnoreCase(blkDevP)) {
 					found = true;
 					break;
 				}
@@ -293,6 +291,12 @@ public class Volume implements java.io.Serializable {
 				return blkDevP;
 		}
 		throw new IOException("no free block devices found");
+	}
+	
+	public BlockDev startDev(String devname) throws IOException {
+		BlockDev dev = this.getBlockDev(devname);
+		dev.startDev(this.getFreeDevice());
+		return dev;
 	}
 
 	private void startThreads() {
