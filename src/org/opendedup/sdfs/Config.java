@@ -275,8 +275,7 @@ public class Config {
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
 		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
-		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
-		Main.volume = new Volume(volume, fileName);
+		
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
 				.item(0);
 		Main.defaultGroup = Integer.parseInt(permissions
@@ -314,6 +313,8 @@ public class Config {
 				.getAttribute("enable-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 		SDFSLogger.getLog().debug("listen-address=" +Main.sdfsCliListenAddr);
+		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
+		Main.volume = new Volume(volume, fileName);
 		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");

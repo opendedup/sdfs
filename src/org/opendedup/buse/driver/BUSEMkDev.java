@@ -44,5 +44,7 @@ public class BUSEMkDev {
 	private static native void init(ThreadGroup threadGroup);
 	
 	public static native void release();
+	
+	public static native void setSize(String dev,long sz);
 
 }

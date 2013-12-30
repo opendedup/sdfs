@@ -173,7 +173,7 @@ public class DedupFileChannel {
 				this.closeLock.unlock();
 			}
 		}
-		if(!mf.isDev())
+		if(mf.getDev() != null)
 			mf.sync();
 	}
 
@@ -596,7 +596,7 @@ public class DedupFileChannel {
 		this.flags = flags;
 	}
 	
-	public void trim(long start,int len) {
+	public void trim(long start,int len) throws IOException {
 		df.trim(start, len);
 	}
 }

@@ -1,12 +1,27 @@
 package org.opendedup.util;
 
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.UnsupportedEncodingException;
 
 public class StringUtils {
 	final static long tbc = 1099511627776L;
 	final static long gbc = 1024 * 1024 * 1024;
 	final static int mbc = 1024 * 1024;
+	
+	public static void writeString(ObjectOutput out, String string) throws IOException {
+		byte [] b = string.getBytes();
+		out.writeShort((short)b.length);
+		out.write(b);
+	}
+	
+	public static String readString(ObjectInput in) throws IOException {
+		short l = in.readShort();
+		 byte [] b = new byte[l];
+		 in.readFully(b);
+		 return new String(b);
+	}
 
 	static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2',
 			(byte) '3', (byte) '4', (byte) '5', (byte) '6', (byte) '7',

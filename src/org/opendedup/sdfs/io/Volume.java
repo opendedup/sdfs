@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.jgroups.Address;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.cluster.VolumeSocket;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
@@ -64,7 +65,17 @@ public class Volume implements java.io.Serializable {
 
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
+	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
+	public VolumeSocket soc = null;
+	
+	public boolean isClustered() {
+		return this.clustered;
+	}
+	
+	public VolumeSocket getSoc() {
+		return this.soc;
+	}
 
 	public void setVolumeFull(boolean full) {
 		this.volumeFull = full;
@@ -89,7 +100,7 @@ public class Volume implements java.io.Serializable {
 			for (BlockDev dev : devices) {
 				try {
 					if (dev.startOnInit)
-						dev.startDev(this.getFreeDevice());
+						this.startDev(dev.devName);
 				} catch (IOException e) {
 
 				}
@@ -122,10 +133,10 @@ public class Volume implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Volume(Element vol,String path) throws IOException {
+	public Volume(Element vol, String path) throws IOException {
 		this.configPath = path;
 		pathF = new File(vol.getAttribute("path"));
-
+		
 		SDFSLogger.getLog().info("Mounting volume " + pathF.getPath());
 		if (!pathF.exists())
 			pathF.mkdirs();
@@ -184,6 +195,9 @@ public class Volume implements java.io.Serializable {
 				this.clusterCopies = 7;
 			}
 		}
+		if(vol.hasAttribute("volume-clustered")) {
+			this.clustered = Boolean.parseBoolean("volume-clustered");
+		}
 		if (vol.hasAttribute("cluster-rack-aware")) {
 			this.clusterRackAware = Boolean.parseBoolean(vol
 					.getAttribute("cluster-rack-aware"));
@@ -198,7 +212,7 @@ public class Volume implements java.io.Serializable {
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
-		if (Main.blockDev) {
+		if (vol.getElementsByTagName("blockdev").getLength() > 0) {
 			NodeList lst = vol.getElementsByTagName("blockdev");
 			for (int i = 0; i < lst.getLength(); i++) {
 				Element el = (Element) lst.item(i);
@@ -211,9 +225,12 @@ public class Volume implements java.io.Serializable {
 	public Volume() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	public void init() {
-		if(Main.blockDev)
+
+	public void init() throws Exception {
+		if(this.clustered) {
+			this.soc = new VolumeSocket(this,Main.DSEClusterConfig);
+		}
+		if (Main.blockDev)
 			this.startAllOnStartupDevices();
 	}
 
@@ -231,18 +248,19 @@ public class Volume implements java.io.Serializable {
 							+ dev.internalPath + "] already exists");
 			}
 			this.devices.add(dev);
-			if (dev.startOnInit) {
+			if (dev.startOnInit && Main.blockDev) {
 				try {
-				dev.startDev(this.getFreeDevice());
-				}catch(Exception e) {
-					SDFSLogger.getLog().warn("unable to start device",e);
+					this.startDev(dev.devName);
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to start device", e);
 				}
 			}
 			this.writer.writeConfig();
 		}
 	}
 
-	public synchronized BlockDev removeBlockDev(String devName) throws Exception {
+	public synchronized BlockDev removeBlockDev(String devName)
+			throws Exception {
 		synchronized (devices) {
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
@@ -261,18 +279,18 @@ public class Volume implements java.io.Serializable {
 		}
 		throw new IOException("Device not found [" + devName + "]");
 	}
-	
+
 	public synchronized BlockDev getBlockDev(String devName) throws IOException {
 		synchronized (devices) {
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
-						return _dev;
+					return _dev;
 				}
 			}
 		}
 		throw new IOException("Device not found [" + devName + "]");
 	}
-	
+
 	public void writeUpdate() throws Exception {
 		this.writer.writeConfig();
 	}
@@ -282,7 +300,8 @@ public class Volume implements java.io.Serializable {
 			String blkDevP = "/dev/nbd" + i;
 			boolean found = false;
 			for (BlockDev _dev : this.devices) {
-				if (_dev.devPath != null &&_dev.devPath.equalsIgnoreCase(blkDevP)) {
+				if (_dev.devPath != null
+						&& _dev.devPath.equalsIgnoreCase(blkDevP)) {
 					found = true;
 					break;
 				}
@@ -292,10 +311,13 @@ public class Volume implements java.io.Serializable {
 		}
 		throw new IOException("no free block devices found");
 	}
-	
-	public BlockDev startDev(String devname) throws IOException {
+
+	public synchronized BlockDev startDev(String devname) throws IOException {
+
 		BlockDev dev = this.getBlockDev(devname);
-		dev.startDev(this.getFreeDevice());
+		if (Main.blockDev) {
+			dev.startDev(this.getFreeDevice());
+		}
 		return dev;
 	}
 
@@ -397,7 +419,6 @@ public class Volume implements java.io.Serializable {
 			if (this.usePerfMon)
 				this.ioMeter.close();
 		}
-
 	}
 
 	public long getTotalBlocks() {
@@ -464,6 +485,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		root.setAttribute("volume-clustered", Boolean.toString(clustered));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
@@ -503,6 +525,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		root.setAttribute("volume-clustered", Boolean.toString(clustered));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);

@@ -19,7 +19,7 @@ public interface DedupFile {
 
 	public abstract void removeFromFlush(long pos);
 	
-	public abstract void trim(long start,int len);
+	public abstract void trim(long start,int len) throws IOException;
 
 	/**
 	 * 

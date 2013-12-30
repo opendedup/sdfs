@@ -2,6 +2,7 @@ package org.opendedup.buse.sdfsdev;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -9,7 +10,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.buse.driver.*;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.BlockDev;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -42,12 +42,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		}
 		if(!f.exists())
 			throw new IOException("device " + devicePath + " not found.");
-		File df = new File(dev.getInternalPath());
-		this.internalFPath = df.getPath();
-		if(!df.exists())
-			df.getParentFile().mkdirs();
-		MetaDataDedupFile mf = MetaFileStore.getMF(df);
-		mf.setDev(true);
+		MetaDataDedupFile mf = dev.getMF();
 		this.ch = mf.getDedupFile().getChannel(0);
 	}
 
@@ -118,7 +113,12 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	@Override
 	public int trim(long from, int len) {
 		SDFSLogger.getLog().debug("trim request from=" + from + " len=" + len);
-		ch.trim(from, len);
+		try {
+			ch.trim(from, len);
+		} catch (IOException e) {
+			SDFSLogger.getLog().error("unable to trim file [" + this.internalFPath + "]", e);
+			return Errno.EACCES;
+		}
 		return 0;
 	}
 
