@@ -1,14 +1,20 @@
 package org.opendedup.sdfs.io;
 
+import java.io.Externalizable;
+import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.buse.driver.BUSEMkDev;
 import org.opendedup.buse.sdfsdev.BlockDeviceBeforeClosedEvent;
 import org.opendedup.buse.sdfsdev.BlockDeviceClosedEvent;
 import org.opendedup.buse.sdfsdev.BlockDeviceOpenEvent;
 import org.opendedup.buse.sdfsdev.SDFSBlockDev;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.util.ProcessWorker;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StorageUnit;
@@ -19,27 +25,39 @@ import org.w3c.dom.Element;
 
 import com.google.common.eventbus.Subscribe;
 
-public class BlockDev {
+public class BlockDev implements Externalizable{
 	String devName;
 	String devPath;
 	String internalPath;
 	String uuid;
 	long size;
 	boolean startOnInit;
-	boolean stopped = true;
+	byte status = 0;
 	String mappedDev;
-
 	SDFSBlockDev dev = null;
+	public static final byte STOPPED=0;
+	public static final byte SYNC=1;
+	public static final byte STARTED=2;
+	private MetaDataDedupFile mf = null;
+	
+	
+	public BlockDev(){
+		
+	}
 
-	public BlockDev(String devName, String devPath, String internalPath,
+	public BlockDev(String devName, String internalPath,
 			long size, boolean start, String uuid) {
 		if (uuid == null)
 			this.uuid = RandomGUID.getGuid();
 		this.devName = devName;
-		this.devPath = devPath;
 		this.size = size;
 		this.internalPath = internalPath;
 		this.startOnInit = start;
+		File df = new File(this.internalPath);
+		if(!df.exists())
+			df.getParentFile().mkdirs();
+		mf = MetaFileStore.getMF(df);
+		mf.setDev(this);
 	}
 
 	public BlockDev(Element el) throws IOException {
@@ -53,6 +71,15 @@ public class BlockDev {
 			this.uuid = RandomGUID.getGuid();
 		this.startOnInit = Boolean.parseBoolean(el
 				.getAttribute("start-on-init"));
+		File df = new File(this.internalPath);
+		if(!df.exists())
+			df.getParentFile().mkdirs();
+		mf = MetaFileStore.getMF(df);
+		mf.setDev(this);
+	}
+	
+	public MetaDataDedupFile getMF() {
+		return this.mf;
 	}
 
 	public String getDevName() {
@@ -75,13 +102,18 @@ public class BlockDev {
 		return size;
 	}
 
-	public void setSize(long size) {
+	public void setSize(long size) throws IOException {
+		if(size<this.size && this.status==2)
+			throw new IOException("cannot shrink a block device while it is online");
+			
+		BUSEMkDev.setSize(devPath, size);
 		this.size = size;
+		
 	}
 
 	@Subscribe
 	public void stopEvent(BlockDeviceClosedEvent evt) {
-		this.stopped = true;
+		this.status = 0;
 		SDFSLogger.getLog().info(
 				"Stopped [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
@@ -127,13 +159,13 @@ public class BlockDev {
 
 	@Subscribe
 	public void startedEvent(BlockDeviceOpenEvent evt) {
-		this.stopped = false;
+		this.status = 0;
 		SDFSLogger.getLog().info(
 				"Started [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
 	}
-
+	
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("blockdev");
 		Element root = doc.getDocumentElement();
@@ -143,7 +175,7 @@ public class BlockDev {
 		root.setAttribute("internal-path", this.internalPath);
 		root.setAttribute("start-on-init", Boolean.toString(this.startOnInit));
 		root.setAttribute("uuid", this.uuid);
-		root.setAttribute("stopped", Boolean.toString(this.stopped));
+		root.setAttribute("status", Byte.toString(this.status));
 		root.setAttribute("mappeddev", this.mappedDev);
 		return doc;
 	}
@@ -198,7 +230,7 @@ public class BlockDev {
 	}
 
 	public void stopDev() throws IOException {
-		if (this.stopped)
+		if (this.status == STOPPED)
 			throw new IOException("Device [" + this.devName
 					+ "] already stopped");
 		dev.close();
@@ -222,14 +254,17 @@ public class BlockDev {
 	}
 
 	public boolean isStopped() {
-		return stopped;
+		return this.status == STOPPED;
 	}
 
-	public void setStopped(boolean stopped) {
-		this.stopped = stopped;
-	}
 
 	public static String toExternalTxt(Element el) {
+		String status = "Stopped";
+		byte stb = Byte.parseByte(el.getAttribute("status"));
+		if(stb==1)
+			status="Synchronizing";
+		if(stb==2)
+			status = "Started";
 		String st = new String();
 		st = st + "=============[" + el.getAttribute("devname")
 				+ "]=============\n";
@@ -239,10 +274,28 @@ public class BlockDev {
 		st = st + "Size : " + el.getAttribute("size") + "\n";
 		st = st + "UUID : " + el.getAttribute("uuid") + "\n";
 		st = st + "Start on Init : " + el.getAttribute("start-on-init") + "\n";
-		st = st + "Stopped : " + el.getAttribute("stopped") + "\n";
+		st = st + "Status : " + status + "\n";
 		return st;
 
 	}
 
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		this.devName = StringUtils.readString(in);
+		this.devPath = StringUtils.readString(in);
+		this.uuid = StringUtils.readString(in);
+		this.startOnInit = in.readBoolean();
+		this.size = in.readLong();
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		StringUtils.writeString(out,devName);
+		StringUtils.writeString(out,devPath);
+		StringUtils.writeString(out,uuid);
+		out.writeBoolean(startOnInit);
+		out.writeLong(size);
+	}
 	
 }

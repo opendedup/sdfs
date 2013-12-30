@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -12,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,7 +26,6 @@ import org.opendedup.util.OSValidator;
 import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements DataMapInterface {
-	private static ArrayList<LongByteArrayMapListener> mapListener = new ArrayList<LongByteArrayMapListener>();
 	private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
 	private static final int _arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
@@ -59,18 +58,6 @@ public class LongByteArrayMap implements DataMapInterface {
 		_V1FREE = new byte[_v1arrayLength];
 		Arrays.fill(_FREE, (byte) 0);
 		Arrays.fill(_V1FREE, (byte) 0);
-	}
-
-	public static void addMapListener(LongByteArrayMapListener l) {
-		mapListener.add(l);
-	}
-
-	public static void removeMapListener(LongByteArrayMapListener l) {
-		mapListener.remove(l);
-	}
-
-	public static ArrayList<LongByteArrayMapListener> getMapListeners() {
-		return mapListener;
 	}
 	
 	public LongByteArrayMap(String filePath) throws IOException {
@@ -301,6 +288,18 @@ public class LongByteArrayMap implements DataMapInterface {
 		// rf.write(data);
 		pbdb.write(ByteBuffer.wrap(data), fpos);
 	}
+	
+	
+	@Override
+	public void putIfNull(long pos, byte[] data)
+			throws IOException {
+		byte [] b = this.get(pos);
+		if(b==null) {
+			this.put(pos, data);
+		}
+	}
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see org.opendedup.collections.DataMap#trim(long, int)

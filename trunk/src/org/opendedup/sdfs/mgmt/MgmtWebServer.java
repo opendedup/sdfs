@@ -302,7 +302,7 @@ public class MgmtWebServer implements Container {
 					}
 					else if(cmd.equalsIgnoreCase("blockdev-update")) {
 						try {
-							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
+							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),request.getQuery().get("param"),request.getQuery().get("value"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"successfully updated block device [" + request.getQuery().get("devname") + "]");

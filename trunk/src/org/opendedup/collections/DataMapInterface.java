@@ -15,8 +15,10 @@ public interface DataMapInterface {
 	public abstract boolean isClosed();
 
 	public abstract void put(long pos, byte[] data) throws IOException;
+	
+	public abstract void putIfNull(long pos, byte[] data) throws IOException;
 
-	public abstract void trim(long pos, int len);
+	public abstract void trim(long pos, int len) throws IOException;
 
 	public abstract void truncate(long length) throws IOException;
 	

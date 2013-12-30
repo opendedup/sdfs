@@ -20,6 +20,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.ThreadPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.cluster.BlockDevSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
@@ -852,7 +853,10 @@ public class SparseDedupFile implements DedupFile {
 				}
 				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath, -1,
 						Main.CHUNK_LENGTH);
-				this.bdb = new LongByteArrayMap(this.databasePath);
+				if(mf.getDev() != null)
+					this.bdb = new BlockDevSocket(mf.getDev(),this.databasePath);
+				else
+					this.bdb = new LongByteArrayMap(this.databasePath);
 
 				this.closed = false;
 			}
@@ -1144,7 +1148,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	@Override
-	public void trim(long start, int len) {
+	public void trim(long start, int len) throws IOException{
 		this.bdb.trim(start, len);
 		
 	}

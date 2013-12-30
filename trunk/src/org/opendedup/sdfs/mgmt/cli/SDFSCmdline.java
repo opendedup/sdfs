@@ -172,10 +172,20 @@ public class SDFSCmdline {
 				System.err.println("device-name size start-on-vol-startup are required options");
 				System.exit(-1);
 			}
-				
 			ProcessBlockDeviceAdd.runCmd(vals[0],vals[1],Boolean.parseBoolean(vals[2]));
 			System.exit(0);
 		}
+		
+		if (cmd.hasOption("blkdev-update")) {
+			String [] vals = cmd.getOptionValues("blkdev-update");
+			if(vals.length != 3) {
+				System.err.println("device-name <size|autostart> <value> are required options");
+				System.exit(-1);
+			}
+			ProcessBlockDeviceUpdate.runCmd(vals[0],vals[1],vals[2]);
+			System.exit(0);
+		}
+		
 		if (cmd.hasOption("blkdev-rm")) {
 			String val = cmd.getOptionValue("blkdev-rm");
 			ProcessBlockDeviceRm.runCmd(val);
