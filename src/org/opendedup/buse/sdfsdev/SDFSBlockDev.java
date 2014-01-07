@@ -3,6 +3,7 @@ package org.opendedup.buse.sdfsdev;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -13,6 +14,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BlockDev;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.SparseDedupFile;
 
 import com.google.common.eventbus.EventBus;
 
@@ -22,7 +24,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	long sz;
 	String devicePath;
 	String internalFPath;
-	DedupFileChannel ch;
+	public DedupFileChannel ch;
 	EventBus eventBus = new EventBus();
 	BlockDev dev;
 	private boolean closed = true;
@@ -44,15 +46,22 @@ public class SDFSBlockDev implements BUSE, Runnable {
 			throw new IOException("device " + devicePath + " not found.");
 		MetaDataDedupFile mf = dev.getMF();
 		this.ch = mf.getDedupFile().getChannel(0);
+		SparseDedupFile df = (SparseDedupFile) this.ch.getDedupFile();
+		eventBus.register(df.bdb);
+	}
+	
+	public void registerListener(Object obj) {
+		eventBus.register(obj);
 	}
 
 	@Override
 	public int read(ByteBuffer data, int len, long offset) {
 		/*
-		SDFSLogger.getLog().debug("read request len=" + len + " offset="
-				+ (int) offset + " databuflen=" + data.capacity()
+		if(len >= Main.CHUNK_LENGTH)
+		SDFSLogger.getLog().info("read request len=" + len + " offset="
+				+ offset + " databuflen=" + data.capacity()
 				+ " databufpos=" + data.position());
-				*/
+		*/
 		try {
 			ch.read(data, 0, len, offset);
 		} catch (IOException e) {
@@ -63,10 +72,11 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	}
 
 	@Override
-	public int write(ByteBuffer buff, int len, long offset) {
+	public int write(ByteBuffer buff, int len, long offset)  {
 		/*
-		SDFSLogger.getLog().debug("write request len=" + len + " offset="
-				+ (int) offset + " databuflen=" + buff.capacity()
+		if(len >= Main.CHUNK_LENGTH)
+		SDFSLogger.getLog().info("write request len=" + len + " offset="
+				+ offset + " databuflen=" + buff.capacity()
 				+ " databufpos=" + buff.position());
 		*/
 		try {
@@ -74,7 +84,9 @@ public class SDFSBlockDev implements BUSE, Runnable {
 				return Errno.ENOSPC;
 			try {
 				ch.writeFile(buff, len, 0, offset);
-			} catch (IOException e) {
+				if(len < Main.CHUNK_LENGTH)
+					eventBus.post(new BlockDeviceSmallWriteEvent(this.dev,buff,offset,len));
+			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + this.internalFPath, e);
 				return Errno.EACCES;
 			}
@@ -99,7 +111,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 	@Override
 	public int flush() {
 		/*
-		SDFSLogger.getLog().debug("flush request");
+		SDFSLogger.getLog().info("flush request");
 		*/
 		try {
 			ch.force(true);
@@ -112,7 +124,9 @@ public class SDFSBlockDev implements BUSE, Runnable {
 
 	@Override
 	public int trim(long from, int len) {
+		/*
 		SDFSLogger.getLog().debug("trim request from=" + from + " len=" + len);
+		*/
 		try {
 			ch.trim(from, len);
 		} catch (IOException e) {

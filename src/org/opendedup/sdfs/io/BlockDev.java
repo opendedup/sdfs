@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.Externalizable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -14,6 +15,7 @@ import org.opendedup.buse.sdfsdev.BlockDeviceClosedEvent;
 import org.opendedup.buse.sdfsdev.BlockDeviceOpenEvent;
 import org.opendedup.buse.sdfsdev.SDFSBlockDev;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.util.ProcessWorker;
 import org.opendedup.util.RandomGUID;
@@ -44,20 +46,19 @@ public class BlockDev implements Externalizable{
 	public BlockDev(){
 		
 	}
+	
+	public SDFSBlockDev getDevIO() {
+		return this.dev;
+	}
 
-	public BlockDev(String devName, String internalPath,
+	public BlockDev(String devName,
 			long size, boolean start, String uuid) {
 		if (uuid == null)
 			this.uuid = RandomGUID.getGuid();
 		this.devName = devName;
 		this.size = size;
-		this.internalPath = internalPath;
+		this.internalPath = Main.volume.getPath() + File.separator +devName;
 		this.startOnInit = start;
-		File df = new File(this.internalPath);
-		if(!df.exists())
-			df.getParentFile().mkdirs();
-		mf = MetaFileStore.getMF(df);
-		mf.setDev(this);
 	}
 
 	public BlockDev(Element el) throws IOException {
@@ -71,14 +72,18 @@ public class BlockDev implements Externalizable{
 			this.uuid = RandomGUID.getGuid();
 		this.startOnInit = Boolean.parseBoolean(el
 				.getAttribute("start-on-init"));
-		File df = new File(this.internalPath);
-		if(!df.exists())
-			df.getParentFile().mkdirs();
-		mf = MetaFileStore.getMF(df);
-		mf.setDev(this);
 	}
 	
 	public MetaDataDedupFile getMF() {
+		if(mf == null) {
+			File df = new File(this.internalPath);
+			if(!df.exists())
+				df.getParentFile().mkdirs();
+			mf = MetaFileStore.getMF(df);
+			mf.setLength(size, true);
+			mf.setDev(this);
+		}
+			
 		return this.mf;
 	}
 
@@ -108,6 +113,7 @@ public class BlockDev implements Externalizable{
 			
 		BUSEMkDev.setSize(devPath, size);
 		this.size = size;
+		this.mf.setLength(size, true);
 		
 	}
 
@@ -127,6 +133,7 @@ public class BlockDev implements Externalizable{
 				"Stopping [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
+		
 		String sh = "/bin/sh";
 		String cop = "-c";
 		String cmd = "umount /dev/mapper/" + this.devName;
@@ -145,7 +152,7 @@ public class BlockDev implements Externalizable{
 		cmd = "dmsetup remove -f " + this.devName;
 		exe = new String[] { sh, cop, cmd };
 		try {
-			ProcessWorker.runProcess(exe, 1000);
+			//ProcessWorker.runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
 					"Remove references to /dev/mapper/" + this.devName);
 		} catch (Exception e) {
@@ -159,7 +166,7 @@ public class BlockDev implements Externalizable{
 
 	@Subscribe
 	public void startedEvent(BlockDeviceOpenEvent evt) {
-		this.status = 0;
+		this.status = STARTED;
 		SDFSLogger.getLog().info(
 				"Started [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
@@ -283,16 +290,15 @@ public class BlockDev implements Externalizable{
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
 		this.devName = StringUtils.readString(in);
-		this.devPath = StringUtils.readString(in);
 		this.uuid = StringUtils.readString(in);
 		this.startOnInit = in.readBoolean();
 		this.size = in.readLong();
+		this.internalPath = Main.volume.getPath() + File.separator +devName;
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		StringUtils.writeString(out,devName);
-		StringUtils.writeString(out,devPath);
 		StringUtils.writeString(out,uuid);
 		out.writeBoolean(startOnInit);
 		out.writeLong(size);

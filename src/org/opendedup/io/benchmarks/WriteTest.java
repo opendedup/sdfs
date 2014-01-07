@@ -54,6 +54,7 @@ public class WriteTest implements Runnable {
 				else
 					currPR++;
 			}
+			fc.force(true);
 			duration = (System.currentTimeMillis() - time);
 			fc.close();
 

@@ -20,6 +20,8 @@ public interface DedupChunkInterface {
 	 * @return gets the lenth of the DedupChunk
 	 */
 	public abstract int getLength();
+	
+	
 
 	/**
 	 * 

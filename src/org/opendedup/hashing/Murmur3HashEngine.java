@@ -1,12 +1,11 @@
 package org.opendedup.hashing;
 
-import java.security.NoSuchAlgorithmException;
 
 public class Murmur3HashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
 
-	public Murmur3HashEngine() throws NoSuchAlgorithmException {
+	public Murmur3HashEngine() {
 	}
 
 	@Override

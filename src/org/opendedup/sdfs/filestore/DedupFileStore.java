@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -50,6 +51,9 @@ public class DedupFileStore {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(60000,
 					Main.maxInactiveFileTime);
+		} else if(Main.blockDev) {
+			//openFileMonitor = new OpenFileMonitor(1000,
+			//		Main.maxInactiveFileTime);
 		}
 	}
 
@@ -65,7 +69,6 @@ public class DedupFileStore {
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
-
 		try {
 			if (!closing) {
 				SDFSLogger.getLog().debug(

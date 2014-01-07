@@ -2,13 +2,14 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataMapInterface;
@@ -42,12 +43,12 @@ public class SparseDedupFile implements DedupFile {
 	private transient String chunkStorePath = null;
 	private DedupFileChannel staticChannel = null;
 	public long lastSync = 0;
-	DataMapInterface bdb = null;
+	public DataMapInterface bdb = null;
 	MessageDigest digest = null;
 	public static final HashFunctionPool hashPool = new HashFunctionPool(
 			Main.writeThreads + 1);
 	protected static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, 1024);
+			Main.writeThreads + 1, ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH)*2);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock syncLock = new ReentrantLock();
@@ -59,7 +60,6 @@ public class SparseDedupFile implements DedupFile {
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers)
-			.expireAfterAccess(5, TimeUnit.SECONDS)
 			.concurrencyLevel(Main.writeThreads * 3)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(
@@ -91,19 +91,10 @@ public class SparseDedupFile implements DedupFile {
 
 					return writeBuffer;
 				}
+				
+				
 			});
 
-	/*
-	 * @SuppressWarnings("serial") private final transient LRUMap writeBuffers =
-	 * new LRUMap( maxWriteBuffers + 1, false) {
-	 * 
-	 * @Override protected boolean removeLRU(AbstractLinkedMap.LinkEntry eldest)
-	 * { if (size() >= maxWriteBuffers) { WritableCacheBuffer writeBuffer =
-	 * (WritableCacheBuffer) eldest .getValue(); if (writeBuffer != null) { try
-	 * { writeBuffer.flush(); } catch (Exception e) { SDFSLogger.getLog().debug(
-	 * "while closing position " + writeBuffer.getFilePosition(), e); } } }
-	 * return true; } };
-	 */
 	private boolean closed = true;
 	static {
 		File f = new File(Main.dedupDBStore);
@@ -132,6 +123,23 @@ public class SparseDedupFile implements DedupFile {
 	public void removeFromFlush(long pos) {
 		this.flushingBuffers.remove(pos);
 	}
+	
+	private DedupChunkInterface load(Long key) throws IOException,
+	FileClosedException {
+if (closed) {
+	throw new FileClosedException("file already closed");
+}
+long chunkPos = getChuckPosition(key);
+DedupChunkInterface writeBuffer = null;
+writeBuffer = flushingBuffers.remove(chunkPos);
+if (writeBuffer == null) {
+	writeBuffer = marshalWriteBuffer(chunkPos, false);
+}
+
+writeBuffer.open();
+
+return writeBuffer;
+}
 
 	/*
 	 * (non-Javadoc)
@@ -276,7 +284,10 @@ public class SparseDedupFile implements DedupFile {
 							+ this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
 			int z = this.flushingBuffers.size();
-			for(int i = 0;i<30000;i++) {
+			int i =0;
+			int x = 1;
+			for(;;) {
+				i++;
 				if(this.flushingBuffers.size() == 0)
 					return z;
 				try {
@@ -284,11 +295,17 @@ public class SparseDedupFile implements DedupFile {
 				} catch (InterruptedException e) {
 					break;
 				}
+				if(i > 30000) {
+					i = 0;
+					int sec = (i/1000)*x;
+					SDFSLogger.getLog().info("WriteCache timed out after ["+sec+"] seconds. There are still " + this.flushingBuffers.size() + " in flush");
+					x++;
+				}
 			}
-			throw new IOException("WriteCache timed out after 30 seconds. There are still " + this.flushingBuffers.size() + " in flush");
 		} finally {
 			this.writeLock.unlock();
 		}
+		return -1;
 
 	}
 
@@ -399,7 +416,6 @@ public class SparseDedupFile implements DedupFile {
 			}
 			}else {
 				if (mf.isDedup() || doop) {
-					
 					chunk = new SparseDataChunk(doop, hash, false,
 							writeBuffer.getHashLoc(),this.bdb.getVersion(),0);
 				} else {
@@ -432,11 +448,14 @@ public class SparseDedupFile implements DedupFile {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
-		long chunkPos = this.getChuckPosition(position);
+		//long chunkPos = this.getChuckPosition(position);
 		DedupChunkInterface writeBuffer = null;
 		this.writeLock.lock();
 		try {
-			writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(chunkPos);
+			if(Main.volume.isClustered())
+				writeBuffer = (WritableCacheBuffer) this.load(position);
+			else
+				writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(position);
 		} catch (ExecutionException e) {
 			throw new IOException(e);
 		} finally {
@@ -482,11 +501,13 @@ public class SparseDedupFile implements DedupFile {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
-		long chunkPos = this.getChuckPosition(position);
 		DedupChunkInterface writeBuffer = null;
 		this.writeLock.lock();
 		try {
-			writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(chunkPos);
+			if(Main.volume.isClustered())
+				writeBuffer = (WritableCacheBuffer) this.load(position);
+			else
+				writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(position);
 		} catch (ExecutionException e) {
 			throw new IOException(e);
 		} finally {
@@ -538,8 +559,14 @@ public class SparseDedupFile implements DedupFile {
 
 			if (Main.safeSync) {
 				try {
+					long tm = System.currentTimeMillis();
+					long wsz = this.writeBuffers.size();
+					int fsz = this.flushingBuffers.size();
 					this.writeCache();
+					long wt = System.currentTimeMillis() - tm;
 					this.bdb.sync();
+					long st = System.currentTimeMillis() - tm - wt;
+					SDFSLogger.getLog().debug("Sync wb=["+wsz+"] fb=["+fsz+"] write fush [" +wt + "] bd sync [" + st + "]");
 				} finally {
 				}
 			} else {
@@ -578,7 +605,7 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public DedupFileChannel getChannel(int flags) throws IOException {
-		if (!Main.safeClose) {
+		if (!Main.safeClose || Main.blockDev) {
 			if (this.staticChannel == null) {
 				if (this.isClosed())
 					this.initDB();
@@ -608,7 +635,7 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public void unRegisterChannel(DedupFileChannel channel, int flags) {
-		if (Main.safeClose) {
+		if (Main.safeClose && !Main.blockDev) {
 			channelLock.lock();
 			try {
 				if (channel.getFlags() == flags) {
@@ -853,8 +880,9 @@ public class SparseDedupFile implements DedupFile {
 				}
 				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath, -1,
 						Main.CHUNK_LENGTH);
-				if(mf.getDev() != null)
+				if(mf.getDev() != null) {
 					this.bdb = new BlockDevSocket(mf.getDev(),this.databasePath);
+				}
 				else
 					this.bdb = new LongByteArrayMap(this.databasePath);
 
@@ -862,6 +890,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			DedupFileStore.addOpenDedupFile(this);
 		} catch (IOException e) {
+			SDFSLogger.getLog().warn("error while opening db",e);
 			throw e;
 		} finally {
 			this.initLock.unlock();
@@ -1150,6 +1179,6 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void trim(long start, int len) throws IOException{
 		this.bdb.trim(start, len);
-		
 	}
+	
 }

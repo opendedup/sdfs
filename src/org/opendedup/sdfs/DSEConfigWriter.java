@@ -57,7 +57,6 @@ public class DSEConfigWriter {
 	String list_ip = "0.0.0.0";
 	long chunk_store_allocation_size = 0;
 	short chunk_size = 4;
-	String fdisk_schedule = "0 59 23 * * ?";
 	boolean awsEnabled = false;
 	boolean azureEnabled = false;
 	String cloudAccessKey = "";
@@ -76,7 +75,6 @@ public class DSEConfigWriter {
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
 	String clusterRack = "rack1";
 	String clusterNodeLocation = "pdx";
-	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -93,14 +91,17 @@ public class DSEConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (!cmd.hasOption("dse-name") || !cmd.hasOption("dse-capacity")
+		if (!cmd.hasOption("dse-capacity")
 				|| !cmd.hasOption("cluster-node-id")) {
 			System.out
-					.println("--dse-name and --dse-capacity --cluster-node-id");
+					.println("--dse-capacity and --cluster-node-id");
 			printHelp(options);
 			System.exit(-1);
 		}
-		dse_name = cmd.getOptionValue("dse-name");
+		if(cmd.hasOption("dse-name"))
+			dse_name = cmd.getOptionValue("dse-name");
+		else
+			dse_name = InetAddress.getLocalHost().getHostName();
 		if(!cmd.hasOption("listen-ip"))
 			this.list_ip= InetAddress.getLocalHost().getHostAddress();
 		else
@@ -188,9 +189,6 @@ public class DSEConfigWriter {
 				this.cloudCompress = Boolean.parseBoolean(cmd
 						.getOptionValue("cloud-compress"));
 		}
-		if (cmd.hasOption("gc-schedule")) {
-			this.fdisk_schedule = cmd.getOptionValue("gc-schedule");
-		}
 		if (cmd.hasOption("dse-capacity")) {
 
 			long sz = StringUtils.parseSize(cmd.getOptionValue("dse-capacity"));
@@ -275,7 +273,6 @@ public class DSEConfigWriter {
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
-		cs.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
@@ -286,7 +283,6 @@ public class DSEConfigWriter {
 		cs.setAttribute("hashdb-class", this.hash_db_class);
 		cs.setAttribute("hash-type", this.hashType);
 		cs.setAttribute("cluster-id", this.clusterID);
-		cs.setAttribute("gc-class", this.gc_class);
 
 		cs.setAttribute("cluster-member-id", Byte.toString(clusterMemberID));
 		cs.setAttribute("cluster-config", this.clusterConfig);
@@ -380,12 +376,6 @@ public class DSEConfigWriter {
 								+ File.separator + "hdb").hasArg()
 				.withArgName("PATH").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("gc-schedule")
-				.withDescription(
-						"The schedule, in cron format, to check for unclaimed chunks within the Dedup Storage Engine. "
-								+ "This should happen less frequently than the io-claim-chunks-schedule. \n Defaults to: \n 0 59 23 * * ?")
-				.hasArg().withArgName("CRON Schedule").create());
-		options.addOption(OptionBuilder
 				.withLongOpt("dse-capacity")
 				.withDescription(
 						"The size in bytes of the Dedup Storeage Engine. "
@@ -450,20 +440,17 @@ public class DSEConfigWriter {
 						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("enable-udp")
-				.withDescription(
-						"Enable udp for some communication between Volume and DSE. Defaults to false")
-				.create());
-		options.addOption(OptionBuilder
 				.withLongOpt("listen-ip")
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. This is a required option.")
 				.hasArg().withArgName("IPv4 Address").create());
+		/*
 		options.addOption(OptionBuilder
 				.withLongOpt("listen-port")
 				.withDescription(
 						"TCP Port to listen on for incoming connections. Defaults to 2222")
 				.hasArg().withArgName("IP Port").create());
+		*/
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-password")
 				.withDescription(

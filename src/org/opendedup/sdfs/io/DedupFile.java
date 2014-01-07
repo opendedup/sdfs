@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import org.opendedup.collections.HashtableFullException;
 
 /**
@@ -20,7 +21,7 @@ public interface DedupFile {
 	public abstract void removeFromFlush(long pos);
 	
 	public abstract void trim(long start,int len) throws IOException;
-
+	
 	/**
 	 * 
 	 * @return true if the dedup file is closed
