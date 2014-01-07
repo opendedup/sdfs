@@ -183,6 +183,39 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 
 	}
+	
+	public LongKeyValue nextKeyValue() throws IOException {
+		iterlock.lock();
+		try {
+			long _cpos = getInternalIterFPos();
+			while (_cpos < flen) {
+				try {
+					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
+					pbdb.read(buf, _cpos);
+					byte[] val = buf.array();
+					if (!Arrays.equals(val, FREE)) {
+						return new LongKeyValue(iterPos * Main.CHUNK_LENGTH,val);
+					}
+				} finally {
+					iterPos++;
+					_cpos = (iterPos * arrayLength)+ this.offset;
+				}
+			}
+			if (getInternalIterFPos() < pbdb.size()) {
+				this.hashlock.lock();
+				try {
+					flen = this.pbdb.size();
+				} finally {
+					this.hashlock.unlock();
+				}
+				return this.nextKeyValue();
+			}
+			return null;
+		} finally {
+			iterlock.unlock();
+		}
+
+	}
 
 	
 	/* (non-Javadoc)

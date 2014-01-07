@@ -340,7 +340,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			break;
 		}
 		case NetworkCMDS.FIND_VOLUME_OWNER: {
-			SDFSLogger.getLog().info("looking for volume");
+			if(server != null && server.volume != null) {
 			byte[] sb = new byte[buf.getInt()];
 			buf.get(sb);
 			String volume = new String(sb);
@@ -348,6 +348,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				rtrn = Main.volume;
 			else
 				rtrn = null;
+			}
 			break;
 		}
 		case NetworkCMDS.SET_GC_SCHEDULE: {

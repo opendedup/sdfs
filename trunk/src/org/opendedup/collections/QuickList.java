@@ -144,7 +144,6 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 	public void add(int index, E element) {
 		this.array[index] = element;
 		this.setSize(index);
-
 	}
 
 	@Override

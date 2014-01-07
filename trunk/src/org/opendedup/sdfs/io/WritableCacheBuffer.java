@@ -407,6 +407,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				this.df.putBufferIntoFlush(this);
 				SparseDedupFile.pool.execute(this);
 			}
+			else {
+				this.closed = true;
+			}
 		} finally {
 			this.lock.unlock();
 		}
@@ -430,13 +433,15 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	public void close() throws IOException {
 		try {
 			this.lock.lock();
+			
 			if (!this.flushing)
 				SDFSLogger.getLog().debug(
 						"####" + this.getFilePosition() + " not flushing");
-			else if (this.closed) {
+						
+			if (this.closed) {
 				SDFSLogger.getLog().debug(
 						this.getFilePosition() + " already closed");
-			} else {
+			} else if(this.dirty){
 				this.df.writeCache(this);
 				df.removeFromFlush(this.getFilePosition());
 				this.closed = true;

@@ -70,8 +70,7 @@ public class ReplicationService implements Serializable {
 
 		try {
 			File f = new File(args[0]);
-			defjobPersistanceFolder = new File(f.getParent() + File.separator
-					+ "replhistory" + File.separator + f.getName());
+			defjobPersistanceFolder = new File("replhistory" + File.separator + f.getName());
 			properties.load(new FileInputStream(args[0]));
 		} catch (IOException e) {
 			System.err.println("Unable to load properties");

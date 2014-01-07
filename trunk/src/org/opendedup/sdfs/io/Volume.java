@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class Volume implements java.io.Serializable {
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
-	public VolumeSocket soc = null;
+	public transient VolumeSocket soc = null;
 	
 	public boolean isClustered() {
 		return this.clustered;
@@ -95,7 +96,7 @@ public class Volume implements java.io.Serializable {
 		}
 	}
 
-	public void startAllOnStartupDevices() {
+	private void startAllOnStartupDevices() {
 		synchronized (devices) {
 			for (BlockDev dev : devices) {
 				try {
@@ -196,7 +197,9 @@ public class Volume implements java.io.Serializable {
 			}
 		}
 		if(vol.hasAttribute("volume-clustered")) {
-			this.clustered = Boolean.parseBoolean("volume-clustered");
+			
+			this.clustered = Boolean.parseBoolean(vol
+					.getAttribute("volume-clustered"));
 		}
 		if (vol.hasAttribute("cluster-rack-aware")) {
 			this.clusterRackAware = Boolean.parseBoolean(vol
@@ -236,18 +239,22 @@ public class Volume implements java.io.Serializable {
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {
 		synchronized (devices) {
+			long sz = 0;
 			for (BlockDev _dev : this.devices) {
 				if (dev.devName.equalsIgnoreCase(_dev.devName))
 					throw new IOException("Device Name [" + dev.devName
 							+ "] already exists");
-				if (dev.devPath.equalsIgnoreCase(_dev.devPath))
-					throw new IOException("Device Path [" + dev.devPath
-							+ "] already exists");
 				if (dev.internalPath.equalsIgnoreCase(_dev.internalPath))
 					throw new IOException("Device Internal Path ["
 							+ dev.internalPath + "] already exists");
+				sz = sz +_dev.size;
 			}
+			sz = sz + dev.size;
+			if(sz > this.getCapacity())
+				throw new IOException("Requested Block Device is too large for volume. " +
+						"Volume capacity is [" +StorageUnit.of(this.getCapacity()).format(this.getCapacity()) + "] and requested size was [" + StorageUnit.of(dev.size).format(dev.size) + "]");
 			this.devices.add(dev);
+			/*
 			if (dev.startOnInit && Main.blockDev) {
 				try {
 					this.startDev(dev.devName);
@@ -255,6 +262,7 @@ public class Volume implements java.io.Serializable {
 					SDFSLogger.getLog().warn("unable to start device", e);
 				}
 			}
+			*/
 			this.writer.writeConfig();
 		}
 	}

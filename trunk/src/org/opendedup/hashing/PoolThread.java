@@ -43,7 +43,6 @@ public class PoolThread extends Thread {
 						}
 					}
 				} else {
-					
 						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(ts);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);

@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.opendedup.sdfs.Main;
@@ -15,7 +14,7 @@ public class BlockDeviceAdd {
 			throw new IOException("Block devices not supported on this volume");
 		else {
 			long sz = StringUtils.parseSize(size);
-			BlockDev dev = new BlockDev(devName,Main.volume.getPath() + File.separator +devName,sz,Boolean.parseBoolean(start),null);
+			BlockDev dev = new BlockDev(devName,sz,Boolean.parseBoolean(start),null);
 			Main.volume.addBlockDev(dev);
 			return dev.getElement();
 		}

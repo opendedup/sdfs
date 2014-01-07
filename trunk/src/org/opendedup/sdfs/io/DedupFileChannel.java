@@ -244,6 +244,8 @@ public class DedupFileChannel {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
+							if(Main.volume.isClustered())
+								writeBuffer.flush();
 						} catch (BufferClosedException e) {
 							writeBuffer = null;
 							SDFSLogger.getLog().debug("trying to write again");
@@ -272,6 +274,8 @@ public class DedupFileChannel {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
+							if(Main.volume.isClustered())
+								writeBuffer.flush();
 						} catch (BufferClosedException e) {
 							SDFSLogger.getLog().debug("trying to write again");
 							writeBuffer = null;
@@ -414,13 +418,15 @@ public class DedupFileChannel {
 		// SDFSLogger.getLog().debug("reading at " + filePos + " "
 		// +buf.capacity() + " bytes");
 		try {
-			if (filePos >= mf.length()) {
+			if (filePos >= mf.length() && !Main.blockDev) {
 				return -1;
 			}
 			long currentLocation = filePos;
 			buf.position(bufPos);
 			int bytesLeft = siz;
 			long futureFilePostion = bytesLeft + currentLocation;
+			if(Main.blockDev && futureFilePostion > mf.length())
+				mf.setLength(futureFilePostion, false);
 			if (futureFilePostion > mf.length()) {
 				bytesLeft = (int) (mf.length() - currentLocation);
 			}
@@ -449,6 +455,8 @@ public class DedupFileChannel {
 						bytesLeft = bytesLeft - _len;
 						read = read + _len;
 					}
+					if(Main.volume.isClustered())
+						readBuffer.flush();
 				} catch (FileClosedException e) {
 					SDFSLogger.getLog().warn(
 							mf.getPath() + " is closed but still writing");
@@ -527,18 +535,6 @@ public class DedupFileChannel {
 		mf.setLastAccessed(System.currentTimeMillis());
 		// Return the new file position
 		return this.position();
-	}
-
-	/**
-	 * Determine if the end of file has been reached.
-	 * 
-	 * @return boolean
-	 **/
-	public boolean isEndOfFile() throws java.io.IOException {
-		// Check if we reached end of file
-		if (this.currentPosition == mf.length())
-			return true;
-		return false;
 	}
 
 	/**

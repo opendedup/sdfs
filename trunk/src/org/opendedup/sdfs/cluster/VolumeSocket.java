@@ -38,13 +38,16 @@ public class VolumeSocket implements RequestHandler, MembershipListener,
 	private Address pmAddr =null;
 
 	public VolumeSocket(Volume vol, String config) throws Exception {
+		SDFSLogger.getLog().info("Starting Volume Socket for " + vol.getName());
 		this.vol = vol;
 		this.cfg = config;
 		channel = new JChannel(this.cfg);
 		disp = new MessageDispatcher(channel, null, null, this);
 		disp.setMembershipListener(this);
 		disp.setMessageListener(this);
-		channel.connect(this.vol.getName(), null, 20000);
+		channel.connect(this.vol.getName());
+		channel.getState(null, 10000);
+		SDFSLogger.getLog().info("Started Volume Socket for " + vol.getName());
 	}
 
 	@Override
