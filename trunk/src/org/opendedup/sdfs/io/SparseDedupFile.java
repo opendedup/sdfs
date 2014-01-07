@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataMapInterface;
@@ -61,6 +62,7 @@ public class SparseDedupFile implements DedupFile {
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers)
 			.concurrencyLevel(Main.writeThreads * 3)
+			.expireAfterAccess(5, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(
 						RemovalNotification<Long, DedupChunkInterface> removal) {
