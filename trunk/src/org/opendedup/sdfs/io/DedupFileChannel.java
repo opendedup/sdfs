@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * 
@@ -28,6 +31,7 @@ public class DedupFileChannel {
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
 	private int flags = -1;
+	EventBus eventBus = new EventBus();
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -42,7 +46,9 @@ public class DedupFileChannel {
 		df = file.getDedupFile();
 		mf = file;
 		this.flags = flags;
-		SDFSLogger.getLog().debug("Initializing Cached File " + mf.getPath());
+		SparseDedupFile sdf = (SparseDedupFile)df;
+		eventBus.register(sdf.bdb);
+		SDFSLogger.getLog().debug("Initializing Cache " + mf.getPath());
 	}
 
 	public boolean isClosed() {
@@ -201,7 +207,7 @@ public class DedupFileChannel {
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
-	public void writeFile(ByteBuffer buf, int len, int pos, long offset)
+	public void writeFile(ByteBuffer buf, int len, int pos, long offset,boolean propigate)
 			throws java.io.IOException {
 		// this.addAio();
 		try {
@@ -226,6 +232,7 @@ public class DedupFileChannel {
 				// If the writebuffer can fit what is left, write it and
 				// quit.
 				if ((endPos) <= Main.CHUNK_LENGTH) {
+					
 					/*
 					 * if (endPos == Main.CHUNK_LENGTH) newBuf = true;
 					 */
@@ -239,6 +246,9 @@ public class DedupFileChannel {
 								"ss buffer underflow writing "
 										+ (buf.capacity() - buf.position())
 										+ " instead of " + bytesLeft);
+					}
+					if(endPos != Main.CHUNK_LENGTH && propigate && mf.getDev() != null) {
+						eventBus.post(new BlockDeviceSmallWriteEvent(mf.getDev(),ByteBuffer.wrap(b),filePos+startPos,bytesLeft));
 					}
 					while (writeBuffer == null) {
 						try {
@@ -274,6 +284,9 @@ public class DedupFileChannel {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
+							if(startPos != 0 &&propigate && mf.getDev() != null) {
+								eventBus.post(new BlockDeviceSmallWriteEvent(mf.getDev(),ByteBuffer.wrap(b),filePos+startPos,_len));
+							}
 							if(Main.volume.isClustered())
 								writeBuffer.flush();
 						} catch (BufferClosedException e) {
@@ -298,7 +311,7 @@ public class DedupFileChannel {
 			try {
 				df.registerChannel(this);
 				this.closed = false;
-				this.writeFile(buf, len, pos, offset);
+				this.writeFile(buf, len, pos, offset,propigate);
 			} finally {
 				this.closeLock.unlock();
 			}
@@ -313,38 +326,6 @@ public class DedupFileChannel {
 		} finally {
 			// this.removeAio();
 		}
-	}
-
-	/**
-	 * writes data to the DedupFile at the current file position
-	 * 
-	 * @param bbuf
-	 *            the bytes to write
-	 * @param len
-	 *            the length of data to write
-	 * @param offset
-	 *            the offset within the bbuf to start the write from
-	 * @throws java.io.IOException
-	 */
-	public void writeFile(ByteBuffer buf, int len, int pos)
-			throws java.io.IOException {
-		this.writeFile(buf, len, pos, this.position());
-	}
-
-	/**
-	 * Reads data from the DedupFile at the current file position
-	 * 
-	 * @param bbuf
-	 *            the byte array to copy the data to.
-	 * @param bufPos
-	 *            the position within the array to copy the data too.
-	 * @param siz
-	 *            the mount of data to copy to the bbuf.
-	 * @return the bytes read
-	 * @throws IOException
-	 */
-	public int read(ByteBuffer bbuf, int bufPos, int siz) throws IOException {
-		return this.read(bbuf, bufPos, siz, this.position());
 	}
 
 	/**

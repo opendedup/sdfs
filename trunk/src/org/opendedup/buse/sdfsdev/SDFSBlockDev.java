@@ -14,7 +14,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BlockDev;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDedupFile;
 
 import com.google.common.eventbus.EventBus;
 
@@ -46,13 +45,9 @@ public class SDFSBlockDev implements BUSE, Runnable {
 			throw new IOException("device " + devicePath + " not found.");
 		MetaDataDedupFile mf = dev.getMF();
 		this.ch = mf.getDedupFile().getChannel(0);
-		SparseDedupFile df = (SparseDedupFile) this.ch.getDedupFile();
-		eventBus.register(df.bdb);
 	}
 	
-	public void registerListener(Object obj) {
-		eventBus.register(obj);
-	}
+	
 
 	@Override
 	public int read(ByteBuffer data, int len, long offset) {
@@ -83,9 +78,8 @@ public class SDFSBlockDev implements BUSE, Runnable {
 			if (Main.volume.isFull())
 				return Errno.ENOSPC;
 			try {
-				ch.writeFile(buff, len, 0, offset);
-				if(len < Main.CHUNK_LENGTH)
-					eventBus.post(new BlockDeviceSmallWriteEvent(this.dev,buff,offset,len));
+				ch.writeFile(buff, len, 0, offset,true);
+					
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + this.internalFPath, e);
 				return Errno.EACCES;
