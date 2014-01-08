@@ -324,7 +324,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 						BlockDeviceSmallWriteEvent evt = (BlockDeviceSmallWriteEvent) Util
 								.objectFromByteBuffer(ck);
 						dev.getDevIO().ch.writeFile(evt.buf, evt.len, 0,
-								evt.pos);
+								evt.pos,false);
 					}
 				}
 			}
