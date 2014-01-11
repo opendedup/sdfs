@@ -20,6 +20,7 @@ public class ProcessSetPerfmonCmd {
 			String msg = root.getAttribute("msg");
 			System.out
 					.printf("Dedup Command [%s] returned [%s]\n", status, msg);
+			formatter.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

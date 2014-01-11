@@ -18,6 +18,7 @@ public class ProcessDedupAllCmd {
 			formatter.format("file=%s&cmd=dedup&options=%s", file, option);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
 			System.out

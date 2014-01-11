@@ -17,6 +17,7 @@ public class ProcessFileInfo {
 			formatter.format("file=%s&cmd=info", file);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));
 			else {

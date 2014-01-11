@@ -229,6 +229,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 					ObjectInputStream oon = new ObjectInputStream(fin);
 
 					mapped = (BitSet) oon.readObject();
+					oon.close();
 				} catch (Exception e) {
 					closedCorrectly = false;
 				}

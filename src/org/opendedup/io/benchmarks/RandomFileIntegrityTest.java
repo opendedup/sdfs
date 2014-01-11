@@ -88,7 +88,7 @@ public class RandomFileIntegrityTest implements Runnable {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		if (args.length != 4) {
 			System.out
-					.println("WriteTest <path to write to> <File Size (KB)> <Number of Parallel Runs> <Number of total runs>");
+					.println("RandomFileIntegrityTest <path to write to> <File Size (KB)> <Number of Parallel Runs> <Number of total runs>");
 			System.exit(0);
 		}
 		int r = Integer.parseInt(args[3]);

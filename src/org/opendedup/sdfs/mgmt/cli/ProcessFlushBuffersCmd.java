@@ -15,6 +15,7 @@ public class ProcessFlushBuffersCmd {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=%s&cmd=flush&options=%s", file, option);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");

@@ -1,17 +1,15 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -24,12 +22,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
 import org.opendedup.sdfs.mgmt.cli.ProcessArchiveOutCmd;
+import org.opendedup.sdfs.mgmt.cli.ProcessDeleteFileCmd;
 import org.opendedup.sdfs.mgmt.cli.ProcessImportArchiveCmd;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -45,6 +42,7 @@ public class ReplicationService implements Serializable {
 	//public int remoteServerDataPort;
 	public int remoteServerPort;
 	public boolean useSSL;
+	public boolean useLSSL;
 	public boolean useMGR;
 	public String archiveFolder;
 
@@ -106,6 +104,7 @@ public class ReplicationService implements Serializable {
 				"replication.slave.folder", "");
 		this.localServerPort = Integer.parseInt(properties.getProperty(
 				"replication.slave.port", "6442"));
+		this.useLSSL = Boolean.parseBoolean(properties.getProperty("replication.slave.useSSL","true"));
 		this.maxSz = Integer.parseInt(properties.getProperty(
 				"replication.batchsize", "-1"));
 		this.jobPersistanceFolder = new File(properties.getProperty(
@@ -222,49 +221,9 @@ public class ReplicationService implements Serializable {
 		}
 	}
 
-	private synchronized Document getResponse(String server, int port,
-			String password, String url) throws IOException {
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(connectAndGet(server, port, password, url,
-					""));
-			doc.getDocumentElement().normalize();
-			return doc;
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
-	}
+	
 
-	private synchronized InputStream connectAndGet(String server, int port,
-			String password, String url, String file) throws IOException {
-		HttpClient client = new HttpClient();
-		client.getParams().setParameter("http.useragent", "SDFS Client");
-		if (password != null)
-			if (url.trim().length() == 0)
-				url = "password=" + password;
-			else
-				url = url + "&password=" + password;
-		file = URLEncoder.encode(file, "UTF-8");
-		String req = "http://" + server + ":" + port + "/" + file + "?" + url;
-		GetMethod method = new GetMethod(req);
-		try {
-			int returnCode = client.executeMethod(method);
-			if (returnCode != 200)
-				throw new IOException("Unable to process command "
-						+ method.getQueryString() + " return code was"
-						+ returnCode + " return msg was "
-						+ method.getResponseBodyAsString());
-			return method.getResponseBodyAsStream();
-		} catch (Exception e) {
-			System.err
-					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6442");
-			System.err.println("Error Request : " + req);
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
-	}
+	
 
 	private void localArchiveImport(String server, int port, String password,
 			String archive, String path, String rserver, String rpasswd,
@@ -296,11 +255,11 @@ public class ReplicationService implements Serializable {
 							+ this.remoteServerFolder + "]");
 			File[] jobsxml = this.jobPersistanceFolder.listFiles();
 			ArrayList<JobHistory> jobs = new ArrayList<JobHistory>();
-
+			SDFSLogger.getLog().info("Found " + jobsxml.length + " historical jobs from " + this.jobPersistanceFolder.getPath());
 			for (int i = 0; i < jobsxml.length; i++) {
 				try {
 					JobHistory jh = parseHistoryFile(jobsxml[i].getPath());
-					if (jh.success)
+					//if (jh.success)
 						jobs.add(jh);
 				} catch (Exception e) {
 					SDFSLogger
@@ -311,9 +270,10 @@ public class ReplicationService implements Serializable {
 				}
 			}
 			int diff = jobs.size() - this.localCopies;
+			SDFSLogger.getLog().info(
+					"Will remove " + diff + " old replication jobs");
 			if (diff > 0) {
-				SDFSLogger.getLog().info(
-						"Will remove " + diff + " old replication jobs");
+				
 				Collections.sort(jobs, new CustomComparator());
 				for (int i = 0; i < diff; i++) {
 					try {
@@ -348,20 +308,13 @@ public class ReplicationService implements Serializable {
 					"ignoring deletion because file = "
 							+ this.mLocalServerFolder);
 		else {
-			file = URLEncoder.encode(file, "UTF-8");
-			StringBuilder sb = new StringBuilder();
-			Formatter formatter = new Formatter(sb);
-			SDFSLogger.getLog().debug("Deleting File [" + file + "] ");
-			formatter.format("file=%s&cmd=%s&options=%s", file, "deletefile",
-					"");
-			Document doc = getResponse(this.localServer, this.localServerPort,
-					this.localServerPassword, sb.toString());
-			Element root = doc.getDocumentElement();
-			String status = root.getAttribute("status");
-			String msg = root.getAttribute("msg");
-			if (status.equalsIgnoreCase("failed"))
+			ProcessDeleteFileCmd cmd =ProcessDeleteFileCmd.execute(file);
+			String status = cmd.status;
+			String msg = cmd.msg;
+			if (status.equalsIgnoreCase("failed") && !msg.endsWith("does not exist"))
 				throw new IOException("delete of " + file + " failed because :"
 						+ msg);
+			
 		}
 	}
 

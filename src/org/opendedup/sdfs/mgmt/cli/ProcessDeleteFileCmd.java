@@ -8,8 +8,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessDeleteFileCmd {
-	String status;
-	String msg;
+	public String status;
+	public String msg;
 
 	public static ProcessDeleteFileCmd execute(String file) {
 		ProcessDeleteFileCmd store = new ProcessDeleteFileCmd();
@@ -21,6 +21,7 @@ public class ProcessDeleteFileCmd {
 			formatter.format("file=%s&cmd=%s&options=%s", file, "deletefile",
 					"");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			store.status = root.getAttribute("status");
 			store.msg = root.getAttribute("msg");

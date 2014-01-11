@@ -18,6 +18,7 @@ public class ProcessGetGCSchedule {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=%s&cmd=get-gc-schedule", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));

@@ -19,6 +19,7 @@ public class ProcessClusterDSEInfo {
 			formatter.format("file=%s&cmd=cluster-dse-info", "null");
 
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));

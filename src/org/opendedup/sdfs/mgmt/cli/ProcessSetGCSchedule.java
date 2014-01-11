@@ -22,7 +22,7 @@ public class ProcessSetGCSchedule {
 			else {
 				ProcessGetGCSchedule.runCmd();
 			}
-
+			formatter.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

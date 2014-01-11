@@ -16,6 +16,7 @@ public class ProcessGetGCMaster {
 				formatter.format("file=%s&cmd=get-gc-master", "null");
 				Document doc = MgmtServerConnection.getResponse(sb.toString());
 				Element root = doc.getDocumentElement();
+				formatter.close();
 				if (root.getAttribute("status").equals("failed"))
 					System.out.println(root.getAttribute("msg"));
 				else {

@@ -12,6 +12,7 @@ public class ProcessClusterPromoteToGC {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=%s&cmd=cluster-promote-gc", "s");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
 		} catch (Exception e) {

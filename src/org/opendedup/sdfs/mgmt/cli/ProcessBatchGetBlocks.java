@@ -33,6 +33,7 @@ public class ProcessBatchGetBlocks {
 				password, sb.toString(), "", file,true);
 		SDFSLogger.getLog().debug("reading imported blocks");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		formatter.close();
 		byte[] buf = new byte[32768];
 		int len;
 		while ((len = in.read(buf)) > 0) {

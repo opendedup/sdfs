@@ -20,6 +20,7 @@ public class ProcessSetPasswordCmd {
 			String msg = root.getAttribute("msg");
 			System.out.printf("change password [%s] returned [%s]\n", status,
 					msg);
+			formatter.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

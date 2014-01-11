@@ -16,6 +16,7 @@ public class ProcessShutdown {
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
+			formatter.close();
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

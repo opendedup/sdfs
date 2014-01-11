@@ -17,6 +17,7 @@ public class ProcessDebugInfo {
 			formatter.format("file=%s&cmd=debug-info", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));
 			else {

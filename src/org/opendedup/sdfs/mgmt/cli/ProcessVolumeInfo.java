@@ -88,6 +88,7 @@ public class ProcessVolumeInfo {
 							.printf("Volume Actual Storage Savings (Unique Blocks Stored/Current Size) : %s%%\n",
 									Double.toString(dedupRate));
 				}
+				formatter.close();
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

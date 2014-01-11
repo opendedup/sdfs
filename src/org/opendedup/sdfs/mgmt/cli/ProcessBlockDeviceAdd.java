@@ -15,6 +15,7 @@ public class ProcessBlockDeviceAdd {
 			formatter.format("file=s&cmd=blockdev-add&devname=%s&size=%s&start=%s", URLEncoder.encode(devName,"UTF-8"),URLEncoder.encode(size,"UTF-8"),Boolean.toString(start));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			System.out.println(root.getAttribute("msg"));
 			if(root.getAttribute("status").equalsIgnoreCase("success"))
 				System.out.println(BlockDev.toExternalTxt((Element)root.getElementsByTagName("blockdev").item(0)));

@@ -300,7 +300,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 			RandomAccessFile raf = new RandomAccessFile(f, "rw");
 			raf.getChannel().force(true);
-
+			raf.close();
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("while closing filechunkstore ", e);
 		}

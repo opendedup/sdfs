@@ -15,6 +15,7 @@ public class ProcessBlockDeviceList {
 			formatter.format("file=s&cmd=blockdev-list");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			if (root.getAttribute("status").equalsIgnoreCase("success")) {
 				NodeList lst = root.getElementsByTagName("blockdev");
 				if (lst.getLength() == 0) {

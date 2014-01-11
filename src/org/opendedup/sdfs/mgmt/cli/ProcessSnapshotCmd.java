@@ -101,6 +101,7 @@ public class ProcessSnapshotCmd {
 				Thread.sleep(100);
 
 			}
+			formatter.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

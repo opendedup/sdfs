@@ -60,6 +60,7 @@ public class MgmtServerConnection {
 		}
 		String req = prot + "://" + server + ":" + port + "/" + file + "?"
 				+ url;
+		//SDFSLogger.getLog().info(req);
 		GetMethod method = new GetMethod(req);
 		int returnCode = client.executeMethod(method);
 		if (returnCode != 200)
@@ -137,6 +138,7 @@ public class MgmtServerConnection {
 		}
 		req = prot + "://" + server + ":" + port + "/" + file + "?"
 				+ url;
+		//SDFSLogger.getLog().info(req);
 		PostMethod method = new PostMethod(req);
 		method.addParameter("data", postData);
 		int returnCode = client.executeMethod(method);

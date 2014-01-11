@@ -1,26 +1,28 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
 
-public class RAFPool {
+public class FCPool {
 
 	private File f;
 	private int poolSize;
-	private LinkedBlockingQueue<RandomAccessFile> passiveObjects = null;
-	private ArrayList<RandomAccessFile> activeObjects = new ArrayList<RandomAccessFile>();
+	private LinkedBlockingQueue<FileChannel> passiveObjects = null;
+	private ArrayList<FileChannel> activeObjects = new ArrayList<FileChannel>();
 	private ReentrantLock alock = new ReentrantLock();
 
-	public RAFPool(File f, int size) throws IOException {
+	public FCPool(File f, int size) throws IOException {
 		this.f = f;
 		this.poolSize = size;
-		passiveObjects = new LinkedBlockingQueue<RandomAccessFile>(
+		passiveObjects = new LinkedBlockingQueue<FileChannel>(
 				this.poolSize);
 		this.populatePool();
 	}
@@ -40,8 +42,8 @@ public class RAFPool {
 		}
 	}
 
-	public RandomAccessFile borrowObject() throws IOException {
-		RandomAccessFile hc = null;
+	public FileChannel borrowObject() throws IOException {
+		FileChannel hc = null;
 		try {
 			hc = this.passiveObjects.poll();
 		} catch (Exception e) {
@@ -49,7 +51,6 @@ public class RAFPool {
 		} finally {
 		}
 		if (hc == null) {
-			SDFSLogger.getLog().info("passive objects empty");
 			hc = this.makeObject();
 		}
 		this.alock.lock();
@@ -65,7 +66,7 @@ public class RAFPool {
 		return hc;
 	}
 
-	public void returnObject(RandomAccessFile hc) throws IOException {
+	public void returnObject(FileChannel hc) throws IOException {
 		alock.lock();
 		try {
 
@@ -79,11 +80,9 @@ public class RAFPool {
 			alock.unlock();
 		}
 		try {
-			boolean inserted = this.passiveObjects.offer(hc);
-			if(!inserted) {
-				SDFSLogger.getLog().info("passive objects full");
-				hc.close();
-			}
+				boolean inserted = this.passiveObjects.offer(hc);
+				if(!inserted)
+					hc.close();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
 			throw new IOException(e.toString());
@@ -92,23 +91,28 @@ public class RAFPool {
 		}
 	}
 
-	public RandomAccessFile makeObject() throws IOException {
-		RandomAccessFile hc = new RandomAccessFile(this.f, "rw");
+	public FileChannel makeObject() throws IOException {
+		@SuppressWarnings("resource")
+		FileChannel hc = new RandomAccessFile(this.f, "rw").getChannel();
 		return hc;
 	}
 
-	public void destroyObject(RandomAccessFile hc) throws IOException {
+	public void destroyObject(FileChannel hc) throws IOException {
 		hc.close();
 	}
 
+	@SuppressWarnings("resource")
 	public void close() throws IOException, InterruptedException {
 		if (this.activeObjects.size() > 0)
 			throw new IOException("Cannot close because writes still occuring");
-		RandomAccessFile hc = passiveObjects.poll();
+		FileChannel hc = passiveObjects.poll();
 		while (hc != null) {
 			hc.close();
 			hc = passiveObjects.poll();
 		}
+		hc = new RandomAccessFile(this.f, "rw").getChannel();
+		hc.force(true);
+		hc.close();
 	}
 
 }

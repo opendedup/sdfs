@@ -93,15 +93,17 @@ public class WriteTest implements Runnable {
 			tests[i] = test;
 		}
 		boolean finished = false;
+		
 		while (!finished) {
+			int nf = 0;
 			for (int i = 0; i < tests.length; i++) {
 				WriteTest test = tests[i];
-				finished = test.isFinished();
-				if (finished) {
+				if (test.isFinished()) {
+					nf++;
 					results[i] = test.results();
-				} else {
-					break;
-				}
+				} 
+				if(nf == tests.length)
+					finished = true;
 			}
 			try {
 				Thread.sleep(10);
