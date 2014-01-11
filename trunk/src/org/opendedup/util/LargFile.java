@@ -48,6 +48,7 @@ public class LargFile {
 		}
 		writer.flush();
 		writer.close();
+		str.close();
 	}
 
 	public static void main(String[] args) throws IOException {

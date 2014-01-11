@@ -188,6 +188,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 				} catch (Exception e) {
 					closedCorrectly = false;
 				}
+				oon.close();
 				f.delete();
 			}
 		}

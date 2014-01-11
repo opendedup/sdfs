@@ -14,6 +14,7 @@ public class ProcessBlockDeviceStop {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=s&cmd=blockdev-stop&devname=%s", URLEncoder.encode(devName,"UTF-8"));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
 			if(root.getAttribute("status").equalsIgnoreCase("success"))

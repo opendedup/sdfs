@@ -22,6 +22,7 @@ public class ProcessCleanStore {
 					Integer.toString(minutes));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			Element evt = (Element) root.getElementsByTagName("event").item(0);
 			String uuid = evt.getAttribute("uuid");
 			boolean closed = false;

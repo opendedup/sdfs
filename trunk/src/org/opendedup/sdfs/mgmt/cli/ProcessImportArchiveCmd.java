@@ -31,6 +31,7 @@ public class ProcessImportArchiveCmd {
 		Document doc = MgmtServerConnection.getResponse(sb.toString());
 		Element root = doc.getDocumentElement();
 		Element evt = (Element) root.getElementsByTagName("event").item(0);
+		formatter.close();
 		String uuid = evt.getAttribute("uuid");
 		long maxcount = Long.parseLong(evt.getAttribute("max-count"));
 		long smaxcount = 0;
@@ -50,6 +51,7 @@ public class ProcessImportArchiveCmd {
 					"event", Integer.toString(0),
 					URLEncoder.encode(uuid, "UTF-8"));
 			doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			root = doc.getDocumentElement();
 			evt = (Element) root.getElementsByTagName("event").item(0);
 			long nmc = Long.parseLong(evt.getAttribute("max-count"));

@@ -20,6 +20,7 @@ public class ProcessClusterVolumesList {
 			formatter.format("file=%s&cmd=cluster-volumes", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));
 			else {

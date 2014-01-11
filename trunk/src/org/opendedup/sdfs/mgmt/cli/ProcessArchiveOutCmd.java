@@ -20,6 +20,7 @@ public class ProcessArchiveOutCmd {
 		StringBuilder sb = new StringBuilder();
 		Formatter formatter = new Formatter(sb);
 		formatter.format("file=%s&cmd=archiveout&options=ilovemg", file);
+		formatter.close();
 		Document doc = MgmtServerConnection.getResponse(sb.toString());
 		Element root = doc.getDocumentElement();
 		Element evt = (Element) root.getElementsByTagName("event").item(0);
@@ -39,6 +40,7 @@ public class ProcessArchiveOutCmd {
 			formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
 					"event", Integer.toString(0),
 					URLEncoder.encode(uuid, "UTF-8"));
+			formatter.close();
 			doc = MgmtServerConnection.getResponse(sb.toString());
 			root = doc.getDocumentElement();
 			evt = (Element) root.getElementsByTagName("event").item(0);

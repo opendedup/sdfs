@@ -12,6 +12,7 @@ public class ProcessClusterVolumeAdd {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=%s&cmd=cluster-volume-add", vol);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			System.out.println(root.getAttribute("msg"));
 		} catch (Exception e) {

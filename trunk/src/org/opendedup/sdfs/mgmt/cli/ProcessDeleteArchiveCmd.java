@@ -21,6 +21,7 @@ public class ProcessDeleteArchiveCmd {
 			formatter.format("file=%s&cmd=%s&options=%s", file,
 					"deletearchive", "");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			store.status = root.getAttribute("status");
 			store.msg = root.getAttribute("msg");

@@ -18,6 +18,7 @@ public class ProcessCopyOutCmd {
 			formatter.format("file=%s&cmd=copyout&options=%s", file, snapshot);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));
 			String status = root.getAttribute("status");

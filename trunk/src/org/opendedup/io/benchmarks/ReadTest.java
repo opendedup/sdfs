@@ -79,14 +79,18 @@ public class ReadTest implements Runnable {
 		}
 		boolean finished = false;
 		while (!finished) {
+			int nf = 0;
 			for (int i = 0; i < tests.length; i++) {
+				
 				ReadTest test = tests[i];
-				finished = test.isFinished();
-				if (finished) {
-					results[i] = test.results();
-				} else {
-					break;
-				}
+				if (test.isFinished()) {
+					
+					nf++;
+					if(results[i] == 0)
+						results[i] = test.results();
+				} 
+				if(nf == tests.length)
+					finished = true;
 			}
 			try {
 				Thread.sleep(10);

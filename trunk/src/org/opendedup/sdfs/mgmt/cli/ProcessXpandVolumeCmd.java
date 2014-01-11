@@ -19,6 +19,7 @@ public class ProcessXpandVolumeCmd {
 			Element root = doc.getDocumentElement();
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
+			formatter.close();
 			System.out.printf("Expand [%s] returned [%s]\n", status, msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

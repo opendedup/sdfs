@@ -18,6 +18,7 @@ public class ProcessClusterRedundancyCheck {
 			formatter.format("file=%s&cmd=%s&options=%s", file, "redundancyck",
 					"z");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
+			formatter.close();
 			Element root = doc.getDocumentElement();
 			Element evt = (Element) root.getElementsByTagName("event").item(0);
 			String uuid = evt.getAttribute("uuid");
