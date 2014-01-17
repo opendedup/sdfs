@@ -166,8 +166,8 @@ public class SDFSCmdline {
 			ProcessXpandVolumeCmd.runCmd(cmd.getOptionValue("expandvolume"));
 			System.exit(0);
 		}
-		if (cmd.hasOption("blkdev-add")) {
-			String [] vals = cmd.getOptionValues("blkdev-add");
+		if (cmd.hasOption("partition-add")) {
+			String [] vals = cmd.getOptionValues("partition-add");
 			if(vals.length != 3) {
 				System.err.println("device-name size start-on-vol-startup are required options");
 				System.exit(-1);
@@ -176,8 +176,8 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		
-		if (cmd.hasOption("blkdev-update")) {
-			String [] vals = cmd.getOptionValues("blkdev-update");
+		if (cmd.hasOption("partition-update")) {
+			String [] vals = cmd.getOptionValues("partition-update");
 			if(vals.length != 3) {
 				System.err.println("device-name <size|autostart> <value> are required options");
 				System.exit(-1);
@@ -186,22 +186,22 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		
-		if (cmd.hasOption("blkdev-rm")) {
-			String val = cmd.getOptionValue("blkdev-rm");
+		if (cmd.hasOption("partition-rm")) {
+			String val = cmd.getOptionValue("partition-rm");
 			ProcessBlockDeviceRm.runCmd(val);
 			System.exit(0);
 		}
-		if (cmd.hasOption("blkdev-start")) {
-			String val = cmd.getOptionValue("blkdev-start");
+		if (cmd.hasOption("partition-start")) {
+			String val = cmd.getOptionValue("partition-start");
 			ProcessBlockDeviceStart.runCmd(val);
 			System.exit(0);
 		}
-		if (cmd.hasOption("blkdev-stop")) {
-			String val = cmd.getOptionValue("blkdev-stop");
+		if (cmd.hasOption("partition-stop")) {
+			String val = cmd.getOptionValue("partition-stop");
 			ProcessBlockDeviceStop.runCmd(val);
 			System.exit(0);
 		}
-		if (cmd.hasOption("blkdev-list")) {
+		if (cmd.hasOption("partition-list")) {
 			ProcessBlockDeviceList.runCmd();
 			System.exit(0);
 		}
@@ -404,24 +404,24 @@ public class SDFSCmdline {
 								+ "if the dedup storage engine is local and not in network mode")
 				.hasArg().withArgName("minutes").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("blkdev-add")
+				.withLongOpt("partition-add")
 				.withDescription(
-						"Creates a virtual block device inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
+						"Creates a partition inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
 				.hasArgs(3).withArgName("device-name size start-on-vol-startup").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("blkdev-rm")
+				.withLongOpt("partition-rm")
 				.withDescription(
-						"Removes a virtual block device from the volume.This will delete the block device and de-reference all data in the volume.").hasArg().withArgName("device-name").create());
+						"Removes a partition from the volume.This will delete the block device and de-reference all data in the volume.").hasArg().withArgName("device-name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("blkdev-stop")
+				.withLongOpt("partition-stop")
 				.withDescription(
-						"Stops an active virtual block device within the volume.").hasArg().withArgName("device-name").create());
+						"Stops an active partition within the volume.").hasArg().withArgName("device-name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("blkdev-start")
+				.withLongOpt("partition-start")
 				.withDescription(
-						"Starts an inactive virtual block device within the volume.").hasArg().withArgName("device-name").create());
+						"Starts an inactive partition within the volume.").hasArg().withArgName("device-name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("blkdev-list")
+				.withLongOpt("partition-list")
 				.withDescription(
 						"Lists all block devices within the volume.").create());
 		return options;
