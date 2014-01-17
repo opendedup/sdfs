@@ -36,6 +36,7 @@ public class BlockDev implements Externalizable{
 	boolean startOnInit;
 	byte status = 0;
 	String mappedDev;
+	String statusMsg = "Stopped";
 	SDFSBlockDev dev = null;
 	public static final byte STOPPED=0;
 	public static final byte SYNC=1;
@@ -122,7 +123,7 @@ public class BlockDev implements Externalizable{
 		this.status = 0;
 		SDFSLogger.getLog().info(
 				"Stopped [" + this.devName + "] at [" + this.internalPath
-						+ "] on [" + this.devPath + "] with size [" + this.size
+						+ "] on [" + this.mappedDev + "] with size [" + this.size
 						+ "]");
 		this.devPath = null;
 	}
@@ -133,7 +134,9 @@ public class BlockDev implements Externalizable{
 				"Stopping [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
-		
+		this.statusMsg = "Stopping [" + this.devName + "] at [" + this.internalPath
+				+ "] on [" + this.devPath + "] with size [" + this.size
+				+ "]";
 		String sh = "/bin/sh";
 		String cop = "-c";
 		String cmd = "umount /dev/mapper/" + this.devName;
@@ -141,7 +144,7 @@ public class BlockDev implements Externalizable{
 		try {
 			ProcessWorker.runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
-					"Remove mounts to /dev/mapper/" + this.devName);
+					"Removed mounts to /dev/mapper/" + this.devName);
 		} catch (Exception e) {
 			SDFSLogger.getLog().info(
 					"Failed to remove mounts to /dev/mapper/"
@@ -152,7 +155,7 @@ public class BlockDev implements Externalizable{
 		cmd = "dmsetup remove -f " + this.devName;
 		exe = new String[] { sh, cop, cmd };
 		try {
-			//ProcessWorker.runProcess(exe, 1000);
+			ProcessWorker.runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
 					"Remove references to /dev/mapper/" + this.devName);
 		} catch (Exception e) {
@@ -162,15 +165,18 @@ public class BlockDev implements Externalizable{
 		}finally {
 			this.mappedDev = null;
 		}
+		this.statusMsg = "Device Stopped";
 	}
 
 	@Subscribe
 	public void startedEvent(BlockDeviceOpenEvent evt) {
 		this.status = STARTED;
-		SDFSLogger.getLog().info(
+		this.statusMsg = 
 				"Started [" + this.devName + "] at [" + this.internalPath
-						+ "] on [" + this.devPath + "] with size [" + this.size
-						+ "]");
+				+ "] on [" + this.mappedDev + "] with size [" + this.size
+				+ "]";
+		SDFSLogger.getLog().info(this.statusMsg);
+		
 	}
 	
 	public Document toXMLDocument() throws ParserConfigurationException {
@@ -184,6 +190,9 @@ public class BlockDev implements Externalizable{
 		root.setAttribute("uuid", this.uuid);
 		root.setAttribute("status", Byte.toString(this.status));
 		root.setAttribute("mappeddev", this.mappedDev);
+		
+		if(this.statusMsg!=null)
+			root.setAttribute("status-msg", this.statusMsg);
 		return doc;
 	}
 
@@ -195,44 +204,46 @@ public class BlockDev implements Externalizable{
 
 	public void startDev(String dp) throws IOException {
 		if (!this.isStopped()) {
-			throw new IOException("Device [" + this.devName
+			throw new IOException("Parition [" + this.devName
 					+ "] already started");
 		}
+		this.statusMsg = "Starting";
 		this.devPath = dp;
 		dev = new SDFSBlockDev(this);
 		Thread th = new Thread(dev);
 		th.start();
-		String sh = "/bin/sh";
-		String cop = "-c";
-		String cmd = "dmsetup remove -f " + this.devName;
-		String[] exe = new String[] { sh, cop, cmd };
-		try {
-			ProcessWorker.runProcess(exe, 1000);
-			SDFSLogger.getLog().info(
-					"Remove old references to /dev/mapper/" + this.devName);
-		} catch (Exception e) {
-			SDFSLogger.getLog().info(
-					"Failed to remove old references to /dev/mapper/"
-							+ this.devName, e);
+		this.statusMsg = "Backing Device Initiated";
+		File f = new File("/dev/mapper/" + this.devName);
+		if(f.exists()) {
+			this.statusMsg = "partition already assigned at [" +f.getPath()+ "] please remove.";
+			throw new IOException(this.statusMsg);
 		}
 		long bsz = this.size / 512L;
-		sh = "/bin/sh";
-		cop = "-c";
-		cmd = "echo 0 " + bsz + " linear " + this.devPath
+		String sh = "/bin/sh";
+		String cop = "-c";
+		String cmd = "echo 0 " + bsz + " linear " + this.devPath
 				+ " 0 | dmsetup create " + this.devName;
-		exe = new String[] { sh, cop, cmd };
+		String [] exe = new String[] { sh, cop, cmd };
 		SDFSLogger.getLog().info(
 				"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath
 						+ " 0 | dmsetup create " + this.devName + "\"");
 		try {
 			ProcessWorker.runProcess(exe, 1000);
 			SDFSLogger.getLog().info(
-					"Mapped device to /dev/mapper/" + this.devName);
+					"Mapped device to partition /dev/mapper/" + this.devName);
 			this.mappedDev = "/dev/mapper/" + this.devName;
 		} catch (Exception e) {
-			SDFSLogger.getLog().info(
-					"Failed to map device to /dev/mapper/" + this.devName, e);
+			this.statusMsg = 
+					"Failed to map device to partition /dev/mapper/" + this.devName;
+			throw new IOException(this.statusMsg);
 		}
+		if(!f.exists()) {
+			this.statusMsg = "Partition not assigned at [" +f.getPath()+ "]. Please retry";
+			throw new IOException(this.statusMsg);
+		}
+		this.statusMsg = 
+					"Mapped device to parition /dev/mapper/" + this.devName;
+		
 
 	}
 
@@ -241,6 +252,8 @@ public class BlockDev implements Externalizable{
 			throw new IOException("Device [" + this.devName
 					+ "] already stopped");
 		dev.close();
+		this.statusMsg = 
+				"Device Stopped";
 		this.dev = null;
 	}
 
@@ -275,15 +288,15 @@ public class BlockDev implements Externalizable{
 		String st = new String();
 		st = st + "=============[" + el.getAttribute("devname")
 				+ "]=============\n";
-		st = st + "Device Name : " + el.getAttribute("devname") + "\n";
-		st = st + "Block Device : " + el.getAttribute("devpath") + "\n";
-		st = st + "Block Device Path : " + el.getAttribute("mappeddev") + "\n";
+		st = st + "Partition Name : " + el.getAttribute("devname") + "\n";
+		st = st + "Virtual Block Device : " + el.getAttribute("devpath") + "\n";
+		st = st + "Partition Path : " + el.getAttribute("mappeddev") + "\n";
 		st = st + "Size : " + el.getAttribute("size") + "\n";
 		st = st + "UUID : " + el.getAttribute("uuid") + "\n";
 		st = st + "Start on Init : " + el.getAttribute("start-on-init") + "\n";
 		st = st + "Status : " + status + "\n";
+		st = st + "Status Msg : " + el.getAttribute("status-msg") + "\n"; 
 		return st;
-
 	}
 
 	@Override
