@@ -16,6 +16,7 @@ public class HashFunctionPool {
 	public static final String TIGER_24 = "tiger24";
 	public static final String MURMUR3_16 = "murmur3_128";
 	public static int hashLength = 16;
+	public static int max_hash_cluster = 1;
 
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
@@ -24,7 +25,11 @@ public class HashFunctionPool {
 			hashLength = TigerHashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
+		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
+			hashLength = VariableHashEngine.getHashLenth();
+			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
+		
 	}
 
 	public HashFunctionPool(int size) {
@@ -84,6 +89,9 @@ public class HashFunctionPool {
 			hc = new TigerHashEngine();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hc = new Murmur3HashEngine();
+		}
+		else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
+			hc = new VariableHashEngine();
 		}
 		return hc;
 	}

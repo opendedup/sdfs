@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.util.OpenBitSet;
@@ -22,8 +23,8 @@ import org.w3c.dom.Element;
 
 public class VariableFileChunkStore implements AbstractChunkStore {
 	private final long pageSize = (long) Main.chunkStorePageSize;
-	private final long lPageSize = 4L + 8L + 1L;
-	private final int iPageSize = 4 + 8 + 1;
+	private final long lPageSize = 4L + 8L + 1L + 1L;
+	private final int iPageSize = 4 + 8 + 1 + 1;
 	private boolean closed = false;
 	private static File chunk_location = new File(Main.chunkStore);
 	private int[] storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
@@ -33,7 +34,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	private OpenBitSet freeSlots = null;
 	File f;
 	Path p;
-	private long currentLength = 0L;
+	private AtomicLong currentLength = new AtomicLong(0);
 	private String name;
 
 	private byte[] FREE = new byte[(int) pageSize];
@@ -79,7 +80,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength = chunkDataWriter.length();
+			this.currentLength.set(chunkDataWriter.length());
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
@@ -168,7 +169,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long size() {
-		return (this.currentLength / this.iPageSize) * this.pageSize;
+		return this.currentLength.get() *this.pageSize;
 	}
 
 	/*
@@ -204,34 +205,46 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		ByteBuffer buf = null;
 		try {
-			if (Main.chunkStoreEncryptionEnabled)
-				chunk = EncryptUtils.encrypt(chunk);
+
 			buf = ByteBuffer.allocate(iPageSize);
 			byte[] data = CompressionUtils.compressSnappy(chunk);
 			boolean compress = true;
+			boolean encrypt = false;
+			if (Main.chunkStoreEncryptionEnabled) {
+				chunk = EncryptUtils.encrypt(chunk);
+				encrypt = true;
+			}
 			if (data.length > chunk.length) {
 				data = chunk;
 				compress = false;
 			}
 			FileChunkStore store = this.getStore(data.length);
 			long ipos = store.writeChunk(hash, data, data.length);
+			long pos = -1;
 			reservePositionlock.lock();
-			long pos = this.freeSlots.nextSetBit(0);
-			if (pos < 0) {
-				pos = this.currentLength;
-				this.currentLength = this.currentLength + this.lPageSize;
-			} else {
-				this.freeSlots.clear(pos);
-				pos = pos * this.lPageSize;
+			if (this.freeSlots != null) {
+				pos = this.freeSlots.nextSetBit(0);
+				if (pos < 0) {
+					this.freeSlots = null;
+				} else {
+					this.freeSlots.clear(pos);
+					pos = pos * this.lPageSize;
+				}
 			}
 			reservePositionlock.unlock();
-
+			if (pos < 0) {
+				pos = this.currentLength.getAndAdd(this.lPageSize);
+			}
 			byte comp = 1;
+			byte enc = 0;
 			if (!compress)
 				comp = 0;
+			if(encrypt)
+				enc = 1;
 			buf.putLong(ipos);
 			buf.putInt(data.length);
 			buf.put(comp);
+			buf.put(enc);
 			buf.position(0);
 			fc.write(buf, pos);
 			return pos;
@@ -260,12 +273,14 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
 			byte comp = buf.get();
+			byte enc = buf.get();
 			FileChunkStore store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(hash, iStart, iLen);
 			if (comp == 1)
-				return CompressionUtils.decompressSnappy(chunk);
-			else
-				return chunk;
+				chunk = CompressionUtils.decompressSnappy(chunk);
+			if (enc == 1)
+				chunk = EncryptUtils.decrypt(chunk);
+			return chunk;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + start, e);
@@ -331,10 +346,13 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
 			byte comp = buf.get();
+			byte enc = buf.get();
 			FileChunkStore store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(new byte[16], iStart, iLen);
 			if (comp == 1)
 				chunk = CompressionUtils.decompressSnappy(chunk);
+			if (enc == 1)
+				chunk = EncryptUtils.decrypt(chunk);
 			byte[] hash = hc.getHash(chunk);
 			ChunkData chk = new ChunkData(hash, pos);
 			chk.setChunk(chunk);

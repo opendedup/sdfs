@@ -10,7 +10,7 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 public class ThreadPool {
 
 	private LinkedBlockingQueue<WritableCacheBuffer> taskQueue = null;
-	private List<PoolThread> threads = new ArrayList<PoolThread>();
+	private List<AbstractPoolThread> threads = new ArrayList<AbstractPoolThread>();
 	private boolean isStopped = false;
 
 	public ThreadPool(int noOfThreads, int maxNoOfTasks) {
@@ -19,7 +19,7 @@ public class ThreadPool {
 		for (int i = 0; i < noOfThreads; i++) {
 			threads.add(new PoolThread(taskQueue));
 		}
-		for (PoolThread thread : threads) {
+		for (AbstractPoolThread thread : threads) {
 			thread.start();
 		}
 	}
@@ -50,7 +50,7 @@ public class ThreadPool {
 
 	public synchronized void stops() {
 		this.isStopped = true;
-		for (PoolThread thread : threads) {
+		for (AbstractPoolThread thread : threads) {
 			thread.exit();
 		}
 	}
