@@ -13,13 +13,14 @@ import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-public class PoolThread extends Thread {
+public class PoolThread implements AbstractPoolThread, Runnable {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
 	private int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
 			maxTasks + 20);
+	Thread th = null;
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -116,13 +117,20 @@ public class PoolThread extends Thread {
 	}
 
 	private ReentrantLock exitLock = new ReentrantLock();
+	
+	public void start() {
+		th = new Thread(this);
+		th.start();
+	}
 
 	public void exit() {
 		exitLock.lock();
 		try {
 			isStopped = true;
-			this.interrupt(); // break pool thread out of dequeue() call.
-		} finally {
+			
+			th.interrupt(); // break pool thread out of dequeue() call.
+		} catch(Exception e) {}
+		finally {
 			exitLock.unlock();
 		}
 	}
@@ -130,4 +138,6 @@ public class PoolThread extends Thread {
 	public boolean isStopped() {
 		return isStopped;
 	}
+
+	
 }

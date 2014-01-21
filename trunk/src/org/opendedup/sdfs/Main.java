@@ -97,7 +97,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "2.0BETA2";
+	public static String version = "2.0BETA3";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -164,7 +164,7 @@ public class Main {
 	 * The chunk size used for deduplication of incoming data. This is used on
 	 * the client.
 	 */
-	public static int CHUNK_LENGTH = 4 * 1024;
+	public static int CHUNK_LENGTH = 16 * 1024;
 	/**
 	 * the default db user name. This is only used if the H2 database is being
 	 * used instead of TC. This is used on the client and chunk store.
