@@ -2,8 +2,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -49,7 +47,8 @@ public class SparseDedupFile implements DedupFile {
 	public static final HashFunctionPool hashPool = new HashFunctionPool(
 			Main.writeThreads + 1);
 	protected static transient final ThreadPool pool = new ThreadPool(
-			Main.writeThreads + 1, ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH)*2);
+			Main.writeThreads + 1,
+			((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock initLock = new ReentrantLock();
 	private final ReentrantLock syncLock = new ReentrantLock();
@@ -93,8 +92,7 @@ public class SparseDedupFile implements DedupFile {
 
 					return writeBuffer;
 				}
-				
-				
+
 			});
 
 	private boolean closed = true;
@@ -125,23 +123,23 @@ public class SparseDedupFile implements DedupFile {
 	public void removeFromFlush(long pos) {
 		this.flushingBuffers.remove(pos);
 	}
-	
+
 	private DedupChunkInterface load(Long key) throws IOException,
-	FileClosedException {
-if (closed) {
-	throw new FileClosedException("file already closed");
-}
-long chunkPos = getChuckPosition(key);
-DedupChunkInterface writeBuffer = null;
-writeBuffer = flushingBuffers.remove(chunkPos);
-if (writeBuffer == null) {
-	writeBuffer = marshalWriteBuffer(chunkPos, false);
-}
+			FileClosedException {
+		if (closed) {
+			throw new FileClosedException("file already closed");
+		}
+		long chunkPos = getChuckPosition(key);
+		DedupChunkInterface writeBuffer = null;
+		writeBuffer = flushingBuffers.remove(chunkPos);
+		if (writeBuffer == null) {
+			writeBuffer = marshalWriteBuffer(chunkPos, false);
+		}
 
-writeBuffer.open();
+		writeBuffer.open();
 
-return writeBuffer;
-}
+		return writeBuffer;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -286,21 +284,25 @@ return writeBuffer;
 							+ this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
 			int z = this.flushingBuffers.size();
-			int i =0;
+			int i = 0;
 			int x = 1;
-			for(;;) {
+			for (;;) {
 				i++;
-				if(this.flushingBuffers.size() == 0)
+				if (this.flushingBuffers.size() == 0)
 					return z;
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
 					break;
 				}
-				if(i > 30000) {
+				if (i > 30000) {
 					i = 0;
-					int sec = (i/1000)*x;
-					SDFSLogger.getLog().info("WriteCache timed out after ["+sec+"] seconds. There are still " + this.flushingBuffers.size() + " in flush");
+					int sec = (i / 1000) * x;
+					SDFSLogger
+							.getLog()
+							.info("WriteCache timed out after [" + sec
+									+ "] seconds. There are still "
+									+ this.flushingBuffers.size() + " in flush");
 					x++;
 				}
 			}
@@ -405,24 +407,26 @@ return writeBuffer;
 		try {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
-			if(this.bdb.getVersion() >0) {
-			if (mf.isDedup() || doop) {
-				
-				chunk = new SparseDataChunk(doop, hash, false,
-						writeBuffer.getHashLoc(),this.bdb.getVersion(),System.currentTimeMillis());
-			} else {
-				chunk = new SparseDataChunk(doop, hash, true,
-						writeBuffer.getHashLoc(),this.bdb.getVersion(),System.currentTimeMillis());
-				this.chunkStore.put(filePosition,
-						writeBuffer.getFlushedBuffer());
-			}
-			}else {
+			if (this.bdb.getVersion() > 0) {
 				if (mf.isDedup() || doop) {
+
 					chunk = new SparseDataChunk(doop, hash, false,
-							writeBuffer.getHashLoc(),this.bdb.getVersion(),0);
+							writeBuffer.getHashLoc(), this.bdb.getVersion(),
+							System.currentTimeMillis());
 				} else {
 					chunk = new SparseDataChunk(doop, hash, true,
-							writeBuffer.getHashLoc(),this.bdb.getVersion(),0);
+							writeBuffer.getHashLoc(), this.bdb.getVersion(),
+							System.currentTimeMillis());
+					this.chunkStore.put(filePosition,
+							writeBuffer.getFlushedBuffer());
+				}
+			} else {
+				if (mf.isDedup() || doop) {
+					chunk = new SparseDataChunk(doop, hash, false,
+							writeBuffer.getHashLoc(), this.bdb.getVersion(), 0);
+				} else {
+					chunk = new SparseDataChunk(doop, hash, true,
+							writeBuffer.getHashLoc(), this.bdb.getVersion(), 0);
 					this.chunkStore.put(filePosition,
 							writeBuffer.getFlushedBuffer());
 				}
@@ -450,14 +454,15 @@ return writeBuffer;
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
-		//long chunkPos = this.getChuckPosition(position);
+		// long chunkPos = this.getChuckPosition(position);
 		DedupChunkInterface writeBuffer = null;
 		this.writeLock.lock();
 		try {
-			if(Main.volume.isClustered())
-				writeBuffer = (WritableCacheBuffer) this.load(position);
+			if (Main.volume.isClustered())
+				writeBuffer = this.load(position);
 			else
-				writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(position);
+				writeBuffer = this.writeBuffers
+						.get(position);
 		} catch (ExecutionException e) {
 			throw new IOException(e);
 		} finally {
@@ -467,7 +472,7 @@ return writeBuffer;
 
 	}
 
-	private WritableCacheBuffer marshalWriteBuffer(long chunkPos,
+	private DedupChunkInterface marshalWriteBuffer(long chunkPos,
 			boolean newChunk) throws IOException, FileClosedException {
 		DedupChunk ck = null;
 		try {
@@ -506,10 +511,11 @@ return writeBuffer;
 		DedupChunkInterface writeBuffer = null;
 		this.writeLock.lock();
 		try {
-			if(Main.volume.isClustered())
+			if (Main.volume.isClustered())
 				writeBuffer = (WritableCacheBuffer) this.load(position);
 			else
-				writeBuffer = (WritableCacheBuffer) this.writeBuffers.get(position);
+				writeBuffer = (WritableCacheBuffer) this.writeBuffers
+						.get(position);
 		} catch (ExecutionException e) {
 			throw new IOException(e);
 		} finally {
@@ -568,7 +574,10 @@ return writeBuffer;
 					long wt = System.currentTimeMillis() - tm;
 					this.bdb.sync();
 					long st = System.currentTimeMillis() - tm - wt;
-					SDFSLogger.getLog().debug("Sync wb=["+wsz+"] fb=["+fsz+"] write fush [" +wt + "] bd sync [" + st + "]");
+					SDFSLogger.getLog().debug(
+							"Sync wb=[" + wsz + "] fb=[" + fsz
+									+ "] write fush [" + wt + "] bd sync ["
+									+ st + "]");
 				} finally {
 				}
 			} else {
@@ -882,17 +891,17 @@ return writeBuffer;
 				}
 				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath, -1,
 						Main.CHUNK_LENGTH);
-				if(mf.getDev() != null) {
-					this.bdb = new BlockDevSocket(mf.getDev(),this.databasePath);
-				}
-				else
+				if (mf.getDev() != null) {
+					this.bdb = new BlockDevSocket(mf.getDev(),
+							this.databasePath);
+				} else
 					this.bdb = new LongByteArrayMap(this.databasePath);
 
 				this.closed = false;
 			}
 			DedupFileStore.addOpenDedupFile(this);
 		} catch (IOException e) {
-			SDFSLogger.getLog().warn("error while opening db",e);
+			SDFSLogger.getLog().warn("error while opening db", e);
 			throw e;
 		} finally {
 			this.initLock.unlock();
@@ -1179,8 +1188,8 @@ return writeBuffer;
 	}
 
 	@Override
-	public void trim(long start, int len) throws IOException{
+	public void trim(long start, int len) throws IOException {
 		this.bdb.trim(start, len);
 	}
-	
+
 }

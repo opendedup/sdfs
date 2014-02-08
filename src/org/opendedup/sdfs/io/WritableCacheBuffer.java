@@ -49,7 +49,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 	}
 
-	protected WritableCacheBuffer(byte[] hash, long startPos, int length,
+	public WritableCacheBuffer(byte[] hash, long startPos, int length,
 			DedupFile df, byte[] hashloc) throws IOException {
 		this.hash = hash;
 		this.length = length;
@@ -74,9 +74,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.setWritable(true);
 	}
 
-	protected WritableCacheBuffer(long startPos) throws IOException {
-		this.position = startPos;
-	}
+	
 
 	private byte[] readBlockFile() throws IOException {
 		raf = new RandomAccessFile(blockFile, "r");
@@ -124,7 +122,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 
-	protected WritableCacheBuffer(DedupChunkInterface dk, DedupFile df)
+	public WritableCacheBuffer(DedupChunkInterface dk, DedupFile df)
 			throws IOException {
 		this.hash = dk.getHash();
 		this.position = dk.getFilePosition();
