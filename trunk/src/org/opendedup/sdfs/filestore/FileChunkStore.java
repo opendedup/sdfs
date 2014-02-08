@@ -63,9 +63,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			if (!bsf.exists()) {
 				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				/*
-				this.freeSlots = new OpenBitSet(
-						(Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
-						*/
+				 * this.freeSlots = new OpenBitSet(
+				 * (Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
+				 */
 			} else {
 				SDFSLogger.getLog().info(
 						"Loading freeslots from " + bsf.getPath());
@@ -200,11 +200,18 @@ public class FileChunkStore implements AbstractChunkStore {
 
 		} catch (Exception e) {
 		}
+		try {
+			this.pool.close();
+		} catch (Exception e) {
+
+		}
 		fc = null;
 		try {
-			OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
-			SDFSLogger.getLog().info("Persisted Free Slots");
-			this.freeSlots.clear(0, this.freeSlots.capacity());
+			if (this.freeSlots != null) {
+				OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
+				SDFSLogger.getLog().info("Persisted Free Slots");
+				this.freeSlots.clear(0, this.freeSlots.capacity());
+			}
 		} catch (Exception e) {
 		}
 	}
@@ -266,12 +273,14 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public long getFreeBlocks() {
+		if (this.freeSlots != null) {
 		return this.freeSlots.cardinality();
+		}
+		else 
+			return 0;
 	}
 
-
 	private ReentrantLock rlock = new ReentrantLock();
-
 
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
@@ -291,7 +300,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					}
 				} catch (Throwable e) {
 					SDFSLogger.getLog().warn(e);
-				} 
+				}
 				if (pos >= 0) {
 					pos = pos * this.pageSize;
 				}
@@ -303,6 +312,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			// this.chunks.invalidate(Long.valueOf(pos));
 			rf = pool.borrowObject();
 			rf.write(ByteBuffer.wrap(chunk), pos);
+			
 			return pos;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -323,7 +333,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		byte[] b = new byte[pageSize];
+		if(len > pageSize)
+			throw new IOException("length is greater than page size");
+		if(len == -1) 
+			len = pageSize;
+		byte[] b = new byte[len];
 		FileChannel rf = pool.borrowObject();
 		try {
 			rf.read(ByteBuffer.wrap(b), start);
@@ -347,7 +361,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		long pos = start / this.pageSize;
 		this.rlock.lock();
-		if(this.freeSlots == null)
+		if (this.freeSlots == null)
 			this.freeSlots = new OpenBitSet();
 		this.freeSlots.ensureCapacity(pos);
 		this.freeSlots.set(pos);

@@ -36,11 +36,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	Path p;
 	private AtomicLong currentLength = new AtomicLong(0);
 	private String name;
-
 	private byte[] FREE = new byte[(int) pageSize];
 	private FileChannel iterFC = null;
 	private AbstractHashEngine hc = null;
 	private File bsf;
+	private FCPool pool = null;
 
 	/**
 	 * 
@@ -83,6 +83,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.currentLength.set(chunkDataWriter.length());
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
+			pool = new FCPool(f, 100);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -96,6 +97,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 						+ storeLengths[i]);
 				FileChunkStore store = new FileChunkStore(f.getPath(),
 						storeLengths[i]);
+				store.setName(Integer.toString(storeLengths[i]));
 				st[i] = store;
 			}
 		} catch (Exception e) {
@@ -116,9 +118,16 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			} catch (Exception e) {
 			}
 			try {
-				OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
-				SDFSLogger.getLog().info("Persisted Free Slots");
-				this.freeSlots.clear(0, this.freeSlots.capacity());
+				this.pool.close();
+			} catch (Exception e) {
+
+			}
+			try {
+				if (this.freeSlots != null) {
+					OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
+					SDFSLogger.getLog().info("Persisted Free Slots");
+					this.freeSlots = null;
+				}
 			} catch (Exception e) {
 			}
 
@@ -169,7 +178,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long size() {
-		return this.currentLength.get() *this.pageSize;
+		return (this.currentLength.get()/this.lPageSize) * this.pageSize;
 	}
 
 	/*
@@ -179,7 +188,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long bytesRead() {
-		return this.bytesRead();
+		return 0;
 	}
 
 	/*
@@ -189,7 +198,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long bytesWritten() {
-		return this.bytesWritten();
+		return 0;
 	}
 
 	private static ReentrantLock reservePositionlock = new ReentrantLock();
@@ -204,22 +213,28 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		ByteBuffer buf = null;
+		FileChannel rf = null;
 		try {
 
 			buf = ByteBuffer.allocate(iPageSize);
-			byte[] data = CompressionUtils.compressSnappy(chunk);
+			byte[] data = CompressionUtils.compressLz4(chunk);
+
 			boolean compress = true;
 			boolean encrypt = false;
-			if (Main.chunkStoreEncryptionEnabled) {
-				chunk = EncryptUtils.encrypt(chunk);
-				encrypt = true;
-			}
-			if (data.length > chunk.length) {
+			if (data.length >= chunk.length) {
 				data = chunk;
 				compress = false;
 			}
+			if (Main.chunkStoreEncryptionEnabled) {
+				data = EncryptUtils.encrypt(data);
+				encrypt = true;
+			}
+
 			FileChunkStore store = this.getStore(data.length);
 			long ipos = store.writeChunk(hash, data, data.length);
+			// SDFSLogger.getLog().info("#######3 writing data from ["
+			// +data.length+"] [" + ipos +"] comp=" + compress + " enc=" +
+			// encrypt + " store=" +store.getName() );
 			long pos = -1;
 			reservePositionlock.lock();
 			if (this.freeSlots != null) {
@@ -239,19 +254,24 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			byte enc = 0;
 			if (!compress)
 				comp = 0;
-			if(encrypt)
+			if (encrypt)
 				enc = 1;
 			buf.putLong(ipos);
 			buf.putInt(data.length);
 			buf.put(comp);
 			buf.put(enc);
 			buf.position(0);
-			fc.write(buf, pos);
+			rf = pool.borrowObject();
+			rf.write(buf, pos);
 			return pos;
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("unable to write data ", e);
 			throw new IOException("unable to write data ");
 		} finally {
+			try {
+				pool.returnObject(rf);
+			} catch (Exception e) {
+			}
 			buf = null;
 			hash = null;
 			chunk = null;
@@ -266,9 +286,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		// long time = System.currentTimeMillis();
 
 		ByteBuffer buf = ByteBuffer.allocate(iPageSize);
-
+		FileChannel rf = pool.borrowObject();
 		try {
-			fc.read(buf, start);
+			rf.read(buf, start);
 			buf.position(0);
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
@@ -276,10 +296,13 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			byte enc = buf.get();
 			FileChunkStore store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(hash, iStart, iLen);
-			if (comp == 1)
-				chunk = CompressionUtils.decompressSnappy(chunk);
+			// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
+			// iStart +"] comp=" + comp + " enc=" + enc + " store="
+			// +store.getName());
 			if (enc == 1)
 				chunk = EncryptUtils.decrypt(chunk);
+			if (comp == 1)
+				chunk = CompressionUtils.decompressLz4(chunk);
 			return chunk;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
@@ -287,6 +310,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			throw new IOException(e);
 		} finally {
 			try {
+				pool.returnObject(rf);
 			} catch (Exception e) {
 			}
 		}
@@ -295,12 +319,26 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
+		FileChannel rf = pool.borrowObject();
+		try {
+			ByteBuffer buf = ByteBuffer.allocate(iPageSize);
+
+			rf.read(buf, start);
+			buf.position(0);
+			long iStart = buf.getLong();
+			int iLen = buf.getInt();
+			FileChunkStore store = this.getStore(iLen);
+			store.deleteChunk(hash, iStart, iLen);
+		} finally {
+			pool.returnObject(rf);
+		}
 		reservePositionlock.lock();
 		try {
 			if (this.closed)
 				throw new IOException("ChunkStore is closed");
-
-			this.freeSlots.set(start / this.pageSize);
+			if (this.freeSlots == null)
+				this.freeSlots = new OpenBitSet();
+			this.freeSlots.set(start / this.lPageSize);
 
 		} finally {
 			reservePositionlock.unlock();
@@ -349,10 +387,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			byte enc = buf.get();
 			FileChunkStore store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(new byte[16], iStart, iLen);
-			if (comp == 1)
-				chunk = CompressionUtils.decompressSnappy(chunk);
+
 			if (enc == 1)
 				chunk = EncryptUtils.decrypt(chunk);
+			if (comp == 1)
+				chunk = CompressionUtils.decompressLz4(chunk);
 			byte[] hash = hc.getHash(chunk);
 			ChunkData chk = new ChunkData(hash, pos);
 			chk.setChunk(chunk);
@@ -388,7 +427,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public long getFreeBlocks() {
-		return this.freeSlots.cardinality();
+		if (this.freeSlots != null) {
+			return this.freeSlots.cardinality();
+		} else
+			return 0;
 	}
 
 }
