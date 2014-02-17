@@ -19,6 +19,7 @@ import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.FactorTest;
 import org.opendedup.util.OpenBitSetSerialize;
+import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 
 public class VariableFileChunkStore implements AbstractChunkStore {
@@ -285,16 +286,19 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		// long time = System.currentTimeMillis();
 
-		ByteBuffer buf = ByteBuffer.allocate(iPageSize);
+		FileChunkStore store = null;
+		ByteBuffer buf = ByteBuffer.wrap(new byte[this.iPageSize]);
+		byte comp= 0;
+		byte enc = 0;
 		FileChannel rf = pool.borrowObject();
 		try {
 			rf.read(buf, start);
 			buf.position(0);
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
-			byte comp = buf.get();
-			byte enc = buf.get();
-			FileChunkStore store = this.getStore(iLen);
+			comp = buf.get();
+			enc = buf.get();
+			store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(hash, iStart, iLen);
 			// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
 			// iStart +"] comp=" + comp + " enc=" + enc + " store="
@@ -305,8 +309,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				chunk = CompressionUtils.decompressLz4(chunk);
 			return chunk;
 		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to fetch chunk at position " + start, e);
+			SDFSLogger.getLog()
+			.error("unable to fetch chunk at position "
+					+ start + " size=" + store.getName() + " comp=" + comp + " enc=" + enc , e);
 			throw new IOException(e);
 		} finally {
 			try {
@@ -377,8 +382,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			iterFC.close();
 			return null;
 		}
+		FileChunkStore store = null;
 		ByteBuffer buf = ByteBuffer.wrap(new byte[this.iPageSize]);
 		long pos = -1;
+		byte comp= 0;
+		byte enc = 0;
 		try {
 			pos = iterFC.position();
 			buf.position(0);
@@ -386,11 +394,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			buf.position(0);
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
-			byte comp = buf.get();
-			byte enc = buf.get();
+			comp = buf.get();
+			enc = buf.get();
 			byte [] _hash = new byte[HashFunctionPool.hashLength];
 			buf.get(_hash);
-			FileChunkStore store = this.getStore(iLen);
+			store = this.getStore(iLen);
 			byte[] chunk = store.getChunk(_hash, iStart, iLen);
 			// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
 			// iStart +"] comp=" + comp + " enc=" + enc + " store="
@@ -401,14 +409,14 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				chunk = CompressionUtils.decompressLz4(chunk);
 			byte[] hash = hc.getHash(chunk);
 			if(!Arrays.areEqual(_hash, hash))
-				SDFSLogger.getLog().warn("possible data corruption at " + pos);
+				SDFSLogger.getLog().warn("possible data corruption at " + pos + " hash=" + StringUtils.getHexString(hash) + " expected=" +StringUtils.getHexString(_hash));
 			ChunkData chk = new ChunkData(_hash, pos);
 			chk.setChunk(chunk);
 			return chk;
 		} catch (Exception e) {
 			SDFSLogger.getLog()
 					.error("unable to fetch chunk at position "
-							+ iterFC.position(), e);
+							+ pos + "size=" + store.getName() + " comp=" + comp + " enc=" + enc , e);
 			throw new IOException(e);
 		} finally {
 			try {

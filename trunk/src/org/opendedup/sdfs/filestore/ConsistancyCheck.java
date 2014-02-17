@@ -40,26 +40,10 @@ public class ConsistancyCheck {
 					bar.update(currentCount);
 				}
 				records++;
-				boolean claimed = false;
-				try {
-					claimed = map.isClaimed(data);
-				} catch(Exception e) {
-					
-				}
 				long pos = map.get(data.getHash());
 				if (pos <0) {
 					map.put(data);
 					recordsRecovered++;
-				}else if(pos != data.getcPos()) {
-					SDFSLogger.getLog().debug("Data Position Mismatch db pos=[" +pos + "] data pos=[" + data.getcPos()+"] claimed=" +claimed);
-					data.setChunk(null);
-					if(!claimed) {
-						mismatch.put(pos, data.getcPos());
-					}else {
-						store.deleteChunk(data.getHash(), data.getcPos(), data.getcLen());
-					}
-				} else {
-					mismatch.remove(pos);
 				}
 				evt.curCt = currentCount;
 				try {
