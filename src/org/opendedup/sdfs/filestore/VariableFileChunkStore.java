@@ -23,8 +23,7 @@ import org.w3c.dom.Element;
 
 public class VariableFileChunkStore implements AbstractChunkStore {
 	private final long pageSize = (long) Main.chunkStorePageSize;
-	private final long lPageSize = 4L + 8L + 1L + 1L;
-	private final int iPageSize = 4 + 8 + 1 + 1;
+	private final int iPageSize = 4 + 8 + 1 + 1 + HashFunctionPool.hashLength;
 	private boolean closed = false;
 	private static File chunk_location = new File(Main.chunkStore);
 	private int[] storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
@@ -178,7 +177,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long size() {
-		return (this.currentLength.get()/this.lPageSize) * this.pageSize;
+		return (this.currentLength.get()/((long)this.iPageSize)) * this.pageSize;
 	}
 
 	/*
@@ -243,12 +242,12 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					this.freeSlots = null;
 				} else {
 					this.freeSlots.clear(pos);
-					pos = pos * this.lPageSize;
+					pos = pos * (long)this.iPageSize;
 				}
 			}
 			reservePositionlock.unlock();
 			if (pos < 0) {
-				pos = this.currentLength.getAndAdd(this.lPageSize);
+				pos = this.currentLength.getAndAdd(this.iPageSize);
 			}
 			byte comp = 1;
 			byte enc = 0;
@@ -260,6 +259,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			buf.putInt(data.length);
 			buf.put(comp);
 			buf.put(enc);
+			buf.put(hash);
 			buf.position(0);
 			rf = pool.borrowObject();
 			rf.write(buf, pos);
@@ -338,7 +338,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				throw new IOException("ChunkStore is closed");
 			if (this.freeSlots == null)
 				this.freeSlots = new OpenBitSet();
-			this.freeSlots.set(start / this.lPageSize);
+			this.freeSlots.set(start / ((long)this.iPageSize));
 
 		} finally {
 			reservePositionlock.unlock();
@@ -373,27 +373,36 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if (iterFC.position() >= iterFC.size())
+		if (iterFC.position() >= iterFC.size()) {
+			iterFC.close();
 			return null;
+		}
 		ByteBuffer buf = ByteBuffer.wrap(new byte[this.iPageSize]);
 		long pos = -1;
 		try {
 			pos = iterFC.position();
+			buf.position(0);
 			iterFC.read(buf);
 			buf.position(0);
 			long iStart = buf.getLong();
 			int iLen = buf.getInt();
 			byte comp = buf.get();
 			byte enc = buf.get();
+			byte [] _hash = new byte[HashFunctionPool.hashLength];
+			buf.get(_hash);
 			FileChunkStore store = this.getStore(iLen);
-			byte[] chunk = store.getChunk(new byte[16], iStart, iLen);
-
+			byte[] chunk = store.getChunk(_hash, iStart, iLen);
+			// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
+			// iStart +"] comp=" + comp + " enc=" + enc + " store="
+			// +store.getName());
 			if (enc == 1)
 				chunk = EncryptUtils.decrypt(chunk);
-			if (comp == 1)
+			if (comp == 1) 
 				chunk = CompressionUtils.decompressLz4(chunk);
 			byte[] hash = hc.getHash(chunk);
-			ChunkData chk = new ChunkData(hash, pos);
+			if(!Arrays.areEqual(_hash, hash))
+				SDFSLogger.getLog().warn("possible data corruption at " + pos);
+			ChunkData chk = new ChunkData(_hash, pos);
 			chk.setChunk(chunk);
 			return chk;
 		} catch (Exception e) {

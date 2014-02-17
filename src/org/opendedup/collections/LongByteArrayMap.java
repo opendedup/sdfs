@@ -28,8 +28,8 @@ import sun.nio.ch.FileChannelImpl;
 public class LongByteArrayMap implements DataMapInterface {
 	private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
-	private static final int _arrayLength = 1 + HashFunctionPool.hashLength + 1 + 8;
-	private static final int _v1arrayLength = 1 + HashFunctionPool.hashLength + 1 + 1+8+8;
+	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)*HashFunctionPool.max_hash_cluster;
+	private static final int _v1arrayLength = (1 + HashFunctionPool.hashLength + 1 + 1+8+8)*HashFunctionPool.max_hash_cluster;
 	private static final int _v1offset = 64;
 	private static final short magicnumber = 6442;
 	String filePath = null;

@@ -42,6 +42,9 @@ public interface AbstractHashesMap {
 	public abstract byte[] getData(byte[] key) throws IOException;
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
+	
+	public abstract boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
+	IOException;
 
 	public abstract long removeRecords(long ms, boolean forceRun, SDFSEvent evt)
 			throws IOException;

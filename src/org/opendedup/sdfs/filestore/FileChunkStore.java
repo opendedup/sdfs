@@ -401,8 +401,10 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		if (iterFC.position() >= iterFC.size())
+		if (iterFC.position() >= iterFC.size()) {
+			iterFC.close();
 			return null;
+		}
 		ByteBuffer fbuf = ByteBuffer.wrap(new byte[pageSize]);
 		long pos = -1;
 		try {
