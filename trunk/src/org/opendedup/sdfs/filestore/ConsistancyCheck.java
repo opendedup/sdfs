@@ -1,5 +1,8 @@
 package org.opendedup.sdfs.filestore;
 
+import java.util.HashMap;
+
+
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -12,6 +15,8 @@ public class ConsistancyCheck {
 		try {
 			store.iterationInit();
 			ChunkData data = store.getNextChunck();
+			HashMap<Long,Long> mismatch = new HashMap<Long,Long>();
+			
 			data.recoverd = true;
 			long records = 0;
 			long recordsRecovered = 0;
@@ -35,15 +40,36 @@ public class ConsistancyCheck {
 					bar.update(currentCount);
 				}
 				records++;
-				if (!map.containsKey(data.getHash())) {
+				boolean claimed = false;
+				try {
+					claimed = map.isClaimed(data);
+				} catch(Exception e) {
+					
+				}
+				long pos = map.get(data.getHash());
+				if (pos <0) {
 					map.put(data);
 					recordsRecovered++;
+				}else if(pos != data.getcPos()) {
+					SDFSLogger.getLog().debug("Data Position Mismatch db pos=[" +pos + "] data pos=[" + data.getcPos()+"] claimed=" +claimed);
+					data.setChunk(null);
+					if(!claimed) {
+						mismatch.put(pos, data.getcPos());
+					}else {
+						store.deleteChunk(data.getHash(), data.getcPos(), data.getcLen());
+					}
+				} else {
+					mismatch.remove(pos);
 				}
 				evt.curCt = currentCount;
+				try {
 				data = store.getNextChunck();
 				if (data != null) {
 					data.recoverd = true;
 					currentCount++;
+				}
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("Data Corruption found in datastore");
 				}
 			}
 			bar.finish();
@@ -51,6 +77,11 @@ public class ConsistancyCheck {
 			System.out.println("Succesfully Ran Consistance Check for ["
 					+ records + "] records, recovered [" + recordsRecovered
 					+ "]");
+			if(mismatch.size() > 0) {
+				String msg = "======Warning Data Alignment Issue. Mismatched Data found at " +mismatch.size() + "======";
+				SDFSLogger.getLog().error(msg);
+				System.out.println(msg);
+			}
 			SDFSLogger
 					.getLog()
 					.warn("Succesfully Ran Consistance Check for [" + records

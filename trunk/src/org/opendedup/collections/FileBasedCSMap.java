@@ -323,7 +323,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
-	private boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
+	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
 			IOException {
 		return this.getMap(cm.getHash()).isClaimed(cm.getHash());
 	}

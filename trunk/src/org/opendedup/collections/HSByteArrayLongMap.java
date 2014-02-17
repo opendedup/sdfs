@@ -1380,7 +1380,7 @@ public class HSByteArrayLongMap extends ReentrantLock implements AbstractMap,
 		return segmentFor(hash);
 	}
 
-	private boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
+	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
 			IOException {
 		return this.getMap(cm.getHash()).isClaimed(cm.getHash());
 	}

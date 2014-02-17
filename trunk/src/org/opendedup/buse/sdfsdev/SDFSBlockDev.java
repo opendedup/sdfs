@@ -60,7 +60,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		try {
 			ch.read(data, 0, len, offset);
 		} catch (IOException e) {
-			SDFSLogger.getLog().error("unable to read file " + this.internalFPath, e);
+			SDFSLogger.getLog().error("unable to read file " + this.devicePath, e);
 			return Errno.ENODATA;
 		}
 		return 0;
@@ -81,7 +81,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 				ch.writeFile(buff, len, 0, offset,true);
 					
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to write to file" + this.internalFPath, e);
+				SDFSLogger.getLog().error("unable to write to block device" + this.devicePath, e);
 				return Errno.EACCES;
 			}
 		} finally {
@@ -97,7 +97,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 				ch.getDedupFile().unRegisterChannel(ch, 0);
 				ch.getDedupFile().forceClose();
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to close " + this.internalFPath, e);
+				SDFSLogger.getLog().error("unable to close " + this.devicePath, e);
 			}
 		}
 	}
@@ -110,7 +110,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		try {
 			ch.force(true);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to sync file [" + this.internalFPath + "]", e);
+			SDFSLogger.getLog().error("unable to sync file [" + this.devicePath + "]", e);
 			return Errno.EACCES;
 		}
 		return 0;
@@ -124,7 +124,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		try {
 			ch.trim(from, len);
 		} catch (IOException e) {
-			SDFSLogger.getLog().error("unable to trim file [" + this.internalFPath + "]", e);
+			SDFSLogger.getLog().error("unable to trim file [" + this.devicePath + "]", e);
 			return Errno.EACCES;
 		}
 		return 0;
