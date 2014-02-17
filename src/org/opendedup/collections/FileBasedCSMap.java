@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
@@ -34,7 +35,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// private static int freeSlotsLength = 3000000;
 	// The amount of memory available for free slots.
 	private boolean closed = true;
-	long kSz = 0;
+	private AtomicLong kSz = new AtomicLong(0);
 	long ram = 0;
 	private long maxSz = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
@@ -86,13 +87,13 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long getSize() {
-		return this.kSz;
+		return this.kSz.get();
 	}
 
 	@Override
 	public long getUsedSize() {
 
-		return kSz * Main.CHUNK_LENGTH;
+		return this.kSz.get() * Main.CHUNK_LENGTH;
 	}
 
 	@Override
@@ -171,7 +172,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		this.loadEvent.endEvent("Loaded entries " + rsz);
 		System.out.println("Loaded entries " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);
-		this.kSz = rsz;
+		this.kSz.set(rsz);
 		this.closed = false;
 		return size;
 	}
@@ -230,7 +231,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					maps[i].iterInit();
 					long fPos = maps[i].removeNextOldRecord(time);
 					while (fPos != -1) {
-						this.kSz--;
+						this.kSz.decrementAndGet();
 						rem++;
 						fPos = maps[i].removeNextOldRecord(time);
 					}
@@ -251,7 +252,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
 					+ " is close");
-		if (this.kSz >= this.maxSz)
+		if (this.kSz.get() >= this.maxSz)
 			throw new HashtableFullException(
 					"entries is greater than or equal to the maximum number of entries. You need to expand"
 							+ "the volume or DSE allocation size");
@@ -273,7 +274,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
 					+ " is close");
-		if (kSz >= this.maxSz)
+		if (kSz.get() >= this.maxSz)
 			throw new HashtableFullException("maximum sized reached");
 		boolean added = false;
 		// if (persist)
@@ -284,9 +285,9 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			}
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 			if (added) {
-				this.arlock.lock();
-				this.kSz++;
-				this.arlock.unlock();
+				this.kSz.incrementAndGet();
+			} else {
+				cm.setmDelete(true);
 			}
 		} else {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
@@ -371,7 +372,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 							+ "] is close");
 				}
 				try {
-					this.kSz--;
+					this.kSz.decrementAndGet();
 				} catch (Exception e) {
 				} finally {
 					this.arlock.unlock();
