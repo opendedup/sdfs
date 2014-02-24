@@ -22,4 +22,10 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	@Override
 	public void destroy() {
 	}
+
+	@Override
+	public boolean isVariableLength() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

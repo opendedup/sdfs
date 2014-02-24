@@ -10,6 +10,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
@@ -113,18 +114,21 @@ public class FDisk {
 					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
-
-							byte[] exists = HCServiceProxy.hashExists(
-									ck.getHash(), false,
-									Main.volume.getClusterCopies());
-							if (exists[0] == -1) {
-								SDFSLogger.getLog().debug(
-										"file ["
-												+ mapFile
-												+ "] could not find "
-												+ StringUtils.getHexString(ck
-														.getHash()));
-								corruptBlocks++;
+							List<HashLocPair> al = ck.getFingers();
+							for (HashLocPair p : al) {
+								byte[] exists = HCServiceProxy.hashExists(
+										p.hash, false,
+										Main.volume.getClusterCopies());
+								if (exists[0] == -1) {
+									SDFSLogger
+											.getLog()
+											.debug("file ["
+													+ mapFile
+													+ "] could not find "
+													+ StringUtils
+															.getHexString(p.hash));
+									corruptBlocks++;
+								}
 							}
 						} else {
 							chunks.add(ck);

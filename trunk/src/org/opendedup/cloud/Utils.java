@@ -1,5 +1,7 @@
 package org.opendedup.cloud;
 
+import java.util.ArrayList;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -11,10 +13,11 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.ServiceException;
+import org.jets3t.service.StorageObjectsChunk;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Object;
+import org.jets3t.service.model.StorageObject;
 import org.jets3t.service.security.AWSCredentials;
-import org.opendedup.logging.SDFSLogger;
 
 public class Utils {
 	public static void deleteBucketAWS(String bucketName, String awsAccessKey,
@@ -25,21 +28,59 @@ public class Utils {
 					awsSecretKey);
 			S3Service bs3Service = new RestS3Service(bawsCredentials);
 			S3Object[] obj = bs3Service.listObjects(bucketName);
-			int n = 0;
-			for (int i = 0; i < obj.length; i++) {
-				bs3Service.deleteObject(bucketName, obj[i].getKey());
-				if (n == 100) {
-					System.out.print(".");
-					n = 0;
+			while (obj.length > 0) {
+				int n = 0;
+				ArrayList<String> al = new ArrayList<String>();
+				for (int i = 0; i < obj.length; i++) {
+					al.add(obj[i].getKey());
+
+					if (n == 100) {
+						String [] ar = new String[al.size()];
+						ar = al.toArray(ar);
+						bs3Service.deleteMultipleObjects(bucketName,
+								ar);
+						al = new ArrayList<String>();
+						System.out.print(".");
+						n = 0;
+					}
+					n++;
 				}
-				n++;
+				String [] ar = new String[al.size()];
+				ar = al.toArray(ar);
+				bs3Service.deleteMultipleObjects(bucketName,
+						(String[]) ar);
+				al = new ArrayList<String>();
+				obj = bs3Service.listObjects(bucketName);
 			}
 			bs3Service.deleteBucket(bucketName);
 			System.out.println("done");
 			System.out.println("Bucket [" + bucketName + "] deleted");
-		} catch (ServiceException e) {
-			SDFSLogger.getLog()
-					.warn("Unable to delete bucket " + bucketName, e);
+		} catch (ServiceException e) { e.printStackTrace();
+		}
+	}
+	
+	public static void listBucketAWS(String bucketName, String awsAccessKey,
+			String awsSecretKey) {
+		try {
+			System.out.println("Listing Objects in Bucket [" + bucketName + "]");
+			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
+					awsSecretKey);
+			S3Service bs3Service = new RestS3Service(bawsCredentials);
+			StorageObjectsChunk ck = bs3Service.listObjectsChunked(bucketName, null, null, 100, null);
+			StorageObject[] obj = ck.getObjects();
+			String lastKey = null;
+			while (obj.length > 0) {
+				
+				for (int i = 0; i < obj.length; i++) {
+					lastKey = obj[i].getKey();
+
+					System.out.println(lastKey);
+				}
+				ck = bs3Service.listObjectsChunked(bucketName, null, null, 100, lastKey);
+				obj = ck.getObjects();
+			}
+			
+		} catch (ServiceException e) { e.printStackTrace();
 		}
 	}
 
@@ -66,6 +107,21 @@ public class Utils {
 				System.exit(-1);
 			}
 		}
+		if(cmd.hasOption("aws-list-bucket-obj")) {
+			if (cmd.hasOption("aws-secret-key")
+					&& cmd.hasOption("aws-access-key")
+					&& cmd.hasOption("aws-bucket-name")) {
+				listBucketAWS(cmd.getOptionValue("aws-bucket-name"),
+						cmd.getOptionValue("aws-access-key"),
+						cmd.getOptionValue("aws-secret-key"));
+				System.exit(0);
+
+			} else {
+				System.out
+						.println("delete bucket request failed. --aws-secret-key, --aws-access-key, and --aws-bucket-name options are required");
+				System.exit(-1);
+			}
+		}
 
 	}
 
@@ -79,6 +135,11 @@ public class Utils {
 				.withLongOpt("aws-delete-bucket")
 				.withDescription(
 						"Deletes and S3 bucket. --aws-secret-key, --aws-access-key, and --aws-bucket-name options are required")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-list-bucket-obj")
+				.withDescription(
+						"Lists objects in the bucket. --aws-secret-key, --aws-access-key, and --aws-bucket-name options are required")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-secret-key")
@@ -113,8 +174,7 @@ public class Utils {
 			System.out.println(e.getMessage());
 			printHelp(buildOptions());
 		} catch (Exception e) {
-			System.out
-					.println("Error : It does not appear the SDFS volume is mounted or listening on tcp port 6642");
+			e.printStackTrace();
 		}
 
 	}

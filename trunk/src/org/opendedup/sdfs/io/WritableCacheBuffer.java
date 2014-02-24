@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -30,7 +31,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private long position;
 	private boolean newChunk = false;
 	private boolean writable = false;
-	private boolean doop = false;
+	private int doop = 0;
 	private int bytesWritten = 0;
 	private DedupFile df;
 	private final ReentrantLock lock = new ReentrantLock();
@@ -39,7 +40,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	File blockFile = null;
 	RandomAccessFile raf = null;
 	boolean rafInit = false;
-	boolean prevDoop = false;
+	int prevDoop = 0;
 	private boolean safeSync = false;
 	private byte[] hashloc;
 	private boolean batchprocessed;
@@ -189,11 +190,24 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private void initBuffer() {
 		if (this.buf == null) {
 			try {
-				buf = HCServiceProxy.fetchChunk(this.getHash(), this.hashloc);
-				if (buf.length > Main.CHUNK_LENGTH) {
-					SDFSLogger.getLog().info(
-							"Alert ! returned chunk to large " + buf.length
-									+ " > " + Main.CHUNK_LENGTH);
+				if(HashFunctionPool.max_hash_cluster > 1) {
+				ByteBuffer hcb = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+				ByteBuffer hb = ByteBuffer.wrap(this.getHash());
+				ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
+				for(int i = 0;i < HashFunctionPool.max_hash_cluster;i++) {
+					byte [] _hash = new byte[HashFunctionPool.hashLength];
+					byte [] _hl = new byte[8];
+					hl.get(_hl);
+					
+					hb.get(_hash);
+					if(_hl[1] != 0)
+						hcb.put(HCServiceProxy.fetchChunk(_hash, _hl));
+					else
+						break;
+				}
+				this.buf = hcb.array();
+				}else {
+					this.buf = HCServiceProxy.fetchChunk(this.getHash(), this.hashloc);
 				}
 			} catch (Exception e) {
 				buf = new byte[Main.CHUNK_LENGTH];
@@ -551,7 +565,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isPrevDoop()
 	 */
 	@Override
-	public boolean isPrevDoop() {
+	public int getPrevDoop() {
 		return prevDoop;
 	}
 
@@ -561,7 +575,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setPrevDoop(boolean)
 	 */
 	@Override
-	public void setPrevDoop(boolean prevDoop) {
+	public void setPrevDoop(int prevDoop) {
 		this.prevDoop = prevDoop;
 	}
 
@@ -669,11 +683,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#setDoop(boolean)
 	 */
 	@Override
-	public void setDoop(boolean doop) {
-		if (!this.doop) {
-			this.doop = doop;
-			this.hashloc[0] = 1;
-		}
+	public void setDoop(int doop) {
+		this.doop = doop;
 	}
 
 	/*
@@ -682,7 +693,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#isDoop()
 	 */
 	@Override
-	public boolean isDoop() {
+	public int getDoop() {
 		return this.doop;
 	}
 

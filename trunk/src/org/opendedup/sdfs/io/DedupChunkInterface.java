@@ -71,9 +71,9 @@ public interface DedupChunkInterface {
 
 	public abstract void destroy();
 
-	public abstract void setDoop(boolean doop);
+	public abstract void setDoop(int doop);
 
-	public abstract boolean isDoop();
+	public abstract int getDoop();
 
 	public abstract int getBytesWritten();
 
@@ -94,6 +94,12 @@ public interface DedupChunkInterface {
 	public boolean isBatchProcessed();
 	
 	public boolean isBatchwritten();
+	
+	public void resetHashLoc();
+	
+	public void addHashLoc(byte loc);
+	
+	public void setBatchwritten(boolean written);
 
 	/**
 	 * Writes to the given target array
@@ -125,9 +131,9 @@ public interface DedupChunkInterface {
 
 	public abstract void persist();
 
-	public abstract boolean isPrevDoop();
+	public abstract int getPrevDoop();
 
-	public abstract void setPrevDoop(boolean prevDoop);
+	public abstract void setPrevDoop(int prevDoop);
 
 	public abstract int hashCode();
 

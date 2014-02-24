@@ -53,8 +53,8 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							byte[] hash = null;
 							try {
 								hash = hc.getHash(runnable.getFlushedBuffer());
-								SparseDataChunk ck = new SparseDataChunk(false,
-										hash, false, new byte[8],(byte)0,0);
+								SparseDataChunk ck = new SparseDataChunk(0,
+										hash, false, new byte[8],(byte)0);
 								runnable.setHash(hash);
 								cks.add(i,ck);
 							} catch (BufferClosedException e) {

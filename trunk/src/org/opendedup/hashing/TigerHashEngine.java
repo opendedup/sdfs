@@ -36,4 +36,10 @@ public class TigerHashEngine implements AbstractHashEngine {
 		hc.reset();
 		hc = null;
 	}
+
+	@Override
+	public boolean isVariableLength() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

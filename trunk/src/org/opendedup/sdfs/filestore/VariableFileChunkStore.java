@@ -217,7 +217,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		try {
 
 			buf = ByteBuffer.allocate(iPageSize);
-			byte[] data = CompressionUtils.compressLz4(chunk);
+			byte[] data = CompressionUtils.compressSnappy(chunk);
 
 			boolean compress = true;
 			boolean encrypt = false;
@@ -306,7 +306,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			if (enc == 1)
 				chunk = EncryptUtils.decrypt(chunk);
 			if (comp == 1)
-				chunk = CompressionUtils.decompressLz4(chunk);
+				chunk = CompressionUtils.decompressSnappy(chunk);
 			return chunk;
 		} catch (Exception e) {
 			SDFSLogger.getLog()
@@ -406,7 +406,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			if (enc == 1)
 				chunk = EncryptUtils.decrypt(chunk);
 			if (comp == 1) 
-				chunk = CompressionUtils.decompressLz4(chunk);
+				chunk = CompressionUtils.decompressSnappy(chunk);
 			byte[] hash = hc.getHash(chunk);
 			if(!Arrays.areEqual(_hash, hash))
 				SDFSLogger.getLog().warn("possible data corruption at " + pos + " hash=" + StringUtils.getHexString(hash) + " expected=" +StringUtils.getHexString(_hash));

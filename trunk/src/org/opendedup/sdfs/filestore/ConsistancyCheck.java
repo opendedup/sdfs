@@ -53,7 +53,7 @@ public class ConsistancyCheck {
 					currentCount++;
 				}
 				}catch(Exception e) {
-					SDFSLogger.getLog().warn("Data Corruption found in datastore");
+					SDFSLogger.getLog().warn("Data Corruption found in datastore",e);
 				}
 			}
 			bar.finish();

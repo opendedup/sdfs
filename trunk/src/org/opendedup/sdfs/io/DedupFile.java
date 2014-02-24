@@ -56,12 +56,12 @@ public interface DedupFile {
 			throws FileClosedException, IOException;
 
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			boolean doop) throws FileClosedException, IOException;
+			int doop) throws FileClosedException, IOException;
 
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
 
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			boolean doop, boolean propigateEvent) throws FileClosedException,
+			int doop, boolean propigateEvent) throws FileClosedException,
 			IOException;
 
 	/**

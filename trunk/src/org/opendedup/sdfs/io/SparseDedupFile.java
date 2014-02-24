@@ -1,10 +1,11 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -16,8 +17,10 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.ThreadPool;
+import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.BlockDevSocket;
@@ -324,8 +327,8 @@ public class SparseDedupFile implements DedupFile {
 		if (writeBuffer.isDirty()) {
 			try {
 				byte[] hashloc = null;
-				boolean doop = false;
 				byte[] hash = null;
+				int dups = 0;
 				if (writeBuffer.isBatchProcessed()) {
 					hash = writeBuffer.getHash();
 					if (writeBuffer.isBatchwritten())
@@ -338,44 +341,63 @@ public class SparseDedupFile implements DedupFile {
 					}
 
 				} else {
-					AbstractHashEngine hc = hashPool.borrowObject();
-					try {
-						hash = hc.getHash(writeBuffer.getFlushedBuffer());
-					} catch (Exception e) {
-						throw new IOException(e);
-					} finally {
-						hashPool.returnObject(hc);
-					}
+					if (HashFunctionPool.max_hash_cluster == 1) {
+						AbstractHashEngine hc = hashPool.borrowObject();
+						try {
+							hash = hc.getHash(writeBuffer.getFlushedBuffer());
+						} catch (Exception e) {
+							throw new IOException(e);
+						} finally {
+							hashPool.returnObject(hc);
+						}
 
-					hashloc = HCServiceProxy.writeChunk(hash,
-							writeBuffer.getFlushedBuffer(),
-							writeBuffer.getLength(), writeBuffer.capacity(),
-							mf.isDedup());
-					writeBuffer.setHashLoc(hashloc);
+						hashloc = HCServiceProxy.writeChunk(hash,
+								writeBuffer.getFlushedBuffer(),
+								writeBuffer.getLength(),
+								writeBuffer.capacity(), mf.isDedup());
+						if(hashloc[0] == 1)
+							dups = writeBuffer.capacity();
+							
+						writeBuffer.setHashLoc(hashloc);
+					} else {
+						VariableHashEngine hc = (VariableHashEngine)hashPool.borrowObject();
+						byte [] hashes = new byte[VariableHashEngine.getHashLenth() * HashFunctionPool.max_hash_cluster];
+						byte [] hashlocs = new byte [8*HashFunctionPool.max_hash_cluster];
+						ByteBuffer hb = ByteBuffer.wrap(hashes);
+						ByteBuffer hl = ByteBuffer.wrap(hashlocs);
+						try {
+							List<Finger> fs = hc.getChunks(writeBuffer.getFlushedBuffer());
+							for(Finger f : fs) {
+								hb.put(f.hash);
+								byte [] hlc = HCServiceProxy.writeChunk(f.hash,
+										f.chunk,
+										f.len,
+										f.len, mf.isDedup());
+								if (hlc[0] == 1)
+									dups = dups + f.len;
+								hl.put(hlc);
+							}
+							writeBuffer.setHashLoc(hl.array());
+							hashloc = hl.array();
+							writeBuffer.setDoop(dups);
+							hash = hb.array();
+							
+						} catch(Exception e) {
+							throw new IOException(e);
+						} finally {
+							hashPool.returnObject(hc);
+						}
+					}
 
 				}
 				if (hashloc[1] == 0 && !Main.chunkStoreLocal)
 					throw new IOException(
 							"unable to write chunk hash location at 1 = "
 									+ hashloc[1]);
-				if (hashloc[0] == 1)
-					doop = true;
-
-				mf.getIOMonitor().addVirtualBytesWritten(
-						writeBuffer.capacity(), true);
-				if (!doop) {
-					if (writeBuffer.isNewChunk() || writeBuffer.isPrevDoop()) {
-						mf.getIOMonitor().addActualBytesWritten(
-								writeBuffer.capacity(), true);
-					}
-					if (writeBuffer.isPrevDoop() && !writeBuffer.isNewChunk()) {
-						mf.getIOMonitor().removeDuplicateBlock(true);
-					}
-				}
-
-				this.updateMap(writeBuffer, hash, doop);
-				if (doop && !writeBuffer.isPrevDoop())
-					mf.getIOMonitor().addDulicateBlock(true);
+				mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
+				mf.getIOMonitor().addActualBytesWritten(dups - writeBuffer.getPrevDoop(), true);
+				this.updateMap(writeBuffer, hash, dups);
+				
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal(
 						"unable to add chunk [" + writeBuffer.getHash()
@@ -391,14 +413,14 @@ public class SparseDedupFile implements DedupFile {
 
 	@Override
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			boolean doop) throws FileClosedException, IOException {
+			int doop) throws FileClosedException, IOException {
 		this.updateMap(writeBuffer, hash, doop, true);
 	}
 
 	// private ReentrantLock updatelock = new ReentrantLock();
 	@Override
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			boolean doop, boolean propigate) throws FileClosedException,
+			int doop, boolean propigate) throws FileClosedException,
 			IOException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
@@ -408,25 +430,15 @@ public class SparseDedupFile implements DedupFile {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
 			if (this.bdb.getVersion() > 0) {
-				if (mf.isDedup() || doop) {
-
 					chunk = new SparseDataChunk(doop, hash, false,
-							writeBuffer.getHashLoc(), this.bdb.getVersion(),
-							System.currentTimeMillis());
-				} else {
-					chunk = new SparseDataChunk(doop, hash, true,
-							writeBuffer.getHashLoc(), this.bdb.getVersion(),
-							System.currentTimeMillis());
-					this.chunkStore.put(filePosition,
-							writeBuffer.getFlushedBuffer());
-				}
+							writeBuffer.getHashLoc(), this.bdb.getVersion());
 			} else {
-				if (mf.isDedup() || doop) {
+				if (mf.isDedup() || doop > 0) {
 					chunk = new SparseDataChunk(doop, hash, false,
-							writeBuffer.getHashLoc(), this.bdb.getVersion(), 0);
+							writeBuffer.getHashLoc(), this.bdb.getVersion());
 				} else {
 					chunk = new SparseDataChunk(doop, hash, true,
-							writeBuffer.getHashLoc(), this.bdb.getVersion(), 0);
+							writeBuffer.getHashLoc(), this.bdb.getVersion());
 					this.chunkStore.put(filePosition,
 							writeBuffer.getFlushedBuffer());
 				}
@@ -461,8 +473,7 @@ public class SparseDedupFile implements DedupFile {
 			if (Main.volume.isClustered())
 				writeBuffer = this.load(position);
 			else
-				writeBuffer = this.writeBuffers
-						.get(position);
+				writeBuffer = this.writeBuffers.get(position);
 		} catch (ExecutionException e) {
 			throw new IOException(e);
 		} finally {
@@ -487,7 +498,7 @@ public class SparseDedupFile implements DedupFile {
 						ck.getLength(), this, ck.getHashLoc());
 			} else {
 				writeBuffer = new WritableCacheBuffer(ck, this);
-				writeBuffer.setPrevDoop(ck.isDoop());
+				writeBuffer.setPrevDoop(ck.getDoop());
 			}
 			// need to fix this
 
@@ -964,9 +975,9 @@ public class SparseDedupFile implements DedupFile {
 					byte[] hashloc = HCServiceProxy.writeChunk(pck.getHash(),
 							chunk, Main.CHUNK_LENGTH, Main.CHUNK_LENGTH,
 							mf.isDedup());
-					boolean doop = false;
+					int doop = 0;
 					if (hashloc[0] == 1)
-						doop = true;
+						doop = Main.CHUNK_LENGTH;
 					DedupChunk ck = new DedupChunk(pck.getHash(), chunk, l,
 							Main.CHUNK_LENGTH, pck.getHashLoc());
 					writeBuffer = new WritableCacheBuffer(ck, this);
@@ -974,7 +985,7 @@ public class SparseDedupFile implements DedupFile {
 					this.updateMap(writeBuffer, writeBuffer.getHash(), doop);
 					ck = null;
 					chunk = null;
-					if (doop)
+					if (doop > 0)
 						doops++;
 				}
 				pck = null;
@@ -1083,7 +1094,7 @@ public class SparseDedupFile implements DedupFile {
 					ck = new DedupChunk(pck.getHash(), dk, place,
 							Main.CHUNK_LENGTH, pck.getHashLoc());
 				}
-				ck.setDoop(pck.isDoop());
+				ck.setDoop(pck.getDoop());
 				pck = null;
 			}
 			b = null;

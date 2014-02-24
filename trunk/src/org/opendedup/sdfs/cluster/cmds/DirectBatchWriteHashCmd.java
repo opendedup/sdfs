@@ -124,7 +124,8 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
 								WritableCacheBuffer buff = chunks.get(i);
-								buff.setDoop(doop);
+								if(doop)
+									buff.setDoop(1);
 								buff.addHashLoc(id);
 								buff.setBatchwritten(true);
 								//proc++;
