@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 
 import com.google.common.eventbus.EventBus;
@@ -414,15 +415,17 @@ public class DedupFileChannel {
 			int read = 0;
 			while (bytesLeft > 0) {
 				DedupChunkInterface readBuffer = null;
-
+				int startPos = 0;
+				byte[] _rb = null;
 				try {
-					byte[] _rb = null;
+					
 					readBuffer = df.getReadBuffer(currentLocation);
 					_rb = readBuffer.getReadChunk();
-					int startPos = (int) (currentLocation - readBuffer
+					startPos = (int) (currentLocation - readBuffer
 							.getFilePosition());
 					int endPos = startPos + bytesLeft;
 					if ((endPos) <= readBuffer.getLength()) {
+						
 						buf.put(_rb, startPos, bytesLeft);
 						mf.getIOMonitor().addBytesRead(bytesLeft, true);
 						read = read + bytesLeft;
@@ -452,11 +455,11 @@ public class DedupFileChannel {
 				} catch (Exception e) {
 					SDFSLogger.getLog().fatal("Error while reading buffer ", e);
 					SDFSLogger.getLog().fatal(
-							"Error Reading Buffer " + readBuffer.getHash()
-									+ " start position [" + filePos
+							"Error Reading Buffer " + StringUtils.getHexString(readBuffer.getHash())
+									+ " start position [" + startPos
 									+ "]  bytes left [" + bytesLeft
-									+ "] filePostion [" + currentLocation
-									+ "] ");
+									+ "] file Postion [" + currentLocation
+									+ "] buf size [" + buf.capacity() + "] read buffer len [" + _rb.length + "]");
 					throw new IOException("Error reading buffer");
 				}
 				if (currentLocation == mf.length()) {

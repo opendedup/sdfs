@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,6 +83,7 @@ public class S3ServicePool {
 				.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
 		jProps.setProperty("httpclient.max-connections",
 				Integer.toString(this.poolSize));
+		
 		RestS3Service s3Service = new RestS3Service(awsCredentials, null, null,
 				jProps);
 		return s3Service;

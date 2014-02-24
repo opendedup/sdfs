@@ -29,7 +29,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)*HashFunctionPool.max_hash_cluster;
-	private static final int _v1arrayLength = (1 + HashFunctionPool.hashLength + 1 + 1+8+8)*HashFunctionPool.max_hash_cluster;
+	private static final int _v1arrayLength = 4+((HashFunctionPool.hashLength + 8)*HashFunctionPool.max_hash_cluster);
 	private static final int _v1offset = 64;
 	private static final short magicnumber = 6442;
 	String filePath = null;
@@ -624,8 +624,8 @@ public class LongByteArrayMap implements DataMapInterface {
 			while(val != null) {
 				evt.curCt++;
 				SparseDataChunk ck = new SparseDataChunk(val);
-				SparseDataChunk _ck = new SparseDataChunk(ck.isDoop(), ck.getHash(), ck.isLocalData(),
-						ck.getHashLoc(),m.version,System.currentTimeMillis());
+				SparseDataChunk _ck = new SparseDataChunk(ck.getDoop(), ck.getHash(), ck.isLocalData(),
+						ck.getHashLoc(),m.version);
 				long fpose = (map.getIterPos() /map.arrayLength)* Main.CHUNK_LENGTH;
 				m.put(fpose, _ck.getBytes());
 				val = map.nextValue();

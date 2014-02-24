@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
@@ -19,22 +20,22 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.BufferClosedException;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
+import org.opendedup.sdfs.io.DedupChunkInterface;
 
 public class BatchWriteHashCmd implements IOClientCmd {
-	List<WritableCacheBuffer> chunks;
+	List<DedupChunkInterface> chunks;
 	QuickList<HashChunk> hk;
 	boolean exists = false;
 	RequestOptions opts = null;
 	int sz = 0;
 
-	public BatchWriteHashCmd(List<WritableCacheBuffer> chunks) {
+	public BatchWriteHashCmd(List<DedupChunkInterface> chunks) {
 		this.chunks = chunks;
 		sz = chunks.size();
 		hk = new QuickList<HashChunk>(sz);
 		//long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
-			WritableCacheBuffer buff = chunks.get(i);
+			DedupChunkInterface buff = chunks.get(i);
 			byte[] hashloc = buff.getHashLoc();
 			int ncopies = 0;
 			for (int z = 1; z < 8; z++) {
@@ -123,8 +124,9 @@ public class BatchWriteHashCmd implements IOClientCmd {
 						for (int i = 0; i < rst.size(); i++) {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
-								WritableCacheBuffer buff = chunks.get(i);
-								buff.setDoop(doop);
+								DedupChunkInterface buff = chunks.get(i);
+								if(doop)
+									buff.setDoop(1);
 								buff.addHashLoc(id);
 								buff.setBatchwritten(true);
 								//proc++;
@@ -142,7 +144,7 @@ public class BatchWriteHashCmd implements IOClientCmd {
 		}
 	}
 
-	public List<WritableCacheBuffer> getHashes() {
+	public List<DedupChunkInterface> getHashes() {
 		return this.chunks;
 	}
 

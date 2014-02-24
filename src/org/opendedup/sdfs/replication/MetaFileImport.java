@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -44,7 +44,8 @@ public class MetaFileImport implements Serializable {
 			int port, int maxSz, SDFSEvent evt, boolean useSSL)
 			throws IOException {
 		SDFSLogger.getLog().info(
-				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ + " use ssl " + useSSL);
+				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ
+						+ " use ssl " + useSSL);
 		levt = SDFSEvent.metaImportEvent(
 				"Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ,
 				evt);
@@ -110,50 +111,47 @@ public class MetaFileImport implements Serializable {
 	public boolean isCorrupt() {
 		return this.corruption;
 	}
-	
-	private boolean batchCheck(ArrayList<SparseDataChunk> chunks,MetaDataDedupFile mf)
-			throws IOException {
+
+	private boolean batchCheck(ArrayList<SparseDataChunk> chunks,
+			MetaDataDedupFile mf) throws IOException {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
-		if(pchunks.size() != chunks.size()) {
-			SDFSLogger.getLog().warn("requested " + chunks.size() + " but received " + pchunks.size());
+		if (pchunks.size() != chunks.size()) {
+			SDFSLogger.getLog().warn(
+					"requested " + chunks.size() + " but received "
+							+ pchunks.size());
 		}
 		boolean corruption = false;
 		for (SparseDataChunk ck : pchunks) {
 			byte[] eb = ck.getHashLoc();
 			boolean exists = false;
-			if(eb[0] == 1)
+			if (eb[0] == 1)
 				exists = true;
-			mf.getIOMonitor().addVirtualBytesWritten(
-					Main.CHUNK_LENGTH, true);
+			mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH, true);
 			if (!exists) {
 				hashes.add(ck.getHash());
 				entries++;
 				levt.blocksImported = entries;
-				mf.getIOMonitor().addActualBytesWritten(
-						Main.CHUNK_LENGTH, true);
+				mf.getIOMonitor()
+						.addActualBytesWritten(Main.CHUNK_LENGTH, true);
 			} else {
 				mf.getIOMonitor().addDulicateBlock(true);
 			}
 			if (hashes.size() >= MAX_SZ) {
 				try {
 					SDFSLogger.getLog().debug(
-							"fetching " + hashes.size()
-									+ " blocks");
-					ProcessBatchGetBlocks.runCmd(hashes,
-							server, port, password, useSSL);
+							"fetching " + hashes.size() + " blocks");
+					ProcessBatchGetBlocks.runCmd(hashes, server, port,
+							password, useSSL);
 					SDFSLogger.getLog().debug(
-							"fetched " + hashes.size()
-									+ " blocks");
+							"fetched " + hashes.size() + " blocks");
 					this.bytesTransmitted = this.bytesTransmitted
 							+ (hashes.size() * Main.CHUNK_LENGTH);
 					levt.bytesImported = this.bytesTransmitted;
 					hashes = null;
 					hashes = new ArrayList<byte[]>();
 				} catch (Throwable e) {
-					SDFSLogger
-							.getLog()
-							.error("Corruption Suspected on import",
-									e);
+					SDFSLogger.getLog().error("Corruption Suspected on import",
+							e);
 					corruption = true;
 				}
 			}
@@ -166,7 +164,8 @@ public class MetaFileImport implements Serializable {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
-		ArrayList<SparseDataChunk> bh = new ArrayList<SparseDataChunk>(MAX_BATCHHASH_SIZE);
+		ArrayList<SparseDataChunk> bh = new ArrayList<SparseDataChunk>(
+				MAX_BATCHHASH_SIZE);
 		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
@@ -190,61 +189,64 @@ public class MetaFileImport implements Serializable {
 					val = mp.nextValue();
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
+						List<HashLocPair> al = ck.getFingers();
+						
 						if (Main.chunkStoreLocal) {
-							byte [] eb = HCServiceProxy.hashExists(ck
-									.getHash(),false);
-							boolean exists = false;
-							if(eb[0] == 1)
-								exists = true;
 							mf.getIOMonitor().addVirtualBytesWritten(
 									Main.CHUNK_LENGTH, true);
-							if (!exists) {
-								hashes.add(ck.getHash());
-								entries++;
-								levt.blocksImported = entries;
-								mf.getIOMonitor().addActualBytesWritten(
-										Main.CHUNK_LENGTH, true);
-							} else {
-								mf.getIOMonitor().addDulicateBlock(true);
-							}
-							if (hashes.size() >= MAX_SZ) {
-								try {
-									SDFSLogger.getLog().debug(
-											"fetching " + hashes.size()
-													+ " blocks");
-									ProcessBatchGetBlocks.runCmd(hashes,
-											server, port, password, useSSL);
-									SDFSLogger.getLog().debug(
-											"fetched " + hashes.size()
-													+ " blocks");
-									this.bytesTransmitted = this.bytesTransmitted
-											+ (hashes.size() * Main.CHUNK_LENGTH);
-									levt.bytesImported = this.bytesTransmitted;
-									hashes = null;
-									hashes = new ArrayList<byte[]>();
-								} catch (Throwable e) {
-									SDFSLogger
-											.getLog()
-											.error("Corruption Suspected on import",
-													e);
-									corruption = true;
+							for (HashLocPair p : al) {
+								byte[] eb = HCServiceProxy.hashExists(
+										p.hash, false);
+								boolean exists = false;
+								if (eb[0] == 1)
+									exists = true;
+								if (!exists) {
+									hashes.add(p.hash);
+									entries++;
+									levt.blocksImported = entries;
+								} else {
+									mf.getIOMonitor().addDulicateBlock(true);
+								}
+								if (hashes.size() >= MAX_SZ) {
+									try {
+										SDFSLogger.getLog().debug(
+												"fetching " + hashes.size()
+														+ " blocks");
+										ProcessBatchGetBlocks.runCmd(hashes,
+												server, port, password, useSSL);
+										SDFSLogger.getLog().debug(
+												"fetched " + hashes.size()
+														+ " blocks");
+										this.bytesTransmitted = this.bytesTransmitted
+												+ (hashes.size() * Main.CHUNK_LENGTH);
+										levt.bytesImported = this.bytesTransmitted;
+										hashes = null;
+										hashes = new ArrayList<byte[]>();
+									} catch (Throwable e) {
+										SDFSLogger
+												.getLog()
+												.error("Corruption Suspected on import",
+														e);
+										corruption = true;
+									}
 								}
 							}
 						} else {
 							bh.add(ck);
 							if (bh.size() >= MAX_BATCHHASH_SIZE) {
-								boolean cp = batchCheck(bh,mf);
-								if(cp)
+								boolean cp = batchCheck(bh, mf);
+								if (cp)
 									corruption = true;
-								bh = new ArrayList<SparseDataChunk>(MAX_BATCHHASH_SIZE);
+								bh = new ArrayList<SparseDataChunk>(
+										MAX_BATCHHASH_SIZE);
 							}
-							
+
 						}
 					}
 				}
 				if (bh.size() > 0) {
-					boolean cp = batchCheck(bh,mf);
-					if(cp)
+					boolean cp = batchCheck(bh, mf);
+					if (cp)
 						corruption = true;
 				}
 				Main.volume.updateCurrentSize(mf.length(), true);

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,8 +29,8 @@ import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
+import org.opendedup.sdfs.io.DedupChunkInterface;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 import com.google.common.cache.CacheBuilder;
@@ -286,6 +287,7 @@ public class HCServiceProxy {
 				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
 			}
+			b[1] =-2;
 		} else {
 			try {
 				SDFSLogger.getLog().debug("looking for hash");
@@ -365,6 +367,7 @@ public class HCServiceProxy {
 				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
 			}
+			b[1] =-2;
 		} else {
 
 			try {
@@ -450,8 +453,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static List<WritableCacheBuffer> batchWriteHash(
-			List<WritableCacheBuffer> hashes) throws IOException {
+	public static List<DedupChunkInterface> batchWriteHash(
+			List<DedupChunkInterface> hashes) throws IOException {
 		if (Main.chunkStoreLocal) {
 			throw new IOException("not implemented for localstore");
 
@@ -482,7 +485,8 @@ public class HCServiceProxy {
 
 	public static byte[] fetchChunk(byte[] hash, byte[] hashloc)
 			throws IOException {
-		if (Main.chunkStoreLocal) {
+		
+		if (Main.chunkStoreLocal)  {
 			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
 			return hc.getData();
 		} else {
@@ -495,7 +499,6 @@ public class HCServiceProxy {
 				throw new IOException(e);
 			}
 		}
-
 	}
 
 	public static long getChunksRead() {

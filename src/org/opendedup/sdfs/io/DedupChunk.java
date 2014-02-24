@@ -18,7 +18,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private long position;
 	private boolean newChunk = false;
 	private boolean writable = false;
-	private boolean doop = false;
+	private int doop = 0;
 	private ReentrantLock lock = new ReentrantLock();
 	private byte[] hashloc;
 
@@ -195,7 +195,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#setDoop(boolean)
 	 */
 	@Override
-	public void setDoop(boolean doop) {
+	public void setDoop(int doop) {
 		this.doop = doop;
 	}
 
@@ -205,7 +205,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#isDoop()
 	 */
 	@Override
-	public boolean isDoop() {
+	public int getDoop() {
 		return doop;
 	}
 
@@ -305,13 +305,13 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public boolean isPrevDoop() {
+	public int getPrevDoop() {
 		// TODO Auto-generated method stub
-		return false;
+		return 0;
 	}
 
 	@Override
-	public void setPrevDoop(boolean prevDoop) {
+	public void setPrevDoop(int prevDoop) {
 		// TODO Auto-generated method stub
 
 	}
@@ -335,6 +335,24 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public boolean isBatchwritten() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void resetHashLoc() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addHashLoc(byte loc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setBatchwritten(boolean written) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
