@@ -367,16 +367,19 @@ public class SparseDedupFile implements DedupFile {
 						ByteBuffer hl = ByteBuffer.wrap(hashlocs);
 						try {
 							List<Finger> fs = hc.getChunks(writeBuffer.getFlushedBuffer());
+							//SDFSLogger.getLog().info("broke data up into " + fs.size() + " chunks");
 							for(Finger f : fs) {
 								hb.put(f.hash);
 								byte [] hlc = HCServiceProxy.writeChunk(f.hash,
 										f.chunk,
-										f.len,
-										f.len, mf.isDedup());
+										f.chunk.length,
+										f.chunk.length, mf.isDedup());
 								if (hlc[0] == 1)
 									dups = dups + f.len;
 								hl.put(hlc);
+								//SDFSLogger.getLog().info("this chunk size is " + f.chunk.length);
 							}
+							
 							writeBuffer.setHashLoc(hl.array());
 							hashloc = hl.array();
 							writeBuffer.setDoop(dups);
@@ -395,9 +398,8 @@ public class SparseDedupFile implements DedupFile {
 							"unable to write chunk hash location at 1 = "
 									+ hashloc[1]);
 				mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
-				mf.getIOMonitor().addActualBytesWritten(dups - writeBuffer.getPrevDoop(), true);
+				mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - (dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, hash, dups);
-				
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal(
 						"unable to add chunk [" + writeBuffer.getHash()
@@ -432,6 +434,7 @@ public class SparseDedupFile implements DedupFile {
 			if (this.bdb.getVersion() > 0) {
 					chunk = new SparseDataChunk(doop, hash, false,
 							writeBuffer.getHashLoc(), this.bdb.getVersion());
+					//SDFSLogger.getLog().info("Hash Size =" + hash.length + " hashloc len = " + writeBuffer.getHashLoc().length);
 			} else {
 				if (mf.isDedup() || doop > 0) {
 					chunk = new SparseDataChunk(doop, hash, false,

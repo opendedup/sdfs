@@ -21,8 +21,7 @@ public class GetDSE {
 							* HCServiceProxy.getPageSize()));
 			root.setAttribute(
 					"current-size",
-					Long.toString(HCServiceProxy.getSize()
-							* HCServiceProxy.getPageSize()));
+					Long.toString(HCServiceProxy.getChunkStore().size()));
 			root.setAttribute("free-blocks",
 					Long.toString(HCServiceProxy.getFreeBlocks()));
 			root.setAttribute("page-size",

@@ -423,6 +423,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		byte[] hash = hc.getHash(fbuf.array());
 		ChunkData chk = new ChunkData(hash, pos);
 		chk.setChunk(fbuf.array());
+		chk.cLen = fbuf.array().length;
 		return chk;
 
 	}

@@ -187,6 +187,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		String hashString = this.getHashName(hash,
 				Main.chunkStoreEncryptionEnabled);
 		S3Object s3Object = new S3Object(hashString);
+		s3Object.addMetadata("size", Integer.toString(chunk.length));
 		if (Main.cloudCompress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			s3Object.addMetadata("compress", "true");
@@ -339,6 +340,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 			}
 			ChunkData chk = new ChunkData(this.getHashBytes(
 					obj[objPos].getKey(), encrypt), 0);
+			if (obj[objPos].containsMetadata("size")) {
+				chk.cLen = Integer.parseInt((String) obj[objPos]
+						.getMetadata("size"));
+			} 
 			objPos++;
 			return chk;
 		}

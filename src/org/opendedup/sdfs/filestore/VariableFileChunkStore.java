@@ -177,8 +177,12 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#size()
 	 */
 	@Override
-	public long size() {
-		return (this.currentLength.get()/((long)this.iPageSize)) * this.pageSize;
+	public long size() { 
+		long sz = 0;
+		for(FileChunkStore cs : this.st) {
+			sz = sz+cs.size();
+		}
+		return sz;
 	}
 
 	/*
@@ -412,6 +416,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				SDFSLogger.getLog().warn("possible data corruption at " + pos + " hash=" + StringUtils.getHexString(hash) + " expected=" +StringUtils.getHexString(_hash));
 			ChunkData chk = new ChunkData(_hash, pos);
 			chk.setChunk(chunk);
+			chk.cLen = chunk.length;
 			return chk;
 		} catch (Exception e) {
 			SDFSLogger.getLog()
