@@ -29,9 +29,9 @@ public class ConsistancyCheck {
 					"Running Consistancy Check on DSE, this may take a while",
 					Main.mountEvent);
 			CommandLineProgressBar bar = new CommandLineProgressBar(
-					"Scanning DSE", store.size() / Main.CHUNK_LENGTH,
+					"Scanning DSE", store.size(),
 					System.out);
-			evt.maxCt = store.size() / Main.CHUNK_LENGTH;
+			evt.maxCt = store.size();
 			long currentCount = 0;
 			while (data != null) {
 				count++;
@@ -50,7 +50,7 @@ public class ConsistancyCheck {
 				data = store.getNextChunck();
 				if (data != null) {
 					data.recoverd = true;
-					currentCount++;
+					currentCount = currentCount + data.cLen;
 				}
 				}catch(Exception e) {
 					SDFSLogger.getLog().warn("Data Corruption found in datastore",e);

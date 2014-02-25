@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -19,14 +20,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
 import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements DataMapInterface {
-	private static final byte swversion = Main.MAPVERSION;
+	//private static final byte swversion = Main.MAPVERSION;
 	// RandomAccessFile bdbf = null;
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)*HashFunctionPool.max_hash_cluster;
 	private static final int _v1arrayLength = 4+((HashFunctionPool.hashLength + 8)*HashFunctionPool.max_hash_cluster);
@@ -49,7 +48,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	RandomAccessFile rf = null;
 	private int offset = _v1offset;
 	private int arrayLength = _v1arrayLength;
-	private byte version = swversion;
+	private byte version = Main.MAPVERSION;
 	private byte [] FREE;
 	long flen = 0;
 
@@ -62,16 +61,10 @@ public class LongByteArrayMap implements DataMapInterface {
 	
 	public LongByteArrayMap(String filePath) throws IOException {
 		this.filePath = filePath;
-		this.openFile(swversion);
+		this.openFile();
 
 	}
 	
-	// private boolean smallMemory = false;
-	public LongByteArrayMap(String filePath, byte version) throws IOException {
-			this.filePath = filePath;
-			this.openFile(version);
-
-		}
 	
 	public byte getVersion() {
 		return this.version;
@@ -238,10 +231,13 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 	}
 
-	private void openFile(byte version) throws IOException {
+	private void openFile() throws IOException {
 		if (this.closed) {
 			this.hashlock.lock();
 			bdbf = Paths.get(filePath);
+			if(HashFunctionPool.max_hash_cluster > 1) {
+				this.version = 1;
+			}
 			try {
 				dbFile = new File(filePath);
 				boolean fileExists = dbFile.exists();
@@ -255,9 +251,11 @@ public class LongByteArrayMap implements DataMapInterface {
 							StandardOpenOption.WRITE, StandardOpenOption.READ,
 							StandardOpenOption.SPARSE);
 					if(version>0) {
+						//SDFSLogger.getLog().info("Writing version " + this.version);
 						ByteBuffer buf = ByteBuffer.allocate(3);
 						buf.putShort(magicnumber);
 						buf.put(version);
+						buf.position(0);
 						bdb.position(0);
 						bdb.write(buf);
 					}
@@ -273,6 +271,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 						StandardOpenOption.READ, StandardOpenOption.SPARSE);
 				ByteBuffer buf = ByteBuffer.allocate(3);
+				pbdb.position(0);
 				pbdb.read(buf);
 				buf.position(0);
 				if(buf.getShort() == magicnumber) {
@@ -280,6 +279,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				} else {
 					this.version = 0;
 				}
+				//SDFSLogger.getLog().info("File version is " + this.version);
 				this.intVersion();
 				// initiall allocate 32k
 				this.closed = false;
@@ -612,6 +612,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 	}
 	
+	/*
 	public static DataMapInterface convertToV1(LongByteArrayMap map,SDFSEvent evt) throws IOException {
 		LongByteArrayMap m = new LongByteArrayMap(map.filePath +"-new",(byte)1);
 		File of = map.dbFile;
@@ -654,4 +655,5 @@ public class LongByteArrayMap implements DataMapInterface {
 		return m;
 	}
 
+*/
 }

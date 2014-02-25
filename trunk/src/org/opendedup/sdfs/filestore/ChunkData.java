@@ -29,7 +29,7 @@ public class ChunkData {
 	private long added = 0;
 	private long lastClaimed = 0;
 	private long numClaimed = 0;
-	private int cLen = 0;
+	public int cLen = 0;
 	private long cPos = 0;
 	private byte[] chunk = null;
 	private AbstractChunkStore writeStore = null;
