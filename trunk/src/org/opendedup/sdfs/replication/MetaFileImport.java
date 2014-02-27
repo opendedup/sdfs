@@ -196,6 +196,9 @@ public class MetaFileImport implements Serializable {
 						if (Main.chunkStoreLocal) {
 							mf.getIOMonitor().addVirtualBytesWritten(
 									Main.CHUNK_LENGTH, true);
+							//Todo : Must fix how this is counted
+							if(HashFunctionPool.max_hash_cluster > 1)
+								mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
 							for (HashLocPair p : al) {
 								byte[] eb = HCServiceProxy.hashExists(
 										p.hash, false);
@@ -220,6 +223,7 @@ public class MetaFileImport implements Serializable {
 										SDFSLogger.getLog().debug(
 												"fetched " + hashes.size()
 														+ " blocks");
+										Main.volume.addDuplicateBytes(-1*sz, true);
 										this.bytesTransmitted = this.bytesTransmitted
 												+ sz;
 										levt.bytesImported = this.bytesTransmitted;
