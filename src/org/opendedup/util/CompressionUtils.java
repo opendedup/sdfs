@@ -20,8 +20,8 @@ import org.xerial.snappy.Snappy;
 
 public class CompressionUtils {
 	
-	static final LZ4Compressor lz4Compressor = LZ4Factory.fastestInstance().fastCompressor();
-	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory.fastestInstance().fastDecompressor();
+	static final LZ4Compressor lz4Compressor = LZ4Factory.safeInstance().fastCompressor();
+	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory.safeInstance().fastDecompressor();
 	
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression

@@ -249,13 +249,16 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		try {
 
 			buf = ByteBuffer.allocate(iPageSize);
+			byte[] b = new byte[chunk.length];
+		    System.arraycopy(chunk, 0, b, 0, chunk.length);
+			
 			byte[] data = null;
 			boolean compress = Main.compress;
 			boolean encrypt = false;
 			if (Main.compress) {
-				data = CompressionUtils.compressLz4(chunk);
-				if (data.length >= chunk.length) {
-					data = chunk;
+				data = CompressionUtils.compressLz4(b);
+				if (data.length >= b.length) {
+					data = b;
 					compress = false;
 				} else {
 					compress = true;
@@ -295,7 +298,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			if (encrypt)
 				enc = 1;
 			buf.putLong(ipos);
-			buf.putInt(chunk.length);
+			buf.putInt(b.length);
 			buf.putInt(data.length);
 			buf.put(comp);
 			buf.put(enc);
@@ -303,7 +306,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			buf.position(0);
 			rf = pool.borrowObject();
 			rf.write(buf, pos);
-			this.size.addAndGet(chunk.length);
+			this.size.addAndGet(b.length);
 			return pos;
 		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("unable to write data ", e);
