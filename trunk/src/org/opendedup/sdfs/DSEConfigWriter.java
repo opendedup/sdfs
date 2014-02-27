@@ -64,7 +64,7 @@ public class DSEConfigWriter {
 	String cloudBucketName = "";
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	boolean chunk_store_encrypt = false;
-	boolean cloudCompress = Main.cloudCompress;
+	boolean compress = Main.compress;
 	String hashType = HashFunctionPool.MURMUR3_16;
 	private String clusterID = "sdfs-cluster";
 	private byte clusterMemberID = 1;
@@ -144,6 +144,7 @@ public class DSEConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 4;
 				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
@@ -165,9 +166,7 @@ public class DSEConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("cloud-compress"))
-				this.cloudCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("cloud-compress"));
+			
 		}
 
 		else if (this.azureEnabled) {
@@ -177,6 +176,7 @@ public class DSEConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 4;
 			} else {
@@ -185,12 +185,9 @@ public class DSEConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			if (cmd.hasOption("cloud-compress"))
-				this.cloudCompress = Boolean.parseBoolean(cmd
-						.getOptionValue("cloud-compress"));
 		}
+		
 		if (cmd.hasOption("dse-capacity")) {
-
 			long sz = StringUtils.parseSize(cmd.getOptionValue("dse-capacity"));
 			this.chunk_store_allocation_size = sz;
 		}
@@ -211,6 +208,10 @@ public class DSEConfigWriter {
 				System.exit(-1);
 			}
 		}
+		
+		if (cmd.hasOption("compress"))
+			this.compress = Boolean.parseBoolean(cmd
+					.getOptionValue("compress"));
 		if (cmd.hasOption("listen-port")) {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));
@@ -298,14 +299,13 @@ public class DSEConfigWriter {
 			throw new IOException(e);
 		}
 		cs.setAttribute("dse-password-salt", this.sdfsCliSalt);
-		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
+		cs.setAttribute("compress", Boolean.toString(this.compress));
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-access-key", this.cloudAccessKey);
 			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		} else if (this.azureEnabled) {
 			Element aws = xmldoc.createElement("azure-store");
@@ -313,7 +313,6 @@ public class DSEConfigWriter {
 			aws.setAttribute("azure-access-key", this.cloudAccessKey);
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -425,9 +424,9 @@ public class DSEConfigWriter {
 						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
 				.hasArg().withArgName("Unique Cloud Bucket Name").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("cloud-compress")
+				.withLongOpt("compress")
 				.withDescription(
-						"Compress chunks before they are sent to the Cloud Storeage bucket. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
+						"Compress chunks before they are sent to the Storeage. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("gs-enabled")

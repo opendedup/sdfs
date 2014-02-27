@@ -84,7 +84,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 			obj.closeDataInputStream();
 			if (Main.chunkStoreEncryptionEnabled)
 				data = EncryptUtils.decrypt(data);
-			if (Main.cloudCompress)
+			if (Main.compress)
 				data = CompressionUtils.decompressZLIB(data);
 			return data;
 		} catch (Exception e) {
@@ -116,7 +116,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 		String hashString = this.getHashName(hash);
 		GSObject gsObject = new GSObject(hashString);
-		if (Main.cloudCompress) {
+		if (Main.compress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			gsObject.addMetadata("compress", "true");
 		} else {
@@ -149,7 +149,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 		String hashString = hash;
 		GSObject gsObject = new GSObject(hashString);
-		if (Main.cloudCompress) {
+		if (Main.compress) {
 			chunk = CompressionUtils.compressZLIB(chunk);
 			gsObject.addMetadata("compress", "true");
 		} else {

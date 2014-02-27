@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -10,8 +11,7 @@ import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.lz4.LZ4Factory;
 
-import org.iq80.snappy.Snappy;
-import org.opendedup.sdfs.Main;
+import org.xerial.snappy.Snappy;
 
 //import org.h2.compress.LZFInputStream;
 //import org.h2.compress.LZFOutputStream;
@@ -19,14 +19,9 @@ import org.opendedup.sdfs.Main;
 
 
 public class CompressionUtils {
-	static {
-		byte[] b;
-		b = Snappy.compress(new byte[4096]);
-		Snappy.uncompress(b, 0, b.length);
-
-	}
-	static final LZ4Compressor lz4Compressor = LZ4Factory.fastestJavaInstance().fastCompressor();
-	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory.fastestJavaInstance().fastDecompressor();
+	
+	static final LZ4Compressor lz4Compressor = LZ4Factory.fastestInstance().fastCompressor();
+	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory.fastestInstance().fastDecompressor();
 	
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression
@@ -80,20 +75,18 @@ public class CompressionUtils {
 	}
 
 	public static byte[] decompressSnappy(byte[] input) throws IOException {
-		return Snappy.uncompress(input, 0, input.length);
+		return Snappy.uncompress(input);
 	}
 	
 	public static byte[] compressLz4(byte[] input) throws IOException {
 		return lz4Compressor.compress(input);
 	}
 
-	public static byte[] decompressLz4(byte[] input) throws IOException {
-		return lz4Decompressor.decompress(input, Main.CHUNK_LENGTH);
+	public static byte[] decompressLz4(byte[] input,int len) throws IOException {
+		return lz4Decompressor.decompress(input, len);
 	}
 	
-	public static byte[] decompressSnappy(byte[] input, int len) throws IOException {
-		return Snappy.uncompress(input, 0, len);
-	}
+	
 
 	public static void main(String[] args) throws IOException {
 		String t = "This is a test";

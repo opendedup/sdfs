@@ -1,12 +1,12 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.util.OpenBitSet;
@@ -35,7 +35,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private RandomAccessFile chunkDataWriter = null;
 	File f;
 	Path p;
-	private AtomicLong currentLength = new AtomicLong(0);
+	private long currentLength = 0;
 	private String name;
 	private OpenBitSet freeSlots = null;
 	private byte[] FREE = new byte[pageSize];
@@ -86,7 +86,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength.set(chunkDataWriter.length());
+			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			pool = new FCPool(f, 100);
@@ -127,7 +127,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength.set(chunkDataWriter.length());
+			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			pool = new FCPool(f, 100);
@@ -171,7 +171,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength.set(chunkDataWriter.length());
+			this.currentLength=chunkDataWriter.length();
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			pool = new FCPool(f, 100);
@@ -248,7 +248,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long size() {
-		return this.currentLength.get();
+		return this.currentLength;
 	}
 
 	/*
@@ -305,13 +305,18 @@ public class FileChunkStore implements AbstractChunkStore {
 					pos = pos * this.pageSize;
 				}
 			}
-			rlock.unlock();
 			if (pos < 0) {
-				pos = this.currentLength.getAndAdd(pageSize);
+				pos = this.currentLength;
+				this.currentLength = this.currentLength + pageSize;
 			}
+			rlock.unlock();
+			
 			// this.chunks.invalidate(Long.valueOf(pos));
 			rf = pool.borrowObject();
-			rf.write(ByteBuffer.wrap(chunk), pos);
+			ByteBuffer buf = ByteBuffer.wrap(new byte [pageSize]);
+			buf.put(chunk);
+			buf.position(0);
+			rf.write(buf, pos);
 			
 			return pos;
 		} catch (Exception e) {

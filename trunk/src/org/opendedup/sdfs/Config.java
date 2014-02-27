@@ -101,7 +101,7 @@ public class Config {
 						.getAttribute("encryption-key");
 			}
 			if (cbe.hasAttribute("compress")) {
-				Main.cloudCompress = Boolean.parseBoolean(cbe
+				Main.compress = Boolean.parseBoolean(cbe
 						.getAttribute("compress"));
 			}
 			if (cbe.hasAttribute("max-repl-batch-sz"))
@@ -134,8 +134,7 @@ public class Config {
 				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-				Main.cloudCompress = Boolean.parseBoolean(aws
-						.getAttribute("compress"));
+				
 			}
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
@@ -147,8 +146,6 @@ public class Config {
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
-				Main.cloudCompress = Boolean.parseBoolean(azure
-						.getAttribute("compress"));
 			}
 			File f = new File(Main.chunkStore);
 			if (!f.exists()) {
@@ -346,6 +343,9 @@ public class Config {
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Element networkcs = (Element) doc.getElementsByTagName("network")
 					.item(0);
+			if (localChunkStore.hasAttribute("compress")) {
+				Main.compress = Boolean.parseBoolean(localChunkStore.getAttribute("compress"));
+			}
 			if (networkcs != null) {
 				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
 						.getAttribute("enable"));
@@ -370,8 +370,6 @@ public class Config {
 				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-				Main.cloudCompress = Boolean.parseBoolean(aws
-						.getAttribute("compress"));
 			}
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
@@ -381,8 +379,6 @@ public class Config {
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
-				Main.cloudCompress = Boolean.parseBoolean(azure
-						.getAttribute("compress"));
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 			}

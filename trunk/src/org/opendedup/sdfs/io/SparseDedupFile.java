@@ -399,6 +399,7 @@ public class SparseDedupFile implements DedupFile {
 									+ hashloc[1]);
 				mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
 				mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - (dups - writeBuffer.getPrevDoop()), true);
+				mf.getIOMonitor().addDulicateData((dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, hash, dups);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal(

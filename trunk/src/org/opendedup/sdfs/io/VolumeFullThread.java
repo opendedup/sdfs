@@ -37,7 +37,7 @@ public class VolumeFullThread implements Runnable {
 					"Drive is almost full space left is [" + avail + "]");
 			return true;
 		}
-		if (vol.fullPercentage < 0 || vol.currentSize == 0)
+		if (vol.fullPercentage < 0 || vol.currentSize.get() == 0)
 			return false;
 		else {
 			return ((vol.getCurrentSize()+Main.CHUNK_LENGTH*1024*10) >= vol.getCapacity());
