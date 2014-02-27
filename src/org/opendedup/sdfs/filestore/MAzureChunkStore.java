@@ -168,7 +168,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			if (!blob.exists()) {
 				HashMap<String, String> metaData = new HashMap<String, String>();
 
-				if (Main.cloudCompress) {
+				if (Main.compress) {
 					chunk = CompressionUtils.compressSnappy(chunk);
 					metaData.put("scompress", "true");
 				} else {
@@ -239,7 +239,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			this.name = Main.cloudBucket;
 			container = serviceClient.getContainerReference(this.name);
 			container.createIfNotExist();
-			this.compress = Main.cloudCompress;
+			this.compress = Main.compress;
 			this.encrypt = Main.chunkStoreEncryptionEnabled;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -262,7 +262,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		Main.cloudAccessKey = args[0];
 		Main.cloudSecretKey = args[1];
 		Main.cloudBucket = args[2];
-		Main.cloudCompress = true;
+		Main.compress = true;
 		Main.chunkStoreEncryptionEnabled = true;
 		Main.chunkStoreEncryptionKey = PassPhrase.getNext();
 

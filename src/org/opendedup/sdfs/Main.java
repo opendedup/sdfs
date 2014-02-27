@@ -338,7 +338,7 @@ public class Main {
 	/**
 	 * Compress AWS data using zlib
 	 */
-	public static boolean cloudCompress = true;
+	public static boolean compress = false;
 
 	/**
 	 * PreAllocates the size of the Dedup Storage Engine

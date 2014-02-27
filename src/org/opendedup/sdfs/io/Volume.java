@@ -2,11 +2,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -24,6 +23,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 public class Volume implements java.io.Serializable {
 
 	/**
@@ -31,26 +32,21 @@ public class Volume implements java.io.Serializable {
 	 */
 
 	private static final long serialVersionUID = 5505952237500542215L;
-	private final transient ReentrantLock updateLock = new ReentrantLock();
 	long capacity;
 	String name;
-	long currentSize;
+	AtomicLong currentSize=new AtomicLong(0);
 	String path;
 	File pathF;
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
-	private transient final ReentrantLock dbLock = new ReentrantLock();
-	private transient final ReentrantLock vbLock = new ReentrantLock();
-	private transient final ReentrantLock rbLock = new ReentrantLock();
-	private transient final ReentrantLock wbLock = new ReentrantLock();
 	long absoluteLength = -1;
-	private long duplicateBytes = 0;
-	private double virtualBytesWritten = 0;
-	private double readBytes = 0;
-	private long actualWriteBytes = 0;
+	private AtomicLong duplicateBytes = new AtomicLong(0);
+	private AtomicDouble virtualBytesWritten = new AtomicDouble(0);
+	private AtomicDouble readBytes = new AtomicDouble(0);
+	private AtomicLong actualWriteBytes = new AtomicLong(0);
 	private boolean closedGracefully = false;
-	private double readOperations;
-	private double writeOperations;
+	private AtomicLong readOperations= new AtomicLong(0);
+	private AtomicLong writeOperations= new AtomicLong(0);
 	private boolean allowExternalSymlinks = true;
 	private boolean useDSESize = false;
 	private boolean useDSECapacity = false;
@@ -165,15 +161,15 @@ public class Volume implements java.io.Serializable {
 		else
 			this.perfMonFile = "/var/log/sdfs/volume-" + this.name
 					+ "-perf.json";
-		this.currentSize = Long.parseLong(vol.getAttribute("current-size"));
+		this.currentSize.set(Long.parseLong(vol.getAttribute("current-size")));
 		if (vol.hasAttribute("duplicate-bytes"))
-			this.duplicateBytes = Long.parseLong(vol
-					.getAttribute("duplicate-bytes"));
+			this.duplicateBytes.set(Long.parseLong(vol
+					.getAttribute("duplicate-bytes")));
 		if (vol.hasAttribute("read-bytes"))
-			this.readBytes = Double.parseDouble(vol.getAttribute("read-bytes"));
+			this.readBytes.set(Double.parseDouble(vol.getAttribute("read-bytes")));
 		if (vol.hasAttribute("write-bytes"))
-			this.actualWriteBytes = Long.parseLong(vol
-					.getAttribute("write-bytes"));
+			this.actualWriteBytes.set(Long.parseLong(vol
+					.getAttribute("write-bytes")));
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));
@@ -345,7 +341,7 @@ public class Volume implements java.io.Serializable {
 
 	public void setCapacity(long capacity, boolean propigateEvent)
 			throws Exception {
-		if (capacity <= this.currentSize)
+		if (capacity <= this.currentSize.get())
 			throw new IOException(
 					"Cannot resize volume to something less than current size. Current Size ["
 							+ this.currentSize + "] requested capacity ["
@@ -364,7 +360,7 @@ public class Volume implements java.io.Serializable {
 		if (this.useDSESize)
 			return HCServiceProxy.getSize() * HCServiceProxy.getPageSize();
 		else
-			return currentSize;
+			return currentSize.get();
 	}
 
 	public String getPath() {
@@ -392,14 +388,9 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void updateCurrentSize(long sz, boolean propigateEvent) {
-		this.updateLock.lock();
-		try {
-			this.currentSize = this.currentSize + sz;
-			if (this.currentSize < 0)
-				this.currentSize = 0;
-		} finally {
-			this.updateLock.unlock();
-		}
+			long val = this.currentSize.addAndGet(sz);
+			if (val < 0)
+				this.currentSize.set(0);
 	}
 
 	public boolean isClosedGracefully() {
@@ -438,11 +429,11 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public double getReadOperations() {
-		return readOperations;
+		return readOperations.get();
 	}
 
 	public double getWriteOperations() {
-		return writeOperations;
+		return writeOperations.get();
 	}
 
 	public String getPerfMonFile() {
@@ -450,15 +441,16 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addWIO(boolean propigateEvent) {
-		if (this.writeOperations == Long.MAX_VALUE)
-			this.writeOperations = 0;
-		this.writeOperations++;
+		long val = this.writeOperations.incrementAndGet();
+		if (this.writeOperations.get() == Long.MAX_VALUE)
+			this.writeOperations.set(val);
+		
 	}
 
 	public void addRIO(boolean propigateEvent) {
-		if (this.readOperations == Long.MAX_VALUE)
-			this.readOperations = 0;
-		this.readOperations++;
+		long val = this.writeOperations.incrementAndGet();
+		if (val == Long.MAX_VALUE)
+			this.readOperations.set(0);
 	}
 
 	public long getNumberOfFiles() {
@@ -470,14 +462,14 @@ public class Volume implements java.io.Serializable {
 		Element root = doc.createElement("volume");
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
-		root.setAttribute("current-size", Long.toString(this.currentSize));
+		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity",
 				StorageUnit.of(this.capacity).format(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
-		root.setAttribute("read-bytes", Double.toString(this.readBytes));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
+		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("cluster-id", this.uuid);
@@ -507,13 +499,13 @@ public class Volume implements java.io.Serializable {
 		Element root = doc.getDocumentElement();
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
-		root.setAttribute("current-size", Long.toString(this.currentSize));
+		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity", Long.toString(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes));
-		root.setAttribute("read-bytes", Double.toString(this.readBytes));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes));
+		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
+		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("name", this.name);
@@ -521,8 +513,8 @@ public class Volume implements java.io.Serializable {
 				"dse-size",
 				Long.toString(HCServiceProxy.getSize()
 						* HCServiceProxy.getPageSize()));
-		root.setAttribute("readops", Double.toString(this.readOperations));
-		root.setAttribute("writeops", Double.toString(this.writeOperations));
+		root.setAttribute("readops", Double.toString(this.readOperations.get()));
+		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links",
@@ -544,53 +536,45 @@ public class Volume implements java.io.Serializable {
 
 	public void addVirtualBytesWritten(long virtualBytesWritten,
 			boolean propigateEvent) {
-		this.vbLock.lock();
 		this.addWIO(true);
-		this.virtualBytesWritten += virtualBytesWritten;
-		if (this.virtualBytesWritten < 0)
-			this.virtualBytesWritten = 0;
-		this.vbLock.unlock();
+		double val = this.virtualBytesWritten.addAndGet(virtualBytesWritten);
+		if (val < 0)
+			this.virtualBytesWritten.set(0);
 	}
 
 	public double getVirtualBytesWritten() {
-		return virtualBytesWritten;
+		return virtualBytesWritten.get();
 	}
 
 	public void addDuplicateBytes(long duplicateBytes, boolean propigateEvent) {
-		this.dbLock.lock();
-		this.duplicateBytes += duplicateBytes;
-		if (this.duplicateBytes < 0)
-			this.duplicateBytes = 0;
-		this.dbLock.unlock();
+		double val = this.duplicateBytes.addAndGet(duplicateBytes);
+		if (val < 0)
+			this.duplicateBytes.set(0);
 	}
 
 	public double getDuplicateBytes() {
-		return duplicateBytes;
+		return duplicateBytes.get();
 	}
 
 	public void addReadBytes(long readBytes, boolean propigateEvent) {
-		this.rbLock.lock();
-		this.readBytes += readBytes;
+		double val = this.readBytes.addAndGet(readBytes);
 		this.addRIO(true);
-		if (this.readBytes < 0)
-			this.readBytes = 0;
-		this.rbLock.unlock();
+		if (val < 0)
+			this.readBytes.set(0);
 	}
 
 	public double getReadBytes() {
-		return readBytes;
+		return readBytes.get();
 	}
 
 	public void addActualWriteBytes(long writeBytes, boolean propigateEvent) {
-		this.wbLock.lock();
-		this.actualWriteBytes += writeBytes;
-		if (this.actualWriteBytes < 0)
-			this.actualWriteBytes = 0;
-		this.wbLock.unlock();
+		double val = this.actualWriteBytes.addAndGet(writeBytes);
+		if (val < 0)
+			this.actualWriteBytes.set(0);
 	}
 
 	public double getActualWriteBytes() {
-		return actualWriteBytes;
+		return actualWriteBytes.get();
 	}
 
 	public String getUuid() {

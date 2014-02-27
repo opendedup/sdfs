@@ -130,6 +130,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.length = dk.getLength();
 		this.newChunk = dk.isNewChunk();
 		this.hashloc = dk.getHashLoc();
+		this.prevDoop = dk.getPrevDoop();
 		this.df = df;
 		if (this.isNewChunk())
 			buf = new byte[Main.CHUNK_LENGTH];

@@ -71,7 +71,7 @@ public class VolumeConfigWriter {
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
-	boolean cloudCompress = Main.cloudCompress;
+	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
@@ -162,19 +162,26 @@ public class VolumeConfigWriter {
 			String ht = cmd.getOptionValue("hash-type");
 			if (ht.equalsIgnoreCase(HashFunctionPool.TIGER_16)
 					|| ht.equalsIgnoreCase(HashFunctionPool.TIGER_24)
-					|| ht.equalsIgnoreCase(HashFunctionPool.MURMUR3_16))
+					|| ht.equalsIgnoreCase(HashFunctionPool.MURMUR3_16)
+					|| ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3))
 				this.hashType = ht;
 			else {
 				System.out.println("Invalid Hash Type. Must be "
 						+ HashFunctionPool.TIGER_16 + " "
 						+ HashFunctionPool.TIGER_24 + " "
-						+ HashFunctionPool.MURMUR3_16);
+						+ HashFunctionPool.MURMUR3_16 + " "
+						+ HashFunctionPool.VARIABLE_MURMUR3);
 				System.exit(-1);
 			}
+			if(ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+				this.chunk_size = 128;
+			} else if (cmd.hasOption("chunkstore-class")) {
+				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
+			}
 		}
-		if (cmd.hasOption("chunkstore-class")) {
-			this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
-		}
+		
+		
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-sync"));
@@ -250,7 +257,7 @@ public class VolumeConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 4;
+					this.chunk_size = 128;
 				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
@@ -308,7 +315,7 @@ public class VolumeConfigWriter {
 
 		}
 		if (cmd.hasOption("chunk-store-compress"))
-			this.cloudCompress = Boolean.parseBoolean(cmd
+			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
 			this.max_percent_full = Double.parseDouble(cmd
@@ -501,7 +508,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		
-		cs.setAttribute("compress", Boolean.toString(this.cloudCompress));
+		cs.setAttribute("compress", Boolean.toString(this.compress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
 		network.setAttribute("enable", Boolean.toString(networkEnable));
@@ -532,7 +539,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-access-key", this.cloudAccessKey);
 			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		} else if (this.gsEnabled) {
 			Element aws = xmldoc.createElement("google-store");
@@ -540,7 +546,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("gs-access-key", this.cloudAccessKey);
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		} else if (this.azureEnabled) {
 			Element aws = xmldoc.createElement("azure-store");
@@ -548,7 +553,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-access-key", this.cloudAccessKey);
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
-			aws.setAttribute("compress", Boolean.toString(this.cloudCompress));
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -830,13 +834,15 @@ public class VolumeConfigWriter {
 								+ HashFunctionPool.TIGER_24
 								+ " "
 								+ HashFunctionPool.MURMUR3_16
+								+ " "
+								+ HashFunctionPool.VARIABLE_MURMUR3
 								+ " This Defaults to "
 								+ HashFunctionPool.MURMUR3_16)
 				.hasArg()
 				.withArgName(
 						HashFunctionPool.TIGER_16 + "|"
 								+ HashFunctionPool.TIGER_24 + "|"
-								+ HashFunctionPool.MURMUR3_16).create());
+								+ HashFunctionPool.MURMUR3_16 + "|" + HashFunctionPool.VARIABLE_MURMUR3).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-encrypt")
 				.withDescription(

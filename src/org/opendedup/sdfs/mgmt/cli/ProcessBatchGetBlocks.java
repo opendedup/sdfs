@@ -17,7 +17,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 
 public class ProcessBatchGetBlocks {
-	public static void runCmd(ArrayList<byte[]> hashes, String server,
+	public static long runCmd(ArrayList<byte[]> hashes, String server,
 			int port, String password, boolean useSSL) throws Exception,
 			ClassNotFoundException, HashtableFullException {
 		SDFSLogger.getLog().debug("getting hashes [" + hashes.size() + "]");
@@ -49,12 +49,15 @@ public class ProcessBatchGetBlocks {
 		obj_in.close();
 		if(hck.size() != hashes.size())
 			throw new IOException("unable to import all blocks requested [" + hashes.size() + "] and received [" + hck.size() + "]");
+		long imsz = 0;
 		for (int i = 0; i < hck.size(); i++) {
 			HashChunk _hc = hck.get(i);
+			imsz =+ _hc.getData().length;
 			HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(), 0,
 					_hc.getData().length, true, null);
 		}
 		SDFSLogger.getLog().debug("imported " +hck.size());
+		return imsz;
 
 	}
 

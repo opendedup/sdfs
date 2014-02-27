@@ -85,7 +85,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 				if (Main.chunkStoreEncryptionEnabled) {
 					data = EncryptUtils.decrypt(data);
 				}
-				if (Main.cloudCompress) {
+				if (Main.compress) {
 					data = CompressionUtils.decompressSnappy(data);
 				}
 				return data;
@@ -128,7 +128,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);
 
-			if (Main.cloudCompress)
+			if (Main.compress)
 				chunk = CompressionUtils.compressSnappy(chunk);
 			if (Main.chunkStoreEncryptionEnabled)
 				chunk = EncryptUtils.encrypt(chunk);
@@ -180,7 +180,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 	public void init() throws IOException {
 		try {
 
-			this.compress = Main.cloudCompress;
+			this.compress = Main.compress;
 			this.encrypt = Main.chunkStoreEncryptionEnabled;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -210,7 +210,7 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 		Main.cloudAccessKey = args[0];
 		Main.cloudSecretKey = args[1];
 		Main.cloudBucket = args[2];
-		Main.cloudCompress = true;
+		Main.compress = true;
 		Main.chunkStoreEncryptionEnabled = true;
 		Main.chunkStoreEncryptionKey = PassPhrase.getNext();
 

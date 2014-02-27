@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -134,7 +135,8 @@ public class MetaFileImport implements Serializable {
 				mf.getIOMonitor()
 						.addActualBytesWritten(Main.CHUNK_LENGTH, true);
 			} else {
-				mf.getIOMonitor().addDulicateBlock(true);
+				if(HashFunctionPool.max_hash_cluster == 1)
+					mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
 			}
 			if (hashes.size() >= MAX_SZ) {
 				try {
@@ -205,20 +207,21 @@ public class MetaFileImport implements Serializable {
 									entries++;
 									levt.blocksImported = entries;
 								} else {
-									mf.getIOMonitor().addDulicateBlock(true);
+									if(HashFunctionPool.max_hash_cluster == 1)
+										mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
 								}
 								if (hashes.size() >= MAX_SZ) {
 									try {
 										SDFSLogger.getLog().debug(
 												"fetching " + hashes.size()
 														+ " blocks");
-										ProcessBatchGetBlocks.runCmd(hashes,
+										long sz = ProcessBatchGetBlocks.runCmd(hashes,
 												server, port, password, useSSL);
 										SDFSLogger.getLog().debug(
 												"fetched " + hashes.size()
 														+ " blocks");
 										this.bytesTransmitted = this.bytesTransmitted
-												+ (hashes.size() * Main.CHUNK_LENGTH);
+												+ sz;
 										levt.bytesImported = this.bytesTransmitted;
 										hashes = null;
 										hashes = new ArrayList<byte[]>();
@@ -268,7 +271,6 @@ public class MetaFileImport implements Serializable {
 				this.virtualBytesTransmitted = this.virtualBytesTransmitted
 						+ mf.length();
 				levt.virtualDataImported = this.virtualBytesTransmitted;
-
 			}
 		}
 		this.filesProcessed++;
