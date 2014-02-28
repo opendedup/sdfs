@@ -229,4 +229,10 @@ public class FileBasedChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
+	@Override
+	public long maxSize() {
+		// TODO Auto-generated method stub
+		return Main.chunkStoreAllocationSize;
+	}
+
 }

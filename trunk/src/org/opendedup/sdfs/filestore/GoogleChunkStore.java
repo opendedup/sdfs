@@ -272,4 +272,9 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
+	@Override
+	public long maxSize() {
+		return Main.chunkStoreAllocationSize;
+	}
+
 }

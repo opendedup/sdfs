@@ -55,6 +55,8 @@ public interface AbstractChunkStore {
 	 * @return Returns the size of the chunk store on disk or service
 	 */
 	public abstract long size();
+	
+	public abstract long maxSize();
 
 	public abstract void setSize(long size);
 

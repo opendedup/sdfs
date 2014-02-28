@@ -149,6 +149,22 @@ public class HCServiceProxy {
 			return socket.getCurrentSize();
 		}
 	}
+	
+	public static long getDSESize() {
+		if (Main.chunkStoreLocal) {
+			return HCServiceProxy.getChunkStore().size();
+		} else {
+			return socket.getCurrentDSESize();
+		}
+	}
+	
+	public static long getDSEMaxSize() {
+		if (Main.chunkStoreLocal) {
+			return HCServiceProxy.getChunkStore().maxSize();
+		} else {
+			return socket.getDSEMaxSize();
+		}
+	}
 
 	public static long getMaxSize() {
 		if (Main.chunkStoreLocal) {

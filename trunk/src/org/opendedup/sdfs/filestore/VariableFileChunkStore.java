@@ -250,8 +250,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 			buf = ByteBuffer.allocate(iPageSize);
 			byte[] b = new byte[chunk.length];
-		    System.arraycopy(chunk, 0, b, 0, chunk.length);
-			
+			System.arraycopy(chunk, 0, b, 0, chunk.length);
+
 			byte[] data = null;
 			boolean compress = Main.compress;
 			boolean encrypt = false;
@@ -268,7 +268,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				data = EncryptUtils.encrypt(data);
 				encrypt = true;
 			}
-			
+
 			FileChunkStore store = this.getStore(data.length);
 			long ipos = store.writeChunk(hash, data, data.length);
 			// SDFSLogger.getLog().info("#######3 writing data from ["
@@ -384,8 +384,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			int iLen = buf.getInt();
 			FileChunkStore store = this.getStore(iLen);
 			store.deleteChunk(hash, iStart, iLen);
-			this.size.addAndGet(-1*cLen);
-			
+			this.size.addAndGet(-1 * cLen);
+			rf.write(ByteBuffer.wrap(new byte[iPageSize]), start);
+
 		} finally {
 			pool.returnObject(rf);
 		}
@@ -428,6 +429,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	}
 
+	byte[] PFREE = new byte[this.iPageSize];
+
 	@Override
 	public ChunkData getNextChunck() throws IOException {
 		if (iterFC.position() >= iterFC.size()) {
@@ -443,34 +446,39 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			pos = iterFC.position();
 			buf.position(0);
 			iterFC.read(buf);
-			buf.position(0);
-			long iStart = buf.getLong();
-			int cLen = buf.getInt();
-			this.size.addAndGet(cLen);
-			int iLen = buf.getInt();
-			comp = buf.get();
-			enc = buf.get();
-			byte[] _hash = new byte[HashFunctionPool.hashLength];
-			buf.get(_hash);
-			store = this.getStore(iLen);
-			byte[] chunk = store.getChunk(_hash, iStart, iLen);
-			// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
-			// iStart +"] comp=" + comp + " enc=" + enc + " store="
-			// +store.getName());
-			if (enc == 1)
-				chunk = EncryptUtils.decrypt(chunk);
-			if (comp == 1)
-				chunk = CompressionUtils.decompressLz4(chunk, cLen);
-			byte[] hash = hc.getHash(chunk);
-			if (!Arrays.areEqual(_hash, hash))
-				SDFSLogger.getLog().warn(
-						"possible data corruption at " + pos + " hash="
-								+ StringUtils.getHexString(hash) + " expected="
-								+ StringUtils.getHexString(_hash));
-			ChunkData chk = new ChunkData(_hash, pos);
-			chk.setChunk(chunk);
-			chk.cLen = chunk.length;
-			return chk;
+			if (Arrays.areEqual(PFREE, buf.array())) {
+				return this.getNextChunck();
+			} else {
+				buf.position(0);
+				long iStart = buf.getLong();
+				int cLen = buf.getInt();
+				this.size.addAndGet(cLen);
+				int iLen = buf.getInt();
+				comp = buf.get();
+				enc = buf.get();
+				byte[] _hash = new byte[HashFunctionPool.hashLength];
+				buf.get(_hash);
+				store = this.getStore(iLen);
+				byte[] chunk = store.getChunk(_hash, iStart, iLen);
+				// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
+				// iStart +"] comp=" + comp + " enc=" + enc + " store="
+				// +store.getName());
+				if (enc == 1)
+					chunk = EncryptUtils.decrypt(chunk);
+				if (comp == 1)
+					chunk = CompressionUtils.decompressLz4(chunk, cLen);
+				byte[] hash = hc.getHash(chunk);
+				if (!Arrays.areEqual(_hash, hash))
+					SDFSLogger.getLog().warn(
+							"possible data corruption at " + pos + " hash="
+									+ StringUtils.getHexString(hash)
+									+ " expected="
+									+ StringUtils.getHexString(_hash));
+				ChunkData chk = new ChunkData(_hash, pos);
+				chk.setChunk(chunk);
+				chk.cLen = chunk.length;
+				return chk;
+			}
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()
@@ -508,6 +516,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			return this.freeSlots.cardinality();
 		} else
 			return 0;
+	}
+
+	@Override
+	public long maxSize() {
+		return Main.chunkStoreAllocationSize;
 	}
 
 }

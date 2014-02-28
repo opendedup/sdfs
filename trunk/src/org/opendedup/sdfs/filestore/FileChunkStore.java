@@ -485,4 +485,9 @@ public class FileChunkStore implements AbstractChunkStore {
 		}
 	}
 
+	@Override
+	public long maxSize() {
+		return Main.chunkStoreAllocationSize;
+	}
+
 }

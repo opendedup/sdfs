@@ -850,6 +850,34 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			l.unlock();
 		}
 	}
+	
+	public long getCurrentDSESize() {
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.dseSize;
+			}
+			return sz;
+		} finally {
+			l.unlock();
+		}
+	}
+	
+	public long getDSEMaxSize() {
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.dseMaxSize;
+			}
+			return sz;
+		} finally {
+			l.unlock();
+		}
+	}
 
 	public long getFreeBlocks() {
 		Lock l = this.sl.readLock();

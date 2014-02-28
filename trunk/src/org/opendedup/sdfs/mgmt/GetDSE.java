@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -15,10 +16,16 @@ public class GetDSE {
 		try {
 			Document doc = XMLUtils.getXMLDoc("dse");
 			Element root = doc.getDocumentElement();
+			if(HashFunctionPool.max_hash_cluster == 1)
 			root.setAttribute(
 					"max-size",
 					Long.toString(HCServiceProxy.getMaxSize()
 							* HCServiceProxy.getPageSize()));
+			else
+				root.setAttribute(
+						"max-size",
+						Long.toString(HCServiceProxy.getMaxSize()
+								* HashFunctionPool.min_page_size));
 			root.setAttribute(
 					"current-size",
 					Long.toString(HCServiceProxy.getChunkStore().size()));
