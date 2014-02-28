@@ -288,4 +288,9 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		return null;
 	}
 
+	@Override
+	public long maxSize() {
+		return Main.chunkStoreAllocationSize;
+	}
+
 }

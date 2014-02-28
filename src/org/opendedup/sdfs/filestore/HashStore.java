@@ -148,10 +148,11 @@ public class HashStore {
 		
 		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		if(HashFunctionPool.max_hash_cluster > 1)
-			entries = (Main.chunkStoreAllocationSize / (Main.chunkStorePageSize/HashFunctionPool.max_hash_cluster)) + 8000;
+			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.min_page_size) + 8000;
 		try {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
+			SDFSLogger.getLog().info("Maximum Number of Entries is " +entries);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath());

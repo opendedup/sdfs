@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -10,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.jgroups.Address;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.VolumeSocket;
@@ -333,8 +333,12 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public long getCapacity() {
-		if (this.useDSECapacity)
-			return HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize();
+		if (this.useDSECapacity) {
+			if(HashFunctionPool.max_hash_cluster == 1)
+				return HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize();
+			else
+				return HCServiceProxy.getMaxSize() * HashFunctionPool.min_page_size;
+		}
 		else
 			return capacity;
 	}
@@ -511,8 +515,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("name", this.name);
 		root.setAttribute(
 				"dse-size",
-				Long.toString(HCServiceProxy.getSize()
-						* HCServiceProxy.getPageSize()));
+				Long.toString(HCServiceProxy.getDSESize()));
 		root.setAttribute("readops", Double.toString(this.readOperations.get()));
 		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
 		root.setAttribute("closed-gracefully",

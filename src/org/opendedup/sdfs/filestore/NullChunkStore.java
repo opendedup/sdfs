@@ -102,4 +102,10 @@ public class NullChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
+	@Override
+	public long maxSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

@@ -21,6 +21,8 @@ public class DSEServer implements Externalizable {
 	public boolean useSSL;
 	public Address address;
 	public long currentSize;
+	public long dseSize;
+	public long dseMaxSize;
 	public long maxSize;
 	public long freeBlocks;
 	public int pageSize;
@@ -67,6 +69,8 @@ public class DSEServer implements Externalizable {
 		this.location = (String) in.readObject();
 		this.rack = (String) in.readObject();
 		this.readOnly = in.readBoolean();
+		this.dseSize = in.readLong();
+		this.dseMaxSize = in.readLong();
 	}
 
 	@Override
@@ -85,6 +89,8 @@ public class DSEServer implements Externalizable {
 		out.writeObject(location);
 		out.writeObject(rack);
 		out.writeBoolean(this.readOnly);
+		out.writeLong(this.dseSize);
+		out.writeLong(this.dseMaxSize);
 	}
 
 	public byte[] getBytes() throws Exception {
@@ -93,7 +99,7 @@ public class DSEServer implements Externalizable {
 		byte[] lb = this.location.getBytes();
 		byte[] rb = this.rack.getBytes();
 		byte[] bz = new byte[1 + 4 + b.length + 1 + 4 + 4 + addr.length + 8 + 8
-				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1];
+				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1+8+8];
 
 		ByteBuffer buf = ByteBuffer.wrap(bz);
 		buf.put(NetworkCMDS.UPDATE_DSE);
@@ -121,6 +127,8 @@ public class DSEServer implements Externalizable {
 			buf.put((byte)1);
 		else
 			buf.put((byte)0);
+		buf.putLong(this.dseSize);
+		buf.putLong(this.dseMaxSize);
 		return buf.array();
 	}
 
@@ -151,6 +159,8 @@ public class DSEServer implements Externalizable {
 		this.rack = new String(rb);
 		if(buf.get() == 1)
 			this.readOnly = true;
+		this.dseSize = buf.getLong();
+		this.dseMaxSize = buf.getLong();
 	}
 
 	public String toString() {
@@ -158,7 +168,7 @@ public class DSEServer implements Externalizable {
 				+ this.serverType + " address=[" + this.address + "] maxsz="
 				+ this.maxSize + " currentsize=" + this.currentSize
 				+ " freeblocks=" + this.freeBlocks + " dseport=" + this.dseport
-				+ " usessl=" + this.useSSL;
+				+ " usessl=" + this.useSSL +  " dseSize=" + this.dseSize + " dseMaxSize=" + this.dseMaxSize;
 	}
 
 	public int hashCode() {

@@ -70,6 +70,12 @@ public class PFullGC implements GCControllerImpl {
 				pFull = (double) HCServiceProxy.getSize()
 						/ (double) HCServiceProxy.getMaxSize();
 			}
+			double dsePFull = 0;
+			if(HCServiceProxy.getChunkStore().size() > 0) {
+				dsePFull= (double) HCServiceProxy.getChunkStore().size()/(double)Main.chunkStoreAllocationSize;
+			}
+			if(dsePFull > pFull)
+				pFull = dsePFull;
 			return pFull;
 		} finally {
 			if (l != null)

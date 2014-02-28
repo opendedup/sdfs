@@ -176,6 +176,7 @@ public class VolumeConfigWriter {
 			if(ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 				this.chunk_size = 128;
+				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
 			}
@@ -256,6 +257,7 @@ public class VolumeConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
 				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
@@ -287,6 +289,7 @@ public class VolumeConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 4;
 			} else {
@@ -304,6 +307,7 @@ public class VolumeConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 4;
 			} else {
@@ -314,9 +318,13 @@ public class VolumeConfigWriter {
 			}
 
 		}
-		if (cmd.hasOption("chunk-store-compress"))
+		if (cmd.hasOption("chunk-store-compress")) {
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
+			if(this.compress && !this.awsEnabled && !this.gsEnabled && this.azureEnabled) {
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+			}
+		}
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
 			this.max_percent_full = Double.parseDouble(cmd
 					.getOptionValue("volume-maximum-full-percentage")) / 100;

@@ -209,9 +209,15 @@ public class DSEConfigWriter {
 			}
 		}
 		
-		if (cmd.hasOption("compress"))
+		if (cmd.hasOption("compress")) {
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("compress"));
+			this.compress = Boolean.parseBoolean(cmd
+					.getOptionValue("chunk-store-compress"));
+			if(this.compress && !this.awsEnabled && this.azureEnabled) {
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+			}
+		}
 		if (cmd.hasOption("listen-port")) {
 			this.network_port = Integer.parseInt(cmd
 					.getOptionValue("listen-port"));

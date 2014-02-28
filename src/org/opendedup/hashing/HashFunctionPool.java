@@ -18,6 +18,7 @@ public class HashFunctionPool {
 	public static final String VARIABLE_MURMUR3 = "VARIABLE_MURMUR3";
 	public static int hashLength = 16;
 	public static int max_hash_cluster = 1;
+	public static int min_page_size = 4096;
 
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -133,8 +134,10 @@ public class SDFSCmds {
 		}
 		if (command.equalsIgnoreCase("user.dse.maxsize")) {
 
-			return Long.toString(HCServiceProxy.getMaxSize()
-					* Main.CHUNK_LENGTH);
+			if(HashFunctionPool.max_hash_cluster == 1)
+				return Long.toString(HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize());
+			else
+				return Long.toString(HCServiceProxy.getMaxSize() * HashFunctionPool.min_page_size);
 		}
 		if (command.equals("user.cmd.ids.status"))
 			return cmdList.get(command);
