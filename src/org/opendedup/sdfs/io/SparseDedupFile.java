@@ -1,14 +1,19 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,6 +30,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.BlockDevSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
 
@@ -60,6 +66,15 @@ public class SparseDedupFile implements DedupFile {
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final ConcurrentHashMap<Long, DedupChunkInterface> flushingBuffers = new ConcurrentHashMap<Long, DedupChunkInterface>(
 			1024, .75f);
+	private static transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
+			2);
+	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 64,
+			10, TimeUnit.SECONDS, worksQueue, executionHandler);
+	static {
+		executor.allowCoreThreadTimeOut(true);
+	}
+	
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers)
@@ -296,6 +311,7 @@ public class SparseDedupFile implements DedupFile {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
+					SDFSLogger.getLog().warn("interrupted");
 					break;
 				}
 				if (i > 30000) {
@@ -369,15 +385,21 @@ public class SparseDedupFile implements DedupFile {
 							List<Finger> fs = hc.getChunks(writeBuffer.getFlushedBuffer());
 							//SDFSLogger.getLog().info("broke data up into " + fs.size() + " chunks");
 							for(Finger f : fs) {
-								hb.put(f.hash);
+								try {
+								
 								byte [] hlc = HCServiceProxy.writeChunk(f.hash,
 										f.chunk,
 										f.chunk.length,
 										f.chunk.length, mf.isDedup());
+								hb.put(f.hash);
 								if (hlc[0] == 1)
 									dups = dups + f.len;
 								hl.put(hlc);
-								//SDFSLogger.getLog().info("this chunk size is " + f.chunk.length);
+								}catch(Throwable e) {
+									SDFSLogger.getLog().warn("unable to write object finger",e);
+									throw e;
+									//SDFSLogger.getLog().info("this chunk size is " + f.chunk.length);
+								}
 							}
 							
 							writeBuffer.setHashLoc(hl.array());
@@ -385,7 +407,7 @@ public class SparseDedupFile implements DedupFile {
 							writeBuffer.setDoop(dups);
 							hash = hb.array();
 							
-						} catch(Exception e) {
+						} catch(Throwable e) {
 							throw new IOException(e);
 						} finally {
 							hashPool.returnObject(hc);

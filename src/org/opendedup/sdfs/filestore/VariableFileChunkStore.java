@@ -532,4 +532,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		return this.compressedLength.get();
 	}
 
+	@Override
+	public void deleteDuplicate(byte[] hash, long start, int len)
+			throws IOException {
+		this.deleteChunk(hash, start, len);
+		
+	}
+
 }

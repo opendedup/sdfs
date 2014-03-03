@@ -133,6 +133,9 @@ public interface AbstractChunkStore {
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
 			throws IOException;
+	
+	public abstract void deleteDuplicate(byte[] hash, long start, int len)
+			throws IOException;
 
 	public abstract ChunkData getNextChunck() throws IOException;
 

@@ -287,7 +287,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			if (added) {
 				this.kSz.incrementAndGet();
 			} else {
-				cm.setmDelete(true);
+				cm.setmDeleteDuplicate(true);
 			}
 		} else {
 			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());

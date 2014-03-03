@@ -6,6 +6,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.jets3t.service.S3Service;
+import org.jets3t.service.ServiceException;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.model.S3Object;
+import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.logging.SDFSLogger;
 
 public class S3ChunkStoreUtils {
 	@SuppressWarnings("static-access")
@@ -52,9 +58,32 @@ public class S3ChunkStoreUtils {
 		}
 		if (cmd.hasOption("delete-bucket")) {
 			System.out.println("000000000000000000000");
-			S3ChunkStore.deleteBucket(cmd.getOptionValue("delete-bucket"),
+			deleteBucket(cmd.getOptionValue("delete-bucket").toLowerCase(),
 					cmd.getOptionValue("aws-access-key"),
 					cmd.getOptionValue("aws-secret-key"));
+		}
+	}
+	
+	public static void deleteBucket(String bucketName, String awsAccessKey,
+			String awsSecretKey) {
+		bucketName = bucketName.toLowerCase();
+		try {
+			System.out.println("");
+			System.out.print("Deleting Bucket [" + bucketName + "]");
+			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
+					awsSecretKey);
+			S3Service bs3Service = new RestS3Service(bawsCredentials);
+			S3Object[] obj = bs3Service.listObjects(bucketName);
+			for (int i = 0; i < obj.length; i++) {
+				bs3Service.deleteObject(bucketName, obj[i].getKey());
+				System.out.print(".");
+			}
+			bs3Service.deleteBucket(bucketName);
+			SDFSLogger.getLog().info("Bucket [" + bucketName + "] deleted");
+			System.out.println("Bucket [" + bucketName + "] deleted");
+		} catch (ServiceException e) {
+			SDFSLogger.getLog()
+					.warn("Unable to delete bucket " + bucketName, e);
 		}
 	}
 
