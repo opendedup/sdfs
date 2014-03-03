@@ -319,9 +319,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private String getHashName(byte[] hash, boolean enc) throws IOException {
 		if (enc) {
 			byte[] encH = EncryptUtils.encrypt(hash);
-			return StringUtils.getHexString(encH);
+			return StringUtils.getHexString(encH).toLowerCase();
 		} else {
-			return StringUtils.getHexString(hash);
+			return StringUtils.getHexString(hash).toLowerCase();
 		}
 	}
 
