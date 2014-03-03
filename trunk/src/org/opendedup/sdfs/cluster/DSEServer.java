@@ -23,6 +23,7 @@ public class DSEServer implements Externalizable {
 	public long currentSize;
 	public long dseSize;
 	public long dseMaxSize;
+	public long dseCompressedSize;
 	public long maxSize;
 	public long freeBlocks;
 	public int pageSize;
@@ -71,6 +72,7 @@ public class DSEServer implements Externalizable {
 		this.readOnly = in.readBoolean();
 		this.dseSize = in.readLong();
 		this.dseMaxSize = in.readLong();
+		this.dseCompressedSize = in.readLong();
 	}
 
 	@Override
@@ -91,6 +93,7 @@ public class DSEServer implements Externalizable {
 		out.writeBoolean(this.readOnly);
 		out.writeLong(this.dseSize);
 		out.writeLong(this.dseMaxSize);
+		out.writeLong(this.dseCompressedSize);
 	}
 
 	public byte[] getBytes() throws Exception {
@@ -129,6 +132,7 @@ public class DSEServer implements Externalizable {
 			buf.put((byte)0);
 		buf.putLong(this.dseSize);
 		buf.putLong(this.dseMaxSize);
+		buf.putLong(this.dseCompressedSize);
 		return buf.array();
 	}
 
@@ -161,6 +165,7 @@ public class DSEServer implements Externalizable {
 			this.readOnly = true;
 		this.dseSize = buf.getLong();
 		this.dseMaxSize = buf.getLong();
+		this.dseCompressedSize = buf.getLong();
 	}
 
 	public String toString() {
@@ -168,7 +173,7 @@ public class DSEServer implements Externalizable {
 				+ this.serverType + " address=[" + this.address + "] maxsz="
 				+ this.maxSize + " currentsize=" + this.currentSize
 				+ " freeblocks=" + this.freeBlocks + " dseport=" + this.dseport
-				+ " usessl=" + this.useSSL +  " dseSize=" + this.dseSize + " dseMaxSize=" + this.dseMaxSize;
+				+ " usessl=" + this.useSSL +  " dseSize=" + this.dseSize + " dseMaxSize=" + this.dseMaxSize + " dseCompressedSize=" + this.dseCompressedSize;
 	}
 
 	public int hashCode() {

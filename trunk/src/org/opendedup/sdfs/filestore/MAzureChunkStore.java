@@ -247,12 +247,6 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void setSize(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void iterationInit() {
 
 	}
@@ -291,6 +285,12 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	@Override
 	public long maxSize() {
 		return Main.chunkStoreAllocationSize;
+	}
+
+	@Override
+	public long compressedSize() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

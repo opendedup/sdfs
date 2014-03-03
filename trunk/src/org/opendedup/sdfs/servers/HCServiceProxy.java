@@ -158,6 +158,14 @@ public class HCServiceProxy {
 		}
 	}
 	
+	public static long getDSECompressedSize() {
+		if (Main.chunkStoreLocal) {
+			return HCServiceProxy.getChunkStore().compressedSize();
+		} else {
+			return socket.getCurrentDSECompSize();
+		}
+	}
+	
 	public static long getDSEMaxSize() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.getChunkStore().maxSize();

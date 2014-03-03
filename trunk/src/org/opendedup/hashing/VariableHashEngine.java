@@ -2,11 +2,12 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendedup.rabin.hashing.MurmurHash3;
+import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory;

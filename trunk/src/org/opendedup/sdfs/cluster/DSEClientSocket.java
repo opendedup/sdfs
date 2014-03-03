@@ -865,6 +865,20 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		}
 	}
 	
+	public long getCurrentDSECompSize() {
+		Lock l = this.sl.readLock();
+		l.lock();
+		try {
+			long sz = 0;
+			for (DSEServer s : sal) {
+				sz = sz + s.dseCompressedSize;
+			}
+			return sz;
+		} finally {
+			l.unlock();
+		}
+	}
+	
 	public long getDSEMaxSize() {
 		Lock l = this.sl.readLock();
 		l.lock();

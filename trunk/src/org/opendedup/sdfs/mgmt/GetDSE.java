@@ -29,6 +29,9 @@ public class GetDSE {
 			root.setAttribute(
 					"current-size",
 					Long.toString(HCServiceProxy.getChunkStore().size()));
+			root.setAttribute(
+					"compressed-size",
+					Long.toString(HCServiceProxy.getChunkStore().compressedSize()));
 			root.setAttribute("free-blocks",
 					Long.toString(HCServiceProxy.getFreeBlocks()));
 			root.setAttribute("page-size",

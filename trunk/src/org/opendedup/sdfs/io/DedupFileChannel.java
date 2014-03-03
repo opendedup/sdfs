@@ -1,12 +1,13 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.rabin.utils.StringUtils;
+import org.opendedup.util.StringUtils;
 import org.opendedup.sdfs.Main;
 
 import com.google.common.eventbus.EventBus;
