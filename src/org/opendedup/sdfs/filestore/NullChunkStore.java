@@ -72,12 +72,6 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void setSize(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ChunkData getNextChunck() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
@@ -104,6 +98,12 @@ public class NullChunkStore implements AbstractChunkStore {
 
 	@Override
 	public long maxSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long compressedSize() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

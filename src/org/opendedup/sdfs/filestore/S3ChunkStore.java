@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.bouncycastle.util.Arrays;
 import org.jets3t.service.S3Service;
@@ -39,7 +40,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 	private static AWSCredentials awsCredentials = null;
 	private String name;
 	private S3ServicePool pool = null;
-	private long currentLength = 0L;
+	private AtomicLong currentLength = new AtomicLong(0);
+	private AtomicLong compressedLength = new AtomicLong(0);
 	private int cacheSize = 10485760 / Main.CHUNK_LENGTH;
 
 	LoadingCache<String, byte[]> chunks = CacheBuilder.newBuilder()
@@ -53,6 +55,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 						S3Object obj = s3Service.getObject(name, hashString);
 						boolean encrypt = false;
 						boolean compress = false;
+						boolean lz4compress = false;
+						int size = Integer.parseInt((String)obj.getMetadata("size"));;
+						int csz = size;
 						if (obj.containsMetadata("encrypt")) {
 							encrypt = Boolean.parseBoolean((String) obj
 									.getMetadata("encrypt"));
@@ -60,9 +65,17 @@ public class S3ChunkStore implements AbstractChunkStore {
 						if (obj.containsMetadata("compress")) {
 							compress = Boolean.parseBoolean((String) obj
 									.getMetadata("compress"));
+						} else if (obj.containsMetadata("lz4compress")) {
+							csz = Integer.parseInt((String)obj.getMetadata("compressedsize"));
+							lz4compress = Boolean.parseBoolean((String) obj
+									.getMetadata("lz4compress"));
+						}
+						int cl = (int) obj.getContentLength();
+						if(cl != csz) {
+							SDFSLogger.getLog().warn("Possible data mismatch size=" + csz + " does not equal content length" +cl);
 						}
 
-						byte[] data = new byte[(int) obj.getContentLength()];
+						byte[] data = new byte[cl];
 						DataInputStream in = new DataInputStream(obj
 								.getDataInputStream());
 						in.readFully(data);
@@ -71,6 +84,9 @@ public class S3ChunkStore implements AbstractChunkStore {
 							data = EncryptUtils.decrypt(data);
 						if (compress)
 							data = CompressionUtils.decompressZLIB(data);
+						else if (lz4compress) {
+							data = CompressionUtils.decompressLz4(data, size);
+						}
 						return data;
 					} catch (Exception e) {
 						SDFSLogger.getLog()
@@ -141,7 +157,36 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void close() {
-
+		RestS3Service s3Service = null;
+		try {
+			
+			s3Service = pool.borrowObject();
+			S3Bucket s3Bucket = s3Service.getBucket(this.name);
+			s3Bucket.removeMetadata("currentsize");
+			s3Bucket.addMetadata("currentsize",
+					Long.toString(this.currentLength.get()));
+			s3Bucket.removeMetadata("currentcompressedsize");
+			s3Bucket.addMetadata("currentcompressedsize",
+					Long.toString(this.compressedLength.get()));
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("error while closing bucket " + this.name,
+					e);
+		} finally {
+			try {
+				pool.returnObject(s3Service);
+			} catch (IOException e) {
+				SDFSLogger.getLog().warn("error while closing bucket " + this.name,
+						e);
+			}
+		}
+		
+		try {
+			pool.close();
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("error while closing bucket " + this.name,
+					e);
+		} 
+		
 	}
 
 	public void expandFile(long length) throws IOException {
@@ -177,7 +222,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return this.currentLength;
+		return this.currentLength.get();
 	}
 
 	@Override
@@ -188,11 +233,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 				Main.chunkStoreEncryptionEnabled);
 		S3Object s3Object = new S3Object(hashString);
 		s3Object.addMetadata("size", Integer.toString(chunk.length));
+		this.currentLength.addAndGet(chunk.length);
 		if (Main.compress) {
-			chunk = CompressionUtils.compressZLIB(chunk);
-			s3Object.addMetadata("compress", "true");
+			chunk = CompressionUtils.compressLz4(chunk);
+			s3Object.addMetadata("lz4compress", "true");
 		} else {
-			s3Object.addMetadata("compress", "false");
+			s3Object.addMetadata("lz4compress", "false");
 		}
 		if (Main.chunkStoreEncryptionEnabled) {
 			chunk = EncryptUtils.encrypt(chunk);
@@ -200,6 +246,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 		} else {
 			s3Object.addMetadata("encrypt", "false");
 		}
+		s3Object.addMetadata("compressedsize", Integer.toString(chunk.length));
+		this.compressedLength.addAndGet(chunk.length);
 		ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
 		s3Object.setDataInputStream(s3IS);
 		s3Object.setContentType("binary/octet-stream");
@@ -232,6 +280,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 		try {
 			this.chunks.invalidate(hashString);
 			s3Service = pool.borrowObject();
+			StorageObject obj = s3Service.getObjectDetails(this.name, hashString);
+			int size = Integer.parseInt((String)obj.getMetadata("size"));
+			int compressedSize = Integer.parseInt((String)obj.getMetadata("compressedsize"));
+			this.currentLength.addAndGet(-1*size);
+			this.compressedLength.addAndGet(-1*compressedSize);
 			s3Service.deleteObject(this.name, hashString);
 		} catch (Exception e) {
 			SDFSLogger.getLog()
@@ -287,7 +340,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		try {
 
 			pool = new S3ServicePool(S3ChunkStore.awsCredentials,
-					Main.writeThreads * 2);
+					8);
 			RestS3Service s3Service = pool.borrowObject();
 
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
@@ -304,17 +357,45 @@ public class S3ChunkStore implements AbstractChunkStore {
 					s3Bucket.addMetadata("encrypt", "false");
 				}
 				SDFSLogger.getLog().info("created new store " + name);
+			} else {
+				if (s3Bucket.containsMetadata("currentsize")) {
+					long cl = Long.parseLong((String) s3Bucket
+							.getMetadata("currentsize"));
+					if (cl >= 0) {
+						this.currentLength.set(cl);
+						s3Bucket.removeMetadata("currentsize");
+						s3Bucket.addMetadata("currentsize", "-1");
+					} else
+						SDFSLogger
+								.getLog()
+								.warn("The S3 objectstore DSE did not close correctly");
+				} else {
+					SDFSLogger
+							.getLog()
+							.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+				}
+				
+				if (s3Bucket.containsMetadata("currentcompressedsize")) {
+					long cl = Long.parseLong((String) s3Bucket
+							.getMetadata("currentsize"));
+					if (cl >= 0) {
+						this.compressedLength.set(cl);
+						s3Bucket.removeMetadata("currentcompressedsize");
+						s3Bucket.addMetadata("currentcompressedsize", "-1");
+					} else
+						SDFSLogger
+								.getLog()
+								.warn("The S3 objectstore DSE did not close correctly");
+				} else {
+					SDFSLogger
+							.getLog()
+							.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+				}
 			}
 			pool.returnObject(s3Service);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
-
-	}
-
-	@Override
-	public void setSize(long size) {
-		this.currentLength = size;
 
 	}
 
@@ -343,7 +424,13 @@ public class S3ChunkStore implements AbstractChunkStore {
 			if (obj[objPos].containsMetadata("size")) {
 				chk.cLen = Integer.parseInt((String) obj[objPos]
 						.getMetadata("size"));
-			} 
+				this.currentLength.addAndGet(chk.cLen);
+			}
+			if (obj[objPos].containsMetadata("compressedsize")) {
+				int cl = Integer.parseInt((String) obj[objPos]
+						.getMetadata("compressedsize"));
+				this.compressedLength.addAndGet(cl);
+			}
 			objPos++;
 			return chk;
 		}
@@ -357,11 +444,13 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void iterationInit() {
-		
+
 		try {
 			bs3Service = new RestS3Service(awsCredentials);
 			StorageObjectsChunk ck = bs3Service.listObjectsChunked(
 					this.getName(), null, null, 1000, null);
+			this.compressedLength.set(0);
+			this.currentLength.set(0);
 			obj = ck.getObjects();
 			this.lastKey = null;
 			objPos = 0;
@@ -381,6 +470,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public long maxSize() {
 		// TODO Auto-generated method stub
 		return Main.chunkStoreAllocationSize;
+	}
+
+	@Override
+	public long compressedSize() {
+		// TODO Auto-generated method stub
+		return this.compressedLength.get();
 	}
 
 }

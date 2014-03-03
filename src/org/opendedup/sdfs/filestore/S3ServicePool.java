@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,8 +81,8 @@ public class S3ServicePool {
 		Jets3tProperties jProps = Jets3tProperties
 				.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
 		jProps.setProperty("httpclient.max-connections",
-				Integer.toString(this.poolSize));
-		
+				Integer.toString(this.poolSize+5));
+
 		RestS3Service s3Service = new RestS3Service(awsCredentials, null, null,
 				jProps);
 		return s3Service;
@@ -91,6 +90,27 @@ public class S3ServicePool {
 
 	public void destroyObject(RestS3Service hc) throws ServiceException {
 		hc.shutdown();
+	}
+
+	public void close() throws ServiceException, IOException,
+			InterruptedException {
+		int z = 0;
+		while (this.activeObjects.size() > 0) {
+			Thread.sleep(1);
+			z++;
+			if (z > 30000)
+				throw new IOException(
+						"Unable to close s3 pool because close command timed out after 30 seconds");
+		}
+		alock.lock();
+		try {
+			for (RestS3Service s : this.passiveObjects) {
+				s.shutdown();
+			}
+			this.passiveObjects.clear();
+		} finally {
+			alock.unlock();
+		}
 	}
 
 }

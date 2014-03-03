@@ -399,12 +399,6 @@ public class FileChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void setSize(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ChunkData getNextChunck() throws IOException {
 		if (iterFC.position() >= iterFC.size()) {
 			iterFC.close();
@@ -488,6 +482,11 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public long maxSize() {
 		return Main.chunkStoreAllocationSize;
+	}
+
+	@Override
+	public long compressedSize() {
+		return this.currentLength;
 	}
 
 }

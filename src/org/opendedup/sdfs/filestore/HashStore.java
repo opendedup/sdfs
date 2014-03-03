@@ -75,7 +75,6 @@ public class HashStore {
 		this.hcs = hcs;
 		try {
 			this.connectDB();
-			hcs.getChuckStore().setSize(bdb.endStartingPosition());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

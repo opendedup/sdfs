@@ -56,9 +56,14 @@ public interface AbstractChunkStore {
 	 */
 	public abstract long size();
 	
+	/**
+	 * 
+	 * @return The size of the chunkstore compressed
+	 */
+	public abstract long compressedSize();
+	
+	
 	public abstract long maxSize();
-
-	public abstract void setSize(long size);
 
 	/**
 	 * 

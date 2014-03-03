@@ -44,6 +44,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	private File lsf;
 	private FCPool pool = null;
 	private AtomicLong size = new AtomicLong(0);
+	private AtomicLong compressedLength = new AtomicLong(0);
 
 	/**
 	 * 
@@ -85,6 +86,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					RandomAccessFile rf = new RandomAccessFile(lsf, "rw");
 					rf.seek(0);
 					this.size = new AtomicLong(rf.readLong());
+					this.compressedLength = new AtomicLong(rf.readLong());
 					rf.close();
 					rf = null;
 					lsf.delete();
@@ -157,6 +159,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				RandomAccessFile rf = new RandomAccessFile(lsf, "rw");
 				rf.seek(0);
 				rf.writeLong(this.size.get());
+				rf.writeLong(this.compressedLength.get());
 				SDFSLogger.getLog().info("Persisted FileSize");
 
 				rf.close();
@@ -307,6 +310,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			rf = pool.borrowObject();
 			rf.write(buf, pos);
 			this.size.addAndGet(b.length);
+			this.compressedLength.addAndGet(data.length);
 			return pos;
 		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("unable to write data ", e);
@@ -370,6 +374,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		}
 	}
 
+	
+	private final byte [] iFree = new byte[iPageSize];
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
@@ -385,7 +391,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			FileChunkStore store = this.getStore(iLen);
 			store.deleteChunk(hash, iStart, iLen);
 			this.size.addAndGet(-1 * cLen);
-			rf.write(ByteBuffer.wrap(new byte[iPageSize]), start);
+			this.compressedLength.addAndGet(-1*iLen);
+			rf.write(ByteBuffer.wrap(iFree), start);
 
 		} finally {
 			pool.returnObject(rf);
@@ -423,12 +430,6 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	}
 
-	@Override
-	public void setSize(long size) {
-		// TODO Auto-generated method stub
-
-	}
-
 	byte[] PFREE = new byte[this.iPageSize];
 
 	@Override
@@ -454,6 +455,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				int cLen = buf.getInt();
 				this.size.addAndGet(cLen);
 				int iLen = buf.getInt();
+				this.compressedLength.addAndGet(iLen);
 				comp = buf.get();
 				enc = buf.get();
 				byte[] _hash = new byte[HashFunctionPool.hashLength];
@@ -503,6 +505,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			hc = HashFunctionPool.getHashEngine();
 			this.iterFC = chunkDataWriter.getChannel();
 			this.iterFC.position(0);
+			this.size.set(0);
+			this.compressedLength.set(0);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -521,6 +525,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	@Override
 	public long maxSize() {
 		return Main.chunkStoreAllocationSize;
+	}
+
+	@Override
+	public long compressedSize() {
+		return this.compressedLength.get();
 	}
 
 }

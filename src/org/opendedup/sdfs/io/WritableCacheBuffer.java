@@ -1,9 +1,17 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
@@ -45,9 +53,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private byte[] hashloc;
 	private boolean batchprocessed;
 	private boolean batchwritten;
-
+	AtomicInteger dn;
+	int sz;
+	AtomicInteger exdn;
+	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
+			2);
+	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(32, 64,
+			10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
-
+		executor.allowCoreThreadTimeOut(true);
 	}
 
 	public WritableCacheBuffer(byte[] hash, long startPos, int length,
@@ -74,8 +89,6 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.endPosition = this.getFilePosition() + this.getLength();
 		this.setWritable(true);
 	}
-
-	
 
 	private byte[] readBlockFile() throws IOException {
 		raf = new RandomAccessFile(blockFile, "r");
@@ -191,24 +204,85 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private void initBuffer() {
 		if (this.buf == null) {
 			try {
-				if(HashFunctionPool.max_hash_cluster > 1) {
-				ByteBuffer hcb = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
-				ByteBuffer hb = ByteBuffer.wrap(this.getHash());
-				ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
-				for(int i = 0;i < HashFunctionPool.max_hash_cluster;i++) {
-					byte [] _hash = new byte[HashFunctionPool.hashLength];
-					byte [] _hl = new byte[8];
-					hl.get(_hl);
-					
-					hb.get(_hash);
-					if(_hl[1] != 0)
-						hcb.put(HCServiceProxy.fetchChunk(_hash, _hl));
-					else
-						break;
-				}
-				this.buf = hcb.array();
-				}else {
-					this.buf = HCServiceProxy.fetchChunk(this.getHash(), this.hashloc);
+				if (HashFunctionPool.max_hash_cluster > 1) {
+					ByteBuffer hcb = ByteBuffer
+							.wrap(new byte[Main.CHUNK_LENGTH]);
+					ByteBuffer hb = ByteBuffer.wrap(this.getHash());
+					ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
+					final ArrayList<Shard> cks = new ArrayList<Shard>();
+					dn = new AtomicInteger(0);
+					exdn = new AtomicInteger(0);
+					for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+						byte[] _hash = new byte[HashFunctionPool.hashLength];
+						byte[] _hl = new byte[8];
+						hl.get(_hl);
+
+						hb.get(_hash);
+						if (_hl[1] != 0) {
+							Shard sh = new Shard();
+							sh.h = _hash;
+							sh.hl = _hl;
+							sh.pos = i;
+							cks.add(i,sh);
+						}
+						else
+							break;
+					}
+					sz = cks.size();
+					AsyncChunkActionListener l = new AsyncChunkActionListener() {
+
+						@Override
+						public void commandException(Exception e) {
+								int _dn =dn.incrementAndGet();
+								exdn.incrementAndGet();
+								SDFSLogger.getLog().error("Error while getting hash", e);
+								if (_dn >= sz) {
+									synchronized (this) {
+										this.notify();
+									}
+								}
+								
+
+						}
+
+						@Override
+						public void commandResponse(Shard result) {
+							int _dn =dn.incrementAndGet();
+							cks.get(result.pos).ck = result.ck;
+								if (_dn >= sz) {
+
+									synchronized (this) {
+										this.notify();
+									}
+								}
+						}
+
+					};
+					for(Shard sh: cks) {
+						sh.l = l;
+						executor.execute(sh);
+					}
+					if (dn.get() < sz) {
+						synchronized (l) {
+							l.wait(10000);
+						}
+					}
+					if (dn.get() < sz)
+						SDFSLogger.getLog().warn(
+								"thread timed out before write was complete ");
+					hcb.position(0);
+					for(Shard sh: cks) {
+						
+						try {
+						hcb.put(sh.ck);
+						}catch(Exception e) {
+							SDFSLogger.getLog().info("pos = " + this.position + "ck sz=" + sh.ck.length + " hcb sz=" + hcb.position() + " cks sz=" +cks.size() + " len=" + (hcb.position() +sh.ck.length));
+						}
+					}
+					this.buf = hcb.array();
+				} else {
+					this.buf = HCServiceProxy.fetchChunk(this.getHash(),
+							this.hashloc);
 				}
 			} catch (Exception e) {
 				buf = new byte[Main.CHUNK_LENGTH];
@@ -443,15 +517,15 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	public void close() throws IOException {
 		try {
 			this.lock.lock();
-			
+
 			if (!this.flushing)
 				SDFSLogger.getLog().debug(
 						"####" + this.getFilePosition() + " not flushing");
-						
+
 			else if (this.closed) {
 				SDFSLogger.getLog().debug(
 						this.getFilePosition() + " already closed");
-			} else if(this.dirty){
+			} else if (this.dirty) {
 				this.df.writeCache(this);
 				df.removeFromFlush(this.getFilePosition());
 				this.closed = true;
@@ -718,6 +792,52 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 	public void setBatchwritten(boolean batchwritten) {
 		this.batchwritten = batchwritten;
+	}
+
+	public static class BlockPolicy implements RejectedExecutionHandler {
+
+		/**
+		 * Creates a <tt>BlockPolicy</tt>.
+		 */
+		public BlockPolicy() {
+		}
+
+		/**
+		 * Puts the Runnable to the blocking queue, effectively blocking the
+		 * delegating thread until space is available.
+		 * 
+		 * @param r
+		 *            the runnable task requested to be executed
+		 * @param e
+		 *            the executor attempting to execute this task
+		 */
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+			try {
+				e.getQueue().put(r);
+			} catch (InterruptedException e1) {
+				SDFSLogger
+						.getLog()
+						.error("Work discarded, thread was interrupted while waiting for space to schedule: {}",
+								e1);
+			}
+		}
+	}
+
+	public static class Shard implements Runnable {
+		int pos;
+		byte[] hl;
+		byte[] h;
+		byte[] ck;
+		AsyncChunkActionListener l;
+		@Override
+		public void run() {
+			try {
+				this.ck = HCServiceProxy.fetchChunk(h, hl);
+				l.commandResponse(this);
+			} catch (Exception e) {
+				l.commandException(e);
+			}
+		}
 	}
 
 }

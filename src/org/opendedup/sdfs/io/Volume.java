@@ -516,6 +516,9 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute(
 				"dse-size",
 				Long.toString(HCServiceProxy.getDSESize()));
+		root.setAttribute(
+				"dse-comp-size",
+				Long.toString(HCServiceProxy.getDSECompressedSize()));
 		root.setAttribute("readops", Double.toString(this.readOperations.get()));
 		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
 		root.setAttribute("closed-gracefully",

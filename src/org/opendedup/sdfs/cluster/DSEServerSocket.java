@@ -105,6 +105,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		server.rack = Main.DSEClusterNodeRack;
 		server.dseSize = HCServiceProxy.getChunkStore().size();
 		server.dseMaxSize = HCServiceProxy.getChunkStore().maxSize();
+		server.dseCompressedSize = HCServiceProxy.getChunkStore().compressedSize();
 
 		channel.getState(null, 10000);
 		lock_service = new LockService(channel);
@@ -545,6 +546,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				server.rack = Main.DSEClusterNodeRack;
 				server.dseSize = HCServiceProxy.getChunkStore().size();
 				server.dseMaxSize = HCServiceProxy.getChunkStore().maxSize();
+				server.dseCompressedSize = HCServiceProxy.getChunkStore().compressedSize();
 				this.addSelfToState();
 				rsp_list = disp.castMessage(null, new Message(null, null,
 						server.getBytes()), new RequestOptions(

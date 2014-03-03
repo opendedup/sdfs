@@ -230,12 +230,6 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		}
 	}
 
-	@Override
-	public void setSize(long size) {
-		this.currentLength = size;
-
-	}
-
 	public void clearStore() throws IOException {
 		try {
 			SDFSLogger.getLog().warn(
@@ -275,6 +269,12 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	@Override
 	public long maxSize() {
 		return Main.chunkStoreAllocationSize;
+	}
+
+	@Override
+	public long compressedSize() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

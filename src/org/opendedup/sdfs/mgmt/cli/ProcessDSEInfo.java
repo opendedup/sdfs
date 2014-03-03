@@ -24,6 +24,8 @@ public class ProcessDSEInfo {
 				long maxSz = Long.parseLong(dse.getAttribute("max-size"));
 				long currentSz = Long.parseLong(dse
 						.getAttribute("current-size"));
+				long compressedSz = Long.parseLong(dse
+						.getAttribute("compressed-size"));
 				long freeBlocks = Long.parseLong(dse
 						.getAttribute("free-blocks"));
 				int pageSize = Integer.parseInt(dse.getAttribute("page-size"));
@@ -39,6 +41,8 @@ public class ProcessDSEInfo {
 						.format(maxSz));
 				System.out.printf("DSE Current Size : %s\n",
 						StorageUnit.of(currentSz).format(currentSz));
+				System.out.printf("DSE Compressed Size : %s\n",
+						StorageUnit.of(compressedSz).format(compressedSz));
 				System.out.printf("DSE Percent Full : %s%%\n", pFull);
 				System.out.printf("DSE Page Size : %s\n", pageSize);
 				System.out.printf("DSE Blocks Available for Reuse : %s\n",
