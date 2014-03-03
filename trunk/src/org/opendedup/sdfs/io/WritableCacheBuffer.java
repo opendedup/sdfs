@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -11,7 +12,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
@@ -53,13 +53,11 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private byte[] hashloc;
 	private boolean batchprocessed;
 	private boolean batchwritten;
-	AtomicInteger dn;
 	int sz;
-	AtomicInteger exdn;
 	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(32, 64,
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 64,
 			10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
 		executor.allowCoreThreadTimeOut(true);
@@ -210,8 +208,6 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 					ByteBuffer hb = ByteBuffer.wrap(this.getHash());
 					ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
 					final ArrayList<Shard> cks = new ArrayList<Shard>();
-					dn = new AtomicInteger(0);
-					exdn = new AtomicInteger(0);
 					for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
 						byte[] _hash = new byte[HashFunctionPool.hashLength];
 						byte[] _hl = new byte[8];
@@ -233,8 +229,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 						@Override
 						public void commandException(Exception e) {
-								int _dn =dn.incrementAndGet();
-								exdn.incrementAndGet();
+								int _dn =this.incrementandGetDN();
+								this.incrementAndGetDNEX();
 								SDFSLogger.getLog().error("Error while getting hash", e);
 								if (_dn >= sz) {
 									synchronized (this) {
@@ -247,7 +243,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 						@Override
 						public void commandResponse(Shard result) {
-							int _dn =dn.incrementAndGet();
+							int _dn =this.incrementandGetDN();
 							cks.get(result.pos).ck = result.ck;
 								if (_dn >= sz) {
 
@@ -262,12 +258,12 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 						sh.l = l;
 						executor.execute(sh);
 					}
-					if (dn.get() < sz) {
+					if (l.getDN() < sz) {
 						synchronized (l) {
 							l.wait(10000);
 						}
 					}
-					if (dn.get() < sz)
+					if (l.getDN() < sz)
 						SDFSLogger.getLog().warn(
 								"thread timed out before write was complete ");
 					hcb.position(0);
@@ -276,7 +272,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 						try {
 						hcb.put(sh.ck);
 						}catch(Exception e) {
-							SDFSLogger.getLog().info("pos = " + this.position + "ck sz=" + sh.ck.length + " hcb sz=" + hcb.position() + " cks sz=" +cks.size() + " len=" + (hcb.position() +sh.ck.length));
+							//SDFSLogger.getLog().info("pos = " + this.position + "ck sz=" + sh.ck.length + " hcb sz=" + hcb.position() + " cks sz=" +cks.size() + " len=" + (hcb.position() +sh.ck.length));
+							throw e;
 						}
 					}
 					this.buf = hcb.array();

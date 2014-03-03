@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,22 +11,24 @@ import org.jets3t.service.Jets3tProperties;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.security.AWSCredentials;
 import org.opendedup.logging.SDFSLogger;
 
-public class S3ServicePool {
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+
+public class AWSS3ServicePool {
 
 	private int poolSize;
-	private LinkedBlockingQueue<RestS3Service> passiveObjects = null;
-	private ArrayList<RestS3Service> activeObjects = new ArrayList<RestS3Service>();
+	private LinkedBlockingQueue<AmazonS3Client> passiveObjects = null;
+	private ArrayList<AmazonS3Client> activeObjects = new ArrayList<AmazonS3Client>();
 	private ReentrantLock alock = new ReentrantLock();
-	private AWSCredentials awsCredentials;
+	private BasicAWSCredentials awsCredentials;
 
-	public S3ServicePool(AWSCredentials awsCredentials, int size)
+	public AWSS3ServicePool(BasicAWSCredentials awsCredentials, int size)
 			throws IOException {
 		this.awsCredentials = awsCredentials;
 		this.poolSize = size;
-		passiveObjects = new LinkedBlockingQueue<RestS3Service>(this.poolSize);
+		passiveObjects = new LinkedBlockingQueue<AmazonS3Client>(this.poolSize);
 		this.populatePool();
 	}
 
@@ -43,16 +46,16 @@ public class S3ServicePool {
 		}
 	}
 
-	public RestS3Service borrowObject() throws IOException,
+	public AmazonS3Client borrowObject() throws IOException,
 			InterruptedException {
-		RestS3Service hc = this.passiveObjects.take();
+		AmazonS3Client hc = this.passiveObjects.take();
 		this.alock.lock();
 		this.activeObjects.add(hc);
 		this.alock.unlock();
 		return hc;
 	}
 
-	public void returnObject(RestS3Service hc) throws IOException {
+	public void returnObject(AmazonS3Client hc) throws IOException {
 		alock.lock();
 		try {
 
@@ -77,14 +80,13 @@ public class S3ServicePool {
 		}
 	}
 
-	public RestS3Service makeObject() throws S3ServiceException {
+	public AmazonS3Client makeObject() throws S3ServiceException {
 		Jets3tProperties jProps = Jets3tProperties
 				.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
 		jProps.setProperty("httpclient.max-connections",
 				Integer.toString(this.poolSize));
 
-		RestS3Service s3Service = new RestS3Service(awsCredentials, null, null,
-				jProps);
+		AmazonS3Client s3Service = new AmazonS3Client(awsCredentials);
 		return s3Service;
 	}
 
@@ -104,7 +106,7 @@ public class S3ServicePool {
 		}
 		alock.lock();
 		try {
-			for (RestS3Service s : this.passiveObjects) {
+			for (AmazonS3Client s : this.passiveObjects) {
 				s.shutdown();
 			}
 			this.passiveObjects.clear();

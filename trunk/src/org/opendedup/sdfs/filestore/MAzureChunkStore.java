@@ -293,4 +293,11 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
+	@Override
+	public void deleteDuplicate(byte[] hash, long start, int len)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

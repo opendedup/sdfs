@@ -489,4 +489,11 @@ public class FileChunkStore implements AbstractChunkStore {
 		return this.currentLength;
 	}
 
+	@Override
+	public void deleteDuplicate(byte[] hash, long start, int len)
+			throws IOException {
+		this.deleteChunk(hash, start, len);
+		
+	}
+
 }

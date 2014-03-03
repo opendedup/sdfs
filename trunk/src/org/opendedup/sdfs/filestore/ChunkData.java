@@ -147,6 +147,23 @@ public class ChunkData {
 		}
 		return false;
 	}
+	
+	public boolean setmDeleteDuplicate(boolean mDelete) {
+		this.mDelete = mDelete;
+		if (this.mDelete) {
+			try {
+				HCServiceProxy.getChunkStore().deleteDuplicate(this.hash,
+						this.cPos, 0);
+				return true;
+			} catch (IOException e) {
+				SDFSLogger.getLog().error(
+						"Unable to remove hash ["
+								+ StringUtils.getHexString(this.hash) + "]", e);
+				return false;
+			}
+		}
+		return false;
+	}
 
 	protected void setChunk(byte[] chk) {
 		this.chunk = chk;
