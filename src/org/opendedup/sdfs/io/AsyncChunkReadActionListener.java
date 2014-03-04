@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opendedup.sdfs.io.WritableCacheBuffer.Shard;
 
-public abstract class AsyncChunkActionListener {
-	AtomicInteger dn = new AtomicInteger(0);;
-	AtomicInteger exdn = new AtomicInteger(0);;
+public abstract class AsyncChunkReadActionListener {
+	AtomicInteger dn = new AtomicInteger(0);
+	AtomicInteger exdn = new AtomicInteger(0);
 	public abstract void commandException(Exception e);
 
 	public abstract void commandResponse(Shard result);

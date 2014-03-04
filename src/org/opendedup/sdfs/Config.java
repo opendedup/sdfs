@@ -126,6 +126,9 @@ public class Config {
 				Main.DSEClusterNodeLocation = cbe
 						.getAttribute("cluster-node-location");
 			}
+			if(cbe.hasAttribute("io-threads")) {
+				Main.dseIOThreads = Integer.parseInt(cbe.getAttribute("io-threads"));
+			}
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
@@ -292,6 +295,9 @@ public class Config {
 				.getAttribute("enabled"));
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
+		if(localChunkStore.hasAttribute("io-threads")) {
+			Main.dseIOThreads = Integer.parseInt(localChunkStore.getAttribute("io-threads"));
+		}
 		if (localChunkStore.hasAttribute("cluster-config"))
 			Main.DSEClusterConfig = localChunkStore
 					.getAttribute("cluster-config");

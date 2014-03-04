@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -69,12 +68,11 @@ public class SparseDedupFile implements DedupFile {
 	private static transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 64,
-			10, TimeUnit.SECONDS, worksQueue, executionHandler);
+	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
+			Main.writeThreads, Main.writeThreads*2, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
 		executor.allowCoreThreadTimeOut(true);
 	}
-	
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers)
@@ -371,43 +369,90 @@ public class SparseDedupFile implements DedupFile {
 								writeBuffer.getFlushedBuffer(),
 								writeBuffer.getLength(),
 								writeBuffer.capacity(), mf.isDedup());
-						if(hashloc[0] == 1)
+						if (hashloc[0] == 1)
 							dups = writeBuffer.capacity();
-							
+
 						writeBuffer.setHashLoc(hashloc);
 					} else {
-						VariableHashEngine hc = (VariableHashEngine)hashPool.borrowObject();
-						byte [] hashes = new byte[VariableHashEngine.getHashLenth() * HashFunctionPool.max_hash_cluster];
-						byte [] hashlocs = new byte [8*HashFunctionPool.max_hash_cluster];
-						ByteBuffer hb = ByteBuffer.wrap(hashes);
-						ByteBuffer hl = ByteBuffer.wrap(hashlocs);
+						VariableHashEngine hc = (VariableHashEngine) hashPool
+								.borrowObject();
+						byte[] hashes = new byte[VariableHashEngine
+								.getHashLenth()
+								* HashFunctionPool.max_hash_cluster];
+						byte[] hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
+						
 						try {
-							List<Finger> fs = hc.getChunks(writeBuffer.getFlushedBuffer());
-							//SDFSLogger.getLog().info("broke data up into " + fs.size() + " chunks");
-							for(Finger f : fs) {
-								try {
-								
-								byte [] hlc = HCServiceProxy.writeChunk(f.hash,
-										f.chunk,
-										f.chunk.length,
-										f.chunk.length, mf.isDedup());
-								hb.put(f.hash);
-								if (hlc[0] == 1)
-									dups = dups + f.len;
-								hl.put(hlc);
-								}catch(Throwable e) {
-									SDFSLogger.getLog().warn("unable to write object finger",e);
-									throw e;
-									//SDFSLogger.getLog().info("this chunk size is " + f.chunk.length);
+							List<Finger> fs = hc.getChunks(writeBuffer
+									.getFlushedBuffer());
+							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
+
+								@Override
+								public void commandException(Finger result,
+										Throwable e) {
+									int _dn = this.incrementandGetDN();
+									this.incrementAndGetDNEX();
+									SDFSLogger.getLog().error(
+											"Error while getting hash", e);
+									if (_dn >= this.getMaxSz()) {
+										synchronized (this) {
+											this.notify();
+										}
+									}
+
+								}
+
+								@Override
+								public void commandResponse(Finger result) {
+									int _dn = this.incrementandGetDN();
+									if (_dn >= this.getMaxSz()) {
+
+										synchronized (this) {
+											this.notify();
+										}
+									}
+								}
+
+							};
+							l.setMaxSize(fs.size());
+							for (Finger f : fs) {
+								f.l = l;
+								f.dedup = mf.isDedup();
+								executor.execute(f);
+							}
+							if (l.getDN() < fs.size()) {
+								synchronized (l) {
+									l.wait(30000);
 								}
 							}
-							
+							if (l.getDN() < fs.size())
+								throw new IOException("Write Timed Out");
+							if (l.getDNEX() > 0)
+								throw new IOException("Write Failed");
+							// SDFSLogger.getLog().info("broke data up into " +
+							// fs.size() + " chunks");
+							ByteBuffer hb = ByteBuffer.wrap(hashes);
+							ByteBuffer hl = ByteBuffer.wrap(hashlocs);
+							for (Finger f : fs) {
+								try {
+
+									byte[] hlc = f.hl;
+									hb.put(f.hash);
+									if (hlc[0] == 1)
+										dups = dups + f.len;
+									hl.put(hlc);
+								} catch (Throwable e) {
+									SDFSLogger.getLog().warn(
+											"unable to write object finger", e);
+									throw e;
+									// SDFSLogger.getLog().info("this chunk size is "
+									// + f.chunk.length);
+								}
+							}
 							writeBuffer.setHashLoc(hl.array());
 							hashloc = hl.array();
 							writeBuffer.setDoop(dups);
 							hash = hb.array();
-							
-						} catch(Throwable e) {
+						} catch (Throwable e) {
 							throw new IOException(e);
 						} finally {
 							hashPool.returnObject(hc);
@@ -419,9 +464,13 @@ public class SparseDedupFile implements DedupFile {
 					throw new IOException(
 							"unable to write chunk hash location at 1 = "
 									+ hashloc[1]);
-				mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
-				mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - (dups - writeBuffer.getPrevDoop()), true);
-				mf.getIOMonitor().addDulicateData((dups - writeBuffer.getPrevDoop()), true);
+				mf.getIOMonitor().addVirtualBytesWritten(
+						writeBuffer.capacity(), true);
+				mf.getIOMonitor().addActualBytesWritten(
+						writeBuffer.capacity()
+								- (dups - writeBuffer.getPrevDoop()), true);
+				mf.getIOMonitor().addDulicateData(
+						(dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, hash, dups);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal(
@@ -437,8 +486,8 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	@Override
-	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
-			int doop) throws FileClosedException, IOException {
+	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash, int doop)
+			throws FileClosedException, IOException {
 		this.updateMap(writeBuffer, hash, doop, true);
 	}
 
@@ -455,9 +504,10 @@ public class SparseDedupFile implements DedupFile {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
 			if (this.bdb.getVersion() > 0) {
-					chunk = new SparseDataChunk(doop, hash, false,
-							writeBuffer.getHashLoc(), this.bdb.getVersion());
-					//SDFSLogger.getLog().info("Hash Size =" + hash.length + " hashloc len = " + writeBuffer.getHashLoc().length);
+				chunk = new SparseDataChunk(doop, hash, false,
+						writeBuffer.getHashLoc(), this.bdb.getVersion());
+				// SDFSLogger.getLog().info("Hash Size =" + hash.length +
+				// " hashloc len = " + writeBuffer.getHashLoc().length);
 			} else {
 				if (mf.isDedup() || doop > 0) {
 					chunk = new SparseDataChunk(doop, hash, false,

@@ -448,7 +448,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			buf.position(0);
 			iterFC.read(buf);
 			if (Arrays.areEqual(PFREE, buf.array())) {
-				return this.getNextChunck();
+				return new ChunkData();
 			} else {
 				buf.position(0);
 				long iStart = buf.getLong();

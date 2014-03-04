@@ -34,6 +34,7 @@ public class ChunkData {
 	private byte[] chunk = null;
 	private AbstractChunkStore writeStore = null;
 	public boolean recoverd = false;
+	public boolean blank;
 
 	private static byte[] blankHash = null;;
 
@@ -47,6 +48,9 @@ public class ChunkData {
 		}
 	}
 
+	public ChunkData() {
+		this.blank = true;
+	}
 	public ChunkData(long cPos, byte[] hash) {
 		this.cPos = cPos;
 		this.hash = hash;

@@ -57,7 +57,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 64,
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads*2,
 			10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
 		executor.allowCoreThreadTimeOut(true);
@@ -225,7 +225,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 							break;
 					}
 					sz = cks.size();
-					AsyncChunkActionListener l = new AsyncChunkActionListener() {
+					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
 
 						@Override
 						public void commandException(Exception e) {
@@ -825,7 +825,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		byte[] hl;
 		byte[] h;
 		byte[] ck;
-		AsyncChunkActionListener l;
+		AsyncChunkReadActionListener l;
 		@Override
 		public void run() {
 			try {
