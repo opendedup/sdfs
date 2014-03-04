@@ -22,7 +22,6 @@ import org.jets3t.service.security.AWSCredentials;
 public class Utils {
 	public static void deleteBucketAWS(String bucketName, String awsAccessKey,
 			String awsSecretKey) {
-		bucketName = bucketName.toLowerCase();
 		try {
 			System.out.print("Deleting Bucket [" + bucketName + "]");
 			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
@@ -62,7 +61,6 @@ public class Utils {
 	
 	public static void listBucketAWS(String bucketName, String awsAccessKey,
 			String awsSecretKey) {
-		bucketName = bucketName.toLowerCase();
 		try {
 			System.out.println("Listing Objects in Bucket [" + bucketName + "]");
 			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,

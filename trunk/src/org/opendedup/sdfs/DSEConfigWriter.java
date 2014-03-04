@@ -75,6 +75,7 @@ public class DSEConfigWriter {
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
 	String clusterRack = "rack1";
 	String clusterNodeLocation = "pdx";
+	int cloudThreads = 0;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -236,6 +237,9 @@ public class DSEConfigWriter {
 					.getOptionValue("cluster-node-location");
 		if (cmd.hasOption("cluster-node-rack"))
 			this.clusterRack = cmd.getOptionValue("cluster-node-rack");
+		if(cmd.hasOption("io-threads")) {
+			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("io-threads"));
+		}
 
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
 				+ "-dse-cfg.xml");
@@ -295,6 +299,7 @@ public class DSEConfigWriter {
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-node-rack", this.clusterRack);
 		cs.setAttribute("cluster-node-location", this.clusterNodeLocation);
+		cs.setAttribute("io-threads", Integer.toString(this.cloudThreads));
 		try {
 			cs.setAttribute("dse-password", HashFunctions.getSHAHash(
 					this.sdfsCliPassword.getBytes(),
@@ -482,12 +487,18 @@ public class DSEConfigWriter {
 				.withDescription(
 						"The location where this cluster node is located.")
 				.hasArg().withArgName("String").create());
+		
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-node-rack")
 				.withDescription(
 						"The rack where this cluster node is located.This is used to make sure that redundant blocks are not all copied to the name rack. To make the cluster rack aware, "
 								+ "also set the --cluster-rack-aware=true.")
 				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("io-threads")
+				.withDescription(
+						"Sets the number of io threads to use for io operations to the dse storage provider. This is set to 8 by default but can be changed to more or less based on bandwidth and io.")
+				.hasArg().withArgName("integer").create());
 		return options;
 	}
 

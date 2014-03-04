@@ -6,8 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.opendedup.hashing.Finger;
 
 public abstract class AsyncChunkWriteActionListener {
-	AtomicInteger dn = new AtomicInteger(0);;
-	AtomicInteger exdn = new AtomicInteger(0);;
+	AtomicInteger dn = new AtomicInteger(0);
+	AtomicInteger exdn = new AtomicInteger(0);
+	int sz = 0;
 	public abstract void commandException(Finger result,Throwable e);
 
 	public abstract void commandResponse(Finger result);
@@ -26,6 +27,14 @@ public abstract class AsyncChunkWriteActionListener {
 	
 	public int getDNEX() {
 		return exdn.get();
+	}
+	
+	public int getMaxSz() {
+		return this.sz;
+	}
+	
+	public void setMaxSize(int sz) {
+		this.sz = sz;
 	}
 
 }

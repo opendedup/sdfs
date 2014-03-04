@@ -71,6 +71,7 @@ public class VolumeConfigWriter {
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
+	int cloudThreads = 8;
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
@@ -318,6 +319,9 @@ public class VolumeConfigWriter {
 			}
 
 		}
+		if(cmd.hasOption("chunk-store-io-threads")) {
+			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("cloud-io-threads"));
+		}
 		if (cmd.hasOption("chunk-store-compress")) {
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
@@ -515,6 +519,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-id", this.clusterID);
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
+		cs.setAttribute("io-threads", Integer.toString(this.cloudThreads));
 		
 		cs.setAttribute("compress", Boolean.toString(this.compress));
 		Element network = xmldoc.createElement("network");
@@ -539,6 +544,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
+		
 		root.appendChild(sdfscli);
 
 		if (this.awsEnabled) {
@@ -873,6 +879,11 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to the value of Cloud Storage access key.")
 				.hasArg().withArgName("Cloud Access Key").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-io-threads")
+				.withDescription(
+						"Sets the number of io threads to use for io operations to the dse storage provider. This is set to 8 by default but can be changed to more or less based on bandwidth and io.")
+				.hasArg().withArgName("integer").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cloud-bucket-name")
 				.withDescription(

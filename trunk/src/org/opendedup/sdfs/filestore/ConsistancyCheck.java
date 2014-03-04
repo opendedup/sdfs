@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.util.HashMap;
 
-
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -15,8 +14,8 @@ public class ConsistancyCheck {
 		try {
 			store.iterationInit();
 			ChunkData data = store.getNextChunck();
-			HashMap<Long,Long> mismatch = new HashMap<Long,Long>();
-			
+			HashMap<Long, Long> mismatch = new HashMap<Long, Long>();
+
 			data.recoverd = true;
 			long records = 0;
 			long recordsRecovered = 0;
@@ -29,31 +28,35 @@ public class ConsistancyCheck {
 					"Running Consistancy Check on DSE, this may take a while",
 					Main.mountEvent);
 			CommandLineProgressBar bar = new CommandLineProgressBar(
-					"Scanning DSE", store.size(),
-					System.out);
-			evt.maxCt = store.size();
+					"Scanning DSE", map.getSize(), System.out);
+			evt.maxCt = map.getSize();
 			long currentCount = 0;
 			while (data != null) {
-				count++;
-				if (count > 100000) {
-					count = 0;
-					bar.update(currentCount);
-				}
-				records++;
-				long pos = map.get(data.getHash());
-				if (pos <0) {
-					map.put(data);
-					recordsRecovered++;
-				}
-				evt.curCt = currentCount;
-				try {
-				data = store.getNextChunck();
-				if (data != null) {
-					data.recoverd = true;
-					currentCount = currentCount + data.cLen;
-				}
-				}catch(Exception e) {
-					SDFSLogger.getLog().warn("Data Corruption found in datastore",e);
+				if (data.blank)
+					data = store.getNextChunck();
+				else {
+					count++;
+					if (count > 100000) {
+						count = 0;
+						bar.update(currentCount);
+					}
+					records++;
+					long pos = map.get(data.getHash());
+					if (pos < 0) {
+						map.put(data);
+						recordsRecovered++;
+					}
+					evt.curCt = currentCount;
+					try {
+						data = store.getNextChunck();
+						if (data != null) {
+							data.recoverd = true;
+							currentCount++;
+						}
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"Data Corruption found in datastore", e);
+					}
 				}
 			}
 			bar.finish();
@@ -61,8 +64,9 @@ public class ConsistancyCheck {
 			System.out.println("Succesfully Ran Consistance Check for ["
 					+ records + "] records, recovered [" + recordsRecovered
 					+ "]");
-			if(mismatch.size() > 0) {
-				String msg = "======Warning Data Alignment Issue. Mismatched Data found at " +mismatch.size() + "======";
+			if (mismatch.size() > 0) {
+				String msg = "======Warning Data Alignment Issue. Mismatched Data found at "
+						+ mismatch.size() + "======";
 				SDFSLogger.getLog().error(msg);
 				System.out.println(msg);
 			}

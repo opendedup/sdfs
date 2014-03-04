@@ -205,7 +205,7 @@ public class Main {
 	 * the number of cpu cores used by the client. This is used on the client.
 	 */
 
-	public static int writeThreads = 8;
+	public static int writeThreads = (short) (Runtime.getRuntime().availableProcessors() * 3);
 	/**
 	 * The representation of a blank hash of the default chunk size. This is
 	 * used on the client.
@@ -370,6 +370,8 @@ public class Main {
 	 * hash type can be tiger or murmur
 	 */
 	public static String hashType = HashFunctionPool.MURMUR3_16;
+	
+	public static int dseIOThreads = 8;
 	/**
 	 * FDisk Schedule in cron format
 	 * 
