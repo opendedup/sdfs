@@ -178,6 +178,7 @@ public class VolumeConfigWriter {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 				this.chunk_size = 128;
 				this.compress = true;
+				this.max_file_write_buffers = 4;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
 			}

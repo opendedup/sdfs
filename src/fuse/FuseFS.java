@@ -73,13 +73,12 @@ public interface FuseFS extends FilesystemConstants {
 	// errno returning scheme
 
 	public int setxattr(ByteBuffer path, ByteBuffer name, ByteBuffer value,
-			int flags, int position);
+			int flags);
 
 	public int getxattrsize(ByteBuffer path, ByteBuffer name,
 			FuseSizeSetter sizeSetter);
 
-	public int getxattr(ByteBuffer path, ByteBuffer name, ByteBuffer value,
-			int position);
+	public int getxattr(ByteBuffer path, ByteBuffer name, ByteBuffer value);
 
 	public int listxattrsize(ByteBuffer path, FuseSizeSetter sizeSetter);
 
