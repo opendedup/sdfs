@@ -64,7 +64,7 @@ public class SparseDedupFile implements DedupFile {
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final ConcurrentHashMap<Long, DedupChunkInterface> flushingBuffers = new ConcurrentHashMap<Long, DedupChunkInterface>(
-			1024, .75f);
+			1024, .75f,Main.writeThreads*2);
 	private static transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();

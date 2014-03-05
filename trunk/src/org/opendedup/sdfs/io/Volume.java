@@ -362,7 +362,7 @@ public class Volume implements java.io.Serializable {
 
 	public long getCurrentSize() {
 		if (this.useDSESize)
-			return HCServiceProxy.getSize() * HCServiceProxy.getPageSize();
+			return HCServiceProxy.getDSECompressedSize();
 		else
 			return currentSize.get();
 	}
