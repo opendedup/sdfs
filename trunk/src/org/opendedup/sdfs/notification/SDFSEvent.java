@@ -112,7 +112,7 @@ public class SDFSEvent implements java.io.Serializable {
 		return this.endTime > 0;
 	}
 
-	public void endEvent(String msg, Level level, Exception e) {
+	public void endEvent(String msg, Level level, Throwable e) {
 		for (int i = 0; i < this.children.size(); i++) {
 			if (this.children.get(i).endTime == -1)
 				this.children.get(i).endEvent(msg, level, e);

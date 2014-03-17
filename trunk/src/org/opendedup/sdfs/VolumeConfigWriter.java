@@ -183,6 +183,23 @@ public class VolumeConfigWriter {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
 			}
 		}
+		if (cmd.hasOption("chunk-store-encrypt")) {
+			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
+					.getOptionValue("chunk-store-encrypt"));
+			if(this.chunk_store_encrypt)
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+		}
+		if (cmd.hasOption("chunk-store-encryption-key")) {
+			String key = cmd
+					.getOptionValue("chunk-store-encryption-key");
+			if(key.length() < 8) {
+				System.err.println("Encryption Key must be greater than 8 characters");
+				System.exit(-1);
+			} else {
+				this.chunk_store_encryption_key = cmd
+						.getOptionValue("chunk-store-encryption-key");
+			}
+		}
 		
 		
 		if (cmd.hasOption("io-safe-sync")) {
@@ -245,10 +262,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("azure-enabled"));
 		}
 
-		if (cmd.hasOption("chunk-store-encrypt")) {
-			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
-					.getOptionValue("chunk-store-encrypt"));
-		}
+		
 		if (cmd.hasOption("gc-class")) {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
@@ -865,6 +879,11 @@ public class VolumeConfigWriter {
 								+ " For AWS this is a good option to enable. The default for this is"
 								+ " false").hasArg().withArgName("true|false")
 				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-encryption-key")
+						.withDescription(
+								"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long").hasArg().withArgName("String")
+						.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
