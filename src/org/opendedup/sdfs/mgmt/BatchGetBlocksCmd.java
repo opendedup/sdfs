@@ -25,7 +25,7 @@ public class BatchGetBlocksCmd {
 
 	private synchronized byte[] archiveOut(byte[] sh) throws IOException,
 			ClassNotFoundException {
-
+		try {
 		sh = CompressionUtils.decompressSnappy(sh);
 		ObjectInputStream obj_in = new ObjectInputStream(
 				new ByteArrayInputStream(sh));
@@ -39,18 +39,25 @@ public class BatchGetBlocksCmd {
 			throw new IOException("requested hash list to long "
 					+ hashes.size() + " > " + MAX_BATCH_SZ);
 		}
-
+		SDFSLogger.getLog().debug("will fetch " + hashes.size() + "blocks");
+		
 		ArrayList<HashChunk> chunks = new ArrayList<HashChunk>(hashes.size());
 		for (int i = 0; i < hashes.size(); i++) {
 			hash = hashes.get(i);
 			HashChunk dChunk = HCServiceProxy.fetchHashChunk(hash);
 			chunks.add(i, dChunk);
+			SDFSLogger.getLog().debug("fetched " + i + " blocks");
 		}
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream obj_out = new ObjectOutputStream(bos);
 		obj_out.writeObject(chunks);
 		byte[] b = CompressionUtils.compressSnappy(bos.toByteArray());
 		return b;
+		}catch(Throwable t) {
+			SDFSLogger.getLog().error("unable to fetch blocks", t);
+			throw new IOException(t);
+			
+		}
 	}
 
 }

@@ -648,7 +648,7 @@ public class SparseDedupFile implements DedupFile {
 		this.syncLock.lock();
 		try {
 			if (this.closed) {
-				throw new FileClosedException("file already closed");
+				return;
 
 			}
 

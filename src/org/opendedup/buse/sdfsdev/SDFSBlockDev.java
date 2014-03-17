@@ -59,7 +59,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		*/
 		try {
 			ch.read(data, 0, len, offset);
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().error("unable to read file " + this.devicePath, e);
 			return Errno.ENODATA;
 		}
@@ -75,12 +75,15 @@ public class SDFSBlockDev implements BUSE, Runnable {
 				+ " databufpos=" + buff.position());
 		*/
 		try {
-			if (Main.volume.isFull())
+			if (Main.volume.isFull()) {
+				SDFSLogger.getLog().error("Volume is full");;
 				return Errno.ENOSPC;
+				
+			}
 			try {
 				ch.writeFile(buff, len, 0, offset,true);
 					
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				SDFSLogger.getLog().error("unable to write to block device" + this.devicePath, e);
 				return Errno.EACCES;
 			}
@@ -96,7 +99,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 				SDFSLogger.getLog().warn("disconnect called for " + this.devicePath);
 				ch.getDedupFile().unRegisterChannel(ch, 0);
 				ch.getDedupFile().forceClose();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				SDFSLogger.getLog().error("unable to close " + this.devicePath, e);
 			}
 		}

@@ -137,6 +137,17 @@ public class DSEConfigWriter {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("encrypt"));
 		}
+		if (cmd.hasOption("encryption-key")) {
+			String key = cmd
+					.getOptionValue("encryption-key");
+			if(key.length() < 8) {
+				System.err.println("Encryption Key must be greater than 8 characters");
+				System.exit(-1);
+			} else {
+				this.chunk_store_encryption_key = cmd
+						.getOptionValue("encryption-key");
+			}
+		}
 
 		if (this.awsEnabled) {
 			if (cmd.hasOption("cloud-secret-key")
@@ -414,6 +425,11 @@ public class DSEConfigWriter {
 								+ " For AWS this is a good option to enable. The default for this is"
 								+ " false").hasArg().withArgName("true|false")
 				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("encryption-key")
+						.withDescription(
+								"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long").hasArg().withArgName("String")
+						.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(

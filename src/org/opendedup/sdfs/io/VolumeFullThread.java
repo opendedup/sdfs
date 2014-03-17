@@ -24,7 +24,7 @@ public class VolumeFullThread implements Runnable {
 				Thread.sleep(duration);
 				vol.setVolumeFull(this.isFull());
 			} catch (Exception e) {
-				SDFSLogger.getLog().debug("Unable to check if full.", e);
+				SDFSLogger.getLog().error("Unable to check if full.", e);
 				this.closed = true;
 			}
 		}
@@ -40,12 +40,19 @@ public class VolumeFullThread implements Runnable {
 		}
 		if (vol.fullPercentage < 0 || vol.currentSize.get() == 0)
 			return false;
-		else if ((vol.getCurrentSize()+offset) >= vol.getCapacity())
+		else if ((vol.getCurrentSize()+offset) >= vol.getCapacity()) {
+			SDFSLogger.getLog().warn(
+					"Drive is almost full. Current Size [" + vol.getCurrentSize() + "] and capacity is [" + vol.getCapacity() + "]");
 			return true;
+		}
 		else if((HCServiceProxy.getDSESize() + offset) >= HCServiceProxy.getDSEMaxSize()) {
+			SDFSLogger.getLog().warn(
+					"Drive is almost full. DSE Size [" + HCServiceProxy.getDSESize() + "] and DSE Max Size is [" + HCServiceProxy.getDSEMaxSize() + "]");
 			return true;
 		}
 		else if((HCServiceProxy.getSize() + 10000) >= HCServiceProxy.getMaxSize()) {
+			SDFSLogger.getLog().warn(
+					"Drive is almost full. DSE HashMap Size [" + HCServiceProxy.getSize() + "] and DSE HashMap Max Size is [" + HCServiceProxy.getMaxSize() + "]");
 			return true;
 		}
 		else

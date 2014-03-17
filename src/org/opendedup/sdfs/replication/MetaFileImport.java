@@ -262,7 +262,7 @@ public class MetaFileImport implements Serializable {
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				SDFSLogger.getLog()
 						.warn("error while checking file [" + mapFile.getPath()
 								+ "]", e);

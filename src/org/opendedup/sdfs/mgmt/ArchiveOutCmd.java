@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
@@ -52,11 +53,13 @@ public class ArchiveOutCmd implements Runnable {
 			return evt.toXML();
 		} catch (Exception e) {
 			throw new IOException(e);
+		} finally {
+			
 		}
 	}
 
 	public void run() {
-		String sc = " not successful";
+		String sc = "not successful";
 		try {
 			SDFSEvent sevt = SDFSEvent.snapEvent("Creating Snapshot of "
 					+ srcPath, f);
@@ -64,21 +67,14 @@ public class ArchiveOutCmd implements Runnable {
 			evt.maxCt = 4;
 			evt.addChild(sevt);
 			MetaDataDedupFile mf = null;
-			try {
 				mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false,
 						sevt);
-
-			} catch (Exception e) {
-				sevt.endEvent("unable to create snapshot", SDFSEvent.ERROR, e);
-				throw e;
-			}
 			evt.curCt = 2;
 
 			SDFSEvent eevt = SDFSEvent.archiveOutEvent("Archiving out "
 					+ srcPath);
 			sevt.endEvent("Created Snapshot of " + srcPath);
 			evt.addChild(eevt);
-			try {
 				SDFSLogger.getLog().debug("Created replication snapshot");
 				eevt.maxCt = 3;
 				eevt.curCt = 0;
@@ -95,23 +91,20 @@ public class ArchiveOutCmd implements Runnable {
 				TVFS.umount(dest.getInnerArchive());
 				eevt.curCt = 3;
 				evt.curCt = 4;
-				eevt.endEvent("Archiving out " + srcPath + " successful");
+				
 				if (nft.exists())
 					evt.endEvent("Archive Out complete from " + srcPath
 							+ " to " + nft.getPath());
 				else
 					throw new IOException(nft.getPath() + " does not exist");
+				eevt.endEvent("Archiving out " + srcPath + " successful");
 				sc = "successful";
 
-			} catch (Exception e) {
-				eevt.endEvent("Archiving out " + srcPath + " failed",
-						SDFSEvent.ERROR, e);
-			}
-		} catch (Exception e) {
-			evt.endEvent("Archive Out failed", SDFSEvent.ERROR, e);
+		} catch (Throwable e) {
 			SDFSLogger.getLog().error(
 					"Unable to archive out [" + srcPath + "] because :"
 							+ e.toString(), e);
+			evt.endEvent("Archive Out failed", SDFSEvent.ERROR, e);
 
 		} finally {
 			DeleteDir.deleteDirectory(nf);

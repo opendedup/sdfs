@@ -56,7 +56,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 						boolean encrypt = false;
 						boolean compress = false;
 						boolean lz4compress = false;
-						int size = Integer.parseInt((String)obj.getMetadata("size"));
+						int size = Integer.parseInt((String) obj
+								.getMetadata("size"));
 						int csz = size;
 						if (obj.containsMetadata("encrypt")) {
 							encrypt = Boolean.parseBoolean((String) obj
@@ -66,13 +67,17 @@ public class S3ChunkStore implements AbstractChunkStore {
 							compress = Boolean.parseBoolean((String) obj
 									.getMetadata("compress"));
 						} else if (obj.containsMetadata("lz4compress")) {
-							csz = Integer.parseInt((String)obj.getMetadata("compressedsize"));
+							csz = Integer.parseInt((String) obj
+									.getMetadata("compressedsize"));
 							lz4compress = Boolean.parseBoolean((String) obj
 									.getMetadata("lz4compress"));
 						}
 						int cl = (int) obj.getContentLength();
-						if(cl != csz) {
-							SDFSLogger.getLog().warn("Possible data mismatch size=" + csz + " does not equal content length" +cl);
+						if (cl != csz) {
+							SDFSLogger.getLog().warn(
+									"Possible data mismatch size=" + csz
+											+ " does not equal content length"
+											+ cl);
 						}
 
 						byte[] data = new byte[cl];
@@ -159,15 +164,16 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void close() {
 		RestS3Service s3Service = null;
 		try {
-			
+
 			s3Service = pool.borrowObject();
-			S3Bucket s3Bucket = s3Service.getBucket(this.name);
-			s3Bucket.removeMetadata("currentsize");
-			s3Bucket.addMetadata("currentsize",
+			S3Object obj = s3Service.getObject(this.name, "bucketinfo");
+			obj.removeMetadata("currentsize");
+			obj.addMetadata("currentsize",
 					Long.toString(this.currentLength.get()));
-			s3Bucket.removeMetadata("currentcompressedsize");
-			s3Bucket.addMetadata("currentcompressedsize",
+			obj.removeMetadata("currentcompressedsize");
+			obj.addMetadata("currentcompressedsize",
 					Long.toString(this.compressedLength.get()));
+			s3Service.updateObjectMetadata(this.name, obj);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name,
 					e);
@@ -175,18 +181,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 			try {
 				pool.returnObject(s3Service);
 			} catch (IOException e) {
-				SDFSLogger.getLog().warn("error while closing bucket " + this.name,
-						e);
+				SDFSLogger.getLog().warn(
+						"error while closing bucket " + this.name, e);
 			}
 		}
-		
+
 		try {
 			pool.close();
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name,
 					e);
-		} 
-		
+		}
+
 	}
 
 	public void expandFile(long length) throws IOException {
@@ -280,11 +286,13 @@ public class S3ChunkStore implements AbstractChunkStore {
 		try {
 			this.chunks.invalidate(hashString);
 			s3Service = pool.borrowObject();
-			StorageObject obj = s3Service.getObjectDetails(this.name, hashString);
-			int size = Integer.parseInt((String)obj.getMetadata("size"));
-			int compressedSize = Integer.parseInt((String)obj.getMetadata("compressedsize"));
-			this.currentLength.addAndGet(-1*size);
-			this.compressedLength.addAndGet(-1*compressedSize);
+			StorageObject obj = s3Service.getObjectDetails(this.name,
+					hashString);
+			int size = Integer.parseInt((String) obj.getMetadata("size"));
+			int compressedSize = Integer.parseInt((String) obj
+					.getMetadata("compressedsize"));
+			this.currentLength.addAndGet(-1 * size);
+			this.compressedLength.addAndGet(-1 * compressedSize);
 			s3Service.deleteObject(this.name, hashString);
 		} catch (Exception e) {
 			SDFSLogger.getLog()
@@ -344,52 +352,65 @@ public class S3ChunkStore implements AbstractChunkStore {
 			RestS3Service s3Service = pool.borrowObject();
 
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
+
 			if (s3Bucket == null) {
 				s3Bucket = s3Service.createBucket(this.name);
-				if (Main.compress) {
-					s3Bucket.addMetadata("compress", "true");
-				} else {
-					s3Bucket.addMetadata("compress", "false");
-				}
-				if (Main.chunkStoreEncryptionEnabled) {
-					s3Bucket.addMetadata("encrypt", "true");
-				} else {
-					s3Bucket.addMetadata("encrypt", "false");
-				}
 				SDFSLogger.getLog().info("created new store " + name);
+				S3Object s3Object = new S3Object("bucketinfo");
+				s3Object.addMetadata("currentsize", "-1");
+				s3Object.addMetadata("currentcompressedsize", "-1");
+				s3Service.putObject(this.name, s3Object);
 			} else {
-				if (s3Bucket.containsMetadata("currentsize")) {
-					long cl = Long.parseLong((String) s3Bucket
-							.getMetadata("currentsize"));
-					if (cl >= 0) {
-						this.currentLength.set(cl);
-						s3Bucket.removeMetadata("currentsize");
-						s3Bucket.addMetadata("currentsize", "-1");
-					} else
-						SDFSLogger
-								.getLog()
-								.warn("The S3 objectstore DSE did not close correctly");
-				} else {
-					SDFSLogger
-							.getLog()
-							.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+
+				S3Object obj = null;
+				try {
+					obj = s3Service.getObject(this.name, "bucketinfo");
+				} catch (Exception e) {
+					SDFSLogger.getLog().info(
+							"unable to find bucketinfo object", e);
 				}
-				
-				if (s3Bucket.containsMetadata("currentcompressedsize")) {
-					long cl = Long.parseLong((String) s3Bucket
-							.getMetadata("currentsize"));
-					if (cl >= 0) {
-						this.compressedLength.set(cl);
-						s3Bucket.removeMetadata("currentcompressedsize");
-						s3Bucket.addMetadata("currentcompressedsize", "-1");
-					} else
+				if (obj == null) {
+					S3Object s3Object = new S3Object("bucketinfo");
+					s3Object.addMetadata("currentsize", "-1");
+					s3Object.addMetadata("currentcompressedsize", "-1");
+					s3Service.putObject(this.name, s3Object);
+				} else {
+					if (obj.containsMetadata("currentsize")) {
+						long cl = Long.parseLong((String) obj
+								.getMetadata("currentsize"));
+						if (cl >= 0) {
+							this.currentLength.set(cl);
+							obj.removeMetadata("currentsize");
+							obj.addMetadata("currentsize",
+									Long.toString(-1 * cl));
+						} else
+							SDFSLogger.getLog().warn(
+									"The S3 objectstore DSE did not close correctly len="
+											+ cl);
+					} else {
 						SDFSLogger
 								.getLog()
-								.warn("The S3 objectstore DSE did not close correctly");
-				} else {
-					SDFSLogger
-							.getLog()
-							.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+								.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+					}
+
+					if (obj.containsMetadata("currentcompressedsize")) {
+						long cl = Long.parseLong((String) obj
+								.getMetadata("currentcompressedsize"));
+						if (cl >= 0) {
+							this.compressedLength.set(cl);
+							obj.removeMetadata("currentcompressedsize");
+							obj.addMetadata("currentcompressedsize",
+									Long.toString(-1 * cl));
+						} else
+							SDFSLogger.getLog().warn(
+									"The S3 objectstore DSE did not close correctly clen="
+											+ cl);
+					} else {
+						SDFSLogger
+								.getLog()
+								.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
+					}
+					s3Service.updateObjectMetadata(this.name, obj);
 				}
 			}
 			pool.returnObject(s3Service);
@@ -415,6 +436,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 		if (objPos < obj.length) {
 			boolean encrypt = false;
 			lastKey = obj[objPos].getKey();
+			if(lastKey.equals("bucketinfo")) {
+				objPos++;
+				return getNextChunck();
+			}
+				
 			if (obj[objPos].containsMetadata("encrypt")) {
 				encrypt = Boolean.parseBoolean((String) obj[objPos]
 						.getMetadata("encrypt"));
@@ -482,7 +508,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void deleteDuplicate(byte[] hash, long start, int len)
 			throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

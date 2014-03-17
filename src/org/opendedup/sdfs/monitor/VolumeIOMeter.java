@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.monitor;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -8,18 +9,23 @@ import org.apache.log4j.RollingFileAppender;
 import org.opendedup.logging.JSONVolPerfLayout;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.slf4j.MDC;
+
+import com.sun.management.UnixOperatingSystemMXBean;
 
 public class VolumeIOMeter implements Runnable {
 
 	private Volume vol;
 	private long bytesRead = 0, bytesWritten = 0, virtualBytesWritten = 0,
-			RIOPS = 0, WIOPS = 0, duplicateBytes = 0;
+			RIOPS = 0, WIOPS = 0, duplicateBytes = 0,dseSz=0,dseCompSz=0;
 	private double pbytesRead = 0, pbytesWritten = 0, pvirtualBytesWritten = 0,
 			pRIOPS = 0, pWIOPS = 0, pduplicateBytes = 0;
 	private Logger log = Logger.getLogger("volperflog");
 	private boolean closed = false;
 	Thread th = null;
+	UnixOperatingSystemMXBean perf = (UnixOperatingSystemMXBean) ManagementFactory
+			.getOperatingSystemMXBean();
 
 	public VolumeIOMeter(Volume vol) {
 		RollingFileAppender app = null;
@@ -70,7 +76,19 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("RIOPS", Long.toString(this.RIOPS));
 		this.WIOPS = (long) (vol.getWriteOperations() - this.pWIOPS);
 		this.pWIOPS = vol.getWriteOperations();
+		this.dseSz = HCServiceProxy.getDSESize();
+		this.dseCompSz = HCServiceProxy.getDSECompressedSize();
+		MDC.put("dseSz", Long.toString(this.dseSz));
+		MDC.put("dseCompSz", Long.toString(this.dseCompSz));
 		MDC.put("WIOPS", Long.toString(this.WIOPS));
+		MDC.put("sdfsCpuLoad", Double.toString(perf.getProcessCpuLoad()));
+		MDC.put("sdfsCpuTime", Double.toString(perf.getProcessCpuTime()));
+		MDC.put("systemCpuLoad", Double.toString(perf.getSystemCpuLoad()));
+		MDC.put("systemCpuAverage", Double.toString(perf.getSystemLoadAverage()));
+		MDC.put("freeMemory", Long.toString(perf.getFreePhysicalMemorySize()));
+		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
+		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));
+		MDC.put("totalSwap", Long.toString(perf.getTotalSwapSpaceSize()));
 		log.info(vol.getName());
 		MDC.clear();
 	}
