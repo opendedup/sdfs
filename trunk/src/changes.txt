@@ -3,7 +3,7 @@ Version 2.0-RC1
 	* Fixed VARIABLE_MURMUR3 command line issue.
 	* Fixed Disk full reporting for block device.
 	* Fixed Missing library from replication
-	* Fixed Azure Cloud Storage DSE to conform to 2.0 framework.
+	* Fixed Azure Cloud Storage DSE to conform to 2.0 framework. Azure now uses LZ4 compression
 	Enhancements :
 	* Added event alerting when disk full
 	* Added event alerting when read and write errors
