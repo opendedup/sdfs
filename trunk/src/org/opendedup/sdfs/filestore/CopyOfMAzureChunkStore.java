@@ -41,7 +41,7 @@ import com.microsoft.windowsazure.services.core.storage.StorageException;
  *         this chunk store since S3 charges per http request.
  * 
  */
-public class MAzureChunkStore implements AbstractChunkStore {
+public class CopyOfMAzureChunkStore implements AbstractChunkStore {
 	CloudStorageAccount account;
 	CloudBlobClient serviceClient;
 	CloudBlobContainer container;
@@ -60,13 +60,14 @@ public class MAzureChunkStore implements AbstractChunkStore {
 					try {
 						CloudBlockBlob blob = container
 								.getBlockBlobReference(hashString);
-						
+
 							ByteArrayOutputStream out = new ByteArrayOutputStream(
 									(int) blob.getProperties().getLength());
 							blob.download(out);
+							byte[] data = out.toByteArray();
+							blob.downloadAttributes();
 							HashMap<String, String> metaData = blob
 									.getMetadata();
-							byte[] data = out.toByteArray();
 							int size = 0;
 							if (metaData.containsKey("encrypt")
 									&& metaData.get("encrypt")
@@ -111,7 +112,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		return false;
 	}
 
-	public MAzureChunkStore() {
+	public CopyOfMAzureChunkStore() {
 
 	}
 
@@ -184,7 +185,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		int cl = chunk.length;
 		try {
 
-			CloudBlockBlob blob = container.getBlockBlobReference(hashString);
+				CloudBlockBlob blob = container.getBlockBlobReference(hashString);
 				HashMap<String, String> metaData = new HashMap<String, String>();
 
 				if (Main.compress) {
@@ -301,7 +302,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		Main.chunkStoreEncryptionEnabled = true;
 		Main.chunkStoreEncryptionKey = PassPhrase.getNext();
 
-		MAzureChunkStore store = new MAzureChunkStore();
+		CopyOfMAzureChunkStore store = new CopyOfMAzureChunkStore();
 		store.init();
 		String testTxt = "this is a test";
 		byte[] hash = HashFunctionPool.getHashEngine().getHash(

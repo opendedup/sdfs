@@ -1,11 +1,11 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -18,7 +18,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 public class Config {
 
@@ -440,38 +439,6 @@ public class Config {
 					"Unable to write volume config " + fileName, e);
 		}
 		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
-	}
-
-	public static synchronized void parserLaunchConfig(String fileName)
-			throws IOException {
-		File file = new File(fileName);
-		SDFSLogger.getLog().info("Parsing launch  config " + fileName);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = null;
-		try {
-			db = dbf.newDocumentBuilder();
-		} catch (ParserConfigurationException e1) {
-			SDFSLogger.getLog().fatal(
-					"unable to parse config file [" + fileName + "]", e1);
-			throw new IOException(e1);
-		}
-		Document doc = null;
-		try {
-			doc = db.parse(file);
-		} catch (SAXException e1) {
-			SDFSLogger.getLog().fatal(
-					"unable to parse config file [" + fileName + "]", e1);
-			throw new IOException(e1);
-		}
-		doc.getDocumentElement().normalize();
-		Element launchParams = (Element) doc.getElementsByTagName(
-				"launch-params").item(0);
-		Main.classPath = launchParams.getAttribute("class-path");
-		SDFSLogger.getLog().info("SDFS Classpath=" + Main.javaPath);
-		Main.javaOptions = launchParams.getAttribute("java-options");
-		SDFSLogger.getLog().info("SDFS Java options=" + Main.javaOptions);
-		Main.javaPath = launchParams.getAttribute("java-path");
-		SDFSLogger.getLog().info("SDFS java path=" + Main.javaPath);
 	}
 
 }

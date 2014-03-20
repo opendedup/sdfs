@@ -67,6 +67,9 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type PERFMON = new Type("Performance Monitor");
 	public transient static final Type TEST = new Type("Testing 123");
 	public transient static final Type CONVMAP = new Type("CONVMAP");
+	public transient static final Type DSKFL = new Type("Disk Full");
+	public transient static final Type RDER = new Type("Read Error");
+	public transient static final Type WER = new Type("Write Error");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
@@ -136,6 +139,16 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
+	
+	public void endEvent() {
+		for (int i = 0; i < this.children.size(); i++) {
+			if (this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent();
+		}
+		this.endTime = System.currentTimeMillis();
+		this.curCt = this.maxCt;
+		SDFSEventLogger.log(this);
+	}
 
 	public static SDFSEvent archiveImportEvent(String shortMsg, SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(AIMPORT, getTarget(), shortMsg, RUNNING);
@@ -154,6 +167,18 @@ public class SDFSEvent implements java.io.Serializable {
 	public static SDFSEvent convMapEvent(String shortMsg,String file) {
 		SDFSEvent event = new SDFSEvent(CONVMAP, file, shortMsg, RUNNING);
 		return event;
+	}
+	
+	public static void rdErrEvent() {
+		SDFSEvent event = new SDFSEvent(RDER, getTarget(), "Read Error Detected",ERROR);
+		event.maxCt=1;
+		event.endEvent();
+	}
+	
+	public static void wrErrEvent() {
+		SDFSEvent event = new SDFSEvent(WER, getTarget(), "Write Error Detected",ERROR);
+		event.maxCt=1;
+		event.endEvent();
 	}
 
 	public static SDFSEvent testEvent(String shortMsg) {
