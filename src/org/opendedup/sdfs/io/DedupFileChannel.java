@@ -321,8 +321,7 @@ public class DedupFileChannel {
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.mf.getPath() + " "
 							+ e.toString(), e);
-			// TODO : fix rollback
-			// df.rollBack();
+			Main.volume.addWriteError();
 			throw new IOException("error while writing to " + this.mf.getPath()
 					+ " " + e.toString());
 		} finally {
@@ -472,6 +471,7 @@ public class DedupFileChannel {
 			return read;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read " + mf.getPath(), e);
+			Main.volume.addReadError();
 			throw new IOException(e);
 		} finally {
 			// this.removeAio();

@@ -14,6 +14,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.VolumeSocket;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StorageUnit;
@@ -59,7 +60,8 @@ public class Volume implements java.io.Serializable {
 	private byte clusterCopies = 2;
 	private boolean clusterRackAware = false;
 	public Address host = null;
-
+	AtomicLong writeErrors=new AtomicLong(0);
+	AtomicLong readErrors=new AtomicLong(0);
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
@@ -76,6 +78,20 @@ public class Volume implements java.io.Serializable {
 
 	public void setVolumeFull(boolean full) {
 		this.volumeFull = full;
+	}
+	
+	public void addWriteError() {
+		long z = this.writeErrors.getAndIncrement();
+		if(z ==0) {
+			SDFSEvent.wrErrEvent();
+		}
+	}
+	
+	public void addReadError() {
+		long z = this.readErrors.getAndIncrement();
+		if(z ==0) {
+			SDFSEvent.rdErrEvent();
+		}
 	}
 
 	public boolean isAllowExternalSymlinks() {
@@ -521,6 +537,8 @@ public class Volume implements java.io.Serializable {
 				Long.toString(HCServiceProxy.getDSECompressedSize()));
 		root.setAttribute("readops", Double.toString(this.readOperations.get()));
 		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
+		root.setAttribute("readerrors", Long.toString(this.readErrors.get()));
+		root.setAttribute("writeerrors", Long.toString(this.writeErrors.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links",
