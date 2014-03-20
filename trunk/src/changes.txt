@@ -1,3 +1,19 @@
+Version 2.0-RC1
+	Fixes :
+	* Fixed VARIABLE_MURMUR3 command line issue.
+	* Fixed Disk full reporting for block device.
+	* Fixed Missing library from replication
+	* Fixed Azure Cloud Storage DSE to conform to 2.0 framework.
+	Enhancements :
+	* Added event alerting when disk full
+	* Added event alerting when read and write errors
+Version 2.0-beta5
+	Enhancements:
+	* Variable block deduplication. Rabin Windowing used to create variable block chunks for storage. Currently this method only
+	works for local storage and cloud storage. It will not work for clustered dse configuration. To enable this feature use mkfs.sdfs --hash-type=VARIABLE_MURMUR3
+	* Variable block compression. LZ4 is now used for all variable block compression
+	* Improved cloud storage performance for aws. Using variable block storage perfomance improves by 2x.
+	* Better block storage reporting sdfs.cli now will report on compressed blocks and actual blocks stored.
 Version 2.0-beta3
 	Fixes:
 	* Fixed reclaim for file based chunkstore
