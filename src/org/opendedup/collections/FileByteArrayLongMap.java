@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
@@ -40,6 +42,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	private boolean closed = false;
 	private BitSet claims = null;
 	private BitSet mapped = null;
+	private AtomicInteger sz = new AtomicInteger(0);
 	long bgst = 0;
 
 	static {
@@ -251,6 +254,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 		if (!closedCorrectly)
 			this.recreateMap();
+		this.sz.set(this.mapped.cardinality());
 		_bpos.seek(0);
 		_bpos.writeLong(-1);
 		_bpos.close();
@@ -377,6 +381,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 					pos = (pos / 8);
 					this.claims.clear(pos);
 					this.mapped.clear(pos);
+					this.sz.decrementAndGet();
 					// this.store.position(pos);
 					// this.store.put((byte)0);
 					return true;
@@ -561,7 +566,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	public boolean put(byte[] key, long value) throws HashtableFullException {
 		try {
 			this.hashlock.lock();
-			if (this.mapped.cardinality() >= size)
+			if (this.sz.get() >= size)
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
@@ -579,6 +584,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 			pos = (pos / 8);
 			this.claims.set(pos);
 			this.mapped.set(pos);
+			this.sz.incrementAndGet();
 			// this.store.position(pos);
 			// this.store.put(storeID);
 			return pos > -1 ? true : false;
@@ -594,7 +600,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 */
 	@Override
 	public int getEntries() {
-		return this.mapped.cardinality();
+		return this.sz.get();
 	}
 
 	/*
@@ -648,7 +654,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 */
 	@Override
 	public int size() {
-		return this.mapped.cardinality();
+		return this.sz.get();
 	}
 
 	/*
@@ -857,6 +863,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 							this.times.putLong(0);
 							this.claims.clear(iterPos);
 							this.mapped.clear(iterPos);
+							this.sz.decrementAndGet();
 							return val;
 						}
 					}
