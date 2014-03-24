@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -267,9 +268,8 @@ public class LongByteArrayMap implements DataMapInterface {
 					flen = dbFile.length();
 				}
 				rf = new RandomAccessFile(filePath, "rw");
-				pbdb = (FileChannelImpl) Files.newByteChannel(bdbf,
-						StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-						StandardOpenOption.READ, StandardOpenOption.SPARSE);
+				
+				pbdb = (FileChannelImpl) rf.getChannel();
 				ByteBuffer buf = ByteBuffer.allocate(3);
 				pbdb.position(0);
 				pbdb.read(buf);
