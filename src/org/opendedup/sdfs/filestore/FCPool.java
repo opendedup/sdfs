@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.lucene.store.NativePosixUtil;
 import org.opendedup.logging.SDFSLogger;
 
 public class FCPool {
@@ -93,7 +93,9 @@ public class FCPool {
 
 	public FileChannel makeObject() throws IOException {
 		@SuppressWarnings("resource")
-		FileChannel hc = new RandomAccessFile(this.f, "rw").getChannel();
+		RandomAccessFile rf = new RandomAccessFile(this.f, "rw");
+		NativePosixUtil.advise(rf.getFD(), 0, 0, NativePosixUtil.DONTNEED);
+		FileChannel hc = rf.getChannel();
 		return hc;
 	}
 
