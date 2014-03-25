@@ -84,13 +84,15 @@ public class WriteTest implements Runnable {
 		Files.deleteIfExists(ps);
 	}
 
-	public static float[] test(String path, int size, int unique, int runs) {
+	public static float[] test(String path, int size, int unique, int runs,int start) {
 		WriteTest[] tests = new WriteTest[runs];
 		float results[] = new float[runs];
-		for (int i = 0; i < tests.length; i++) {
+		int t = 0;
+		for (int i = start; i < (start+ tests.length); i++) {
 			WriteTest test = new WriteTest(path + File.separator + "test" + i
 					+ ".bin", size, unique);
-			tests[i] = test;
+			tests[t] = test;
+			t++;
 		}
 		boolean finished = false;
 		
@@ -179,8 +181,9 @@ public class WriteTest implements Runnable {
 		}
 		int r = Integer.parseInt(args[4]);
 		for (int i = 0; i < r; i++) {
+			int start = i * Integer.parseInt(args[3]);
 			float[] results = test(args[0], Integer.parseInt(args[1]),
-					Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+					Integer.parseInt(args[2]), Integer.parseInt(args[3]),start);
 
 			String testName = args[5];
 			String logFileName = args[6];
