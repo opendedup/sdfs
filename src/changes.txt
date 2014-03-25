@@ -4,9 +4,12 @@ Version 2.0-RC1
 	* Fixed Disk full reporting for block device.
 	* Fixed Missing library from replication
 	* Fixed Azure Cloud Storage DSE to conform to 2.0 framework. Azure now uses LZ4 compression
+	* recompiled fuse, java fuse, buse, and java buse c libs.
 	Enhancements :
 	* Added event alerting when disk full
 	* Added event alerting when read and write errors
+	* Added required fuse library to distribution /bin directory so SDFS no longer requires update of fuse libs.
+	* Updated required java jar libraries to later versions
 Version 2.0-beta5
 	Enhancements:
 	* Variable block deduplication. Rabin Windowing used to create variable block chunks for storage. Currently this method only
