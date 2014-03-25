@@ -242,6 +242,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		return this.st[FactorTest.closest2Pos(sz, this.storeLengths)];
 	}
 
+	long smallestFree = 0;
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
@@ -280,10 +281,12 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			long pos = -1;
 			reservePositionlock.lock();
 			if (this.freeSlots != null) {
-				pos = this.freeSlots.nextSetBit(0);
+				pos = this.freeSlots.nextSetBit(smallestFree);
 				if (pos < 0) {
 					this.freeSlots = null;
+					this.smallestFree = 0;
 				} else {
+					this.smallestFree = pos;
 					this.freeSlots.clear(pos);
 					pos = pos * (long) this.iPageSize;
 				}
@@ -401,9 +404,14 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		try {
 			if (this.closed)
 				throw new IOException("ChunkStore is closed");
-			if (this.freeSlots == null)
+			if (this.freeSlots == null) {
 				this.freeSlots = new OpenBitSet();
-			this.freeSlots.set(start / ((long) this.iPageSize));
+				this.smallestFree = 0;
+			}
+			long ps = start / ((long) this.iPageSize);
+			this.freeSlots.set(ps);
+			if(this.smallestFree > ps)
+				this.smallestFree = ps-1;
 
 		} finally {
 			reservePositionlock.unlock();
