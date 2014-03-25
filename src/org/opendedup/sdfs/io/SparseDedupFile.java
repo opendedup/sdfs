@@ -421,7 +421,7 @@ public class SparseDedupFile implements DedupFile {
 							}
 							if (l.getDN() < fs.size()) {
 								synchronized (l) {
-									l.wait(30000);
+									l.wait();
 								}
 							}
 							if (l.getDN() < fs.size())
