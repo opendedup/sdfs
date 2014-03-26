@@ -1,8 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -57,8 +55,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads*2,
-			10, TimeUnit.SECONDS, worksQueue, executionHandler);
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
+			Main.writeThreads, Main.writeThreads * 2, 10, TimeUnit.SECONDS,
+			worksQueue, executionHandler);
 	static {
 		executor.allowCoreThreadTimeOut(true);
 	}
@@ -192,16 +191,19 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	public byte[] getReadChunk() throws IOException {
 		this.lock.lock();
 		try {
-			this.initBuffer();
+			try {
+				this.initBuffer();
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
 			return buf;
 		} finally {
 			this.lock.unlock();
 		}
 	}
 
-	private void initBuffer() {
+	private void initBuffer() throws IOException, InterruptedException {
 		if (this.buf == null) {
-			try {
 				if (HashFunctionPool.max_hash_cluster > 1) {
 					ByteBuffer hcb = ByteBuffer
 							.wrap(new byte[Main.CHUNK_LENGTH]);
@@ -219,9 +221,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 							sh.h = _hash;
 							sh.hl = _hl;
 							sh.pos = i;
-							cks.add(i,sh);
-						}
-						else
+							cks.add(i, sh);
+						} else
 							break;
 					}
 					sz = cks.size();
@@ -229,51 +230,73 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 						@Override
 						public void commandException(Exception e) {
-								int _dn =this.incrementandGetDN();
-								this.incrementAndGetDNEX();
-								SDFSLogger.getLog().error("Error while getting hash", e);
-								if (_dn >= sz) {
-									synchronized (this) {
-										this.notify();
-									}
+							int _dn = this.incrementandGetDN();
+							this.incrementAndGetDNEX();
+							SDFSLogger.getLog().error(
+									"Error while getting hash", e);
+							if (_dn >= sz) {
+								synchronized (this) {
+									this.notifyAll();
 								}
-								
+							}
 
 						}
 
 						@Override
 						public void commandResponse(Shard result) {
-							int _dn =this.incrementandGetDN();
+							int _dn = this.incrementandGetDN();
 							cks.get(result.pos).ck = result.ck;
-								if (_dn >= sz) {
+							if (_dn >= sz) {
 
-									synchronized (this) {
-										this.notify();
-									}
+								synchronized (this) {
+									this.notifyAll();
 								}
+							}
 						}
 
 					};
-					for(Shard sh: cks) {
+					for (Shard sh : cks) {
 						sh.l = l;
 						executor.execute(sh);
 					}
+					int loops = 6;
+					int wl = 0;
+					int tm = 10000;
 					if (l.getDN() < sz) {
-						synchronized (l) {
-							l.wait(10000);
+						if (wl > 0) {
+							int nt = (tm * wl) / 1000;
+							SDFSLogger
+									.getLog()
+									.warn("Slow io, waited ["
+											+ nt
+											+ "] seconds for all reads to complete.");
 						}
+						if (wl > loops) {
+							int nt = (tm * wl) / 1000;
+							throw new IOException("read Timed Out after ["
+									+ nt + "] seconds. Expected [" + sz
+									+ "] block read but only [" + l.getDN()
+									+ "] were completed");
+						}
+						synchronized (l) {
+							l.wait(tm);
+						}
+						wl++;
 					}
 					if (l.getDN() < sz)
 						SDFSLogger.getLog().warn(
-								"thread timed out before write was complete ");
+								"thread timed out before read was complete ");
 					hcb.position(0);
-					for(Shard sh: cks) {
-						
+					for (Shard sh : cks) {
+
 						try {
-						hcb.put(sh.ck);
-						}catch(Exception e) {
-							//SDFSLogger.getLog().info("pos = " + this.position + "ck sz=" + sh.ck.length + " hcb sz=" + hcb.position() + " cks sz=" +cks.size() + " len=" + (hcb.position() +sh.ck.length));
-							throw e;
+							hcb.put(sh.ck);
+						} catch (Exception e) {
+							// SDFSLogger.getLog().info("pos = " + this.position
+							// + "ck sz=" + sh.ck.length + " hcb sz=" +
+							// hcb.position() + " cks sz=" +cks.size() + " len="
+							// + (hcb.position() +sh.ck.length));
+							throw new IOException(e);
 						}
 					}
 					this.buf = hcb.array();
@@ -281,12 +304,6 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 					this.buf = HCServiceProxy.fetchChunk(this.getHash(),
 							this.hashloc);
 				}
-			} catch (Exception e) {
-				buf = new byte[Main.CHUNK_LENGTH];
-				SDFSLogger.getLog().fatal(
-						"unable to get chunk bytes for " + this.getHash()
-								+ " at position " + this.getFilePosition(), e);
-			}
 		}
 	}
 
@@ -332,7 +349,11 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		if (this.flushing)
 			throw new BufferClosedException("Buffer Flushing");
 		try {
-			this.initBuffer();
+			try {
+				this.initBuffer();
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
 			return buf;
 		} finally {
 			this.lock.unlock();
@@ -362,7 +383,11 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			if (pos == 0 && b.length == Main.CHUNK_LENGTH) {
 				this.buf = b;
 			} else {
-				this.initBuffer();
+				try {
+					this.initBuffer();
+				} catch (InterruptedException e) {
+					throw new IOException(e);
+				}
 				ByteBuffer _buff = ByteBuffer.wrap(buf);
 				_buff.position(pos);
 				_buff.put(b);
@@ -811,7 +836,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
 			try {
 				e.getQueue().put(r);
-			} catch (InterruptedException e1) {
+			} catch (Exception e1) {
 				SDFSLogger
 						.getLog()
 						.error("Work discarded, thread was interrupted while waiting for space to schedule: {}",
@@ -826,6 +851,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		byte[] h;
 		byte[] ck;
 		AsyncChunkReadActionListener l;
+
 		@Override
 		public void run() {
 			try {

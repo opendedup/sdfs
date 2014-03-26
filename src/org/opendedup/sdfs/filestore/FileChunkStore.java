@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -8,7 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.lucene.store.NativePosixUtil;
+//import org.apache.lucene.store.NativePosixUtil;
 import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.AbstractHashEngine;
@@ -169,7 +170,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			NativePosixUtil.advise(chunkDataWriter.getFD(), 0, 0, NativePosixUtil.SEQUENTIAL);
+			//NativePosixUtil.advise(chunkDataWriter.getFD(), 0, 0, NativePosixUtil.SEQUENTIAL);
 			this.currentLength=chunkDataWriter.length();
 			this.closed = false;
 			pool = new FCPool(f, 100);
@@ -371,7 +372,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.smallestFree = 0;
 		}
 		if(this.smallestFree > pos)
-			this.smallestFree = pos-1;
+			this.smallestFree = pos;
 		this.freeSlots.ensureCapacity(pos);
 		this.freeSlots.set(pos);
 		this.rlock.unlock();

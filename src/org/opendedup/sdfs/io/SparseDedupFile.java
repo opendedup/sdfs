@@ -66,12 +66,12 @@ public class SparseDedupFile implements DedupFile {
 	private transient final ConcurrentHashMap<Long, DedupChunkInterface> flushingBuffers = new ConcurrentHashMap<Long, DedupChunkInterface>(
 			1024, .75f,Main.writeThreads*2);
 	private static transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+			HashFunctionPool.max_hash_cluster);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads*2, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
+			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	static {
-		executor.allowCoreThreadTimeOut(true);
+		//executor.allowCoreThreadTimeOut(true);
 	}
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
@@ -395,19 +395,17 @@ public class SparseDedupFile implements DedupFile {
 											"Error while getting hash", e);
 									if (_dn >= this.getMaxSz()) {
 										synchronized (this) {
-											this.notify();
+											this.notifyAll();
 										}
 									}
-
 								}
 
 								@Override
 								public void commandResponse(Finger result) {
 									int _dn = this.incrementandGetDN();
 									if (_dn >= this.getMaxSz()) {
-
 										synchronized (this) {
-											this.notify();
+											this.notifyAll();
 										}
 									}
 								}
@@ -419,13 +417,25 @@ public class SparseDedupFile implements DedupFile {
 								f.dedup = mf.isDedup();
 								executor.execute(f);
 							}
-							if (l.getDN() < fs.size()) {
-								synchronized (l) {
-									l.wait();
-								}
+							int loops = 6;
+							int wl = 0;
+							int tm = 10000;
+							while (l.getDN() < fs.size()) {
+									if(wl > 0) {
+										int nt = (tm * wl)/1000;
+										SDFSLogger.getLog().warn("Slow io, waited [" + nt+"] seconds for all writes to complete.");
+									}
+									if(wl > loops) {
+										int nt = (tm * wl)/1000;
+										throw new IOException("Write Timed Out after ["+ nt+"] seconds. Expected [" + fs.size() + "] block writes but only [" + l.getDN() + "] were completed");
+									}
+									synchronized(l) {
+									l.wait(tm);
+									}
+									wl++;
 							}
-							if (l.getDN() < fs.size())
-								throw new IOException("Write Timed Out");
+							if (l.getDN() < fs.size()) 
+								throw new IOException("Write Timed Out expected [" + fs.size() + "] but got [" + l.getDN() + "]");
 							if (l.getDNEX() > 0)
 								throw new IOException("Write Failed");
 							// SDFSLogger.getLog().info("broke data up into " +
