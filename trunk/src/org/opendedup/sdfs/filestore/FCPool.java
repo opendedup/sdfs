@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.lucene.store.NativePosixUtil;
+//import org.apache.lucene.store.NativePosixUtil;
 import org.opendedup.logging.SDFSLogger;
 
 public class FCPool {
@@ -33,9 +34,7 @@ public class FCPool {
 
 				this.passiveObjects.add(this.makeObject());
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to get object out of pool ",
-						e);
-				throw new IOException(e.toString());
+				throw new IOException(e);
 
 			} finally {
 			}
@@ -57,8 +56,7 @@ public class FCPool {
 		try {
 			this.activeObjects.add(hc);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
-			throw new IOException(e.toString());
+			throw new IOException(e);
 
 		} finally {
 			alock.unlock();
@@ -84,8 +82,7 @@ public class FCPool {
 				if(!inserted)
 					hc.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
-			throw new IOException(e.toString());
+			throw new IOException(e);
 
 		} finally {
 		}
@@ -94,7 +91,7 @@ public class FCPool {
 	public FileChannel makeObject() throws IOException {
 		@SuppressWarnings("resource")
 		RandomAccessFile rf = new RandomAccessFile(this.f, "rw");
-		NativePosixUtil.advise(rf.getFD(), 0, 0, NativePosixUtil.DONTNEED);
+		//NativePosixUtil.advise(rf.getFD(), 0, 0, NativePosixUtil.DONTNEED);
 		FileChannel hc = rf.getChannel();
 		return hc;
 	}

@@ -396,7 +396,6 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.size.addAndGet(-1 * cLen);
 			this.compressedLength.addAndGet(-1*iLen);
 			rf.write(ByteBuffer.wrap(iFree), start);
-
 		} finally {
 			pool.returnObject(rf);
 		}
@@ -410,8 +409,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			}
 			long ps = start / ((long) this.iPageSize);
 			this.freeSlots.set(ps);
-			if(this.smallestFree > ps)
-				this.smallestFree = ps-1;
+			if(this.smallestFree > ps) {
+				this.smallestFree = ps;
+			}
 
 		} finally {
 			reservePositionlock.unlock();
