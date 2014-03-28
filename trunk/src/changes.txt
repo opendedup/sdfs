@@ -1,3 +1,10 @@
+Version 2.0-RC2
+	Fixes :
+	* Fixed Redhat/Centos 6.5 Library dependency issue
+	* Fixed write failures due to slow disk subsystem. This issue only effects Variable Block Deduplication
+	* Fixed slow performance for large volumes due to the impact of bitmap scans for every put
+	* Fixed sync error loop in FileStore
+	* Fixed replication script to point to updated libraries. 
 Version 2.0-RC1
 	Fixes :
 	* Fixed VARIABLE_MURMUR3 command line issue.
