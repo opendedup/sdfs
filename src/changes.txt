@@ -4,7 +4,8 @@ Version 2.0-RC2
 	* Fixed write failures due to slow disk subsystem. This issue only effects Variable Block Deduplication
 	* Fixed slow performance for large volumes due to the impact of bitmap scans for every put
 	* Fixed sync error loop in FileStore
-	* Fixed replication script to point to updated libraries. 
+	* Fixed replication script to point to updated libraries.
+	* Fixed  Rabin hashing memory allocation performance issue.
 Version 2.0-RC1
 	Fixes :
 	* Fixed VARIABLE_MURMUR3 command line issue.
