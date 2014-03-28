@@ -25,7 +25,7 @@ public class VolumeFullThread implements Runnable {
 				Thread.sleep(duration);
 				vol.setVolumeFull(this.isFull());
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to check if full.", e);
+				SDFSLogger.getLog().debug("Unable to check if full.", e);
 				this.closed = true;
 			}
 		}
@@ -49,8 +49,6 @@ public class VolumeFullThread implements Runnable {
 		}catch(Throwable e) {
 			SDFSLogger.getLog().error("error creating disk full event",e);
 		}
-		
-		
 	}
 	
 	private long offset = Main.CHUNK_LENGTH*1024*10;

@@ -95,7 +95,7 @@ public class ManualGC {
 			HCServiceProxy.processHashClaims(evt);
 			evt.curCt = 66;
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
 			evt.endEvent(
 					"SDFS Volume Cleanup Failed because " + e.getMessage(),

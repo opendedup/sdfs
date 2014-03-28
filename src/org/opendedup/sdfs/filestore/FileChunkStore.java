@@ -93,7 +93,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to open filestore", e);
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -133,7 +135,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to open filestore" + fpath, e);
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -177,7 +181,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to open filestore" + fpath, e);
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
@@ -187,7 +193,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#closeStore()
 	 */
 	public void closeStore() {
-
+		SDFSLogger.getLog().info("Closing chunkstore " +this.name);
 		try {
 			this.chunkDataWriter.getFD().sync();
 
@@ -466,7 +472,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					Thread.sleep(interval);
 					store.sync();
 				} catch (IOException e) {
-					SDFSLogger.getLog().warn("Unable to flush FileChunkStore ",
+					SDFSLogger.getLog().debug("Unable to flush FileChunkStore ",
 							e);
 				} catch (InterruptedException e) {
 					break;
