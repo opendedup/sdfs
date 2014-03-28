@@ -126,7 +126,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				st[i] = store;
 			}
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to open variable filestore", e);
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
