@@ -64,14 +64,15 @@ public class SparseDedupFile implements DedupFile {
 	private LargeLongByteArrayMap chunkStore = null;
 	private int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final ConcurrentHashMap<Long, DedupChunkInterface> flushingBuffers = new ConcurrentHashMap<Long, DedupChunkInterface>(
-			1024, .75f,Main.writeThreads*2);
+			1024, .75f, Main.writeThreads * 2);
 	private static transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			HashFunctionPool.max_hash_cluster);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
+			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+			worksQueue, executionHandler);
 	static {
-		//executor.allowCoreThreadTimeOut(true);
+		// executor.allowCoreThreadTimeOut(true);
 	}
 
 	LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
@@ -125,8 +126,10 @@ public class SparseDedupFile implements DedupFile {
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		// SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" +
 		// this.maxWriteBuffers);
-		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
-		SDFSLogger.getLog().debug("LRU Size is " + (maxWriteBuffers + 1));
+		if (SDFSLogger.isDebug()) {
+			SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath());
+			SDFSLogger.getLog().debug("LRU Size is " + (maxWriteBuffers + 1));
+		}
 		this.mf = mf;
 		if (mf.getDfGuid() == null) {
 			// new Instance
@@ -185,9 +188,11 @@ public class SparseDedupFile implements DedupFile {
 					+ _df.GUID + ".map");
 			File _dbc = new File(_directory.getPath() + File.separator
 					+ _df.GUID + ".chk");
-			SDFSLogger.getLog().debug("Snap folder is " + _directory);
-			SDFSLogger.getLog().debug("Snap map is " + _dbf);
-			SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
+			if (SDFSLogger.isDebug()) {
+				SDFSLogger.getLog().debug("Snap folder is " + _directory);
+				SDFSLogger.getLog().debug("Snap map is " + _dbf);
+				SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
+			}
 			bdb.copy(_dbf.getPath());
 			chunkStore.copy(_dbc.getPath());
 
@@ -295,9 +300,10 @@ public class SparseDedupFile implements DedupFile {
 	public int writeCache() throws IOException, HashtableFullException {
 		this.writeLock.lock();
 		try {
-			SDFSLogger.getLog().debug(
-					"Flushing Cache of for " + mf.getPath() + " of size "
-							+ this.writeBuffers.size());
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"Flushing Cache of for " + mf.getPath() + " of size "
+								+ this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
 			int z = this.flushingBuffers.size();
 			int i = 0;
@@ -380,7 +386,7 @@ public class SparseDedupFile implements DedupFile {
 								.getHashLenth()
 								* HashFunctionPool.max_hash_cluster];
 						byte[] hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
-						
+
 						try {
 							List<Finger> fs = hc.getChunks(writeBuffer
 									.getFlushedBuffer());
@@ -421,21 +427,35 @@ public class SparseDedupFile implements DedupFile {
 							int wl = 0;
 							int tm = 10000;
 							while (l.getDN() < fs.size()) {
-									if(wl > 0) {
-										int nt = (tm * wl)/1000;
-										SDFSLogger.getLog().warn("Slow io, waited [" + nt+"] seconds for all writes to complete.");
-									}
-									if(wl > loops) {
-										int nt = (tm * wl)/1000;
-										throw new IOException("Write Timed Out after ["+ nt+"] seconds. Expected [" + fs.size() + "] block writes but only [" + l.getDN() + "] were completed");
-									}
-									synchronized(l) {
+								if (wl > 0) {
+									int nt = (tm * wl) / 1000;
+									SDFSLogger
+											.getLog()
+											.warn("Slow io, waited ["
+													+ nt
+													+ "] seconds for all writes to complete.");
+								}
+								if (wl > loops) {
+									int nt = (tm * wl) / 1000;
+									throw new IOException(
+											"Write Timed Out after ["
+													+ nt
+													+ "] seconds. Expected ["
+													+ fs.size()
+													+ "] block writes but only ["
+													+ l.getDN()
+													+ "] were completed");
+								}
+								synchronized (l) {
 									l.wait(tm);
-									}
-									wl++;
+								}
+								wl++;
 							}
-							if (l.getDN() < fs.size()) 
-								throw new IOException("Write Timed Out expected [" + fs.size() + "] but got [" + l.getDN() + "]");
+							if (l.getDN() < fs.size())
+								throw new IOException(
+										"Write Timed Out expected ["
+												+ fs.size() + "] but got ["
+												+ l.getDN() + "]");
 							if (l.getDNEX() > 0)
 								throw new IOException("Write Failed");
 							// SDFSLogger.getLog().info("broke data up into " +
@@ -671,10 +691,11 @@ public class SparseDedupFile implements DedupFile {
 					long wt = System.currentTimeMillis() - tm;
 					this.bdb.sync();
 					long st = System.currentTimeMillis() - tm - wt;
-					SDFSLogger.getLog().debug(
-							"Sync wb=[" + wsz + "] fb=[" + fsz
-									+ "] write fush [" + wt + "] bd sync ["
-									+ st + "]");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"Sync wb=[" + wsz + "] fb=[" + fsz
+										+ "] write fush [" + wt + "] bd sync ["
+										+ st + "]");
 				} finally {
 				}
 			} else {
@@ -838,7 +859,8 @@ public class SparseDedupFile implements DedupFile {
 		this.writeLock.lock();
 		try {
 			if (!this.closed) {
-				SDFSLogger.getLog().debug("Closing [" + mf.getPath() + "]");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("Closing [" + mf.getPath() + "]");
 				if (Main.safeClose) {
 					try {
 						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
@@ -862,7 +884,9 @@ public class SparseDedupFile implements DedupFile {
 				}
 				try {
 					int nwb = this.writeCache();
-					SDFSLogger.getLog().debug("Flushed " + nwb + " buffers");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog()
+								.debug("Flushed " + nwb + " buffers");
 
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
@@ -885,7 +909,8 @@ public class SparseDedupFile implements DedupFile {
 				mf.setDedupFile(this);
 				mf.sync();
 			}
-			SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
 		} catch (Exception e) {
 
 			SDFSLogger.getLog().error("error closing " + mf.getPath(), e);
@@ -1049,7 +1074,9 @@ public class SparseDedupFile implements DedupFile {
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		SDFSLogger.getLog().debug("removing for dups within " + mf.getPath());
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					"removing for dups within " + mf.getPath());
 		long doops = 0;
 		long records = 0;
 		while (l > -1) {
@@ -1086,9 +1113,10 @@ public class SparseDedupFile implements DedupFile {
 		if (this.buffers.size() == 0) {
 			this.forceClose();
 		}
-		SDFSLogger.getLog().debug(
-				"Checked [" + records + "] blocks found [" + doops
-						+ "] new duplicate blocks");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					"Checked [" + records + "] blocks found [" + doops
+							+ "] new duplicate blocks");
 	}
 
 	private void checkForDups() throws IOException, FileClosedException {
@@ -1097,7 +1125,8 @@ public class SparseDedupFile implements DedupFile {
 		}
 		bdb.iterInit();
 		Long l = bdb.nextKey();
-		SDFSLogger.getLog().debug("checking for dups");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("checking for dups");
 		long doops = 0;
 		long records = 0;
 		long localRec = 0;
@@ -1136,10 +1165,11 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			this.chunkStore.unlockCollection();
 		}
-		SDFSLogger.getLog().debug(
-				"Checked [" + records + "] blocks found [" + doops
-						+ "] new duplicate blocks from [" + localRec
-						+ "] local records last key was [" + pos + "]");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					"Checked [" + records + "] blocks found [" + doops
+							+ "] new duplicate blocks from [" + localRec
+							+ "] local records last key was [" + pos + "]");
 	}
 
 	/*

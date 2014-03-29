@@ -88,8 +88,7 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			long tm = System.currentTimeMillis() - ms;
 			return hcService.removeStailHashes(tm, forceRun, evt);
-		}
-		else {
+		} else {
 			RemoveChunksCmd cmd = new RemoveChunksCmd(ms, forceRun, evt);
 			cmd.executeCmd(cs);
 			return cmd.removedHashesCount();
@@ -109,7 +108,8 @@ public class HCServiceProxy {
 				hcService.init();
 				File file = new File(Main.hashDBStore + File.separator
 						+ ".lock");
-				if (Main.runConsistancyCheck && (!Main.closedGracefully || file.exists())) {
+				if (Main.runConsistancyCheck
+						&& (!Main.closedGracefully || file.exists())) {
 					hcService.runConsistancyCheck();
 				}
 				touchRunFile();
@@ -149,7 +149,7 @@ public class HCServiceProxy {
 			return socket.getCurrentSize();
 		}
 	}
-	
+
 	public static long getDSESize() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.getChunkStore().size();
@@ -157,7 +157,7 @@ public class HCServiceProxy {
 			return socket.getCurrentDSESize();
 		}
 	}
-	
+
 	public static long getDSECompressedSize() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.getChunkStore().compressedSize();
@@ -165,7 +165,7 @@ public class HCServiceProxy {
 			return socket.getCurrentDSECompSize();
 		}
 	}
-	
+
 	public static long getDSEMaxSize() {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.getChunkStore().maxSize();
@@ -223,14 +223,16 @@ public class HCServiceProxy {
 						Main.volume.getClusterCopies(), ignoredHosts);
 
 				cmd.executeCmd(socket);
-				SDFSLogger.getLog().debug(
-						"wrote data when found some but not all");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"wrote data when found some but not all");
 				return cmd.reponse();
 			} else {
 				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 						Main.volume.getClusterCopies());
 				cmd.executeCmd(socket);
-				SDFSLogger.getLog().debug("wrote data when found none");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("wrote data when found none");
 
 				return cmd.reponse();
 			}
@@ -239,22 +241,23 @@ public class HCServiceProxy {
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
 			byte[] hashloc) throws IOException {
-		
+
 		int tries = 0;
-		while(true) {
+		while (true) {
 			try {
 				return _write(hash, aContents, hashloc);
-			} catch(IOException e) {
+			} catch (IOException e) {
 				tries++;
-				if(tries > 10) {
+				if (tries > 10) {
 					throw e;
 				}
 			} catch (RedundancyNotMetException e) {
 				tries++;
 				hashloc = e.hashloc;
-				if(tries > 10) {
-					SDFSLogger.getLog().warn("Redundancy Requirements have not been met");
-					//throw e;
+				if (tries > 10) {
+					SDFSLogger.getLog().warn(
+							"Redundancy Requirements have not been met");
+					// throw e;
 				}
 			}
 		}
@@ -279,7 +282,9 @@ public class HCServiceProxy {
 					aContents.length, false, Main.volume.getClusterCopies(),
 					ignoredHosts);
 			cmd.executeCmd(socket); //
-			SDFSLogger.getLog().debug("wrote data when found some but not all");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"wrote data when found some but not all");
 			return cmd.reponse();
 
 		} else {
@@ -311,15 +316,17 @@ public class HCServiceProxy {
 				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
 			}
-			b[1] =-2;
+			b[1] = -2;
 		} else {
 			try {
-				SDFSLogger.getLog().debug("looking for hash");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("looking for hash");
 				HashExistsCmd hcmd = new HashExistsCmd(hash, false,
 						Main.volume.getClusterCopies());
 				hcmd.executeCmd(socket);
 				if (hcmd.meetsRedundancyRequirements()) {
-					SDFSLogger.getLog().debug("found all");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("found all");
 					return hcmd.getResponse();
 				} else if (hcmd.exists()) {
 					byte[] ignoredHosts = new byte[hcmd.responses()];
@@ -338,8 +345,9 @@ public class HCServiceProxy {
 								throw e;
 						}
 					}
-					SDFSLogger.getLog().debug(
-							"wrote data when found some but not all");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"wrote data when found some but not all");
 					return cmd.reponse();
 				} else {
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
@@ -355,7 +363,8 @@ public class HCServiceProxy {
 								throw e;
 						}
 					}
-					SDFSLogger.getLog().debug("wrote data when found none");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("wrote data when found none");
 
 					// if(cmd.getExDn() > 0) {
 					// SDFSLogger.getLog().warn("Was unable to write to all storage nodes.");
@@ -391,7 +400,7 @@ public class HCServiceProxy {
 				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
 						Main.CHUNK_LENGTH, false);
 			}
-			b[1] =-2;
+			b[1] = -2;
 		} else {
 
 			try {
@@ -451,8 +460,7 @@ public class HCServiceProxy {
 			if (HCServiceProxy.hcService.hashExists(hash)) {
 				exists[0] = 1;
 				return exists;
-			}
-			else {
+			} else {
 				exists[0] = -1;
 				return exists;
 			}
@@ -509,8 +517,8 @@ public class HCServiceProxy {
 
 	public static byte[] fetchChunk(byte[] hash, byte[] hashloc)
 			throws IOException {
-		
-		if (Main.chunkStoreLocal)  {
+
+		if (Main.chunkStoreLocal) {
 			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
 			return hc.getData();
 		} else {

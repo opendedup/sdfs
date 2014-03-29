@@ -111,7 +111,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			throw new IOException("No DSE Servers found");
 		}
 		lock_service = new LockService(channel);
-		SDFSLogger.getLog().debug("finding all volumes");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("finding all volumes");
 		try {
 
 			for (String vol : remoteVolumes) {
@@ -134,7 +135,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to list volumes", e);
 		}
-		SDFSLogger.getLog().debug("found [" + volumes.size() + "] volumes");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("found [" + volumes.size() + "] volumes");
 
 	}
 
@@ -247,8 +249,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 						l = this.pl.writeLock();
 						l.lock();
 						if (pools[s.id] == null && Main.DSEClusterDirectIO) {
-							SDFSLogger.getLog().debug(
-									"creating pool for " + s.id);
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"creating pool for " + s.id);
 							pools[s.id] = s.createPool();
 						}
 						l.unlock();
@@ -340,14 +343,14 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			break;
 		}
 		case NetworkCMDS.FIND_VOLUME_OWNER: {
-			if(server != null && server.volume != null) {
-			byte[] sb = new byte[buf.getInt()];
-			buf.get(sb);
-			String volume = new String(sb);
-			if (volume.equals(server.volume.getName()))
-				rtrn = Main.volume;
-			else
-				rtrn = null;
+			if (server != null && server.volume != null) {
+				byte[] sb = new byte[buf.getInt()];
+				buf.get(sb);
+				String volume = new String(sb);
+				if (volume.equals(server.volume.getName()))
+					rtrn = Main.volume;
+				else
+					rtrn = null;
 			}
 			break;
 		}
@@ -468,7 +471,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 		if (this.lock_service != null) {
 			Lock l = this.lock_service.getLock("gc");
 			try {
-				SDFSLogger.getLog().debug("Cheching if GC Master exists");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("Cheching if GC Master exists");
 				l.lock();
 				FindGCMasterCmd f = new FindGCMasterCmd();
 				f.executeCmd(this);
@@ -479,9 +483,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					this._startGC();
 					SDFSLogger.getLog().info("Started GC");
 				} else {
-					SDFSLogger.getLog().debug(
-							"Did not start GC because already exists at "
-									+ f.getResults());
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"Did not start GC because already exists at "
+										+ f.getResults());
 				}
 
 			} catch (Exception e) {
@@ -588,11 +593,14 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 
 			while (iter.hasNext()) {
 				Address addr = iter.next();
-				SDFSLogger.getLog().debug(
-						"found " + addr + " " + new_view.containsMember(addr));
-				if (!new_view.containsMember(addr)) {
+				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
-							"removed " + addr + " from state.");
+							"found " + addr + " "
+									+ new_view.containsMember(addr));
+				if (!new_view.containsMember(addr)) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"removed " + addr + " from state.");
 					DSEServer s = serverState.remove(addr);
 					Lock l = this.ssl.writeLock();
 					l.lock();
@@ -687,7 +695,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					l = this.pl.writeLock();
 					l.lock();
 					if (pools[s.id] == null && Main.DSEClusterDirectIO) {
-						SDFSLogger.getLog().debug("creating pool for " + s.id);
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug(
+									"creating pool for " + s.id);
 
 						pools[s.id] = s.createPool();
 					}
@@ -750,9 +760,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 							if (pools[s.id] == null && Main.DSEClusterDirectIO) {
 								pools[s.id] = s.createPool();
 							} else {
-								SDFSLogger.getLog().debug(
-										" pool for " + s.id + " is "
-												+ pools[s.id]);
+								if (SDFSLogger.isDebug())
+									SDFSLogger.getLog().debug(
+											" pool for " + s.id + " is "
+													+ pools[s.id]);
 							}
 						} finally {
 							_pl.unlock();
@@ -815,8 +826,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				Main.volume.setOffLine(sal.size() == 0);
 
 			}
-			SDFSLogger.getLog().debug(
-					"received state (" + list.size() + " state");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"received state (" + list.size() + " state");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -829,7 +841,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			long sz = 0;
 			for (DSEServer s : sal) {
 				sz = sz + s.maxSize;
-				SDFSLogger.getLog().debug("sz=" + sz);
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("sz=" + sz);
 			}
 			return sz;
 		} finally {
@@ -850,7 +863,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			l.unlock();
 		}
 	}
-	
+
 	public long getCurrentDSESize() {
 		Lock l = this.sl.readLock();
 		l.lock();
@@ -864,7 +877,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			l.unlock();
 		}
 	}
-	
+
 	public long getCurrentDSECompSize() {
 		Lock l = this.sl.readLock();
 		l.lock();
@@ -878,7 +891,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			l.unlock();
 		}
 	}
-	
+
 	public long getDSEMaxSize() {
 		Lock l = this.sl.readLock();
 		l.lock();
@@ -981,8 +994,9 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 				l.lock();
 				try {
 					if (pools[server.id] == null) {
-						SDFSLogger.getLog().debug(
-								"creating pool for " + server.id);
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug(
+									"creating pool for " + server.id);
 						pools[server.id] = server.createPool();
 					}
 				} finally {

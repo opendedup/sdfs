@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -488,7 +489,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = null;
 
 			try {
-				SDFSLogger.getLog().debug(
+				if(SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
 						"renaming [" + from + "] to [" + to + "]");
 				f = resolvePath(from);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
@@ -525,6 +527,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					if (MetaFileStore.removeMetaFile(f.getPath()))
 						return 0;
 					else {
+						if(SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"unable to delete folder " + f.getPath());
 						throw new FuseException().initErrno(Errno.ENOTEMPTY);
@@ -607,7 +610,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// SDFSLogger.getLog().info("18");
 		// Thread.currentThread().setName("19 "+Long.toString(System.currentTimeMillis()));
 		try {
-			SDFSLogger.getLog().debug("removing " + path);
+			if(SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("removing " + path);
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				File f = new File(mountedVolume + path);
 				this.pathMap.remove(f.getPath());
@@ -694,7 +698,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			_f = new File(pt);
 			if (!_f.exists()) {
 				_f = null;
-				SDFSLogger.getLog().debug("No such node");
+				if(SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("No such node");
 				throw new FuseException().initErrno(Errno.ENOENT);
 			}
 		}
@@ -801,7 +806,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					String val = mf.getXAttribute(name);
 					if (val != null) {
-						SDFSLogger.getLog().debug("val=" + val);
+						if(SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug("val=" + val);
 						dst.put(val.getBytes());
 					} else
 						throw new FuseException().initErrno(Errno.ENODATA);
@@ -905,7 +911,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					String val = mf.getXAttribute(name);
 					if (val != null) {
-						SDFSLogger.getLog().debug("val=" + val);
+						if(SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug("val=" + val);
 						dst.put(val.getBytes());
 					} else
 						throw new FuseException().initErrno(Errno.ENODATA);

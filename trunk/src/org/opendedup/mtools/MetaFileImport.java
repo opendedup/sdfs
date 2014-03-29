@@ -68,12 +68,15 @@ public class MetaFileImport {
 							byte[] exists = HCServiceProxy.hashExists(
 									ck.getHash(), false);
 							if (exists[0] == -1) {
-								SDFSLogger.getLog().debug(
-										"file ["
-												+ mapFile
-												+ "] could not find "
-												+ StringUtils.getHexString(ck
-														.getHash()));
+								if (SDFSLogger.isDebug())
+									SDFSLogger
+											.getLog()
+											.debug("file ["
+													+ mapFile
+													+ "] could not find "
+													+ StringUtils
+															.getHexString(ck
+																	.getHash()));
 								corruption = true;
 								corruptBlocks++;
 							}

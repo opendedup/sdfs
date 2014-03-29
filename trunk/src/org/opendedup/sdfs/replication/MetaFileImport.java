@@ -135,17 +135,19 @@ public class MetaFileImport implements Serializable {
 				mf.getIOMonitor()
 						.addActualBytesWritten(Main.CHUNK_LENGTH, true);
 			} else {
-				if(HashFunctionPool.max_hash_cluster == 1)
-					mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
+				if (HashFunctionPool.max_hash_cluster == 1)
+					mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH, true);
 			}
 			if (hashes.size() >= MAX_SZ) {
 				try {
-					SDFSLogger.getLog().debug(
-							"fetching " + hashes.size() + " blocks");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"fetching " + hashes.size() + " blocks");
 					ProcessBatchGetBlocks.runCmd(hashes, server, port,
 							password, useSSL);
-					SDFSLogger.getLog().debug(
-							"fetched " + hashes.size() + " blocks");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"fetched " + hashes.size() + " blocks");
 					this.bytesTransmitted = this.bytesTransmitted
 							+ (hashes.size() * Main.CHUNK_LENGTH);
 					levt.bytesImported = this.bytesTransmitted;
@@ -192,16 +194,17 @@ public class MetaFileImport implements Serializable {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val);
 						List<HashLocPair> al = ck.getFingers();
-						
+
 						if (Main.chunkStoreLocal) {
 							mf.getIOMonitor().addVirtualBytesWritten(
 									Main.CHUNK_LENGTH, true);
-							//Todo : Must fix how this is counted
-							if(HashFunctionPool.max_hash_cluster > 1)
-								mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
+							// Todo : Must fix how this is counted
+							if (HashFunctionPool.max_hash_cluster > 1)
+								mf.getIOMonitor().addDulicateData(
+										Main.CHUNK_LENGTH, true);
 							for (HashLocPair p : al) {
-								byte[] eb = HCServiceProxy.hashExists(
-										p.hash, false);
+								byte[] eb = HCServiceProxy.hashExists(p.hash,
+										false);
 								boolean exists = false;
 								if (eb[0] == 1)
 									exists = true;
@@ -210,20 +213,25 @@ public class MetaFileImport implements Serializable {
 									entries++;
 									levt.blocksImported = entries;
 								} else {
-									if(HashFunctionPool.max_hash_cluster == 1)
-										mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH,true);
+									if (HashFunctionPool.max_hash_cluster == 1)
+										mf.getIOMonitor().addDulicateData(
+												Main.CHUNK_LENGTH, true);
 								}
 								if (hashes.size() >= MAX_SZ) {
 									try {
-										SDFSLogger.getLog().debug(
-												"fetching " + hashes.size()
-														+ " blocks");
-										long sz = ProcessBatchGetBlocks.runCmd(hashes,
-												server, port, password, useSSL);
-										SDFSLogger.getLog().debug(
-												"fetched " + hashes.size()
-														+ " blocks");
-										Main.volume.addDuplicateBytes(-1*sz, true);
+										if (SDFSLogger.isDebug())
+											SDFSLogger.getLog().debug(
+													"fetching " + hashes.size()
+															+ " blocks");
+										long sz = ProcessBatchGetBlocks.runCmd(
+												hashes, server, port, password,
+												useSSL);
+										if (SDFSLogger.isDebug())
+											SDFSLogger.getLog().debug(
+													"fetched " + hashes.size()
+															+ " blocks");
+										Main.volume.addDuplicateBytes(-1 * sz,
+												true);
 										this.bytesTransmitted = this.bytesTransmitted
 												+ sz;
 										levt.bytesImported = this.bytesTransmitted;

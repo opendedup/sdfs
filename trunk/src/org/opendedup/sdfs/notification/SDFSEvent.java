@@ -139,7 +139,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
-	
+
 	public void endEvent() {
 		for (int i = 0; i < this.children.size(); i++) {
 			if (this.children.get(i).endTime == -1)
@@ -163,21 +163,23 @@ public class SDFSEvent implements java.io.Serializable {
 		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
-	public static SDFSEvent convMapEvent(String shortMsg,String file) {
+
+	public static SDFSEvent convMapEvent(String shortMsg, String file) {
 		SDFSEvent event = new SDFSEvent(CONVMAP, file, shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static void rdErrEvent() {
-		SDFSEvent event = new SDFSEvent(RDER, getTarget(), "Read Error Detected",ERROR);
-		event.maxCt=1;
+		SDFSEvent event = new SDFSEvent(RDER, getTarget(),
+				"Read Error Detected", ERROR);
+		event.maxCt = 1;
 		event.endEvent();
 	}
-	
+
 	public static void wrErrEvent() {
-		SDFSEvent event = new SDFSEvent(WER, getTarget(), "Write Error Detected",ERROR);
-		event.maxCt=1;
+		SDFSEvent event = new SDFSEvent(WER, getTarget(),
+				"Write Error Detected", ERROR);
+		event.maxCt = 1;
 		event.endEvent();
 	}
 
@@ -362,7 +364,8 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public Element toXML() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("event");
-		SDFSLogger.getLog().debug(this.toString());
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(this.toString());
 		Element root = doc.getDocumentElement();
 		root.setAttribute("start-date", format.format(new Date(this.startTime)));
 		root.setAttribute("start-timestamp", Long.toString(this.startTime));

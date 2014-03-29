@@ -71,6 +71,7 @@ public class DedupFileStore {
 			throws IOException {
 		try {
 			if (!closing) {
+				if(SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
 						"getting dedupfile for " + mf.getPath() + "and df "
 								+ mf.getDfGuid());
@@ -89,6 +90,7 @@ public class DedupFileStore {
 								}
 							}
 						}
+						if(SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"creating new dedup file for " + mf.getPath());
 					} catch (Exception e) {
@@ -132,11 +134,13 @@ public class DedupFileStore {
 	 */
 	public static void addOpenDedupFile(DedupFile df) throws IOException {
 		if (!closing) {
+			if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("adding dedupfile");
 			if (openFile.size() >= Main.maxOpenFiles)
 				throw new IOException("maximum number of files reached ["
 						+ Main.maxOpenFiles + "]. Too many open files");
 			openFile.put(df.getGUID(), df);
+			if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"dedupfile cache size is " + openFile.size());
 		} else {
@@ -215,6 +219,7 @@ public class DedupFileStore {
 	 */
 	public static void close() {
 		closing = true;
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("Open Files = " + openFile.size());
 		if (openFileMonitor != null)
 			openFileMonitor.close();
@@ -224,6 +229,7 @@ public class DedupFileStore {
 			DedupFile df = (DedupFile) dfs[i];
 			if (df != null) {
 				df.forceClose();
+				if(SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
 						"Closed " + df.getMetaFile().getPath());
 			}
@@ -234,6 +240,7 @@ public class DedupFileStore {
 	 * Flushes the write buffers for all open files.
 	 */
 	public static void flushAllFiles() {
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug(
 				"flushing write caches of size " + openFile.size());
 		Object[] dfs = getArray();
@@ -245,6 +252,7 @@ public class DedupFileStore {
 				SDFSLogger.getLog().warn("DSE Full", e);
 			}
 		}
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("write caches flushed");
 	}
 }

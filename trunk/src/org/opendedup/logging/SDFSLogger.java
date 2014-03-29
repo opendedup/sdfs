@@ -13,6 +13,7 @@ public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
+	private static boolean debug = false;
 	static {
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
@@ -43,12 +44,20 @@ public class SDFSLogger {
 	public static Logger getBasicLog() {
 		return basicLog;
 	}
+	
+	public static boolean isDebug() {
+		return debug;
+	}
 
 	public static void setLevel(int level) {
-		if (level == 0)
+		if (level == 0) {
 			log.setLevel(Level.DEBUG);
-		else
+			debug = true;
+		}
+		else {
 			log.setLevel(Level.INFO);
+			debug = false;
+		}
 	}
 
 	public static void setToFileAppender(String file) {

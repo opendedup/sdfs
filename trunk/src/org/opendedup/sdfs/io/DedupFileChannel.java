@@ -50,6 +50,7 @@ public class DedupFileChannel {
 		this.flags = flags;
 		SparseDedupFile sdf = (SparseDedupFile)df;
 		eventBus.register(sdf.bdb);
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("Initializing Cache " + mf.getPath());
 	}
 
@@ -74,6 +75,7 @@ public class DedupFileChannel {
 	private ReentrantLock truncateLock = new ReentrantLock();
 
 	public void truncateFile(long siz) throws IOException {
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("Truncating File");
 		truncateLock.lock();
 		try {
@@ -260,6 +262,7 @@ public class DedupFileChannel {
 								writeBuffer.flush();
 						} catch (BufferClosedException e) {
 							writeBuffer = null;
+							if(SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("trying to write again");
 						}
 					}
@@ -292,6 +295,7 @@ public class DedupFileChannel {
 							if(Main.volume.isClustered())
 								writeBuffer.flush();
 						} catch (BufferClosedException e) {
+							if(SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("trying to write again");
 							writeBuffer = null;
 						}
