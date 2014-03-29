@@ -101,7 +101,8 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 				if (this.pmAddr == null
 						|| this.pmAddr.equals(channel.getAddress())) {
 					this.pmAddr = channel.getAddress();
-					SDFSLogger.getLog().debug("First node in cluster");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("First node in cluster");
 				} else {
 					SDFSLogger
 							.getLog()
@@ -324,7 +325,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 						BlockDeviceSmallWriteEvent evt = (BlockDeviceSmallWriteEvent) Util
 								.objectFromByteBuffer(ck);
 						dev.getDevIO().ch.writeFile(evt.buf, evt.len, 0,
-								evt.pos,false);
+								evt.pos, false);
 					}
 				}
 			}

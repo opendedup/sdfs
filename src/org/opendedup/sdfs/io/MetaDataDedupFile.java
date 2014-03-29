@@ -87,11 +87,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public static ArrayList<MetaFileEventListener> getMetaFileListeners() {
 		return mfListeners;
 	}
-	
+
 	public BlockDev getDev() {
 		return this.blkdev;
 	}
-	
+
 	public void setDev(BlockDev dev) {
 		this.blkdev = dev;
 	}
@@ -438,9 +438,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (this.dfGuid == null) {
 					DedupFile df = DedupFileStore.getDedupFile(this);
 					this.dfGuid = df.getGUID();
-					SDFSLogger.getLog().debug(
-							"No DF EXISTS .... Set dedup file for "
-									+ this.getPath() + " to " + this.dfGuid);
+					if (SDFSLogger.isDebug())
+						SDFSLogger
+								.getLog()
+								.debug("No DF EXISTS .... Set dedup file for "
+										+ this.getPath() + " to " + this.dfGuid);
 					this.sync();
 					return df;
 				} else {
@@ -502,7 +504,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
 			SDFSEvent evt, boolean propigateEvent) throws IOException {
 		if (!this.isDirectory()) {
-			SDFSLogger.getLog().debug("is snapshot file");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath
@@ -536,8 +539,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
 								.getGUID();
 					} catch (java.lang.NullPointerException e) {
-						SDFSLogger.getLog().debug(
-								"no dedupfile for " + this.path, e);
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug(
+									"no dedupfile for " + this.path, e);
 					}
 				} catch (HashtableFullException e) {
 					throw new IOException(e);
@@ -555,8 +559,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				try {
 					DedupFileStore.cloneDedupFile(this, _mf);
 				} catch (java.lang.NullPointerException e) {
-					SDFSLogger.getLog().debug("no dedupfile for " + this.path,
-							e);
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"no dedupfile for " + this.path, e);
 				}
 			}
 			_mf.getIOMonitor().setVirtualBytesWritten(
@@ -576,7 +581,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			evt.curCt = evt.curCt + 1;
 			return _mf;
 		} else {
-			SDFSLogger.getLog().debug("is snapshot dir");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("is snapshot dir");
 			File f = new File(snaptoPath);
 			f.mkdirs();
 			int trimlen = this.getPath().length();
@@ -629,8 +635,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (f.exists() && !overwrite)
 			throw new IOException("path exists [" + snaptoPath
 					+ "]Cannot overwrite existing data ");
-
-		SDFSLogger.getLog().debug("is snapshot dir");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("is snapshot dir");
 		if (!f.exists())
 			f.mkdirs();
 		String cpCmd = "cp -rf --preserve=mode,ownership,timestamps "
@@ -657,9 +663,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (file.isDirectory())
 				file.copyDir(npath);
 			else {
-				SDFSLogger.getLog().debug(
-						"copy dedup file for : " + file.getPath() + " guid :"
-								+ file.getDfGuid());
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"copy dedup file for : " + file.getPath()
+									+ " guid :" + file.getDfGuid());
 				if (file.dfGuid != null) {
 					if (DedupFileStore.fileOpen(file))
 						file.getDedupFile().copyTo(npath, true);
@@ -709,7 +716,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.path = path;
 		File f = new File(path);
 		if (!f.exists()) {
-			SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"Creating new MetaFile for " + this.path);
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
 			this.owner_id = Main.defaultOwner;
@@ -746,14 +755,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (!f.isDirectory()) {
 
 				try {
-					
+
 					if (f.getParentFile() == null
 							|| !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
 					out = new ObjectOutputStream(
 							new FileOutputStream(this.path));
 					out.writeObject(this);
-					SDFSLogger.getLog().debug("writing out " + f.getPath());
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("writing out " + f.getPath());
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn(
 							"unable to write file metadata for [" + this.path
@@ -928,12 +938,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			return f.renameTo(new File(dest));
 		} else {
 			if (f.exists()) {
-				SDFSLogger.getLog().debug("destination file exists, deleting");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"destination file exists, deleting");
 				MetaFileStore.removeMetaFile(dest, true);
 			}
 			boolean rename = f.renameTo(new File(dest));
 			if (rename) {
-				SDFSLogger.getLog().debug("FileSystem rename succesful");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("FileSystem rename succesful");
 				MetaFileStore.rename(this.path, dest, this);
 				this.path = dest;
 				this.unmarshal();
@@ -1153,7 +1166,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
-		SDFSLogger.getLog().debug("reading in file " + this.path);
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("reading in file " + this.path);
 		in.readLong();
 		this.length = in.readLong();
 		this.lastModified = in.readLong();
@@ -1211,7 +1225,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		SDFSLogger.getLog().debug("writing out file " + this.path);
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("writing out file " + this.path);
 		out.writeLong(-1);
 		out.writeLong(length);
 		out.writeLong(lastModified);

@@ -56,43 +56,42 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			.maximumSize(cacheSize).concurrencyLevel(72)
 			.build(new CacheLoader<String, byte[]>() {
 				public byte[] load(String hashString) throws IOException {
-					SDFSLogger.getLog().debug("getting hash " + hashString);
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("getting hash " + hashString);
 					try {
 						CloudBlockBlob blob = container
 								.getBlockBlobReference(hashString);
-						
-							ByteArrayOutputStream out = new ByteArrayOutputStream(
-									(int) blob.getProperties().getLength());
-							blob.download(out);
-							HashMap<String, String> metaData = blob
-									.getMetadata();
-							byte[] data = out.toByteArray();
-							int size = 0;
-							if (metaData.containsKey("encrypt")
-									&& metaData.get("encrypt")
-											.equalsIgnoreCase("true")) {
-								data = EncryptUtils.decrypt(data);
-							}
-							if (metaData.containsKey("compress")
-									&& metaData.get("compress")
-											.equalsIgnoreCase("true")) {
-								data = CompressionUtils.decompressZLIB(data);
 
-							}
-							if (metaData.containsKey("scompress")
-									&& metaData.get("scompress")
-											.equalsIgnoreCase("true")) {
-								data = CompressionUtils.decompressSnappy(data);
-							}
-							if (metaData.containsKey("lz4Compress")
-									&& metaData.get("lz4Compress")
-											.equalsIgnoreCase("true")) {
-								size = Integer.parseInt(metaData.get("size"));
-								data = CompressionUtils.decompressLz4(data,
-										size);
-							}
+						ByteArrayOutputStream out = new ByteArrayOutputStream(
+								(int) blob.getProperties().getLength());
+						blob.download(out);
+						HashMap<String, String> metaData = blob.getMetadata();
+						byte[] data = out.toByteArray();
+						int size = 0;
+						if (metaData.containsKey("encrypt")
+								&& metaData.get("encrypt").equalsIgnoreCase(
+										"true")) {
+							data = EncryptUtils.decrypt(data);
+						}
+						if (metaData.containsKey("compress")
+								&& metaData.get("compress").equalsIgnoreCase(
+										"true")) {
+							data = CompressionUtils.decompressZLIB(data);
 
-							return data;
+						}
+						if (metaData.containsKey("scompress")
+								&& metaData.get("scompress").equalsIgnoreCase(
+										"true")) {
+							data = CompressionUtils.decompressSnappy(data);
+						}
+						if (metaData.containsKey("lz4Compress")
+								&& metaData.get("lz4Compress")
+										.equalsIgnoreCase("true")) {
+							size = Integer.parseInt(metaData.get("size"));
+							data = CompressionUtils.decompressLz4(data, size);
+						}
+
+						return data;
 					} catch (Exception e) {
 						SDFSLogger.getLog()
 								.error("unable to fetch block [" + hashString
@@ -149,7 +148,8 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 			String hashString = this.getHashName(hash,
 					Main.chunkStoreEncryptionEnabled);
-			SDFSLogger.getLog().debug("getting hash " + hashString);
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("getting hash " + hashString);
 			byte[] _bz = this.chunks.get(hashString);
 			byte[] bz = Arrays.clone(_bz);
 			return bz;
@@ -185,26 +185,26 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		try {
 
 			CloudBlockBlob blob = container.getBlockBlobReference(hashString);
-				HashMap<String, String> metaData = new HashMap<String, String>();
+			HashMap<String, String> metaData = new HashMap<String, String>();
 
-				if (Main.compress) {
-					chunk = CompressionUtils.compressLz4(chunk);
-					metaData.put("lz4Compress", "true");
-				} else {
-					metaData.put("lz4Compress", "false");
-				}
-				if (Main.chunkStoreEncryptionEnabled) {
-					chunk = EncryptUtils.encrypt(chunk);
-					metaData.put("encrypt", "true");
-				} else {
-					metaData.put("encrypt", "false");
-				}
-				metaData.put("size", Integer.toString(cl));
-				metaData.put("compressedsize", Integer.toString(chunk.length));
-				blob.setMetadata(metaData);
-				ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
-				blob.upload(s3IS, chunk.length);
-				blob.uploadMetadata();
+			if (Main.compress) {
+				chunk = CompressionUtils.compressLz4(chunk);
+				metaData.put("lz4Compress", "true");
+			} else {
+				metaData.put("lz4Compress", "false");
+			}
+			if (Main.chunkStoreEncryptionEnabled) {
+				chunk = EncryptUtils.encrypt(chunk);
+				metaData.put("encrypt", "true");
+			} else {
+				metaData.put("encrypt", "false");
+			}
+			metaData.put("size", Integer.toString(cl));
+			metaData.put("compressedsize", Integer.toString(chunk.length));
+			blob.setMetadata(metaData);
+			ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
+			blob.upload(s3IS, chunk.length);
+			blob.uploadMetadata();
 			return 0;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write hash " + hashString, e);

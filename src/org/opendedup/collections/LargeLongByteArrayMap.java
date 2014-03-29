@@ -217,7 +217,8 @@ public class LargeLongByteArrayMap implements AbstractMap {
 				Process p = Runtime.getRuntime().exec(
 						"cp --sparse=always " + src.getPath() + " "
 								+ dest.getPath());
-				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
+				if(SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 
 		} catch (Exception e) {

@@ -61,11 +61,13 @@ public class OpenFileMonitor implements Runnable {
 								if (df != null) {
 									DedupFileStore.getDedupFile(
 											df.getMetaFile()).forceClose();
-									SDFSLogger.getLog().debug(
-											"Closing ["
-													+ df.getMetaFile()
-															.getPath()
-													+ "] because its stale");
+									if (SDFSLogger.isDebug())
+										SDFSLogger
+												.getLog()
+												.debug("Closing ["
+														+ df.getMetaFile()
+																.getPath()
+														+ "] because its stale");
 								}
 							} catch (Exception e) {
 								SDFSLogger

@@ -204,106 +204,105 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 	private void initBuffer() throws IOException, InterruptedException {
 		if (this.buf == null) {
-				if (HashFunctionPool.max_hash_cluster > 1) {
-					ByteBuffer hcb = ByteBuffer
-							.wrap(new byte[Main.CHUNK_LENGTH]);
-					ByteBuffer hb = ByteBuffer.wrap(this.getHash());
-					ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
-					final ArrayList<Shard> cks = new ArrayList<Shard>();
-					for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
-						byte[] _hash = new byte[HashFunctionPool.hashLength];
-						byte[] _hl = new byte[8];
-						hl.get(_hl);
+			if (HashFunctionPool.max_hash_cluster > 1) {
+				ByteBuffer hcb = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+				ByteBuffer hb = ByteBuffer.wrap(this.getHash());
+				ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
+				final ArrayList<Shard> cks = new ArrayList<Shard>();
+				for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+					byte[] _hash = new byte[HashFunctionPool.hashLength];
+					byte[] _hl = new byte[8];
+					hl.get(_hl);
 
-						hb.get(_hash);
-						if (_hl[1] != 0) {
-							Shard sh = new Shard();
-							sh.h = _hash;
-							sh.hl = _hl;
-							sh.pos = i;
-							cks.add(i, sh);
-						} else
-							break;
-					}
-					sz = cks.size();
-					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
-
-						@Override
-						public void commandException(Exception e) {
-							int _dn = this.incrementandGetDN();
-							this.incrementAndGetDNEX();
-							SDFSLogger.getLog().error(
-									"Error while getting hash", e);
-							if (_dn >= sz) {
-								synchronized (this) {
-									this.notifyAll();
-								}
-							}
-
-						}
-
-						@Override
-						public void commandResponse(Shard result) {
-							int _dn = this.incrementandGetDN();
-							cks.get(result.pos).ck = result.ck;
-							if (_dn >= sz) {
-
-								synchronized (this) {
-									this.notifyAll();
-								}
-							}
-						}
-
-					};
-					for (Shard sh : cks) {
-						sh.l = l;
-						executor.execute(sh);
-					}
-					int loops = 6;
-					int wl = 0;
-					int tm = 10000;
-					if (l.getDN() < sz) {
-						if (wl > 0) {
-							int nt = (tm * wl) / 1000;
-							SDFSLogger
-									.getLog()
-									.warn("Slow io, waited ["
-											+ nt
-											+ "] seconds for all reads to complete.");
-						}
-						if (wl > loops) {
-							int nt = (tm * wl) / 1000;
-							throw new IOException("read Timed Out after ["
-									+ nt + "] seconds. Expected [" + sz
-									+ "] block read but only [" + l.getDN()
-									+ "] were completed");
-						}
-						synchronized (l) {
-							l.wait(tm);
-						}
-						wl++;
-					}
-					if (l.getDN() < sz)
-						SDFSLogger.getLog().warn(
-								"thread timed out before read was complete ");
-					hcb.position(0);
-					for (Shard sh : cks) {
-
-						try {
-							hcb.put(sh.ck);
-						} catch (Exception e) {
-							// SDFSLogger.getLog().info("pos = " + this.position
-							// + "ck sz=" + sh.ck.length + " hcb sz=" +
-							// hcb.position() + " cks sz=" +cks.size() + " len="
-							// + (hcb.position() +sh.ck.length));
-							throw new IOException(e);
-						}
-					}
-					this.buf = hcb.array();
-				} else {
-					this.buf = HCServiceProxy.fetchChunk(this.getHash(),
-							this.hashloc);
+					hb.get(_hash);
+					if (_hl[1] != 0) {
+						Shard sh = new Shard();
+						sh.h = _hash;
+						sh.hl = _hl;
+						sh.pos = i;
+						cks.add(i, sh);
+					} else
+						break;
 				}
+				sz = cks.size();
+				AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
+
+					@Override
+					public void commandException(Exception e) {
+						int _dn = this.incrementandGetDN();
+						this.incrementAndGetDNEX();
+						SDFSLogger.getLog()
+								.error("Error while getting hash", e);
+						if (_dn >= sz) {
+							synchronized (this) {
+								this.notifyAll();
+							}
+						}
+
+					}
+
+					@Override
+					public void commandResponse(Shard result) {
+						int _dn = this.incrementandGetDN();
+						cks.get(result.pos).ck = result.ck;
+						if (_dn >= sz) {
+
+							synchronized (this) {
+								this.notifyAll();
+							}
+						}
+					}
+
+				};
+				for (Shard sh : cks) {
+					sh.l = l;
+					executor.execute(sh);
+				}
+				int loops = 6;
+				int wl = 0;
+				int tm = 10000;
+				if (l.getDN() < sz) {
+					if (wl > 0) {
+						int nt = (tm * wl) / 1000;
+						SDFSLogger
+								.getLog()
+								.warn("Slow io, waited ["
+										+ nt
+										+ "] seconds for all reads to complete.");
+					}
+					if (wl > loops) {
+						int nt = (tm * wl) / 1000;
+						throw new IOException("read Timed Out after [" + nt
+								+ "] seconds. Expected [" + sz
+								+ "] block read but only [" + l.getDN()
+								+ "] were completed");
+					}
+					synchronized (l) {
+						l.wait(tm);
+					}
+					wl++;
+				}
+				if (l.getDN() < sz)
+					SDFSLogger.getLog().warn(
+							"thread timed out before read was complete ");
+				hcb.position(0);
+				for (Shard sh : cks) {
+
+					try {
+						hcb.put(sh.ck);
+					} catch (Exception e) {
+						// SDFSLogger.getLog().info("pos = " + this.position
+						// + "ck sz=" + sh.ck.length + " hcb sz=" +
+						// hcb.position() + " cks sz=" +cks.size() + " len="
+						// + (hcb.position() +sh.ck.length));
+						throw new IOException(e);
+					}
+				}
+				this.buf = hcb.array();
+			} else {
+				this.buf = HCServiceProxy.fetchChunk(this.getHash(),
+						this.hashloc);
+			}
 		}
 	}
 
@@ -500,15 +499,19 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		try {
 			this.lock.lock();
 			if (this.flushing) {
-				SDFSLogger.getLog().debug(
-						"cannot flush buffer at pos " + this.getFilePosition()
-								+ " already flushing");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"cannot flush buffer at pos "
+									+ this.getFilePosition()
+									+ " already flushing");
 				throw new BufferClosedException("Buffer Closed");
+
 			}
 			if (this.closed) {
-				SDFSLogger.getLog().debug(
-						"cannot flush buffer at pos " + this.getFilePosition()
-								+ " closed");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"cannot flush buffer at pos "
+									+ this.getFilePosition() + " closed");
 				throw new BufferClosedException("Buffer Closed");
 			}
 			this.flushing = true;
@@ -540,13 +543,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		try {
 			this.lock.lock();
 
-			if (!this.flushing)
-				SDFSLogger.getLog().debug(
-						"####" + this.getFilePosition() + " not flushing");
+			if (!this.flushing) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"####" + this.getFilePosition() + " not flushing");
+			}
 
 			else if (this.closed) {
-				SDFSLogger.getLog().debug(
-						this.getFilePosition() + " already closed");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							this.getFilePosition() + " already closed");
 			} else if (this.dirty) {
 				this.df.writeCache(this);
 				df.removeFromFlush(this.getFilePosition());
@@ -572,12 +578,14 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 	public void endClose() throws IOException {
 		try {
-			if (!this.flushing)
-				SDFSLogger.getLog().debug(
-						"####" + this.getFilePosition() + " not flushing");
-			else if (this.closed) {
-				SDFSLogger.getLog().debug(
-						this.getFilePosition() + " already closed");
+			if (!this.flushing) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"####" + this.getFilePosition() + " not flushing");
+			} else if (this.closed) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							this.getFilePosition() + " already closed");
 			} else {
 				this.df.writeCache(this);
 				df.removeFromFlush(this.getFilePosition());
@@ -596,8 +604,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		this.lock.lock();
 		try {
 			if (this.closed) {
-				SDFSLogger.getLog().debug(
-						this.getFilePosition() + " already closed");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							this.getFilePosition() + " already closed");
 				throw new BufferClosedException("Buffer Closed");
 			}
 			if (this.buf == null)

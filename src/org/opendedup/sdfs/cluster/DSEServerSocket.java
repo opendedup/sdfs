@@ -105,7 +105,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		server.rack = Main.DSEClusterNodeRack;
 		server.dseSize = HCServiceProxy.getChunkStore().size();
 		server.dseMaxSize = HCServiceProxy.getChunkStore().maxSize();
-		server.dseCompressedSize = HCServiceProxy.getChunkStore().compressedSize();
+		server.dseCompressedSize = HCServiceProxy.getChunkStore()
+				.compressedSize();
 
 		channel.getState(null, 10000);
 		lock_service = new LockService(channel);
@@ -313,17 +314,20 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				buf.get(ob);
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
 				HCServiceProxy.processHashClaims(evt);
-				SDFSLogger.getLog().debug("sending back claim chunks cmd");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("sending back claim chunks cmd");
 				rtrn = evt;
 				break;
 			}
 			case NetworkCMDS.RUN_REMOVE: {
-				SDFSLogger.getLog().debug("recieved remove chunks cmd");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("recieved remove chunks cmd");
 				long ms = buf.getLong();
 				long timestamp = System.currentTimeMillis() - ms;
-				SDFSLogger.getLog().debug(
-						"recieved remove chunks cmd after ["
-								+ new Date(timestamp) + "]");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"recieved remove chunks cmd after ["
+									+ new Date(timestamp) + "]");
 				byte fb = buf.get();
 				boolean force = false;
 				if (fb == 1)
@@ -343,8 +347,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] sb = new byte[buf.getInt()];
 				buf.get(sb);
 				String volume = new String(sb);
-				if (this.volumes.containsKey(volume) && this.volumes.get(volume) != null) {
-						throw new IOException("Volume is mounted by " + this.volumes.get(volume).host);
+				if (this.volumes.containsKey(volume)
+						&& this.volumes.get(volume) != null) {
+					throw new IOException("Volume is mounted by "
+							+ this.volumes.get(volume).host);
 				}
 				this.volumes.remove(volume);
 				rtrn = Boolean.valueOf(true);
@@ -394,9 +400,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 		if (new_view instanceof MergeView) {
 			lock_service.unlockAll();
 		}
-		SDFSLogger.getLog().debug(
-				"**server view: " + new_view + " peer master = "
-						+ Boolean.toString(this.peermaster));
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					"**server view: " + new_view + " peer master = "
+							+ Boolean.toString(this.peermaster));
 		synchronized (serverState) {
 			Iterator<Address> iter = serverState.keySet().iterator();
 			while (iter.hasNext()) {
@@ -421,7 +428,9 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				}
 			}
 		}
-		SDFSLogger.getLog().debug(server + " - size : " + serverState.size());
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					server + " - size : " + serverState.size());
 	}
 
 	public void suspect(Address mbr) {
@@ -429,7 +438,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	}
 
 	public void receive(Message msg) {
-		SDFSLogger.getLog().debug("message recieved " + msg);
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("message recieved " + msg);
 		try {
 			DSEServer server = (DSEServer) msg.getObject();
 			synchronized (serverState) {
@@ -495,8 +505,9 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					}
 				}
 			}
-			SDFSLogger.getLog().debug(
-					"received state (" + list.size() + " state");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"received state (" + list.size() + " state");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while getting state", e);
 		}
@@ -546,7 +557,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				server.rack = Main.DSEClusterNodeRack;
 				server.dseSize = HCServiceProxy.getChunkStore().size();
 				server.dseMaxSize = HCServiceProxy.getChunkStore().maxSize();
-				server.dseCompressedSize = HCServiceProxy.getChunkStore().compressedSize();
+				server.dseCompressedSize = HCServiceProxy.getChunkStore()
+						.compressedSize();
 				this.addSelfToState();
 				rsp_list = disp.castMessage(null, new Message(null, null,
 						server.getBytes()), new RequestOptions(

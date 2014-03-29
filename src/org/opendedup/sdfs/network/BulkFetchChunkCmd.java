@@ -33,6 +33,7 @@ public class BulkFetchChunkCmd implements IOCmd {
 		obj_out.writeObject(hashes);
 		byte[] sh = CompressionUtils.compressSnappy(bos.toByteArray());
 		// byte [] sh = bos.toByteArray();
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("Sent bulkfetch [" + sh.length + "]");
 		os.write(NetworkCMDS.BULK_FETCH_CMD);
 		os.writeInt(sh.length);
@@ -49,8 +50,10 @@ public class BulkFetchChunkCmd implements IOCmd {
 		}
 		byte[] us = new byte[size];
 		is.readFully(us);
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug("Recieved bulkfetch [" + us.length + "]");
 		us = CompressionUtils.decompressSnappy(us);
+		if(SDFSLogger.isDebug())
 		SDFSLogger.getLog().debug(
 				"Recieved bulkfetch uncompressed [" + us.length + "]");
 		ByteArrayInputStream bin = new ByteArrayInputStream(us);

@@ -35,7 +35,7 @@ public class Volume implements java.io.Serializable {
 	private static final long serialVersionUID = 5505952237500542215L;
 	long capacity;
 	String name;
-	AtomicLong currentSize=new AtomicLong(0);
+	AtomicLong currentSize = new AtomicLong(0);
 	String path;
 	File pathF;
 	final int blockSize = 128 * 1024;
@@ -46,8 +46,8 @@ public class Volume implements java.io.Serializable {
 	private AtomicDouble readBytes = new AtomicDouble(0);
 	private AtomicLong actualWriteBytes = new AtomicLong(0);
 	private boolean closedGracefully = false;
-	private AtomicLong readOperations= new AtomicLong(0);
-	private AtomicLong writeOperations= new AtomicLong(0);
+	private AtomicLong readOperations = new AtomicLong(0);
+	private AtomicLong writeOperations = new AtomicLong(0);
 	private boolean allowExternalSymlinks = true;
 	private boolean useDSESize = false;
 	private boolean useDSECapacity = false;
@@ -60,18 +60,18 @@ public class Volume implements java.io.Serializable {
 	private byte clusterCopies = 2;
 	private boolean clusterRackAware = false;
 	public Address host = null;
-	AtomicLong writeErrors=new AtomicLong(0);
-	AtomicLong readErrors=new AtomicLong(0);
+	AtomicLong writeErrors = new AtomicLong(0);
+	AtomicLong readErrors = new AtomicLong(0);
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
 	public transient VolumeSocket soc = null;
-	
+
 	public boolean isClustered() {
 		return this.clustered;
 	}
-	
+
 	public VolumeSocket getSoc() {
 		return this.soc;
 	}
@@ -79,17 +79,17 @@ public class Volume implements java.io.Serializable {
 	public void setVolumeFull(boolean full) {
 		this.volumeFull = full;
 	}
-	
+
 	public void addWriteError() {
 		long z = this.writeErrors.getAndIncrement();
-		if(z ==0) {
+		if (z == 0) {
 			SDFSEvent.wrErrEvent();
 		}
 	}
-	
+
 	public void addReadError() {
 		long z = this.readErrors.getAndIncrement();
-		if(z ==0) {
+		if (z == 0) {
 			SDFSEvent.rdErrEvent();
 		}
 	}
@@ -149,7 +149,7 @@ public class Volume implements java.io.Serializable {
 	public Volume(Element vol, String path) throws IOException {
 		this.configPath = path;
 		pathF = new File(vol.getAttribute("path"));
-		
+
 		SDFSLogger.getLog().info("Mounting volume " + pathF.getPath());
 		if (!pathF.exists())
 			pathF.mkdirs();
@@ -182,7 +182,8 @@ public class Volume implements java.io.Serializable {
 			this.duplicateBytes.set(Long.parseLong(vol
 					.getAttribute("duplicate-bytes")));
 		if (vol.hasAttribute("read-bytes"))
-			this.readBytes.set(Double.parseDouble(vol.getAttribute("read-bytes")));
+			this.readBytes.set(Double.parseDouble(vol
+					.getAttribute("read-bytes")));
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
@@ -208,8 +209,8 @@ public class Volume implements java.io.Serializable {
 				this.clusterCopies = 7;
 			}
 		}
-		if(vol.hasAttribute("volume-clustered")) {
-			
+		if (vol.hasAttribute("volume-clustered")) {
+
 			this.clustered = Boolean.parseBoolean(vol
 					.getAttribute("volume-clustered"));
 		}
@@ -242,8 +243,8 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void init() throws Exception {
-		if(this.clustered) {
-			this.soc = new VolumeSocket(this,Main.DSEClusterConfig);
+		if (this.clustered) {
+			this.soc = new VolumeSocket(this, Main.DSEClusterConfig);
 		}
 		if (Main.blockDev)
 			this.startAllOnStartupDevices();
@@ -259,22 +260,24 @@ public class Volume implements java.io.Serializable {
 				if (dev.internalPath.equalsIgnoreCase(_dev.internalPath))
 					throw new IOException("Device Internal Path ["
 							+ dev.internalPath + "] already exists");
-				sz = sz +_dev.size;
+				sz = sz + _dev.size;
 			}
 			sz = sz + dev.size;
-			if(sz > this.getCapacity())
-				throw new IOException("Requested Block Device is too large for volume. " +
-						"Volume capacity is [" +StorageUnit.of(this.getCapacity()).format(this.getCapacity()) + "] and requested size was [" + StorageUnit.of(dev.size).format(dev.size) + "]");
+			if (sz > this.getCapacity())
+				throw new IOException(
+						"Requested Block Device is too large for volume. "
+								+ "Volume capacity is ["
+								+ StorageUnit.of(this.getCapacity()).format(
+										this.getCapacity())
+								+ "] and requested size was ["
+								+ StorageUnit.of(dev.size).format(dev.size)
+								+ "]");
 			this.devices.add(dev);
 			/*
-			if (dev.startOnInit && Main.blockDev) {
-				try {
-					this.startDev(dev.devName);
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("unable to start device", e);
-				}
-			}
-			*/
+			 * if (dev.startOnInit && Main.blockDev) { try {
+			 * this.startDev(dev.devName); } catch (Exception e) {
+			 * SDFSLogger.getLog().warn("unable to start device", e); } }
+			 */
 			this.writer.writeConfig();
 		}
 	}
@@ -287,9 +290,11 @@ public class Volume implements java.io.Serializable {
 					try {
 						_dev.stopDev();
 					} catch (IOException e) {
-						SDFSLogger.getLog().debug(
-								"issue while stopping device during removal ",
-								e);
+						if (SDFSLogger.isDebug())
+							SDFSLogger
+									.getLog()
+									.debug("issue while stopping device during removal ",
+											e);
 					}
 					this.devices.remove(_dev);
 					this.writer.writeConfig();
@@ -350,12 +355,13 @@ public class Volume implements java.io.Serializable {
 
 	public long getCapacity() {
 		if (this.useDSECapacity) {
-			if(HashFunctionPool.max_hash_cluster == 1)
-				return HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize();
+			if (HashFunctionPool.max_hash_cluster == 1)
+				return HCServiceProxy.getMaxSize()
+						* HCServiceProxy.getPageSize();
 			else
-				return HCServiceProxy.getMaxSize() * HashFunctionPool.min_page_size;
-		}
-		else
+				return HCServiceProxy.getMaxSize()
+						* HashFunctionPool.min_page_size;
+		} else
 			return capacity;
 	}
 
@@ -408,9 +414,9 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void updateCurrentSize(long sz, boolean propigateEvent) {
-			long val = this.currentSize.addAndGet(sz);
-			if (val < 0)
-				this.currentSize.set(0);
+		long val = this.currentSize.addAndGet(sz);
+		if (val < 0)
+			this.currentSize.set(0);
 	}
 
 	public boolean isClosedGracefully() {
@@ -464,7 +470,7 @@ public class Volume implements java.io.Serializable {
 		long val = this.writeOperations.incrementAndGet();
 		if (this.writeOperations.get() == Long.MAX_VALUE)
 			this.writeOperations.set(val);
-		
+
 	}
 
 	public void addRIO(boolean propigateEvent) {
@@ -487,9 +493,11 @@ public class Volume implements java.io.Serializable {
 				StorageUnit.of(this.capacity).format(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("duplicate-bytes",
+				Long.toString(this.duplicateBytes.get()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes.get()));
+		root.setAttribute("write-bytes",
+				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("cluster-id", this.uuid);
@@ -523,20 +531,21 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("capacity", Long.toString(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("duplicate-bytes",
+				Long.toString(this.duplicateBytes.get()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
-		root.setAttribute("write-bytes", Long.toString(this.actualWriteBytes.get()));
+		root.setAttribute("write-bytes",
+				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("name", this.name);
-		root.setAttribute(
-				"dse-size",
+		root.setAttribute("dse-size",
 				Long.toString(HCServiceProxy.getDSESize()));
-		root.setAttribute(
-				"dse-comp-size",
+		root.setAttribute("dse-comp-size",
 				Long.toString(HCServiceProxy.getDSECompressedSize()));
 		root.setAttribute("readops", Double.toString(this.readOperations.get()));
-		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
+		root.setAttribute("writeops",
+				Double.toString(this.writeOperations.get()));
 		root.setAttribute("readerrors", Long.toString(this.readErrors.get()));
 		root.setAttribute("writeerrors", Long.toString(this.writeErrors.get()));
 		root.setAttribute("closed-gracefully",

@@ -47,7 +47,8 @@ public class ClientThread extends Thread {
 
 	public ClientThread(Socket clientSocket) {
 		this.clientSocket = clientSocket;
-		SDFSLogger.getLog().debug("Client Threads is " + clients.size());
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("Client Threads is " + clients.size());
 		addClient(this);
 	}
 
@@ -91,7 +92,9 @@ public class ClientThread extends Thread {
 			while (true) {
 				byte cmd = is.readByte();
 				if (cmd == NetworkCMDS.QUIT_CMD) {
-					SDFSLogger.getLog().debug("Quiting Client Network Thread");
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"Quiting Client Network Thread");
 					break;
 				}
 				if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
@@ -291,9 +294,10 @@ public class ClientThread extends Thread {
 							os.writeInt(b.length);
 							os.write(b);
 							os.flush();
-							SDFSLogger.getLog().debug(
-									"wrote " + b.length + " entries "
-											+ chunks.size());
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"wrote " + b.length + " entries "
+												+ chunks.size());
 						} finally {
 							writelock.unlock();
 							bos.close();
@@ -336,7 +340,8 @@ public class ClientThread extends Thread {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("connection failed ", e);
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("connection failed ", e);
 
 		} finally {
 			try {

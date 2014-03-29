@@ -87,9 +87,10 @@ public class FDisk {
 		for (SparseDataChunk ck : pchunks) {
 			byte[] exists = ck.getHashLoc();
 			if (exists[0] == -1) {
-				SDFSLogger.getLog().debug(
-						"could not find "
-								+ StringUtils.getHexString(ck.getHash()));
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"could not find "
+									+ StringUtils.getHexString(ck.getHash()));
 				corruptBlocks++;
 			}
 		}
@@ -120,13 +121,14 @@ public class FDisk {
 										p.hash, false,
 										Main.volume.getClusterCopies());
 								if (exists[0] == -1) {
-									SDFSLogger
-											.getLog()
-											.debug("file ["
-													+ mapFile
-													+ "] could not find "
-													+ StringUtils
-															.getHexString(p.hash));
+									if (SDFSLogger.isDebug())
+										SDFSLogger
+												.getLog()
+												.debug("file ["
+														+ mapFile
+														+ "] could not find "
+														+ StringUtils
+																.getHexString(p.hash));
 									corruptBlocks++;
 								}
 							}

@@ -62,6 +62,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Loading freebits bitset");
 			bsf = new File(chunk_location + File.separator + "freebit.map");
 			if (!bsf.exists()) {
+				if(SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				/*
 				 * this.freeSlots = new OpenBitSet(
@@ -107,6 +108,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Loading freebits bitset");
 			bsf = new File(pf.getPath() + File.separator + "freebit.map");
 			if (!bsf.exists()) {
+				if(SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
@@ -472,6 +474,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					Thread.sleep(interval);
 					store.sync();
 				} catch (IOException e) {
+					if(SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("Unable to flush FileChunkStore ",
 							e);
 				} catch (InterruptedException e) {

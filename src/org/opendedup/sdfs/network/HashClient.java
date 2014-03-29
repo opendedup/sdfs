@@ -74,9 +74,10 @@ public class HashClient implements Runnable {
 		// Try to open a socket on a given host and port
 		// Try to open input and output streams
 		try {
-			SDFSLogger.getLog().debug(
-					"Connecting to server " + server.getHostName()
-							+ " on port " + server.getPort());
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"Connecting to server " + server.getHostName()
+								+ " on port " + server.getPort());
 			if (server.isSSL()) {
 				TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 					@Override
@@ -129,9 +130,10 @@ public class HashClient implements Runnable {
 				throw new IOException(
 						"unable to authenticate chech upstream password");
 			this.closed = false;
-			SDFSLogger.getLog().debug(
-					"hashclient connection established "
-							+ clientSocket.toString());
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"hashclient connection established "
+								+ clientSocket.toString());
 		} catch (UnknownHostException e) {
 			SDFSLogger.getLog().fatal(
 					"Don't know about host " + server.getHostName()

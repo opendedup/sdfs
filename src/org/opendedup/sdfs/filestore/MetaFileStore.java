@@ -64,8 +64,10 @@ public class MetaFileStore {
 	public static void rename(String src, String dst, MetaDataDedupFile mf) {
 		getMFLock.lock();
 		try {
-			SDFSLogger.getLog().debug(
-					"removing [" + dst + "] and replacing with [" + src + "]");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"removing [" + dst + "] and replacing with [" + src
+								+ "]");
 			pathMap.remove(src);
 			pathMap.remove(dst);
 			pathMap.put(dst, mf);
@@ -224,7 +226,8 @@ public class MetaFileStore {
 				buf.unmarshal();
 				z++;
 			}
-			SDFSLogger.getLog().debug("flushed " + z + " files ");
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("flushed " + z + " files ");
 			// recman.commit();
 			return true;
 		} catch (Exception e) {
@@ -305,9 +308,10 @@ public class MetaFileStore {
 						try {
 							deleted = mf.getDedupFile().delete(true);
 						} catch (Exception e) {
-							SDFSLogger.getLog().debug(
-									"unable to delete dedup file for " + path,
-									e);
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"unable to delete dedup file for "
+												+ path, e);
 						}
 					}
 					deleted = mf.deleteStub();
@@ -318,11 +322,17 @@ public class MetaFileStore {
 					}
 				}
 			} catch (Exception e) {
-				if (mf != null)
-					SDFSLogger.getLog().debug("unable to remove " + path, e);
-				if (mf == null)
-					SDFSLogger.getLog().debug(
-							"unable to remove  because [" + path + "] is null");
+				if (mf != null) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog()
+								.debug("unable to remove " + path, e);
+				}
+				if (mf == null) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"unable to remove  because [" + path
+										+ "] is null");
+				}
 			}
 			mf = null;
 			return deleted;

@@ -62,7 +62,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Loading freebits bitset");
 			bsf = new File(chunk_location + File.separator + "freebit.map");
 			if (!bsf.exists()) {
-				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
 				SDFSLogger.getLog().info(
@@ -245,6 +246,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	}
 
 	long smallestFree = 0;
+
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
@@ -379,8 +381,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		}
 	}
 
-	
-	private final byte [] iFree = new byte[iPageSize];
+	private final byte[] iFree = new byte[iPageSize];
+
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len)
 			throws IOException {
@@ -396,7 +398,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			FileChunkStore store = this.getStore(iLen);
 			store.deleteChunk(hash, iStart, iLen);
 			this.size.addAndGet(-1 * cLen);
-			this.compressedLength.addAndGet(-1*iLen);
+			this.compressedLength.addAndGet(-1 * iLen);
 			rf.write(ByteBuffer.wrap(iFree), start);
 		} finally {
 			pool.returnObject(rf);
@@ -411,7 +413,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			}
 			long ps = start / ((long) this.iPageSize);
 			this.freeSlots.set(ps);
-			if(this.smallestFree > ps) {
+			if (this.smallestFree > ps) {
 				this.smallestFree = ps;
 			}
 
@@ -546,7 +548,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	public void deleteDuplicate(byte[] hash, long start, int len)
 			throws IOException {
 		this.deleteChunk(hash, start, len);
-		
+
 	}
 
 }
