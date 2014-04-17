@@ -58,7 +58,8 @@ public class MetaFileStore {
 	 * @param mf
 	 */
 	private static void cacheMF(MetaDataDedupFile mf) {
-		pathMap.put(mf.getPath(), mf);
+		if(mf != null)
+			pathMap.put(mf.getPath(), mf);
 	}
 
 	public static void rename(String src, String dst, MetaDataDedupFile mf) {
