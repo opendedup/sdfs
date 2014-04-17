@@ -474,7 +474,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				buf.get(_hash);
 				store = this.getStore(iLen);
 				byte[] chunk = store.getChunk(_hash, iStart, iLen);
-				// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
+				// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" + 
 				// iStart +"] comp=" + comp + " enc=" + enc + " store="
 				// +store.getName());
 				if (enc == 1)
