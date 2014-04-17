@@ -406,7 +406,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		}
 		return 0;
 	}
-
+	
 	@Override
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
