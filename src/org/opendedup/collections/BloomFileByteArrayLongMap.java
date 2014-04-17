@@ -808,7 +808,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().warn("error closing",e);
 		}
 		try {
 			File f = new File(path + ".vrp");
@@ -820,7 +820,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().warn("error closing",e);
 		}
 		try {
 			File f = new File(path + ".bf");
@@ -832,7 +832,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().warn("error closing",e);
 		}
 		try {
 			RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
@@ -840,7 +840,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			_bpos.writeLong(bgst);
 			_bpos.close();
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().warn("error closing",e);
 		}
 
 		this.hashlock.unlock();
