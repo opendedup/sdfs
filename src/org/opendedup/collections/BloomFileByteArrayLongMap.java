@@ -46,7 +46,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 	private ByteBuffer rbuf = ByteBuffer.wrap(new byte[EL]);
 	private AtomicInteger sz = new AtomicInteger(0);
 	BloomFilter<KeyBlob> bf = null;
-	BloomFilter<KeyBlob> _bf =  null;
+	boolean runningGC;
 	long bgst = 0;
 
 	static {
@@ -93,6 +93,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				this.mapped.clear(iterPos - 1);
 			} else if (!Arrays.equals(key, FREE)) {
 				this.mapped.set(iterPos - 1);
+				this.removed.clear(iterPos - 1);
+				this.bf.put(new KeyBlob(key));
 				return key;
 			} else {
 				this.mapped.clear(iterPos - 1);
@@ -219,7 +221,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 	@Override
 	public long setUp() throws IOException {
 		this.rbuf.put(REMOVED);
-		File posFile = new File(path + ".pos");
+		File posFile = new File(path + ".keys");
 		boolean newInstance = !posFile.exists();
 		@SuppressWarnings("resource")
 		RandomAccessFile _tRaf = new RandomAccessFile(path + ".ctimes", "rw");
@@ -298,6 +300,10 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 		}
 		keys = this.kFC.map(MapMode.READ_WRITE, 0, size * EL);
+		
+		if (!closedCorrectly) {
+			this.recreateMap();
+		}
 		if (bgst < 0) {
 			SDFSLogger.getLog()
 					.info("Hashtable " + path
@@ -305,8 +311,6 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			bgst = this.getBigestKey();
 
 		}
-		if (!closedCorrectly)
-			this.recreateMap();
 		sz.set(mapped.cardinality());
 		_bpos.seek(0);
 		_bpos.writeLong(-1);
@@ -328,14 +332,14 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		try {
 			this.hashlock.lock();
 			KeyBlob kb = new KeyBlob(key);
-			if (!bf.mightContain(kb))
+			if (!runningGC && !bf.mightContain(kb))
 				return false;
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
 				this.claims.set(pos);
-				if(this._bf != null)
-					this._bf.put(kb);
+				if(this.runningGC)
+					this.bf.put(kb);
 				return true;
 			}
 			return false;
@@ -395,8 +399,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				//this.kFC.write(lb, pos);
 				pos = (pos / EL);
 				this.claims.set(pos);
-				if(this._bf != null) {
-					this._bf.put(new KeyBlob(key));
+				if(this.runningGC) {
+					this.bf.put(new KeyBlob(key));
 				}
 				this.mapped.set(pos);
 				this.removed.clear(pos);
@@ -422,7 +426,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 	public boolean remove(byte[] key) throws IOException {
 		try {
 			this.hashlock.lock();
-			if (!bf.mightContain(new KeyBlob(key)))
+			if (!this.runningGC && !bf.mightContain(new KeyBlob(key)))
 				return false;
 			int pos = this.index(key);
 
@@ -431,8 +435,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 			boolean claimed = this.claims.get(pos);
 			if (claimed) {
-				if(this._bf != null)
-					this._bf.put(new KeyBlob(key));
+				if(this.runningGC)
+					this.bf.put(new KeyBlob(key));
 				return false;
 			} else {
 				keys.position(pos);
@@ -549,7 +553,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			if (index < 0) {
 				index += length;
 			}
-			if (mapped.get(index / EL)) {
+			if (! this.isFree(index / EL)) {
+				
 				keys.position(index);
 				keys.get(cur);
 				//
@@ -563,7 +568,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				//
 				if (Arrays.equals(cur, key))
 					return index;
-			} else {
+			} 
+			else {
 				return -1;
 			}
 		} while (index != loopIndex);
@@ -633,7 +639,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 
 			// A FREE slot stops the search
-			if (!mapped.get(index / EL)) {
+			if (this.isFree(index/EL)) {
 				if (firstRemoved != -1) {
 					return firstRemoved;
 				} else {
@@ -676,9 +682,15 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			KeyBlob kb = new KeyBlob(key);
-			int pos = this.insertionIndex(key, this.bf.mightContain(kb));
-			if (pos < 0)
+			int pos = -1;
+			if(!this.runningGC)
+			 pos = this.insertionIndex(key, true);
+			else
+				pos = this.insertionIndex(key, bf.mightContain(kb));
+			if (pos < 0) {
+				this.bf.put(kb);
 				return false;
+			}
 			this.keys.position(pos);
 			this.keys.put(key);
 			this.keys.putLong(value);
@@ -687,10 +699,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			pos = (pos / EL);
 			this.claims.set(pos);
 			this.mapped.set(pos);
-			if(this._bf != null)
-				this._bf.put(kb);
 			this.sz.incrementAndGet();
 			this.removed.clear(pos);
+			this.bf.put(kb);
 			// this.store.position(pos);
 			// this.store.put(storeID);
 			return pos > -1 ? true : false;
@@ -730,7 +741,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			this.hashlock.lock();
 			if (key == null)
 				return -1;
-			if (!this.bf.mightContain(new KeyBlob(key)))
+			if (!this.runningGC && !this.bf.mightContain(new KeyBlob(key)))
 				return -1;
 			int pos = this.index(key);
 			if (pos == -1) {
@@ -742,8 +753,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 					pos = (pos / EL);
 					this.claims.set(pos);
 				}
-				if(_bf !=null)
-					this._bf.put(new KeyBlob(key));
+				if(this.runningGC)
+					this.bf.put(new KeyBlob(key));
 				return val;
 
 			}
@@ -848,24 +859,15 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		if (this.closed)
 			throw new IOException("Hashtable " + this.path + " is close");
 		long k = 0;
-		this.hashlock.lock();
-		try {
-			this._bf = BloomFilter.create(kbFunnel,  size, .01);
-		}finally {
-		this.hashlock.unlock();
-		}
+		
 		try {
 			this.iterInit();
-			byte [] zs = new byte[FREE.length];
 			while (iterPos < size) {
 				this.hashlock.lock();
 				try {
 					boolean claimed = claims.get(iterPos);
 					claims.clear(iterPos);
 					if (claimed) {
-						this.keys.position(iterPos * EL);
-						this.keys.get(zs);
-						this._bf.put(new KeyBlob(zs));
 						this.mapped.set(iterPos);
 						this.removed.clear(iterPos);
 						this.tlb.position(0);
@@ -882,10 +884,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		} catch (NullPointerException e) {
 
 		}
-		this.hashlock.lock();
-		this.bf = _bf;
-		this._bf = null;
-		this.hashlock.unlock();
+		
 		return k;
 	}
 
@@ -940,10 +939,17 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 							byte [] key = new byte[FREE.length];
 							this.keys.position(iterPos*EL);
 							this.keys.get(key);
+							this.removed.clear(iterPos);
+							this.mapped.set(iterPos);
 							this.bf.put(new KeyBlob(key));
-							if(this._bf != null)
-								this._bf.put(new KeyBlob(key));
 						}
+					} else {
+						byte [] key = new byte[FREE.length];
+						this.keys.position(iterPos*EL);
+						this.keys.get(key);
+						this.removed.clear(iterPos);
+						this.mapped.set(iterPos);
+						this.bf.put(new KeyBlob(key));
 					}
 				}
 			} finally {
@@ -952,6 +958,29 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 		}
 		return -1;
+	}
+	
+	protected synchronized long removeAllOldRecord(long time) throws IOException {
+		try {
+		this.hashlock.lock();
+		try {
+			this.bf = BloomFilter.create(kbFunnel,  size, .01);
+			this.runningGC = true;
+		}finally {
+		this.hashlock.unlock();
+		}
+		long nm = 0;
+		long fPos = removeNextOldRecord(time);
+		while (fPos != -1) {
+			nm++;
+			fPos = removeNextOldRecord(time);
+		}
+		return nm;
+		}finally {
+			this.hashlock.lock();
+			this.runningGC = false;
+			this.hashlock.unlock();
+		}
 	}
 	
 	private static class KeyBlob {
@@ -974,3 +1003,5 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		}
 	};
 }
+
+
