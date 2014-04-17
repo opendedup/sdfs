@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -16,7 +17,7 @@ import org.opendedup.util.CompressionUtils;
 public class BatchGetBlocksCmd {
 
 	private static int MAX_BATCH_SZ = (Main.MAX_REPL_BATCH_SZ * 1024 * 1024)
-			/ Main.CHUNK_LENGTH;
+			/ (Main.CHUNK_LENGTH/HashFunctionPool.max_hash_cluster);
 
 	public byte[] getResult(byte[] b) throws IOException,
 			ClassNotFoundException {

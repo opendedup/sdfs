@@ -681,6 +681,12 @@ public class MgmtWebServer implements Container {
 				SDFSLogger.getLog().error("unable to satify request ", e1);
 			}
 			SDFSLogger.getLog().error("unable to satify request ", e);
+		} finally {
+			try {
+				response.close();
+			} catch (IOException e) {
+				SDFSLogger.getLog().debug("error when closing response",e);
+			}
 		}
 	}
 
