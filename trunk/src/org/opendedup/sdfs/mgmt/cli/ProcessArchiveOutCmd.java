@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Formatter;
 
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.XMLUtils;
@@ -110,7 +111,11 @@ public class ProcessArchiveOutCmd {
 			}
 
 		}
-		InputStream in = MgmtServerConnection.connectAndGet("", f.getName());
+		GetMethod m = null;
+		InputStream in = null;
+		try {
+		m = MgmtServerConnection.connectAndGet("", f.getName());
+		in = m.getResponseBodyAsStream();
 		File nf = new File(dir + File.separator + f.getName());
 		if (!nf.getParentFile().exists())
 			nf.getParentFile().mkdirs();
@@ -122,7 +127,14 @@ public class ProcessArchiveOutCmd {
 		}
 		in.close();
 		out.close();
+		m.releaseConnection();
 		return nf.getPath();
+		}finally {
+			if(in != null)
+				in.close();
+			if(m != null)
+				m.releaseConnection();
+		}
 
 	}
 
