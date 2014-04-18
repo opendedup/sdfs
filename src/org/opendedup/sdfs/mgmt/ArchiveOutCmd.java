@@ -43,7 +43,7 @@ public class ArchiveOutCmd implements Runnable {
 		nf = new File(vp.getPath() + File.separator + "archives"
 				+ File.separator + RandomGUID.getGuid());
 		SDFSLogger.getLog().debug("Replication staging = " + nf.getPath());
-		nft = new File(nf.getPath() + ".zip");
+		nft = new File(nf.getPath() + ".tar.gz");
 		SDFSLogger.getLog().debug("Created replication snapshot");
 		evt = SDFSEvent.archiveOutEvent("Archiving out " + srcPath);
 		evt.extendedInfo = nft.getPath();
@@ -83,11 +83,13 @@ public class ArchiveOutCmd implements Runnable {
 				MetaFileStore.removeMetaFile(af.getPath(), true);
 				eevt.curCt = 2;
 				SDFSLogger.getLog().debug("Copied out replication snapshot");
-				TFile dest = new TFile(nf.getPath() + ".zip");
+				TFile dest = new TFile(nf.getPath() + ".tar.gz");
 				TFile src = new TFile(nf);
 				src.cp_rp(dest);
 				SDFSLogger.getLog().debug(
-						"created archive " + nf.getPath() + ".zip");
+						"created archive " + nf.getPath() + ".tar.gz");
+				TVFS.umount(dest);
+				TVFS.umount(src);
 				TVFS.umount(dest.getInnerArchive());
 				eevt.curCt = 3;
 				evt.curCt = 4;
