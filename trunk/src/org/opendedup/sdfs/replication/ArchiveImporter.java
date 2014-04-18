@@ -85,6 +85,8 @@ public class ArchiveImporter {
 					ddb.mkdirs();
 				TFile mDstFiles = new TFile(Main.dedupDBStore + File.separator);
 				this.export(srcFiles, mDstFiles);
+				TVFS.umount(srcFiles);
+				TVFS.umount(mDstFiles);
 				TVFS.umount(srcRoot.getInnerArchive());
 
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
