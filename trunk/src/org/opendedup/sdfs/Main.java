@@ -88,7 +88,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "2.0RC2";
+	public static String version = "2.0";
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
