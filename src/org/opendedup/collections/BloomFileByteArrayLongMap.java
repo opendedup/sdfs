@@ -1,13 +1,13 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -18,7 +18,6 @@ import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -27,27 +26,31 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-public class BloomFileByteArrayLongMap implements AbstractShard {
-	MappedByteBuffer keys = null;
-	private int size = 0;
-	private String path = null;
-	private FileChannel kFC = null;
-	private FileChannel tRaf = null;
-	private static final int EL = HashFunctionPool.hashLength + 8;
-	private static final int VP = HashFunctionPool.hashLength;
-	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
-	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
-	private int iterPos = 0;
-	private boolean closed = false;
-	private BitSet claims = null;
-	private BitSet removed = null;
-	private BitSet mapped = null;
-	private ByteBuffer rbuf = ByteBuffer.wrap(new byte[EL]);
-	private AtomicInteger sz = new AtomicInteger(0);
-	BloomFilter<KeyBlob> bf = null;
-	boolean runningGC;
-	long bgst = 0;
+public class BloomFileByteArrayLongMap implements AbstractShard,Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	transient MappedByteBuffer keys = null;
+	transient private int size = 0;
+	transient private String path = null;
+	transient private FileChannel kFC = null;
+	transient private FileChannel tRaf = null;
+	transient private static final int EL = HashFunctionPool.hashLength + 8;
+	transient private static final int VP = HashFunctionPool.hashLength;
+	transient private ReentrantLock hashlock = new ReentrantLock();
+	transient public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	transient public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
+	transient private int iterPos = 0;
+	transient private boolean closed = false;
+	transient private BitSet claims = null;
+	transient private BitSet removed = null;
+	transient private BitSet mapped = null;
+	transient private ByteBuffer rbuf = ByteBuffer.wrap(new byte[EL]);
+	transient private AtomicInteger sz = new AtomicInteger(0);
+	transient BloomFilter<KeyBlob> bf = null;
+	transient boolean runningGC;
+	transient long bgst = 0;
 
 	static {
 		FREE = new byte[HashFunctionPool.hashLength];
@@ -62,7 +65,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		this.path = path;
 	}
 
-	private ReentrantLock iterlock = new ReentrantLock();
+	private transient ReentrantLock iterlock = new ReentrantLock();
 
 	/*
 	 * (non-Javadoc)
@@ -148,7 +151,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			try {
 				ByteBuffer lb = ByteBuffer.wrap(new byte[8]);
 
-				keys.position((iterPos * EL)+VP);
+				keys.position((iterPos * EL) + VP);
 				val = keys.getLong();
 				if (val >= 0) {
 					boolean claimed = claims.get(iterPos);
@@ -200,7 +203,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			this.hashlock.lock();
 			while (iterPos < size) {
 				long val = -1;
-				keys.position((iterPos * EL)+VP);
+				keys.position((iterPos * EL) + VP);
 				val = keys.getLong();
 				iterPos++;
 				if (val > _bgst)
@@ -231,15 +234,17 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		this.kFC = _kRaf.getChannel();
 		try {
 			/*
-			Field fd = tRaf.getClass().getDeclaredField("fd");
-			fd.setAccessible(true);
-			NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0, NativePosixUtil.DONTNEED);
-			NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0, NativePosixUtil.RANDOM);
-			fd = kFC.getClass().getDeclaredField("fd");
-			fd.setAccessible(true);
-			NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0, NativePosixUtil.DONTNEED);
-			NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0, NativePosixUtil.RANDOM);
-			*/
+			 * Field fd = tRaf.getClass().getDeclaredField("fd");
+			 * fd.setAccessible(true); NativePosixUtil.advise((FileDescriptor)
+			 * fd.get(tRaf), 0, 0, NativePosixUtil.DONTNEED);
+			 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
+			 * NativePosixUtil.RANDOM); fd =
+			 * kFC.getClass().getDeclaredField("fd"); fd.setAccessible(true);
+			 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
+			 * NativePosixUtil.DONTNEED);
+			 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
+			 * NativePosixUtil.RANDOM);
+			 */
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to set advisory", e);
 			throw new IOException(e);
@@ -254,9 +259,10 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			bf = BloomFilter.create(kbFunnel, size, .01);
 		} else {
 			File f = new File(path + ".vmp");
-			if (!f.exists())
+			if (!f.exists()) {
 				closedCorrectly = false;
-			else {
+				SDFSLogger.getLog().warn("vmp does not exist");
+			} else {
 				try {
 					FileInputStream fin = new FileInputStream(f);
 					ObjectInputStream oon = new ObjectInputStream(fin);
@@ -264,14 +270,16 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 					mapped = (BitSet) oon.readObject();
 					oon.close();
 				} catch (Exception e) {
+					SDFSLogger.getLog().warn("vmp load error", e);
 					closedCorrectly = false;
 				}
 				f.delete();
 			}
 			f = new File(path + ".vrp");
-			if (!f.exists())
+			if (!f.exists()) {
 				closedCorrectly = false;
-			else {
+				SDFSLogger.getLog().warn("vrp does not exist");
+			} else {
 				try {
 					FileInputStream fin = new FileInputStream(f);
 					ObjectInputStream oon = new ObjectInputStream(fin);
@@ -279,28 +287,31 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 					removed = (BitSet) oon.readObject();
 					oon.close();
 				} catch (Exception e) {
+					SDFSLogger.getLog().warn("vrp load error", e);
 					closedCorrectly = false;
 				}
 				f.delete();
 			}
 			f = new File(path + ".bf");
-			if (!f.exists())
+			if (!f.exists()) {
 				closedCorrectly = false;
-			else {
+				SDFSLogger.getLog().warn("bf does not exist");
+			} else {
 				try {
 					FileInputStream fin = new FileInputStream(f);
 					ObjectInputStream oon = new ObjectInputStream(fin);
 					bf = (BloomFilter<KeyBlob>) oon.readObject();
 					oon.close();
 				} catch (Exception e) {
+					SDFSLogger.getLog().warn("bf load error", e);
 					closedCorrectly = false;
-					
+
 				}
 				f.delete();
 			}
 		}
 		keys = this.kFC.map(MapMode.READ_WRITE, 0, size * EL);
-		
+
 		if (!closedCorrectly) {
 			this.recreateMap();
 		}
@@ -338,7 +349,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			if (index >= 0) {
 				int pos = (index / EL);
 				this.claims.set(pos);
-				if(this.runningGC)
+				if (this.runningGC)
 					this.bf.put(kb);
 				return true;
 			}
@@ -396,10 +407,10 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				lb.put(key);
 				lb.putLong(value);
 				lb.position(0);
-				//this.kFC.write(lb, pos);
+				// this.kFC.write(lb, pos);
 				pos = (pos / EL);
 				this.claims.set(pos);
-				if(this.runningGC) {
+				if (this.runningGC) {
 					this.bf.put(new KeyBlob(key));
 				}
 				this.mapped.set(pos);
@@ -422,7 +433,6 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 	 * @see org.opendedup.collections.AbstractShard#remove(byte[])
 	 */
 	@Override
-	
 	public boolean remove(byte[] key) throws IOException {
 		try {
 			this.hashlock.lock();
@@ -435,7 +445,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 			boolean claimed = this.claims.get(pos);
 			if (claimed) {
-				if(this.runningGC)
+				if (this.runningGC)
 					this.bf.put(new KeyBlob(key));
 				return false;
 			} else {
@@ -443,13 +453,14 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				keys.put(REMOVED);
 				keys.putLong(0);
 				long fp = keys.getLong();
-				
+
 				ChunkData ck = new ChunkData(fp, key);
 				if (ck.setmDelete(true)) {
-					
+
 					rbuf.position(0);
-					//this.kFC.write(rbuf, pos);
-					this.tRaf.write(ByteBuffer.wrap(new byte[8]), (pos/EL)*8);
+					// this.kFC.write(rbuf, pos);
+					this.tRaf.write(ByteBuffer.wrap(new byte[8]),
+							(pos / EL) * 8);
 					pos = (pos / EL);
 					this.claims.clear(pos);
 					this.mapped.clear(pos);
@@ -518,10 +529,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		}
 
 		if (Arrays.equals(cur, FREE)) {
-			
-				SDFSLogger.getLog().warn(
-						"Should not be here in hashmap in index");
-				return -1;
+
+			SDFSLogger.getLog().warn("Should not be here in hashmap in index");
+			return -1;
 		}
 		return indexRehashed(key, index, hash, cur);
 	}
@@ -553,23 +563,21 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			if (index < 0) {
 				index += length;
 			}
-			if (! this.isFree(index / EL)) {
-				
+			if (!this.isFree(index / EL)) {
+
 				keys.position(index);
 				keys.get(cur);
 				//
 				if (Arrays.equals(cur, FREE)) {
-					
-						SDFSLogger
-								.getLog()
-								.warn("Should not be here in hashmap in indexRehashed");
-						return -1;
+
+					SDFSLogger.getLog().warn(
+							"Should not be here in hashmap in indexRehashed");
+					return -1;
 				}
 				//
 				if (Arrays.equals(cur, key))
 					return index;
-			} 
-			else {
+			} else {
 				return -1;
 			}
 		} while (index != loopIndex);
@@ -577,7 +585,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		return -1;
 	}
 
-	protected int insertionIndex(byte[] key, boolean migthexist) throws IOException {
+	protected int insertionIndex(byte[] key, boolean migthexist)
+			throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
@@ -591,13 +600,13 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		keys.get(cur);
 
 		if (Arrays.equals(cur, FREE)) {
-				SDFSLogger.getLog().warn(
-						"Should not be here in hashmap in insertionIndex");
-				return index;
+			SDFSLogger.getLog().warn(
+					"Should not be here in hashmap in insertionIndex");
+			return index;
 		} else if (Arrays.equals(cur, key)) {
 			return -index - 1; // already stored
 		}
-		return insertKeyRehash(key, index, hash, cur,migthexist);
+		return insertKeyRehash(key, index, hash, cur, migthexist);
 	}
 
 	/**
@@ -615,8 +624,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 	 * @throws IOException
 	 */
 	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur,
-			boolean mightexist)
-			throws IOException {
+			boolean mightexist) throws IOException {
 		final int length = size * EL;
 		final int probe = (1 + (hash % (size - 2))) * EL;
 		final int loopIndex = index;
@@ -639,7 +647,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			}
 
 			// A FREE slot stops the search
-			if (this.isFree(index/EL)) {
+			if (this.isFree(index / EL)) {
 				if (firstRemoved != -1) {
 					return firstRemoved;
 				} else {
@@ -665,7 +673,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 				"No free or removed slots available. Key set full?!!");
 	}
 
-	ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
+	transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
 
 	/*
 	 * (non-Javadoc)
@@ -683,8 +691,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 								+ "the volume or DSE allocation size");
 			KeyBlob kb = new KeyBlob(key);
 			int pos = -1;
-			if(!this.runningGC)
-			 pos = this.insertionIndex(key, true);
+			if (!this.runningGC)
+				pos = this.insertionIndex(key, true);
 			else
 				pos = this.insertionIndex(key, bf.mightContain(kb));
 			if (pos < 0) {
@@ -747,13 +755,13 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			if (pos == -1) {
 				return -1;
 			} else {
-				this.keys.position(pos+VP);
+				this.keys.position(pos + VP);
 				long val = this.keys.getLong();
 				if (claim) {
 					pos = (pos / EL);
 					this.claims.set(pos);
 				}
-				if(this.runningGC)
+				if (this.runningGC)
 					this.bf.put(new KeyBlob(key));
 				return val;
 
@@ -808,7 +816,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing",e);
+			SDFSLogger.getLog().warn("error closing", e);
 		}
 		try {
 			File f = new File(path + ".vrp");
@@ -820,19 +828,21 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing",e);
+			SDFSLogger.getLog().warn("error closing", e);
 		}
-		try {
-			File f = new File(path + ".bf");
-			FileOutputStream fout = new FileOutputStream(f);
-			ObjectOutputStream oon = new ObjectOutputStream(fout);
-			oon.writeObject(this.bf);
-			oon.flush();
-			oon.close();
-			fout.flush();
-			fout.close();
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing",e);
+		if (this.bf != null) {
+			try {
+				File f = new File(path + ".bf");
+				FileOutputStream fout = new FileOutputStream(f);
+				ObjectOutputStream oon = new ObjectOutputStream(fout);
+				oon.writeObject(this.bf);
+				oon.flush();
+				oon.close();
+				fout.flush();
+				fout.close();
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("error closing", e);
+			}
 		}
 		try {
 			RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
@@ -840,15 +850,16 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 			_bpos.writeLong(bgst);
 			_bpos.close();
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing",e);
+			SDFSLogger.getLog().warn("error closing", e);
 		}
 
 		this.hashlock.unlock();
-		if(SDFSLogger.isDebug())
+		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
-	private ByteBuffer tlb = ByteBuffer.wrap(new byte[8]);
+	transient private ByteBuffer tlb = ByteBuffer.wrap(new byte[8]);
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -859,7 +870,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		if (this.closed)
 			throw new IOException("Hashtable " + this.path + " is close");
 		long k = 0;
-		
+
 		try {
 			this.iterInit();
 			while (iterPos < size) {
@@ -884,7 +895,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		} catch (NullPointerException e) {
 
 		}
-		
+
 		return k;
 	}
 
@@ -916,11 +927,11 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 					this.tRaf.read(tlb, iterPos * 8);
 					this.tlb.position(0);
 					long tm = this.tlb.getLong();
-					if (tm < time ) {
+					if (tm < time) {
 						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
 							keys.position(iterPos * EL);
-							byte [] key = new byte[FREE.length];
+							byte[] key = new byte[FREE.length];
 							keys.get(key);
 							val = keys.getLong();
 							keys.position(iterPos * EL);
@@ -928,24 +939,24 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 							keys.putLong(0);
 							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
-							this.tRaf.write(ByteBuffer.wrap(new byte[8]), iterPos * 8);
+							this.tRaf.write(ByteBuffer.wrap(new byte[8]),
+									iterPos * 8);
 							this.claims.clear(iterPos);
 							this.mapped.clear(iterPos);
 							this.sz.decrementAndGet();
 							this.removed.set(iterPos);
 							return val;
-						}
-						else {
-							byte [] key = new byte[FREE.length];
-							this.keys.position(iterPos*EL);
+						} else {
+							byte[] key = new byte[FREE.length];
+							this.keys.position(iterPos * EL);
 							this.keys.get(key);
 							this.removed.clear(iterPos);
 							this.mapped.set(iterPos);
 							this.bf.put(new KeyBlob(key));
 						}
 					} else {
-						byte [] key = new byte[FREE.length];
-						this.keys.position(iterPos*EL);
+						byte[] key = new byte[FREE.length];
+						this.keys.position(iterPos * EL);
 						this.keys.get(key);
 						this.removed.clear(iterPos);
 						this.mapped.set(iterPos);
@@ -959,34 +970,50 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		}
 		return -1;
 	}
-	
-	protected synchronized long removeAllOldRecord(long time) throws IOException {
+
+	protected synchronized long removeAllOldRecord(long time)
+			throws IOException {
 		try {
-		this.hashlock.lock();
-		try {
-			this.bf = BloomFilter.create(kbFunnel,  size, .01);
-			this.runningGC = true;
-		}finally {
-		this.hashlock.unlock();
-		}
-		long nm = 0;
-		long fPos = removeNextOldRecord(time);
-		while (fPos != -1) {
-			nm++;
-			fPos = removeNextOldRecord(time);
-		}
-		return nm;
-		}finally {
+			this.hashlock.lock();
+			try {
+				this.bf = BloomFilter.create(kbFunnel, size, .01);
+				this.runningGC = true;
+			} finally {
+				this.hashlock.unlock();
+			}
+			long nm = 0;
+			long fPos = removeNextOldRecord(time);
+			while (fPos != -1) {
+				nm++;
+				fPos = removeNextOldRecord(time);
+			}
+			return nm;
+		} finally {
 			this.hashlock.lock();
 			this.runningGC = false;
 			this.hashlock.unlock();
 		}
 	}
-	
-	private static class KeyBlob {
-		byte[] key;
+
+	public static class KeyBlob implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2753966297671970793L;
+		/**
+		 * 
+		 */
+		private byte[] key;
 
 		public KeyBlob(byte[] key) {
+			this.key = key;
+		}
+		
+		public byte [] getKey() {
+			return this.key;
+		}
+		
+		public void setKey(byte [] key) {
 			this.key = key;
 		}
 	}
@@ -995,7 +1022,11 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		/**
 		 * 
 		 */
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = -1612304804452862219L;
+
+		/**
+		 * 
+		 */
 
 		@Override
 		public void funnel(KeyBlob key, PrimitiveSink into) {
@@ -1003,5 +1034,3 @@ public class BloomFileByteArrayLongMap implements AbstractShard {
 		}
 	};
 }
-
-
