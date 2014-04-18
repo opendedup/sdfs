@@ -1,5 +1,6 @@
 package fuse.logging;
 
+
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Enumeration;
