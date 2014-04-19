@@ -1,3 +1,11 @@
+Version 2.0
+	Fixes :
+	* Fixed Replication Action opening to many ports.
+	* Fixed Temp files not deleting during replication.
+	* Update the Guava library to 1.6 release.
+	Enhancements :
+	* Added Beta Hashmap for faster hashtable lookups and storage. This hashmap, MaxFileBasedCSMap, uses a bloomfilter and bitmap to speed up lookups within the hashtable. 
+	It will also require less resident memory that the current implementation. To use this hashmap add the option --chunk-store-hashdb-class="org.opendedup.collections.MaxFileBasedCSMap"
 Version 2.0-RC2
 	Fixes :
 	* Fixed Redhat/Centos 6.5 Library dependency issue
@@ -30,6 +38,28 @@ Version 2.0-beta3
 	* Fixed reclaim for file based chunkstore
 	Enhancements:
 	* Include basic structure for variable based deduplication. Beta 4 will include basic support for variable block deduplication.
+Version 2.0-beta2
+	Fixes:	
+	* Fixed garbage various collection issues for volumes over 8TB
+	* Fixed replication copies issue. 
+	Enhancements
+	* Added virtual volume manager. Opendedup can now run as a virual block device and dedup any filesystem on top of it.
+	  Opendedup has tested, EXT4, btrfs, and OCFS2 for validation and QA. All perform and function as if they are running on block device.
+	  Take a look at odvol.make odvol.start odvol.cli for more details. There is also a quickstart guide at 
+          http://www.opendedup.org/quickstart-guide-for-opendedup-volume-manager-20
+	* Improved read performance. There are various improvements to read performance that can increase read speeds by up to 
+	  20% based on benchmark testing performed.
+Version 2.0-beta1
+	Enhancements - Major new version see http://www.opendedup.org/sdfs-20-administration-guide for more detail.
+	* This version is not backwards compatible with older versions because of design changes for clustering
+	* Refactored Cluster DSE Support with major new features, these include.
+		* SDFS High Availability : All block data can is replicated across up to 7 Block Storage nodes (2 by default).
+		* Global Deduplication across all SDFS volumes in a cluster
+		* Block Storage Node dynamically expandable to up to 126 independent storage pools
+		* Very low Intra-Cluster network IO since only globally unique blocks are written 
+	* Refactored filesystem Sync action
+	* Refactored XML configuration
+	* Refactored Replication :Now all traffice is encrypted over a single SSL port (6442)
 Version 1.2.1
 	Fixes:
 	* Free space calculation was causing problems with new volumes in 1.2.0 not being able to be more than .95 full.
