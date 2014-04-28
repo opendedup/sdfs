@@ -67,6 +67,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type PERFMON = new Type("Performance Monitor");
 	public transient static final Type TEST = new Type("Testing 123");
 	public transient static final Type CONVMAP = new Type("CONVMAP");
+	public transient static final Type PSWD = new Type("Password Changed");
 	public transient static final Type DSKFL = new Type("Disk Full");
 	public transient static final Type RDER = new Type("Read Error");
 	public transient static final Type WER = new Type("Write Error");
@@ -161,6 +162,11 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static SDFSEvent importEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
+		return event;
+	}
+	
+	public static SDFSEvent passwdEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(PSWD, "Administrative User", shortMsg, RUNNING);
 		return event;
 	}
 
