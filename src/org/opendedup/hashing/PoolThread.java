@@ -17,10 +17,17 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
-	private int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
+	private static int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / (Main.CHUNK_LENGTH)) + 1;
+	//private static final int maxTasks = 40;
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
-			maxTasks + 20);
+			maxTasks);
 	Thread th = null;
+	
+	static {
+		if(maxTasks > 120)
+			maxTasks = 120;
+		SDFSLogger.getLog().info("Pool List Size will be " + maxTasks);
+	}
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
@@ -44,7 +51,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 						}
 					}
 				} else {
-						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(ts);
+						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(maxTasks);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							runnable.startClose();
@@ -104,10 +111,9 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 						*/
 						cks = null;
 					}
-				Thread.sleep(1);
 				}
 				else {
-					Thread.sleep(10);
+					Thread.sleep(5);
 				}
 				
 			} catch (Exception e) {

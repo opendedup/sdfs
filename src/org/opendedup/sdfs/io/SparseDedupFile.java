@@ -319,13 +319,14 @@ public class SparseDedupFile implements DedupFile {
 					break;
 				}
 				if (i > 30000) {
-					i = 0;
+					
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()
 							.info("WriteCache timed out after [" + sec
 									+ "] seconds. There are still "
 									+ this.flushingBuffers.size() + " in flush");
+					i = 0;
 					x++;
 				}
 			}
@@ -1311,7 +1312,6 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer) {
 		this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
-
 	}
 
 	@Override

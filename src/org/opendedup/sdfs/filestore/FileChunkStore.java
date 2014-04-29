@@ -44,7 +44,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private AbstractHashEngine hc = null;
 	private SyncThread th = null;
 	private File bsf;
-	private RAFPool pool = null;
+	private FCPool pool = null;
 
 	/**
 	 * 
@@ -90,7 +90,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			chunkDataWriter = new RandomAccessFile(f, "rw");
 			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
-			pool = new RAFPool(f, 100);
+			pool = new FCPool(f, 100);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
@@ -133,7 +133,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			chunkDataWriter = new RandomAccessFile(f, "rw");
 			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
-			pool = new RAFPool(f, 100);
+			pool = new FCPool(f, 100);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
@@ -179,7 +179,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			//NativePosixUtil.advise(chunkDataWriter.getFD(), 0, 0, NativePosixUtil.SEQUENTIAL);
 			this.currentLength=chunkDataWriter.length();
 			this.closed = false;
-			pool = new RAFPool(f, 100);
+			pool = new FCPool(f, 100);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
@@ -223,7 +223,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	}
 
 	protected void sync() throws IOException {
-		//this.chunkDataWriter.getFD().sync();
+		this.chunkDataWriter.getFD().sync();
 	}
 
 	/*
@@ -294,7 +294,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
 		long pos = -1;
-		RandomAccessFile rf = null;
+		FileChannel rf = null;
 		try {
 			rlock.lock();
 			if (this.freeSlots != null) {
@@ -322,8 +322,10 @@ public class FileChunkStore implements AbstractChunkStore {
 			
 			// this.chunks.invalidate(Long.valueOf(pos));
 			rf = pool.borrowObject();
-			rf.seek(pos);
-            rf.write(chunk);
+			ByteBuffer buf = ByteBuffer.wrap(new byte [pageSize]);
+			buf.put(chunk);
+			buf.position(0);
+			rf.write(buf, pos);
 			
 			return pos;
 		} catch (Exception e) {
@@ -350,10 +352,9 @@ public class FileChunkStore implements AbstractChunkStore {
 		if(len == -1) 
 			len = pageSize;
 		byte[] b = new byte[len];
-		RandomAccessFile rf = pool.borrowObject();
+		FileChannel rf = pool.borrowObject();
 		try {
-			rf.seek(start);
-			rf.read(b);
+			rf.read(ByteBuffer.wrap(b), start);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to fetch chunk at position " + start, e);
