@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -14,6 +15,8 @@ import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
+
+import com.google.common.hash.BloomFilter;
 
 public class HashChunkService implements HashChunkServiceInterface {
 
@@ -138,6 +141,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 
 	public void processHashClaims(SDFSEvent evt) throws IOException {
 		hs.processHashClaims(evt);
+	}
+	
+	public long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf)throws IOException {
+		return hs.processHashClaims(evt,bf);
 	}
 
 	public long removeStailHashes(long ms, boolean forceRun, SDFSEvent evt)

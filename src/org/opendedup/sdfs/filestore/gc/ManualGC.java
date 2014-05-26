@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -88,12 +89,16 @@ public class ManualGC {
 
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				new FDisk(evt);
+				evt.curCt = 33;
+				HCServiceProxy.processHashClaims(evt);
+				evt.curCt = 66;
 			} else {
 				HCServiceProxy.runFDisk(evt);
+				evt.curCt = 33;
+				HCServiceProxy.processHashClaims(evt);
+				evt.curCt = 66;
 			}
-			evt.curCt = 33;
-			HCServiceProxy.processHashClaims(evt);
-			evt.curCt = 66;
+			
 
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);

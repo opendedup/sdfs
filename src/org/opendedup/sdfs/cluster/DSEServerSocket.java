@@ -31,6 +31,7 @@ import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.collections.QuickList;
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
@@ -42,6 +43,8 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.StringUtils;
+
+import com.google.common.hash.BloomFilter;
 
 public class DSEServerSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -316,6 +319,19 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				HCServiceProxy.processHashClaims(evt);
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("sending back claim chunks cmd");
+				rtrn = evt;
+				break;
+			}
+			case NetworkCMDS.RUN_CLAIMBF: {
+				byte[] ob = new byte[buf.getInt()];
+				buf.get(ob);
+				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
+				byte[] bb = new byte[buf.getInt()];
+				buf.get(bb);
+				BloomFilter<KeyBlob> bf = (BloomFilter<KeyBlob>)Util.objectFromByteBuffer(bb);
+				HCServiceProxy.processHashClaims(evt,bf);
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("sending back bloom claim chunks cmd");
 				rtrn = evt;
 				break;
 			}

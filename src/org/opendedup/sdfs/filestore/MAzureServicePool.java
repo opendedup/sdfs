@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -10,11 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
 
-import com.microsoft.windowsazure.services.blob.client.CloudBlobClient;
-import com.microsoft.windowsazure.services.blob.client.CloudBlobContainer;
-import com.microsoft.windowsazure.services.core.storage.CloudStorageAccount;
-import com.microsoft.windowsazure.services.core.storage.StorageException;
-
+import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.blob.*;
 public class MAzureServicePool {
 
 	private int poolSize;
@@ -80,9 +78,10 @@ public class MAzureServicePool {
 	}
 
 	public CloudBlobContainer makeObject() throws URISyntaxException, StorageException {
+		SDFSLogger.getLog().info("pool size is " +this.passiveObjects.size());
 		CloudBlobClient serviceClient = account.createCloudBlobClient();
 		CloudBlobContainer container = serviceClient.getContainerReference(this.bucket);
-		container.createIfNotExist();
+		container.createIfNotExists();
 		return container;
 	}
 

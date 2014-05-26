@@ -19,6 +19,7 @@ public class SparseDataChunk implements Externalizable {
 	private boolean localData = false;
 	int currentpos = 1;
 	private int RAWDL = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
+	//private int RAWDL;
 	private byte[] hashlocs;
 	private long fpos;
 	private byte version = 1;
