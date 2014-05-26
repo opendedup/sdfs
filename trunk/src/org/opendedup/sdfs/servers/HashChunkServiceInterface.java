@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
+
+import com.google.common.hash.BloomFilter;
 
 public interface HashChunkServiceInterface {
 
@@ -33,6 +36,8 @@ public interface HashChunkServiceInterface {
 	public abstract byte getHashRoute(byte[] hash);
 
 	public abstract void processHashClaims(SDFSEvent evt) throws IOException;
+	
+	public abstract long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException;
 
 	public abstract long removeStailHashes(long ms, boolean forceRun,
 			SDFSEvent evt) throws IOException;

@@ -2,8 +2,11 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
+
+import com.google.common.hash.BloomFilter;
 
 public interface AbstractHashesMap {
 
@@ -19,6 +22,7 @@ public interface AbstractHashesMap {
 
 	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 
+	public abstract long claimRecords(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException;
 	/**
 	 * Searches the set for <tt>obj</tt>
 	 * 

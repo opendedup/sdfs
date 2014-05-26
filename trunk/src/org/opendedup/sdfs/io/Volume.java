@@ -606,7 +606,7 @@ public class Volume implements java.io.Serializable {
 			this.actualWriteBytes.set(0);
 	}
 
-	public double getActualWriteBytes() {
+	public long getActualWriteBytes() {
 		return actualWriteBytes.get();
 	}
 

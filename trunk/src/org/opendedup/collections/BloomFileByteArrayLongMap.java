@@ -26,7 +26,7 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-public class BloomFileByteArrayLongMap implements AbstractShard,Serializable {
+public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	/**
 	 * 
 	 */
@@ -87,20 +87,29 @@ public class BloomFileByteArrayLongMap implements AbstractShard,Serializable {
 	@Override
 	public byte[] nextKey() {
 		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * EL);
-			keys.get(key);
-			iterPos++;
-			if (Arrays.equals(key, REMOVED)) {
-				this.removed.set(iterPos - 1);
-				this.mapped.clear(iterPos - 1);
-			} else if (!Arrays.equals(key, FREE)) {
-				this.mapped.set(iterPos - 1);
-				this.removed.clear(iterPos - 1);
-				this.bf.put(new KeyBlob(key));
-				return key;
-			} else {
-				this.mapped.clear(iterPos - 1);
+			this.hashlock.lock();
+			try {
+				if (this.mapped.get(iterPos)) {
+					byte[] key = new byte[FREE.length];
+					keys.position(iterPos * EL);
+					keys.get(key);
+					iterPos++;
+					if (Arrays.equals(key, REMOVED)) {
+						this.removed.set(iterPos - 1);
+						this.mapped.clear(iterPos - 1);
+					} else if (!Arrays.equals(key, FREE)) {
+						this.mapped.set(iterPos - 1);
+						this.removed.clear(iterPos - 1);
+						this.bf.put(new KeyBlob(key));
+						return key;
+					} else {
+						this.mapped.clear(iterPos - 1);
+					}
+				} else {
+					iterPos++;
+				}
+			} finally {
+				this.hashlock.unlock();
 			}
 
 		}
@@ -1003,17 +1012,17 @@ public class BloomFileByteArrayLongMap implements AbstractShard,Serializable {
 		/**
 		 * 
 		 */
-		private byte[] key;
+		public byte[] key;
 
 		public KeyBlob(byte[] key) {
 			this.key = key;
 		}
-		
-		public byte [] getKey() {
+
+		public byte[] getKey() {
 			return this.key;
 		}
-		
-		public void setKey(byte [] key) {
+
+		public void setKey(byte[] key) {
 			this.key = key;
 		}
 	}
@@ -1033,5 +1042,20 @@ public class BloomFileByteArrayLongMap implements AbstractShard,Serializable {
 			into.putBytes(key.key);
 		}
 	};
-}
 
+	@Override
+	public long claimRecords(BloomFilter<KeyBlob> bf) throws IOException {
+		this.iterInit();
+		byte[] key = this.nextKey();
+		while (key != null) {
+			if (bf.mightContain(new KeyBlob(key))) {
+				this.hashlock.lock(); 
+				this.claims.set(this.iterPos - 1);
+				this.hashlock.unlock();
+			}
+			key = this.nextKey();
+		}
+		this.iterInit();
+		return this.claimRecords();
+	}
+}

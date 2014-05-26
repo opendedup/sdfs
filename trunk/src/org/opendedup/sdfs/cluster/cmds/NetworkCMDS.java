@@ -53,4 +53,5 @@ public class NetworkCMDS {
 	public static final byte GET_VOLUME_INFO = 25;
 	public static final byte BATCH_WRITE_HASH_CMD = 26;
 	public static final byte SET_GC_SCHEDULE = 27;
+	public static final byte RUN_CLAIMBF = 28;
 }

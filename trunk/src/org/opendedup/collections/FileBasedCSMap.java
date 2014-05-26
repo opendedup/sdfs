@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
@@ -19,8 +21,10 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
-import org.opendedup.util.OSValidator;
+//import org.opendedup.util.OSValidator;
 import org.opendedup.util.StringUtils;
+
+import com.google.common.hash.BloomFilter;
 
 public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
@@ -128,6 +132,35 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		SDFSLogger.getLog().info("claimed [" + claims + "] records");
 	}
 
+	@Override
+	public synchronized long claimRecords(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException {
+		if (this.isClosed())
+			throw new IOException("Hashtable " + this.fileName + " is close");
+		SDFSLogger.getLog().info("Claiming Records [" + this.getSize() + "] from ["
+				+ this.fileName + "]");
+		SDFSEvent tEvt = SDFSEvent.claimInfoEvent(
+				"Claiming Records [" + this.getSize() + "] from ["
+						+ this.fileName + "]", evt);
+		tEvt.maxCt = this.maps.length;
+		long claims = 0;
+		for (int i = 0; i < maps.length; i++) {
+			tEvt.curCt++;
+			try {
+				maps[i].iterInit();
+				claims = claims + maps[i].claimRecords(bf);
+			} catch (Exception e) {
+				tEvt.endEvent("Unable to claim records for " + i
+						+ " because : [" + e.toString() + "]", SDFSEvent.ERROR);
+				SDFSLogger.getLog()
+						.error("Unable to claim records for " + i, e);
+				throw new IOException(e);
+			}
+		}
+		tEvt.endEvent("removed [" + claims + "] records");
+		SDFSLogger.getLog().info("removed [" + claims + "] records");
+		return claims;
+	}
+	
 	/**
 	 * initializes the Object set of this hash table.
 	 * 
@@ -155,10 +188,12 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			ram = ram + (sz * (HashFunctionPool.hashLength + 8));
 			String fp = this.fileName + "-" + i;
 			AbstractShard m = null;
+			/*
 			if (OSValidator.isWindows())
 				m = new FCByteArrayLongMap(fp, sz,
 						(short) HashFunctionPool.hashLength);
 			else
+			*/
 				m = new FileByteArrayLongMap(fp, sz,
 						(short) HashFunctionPool.hashLength);
 			long mep = m.setUp();

@@ -1,7 +1,6 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,10 +20,13 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
+
+import com.google.common.hash.BloomFilter;
 
 public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
@@ -80,15 +82,20 @@ public class FileByteArrayLongMap implements AbstractShard {
 	@Override
 	public byte[] nextKey() {
 		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * FREE.length);
-			keys.get(key);
-			iterPos++;
-			if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-				this.mapped.set(iterPos - 1);
-				return key;
-			} else {
-				this.mapped.clear(iterPos - 1);
+			this.hashlock.lock();
+			try {
+				byte[] key = new byte[FREE.length];
+				keys.position(iterPos * FREE.length);
+				keys.get(key);
+				iterPos++;
+				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+					this.mapped.set(iterPos - 1);
+					return key;
+				} else {
+					this.mapped.clear(iterPos - 1);
+				}
+			} finally {
+				this.hashlock.unlock();
 			}
 
 		}
@@ -808,6 +815,47 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 		}
 		return k;
+	}
+
+	@Override
+	public long claimRecords(BloomFilter<KeyBlob> bf) throws IOException {
+		this.hashlock.lock();
+		this.claims.clear();
+		this.hashlock.unlock();
+		this.iterInit();
+		long sz = 0;
+		while (iterPos < size) {
+			this.hashlock.lock();
+			try {
+				byte[] key = new byte[FREE.length];
+				keys.position(iterPos * FREE.length);
+				keys.get(key);
+				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+					if (!bf.mightContain(new KeyBlob(key))
+							&& !this.claims.get(iterPos)) {
+						keys.position(iterPos * FREE.length);
+						keys.put(REMOVED);
+						this.values.position(iterPos * 8);
+						long val = this.values.getLong();
+						ChunkData ck = new ChunkData(val, key);
+						ck.setmDelete(true);
+						this.values.position(iterPos * 8);
+						this.values.putLong(0);
+						this.mapped.clear(iterPos);
+						this.sz.decrementAndGet();
+						this.claims.clear(iterPos);
+						sz++;
+					} else {
+						this.mapped.set(iterPos);
+					}
+				}
+
+			} finally {
+				iterPos++;
+				this.hashlock.unlock();
+			}
+		}
+		return sz;
 	}
 
 	/*

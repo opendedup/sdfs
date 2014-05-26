@@ -102,7 +102,7 @@ public class DSEServer implements Externalizable {
 		byte[] lb = this.location.getBytes();
 		byte[] rb = this.rack.getBytes();
 		byte[] bz = new byte[1 + 4 + b.length + 1 + 4 + 4 + addr.length + 8 + 8
-				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1+8+8];
+				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1+8+8+8];
 
 		ByteBuffer buf = ByteBuffer.wrap(bz);
 		buf.put(NetworkCMDS.UPDATE_DSE);

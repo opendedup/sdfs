@@ -2,27 +2,30 @@ package org.opendedup.mtools;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
-import org.opendedup.util.StringUtils;
 
-public class FDisk {
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.PrimitiveSink;
+
+public class BloomFDisk {
 	private long files = 0;
-	private long corruptFiles = 0;
 	private SDFSEvent fEvt = null;
-	private static final int MAX_BATCH_SIZE = 10000;
+	private long entries = 0;
+	transient BloomFilter<KeyBlob> bf = null;
 
-	public FDisk(SDFSEvent evt) throws FDiskException {
+	public BloomFDisk(SDFSEvent evt) throws FDiskException {
 		init(evt);
 	}
 
@@ -45,6 +48,14 @@ public class FDisk {
 							+ " file size = " + FileCounts.getSize(f, false),
 					evt);
 			fEvt.maxCt = FileCounts.getSize(f, false);
+			this.entries = Main.volume.getActualWriteBytes() / HashFunctionPool.min_page_size;
+			int tr = 0;
+			if(entries > Integer.MAX_VALUE)
+				tr = Integer.MAX_VALUE;
+			else
+				tr = (int)this.entries;
+			SDFSLogger.getLog().info("entries = " + tr);
+			bf = BloomFilter.create(kbFunnel, tr, .01);
 			SDFSLogger.getLog().info(
 					"Starting FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
@@ -52,12 +63,10 @@ public class FDisk {
 			this.traverse(f);
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000
-							+ "] seconds to check [" + files + "]. Found ["
-							+ this.corruptFiles + "] corrupt files");
+							+ "] seconds to check [" + files + "].");
 
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
-					/ 1000 + "] seconds to check [" + files + "]. Found ["
-					+ this.corruptFiles + "] corrupt files");
+					/ 1000 + "] seconds to check [" + files + "].");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
@@ -65,6 +74,10 @@ public class FDisk {
 			throw new FDiskException(e);
 
 		}
+	}
+	
+	public BloomFilter<KeyBlob> getResults() {
+		return this.bf;
 	}
 
 	private void traverse(File dir) throws IOException {
@@ -80,33 +93,13 @@ public class FDisk {
 		}
 	}
 
-	private int batchCheck(ArrayList<SparseDataChunk> chunks)
-			throws IOException {
-		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
-		int corruptBlocks = 0;
-		for (SparseDataChunk ck : pchunks) {
-			byte[] exists = ck.getHashLoc();
-			if (exists[0] == -1) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"could not find "
-									+ StringUtils.getHexString(ck.getHash()));
-				corruptBlocks++;
-			}
-		}
-		return corruptBlocks;
-	}
-
 	private void checkDedupFile(File mapFile) throws IOException {
 		DataMapInterface mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
 			long prevpos = 0;
-			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(
-					MAX_BATCH_SIZE);
 			byte[] val = new byte[0];
 			mp.iterInit();
-			long corruptBlocks = 0;
 			while (val != null) {
 				fEvt.curCt += (mp.getIterPos() - prevpos);
 				prevpos = mp.getIterPos();
@@ -114,43 +107,12 @@ public class FDisk {
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
-						if (Main.chunkStoreLocal) {
 							List<HashLocPair> al = ck.getFingers();
 							for (HashLocPair p : al) {
-								byte[] exists = HCServiceProxy.hashExists(
-										p.hash, false,
-										Main.volume.getClusterCopies());
-								if (exists[0] == -1) {
-									if (SDFSLogger.isDebug())
-										SDFSLogger
-												.getLog()
-												.debug("file ["
-														+ mapFile
-														+ "] could not find "
-														+ StringUtils
-																.getHexString(p.hash));
-									corruptBlocks++;
-								}
+								bf.put(new KeyBlob(p.hash));
 							}
-						} else {
-							chunks.add(ck);
-							if (chunks.size() >= MAX_BATCH_SIZE) {
-								corruptBlocks += batchCheck(chunks);
-								chunks = new ArrayList<SparseDataChunk>(
-										MAX_BATCH_SIZE);
-							}
-						}
 					}
 				}
-			}
-			if (chunks.size() > 0) {
-				corruptBlocks += batchCheck(chunks);
-			}
-			if (corruptBlocks > 0) {
-				this.corruptFiles++;
-				SDFSLogger.getLog().warn(
-						"map file " + mapFile.getPath() + " is suspect, ["
-								+ corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().info(
@@ -162,5 +124,21 @@ public class FDisk {
 		}
 		this.files++;
 	}
+	
+	Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1612304804452862219L;
+
+		/**
+		 * 
+		 */
+
+		@Override
+		public void funnel(KeyBlob key, PrimitiveSink into) {
+			into.putBytes(key.key);
+		}
+	};
 
 }

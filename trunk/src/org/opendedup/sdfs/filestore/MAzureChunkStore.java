@@ -24,13 +24,8 @@ import org.w3c.dom.Element;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.microsoft.windowsazure.services.blob.client.CloudBlob;
-import com.microsoft.windowsazure.services.blob.client.CloudBlobClient;
-import com.microsoft.windowsazure.services.blob.client.CloudBlobContainer;
-import com.microsoft.windowsazure.services.blob.client.CloudBlockBlob;
-import com.microsoft.windowsazure.services.blob.client.ListBlobItem;
-import com.microsoft.windowsazure.services.core.storage.CloudStorageAccount;
-import com.microsoft.windowsazure.services.core.storage.StorageException;
+import com.microsoft.azure.storage.*;
+import com.microsoft.azure.storage.blob.*;
 
 /**
  * 
@@ -44,13 +39,18 @@ import com.microsoft.windowsazure.services.core.storage.StorageException;
 public class MAzureChunkStore implements AbstractChunkStore {
 	CloudStorageAccount account;
 	CloudBlobClient serviceClient;
-	CloudBlobContainer container;
+	// CloudBlobContainer container;
+	private MAzureServicePool pool;
 	private String name;
 	boolean compress = false;
 	boolean encrypt = false;
 	private AtomicLong currentLength = new AtomicLong(0);
 	private AtomicLong compressedLength = new AtomicLong(0);
 	private int cacheSize = 104857600 / Main.CHUNK_LENGTH;
+	static {
+		System.setProperty("http.keepalive", "true");
+		System.setProperty("http.maxConnections", "128");
+	}
 
 	LoadingCache<String, byte[]> chunks = CacheBuilder.newBuilder()
 			.maximumSize(cacheSize).concurrencyLevel(72)
@@ -58,7 +58,9 @@ public class MAzureChunkStore implements AbstractChunkStore {
 				public byte[] load(String hashString) throws IOException {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("getting hash " + hashString);
+					CloudBlobContainer container = null;
 					try {
+						container = pool.borrowObject();
 						CloudBlockBlob blob = container
 								.getBlockBlobReference(hashString);
 
@@ -97,6 +99,8 @@ public class MAzureChunkStore implements AbstractChunkStore {
 								.error("unable to fetch block [" + hashString
 										+ "]", e);
 						throw new IOException(e);
+					} finally {
+						pool.returnObject(container);
 					}
 				}
 			});
@@ -126,7 +130,9 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void close() {
+		CloudBlobContainer container = null;
 		try {
+			container = pool.borrowObject();
 			HashMap<String, String> md = container.getMetadata();
 			md.put("currentlength", Long.toString(this.currentLength.get()));
 			md.put("compressedlength",
@@ -135,6 +141,17 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			container.uploadMetadata();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error closing container", e);
+		} finally {
+			try {
+				pool.returnObject(container);
+			} catch (IOException e) {
+				SDFSLogger.getLog().info("error returning object", e);
+			}
+		}
+		try {
+			pool.close();
+		} catch (Exception e) {
+
 		}
 	}
 
@@ -167,6 +184,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void setName(String name) {
+		this.name = name.toLowerCase();
 
 	}
 
@@ -181,34 +199,38 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			throws IOException {
 		String hashString = this.getHashName(hash,
 				Main.chunkStoreEncryptionEnabled);
+		CloudBlobContainer container = null;
 		int cl = chunk.length;
 		try {
+			container = pool.borrowObject();
 
-			CloudBlockBlob blob = container.getBlockBlobReference(hashString);
-			HashMap<String, String> metaData = new HashMap<String, String>();
+			 CloudBlockBlob blob = container.getBlockBlobReference(hashString);
+             HashMap<String, String> metaData = new HashMap<String, String>();
 
-			if (Main.compress) {
-				chunk = CompressionUtils.compressLz4(chunk);
-				metaData.put("lz4Compress", "true");
-			} else {
-				metaData.put("lz4Compress", "false");
-			}
-			if (Main.chunkStoreEncryptionEnabled) {
-				chunk = EncryptUtils.encrypt(chunk);
-				metaData.put("encrypt", "true");
-			} else {
-				metaData.put("encrypt", "false");
-			}
-			metaData.put("size", Integer.toString(cl));
-			metaData.put("compressedsize", Integer.toString(chunk.length));
-			blob.setMetadata(metaData);
-			ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
-			blob.upload(s3IS, chunk.length);
-			blob.uploadMetadata();
-			return 0;
+             if (Main.compress) {
+                     chunk = CompressionUtils.compressLz4(chunk);
+                     metaData.put("lz4Compress", "true");
+             } else {
+                     metaData.put("lz4Compress", "false");
+             }
+             if (Main.chunkStoreEncryptionEnabled) {
+                     chunk = EncryptUtils.encrypt(chunk);
+                     metaData.put("encrypt", "true");
+             } else {
+                     metaData.put("encrypt", "false");
+             }
+             metaData.put("size", Integer.toString(cl));
+             metaData.put("compressedsize", Integer.toString(chunk.length));
+             blob.setMetadata(metaData);
+             ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
+             blob.upload(s3IS, chunk.length);
+             blob.uploadMetadata();
+             return 0;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write hash " + hashString, e);
 			throw new IOException(e);
+		} finally {
+			pool.returnObject(container);
 		}
 	}
 
@@ -217,7 +239,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			throws IOException {
 		String hashString = this.getHashName(hash,
 				Main.chunkStoreEncryptionEnabled);
+
+		CloudBlobContainer container = null;
 		try {
+			container = pool.borrowObject();
 			this.chunks.invalidate(hashString);
 			CloudBlockBlob blob = container.getBlockBlobReference(hashString);
 			if (blob.exists())
@@ -226,11 +251,19 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog()
 					.warn("Unable to delete object " + hashString, e);
 		} finally {
+			pool.returnObject(container);
 		}
 	}
 
-	public void deleteBucket() throws StorageException {
-		container.deleteIfExists();
+	public void deleteBucket() throws StorageException, IOException,
+			InterruptedException {
+		CloudBlobContainer container = null;
+		try {
+			container = pool.borrowObject();
+			container.deleteIfExists();
+		} finally {
+			pool.returnObject(container);
+		}
 		this.close();
 	}
 
@@ -245,20 +278,21 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void init(Element config) throws IOException {
+		this.name = Main.cloudBucket.toLowerCase();
 		init();
 
 	}
 
 	public void init() throws IOException {
+		CloudBlobContainer container = null;
 		try {
 			String storageConnectionString = "DefaultEndpointsProtocol=http;"
 					+ "AccountName=" + Main.cloudAccessKey + ";"
 					+ "AccountKey=" + Main.cloudSecretKey;
 			account = CloudStorageAccount.parse(storageConnectionString);
-			serviceClient = account.createCloudBlobClient();
-			this.name = Main.cloudBucket;
-			container = serviceClient.getContainerReference(this.name);
-			container.createIfNotExist();
+			pool = new MAzureServicePool(account, 128, this.name);
+			container = pool.borrowObject();
+			container.createIfNotExists();
 			HashMap<String, String> md = container.getMetadata();
 			long sz = 0;
 			long cl = 0;
@@ -282,14 +316,20 @@ public class MAzureChunkStore implements AbstractChunkStore {
 			this.encrypt = Main.chunkStoreEncryptionEnabled;
 		} catch (Exception e) {
 			throw new IOException(e);
+		} finally {
+			if (pool != null)
+				pool.returnObject(container);
 		}
 	}
 
 	Iterator<ListBlobItem> iter = null;
+	CloudBlobContainer iContainer = null;
 
 	@Override
 	public void iterationInit() {
-		iter = container.listBlobs().iterator();
+		if (iContainer == null)
+
+			iter = iContainer.listBlobs().iterator();
 	}
 
 	public static void main(String[] args) throws IOException,
@@ -329,9 +369,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	@Override
 	public ChunkData getNextChunck() throws IOException {
 		try {
-			if (!iter.hasNext())
+			if (!iter.hasNext()) {
+				pool.returnObject(iContainer);
 				return null;
-			else {
+			} else {
 				CloudBlob bi = (CloudBlob) iter.next();
 				HashMap<String, String> md = bi.getMetadata();
 				boolean encrypt = Boolean.parseBoolean(md.get("encrypt"));
