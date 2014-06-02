@@ -48,12 +48,13 @@ public class BloomFDisk {
 							+ " file size = " + FileCounts.getSize(f, false),
 					evt);
 			fEvt.maxCt = FileCounts.getSize(f, false);
-			this.entries = Main.volume.getActualWriteBytes() / HashFunctionPool.min_page_size;
+			this.entries = Main.volume.getActualWriteBytes()
+					/ HashFunctionPool.min_page_size;
 			int tr = 0;
-			if(entries > Integer.MAX_VALUE)
+			if (entries > Integer.MAX_VALUE)
 				tr = Integer.MAX_VALUE;
 			else
-				tr = (int)this.entries;
+				tr = (int) this.entries;
 			SDFSLogger.getLog().info("entries = " + tr);
 			bf = BloomFilter.create(kbFunnel, tr, .01);
 			SDFSLogger.getLog().info(
@@ -75,7 +76,7 @@ public class BloomFDisk {
 
 		}
 	}
-	
+
 	public BloomFilter<KeyBlob> getResults() {
 		return this.bf;
 	}
@@ -107,10 +108,10 @@ public class BloomFDisk {
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val);
 					if (!ck.isLocalData()) {
-							List<HashLocPair> al = ck.getFingers();
-							for (HashLocPair p : al) {
-								bf.put(new KeyBlob(p.hash));
-							}
+						List<HashLocPair> al = ck.getFingers();
+						for (HashLocPair p : al) {
+							bf.put(new KeyBlob(p.hash));
+						}
 					}
 				}
 			}
@@ -124,7 +125,7 @@ public class BloomFDisk {
 		}
 		this.files++;
 	}
-	
+
 	Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
 		/**
 		 * 

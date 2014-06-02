@@ -25,9 +25,9 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 		this.arraySize = size;
 		array = this.newElementArray(this.arraySize);
 	}
-	
+
 	public QuickList() {
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -189,7 +189,7 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 		this.arraySize = arg0.readInt();
 		this.size = arg0.readInt();
 		array = this.newElementArray(this.arraySize);
-		for(int i = 0;i<this.size;i++) {
+		for (int i = 0; i < this.size; i++) {
 			this.array[i] = (E) arg0.readObject();
 		}
 	}
@@ -198,25 +198,25 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 	public void writeExternal(ObjectOutput arg0) throws IOException {
 		arg0.writeInt(arraySize);
 		arg0.writeInt(size);
-		for(int i = 0;i<this.size;i++) {
+		for (int i = 0; i < this.size; i++) {
 			arg0.writeObject(this.array[i]);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static void main(String [] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		QuickList<String> l = new QuickList<String>(10);
-		
-		l.add(0,"a");
-		l.add(1,null);
+
+		l.add(0, "a");
+		l.add(1, null);
 		l.add(2, "b");
-		l.add(3,"c");
+		l.add(3, "c");
 		byte[] ar = Util.objectToByteBuffer(l);
 		QuickList<String> z = (QuickList<String>) Util.objectFromByteBuffer(ar);
-		for(int i = 0;i<z.size();i++) {
+		for (int i = 0; i < z.size(); i++) {
 			System.out.println(z.get(i));
 		}
-		
+
 	}
 
 }

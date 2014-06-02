@@ -74,10 +74,9 @@ public class MetaFileImport implements Serializable {
 		this.traverse(new File(this.path));
 		if (hashes.size() != 0) {
 			try {
-				ProcessBatchGetBlocks.runCmd(hashes, server, port, password,
-						useSSL);
-				this.bytesTransmitted = this.bytesTransmitted
-						+ (hashes.size() * Main.CHUNK_LENGTH);
+				long sz = ProcessBatchGetBlocks.runCmd(hashes, server, port,
+						password, useSSL);
+				this.bytesTransmitted += sz;
 				levt.bytesImported = this.bytesTransmitted;
 			} catch (Throwable e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import", e);

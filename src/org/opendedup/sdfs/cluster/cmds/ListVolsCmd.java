@@ -52,7 +52,8 @@ public class ListVolsCmd implements IOPeerCmd {
 								.getValue();
 						for (String volStr : rst) {
 							if (!this.results.containsKey(volStr)) {
-								FindVolOwnerCmd cmd = new FindVolOwnerCmd(volStr);
+								FindVolOwnerCmd cmd = new FindVolOwnerCmd(
+										volStr);
 								cmd.executeCmd(soc);
 								Volume vol = cmd.getResults();
 								this.results.put(volStr, vol);

@@ -4,7 +4,7 @@ public class ShutdownHook extends Thread {
 	public String dev;
 	public BUSE bClass;
 
-	ShutdownHook(String dev,BUSE bClass) {
+	ShutdownHook(String dev, BUSE bClass) {
 		this.bClass = bClass;
 		this.dev = dev;
 		System.out.println("Registered shutdown hook for " + dev);

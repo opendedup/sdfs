@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
 public class FileChunkStore implements AbstractChunkStore {
 	private int pageSize = Main.chunkStorePageSize;
 	private boolean closed = false;
-	//private FileChannel fc = null;
+	// private FileChannel fc = null;
 	private RandomAccessFile chunkDataWriter = null;
 	File f;
 	Path p;
@@ -62,8 +62,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Loading freebits bitset");
 			bsf = new File(chunk_location + File.separator + "freebit.map");
 			if (!bsf.exists()) {
-				if(SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				/*
 				 * this.freeSlots = new OpenBitSet(
 				 * (Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
@@ -108,8 +108,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			SDFSLogger.getLog().info("Loading freebits bitset");
 			bsf = new File(pf.getPath() + File.separator + "freebit.map");
 			if (!bsf.exists()) {
-				if(SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
 				SDFSLogger.getLog().info(
@@ -176,8 +176,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			//NativePosixUtil.advise(chunkDataWriter.getFD(), 0, 0, NativePosixUtil.SEQUENTIAL);
-			this.currentLength=chunkDataWriter.length();
+			// NativePosixUtil.advise(chunkDataWriter.getFD(), 0, 0,
+			// NativePosixUtil.SEQUENTIAL);
+			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			pool = new FCPool(f, 100);
 			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
@@ -195,7 +196,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#closeStore()
 	 */
 	public void closeStore() {
-		SDFSLogger.getLog().info("Closing chunkstore " +this.name);
+		SDFSLogger.getLog().info("Closing chunkstore " + this.name);
 		try {
 			this.chunkDataWriter.getFD().sync();
 
@@ -280,15 +281,15 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public long getFreeBlocks() {
 		if (this.freeSlots != null) {
-		return this.freeSlots.cardinality();
-		}
-		else 
+			return this.freeSlots.cardinality();
+		} else
 			return 0;
 	}
 
 	private ReentrantLock rlock = new ReentrantLock();
 
 	long smallestFree = 0;
+
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
 		if (this.closed)
@@ -319,14 +320,14 @@ public class FileChunkStore implements AbstractChunkStore {
 				this.currentLength = this.currentLength + pageSize;
 			}
 			rlock.unlock();
-			
+
 			// this.chunks.invalidate(Long.valueOf(pos));
 			rf = pool.borrowObject();
-			ByteBuffer buf = ByteBuffer.wrap(new byte [pageSize]);
+			ByteBuffer buf = ByteBuffer.wrap(new byte[pageSize]);
 			buf.put(chunk);
 			buf.position(0);
 			rf.write(buf, pos);
-			
+
 			return pos;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -347,9 +348,9 @@ public class FileChunkStore implements AbstractChunkStore {
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		if(len > pageSize)
+		if (len > pageSize)
 			throw new IOException("length is greater than page size");
-		if(len == -1) 
+		if (len == -1)
 			len = pageSize;
 		byte[] b = new byte[len];
 		FileChannel rf = pool.borrowObject();
@@ -379,7 +380,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.freeSlots = new OpenBitSet();
 			this.smallestFree = 0;
 		}
-		if(this.smallestFree > pos)
+		if (this.smallestFree > pos)
 			this.smallestFree = pos;
 		this.freeSlots.ensureCapacity(pos);
 		this.freeSlots.set(pos);
@@ -474,9 +475,9 @@ public class FileChunkStore implements AbstractChunkStore {
 					Thread.sleep(interval);
 					store.sync();
 				} catch (IOException e) {
-					if(SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("Unable to flush FileChunkStore ",
-							e);
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"Unable to flush FileChunkStore ", e);
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -507,7 +508,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	public void deleteDuplicate(byte[] hash, long start, int len)
 			throws IOException {
 		this.deleteChunk(hash, start, len);
-		
+
 	}
 
 }

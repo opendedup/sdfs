@@ -164,9 +164,10 @@ public class SDFSEvent implements java.io.Serializable {
 		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
 		return event;
 	}
-	
+
 	public static SDFSEvent passwdEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(PSWD, "Administrative User", shortMsg, RUNNING);
+		SDFSEvent event = new SDFSEvent(PSWD, "Administrative User", shortMsg,
+				RUNNING);
 		return event;
 	}
 

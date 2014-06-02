@@ -51,6 +51,7 @@ public class ChunkData {
 	public ChunkData() {
 		this.blank = true;
 	}
+
 	public ChunkData(long cPos, byte[] hash) {
 		this.cPos = cPos;
 		this.hash = hash;
@@ -151,7 +152,7 @@ public class ChunkData {
 		}
 		return false;
 	}
-	
+
 	public boolean setmDeleteDuplicate(boolean mDelete) {
 		this.mDelete = mDelete;
 		if (this.mDelete) {

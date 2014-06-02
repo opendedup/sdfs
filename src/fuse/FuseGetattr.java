@@ -9,7 +9,6 @@
 
 package fuse;
 
-
 public class FuseGetattr extends FuseFtype implements FuseGetattrSetter,
 		FuseStatConstants {
 	public long inode;

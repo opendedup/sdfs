@@ -7,9 +7,9 @@ import org.opendedup.sdfs.io.BlockDev;
 import org.w3c.dom.Element;
 
 public class BlockDeviceRm {
-	
+
 	public Element getResult(String devName) throws Exception {
-		if(!Main.blockDev)
+		if (!Main.blockDev)
 			throw new IOException("Block devices not supported on this volume");
 		else {
 			BlockDev dev = Main.volume.removeBlockDev(devName);

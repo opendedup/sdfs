@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt.cli;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,13 +35,12 @@ public class MgmtServerConnection {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			
+
 			if (userName != null && password != null)
 				if (url.trim().length() == 0)
-					url = "username=" + userName + "&password=" + password;
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 				else
-					url = url + "&username=" + userName + "&password="
-							+ password;
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";
@@ -86,9 +86,9 @@ public class MgmtServerConnection {
 			boolean useSSL) throws IOException {
 		if (userName != null && password != null)
 			if (url.trim().length() == 0)
-				url = "username=" + userName + "&password=" + password;
+				url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 			else
-				url = url + "&username=" + userName + "&password=" + password;
+				url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 		String prot = "http";
 		if (useSSL) {
 			prot = "https";
@@ -113,7 +113,7 @@ public class MgmtServerConnection {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			m = connectAndGet(server, port, password, url, "", useSSL);
-			
+
 			Document doc = db.parse(m.getResponseBodyAsStream());
 			doc.getDocumentElement().normalize();
 			return doc;
@@ -136,10 +136,9 @@ public class MgmtServerConnection {
 		try {
 			if (userName != null && password != null)
 				if (url.trim().length() == 0)
-					url = "username=" + userName + "&password=" + password;
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 				else
-					url = url + "&username=" + userName + "&password="
-							+ password;
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";
@@ -169,10 +168,9 @@ public class MgmtServerConnection {
 		try {
 			if (userName != null && password != null)
 				if (url.trim().length() == 0)
-					url = "username=" + userName + "&password=" + password;
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 				else
-					url = url + "&username=" + userName + "&password="
-							+ password;
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";

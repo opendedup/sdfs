@@ -133,11 +133,13 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+			throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
-		SDFSLogger.getLog().info("Claiming Records [" + this.getSize() + "] from ["
-				+ this.fileName + "]");
+		SDFSLogger.getLog().info(
+				"Claiming Records [" + this.getSize() + "] from ["
+						+ this.fileName + "]");
 		SDFSEvent tEvt = SDFSEvent.claimInfoEvent(
 				"Claiming Records [" + this.getSize() + "] from ["
 						+ this.fileName + "]", evt);
@@ -160,7 +162,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		SDFSLogger.getLog().info("removed [" + claims + "] records");
 		return claims;
 	}
-	
+
 	/**
 	 * initializes the Object set of this hash table.
 	 * 
@@ -189,13 +191,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			String fp = this.fileName + "-" + i;
 			AbstractShard m = null;
 			/*
-			if (OSValidator.isWindows())
-				m = new FCByteArrayLongMap(fp, sz,
-						(short) HashFunctionPool.hashLength);
-			else
-			*/
-				m = new FileByteArrayLongMap(fp, sz,
-						(short) HashFunctionPool.hashLength);
+			 * if (OSValidator.isWindows()) m = new FCByteArrayLongMap(fp, sz,
+			 * (short) HashFunctionPool.hashLength); else
+			 */
+			m = new FileByteArrayLongMap(fp, sz,
+					(short) HashFunctionPool.hashLength);
 			long mep = m.setUp();
 			if (mep > endPos)
 				endPos = mep;

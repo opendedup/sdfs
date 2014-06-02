@@ -35,7 +35,6 @@ public class DSEServer implements Externalizable {
 	public static final int CLIENT = 1;
 	public static final int LISTENER = 2;
 	public boolean readOnly = false;
-	
 
 	public DSEServer() {
 
@@ -102,7 +101,7 @@ public class DSEServer implements Externalizable {
 		byte[] lb = this.location.getBytes();
 		byte[] rb = this.rack.getBytes();
 		byte[] bz = new byte[1 + 4 + b.length + 1 + 4 + 4 + addr.length + 8 + 8
-				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1+8+8+8];
+				+ 8 + 4 + 4 + 1 + 4 + lb.length + 4 + rb.length + 1 + 8 + 8 + 8];
 
 		ByteBuffer buf = ByteBuffer.wrap(bz);
 		buf.put(NetworkCMDS.UPDATE_DSE);
@@ -126,10 +125,10 @@ public class DSEServer implements Externalizable {
 		buf.put(lb);
 		buf.putInt(rb.length);
 		buf.put(rb);
-		if(this.readOnly)
-			buf.put((byte)1);
+		if (this.readOnly)
+			buf.put((byte) 1);
 		else
-			buf.put((byte)0);
+			buf.put((byte) 0);
 		buf.putLong(this.dseSize);
 		buf.putLong(this.dseMaxSize);
 		buf.putLong(this.dseCompressedSize);
@@ -161,7 +160,7 @@ public class DSEServer implements Externalizable {
 		buf.get(rb);
 		this.location = new String(lb);
 		this.rack = new String(rb);
-		if(buf.get() == 1)
+		if (buf.get() == 1)
 			this.readOnly = true;
 		this.dseSize = buf.getLong();
 		this.dseMaxSize = buf.getLong();
@@ -173,7 +172,9 @@ public class DSEServer implements Externalizable {
 				+ this.serverType + " address=[" + this.address + "] maxsz="
 				+ this.maxSize + " currentsize=" + this.currentSize
 				+ " freeblocks=" + this.freeBlocks + " dseport=" + this.dseport
-				+ " usessl=" + this.useSSL +  " dseSize=" + this.dseSize + " dseMaxSize=" + this.dseMaxSize + " dseCompressedSize=" + this.dseCompressedSize;
+				+ " usessl=" + this.useSSL + " dseSize=" + this.dseSize
+				+ " dseMaxSize=" + this.dseMaxSize + " dseCompressedSize="
+				+ this.dseCompressedSize;
 	}
 
 	public int hashCode() {

@@ -48,7 +48,5 @@ public class ProcessWorker extends Thread {
 			return;
 		}
 	}
-	
-
 
 }

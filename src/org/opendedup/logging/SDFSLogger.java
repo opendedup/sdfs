@@ -44,7 +44,7 @@ public class SDFSLogger {
 	public static Logger getBasicLog() {
 		return basicLog;
 	}
-	
+
 	public static boolean isDebug() {
 		return debug;
 	}
@@ -53,8 +53,7 @@ public class SDFSLogger {
 		if (level == 0) {
 			log.setLevel(Level.DEBUG);
 			debug = true;
-		}
-		else {
+		} else {
 			log.setLevel(Level.INFO);
 			debug = false;
 		}

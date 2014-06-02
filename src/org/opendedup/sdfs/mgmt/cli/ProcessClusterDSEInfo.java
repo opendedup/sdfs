@@ -65,7 +65,7 @@ public class ProcessClusterDSEInfo {
 						DecimalFormat twoDForm = new DecimalFormat("#.##");
 						pFull = Double.valueOf(twoDForm.format(pFull));
 					}
-					String[] row = { host,dse.getAttribute("id"),
+					String[] row = { host, dse.getAttribute("id"),
 							StorageUnit.of(currentSz).format(currentSz),
 							StorageUnit.of(maxSz).format(maxSz),
 							Double.toString(pFull), Integer.toString(pageSize),

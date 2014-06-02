@@ -174,7 +174,7 @@ public class VolumeConfigWriter {
 						+ HashFunctionPool.VARIABLE_MURMUR3);
 				System.exit(-1);
 			}
-			if(ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
+			if (ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 				this.chunk_size = 128;
 				this.compress = true;
@@ -186,22 +186,21 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-encrypt")) {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-encrypt"));
-			if(this.chunk_store_encrypt)
+			if (this.chunk_store_encrypt)
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 		}
 		if (cmd.hasOption("chunk-store-encryption-key")) {
-			String key = cmd
-					.getOptionValue("chunk-store-encryption-key");
-			if(key.length() < 8) {
-				System.err.println("Encryption Key must be greater than 8 characters");
+			String key = cmd.getOptionValue("chunk-store-encryption-key");
+			if (key.length() < 8) {
+				System.err
+						.println("Encryption Key must be greater than 8 characters");
 				System.exit(-1);
 			} else {
 				this.chunk_store_encryption_key = cmd
 						.getOptionValue("chunk-store-encryption-key");
 			}
 		}
-		
-		
+
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-sync"));
@@ -262,7 +261,6 @@ public class VolumeConfigWriter {
 					.getOptionValue("azure-enabled"));
 		}
 
-		
 		if (cmd.hasOption("gc-class")) {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
@@ -334,13 +332,15 @@ public class VolumeConfigWriter {
 			}
 
 		}
-		if(cmd.hasOption("chunk-store-io-threads")) {
-			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("cloud-io-threads"));
+		if (cmd.hasOption("chunk-store-io-threads")) {
+			this.cloudThreads = Integer.parseInt(cmd
+					.getOptionValue("cloud-io-threads"));
 		}
 		if (cmd.hasOption("chunk-store-compress")) {
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
-			if(this.compress && !this.awsEnabled && !this.gsEnabled && this.azureEnabled) {
+			if (this.compress && !this.awsEnabled && !this.gsEnabled
+					&& this.azureEnabled) {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 			}
 		}
@@ -513,7 +513,8 @@ public class VolumeConfigWriter {
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
 		vol.setAttribute("cluster-id", this.clusterID);
 		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		vol.setAttribute("cluster-response-timeout", Integer.toString(chunk_size * 1000));
+		vol.setAttribute("cluster-response-timeout",
+				Integer.toString(chunk_size * 1000));
 		vol.setAttribute("cluster-rack-aware",
 				Boolean.toString(clusterRackAware));
 		root.appendChild(vol);
@@ -535,7 +536,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		cs.setAttribute("io-threads", Integer.toString(this.cloudThreads));
-		
+
 		cs.setAttribute("compress", Boolean.toString(this.compress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
@@ -559,7 +560,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
-		
+
 		root.appendChild(sdfscli);
 
 		if (this.awsEnabled) {
@@ -871,7 +872,8 @@ public class VolumeConfigWriter {
 				.withArgName(
 						HashFunctionPool.TIGER_16 + "|"
 								+ HashFunctionPool.TIGER_24 + "|"
-								+ HashFunctionPool.MURMUR3_16 + "|" + HashFunctionPool.VARIABLE_MURMUR3).create());
+								+ HashFunctionPool.MURMUR3_16 + "|"
+								+ HashFunctionPool.VARIABLE_MURMUR3).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-encrypt")
 				.withDescription(
@@ -881,9 +883,9 @@ public class VolumeConfigWriter {
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-encryption-key")
-						.withDescription(
-								"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long").hasArg().withArgName("String")
-						.create());
+				.withDescription(
+						"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
@@ -1012,23 +1014,16 @@ public class VolumeConfigWriter {
 							+ wr.volume_name.trim()
 							+ "-volume-cfg.xml] for configuration details if you need to change anything");
 			/*
-			if (!wr.chunk_store_local) {
-				File _f = new File(OSValidator.getConfigPath() + wr.clusterID
-						+ "-gc-cfg.xml");
-				if (_f.exists())
-					System.out
-							.println("Existing Garbage Collection Service Configuration File already created at ["
-									+ OSValidator.getConfigPath()
-									+ wr.clusterID + "-gc-cfg.xml]");
-				else {
-					wr.writeGCConfigFile();
-					System.out
-							.println("New Garbage Collection Service Configuration File Created at ["
-									+ OSValidator.getConfigPath()
-									+ wr.clusterID + "-gc-cfg.xml]");
-				}
-			}
-			*/
+			 * if (!wr.chunk_store_local) { File _f = new
+			 * File(OSValidator.getConfigPath() + wr.clusterID + "-gc-cfg.xml");
+			 * if (_f.exists()) System.out .println(
+			 * "Existing Garbage Collection Service Configuration File already created at ["
+			 * + OSValidator.getConfigPath() + wr.clusterID + "-gc-cfg.xml]");
+			 * else { wr.writeGCConfigFile(); System.out .println(
+			 * "New Garbage Collection Service Configuration File Created at ["
+			 * + OSValidator.getConfigPath() + wr.clusterID + "-gc-cfg.xml]"); }
+			 * }
+			 */
 		} catch (Exception e) {
 			System.err.println("ERROR : Unable to create volume because "
 					+ e.toString());

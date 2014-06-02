@@ -16,12 +16,12 @@ public class ChunkClaimJob implements Job {
 		l.lock();
 		try {
 			long tm = System.currentTimeMillis();
-			long mil = - (5 * 60 * 1000);
+			long mil = -(5 * 60 * 1000);
 			SDFSEvent evt = SDFSEvent
 					.gcInfoEvent("Running Scheduled Chunk Claim Job");
 			HCServiceProxy.processHashClaims(evt);
 			long dur = System.currentTimeMillis() - tm;
-			HCServiceProxy.removeStailHashes(dur+mil, true, evt);
+			HCServiceProxy.removeStailHashes(dur + mil, true, evt);
 		} catch (Exception e) {
 			throw new JobExecutionException(e);
 		} finally {

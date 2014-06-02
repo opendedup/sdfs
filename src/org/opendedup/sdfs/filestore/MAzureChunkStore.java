@@ -204,28 +204,28 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		try {
 			container = pool.borrowObject();
 
-			 CloudBlockBlob blob = container.getBlockBlobReference(hashString);
-             HashMap<String, String> metaData = new HashMap<String, String>();
+			CloudBlockBlob blob = container.getBlockBlobReference(hashString);
+			HashMap<String, String> metaData = new HashMap<String, String>();
 
-             if (Main.compress) {
-                     chunk = CompressionUtils.compressLz4(chunk);
-                     metaData.put("lz4Compress", "true");
-             } else {
-                     metaData.put("lz4Compress", "false");
-             }
-             if (Main.chunkStoreEncryptionEnabled) {
-                     chunk = EncryptUtils.encrypt(chunk);
-                     metaData.put("encrypt", "true");
-             } else {
-                     metaData.put("encrypt", "false");
-             }
-             metaData.put("size", Integer.toString(cl));
-             metaData.put("compressedsize", Integer.toString(chunk.length));
-             blob.setMetadata(metaData);
-             ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
-             blob.upload(s3IS, chunk.length);
-             blob.uploadMetadata();
-             return 0;
+			if (Main.compress) {
+				chunk = CompressionUtils.compressLz4(chunk);
+				metaData.put("lz4Compress", "true");
+			} else {
+				metaData.put("lz4Compress", "false");
+			}
+			if (Main.chunkStoreEncryptionEnabled) {
+				chunk = EncryptUtils.encrypt(chunk);
+				metaData.put("encrypt", "true");
+			} else {
+				metaData.put("encrypt", "false");
+			}
+			metaData.put("size", Integer.toString(cl));
+			metaData.put("compressedsize", Integer.toString(chunk.length));
+			blob.setMetadata(metaData);
+			ByteArrayInputStream s3IS = new ByteArrayInputStream(chunk);
+			blob.upload(s3IS, chunk.length);
+			blob.uploadMetadata();
+			return 0;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write hash " + hashString, e);
 			throw new IOException(e);

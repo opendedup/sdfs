@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
@@ -16,7 +15,6 @@ import org.w3c.dom.Element;
 
 import de.schlichtherle.truezip.file.TFile;
 import de.schlichtherle.truezip.file.TVFS;
-
 
 public class ArchiveOutCmd implements Runnable {
 	SDFSEvent evt = null;
@@ -54,7 +52,7 @@ public class ArchiveOutCmd implements Runnable {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			
+
 		}
 	}
 
@@ -67,40 +65,39 @@ public class ArchiveOutCmd implements Runnable {
 			evt.maxCt = 4;
 			evt.addChild(sevt);
 			MetaDataDedupFile mf = null;
-				mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false,
-						sevt);
+			mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false, sevt);
 			evt.curCt = 2;
 
 			SDFSEvent eevt = SDFSEvent.archiveOutEvent("Archiving out "
 					+ srcPath);
 			sevt.endEvent("Created Snapshot of " + srcPath);
 			evt.addChild(eevt);
-				SDFSLogger.getLog().debug("Created replication snapshot");
-				eevt.maxCt = 3;
-				eevt.curCt = 0;
-				mf.copyTo(nf.getPath(), true, true);
-				eevt.curCt = 1;
-				MetaFileStore.removeMetaFile(af.getPath(), true);
-				eevt.curCt = 2;
-				SDFSLogger.getLog().debug("Copied out replication snapshot");
-				TFile dest = new TFile(nf.getPath() + ".tar.gz");
-				TFile src = new TFile(nf);
-				src.cp_rp(dest);
-				SDFSLogger.getLog().debug(
-						"created archive " + nf.getPath() + ".tar.gz");
-				TVFS.umount(dest);
-				TVFS.umount(src);
-				TVFS.umount(dest.getInnerArchive());
-				eevt.curCt = 3;
-				evt.curCt = 4;
-				
-				if (nft.exists())
-					evt.endEvent("Archive Out complete from " + srcPath
-							+ " to " + nft.getPath());
-				else
-					throw new IOException(nft.getPath() + " does not exist");
-				eevt.endEvent("Archiving out " + srcPath + " successful");
-				sc = "successful";
+			SDFSLogger.getLog().debug("Created replication snapshot");
+			eevt.maxCt = 3;
+			eevt.curCt = 0;
+			mf.copyTo(nf.getPath(), true, true);
+			eevt.curCt = 1;
+			MetaFileStore.removeMetaFile(af.getPath(), true);
+			eevt.curCt = 2;
+			SDFSLogger.getLog().debug("Copied out replication snapshot");
+			TFile dest = new TFile(nf.getPath() + ".tar.gz");
+			TFile src = new TFile(nf);
+			src.cp_rp(dest);
+			SDFSLogger.getLog().debug(
+					"created archive " + nf.getPath() + ".tar.gz");
+			TVFS.umount(dest);
+			TVFS.umount(src);
+			TVFS.umount(dest.getInnerArchive());
+			eevt.curCt = 3;
+			evt.curCt = 4;
+
+			if (nft.exists())
+				evt.endEvent("Archive Out complete from " + srcPath + " to "
+						+ nft.getPath());
+			else
+				throw new IOException(nft.getPath() + " does not exist");
+			eevt.endEvent("Archiving out " + srcPath + " successful");
+			sc = "successful";
 
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(

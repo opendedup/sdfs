@@ -328,10 +328,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
 				byte[] bb = new byte[buf.getInt()];
 				buf.get(bb);
-				BloomFilter<KeyBlob> bf = (BloomFilter<KeyBlob>)Util.objectFromByteBuffer(bb);
-				HCServiceProxy.processHashClaims(evt,bf);
+				BloomFilter<KeyBlob> bf = (BloomFilter<KeyBlob>) Util
+						.objectFromByteBuffer(bb);
+				HCServiceProxy.processHashClaims(evt, bf);
 				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("sending back bloom claim chunks cmd");
+					SDFSLogger.getLog().debug(
+							"sending back bloom claim chunks cmd");
 				rtrn = evt;
 				break;
 			}

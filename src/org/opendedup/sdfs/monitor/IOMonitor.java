@@ -112,15 +112,17 @@ public class IOMonitor implements java.io.Serializable {
 	}
 
 	public void removeDuplicateBlock(boolean propigateEvent) {
-		this.duplicateBlocks.addAndGet(-1* Main.CHUNK_LENGTH);
+		this.duplicateBlocks.addAndGet(-1 * Main.CHUNK_LENGTH);
 		Main.volume.addDuplicateBytes(-1 * Main.CHUNK_LENGTH, true);
 	}
 
 	public void clearAllCounters(boolean propigateEvent) {
 		Main.volume.addReadBytes(-1 * this.bytesRead.get(), true);
 		Main.volume.addDuplicateBytes(-1 * this.duplicateBlocks.get(), true);
-		Main.volume.addActualWriteBytes(-1 * this.actualBytesWritten.get(), true);
-		Main.volume.addVirtualBytesWritten(-1 * this.virtualBytesWritten.get(), true);
+		Main.volume.addActualWriteBytes(-1 * this.actualBytesWritten.get(),
+				true);
+		Main.volume.addVirtualBytesWritten(-1 * this.virtualBytesWritten.get(),
+				true);
 		this.bytesRead.set(0);
 		this.duplicateBlocks.set(0);
 		this.actualBytesWritten.set(0);
@@ -134,7 +136,7 @@ public class IOMonitor implements java.io.Serializable {
 		this.virtualBytesWritten.set(0);
 	}
 
-	public void addDulicateData(int len,boolean propigateEvent) {
+	public void addDulicateData(int len, boolean propigateEvent) {
 		this.duplicateBlocks.addAndGet(len);
 		Main.volume.addDuplicateBytes(len, true);
 	}
@@ -176,7 +178,7 @@ public class IOMonitor implements java.io.Serializable {
 			this.rbps.set(buf.getLong());
 			this.wbps.set(buf.getLong());
 			this.bps.set(buf.getLong());
-			this.qos =buf.getInt();
+			this.qos = buf.getInt();
 		}
 	}
 
@@ -190,15 +192,19 @@ public class IOMonitor implements java.io.Serializable {
 		root.setAttribute("duplicate-blocks",
 				Long.toString(this.duplicateBlocks.get()));
 		root.setAttribute("readops", Long.toString(this.readOperations.get()));
-		root.setAttribute("writeops", Long.toBinaryString(this.writeOperations.get()));
-		root.setAttribute("max-readops", Integer.toString(this.riops.intValue()));
-		root.setAttribute("max-writeops", Integer.toString(this.wiops.intValue()));
+		root.setAttribute("writeops",
+				Long.toBinaryString(this.writeOperations.get()));
+		root.setAttribute("max-readops",
+				Integer.toString(this.riops.intValue()));
+		root.setAttribute("max-writeops",
+				Integer.toString(this.wiops.intValue()));
 		root.setAttribute("max-iops", Integer.toString(this.iops.intValue()));
 		root.setAttribute("max-readmbps",
 				Long.toString(this.rbps.get() / (1024 * 1024)));
 		root.setAttribute("max-writembps",
 				Long.toString(this.wbps.get() / (1024 * 1024)));
-		root.setAttribute("max-mbps", Long.toString(this.bps.get() / (1024 * 1024)));
+		root.setAttribute("max-mbps",
+				Long.toString(this.bps.get() / (1024 * 1024)));
 		root.setAttribute("io-qos", Integer.toString(this.qos));
 		root.setAttribute("io-profile", this.iopProfile);
 		return root;

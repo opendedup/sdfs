@@ -1,6 +1,5 @@
 package org.opendedup.hashing;
 
-
 public class Murmur3HashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;

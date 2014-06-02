@@ -14,7 +14,7 @@ public class GetGCSchedule {
 		try {
 			Document doc = XMLUtils.getXMLDoc("schedule");
 			Element root = doc.getDocumentElement();
-			root.setAttribute("schedule",Main.fDkiskSchedule);
+			root.setAttribute("schedule", Main.fDkiskSchedule);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

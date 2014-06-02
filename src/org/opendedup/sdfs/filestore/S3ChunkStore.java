@@ -436,11 +436,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 		if (objPos < obj.length) {
 			boolean encrypt = false;
 			lastKey = obj[objPos].getKey();
-			if(lastKey.equals("bucketinfo")) {
+			if (lastKey.equals("bucketinfo")) {
 				objPos++;
 				return getNextChunck();
 			}
-				
+
 			if (obj[objPos].containsMetadata("encrypt")) {
 				encrypt = Boolean.parseBoolean((String) obj[objPos]
 						.getMetadata("encrypt"));

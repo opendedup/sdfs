@@ -10,16 +10,14 @@ public class BUSEMkDev {
 		System.loadLibrary("jbuse");
 	}
 
-
 	public static int startdev(final String dev, long sz, int blksz, BUSE buse,
 			boolean readonly) throws Exception {
-		
-		
+
 		log.info("Mounted filesystem");
-		//ShutdownHook t = new ShutdownHook(dev,buse);
-		//Runtime.getRuntime().addShutdownHook(t);
-		int z = mkdev(dev, sz, blksz,buse, readonly);
-		
+		// ShutdownHook t = new ShutdownHook(dev,buse);
+		// Runtime.getRuntime().addShutdownHook(t);
+		int z = mkdev(dev, sz, blksz, buse, readonly);
+
 		log.info("Filesystem is unmounted");
 		return z;
 	}
@@ -27,7 +25,7 @@ public class BUSEMkDev {
 	public static void closeDev(final String dev) throws Exception {
 		closedev(dev);
 	}
-	
+
 	public static void init() {
 		ThreadGroup threadGroup = new ThreadGroup(Thread.currentThread()
 				.getThreadGroup(), "BUSE Threads");
@@ -35,16 +33,15 @@ public class BUSEMkDev {
 		init(threadGroup);
 	}
 
-	private static native int mkdev(String dev, long sz,int blksz, BUSE buse,
+	private static native int mkdev(String dev, long sz, int blksz, BUSE buse,
 			boolean readonly) throws Exception;
-	
 
 	private static native void closedev(String dev) throws Exception;
-	
+
 	private static native void init(ThreadGroup threadGroup);
-	
+
 	public static native void release();
-	
-	public static native void setSize(String dev,long sz);
+
+	public static native void setSize(String dev, long sz);
 
 }

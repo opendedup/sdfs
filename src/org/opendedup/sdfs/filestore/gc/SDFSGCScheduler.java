@@ -40,15 +40,14 @@ public class SDFSGCScheduler {
 					"Unable to schedule SDFS Garbage Collection", e);
 		}
 	}
-	
+
 	public String nextFileTime() {
 		return cctrigger.getNextFireTime().toString();
 	}
-	
+
 	public String schedule() {
 		return cctrigger.getCronExpression();
 	}
-	
 
 	public void stopSchedules() {
 		try {

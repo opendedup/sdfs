@@ -1,6 +1,5 @@
 package org.opendedup.buse.sdfsdev;
 
-
 import org.opendedup.buse.driver.BUSEMkDev;
 import org.opendedup.logging.SDFSLogger;
 

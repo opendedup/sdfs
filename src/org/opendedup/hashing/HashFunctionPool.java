@@ -31,10 +31,10 @@ public class HashFunctionPool {
 			min_page_size = 4096;
 			hashLength = VariableHashEngine.getHashLenth();
 			Main.MAPVERSION = 1;
-			
+
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
-		
+
 	}
 
 	public HashFunctionPool(int size) {
@@ -94,8 +94,7 @@ public class HashFunctionPool {
 			hc = new TigerHashEngine();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hc = new Murmur3HashEngine();
-		}
-		else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
+		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
 			hc = new VariableHashEngine();
 		}
 		return hc;

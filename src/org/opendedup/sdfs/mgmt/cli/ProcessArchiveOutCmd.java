@@ -114,25 +114,25 @@ public class ProcessArchiveOutCmd {
 		GetMethod m = null;
 		InputStream in = null;
 		try {
-		m = MgmtServerConnection.connectAndGet("", f.getName());
-		in = m.getResponseBodyAsStream();
-		File nf = new File(dir + File.separator + f.getName());
-		if (!nf.getParentFile().exists())
-			nf.getParentFile().mkdirs();
-		FileOutputStream out = new FileOutputStream(nf.getPath());
-		byte[] buf = new byte[32768];
-		int len;
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
-		}
-		in.close();
-		out.close();
-		m.releaseConnection();
-		return nf.getPath();
-		}finally {
-			if(in != null)
+			m = MgmtServerConnection.connectAndGet("", f.getName());
+			in = m.getResponseBodyAsStream();
+			File nf = new File(dir + File.separator + f.getName());
+			if (!nf.getParentFile().exists())
+				nf.getParentFile().mkdirs();
+			FileOutputStream out = new FileOutputStream(nf.getPath());
+			byte[] buf = new byte[32768];
+			int len;
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+			in.close();
+			out.close();
+			m.releaseConnection();
+			return nf.getPath();
+		} finally {
+			if (in != null)
 				in.close();
-			if(m != null)
+			if (m != null)
 				m.releaseConnection();
 		}
 

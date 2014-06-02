@@ -98,7 +98,6 @@ public class ManualGC {
 				HCServiceProxy.processHashClaims(evt);
 				evt.curCt = 66;
 			}
-			
 
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
@@ -110,10 +109,12 @@ public class ManualGC {
 		}
 		try {
 			long dur = System.currentTimeMillis() - tm;
-			long nmc = dur+milliseconds;
-			SDFSLogger.getLog().debug("Will Request cluster remove data  not claimed since " + new Date(System.currentTimeMillis()- nmc));
-			rm = HCServiceProxy
-					.removeStailHashes(dur + milliseconds, false, evt);
+			long nmc = dur + milliseconds;
+			SDFSLogger.getLog().debug(
+					"Will Request cluster remove data  not claimed since "
+							+ new Date(System.currentTimeMillis() - nmc));
+			rm = HCServiceProxy.removeStailHashes(dur + milliseconds, false,
+					evt);
 		} finally {
 
 		}

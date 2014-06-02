@@ -65,7 +65,7 @@ public class SDFSVolMgr {
 			}
 		}
 		String volname = "SDFS";
-		if(cmd.hasOption("nocheck")) {
+		if (cmd.hasOption("nocheck")) {
 			Main.runConsistancyCheck = false;
 		}
 		if (cmd.hasOption("c")) {
@@ -131,9 +131,10 @@ public class SDFSVolMgr {
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		
+
 		try {
-			VolumeShutdownHook shutdownHook = new VolumeShutdownHook(sdfsService,Main.volume);
+			VolumeShutdownHook shutdownHook = new VolumeShutdownHook(
+					sdfsService, Main.volume);
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
 		} catch (Throwable e) {
 			e.printStackTrace();

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -503,6 +502,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
 			SDFSEvent evt, boolean propigateEvent) throws IOException {
+		if (this.isSymlink()) {
+
+			File dst = new File(snaptoPath);
+			File src = new File(this.getPath());
+			if (dst.exists() && !overwrite) {
+				throw new IOException(snaptoPath + " already exists");
+			}
+			Path srcP = Paths.get(src.getPath());
+			Path dstP = Paths.get(dst.getPath());
+			try {
+				Files.createSymbolicLink(dstP, Files.readSymbolicLink(srcP).toFile().toPath());
+			} catch (IOException e) {
+				SDFSLogger.getLog().error(
+						"error symlinking " + this.getPath() + " to "
+								+ snaptoPath, e);
+			}
+			return new MetaDataDedupFile(snaptoPath);
+		}
 		if (!this.isDirectory()) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("is snapshot file");

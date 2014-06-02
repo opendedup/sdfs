@@ -1049,7 +1049,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		byte[] key = this.nextKey();
 		while (key != null) {
 			if (bf.mightContain(new KeyBlob(key))) {
-				this.hashlock.lock(); 
+				this.hashlock.lock();
 				this.claims.set(this.iterPos - 1);
 				this.hashlock.unlock();
 			}

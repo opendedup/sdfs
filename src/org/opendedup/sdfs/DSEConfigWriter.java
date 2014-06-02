@@ -92,19 +92,17 @@ public class DSEConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (!cmd.hasOption("dse-capacity")
-				|| !cmd.hasOption("cluster-node-id")) {
-			System.out
-					.println("--dse-capacity and --cluster-node-id");
+		if (!cmd.hasOption("dse-capacity") || !cmd.hasOption("cluster-node-id")) {
+			System.out.println("--dse-capacity and --cluster-node-id");
 			printHelp(options);
 			System.exit(-1);
 		}
-		if(cmd.hasOption("dse-name"))
+		if (cmd.hasOption("dse-name"))
 			dse_name = cmd.getOptionValue("dse-name");
 		else
 			dse_name = InetAddress.getLocalHost().getHostName();
-		if(!cmd.hasOption("listen-ip"))
-			this.list_ip= InetAddress.getLocalHost().getHostAddress();
+		if (!cmd.hasOption("listen-ip"))
+			this.list_ip = InetAddress.getLocalHost().getHostAddress();
 		else
 			this.list_ip = cmd.getOptionValue("listen-ip");
 		base_path = OSValidator.getProgramBasePath() + "dse" + File.separator
@@ -138,10 +136,10 @@ public class DSEConfigWriter {
 					.getOptionValue("encrypt"));
 		}
 		if (cmd.hasOption("encryption-key")) {
-			String key = cmd
-					.getOptionValue("encryption-key");
-			if(key.length() < 8) {
-				System.err.println("Encryption Key must be greater than 8 characters");
+			String key = cmd.getOptionValue("encryption-key");
+			if (key.length() < 8) {
+				System.err
+						.println("Encryption Key must be greater than 8 characters");
 				System.exit(-1);
 			} else {
 				this.chunk_store_encryption_key = cmd
@@ -178,7 +176,7 @@ public class DSEConfigWriter {
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-			
+
 		}
 
 		else if (this.azureEnabled) {
@@ -198,7 +196,7 @@ public class DSEConfigWriter {
 				System.exit(-1);
 			}
 		}
-		
+
 		if (cmd.hasOption("dse-capacity")) {
 			long sz = StringUtils.parseSize(cmd.getOptionValue("dse-capacity"));
 			this.chunk_store_allocation_size = sz;
@@ -220,13 +218,13 @@ public class DSEConfigWriter {
 				System.exit(-1);
 			}
 		}
-		
+
 		if (cmd.hasOption("compress")) {
-			this.compress = Boolean.parseBoolean(cmd
-					.getOptionValue("compress"));
+			this.compress = Boolean
+					.parseBoolean(cmd.getOptionValue("compress"));
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
-			if(this.compress && !this.awsEnabled && this.azureEnabled) {
+			if (this.compress && !this.awsEnabled && this.azureEnabled) {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 			}
 		}
@@ -248,8 +246,9 @@ public class DSEConfigWriter {
 					.getOptionValue("cluster-node-location");
 		if (cmd.hasOption("cluster-node-rack"))
 			this.clusterRack = cmd.getOptionValue("cluster-node-rack");
-		if(cmd.hasOption("io-threads")) {
-			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("io-threads"));
+		if (cmd.hasOption("io-threads")) {
+			this.cloudThreads = Integer.parseInt(cmd
+					.getOptionValue("io-threads"));
 		}
 
 		File file = new File(OSValidator.getConfigPath() + this.dse_name.trim()
@@ -427,9 +426,9 @@ public class DSEConfigWriter {
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("encryption-key")
-						.withDescription(
-								"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long").hasArg().withArgName("String")
-						.create());
+				.withDescription(
+						"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
 				.withDescription(
@@ -471,12 +470,11 @@ public class DSEConfigWriter {
 						"Host name or IPv4 Address to listen on for incoming connections. This is a required option.")
 				.hasArg().withArgName("IPv4 Address").create());
 		/*
-		options.addOption(OptionBuilder
-				.withLongOpt("listen-port")
-				.withDescription(
-						"TCP Port to listen on for incoming connections. Defaults to 2222")
-				.hasArg().withArgName("IP Port").create());
-		*/
+		 * options.addOption(OptionBuilder .withLongOpt("listen-port")
+		 * .withDescription(
+		 * "TCP Port to listen on for incoming connections. Defaults to 2222")
+		 * .hasArg().withArgName("IP Port").create());
+		 */
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-password")
 				.withDescription(
@@ -503,7 +501,7 @@ public class DSEConfigWriter {
 				.withDescription(
 						"The location where this cluster node is located.")
 				.hasArg().withArgName("String").create());
-		
+
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-node-rack")
 				.withDescription(

@@ -22,7 +22,9 @@ public interface AbstractHashesMap {
 
 	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 
-	public abstract long claimRecords(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException;
+	public abstract long claimRecords(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+			throws IOException;
+
 	/**
 	 * Searches the set for <tt>obj</tt>
 	 * 
@@ -46,9 +48,9 @@ public interface AbstractHashesMap {
 	public abstract byte[] getData(byte[] key) throws IOException;
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
-	
-	public abstract boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
-	IOException;
+
+	public abstract boolean isClaimed(ChunkData cm)
+			throws KeyNotFoundException, IOException;
 
 	public abstract long removeRecords(long ms, boolean forceRun, SDFSEvent evt)
 			throws IOException;

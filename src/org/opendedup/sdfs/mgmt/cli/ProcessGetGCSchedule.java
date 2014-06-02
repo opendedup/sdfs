@@ -26,17 +26,16 @@ public class ProcessGetGCSchedule {
 				Element se = (Element) root.getElementsByTagName("schedule")
 						.item(0);
 				String schedule = se.getAttribute("schedule");
-				System.out.printf("Cron Schedule is : %s\n",
-						schedule);
+				System.out.printf("Cron Schedule is : %s\n", schedule);
 				CronExpression cex = new CronExpression(schedule);
-				ASCIITableHeader[] headerObjs = {
-						new ASCIITableHeader("Next 5 Runs", ASCIITable.ALIGN_LEFT)};
+				ASCIITableHeader[] headerObjs = { new ASCIITableHeader(
+						"Next 5 Runs", ASCIITable.ALIGN_LEFT) };
 				String[][] data = new String[5][1];
 				Date d = cex.getNextValidTimeAfter(new Date());
 				for (int i = 0; i < 5; i++) {
-					data[i][0]=d.toString();
+					data[i][0] = d.toString();
 					d = cex.getNextValidTimeAfter(d);
-					
+
 				}
 				ASCIITable.getInstance().printTable(headerObjs, data);
 			}

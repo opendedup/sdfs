@@ -36,8 +36,9 @@ public interface HashChunkServiceInterface {
 	public abstract byte getHashRoute(byte[] hash);
 
 	public abstract void processHashClaims(SDFSEvent evt) throws IOException;
-	
-	public abstract long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException;
+
+	public abstract long processHashClaims(SDFSEvent evt,
+			BloomFilter<KeyBlob> bf) throws IOException;
 
 	public abstract long removeStailHashes(long ms, boolean forceRun,
 			SDFSEvent evt) throws IOException;

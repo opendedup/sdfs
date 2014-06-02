@@ -27,9 +27,9 @@ public class HashChunk implements Externalizable {
 	private byte[] data;
 	// whether or not the data is compressed
 	private boolean compressed;
-	
+
 	public HashChunk() {
-		
+
 	}
 
 	/**
@@ -47,8 +47,7 @@ public class HashChunk implements Externalizable {
 	 * @param compressed
 	 *            whether or not the data is compressed
 	 */
-	public HashChunk(byte[] name, byte[] data,
-			boolean compressed) {
+	public HashChunk(byte[] name, byte[] data, boolean compressed) {
 		this.name = name;
 		this.data = data;
 		this.compressed = compressed;
@@ -95,8 +94,6 @@ public class HashChunk implements Externalizable {
 	public void setName(byte[] name) {
 		this.name = name;
 	}
-
-	
 
 	@Override
 	public String toString() {

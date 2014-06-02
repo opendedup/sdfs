@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
 
 import com.google.common.eventbus.Subscribe;
 
-public class BlockDev implements Externalizable{
+public class BlockDev implements Externalizable {
 	String devName;
 	String devPath;
 	String internalPath;
@@ -38,33 +38,31 @@ public class BlockDev implements Externalizable{
 	String mappedDev;
 	String statusMsg = "Stopped";
 	SDFSBlockDev dev = null;
-	public static final byte STOPPED=0;
-	public static final byte SYNC=1;
-	public static final byte STARTED=2;
+	public static final byte STOPPED = 0;
+	public static final byte SYNC = 1;
+	public static final byte STARTED = 2;
 	private MetaDataDedupFile mf = null;
-	
-	
-	public BlockDev(){
-		
+
+	public BlockDev() {
+
 	}
-	
+
 	public SDFSBlockDev getDevIO() {
 		return this.dev;
 	}
 
-	public BlockDev(String devName,
-			long size, boolean start, String uuid) {
+	public BlockDev(String devName, long size, boolean start, String uuid) {
 		if (uuid == null)
 			this.uuid = RandomGUID.getGuid();
 		this.devName = devName;
 		this.size = size;
-		this.internalPath = Main.volume.getPath() + File.separator +devName;
+		this.internalPath = Main.volume.getPath() + File.separator + devName;
 		this.startOnInit = start;
 	}
 
 	public BlockDev(Element el) throws IOException {
 		this.devName = el.getAttribute("devname");
-		//this.devPath = el.getAttribute("devpath");
+		// this.devPath = el.getAttribute("devpath");
 		this.size = StringUtils.parseSize(el.getAttribute("size"));
 		this.internalPath = el.getAttribute("internal-path");
 		if (el.hasAttribute("uuid"))
@@ -74,17 +72,17 @@ public class BlockDev implements Externalizable{
 		this.startOnInit = Boolean.parseBoolean(el
 				.getAttribute("start-on-init"));
 	}
-	
+
 	public MetaDataDedupFile getMF() {
-		if(mf == null) {
+		if (mf == null) {
 			File df = new File(this.internalPath);
-			if(!df.exists())
+			if (!df.exists())
 				df.getParentFile().mkdirs();
 			mf = MetaFileStore.getMF(df);
 			mf.setLength(size, true);
 			mf.setDev(this);
 		}
-			
+
 		return this.mf;
 	}
 
@@ -109,13 +107,14 @@ public class BlockDev implements Externalizable{
 	}
 
 	public void setSize(long size) throws IOException {
-		if(size<this.size && this.status==2)
-			throw new IOException("cannot shrink a block device while it is online");
-			
+		if (size < this.size && this.status == 2)
+			throw new IOException(
+					"cannot shrink a block device while it is online");
+
 		BUSEMkDev.setSize(devPath, size);
 		this.size = size;
 		this.mf.setLength(size, true);
-		
+
 	}
 
 	@Subscribe
@@ -123,8 +122,8 @@ public class BlockDev implements Externalizable{
 		this.status = 0;
 		SDFSLogger.getLog().info(
 				"Stopped [" + this.devName + "] at [" + this.internalPath
-						+ "] on [" + this.mappedDev + "] with size [" + this.size
-						+ "]");
+						+ "] on [" + this.mappedDev + "] with size ["
+						+ this.size + "]");
 		this.devPath = null;
 	}
 
@@ -134,9 +133,9 @@ public class BlockDev implements Externalizable{
 				"Stopping [" + this.devName + "] at [" + this.internalPath
 						+ "] on [" + this.devPath + "] with size [" + this.size
 						+ "]");
-		this.statusMsg = "Stopping [" + this.devName + "] at [" + this.internalPath
-				+ "] on [" + this.devPath + "] with size [" + this.size
-				+ "]";
+		this.statusMsg = "Stopping [" + this.devName + "] at ["
+				+ this.internalPath + "] on [" + this.devPath + "] with size ["
+				+ this.size + "]";
 		String sh = "/bin/sh";
 		String cop = "-c";
 		String cmd = "umount /dev/mapper/" + this.devName;
@@ -146,8 +145,8 @@ public class BlockDev implements Externalizable{
 			SDFSLogger.getLog().info(
 					"Removed mounts to /dev/mapper/" + this.devName);
 		} catch (Exception e) {
-			SDFSLogger.getLog().info(
-					"Failed to remove mounts to /dev/mapper/"
+			SDFSLogger.getLog()
+					.info("Failed to remove mounts to /dev/mapper/"
 							+ this.devName, e);
 		}
 		sh = "/bin/sh";
@@ -162,7 +161,7 @@ public class BlockDev implements Externalizable{
 			SDFSLogger.getLog().info(
 					"Failed to remove references to /dev/mapper/"
 							+ this.devName, e);
-		}finally {
+		} finally {
 			this.mappedDev = null;
 		}
 		this.statusMsg = "Device Stopped";
@@ -171,14 +170,13 @@ public class BlockDev implements Externalizable{
 	@Subscribe
 	public void startedEvent(BlockDeviceOpenEvent evt) {
 		this.status = STARTED;
-		this.statusMsg = 
-				"Started [" + this.devName + "] at [" + this.internalPath
-				+ "] on [" + this.mappedDev + "] with size [" + this.size
-				+ "]";
+		this.statusMsg = "Started [" + this.devName + "] at ["
+				+ this.internalPath + "] on [" + this.mappedDev
+				+ "] with size [" + this.size + "]";
 		SDFSLogger.getLog().info(this.statusMsg);
-		
+
 	}
-	
+
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("blockdev");
 		Element root = doc.getDocumentElement();
@@ -190,8 +188,8 @@ public class BlockDev implements Externalizable{
 		root.setAttribute("uuid", this.uuid);
 		root.setAttribute("status", Byte.toString(this.status));
 		root.setAttribute("mappeddev", this.mappedDev);
-		
-		if(this.statusMsg!=null)
+
+		if (this.statusMsg != null)
 			root.setAttribute("status-msg", this.statusMsg);
 		return doc;
 	}
@@ -214,8 +212,9 @@ public class BlockDev implements Externalizable{
 		th.start();
 		this.statusMsg = "Backing Device Initiated";
 		File f = new File("/dev/mapper/" + this.devName);
-		if(f.exists()) {
-			this.statusMsg = "partition already assigned at [" +f.getPath()+ "] please remove.";
+		if (f.exists()) {
+			this.statusMsg = "partition already assigned at [" + f.getPath()
+					+ "] please remove.";
 			throw new IOException(this.statusMsg);
 		}
 		long bsz = this.size / 512L;
@@ -223,7 +222,7 @@ public class BlockDev implements Externalizable{
 		String cop = "-c";
 		String cmd = "echo 0 " + bsz + " linear " + this.devPath
 				+ " 0 | dmsetup create " + this.devName;
-		String [] exe = new String[] { sh, cop, cmd };
+		String[] exe = new String[] { sh, cop, cmd };
 		SDFSLogger.getLog().info(
 				"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath
 						+ " 0 | dmsetup create " + this.devName + "\"");
@@ -233,17 +232,17 @@ public class BlockDev implements Externalizable{
 					"Mapped device to partition /dev/mapper/" + this.devName);
 			this.mappedDev = "/dev/mapper/" + this.devName;
 		} catch (Exception e) {
-			this.statusMsg = 
-					"Failed to map device to partition /dev/mapper/" + this.devName;
+			this.statusMsg = "Failed to map device to partition /dev/mapper/"
+					+ this.devName;
 			throw new IOException(this.statusMsg);
 		}
-		if(!f.exists()) {
-			this.statusMsg = "Partition not assigned at [" +f.getPath()+ "]. Please retry";
+		if (!f.exists()) {
+			this.statusMsg = "Partition not assigned at [" + f.getPath()
+					+ "]. Please retry";
 			throw new IOException(this.statusMsg);
 		}
-		this.statusMsg = 
-					"Mapped device to parition /dev/mapper/" + this.devName;
-		
+		this.statusMsg = "Mapped device to parition /dev/mapper/"
+				+ this.devName;
 
 	}
 
@@ -252,8 +251,7 @@ public class BlockDev implements Externalizable{
 			throw new IOException("Device [" + this.devName
 					+ "] already stopped");
 		dev.close();
-		this.statusMsg = 
-				"Device Stopped";
+		this.statusMsg = "Device Stopped";
 		this.dev = null;
 	}
 
@@ -277,13 +275,12 @@ public class BlockDev implements Externalizable{
 		return this.status == STOPPED;
 	}
 
-
 	public static String toExternalTxt(Element el) {
 		String status = "Stopped";
 		byte stb = Byte.parseByte(el.getAttribute("status"));
-		if(stb==1)
-			status="Synchronizing";
-		if(stb==2)
+		if (stb == 1)
+			status = "Synchronizing";
+		if (stb == 2)
 			status = "Started";
 		String st = new String();
 		st = st + "=============[" + el.getAttribute("devname")
@@ -295,7 +292,7 @@ public class BlockDev implements Externalizable{
 		st = st + "UUID : " + el.getAttribute("uuid") + "\n";
 		st = st + "Start on Init : " + el.getAttribute("start-on-init") + "\n";
 		st = st + "Status : " + status + "\n";
-		st = st + "Status Msg : " + el.getAttribute("status-msg") + "\n"; 
+		st = st + "Status Msg : " + el.getAttribute("status-msg") + "\n";
 		return st;
 	}
 
@@ -306,15 +303,15 @@ public class BlockDev implements Externalizable{
 		this.uuid = StringUtils.readString(in);
 		this.startOnInit = in.readBoolean();
 		this.size = in.readLong();
-		this.internalPath = Main.volume.getPath() + File.separator +devName;
+		this.internalPath = Main.volume.getPath() + File.separator + devName;
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		StringUtils.writeString(out,devName);
-		StringUtils.writeString(out,uuid);
+		StringUtils.writeString(out, devName);
+		StringUtils.writeString(out, uuid);
 		out.writeBoolean(startOnInit);
 		out.writeLong(size);
 	}
-	
+
 }

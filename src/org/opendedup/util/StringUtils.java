@@ -9,18 +9,19 @@ public class StringUtils {
 	final static long tbc = 1099511627776L;
 	final static long gbc = 1024 * 1024 * 1024;
 	final static int mbc = 1024 * 1024;
-	
-	public static void writeString(ObjectOutput out, String string) throws IOException {
-		byte [] b = string.getBytes();
-		out.writeShort((short)b.length);
+
+	public static void writeString(ObjectOutput out, String string)
+			throws IOException {
+		byte[] b = string.getBytes();
+		out.writeShort((short) b.length);
 		out.write(b);
 	}
-	
+
 	public static String readString(ObjectInput in) throws IOException {
 		short l = in.readShort();
-		 byte [] b = new byte[l];
-		 in.readFully(b);
-		 return new String(b);
+		byte[] b = new byte[l];
+		in.readFully(b);
+		return new String(b);
 	}
 
 	static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2',

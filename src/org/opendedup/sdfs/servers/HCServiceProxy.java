@@ -74,11 +74,11 @@ public class HCServiceProxy {
 
 		}
 	}
-	
-	public static synchronized long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf)
-			throws IOException {
+
+	public static synchronized long processHashClaims(SDFSEvent evt,
+			BloomFilter<KeyBlob> bf) throws IOException {
 		if (Main.chunkStoreLocal)
-			return hcService.processHashClaims(evt,bf);
+			return hcService.processHashClaims(evt, bf);
 		else {
 			new ClaimHashesCmd(evt).executeCmd(cs);
 

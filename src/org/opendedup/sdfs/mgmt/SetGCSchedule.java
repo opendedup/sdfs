@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.SetGCScheduleCmd;
@@ -19,7 +18,7 @@ public class SetGCSchedule {
 				Main.pFullSched.gcSched.stopSchedules();
 				Main.fDkiskSchedule = schedule;
 				Main.pFullSched.gcSched = new SDFSGCScheduler();
-				SDFSLogger.getLog().info("schedule set to [" +schedule + "]");
+				SDFSLogger.getLog().info("schedule set to [" + schedule + "]");
 			} else {
 				SetGCScheduleCmd acmd = new SetGCScheduleCmd(schedule);
 				acmd.executeCmd(HCServiceProxy.cs);

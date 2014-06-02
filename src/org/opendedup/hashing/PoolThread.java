@@ -18,13 +18,13 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private boolean isStopped = false;
 	private static int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / (Main.CHUNK_LENGTH)) + 1;
-	//private static final int maxTasks = 40;
+	// private static final int maxTasks = 40;
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
 			maxTasks);
 	Thread th = null;
-	
+
 	static {
-		if(maxTasks > 120)
+		if (maxTasks > 120)
 			maxTasks = 120;
 		SDFSLogger.getLog().info("Pool List Size will be " + maxTasks);
 	}
@@ -40,18 +40,19 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 				tasks.clear();
 				int ts = taskQueue.drainTo(tasks, maxTasks);
 				if (ts > 0) {
-				if (Main.chunkStoreLocal) {
-					for (int i = 0; i < ts; i++) {
-						WritableCacheBuffer runnable = tasks.get(i);
-						try {
-							runnable.close();
-						} catch (Exception e) {
-							SDFSLogger.getLog().fatal(
-									"unable to execute thread", e);
+					if (Main.chunkStoreLocal) {
+						for (int i = 0; i < ts; i++) {
+							WritableCacheBuffer runnable = tasks.get(i);
+							try {
+								runnable.close();
+							} catch (Exception e) {
+								SDFSLogger.getLog().fatal(
+										"unable to execute thread", e);
+							}
 						}
-					}
-				} else {
-						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(maxTasks);
+					} else {
+						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(
+								maxTasks);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							runnable.startClose();
@@ -61,11 +62,11 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							try {
 								hash = hc.getHash(runnable.getFlushedBuffer());
 								SparseDataChunk ck = new SparseDataChunk(0,
-										hash, false, new byte[8],(byte)0);
+										hash, false, new byte[8], (byte) 0);
 								runnable.setHash(hash);
-								cks.add(i,ck);
+								cks.add(i, ck);
 							} catch (BufferClosedException e) {
-								cks.add(i,null);
+								cks.add(i, null);
 							} finally {
 								SparseDedupFile.hashPool.returnObject(hc);
 							}
@@ -85,37 +86,27 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 										SDFSLogger.getLog().warn(
 												"unable to close block", e);
 									}
-								}
-								else {
+								} else {
 									SDFSLogger.getLog().fatal(
 											"there is a hash mismatch!");
 								}
 							}
 						}
 						/*
-						try {
-						HCServiceProxy.batchWriteHash(tasks);
-						}catch (Exception e) {
-							SDFSLogger.getLog().warn(
-									"unable to run batch", e);
-						}
-						for (int i = 0; i < ts; i++) {
-							WritableCacheBuffer runnable = tasks.get(i);
-							try {
-								runnable.endClose();
-							} catch (Exception e) {
-								SDFSLogger.getLog().warn(
-										"unable to close block", e);
-							}
-						}
-						*/
+						 * try { HCServiceProxy.batchWriteHash(tasks); }catch
+						 * (Exception e) { SDFSLogger.getLog().warn(
+						 * "unable to run batch", e); } for (int i = 0; i < ts;
+						 * i++) { WritableCacheBuffer runnable = tasks.get(i);
+						 * try { runnable.endClose(); } catch (Exception e) {
+						 * SDFSLogger.getLog().warn( "unable to close block",
+						 * e); } }
+						 */
 						cks = null;
 					}
-				}
-				else {
+				} else {
 					Thread.sleep(5);
 				}
-				
+
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to execute thread", e);
 			}
@@ -123,7 +114,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	}
 
 	private ReentrantLock exitLock = new ReentrantLock();
-	
+
 	public void start() {
 		th = new Thread(this);
 		th.start();
@@ -133,10 +124,10 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 		exitLock.lock();
 		try {
 			isStopped = true;
-			
+
 			th.interrupt(); // break pool thread out of dequeue() call.
-		} catch(Exception e) {}
-		finally {
+		} catch (Exception e) {
+		} finally {
 			exitLock.unlock();
 		}
 	}
@@ -145,5 +136,4 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 		return isStopped;
 	}
 
-	
 }
