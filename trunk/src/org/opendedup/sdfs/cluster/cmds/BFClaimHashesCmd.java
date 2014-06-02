@@ -26,7 +26,7 @@ public class BFClaimHashesCmd implements IOPeerCmd {
 	SDFSEvent evt;
 	BloomFilter<KeyBlob> bf;
 
-	public BFClaimHashesCmd(SDFSEvent evt,BloomFilter<KeyBlob> bf) {
+	public BFClaimHashesCmd(SDFSEvent evt, BloomFilter<KeyBlob> bf) {
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
 		this.evt = evt;
 		this.bf = bf;

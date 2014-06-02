@@ -18,7 +18,7 @@ public class VolumeIOMeter implements Runnable {
 
 	private Volume vol;
 	private long bytesRead = 0, bytesWritten = 0, virtualBytesWritten = 0,
-			RIOPS = 0, WIOPS = 0, duplicateBytes = 0,dseSz=0,dseCompSz=0;
+			RIOPS = 0, WIOPS = 0, duplicateBytes = 0, dseSz = 0, dseCompSz = 0;
 	private double pbytesRead = 0, pbytesWritten = 0, pvirtualBytesWritten = 0,
 			pRIOPS = 0, pWIOPS = 0, pduplicateBytes = 0;
 	private Logger log = Logger.getLogger("volperflog");
@@ -84,7 +84,8 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("sdfsCpuLoad", Double.toString(perf.getProcessCpuLoad()));
 		MDC.put("sdfsCpuTime", Double.toString(perf.getProcessCpuTime()));
 		MDC.put("systemCpuLoad", Double.toString(perf.getSystemCpuLoad()));
-		MDC.put("systemCpuAverage", Double.toString(perf.getSystemLoadAverage()));
+		MDC.put("systemCpuAverage",
+				Double.toString(perf.getSystemLoadAverage()));
 		MDC.put("freeMemory", Long.toString(perf.getFreePhysicalMemorySize()));
 		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
 		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));

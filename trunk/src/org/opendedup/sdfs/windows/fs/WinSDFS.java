@@ -307,7 +307,7 @@ public class WinSDFS implements DokanOperations {
 		// log("[onWriteFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
 		try {
-			ch.writeFile(buf, buf.capacity(), 0, offset,true);
+			ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			// log("wrote " + new String(b));
 		} catch (IOException e) {
 			log.error("unable to write to file" + fileName, e);

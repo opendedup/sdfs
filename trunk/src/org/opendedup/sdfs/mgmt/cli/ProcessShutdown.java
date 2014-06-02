@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-
 import java.util.Formatter;
 
 import org.w3c.dom.Document;

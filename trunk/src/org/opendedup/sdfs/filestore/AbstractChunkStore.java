@@ -55,14 +55,13 @@ public interface AbstractChunkStore {
 	 * @return Returns the size of the chunk store on disk or service
 	 */
 	public abstract long size();
-	
+
 	/**
 	 * 
 	 * @return The size of the chunkstore compressed
 	 */
 	public abstract long compressedSize();
-	
-	
+
 	public abstract long maxSize();
 
 	/**
@@ -133,7 +132,7 @@ public interface AbstractChunkStore {
 
 	public abstract void deleteChunk(byte[] hash, long start, int len)
 			throws IOException;
-	
+
 	public abstract void deleteDuplicate(byte[] hash, long start, int len)
 			throws IOException;
 

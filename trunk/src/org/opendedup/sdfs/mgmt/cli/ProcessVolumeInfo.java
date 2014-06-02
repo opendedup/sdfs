@@ -28,8 +28,7 @@ public class ProcessVolumeInfo {
 						.getAttribute("current-size"));
 				long dedupSz = Long.parseLong(dse
 						.getAttribute("duplicate-bytes"));
-				long compSz = Long.parseLong(dse
-						.getAttribute("dse-comp-size"));
+				long compSz = Long.parseLong(dse.getAttribute("dse-comp-size"));
 				long dseSz = Long.parseLong(dse.getAttribute("dse-size"));
 				System.out.printf("Volume Capacity : %s\n",
 						StorageUnit.of(capacitySz).format(capacitySz));
@@ -45,7 +44,8 @@ public class ProcessVolumeInfo {
 						StorageUnit.of(dedupSz).format(dedupSz));
 				System.out.printf("Unique Blocks Stored: %s\n",
 						StorageUnit.of(dseSz).format(dseSz));
-				System.out.printf("Unique Blocks Stored after Compression : %s\n",
+				System.out.printf(
+						"Unique Blocks Stored after Compression : %s\n",
 						StorageUnit.of(compSz).format(compSz));
 				System.out.printf("Cluster Block Copies : %s\n",
 						dse.getAttribute("cluster-block-copies"));
@@ -74,16 +74,13 @@ public class ProcessVolumeInfo {
 									Double.toString(dedupRate));
 				}
 				if (compSz == 0 || dseSz == 0) {
-					System.out
-							.printf("Compression Rate: %d%%\n",
-									0);
+					System.out.printf("Compression Rate: %d%%\n", 0);
 				} else {
 					double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
 					DecimalFormat twoDForm = new DecimalFormat("#.##");
 					compRate = Double.valueOf(twoDForm.format(compRate));
-					System.out
-							.printf("Compression Rate: %s%%\n",
-									Double.toString(compRate));
+					System.out.printf("Compression Rate: %s%%\n",
+							Double.toString(compRate));
 				}
 				formatter.close();
 			}

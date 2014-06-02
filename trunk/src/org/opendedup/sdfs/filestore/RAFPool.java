@@ -80,7 +80,7 @@ public class RAFPool {
 		}
 		try {
 			boolean inserted = this.passiveObjects.offer(hc);
-			if(!inserted) {
+			if (!inserted) {
 				SDFSLogger.getLog().info("passive objects full");
 				hc.close();
 			}

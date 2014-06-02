@@ -340,19 +340,19 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	@Override
 	public void resetHashLoc() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void addHashLoc(byte loc) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setBatchwritten(boolean written) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

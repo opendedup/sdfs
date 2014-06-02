@@ -8,17 +8,21 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessBlockDeviceUpdate {
-	public static void runCmd(String devName,String param,String value) {
+	public static void runCmd(String devName, String param, String value) {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			formatter.format("file=s&cmd=blockdev-add&devname=%s&param=%s&value=%s", URLEncoder.encode(devName,"UTF-8"),URLEncoder.encode(param,"UTF-8"),value);
+			formatter.format(
+					"file=s&cmd=blockdev-add&devname=%s&param=%s&value=%s",
+					URLEncoder.encode(devName, "UTF-8"),
+					URLEncoder.encode(param, "UTF-8"), value);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
 			System.out.println(root.getAttribute("msg"));
-			if(root.getAttribute("status").equalsIgnoreCase("success"))
-				System.out.println(BlockDev.toExternalTxt((Element)root.getElementsByTagName("blockdev").item(0)));
+			if (root.getAttribute("status").equalsIgnoreCase("success"))
+				System.out.println(BlockDev.toExternalTxt((Element) root
+						.getElementsByTagName("blockdev").item(0)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

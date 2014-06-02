@@ -25,7 +25,7 @@ public class DiskFullEvent extends SDFSEvent {
 	public Element toXML() throws ParserConfigurationException {
 		Element el = super.toXML();
 		el.setAttribute("current-size", Long.toString(this.currentSz));
-		el.setAttribute("max-size",Long.toString(this.maxSz));
+		el.setAttribute("max-size", Long.toString(this.maxSz));
 		el.setAttribute("dse-size", Long.toString(this.dseSz));
 		el.setAttribute("dse-max-size", Long.toString(this.maxDseSz));
 		el.setAttribute("disk-usage", Long.toString(this.dskUsage));

@@ -63,7 +63,7 @@ public class S3ChunkStoreUtils {
 					cmd.getOptionValue("aws-secret-key"));
 		}
 	}
-	
+
 	public static void deleteBucket(String bucketName, String awsAccessKey,
 			String awsSecretKey) {
 		bucketName = bucketName.toLowerCase();

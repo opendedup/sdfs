@@ -12,13 +12,15 @@ public class ProcessBlockDeviceStart {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			formatter.format("file=s&cmd=blockdev-start&devname=%s", URLEncoder.encode(devName,"UTF-8"));
+			formatter.format("file=s&cmd=blockdev-start&devname=%s",
+					URLEncoder.encode(devName, "UTF-8"));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
 			System.out.println(root.getAttribute("msg"));
-			if(root.getAttribute("status").equalsIgnoreCase("success"))
-				System.out.println(BlockDev.toExternalTxt((Element)root.getElementsByTagName("blockdev").item(0)));
+			if (root.getAttribute("status").equalsIgnoreCase("success"))
+				System.out.println(BlockDev.toExternalTxt((Element) root
+						.getElementsByTagName("blockdev").item(0)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

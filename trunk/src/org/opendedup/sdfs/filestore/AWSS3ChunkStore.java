@@ -342,7 +342,8 @@ public class AWSS3ChunkStore implements AbstractChunkStore {
 		this.name = Main.cloudBucket.toLowerCase();
 		try {
 
-			pool = new AWSS3ServicePool(AWSS3ChunkStore.awsCredentials, Main.writeThreads);
+			pool = new AWSS3ServicePool(AWSS3ChunkStore.awsCredentials,
+					Main.writeThreads);
 			AmazonS3Client s3Service = pool.borrowObject();
 			boolean exists = s3Service.doesBucketExist(this.name);
 			if (!exists) {
@@ -444,7 +445,7 @@ public class AWSS3ChunkStore implements AbstractChunkStore {
 	public void deleteDuplicate(byte[] hash, long start, int len)
 			throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

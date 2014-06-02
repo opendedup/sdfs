@@ -81,15 +81,15 @@ public class ReadTest implements Runnable {
 		while (!finished) {
 			int nf = 0;
 			for (int i = 0; i < tests.length; i++) {
-				
+
 				ReadTest test = tests[i];
 				if (test.isFinished()) {
-					
+
 					nf++;
-					if(results[i] == 0)
+					if (results[i] == 0)
 						results[i] = test.results();
-				} 
-				if(nf == tests.length)
+				}
+				if (nf == tests.length)
 					finished = true;
 			}
 			try {

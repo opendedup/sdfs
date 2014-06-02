@@ -23,8 +23,7 @@ public class FCPool {
 	public FCPool(File f, int size) throws IOException {
 		this.f = f;
 		this.poolSize = size;
-		passiveObjects = new LinkedBlockingQueue<FileChannel>(
-				this.poolSize);
+		passiveObjects = new LinkedBlockingQueue<FileChannel>(this.poolSize);
 		this.populatePool();
 	}
 
@@ -78,9 +77,9 @@ public class FCPool {
 			alock.unlock();
 		}
 		try {
-				boolean inserted = this.passiveObjects.offer(hc);
-				if(!inserted)
-					hc.close();
+			boolean inserted = this.passiveObjects.offer(hc);
+			if (!inserted)
+				hc.close();
 		} catch (Exception e) {
 			throw new IOException(e);
 
@@ -91,7 +90,7 @@ public class FCPool {
 	public FileChannel makeObject() throws IOException {
 		@SuppressWarnings("resource")
 		RandomAccessFile rf = new RandomAccessFile(this.f, "rw");
-		//NativePosixUtil.advise(rf.getFD(), 0, 0, NativePosixUtil.DONTNEED);
+		// NativePosixUtil.advise(rf.getFD(), 0, 0, NativePosixUtil.DONTNEED);
 		FileChannel hc = rf.getChannel();
 		return hc;
 	}

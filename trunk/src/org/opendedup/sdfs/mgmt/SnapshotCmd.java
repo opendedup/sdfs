@@ -18,6 +18,7 @@ public class SnapshotCmd implements Runnable {
 	SDFSEvent evt;
 
 	public Element getResult(String cmd, String file) throws IOException {
+		SDFSLogger.getLog().info(cmd + " file=" + file);
 		this.srcPath = file;
 		this.dstPath = cmd;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
@@ -26,6 +27,7 @@ public class SnapshotCmd implements Runnable {
 		Thread th = new Thread(this);
 		th.start();
 		try {
+			SDFSLogger.getLog().info(evt.toXML());
 			return evt.toXML();
 		} catch (ParserConfigurationException e) {
 			throw new IOException(e);

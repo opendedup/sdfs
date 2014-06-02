@@ -319,7 +319,7 @@ public class SparseDedupFile implements DedupFile {
 					break;
 				}
 				if (i > 30000) {
-					
+
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()

@@ -147,14 +147,14 @@ public class HashStore {
 			directory.mkdirs();
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
-		
+
 		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
-		if(HashFunctionPool.max_hash_cluster > 1)
+		if (HashFunctionPool.max_hash_cluster > 1)
 			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.min_page_size) + 8000;
 		try {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
-			SDFSLogger.getLog().info("Maximum Number of Entries is " +entries);
+			SDFSLogger.getLog().info("Maximum Number of Entries is " + entries);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath());
@@ -216,9 +216,10 @@ public class HashStore {
 	public void processHashClaims(SDFSEvent evt) throws IOException {
 		this.bdb.claimRecords(evt);
 	}
-	
-	public long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf) throws IOException {
-		return this.bdb.claimRecords(evt,bf);
+
+	public long processHashClaims(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+			throws IOException {
+		return this.bdb.claimRecords(evt, bf);
 	}
 
 	public long evictChunks(long time, boolean forceRun, SDFSEvent evt)

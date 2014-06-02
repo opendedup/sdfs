@@ -28,7 +28,7 @@ public class RandomFileIntegrityTest implements Runnable {
 	public void run() {
 		try {
 			int len = 1024 * size;
-			
+
 			Random rnd = new Random();
 			byte[] b = new byte[len];
 			rnd.nextBytes(b);
@@ -37,8 +37,7 @@ public class RandomFileIntegrityTest implements Runnable {
 			hashcode = BaseEncoding.base16().encode(nhc);
 			path = new File(path.getPath() + File.separator + hashcode);
 			Files.write(b, path);
-			byte[] hc = Files.hash(path,
-					Hashing.murmur3_128()).asBytes();
+			byte[] hc = Files.hash(path, Hashing.murmur3_128()).asBytes();
 			passed = Arrays.equals(hc, nhc);
 			hashcode = BaseEncoding.base16().encode(hc);
 		} catch (Exception e) {
@@ -58,21 +57,23 @@ public class RandomFileIntegrityTest implements Runnable {
 	public static int test(String path, int size, int runs) throws IOException {
 		RandomFileIntegrityTest[] tests = new RandomFileIntegrityTest[runs];
 		for (int i = 0; i < tests.length; i++) {
-			RandomFileIntegrityTest test = new RandomFileIntegrityTest(new File(path),  size);
+			RandomFileIntegrityTest test = new RandomFileIntegrityTest(
+					new File(path), size);
 			tests[i] = test;
 		}
 		boolean finished = false;
-		int passed = 0;;
+		int passed = 0;
+		;
 		while (!finished) {
 			int nf = 0;
 			for (int i = 0; i < tests.length; i++) {
 				RandomFileIntegrityTest test = tests[i];
 				if (test.isFinished()) {
 					nf++;
-					if(test.passed)
+					if (test.passed)
 						passed++;
 				}
-				if(nf == tests.length)
+				if (nf == tests.length)
 					finished = true;
 			}
 			try {
@@ -85,7 +86,8 @@ public class RandomFileIntegrityTest implements Runnable {
 		return passed;
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException,
+			InterruptedException {
 		if (args.length != 4) {
 			System.out
 					.println("RandomFileIntegrityTest <path to write to> <File Size (KB)> <Number of Parallel Runs> <Number of total runs>");
@@ -93,26 +95,24 @@ public class RandomFileIntegrityTest implements Runnable {
 		}
 		int r = Integer.parseInt(args[3]);
 		for (int i = 0; i < r; i++) {
-			test(args[0], 
-					Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			test(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		}
 		Process p = Runtime.getRuntime().exec("sync");
 		p.waitFor();
 		p = Runtime.getRuntime().exec("echo 3 > /proc/sys/vm/drop_caches");
 		p.waitFor();
 		File f = new File(args[0]);
-		File [] fs =f.listFiles();
+		File[] fs = f.listFiles();
 		System.out.println("Checking " + fs.length);
 		int passed = 0;
-		for(File hf : fs) {
-			byte [] hc = BaseEncoding.base16().decode(hf.getName());
-			byte [] nhc = Files.hash(hf,
-					Hashing.murmur3_128()).asBytes();
-			if(Arrays.equals(hc, nhc)) {
+		for (File hf : fs) {
+			byte[] hc = BaseEncoding.base16().decode(hf.getName());
+			byte[] nhc = Files.hash(hf, Hashing.murmur3_128()).asBytes();
+			if (Arrays.equals(hc, nhc)) {
 				passed++;
 			}
 		}
-		System.out.println("Files=" +fs.length + " Passed=" + passed);
+		System.out.println("Files=" + fs.length + " Passed=" + passed);
 	}
 
 }

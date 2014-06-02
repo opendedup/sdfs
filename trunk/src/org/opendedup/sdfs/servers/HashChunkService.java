@@ -83,7 +83,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 					+ "]");
 		chunksRead++;
 		kBytesRead = kBytesRead + (position / KBYTE);
-		boolean written = hs.addHashChunk(new HashChunk(hash, aContents, compressed));
+		boolean written = hs.addHashChunk(new HashChunk(hash, aContents,
+				compressed));
 		if (written) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -142,9 +143,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 	public void processHashClaims(SDFSEvent evt) throws IOException {
 		hs.processHashClaims(evt);
 	}
-	
-	public long processHashClaims(SDFSEvent evt,BloomFilter<KeyBlob> bf)throws IOException {
-		return hs.processHashClaims(evt,bf);
+
+	public long processHashClaims(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+			throws IOException {
+		return hs.processHashClaims(evt, bf);
 	}
 
 	public long removeStailHashes(long ms, boolean forceRun, SDFSEvent evt)

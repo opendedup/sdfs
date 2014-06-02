@@ -35,7 +35,7 @@ public class VolumeSocket implements RequestHandler, MembershipListener,
 
 	private MessageDispatcher disp;
 	private boolean peermaster = false;
-	private Address pmAddr =null;
+	private Address pmAddr = null;
 
 	public VolumeSocket(Volume vol, String config) throws Exception {
 		SDFSLogger.getLog().info("Starting Volume Socket for " + vol.getName());
@@ -106,7 +106,7 @@ public class VolumeSocket implements RequestHandler, MembershipListener,
 		}
 		this.pmAddr = new_view.getMembers().get(0);
 		if (pmAddr.equals(this.channel.getAddress())) {
-			this.peermaster =true;
+			this.peermaster = true;
 		} else {
 			this.peermaster = false;
 		}
@@ -147,7 +147,7 @@ public class VolumeSocket implements RequestHandler, MembershipListener,
 				_dev.setSize(dev.getSize());
 			}
 			break;
-			
+
 		}
 		return null;
 	}

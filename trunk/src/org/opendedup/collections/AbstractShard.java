@@ -69,8 +69,9 @@ public interface AbstractShard {
 	public abstract void close();
 
 	public abstract long claimRecords() throws IOException;
-	
-	public abstract long claimRecords(BloomFilter<KeyBlob> bf) throws IOException;
+
+	public abstract long claimRecords(BloomFilter<KeyBlob> bf)
+			throws IOException;
 
 	public abstract void sync() throws SyncFailedException, IOException;
 

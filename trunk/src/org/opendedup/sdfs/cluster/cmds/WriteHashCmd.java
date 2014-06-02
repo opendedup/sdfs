@@ -49,10 +49,10 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout, false);
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
+				false);
 		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		// opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.OOB);
 		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
@@ -79,10 +79,10 @@ public class WriteHashCmd implements IOClientCmd {
 			this.aContents = aContents;
 			this.len = this.aContents.length;
 		}
-		opts = new RequestOptions(ResponseMode.GET_ALL,
-				Main.ClusterRSPTimeout, false);
-		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
+				false);
+		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		// opts.setFlags(Message.Flag.DONT_BUNDLE);
 		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
@@ -165,7 +165,8 @@ public class WriteHashCmd implements IOClientCmd {
 		if (pos == 1)
 			throw new IOException("unable to write to any storage nodes");
 		if (written < addrs.size()) {
-			throw new RedundancyNotMetException(written, addrs.size(),this.resp);
+			throw new RedundancyNotMetException(written, addrs.size(),
+					this.resp);
 		}
 	}
 

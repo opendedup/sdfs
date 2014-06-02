@@ -89,12 +89,12 @@ public class MgmtWebServer implements Container {
 					if (cmd == null) {
 						result.setAttribute("status", "failed");
 						result.setAttribute("msg", "no command specified");
-					}else if(cmd.equalsIgnoreCase("shutdown")) {
+					} else if (cmd.equalsIgnoreCase("shutdown")) {
 						new Shutdown().getResult();
 						result.setAttribute("status", "success");
-						result.setAttribute("msg", "shutting down volume manager");
-					}
-					else if (cmd.equalsIgnoreCase("info")) {
+						result.setAttribute("msg",
+								"shutting down volume manager");
+					} else if (cmd.equalsIgnoreCase("info")) {
 						try {
 							Element msg = new GetAttributes().getResult(
 									cmdOptions, file);
@@ -232,66 +232,79 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if(cmd.equalsIgnoreCase("blockdev-add")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-add")) {
 						try {
-							Element el = new BlockDeviceAdd().getResult(request.getQuery().get("devname"),request.getQuery().get("size"),request.getQuery().get("start"));
-							
+							Element el = new BlockDeviceAdd().getResult(request
+									.getQuery().get("devname"), request
+									.getQuery().get("size"), request.getQuery()
+									.get("start"));
+
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully added block device [" + request.getQuery().get("devname") + "]");
+									"successfully added block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if(cmd.equalsIgnoreCase("blockdev-rm")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-rm")) {
 						try {
-							Element el = new BlockDeviceRm().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceRm().getResult(request
+									.getQuery().get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully removed block device [" + request.getQuery().get("devname") + "]");
+									"successfully removed block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if(cmd.equalsIgnoreCase("blockdev-start")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-start")) {
 						try {
-							Element el = new BlockDeviceStart().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStart()
+									.getResult(request.getQuery()
+											.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully started block device [" + request.getQuery().get("devname") + "]");
+									"successfully started block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if(cmd.equalsIgnoreCase("blockdev-stop")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-stop")) {
 						try {
-							Element el = new BlockDeviceStop().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStop()
+									.getResult(request.getQuery()
+											.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully stopped block device [" + request.getQuery().get("devname") + "]");
+									"successfully stopped block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if(cmd.equalsIgnoreCase("blockdev-list")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-list")) {
 						try {
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
-							List<Element> els = new BlockDeviceList().getResult();
-							for(Element el : els) {
+							List<Element> els = new BlockDeviceList()
+									.getResult();
+							for (Element el : els) {
 								result.appendChild(doc.adoptNode(el));
 							}
 						} catch (IOException e) {
@@ -299,13 +312,17 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if(cmd.equalsIgnoreCase("blockdev-update")) {
+					} else if (cmd.equalsIgnoreCase("blockdev-update")) {
 						try {
-							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),request.getQuery().get("param"),request.getQuery().get("value"));
+							Element el = new BlockDeviceUpdate().getResult(
+									request.getQuery().get("devname"), request
+											.getQuery().get("param"), request
+											.getQuery().get("value"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully updated block device [" + request.getQuery().get("devname") + "]");
+									"successfully updated block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -313,7 +330,7 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					}
-					
+
 					else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
@@ -325,35 +342,34 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("get-gc-schedule")) {
+					} else if (cmd.equalsIgnoreCase("get-gc-schedule")) {
 						try {
-							Element msg =new GetGCSchedule().getResult(cmdOptions, file);
+							Element msg = new GetGCSchedule().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
-							
+
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} else if (cmd.equalsIgnoreCase("get-gc-master")) {
+						try {
+							Element msg = new GetGCMaster().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
 					}
-					else if (cmd.equalsIgnoreCase("get-gc-master")) {
-						try {
-							Element msg =new GetGCMaster().getResult();
-							result.setAttribute("status", "success");
-							result.setAttribute("msg",
-									"command completed successfully");
-							result.appendChild(doc.adoptNode(msg));
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
-						}
-					}
-					
+
 					else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
 						try {
 							new PromoteToGCMaster().getResult(cmdOptions, file);
@@ -469,7 +485,8 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
 						byte[] rb = com.google.common.io.BaseEncoding
-								.base64Url().decode(request.getParameter("data"));
+								.base64Url().decode(
+										request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.set("Content-Type", "application/octet-stream");
@@ -685,7 +702,7 @@ public class MgmtWebServer implements Container {
 			try {
 				response.close();
 			} catch (IOException e) {
-				SDFSLogger.getLog().debug("error when closing response",e);
+				SDFSLogger.getLog().debug("error when closing response", e);
 			}
 		}
 	}
@@ -711,9 +728,10 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-		        SSLContext sslContext = SSLContext.getInstance("SSLv3");
-		        // sslContext.init(keyManagerFactory.getKeyManagers(), new TrustManager[]{new NaiveX509TrustManager()}, null);
-		        sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+				SSLContext sslContext = SSLContext.getInstance("SSLv3");
+				// sslContext.init(keyManagerFactory.getKeyManagers(), new
+				// TrustManager[]{new NaiveX509TrustManager()}, null);
+				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 				Container container = new MgmtWebServer();
 				connection = new SocketConnection(container);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);

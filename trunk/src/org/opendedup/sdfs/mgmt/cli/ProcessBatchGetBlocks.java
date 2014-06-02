@@ -60,7 +60,7 @@ public class ProcessBatchGetBlocks {
 			long imsz = 0;
 			for (int i = 0; i < hck.size(); i++) {
 				HashChunk _hc = hck.get(i);
-				imsz = +_hc.getData().length;
+				imsz += _hc.getData().length;
 				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(), 0,
 						_hc.getData().length, true, null);
 			}

@@ -74,8 +74,7 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if (cmd.hasOption("set-gc-schedule")) {
-			ProcessSetGCSchedule.runCmd(cmd
-					.getOptionValue("set-gc-schedule"));
+			ProcessSetGCSchedule.runCmd(cmd.getOptionValue("set-gc-schedule"));
 			System.exit(0);
 		}
 		if (cmd.hasOption("get-gc-schedule")) {
@@ -167,25 +166,28 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if (cmd.hasOption("partition-add")) {
-			String [] vals = cmd.getOptionValues("partition-add");
-			if(vals.length != 3) {
-				System.err.println("device-name size start-on-vol-startup are required options");
+			String[] vals = cmd.getOptionValues("partition-add");
+			if (vals.length != 3) {
+				System.err
+						.println("device-name size start-on-vol-startup are required options");
 				System.exit(-1);
 			}
-			ProcessBlockDeviceAdd.runCmd(vals[0],vals[1],Boolean.parseBoolean(vals[2]));
+			ProcessBlockDeviceAdd.runCmd(vals[0], vals[1],
+					Boolean.parseBoolean(vals[2]));
 			System.exit(0);
 		}
-		
+
 		if (cmd.hasOption("partition-update")) {
-			String [] vals = cmd.getOptionValues("partition-update");
-			if(vals.length != 3) {
-				System.err.println("device-name <size|autostart> <value> are required options");
+			String[] vals = cmd.getOptionValues("partition-update");
+			if (vals.length != 3) {
+				System.err
+						.println("device-name <size|autostart> <value> are required options");
 				System.exit(-1);
 			}
-			ProcessBlockDeviceUpdate.runCmd(vals[0],vals[1],vals[2]);
+			ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
 			System.exit(0);
 		}
-		
+
 		if (cmd.hasOption("partition-rm")) {
 			String val = cmd.getOptionValue("partition-rm");
 			ProcessBlockDeviceRm.runCmd(val);
@@ -217,8 +219,11 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder.withLongOpt("help")
 				.withDescription("Display these options.").hasArg(false)
 				.create());
-		options.addOption(OptionBuilder.withLongOpt("server")
-				.withDescription("SDFS host location that is the target of this cli command.").hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("server")
+				.withDescription(
+						"SDFS host location that is the target of this cli command.")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("expandvolume")
 				.withDescription(
@@ -298,11 +303,9 @@ public class SDFSCmdline {
 				.withDescription(
 						"Returns the current Garbage Collection Coordinator. ")
 				.hasArg(false).create());
-		options.addOption(OptionBuilder
-				.withLongOpt("shutdown")
-				.withDescription(
-						"Shuts down the volume")
-				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("shutdown")
+				.withDescription("Shuts down the volume").hasArg(false)
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("set-gc-schedule")
 				.withDescription(
@@ -310,8 +313,7 @@ public class SDFSCmdline {
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("get-gc-schedule")
-				.withDescription(
-						"Returns the cron schedule for the GC Master.")
+				.withDescription("Returns the cron schedule for the GC Master.")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("snapshot")
@@ -407,23 +409,25 @@ public class SDFSCmdline {
 				.withLongOpt("partition-add")
 				.withDescription(
 						"Creates a partition inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
-				.hasArgs(3).withArgName("device-name size start-on-vol-startup").create());
+				.hasArgs(3)
+				.withArgName("device-name size start-on-vol-startup").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-rm")
 				.withDescription(
-						"Removes a partition from the volume.This will delete the block device and de-reference all data in the volume.").hasArg().withArgName("device-name").create());
+						"Removes a partition from the volume.This will delete the block device and de-reference all data in the volume.")
+				.hasArg().withArgName("device-name").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-stop")
-				.withDescription(
-						"Stops an active partition within the volume.").hasArg().withArgName("device-name").create());
+				.withDescription("Stops an active partition within the volume.")
+				.hasArg().withArgName("device-name").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-start")
 				.withDescription(
-						"Starts an inactive partition within the volume.").hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-list")
-				.withDescription(
-						"Lists all block devices within the volume.").create());
+						"Starts an inactive partition within the volume.")
+				.hasArg().withArgName("device-name").create());
+		options.addOption(OptionBuilder.withLongOpt("partition-list")
+				.withDescription("Lists all block devices within the volume.")
+				.create());
 		return options;
 	}
 

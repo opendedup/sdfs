@@ -32,7 +32,7 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 		this.chunks = chunks;
 		sz = chunks.size();
 		hk = new QuickList<HashChunk>(sz);
-		//long tm = System.currentTimeMillis();
+		// long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
 			WritableCacheBuffer buff = chunks.get(i);
 			byte[] hashloc = buff.getHashLoc();
@@ -55,8 +55,8 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 				hk.add(i, null);
 			}
 		}
-		//tm = System.currentTimeMillis() - tm;
-		//SDFSLogger.getLog().info("ph 1 time was " + tm + " sz = " + sz);
+		// tm = System.currentTimeMillis() - tm;
+		// SDFSLogger.getLog().info("ph 1 time was " + tm + " sz = " + sz);
 	}
 
 	@Override
@@ -65,43 +65,45 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 				* sz, true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		// opts.setFlags(Message.Flag.NO_FC);
-		//opts.setFlags(Message.Flag.OOB);
+		// opts.setFlags(Message.Flag.OOB);
 		opts.setAnycasting(true);
 		try {
-			//long tm = System.currentTimeMillis();
+			// long tm = System.currentTimeMillis();
 			byte[] ar = null;
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput out = null;
 			try {
-			  out = new ObjectOutputStream(bos);   
-			  out.writeObject(hk);
-			  ar = bos.toByteArray();
+				out = new ObjectOutputStream(bos);
+				out.writeObject(hk);
+				ar = bos.toByteArray();
 			} finally {
-			  out.close();
-			  bos.close();
+				out.close();
+				bos.close();
 			}
-			//tm = System.currentTimeMillis() - tm;
-			//SDFSLogger.getLog().info("ph 2 time was " + tm);
-			//tm = System.currentTimeMillis();
+			// tm = System.currentTimeMillis() - tm;
+			// SDFSLogger.getLog().info("ph 2 time was " + tm);
+			// tm = System.currentTimeMillis();
 			byte[] b = new byte[1 + 4 + ar.length];
 			ByteBuffer buf = ByteBuffer.wrap(b);
 			buf.put(NetworkCMDS.BATCH_WRITE_HASH_CMD);
 			buf.putInt(ar.length);
 			buf.put(ar);
-			//tm = System.currentTimeMillis() - tm;
-			//SDFSLogger.getLog().info("ph 3 time was " + tm);
-			//tm = System.currentTimeMillis();
+			// tm = System.currentTimeMillis() - tm;
+			// SDFSLogger.getLog().info("ph 3 time was " + tm);
+			// tm = System.currentTimeMillis();
 			List<Address> servers = soc.getServers(
 					Main.volume.getClusterCopies(), null);
-			//tm = System.currentTimeMillis() - tm;
-			//SDFSLogger.getLog().info("ph 4 time was " + tm + " server sz =" +servers.size());
-			//tm = System.currentTimeMillis();
+			// tm = System.currentTimeMillis() - tm;
+			// SDFSLogger.getLog().info("ph 4 time was " + tm + " server sz ="
+			// +servers.size());
+			// tm = System.currentTimeMillis();
 			RspList<Object> lst = soc.disp.castMessage(servers, new Message(
 					null, null, buf.array()), opts);
-			//tm = System.currentTimeMillis() - tm;
-			//SDFSLogger.getLog().info("ph 5 time was " + tm + " buff sz " + b.length);
-			//tm = System.currentTimeMillis();
-			//int proc = 0;
+			// tm = System.currentTimeMillis() - tm;
+			// SDFSLogger.getLog().info("ph 5 time was " + tm + " buff sz " +
+			// b.length);
+			// tm = System.currentTimeMillis();
+			// int proc = 0;
 			for (Rsp<Object> rsp : lst) {
 				if (rsp.hasException()) {
 					SDFSLogger.getLog().error(
@@ -124,18 +126,19 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
 								WritableCacheBuffer buff = chunks.get(i);
-								if(doop)
+								if (doop)
 									buff.setDoop(1);
 								buff.addHashLoc(id);
 								buff.setBatchwritten(true);
-								//proc++;
+								// proc++;
 							}
 						}
 					}
 				}
 			}
-			//tm = System.currentTimeMillis() - tm;
-			//SDFSLogger.getLog().info("ph 6 time was " + tm + " blocks processed " +proc);
+			// tm = System.currentTimeMillis() - tm;
+			// SDFSLogger.getLog().info("ph 6 time was " + tm +
+			// " blocks processed " +proc);
 
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error("error while writing hash", e);

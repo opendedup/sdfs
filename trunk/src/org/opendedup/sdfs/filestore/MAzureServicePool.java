@@ -2,17 +2,16 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import org.opendedup.logging.SDFSLogger;
 
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.blob.*;
+
 public class MAzureServicePool {
 
 	private int poolSize;
@@ -22,12 +21,13 @@ public class MAzureServicePool {
 	private CloudStorageAccount account;
 	private String bucket;
 
-	public MAzureServicePool(CloudStorageAccount account, int size,String bucket)
-			throws IOException {
+	public MAzureServicePool(CloudStorageAccount account, int size,
+			String bucket) throws IOException {
 		this.bucket = bucket;
 		this.account = account;
 		this.poolSize = size;
-		passiveObjects = new LinkedBlockingQueue<CloudBlobContainer>(this.poolSize);
+		passiveObjects = new LinkedBlockingQueue<CloudBlobContainer>(
+				this.poolSize);
 		this.populatePool();
 	}
 
@@ -77,19 +77,20 @@ public class MAzureServicePool {
 		}
 	}
 
-	public CloudBlobContainer makeObject() throws URISyntaxException, StorageException {
-		SDFSLogger.getLog().info("pool size is " +this.passiveObjects.size());
+	public CloudBlobContainer makeObject() throws URISyntaxException,
+			StorageException {
+		SDFSLogger.getLog().info("pool size is " + this.passiveObjects.size());
 		CloudBlobClient serviceClient = account.createCloudBlobClient();
-		CloudBlobContainer container = serviceClient.getContainerReference(this.bucket);
+		CloudBlobContainer container = serviceClient
+				.getContainerReference(this.bucket);
 		container.createIfNotExists();
 		return container;
 	}
 
-	public void destroyObject(CloudBlobContainer hc)  {
+	public void destroyObject(CloudBlobContainer hc) {
 	}
 
-	public void close() throws IOException,
-			InterruptedException {
+	public void close() throws IOException, InterruptedException {
 		int z = 0;
 		while (this.activeObjects.size() > 0) {
 			Thread.sleep(1);
@@ -100,7 +101,7 @@ public class MAzureServicePool {
 		}
 		alock.lock();
 		try {
-			
+
 			this.passiveObjects.clear();
 		} finally {
 			alock.unlock();

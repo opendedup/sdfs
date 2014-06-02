@@ -20,8 +20,6 @@ public interface DedupChunkInterface {
 	 * @return gets the lenth of the DedupChunk
 	 */
 	public abstract int getLength();
-	
-	
 
 	/**
 	 * 
@@ -92,13 +90,13 @@ public interface DedupChunkInterface {
 	public void flush() throws BufferClosedException;
 
 	public boolean isBatchProcessed();
-	
+
 	public boolean isBatchwritten();
-	
+
 	public void resetHashLoc();
-	
+
 	public void addHashLoc(byte loc);
-	
+
 	public void setBatchwritten(boolean written);
 
 	/**

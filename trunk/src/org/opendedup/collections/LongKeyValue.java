@@ -6,15 +6,16 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class LongKeyValue implements Externalizable {
-	private byte [] value;
+	private byte[] value;
 	private long key;
-	public LongKeyValue(long key,byte [] value) {
+
+	public LongKeyValue(long key, byte[] value) {
 		this.key = key;
-		this.value =value;
+		this.value = value;
 	}
-	
+
 	public LongKeyValue() {
-		
+
 	}
 
 	@Override
@@ -32,11 +33,9 @@ public class LongKeyValue implements Externalizable {
 		in.write(value);
 	}
 
-	public byte [] getValue() {
+	public byte[] getValue() {
 		return value;
 	}
-
-	
 
 	public long getKey() {
 		return key;

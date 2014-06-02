@@ -134,10 +134,12 @@ public class SDFSCmds {
 		}
 		if (command.equalsIgnoreCase("user.dse.maxsize")) {
 
-			if(HashFunctionPool.max_hash_cluster == 1)
-				return Long.toString(HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize());
+			if (HashFunctionPool.max_hash_cluster == 1)
+				return Long.toString(HCServiceProxy.getMaxSize()
+						* HCServiceProxy.getPageSize());
 			else
-				return Long.toString(HCServiceProxy.getMaxSize() * HashFunctionPool.min_page_size);
+				return Long.toString(HCServiceProxy.getMaxSize()
+						* HashFunctionPool.min_page_size);
 		}
 		if (command.equals("user.cmd.ids.status"))
 			return cmdList.get(command);

@@ -52,9 +52,9 @@ public class BulkWriteChunkCmd implements IOCmd {
 		}
 		byte[] us = new byte[size];
 		is.readFully(us);
-		if(SDFSLogger.isDebug())
-		SDFSLogger.getLog().debug("Received bulkfetch [" + us.length + "]");
-		//us = CompressionUtils.decompressSnappy(us);
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("Received bulkfetch [" + us.length + "]");
+		// us = CompressionUtils.decompressSnappy(us);
 		ByteArrayInputStream bin = new ByteArrayInputStream(us);
 		ObjectInputStream obj_in = new ObjectInputStream(bin);
 		try {

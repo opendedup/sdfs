@@ -29,8 +29,9 @@ public class SDFSService {
 
 	public void start(boolean useSSL) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
-		if(Main.version.startsWith("0") || Main.version.startsWith("1")) {
-			System.err.println("This version is not backwards compatible with previous versions of SDFS");
+		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
+			System.err
+					.println("This version is not backwards compatible with previous versions of SDFS");
 			System.err.println("Exiting");
 			System.exit(-1);
 		}

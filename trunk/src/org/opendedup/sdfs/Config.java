@@ -125,8 +125,9 @@ public class Config {
 				Main.DSEClusterNodeLocation = cbe
 						.getAttribute("cluster-node-location");
 			}
-			if(cbe.hasAttribute("io-threads")) {
-				Main.dseIOThreads = Integer.parseInt(cbe.getAttribute("io-threads"));
+			if (cbe.hasAttribute("io-threads")) {
+				Main.dseIOThreads = Integer.parseInt(cbe
+						.getAttribute("io-threads"));
 			}
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
@@ -136,7 +137,7 @@ public class Config {
 				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-				
+
 			}
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
@@ -274,7 +275,7 @@ public class Config {
 		Main.maxInactiveFileTime = Integer.parseInt(cache
 				.getAttribute("max-file-inactive")) * 1000;
 		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");
-		
+
 		Element permissions = (Element) doc.getElementsByTagName("permissions")
 				.item(0);
 		Main.defaultGroup = Integer.parseInt(permissions
@@ -294,8 +295,9 @@ public class Config {
 				.getAttribute("enabled"));
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
-		if(localChunkStore.hasAttribute("io-threads")) {
-			Main.dseIOThreads = Integer.parseInt(localChunkStore.getAttribute("io-threads"));
+		if (localChunkStore.hasAttribute("io-threads")) {
+			Main.dseIOThreads = Integer.parseInt(localChunkStore
+					.getAttribute("io-threads"));
 		}
 		if (localChunkStore.hasAttribute("cluster-config"))
 			Main.DSEClusterConfig = localChunkStore
@@ -306,15 +308,14 @@ public class Config {
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
-		Main.sdfsCliEnabled = Boolean.parseBoolean(cli
-				.getAttribute("enable"));
+		Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
 		Main.sdfsPassword = cli.getAttribute("password");
 		Main.sdfsPasswordSalt = cli.getAttribute("salt");
 		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
 				.getAttribute("enable-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
-		SDFSLogger.getLog().debug("listen-address=" +Main.sdfsCliListenAddr);
+		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume, fileName);
 		if (Main.chunkStoreLocal) {
@@ -349,7 +350,8 @@ public class Config {
 			Element networkcs = (Element) doc.getElementsByTagName("network")
 					.item(0);
 			if (localChunkStore.hasAttribute("compress")) {
-				Main.compress = Boolean.parseBoolean(localChunkStore.getAttribute("compress"));
+				Main.compress = Boolean.parseBoolean(localChunkStore
+						.getAttribute("compress"));
 			}
 			if (networkcs != null) {
 				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs
@@ -388,7 +390,6 @@ public class Config {
 						.getAttribute("enabled"));
 			}
 
-			
 		}
 
 		/*

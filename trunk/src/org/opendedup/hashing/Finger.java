@@ -1,6 +1,5 @@
 package org.opendedup.hashing;
 
-
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -17,10 +16,10 @@ public class Finger implements Runnable {
 	@Override
 	public void run() {
 		try {
-			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk, this.chunk.length,
-					this.chunk.length, this.dedup);
+			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
+					this.chunk.length, this.chunk.length, this.dedup);
 			l.commandResponse(this);
-			
+
 		} catch (Throwable e) {
 			l.commandException(this, e);
 		}

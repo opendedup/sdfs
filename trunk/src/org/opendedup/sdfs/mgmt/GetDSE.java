@@ -16,22 +16,20 @@ public class GetDSE {
 		try {
 			Document doc = XMLUtils.getXMLDoc("dse");
 			Element root = doc.getDocumentElement();
-			if(HashFunctionPool.max_hash_cluster == 1)
-			root.setAttribute(
-					"max-size",
-					Long.toString(HCServiceProxy.getMaxSize()
-							* HCServiceProxy.getPageSize()));
+			if (HashFunctionPool.max_hash_cluster == 1)
+				root.setAttribute(
+						"max-size",
+						Long.toString(HCServiceProxy.getMaxSize()
+								* HCServiceProxy.getPageSize()));
 			else
 				root.setAttribute(
 						"max-size",
 						Long.toString(HCServiceProxy.getMaxSize()
 								* HashFunctionPool.min_page_size));
-			root.setAttribute(
-					"current-size",
+			root.setAttribute("current-size",
 					Long.toString(HCServiceProxy.getChunkStore().size()));
-			root.setAttribute(
-					"compressed-size",
-					Long.toString(HCServiceProxy.getChunkStore().compressedSize()));
+			root.setAttribute("compressed-size", Long.toString(HCServiceProxy
+					.getChunkStore().compressedSize()));
 			root.setAttribute("free-blocks",
 					Long.toString(HCServiceProxy.getFreeBlocks()));
 			root.setAttribute("page-size",

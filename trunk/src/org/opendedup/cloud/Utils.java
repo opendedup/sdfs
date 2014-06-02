@@ -35,52 +35,55 @@ public class Utils {
 					al.add(obj[i].getKey());
 
 					if (n == 100) {
-						String [] ar = new String[al.size()];
+						String[] ar = new String[al.size()];
 						ar = al.toArray(ar);
-						bs3Service.deleteMultipleObjects(bucketName,
-								ar);
+						bs3Service.deleteMultipleObjects(bucketName, ar);
 						al = new ArrayList<String>();
 						System.out.print(".");
 						n = 0;
 					}
 					n++;
 				}
-				String [] ar = new String[al.size()];
+				String[] ar = new String[al.size()];
 				ar = al.toArray(ar);
-				bs3Service.deleteMultipleObjects(bucketName,
-						(String[]) ar);
+				bs3Service.deleteMultipleObjects(bucketName, (String[]) ar);
 				al = new ArrayList<String>();
 				obj = bs3Service.listObjects(bucketName);
 			}
 			bs3Service.deleteBucket(bucketName);
 			System.out.println("done");
 			System.out.println("Bucket [" + bucketName + "] deleted");
-		} catch (ServiceException e) { e.printStackTrace();
+		} catch (ServiceException e) {
+			e.printStackTrace();
 		}
 	}
-	
+
 	public static void listBucketAWS(String bucketName, String awsAccessKey,
 			String awsSecretKey) {
 		try {
-			System.out.println("Listing Objects in Bucket [" + bucketName + "]");
+			System.out
+					.println("Listing Objects in Bucket [" + bucketName + "]");
 			AWSCredentials bawsCredentials = new AWSCredentials(awsAccessKey,
 					awsSecretKey);
 			S3Service bs3Service = new RestS3Service(bawsCredentials);
-			StorageObjectsChunk ck = bs3Service.listObjectsChunked(bucketName, null, null, 100, null);
+			StorageObjectsChunk ck = bs3Service.listObjectsChunked(bucketName,
+					null, null, 100, null);
 			StorageObject[] obj = ck.getObjects();
 			String lastKey = null;
 			while (obj.length > 0) {
-				
+
 				for (int i = 0; i < obj.length; i++) {
 					lastKey = obj[i].getKey();
 
 					System.out.println(lastKey);
 				}
-				ck = bs3Service.listObjectsChunked(bucketName, null, null, 100, lastKey);
+				ck = bs3Service.listObjectsChunked(bucketName, null, null, 100,
+						lastKey);
 				obj = ck.getObjects();
 			}
-			
-		} catch (ServiceException e) { e.printStackTrace();
+
+		} catch (ServiceException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -107,7 +110,7 @@ public class Utils {
 				System.exit(-1);
 			}
 		}
-		if(cmd.hasOption("aws-list-bucket-obj")) {
+		if (cmd.hasOption("aws-list-bucket-obj")) {
 			if (cmd.hasOption("aws-secret-key")
 					&& cmd.hasOption("aws-access-key")
 					&& cmd.hasOption("aws-bucket-name")) {

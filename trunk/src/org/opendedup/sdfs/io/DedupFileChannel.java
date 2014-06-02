@@ -48,10 +48,10 @@ public class DedupFileChannel {
 		df = file.getDedupFile();
 		mf = file;
 		this.flags = flags;
-		SparseDedupFile sdf = (SparseDedupFile)df;
+		SparseDedupFile sdf = (SparseDedupFile) df;
 		eventBus.register(sdf.bdb);
-		if(SDFSLogger.isDebug())
-		SDFSLogger.getLog().debug("Initializing Cache " + mf.getPath());
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("Initializing Cache " + mf.getPath());
 	}
 
 	public boolean isClosed() {
@@ -75,8 +75,8 @@ public class DedupFileChannel {
 	private ReentrantLock truncateLock = new ReentrantLock();
 
 	public void truncateFile(long siz) throws IOException {
-		if(SDFSLogger.isDebug())
-		SDFSLogger.getLog().debug("Truncating File");
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug("Truncating File");
 		truncateLock.lock();
 		try {
 			if (siz < mf.length()) {
@@ -183,7 +183,7 @@ public class DedupFileChannel {
 				this.closeLock.unlock();
 			}
 		}
-		if(mf.getDev() != null)
+		if (mf.getDev() != null)
 			mf.sync();
 	}
 
@@ -211,8 +211,8 @@ public class DedupFileChannel {
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 */
-	public void writeFile(ByteBuffer buf, int len, int pos, long offset,boolean propigate)
-			throws java.io.IOException {
+	public void writeFile(ByteBuffer buf, int len, int pos, long offset,
+			boolean propigate) throws java.io.IOException {
 		// this.addAio();
 		try {
 			buf.position(pos);
@@ -236,7 +236,7 @@ public class DedupFileChannel {
 				// If the writebuffer can fit what is left, write it and
 				// quit.
 				if ((endPos) <= Main.CHUNK_LENGTH) {
-					
+
 					/*
 					 * if (endPos == Main.CHUNK_LENGTH) newBuf = true;
 					 */
@@ -251,19 +251,23 @@ public class DedupFileChannel {
 										+ (buf.capacity() - buf.position())
 										+ " instead of " + bytesLeft);
 					}
-					if(endPos != Main.CHUNK_LENGTH && propigate && mf.getDev() != null) {
-						eventBus.post(new BlockDeviceSmallWriteEvent(mf.getDev(),ByteBuffer.wrap(b),filePos+startPos,bytesLeft));
+					if (endPos != Main.CHUNK_LENGTH && propigate
+							&& mf.getDev() != null) {
+						eventBus.post(new BlockDeviceSmallWriteEvent(mf
+								.getDev(), ByteBuffer.wrap(b), filePos
+								+ startPos, bytesLeft));
 					}
 					while (writeBuffer == null) {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
-							if(Main.volume.isClustered())
+							if (Main.volume.isClustered())
 								writeBuffer.flush();
 						} catch (BufferClosedException e) {
 							writeBuffer = null;
-							if(SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("trying to write again");
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"trying to write again");
 						}
 					}
 					write = write + bytesLeft;
@@ -289,14 +293,18 @@ public class DedupFileChannel {
 						try {
 							writeBuffer = df.getWriteBuffer(filePos);
 							writeBuffer.write(b, startPos);
-							if(startPos != 0 &&propigate && mf.getDev() != null) {
-								eventBus.post(new BlockDeviceSmallWriteEvent(mf.getDev(),ByteBuffer.wrap(b),filePos+startPos,_len));
+							if (startPos != 0 && propigate
+									&& mf.getDev() != null) {
+								eventBus.post(new BlockDeviceSmallWriteEvent(mf
+										.getDev(), ByteBuffer.wrap(b), filePos
+										+ startPos, _len));
 							}
-							if(Main.volume.isClustered())
+							if (Main.volume.isClustered())
 								writeBuffer.flush();
 						} catch (BufferClosedException e) {
-							if(SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("trying to write again");
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"trying to write again");
 							writeBuffer = null;
 						}
 					}
@@ -317,7 +325,7 @@ public class DedupFileChannel {
 			try {
 				df.registerChannel(this);
 				this.closed = false;
-				this.writeFile(buf, len, pos, offset,propigate);
+				this.writeFile(buf, len, pos, offset, propigate);
 			} finally {
 				this.closeLock.unlock();
 			}
@@ -411,7 +419,7 @@ public class DedupFileChannel {
 			buf.position(bufPos);
 			int bytesLeft = siz;
 			long futureFilePostion = bytesLeft + currentLocation;
-			if(Main.blockDev && futureFilePostion > mf.length())
+			if (Main.blockDev && futureFilePostion > mf.length())
 				mf.setLength(futureFilePostion, false);
 			if (futureFilePostion > mf.length()) {
 				bytesLeft = (int) (mf.length() - currentLocation);
@@ -422,14 +430,14 @@ public class DedupFileChannel {
 				int startPos = 0;
 				byte[] _rb = null;
 				try {
-					
+
 					readBuffer = df.getReadBuffer(currentLocation);
 					_rb = readBuffer.getReadChunk();
 					startPos = (int) (currentLocation - readBuffer
 							.getFilePosition());
 					int endPos = startPos + bytesLeft;
 					if ((endPos) <= readBuffer.getLength()) {
-						
+
 						buf.put(_rb, startPos, bytesLeft);
 						mf.getIOMonitor().addBytesRead(bytesLeft, true);
 						read = read + bytesLeft;
@@ -443,7 +451,7 @@ public class DedupFileChannel {
 						bytesLeft = bytesLeft - _len;
 						read = read + _len;
 					}
-					if(Main.volume.isClustered())
+					if (Main.volume.isClustered())
 						readBuffer.flush();
 				} catch (FileClosedException e) {
 					SDFSLogger.getLog().warn(
@@ -459,11 +467,13 @@ public class DedupFileChannel {
 				} catch (Exception e) {
 					SDFSLogger.getLog().fatal("Error while reading buffer ", e);
 					SDFSLogger.getLog().fatal(
-							"Error Reading Buffer " + StringUtils.getHexString(readBuffer.getHash())
-									+ " start position [" + startPos
-									+ "]  bytes left [" + bytesLeft
+							"Error Reading Buffer "
+									+ StringUtils.getHexString(readBuffer
+											.getHash()) + " start position ["
+									+ startPos + "]  bytes left [" + bytesLeft
 									+ "] file Postion [" + currentLocation
-									+ "] buf size [" + buf.capacity() + "] read buffer len [" + _rb.length + "]");
+									+ "] buf size [" + buf.capacity()
+									+ "] read buffer len [" + _rb.length + "]");
 					throw new IOException("Error reading buffer");
 				}
 				if (currentLocation == mf.length()) {
@@ -580,8 +590,8 @@ public class DedupFileChannel {
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}
-	
-	public void trim(long start,int len) throws IOException {
+
+	public void trim(long start, int len) throws IOException {
 		df.trim(start, len);
 	}
 }

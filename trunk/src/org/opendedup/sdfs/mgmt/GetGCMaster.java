@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.FindGCMasterCmd;
@@ -23,12 +22,12 @@ public class GetGCMaster {
 			master = acmd.getResults().toString();
 			Document doc = XMLUtils.getXMLDoc("master");
 			Element root = doc.getDocumentElement();
-			root.setAttribute("host",master);
+			root.setAttribute("host", master);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to fulfill request ", e);
-			throw new IOException("unable to fulfill request because " + e.toString());
+			SDFSLogger.getLog().error("unable to fulfill request ", e);
+			throw new IOException("unable to fulfill request because "
+					+ e.toString());
 		}
 	}
 }

@@ -2,7 +2,6 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
-
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +22,11 @@ public class VariableHashEngine implements AbstractHashEngine {
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	static long bytesPerWindow = 48;
-	EnhancedFingerFactory ff = new EnhancedFingerFactory(p,
-			bytesPerWindow, boundaryDetector,minLen,maxLen);
-	
+	EnhancedFingerFactory ff = new EnhancedFingerFactory(p, bytesPerWindow,
+			boundaryDetector, minLen, maxLen);
+
 	public VariableHashEngine() throws NoSuchAlgorithmException {
-		
+
 	}
 
 	@Override
@@ -35,18 +34,18 @@ public class VariableHashEngine implements AbstractHashEngine {
 		byte[] hash = MurmurHash3.murmur128(data, seed);
 		return hash;
 	}
-	
-	public List<Finger> getChunks(byte [] data) throws IOException {
-		final ArrayList<Finger> al= new ArrayList<Finger>();
+
+	public List<Finger> getChunks(byte[] data) throws IOException {
+		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(data, new EnhancedChunkVisitor() {
-			public void visit(long fingerprint, long chunkStart,
-					long chunkEnd,byte [] chunk) {
-				byte [] hash = getHash(chunk);
+			public void visit(long fingerprint, long chunkStart, long chunkEnd,
+					byte[] chunk) {
+				byte[] hash = getHash(chunk);
 				Finger f = new Finger();
 				f.chunk = chunk;
 				f.hash = hash;
-				f.len = (int)(chunkEnd-chunkStart);
-				f.start = (int)chunkStart;
+				f.len = (int) (chunkEnd - chunkStart);
+				f.start = (int) chunkStart;
 				al.add(f);
 			}
 		});
@@ -57,14 +56,14 @@ public class VariableHashEngine implements AbstractHashEngine {
 		// TODO Auto-generated method stub
 		return 16;
 	}
-	
+
 	public static int getMaxCluster() {
-		return maxLen/minLen;
+		return maxLen / minLen;
 	}
 
 	@Override
 	public void destroy() {
-	
+
 	}
 
 	@Override

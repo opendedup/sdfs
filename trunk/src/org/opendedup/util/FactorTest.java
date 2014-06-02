@@ -17,10 +17,10 @@ public class FactorTest {
 	public static int[] factorsOf(double val) {
 		ArrayList<Integer> al = new ArrayList<Integer>();
 		double prev = val;
-		al.add((int)val);
+		al.add((int) val);
 		while (val >= 512) {
-			if((prev -val) >= 512) {
-				al.add((int)val);
+			if ((prev - val) >= 512) {
+				al.add((int) val);
 				prev = val;
 			}
 			val = val / 1.2;

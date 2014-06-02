@@ -58,7 +58,7 @@ public class MetaFileStore {
 	 * @param mf
 	 */
 	private static void cacheMF(MetaDataDedupFile mf) {
-		if(mf != null)
+		if (mf != null)
 			pathMap.put(mf.getPath(), mf);
 	}
 

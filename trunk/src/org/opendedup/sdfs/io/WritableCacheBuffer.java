@@ -229,11 +229,10 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 					@Override
 					public void commandException(Exception e) {
-						int _dn = this.incrementandGetDN();
 						this.incrementAndGetDNEX();
 						SDFSLogger.getLog()
 								.error("Error while getting hash", e);
-						if (_dn >= sz) {
+						if (this.incrementAndGetDNEX() >= sz) {
 							synchronized (this) {
 								this.notifyAll();
 							}
@@ -243,9 +242,8 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 
 					@Override
 					public void commandResponse(Shard result) {
-						int _dn = this.incrementandGetDN();
 						cks.get(result.pos).ck = result.ck;
-						if (_dn >= sz) {
+						if (this.incrementandGetDN() >= sz) {
 
 							synchronized (this) {
 								this.notifyAll();
@@ -260,7 +258,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				}
 				int loops = 6;
 				int wl = 0;
-				int tm = 10000;
+				int tm = 60000;
 				if (l.getDN() < sz) {
 					if (wl > 0) {
 						int nt = (tm * wl) / 1000;

@@ -7,7 +7,6 @@ import java.util.Formatter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 public class ProcessSetGCSchedule {
 	public static void runCmd(String schedule) {
 		try {
@@ -29,7 +28,5 @@ public class ProcessSetGCSchedule {
 		}
 
 	}
-
-	
 
 }

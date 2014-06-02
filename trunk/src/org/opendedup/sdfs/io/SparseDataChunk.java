@@ -12,6 +12,7 @@ import java.util.List;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.Main;
+
 public class SparseDataChunk implements Externalizable {
 
 	private int doop;
@@ -19,7 +20,7 @@ public class SparseDataChunk implements Externalizable {
 	private boolean localData = false;
 	int currentpos = 1;
 	private int RAWDL = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
-	//private int RAWDL;
+	// private int RAWDL;
 	private byte[] hashlocs;
 	private long fpos;
 	private byte version = 1;
@@ -28,8 +29,6 @@ public class SparseDataChunk implements Externalizable {
 	public SparseDataChunk() {
 
 	}
-	
-	
 
 	public SparseDataChunk(byte[] rawData) throws IOException {
 		if (rawData.length == LongByteArrayMap._FREE.length)
@@ -210,32 +209,31 @@ public class SparseDataChunk implements Externalizable {
 			arg0.writeByte(this.version);
 		}
 	}
-	
+
 	public List<HashLocPair> getFingers() {
 		ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
 		ByteBuffer hb = ByteBuffer.wrap(this.getHash());
 		ByteBuffer hl = ByteBuffer.wrap(this.hashlocs);
-		for(int i = 0;i < HashFunctionPool.max_hash_cluster;i++) {
-			byte [] _hash = new byte[HashFunctionPool.hashLength];
-			byte [] _hl = new byte[8];
+		for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+			byte[] _hash = new byte[HashFunctionPool.hashLength];
+			byte[] _hl = new byte[8];
 			hl.get(_hl);
-			
+
 			hb.get(_hash);
-			if(HashFunctionPool.max_hash_cluster == 1 || _hl[1] != 0) {
+			if (HashFunctionPool.max_hash_cluster == 1 || _hl[1] != 0) {
 				HashLocPair p = new HashLocPair();
-				p.hash =_hash;
+				p.hash = _hash;
 				p.hashloc = _hl;
 				al.add(p);
-			}
-			else
+			} else
 				break;
 		}
 		return al;
 	}
-	
+
 	public static class HashLocPair {
-		public byte [] hash;
-		public byte [] hashloc;
+		public byte[] hash;
+		public byte[] hashloc;
 	}
 
 }

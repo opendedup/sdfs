@@ -43,8 +43,7 @@ public class SetGCScheduleCmd implements IOPeerCmd {
 					throw rsp.getException();
 				} else if (rsp.wasSuspected() | rsp.wasUnreachable()) {
 					SDFSLogger.getLog().error(
-							"Set Schedule  unreachable for "
-									+ rsp.getSender());
+							"Set Schedule  unreachable for " + rsp.getSender());
 				}
 
 			}

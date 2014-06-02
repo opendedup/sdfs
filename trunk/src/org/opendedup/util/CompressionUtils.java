@@ -16,13 +16,13 @@ import org.xerial.snappy.Snappy;
 //import org.h2.compress.LZFInputStream;
 //import org.h2.compress.LZFOutputStream;
 
-
-
 public class CompressionUtils {
-	
-	static final LZ4Compressor lz4Compressor = LZ4Factory.safeInstance().fastCompressor();
-	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory.safeInstance().fastDecompressor();
-	
+
+	static final LZ4Compressor lz4Compressor = LZ4Factory.safeInstance()
+			.fastCompressor();
+	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory
+			.safeInstance().fastDecompressor();
+
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression
 		Deflater compressor = new Deflater();
@@ -77,16 +77,15 @@ public class CompressionUtils {
 	public static byte[] decompressSnappy(byte[] input) throws IOException {
 		return Snappy.uncompress(input);
 	}
-	
+
 	public static byte[] compressLz4(byte[] input) throws IOException {
 		return lz4Compressor.compress(input);
 	}
 
-	public static byte[] decompressLz4(byte[] input,int len) throws IOException {
+	public static byte[] decompressLz4(byte[] input, int len)
+			throws IOException {
 		return lz4Decompressor.decompress(input, len);
 	}
-	
-	
 
 	public static void main(String[] args) throws IOException {
 		String t = "This is a test";
