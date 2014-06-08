@@ -118,7 +118,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
+		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -274,7 +274,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			throws IOException {
 		this.owner_id = owner_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id));
+		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id),LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -312,7 +312,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			throws IOException {
 		this.group_id = group_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id));
+		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id),LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**

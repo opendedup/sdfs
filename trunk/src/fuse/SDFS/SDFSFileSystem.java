@@ -85,9 +85,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				Path p = Paths.get(f.getPath());
 
 				try {
-					Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
+					Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),LinkOption.NOFOLLOW_LINKS);
 				} catch (IOException e) {
-					e.printStackTrace();
+					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
 							.initErrno(Errno.EACCES);
 				} finally {
@@ -98,7 +98,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				try {
 					mf.setMode(mode);
 				} catch (IOException e) {
-					e.printStackTrace();
+					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
 							.initErrno(Errno.EACCES);
 				} finally {
@@ -119,8 +119,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					|| ftype == FuseFtypeConstants.TYPE_DIR) {
 				Path p = Paths.get(f.getPath());
 				try {
-					Files.setAttribute(p, "unix:uid", Integer.valueOf(uid));
-					Files.setAttribute(p, "unix:gid", Integer.valueOf(gid));
+					Files.setAttribute(p, "unix:uid", Integer.valueOf(uid),LinkOption.NOFOLLOW_LINKS);
+					Files.setAttribute(p, "unix:gid", Integer.valueOf(gid),LinkOption.NOFOLLOW_LINKS);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new FuseException("access denied for " + path)
@@ -134,7 +134,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					mf.setOwner_id(uid);
 					mf.setGroup_id(gid);
 				} catch (IOException e) {
-					e.printStackTrace();
+					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
 							.initErrno(Errno.EACCES);
 				} finally {
@@ -206,6 +206,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						mode = (Integer) Files.getAttribute(p, "unix:mode",
 								LinkOption.NOFOLLOW_LINKS);
 					} catch (Exception e) {
+						SDFSLogger.getLog().error("unable to parse sylink " + path,
+								e);
 					}
 
 					int atime = 0;
@@ -351,7 +353,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			try {
 				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
 			} catch (IOException e) {
-				e.printStackTrace();
+				SDFSLogger.getLog().error("error while making dir " + path, e);
 				throw new FuseException("access denied for " + path)
 						.initErrno(Errno.EACCES);
 			} finally {
@@ -485,6 +487,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				ch = null;
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to close " + path, e);
+				throw new FuseException("error getting linking " + path)
+						.initErrno(Errno.EBADFD);
 			}
 		} finally {
 		}
@@ -560,7 +564,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				used = blocks;
 			statfsSetter.set(Main.volume.getBlockSize(), blocks, blocks - used,
 					blocks - used, 0, 0, NAME_LENGTH);
-		} finally {
+		}  catch (Exception e) {
+			SDFSLogger.getLog().error("unable to stat", e);
+			throw new FuseException().initErrno(Errno.EACCES);
+		}finally {
 
 		}
 		return 0;
@@ -668,14 +675,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				mf.setLastModified(mtime * 1000L);
 			} else {
 				Path p = f.toPath();
-				try {
 					Files.setLastModifiedTime(p,
 							FileTime.fromMillis(mtime * 1000L));
-				} catch (IOException e) {
-					SDFSLogger.getLog().warn(
-							"unable to set time on directory " + path, e);
-				}
+				
 			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable change utime path " + path, e);
+			throw new FuseException().initErrno(Errno.EACCES);
 		} finally {
 		}
 		return 0;
@@ -718,6 +724,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				_f = null;
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("No such node");
+				SDFSLogger.getLog().error("no such node " + path);
 				throw new FuseException().initErrno(Errno.ENOENT);
 			}
 		}

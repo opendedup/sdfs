@@ -1,7 +1,8 @@
 Version 2.0.1
 	Fixes :
 	* Fixed Replication Reporting of progress by bytes transferred.
-	* Fixed Symlink Wierdness.
+	* Fixed Symlink issues when file does not exist.
+	* Fixed Symlink permissions
 	* Fixed Clustered DSE buffersize mismatch issue.
 	* Update the Guava library to 1.7 release.
 Version 2.0
