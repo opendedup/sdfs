@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,8 +47,9 @@ public class GetFilteredFileAttributes {
 								+ e.toString());
 			}
 		} else {
-			MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
+			
 			try {
+				MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
@@ -69,7 +71,12 @@ public class GetFilteredFileAttributes {
 		File[] files = parentFile.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory() && this.includeFolders) {
-				MetaDataDedupFile mf = MetaFileStore.getMF(files[i].getPath());
+				MetaDataDedupFile mf = null;
+				try {
+					mf = MetaFileStore.getMF(files[i].getPath());
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 				Element fe = mf.toXML(doc);
 				parentEl.appendChild(fe);
 				if (this.level == -1 || this.currentLevel < this.level) {
@@ -78,7 +85,12 @@ public class GetFilteredFileAttributes {
 			}
 
 			if (files[i].isFile() && this.includeFiles) {
-				MetaDataDedupFile mf = MetaFileStore.getMF(files[i].getPath());
+				MetaDataDedupFile mf = null;
+				try {
+					mf = MetaFileStore.getMF(files[i].getPath());
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 				Element fe = mf.toXML(doc);
 				parentEl.appendChild(fe);
 			}

@@ -1,11 +1,11 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
+
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;

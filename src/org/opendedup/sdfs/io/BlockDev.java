@@ -73,12 +73,16 @@ public class BlockDev implements Externalizable {
 				.getAttribute("start-on-init"));
 	}
 
-	public MetaDataDedupFile getMF() {
+	public MetaDataDedupFile getMF() throws IOException {
 		if (mf == null) {
 			File df = new File(this.internalPath);
 			if (!df.exists())
 				df.getParentFile().mkdirs();
-			mf = MetaFileStore.getMF(df);
+			try {
+				mf = MetaFileStore.getMF(df);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
 			mf.setLength(size, true);
 			mf.setDev(this);
 		}

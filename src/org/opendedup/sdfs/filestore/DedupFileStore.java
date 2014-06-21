@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -9,10 +10,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 
 /**
  * 
@@ -32,17 +29,7 @@ public class DedupFileStore {
 	 * stores open files in an LRU map. Files will be evicted based on the
 	 * maxOpenFiles parameter
 	 */
-	private static ConcurrentLinkedHashMap<String, DedupFile> openFile = new Builder<String, DedupFile>()
-			.concurrencyLevel(Main.writeThreads)
-			.maximumWeightedCapacity(Main.maxOpenFiles - 1)
-			.listener(new EvictionListener<String, DedupFile>() {
-				// This method is called just after a new entry has been
-				// added
-				@Override
-				public void onEviction(String key, DedupFile file) {
-					file.forceClose();
-				}
-			}).build();
+	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -66,63 +53,35 @@ public class DedupFileStore {
 	 * @throws IOException
 	 */
 	private static ReentrantLock getDFLock = new ReentrantLock();
+	
+	public static void updateDedupFile(MetaDataDedupFile mf) {
+		getDFLock.lock();
+		try{
+		DedupFile df = openFile.get(mf.getDfGuid());
+		if(df != null)
+			df.setMetaDataDedupFile(mf);
+		}finally {
+			getDFLock.unlock();
+		}
+	}
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf)
 			throws IOException {
+		getDFLock.lock();
+		DedupFile df = null;
 		try {
 			if (!closing) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"getting dedupfile for " + mf.getPath() + "and df "
-									+ mf.getDfGuid());
-				DedupFile df = null;
-				if (mf.getDfGuid() == null) {
-					getDFLock.lock();
-					try {
-						if (mf.getDfGuid() == null) {
-							df = new SparseDedupFile(mf);
-						} else {
-							df = openFile.get(mf.getDfGuid());
-							if (df == null) {
-								df = openFile.get(mf.getDfGuid());
-								if (df == null) {
-									df = new SparseDedupFile(mf);
-								}
-							}
-						}
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug(
-									"creating new dedup file for "
-											+ mf.getPath());
-					} catch (Exception e) {
-
-					} finally {
-						getDFLock.unlock();
-					}
-				} else {
 					df = openFile.get(mf.getDfGuid());
 					if (df == null) {
-						getDFLock.lock();
-						try {
-							df = openFile.get(mf.getDfGuid());
-							if (df == null) {
-								df = new SparseDedupFile(mf);
-							}
-						} finally {
-							getDFLock.unlock();
-						}
-					}
-				}
-				if (df == null) {
-					throw new IOException("Can't find dedup file for "
-							+ mf.getPath() + " requested df=" + mf.getDfGuid());
+							df = new SparseDedupFile(mf);
+								DedupFileStore.openFile.put(df.getGUID(), df);
 				}
 				return df;
 			} else {
 				throw new IOException("DedupFileStore is closed");
 			}
 		} finally {
-
+			getDFLock.unlock();
 		}
 	}
 
@@ -133,10 +92,10 @@ public class DedupFileStore {
 	 *            the dedup file to add to the openfile hashmap
 	 * @throws IOException
 	 */
-	public static void addOpenDedupFile(DedupFile df) throws IOException {
+	public static void addOpenDedupFiles(DedupFile df) throws IOException {
 		if (!closing) {
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("adding dedupfile");
+				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
 			if (openFile.size() >= Main.maxOpenFiles)
 				throw new IOException("maximum number of files reached ["
 						+ Main.maxOpenFiles + "]. Too many open files");

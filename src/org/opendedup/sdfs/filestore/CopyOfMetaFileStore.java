@@ -7,6 +7,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -15,9 +17,11 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 
 /**
  * 
@@ -29,18 +33,27 @@ import com.googlecode.concurrentlinkedhashmap.EvictionListener;
  * 
  * 
  */
-public class MetaFileStore {
+public class CopyOfMetaFileStore {
+	
+	private static ReentrantLock getMFLock = new ReentrantLock();
 
-	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>()
-			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(5000)
-			.listener(new EvictionListener<String, MetaDataDedupFile>() {
-				// This method is called just after a new entry has been
-				// added
+	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder
+			.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).concurrencyLevel(Main.writeThreads).maximumSize(Main.maxOpenFiles).removalListener(new RemovalListener<String, MetaDataDedupFile>() {
+
 				@Override
-				public void onEviction(String key, MetaDataDedupFile file) {
-					file.unmarshal();
+				public void onRemoval(
+						RemovalNotification<String, MetaDataDedupFile> removal) {
+					removal.getValue().unmarshal();
 				}
-			}).build();
+			}).build(new CacheLoader<String, MetaDataDedupFile>() {
+
+				@Override
+				public MetaDataDedupFile load(String path) throws Exception {
+					
+					return MetaDataDedupFile.getFile(path);
+				}
+				
+			});
 
 	static {
 		if (Main.version.startsWith("0.8")) {
@@ -52,31 +65,18 @@ public class MetaFileStore {
 
 	}
 
-	/**
-	 * caches a file to the pathmap
-	 * 
-	 * @param mf
-	 */
-	private static void cacheMF(MetaDataDedupFile mf) {
-		if (mf != null)
-			pathMap.put(mf.getPath(), mf);
-	}
-
-	public static void renames(String src, String dst) {
-		getMFLock.lock();
-		try {
+	public static void rename(String src, String dst, MetaDataDedupFile mf) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
 						"removing [" + dst + "] and replacing with [" + src
 								+ "]");
-			MetaDataDedupFile mf = getMF(src);
-			mf.renameTo(dst);
-			pathMap.remove(src);
-			pathMap.remove(dst);
-			pathMap.put(dst, mf);
-		} finally {
-			getMFLock.unlock();
-		}
+			getMFLock.lock();
+			try {
+			pathMap.invalidate(src);
+			pathMap.invalidate(dst);
+			}finally {
+				getMFLock.unlock();
+			}
 	}
 
 	/**
@@ -86,7 +86,12 @@ public class MetaFileStore {
 	 *            the path of the MetaDataDedupFile
 	 */
 	public static void removedCachedMF(String path) {
-		pathMap.remove(path);
+		getMFLock.lock();
+		try{
+		pathMap.invalidate(path);
+		}finally {
+			getMFLock.unlock();
+		}
 	}
 
 	/**
@@ -94,39 +99,35 @@ public class MetaFileStore {
 	 * @param path
 	 *            the path to the MetaDataDedupFile
 	 * @return the MetaDataDedupFile
+	 * @throws ExecutionException 
 	 */
-	private static ReentrantLock getMFLock = new ReentrantLock();
 
-	public static MetaDataDedupFile getMF(File f) {
+	public static MetaDataDedupFile getMF(File f) throws ExecutionException {
 		MetaDataDedupFile mf = null;
-
+		getMFLock.lock();
+		try{
 		mf = pathMap.get(f.getPath());
-
-		if (mf == null) {
-			getMFLock.lock();
-			try {
-				mf = MetaDataDedupFile.getFile(f.getPath());
-				cacheMF(mf);
-			} finally {
-				getMFLock.unlock();
-			}
+		}finally {
+			getMFLock.unlock();
 		}
+		
 
 		return mf;
 
 	}
 
 	public static MetaDataDedupFile getFolder(File f) {
-		getMFLock.lock();
-		try {
+		
 			return MetaDataDedupFile.getFile(f.getPath());
-		} finally {
-			getMFLock.unlock();
-		}
 	}
 
-	public static MetaDataDedupFile getMF(String filePath) {
+	public static MetaDataDedupFile getMF(String filePath) throws ExecutionException {
+		getMFLock.lock();
+		try {
 		return getMF(new File(filePath));
+		}finally {
+			getMFLock.unlock();
+		}
 	}
 
 	/**
@@ -136,8 +137,9 @@ public class MetaFileStore {
 	 * @param child
 	 *            the child file
 	 * @return the MetaDataDedupFile associated with this path.
+	 * @throws ExecutionException 
 	 */
-	public static MetaDataDedupFile getMF(File parent, String child) {
+	public static MetaDataDedupFile getMF(File parent, String child) throws ExecutionException {
 		String pth = parent.getAbsolutePath() + File.separator + child;
 		return getMF(new File(pth));
 	}
@@ -177,9 +179,11 @@ public class MetaFileStore {
 	public static MetaDataDedupFile snapshot(String origionalPath,
 			String snapPath, boolean overwrite, SDFSEvent evt,
 			boolean propigateEvent) throws IOException {
+		getMFLock.lock();
 		try {
 			Path p = Paths.get(origionalPath);
 			if (Files.isSymbolicLink(p)) {
+
 				MetaDataDedupFile mf = getMF(new File(origionalPath));
 				File dst = new File(snapPath);
 				File src = new File(mf.getPath());
@@ -209,8 +213,10 @@ public class MetaFileStore {
 					return _mf;
 				}
 			}
+		} catch (ExecutionException e1) {
+			throw new IOException(e1);
 		} finally {
-
+			getMFLock.unlock();
 		}
 	}
 
@@ -220,30 +226,21 @@ public class MetaFileStore {
 	 * @return true if committed
 	 */
 	public static boolean commit() {
+		getMFLock.lock();
 		try {
-			Object[] files = pathMap.values().toArray();
-			int z = 0;
-			for (int i = 0; i < files.length; i++) {
-				MetaDataDedupFile buf = (MetaDataDedupFile) files[i];
-				buf.unmarshal();
-				z++;
-			}
+			int z = (int)pathMap.size();
+			pathMap.invalidateAll();
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("flushed " + z + " files ");
 			// recman.commit();
 			return true;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to commit transaction", e);
+		} finally {
+			getMFLock.unlock();
 		}
 		return false;
 	}
-
-	/**
-	 * Removes a file from the jdbm db
-	 * 
-	 * @param guid
-	 *            the guid for the MetaDataDedupFile
-	 */
 
 	public static boolean removeMetaFile(String path) {
 		return removeMetaFile(path, true);
@@ -252,7 +249,6 @@ public class MetaFileStore {
 	public static boolean removeMetaFile(String path, boolean propigateEvent) {
 		getMFLock.lock();
 		try {
-			if(new File(path).exists()) {
 			MetaDataDedupFile mf = null;
 			boolean deleted = false;
 			try {
@@ -292,7 +288,7 @@ public class MetaFileStore {
 					return true;
 				} else {
 					mf = getMF(new File(path));
-					pathMap.remove(mf.getPath());
+					pathMap.invalidate(path);
 
 					Main.volume.updateCurrentSize(-1 * mf.length(), true);
 					try {
@@ -334,15 +330,12 @@ public class MetaFileStore {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"unable to remove  because [" + path
-										+ "] is null",e);
+										+ "] is null");
 				}
 			}
-			mf = null; 
+			mf = null;
 			return deleted;
-			}else 
-				return true;
 		} finally {
-			pathMap.remove(path);
 			getMFLock.unlock();
 		}
 	}

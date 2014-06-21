@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.notification;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.LinkedHashMap;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.logging.SDFSEventLogger;
-import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.RandomGUID;
@@ -371,8 +371,10 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public Element toXML() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("event");
+		/*
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(this.toString());
+		*/
 		Element root = doc.getDocumentElement();
 		root.setAttribute("start-date", format.format(new Date(this.startTime)));
 		root.setAttribute("start-timestamp", Long.toString(this.startTime));

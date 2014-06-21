@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -99,7 +100,12 @@ public class SDFSCmds {
 
 	public String getAttr(String command, String path) {
 		String internalPath = this.mountedVolume + File.separator + path;
-		MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
+		MetaDataDedupFile mf = null;
+		try {
+			mf = MetaFileStore.getMF(internalPath);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error getting attrs",e);
+		}
 		File f = new File(internalPath);
 		if (!f.isDirectory()) {
 			if (command.equalsIgnoreCase("user.sdfs.dedupAll")) {
@@ -168,7 +174,12 @@ public class SDFSCmds {
 			File f = new File(mountedVolume + File.separator + path);
 			if (!f.isDirectory()) {
 				if (name.startsWith("user.sdfs")) {
-					MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+					MetaDataDedupFile mf = null;
+					try {
+						mf = MetaFileStore.getMF(f.getPath());
+					} catch (Exception e) {
+						SDFSLogger.getLog().error("error getting attrs",e);
+					}
 					long val = Long.parseLong(valStr);
 					if (name.equalsIgnoreCase("user.sdfs.ActualBytesWritten")) {
 						mf.getIOMonitor().setActualBytesWritten(val, true);

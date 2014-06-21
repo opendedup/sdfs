@@ -94,10 +94,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					path = null;
 				}
 			} else {
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				
 				try {
+					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					mf.setMode(mode);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
 							.initErrno(Errno.EACCES);
@@ -129,11 +130,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					path = null;
 				}
 			} else {
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				
 				try {
+					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					mf.setOwner_id(uid);
 					mf.setGroup_id(gid);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
 							.initErrno(Errno.EACCES);
@@ -171,13 +173,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
-			ch.force(true);
+			if(Main.safeSync) {
+				if(SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("sync " + path + " df=" + ch.getDedupFile().getGUID());
+				ch.force(true);
+			}
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
 			throw new FuseException("unable to sync file")
 					.initErrno(Errno.EACCES);
 		} finally {
+			
 		}
 		return 0;
 	}
@@ -400,17 +407,17 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 				try {
 					mf.setMode(mode);
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new FuseException("access denied for " + path)
-							.initErrno(Errno.EACCES);
 				} finally {
 					f = null;
 				}
 
 			}
-		} finally {
-		}
+		} 
+		catch (Exception e) {
+		SDFSLogger.getLog().error("error making " + path, e);
+		throw new FuseException("access denied for " + path)
+				.initErrno(Errno.EACCES);
+	}
 		return 0;
 	}
 
@@ -443,7 +450,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + path, e);
 			throw new FuseException("error opening " + path)
 					.initErrno(Errno.ENODATA);
@@ -464,7 +471,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						+ lpath.substring(this.mountedVolume.length());
 			//SDFSLogger.getLog().info("path=" + path + " lpath=" + lpath);
 			link.put(lpath);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting linking " + path, e);
 			throw new FuseException("error getting linking " + path)
 					.initErrno(Errno.EACCES);
@@ -506,8 +513,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					SDFSLogger.getLog().debug(
 							"renaming [" + from + "] to [" + to + "]");
 				f = resolvePath(from);
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.renameTo(this.mountedVolume + to);
+				MetaFileStore.renames(f.getPath(), this.mountedVolume + to);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to rename " + from + " to " + to, e);
@@ -634,6 +640,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("removing " + path);
+			if(!Main.safeClose) {
+				this.getFileChannel(path, -1).getDedupFile().forceClose();
+			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				File f = new File(mountedVolume + path);
 				//SDFSLogger.getLog().info("deleting symlink " + f.getPath());
@@ -808,7 +817,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		try {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			return mf.getDedupFile().getChannel(flags);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to open file" + path, e);
 			throw new FuseException("error opening " + path)
 					.initErrno(Errno.EACCES);
@@ -838,7 +847,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						throw new FuseException().initErrno(Errno.ENODATA);
 				}
 			}
-		} finally {
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}
+		finally {
 		}
 		return 0;
 	}
@@ -866,7 +879,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				if (val != null)
 					sizeSetter.setSize(val.getBytes().length);
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}finally {
 		}
 		return 0;
 	}
@@ -883,7 +899,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			for (int i = 0; i < atters.length; i++) {
 				lister.add(atters[i]);
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}finally {
 
 		}
 		return 0;
@@ -913,7 +932,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.addXAttribute(name, valStr);
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}finally {
 		}
 		return 0;
 	}
@@ -943,7 +965,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						throw new FuseException().initErrno(Errno.ENODATA);
 				}
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}finally {
 
 		}
 		return 0;
@@ -965,7 +990,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.addXAttribute(name, valStr);
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}finally {
 
 		}
 		return 0;
