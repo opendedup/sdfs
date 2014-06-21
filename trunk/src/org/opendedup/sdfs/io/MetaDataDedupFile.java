@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -118,7 +119,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),
+				LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -274,7 +276,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			throws IOException {
 		this.owner_id = owner_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id),LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id),
+				LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -312,7 +315,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			throws IOException {
 		this.group_id = group_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id),LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id),
+				LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -364,11 +368,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			ObjectInputStream in = null;
 			try {
 				in = new ObjectInputStream(new FileInputStream(path));
-
 				mf = (MetaDataDedupFile) in.readObject();
 				mf.path = path;
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to de-serialize " + path, e);
+				mf = new MetaDataDedupFile(path);
 			} finally {
 				if (in != null) {
 					try {
@@ -422,36 +426,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		init(pth);
 	}
 
-	/**
-	 * 
-	 * @return the DedupFile associated with this file. It will create one if it
-	 *         does not already exist.
-	 * @throws IOException
-	 */
-	private ReentrantLock getDFLock = new ReentrantLock();
-
 	public DedupFile getDedupFile() throws IOException {
-		if (this.dfGuid == null) {
-			getDFLock.lock();
-			try {
-				if (this.dfGuid == null) {
-					DedupFile df = DedupFileStore.getDedupFile(this);
-					this.dfGuid = df.getGUID();
-					if (SDFSLogger.isDebug())
-						SDFSLogger
-								.getLog()
-								.debug("No DF EXISTS .... Set dedup file for "
-										+ this.getPath() + " to " + this.dfGuid);
-					this.sync();
-					return df;
-				} else {
-					return DedupFileStore.getDedupFile(this);
-				}
-			} finally {
-				getDFLock.unlock();
+		this.writeLock.lock();
+		try {
+			if (this.dfGuid == null) {
+				DedupFile df = new SparseDedupFile(this);
+				this.dfGuid = df.getGUID();
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"No DF EXISTS .... Set dedup file for "
+									+ this.getPath() + " to " + this.dfGuid);
+				this.sync();
+				DedupFileStore.addOpenDedupFiles(df);
+				return df;
+			} else {
+				return DedupFileStore.getDedupFile(this);
 			}
-		} else {
-			return DedupFileStore.getDedupFile(this);
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -512,7 +504,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			Path srcP = Paths.get(src.getPath());
 			Path dstP = Paths.get(dst.getPath());
 			try {
-				Files.createSymbolicLink(dstP, Files.readSymbolicLink(srcP).toFile().toPath());
+				Files.createSymbolicLink(dstP, Files.readSymbolicLink(srcP)
+						.toFile().toPath());
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(
 						"error symlinking " + this.getPath() + " to "
@@ -610,7 +603,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						+ file.getPath().substring(trimlen);
 				file.snapshot(newPath, overwrite, evt, propigateEvent);
 			}
-			return MetaFileStore.getMF(snaptoPath);
+			try {
+				return MetaFileStore.getMF(snaptoPath);
+			} catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"unable to traverse " + this.getPath());
+				throw new IOException(e);
+			}
 		}
 	}
 
@@ -779,8 +778,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					out = new ObjectOutputStream(
 							new FileOutputStream(this.path));
 					out.writeObject(this);
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("writing out " + f.getPath());
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn(
 							"unable to write file metadata for [" + this.path
@@ -875,8 +872,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return true if deleted
 	 */
 	public boolean deleteStub() {
-		File f = new File(this.path);
-		return f.delete();
+		this.writeLock.lock();
+		try {
+			File f = new File(this.path);
+			return f.delete();
+		} finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -924,8 +926,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			MetaDataDedupFile[] df = new MetaDataDedupFile[files.length];
 			for (int i = 0; i < df.length; i++) {
 
-				df[i] = MetaFileStore.getMF(this.getPath() + File.separator
-						+ files[i]);
+				try {
+					df[i] = MetaFileStore.getMF(this.getPath() + File.separator
+							+ files[i]);
+				} catch (Exception e) {
+					SDFSLogger.getLog().error(
+							"unable to traverse " + this.getPath());
+				}
 			}
 			return df;
 		} else {
@@ -938,39 +945,43 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean renameTo(String dest, boolean propigateEvent) {
-		File f = new File(this.path);
-		if (this.symlink) {
-			f = new File(this.symlinkPath);
-			f.delete();
-			Path dstP = Paths.get(dest);
-			Path srcP = Paths.get(this.path);
-			try {
-				Files.createSymbolicLink(dstP, srcP);
-				return true;
-			} catch (IOException e) {
-				SDFSLogger.getLog().warn("unable to rename file to " + dest, e);
-				return false;
-			}
-		} else if (f.isDirectory()) {
-			return f.renameTo(new File(dest));
-		} else {
-			if (f.exists()) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"destination file exists, deleting");
-				MetaFileStore.removeMetaFile(dest, true);
-			}
-			boolean rename = f.renameTo(new File(dest));
-			if (rename) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("FileSystem rename succesful");
-				MetaFileStore.rename(this.path, dest, this);
-				this.path = dest;
-				this.unmarshal();
+		writeLock.lock();
+
+		try {
+			File f = new File(this.path);
+			if (this.symlink) {
+				f = new File(this.symlinkPath);
+				f.delete();
+				Path dstP = Paths.get(dest);
+				Path srcP = Paths.get(this.path);
+				try {
+					Files.createSymbolicLink(dstP, srcP);
+					return true;
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn(
+							"unable to rename file to " + dest, e);
+					return false;
+				}
+			} else if (f.isDirectory()) {
+				return f.renameTo(new File(dest));
 			} else {
-				SDFSLogger.getLog().warn("unable to move file");
+				MetaFileStore.removeMetaFile(dest, true);
+				DedupFileStore.updateDedupFile(this);
+				boolean rename = f.renameTo(new File(dest));
+				if (rename) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog()
+								.debug("FileSystem rename succesful");
+					this.path = dest;
+					this.unmarshal();
+				} else {
+					SDFSLogger.getLog().warn("unable to move file");
+
+				}
+				return rename;
 			}
-			return rename;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -1183,106 +1194,119 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("reading in file " + this.path);
-		in.readLong();
-		this.length = in.readLong();
-		this.lastModified = in.readLong();
-		this.lastAccessed = in.readLong();
-		this.execute = in.readBoolean();
-		this.read = in.readBoolean();
-		this.write = in.readBoolean();
-		this.hidden = in.readBoolean();
-		this.ownerWriteOnly = in.readBoolean();
-		this.ownerExecOnly = in.readBoolean();
-		this.ownerReadOnly = in.readBoolean();
-		int dfgl = in.readInt();
-		if (dfgl == -1) {
-			this.dfGuid = null;
-		} else {
-			byte[] dfb = new byte[dfgl];
-			in.readFully(dfb);
-			this.dfGuid = new String(dfb);
-		}
-		int gl = in.readInt();
-		byte[] gfb = new byte[gl];
-		in.readFully(gfb);
-		this.guid = new String(gfb);
-
-		int ml = in.readInt();
-		if (ml == -1) {
-			this.monitor = null;
-		} else {
-			byte[] mlb = new byte[ml];
-			in.readFully(mlb);
-			this.monitor = new IOMonitor(this);
-			monitor.fromByteArray(mlb);
-		}
-		this.vmdk = in.readBoolean();
-		// owner id is ignored
-		in.readInt();
-		// group id is ignored
-		in.readInt();
-		byte[] hmb = new byte[in.readInt()];
-		in.readFully(hmb);
-		this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
-		this.dedup = in.readBoolean();
+		this.writeLock.lock();
 		try {
-			if (in.available() > 0) {
-				int vlen = in.readInt();
-				byte[] vb = new byte[vlen];
-				in.readFully(vb);
-				this.version = new String(vb);
-			}
-		} catch (Exception e) {
 
+			in.readLong();
+			this.length = in.readLong();
+			this.lastModified = in.readLong();
+			this.lastAccessed = in.readLong();
+			this.execute = in.readBoolean();
+			this.read = in.readBoolean();
+			this.write = in.readBoolean();
+			this.hidden = in.readBoolean();
+			this.ownerWriteOnly = in.readBoolean();
+			this.ownerExecOnly = in.readBoolean();
+			this.ownerReadOnly = in.readBoolean();
+			int dfgl = in.readInt();
+			if (dfgl == -1) {
+				this.dfGuid = null;
+			} else {
+				byte[] dfb = new byte[dfgl];
+				in.readFully(dfb);
+				this.dfGuid = new String(dfb);
+			}
+			int gl = in.readInt();
+			byte[] gfb = new byte[gl];
+			in.readFully(gfb);
+			this.guid = new String(gfb);
+
+			int ml = in.readInt();
+			if (ml == -1) {
+				this.monitor = null;
+			} else {
+				byte[] mlb = new byte[ml];
+				in.readFully(mlb);
+				this.monitor = new IOMonitor(this);
+				monitor.fromByteArray(mlb);
+			}
+			this.vmdk = in.readBoolean();
+			// owner id is ignored
+			in.readInt();
+			// group id is ignored
+			in.readInt();
+			byte[] hmb = new byte[in.readInt()];
+			in.readFully(hmb);
+			this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
+			this.dedup = in.readBoolean();
+			try {
+				if (in.available() > 0) {
+					int vlen = in.readInt();
+					byte[] vb = new byte[vlen];
+					in.readFully(vb);
+					this.version = new String(vb);
+				}
+			} catch (Exception e) {
+
+			}
+		} finally {
+			this.writeLock.unlock();
 		}
+		if (SDFSLogger.isDebug())
+			SDFSLogger.getLog().debug(
+					"reading in file " + this.path + " df=" + this.dfGuid);
 
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("writing out file " + this.path);
-		out.writeLong(-1);
-		out.writeLong(length);
-		out.writeLong(lastModified);
-		out.writeLong(lastAccessed);
-		out.writeBoolean(execute);
-		out.writeBoolean(read);
-		out.writeBoolean(write);
-		out.writeBoolean(hidden);
-		out.writeBoolean(ownerWriteOnly);
-		out.writeBoolean(ownerExecOnly);
-		out.writeBoolean(ownerReadOnly);
+		this.writeLock.lock();
+		try {
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"writing out file=" + this.path + " df=" + this.dfGuid);
+			out.writeLong(-1);
+			out.writeLong(length);
+			out.writeLong(lastModified);
+			out.writeLong(lastAccessed);
+			out.writeBoolean(execute);
+			out.writeBoolean(read);
+			out.writeBoolean(write);
+			out.writeBoolean(hidden);
+			out.writeBoolean(ownerWriteOnly);
+			out.writeBoolean(ownerExecOnly);
+			out.writeBoolean(ownerReadOnly);
 
-		if (this.dfGuid != null) {
-			byte[] dfb = this.dfGuid.getBytes();
+			if (this.dfGuid != null) {
+				byte[] dfb = this.dfGuid.getBytes();
+				out.writeInt(dfb.length);
+				out.write(dfb);
+			} else {
+				out.writeInt(-1);
+			}
+			byte[] dfb = this.guid.getBytes();
 			out.writeInt(dfb.length);
 			out.write(dfb);
-		} else {
-			out.writeInt(-1);
+			if (this.monitor != null) {
+				byte[] mfb = this.monitor.toByteArray();
+				out.writeInt(mfb.length);
+				out.write(mfb);
+			} else {
+				out.writeInt(-1);
+			}
+			out.writeBoolean(vmdk);
+			out.writeInt(owner_id);
+			out.writeInt(group_id);
+			byte[] hmb = ByteUtils.serializeHashMap(extendedAttrs);
+			out.writeInt(hmb.length);
+			out.write(hmb);
+			out.writeBoolean(dedup);
+			byte[] vb = this.version.getBytes();
+			out.writeInt(vb.length);
+			out.write(vb);
+		} finally {
+			this.writeLock.unlock();
 		}
-		byte[] dfb = this.guid.getBytes();
-		out.writeInt(dfb.length);
-		out.write(dfb);
-		if (this.monitor != null) {
-			byte[] mfb = this.monitor.toByteArray();
-			out.writeInt(mfb.length);
-			out.write(mfb);
-		} else {
-			out.writeInt(-1);
-		}
-		out.writeBoolean(vmdk);
-		out.writeInt(owner_id);
-		out.writeInt(group_id);
-		byte[] hmb = ByteUtils.serializeHashMap(extendedAttrs);
-		out.writeInt(hmb.length);
-		out.write(hmb);
-		out.writeBoolean(dedup);
-		byte[] vb = this.version.getBytes();
-		out.writeInt(vb.length);
-		out.write(vb);
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException,

@@ -38,8 +38,9 @@ public class GetAttributes {
 								+ e.toString());
 			}
 		} else {
-			MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
+			
 			try {
+				MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();

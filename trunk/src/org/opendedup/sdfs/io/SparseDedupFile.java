@@ -43,7 +43,7 @@ public class SparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
-	private transient final MetaDataDedupFile mf;
+	private transient MetaDataDedupFile mf;
 	private transient final ArrayList<DedupFileChannel> buffers = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
@@ -137,6 +137,7 @@ public class SparseDedupFile implements DedupFile {
 		} else {
 			this.GUID = mf.getDfGuid();
 		}
+		
 	}
 
 	public void removeFromFlush(long pos) {
@@ -739,7 +740,7 @@ public class SparseDedupFile implements DedupFile {
 			if (this.staticChannel == null) {
 				if (this.isClosed())
 					this.initDB();
-				this.staticChannel = new DedupFileChannel(mf, -1);
+				this.staticChannel = new DedupFileChannel(this, -1);
 			}
 			return this.staticChannel;
 		} else {
@@ -747,7 +748,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				if (this.isClosed() || this.buffers.size() == 0)
 					this.initDB();
-				DedupFileChannel channel = new DedupFileChannel(mf, flags);
+				DedupFileChannel channel = new DedupFileChannel(this, flags);
 				this.buffers.add(channel);
 				return channel;
 			} finally {
@@ -907,8 +908,10 @@ public class SparseDedupFile implements DedupFile {
 					this.chunkStore.close();
 				} catch (Exception e) {
 				}
-				mf.setDedupFile(this);
-				mf.sync();
+				DedupFileStore.getDedupFile(mf).getMetaFile().setDedupFile(this);
+				DedupFileStore.getDedupFile(mf).getMetaFile().sync();
+				DedupFileStore.removeOpenDedupFile(GUID);
+				
 			}
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
@@ -916,7 +919,6 @@ public class SparseDedupFile implements DedupFile {
 
 			SDFSLogger.getLog().error("error closing " + mf.getPath(), e);
 		} finally {
-			DedupFileStore.removeOpenDedupFile(this.GUID);
 			bdb = null;
 			chunkStore = null;
 			this.closed = true;
@@ -1022,7 +1024,6 @@ public class SparseDedupFile implements DedupFile {
 
 				this.closed = false;
 			}
-			DedupFileStore.addOpenDedupFile(this);
 		} catch (IOException e) {
 			SDFSLogger.getLog().warn("error while opening db", e);
 			throw e;
@@ -1317,6 +1318,12 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void trim(long start, int len) throws IOException {
 		this.bdb.trim(start, len);
+	}
+
+	@Override
+	public void setMetaDataDedupFile(MetaDataDedupFile mf) {
+		this.mf = mf;
+		
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
+
 import java.nio.file.NoSuchFileException;
 
 import org.opendedup.logging.SDFSLogger;
@@ -117,8 +118,13 @@ public class OpenFileMonitor implements Runnable {
 			return false;
 		else {
 			long currentTime = System.currentTimeMillis();
-			long staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
-					.getLastAccessed() + this.maxInactive;
+			long staleTime = 0;
+			try {
+				staleTime = MetaFileStore.getMF(df.getMetaFile().getPath())
+						.getLastAccessed() + this.maxInactive;
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error checking last accessed",e);
+			}
 			return currentTime > staleTime;
 		}
 	}

@@ -27,6 +27,7 @@ public interface DedupFile {
 	 */
 	public abstract boolean isClosed();
 
+	public abstract void setMetaDataDedupFile(MetaDataDedupFile mf);
 	/**
 	 * Writes all the cache buffers to the dedup chunk store service
 	 */

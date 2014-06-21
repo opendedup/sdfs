@@ -213,9 +213,7 @@ public class ArchiveImporter {
 			}
 		}
 		try {
-			MetaDataDedupFile nmf = MetaFileStore.getMF(sdest);
-			nmf.renameTo(dest, true);
-			MetaFileStore.removeMetaFile(sdest, true);
+			MetaFileStore.renames(sdest,dest);
 			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
 
 		} catch (Exception e) {

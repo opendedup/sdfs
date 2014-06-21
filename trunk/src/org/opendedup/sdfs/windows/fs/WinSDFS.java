@@ -352,10 +352,15 @@ public class WinSDFS implements DokanOperations {
 					rootLastWrite, volumeSerialNumber,
 					Main.volume.getCapacity(), 1, 1);
 		}
+		try {
 		MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(fileName)
 				.getPath());
 		MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
 		return fi.toByHandleFileInformation();
+		}catch (Exception e) {
+			log.error("unable to sync file " + fileName, e);
+			throw new DokanOperationException(ERROR_WRITE_FAULT);
+		}
 	}
 
 	@Override
@@ -405,9 +410,14 @@ public class WinSDFS implements DokanOperations {
 			long mtime, DokanFileInfo arg4) throws DokanOperationException {
 		// log("[onSetFileTime] " + fileName);
 		File f = this.resolvePath(fileName);
+		try {
 		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 		mf.setLastAccessed(atime * 1000L, true);
 		mf.setLastModified(mtime * 1000L, true);
+		}catch (Exception e) {
+			log.error("unable to set file " + fileName, e);
+			throw new DokanOperationException(ERROR_WRITE_FAULT);
+		}
 	}
 
 	@Override
@@ -454,8 +464,7 @@ public class WinSDFS implements DokanOperations {
 		File f = null;
 		try {
 			f = resolvePath(from);
-			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-			mf.renameTo(this.mountedVolume + to, true);
+			MetaFileStore.renames(f.getPath(),this.mountedVolume + to);
 			DedupFileChannel ch = this.dedupChannels.get(arg3.handle);
 			if (ch != null) {
 				this.channelLock.lock();
@@ -553,7 +562,7 @@ public class WinSDFS implements DokanOperations {
 							+ this.dedupChannels.size());
 					channelLock.unlock();
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				log.error("unable to open file" + f.getPath(), e);
 				throw new DokanOperationException(WinError.ERROR_GEN_FAILURE);
 			}
