@@ -1,7 +1,9 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Formatter;
+import java.util.Locale;
 
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
@@ -55,7 +57,8 @@ public class ProcessVolumeInfo {
 									0);
 				} else {
 					double dedupRate = (((double) dseSz / (double) capacitySz) * 100);
-					DecimalFormat twoDForm = new DecimalFormat("#.##");
+					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					twoDForm.applyPattern("#.##");
 					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 					System.out
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %s%%\n",
@@ -67,7 +70,8 @@ public class ProcessVolumeInfo {
 									0);
 				} else {
 					double dedupRate = (1 - ((double) compSz / (double) currentSz)) * 100;
-					DecimalFormat twoDForm = new DecimalFormat("#.##");
+					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					twoDForm.applyPattern("#.##");
 					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 					System.out
 							.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size) : %s%%\n",
@@ -77,7 +81,8 @@ public class ProcessVolumeInfo {
 					System.out.printf("Compression Rate: %d%%\n", 0);
 				} else {
 					double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
-					DecimalFormat twoDForm = new DecimalFormat("#.##");
+					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					twoDForm.applyPattern("#.##");
 					compRate = Double.valueOf(twoDForm.format(compRate));
 					System.out.printf("Compression Rate: %s%%\n",
 							Double.toString(compRate));

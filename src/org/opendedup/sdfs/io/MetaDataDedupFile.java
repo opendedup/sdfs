@@ -437,7 +437,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 							"No DF EXISTS .... Set dedup file for "
 									+ this.getPath() + " to " + this.dfGuid);
 				this.sync();
-				DedupFileStore.addOpenDedupFiles(df);
 				return df;
 			} else {
 				return DedupFileStore.getDedupFile(this);

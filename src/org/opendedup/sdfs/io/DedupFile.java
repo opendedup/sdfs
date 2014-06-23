@@ -17,7 +17,6 @@ import org.opendedup.collections.HashtableFullException;
  */
 public interface DedupFile {
 
-	public abstract void removeFromFlush(long pos);
 
 	public abstract void trim(long start, int len) throws IOException;
 
@@ -27,7 +26,6 @@ public interface DedupFile {
 	 */
 	public abstract boolean isClosed();
 
-	public abstract void setMetaDataDedupFile(MetaDataDedupFile mf);
 	/**
 	 * Writes all the cache buffers to the dedup chunk store service
 	 */
@@ -44,21 +42,12 @@ public interface DedupFile {
 	public abstract DedupChunkInterface getWriteBuffer(long position)
 			throws FileClosedException, IOException;
 
-	/**
-	 * 
-	 * @param position
-	 *            the position within the DedupFile where to return the read
-	 *            buffer from
-	 * @return the specific read buffer.
-	 * @throws IOException
-	 */
-	public abstract DedupChunkInterface getReadBuffer(long position)
-			throws FileClosedException, IOException;
-
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash, int doop)
 			throws FileClosedException, IOException;
 
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
+	
+	public void removeBufferFromFlush(DedupChunkInterface writeBuffer);
 
 	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
 			int doop, boolean propigateEvent) throws FileClosedException,
@@ -221,6 +210,8 @@ public interface DedupFile {
 	 *            to remove from the file
 	 */
 	public abstract void removeLock(DedupFileLock lock);
+	
+	public abstract void setMetaDataDedupFile(MetaDataDedupFile mf);
 
 	/**
 	 * 

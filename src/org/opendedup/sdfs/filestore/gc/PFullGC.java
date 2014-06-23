@@ -1,6 +1,9 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.text.DecimalFormat;
+
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
@@ -18,7 +21,8 @@ public class PFullGC implements GCControllerImpl {
 		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
 		double pFull = (this.prevPFull * 100);
 		double nFull = (this.nextPFull * 100);
-		DecimalFormat twoDForm = new DecimalFormat("#.##");
+		DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+		twoDForm.applyPattern("#.##");
 		pFull = Double.valueOf(twoDForm.format(pFull));
 		nFull = Double.valueOf(twoDForm.format(nFull));
 		SDFSLogger.getLog().info(
@@ -39,7 +43,8 @@ public class PFullGC implements GCControllerImpl {
 				this.nextPFull = this.calcNxtRun();
 				double pFull = (this.prevPFull * 100);
 				double nFull = (this.nextPFull * 100);
-				DecimalFormat twoDForm = new DecimalFormat("#.##");
+				DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+				twoDForm.applyPattern("#.##");
 				pFull = Double.valueOf(twoDForm.format(pFull));
 				nFull = Double.valueOf(twoDForm.format(nFull));
 				SDFSLogger.getLog().info(

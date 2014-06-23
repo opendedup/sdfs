@@ -4,6 +4,8 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -12,11 +14,18 @@ public class IOMeter implements Runnable {
 	private long sleeptime = 15;
 	String fileName;
 	private boolean stopped = false;
-	DecimalFormat df = new DecimalFormat("###.##");
-	DecimalFormat dfp = new DecimalFormat("##.##%");
+	
+	private static DecimalFormat df = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+	private static DecimalFormat dfp = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+	
+	static  {
+		df.applyPattern("###.##");
+		dfp.applyPattern("##.##%");
+	}
 
 	public IOMeter(String fileName) {
 		this.fileName = fileName;
+		
 	}
 
 	@Override
