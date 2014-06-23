@@ -2,7 +2,9 @@ package org.opendedup.sdfs.mgmt.cli;
 
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Formatter;
+import java.util.Locale;
 
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
@@ -95,7 +97,8 @@ public class ProcessFileInfo {
 							System.out.printf("dedup rate : %d%%\n", 0);
 						} else {
 							double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
-							DecimalFormat twoDForm = new DecimalFormat("#.##");
+							DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+							twoDForm.applyPattern("#.##");
 							dedupRate = Double.valueOf(twoDForm
 									.format(dedupRate));
 

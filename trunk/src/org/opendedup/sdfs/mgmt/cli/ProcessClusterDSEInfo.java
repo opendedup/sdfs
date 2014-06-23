@@ -1,7 +1,9 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Formatter;
+import java.util.Locale;
 
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
@@ -62,7 +64,8 @@ public class ProcessClusterDSEInfo {
 					double pFull = 0.00;
 					if (currentSz > 0) {
 						pFull = (((double) currentSz / (double) maxSz) * 100);
-						DecimalFormat twoDForm = new DecimalFormat("#.##");
+						DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+						twoDForm.applyPattern("#.##");
 						pFull = Double.valueOf(twoDForm.format(pFull));
 					}
 					String[] row = { host, dse.getAttribute("id"),

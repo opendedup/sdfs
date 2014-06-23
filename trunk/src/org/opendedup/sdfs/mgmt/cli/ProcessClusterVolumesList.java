@@ -1,7 +1,9 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Formatter;
+import java.util.Locale;
 
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
@@ -67,7 +69,8 @@ public class ProcessClusterVolumesList {
 						double pf = ((double) Long.parseLong(dse
 								.getAttribute("current-size")) / (double) StringUtils
 								.parseSize(dse.getAttribute("capacity"))) * 100;
-						DecimalFormat twoDForm = new DecimalFormat("#.##");
+						DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+						twoDForm.applyPattern("#.##");
 						String cpf = Double.toString(Double.valueOf(twoDForm
 								.format(pf)));
 						String wb = StorageUnit.GIGABYTE.format(Long

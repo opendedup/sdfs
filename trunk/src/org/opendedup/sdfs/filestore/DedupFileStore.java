@@ -74,7 +74,26 @@ public class DedupFileStore {
 					df = openFile.get(mf.getDfGuid());
 					if (df == null) {
 							df = new SparseDedupFile(mf);
-								DedupFileStore.openFile.put(df.getGUID(), df);
+				}
+				return df;
+			} else {
+				throw new IOException("DedupFileStore is closed");
+			}
+		} finally {
+			getDFLock.unlock();
+		}
+	}
+	
+	public static DedupFile openDedupFile(MetaDataDedupFile mf)
+			throws IOException {
+		getDFLock.lock();
+		DedupFile df = null;
+		try {
+			if (!closing) {
+					df = openFile.get(mf.getDfGuid());
+					if (df == null) {
+							df = new SparseDedupFile(mf);
+							DedupFileStore.openFile.put(df.getGUID(), df);
 				}
 				return df;
 			} else {

@@ -77,13 +77,18 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return hash;
 	}
 
-	public byte[] getReadChunk() throws IOException {
+	public byte[] getReadChunk(int start,int len) throws IOException {
 		this.lock.lock();
+		byte [] ds = new byte [len]; 
 		try {
-			if (data != null)
-				return data;
-			else
-				return HCServiceProxy.fetchChunk(hash, hashloc);
+			if (data != null) {
+				System.arraycopy(data, start, ds, 0, ds.length);
+			}
+			else {
+				byte [] dd = HCServiceProxy.fetchChunk(hash, hashloc);
+				System.arraycopy(dd, start, ds, 0, ds.length);
+			}
+			return ds;
 		} finally {
 			this.lock.unlock();
 		}

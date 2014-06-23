@@ -27,7 +27,7 @@ public interface DedupChunkInterface {
 	 */
 	public abstract long getFilePosition();
 
-	public abstract byte[] getReadChunk() throws IOException;
+	public abstract byte[] getReadChunk(int start,int end) throws IOException,BufferClosedException;
 
 	/**
 	 * 
@@ -92,7 +92,6 @@ public interface DedupChunkInterface {
 	public boolean isBatchProcessed();
 
 	public boolean isBatchwritten();
-
 	public void resetHashLoc();
 
 	public void addHashLoc(byte loc);

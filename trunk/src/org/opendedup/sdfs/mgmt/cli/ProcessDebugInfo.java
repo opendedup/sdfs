@@ -1,7 +1,9 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Formatter;
+import java.util.Locale;
 
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.StorageUnit;
@@ -26,7 +28,8 @@ public class ProcessDebugInfo {
 				System.out.printf("Active SDFS Threads : %s\n",
 						debug.getAttribute("active-threads"));
 				if (OSValidator.isUnix()) {
-					DecimalFormat zDForm = new DecimalFormat("#");
+					DecimalFormat zDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					zDForm.applyPattern("#");
 					double tcp = Double.parseDouble(debug
 							.getAttribute("total-cpu-load")) * 100;
 					double pcp = Double.parseDouble(debug

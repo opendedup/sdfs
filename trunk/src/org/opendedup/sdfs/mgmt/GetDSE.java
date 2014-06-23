@@ -34,6 +34,7 @@ public class GetDSE {
 					Long.toString(HCServiceProxy.getFreeBlocks()));
 			root.setAttribute("page-size",
 					Long.toString(HCServiceProxy.getPageSize()));
+			root.setAttribute("storage-type", Main.chunkStoreClass);
 			root.setAttribute("listen-port", Integer.toString(Main.serverPort));
 			root.setAttribute("listen-hostname", Main.serverHostName);
 			root.setAttribute("listen-encrypted",
