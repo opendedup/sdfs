@@ -1,12 +1,13 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +29,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
  *         evicted from the file system based LRU. When a writable cache buffer
  *         is evicted it is then written to the dedup chunk service
  */
-public class WritableCacheBuffer implements DedupChunkInterface {
+public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	private ByteBuffer buf = null;
 	private boolean dirty = false;
@@ -55,14 +56,30 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 	private boolean batchprocessed;
 	private boolean batchwritten;
 	int sz;
-	private static BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+	private static int maxTasks = ((Main.maxWriteBuffers * 1024 * 1024) / (Main.CHUNK_LENGTH)) + 1;
+	private static BlockingQueue<Runnable> worksQueue = null;
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads * 2, 10, TimeUnit.SECONDS,
-			worksQueue, executionHandler);
+	private static ThreadPoolExecutor executor = null;
+	private static BlockingQueue<Runnable> lworksQueue = null;
+	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
+	private static ThreadPoolExecutor lexecutor = null;
 	static {
+		if (maxTasks > 120)
+			maxTasks = 120;
+		SDFSLogger.getLog().info("WriteCacheBuffer Pool List Size will be " + maxTasks);
+		worksQueue = new LinkedBlockingQueue<Runnable>(
+				maxTasks);
+		executor = new ThreadPoolExecutor(
+				Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+				worksQueue, executionHandler);
+		lworksQueue = new LinkedBlockingQueue<Runnable>(
+				maxTasks);
+		lexecutor = new ThreadPoolExecutor(
+				Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+				lworksQueue, lexecutionHandler);
+		
 		executor.allowCoreThreadTimeOut(true);
+		
 	}
 
 	public WritableCacheBuffer(byte[] hash, long startPos, int length,
@@ -274,7 +291,7 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				}
 				int loops = 6;
 				int wl = 0;
-				int tm = 60000;
+				int tm = 60000*5;
 				if (l.getDN() < sz) {
 					if (wl > 0) {
 						int nt = (tm * wl) / 1000;
@@ -550,7 +567,10 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			this.flushing = true;
 			if (this.isDirty()) {
 				this.df.putBufferIntoFlush(this);
-				SparseDedupFile.pool.execute(this);
+				if(Main.chunkStoreLocal)
+					lexecutor.execute(this);
+				else
+					SparseDedupFile.pool.execute(this);
 			}
 		} finally {
 			this.lock.unlock();
@@ -922,6 +942,16 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 				l.commandException(e);
 			}
 		}
+	}
+
+	@Override
+	public void run() {
+		try {
+			this.close();
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to close", e);
+		}
+		
 	}
 
 }

@@ -69,13 +69,10 @@ public class DedupFileChannel {
 	 *            the size of the file channel
 	 * @exception IOException
 	 */
-	private ReentrantLock truncateLock = new ReentrantLock();
 
-	public void truncateFile(long siz) throws IOException {
+	public synchronized void truncateFile(long siz) throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Truncating File");
-		truncateLock.lock();
-		try {
 			if (siz < df.getMetaFile().length()) {
 				df.truncate(siz);
 				/*
@@ -92,11 +89,8 @@ public class DedupFileChannel {
 				 */
 
 			}
-			df.getMetaFile().setLastAccessed(System.currentTimeMillis());
+			df.getMetaFile().setLastModified(System.currentTimeMillis());
 			df.getMetaFile().setLength(siz, true);
-		} finally {
-			truncateLock.unlock();
-		}
 	}
 
 	/**
@@ -184,16 +178,7 @@ public class DedupFileChannel {
 			df.getMetaFile().sync();
 	}
 
-	/**
-	 * 
-	 * @param lastModified
-	 *            sets the last time the data was modified for the underlying
-	 *            file
-	 * @throws IOException
-	 */
-	public void setLastModified(long lastModified) throws IOException {
-		df.getMetaFile().setLastModified(lastModified);
-	}
+
 
 	/**
 	 * writes data to the DedupFile
@@ -288,7 +273,6 @@ public class DedupFileChannel {
 				}
 
 			}
-			df.getMetaFile().setLastModified(System.currentTimeMillis());
 		} catch (FileClosedException e) {
 			SDFSLogger.getLog().warn(
 					df.getMetaFile().getPath() + " is closed but still writing");
@@ -308,7 +292,7 @@ public class DedupFileChannel {
 			throw new IOException("error while writing to " + this.df.getMetaFile().getPath()
 					+ " " + e.toString());
 		} finally {
-			// this.removeAio();
+			df.getMetaFile().setLastModified(System.currentTimeMillis());
 		}
 	}
 
@@ -337,7 +321,6 @@ public class DedupFileChannel {
 
 					} finally {
 						this.closed = true;
-						this.closeLock.unlock();
 					}
 				}
 			}
@@ -471,7 +454,7 @@ public class DedupFileChannel {
 				if (currentLocation == df.getMetaFile().length()) {
 					return read;
 				}
-				df.getMetaFile().setLastAccessed(System.currentTimeMillis());
+				
 				this.currentPosition = currentLocation;
 			}
 			return read;
@@ -480,6 +463,7 @@ public class DedupFileChannel {
 			Main.volume.addReadError();
 			throw new IOException(e);
 		} finally {
+			df.getMetaFile().setLastAccessed(System.currentTimeMillis());
 			// this.removeAio();
 		}
 

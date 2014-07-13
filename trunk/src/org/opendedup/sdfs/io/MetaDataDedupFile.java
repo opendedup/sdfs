@@ -512,7 +512,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			return new MetaDataDedupFile(snaptoPath);
 		}
-		if (!this.isDirectory()) {
+		else if (!this.isDirectory()) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
@@ -648,13 +648,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		SDFSLogger.getLog().info("Copying to " + snaptoPath);
 		File f = new File(snaptoPath);
 		if (f.exists() && !overwrite)
-			throw new IOException("path exists [" + snaptoPath
+			throw new IOException("while copying path exists [" + snaptoPath
 					+ "]Cannot overwrite existing data ");
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("is snapshot dir");
 		if (!f.exists())
 			f.mkdirs();
-		String cpCmd = "cp -rf --preserve=mode,ownership,timestamps "
+		String cpCmd = "cp -rf --preserve=all "
 				+ this.path + " " + snaptoPath;
 		Process p = Runtime.getRuntime().exec(cpCmd);
 		try {
@@ -672,10 +672,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	private void copyDir(String npath) throws IOException {
 		String[] files = this.list();
+		
 		for (int i = 0; i < files.length; i++) {
 			MetaDataDedupFile file = MetaDataDedupFile.getFile(this.getPath()
 					+ File.separator + files[i]);
-			if (file.isDirectory())
+			if (file.isDirectory() && !file.isSymlink())
 				file.copyDir(npath);
 			else {
 				if (SDFSLogger.isDebug())
@@ -742,7 +743,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.lastModified = System.currentTimeMillis();
 			this.dedup = Main.dedupFiles;
 			this.setLength(0, false, true);
-			this.sync(true);
+			this.sync();
 		} else if (f.isDirectory()) {
 			this.permissions = Main.defaultDirPermissions;
 			this.owner_id = Main.defaultOwner;
@@ -801,7 +802,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if serialized
 	 */
-	public boolean unmarshal() {
+	private boolean unmarshal() {
 		return this.writeFile();
 	}
 
@@ -939,18 +940,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
-	public boolean renameTo(String dest) {
+	public boolean renameTo(String dest) throws IOException {
 		return renameTo(dest, true);
 	}
 
-	public boolean renameTo(String dest, boolean propigateEvent) {
+	public boolean renameTo(String dest, boolean propigateEvent) throws IOException {
 		writeLock.lock();
 
 		try {
 			File f = new File(this.path);
 			if (this.symlink) {
-				f = new File(this.symlinkPath);
-				f.delete();
+				Files.deleteIfExists(f.toPath());
 				Path dstP = Paths.get(dest);
 				Path srcP = Paths.get(this.path);
 				try {
@@ -985,7 +985,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean exists() {
+		writeLock.lock();
+
+		try {
 		return new File(this.path).exists();
+		} finally {
+			writeLock.unlock();
+		}
 	}
 
 	public String getAbsolutePath() {
@@ -1261,6 +1267,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void writeExternal(ObjectOutput out) throws IOException {
 		this.writeLock.lock();
 		try {
+			if(this.isSymlink())
+				return;
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
 						"writing out file=" + this.path + " df=" + this.dfGuid);
