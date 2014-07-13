@@ -9,6 +9,7 @@ public class StringUtils {
 	final static long tbc = 1099511627776L;
 	final static long gbc = 1024 * 1024 * 1024;
 	final static int mbc = 1024 * 1024;
+	final static int kbc = 1024;
 
 	public static void writeString(ObjectOutput out, String string)
 			throws IOException {
@@ -68,6 +69,8 @@ public class StringUtils {
 			fSize = (long) (sz * gbc);
 		else if (units.equalsIgnoreCase("MB"))
 			fSize = (long) (sz * mbc);
+		else if (units.equalsIgnoreCase("KB"))
+			fSize = (long) (sz * kbc);
 		else {
 
 			throw new IOException("unable to determine capacity of volume "
