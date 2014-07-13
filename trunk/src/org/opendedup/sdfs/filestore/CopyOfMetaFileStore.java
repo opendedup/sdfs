@@ -43,7 +43,7 @@ public class CopyOfMetaFileStore {
 				@Override
 				public void onRemoval(
 						RemovalNotification<String, MetaDataDedupFile> removal) {
-					removal.getValue().unmarshal();
+					removal.getValue().sync();
 				}
 			}).build(new CacheLoader<String, MetaDataDedupFile>() {
 
