@@ -766,7 +766,7 @@ public class MgmtWebServer implements Container {
 	public static void stop() {
 		try {
 			connection.close();
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog()
 					.error("unable to stop Web Management Server", e);
 		}
