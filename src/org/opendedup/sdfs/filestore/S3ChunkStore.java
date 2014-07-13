@@ -234,7 +234,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
-
 		String hashString = this.getHashName(hash,
 				Main.chunkStoreEncryptionEnabled);
 		S3Object s3Object = new S3Object(hashString);
