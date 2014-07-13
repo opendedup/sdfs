@@ -2,6 +2,7 @@ package fuse.SDFS;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -18,10 +19,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 
 import fuse.Errno;
 import fuse.Filesystem3;
@@ -47,19 +44,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	static int kbc = 1024;
 	private SDFSCmds sdfsCmds;
 
-	private ConcurrentLinkedHashMap<String, File> pathMap = new Builder<String, File>()
-			.concurrencyLevel(72).maximumWeightedCapacity(100)
-			.listener(new EvictionListener<String, File>() {
-				// This method is called just after a new entry has been
-				// added
-				@Override
-				public void onEviction(String key, File file) {
-
-				}
-			}).build();
-
 	public SDFSFileSystem(String mountedVolume, String mountPoint) {
-		
+
 		SDFSLogger.getLog().info(
 				"mounting " + mountedVolume + " to " + mountPoint);
 		this.mountedVolume = mountedVolume;
@@ -76,7 +62,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int chmod(String path, int mode) throws FuseException {
-		//SDFSLogger.getLog().info("12");
+		// SDFSLogger.getLog().info("12");
 		try {
 			File f = resolvePath(path);
 			int ftype = this.getFtype(path);
@@ -85,7 +71,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				Path p = Paths.get(f.getPath());
 
 				try {
-					Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),LinkOption.NOFOLLOW_LINKS);
+					Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),
+							LinkOption.NOFOLLOW_LINKS);
 				} catch (IOException e) {
 					SDFSLogger.getLog().warn("access denied for " + path, e);
 					throw new FuseException("access denied for " + path)
@@ -94,7 +81,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					path = null;
 				}
 			} else {
-				
+
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					mf.setMode(mode);
@@ -112,7 +99,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int chown(String path, int uid, int gid) throws FuseException {
-		//SDFSLogger.getLog().info("17");
+		// SDFSLogger.getLog().info("17");
 		try {
 			File f = resolvePath(path);
 			int ftype = this.getFtype(path);
@@ -120,8 +107,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					|| ftype == FuseFtypeConstants.TYPE_DIR) {
 				Path p = Paths.get(f.getPath());
 				try {
-					Files.setAttribute(p, "unix:uid", Integer.valueOf(uid),LinkOption.NOFOLLOW_LINKS);
-					Files.setAttribute(p, "unix:gid", Integer.valueOf(gid),LinkOption.NOFOLLOW_LINKS);
+					Files.setAttribute(p, "unix:uid", Integer.valueOf(uid),
+							LinkOption.NOFOLLOW_LINKS);
+					Files.setAttribute(p, "unix:gid", Integer.valueOf(gid),
+							LinkOption.NOFOLLOW_LINKS);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new FuseException("access denied for " + path)
@@ -130,7 +119,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					path = null;
 				}
 			} else {
-				
+
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					mf.setOwner_id(uid);
@@ -150,7 +139,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int flush(String path, Object fh) throws FuseException {
-		//SDFSLogger.getLog().info("109");
+		// SDFSLogger.getLog().info("109");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		DedupFileChannel ch = (DedupFileChannel) fh;
@@ -168,14 +157,16 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int fsync(String path, Object fh, boolean isDatasync)
 			throws FuseException {
-		//SDFSLogger.getLog().info("1000");
+		// SDFSLogger.getLog().info("1000");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		DedupFileChannel ch = (DedupFileChannel) fh;
 		try {
-			if(Main.safeSync) {
-				if(SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("sync " + path + " df=" + ch.getDedupFile().getGUID());
+			if (Main.safeSync) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"sync " + path + " df="
+									+ ch.getDedupFile().getGUID());
 				ch.force(true);
 			}
 
@@ -184,7 +175,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throw new FuseException("unable to sync file")
 					.initErrno(Errno.EACCES);
 		} finally {
-			
+
 		}
 		return 0;
 	}
@@ -192,12 +183,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int getattr(String path, FuseGetattrSetter getattrSetter)
 			throws FuseException {
-		//SDFSLogger.getLog().info("0");
+		// SDFSLogger.getLog().info("0");
 		try {
 			int ftype = this.getFtype(path);
-			//SDFSLogger.getLog().info("poop " + path + " " + ftype);
+			// SDFSLogger.getLog().info("poop " + path + " " + ftype);
 			if (ftype == FuseFtypeConstants.TYPE_SYMLINK) {
-				//SDFSLogger.getLog().info("poop " + path);
+				// SDFSLogger.getLog().info("poop " + path);
 				Path p = null;
 				BasicFileAttributes attrs = null;
 				try {
@@ -213,8 +204,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						mode = (Integer) Files.getAttribute(p, "unix:mode",
 								LinkOption.NOFOLLOW_LINKS);
 					} catch (Exception e) {
-						SDFSLogger.getLog().error("unable to parse sylink " + path,
-								e);
+						SDFSLogger.getLog().error(
+								"unable to parse sylink " + path, e);
 					}
 
 					int atime = 0;
@@ -296,7 +287,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int getdir(String path, FuseDirFiller dirFiller)
 			throws FuseException {
-		//SDFSLogger.getLog().info("1");
+		// SDFSLogger.getLog().info("1");
 		try {
 			File f = null;
 			try {
@@ -324,7 +315,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int link(String from, String to) throws FuseException {
-		//SDFSLogger.getLog().info("2");
+		// SDFSLogger.getLog().info("2");
 		throw new FuseException("error hard linking is not supported")
 				.initErrno(Errno.ENOSYS);
 
@@ -343,7 +334,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int mkdir(String path, int mode) throws FuseException {
-		//SDFSLogger.getLog().info("3");
+		// SDFSLogger.getLog().info("3");
 		try {
 			File f = new File(this.mountedVolume + path);
 			if (Main.volume.isOffLine())
@@ -373,7 +364,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int mknod(String path, int mode, int rdev) throws FuseException {
-		//SDFSLogger.getLog().info("4");
+		// SDFSLogger.getLog().info("4");
 		try {
 			File f = new File(this.mountedVolume + path);
 			if (Main.volume.isOffLine())
@@ -386,6 +377,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				throw new FuseException("file exists").initErrno(Errno.EPERM);
 			} else {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				mf.sync();
 				// Wait up to 5 seconds for file to be created
 				int z = 5000;
 				int i = 0;
@@ -412,19 +404,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 
 			}
-		} 
-		catch (Exception e) {
-		SDFSLogger.getLog().error("error making " + path, e);
-		throw new FuseException("access denied for " + path)
-				.initErrno(Errno.EACCES);
-	}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error making " + path, e);
+			throw new FuseException("access denied for " + path)
+					.initErrno(Errno.EACCES);
+		}
 		return 0;
 	}
 
 	@Override
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
-		//SDFSLogger.getLog().info("9");
+		// SDFSLogger.getLog().info("9");
 		// Thread.currentThread().setName("10 " +
 		// Long.toString(System.currentTimeMillis()));
 		if (Main.volume.isOffLine())
@@ -442,7 +433,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int read(String path, Object fh, ByteBuffer buf, long offset)
 			throws FuseException {
-		//SDFSLogger.getLog().info("1911");
+		// SDFSLogger.getLog().info("1911");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		try {
@@ -461,7 +452,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int readlink(String path, CharBuffer link) throws FuseException {
-		//SDFSLogger.getLog().info("190");
+		// SDFSLogger.getLog().info("190");
 		Path p = Paths.get(this.mountedVolume + path);
 		try {
 
@@ -469,7 +460,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			if (lpath.startsWith(this.mountedVolume))
 				lpath = this.mountPoint
 						+ lpath.substring(this.mountedVolume.length());
-			//SDFSLogger.getLog().info("path=" + path + " lpath=" + lpath);
+			// SDFSLogger.getLog().info("path=" + path + " lpath=" + lpath);
 			link.put(lpath);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting linking " + path, e);
@@ -483,7 +474,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int release(String path, Object fh, int flags) throws FuseException {
-		//SDFSLogger.getLog().info("199");
+		// SDFSLogger.getLog().info("199");
 		try {
 			if (!Main.safeClose)
 				return 0;
@@ -504,7 +495,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int rename(String from, String to) throws FuseException {
-		//SDFSLogger.getLog().info("198");
+		// SDFSLogger.getLog().info("198");
 		try {
 			File f = null;
 
@@ -513,7 +504,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					SDFSLogger.getLog().debug(
 							"renaming [" + from + "] to [" + to + "]");
 				f = resolvePath(from);
-				MetaFileStore.renames(f.getPath(), this.mountedVolume + to);
+				MetaFileStore.rename(f.getPath(), this.mountedVolume + to);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to rename " + from + " to " + to, e);
@@ -528,13 +519,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int rmdir(String path) throws FuseException {
-		//SDFSLogger.getLog().info("197");
+		// SDFSLogger.getLog().info("197");
 		try {
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 
 				File f = new File(mountedVolume + path);
-				//SDFSLogger.getLog().info("deleting symlink " + f.getPath());
-				this.pathMap.remove(f.getPath());
+				// SDFSLogger.getLog().info("deleting symlink " + f.getPath());
 				if (!f.delete()) {
 					f = null;
 					throw new FuseException().initErrno(Errno.EACCES);
@@ -542,7 +532,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				return 0;
 			} else {
 				File f = resolvePath(path);
-				this.pathMap.remove(f.getPath());
 				if (f.getName().equals(".") || f.getName().equals(".."))
 					return 0;
 				else {
@@ -562,7 +551,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
-		//SDFSLogger.getLog().info("196");
+		// SDFSLogger.getLog().info("196");
 		try {
 			int blocks = (int) Main.volume.getTotalBlocks();
 			int used = (int) Main.volume.getUsedBlocks();
@@ -570,10 +559,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				used = blocks;
 			statfsSetter.set(Main.volume.getBlockSize(), blocks, blocks - used,
 					blocks - used, 0, 0, NAME_LENGTH);
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to stat", e);
 			throw new FuseException().initErrno(Errno.EACCES);
-		}finally {
+		} finally {
 
 		}
 		return 0;
@@ -581,7 +570,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int symlink(String from, String to) throws FuseException {
-		//SDFSLogger.getLog().info("195");
+		// SDFSLogger.getLog().info("195");
 		try {
 			File src = null;
 
@@ -603,8 +592,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 			Path srcP = Paths.get(src.getPath());
 			Path dstP = Paths.get(dst.getPath());
-			//SDFSLogger.getLog().info(
-			//		"symlink " + src.getPath() + " to " + dst.getPath());
+			// SDFSLogger.getLog().info(
+			// "symlink " + src.getPath() + " to " + dst.getPath());
 			try {
 				Files.createSymbolicLink(dstP, srcP);
 			} catch (IOException e) {
@@ -620,7 +609,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int truncate(String path, long size) throws FuseException {
-		//SDFSLogger.getLog().info("193");
+		// SDFSLogger.getLog().info("193");
 		try {
 			DedupFileChannel ch = this.getFileChannel(path, -1);
 			ch.truncateFile(size);
@@ -635,27 +624,25 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int unlink(String path) throws FuseException {
-		//SDFSLogger.getLog().info("18 " + path);
+		// SDFSLogger.getLog().info("18 " + path);
 		// Thread.currentThread().setName("19 "+Long.toString(System.currentTimeMillis()));
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("removing " + path);
-			if(!Main.safeClose) {
+			if (!Main.safeClose) {
 				this.getFileChannel(path, -1).getDedupFile().forceClose();
 			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				File f = new File(mountedVolume + path);
-				//SDFSLogger.getLog().info("deleting symlink " + f.getPath());
-				this.pathMap.remove(f.getPath());
+				// SDFSLogger.getLog().info("deleting symlink " + f.getPath());
 				if (!f.delete())
 					throw new FuseException().initErrno(Errno.EACCES);
 				return 0;
 			} else {
 
 				File f = this.resolvePath(path);
-				//SDFSLogger.getLog().info("deleting file " + f.getPath());
+				// SDFSLogger.getLog().info("deleting file " + f.getPath());
 				try {
-					this.pathMap.remove(f.getPath());
 					if (MetaFileStore.removeMetaFile(f.getPath()))
 						return 0;
 					else {
@@ -674,7 +661,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int utime(String path, int atime, int mtime) throws FuseException {
-		//SDFSLogger.getLog().info("19");
+		// SDFSLogger.getLog().info("19");
 		// Thread.currentThread().setName("20 "+Long.toString(System.currentTimeMillis()));
 		try {
 			File f = this.resolvePath(path);
@@ -684,9 +671,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				mf.setLastModified(mtime * 1000L);
 			} else {
 				Path p = f.toPath();
-					Files.setLastModifiedTime(p,
-							FileTime.fromMillis(mtime * 1000L));
-				
+				Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
+
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable change utime path " + path, e);
@@ -699,7 +685,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	@Override
 	public int write(String path, Object fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
-		//SDFSLogger.getLog().info("191");
+		// SDFSLogger.getLog().info("191");
 		// SDFSLogger.getLog().debug("writing " + buf.capacity());
 		// Thread.currentThread().setName("21 "+Long.toString(System.currentTimeMillis()));
 		if (Main.volume.isOffLine())
@@ -726,16 +712,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private File resolvePath(String path) throws FuseException {
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
-		_f = this.pathMap.get(_f.getPath());
-		if (_f == null) {
-			_f = new File(pt);
-			if (!_f.exists()) {
-				_f = null;
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("No such node");
-				SDFSLogger.getLog().error("no such node " + path);
-				throw new FuseException().initErrno(Errno.ENOENT);
-			}
+
+		if (!_f.exists()) {
+			_f = null;
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("No such node");
+			SDFSLogger.getLog().error("no such node " + path);
+			throw new FuseException().initErrno(Errno.ENOENT);
 		}
 		return _f;
 	}
@@ -765,7 +748,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			else if (_f.isFile())
 				return FuseFtypeConstants.TYPE_FILE;
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn(_f.getPath() + " does not exist",e);
+			SDFSLogger.getLog().warn(_f.getPath() + " does not exist", e);
 			_f = null;
 			p = null;
 			throw new FuseException("No such node").initErrno(Errno.ENOENT);
@@ -776,38 +759,28 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private int getFtype(String path) throws FuseException {
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
-		_f = this.pathMap.get(_f.getPath());
-		if (_f != null) {
-			/*
-			 * if (!_f.exists()) { throw new
-			 * FuseException().initErrno(Errno.ENOENT); }
-			 */
-			return FuseFtypeConstants.TYPE_FILE;
-		} else {
-			_f = new File(pt);
-			if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)) {
-				throw new FuseException().initErrno(Errno.ENOENT);
-			}
-			Path p = Paths.get(_f.getPath());
-			try {
-				boolean isSymbolicLink = Files.isSymbolicLink(p);
-				if (isSymbolicLink)
-					return FuseFtypeConstants.TYPE_SYMLINK;
-				else if (_f.isDirectory())
-					return FuseFtypeConstants.TYPE_DIR;
-				else if (_f.isFile()) {
-					this.pathMap.putIfAbsent(_f.getPath(), _f);
-					return FuseFtypeConstants.TYPE_FILE;
-				}
-			} catch (Exception e) {
-				_f = null;
-				p = null;
-				SDFSLogger.getLog().warn(path + " does not exist",e);
-				throw new FuseException("No such node").initErrno(Errno.ENOENT);
-			}
-			SDFSLogger.getLog().error("could not determine type for " + path);
+
+		if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)) {
 			throw new FuseException().initErrno(Errno.ENOENT);
 		}
+		Path p = Paths.get(_f.getPath());
+		try {
+			boolean isSymbolicLink = Files.isSymbolicLink(p);
+			if (isSymbolicLink)
+				return FuseFtypeConstants.TYPE_SYMLINK;
+			else if (_f.isDirectory())
+				return FuseFtypeConstants.TYPE_DIR;
+			else if (_f.isFile()) {
+				return FuseFtypeConstants.TYPE_FILE;
+			}
+		} catch (Exception e) {
+			_f = null;
+			p = null;
+			SDFSLogger.getLog().warn(path + " does not exist", e);
+			throw new FuseException("No such node").initErrno(Errno.ENOENT);
+		}
+		SDFSLogger.getLog().error("could not determine type for " + path);
+		throw new FuseException().initErrno(Errno.ENOENT);
 	}
 
 	private DedupFileChannel getFileChannel(String path, int flags)
@@ -847,11 +820,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						throw new FuseException().initErrno(Errno.ENODATA);
 				}
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}
-		finally {
+		} finally {
 		}
 		return 0;
 	}
@@ -879,10 +851,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				if (val != null)
 					sizeSetter.setSize(val.getBytes().length);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}finally {
+		} finally {
 		}
 		return 0;
 	}
@@ -899,10 +871,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			for (int i = 0; i < atters.length; i++) {
 				lister.add(atters[i]);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}finally {
+		} finally {
 
 		}
 		return 0;
@@ -932,10 +904,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.addXAttribute(name, valStr);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}finally {
+		} finally {
 		}
 		return 0;
 	}
@@ -965,10 +937,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						throw new FuseException().initErrno(Errno.ENODATA);
 				}
 			}
-		} catch(Exception e) {
+		}catch(FuseException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}finally {
+		} finally {
 
 		}
 		return 0;
@@ -990,10 +965,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.addXAttribute(name, valStr);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
-		}finally {
+		} finally {
 
 		}
 		return 0;
