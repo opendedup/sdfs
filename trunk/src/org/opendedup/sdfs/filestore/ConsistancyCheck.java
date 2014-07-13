@@ -14,6 +14,8 @@ public class ConsistancyCheck {
 		try {
 			store.iterationInit();
 			ChunkData data = store.getNextChunck();
+			if(data ==  null)
+				return;
 			HashMap<Long, Long> mismatch = new HashMap<Long, Long>();
 
 			data.recoverd = true;
