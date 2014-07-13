@@ -213,7 +213,7 @@ public class ArchiveImporter {
 			}
 		}
 		try {
-			MetaFileStore.renames(sdest,dest);
+			MetaFileStore.rename(sdest,dest);
 			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
 
 		} catch (Exception e) {
