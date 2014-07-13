@@ -1,7 +1,9 @@
 package org.opendedup.hashing;
 
 import java.util.ArrayList;
+
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendedup.logging.SDFSLogger;
@@ -9,7 +11,7 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class ThreadPool {
 
-	private LinkedBlockingQueue<WritableCacheBuffer> taskQueue = null;
+	private BlockingQueue<WritableCacheBuffer> taskQueue = null;
 	private List<AbstractPoolThread> threads = new ArrayList<AbstractPoolThread>();
 	private boolean isStopped = false;
 
