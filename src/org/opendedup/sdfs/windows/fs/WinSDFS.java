@@ -464,7 +464,7 @@ public class WinSDFS implements DokanOperations {
 		File f = null;
 		try {
 			f = resolvePath(from);
-			MetaFileStore.renames(f.getPath(),this.mountedVolume + to);
+			MetaFileStore.rename(f.getPath(),this.mountedVolume + to);
 			DedupFileChannel ch = this.dedupChannels.get(arg3.handle);
 			if (ch != null) {
 				this.channelLock.lock();
