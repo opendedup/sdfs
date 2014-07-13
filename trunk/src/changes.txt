@@ -1,3 +1,11 @@
+Version 2.0.2
+	Fixes :
+	* Fixed More Symlink issues.
+	* Fixed random IO corruption under high load
+	* Fixed concurrent file read and delete issues
+	* Fixed libfuse.so issue where Native library was used over custom library.
+	Enhancements :
+	* Improved read/write performance by 20%-50%
 Version 2.0.1
 	Fixes :
 	* Fixed Replication Reporting of progress by bytes transferred.
