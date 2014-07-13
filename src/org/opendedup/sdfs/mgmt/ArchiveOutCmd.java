@@ -106,7 +106,11 @@ public class ArchiveOutCmd implements Runnable {
 			evt.endEvent("Archive Out failed", SDFSEvent.ERROR, e);
 
 		} finally {
-			DeleteDir.deleteDirectory(nf);
+			try {
+				DeleteDir.deleteDirectory(nf);
+			} catch (IOException e) {
+				SDFSLogger.getLog().warn("error while deleting " +nf.getPath(),e);
+			}
 			SDFSLogger.getLog().info("Exited Replication task [" + sc + "]");
 		}
 
