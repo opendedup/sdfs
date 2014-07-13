@@ -38,7 +38,7 @@ public class MetaFileStore {
 				// added
 				@Override
 				public void onEviction(String key, MetaDataDedupFile file) {
-					file.unmarshal();
+					file.sync();
 				}
 			}).build();
 
@@ -58,11 +58,11 @@ public class MetaFileStore {
 	 * @param mf
 	 */
 	private static void cacheMF(MetaDataDedupFile mf) {
-		if (mf != null)
+		if (mf != null && !mf.isSymlink())
 			pathMap.put(mf.getPath(), mf);
 	}
 
-	public static void renames(String src, String dst) {
+	public static void rename(String src, String dst) throws IOException {
 		getMFLock.lock();
 		try {
 			if (SDFSLogger.isDebug())
@@ -180,9 +180,8 @@ public class MetaFileStore {
 		try {
 			Path p = Paths.get(origionalPath);
 			if (Files.isSymbolicLink(p)) {
-				MetaDataDedupFile mf = getMF(new File(origionalPath));
 				File dst = new File(snapPath);
-				File src = new File(mf.getPath());
+				File src =Files.readSymbolicLink(p).toFile();
 				if (dst.exists() && !overwrite) {
 					throw new IOException(snapPath + " already exists");
 				}
@@ -195,7 +194,7 @@ public class MetaFileStore {
 							"error symlinking " + origionalPath + " to "
 									+ snapPath, e);
 				}
-				return mf;
+				return getMF(new File(snapPath));
 			} else {
 
 				MetaDataDedupFile mf = getMF(new File(origionalPath));
@@ -225,7 +224,7 @@ public class MetaFileStore {
 			int z = 0;
 			for (int i = 0; i < files.length; i++) {
 				MetaDataDedupFile buf = (MetaDataDedupFile) files[i];
-				buf.unmarshal();
+				buf.sync();
 				z++;
 			}
 			if (SDFSLogger.isDebug())
@@ -270,7 +269,10 @@ public class MetaFileStore {
 				} else {
 					isDir = new File(path).isDirectory();
 				}
-				if (isDir) {
+				if (isSymlink) {
+					return Files.deleteIfExists(p);
+				}
+				else if (isDir) {
 					File ps = new File(path);
 
 					File[] files = ps.listFiles();
@@ -278,7 +280,6 @@ public class MetaFileStore {
 					for (int i = 0; i < files.length; i++) {
 						boolean sd = removeMetaFile(files[i].getPath(),
 								propigateEvent);
-						files[i].delete();
 						if (!sd) {
 							SDFSLogger.getLog().warn(
 									"delete failed : unable to delete ["
@@ -286,13 +287,9 @@ public class MetaFileStore {
 							return sd;
 						}
 					}
-					return (ps.delete());
+					return Files.deleteIfExists(p);
 				}
-				if (isSymlink) {
-					p.toFile().delete();
-					p = null;
-					return true;
-				} else {
+				 else {
 					mf = getMF(new File(path));
 					pathMap.remove(mf.getPath());
 
