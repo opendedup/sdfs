@@ -159,6 +159,12 @@ public class VolumeConfigWriter {
 			this.safe_close = Boolean.parseBoolean(cmd
 					.getOptionValue("io-safe-close"));
 		}
+		if (cmd.hasOption("io-max-file-write-buffers")) {
+			this.max_file_write_buffers = Integer.parseInt(cmd
+					.getOptionValue("io-max-file-write-buffers"));
+		} else {
+			this.max_file_write_buffers = 1;
+		}
 		if (cmd.hasOption("hash-type")) {
 			String ht = cmd.getOptionValue("hash-type");
 			if (ht.equalsIgnoreCase(HashFunctionPool.TIGER_16)
@@ -178,7 +184,7 @@ public class VolumeConfigWriter {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
 				this.chunk_size = 128;
 				this.compress = true;
-				this.max_file_write_buffers = 4;
+				this.max_file_write_buffers =16;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
 			}
@@ -213,12 +219,7 @@ public class VolumeConfigWriter {
 			this.chunk_size = Short.parseShort(cmd
 					.getOptionValue("io-chunk-size"));
 		}
-		if (cmd.hasOption("io-max-file-write-buffers")) {
-			this.max_file_write_buffers = Integer.parseInt(cmd
-					.getOptionValue("io-max-file-write-buffers"));
-		} else {
-			this.max_file_write_buffers = 1;
-		}
+		
 		if (cmd.hasOption("io-max-open-files")) {
 			this.max_open_files = Integer.parseInt(cmd
 					.getOptionValue("io-max-open-files"));
@@ -305,7 +306,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 4;
+					this.chunk_size = 128;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -323,14 +324,13 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 4;
+					this.chunk_size = 128;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
 						.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
-
 		}
 		if (cmd.hasOption("chunk-store-io-threads")) {
 			this.cloudThreads = Integer.parseInt(cmd

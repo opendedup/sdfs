@@ -363,7 +363,8 @@ public class Main {
 	 */
 	public static String hashType = HashFunctionPool.MURMUR3_16;
 
-	public static int dseIOThreads = 8;
+	public static int dseIOThreads = 24;
+	
 	/**
 	 * FDisk Schedule in cron format
 	 * 

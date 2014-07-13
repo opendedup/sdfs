@@ -132,18 +132,21 @@ public class Config {
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+				if(aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-
 			}
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
 			if (azureSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
 				Element azure = (Element) doc.getElementsByTagName("azure")
 						.item(0);
+				if(azure.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
@@ -165,7 +168,10 @@ public class Config {
 				if (!f.mkdirs())
 					throw new IOException("Unable to create " + f.getPath());
 			}
-
+			if(Main.chunkStoreEncryptionEnabled)
+				SDFSLogger.getLog().info("################## Encryption is enabled ##################");
+			else
+				SDFSLogger.getLog().info("################## Encryption is NOT enabled ##################");
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to parse config file [" + fileName + "]", e);
@@ -372,6 +378,8 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName(
 						"aws").item(0);
+				if(aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
@@ -383,6 +391,8 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
 				Element azure = (Element) doc.getElementsByTagName(
 						"azure-store").item(0);
+				if(azure.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
@@ -391,6 +401,10 @@ public class Config {
 			}
 
 		}
+		if(Main.chunkStoreEncryptionEnabled)
+			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
+		else
+			SDFSLogger.getLog().info("################## Encryption is NOT enabled ##################");
 
 		/*
 		 * IOMeter meter = new IOMeter(Main.ioLogFile); Thread th = new
