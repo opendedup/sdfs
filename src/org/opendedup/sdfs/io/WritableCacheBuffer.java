@@ -209,11 +209,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public byte[] getReadChunk(int startPos, int len) throws IOException, BufferClosedException {
 		if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("reading "+ df.getMetaFile().getPath() +" df=" + df.getGUID() + " fpos=" + this.position + " start=" +startPos + " len=" + len);
-		this.lock.lock();
+		
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed");
 		if (this.flushing)
 			throw new BufferClosedException("Buffer Flushing");
+		this.lock.lock();
 		try {
 			try {
 				this.initBuffer();
@@ -386,11 +387,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public byte[] getChunk() throws IOException, BufferClosedException {
-		this.lock.lock();
+		
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed");
 		if (this.flushing)
 			throw new BufferClosedException("Buffer Flushing");
+		this.lock.lock();
 		try {
 			try {
 				this.initBuffer();
@@ -467,8 +469,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void truncate(int len) throws BufferClosedException {
+		this.lock.lock();
 		try {
-			this.lock.lock();
+			
 			if (this.closed)
 				throw new BufferClosedException("Buffer Closed");
 			if (!safeSync) {
@@ -546,8 +549,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void flush() throws BufferClosedException {
+		this.lock.lock();
 		try {
-			this.lock.lock();
+			
 			if (this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
@@ -593,8 +597,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void close() throws IOException {
+		this.lock.lock();
 		try {
-			this.lock.lock();
+			
 
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
