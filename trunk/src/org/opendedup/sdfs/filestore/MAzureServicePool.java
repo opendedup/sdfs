@@ -1,13 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.blob.*;
@@ -23,6 +23,8 @@ public class MAzureServicePool {
 
 	public MAzureServicePool(CloudStorageAccount account, int size,
 			String bucket) throws IOException {
+		System.setProperty("http.keepalive", "true");
+		System.setProperty("http.maxConnections", Integer.toString(size));
 		this.bucket = bucket;
 		this.account = account;
 		this.poolSize = size;
@@ -81,8 +83,13 @@ public class MAzureServicePool {
 			StorageException {
 		SDFSLogger.getLog().info("pool size is " + this.passiveObjects.size());
 		CloudBlobClient serviceClient = account.createCloudBlobClient();
+		serviceClient = account.createCloudBlobClient();
+		serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads*2);
+		serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs(10*1000);
+		serviceClient.getDefaultRequestOptions().setRetryPolicyFactory(new RetryExponentialRetry(500,5));
 		CloudBlobContainer container = serviceClient
 				.getContainerReference(this.bucket);
+		
 		container.createIfNotExists();
 		return container;
 	}
