@@ -348,7 +348,8 @@ public class Config {
 						.getAttribute("max-repl-batch-sz"));
 			if (localChunkStore.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean
-						.parseBoolean("encrypt");
+						.parseBoolean(localChunkStore
+								.getAttribute("encrypt"));
 				Main.chunkStoreEncryptionKey = localChunkStore
 						.getAttribute("encryption-key");
 			}

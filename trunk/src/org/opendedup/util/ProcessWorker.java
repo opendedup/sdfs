@@ -1,52 +1,89 @@
 package org.opendedup.util;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeoutException;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 
-public class ProcessWorker extends Thread {
+public class ProcessWorker {
 
 	public static int runProcess(String[] pstr, int timeout)
 			throws TimeoutException, InterruptedException, IOException {
+		
 		String cmdStr = "";
 		for (String st : pstr) {
 			cmdStr = cmdStr + " " + st;
 		}
-		SDFSLogger.getLog().info("Executing [" + cmdStr + "]");
-		Process p = Runtime.getRuntime().exec(pstr);
-		ProcessWorker worker = new ProcessWorker(p);
-		worker.start();
+		SDFSLogger.getLog().debug("Executing [" + cmdStr + "]");
+		Process p = null;
 		try {
-			worker.join(timeout);
-			if (worker.exit != null) {
-				SDFSLogger.getLog().info(
-						"[" + cmdStr + "] returned " + worker.exit);
-				return worker.exit;
-			} else
-				throw new TimeoutException();
-		} catch (InterruptedException ex) {
-			worker.interrupt();
-			Thread.currentThread().interrupt();
-			throw ex;
-		} finally {
-			p.destroy();
+			p = Runtime.getRuntime().exec(pstr, null, new File(Main.volume.getPath()));
+			ReadStream s1 = new ReadStream("stdin", p.getInputStream ());
+			ReadStream s2 = new ReadStream("stderr", p.getErrorStream ());
+			s1.start ();
+			s2.start ();
+		}catch(Throwable e) {
+			SDFSLogger.getLog().error("unable to execute " + cmdStr,e);
+			throw new IOException(e);
 		}
+		long now = System.currentTimeMillis();
+	    long finish = now + timeout;
+	    while ( isAlive( p ) && ( System.currentTimeMillis() < finish ) )
+	    {
+	        Thread.sleep( 10 );
+	    }
+	    if ( isAlive( p ) )
+	    {
+	        throw new TimeoutException( "Process timeout out after " + timeout + " ms" );
+	    }
+	    return p.exitValue();
 	}
-
-	private final Process process;
-	private Integer exit;
-
-	private ProcessWorker(Process process) {
-		this.process = process;
+	
+	public static boolean isAlive( Process p ) {
+	    try
+	    {	
+	        p.exitValue();
+	        return false;
+	    } catch (IllegalThreadStateException e) {
+	        return true;
+	    }
 	}
-
-	public void run() {
-		try {
-			exit = process.waitFor();
-		} catch (InterruptedException ignore) {
-			return;
-		}
+	
+	private static class ReadStream implements Runnable {
+	    String name;
+	    InputStream is;
+	    Thread thread;      
+	    public ReadStream(String name, InputStream is) {
+	        this.name = name;
+	        this.is = is;
+	    }       
+	    public void start () {
+	        thread = new Thread (this);
+	        thread.start ();
+	    }       
+	    public void run () {
+	        try {
+	            InputStreamReader isr = new InputStreamReader (is);
+	            BufferedReader br = new BufferedReader (isr);   
+	            while (true) {
+	                String s = br.readLine ();
+	                if (s == null) break;
+	                SDFSLogger.getLog().debug("[" + name + "] " + s);
+	            }
+	            is.close ();    
+	        } catch (Exception ex) {
+	        	SDFSLogger.getLog().debug("Problem reading stream " + name + "... :" , ex);
+	        }
+	    }
 	}
+	
+	
+
+	
 
 }

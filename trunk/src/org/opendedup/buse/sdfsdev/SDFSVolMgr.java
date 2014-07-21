@@ -118,8 +118,10 @@ public class SDFSVolMgr {
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
 		Main.blockDev = true;
+		
 		BUSEMkDev.init();
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
+		
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
@@ -131,14 +133,16 @@ public class SDFSVolMgr {
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-
 		try {
-			VolumeShutdownHook shutdownHook = new VolumeShutdownHook(
-					sdfsService, Main.volume);
+			SDFSLogger.getLog().info("Volume name is " + Main.volume.getName());
+			VolumeShutdownHook.service = sdfsService;
+			VolumeShutdownHook shutdownHook = new VolumeShutdownHook();
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+
+		
 	}
 
 	private static void printHelp(Options options) {

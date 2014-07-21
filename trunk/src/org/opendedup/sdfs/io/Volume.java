@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -67,6 +68,8 @@ public class Volume implements java.io.Serializable {
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
 	public transient VolumeSocket soc = null;
+	private ReentrantLock devLock = new ReentrantLock();
+	
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -99,25 +102,36 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void closeAllDevices() {
+		SDFSLogger.getLog().warn("Closing all devices");
+		devLock.lock();
+		try{
 		for (BlockDev dev : devices) {
 			try {
+				SDFSLogger.getLog().warn("Closing " + dev.devName);
 				dev.stopDev();
-			} catch (IOException e) {
+				SDFSLogger.getLog().warn("Closed " + dev.devName);
+			} catch (Exception e) {
 
 			}
+		}
+		} finally {
+			devLock.unlock();
 		}
 	}
 
 	private void startAllOnStartupDevices() {
-		synchronized (devices) {
+		devLock.lock();
+		try{
 			for (BlockDev dev : devices) {
 				try {
 					if (dev.startOnInit)
 						this.startDev(dev.devName);
-				} catch (IOException e) {
-
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to start block device [" + dev.devName + "]",e);
 				}
 			}
+		} finally {
+			devLock.unlock();
 		}
 	}
 
@@ -251,7 +265,8 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {
-		synchronized (devices) {
+		devLock.lock();
+		try{
 			long sz = 0;
 			for (BlockDev _dev : this.devices) {
 				if (dev.devName.equalsIgnoreCase(_dev.devName))
@@ -279,12 +294,15 @@ public class Volume implements java.io.Serializable {
 			 * SDFSLogger.getLog().warn("unable to start device", e); } }
 			 */
 			this.writer.writeConfig();
+		} finally {
+			devLock.unlock();
 		}
 	}
 
 	public synchronized BlockDev removeBlockDev(String devName)
 			throws Exception {
-		synchronized (devices) {
+		devLock.lock();
+		try{
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
 					try {
@@ -301,17 +319,22 @@ public class Volume implements java.io.Serializable {
 					return _dev;
 				}
 			}
+		} finally {
+			devLock.unlock();
 		}
 		throw new IOException("Device not found [" + devName + "]");
 	}
 
 	public synchronized BlockDev getBlockDev(String devName) throws IOException {
-		synchronized (devices) {
+		devLock.lock();
+		try{
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
 					return _dev;
 				}
 			}
+		} finally {
+			devLock.unlock();
 		}
 		throw new IOException("Device not found [" + devName + "]");
 	}
