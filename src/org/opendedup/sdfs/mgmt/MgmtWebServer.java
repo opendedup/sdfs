@@ -658,9 +658,10 @@ public class MgmtWebServer implements Container {
 					body.println("could not find " + reqPath);
 					body.close();
 				} else {
-
+					
 					File f = new File(archivePath + File.separator
 							+ reqPath.getPath());
+					try {
 					if (f.exists()) {
 						long time = System.currentTimeMillis();
 						response.set("Content-Type", "application/x-gtar");
@@ -678,12 +679,15 @@ public class MgmtWebServer implements Container {
 						}
 						in.close();
 						out.close();
-						f.delete();
+						
 					} else {
 						response.setCode(404);
 						PrintStream body = response.getPrintStream();
 						body.println("could not find " + reqPath);
 						body.close();
+					}
+					}finally {
+						f.delete();
 					}
 				}
 			}

@@ -52,14 +52,14 @@ public class FileChunkStore implements AbstractChunkStore {
 	 *            the name of the chunk store.
 	 */
 	public FileChunkStore() {
-		SDFSLogger.getLog().info("Opening Chunk Store");
+		SDFSLogger.getLog().debug("Opening Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
 			File chunk_location = new File(Main.chunkStore);
 			if (!chunk_location.exists()) {
 				chunk_location.mkdirs();
 			}
-			SDFSLogger.getLog().info("Loading freebits bitset");
+			SDFSLogger.getLog().debug("Loading freebits bitset");
 			bsf = new File(chunk_location + File.separator + "freebit.map");
 			if (!bsf.exists()) {
 				if (SDFSLogger.isDebug())
@@ -69,7 +69,7 @@ public class FileChunkStore implements AbstractChunkStore {
 				 * (Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
 				 */
 			} else {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loading freeslots from " + bsf.getPath());
 				try {
 					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
@@ -78,7 +78,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					SDFSLogger.getLog().error(
 							"Unable to load bitset from " + bsf.getPath(), e);
 				}
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loaded [" + this.freeSlots.cardinality()
 								+ "] free slots");
 			}
@@ -91,7 +91,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			pool = new FCPool(f, 100);
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			SDFSLogger.getLog().debug("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to open filestore", e);
@@ -101,18 +101,18 @@ public class FileChunkStore implements AbstractChunkStore {
 	}
 
 	public FileChunkStore(String fpath) {
-		SDFSLogger.getLog().info("Opening Chunk Store " + fpath);
+		SDFSLogger.getLog().debug("Opening Chunk Store " + fpath);
 		File pf = new File(fpath).getParentFile();
 		Arrays.fill(FREE, (byte) 0);
 		try {
-			SDFSLogger.getLog().info("Loading freebits bitset");
+			SDFSLogger.getLog().debug("Loading freebits bitset");
 			bsf = new File(pf.getPath() + File.separator + "freebit.map");
 			if (!bsf.exists()) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loading freeslots from " + bsf.getPath());
 				try {
 					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
@@ -121,7 +121,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					SDFSLogger.getLog().error(
 							"Unable to load bitset from " + bsf.getPath(), e);
 				}
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loaded [" + this.freeSlots.cardinality()
 								+ "] free slots");
 			}
@@ -134,7 +134,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			pool = new FCPool(f, 100);
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			SDFSLogger.getLog().debug("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to open filestore" + fpath, e);
@@ -144,20 +144,20 @@ public class FileChunkStore implements AbstractChunkStore {
 	}
 
 	public FileChunkStore(String fpath, int chunkLength) {
-		SDFSLogger.getLog().info(
+		SDFSLogger.getLog().debug(
 				"Opening Chunk Store [" + fpath + "] with chunksize of "
 						+ chunkLength);
 		this.pageSize = chunkLength;
 		FREE = new byte[pageSize];
 		Arrays.fill(FREE, (byte) 0);
 		try {
-			SDFSLogger.getLog().info("Loading freebits bitset");
+			SDFSLogger.getLog().debug("Loading freebits bitset");
 			bsf = new File(fpath + "freebit.map");
 			if (!bsf.exists()) {
 				SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loading freeslots from " + bsf.getPath());
 				try {
 					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
@@ -166,7 +166,7 @@ public class FileChunkStore implements AbstractChunkStore {
 					SDFSLogger.getLog().error(
 							"Unable to load bitset from " + bsf.getPath(), e);
 				}
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loaded [" + this.freeSlots.cardinality()
 								+ "] free slots");
 			}
@@ -181,7 +181,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.currentLength = chunkDataWriter.length();
 			this.closed = false;
 			pool = new FCPool(f, 100);
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			SDFSLogger.getLog().debug("ChunkStore " + f.getPath() + " created");
 			th = new SyncThread(this);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to open filestore" + fpath, e);
@@ -196,7 +196,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 * @see com.annesam.sdfs.filestore.AbstractChunkStore#closeStore()
 	 */
 	public void closeStore() {
-		SDFSLogger.getLog().info("Closing chunkstore " + this.name);
+		SDFSLogger.getLog().debug("Closing chunkstore " + this.name);
 		try {
 			this.chunkDataWriter.getFD().sync();
 
@@ -216,7 +216,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		try {
 			if (this.freeSlots != null) {
 				OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
-				SDFSLogger.getLog().info("Persisted Free Slots");
+				SDFSLogger.getLog().debug("Persisted Free Slots");
 				this.freeSlots.clear(0, this.freeSlots.capacity());
 			}
 		} catch (Exception e) {

@@ -3,6 +3,7 @@ package org.opendedup.sdfs.replication;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +98,11 @@ public class MetaFileImport implements Serializable {
 			ReplicationCanceledException {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
-		if (dir.isDirectory()) {
+		if (Files.isSymbolicLink(dir.toPath())) {
+			if(SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("File is symlink");
+		}
+		else if (dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));

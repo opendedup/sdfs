@@ -44,11 +44,14 @@ public class Utils {
 					}
 					n++;
 				}
+				if(al.size() > 0) {
 				String[] ar = new String[al.size()];
+				
 				ar = al.toArray(ar);
 				bs3Service.deleteMultipleObjects(bucketName, (String[]) ar);
 				al = new ArrayList<String>();
 				obj = bs3Service.listObjects(bucketName);
+				}
 			}
 			bs3Service.deleteBucket(bucketName);
 			System.out.println("done");

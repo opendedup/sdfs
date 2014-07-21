@@ -52,21 +52,21 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 *            the name of the chunk store.
 	 */
 	public VariableFileChunkStore() {
-		SDFSLogger.getLog().info("Opening Variable Length Chunk Store");
+		SDFSLogger.getLog().debug("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
 			File chunk_location = new File(Main.chunkStore);
 			if (!chunk_location.exists()) {
 				chunk_location.mkdirs();
 			}
-			SDFSLogger.getLog().info("Loading freebits bitset");
+			SDFSLogger.getLog().debug("Loading freebits bitset");
 			bsf = new File(chunk_location + File.separator + "freebit.map");
 			if (!bsf.exists()) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("Looks like a new ChunkStore");
 				this.freeSlots = new OpenBitSet();
 			} else {
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loading freeslots from " + bsf.getPath());
 				try {
 					this.freeSlots = OpenBitSetSerialize.readIn(bsf.getPath());
@@ -75,7 +75,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					SDFSLogger.getLog().error(
 							"Unable to load bitset from " + bsf.getPath(), e);
 				}
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"Loaded [" + this.freeSlots.cardinality()
 								+ "] free slots");
 			}
@@ -96,7 +96,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 							"Unable to load filestore size from "
 									+ lsf.getPath(), e);
 				}
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"FileStore Size [" + this.size.get() + "] ");
 			}
 
@@ -110,7 +110,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			pool = new FCPool(f, 100);
-			SDFSLogger.getLog().info("ChunkStore " + f.getPath() + " created");
+			SDFSLogger.getLog().debug("ChunkStore " + f.getPath() + " created");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -153,7 +153,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			try {
 				if (this.freeSlots != null) {
 					OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
-					SDFSLogger.getLog().info("Persisted Free Slots");
+					SDFSLogger.getLog().debug("Persisted Free Slots");
 					this.freeSlots = null;
 				}
 			} catch (Exception e) {
@@ -163,7 +163,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				rf.seek(0);
 				rf.writeLong(this.size.get());
 				rf.writeLong(this.compressedLength.get());
-				SDFSLogger.getLog().info("Persisted FileSize");
+				SDFSLogger.getLog().debug("Persisted FileSize");
 
 				rf.close();
 			} catch (Exception e) {

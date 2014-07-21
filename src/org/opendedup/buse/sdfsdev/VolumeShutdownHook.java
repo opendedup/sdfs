@@ -2,18 +2,14 @@ package org.opendedup.buse.sdfsdev;
 
 import org.opendedup.buse.driver.BUSEMkDev;
 import org.opendedup.logging.SDFSLogger;
-
-import org.opendedup.sdfs.io.Volume;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 
 public class VolumeShutdownHook extends Thread {
-	private static SDFSService service;
-	private static Volume vol;
+	public static SDFSService service;
 	private static boolean stopped;
 
-	public VolumeShutdownHook(SDFSService service, Volume vol) {
-		VolumeShutdownHook.vol = vol;
-		VolumeShutdownHook.service = service;
+	public VolumeShutdownHook() {
 	}
 
 	@Override
@@ -28,11 +24,11 @@ public class VolumeShutdownHook extends Thread {
 			SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 			SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
 			try {
-				vol.closeAllDevices();
+				Main.volume.closeAllDevices();
 				Thread.sleep(1000);
 				BUSEMkDev.release();
 				service.stop();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 			SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
