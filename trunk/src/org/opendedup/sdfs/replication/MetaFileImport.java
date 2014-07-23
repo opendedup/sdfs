@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
@@ -30,8 +31,8 @@ public class MetaFileImport implements Serializable {
 	private static final int MAX_BATCHHASH_SIZE = 100;
 	boolean corruption = false;
 	private long entries = 0;
-	private long bytesTransmitted;
-	private long virtualBytesTransmitted;
+	private AtomicLong bytesTransmitted = new AtomicLong(0);
+	private AtomicLong virtualBytesTransmitted = new AtomicLong(0);
 	private String server = null;
 	private String path = null;
 	private transient String password = null;
@@ -77,8 +78,8 @@ public class MetaFileImport implements Serializable {
 			try {
 				long sz = ProcessBatchGetBlocks.runCmd(hashes, server, port,
 						password, useSSL);
-				this.bytesTransmitted += sz;
-				levt.bytesImported = this.bytesTransmitted;
+				this.bytesTransmitted.addAndGet(sz);
+				levt.bytesImported = this.bytesTransmitted.get();
 			} catch (Throwable e) {
 				SDFSLogger.getLog().error("Corruption Suspected on import", e);
 				corruption = true;
@@ -99,10 +100,9 @@ public class MetaFileImport implements Serializable {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		if (Files.isSymbolicLink(dir.toPath())) {
-			if(SDFSLogger.isDebug())
+			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("File is symlink");
-		}
-		else if (dir.isDirectory()) {
+		} else if (dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));
@@ -152,9 +152,9 @@ public class MetaFileImport implements Serializable {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"fetched " + hashes.size() + " blocks");
-					this.bytesTransmitted = this.bytesTransmitted
-							+ (hashes.size() * Main.CHUNK_LENGTH);
-					levt.bytesImported = this.bytesTransmitted;
+					this.bytesTransmitted
+							.addAndGet((hashes.size() * Main.CHUNK_LENGTH));
+					levt.bytesImported = this.bytesTransmitted.get();
 					hashes = null;
 					hashes = new ArrayList<byte[]>();
 				} catch (Throwable e) {
@@ -227,20 +227,36 @@ public class MetaFileImport implements Serializable {
 											SDFSLogger.getLog().debug(
 													"fetching " + hashes.size()
 															+ " blocks");
-										long sz = ProcessBatchGetBlocks.runCmd(
-												hashes, server, port, password,
-												useSSL);
-										if (SDFSLogger.isDebug())
-											SDFSLogger.getLog().debug(
-													"fetched " + hashes.size()
-															+ " blocks");
-										Main.volume.addDuplicateBytes(-1 * sz,
-												true);
-										this.bytesTransmitted = this.bytesTransmitted
-												+ sz;
-										levt.bytesImported = this.bytesTransmitted;
-										hashes = null;
-										hashes = new ArrayList<byte[]>();
+										int tries = 0;
+										for (;;) {
+											try {
+
+												long sz = ProcessBatchGetBlocks
+														.runCmd(hashes, server,
+																port, password,
+																useSSL);
+												if (SDFSLogger.isDebug())
+													SDFSLogger
+															.getLog()
+															.debug("fetched "
+																	+ hashes.size()
+																	+ " blocks");
+												Main.volume.addDuplicateBytes(
+														-1 * sz, true);
+												this.bytesTransmitted
+														.addAndGet(sz);
+												levt.bytesImported = this.bytesTransmitted
+														.get();
+												hashes = null;
+												hashes = new ArrayList<byte[]>();
+												break;
+											} catch (Exception e) {
+												tries++;
+												if (tries > 3)
+													throw e;
+											}
+
+										}
 									} catch (Throwable e) {
 										SDFSLogger
 												.getLog()
@@ -284,9 +300,8 @@ public class MetaFileImport implements Serializable {
 			} finally {
 				mp.close();
 				mp = null;
-				this.virtualBytesTransmitted = this.virtualBytesTransmitted
-						+ mf.length();
-				levt.virtualDataImported = this.virtualBytesTransmitted;
+				this.virtualBytesTransmitted.addAndGet(mf.length());
+				levt.virtualDataImported = this.virtualBytesTransmitted.get();
 			}
 		}
 		this.filesProcessed++;
@@ -311,11 +326,11 @@ public class MetaFileImport implements Serializable {
 	}
 
 	public long getBytesTransmitted() {
-		return bytesTransmitted;
+		return bytesTransmitted.get();
 	}
 
 	public long getVirtualBytesTransmitted() {
-		return virtualBytesTransmitted;
+		return virtualBytesTransmitted.get();
 	}
 
 	public String getServer() {

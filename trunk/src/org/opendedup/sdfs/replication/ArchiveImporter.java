@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -17,6 +16,8 @@ import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.FileCounts;
+import org.opendedup.util.OSValidator;
+import org.opendedup.util.ProcessWorker;
 import org.opendedup.util.RandomGUID;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -50,11 +51,14 @@ public class ArchiveImporter {
 				+ " from " + server + ":" + port + " to " + dest, evt);
 		ReadLock l = GCMain.gclock.readLock();
 		l.lock();
-		TFile fDstFiles = null;
+		runningJobs.put(evt.uid, this);
+		String sdest = dest + "." + RandomGUID.getGuid();
+		File f = new File(srcArchive);
+		File fDstFiles = new File(Main.volume.getPath()
+				+ File.separator + sdest);
 		try {
-			runningJobs.put(evt.uid, this);
-			File f = new File(srcArchive);
-			String sdest = dest + "." + RandomGUID.getGuid();
+
+			
 			SDFSLogger.getLog().info("setting up staging at " + sdest);
 			try {
 				SDFSLogger.getLog().info(
@@ -62,38 +66,105 @@ public class ArchiveImporter {
 								+ port + " to " + dest);
 				if (!f.exists())
 					throw new IOException("File does not exist " + srcArchive);
-				TFile srcRoot = new TFile(new File(srcArchive + "/"));
-				ievt.maxCt = FileCounts.getSize(srcRoot);
-				SDFSLogger.getLog().info("Tar file size is " + ievt.maxCt);
-				TFile srcFilesRoot = new TFile(new File(srcArchive + "/files/"));
-				TFile srcFiles = null;
-				try {
-					srcFiles = srcFilesRoot.listFiles()[0];
-				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"Replication archive is corrupt " + srcArchive
-									+ " size of "
-									+ new File(srcArchive).length(), e);
-					throw e;
-				}
-				fDstFiles = new TFile(Main.volume.getPath() + File.separator
-						+ sdest);
-				this.export(srcFiles, fDstFiles);
-				srcFiles = new TFile(new File(srcArchive + "/ddb/"));
-				File ddb = new File(Main.dedupDBStore + File.separator);
-				if (!ddb.exists())
-					ddb.mkdirs();
-				TFile mDstFiles = new TFile(Main.dedupDBStore + File.separator);
-				this.export(srcFiles, mDstFiles);
-				TVFS.umount(srcFiles);
-				TVFS.umount(mDstFiles);
-				TVFS.umount(srcRoot.getInnerArchive());
+				if (OSValidator.isWindows()) {
+					
+					TFile srcRoot = new TFile(new File(srcArchive + "/"));
+					ievt.maxCt = FileCounts.getSize(srcRoot);
 
+					SDFSLogger.getLog().info("Tar file size is " + ievt.maxCt);
+					TFile srcFilesRoot = new TFile(new File(srcArchive
+							+ "/files/"));
+					TFile srcFiles = null;
+					try {
+						srcFiles = srcFilesRoot.listFiles()[0];
+					} catch (Exception e) {
+						SDFSLogger.getLog().error(
+								"Replication archive is corrupt " + srcArchive
+										+ " size of "
+										+ new File(srcArchive).length(), e);
+						throw e;
+					}
+					TFile tfDstFiles = new TFile(Main.volume.getPath()
+							+ File.separator + sdest);
+					this.export(srcFiles, tfDstFiles);
+					srcFiles = new TFile(new File(srcArchive + "/ddb/"));
+					File ddb = new File(Main.dedupDBStore + File.separator);
+					if (!ddb.exists())
+						ddb.mkdirs();
+					TFile mDstFiles = new TFile(Main.dedupDBStore
+							+ File.separator);
+					this.export(srcFiles, mDstFiles);
+					TVFS.umount(srcFiles);
+					TVFS.umount(mDstFiles);
+					TVFS.umount(srcRoot.getInnerArchive());
+				} else {
+					ievt.maxCt = 3;
+					File stg =null;
+					try {
+					stg = new File(new File(srcArchive).getParentFile()
+							.getPath() + File.separator + RandomGUID.getGuid());
+					stg.mkdirs();
+					String expFile = "tar -xzf " + srcArchive + " -C "
+							+ stg.getPath();
+					int xt = ProcessWorker.runProcess(expFile);
+					if(xt != 0)
+						throw new IOException("expand failed in " +expFile + " exit value was " + xt);
+					ievt.curCt++;
+					SDFSLogger.getLog().info(
+							"executed " + expFile + " exit code was "
+									+ xt);
+					File srcFilesRoot = new File(stg.getPath() + File.separator
+							+ "files");
+					File srcFiles = null;
+					try {
+						srcFiles = srcFilesRoot.listFiles()[0];
+					} catch (Exception e) {
+						SDFSLogger.getLog().error(
+								"Replication archive is corrupt " + srcArchive
+										+ " size of "
+										+ new File(srcArchive).length(), e);
+						throw e;
+					}
+					SDFSLogger.getLog().info("setting up staging at " + fDstFiles.getPath());
+					String cpCmd = "cp -rfa " + srcFiles + " " + fDstFiles;
+					
+					xt = ProcessWorker.runProcess(cpCmd);
+					if(xt != 0)
+						throw new IOException("copy failed in " +cpCmd + " exit value was " + xt);
+					SDFSLogger.getLog().info(
+							"executed " + cpCmd + " exit code was "
+									+ xt);
+					ievt.curCt++;
+					srcFiles = new File(stg.getPath() + File.separator
+							+ "ddb");
+					File ddb = new File(Main.dedupDBStore + File.separator);
+					if (!ddb.exists())
+						ddb.mkdirs();
+					cpCmd = "cp -rfa " + srcFiles + File.separator + " " + ddb.getParentFile().getPath();
+					xt = ProcessWorker.runProcess(cpCmd);
+					if(xt != 0)
+						throw new IOException("copy failed in " +cpCmd + " exit value was " + xt);
+					SDFSLogger.getLog().info(
+							"executed " + cpCmd + " exit code was "
+									+ xt);
+					ievt.endEvent("Staging completed successfully");
+					} catch(Exception e) {
+						ievt.endEvent(e.getMessage(), SDFSEvent.ERROR);
+						throw e;
+					}finally {
+						//FileUtils.deleteDirectory(stg);
+						//Process p = Runtime.getRuntime().exec("rm -rf " + stg);
+						//p.waitFor();
+						//f.delete();
+					}
+
+				}
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
 						+ sdest, server, password, port, maxSz, evt, useSSL);
 
 				imp.runImport();
 				if (imp.isCorrupt()) {
+
 					// evt.endEvent("Import failed for " + srcArchive +
 					// " because not all the data could be imported from " +
 					// server,SDFSEvent.WARN);
@@ -163,7 +234,7 @@ public class ArchiveImporter {
 			}
 		} finally {
 			try {
-				fDstFiles.rm();
+				
 			} catch (Exception e) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("error", e);
@@ -213,7 +284,7 @@ public class ArchiveImporter {
 			}
 		}
 		try {
-			MetaFileStore.rename(sdest,dest);
+			MetaFileStore.rename(sdest, dest);
 			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
 
 		} catch (Exception e) {
@@ -227,13 +298,14 @@ public class ArchiveImporter {
 		}
 	}
 
-	private void export(TFile file, TFile dst)
+	private void export(File file, File dst)
 			throws ReplicationCanceledException, IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"extracting " + file.getPath() + " to " + dst.getPath());
 		if (!closed) {
-			TFile.cp_rp(file, dst, TArchiveDetector.NULL);
+			if (OSValidator.isWindows())
+				TFile.cp_rp(file, dst, TArchiveDetector.NULL);
 			/*
 			 * if (file.isDirectory()) { dst.mkdirs(); // All files and
 			 * subdirectories TFile[] files = file.listFiles(); for (int i = 0;
@@ -252,15 +324,7 @@ public class ArchiveImporter {
 		}
 	}
 
-	public static void main(String[] args) {
-		String srcArchive = "/tmp/test.zip";
-		TFile srcRoot = new TFile(new File(srcArchive + "/test/"));
-		System.out.println("Tar file size is " + FileCounts.getSize(srcRoot));
-		TFile[] srcFiles = srcRoot.listFiles();
-		for (TFile f : srcFiles) {
-			System.out.println("file=" + f.getName());
-		}
-
+	public static void main(String[] args) throws IOException {
 	}
 
 }

@@ -27,6 +27,8 @@ public class MgmtServerConnection {
 				new EasySSLProtocolSocketFactory(), 443);
 		Protocol.registerProtocol("https", easyhttps);
 		client.getParams().setParameter("http.useragent", "SDFS Client");
+		client.getParams().setParameter("http.socket.timeout", 60*1000);
+		client.getParams().setParameter("http.connection.timeout", 60*1000);
 	}
 
 	public static Document getResponse(String url) throws IOException {
