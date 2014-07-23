@@ -44,6 +44,26 @@ public class ProcessWorker {
 	    return p.exitValue();
 	}
 	
+	public static int runProcess(String pstr)
+			throws TimeoutException, InterruptedException, IOException {
+		
+		
+		SDFSLogger.getLog().debug("Executing [" + pstr + "]");
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec(pstr, null, new File(Main.volume.getPath()));
+			ReadStream s1 = new ReadStream("stdin", p.getInputStream ());
+			ReadStream s2 = new ReadStream("stderr", p.getErrorStream ());
+			s1.start ();
+			s2.start ();
+		}catch(Throwable e) {
+			SDFSLogger.getLog().error("unable to execute " + pstr,e);
+			throw new IOException(e);
+		}
+		p.waitFor();
+	    return p.exitValue();
+	}
+	
 	public static boolean isAlive( Process p ) {
 	    try
 	    {	
@@ -73,7 +93,7 @@ public class ProcessWorker {
 	            while (true) {
 	                String s = br.readLine ();
 	                if (s == null) break;
-	                SDFSLogger.getLog().debug("[" + name + "] " + s);
+	                SDFSLogger.getLog().info("[" + name + "] " + s);
 	            }
 	            is.close ();    
 	        } catch (Exception ex) {

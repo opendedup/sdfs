@@ -10,6 +10,7 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.DeleteDir;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.RandomGUID;
 import org.w3c.dom.Element;
 
@@ -80,14 +81,20 @@ public class ArchiveOutCmd implements Runnable {
 			MetaFileStore.removeMetaFile(af.getPath(), true);
 			eevt.curCt = 2;
 			SDFSLogger.getLog().debug("Copied out replication snapshot");
-			TFile dest = new TFile(nf.getPath() + ".tar.gz");
-			TFile src = new TFile(nf);
-			src.cp_rp(dest);
-			SDFSLogger.getLog().debug(
-					"created archive " + nf.getPath() + ".tar.gz");
-			TVFS.umount(dest);
-			TVFS.umount(src);
-			TVFS.umount(dest.getInnerArchive());
+			if (OSValidator.isWindows()) {
+				TFile dest = new TFile(nf.getPath() + ".tar.gz");
+				TFile src = new TFile(nf);
+				SDFSLogger.getLog().debug(
+						"created archive " + nf.getPath() + ".tar.gz");
+				TVFS.umount(dest);
+				TVFS.umount(src);
+				TVFS.umount(dest.getInnerArchive());
+			} else {
+				Process p = Runtime.getRuntime().exec(
+						"tar -cpzf " + nf.getPath() + ".tar.gz -C "
+								+ nf.getPath() + " .", null, nf);
+				p.waitFor();
+			}
 			eevt.curCt = 3;
 			evt.curCt = 4;
 
@@ -108,8 +115,9 @@ public class ArchiveOutCmd implements Runnable {
 		} finally {
 			try {
 				DeleteDir.deleteDirectory(nf);
-			} catch (IOException e) {
-				SDFSLogger.getLog().warn("error while deleting " +nf.getPath(),e);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn(
+						"error while deleting " + nf.getPath(), e);
 			}
 			SDFSLogger.getLog().info("Exited Replication task [" + sc + "]");
 		}
