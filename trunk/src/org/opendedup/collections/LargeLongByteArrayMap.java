@@ -21,6 +21,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	// RandomAccessFile bdbf = null;
 	String fileName;
 	boolean closed = true;
+	boolean dirty = false;
 	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 
 	public LargeLongByteArrayMap(String fileName, long initialSize,
@@ -77,16 +78,19 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	public void close() {
 		this.hashlock.writeLock().lock();
 		this.closed = true;
-		RandomAccessFile bdbf = null;
-		try {
-			bdbf = new RandomAccessFile(fileName, "rw");
-			bdbf.getFD().sync();
-		} catch (Exception e) {
-		} finally {
+		if (this.dirty) {
+			RandomAccessFile bdbf = null;
 			try {
-				bdbf.close();
-			} catch (IOException e) {
+				bdbf = new RandomAccessFile(fileName, "rw");
+				bdbf.getFD().sync();
+			} catch (Exception e) {
+			} finally {
+				try {
+					bdbf.close();
+				} catch (IOException e) {
 
+				}
+				this.dirty = false;
 			}
 			this.hashlock.writeLock().unlock();
 		}
@@ -125,6 +129,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	public void put(long pos, byte[] data) throws IOException {
 		this.hashlock.writeLock().lock();
+		this.dirty = true;
 		if (data.length != this.arraySize)
 			throw new IOException(" size mismatch " + data.length
 					+ " does not equal " + this.arraySize);
@@ -152,6 +157,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		if (checkForLock) {
 			this.hashlock.writeLock().lock();
 		}
+		this.dirty = true;
 		RandomAccessFile rf = null;
 		try {
 			rf = new RandomAccessFile(this.fileName, "rw");
@@ -170,10 +176,18 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	@Override
 	public void sync() throws IOException {
-		RandomAccessFile bdbf = new RandomAccessFile(fileName, "rw");
-		bdbf.getFD().sync();
-		bdbf.close();
-		bdbf = null;
+		this.hashlock.writeLock().lock();
+		try {
+			if (this.dirty) {
+				RandomAccessFile bdbf = new RandomAccessFile(fileName, "rw");
+				bdbf.getFD().sync();
+				bdbf.close();
+				bdbf = null;
+				this.dirty = false;
+			}
+		} finally {
+			this.hashlock.writeLock().unlock();
+		}
 
 	}
 
@@ -258,6 +272,7 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	public void optimize() throws IOException {
 		this.hashlock.writeLock().lock();
+		this.dirty = true;
 		RandomAccessFile rf = null;
 		RandomAccessFile nrf = null;
 		try {

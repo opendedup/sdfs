@@ -99,6 +99,8 @@ public class Config {
 				Main.chunkStoreEncryptionKey = cbe
 						.getAttribute("encryption-key");
 			}
+			if(cbe.hasAttribute("encryption-iv"))
+				Main.chunkStoreEncryptionIV = cbe.getAttribute("encryption-iv");
 			if (cbe.hasAttribute("compress")) {
 				Main.compress = Boolean.parseBoolean(cbe
 						.getAttribute("compress"));
@@ -353,6 +355,8 @@ public class Config {
 				Main.chunkStoreEncryptionKey = localChunkStore
 						.getAttribute("encryption-key");
 			}
+			if(localChunkStore.hasAttribute("encryption-iv"))
+				Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Element networkcs = (Element) doc.getElementsByTagName("network")
 					.item(0);

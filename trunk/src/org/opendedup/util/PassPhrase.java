@@ -1,5 +1,7 @@
 package org.opendedup.util;
 
+import java.security.SecureRandom;
+
 /*
  * Copyright (c) Ian F. Darwin, http://www.darwinsys.com/, 1996-2002.
  * All rights reserved. Software written by Ian F. Darwin and others.
@@ -66,6 +68,13 @@ public class PassPhrase {
 			sb.append(goodChar[r.nextInt(goodChar.length)]);
 		}
 		return sb.toString();
+	}
+	
+	public static String getIV() {
+		SecureRandom rnd = new SecureRandom();
+		byte [] b = new byte[16];
+		rnd.nextBytes(b);
+		return StringUtils.getHexString(b);
 	}
 
 	public static void main(String[] argv) {

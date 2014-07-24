@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
@@ -152,6 +153,12 @@ public class HCServiceProxy {
 
 			return (byte) socket.serverState.size();
 		}
+	}
+	
+	public static AbstractHashesMap getHashesMap() {
+		if(Main.chunkStoreLocal)
+		return hcService.getHashesMap();
+		else return null;
 	}
 
 	public static long getSize() {
