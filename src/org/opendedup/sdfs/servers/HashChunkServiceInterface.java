@@ -3,6 +3,7 @@ package org.opendedup.sdfs.servers;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -44,6 +45,8 @@ public interface HashChunkServiceInterface {
 			SDFSEvent evt) throws IOException;
 
 	public abstract void commitChunks();
+	
+	public abstract AbstractHashesMap getHashesMap();
 
 	public abstract void runConsistancyCheck();
 

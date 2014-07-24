@@ -63,6 +63,7 @@ public class DSEConfigWriter {
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	String chunk_store_encryption_key = PassPhrase.getNext();
+	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 	boolean compress = Main.compress;
 	String hashType = HashFunctionPool.MURMUR3_16;
@@ -145,6 +146,10 @@ public class DSEConfigWriter {
 				this.chunk_store_encryption_key = cmd
 						.getOptionValue("encryption-key");
 			}
+		}
+		if (cmd.hasOption("encryption-iv")) {
+			String iv =  cmd.getOptionValue("encryption-iv");
+			this.chunk_store_iv = iv;
 		}
 
 		if (this.awsEnabled) {
@@ -297,6 +302,7 @@ public class DSEConfigWriter {
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
+		cs.setAttribute("encryption-iv", this.chunk_store_iv);
 		cs.setAttribute("max-repl-batch-sz",
 				Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -428,6 +434,11 @@ public class DSEConfigWriter {
 				.withLongOpt("encryption-key")
 				.withDescription(
 						"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("encryption-iv")
+				.withDescription(
+						"The encryption  initialization vector (IV) used for encrypting data. If not specified a strong key will be generated automatically")
 				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")

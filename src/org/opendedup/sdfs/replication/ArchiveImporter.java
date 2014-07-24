@@ -153,9 +153,9 @@ public class ArchiveImporter {
 						throw e;
 					}finally {
 						//FileUtils.deleteDirectory(stg);
-						//Process p = Runtime.getRuntime().exec("rm -rf " + stg);
-						//p.waitFor();
-						//f.delete();
+						Process p = Runtime.getRuntime().exec("rm -rf " + stg);
+						p.waitFor();
+						f.delete();
 					}
 
 				}

@@ -93,7 +93,10 @@ public class ProcessWorker {
 	            while (true) {
 	                String s = br.readLine ();
 	                if (s == null) break;
-	                SDFSLogger.getLog().info("[" + name + "] " + s);
+	                if(name.equalsIgnoreCase("stderr"))
+	                	SDFSLogger.getLog().error("[" + name + "] " + s);
+	                else
+	                	SDFSLogger.getLog().debug("[" + name + "] " + s);
 	            }
 	            is.close ();    
 	        } catch (Exception ex) {

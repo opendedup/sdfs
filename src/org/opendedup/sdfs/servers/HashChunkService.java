@@ -3,6 +3,7 @@ package org.opendedup.sdfs.servers;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
@@ -72,6 +73,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 
 	public AbstractChunkStore getChuckStore() {
 		return fileStore;
+	}
+	
+	public AbstractHashesMap getHashesMap() {
+		return hs.bdb;
 	}
 
 	public boolean writeChunk(byte[] hash, byte[] aContents, int position,

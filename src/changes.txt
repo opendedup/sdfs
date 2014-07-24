@@ -1,5 +1,13 @@
 Version 2.0.2
 	Fixes :
+	* Fixed More Replication Symlink issues.
+	* Fixed random deadlock under high load
+	* Nested Snapshots looping
+	* Fixed odvol mapping files and releasing them. This cause a hang during creation and subsequent restarts
+	Enhancements :
+	* Added more replication resilience
+Version 2.0.2
+	Fixes :
 	* Fixed More Symlink issues.
 	* Fixed random IO corruption under high load
 	* Fixed concurrent file read and delete issues

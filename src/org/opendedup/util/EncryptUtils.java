@@ -1,23 +1,26 @@
 package org.opendedup.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-
-
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
-import java.util.Random;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.util.Arrays;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -25,6 +28,8 @@ import org.opendedup.sdfs.Main;
 public class EncryptUtils {
 	private static byte[] keyBytes = null;
 	private static SecretKeySpec key = null;
+	private static final byte [] iv = StringUtils.getHexBytes(Main.chunkStoreEncryptionIV);
+	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
 		try {
 			keyBytes = HashFunctions
@@ -100,7 +105,7 @@ public class EncryptUtils {
 	public static byte[] decrypt(byte[] encChunk) {
 		BlockCipher engine = new AESEngine();
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(engine);
-
+		
 		cipher.init(false, new KeyParameter(keyBytes));
 		int size = cipher.getOutputSize(encChunk.length);
 		byte[] clearText = new byte[size];
@@ -120,27 +125,43 @@ public class EncryptUtils {
 		}
 		return clearText;
 	}
+	
+	public static void encryptFile(File src,File dst) throws Exception {
+		dst.getParentFile().mkdirs();
+	         
+	         Cipher encrypt =  Cipher.getInstance("AES/CBC/PKCS5Padding");  
+	         encrypt.init(Cipher.ENCRYPT_MODE, key,spec);
+	         //opening streams
+	         FileOutputStream fos =new FileOutputStream(dst);
+	         FileInputStream fis =new FileInputStream(src);
+	         CipherOutputStream cout=new CipherOutputStream(fos, encrypt);
+	         IOUtils.copy(fis,cout);
+	         cout.flush();
+	         cout.close();
+	         fis.close();
+	}
+	
+	public static void decryptFile(File src,File dst) throws Exception {
+		dst.getParentFile().mkdirs();
+	         
+	         Cipher encrypt =  Cipher.getInstance("AES/CBC/PKCS5Padding");  
+	         encrypt.init(Cipher.DECRYPT_MODE, key,spec);
+	         //opening streams
+	         FileOutputStream fos =new FileOutputStream(dst);
+	         FileInputStream fis =new FileInputStream(src);
+	         CipherInputStream cis=new CipherInputStream(fis, encrypt);
+	         IOUtils.copy(cis,fos);
+	        fos.flush();
+	        fos.close();
+	        cis.close();
+	}
+	
+	
 
-	public static void main(String[] args) throws IOException {
-		String testStr = "blaaaaaaaaaaaaa!sssssss";
-		byte[] enc = EncryptUtils.encrypt(testStr.getBytes());
-		byte[] dec = EncryptUtils.decrypt(enc);
-		String bla = new String(dec);
-		System.out.println(bla + " equals " + bla.equals(testStr));
-		if (!Arrays.areEqual(dec, testStr.getBytes()))
-			System.out.println("Encryption Error!!");
+	public static void main(String[] args) throws Exception {
 		long start = System.currentTimeMillis();
-		Random rnd = new Random();
-		for (int i = 0; i < 800; i++) {
-			byte[] b = new byte[128 * 1024];
-			rnd.nextBytes(b);
-			enc = EncryptUtils.encrypt(b);
-			dec = EncryptUtils.decrypt(enc);
-			if (!Arrays.areEqual(dec, b))
-				System.out.println("Encryption Error ["
-						+ HashFunctions.getMD5Hash(b) + "] ["
-						+ HashFunctions.getMD5Hash(dec) + "]");
-		}
+		encryptFile(new File("/home/samsilverberg/Downloads/24199E7D-B252-A19F-8AF4-CC0A6177871F.tar.gz"),new File("/home/samsilverberg/Downloads/enc.tar.gz"));
+		decryptFile(new File("/home/samsilverberg/Downloads/enc.tar.gz"),new File("/home/samsilverberg/Downloads/poo.tar.gz"));
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");
 	}

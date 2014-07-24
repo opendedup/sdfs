@@ -76,6 +76,7 @@ public class VolumeConfigWriter {
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
+	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 
 	String hashType = HashFunctionPool.MURMUR3_16;
@@ -205,6 +206,10 @@ public class VolumeConfigWriter {
 				this.chunk_store_encryption_key = cmd
 						.getOptionValue("chunk-store-encryption-key");
 			}
+		}
+		if (cmd.hasOption("chunk-store-iv")) {
+			String iv =  cmd.getOptionValue("chunk-store-iv");
+			this.chunk_store_iv = iv;
 		}
 
 		if (cmd.hasOption("io-safe-sync")) {
@@ -527,6 +532,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
+		cs.setAttribute("encryption-iv", this.chunk_store_iv);
 		cs.setAttribute("max-repl-batch-sz",
 				Integer.toString(Main.MAX_REPL_BATCH_SZ));
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
@@ -885,6 +891,11 @@ public class VolumeConfigWriter {
 				.withLongOpt("chunk-store-encryption-key")
 				.withDescription(
 						"The encryption key used for encrypting data. If not specified a strong key will be generated automatically. They key must be at least 8 charaters long")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("chunk-store-iv")
+				.withDescription(
+						"The encryption  initialization vector (IV) used for encrypting data. If not specified a strong key will be generated automatically")
 				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("aws-enabled")
