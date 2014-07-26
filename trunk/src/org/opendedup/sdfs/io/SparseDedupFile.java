@@ -312,7 +312,7 @@ public class SparseDedupFile implements DedupFile {
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()
-							.info("WriteCache timed out after [" + sec
+							.info("WriteCache has take over [" + sec
 									+ "] seconds. There are still "
 									+ this.flushingBuffers.size() + " in flush");
 					i = 0;
@@ -417,19 +417,22 @@ public class SparseDedupFile implements DedupFile {
 								f.dedup = mf.isDedup();
 								executor.execute(f);
 							}
-							int loops = 6*5;
+							
 							int wl = 0;
-							int tm = 10000;
+							int tm = 1000;
+					
+							int al = 0;
 							while (l.getDN() < fs.size()) {
-								if (wl > 0) {
-									int nt = (tm * wl) / 1000;
+								if (al > 10) {
+									int nt = wl / 1000;
 									SDFSLogger
 											.getLog()
 											.warn("Slow io, waited ["
 													+ nt
 													+ "] seconds for all writes to complete.");
+									al = 0;
 								}
-								if (wl > loops) {
+								if (Main.writeTimeoutSeconds >0 && wl > (Main.writeTimeoutSeconds*tm)) {
 									int nt = (tm * wl) / 1000;
 									throw new IOException(
 											"Write Timed Out after ["
@@ -443,7 +446,8 @@ public class SparseDedupFile implements DedupFile {
 								synchronized (l) {
 									l.wait(tm);
 								}
-								wl++;
+								al++;
+								wl +=tm;
 							}
 							if (l.getDN() < fs.size())
 								throw new IOException(

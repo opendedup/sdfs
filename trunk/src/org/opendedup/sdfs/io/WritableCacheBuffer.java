@@ -290,19 +290,20 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					sh.l = l;
 					executor.execute(sh);
 				}
-				int loops = 6;
 				int wl = 0;
-				int tm = 60000*5;
-				if (l.getDN() < sz) {
-					if (wl > 0) {
-						int nt = (tm * wl) / 1000;
+				int tm = 1000;
+				int al = 0;
+				while (l.getDN() < sz) {
+					if (al > 10) {
+						int nt = wl / 1000;
 						SDFSLogger
 								.getLog()
 								.warn("Slow io, waited ["
 										+ nt
 										+ "] seconds for all reads to complete.");
+						al =0;
 					}
-					if (wl > loops) {
+					if (Main.readTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds*tm)) {
 						int nt = (tm * wl) / 1000;
 						throw new IOException("read Timed Out after [" + nt
 								+ "] seconds. Expected [" + sz
@@ -310,9 +311,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 								+ "] were completed");
 					}
 					synchronized (l) {
-						l.wait(tm);
+						l.wait(1000);
 					}
-					wl++;
+					wl+=1000;
+					al++;
 				}
 				if (l.getDN() < sz)
 					SDFSLogger.getLog().warn(
