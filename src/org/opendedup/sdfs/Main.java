@@ -21,6 +21,9 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	
+	public static int writeTimeoutSeconds = 300;
+	public static int readTimeoutSeconds = 300;
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = true;
 

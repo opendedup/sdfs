@@ -79,7 +79,7 @@ public class EncryptUtils {
 		return chunk;
 	}
 
-	public static byte[] encrypt(byte[] chunk) {
+	public static byte[] encrypt(byte[] chunk) throws IOException {
 		BlockCipher engine = new AESEngine();
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(engine);
 
@@ -96,13 +96,13 @@ public class EncryptUtils {
 				cipherText = tmp;
 			}
 		} catch (CryptoException ce) {
-			System.err.println(ce);
-			System.exit(1);
+			SDFSLogger.getLog().error("uable to decrypt", ce);
+			throw new IOException(ce);
 		}
 		return cipherText;
 	}
 
-	public static byte[] decrypt(byte[] encChunk) {
+	public static byte[] decrypt(byte[] encChunk) throws IOException {
 		BlockCipher engine = new AESEngine();
 		PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(engine);
 		
@@ -120,8 +120,8 @@ public class EncryptUtils {
 				clearText = tmp;
 			}
 		} catch (CryptoException ce) {
-			System.err.println(ce);
-			System.exit(1);
+			SDFSLogger.getLog().error("uable to decrypt", ce);
+			throw new IOException(ce);
 		}
 		return clearText;
 	}

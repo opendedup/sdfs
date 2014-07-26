@@ -332,7 +332,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		}
 	}
 
-	private byte[] getHashBytes(String hashStr, boolean enc) {
+	private byte[] getHashBytes(String hashStr, boolean enc) throws IOException {
 		if (enc) {
 			byte[] encH = StringUtils.getHexBytes(hashStr);
 			return EncryptUtils.decrypt(encH);

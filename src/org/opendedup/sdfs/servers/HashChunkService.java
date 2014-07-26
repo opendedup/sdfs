@@ -48,23 +48,18 @@ public class HashChunkService implements HashChunkServiceInterface {
 			fileStore = (AbstractChunkStore) Class
 					.forName(Main.chunkStoreClass).newInstance();
 			fileStore.init(Main.chunkStoreConfig);
-		} catch (InstantiationException e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			System.err.println("Unable to initiate ChunkStore");
+			e.printStackTrace();
 			System.exit(-1);
-		} catch (IllegalAccessException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		} catch (ClassNotFoundException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		} catch (IOException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			System.exit(-1);
-		}
+		} 
 		try {
 			hs = new HashStore(this);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to start hashstore", e);
+			System.err.println("Unable to initiate hashstore");
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}

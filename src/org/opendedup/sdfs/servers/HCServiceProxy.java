@@ -141,6 +141,7 @@ public class HCServiceProxy {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to initialize HashChunkService ",
 					e);
+			System.err.println("Unable to initialize HashChunkService ");
 			e.printStackTrace();
 			System.exit(-1);
 		}
