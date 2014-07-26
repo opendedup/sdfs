@@ -199,7 +199,7 @@ public class HashStore {
 		try {
 			byte[] data = bdb.getData(hash);
 			if (data == null && Arrays.equals(hash, blankHash)) {
-				hs = new HashChunk(hash, blankData, false);
+				hs = new HashChunk(hash, new byte[blankData.length], false);
 			}
 			hs = new HashChunk(hash, data, false);
 			// this.cacheBuffers.put(hStr, hs);
