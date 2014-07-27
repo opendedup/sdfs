@@ -346,10 +346,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				f = null;
 				throw new FuseException("folder exists").initErrno(Errno.EPERM);
 			}
-			f.mkdir();
-			Path p = Paths.get(f.getPath());
 			try {
-				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
+				MetaFileStore.mkDir(f, mode);
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("error while making dir " + path, e);
 				throw new FuseException("access denied for " + path)
@@ -633,11 +631,17 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				this.getFileChannel(path, -1).getDedupFile().forceClose();
 			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
-				File f = new File(mountedVolume + path);
+				Path p = new File(mountedVolume + path).toPath();
 				// SDFSLogger.getLog().info("deleting symlink " + f.getPath());
-				if (!f.delete())
+				try {
+				if (!Files.deleteIfExists(p))
 					throw new FuseException().initErrno(Errno.EACCES);
 				return 0;
+				}catch (IOException e) {
+					SDFSLogger.getLog().warn(
+							"unable to delete symlink " + p);
+					throw new FuseException().initErrno(Errno.ENOSYS);
+				}
 			} else {
 
 				File f = this.resolvePath(path);
@@ -655,7 +659,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					throw new FuseException().initErrno(Errno.EACCES);
 				}
 			}
-		} finally {
+		}  finally {
 		}
 	}
 

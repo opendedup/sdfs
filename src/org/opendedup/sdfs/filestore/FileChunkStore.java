@@ -223,7 +223,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		}
 	}
 
-	protected void sync() throws IOException {
+	public void sync() throws IOException {
 		this.chunkDataWriter.getFD().sync();
 	}
 

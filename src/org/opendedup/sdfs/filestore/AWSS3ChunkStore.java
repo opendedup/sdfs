@@ -448,4 +448,10 @@ public class AWSS3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void sync() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

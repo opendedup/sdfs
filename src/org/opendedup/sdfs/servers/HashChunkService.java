@@ -214,4 +214,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 
 	}
 
+	@Override
+	public void sync() throws IOException {
+		fileStore.sync();
+		
+	}
+
 }

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -30,6 +31,8 @@ import com.googlecode.concurrentlinkedhashmap.EvictionListener;
  * 
  */
 public class MetaFileStore {
+	
+	
 
 	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>()
 			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(5000)
@@ -114,6 +117,22 @@ public class MetaFileStore {
 
 		return mf;
 
+	}
+	
+	public static void mkDir(File f, int mode) throws IOException {
+		if (f.exists()) {
+			f = null;
+			throw new IOException("folder exists");
+		}
+		f.mkdir();
+		Path p = Paths.get(f.getPath());
+		try {
+			if(!OSValidator.isWindows())
+				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
+		} catch (IOException e) {
+			SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);
+			throw new IOException("access denied for " + f.getPath());
+		} 
 	}
 
 	public static MetaDataDedupFile getFolder(File f) {

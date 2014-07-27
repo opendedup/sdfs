@@ -423,7 +423,7 @@ public class SparseDedupFile implements DedupFile {
 					
 							int al = 0;
 							while (l.getDN() < fs.size()) {
-								if (al > 10) {
+								if (al == 30) {
 									int nt = wl / 1000;
 									SDFSLogger
 											.getLog()
@@ -674,6 +674,7 @@ public class SparseDedupFile implements DedupFile {
 							"Sync wb=[" + wsz + "] fb=[" + fsz
 									+ "] write fush [" + wt + "] bd sync ["
 									+ st + "]");
+				HCServiceProxy.sync();
 			}
 		} catch (Exception e) {
 			throw new IOException(e);
