@@ -221,6 +221,11 @@ public class HCServiceProxy {
 			return Main.CHUNK_LENGTH;
 		}
 	}
+	
+	public static void sync()throws IOException {
+		if(Main.chunkStoreLocal)
+			hcService.sync();
+	}
 
 	private static byte[] _write(byte[] hash, byte[] aContents, byte[] hashloc)
 			throws IOException, RedundancyNotMetException {

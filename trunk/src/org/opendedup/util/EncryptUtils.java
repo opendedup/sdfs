@@ -28,12 +28,13 @@ import org.opendedup.sdfs.Main;
 public class EncryptUtils {
 	private static byte[] keyBytes = null;
 	private static SecretKeySpec key = null;
-	private static final byte [] iv = StringUtils.getHexBytes(Main.chunkStoreEncryptionIV);
+	private static byte [] iv = StringUtils.getHexBytes(Main.chunkStoreEncryptionIV);
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
 		try {
 			keyBytes = HashFunctions
 					.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
+			iv = StringUtils.getHexBytes(Main.chunkStoreEncryptionIV);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

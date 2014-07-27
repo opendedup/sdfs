@@ -510,4 +510,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void sync() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

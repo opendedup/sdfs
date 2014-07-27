@@ -63,6 +63,8 @@ public interface AbstractChunkStore {
 	public abstract long compressedSize();
 
 	public abstract long maxSize();
+	
+	public abstract void sync() throws IOException;
 
 	/**
 	 * 

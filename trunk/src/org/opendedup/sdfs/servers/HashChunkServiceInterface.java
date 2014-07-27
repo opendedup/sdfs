@@ -67,6 +67,8 @@ public interface HashChunkServiceInterface {
 	public abstract long getDupsFound();
 
 	public abstract void close();
+	
+	public abstract void sync() throws IOException;
 
 	public abstract void init() throws IOException;
 

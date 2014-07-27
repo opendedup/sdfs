@@ -284,4 +284,10 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void sync() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -407,4 +407,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void sync() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

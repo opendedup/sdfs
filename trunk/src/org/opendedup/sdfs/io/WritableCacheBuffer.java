@@ -294,7 +294,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				int tm = 1000;
 				int al = 0;
 				while (l.getDN() < sz) {
-					if (al > 10) {
+					if (al == 30) {
 						int nt = wl / 1000;
 						SDFSLogger
 								.getLog()

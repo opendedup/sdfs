@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
@@ -35,6 +34,8 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.eventbus.EventBus;
+
 /**
  * 
  * @author annesam Stores Meta-Data about a dedupFile. This class is modeled
@@ -44,6 +45,7 @@ import org.w3c.dom.Element;
 public class MetaDataDedupFile implements java.io.Externalizable {
 
 	private static final long serialVersionUID = -4598940197202968523L;
+	private static EventBus eventBus = new EventBus();
 	transient public static final String pathSeparator = File.pathSeparator;
 	transient public static final String separator = File.separator;
 	transient public static final char pathSeparatorChar = File.pathSeparatorChar;
@@ -74,18 +76,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String symlinkPath = null;
 	private String version = Main.version;
 	private BlockDev blkdev = null;
-	private static ArrayList<MetaFileEventListener> mfListeners = new ArrayList<MetaFileEventListener>();
-
-	public static void addMetaFileListener(MetaFileEventListener l) {
-		mfListeners.add(l);
-	}
-
-	public static void removeMetaFileListener(MetaFileEventListener l) {
-		mfListeners.remove(l);
-	}
-
-	public static ArrayList<MetaFileEventListener> getMetaFileListeners() {
-		return mfListeners;
+	
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
 	}
 
 	public BlockDev getDev() {
@@ -957,7 +950,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public boolean renameTo(String dest, boolean propigateEvent)
 			throws IOException {
 		writeLock.lock();
-
 		try {
 			File f = new File(this.path);
 			if (this.symlink) {

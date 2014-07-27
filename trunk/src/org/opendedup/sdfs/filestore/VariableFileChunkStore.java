@@ -173,7 +173,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	}
 
-	protected void sync() throws IOException {
+	public void sync() throws IOException {
 		for (FileChunkStore store : st) {
 			try {
 				store.sync();
