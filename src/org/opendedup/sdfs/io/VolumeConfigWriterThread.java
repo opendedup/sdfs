@@ -7,12 +7,20 @@ import java.nio.file.Path;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.events.VolumeWritten;
+
+import com.google.common.eventbus.EventBus;
 
 public class VolumeConfigWriterThread implements Runnable {
 	private String configFile = null;
 	private Thread th = null;
 	private long duration = 60 * 1000;
 	boolean closed = false;
+	private static EventBus eventBus = new EventBus();
+	
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
+	}
 
 	public VolumeConfigWriterThread(String configFile) {
 		this.configFile = configFile;
@@ -47,6 +55,7 @@ public class VolumeConfigWriterThread implements Runnable {
 		Files.copy(src, bak);
 		Main.volume.setClosedGracefully(false);
 		Config.writeSDFSConfigFile(configFile);
+		eventBus.post(new VolumeWritten(Main.volume));
 	}
 
 	public void stop() {
