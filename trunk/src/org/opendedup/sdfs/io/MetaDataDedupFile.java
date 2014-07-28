@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +26,9 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileRenamed;
+import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
@@ -76,6 +78,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String symlinkPath = null;
 	private String version = Main.version;
 	private BlockDev blkdev = null;
+	private boolean dirty = false;
 	
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -746,6 +749,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.lastModified = System.currentTimeMillis();
 			this.dedup = Main.dedupFiles;
 			this.setLength(0, false, true);
+			this.dirty = true;
 			this.sync();
 		} else if (f.isDirectory()) {
 			this.permissions = Main.defaultDirPermissions;
@@ -781,6 +785,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					out = new ObjectOutputStream(
 							new FileOutputStream(this.path));
 					out.writeObject(this);
+					out.flush();
+					out.close();
+					eventBus.post(new MFileWritten(this));
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn(
 							"unable to write file metadata for [" + this.path
@@ -789,12 +796,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				}
 			}
 		} finally {
-			if (out != null)
-				try {
-					out.flush();
-					out.close();
-				} catch (IOException e) {
-				}
 			writeLock.unlock();
 		}
 		return true;
@@ -867,6 +868,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setHidden(boolean hidden, boolean propigateEvent) {
 		this.hidden = hidden;
+		this.dirty = true;
 		this.unmarshal();
 	}
 
@@ -878,7 +880,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
-			return f.delete();
+			boolean del= f.delete();
+			if(del)
+				eventBus.post(new MFileDeleted(this));
+			return del;
 		} finally {
 			this.writeLock.unlock();
 		}
@@ -901,6 +906,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	protected void setDedupFile(DedupFile df, boolean propigateEvent) {
+		this.dirty = true;
 		this.dfGuid = df.getGUID();
 	}
 
@@ -970,12 +976,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				MetaFileStore.removeMetaFile(dest, true);
 				DedupFileStore.updateDedupFile(this);
 				boolean rename = f.renameTo(new File(dest));
+				
 				if (rename) {
+					this.dirty = true;
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog()
 								.debug("FileSystem rename succesful");
+					
 					this.path = dest;
 					this.unmarshal();
+					eventBus.register(new MFileRenamed(this,f.getPath(),dest));
 				} else {
 					SDFSLogger.getLog().warn("unable to move file");
 
@@ -1031,6 +1041,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setExecutable(boolean executable, boolean propigateEvent) {
 		this.execute = executable;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
 	}
@@ -1039,12 +1050,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			boolean propigateEvent) {
 		this.write = writable;
 		this.ownerWriteOnly = ownerOnly;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
 	}
 
 	public boolean setWritable(boolean writable, boolean propigateEvent) {
 		this.write = writable;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
 	}
@@ -1059,12 +1072,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setReadable(boolean readable, boolean propigateEvent) {
 		this.read = readable;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
 	}
 
 	public void setReadOnly(boolean propigateEvent) {
 		this.read = true;
+		this.dirty = true;
 		this.unmarshal();
 	}
 
@@ -1099,6 +1114,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setLastModified(long lastModified, boolean propigateEvent) {
 		this.lastModified = lastModified;
+		this.dirty = true;
 		this.lastAccessed = lastModified;
 		return true;
 	}
@@ -1129,6 +1145,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		long len = l - this.length;
 		Main.volume.updateCurrentSize(len, true);
 		this.length = l;
+		this.dirty = true;
 		if (serialize)
 			this.unmarshal();
 	}
@@ -1192,11 +1209,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
+		this.dirty = true;
 		this.lastAccessed = lastAccessed;
 	}
 
 	public long getLastAccessed() {
 		return lastAccessed;
+	}
+	
+	public boolean isDirty() {
+		return this.dirty;
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -31,6 +30,8 @@ import org.opendedup.sdfs.cluster.BlockDevSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
+import org.opendedup.sdfs.io.events.SFileDeleted;
+import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
 
@@ -39,11 +40,13 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.eventbus.EventBus;
 
 public class SparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
+	private static EventBus eventBus = new EventBus();
 	private transient MetaDataDedupFile mf;
 	private transient final ArrayList<DedupFileChannel> channels = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
@@ -71,8 +74,13 @@ public class SparseDedupFile implements DedupFile {
 	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, executionHandler);
+	private boolean dirty = false;
 	static {
 		// executor.allowCoreThreadTimeOut(true);
+	}
+	
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
 	}
 
 	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
@@ -265,6 +273,7 @@ public class SparseDedupFile implements DedupFile {
 			String filePath = Main.dedupDBStore + File.separator
 					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
 			DedupFileStore.removeOpenDedupFile(this.GUID);
+			eventBus.post(new SFileDeleted(this));
 			return DeleteDir.deleteDirectory(new File(filePath));
 		} catch (Exception e) {
 
@@ -339,6 +348,7 @@ public class SparseDedupFile implements DedupFile {
 		if (writeBuffer == null)
 			return;
 		if (writeBuffer.isDirty()) {
+			this.dirty = true;
 			try {
 				byte[] hashloc = null;
 				byte[] hash = null;
@@ -874,6 +884,7 @@ public class SparseDedupFile implements DedupFile {
 				if(!this.deleted) {
 					MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
 					MetaFileStore.getMF(mf.getPath()).sync();
+					eventBus.post(new SFileWritten(this));
 				}
 			}
 			if (SDFSLogger.isDebug())
@@ -886,6 +897,7 @@ public class SparseDedupFile implements DedupFile {
 			bdb = null;
 			chunkStore = null;
 			this.closed = true;
+			this.dirty = false;
 			this.channelLock.unlock();
 			this.syncLock.unlock();
 		}
@@ -1271,6 +1283,10 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public boolean isAbsolute() {
 		return true;
+	}
+	
+	public boolean isDirty() {
+		return this.dirty;
 	}
 
 	@Override
