@@ -32,6 +32,8 @@ public class Main {
 	public static boolean firstRun = true;
 
 	public static boolean logToConsole = false;
+	
+	public static boolean syncDL = true;
 
 	public static StandAloneGCScheduler pFullSched = null;
 

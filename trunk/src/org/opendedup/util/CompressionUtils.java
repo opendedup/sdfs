@@ -1,16 +1,21 @@
 package org.opendedup.util;
 
 import java.io.ByteArrayOutputStream;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.lz4.LZ4Factory;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.xerial.snappy.Snappy;
 
 //import org.h2.compress.LZFInputStream;
@@ -86,11 +91,31 @@ public class CompressionUtils {
 			throws IOException {
 		return lz4Decompressor.decompress(input, len);
 	}
-
-	public static void main(String[] args) throws IOException {
-		String t = "This is a test";
-		System.out.println(new String(decompressSnappy(compressSnappy(t
-				.getBytes()))));
+	
+	public static void compressFile(File src,File dst) throws IOException {
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos =new FileOutputStream(dst);
+        FileInputStream fis =new FileInputStream(src);
+        LZ4BlockOutputStream os = new LZ4BlockOutputStream(fos,1 << 16,lz4Compressor);
+        IOUtils.copy(fis, os);
+        os.flush();
+        os.close();
+        fis.close();
 	}
+	
+	public static void decompressFile(File src,File dst) throws IOException {
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos =new FileOutputStream(dst);
+        FileInputStream fis =new FileInputStream(src);
+        LZ4BlockInputStream is = new LZ4BlockInputStream(fis,lz4Decompressor);
+        IOUtils.copy(is, fos);
+        fos.flush();
+        fos.close();
+        fis.close();
+	}
+
+	
 
 }
