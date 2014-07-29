@@ -128,7 +128,8 @@ public class EncryptUtils {
 	}
 	
 	public static void encryptFile(File src,File dst) throws Exception {
-		dst.getParentFile().mkdirs();
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
 	         
 	         Cipher encrypt =  Cipher.getInstance("AES/CBC/PKCS5Padding");  
 	         encrypt.init(Cipher.ENCRYPT_MODE, key,spec);
@@ -143,7 +144,8 @@ public class EncryptUtils {
 	}
 	
 	public static void decryptFile(File src,File dst) throws Exception {
-		dst.getParentFile().mkdirs();
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
 	         
 	         Cipher encrypt =  Cipher.getInstance("AES/CBC/PKCS5Padding");  
 	         encrypt.init(Cipher.DECRYPT_MODE, key,spec);
@@ -159,12 +161,6 @@ public class EncryptUtils {
 	
 	
 
-	public static void main(String[] args) throws Exception {
-		long start = System.currentTimeMillis();
-		encryptFile(new File("/home/samsilverberg/Downloads/24199E7D-B252-A19F-8AF4-CC0A6177871F.tar.gz"),new File("/home/samsilverberg/Downloads/enc.tar.gz"));
-		decryptFile(new File("/home/samsilverberg/Downloads/enc.tar.gz"),new File("/home/samsilverberg/Downloads/poo.tar.gz"));
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms");
-	}
+	
 
 }

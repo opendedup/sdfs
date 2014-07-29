@@ -32,17 +32,20 @@ import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.DedupChunkInterface;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.eventbus.EventBus;
 import com.google.common.hash.BloomFilter;
 
 public class HCServiceProxy {
 
 	private static HashChunkServiceInterface hcService = null;
 	private static DSEClientSocket socket = null;
+	private static EventBus eventBus = new EventBus();
 	public static ClusterSocket cs = null;
 	private static int cacheSize = 104857600 / Main.CHUNK_LENGTH;
 	private static final LoadingCache<ByteArrayWrapper, byte[]> chunks = CacheBuilder
@@ -66,6 +69,10 @@ public class HCServiceProxy {
 
 	// private static boolean initialized = false;
 
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
+	}
+	
 	public static synchronized void processHashClaims(SDFSEvent evt)
 			throws IOException {
 		if (Main.chunkStoreLocal)
@@ -126,6 +133,9 @@ public class HCServiceProxy {
 					hcService.runConsistancyCheck();
 				}
 				touchRunFile();
+				if(Main.syncDL) {
+					eventBus.post(new CloudSyncDLRequest());
+				}
 			}
 
 			else {

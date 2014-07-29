@@ -12,7 +12,7 @@ import org.opendedup.sdfs.io.events.VolumeWritten;
 import com.google.common.eventbus.EventBus;
 
 public class VolumeConfigWriterThread implements Runnable {
-	private String configFile = null;
+	public  String configFile = null;
 	private Thread th = null;
 	private long duration = 60 * 1000;
 	boolean closed = false;
