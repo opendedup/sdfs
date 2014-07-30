@@ -99,7 +99,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long maxSize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return Long.MAX_VALUE;
 	}
 
 	@Override
