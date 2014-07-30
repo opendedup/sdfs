@@ -33,7 +33,7 @@ public class Main {
 
 	public static boolean logToConsole = false;
 	
-	public static boolean syncDL = true;
+	public static boolean syncDL = false;
 
 	public static StandAloneGCScheduler pFullSched = null;
 
