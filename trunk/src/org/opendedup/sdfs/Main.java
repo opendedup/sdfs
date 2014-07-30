@@ -378,15 +378,6 @@ public class Main {
 	 */
 	public static String fDkiskSchedule = "0 59 23 * * ?";
 
-	/**
-	 * Age, if older than, that data will be evicted from the Dedup Storage
-	 * Engine
-	 */
-	// public static int evictionAge = 3;
-	/**
-	 * Compressed Index
-	 */
-	public static boolean compressedIndex = false;
 
 	public static boolean closedGracefully = true;
 
