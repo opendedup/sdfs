@@ -173,6 +173,12 @@ public class Volume implements java.io.Serializable {
 			this.name = vol.getAttribute("name");
 		else
 			this.name = pathF.getParentFile().getName();
+		if(vol.hasAttribute("read-timeout-seconds"))
+			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
+		if(vol.hasAttribute("write-timeout-seconds"))
+			Main.writeTimeoutSeconds = Integer.parseInt(vol.getAttribute("write-timeout-seconds"));
+		if(vol.hasAttribute("sync-files"))
+			Main.syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
 		if (vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol
 					.getAttribute("use-dse-size"));
@@ -537,6 +543,9 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
+		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
@@ -582,6 +591,9 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
+		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);

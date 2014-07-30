@@ -50,6 +50,8 @@ public class VolumeConfigWriter {
 	int max_file_write_buffers = 24;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
+	int write_timeout = Main.writeTimeoutSeconds;
+	int read_timeout = Main.readTimeoutSeconds;
 	String filePermissions = "0644";
 	String dirPermissions = "0755";
 	String owner = "0";
@@ -522,6 +524,8 @@ public class VolumeConfigWriter {
 				Integer.toString(chunk_size * 1000));
 		vol.setAttribute("cluster-rack-aware",
 				Boolean.toString(clusterRackAware));
+		vol.setAttribute("read-timeout-seconds", Integer.toString(this.read_timeout));
+		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");
