@@ -11,6 +11,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WriteTest implements Runnable {
 	String path;
@@ -18,6 +19,7 @@ public class WriteTest implements Runnable {
 	int uniqueP;
 	int bs = 1048576;
 	public long duration = 0;
+	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;
 
 	public WriteTest(String path, int size, int uniqueP) {
@@ -90,7 +92,7 @@ public class WriteTest implements Runnable {
 		float results[] = new float[runs];
 		int t = 0;
 		for (int i = start; i < (start + tests.length); i++) {
-			WriteTest test = new WriteTest(path + File.separator + "test" + i
+			WriteTest test = new WriteTest(path + File.separator + "test" + fn.getAndIncrement()
 					+ ".bin", size, unique);
 			tests[t] = test;
 			t++;

@@ -35,7 +35,6 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	transient private int size = 0;
 	transient private String path = null;
 	transient private FileChannel kFC = null;
-	transient private FileChannel tRaf = null;
 	transient private static final int EL = HashFunctionPool.hashLength + 8;
 	transient private static final int VP = HashFunctionPool.hashLength;
 	transient private ReentrantLock hashlock = new ReentrantLock();
@@ -158,7 +157,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			long val = -1;
 			this.hashlock.lock();
 			try {
-				ByteBuffer lb = ByteBuffer.wrap(new byte[8]);
+				//ByteBuffer lb = ByteBuffer.wrap(new byte[8]);
 
 				keys.position((iterPos * EL) + VP);
 				val = keys.getLong();
@@ -168,9 +167,12 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 						this.mapped.set(iterPos);
 						this.removed.clear(iterPos);
 						claims.clear(iterPos);
-						lb.position(0);
-						lb.putLong(System.currentTimeMillis());
-						this.tRaf.write(lb, iterPos * 8);
+						//lb.position(0);
+						//lb.putLong(System.currentTimeMillis());
+						RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+						tRaf.seek(iterPos * 8);
+						tRaf.writeLong(System.currentTimeMillis());
+						tRaf.close();
 					}
 					if (claimed)
 						return val;
@@ -235,9 +237,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		this.rbuf.put(REMOVED);
 		File posFile = new File(path + ".keys");
 		boolean newInstance = !posFile.exists();
-		@SuppressWarnings("resource")
-		RandomAccessFile _tRaf = new RandomAccessFile(path + ".ctimes", "rw");
-		tRaf = _tRaf.getChannel();
+		
 		@SuppressWarnings("resource")
 		RandomAccessFile _kRaf = new RandomAccessFile(path + ".keys", "rw");
 		this.kFC = _kRaf.getChannel();
@@ -468,8 +468,10 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 
 					rbuf.position(0);
 					// this.kFC.write(rbuf, pos);
-					this.tRaf.write(ByteBuffer.wrap(new byte[8]),
-							(pos / EL) * 8);
+					RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+					tRaf.seek((pos / EL) * 8);
+					tRaf.write(new byte[8]);
+					tRaf.close();
 					pos = (pos / EL);
 					this.claims.clear(pos);
 					this.mapped.clear(pos);
@@ -810,8 +812,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 
 		}
 		try {
-			this.tRaf.force(true);
-			this.tRaf.close();
+			RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+			tRaf.getFD().sync();
+			tRaf.close();
 		} catch (Exception e) {
 
 		}
@@ -867,7 +870,6 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
-	transient private ByteBuffer tlb = ByteBuffer.wrap(new byte[8]);
 
 	/*
 	 * (non-Javadoc)
@@ -890,10 +892,11 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 					if (claimed) {
 						this.mapped.set(iterPos);
 						this.removed.clear(iterPos);
-						this.tlb.position(0);
-						this.tlb.putLong(System.currentTimeMillis());
-						this.tlb.position(0);
-						this.tRaf.write(tlb, iterPos * 8);
+
+						RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+						tRaf.seek(iterPos * 8);
+						tRaf.writeLong(System.currentTimeMillis());
+						tRaf.close();
 						k++;
 					}
 				} finally {
@@ -916,7 +919,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	@Override
 	public void sync() throws SyncFailedException, IOException {
 		this.kFC.force(true);
-		tRaf.force(true);
+		RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+		tRaf.getFD().sync();
+		tRaf.close();
 	}
 
 	/*
@@ -932,10 +937,10 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			this.hashlock.lock();
 			try {
 				if (this.mapped.get(iterPos)) {
-					this.tlb.position(0);
-					this.tRaf.read(tlb, iterPos * 8);
-					this.tlb.position(0);
-					long tm = this.tlb.getLong();
+					RandomAccessFile tRaf = new RandomAccessFile(path + ".ctimes", "rw");
+					try {
+					tRaf.seek(iterPos * 8);
+					long tm = tRaf.readLong();
 					if (tm < time) {
 						boolean claimed = claims.get(iterPos);
 						if (!claimed) {
@@ -948,8 +953,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 							keys.putLong(0);
 							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
-							this.tRaf.write(ByteBuffer.wrap(new byte[8]),
-									iterPos * 8);
+							tRaf.seek(iterPos * 8);
+							tRaf.write(new byte[8]);
 							this.claims.clear(iterPos);
 							this.mapped.clear(iterPos);
 							this.sz.decrementAndGet();
@@ -970,6 +975,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 						this.removed.clear(iterPos);
 						this.mapped.set(iterPos);
 						this.bf.put(new KeyBlob(key));
+					}
+					}finally {
+					tRaf.close();
 					}
 				}
 			} finally {
