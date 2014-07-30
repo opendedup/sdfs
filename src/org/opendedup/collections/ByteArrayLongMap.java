@@ -8,7 +8,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 
 //import com.ning.compress.lzf.LZFDecoder;
 //import com.ning.compress.lzf.LZFEncoder;
@@ -126,23 +125,15 @@ public class ByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public int setUp() throws IOException {
-		if (!Main.compressedIndex) {
 			keys = ByteBuffer.allocateDirect(size * FREE.length);
 			values = ByteBuffer.allocateDirect(size * 8);
 			claims = new BitSet(size);
-		} else {
-			// this.compKeys = LZFEncoder.encode(keyB);
-			// this.compValues = LZFEncoder.encode(valueB);
-			// this.compClaims = LZFEncoder.encode(claimsB);
-		}
-		this.decompress();
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
 			claims.clear();
 			// store.put((byte) 0);
 		}
-		this.compress();
 		this.derefByteArray();
 		// store = ByteBuffer.allocateDirect(size);
 
@@ -152,28 +143,14 @@ public class ByteArrayLongMap {
 		return size;
 	}
 
-	private void decompress() throws IOException {
-		if (Main.compressedIndex) {
-			// keys = ByteBuffer.wrap(LZFDecoder.decode(compKeys));
-			// values = ByteBuffer.wrap(LZFDecoder.decode(compValues));
-
-		}
-	}
-
 	private void derefByteArray() {
-		if (Main.compressedIndex) {
+		
 			keys = null;
 			values = null;
 			claims = null;
-		}
 	}
 
-	private void compress() throws IOException {
-		if (Main.compressedIndex) {
-			// compKeys = LZFEncoder.encode(keys.array());
-			// compValues = LZFEncoder.encode(values.array());
-		}
-	}
+
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -185,7 +162,6 @@ public class ByteArrayLongMap {
 	public boolean containsKey(byte[] key) {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
@@ -212,7 +188,6 @@ public class ByteArrayLongMap {
 	public boolean isClaimed(byte[] key) {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / FREE.length);
@@ -253,7 +228,6 @@ public class ByteArrayLongMap {
 	public boolean remove(byte[] key) throws IOException {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			int pos = this.index(key);
 			boolean claimed = this.claims.get(pos / FREE.length);
 			if (pos == -1) {
@@ -275,9 +249,7 @@ public class ByteArrayLongMap {
 					return true;
 				} catch (Exception e) {
 					throw e;
-				} finally {
-					this.compress();
-				}
+				} 
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -446,7 +418,6 @@ public class ByteArrayLongMap {
 	public boolean put(byte[] key, long value, byte storeID) {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			if (entries >= size)
 				throw new IOException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
@@ -468,9 +439,7 @@ public class ByteArrayLongMap {
 				return pos > -1 ? true : false;
 			} catch (Exception e) {
 				throw e;
-			} finally {
-				this.compress();
-			}
+			} 
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;
@@ -491,7 +460,6 @@ public class ByteArrayLongMap {
 	public long get(byte[] key, boolean claim) {
 		try {
 			this.hashlock.lock();
-			this.decompress();
 			if (key == null)
 				return -1;
 			int pos = this.index(key);
