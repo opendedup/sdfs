@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,13 +18,12 @@ import java.util.BitSet;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.util.LargeBloomFilter;
 
-import com.google.common.hash.BloomFilter;
 
 public class FCByteArrayLongMap implements AbstractShard {
 	// MappedByteBuffer keys = null;
@@ -716,11 +716,11 @@ public class FCByteArrayLongMap implements AbstractShard {
 	}
 
 	@Override
-	public long claimRecords(BloomFilter<KeyBlob> bf) throws IOException {
+	public long claimRecords(LargeBloomFilter bf) throws IOException {
 		this.iterInit();
 		byte[] key = this.nextKey();
 		while (key != null) {
-			if (bf.mightContain(new KeyBlob(key))) {
+			if (bf.mightContain(key)) {
 				this.hashlock.lock();
 				this.claims.set(this.iterPos - 1);
 				this.hashlock.unlock();

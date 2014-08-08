@@ -62,6 +62,7 @@ public class DSEConfigWriter {
 	String cloudAccessKey = "";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
+	int avgPgSz = 8192;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
@@ -294,7 +295,7 @@ public class DSEConfigWriter {
 		loc.setAttribute("chunk-store", this.chunk_store_data_location);
 		root.appendChild(loc);
 		Element cs = xmldoc.createElement("chunk-store");
-
+		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("page-size", Integer.toString(this.chunk_size * 1024));
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("allocation-size",

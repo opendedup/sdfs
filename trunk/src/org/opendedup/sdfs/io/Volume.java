@@ -389,7 +389,7 @@ public class Volume implements java.io.Serializable {
 						* HCServiceProxy.getPageSize();
 			else
 				return HCServiceProxy.getMaxSize()
-						* HashFunctionPool.min_page_size;
+						* HashFunctionPool.avg_page_size;
 		} else
 			return capacity;
 	}

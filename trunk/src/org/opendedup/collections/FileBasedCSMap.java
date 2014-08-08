@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
@@ -20,17 +19,15 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CommandLineProgressBar;
+import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.NextPrime;
 //import org.opendedup.util.OSValidator;
 import org.opendedup.util.StringUtils;
 
-import com.google.common.hash.BloomFilter;
 
 public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
 	private long size = 0;
-	private final ReentrantLock arlock = new ReentrantLock();
-	private final ReentrantLock iolock = new ReentrantLock();
 	private String fileName;
 	private String origFileName;
 	long compactKsz = 0;
@@ -80,11 +77,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public long getAllocatedRam() {
-		return this.ram;
-	}
-
-	@Override
 	public boolean isClosed() {
 		return this.closed;
 	}
@@ -128,12 +120,16 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				throw new IOException(e);
 			}
 		}
+		this.kSz = new AtomicLong(0);
+		for (int i = 0; i < maps.length; i++) {
+			this.kSz.addAndGet(maps[i].size());
+		}
 		tEvt.endEvent("claimed [" + claims + "] records");
 		SDFSLogger.getLog().info("claimed [" + claims + "] records");
 	}
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+	public synchronized long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -158,8 +154,9 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				throw new IOException(e);
 			}
 		}
-		tEvt.endEvent("removed [" + claims + "] records");
-		SDFSLogger.getLog().info("removed [" + claims + "] records");
+		
+		tEvt.endEvent("claimed [" + claims + "] records");
+		SDFSLogger.getLog().info("claimed [" + claims + "] records");
 		return claims;
 	}
 
@@ -273,6 +270,10 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				}
 			}
 		}
+		this.kSz = new AtomicLong(0);
+		for (int i = 0; i < maps.length; i++) {
+			this.kSz.addAndGet(maps[i].size());
+		}
 		tEvt.actionCount = rem;
 		tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
 				+ HCServiceProxy.getFreeBlocks() + "]");
@@ -339,7 +340,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	 */
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
-		this.arlock.lock();
 		try {
 			boolean added = false;
 			if (!this.isClaimed(cm)) {
@@ -354,7 +354,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		} catch (KeyNotFoundException e) {
 			return false;
 		} finally {
-			this.arlock.unlock();
 
 		}
 	}
@@ -401,7 +400,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				return false;
 			} else {
 				cm.setmDelete(true);
-				this.arlock.lock();
 				if (this.isClosed()) {
 					throw new IOException("hashtable [" + this.fileName
 							+ "] is close");
@@ -410,7 +408,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					this.kSz.decrementAndGet();
 				} catch (Exception e) {
 				} finally {
-					this.arlock.unlock();
 				}
 
 				return true;
@@ -447,8 +444,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public void close() {
-		this.arlock.lock();
-		this.iolock.lock();
 		this.syncLock.lock();
 		try {
 			this.closed = true;
@@ -461,8 +456,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				this.maps[i] = null;
 			}
 		} finally {
-			this.arlock.unlock();
-			this.iolock.unlock();
 			this.syncLock.unlock();
 			SDFSLogger.getLog()
 					.info("Hashtable [" + this.fileName + "] closed");

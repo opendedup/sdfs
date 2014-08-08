@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
@@ -34,12 +34,12 @@ import org.opendedup.sdfs.io.DedupChunkInterface;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.LargeBloomFilter;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.eventbus.EventBus;
-import com.google.common.hash.BloomFilter;
 
 public class HCServiceProxy {
 
@@ -84,7 +84,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized long processHashClaims(SDFSEvent evt,
-			BloomFilter<KeyBlob> bf) throws IOException {
+			LargeBloomFilter bf) throws IOException {
 		if (Main.chunkStoreLocal)
 			return hcService.processHashClaims(evt, bf);
 		else {

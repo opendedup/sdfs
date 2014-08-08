@@ -153,9 +153,9 @@ public class FDisk {
 								+ corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().info(
+			SDFSLogger.getLog().error(
 					"error while checking file [" + mapFile.getPath() + "]", e);
-			throw new IOException(e);
+			//throw new IOException(e);
 		} finally {
 			mp.close();
 			mp = null;

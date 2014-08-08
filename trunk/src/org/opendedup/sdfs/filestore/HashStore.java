@@ -1,20 +1,20 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HashChunkServiceInterface;
+import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
 
-import com.google.common.hash.BloomFilter;
 
 /**
  * 
@@ -150,7 +150,7 @@ public class HashStore {
 
 		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		if (HashFunctionPool.max_hash_cluster > 1)
-			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.min_page_size) + 8000;
+			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
 		try {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
@@ -217,8 +217,8 @@ public class HashStore {
 		this.bdb.claimRecords(evt);
 	}
 
-	public long processHashClaims(SDFSEvent evt, BloomFilter<KeyBlob> bf)
-			throws IOException {
+	
+	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf) throws IOException {
 		return this.bdb.claimRecords(evt, bf);
 	}
 

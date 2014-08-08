@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -31,7 +32,6 @@ import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.collections.QuickList;
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
@@ -42,9 +42,9 @@ import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
+import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
 
-import com.google.common.hash.BloomFilter;
 
 public class DSEServerSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -328,7 +328,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
 				byte[] bb = new byte[buf.getInt()];
 				buf.get(bb);
-				BloomFilter<KeyBlob> bf = (BloomFilter<KeyBlob>) Util
+				LargeBloomFilter bf = (LargeBloomFilter) Util
 						.objectFromByteBuffer(bb);
 				HCServiceProxy.processHashClaims(evt, bf);
 				if (SDFSLogger.isDebug())
