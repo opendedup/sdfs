@@ -1,6 +1,7 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -13,9 +14,10 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
+import org.opendedup.util.LargeBloomFilter;
 
-import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
@@ -23,7 +25,7 @@ public class BloomFDisk {
 	private long files = 0;
 	private SDFSEvent fEvt = null;
 	private long entries = 0;
-	transient BloomFilter<KeyBlob> bf = null;
+	transient LargeBloomFilter bf = null;
 
 	public BloomFDisk(SDFSEvent evt) throws FDiskException {
 		init(evt);
@@ -49,14 +51,16 @@ public class BloomFDisk {
 					evt);
 			fEvt.maxCt = FileCounts.getSize(f, false);
 			this.entries = Main.volume.getActualWriteBytes()
-					/ HashFunctionPool.min_page_size;
+					/ HashFunctionPool.avg_page_size;
+			if(Main.chunkStoreLocal)
+				this.entries = HCServiceProxy.getSize();
 			int tr = 0;
 			if (entries > Integer.MAX_VALUE)
 				tr = Integer.MAX_VALUE;
 			else
 				tr = (int) this.entries;
 			SDFSLogger.getLog().info("entries = " + tr);
-			bf = BloomFilter.create(kbFunnel, tr, .01);
+			bf = new LargeBloomFilter( tr, .10);
 			SDFSLogger.getLog().info(
 					"Starting FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
@@ -77,7 +81,7 @@ public class BloomFDisk {
 		}
 	}
 
-	public BloomFilter<KeyBlob> getResults() {
+	public LargeBloomFilter getResults() {
 		return this.bf;
 	}
 
@@ -110,7 +114,7 @@ public class BloomFDisk {
 					if (!ck.isLocalData()) {
 						List<HashLocPair> al = ck.getFingers();
 						for (HashLocPair p : al) {
-							bf.put(new KeyBlob(p.hash));
+							bf.put(p.hash);
 						}
 					}
 				}

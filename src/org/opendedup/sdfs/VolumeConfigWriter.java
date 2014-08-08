@@ -58,6 +58,7 @@ public class VolumeConfigWriter {
 	String group = "0";
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
+	int avgPgSz = 8192;
 	double max_percent_full = .95;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
@@ -485,6 +486,7 @@ public class VolumeConfigWriter {
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("log-level", "1");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
+		
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
 		io.setAttribute("max-file-inactive", "900");
 		io.setAttribute("max-file-write-buffers",
@@ -530,6 +532,7 @@ public class VolumeConfigWriter {
 
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
+		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("gc-class", this.gc_class);

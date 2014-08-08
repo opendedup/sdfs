@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -88,9 +88,9 @@ public class ManualGC {
 		try {
 
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
-				new FDisk(evt);
+				BloomFDisk fd = new BloomFDisk(evt);
 				evt.curCt = 33;
-				HCServiceProxy.processHashClaims(evt);
+				rm = HCServiceProxy.processHashClaims(evt,fd.getResults());
 				evt.curCt = 66;
 			} else {
 				HCServiceProxy.runFDisk(evt);
@@ -108,6 +108,7 @@ public class ManualGC {
 			throw new IOException(e);
 		}
 		try {
+			if (Main.chunkStoreLocal && Main.volume.getName() == null) {
 			long dur = System.currentTimeMillis() - tm;
 			long nmc = dur + milliseconds;
 			SDFSLogger.getLog().debug(
@@ -115,6 +116,7 @@ public class ManualGC {
 							+ new Date(System.currentTimeMillis() - nmc));
 			rm = HCServiceProxy.removeStailHashes(dur + milliseconds, false,
 					evt);
+			}
 		} finally {
 
 		}

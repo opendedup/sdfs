@@ -73,6 +73,9 @@ public class Config {
 			}
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
+			if(cbe.hasAttribute("average-chunk-size")) {
+				HashFunctionPool.avg_page_size = Integer.parseInt(cbe.getAttribute("average-chunk-size"));
+			}
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
 			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
@@ -301,6 +304,9 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
+		if(localChunkStore.hasAttribute("average-chunk-size")) {
+			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
+		}
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
 		if (localChunkStore.hasAttribute("io-threads")) {

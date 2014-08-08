@@ -145,7 +145,7 @@ public class SDFSCmds {
 						* HCServiceProxy.getPageSize());
 			else
 				return Long.toString(HCServiceProxy.getMaxSize()
-						* HashFunctionPool.min_page_size);
+						* HashFunctionPool.avg_page_size);
 		}
 		if (command.equals("user.cmd.ids.status"))
 			return cmdList.get(command);

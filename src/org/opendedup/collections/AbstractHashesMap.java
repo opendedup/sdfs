@@ -2,17 +2,14 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
+
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
-
-import com.google.common.hash.BloomFilter;
+import org.opendedup.util.LargeBloomFilter;
 
 public interface AbstractHashesMap {
 
 	public abstract long endStartingPosition();
-
-	public abstract long getAllocatedRam();
 
 	public abstract long getSize();
 
@@ -22,7 +19,7 @@ public interface AbstractHashesMap {
 
 	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 
-	public abstract long claimRecords(SDFSEvent evt, BloomFilter<KeyBlob> bf)
+	public abstract long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;
 
 	/**

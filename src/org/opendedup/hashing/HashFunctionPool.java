@@ -18,7 +18,8 @@ public class HashFunctionPool {
 	public static final String VARIABLE_MURMUR3 = "VARIABLE_MURMUR3";
 	public static int hashLength = 16;
 	public static int max_hash_cluster = 1;
-	public static int min_page_size = Main.CHUNK_LENGTH;
+	//public static int min_page_size = Main.CHUNK_LENGTH;
+	public static int avg_page_size = 4096;
 
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
@@ -28,7 +29,6 @@ public class HashFunctionPool {
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
-			min_page_size = 4096;
 			hashLength = VariableHashEngine.getHashLenth();
 			Main.MAPVERSION = 1;
 

@@ -53,7 +53,7 @@ public class Utils {
 				obj = bs3Service.listObjects(bucketName);
 				}
 			}
-			bs3Service.deleteBucket(bucketName);
+			//bs3Service.deleteBucket(bucketName);
 			System.out.println("done");
 			System.out.println("Bucket [" + bucketName + "] deleted");
 		} catch (ServiceException e) {

@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.util.LargeBloomFilter;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
@@ -64,18 +65,14 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		this.path = path;
 	}
 
-	private transient ReentrantLock iterlock = new ReentrantLock();
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#iterInit()
 	 */
 	@Override
-	public void iterInit() {
-		this.iterlock.lock();
+	public synchronized void iterInit() {
 		this.iterPos = 0;
-		this.iterlock.unlock();
 	}
 
 	/*
@@ -1051,6 +1048,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		}
 	};
 
+	/*
 	@Override
 	public long claimRecords(BloomFilter<KeyBlob> bf) throws IOException {
 		this.iterInit();
@@ -1065,5 +1063,57 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		}
 		this.iterInit();
 		return this.claimRecords();
+	}
+	*/
+	
+	@Override
+	public long claimRecords(LargeBloomFilter nbf) throws IOException {
+		this.iterInit();
+		long sz = 0;
+		this.hashlock.lock();
+		try {
+			bf = BloomFilter.create(kbFunnel, size, .01);
+			this.runningGC = true;
+		} finally {
+			this.hashlock.unlock();
+		}
+		try {
+		while (iterPos < size) {
+			this.hashlock.lock();
+			try {
+				byte[] key = new byte[FREE.length];
+				keys.position(iterPos * EL);
+				keys.get(key);
+				long val = keys.getLong();
+				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+					if (!nbf.mightContain(key)
+							&& !this.claims.get(iterPos)) {
+						keys.position(iterPos * EL);
+						keys.put(REMOVED);
+						keys.putLong(0);
+						ChunkData ck = new ChunkData(val, key);
+						ck.setmDelete(true);
+						this.mapped.clear(iterPos);
+						this.sz.decrementAndGet();
+						this.removed.set(iterPos);
+						sz++;
+					} else {
+						this.mapped.set(iterPos);
+						bf.put(new KeyBlob(key));
+					}
+					this.claims.clear(iterPos);
+				}
+
+			} finally {
+				iterPos++;
+				this.hashlock.unlock();
+			}
+		}
+		return sz;
+		} finally {
+			this.hashlock.lock();
+			this.runningGC = false;
+			this.hashlock.unlock();
+		}
 	}
 }
