@@ -104,6 +104,7 @@ public class VolumeConfigWriter {
 	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 	private boolean clusterRackAware = false;
+	private boolean ext = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -213,6 +214,11 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("chunk-store-iv")) {
 			String iv =  cmd.getOptionValue("chunk-store-iv");
 			this.chunk_store_iv = iv;
+		}
+		
+		if (cmd.hasOption("ext")) {
+			this.ext = true;
+			this.hash_db_class = "org.opendedup.collections.MaxFileBasedCSMap";
 		}
 
 		if (cmd.hasOption("io-safe-sync")) {
@@ -582,6 +588,18 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-access-key", this.cloudAccessKey);
 			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
+			if(ext) {
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
+				Element extended  = xmldoc.createElement("extended-config");
+				extended.setAttribute("block-size", "20MB");
+				extended.setAttribute("allow-sync", "false");
+				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("sync-files", "true");
+				extended.setAttribute("local-cache-size","4GB");
+				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("io-threads", Integer.toString(write_threads));
+				cs.appendChild(extended);
+			}
 			cs.appendChild(aws);
 		} else if (this.gsEnabled) {
 			Element aws = xmldoc.createElement("google-store");
@@ -596,6 +614,18 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-access-key", this.cloudAccessKey);
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
+			if(ext) {
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
+				Element extended  = xmldoc.createElement("extended-config");
+				extended.setAttribute("block-size", "10MB");
+				extended.setAttribute("allow-sync", "false");
+				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("sync-files", "true");
+				extended.setAttribute("local-cache-size","4GB");
+				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("io-threads", Integer.toString(write_threads));
+				cs.appendChild(extended);
+			}
 			cs.appendChild(aws);
 		}
 		root.appendChild(cs);
@@ -1011,6 +1041,8 @@ public class VolumeConfigWriter {
 								+ " any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node "
 								+ " for this cluster.").hasArg()
 				.withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("ext").create());
 		return options;
 	}
 

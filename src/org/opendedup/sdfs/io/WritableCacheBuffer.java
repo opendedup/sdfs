@@ -325,10 +325,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					try {
 						hcb.put(sh.ck);
 					} catch (Exception e) {
-						// SDFSLogger.getLog().info("pos = " + this.position
-						// + "ck sz=" + sh.ck.length + " hcb sz=" +
-						// hcb.position() + " cks sz=" +cks.size() + " len="
-						// + (hcb.position() +sh.ck.length));
+						SDFSLogger.getLog().error("pos = " + this.position
+						 + "ck sz=" + sh.ck.length + " hcb sz=" +
+						 hcb.position() + " cks sz=" +cks.size() + " len="
+						 + (hcb.position() +sh.ck.length));
 						throw new IOException(e);
 					}
 				}
