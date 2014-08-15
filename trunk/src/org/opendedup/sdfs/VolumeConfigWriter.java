@@ -595,9 +595,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "6000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size","4GB");
+				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
-				extended.setAttribute("io-threads", Integer.toString(write_threads));
+				extended.setAttribute("io-threads", "16");
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -621,9 +621,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "6000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size","4GB");
+				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
-				extended.setAttribute("io-threads", Integer.toString(write_threads));
+				extended.setAttribute("io-threads", "16");
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
