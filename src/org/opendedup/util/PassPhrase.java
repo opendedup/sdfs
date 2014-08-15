@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 
 /*
  * Copyright (c) Ian F. Darwin, http://www.darwinsys.com/, 1996-2002.
+
  * All rights reserved. Software written by Ian F. Darwin and others.
  * $Id: LICENSE,v 1.8 2004/02/09 03:33:38 ian Exp $
  *
@@ -43,7 +44,7 @@ import java.security.SecureRandom;
  */
 public class PassPhrase {
 	/** Minimum length for a decent password */
-	public static final int MIN_LENGTH = 18;
+	public static final int MIN_LENGTH = 64;
 
 	/** The random number generator. */
 	protected static java.security.SecureRandom r = new java.security.SecureRandom();
@@ -57,8 +58,8 @@ public class PassPhrase {
 	protected static char[] goodChar = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 			'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
 			'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
-			'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '_', '1', 'l',
+			'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','I','i','L',
+			'2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '_', '1', 'l','0',
 			'=' };
 
 	/* Generate a Password object with a random password. */

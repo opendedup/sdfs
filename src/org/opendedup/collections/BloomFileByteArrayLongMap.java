@@ -112,6 +112,33 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		return null;
 	}
 
+	public byte[] _nextKey() {
+		while (iterPos < size) {
+			this.hashlock.lock();
+			try {
+					byte[] key = new byte[FREE.length];
+					keys.position(iterPos * EL);
+					keys.get(key);
+					iterPos++;
+					if (Arrays.equals(key, REMOVED)) {
+						this.removed.set(iterPos - 1);
+						this.mapped.clear(iterPos - 1);
+					} else if (!Arrays.equals(key, FREE)) {
+						this.mapped.set(iterPos - 1);
+						this.removed.clear(iterPos - 1);
+						this.bf.put(new KeyBlob(key));
+						return key;
+					} else {
+						this.mapped.clear(iterPos - 1);
+					}
+			} finally {
+				this.hashlock.unlock();
+			}
+
+		}
+		return null;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -190,9 +217,9 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		removed.clear();
 		bf = BloomFilter.create(kbFunnel, size, .01);
 		this.iterInit();
-		byte[] key = this.nextKey();
+		byte[] key = this._nextKey();
 		while (key != null)
-			key = this.nextKey();
+			key = this._nextKey();
 		SDFSLogger.getLog().warn(
 				"Recovered Hashmap " + this.path + " entries = "
 						+ mapped.cardinality());
