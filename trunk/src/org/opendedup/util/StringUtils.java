@@ -6,6 +6,7 @@ import java.io.ObjectOutput;
 import java.io.UnsupportedEncodingException;
 
 public class StringUtils {
+	final static long pbc = 1125899906842624L;
 	final static long tbc = 1099511627776L;
 	final static long gbc = 1024 * 1024 * 1024;
 	final static int mbc = 1024 * 1024;
@@ -63,7 +64,9 @@ public class StringUtils {
 		float sz = Float.parseFloat(capString.substring(0,
 				capString.length() - 2));
 		long fSize = 0;
-		if (units.equalsIgnoreCase("TB"))
+		if (units.equalsIgnoreCase("PB"))
+			fSize = (long) (sz * pbc);
+		else if (units.equalsIgnoreCase("TB"))
 			fSize = (long) (sz * tbc);
 		else if (units.equalsIgnoreCase("GB"))
 			fSize = (long) (sz * gbc);

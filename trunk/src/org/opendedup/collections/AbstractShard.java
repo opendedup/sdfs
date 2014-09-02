@@ -1,9 +1,9 @@
 package org.opendedup.collections;
 
 import java.io.IOException;
-
 import java.io.SyncFailedException;
 
+import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 
 
@@ -55,7 +55,10 @@ public interface AbstractShard {
 
 	public abstract boolean remove(byte[] key) throws IOException;
 
-	public abstract boolean put(byte[] key, long value)
+	public abstract boolean put(ChunkData cm)
+			throws HashtableFullException, IOException;
+	
+	public abstract boolean put(byte [] key,long val)
 			throws HashtableFullException, IOException;
 
 	public abstract int getEntries();

@@ -17,7 +17,8 @@ public class WriteTest implements Runnable {
 	String path;
 	int size;
 	int uniqueP;
-	int bs = 1048576;
+	int bs = 16*1024;
+	int ss = bs *100;
 	public long duration = 0;
 	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;
@@ -44,19 +45,23 @@ public class WriteTest implements Runnable {
 			byte[] b = new byte[bs];
 			long time = System.currentTimeMillis();
 			int currPR = 0;
+			ByteBuffer bz = ByteBuffer.allocateDirect(ss);
 			while (sz < len) {
 				if (currPR < this.uniqueP) {
 					rnd.nextBytes(b);
 				}
-				ByteBuffer buf = ByteBuffer.wrap(b);
-				fc.write(buf);
+				bz.put(b);
+				if(!bz.hasRemaining()) {
+					bz.flip();
+					fc.write(bz);
+					bz.flip();
+				}
 				sz = sz + b.length;
 				if (currPR == 100)
 					currPR = 0;
 				else
 					currPR++;
 			}
-			fc.force(true);
 			duration = (System.currentTimeMillis() - time);
 			fc.close();
 
@@ -111,9 +116,8 @@ public class WriteTest implements Runnable {
 					finished = true;
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

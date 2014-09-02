@@ -1,6 +1,7 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -43,7 +44,7 @@ public class VolumeConfigWriter {
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
-	boolean safe_sync = false;
+	boolean safe_sync = true;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	short chunk_size = 4;
@@ -289,18 +290,19 @@ public class VolumeConfigWriter {
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 128;
-				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
 							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!S3ChunkStore.checkBucketUnique(cloudAccessKey,
+				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkBucketUnique(cloudAccessKey,
 						cloudSecretKey, cloudBucketName)) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println("cloud-bucket-name is not unique");
 					System.exit(-1);
 				}
+				
 
 			} else {
 				System.out.println("Error : Unable to create volume");
@@ -494,7 +496,10 @@ public class VolumeConfigWriter {
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
 		
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
-		io.setAttribute("max-file-inactive", "900");
+		if(ext)
+			io.setAttribute("max-file-inactive", "0");
+		else
+			io.setAttribute("max-file-inactive", "900");
 		io.setAttribute("max-file-write-buffers",
 				Integer.toString(this.max_file_write_buffers));
 		io.setAttribute("max-open-files", Integer.toString(this.max_open_files));
@@ -555,7 +560,6 @@ public class VolumeConfigWriter {
 		cs.setAttribute("cluster-config", this.clusterConfig);
 		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		cs.setAttribute("io-threads", Integer.toString(this.cloudThreads));
-
 		cs.setAttribute("compress", Boolean.toString(this.compress));
 		Element network = xmldoc.createElement("network");
 		network.setAttribute("hostname", this.list_ip);
@@ -589,6 +593,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if(ext) {
+				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "20MB");
@@ -615,6 +620,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			if(ext) {
+				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "10MB");
@@ -752,6 +758,8 @@ public class VolumeConfigWriter {
 						"the file path to location for the io log.\n Defaults to: \n --base-path + "
 								+ File.separator + "sdfs.log").hasArg()
 				.withArgName("PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("cloud-disable-test").withDescription("Disables testing authentication for s3").create()
+				);
 		options.addOption(OptionBuilder
 				.withLongOpt("io-safe-close")
 				.withDescription(

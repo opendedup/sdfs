@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
-
 import java.nio.file.NoSuchFileException;
 
 import org.opendedup.logging.SDFSLogger;
@@ -23,6 +22,7 @@ public class OpenFileMonitor implements Runnable {
 	int interval = 5000;
 	int maxInactive = 900000;
 	boolean closed = false;
+	boolean done = false;
 	Thread th = null;
 
 	/**
@@ -43,6 +43,7 @@ public class OpenFileMonitor implements Runnable {
 
 	@Override
 	public void run() {
+		try {
 		while (!closed) {
 			try {
 				Thread.sleep(this.interval);
@@ -103,6 +104,9 @@ public class OpenFileMonitor implements Runnable {
 				SDFSLogger.getLog().warn("Unable check files", e);
 			}
 		}
+		}finally {
+		done = true;
+		}
 	}
 
 	/**
@@ -130,10 +134,18 @@ public class OpenFileMonitor implements Runnable {
 
 	/**
 	 * Closes the OpenFileMonitor thread.
+	 * @throws InterruptedException 
 	 */
 	public void close() {
 		this.closed = true;
 		th.interrupt();
+		while(!done) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
 	}
 
 }

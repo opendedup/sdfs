@@ -1,5 +1,7 @@
 package org.opendedup.hashing;
 
+import org.opendedup.sdfs.Main;
+
 public class Murmur3HashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
@@ -26,5 +28,11 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	public boolean isVariableLength() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public int getMaxLen() {
+		// TODO Auto-generated method stub
+		return Main.CHUNK_LENGTH;
 	}
 }

@@ -1,7 +1,6 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
 	public static final int minLen = (4 * 1024);
-	public static final int maxLen = Main.CHUNK_LENGTH;
+	public static final int maxLen = Main.CHUNK_LENGTH;;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	static long bytesPerWindow = 48;
@@ -70,5 +69,11 @@ public class VariableHashEngine implements AbstractHashEngine {
 	public boolean isVariableLength() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+	
+	@Override
+	public int getMaxLen() {
+		// TODO Auto-generated method stub
+		return Main.CHUNK_LENGTH;
 	}
 }

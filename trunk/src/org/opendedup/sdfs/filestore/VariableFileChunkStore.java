@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -11,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
-import org.opendedup.hashing.AbstractHashEngine;
+//import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -19,7 +20,7 @@ import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.FactorTest;
 import org.opendedup.util.OpenBitSetSerialize;
-import org.opendedup.util.StringUtils;
+//import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 
 public class VariableFileChunkStore implements AbstractChunkStore {
@@ -39,7 +40,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	private String name;
 	private byte[] FREE = new byte[(int) pageSize];
 	private FileChannel iterFC = null;
-	private AbstractHashEngine hc = null;
+	//private AbstractHashEngine hc = null;
 	private File bsf;
 	private File lsf;
 	private FCPool pool = null;
@@ -463,7 +464,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				return new ChunkData();
 			} else {
 				buf.position(0);
-				long iStart = buf.getLong();
+				buf.getLong();
 				int cLen = buf.getInt();
 				this.size.addAndGet(cLen);
 				int iLen = buf.getInt();
@@ -472,7 +473,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				enc = buf.get();
 				byte[] _hash = new byte[HashFunctionPool.hashLength];
 				buf.get(_hash);
+				
 				store = this.getStore(iLen);
+				/*
 				byte[] chunk = store.getChunk(_hash, iStart, iLen);
 				// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
 				// iStart +"] comp=" + comp + " enc=" + enc + " store="
@@ -488,12 +491,13 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 									+ StringUtils.getHexString(hash)
 									+ " expected="
 									+ StringUtils.getHexString(_hash));
+									*/
 				ChunkData chk = new ChunkData(_hash, pos);
-				chk.setChunk(chunk);
-				chk.cLen = chunk.length;
+				//chk.setChunk(chunk);
+				//chk.cLen = chunk.length;
 				return chk;
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			SDFSLogger
 					.getLog()
 					.error("unable to fetch chunk at position " + pos + "size="
@@ -514,7 +518,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	public void iterationInit() throws IOException {
 		this.iterlock.lock();
 		try {
-			hc = HashFunctionPool.getHashEngine();
+			//hc = HashFunctionPool.getHashEngine();
 			this.iterFC = chunkDataWriter.getChannel();
 			this.iterFC.position(0);
 			this.size.set(0);

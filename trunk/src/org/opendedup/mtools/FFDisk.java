@@ -11,21 +11,25 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
+import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 
-public class FDisk {
+public class FFDisk {
 	private AtomicLong files = new AtomicLong(0);
+	private AtomicLong lsz = new AtomicLong(0);
 	private AtomicLong corruptFiles = new AtomicLong(0);
 	public SDFSEvent fEvt = null;
 	private static final int MAX_BATCH_SIZE = 10000;
@@ -37,31 +41,30 @@ public class FDisk {
 			Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
 	
-	public FDisk(SDFSEvent evt) throws FDiskException {
-		init(evt);
+	public FFDisk(String file) throws FDiskException, IOException {
+		File f = new File(Main.dedupDBStore);
+		long sz = FileCounts.getSize(f, false);
+		fEvt = SDFSEvent.fdiskInfoEvent(
+				"Starting FDISK for " + file
+						+ " file count = " + FileCounts.getCount(f, false)
+						+ " file size = " + StorageUnit.of(sz).format(sz));
+		fEvt.maxCt = sz;
+		
 	}
 
-	public void init(SDFSEvent evt) throws FDiskException {
-		File f = new File(Main.dedupDBStore);
+	public void init(String file) throws FDiskException {
+		File f = new File(Main.volume.getPath() + File.separator + file);
 		if (!f.exists()) {
-			SDFSEvent
-					.fdiskInfoEvent(
-							"FDisk Will not start because the volume has not been written too",
-							evt)
-					.endEvent(
+			
+					fEvt.endEvent(
 							"FDisk Will not start because the volume has not been written too");
 			throw new FDiskException(
 					"FDisk Will not start because the volume has not been written too");
 		}
 		try {
-			fEvt = SDFSEvent.fdiskInfoEvent(
-					"Starting FDISK for " + Main.volume.getName()
-							+ " file count = " + FileCounts.getCount(f, false)
-							+ " file size = " + FileCounts.getSize(f, false),
-					evt);
-			fEvt.maxCt = FileCounts.getSize(f, false);
+			
 			SDFSLogger.getLog().info(
-					"Starting FDISK for " + Main.volume.getName());
+					"Starting FDISK for " + f.getPath());
 			long start = System.currentTimeMillis();
 
 			this.traverse(f);
@@ -71,14 +74,19 @@ public class FDisk {
 				}
 			if(failed)
 				throw new IOException("FDisk traverse failed");
+			long dur = (System.currentTimeMillis() - start) / 1000;
+			long spd = 0;
+			if(dur > 0)
+				spd = lsz.get()/dur;
+			
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check [" + files + "]. Found ["
-							+ this.corruptFiles + "] corrupt files");
+							+ this.corruptFiles + "] corrupt files. Speed= "+ StorageUnit.of(spd).format(spd) + "/s");
 
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
 					/ 1000 + "] seconds to check [" + files + "]. Found ["
-					+ this.corruptFiles + "] corrupt files");
+					+ this.corruptFiles + "] corrupt files. Speed= "+ StorageUnit.of(spd).format(spd) + "/s");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
@@ -99,9 +107,7 @@ public class FDisk {
 		} else {
 			if(failed)
 				throw new IOException("FDisk traverse failed");
-			if (dir.getPath().endsWith(".map")) {
 				executor.execute(new CheckDedupFile(this,dir));
-			}
 		}
 	}
 
@@ -121,11 +127,19 @@ public class FDisk {
 		}
 		return corruptBlocks;
 	}
-
-	private void checkDedupFile(File mapFile) throws IOException {
+	ReentrantLock l = new ReentrantLock();
+	private void checkDedupFile(File metaFile) throws IOException {
 		DataMapInterface mp = null;
 		try {
-			mp = new LongByteArrayMap(mapFile.getPath());
+			MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
+			lsz.addAndGet(mf.length());
+			String guid= mf.getDfGuid();
+			File directory = new File(Main.dedupDBStore + File.separator
+					+ guid.substring(0, 2) + File.separator
+					+ guid);
+			File dbf = new File(directory.getPath() + File.separator
+					+ guid + ".map");
+			mp = new LongByteArrayMap(dbf.getPath());
 			long prevpos = 0;
 			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(
 					MAX_BATCH_SIZE);
@@ -133,7 +147,9 @@ public class FDisk {
 			mp.iterInit();
 			long corruptBlocks = 0;
 			while (val != null) {
+				l.lock();
 				fEvt.curCt += (mp.getIterPos() - prevpos);
+				l.unlock();
 				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
@@ -150,7 +166,7 @@ public class FDisk {
 										SDFSLogger
 												.getLog()
 												.debug("file ["
-														+ mapFile
+														+ metaFile.getPath()
 														+ "] could not find "
 														+ StringUtils
 																.getHexString(p.hash));
@@ -159,7 +175,7 @@ public class FDisk {
 									SDFSLogger
 									.getLog()
 									.debug("file ["
-											+ mapFile
+											+ metaFile.getPath()
 											+ "] found "
 											+ StringUtils
 													.getHexString(p.hash));
@@ -183,12 +199,12 @@ public class FDisk {
 			if (corruptBlocks > 0) {
 				this.corruptFiles.incrementAndGet();
 				SDFSLogger.getLog().warn(
-						"map file " + mapFile.getPath() + " is suspect, ["
+						"map file " + metaFile.getPath()+ " is suspect, ["
 								+ corruptBlocks + "] missing blocks found.");
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(
-					"error while checking file [" + mapFile.getPath() + "]", e);
+					"error while checking file [" + metaFile.getPath() + "]", e);
 			// throw new IOException(e);
 		} finally {
 			mp.close();
@@ -199,10 +215,10 @@ public class FDisk {
 
 	private static class CheckDedupFile implements Runnable {
 
-		FDisk fd = null;
+		FFDisk fd = null;
 		File f = null;
 
-		protected CheckDedupFile(FDisk fd, File f) {
+		protected CheckDedupFile(FFDisk fd, File f) {
 			this.fd = fd;
 			this.f = f;
 		}

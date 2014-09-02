@@ -33,6 +33,7 @@ public class ConsistancyCheck {
 					"Scanning DSE", map.getSize(), System.out);
 			evt.maxCt = map.getSize();
 			long currentCount = 0;
+			long corruption = 0;
 			while (data != null) {
 				if (data.blank)
 					data = store.getNextChunck();
@@ -56,6 +57,7 @@ public class ConsistancyCheck {
 							currentCount++;
 						}
 					} catch (Exception e) {
+						corruption ++;
 						SDFSLogger.getLog().warn(
 								"Data Corruption found in datastore", e);
 					}
@@ -63,6 +65,11 @@ public class ConsistancyCheck {
 			}
 			bar.finish();
 			System.out.println("Finished");
+			if(corruption>0) {
+				SDFSLogger.getLog().warn("Corruption found for [" + corruption + "] blocks" );
+				System.out.println("Corruption found for [" + corruption + "] blocks");
+			}
+				
 			System.out.println("Succesfully Ran Consistance Check for ["
 					+ records + "] records, recovered [" + recordsRecovered
 					+ "]");

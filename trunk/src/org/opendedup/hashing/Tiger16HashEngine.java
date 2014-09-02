@@ -2,6 +2,8 @@ package org.opendedup.hashing;
 
 import java.security.NoSuchAlgorithmException;
 
+import org.opendedup.sdfs.Main;
+
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 
@@ -36,5 +38,11 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 	public boolean isVariableLength() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public int getMaxLen() {
+		// TODO Auto-generated method stub
+		return Main.chunkStorePageSize;
 	}
 }

@@ -6,6 +6,7 @@ import java.security.NoSuchProviderException;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.opendedup.sdfs.Main;
 
 public class TigerHashEngine implements AbstractHashEngine {
 	static {
@@ -41,5 +42,11 @@ public class TigerHashEngine implements AbstractHashEngine {
 	public boolean isVariableLength() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public int getMaxLen() {
+		// TODO Auto-generated method stub
+		return Main.CHUNK_LENGTH;
 	}
 }
