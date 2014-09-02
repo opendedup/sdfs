@@ -57,9 +57,9 @@ public class FFDisk {
 		if (!f.exists()) {
 			
 					fEvt.endEvent(
-							"FDisk Will not start because the volume has not been written too");
+							"FDisk Will not start because the file " + file + " does not exist");
 			throw new FDiskException(
-					"FDisk Will not start because the volume has not been written too");
+					"FDisk Will not start because the file " + file + " does not exist");
 		}
 		try {
 			
