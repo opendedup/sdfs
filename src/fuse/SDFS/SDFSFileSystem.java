@@ -628,7 +628,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("removing " + path);
 			if (!Main.safeClose) {
-				this.getFileChannel(path, -1).getDedupFile().forceClose();
+				try {
+					this.getFileChannel(path, -1).getDedupFile().forceClose();
+				} catch (IOException e) {
+					SDFSLogger.getLog().error("unable to close file " + path, e);
+				}
 			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				Path p = new File(mountedVolume + path).toPath();

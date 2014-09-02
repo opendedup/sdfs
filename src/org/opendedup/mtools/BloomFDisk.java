@@ -55,8 +55,7 @@ public class BloomFDisk {
 							evt)
 					.endEvent(
 							"FDisk Will not start because the volume has not been written too");
-			throw new FDiskException(
-					"FDisk Will not start because the volume has not been written too");
+			return;
 		}
 		try {
 			long sz = FileCounts.getSize(f, false);

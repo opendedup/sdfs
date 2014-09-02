@@ -187,7 +187,7 @@ public interface DedupFile {
 	/**
 	 * Closes the DedupFile and all DedupFileChannels
 	 */
-	public abstract void forceClose();
+	public abstract void forceClose() throws IOException;
 
 	/**
 	 * Gets the GUID associated with this file. Each DedupFile has an associated

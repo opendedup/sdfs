@@ -75,7 +75,7 @@ public class SparseDedupFile implements DedupFile {
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, executionHandler);
 	private boolean dirty = false;
-	
+	private boolean toOccured = false;
 	
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -329,7 +329,6 @@ public class SparseDedupFile implements DedupFile {
 			
 		}
 		return -1;
-
 	}
 	
 	public void setMetaDataDedupFile(MetaDataDedupFile mf) {
@@ -440,6 +439,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 								if (Main.writeTimeoutSeconds >0 && wl > (Main.writeTimeoutSeconds*tm)) {
 									int nt = (tm * wl) / 1000;
+									this.toOccured = true;
 									throw new IOException(
 											"Write Timed Out after ["
 													+ nt
@@ -455,11 +455,13 @@ public class SparseDedupFile implements DedupFile {
 								al++;
 								wl +=tm;
 							}
-							if (l.getDN() < fs.size())
+							if (l.getDN() < fs.size()) {
+								this.toOccured = true;
 								throw new IOException(
 										"Write Timed Out expected ["
 												+ fs.size() + "] but got ["
 												+ l.getDN() + "]");
+							}
 							if (l.getDNEX() > 0)
 								throw new IOException("Write Failed");
 							// SDFSLogger.getLog().info("broke data up into " +
@@ -577,6 +579,9 @@ public class SparseDedupFile implements DedupFile {
 			if (this.closed) {
 				throw new FileClosedException("file already closed");
 			}
+			if (this.toOccured) {
+				throw new FileClosedException("timeout occured");
+			}
 			long chunkPos = this.getChuckPosition(position);
 			DedupChunkInterface writeBuffer = null;
 			try {
@@ -685,6 +690,8 @@ public class SparseDedupFile implements DedupFile {
 									+ st + "]");
 				HCServiceProxy.sync();
 			}
+			if(this.toOccured)
+				throw new IOException("timeout occured");
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -764,6 +771,8 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public void registerChannel(DedupFileChannel channel) throws IOException {
+		if(this.toOccured)
+			throw new IOException("timeout occured");
 		if (!Main.safeClose) {
 			channelLock.lock();
 			try {
@@ -820,7 +829,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	@Override
-	public void forceClose() {
+	public void forceClose() throws IOException {
 		this.syncLock.lock();
 		this.channelLock.lock();
 		try {
@@ -876,6 +885,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 				this.bdb = null;
 				this.closed = true;
+				
 				try {
 					this.chunkStore.close();
 				} catch (Exception e) {
@@ -886,11 +896,12 @@ public class SparseDedupFile implements DedupFile {
 					eventBus.post(new SFileWritten(this));
 				}
 			}
+			if(this.toOccured) {
+				this.toOccured =false;
+				throw new IOException("timeout occured");
+			}
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
-		} catch (Exception e) {
-
-			SDFSLogger.getLog().error("error closing " + mf.getPath(), e);
 		} finally {
 			DedupFileStore.removeOpenDedupFile(this.GUID);
 			bdb = null;

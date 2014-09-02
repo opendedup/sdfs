@@ -207,7 +207,13 @@ public class DedupFileStore {
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
 			if (df != null) {
-				df.forceClose();
+				try {
+					df.forceClose();
+				} catch (IOException e) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"unable to Close " + df.getMetaFile().getPath(),e);
+				}
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							"Closed " + df.getMetaFile().getPath());
