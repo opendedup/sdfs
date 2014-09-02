@@ -17,12 +17,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
@@ -569,7 +567,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
-	@Override
+	
 	public boolean put(byte[] key, long value) throws HashtableFullException {
 		try {
 			this.hashlock.lock();
@@ -578,8 +576,12 @@ public class FileByteArrayLongMap implements AbstractShard {
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
-			if (pos < 0)
+			if (pos < 0) {
+				int npos = -pos -1;
+				npos = (npos / FREE.length);
+				this.claims.set(npos);
 				return false;
+			}
 			this.keys.position(pos);
 			this.keys.put(key);
 
@@ -599,6 +601,46 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.hashlock.unlock();
 		}
 	}
+	
+	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
+		try {
+			byte [] key = cm.getHash();
+			this.hashlock.lock();
+			if (this.sz.get() >= size)
+				throw new HashtableFullException(
+						"entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
+			int pos = this.insertionIndex(key);
+			if (pos < 0) {
+				int npos = -pos -1;
+				npos = (npos / FREE.length);
+				this.claims.set(npos);
+				return false;
+			}
+			this.keys.position(pos);
+			this.keys.put(key);
+			if (!cm.recoverd) {
+				
+				cm.persistData(true);
+			}
+			if (cm.getcPos() > bgst)
+				bgst = cm.getcPos();
+			pos = (pos / FREE.length) * 8;
+			this.values.position(pos);
+			this.values.putLong(cm.getcPos());
+			pos = (pos / 8);
+			this.claims.set(pos);
+			this.mapped.set(pos);
+			this.sz.incrementAndGet();
+			// this.store.position(pos);
+			// this.store.put(storeID);
+			return pos > -1 ? true : false;
+		} finally {
+			this.hashlock.unlock();
+		}
+	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -716,72 +758,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 		SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
-	public static void main(String[] args) throws Exception {
-		AbstractShard b = new FileByteArrayLongMap("/opt/sdfs/hashesaaa",
-				10000000, (short) 16);
-		long start = System.currentTimeMillis();
-		Random rnd = new Random();
-		byte[] hash = null;
-		long val = -33;
-		byte[] hash1 = null;
-		long val1 = -33;
-		Tiger16HashEngine eng = new Tiger16HashEngine();
-		for (int i = 0; i < 60000; i++) {
-			byte[] z = new byte[64];
-			rnd.nextBytes(z);
-			hash = eng.getHash(z);
-			val = rnd.nextLong();
-			if (i == 5000) {
-				val1 = val;
-				hash1 = hash;
-			}
-			if (val < 0)
-				val = val * -1;
-			boolean k = b.put(hash, val);
-			if (k == false)
-				System.out.println("Unable to add this " + k);
-
-		}
-		long end = System.currentTimeMillis();
-		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
-		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
-				+ " ms at pos " + b.get(hash1));
-		b.iterInit();
-		int vals = 0;
-		byte[] key = new byte[16];
-		start = System.currentTimeMillis();
-		while (key != null) {
-			key = b.nextKey();
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			vals++;
-		}
-
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-		b.iterInit();
-		key = new byte[16];
-		start = System.currentTimeMillis();
-		vals = 0;
-		while (key != null) {
-			key = b.nextClaimedKey(false);
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			vals++;
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-		b.iterInit();
-		long v = 0;
-		start = System.currentTimeMillis();
-		vals = 0;
-		while (v >= 0) {
-			v = b.nextClaimedValue(true);
-			vals++;
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-	}
+	
 
 	/*
 	 * (non-Javadoc)

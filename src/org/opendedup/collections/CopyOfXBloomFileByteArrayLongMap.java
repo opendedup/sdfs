@@ -27,7 +27,7 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
+public class CopyOfXBloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	/**
 	 * 
 	 */
@@ -59,7 +59,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public BloomFileByteArrayLongMap(String path, int size, short arraySize)
+	public CopyOfXBloomFileByteArrayLongMap(String path, int size, short arraySize)
 			throws IOException {
 		this.size = size;
 		this.path = path;
@@ -547,6 +547,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	 * @throws IOException
 	 */
 	byte[] current = new byte[FREE.length];
+
 	private int index(byte[] key) throws IOException {
 
 		// From here on we know obj to be non-null
@@ -558,7 +559,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			return -1;
 		else
 			index = index * EL;
-		
+		rrds++;
 		keys.position(index);
 		keys.get(current);
 
@@ -592,17 +593,17 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
 		int length = size * EL;
-		int probe = (1 + (hash % (size - 2))) * EL;
+		int probe = EL;
 
 		final int loopIndex = index;
 
 		do {
-			index -= probe;
-			if (index < 0) {
-				index += length;
+			index += probe;
+			if (index > length) {
+				index = 0;
 			}
 			if (!this.isFree(index / EL)) {
-
+				rrds++;
 				keys.position(index);
 				keys.get(cur);
 				//
@@ -633,15 +634,13 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			return index * EL;
 		else
 			index = index * EL;
-		keys.position(index);
-		keys.get(current);
-
-		if (Arrays.equals(current, FREE)) {
-			SDFSLogger.getLog().warn(
-					"Should not be here in hashmap in insertionIndex");
-			return index;
-		} else if (Arrays.equals(current, key)) {
-			return -index - 1; // already stored
+		if (migthexist) {
+			keys.position(index);
+			keys.get(current);
+			rds++;
+			if (Arrays.equals(current, key)) {
+				return -index - 1; // already stored
+			}
 		}
 		return insertKeyRehash(key, index, hash, current, migthexist);
 	}
@@ -663,7 +662,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur,
 			boolean mightexist) throws IOException {
 		final int length = size * EL;
-		final int probe = (1 + (hash % (size - 2))) * EL;
+		final int probe = EL;
 		final int loopIndex = index;
 		int firstRemoved = -1;
 
@@ -672,15 +671,15 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		 */
 		do {
 			// Identify first removed slot
-
+			rh++;
 			if (this.removed.get(index / EL) && firstRemoved == -1) {
 				firstRemoved = index;
 				if (!mightexist)
 					return index;
 			}
-			index -= probe;
-			if (index < 0) {
-				index += length;
+			index += probe;
+			if (index > length) {
+				index = 0;
 			}
 
 			// A FREE slot stops the search
@@ -691,10 +690,13 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 					return index;
 				}
 			}
-			keys.position(index);
-			keys.get(cur);
-			if (Arrays.equals(cur, key)) {
-				return -index - 1;
+			if (mightexist) {
+				rds++;
+				keys.position(index);
+				keys.get(cur);
+				if (Arrays.equals(cur, key)) {
+					return -index - 1;
+				}
 			}
 			// Detect loop
 		} while (index != loopIndex);
@@ -710,36 +712,55 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				"No free or removed slots available. Key set full?!!");
 	}
 
-	//transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
+	// transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
+	int bsz = 0;
+	int fpp = 0;
+	int zd = 0;
+	int rds = 0;
+	int rrds = 0;
+	int rh = 0;
 	@Override
 	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
 		try {
 			byte[] key = cm.getHash();
 			this.hashlock.lock();
+			if(bsz ==3000) {
+				SDFSLogger.getLog().info("dsz=" + bsz+" bf fp=" +fpp + " trs=" + bsz + " zd=" +zd + " rds=" + rds + " rrds=" + rrds + " rh=" + rh);
+				bsz = 0;
+				fpp = 0;
+				zd = 0;
+				rds = 0;
+				rrds = 0;
+				rh = 0;
+			}
+			bsz++;
 			if (this.sz.get() >= size)
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			KeyBlob kb = new KeyBlob(key);
 			int pos = -1;
+			boolean mc = bf.mightContain(kb);
 			if (this.runningGC)
 				pos = this.insertionIndex(key, true);
 			else
-				pos = this.insertionIndex(key, bf.mightContain(kb));
+				pos = this.insertionIndex(key, mc);
 			if (pos < 0) {
-				
+				zd++;
 				int npos = -pos - 1;
 				npos = (npos / EL);
 				this.claims.set(npos);
 				this.bf.put(kb);
 				return false;
 			} else {
+				if(mc)
+					fpp++;
 				if (!cm.recoverd) {
 					cm.persistData(true);
 				}
@@ -773,7 +794,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 								+ "the volume or DSE allocation size");
 			KeyBlob kb = new KeyBlob(key);
 			int pos = -1;
-			if (!this.runningGC)
+			if (this.runningGC)
 				pos = this.insertionIndex(key, true);
 			else
 				pos = this.insertionIndex(key, bf.mightContain(kb));

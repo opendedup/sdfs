@@ -50,7 +50,6 @@ public interface DedupChunkInterface {
 	 */
 	public abstract void setNewChunk(boolean newChunk);
 
-	public abstract byte[] getChunk() throws IOException, BufferClosedException;
 
 	/**
 	 * sets the chunk as writable

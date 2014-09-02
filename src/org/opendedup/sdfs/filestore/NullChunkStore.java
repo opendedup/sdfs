@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+
 import org.w3c.dom.Element;
 
 /**
@@ -15,7 +16,7 @@ import org.w3c.dom.Element;
  */
 
 public class NullChunkStore implements AbstractChunkStore {
-
+	//AtomicLong sz = new AtomicLong(0);
 	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
@@ -37,7 +38,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException {
 		// TODO Auto-generated method stub
-		return new byte[0];
+		return new byte[len];
 	}
 
 	@Override
@@ -55,6 +56,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
+		//return sz.get();
 		return 0;
 	}
 
@@ -92,7 +94,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
-		// TODO Auto-generated method stub
+		//this.sz.addAndGet(len);
 		return 0;
 	}
 
@@ -105,6 +107,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long compressedSize() {
 		// TODO Auto-generated method stub
+		//return this.sz.get();
 		return 0;
 	}
 

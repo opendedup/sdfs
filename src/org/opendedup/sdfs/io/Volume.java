@@ -216,9 +216,12 @@ public class Volume implements java.io.Serializable {
 					"Volume write threshold is " + this.fullPercentage);
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
 		}
-		if (vol.hasAttribute("closed-gracefully"))
+		if (vol.hasAttribute("closed-gracefully")) {
 			Main.closedGracefully = Boolean.parseBoolean(vol
 					.getAttribute("closed-gracefully"));
+			if(!Main.closedGracefully)
+				Main.runConsistancyCheck = true;
+		}
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));

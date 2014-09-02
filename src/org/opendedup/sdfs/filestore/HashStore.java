@@ -15,7 +15,6 @@ import org.opendedup.sdfs.servers.HashChunkServiceInterface;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
 
-
 /**
  * 
  * @author Sam Silverberg
@@ -148,9 +147,9 @@ public class HashStore {
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
 
-		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
+		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
 		if (HashFunctionPool.max_hash_cluster > 1)
-			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
+			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size);
 		try {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
@@ -217,8 +216,8 @@ public class HashStore {
 		this.bdb.claimRecords(evt);
 	}
 
-	
-	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf) throws IOException {
+	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
+			throws IOException {
 		return this.bdb.claimRecords(evt, bf);
 	}
 
@@ -240,8 +239,8 @@ public class HashStore {
 	public boolean addHashChunk(HashChunk chunk) throws IOException,
 			HashtableFullException {
 		boolean written = false;
-		if (!bdb.containsKey(chunk.getName())) {
-			try {
+		try {
+			//if (!bdb.containsKey(chunk.getName())) {
 				// long start = chunkStore.reserveWritePosition(chunk.getLen());
 				ChunkData cm = new ChunkData(chunk.getName(),
 						Main.chunkStorePageSize, chunk.getData());
@@ -249,21 +248,21 @@ public class HashStore {
 				// SDFSLogger.getLog().debug("wrote hash " +
 				// StringUtils.getHexString(chunk.getName()) + " = " +written);
 
-			} catch (IOException e) {
-				SDFSLogger.getLog().fatal(
-						"Unable to commit chunk "
-								+ StringUtils.getHexString(chunk.getName()), e);
-				throw e;
-			} catch (HashtableFullException e) {
-				SDFSLogger.getLog().fatal(
-						"Unable to commit chunk "
-								+ StringUtils.getHexString(chunk.getName()), e);
-				throw e;
-			}
+			//}
+		} catch (IOException e) {
+			SDFSLogger.getLog().fatal(
+					"Unable to commit chunk "
+							+ StringUtils.getHexString(chunk.getName()), e);
+			throw e;
+		} catch (HashtableFullException e) {
+			SDFSLogger.getLog().fatal(
+					"Unable to commit chunk "
+							+ StringUtils.getHexString(chunk.getName()), e);
+			throw e;
+		}
 
-			finally {
+		finally {
 
-			}
 		}
 		return written;
 	}

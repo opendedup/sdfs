@@ -157,6 +157,10 @@ public class SDFSCmdline {
 					.getOptionValue("cleanstore")));
 			System.exit(0);
 		}
+		if (cmd.hasOption("fdisk")) {
+			ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
+			System.exit(0);
+		}
 		if (cmd.hasOption("change-password")) {
 			ProcessSetPasswordCmd.runCmd(cmd.getOptionValue("change-password"));
 			System.exit(0);
@@ -280,6 +284,11 @@ public class SDFSCmdline {
 						"Returns A List of SDFS Volumes in the cluster. "
 								+ "\n e.g. --cluster-volumes").hasArg(false)
 				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("fdisk")
+				.withDescription(
+						"Runs fdisk on volume.")
+				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-volume-remove")
 				.withDescription(

@@ -319,7 +319,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			if (!cm.recoverd) {
 				cm.persistData(true);
 			}
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
+			added = this.getMap(cm.getHash()).put(cm);
 			if (added) {
 				this.kSz.incrementAndGet();
 			} else {

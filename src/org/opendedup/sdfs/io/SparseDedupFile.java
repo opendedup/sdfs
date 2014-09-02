@@ -75,9 +75,7 @@ public class SparseDedupFile implements DedupFile {
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, executionHandler);
 	private boolean dirty = false;
-	static {
-		// executor.allowCoreThreadTimeOut(true);
-	}
+	
 	
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -85,7 +83,7 @@ public class SparseDedupFile implements DedupFile {
 
 	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers + 1)
-			.concurrencyLevel(Main.writeThreads * 3)
+			.concurrencyLevel(Main.writeThreads)
 			.expireAfterAccess(10, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(
@@ -132,7 +130,6 @@ public class SparseDedupFile implements DedupFile {
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		// SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" +
 		// this.maxWriteBuffers);
-		
 		this.mf = mf;
 		if (mf.getDfGuid() == null) {
 			// new Instance
@@ -427,7 +424,6 @@ public class SparseDedupFile implements DedupFile {
 								f.dedup = mf.isDedup();
 								executor.execute(f);
 							}
-							
 							int wl = 0;
 							int tm = 1000;
 					
@@ -584,10 +580,12 @@ public class SparseDedupFile implements DedupFile {
 			long chunkPos = this.getChuckPosition(position);
 			DedupChunkInterface writeBuffer = null;
 			try {
-				if (Main.volume.isClustered())
+				if (Main.volume.isClustered()) {
 					writeBuffer = this.load(chunkPos);
-				else
+				}
+				else {
 					writeBuffer = this.writeBuffers.get(chunkPos);
+				}
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
@@ -606,8 +604,9 @@ public class SparseDedupFile implements DedupFile {
 
 			if (newChunk)
 				ck = createNewChunk(chunkPos);
-			else
+			else {
 				ck = this.getHash(chunkPos, true);
+			}
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(ck.getHash(), chunkPos,
 						ck.getLength(), this, ck.getHashLoc());

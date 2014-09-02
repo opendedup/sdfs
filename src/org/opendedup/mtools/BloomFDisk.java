@@ -1,9 +1,16 @@
 package org.opendedup.mtools;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.DataMapInterface;
@@ -13,6 +20,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
+import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
@@ -22,16 +30,23 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
 public class BloomFDisk {
-	private long files = 0;
+	private AtomicLong files = new AtomicLong(0);
 	private SDFSEvent fEvt = null;
-	private long entries = 0;
+	private AtomicLong entries = new AtomicLong(0);
 	transient LargeBloomFilter bf = null;
-
+	private boolean failed = false;
+	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
+			2);
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads + 1,
+			Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
+			executionHandler);
+	
 	public BloomFDisk(SDFSEvent evt) throws FDiskException {
 		init(evt);
 	}
 
-	public void init(SDFSEvent evt) throws FDiskException {
+	private void init(SDFSEvent evt) throws FDiskException {
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
 			SDFSEvent
@@ -44,28 +59,31 @@ public class BloomFDisk {
 					"FDisk Will not start because the volume has not been written too");
 		}
 		try {
+			long sz = FileCounts.getSize(f, false);
 			fEvt = SDFSEvent.fdiskInfoEvent(
-					"Starting FDISK for " + Main.volume.getName()
-							+ " file count = " + FileCounts.getCount(f, false)
-							+ " file size = " + FileCounts.getSize(f, false),
+					"Starting BFDISK for " + Main.volume.getName()
+							+ " file size = " + sz,
 					evt);
-			fEvt.maxCt = FileCounts.getSize(f, false);
-			this.entries = Main.volume.getActualWriteBytes()
-					/ HashFunctionPool.avg_page_size;
+			fEvt.maxCt = sz;
+			
 			if(Main.chunkStoreLocal)
-				this.entries = HCServiceProxy.getSize();
-			int tr = 0;
-			if (entries > Integer.MAX_VALUE)
-				tr = Integer.MAX_VALUE;
+				this.entries = new AtomicLong(HCServiceProxy.getSize());
 			else
-				tr = (int) this.entries;
-			SDFSLogger.getLog().info("entries = " + tr);
-			bf = new LargeBloomFilter( tr, .10);
+				this.entries = new AtomicLong(Main.volume.getActualWriteBytes()
+						/ HashFunctionPool.avg_page_size);
+			SDFSLogger.getLog().info("entries = " + this.entries.get());
+			bf = new LargeBloomFilter( this.entries.get(), .10);
 			SDFSLogger.getLog().info(
-					"Starting FDISK for " + Main.volume.getName());
+					"Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
 
 			this.traverse(f);
+			executor.shutdown();
+			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+				  SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
+				}
+			if(failed)
+				throw new IOException("BFDisk traverse failed");
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check [" + files + "].");
@@ -76,7 +94,7 @@ public class BloomFDisk {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
 					SDFSEvent.ERROR);
-			throw new FDiskException(e);
+			this.failed = true;
 
 		}
 	}
@@ -87,18 +105,23 @@ public class BloomFDisk {
 
 	private void traverse(File dir) throws IOException {
 		if (dir.isDirectory()) {
+			if(failed)
+				throw new IOException("BFDisk traverse failed");
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));
 			}
 		} else {
+			if(failed)
+				throw new IOException("BFDisk traverse failed");
 			if (dir.getPath().endsWith(".map")) {
-				this.checkDedupFile(dir);
+				executor.execute(new CheckDedupFile(this,dir));
 			}
 		}
 	}
 
-	private void checkDedupFile(File mapFile) throws IOException {
+	ReentrantLock l = new ReentrantLock();
+	private void checkDedupFile(File mapFile) {
 		DataMapInterface mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
@@ -106,7 +129,9 @@ public class BloomFDisk {
 			byte[] val = new byte[0];
 			mp.iterInit();
 			while (val != null) {
+				l.lock();
 				fEvt.curCt += (mp.getIterPos() - prevpos);
+				l.unlock();
 				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
@@ -122,12 +147,12 @@ public class BloomFDisk {
 		} catch (Throwable e) {
 			SDFSLogger.getLog().info(
 					"error while checking file [" + mapFile.getPath() + "]", e);
-			throw new IOException(e);
+			this.failed = true;
 		} finally {
 			mp.close();
 			mp = null;
 		}
-		this.files++;
+		this.files.incrementAndGet();
 	}
 
 	Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
@@ -145,5 +170,37 @@ public class BloomFDisk {
 			into.putBytes(key.key);
 		}
 	};
+	
+	private static class CheckDedupFile implements Runnable {
+		
+		BloomFDisk fd = null;
+		File f = null;
+		protected CheckDedupFile(BloomFDisk fd,File f) {
+			this.fd =fd;
+			this.f = f;
+		}
+		@Override
+		public void run() {
+				fd.checkDedupFile(f);
+		}
+		
+	}
+	
+	private final static class ProcessPriorityThreadFactory implements ThreadFactory {
+
+	    private final int threadPriority;
+
+	    public ProcessPriorityThreadFactory(int threadPriority) {
+	        this.threadPriority = threadPriority;
+	    }
+
+	    @Override
+	    public Thread newThread(Runnable r) {
+	        Thread thread = new Thread(r);
+	        thread.setPriority(threadPriority);
+	        return thread;
+	    }
+
+	}
 
 }

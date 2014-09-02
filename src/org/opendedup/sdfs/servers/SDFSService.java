@@ -2,12 +2,14 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -48,6 +50,11 @@ public class SDFSService {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
+		System.out.println("Initializing HashFunction");
+		SDFSLogger.getLog().info("Initializing HashFunction");
+		SparseDedupFile.hashPool.hashCode();
+		System.out.println("HashFunction Initialized");
+		SDFSLogger.getLog().info("HashFunction Initialized");
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");

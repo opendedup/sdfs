@@ -596,7 +596,21 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("redundancyck")) {
+					} else if (cmd.equalsIgnoreCase("fdisk")) {
+						try {
+							Element msg = new FDISKCmd().getResult(
+									cmdOptions, file);
+							result.setAttribute("status", "success");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					
+					else if (cmd.equalsIgnoreCase("redundancyck")) {
 						try {
 							Element msg = new ClusterRedundancyCmd().getResult(
 									cmdOptions, null);

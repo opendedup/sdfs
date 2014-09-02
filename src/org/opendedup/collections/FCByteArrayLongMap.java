@@ -502,6 +502,44 @@ public class FCByteArrayLongMap implements AbstractShard {
 		throw new IllegalStateException(
 				"No free or removed slots available. Key set full?!!");
 	}
+	
+	public boolean put(ChunkData cm) {
+		try {
+			byte [] key = cm.getHash();
+			this.hashlock.lock();
+			if (this.mapped.cardinality() >= size)
+				throw new IOException(
+						"entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
+			int pos = this.insertionIndex(key);
+			if (pos < 0) {
+				int npos = -pos -1;
+				npos = (npos / FREE.length);
+				this.claims.set(npos);
+				return false;
+			}
+			this.kFC.write(ByteBuffer.wrap(key), pos);
+			if (!cm.recoverd) {
+				cm.persistData(true);
+			}
+			if (cm.getcPos() > bgst)
+				bgst = cm.getcPos();
+			pos = (pos / FREE.length) * 8;
+			this.vRaf.seek(pos);
+			this.vRaf.writeLong(cm.getcPos());
+			pos = (pos / 8);
+			this.claims.set(pos);
+			this.mapped.set(pos);
+			// this.store.position(pos);
+			// this.store.put(storeID);
+			return pos > -1 ? true : false;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("error inserting record", e);
+			return false;
+		} finally {
+			this.hashlock.unlock();
+		}
+	}
 
 	public boolean put(byte[] key, long value) {
 		try {
@@ -511,8 +549,12 @@ public class FCByteArrayLongMap implements AbstractShard {
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
-			if (pos < 0)
+			if (pos < 0) {
+				int npos = -pos -1;
+				npos = (npos / FREE.length);
+				this.claims.set(npos);
 				return false;
+			}
 			this.kFC.write(ByteBuffer.wrap(key), pos);
 
 			if (value > bgst)

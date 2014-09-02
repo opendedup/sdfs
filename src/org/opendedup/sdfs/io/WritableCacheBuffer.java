@@ -326,9 +326,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						hcb.put(sh.ck);
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("pos = " + this.position
-						 + "ck sz=" + sh.ck.length + " hcb sz=" +
+						 + " ck sz=" + sh.ck.length + " hcb pos=" +
 						 hcb.position() + " cks sz=" +cks.size() + " len="
-						 + (hcb.position() +sh.ck.length));
+						 + (hcb.capacity()));
 						throw new IOException(e);
 					}
 				}
@@ -380,32 +380,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	@Override
 	public long getEndPosition() {
 		return endPosition;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#getChunk()
-	 */
-	@Override
-	public byte[] getChunk() throws IOException, BufferClosedException {
-		
-		if (this.closed)
-			throw new BufferClosedException("Buffer Closed");
-		if (this.flushing)
-			throw new BufferClosedException("Buffer Flushing");
-		this.lock.lock();
-		try {
-			try {
-				this.initBuffer();
-			} catch (InterruptedException e) {
-				throw new IOException(e);
-			}
-			
-			return buf.array();
-		} finally {
-			this.lock.unlock();
-		}
 	}
 
 	/*
@@ -618,7 +592,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				df.removeBufferFromFlush(this);
 				this.closed = true;
 				this.flushing = false;
+				this.dirty = false;
 				
+			} else {
+				this.closed = true;
+				this.flushing = false;
 			}
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -648,11 +626,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					SDFSLogger.getLog().debug(
 							this.getFilePosition() + " already closed");
 			} else {
+				
 				this.df.writeCache(this);
 				df.removeBufferFromFlush(this);
 				this.closed = true;
 				this.flushing = false;
 			}
+				
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
