@@ -54,6 +54,7 @@ public class SparseDedupFile implements DedupFile {
 	private transient String chunkStorePath = null;
 	private DedupFileChannel staticChannel = null;
 	public long lastSync = 0;
+	public static boolean storageConnected = true;
 	public DataMapInterface bdb = null;
 	MessageDigest digest = null;
 	public static final HashFunctionPool hashPool = new HashFunctionPool(
@@ -582,6 +583,8 @@ public class SparseDedupFile implements DedupFile {
 			if (this.toOccured) {
 				throw new FileClosedException("timeout occured");
 			}
+			if(!storageConnected)
+				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
 			DedupChunkInterface writeBuffer = null;
 			try {
@@ -662,6 +665,8 @@ public class SparseDedupFile implements DedupFile {
 			throws FileClosedException, IOException {
 		this.syncLock.lock();
 		try {
+			if(!storageConnected)
+				throw new IOException("storage offline");
 			if (this.closed) {
 				return;
 
@@ -708,6 +713,10 @@ public class SparseDedupFile implements DedupFile {
 	public DedupFileChannel getChannel(int flags) throws IOException {
 		channelLock.lock();
 		try {
+			if(!storageConnected)
+				throw new IOException("storage offline");
+			if(this.toOccured)
+				throw new IOException("timeout occured");
 			if (!Main.safeClose || Main.blockDev) {
 				if (this.staticChannel == null) {
 					if (this.isClosed())
@@ -742,6 +751,7 @@ public class SparseDedupFile implements DedupFile {
 			channelLock.lock();
 			try {
 				
+				
 				if (channel.getFlags() == flags) {
 					this.channels.remove(channel);
 					channel.close(flags);
@@ -771,6 +781,8 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public void registerChannel(DedupFileChannel channel) throws IOException {
+		if(!storageConnected)
+			throw new IOException("storage offline");
 		if(this.toOccured)
 			throw new IOException("timeout occured");
 		if (!Main.safeClose) {
@@ -900,6 +912,8 @@ public class SparseDedupFile implements DedupFile {
 				this.toOccured =false;
 				throw new IOException("timeout occured");
 			}
+			if(!storageConnected)
+				throw new IOException("storage offline");
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
 		} finally {
@@ -984,6 +998,8 @@ public class SparseDedupFile implements DedupFile {
 	private void initDB() throws IOException {
 		this.syncLock.lock();
 		try {
+			if(!storageConnected)
+				throw new IOException("storage offline");
 			if (this.isClosed()) {
 				File directory = new File(Main.dedupDBStore + File.separator
 						+ this.GUID.substring(0, 2) + File.separator
