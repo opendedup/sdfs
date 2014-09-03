@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,7 +35,6 @@ public class EncryptUtils {
 		try {
 			keyBytes = HashFunctions
 					.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
-			iv = StringUtils.getHexBytes(Main.chunkStoreEncryptionIV);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -125,6 +125,35 @@ public class EncryptUtils {
 			throw new IOException(ce);
 		}
 		return clearText;
+	}
+	
+	public static byte[] encryptCBC(byte[] chunk) throws IOException {
+		
+
+		try {
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+	        cipher.init(Cipher.ENCRYPT_MODE, key,spec);
+			byte[] encrypted = cipher.doFinal(chunk);
+			return encrypted;
+		} catch (Exception ce) {
+			SDFSLogger.getLog().error("uable to encrypt", ce);
+			throw new IOException(ce);
+		}
+		
+	}
+
+	public static byte[] decryptCBC(byte[] encChunk) throws IOException {
+		
+		try {
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+	        cipher.init(Cipher.DECRYPT_MODE, key,spec);
+	        byte[] decrypted = cipher.doFinal(encChunk);
+	        return decrypted;
+		} catch (Exception ce) {
+			SDFSLogger.getLog().error("uable to decrypt", ce);
+			throw new IOException(ce);
+		}
+
 	}
 	
 	public static void encryptFile(File src,File dst) throws Exception {
