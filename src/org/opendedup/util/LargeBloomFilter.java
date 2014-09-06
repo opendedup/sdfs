@@ -115,11 +115,15 @@ public class LargeBloomFilter implements Serializable{
 	};
 
 	public void save(File dir) throws IOException {
+		CommandLineProgressBar bar = new CommandLineProgressBar("Saving BloomFilters",
+				bfs.length, System.out);
 		for (int i = 0; i < bfs.length; i++) {
 			File f = new File(dir.getPath() + File.separator + "lbf" + i
 					+ ".bf");
 			bfs[i].save(f);
+			bar.update(i);
 		}
+		bar.finish();
 	}
 
 }

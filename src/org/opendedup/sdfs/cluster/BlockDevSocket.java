@@ -695,4 +695,10 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 
 	}
 
+	@Override
+	public void put(long pos, byte[] data, int length) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

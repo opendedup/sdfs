@@ -35,10 +35,14 @@ public class SparseDataChunk implements Externalizable {
 			this.version = 0;
 		if (rawData.length == LongByteArrayMap._V1FREE.length)
 			this.version = 1;
+		if (rawData.length == LongByteArrayMap._V2FREE.length)
+			this.version = 2;
 		if (version == 0)
 			this.RAWDL = LongByteArrayMap._FREE.length;
 		else if (version == 1)
 			this.RAWDL = LongByteArrayMap._V1FREE.length;
+		else if (version == 2)
+			this.RAWDL = LongByteArrayMap._V2FREE.length;
 		if (rawData.length != RAWDL)
 			throw new IOException(
 					"possible data corruption: byte array length "
@@ -60,12 +64,19 @@ public class SparseDataChunk implements Externalizable {
 				this.localData = true;
 			hashlocs = new byte[8];
 			buf.get(hashlocs);
-		} else {
+		} else if(this.version == 1) {
 			doop = buf.getInt();
 			hash = new byte[HashFunctionPool.hashLength
 					* HashFunctionPool.max_hash_cluster];
 			buf.get(hash);
 			hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
+			buf.get(hashlocs);
+		}
+		else if(this.version == 2) {
+			doop = buf.getInt();
+			hash = new byte[buf.getInt()];
+			buf.get(hash);
+			hashlocs = new byte[buf.getInt()];
 			buf.get(hashlocs);
 		}
 	}
@@ -77,6 +88,8 @@ public class SparseDataChunk implements Externalizable {
 			this.RAWDL = LongByteArrayMap._FREE.length;
 		else if (version == 1)
 			this.RAWDL = LongByteArrayMap._V1FREE.length;
+		else if (version == 2)
+			this.RAWDL = LongByteArrayMap._V2FREE.length;
 		this.doop = doop;
 		this.hash = hash;
 		this.localData = localData;
@@ -97,12 +110,22 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	public byte[] getBytes() {
-		ByteBuffer buf = ByteBuffer.wrap(new byte[RAWDL]);
-		if (this.version > 0) {
+		ByteBuffer buf = null;
+		if (this.version == 1) {
+			 buf = ByteBuffer.wrap(new byte[4+hash.length+hashlocs.length]);
 			buf.putInt(this.doop);
 			buf.put(this.hash);
 			buf.put(this.hashlocs);
-		} else {
+		} else if(this.version == 2) {
+			buf = ByteBuffer.wrap(new byte[4+4+hash.length+4+hashlocs.length]);
+			buf.putInt(this.doop);
+			buf.putInt(this.hash.length);
+			buf.put(this.hash);
+			buf.putInt(this.hashlocs.length);
+			buf.put(this.hashlocs);
+		}
+		else {
+			buf = ByteBuffer.wrap(new byte[1+hash.length+1+hashlocs.length]);
 			if (doop > 0)
 				buf.put((byte) 1);
 			else
