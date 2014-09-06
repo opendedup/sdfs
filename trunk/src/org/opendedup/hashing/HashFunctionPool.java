@@ -30,7 +30,7 @@ public class HashFunctionPool {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
 			hashLength = VariableHashEngine.getHashLenth();
-			Main.MAPVERSION = 1;
+			Main.MAPVERSION = 2;
 
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}

@@ -27,13 +27,16 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)
 			* HashFunctionPool.max_hash_cluster;
 	private static final int _v1arrayLength = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
+	private static final int _v2arrayLength = 4 +4+4+((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
 	private static final int _v1offset = 64;
+	private static final int _v2offset = 256;
 	private static final short magicnumber = 6442;
 	String filePath = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	private boolean closed = true;
 	public static byte[] _FREE = new byte[_arrayLength];
 	public static byte[] _V1FREE = new byte[_v1arrayLength];
+	public static byte[] _V2FREE = new byte[_v2arrayLength];
 	public long iterPos = 0;
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
@@ -44,7 +47,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	// FileChannel iterbdb = null;
 	FileChannelImpl pbdb = null;
 	RandomAccessFile rf = null;
-	private int offset = _v1offset;
+	private int offset = 0;
 	private int arrayLength = _v1arrayLength;
 	private byte version = Main.MAPVERSION;
 	private byte[] FREE;
@@ -53,8 +56,10 @@ public class LongByteArrayMap implements DataMapInterface {
 	static {
 		_FREE = new byte[_arrayLength];
 		_V1FREE = new byte[_v1arrayLength];
+		_V2FREE = new byte[_v2arrayLength];
 		Arrays.fill(_FREE, (byte) 0);
 		Arrays.fill(_V1FREE, (byte) 0);
+		Arrays.fill(_V2FREE, (byte) 0);
 	}
 
 	public LongByteArrayMap(String filePath) throws IOException {
@@ -235,8 +240,13 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 		if (version == 1) {
 			this.FREE = _V1FREE;
-			this.offset = 64;
+			this.offset = _v1offset;
 			this.arrayLength = _v1arrayLength;
+		}
+		if (version == 2) {
+			this.FREE = _V2FREE;
+			this.offset = _v2offset;
+			this.arrayLength = _v2arrayLength;
 		}
 	}
 
@@ -569,7 +579,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			} else {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("snapping on unix/linux volume");
-				String cpCmd = "cp --sparse=always " + src.getPath() + " "
+				String cpCmd = "cp --sparse=always --reflink=auto " + src.getPath() + " "
 						+ dest.getPath();
 				SDFSLogger.getLog().debug(cpCmd);
 				Process p = Runtime.getRuntime().exec(cpCmd);
@@ -640,6 +650,12 @@ public class LongByteArrayMap implements DataMapInterface {
 			this.rf.close();
 		} catch (Exception e) {
 		}
+	}
+
+	@Override
+	public void put(long pos, byte[] data, int length) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/*

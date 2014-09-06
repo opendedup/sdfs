@@ -1,6 +1,7 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,13 @@ import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Ordering;
 
 public class FFDisk {
 	private AtomicLong files = new AtomicLong(0);
@@ -37,16 +42,17 @@ public class FFDisk {
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads + 1,
-			Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads/2,
+			Main.writeThreads/2, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
-	
+	int fc = 0;
 	public FFDisk(String file) throws FDiskException, IOException {
 		File f = new File(Main.dedupDBStore);
 		long sz = FileCounts.getSize(f, false);
+		fc = (int)FileCounts.getCount(f, false);
 		fEvt = SDFSEvent.fdiskInfoEvent(
 				"Starting FDISK for " + file
-						+ " file count = " + FileCounts.getCount(f, false)
+						+ " file count = " + fc
 						+ " file size = " + StorageUnit.of(sz).format(sz));
 		fEvt.maxCt = sz;
 		
@@ -95,19 +101,51 @@ public class FFDisk {
 
 		}
 	}
-
-	private void traverse(File dir) throws IOException {
+	ArrayList<File> filesAL = new ArrayList<File>();
+	private void createFileList(File dir) throws IOException {
+		if(SDFSService.isStopped())
+			return;
+		
 		if (dir.isDirectory()) {
-			if(failed)
-				throw new IOException("FDisk traverse failed");
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
-				traverse(new File(dir, children[i]));
+				createFileList(new File(dir, children[i]));
 			}
 		} else {
+			filesAL.add(dir);
+		}
+		
+		
+	}
+	
+	Function<File, Long> getLastModified = new Function<File, Long>() {
+	    public Long apply(File file) {
+			try {
+				MetaDataDedupFile mf = MetaDataDedupFile.getFile(file.getPath());
+				return mf.lastModified();
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error getting attributes for " + file.getPath(),e);
+			}
+	    	return 0L;
+	    }
+	};
+
+	
+	
+	private void traverse(File dir) throws IOException {
+		if(SDFSService.isStopped())
+			return;
+		filesAL = new ArrayList<File>(fc);
+		this.createFileList(dir);
+		List<File> orderedFiles = Ordering.natural().onResultOf(getLastModified).
+                sortedCopy(filesAL);
+		filesAL = null;
+		for(File f : orderedFiles) {
 			if(failed)
 				throw new IOException("FDisk traverse failed");
-				executor.execute(new CheckDedupFile(this,dir));
+			if(SDFSService.isStopped())
+				return;
+			executor.execute(new CheckDedupFile(this,f));
 		}
 	}
 
@@ -130,8 +168,10 @@ public class FFDisk {
 	ReentrantLock l = new ReentrantLock();
 	private void checkDedupFile(File metaFile) throws IOException {
 		DataMapInterface mp = null;
+		MetaDataDedupFile mf = null;
 		try {
-			MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
+			long start = System.currentTimeMillis();
+			mf = MetaDataDedupFile.getFile(metaFile.getPath());
 			lsz.addAndGet(mf.length());
 			String guid= mf.getDfGuid();
 			File directory = new File(Main.dedupDBStore + File.separator
@@ -202,6 +242,15 @@ public class FFDisk {
 						"map file " + metaFile.getPath()+ " is suspect, ["
 								+ corruptBlocks + "] missing blocks found.");
 			}
+			long dur = (System.currentTimeMillis() - start) / 1000;
+			long spd = 0;
+			if(dur > 0)
+				spd = mf.length()/dur;
+			SDFSLogger.getLog().info(
+					"took [" + (System.currentTimeMillis() - start) / 1000
+							+ "] seconds to check [" + metaFile.getPath() + "]. Found ["
+							+ corruptBlocks + "] corrupt blocks. Speed= "+ StorageUnit.of(spd).format(spd) + "/s");
+			
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(
 					"error while checking file [" + metaFile.getPath() + "]", e);

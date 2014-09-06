@@ -19,7 +19,12 @@ public class SDFSService {
 
 	private NetworkDSEServer ndServer = null;
 	private ArrayList<String> volumes;
+	private static boolean stopped = false;
 
+	public static boolean isStopped() {
+		return stopped;
+	}
+	
 	public SDFSService(String configFile, ArrayList<String> volumes) {
 
 		this.configFile = configFile;
@@ -86,6 +91,7 @@ public class SDFSService {
 	}
 
 	public void stop() {
+		stopped = true;
 		SDFSEvent evt = SDFSEvent.umountEvent("Unmounting Volume");
 		SDFSLogger.getLog().info("Shutting Down SDFS");
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");

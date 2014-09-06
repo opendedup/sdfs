@@ -44,7 +44,7 @@ public class VolumeConfigWriter {
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
-	boolean safe_sync = true;
+	boolean safe_sync = false;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	short chunk_size = 4;
@@ -496,9 +496,6 @@ public class VolumeConfigWriter {
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
 		
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
-		if(ext)
-			io.setAttribute("max-file-inactive", "0");
-		else
 			io.setAttribute("max-file-inactive", "900");
 		io.setAttribute("max-file-write-buffers",
 				Integer.toString(this.max_file_write_buffers));
@@ -594,7 +591,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if(ext) {
 				this.chunk_size = 1024;
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
+				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "20MB");
 				extended.setAttribute("allow-sync", "false");
@@ -621,7 +618,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			if(ext) {
 				this.chunk_size = 1024;
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
+				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "10MB");
 				extended.setAttribute("allow-sync", "false");
