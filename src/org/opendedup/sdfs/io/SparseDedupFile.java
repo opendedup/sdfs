@@ -77,7 +77,6 @@ public class SparseDedupFile implements DedupFile {
 			worksQueue, executionHandler);
 	private boolean dirty = false;
 	private boolean toOccured = false;
-	
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -586,20 +585,17 @@ public class SparseDedupFile implements DedupFile {
 			if(!storageConnected)
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
-			DedupChunkInterface writeBuffer = null;
 			try {
 				if (Main.volume.isClustered()) {
-					writeBuffer = this.load(chunkPos);
+					return this.load(chunkPos);
 				}
 				else {
-					writeBuffer = this.writeBuffers.get(chunkPos);
+					return this.writeBuffers.get(chunkPos);
 				}
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
-			return writeBuffer;
 		} finally {
-			//this.writeLock.unlock();
 		}
 
 	}
@@ -664,6 +660,11 @@ public class SparseDedupFile implements DedupFile {
 	public void sync(boolean force, boolean propigate)
 			throws FileClosedException, IOException {
 		this.syncLock.lock();
+		try {
+			throw new IOException("sync");
+		}catch(Exception e) {
+			SDFSLogger.getLog().info("poop", e);
+		}
 		try {
 			if(!storageConnected)
 				throw new IOException("storage offline");

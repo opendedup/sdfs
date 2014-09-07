@@ -2,16 +2,19 @@ package org.opendedup.hashing;
 
 import org.opendedup.sdfs.Main;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+
 public class Murmur3HashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
-
+	HashFunction hf = Hashing.murmur3_128(seed);
 	public Murmur3HashEngine() {
 	}
 
 	@Override
 	public byte[] getHash(byte[] data) {
-		byte[] hash = MurmurHash3.murmur128(data, seed);
+		byte[] hash = hf.hashBytes(data).asBytes();
 		return hash;
 	}
 
