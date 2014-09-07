@@ -243,7 +243,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				ByteBuffer hb = ByteBuffer.wrap(this.getHash());
 				ByteBuffer hl = ByteBuffer.wrap(this.hashloc);
 				final ArrayList<Shard> cks = new ArrayList<Shard>();
-				for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+				int i = 0;
+				while (hb.hasRemaining()) {
 					byte[] _hash = new byte[HashFunctionPool.hashLength];
 					byte[] _hl = new byte[8];
 					hl.get(_hl);
@@ -257,6 +258,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						cks.add(i, sh);
 					} else
 						break;
+					i++;
 				}
 				sz = cks.size();
 				AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {

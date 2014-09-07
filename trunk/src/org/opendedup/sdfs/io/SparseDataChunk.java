@@ -19,34 +19,25 @@ public class SparseDataChunk implements Externalizable {
 	private byte[] hash;
 	private boolean localData = false;
 	int currentpos = 1;
-	private int RAWDL = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
 	// private int RAWDL;
 	private byte[] hashlocs;
 	private long fpos;
 	private byte version = 1;
 	private static final long serialVersionUID = -2782607786999940224L;
+	
 
 	public SparseDataChunk() {
 
 	}
 
-	public SparseDataChunk(byte[] rawData) throws IOException {
+	public SparseDataChunk(byte[] rawData,int version) throws IOException {
 		if (rawData.length == LongByteArrayMap._FREE.length)
 			this.version = 0;
 		if (rawData.length == LongByteArrayMap._V1FREE.length)
 			this.version = 1;
-		if (rawData.length == LongByteArrayMap._V2FREE.length)
-			this.version = 2;
-		if (version == 0)
-			this.RAWDL = LongByteArrayMap._FREE.length;
-		else if (version == 1)
-			this.RAWDL = LongByteArrayMap._V1FREE.length;
-		else if (version == 2)
-			this.RAWDL = LongByteArrayMap._V2FREE.length;
-		if (rawData.length != RAWDL)
-			throw new IOException(
-					"possible data corruption: byte array length "
-							+ rawData.length + " does not equal " + RAWDL);
+		else
+			this.version = rawData[0];
+		
 
 		ByteBuffer buf = ByteBuffer.wrap(rawData);
 		if (this.version == 0) {
@@ -73,6 +64,8 @@ public class SparseDataChunk implements Externalizable {
 			buf.get(hashlocs);
 		}
 		else if(this.version == 2) {
+			buf.get();
+			buf.getInt();
 			doop = buf.getInt();
 			hash = new byte[buf.getInt()];
 			buf.get(hash);
@@ -84,12 +77,7 @@ public class SparseDataChunk implements Externalizable {
 	public SparseDataChunk(int doop, byte[] hash, boolean localData,
 			byte[] hashlocs, byte version) {
 		this.version = version;
-		if (version == 0)
-			this.RAWDL = LongByteArrayMap._FREE.length;
-		else if (version == 1)
-			this.RAWDL = LongByteArrayMap._V1FREE.length;
-		else if (version == 2)
-			this.RAWDL = LongByteArrayMap._V2FREE.length;
+		
 		this.doop = doop;
 		this.hash = hash;
 		this.localData = localData;
@@ -117,7 +105,9 @@ public class SparseDataChunk implements Externalizable {
 			buf.put(this.hash);
 			buf.put(this.hashlocs);
 		} else if(this.version == 2) {
-			buf = ByteBuffer.wrap(new byte[4+4+hash.length+4+hashlocs.length]);
+			buf = ByteBuffer.wrap(new byte[1+4+4+4+hash.length+4+hashlocs.length]);
+			buf.put(this.version);
+			buf.putInt(buf.capacity());
 			buf.putInt(this.doop);
 			buf.putInt(this.hash.length);
 			buf.put(this.hash);
@@ -237,7 +227,7 @@ public class SparseDataChunk implements Externalizable {
 		ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
 		ByteBuffer hb = ByteBuffer.wrap(this.getHash());
 		ByteBuffer hl = ByteBuffer.wrap(this.hashlocs);
-		for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+		while(hb.hasRemaining()) {
 			byte[] _hash = new byte[HashFunctionPool.hashLength];
 			byte[] _hl = new byte[8];
 			hl.get(_hl);

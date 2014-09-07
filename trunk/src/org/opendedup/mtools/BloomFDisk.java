@@ -1,6 +1,7 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,7 +14,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
-import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -121,7 +121,7 @@ public class BloomFDisk {
 
 	ReentrantLock l = new ReentrantLock();
 	private void checkDedupFile(File mapFile) {
-		DataMapInterface mp = null;
+		LongByteArrayMap mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
 			long prevpos = 0;
@@ -134,7 +134,7 @@ public class BloomFDisk {
 				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val);
+					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 					if (!ck.isLocalData()) {
 						List<HashLocPair> al = ck.getFingers();
 						for (HashLocPair p : al) {

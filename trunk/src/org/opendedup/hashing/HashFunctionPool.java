@@ -31,7 +31,6 @@ public class HashFunctionPool {
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
 			hashLength = VariableHashEngine.getHashLenth();
 			Main.MAPVERSION = 2;
-
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
 

@@ -2,7 +2,8 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
-
+import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
@@ -60,6 +61,8 @@ public class SDFSService {
 		SparseDedupFile.hashPool.hashCode();
 		System.out.println("HashFunction Initialized");
 		SDFSLogger.getLog().info("HashFunction Initialized");
+		if(HashFunctionPool.max_hash_cluster > 1)
+			SDFSLogger.getLog().info("HashFunction Min Block Size=" + VariableHashEngine.minLen + " Max Block Size=" + VariableHashEngine.maxLen);
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +13,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.w3c.dom.Document;
@@ -277,6 +277,11 @@ public class Config {
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
+		if(cache.hasAttribute("max-variable-segment-size")) {
+			VariableHashEngine.maxLen = Integer.parseInt(cache.getAttribute("max-variable-segment-size"))*1024;
+		} else {
+			VariableHashEngine.maxLen =Main.CHUNK_LENGTH;
+		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 
 		Main.maxWriteBuffers = Integer.parseInt(cache

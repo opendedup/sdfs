@@ -137,7 +137,7 @@ public class FDisk {
 				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val);
+					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 							List<HashLocPair> al = ck.getFingers();

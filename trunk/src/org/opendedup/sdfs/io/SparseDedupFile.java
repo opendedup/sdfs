@@ -77,6 +77,7 @@ public class SparseDedupFile implements DedupFile {
 			worksQueue, executionHandler);
 	private boolean dirty = false;
 	private boolean toOccured = false;
+	private boolean errOccured = false;
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -382,10 +383,7 @@ public class SparseDedupFile implements DedupFile {
 					} else {
 						VariableHashEngine hc = (VariableHashEngine) hashPool
 								.borrowObject();
-						byte[] hashes = new byte[VariableHashEngine
-								.getHashLenth()
-								* HashFunctionPool.max_hash_cluster];
-						byte[] hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
+						
 
 						try {
 							List<Finger> fs = hc.getChunks(writeBuffer
@@ -466,6 +464,20 @@ public class SparseDedupFile implements DedupFile {
 								throw new IOException("Write Failed");
 							// SDFSLogger.getLog().info("broke data up into " +
 							// fs.size() + " chunks");
+							byte[] hashes = null;
+							byte[] hashlocs = null;
+							if(bdb.getVersion() ==2) {
+								hashes = new byte[VariableHashEngine
+														.getHashLenth()
+														* fs.size()];
+								hashlocs = new byte[8 * fs.size()];
+							}
+							else {
+								hashes = new byte[VariableHashEngine
+													.getHashLenth()
+													* VariableHashEngine.getMaxCluster()];
+								hashlocs = new byte[8 * VariableHashEngine.getMaxCluster()];
+							}
 							ByteBuffer hb = ByteBuffer.wrap(hashes);
 							ByteBuffer hl = ByteBuffer.wrap(hashlocs);
 							for (Finger f : fs) {
@@ -489,6 +501,7 @@ public class SparseDedupFile implements DedupFile {
 							writeBuffer.setDoop(dups);
 							hash = hb.array();
 						} catch (Throwable e) {
+							this.errOccured = true;
 							throw new IOException(e);
 						} finally {
 							hashPool.returnObject(hc);
@@ -580,8 +593,12 @@ public class SparseDedupFile implements DedupFile {
 				throw new FileClosedException("file already closed");
 			}
 			if (this.toOccured) {
-				throw new FileClosedException("timeout occured");
+				throw new IOException("timeout occured");
 			}
+			if (this.errOccured) {
+				throw new IOException("write error occured");
+			}
+			
 			if(!storageConnected)
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
@@ -660,11 +677,6 @@ public class SparseDedupFile implements DedupFile {
 	public void sync(boolean force, boolean propigate)
 			throws FileClosedException, IOException {
 		this.syncLock.lock();
-		try {
-			throw new IOException("sync");
-		}catch(Exception e) {
-			SDFSLogger.getLog().info("poop", e);
-		}
 		try {
 			if(!storageConnected)
 				throw new IOException("storage offline");
@@ -1085,7 +1097,7 @@ public class SparseDedupFile implements DedupFile {
 		long records = 0;
 		while (l > -1) {
 			try {
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.getVersion());
 				WritableCacheBuffer writeBuffer = null;
 				if (pck.isLocalData() && mf.isDedup()) {
 					byte[] chunk = chunkStore.get(l);
@@ -1141,7 +1153,7 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			while (l > -1) {
 				pos = l;
-				SparseDataChunk pck = new SparseDataChunk(bdb.get(l));
+				SparseDataChunk pck = new SparseDataChunk(bdb.get(l),this.bdb.getVersion());
 				if (pck.isLocalData()) {
 					byte[] exists = HCServiceProxy.hashExists(pck.getHash(),
 							false);
@@ -1203,7 +1215,7 @@ public class SparseDedupFile implements DedupFile {
 			// this.addReadAhead(place);
 			byte[] b = this.bdb.get(place);
 			if (b != null) {
-				SparseDataChunk pck = new SparseDataChunk(b);
+				SparseDataChunk pck = new SparseDataChunk(b,this.bdb.getVersion());
 				// ByteString data = pck.getData();
 				boolean dataEmpty = !pck.isLocalData();
 				if (dataEmpty) {

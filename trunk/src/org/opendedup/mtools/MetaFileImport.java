@@ -1,11 +1,11 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -35,14 +35,12 @@ public class MetaFileImport {
 	}
 
 	private void traverse(File dir) throws IOException {
-
 		if (dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));
 			}
 		} else {
-
 			this.checkDedupFile(dir);
 		}
 	}
@@ -54,7 +52,7 @@ public class MetaFileImport {
 			File mapFile = new File(Main.dedupDBStore + File.separator
 					+ dfGuid.substring(0, 2) + File.separator + dfGuid
 					+ File.separator + dfGuid + ".map");
-			DataMapInterface mp = new LongByteArrayMap(mapFile.getPath());
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				mp.iterInit();
@@ -63,7 +61,7 @@ public class MetaFileImport {
 				while (val != null) {
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val);
+						SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 						if (!ck.isLocalData()) {
 							byte[] exists = HCServiceProxy.hashExists(
 									ck.getHash(), false);

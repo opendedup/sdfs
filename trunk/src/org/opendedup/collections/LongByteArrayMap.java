@@ -27,7 +27,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)
 			* HashFunctionPool.max_hash_cluster;
 	private static final int _v1arrayLength = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
-	private static final int _v2arrayLength = 4 +4+4+((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
+	private static final int _v2arrayLength = 1+4+4+4+4+((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
 	private static final int _v1offset = 64;
 	private static final int _v2offset = 256;
 	private static final short magicnumber = 6442;
@@ -54,6 +54,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	long flen = 0;
 
 	static {
+		SDFSLogger.getLog().info("File Map Version is = " +Main.MAPVERSION);
 		_FREE = new byte[_arrayLength];
 		_V1FREE = new byte[_v1arrayLength];
 		_V2FREE = new byte[_v2arrayLength];
@@ -254,9 +255,6 @@ public class LongByteArrayMap implements DataMapInterface {
 		if (this.closed) {
 			this.hashlock.lock();
 			bdbf = Paths.get(filePath);
-			if (HashFunctionPool.max_hash_cluster > 1) {
-				this.version = 1;
-			}
 			try {
 				dbFile = new File(filePath);
 				boolean fileExists = dbFile.exists();
@@ -328,9 +326,11 @@ public class LongByteArrayMap implements DataMapInterface {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.filePath + "] is close");
 		}
+		/*
 		if (data.length != arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + arrayLength);
+		*/
 		long fpos = 0;
 		fpos = this.getMapFilePosition(pos);
 
@@ -486,7 +486,17 @@ public class LongByteArrayMap implements DataMapInterface {
 
 			if (fpos > flen)
 				return null;
-			byte[] buf = new byte[arrayLength];
+			byte [] buf = null;
+			if(version == 2) {
+				ByteBuffer bf = ByteBuffer.allocate(5);
+				pbdb.read(bf, fpos);
+				bf.position(1);
+				buf =new byte[bf.getInt()];
+				if(buf.length == 0)
+					return null;
+			}
+			else
+				buf = new byte[arrayLength];
 			pbdb.read(ByteBuffer.wrap(buf), fpos);
 			if (Arrays.equals(buf, FREE))
 				return null;

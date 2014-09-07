@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -183,7 +183,7 @@ public class MetaFileImport implements Serializable {
 			if (!mapFile.exists()) {
 				return;
 			}
-			DataMapInterface mp = new LongByteArrayMap(mapFile.getPath());
+			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
 				byte[] val = new byte[0];
 				long prevpos = 0;
@@ -196,7 +196,7 @@ public class MetaFileImport implements Serializable {
 					prevpos = mp.getIterPos();
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val);
+						SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 						List<HashLocPair> al = ck.getFingers();
 
 						if (Main.chunkStoreLocal) {
