@@ -507,6 +507,8 @@ public class VolumeConfigWriter {
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("hash-type", this.hashType);
+		if(ext)
+			io.setAttribute("max-variable-segment-size","16");
 		root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");
@@ -591,6 +593,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if(ext) {
 				this.chunk_size = 1024;
+				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "20MB");

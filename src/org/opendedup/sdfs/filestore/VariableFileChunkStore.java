@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -14,6 +13,7 @@ import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
 //import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
@@ -53,6 +53,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 *            the name of the chunk store.
 	 */
 	public VariableFileChunkStore() {
+		if(Main.volume != null && HashFunctionPool.max_hash_cluster > 1) {
+			storeLengths = FactorTest.factorsOf(VariableHashEngine.maxLen);
+		}
 		SDFSLogger.getLog().debug("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
