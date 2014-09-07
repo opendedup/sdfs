@@ -1,17 +1,20 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
 import org.rabinfingerprint.polynomial.Polynomial;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 public class VariableHashEngine implements AbstractHashEngine {
 
@@ -23,14 +26,15 @@ public class VariableHashEngine implements AbstractHashEngine {
 	static long bytesPerWindow = 48;
 	EnhancedFingerFactory ff = new EnhancedFingerFactory(p, bytesPerWindow,
 			boundaryDetector, minLen, maxLen);
-
+	HashFunction hf = Hashing.murmur3_128(seed);
+	
 	public VariableHashEngine() throws NoSuchAlgorithmException {
 
 	}
 
 	@Override
 	public byte[] getHash(byte[] data) {
-		byte[] hash = MurmurHash3.murmur128(data, seed);
+		byte[] hash = hf.hashBytes(data).asBytes();
 		return hash;
 	}
 

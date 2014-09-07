@@ -15,45 +15,45 @@ import com.google.common.hash.PrimitiveSink;
 public class LargeBloomFilter implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	LBF[] bfs = new LBF[256];
+	LBF[] bfs = new LBF[16];
 	boolean ilg = false;
 
 	public LargeBloomFilter(long sz, double fpp) {
 
-		long msz = (long) 100 * (long) Integer.MAX_VALUE;
+		long msz = (long) 8 * (long) Integer.MAX_VALUE;
 		if (sz > msz) {
 			SDFSLogger.getLog().info(
 					"######### using larger hash bdb size ################");
-			bfs = new LBF[256];
+			bfs = new LBF[16];
 			ilg = true;
 		} else {
-			bfs = new LBF[128];
+			bfs = new LBF[8];
 		}
-		int isz = (int) (sz / bfs.length) + 2000;
+		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new LBF(BloomFilter.create(kbFunnel, isz, fpp));
 		}
 	}
 
 	public static int guessSz(long sz) {
-		long msz = (long) 100 * (long) Integer.MAX_VALUE;
+		long msz = (long) 8 * (long) Integer.MAX_VALUE;
 		if (sz > msz) {
-			return 256;
+			return 16;
 		} else {
-			return 128;
+			return 8;
 		}
 	}
 
 	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
 			throws IOException {
-		long msz = (long) 100 * (long) Integer.MAX_VALUE;
+		long msz = (long) 8 * (long) Integer.MAX_VALUE;
 		if (sz > msz) {
 			SDFSLogger.getLog().info(
 					"######### using larger hash bdb size ################");
-			bfs = new LBF[256];
+			bfs = new LBF[16];
 			ilg = true;
 		} else {
-			bfs = new LBF[128];
+			bfs = new LBF[8];
 		}
 		CommandLineProgressBar bar = null;
 		if (fb)
@@ -78,15 +78,14 @@ public class LargeBloomFilter implements Serializable{
 
 		int hashb = hash[2];
 		if (hashb < 0) {
-			if (ilg)
-				hashb = ((hashb * -1) + 127);
-			else
 				hashb = ((hashb * -1) - 1);
 		}
-		int hashRoute = hashb;
-
+		int hashRoute = 0;
+		if(ilg)
+			hashRoute = hashb/8;
+		else
+			hashRoute= hashb/16;
 		LBF m = bfs[hashRoute];
-
 		return m;
 	}
 
@@ -124,6 +123,17 @@ public class LargeBloomFilter implements Serializable{
 			bar.update(i);
 		}
 		bar.finish();
+	}
+	
+	public static void main(String [] args) {
+		int [] ht = new int[8];
+		for(int i = 0; i < 128;i++) {
+			int z = i/16;
+			ht[z]++;
+		}
+		for(int i :ht) {
+			System.out.println("i=" + i);
+		}
 	}
 
 }
