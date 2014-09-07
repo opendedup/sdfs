@@ -16,19 +16,10 @@ public class LargeBloomFilter implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	LBF[] bfs = new LBF[16];
-	boolean ilg = false;
 
 	public LargeBloomFilter(long sz, double fpp) {
 
-		long msz = (long) 8 * (long) Integer.MAX_VALUE;
-		if (sz > msz) {
-			SDFSLogger.getLog().info(
-					"######### using larger hash bdb size ################");
-			bfs = new LBF[16];
-			ilg = true;
-		} else {
-			bfs = new LBF[8];
-		}
+		bfs = new LBF[16];
 		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new LBF(BloomFilter.create(kbFunnel, isz, fpp));
@@ -46,15 +37,7 @@ public class LargeBloomFilter implements Serializable{
 
 	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
 			throws IOException {
-		long msz = (long) 8 * (long) Integer.MAX_VALUE;
-		if (sz > msz) {
-			SDFSLogger.getLog().info(
-					"######### using larger hash bdb size ################");
 			bfs = new LBF[16];
-			ilg = true;
-		} else {
-			bfs = new LBF[8];
-		}
 		CommandLineProgressBar bar = null;
 		if (fb)
 			bar = new CommandLineProgressBar("Loading BloomFilters",
@@ -81,10 +64,7 @@ public class LargeBloomFilter implements Serializable{
 				hashb = ((hashb * -1) - 1);
 		}
 		int hashRoute = 0;
-		if(ilg)
-			hashRoute = hashb/8;
-		else
-			hashRoute= hashb/16;
+		hashRoute = hashb/8;
 		LBF m = bfs[hashRoute];
 		return m;
 	}
@@ -126,9 +106,9 @@ public class LargeBloomFilter implements Serializable{
 	}
 	
 	public static void main(String [] args) {
-		int [] ht = new int[8];
+		int [] ht = new int[16];
 		for(int i = 0; i < 128;i++) {
-			int z = i/16;
+			int z = i/8;
 			ht[z]++;
 		}
 		for(int i :ht) {
