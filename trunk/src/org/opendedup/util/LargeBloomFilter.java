@@ -2,11 +2,11 @@ package org.opendedup.util;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.Serializable;
 
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
-import org.opendedup.logging.SDFSLogger;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
@@ -15,29 +15,22 @@ import com.google.common.hash.PrimitiveSink;
 public class LargeBloomFilter implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	LBF[] bfs = new LBF[16];
+	LBF[] bfs = new LBF[128];
 
 	public LargeBloomFilter(long sz, double fpp) {
 
-		bfs = new LBF[16];
+		bfs = new LBF[128];
 		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new LBF(BloomFilter.create(kbFunnel, isz, fpp));
 		}
 	}
 
-	public static int guessSz(long sz) {
-		long msz = (long) 8 * (long) Integer.MAX_VALUE;
-		if (sz > msz) {
-			return 16;
-		} else {
-			return 8;
-		}
-	}
+
 
 	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
 			throws IOException {
-			bfs = new LBF[16];
+			bfs = new LBF[128];
 		CommandLineProgressBar bar = null;
 		if (fb)
 			bar = new CommandLineProgressBar("Loading BloomFilters",
@@ -59,13 +52,11 @@ public class LargeBloomFilter implements Serializable{
 
 	private LBF getMap(byte[] hash) {
 
-		int hashb = hash[2];
+		int hashb = hash[1];
 		if (hashb < 0) {
 				hashb = ((hashb * -1) - 1);
 		}
-		int hashRoute = 0;
-		hashRoute = hashb/8;
-		LBF m = bfs[hashRoute];
+		LBF m = bfs[hashb];
 		return m;
 	}
 
@@ -106,9 +97,9 @@ public class LargeBloomFilter implements Serializable{
 	}
 	
 	public static void main(String [] args) {
-		int [] ht = new int[16];
+		int [] ht = new int[32];
 		for(int i = 0; i < 128;i++) {
-			int z = i/8;
+			int z = i/4;
 			ht[z]++;
 		}
 		for(int i :ht) {
