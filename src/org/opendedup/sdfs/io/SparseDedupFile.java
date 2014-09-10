@@ -584,6 +584,64 @@ public class SparseDedupFile implements DedupFile {
 	 * 
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getWriteBuffer(long)
 	 */
+	
+	public SparseDataChunk getSparseDataChunk(long pos) throws IOException, FileClosedException {
+		if(pos > mf.length())
+			return null;
+		if (this.closed) {
+			throw new FileClosedException("file already closed");
+		}
+		if (this.toOccured) {
+			throw new IOException("timeout occured");
+		}
+		if (this.errOccured) {
+			throw new IOException("write error occured");
+		}
+		long place = this.getChuckPosition(pos);
+		if(place != pos)
+			throw new IOException("Chunk request position request [" + pos + "] does not align with block size [" + Main.CHUNK_LENGTH + "]");
+		SparseDataChunk pck = null;
+		if(pos < mf.length()) {
+				pck = new SparseDataChunk(bdb.get(pos),this.bdb.getVersion());
+				if(pos + Main.CHUNK_LENGTH > mf.length())
+					pck.len = (int)(mf.length() - pos);
+				else
+					pck.len = Main.CHUNK_LENGTH;
+		}
+		return pck;
+	}
+	
+	public int putSparseDataChunk(long pos,SparseDataChunk buf) throws FileClosedException, IOException {
+		if (this.closed) {
+			throw new FileClosedException("file already closed");
+		}
+		if (this.toOccured) {
+			throw new IOException("timeout occured");
+		}
+		if (this.errOccured) {
+			throw new IOException("write error occured");
+		}
+		long place = this.getChuckPosition(pos);
+		if(place != pos)
+			throw new IOException("Chunk request position request [" + pos + "] does not align with block size [" + Main.CHUNK_LENGTH + "]");
+		writeBuffers.invalidate(place);
+		int z = 0;
+		while(this.flushingBuffers.containsKey(pos)) {
+			try {
+				Thread.sleep(10);
+				z++;
+			} catch (InterruptedException e) {
+
+			}
+			if(z > 6000)
+				throw new IOException("Waiting for flush timed out");
+		}
+		bdb.put(pos, buf.getBytes());
+		long epos = pos + buf.len;
+		if(epos > mf.length())
+			mf.setLength(epos, false);
+		return buf.len;
+	}
 
 	@Override
 	public DedupChunkInterface getWriteBuffer(long position)
@@ -614,7 +672,6 @@ public class SparseDedupFile implements DedupFile {
 			}
 		} finally {
 		}
-
 	}
 
 	private DedupChunkInterface marshalWriteBuffer(long chunkPos,
