@@ -24,6 +24,7 @@ public class SparseDataChunk implements Externalizable {
 	private long fpos;
 	private byte version = 1;
 	private static final long serialVersionUID = -2782607786999940224L;
+	public int len = 0;
 	
 
 	public SparseDataChunk() {

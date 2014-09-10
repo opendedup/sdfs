@@ -148,6 +148,26 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					}
+					else if (cmd.equalsIgnoreCase("copyextents")) {
+						try {
+							String srcfile = request.getQuery().get("srcfile");
+							String dstfile = request.getQuery().get("dstfile");
+							long sstart = Long.parseLong(request.getQuery().get("sstart"));
+							long len = Long.parseLong(request.getQuery().get("len"));
+							long dstart = Long.parseLong(request.getQuery().get("dstart"));
+							
+							Element msg = new CopyExtents().getResult(
+									srcfile,dstfile,sstart,len,dstart);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
 
 					else if (cmd.equalsIgnoreCase("filteredinfo")) {
 						try {
