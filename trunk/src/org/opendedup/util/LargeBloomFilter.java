@@ -15,11 +15,11 @@ import com.google.common.hash.PrimitiveSink;
 public class LargeBloomFilter implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	LBF[] bfs = new LBF[128];
+	LBF[] bfs = new LBF[256];
 
 	public LargeBloomFilter(long sz, double fpp) {
 
-		bfs = new LBF[128];
+		bfs = new LBF[256];
 		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new LBF(BloomFilter.create(kbFunnel, isz, fpp));
@@ -30,7 +30,7 @@ public class LargeBloomFilter implements Serializable{
 
 	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
 			throws IOException {
-			bfs = new LBF[128];
+			bfs = new LBF[256];
 		CommandLineProgressBar bar = null;
 		if (fb)
 			bar = new CommandLineProgressBar("Loading BloomFilters",
@@ -54,7 +54,7 @@ public class LargeBloomFilter implements Serializable{
 
 		int hashb = hash[1];
 		if (hashb < 0) {
-				hashb = ((hashb * -1) - 1);
+			hashb = ((hashb * -1) +127);
 		}
 		LBF m = bfs[hashb];
 		return m;
