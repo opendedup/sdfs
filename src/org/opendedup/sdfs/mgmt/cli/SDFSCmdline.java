@@ -191,6 +191,20 @@ public class SDFSCmdline {
 			ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
 			System.exit(0);
 		}
+		
+		if (cmd.hasOption("copy-extents")) {
+			String[] vals = cmd.getOptionValues("copy-extents");
+			if (vals.length != 3) {
+				System.err
+						.println("copy-extents <source-start> <len> <destination-start>");
+				System.exit(-1);
+			}
+			String sfile = cmd.getOptionValue("file-path");
+			String dfile = cmd.getOptionValue("snapshot-path");
+			ProcessCopyExtents.runCmd(sfile,dfile,Long.parseLong(vals[0]), Long.parseLong(vals[1]), Long.parseLong(vals[2]));
+			System.exit(0);
+		}
+		
 
 		if (cmd.hasOption("partition-rm")) {
 			String val = cmd.getOptionValue("partition-rm");
@@ -314,6 +328,9 @@ public class SDFSCmdline {
 				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("shutdown")
 				.withDescription("Shuts down the volume").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("copy-extents")
+				.withDescription("Copies Extent from one file to another").hasArgs(3)
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("set-gc-schedule")
