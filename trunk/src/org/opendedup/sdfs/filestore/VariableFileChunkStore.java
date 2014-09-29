@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -13,7 +14,6 @@ import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
 //import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
@@ -36,7 +36,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	private OpenBitSet freeSlots = null;
 	File f;
 	Path p;
-	private long currentLength = 0;
+	private AtomicLong currentLength = new AtomicLong(0);
 	private String name;
 	private byte[] FREE = new byte[(int) pageSize];
 	private FileChannel iterFC = null;
@@ -54,7 +54,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	public VariableFileChunkStore() {
 		if(Main.volume != null && HashFunctionPool.max_hash_cluster > 1) {
-			storeLengths = FactorTest.factorsOf(VariableHashEngine.maxLen);
+			storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
 		}
 		SDFSLogger.getLog().debug("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
@@ -86,6 +86,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			lsf = new File(chunk_location + File.separator + "sizemarker.lng");
 			if (!lsf.exists()) {
 				this.size = new AtomicLong(0);
+				this.compressedLength = new AtomicLong(0);
 			} else {
 				try {
 					RandomAccessFile rf = new RandomAccessFile(lsf, "rw");
@@ -110,7 +111,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.name = "chunks";
 			p = f.toPath();
 			chunkDataWriter = new RandomAccessFile(f, "rw");
-			this.currentLength = chunkDataWriter.length();
+			this.currentLength.set(chunkDataWriter.length());
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
 			pool = new FCPool(f, 100);
@@ -145,6 +146,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	public void closeStore() {
 		for (FileChunkStore store : st) {
 			try {
+				store.sync();
 				store.close();
 
 			} catch (Exception e) {
@@ -168,7 +170,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				rf.writeLong(this.size.get());
 				rf.writeLong(this.compressedLength.get());
 				SDFSLogger.getLog().debug("Persisted FileSize");
-
+				rf.getFD().sync();
 				rf.close();
 			} catch (Exception e) {
 			}
@@ -300,8 +302,8 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				}
 			}
 			if (pos < 0) {
-				pos = this.currentLength;
-				this.currentLength = this.currentLength + this.iPageSize;
+				pos = this.currentLength.get();
+				this.currentLength.addAndGet(this.iPageSize);
 			}
 			reservePositionlock.unlock();
 
@@ -476,7 +478,6 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				enc = buf.get();
 				byte[] _hash = new byte[HashFunctionPool.hashLength];
 				buf.get(_hash);
-				
 				store = this.getStore(iLen);
 				/*
 				byte[] chunk = store.getChunk(_hash, iStart, iLen);

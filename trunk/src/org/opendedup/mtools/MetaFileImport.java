@@ -1,7 +1,6 @@
 package org.opendedup.mtools;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.List;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -63,8 +63,9 @@ public class MetaFileImport {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 						if (!ck.isLocalData()) {
+							for (HashLocPair p : ck.getFingers()) {
 							byte[] exists = HCServiceProxy.hashExists(
-									ck.getHash(), false);
+									p.hash, false);
 							if (exists[0] == -1) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger
@@ -73,10 +74,10 @@ public class MetaFileImport {
 													+ mapFile
 													+ "] could not find "
 													+ StringUtils
-															.getHexString(ck
-																	.getHash()));
+															.getHexString(p.hash));
 								corruption = true;
 								corruptBlocks++;
+							}
 							}
 						}
 					}

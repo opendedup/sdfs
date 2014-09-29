@@ -1,7 +1,6 @@
 package org.opendedup.mtools;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +17,9 @@ import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -154,13 +153,15 @@ public class FFDisk {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for (SparseDataChunk ck : pchunks) {
-			byte[] exists = ck.getHashLoc();
+			for (HashLocPair p : ck.getFingers()) {
+			byte[] exists = p.hashloc;
 			if (exists[0] == -1) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							"could not find "
-									+ StringUtils.getHexString(ck.getHash()));
+									+ StringUtils.getHexString(p.hash));
 				corruptBlocks++;
+			}
 			}
 		}
 		return corruptBlocks;

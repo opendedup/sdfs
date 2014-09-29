@@ -226,7 +226,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					try {
 						if (chunks.get(i) != null)
 							rsults.add(i, Boolean.valueOf(HCServiceProxy
-									.hashExists(chunks.get(i).getHash())));
+									.hashExists(chunks.get(i).getFingers().get(0).hash)));
 						else
 							rsults.add(i, Boolean.valueOf(false));
 					} catch (Exception e) {

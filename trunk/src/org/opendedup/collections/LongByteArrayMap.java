@@ -1,7 +1,6 @@
 package org.opendedup.collections;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -17,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.OSValidator;
 
 import sun.nio.ch.FileChannelImpl;
@@ -27,7 +27,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)
 			* HashFunctionPool.max_hash_cluster;
 	private static final int _v1arrayLength = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
-	private static final int _v2arrayLength = 1+4+4+4+4+((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
+	private static final int _v2arrayLength = 1 + 4 + 4 + 4 +(HashLocPair.BAL * HashFunctionPool.max_hash_cluster*2);
 	private static final int _v1offset = 64;
 	private static final int _v2offset = 256;
 	private static final short magicnumber = 6442;

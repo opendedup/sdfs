@@ -1,19 +1,11 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface DedupChunkInterface {
 
-	/**
-	 * 
-	 * @return returns the MD5 Hash
-	 */
 
-	public abstract byte[] getHash();
-
-	public abstract byte[] getHashLoc();
-
-	public abstract void setHashLoc(byte[] hashloc);
 
 	/**
 	 * 
@@ -29,6 +21,7 @@ public interface DedupChunkInterface {
 
 	public abstract byte[] getReadChunk(int start,int end) throws IOException,BufferClosedException;
 
+	public List<HashLocPair> getFingers();
 	/**
 	 * 
 	 * @param length
@@ -91,9 +84,8 @@ public interface DedupChunkInterface {
 	public boolean isBatchProcessed();
 
 	public boolean isBatchwritten();
-	public void resetHashLoc();
-
-	public void addHashLoc(byte loc);
+	
+	public void setAR(List <HashLocPair> al);
 
 	public void setBatchwritten(boolean written);
 

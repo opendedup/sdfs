@@ -1,9 +1,9 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.sdfs.servers.HCServiceProxy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -12,15 +12,12 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
  */
 public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private static final long serialVersionUID = -5440311151699047048L;
-	private byte[] hash;
-	private byte[] data = null;
 	private int length;
 	private long position;
 	private boolean newChunk = false;
 	private boolean writable = false;
 	private int doop = 0;
-	private ReentrantLock lock = new ReentrantLock();
-	private byte[] hashloc;
+	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 
 	public DedupChunk(long position) {
 		this.position = position;
@@ -35,63 +32,21 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(byte[] hash, long position, int length, boolean newChunk,
-			byte[] hashloc) {
-		this.hash = hash;
+	public DedupChunk(long position, int length, boolean newChunk,List<HashLocPair> ar
+			) {
+		
 		this.length = length;
 		this.position = position;
 		this.newChunk = newChunk;
-		if (this.isNewChunk())
-			data = new byte[this.length];
-		else
-			this.hashloc = hashloc;
+		this.ar = ar;
+		
+			
 	}
 
-	/**
-	 * 
-	 * @param hash
-	 *            The MD5 Hash of the chunk requested.
-	 * @param position
-	 *            The start position within the deduplicated file
-	 * @param length
-	 *            The length of the chunk
-	 */
-	public DedupChunk(byte[] hash, byte[] data, long position, int length,
-			byte[] hashloc) {
-		this.hash = hash;
-		this.data = data;
-		this.length = length;
-		this.position = position;
-		this.newChunk = false;
-		this.hashloc = hashloc;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.sdfs.io.DedupChunkInterface#getHash()
-	 */
-
-	@Override
-	public byte[] getHash() {
-		return hash;
-	}
+	
 
 	public byte[] getReadChunk(int start,int len) throws IOException {
-		this.lock.lock();
-		byte [] ds = new byte [len]; 
-		try {
-			if (data != null) {
-				System.arraycopy(data, start, ds, 0, ds.length);
-			}
-			else {
-				byte [] dd = HCServiceProxy.fetchChunk(hash, hashloc);
-				System.arraycopy(dd, start, ds, 0, ds.length);
-			}
-			return ds;
-		} finally {
-			this.lock.unlock();
-		}
+		throw new IOException("not implemented");
 	}
 
 	/*
@@ -303,17 +258,20 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public byte[] getHashLoc() {
-		return this.hashloc;
+	public void setBatchwritten(boolean written) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
-	public void setHashLoc(byte[] hashloc) {
-		this.hashloc = hashloc;
+	public List<HashLocPair> getFingers() {
+		// TODO Auto-generated method stub
+		return this.ar;
 	}
 
 	@Override
 	public boolean isBatchProcessed() {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -324,21 +282,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void resetHashLoc() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addHashLoc(byte loc) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setBatchwritten(boolean written) {
-		// TODO Auto-generated method stub
-
+	public void setAR(List<HashLocPair> al) {
+		this.ar = al;
+		
 	}
 
 }

@@ -10,6 +10,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -125,15 +126,16 @@ public class ClusterRedundancyCheck {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for (SparseDataChunk ck : pchunks) {
-			byte[] exists = ck.getHashLoc();
+			HashLocPair p = ck.getFingers().get(0);
+			byte[] exists = p.hashloc;
 			if (exists[0] == -1) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							" could not find "
-									+ StringUtils.getHexString(ck.getHash()));
+									+ StringUtils.getHexString(p.hash));
 				corruptBlocks++;
 			} else {
-				byte[] currenthl = ck.getHashLoc();
+				byte[] currenthl = p.hashloc;
 				exists[0] = currenthl[0];
 				try {
 					int ncopies = 0;
@@ -143,9 +145,9 @@ public class ClusterRedundancyCheck {
 						}
 					}
 					if (ncopies < Main.volume.getClusterCopies()) {
-						byte[] nb = HCServiceProxy.fetchChunk(ck.getHash(),
+						byte[] nb = HCServiceProxy.fetchChunk(p.hash,
 								exists);
-						exists = HCServiceProxy.writeChunk(ck.getHash(), nb, 0,
+						exists = HCServiceProxy.writeChunk(p.hash, nb, 0,
 								nb.length, true, exists);
 						ncopies = 0;
 						for (int i = 1; i < 8; i++) {
@@ -162,7 +164,7 @@ public class ClusterRedundancyCheck {
 					exists[0] = currenthl[0];
 
 					if (!brequals(currenthl, exists)) {
-						ck.setHashLoc(exists);
+						p.hashloc = exists;
 					}
 					mp.put(ck.getFpos(), ck.getBytes());
 				} catch (IOException e) {
@@ -193,10 +195,11 @@ public class ClusterRedundancyCheck {
 					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
 					ck.setFpos((prevpos / mp.getFree().length)
 							* Main.CHUNK_LENGTH);
+					HashLocPair p = ck.getFingers().get(0);
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 							byte[] exists = HCServiceProxy.hashExists(
-									ck.getHash(), true);
+									p.hash, true);
 
 							if (exists[0] == -1) {
 								if (SDFSLogger.isDebug())
@@ -206,11 +209,10 @@ public class ClusterRedundancyCheck {
 													+ mapFile
 													+ "] could not find "
 													+ StringUtils
-															.getHexString(ck
-																	.getHash()));
+															.getHexString(p.hash));
 								corruptBlocks++;
 							} else {
-								byte[] currenthl = ck.getHashLoc();
+								byte[] currenthl = p.hash;
 								exists[0] = currenthl[0];
 								try {
 									int ncopies = 0;
@@ -224,9 +226,9 @@ public class ClusterRedundancyCheck {
 											&& ncopies < HCServiceProxy.cs
 													.getStorageNodes().size()) {
 										byte[] nb = HCServiceProxy.fetchChunk(
-												ck.getHash(), exists);
+												p.hash, exists);
 										exists = HCServiceProxy.writeChunk(
-												ck.getHash(), nb, 0, nb.length,
+												p.hash, nb, 0, nb.length,
 												true, exists);
 										ncopies = 0;
 										for (int i = 1; i < 8; i++) {
@@ -249,7 +251,7 @@ public class ClusterRedundancyCheck {
 									exists[0] = currenthl[0];
 
 									if (!brequals(currenthl, exists)) {
-										ck.setHashLoc(exists);
+										p.hashloc = exists;
 									}
 									mp.put(ck.getFpos(), ck.getBytes());
 								} catch (IOException e) {
