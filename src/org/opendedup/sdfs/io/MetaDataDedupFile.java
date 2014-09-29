@@ -53,6 +53,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	transient public static final char separatorChar = File.separatorChar;
 	private long length = 0;
 	private String path = "";
+	private String backingFile = null;
+	private boolean iterWeaveCP = false;
 	private long lastModified = 0;
 	private long lastAccessed = 0;
 	private boolean execute = true;
@@ -178,6 +180,22 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void addXAttribute(String name, String value, boolean propigateEvent) {
 		extendedAttrs.put(name, value);
+	}
+	
+	public void setBackingFile(String file) {
+		this.backingFile = file;
+	}
+	
+	public String getBackingFile() {
+		return this.backingFile;
+	}
+	
+	public void setInterWeaveCP(boolean interweave) {
+		this.iterWeaveCP = interweave;
+	}
+	
+	public boolean isInterWeaveCP() {
+		return this.iterWeaveCP;
 	}
 
 	/**
@@ -1278,7 +1296,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					byte[] vb = new byte[vlen];
 					in.readFully(vb);
 					this.version = new String(vb);
+				} 
+				/*
+				if(in.available() > 0) {
+					int vlen = in.readInt();
+					byte[] vb = new byte[vlen];
+					in.readFully(vb);
+					this.backingFile = new String(vb);
+					this.iterWeaveCP = in.readBoolean();
 				}
+				*/
 			} catch (Exception e) {
 
 			}
@@ -1339,6 +1366,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			byte[] vb = this.version.getBytes();
 			out.writeInt(vb.length);
 			out.write(vb);
+			/*
+			if(this.backingFile == null)
+				out.writeInt(0);
+			else {
+				byte [] bb = this.backingFile.getBytes();
+				out.writeInt(bb.length);
+				out.write(bb);
+			}
+			out.writeBoolean(this.iterWeaveCP);
+				*/
 		} finally {
 			this.writeLock.unlock();
 		}

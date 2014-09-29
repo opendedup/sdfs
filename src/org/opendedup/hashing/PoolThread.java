@@ -1,5 +1,6 @@
 package org.opendedup.hashing;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -8,6 +9,7 @@ import org.opendedup.collections.QuickList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BufferClosedException;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
@@ -60,10 +62,19 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									.borrowObject();
 							byte[] hash = null;
 							try {
-								hash = hc.getHash(runnable.getFlushedBuffer());
-								SparseDataChunk ck = new SparseDataChunk(0,
-										hash, false, new byte[8], (byte) 0);
-								runnable.setHash(hash);
+								
+								byte [] b = runnable.getFlushedBuffer();
+								hash = hc.getHash(b);
+								ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
+								HashLocPair p = new HashLocPair();
+								p.hash = hash;
+								p.pos = 0;
+								p.len = b.length;
+								p.hashloc = new byte[8];
+								p.hash = hash;
+								ar.add(p);
+								SparseDataChunk ck = new SparseDataChunk(0, ar,false, (byte) 2);
+								
 								cks.add(i, ck);
 							} catch (BufferClosedException e) {
 								cks.add(i, null);
@@ -77,9 +88,11 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							WritableCacheBuffer runnable = tasks.get(i);
 							SparseDataChunk ck = cks.get(i);
 							if (ck != null) {
-								if (Arrays.equals(ck.getHash(),
-										runnable.getHash())) {
-									runnable.setHashLoc(ck.getHashLoc());
+								HashLocPair p = ck.getFingers().get(0);
+								HashLocPair lp = runnable.getFingers().get(0);
+								if (Arrays.equals(lp.hash,
+										p.hash)) {
+									runnable.getFingers().set(0, p);
 									try {
 										runnable.endClose();
 									} catch (Exception e) {

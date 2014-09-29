@@ -44,9 +44,12 @@ public class BatchHashExistsCmd implements IOClientCmd {
 			RspList<Object> lst = soc.disp.castMessage(null, new Message(null,
 					null, buf.array()), opts);
 			for (int i = 0; i < hashes.size(); i++) {
-				SparseDataChunk ck = hashes.get(i);
+				//SparseDataChunk ck = hashes.get(i);
+				// TODO Fix this!!!!!!
+				/*
 				if (ck != null)
 					ck.resetHashLoc();
+					*/
 			}
 			for (Rsp<Object> rsp : lst) {
 				if (rsp.hasException()) {
@@ -66,12 +69,15 @@ public class BatchHashExistsCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						byte id = soc.serverState.get(rsp.getSender()).id;
+						//byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							boolean exists = rst.get(i);
 							if (exists) {
+								// TODO Fix this!!!!!!
+								/*
 								if (hashes.get(i) != null)
 									this.hashes.get(i).addHashLoc(id);
+									*/
 							}
 						}
 					}

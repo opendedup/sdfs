@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -14,9 +13,9 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -127,13 +126,14 @@ public class MetaFileImport implements Serializable {
 		}
 		boolean corruption = false;
 		for (SparseDataChunk ck : pchunks) {
-			byte[] eb = ck.getHashLoc();
+			for(HashLocPair p : ck.getFingers()) {
+			byte[] eb = p.hashloc;
 			boolean exists = false;
 			if (eb[0] == 1)
 				exists = true;
 			mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH, true);
 			if (!exists) {
-				hashes.add(ck.getHash());
+				hashes.add(p.hash);
 				entries++;
 				levt.blocksImported = entries;
 				mf.getIOMonitor()
@@ -162,6 +162,7 @@ public class MetaFileImport implements Serializable {
 							e);
 					corruption = true;
 				}
+			}
 			}
 		}
 		return corruption;

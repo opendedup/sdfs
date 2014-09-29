@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
@@ -18,7 +19,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 
 public class DirectBatchWriteHashCmd implements IOClientCmd {
@@ -34,7 +34,10 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 		hk = new QuickList<HashChunk>(sz);
 		// long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
+			// TODO Fix this!!!!!!
+						/*
 			WritableCacheBuffer buff = chunks.get(i);
+			
 			byte[] hashloc = buff.getHashLoc();
 			int ncopies = 0;
 			for (int z = 1; z < 8; z++) {
@@ -54,7 +57,9 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 			} else {
 				hk.add(i, null);
 			}
+			*/
 		}
+		
 		// tm = System.currentTimeMillis() - tm;
 		// SDFSLogger.getLog().info("ph 1 time was " + tm + " sz = " + sz);
 	}
@@ -121,14 +126,15 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						byte id = soc.serverState.get(rsp.getSender()).id;
+						//byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
 								WritableCacheBuffer buff = chunks.get(i);
 								if (doop)
 									buff.setDoop(1);
-								buff.addHashLoc(id);
+								// TODO Fix this!!!!!!
+								//buff.addHashLoc(id);
 								buff.setBatchwritten(true);
 								// proc++;
 							}

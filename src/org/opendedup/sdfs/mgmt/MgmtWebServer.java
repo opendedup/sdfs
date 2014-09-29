@@ -35,6 +35,8 @@ import org.simpleframework.http.Path;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
+import org.simpleframework.http.core.ContainerServer;
+import org.simpleframework.transport.Server;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 import org.w3c.dom.DOMImplementation;
@@ -509,8 +511,8 @@ public class MgmtWebServer implements Container {
 										request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
-						response.set("Content-Type", "application/octet-stream");
-						response.set("Server", "SDFS Management Server");
+						response.setContentType("application/octet-stream");
+						response.setValue("Server", "SDFS Management Server");
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
 						response.getByteChannel().write(ByteBuffer.wrap(rslt));
@@ -673,8 +675,8 @@ public class MgmtWebServer implements Container {
 					long time = System.currentTimeMillis();
 
 					// SDFSLogger.getLog().debug(rsString);
-					response.set("Content-Type", "text/xml");
-					response.set("Server", "SDFS Management Server");
+					response.setContentType("text/xml");
+					response.addValue("Server", "SDFS Management Server");
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
 					body.println(rsString);
@@ -698,12 +700,11 @@ public class MgmtWebServer implements Container {
 					try {
 					if (f.exists()) {
 						long time = System.currentTimeMillis();
-						response.set("Content-Type", "application/x-gtar");
-						response.set("Server", "SDFS Management Server");
+						response.setContentType("application/x-gtar");
+						response.addValue("Server", "SDFS Management Server");
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
-						response.set("Content-Length",
-								Long.toString(f.length()));
+						response.setContentLength(f.length());
 						InputStream in = new FileInputStream(f);
 						OutputStream out = response.getOutputStream();
 						byte[] buf = new byte[32768];
@@ -771,7 +772,8 @@ public class MgmtWebServer implements Container {
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 				Container container = new MgmtWebServer();
-				connection = new SocketConnection(container);
+				Server s = new ContainerServer(container);
+				connection = new SocketConnection(s);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 				SocketAddress address = new InetSocketAddress(
 						Main.sdfsCliListenAddr, Main.sdfsCliPort);
@@ -783,7 +785,8 @@ public class MgmtWebServer implements Container {
 			} else {
 				try {
 					Container container = new MgmtWebServer();
-					connection = new SocketConnection(container);
+					Server s = new ContainerServer(container);
+					connection = new SocketConnection(s);
 					Main.sdfsCliPort = FindOpenPort
 							.pickFreePort(Main.sdfsCliPort);
 					SocketAddress address = new InetSocketAddress(

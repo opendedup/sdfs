@@ -36,7 +36,7 @@ public class BatchWriteHashCmd implements IOClientCmd {
 		// long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
 			DedupChunkInterface buff = chunks.get(i);
-			byte[] hashloc = buff.getHashLoc();
+			byte[] hashloc = buff.getFingers().get(0).hashloc;
 			int ncopies = 0;
 			for (int z = 1; z < 8; z++) {
 				if (hashloc[z] > (byte) 0) {
@@ -44,10 +44,11 @@ public class BatchWriteHashCmd implements IOClientCmd {
 				}
 			}
 			if (ncopies == 0) {
-				buff.resetHashLoc();
+				// TODO Fix this!!!!!!
+				//buff.resetHashLoc();
 				try {
 					hk.add(i,
-							new HashChunk(buff.getHash(), buff
+							new HashChunk(buff.getFingers().get(0).hash, buff
 									.getFlushedBuffer(), false));
 				} catch (BufferClosedException e) {
 					hk.add(i, null);
@@ -122,14 +123,15 @@ public class BatchWriteHashCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						byte id = soc.serverState.get(rsp.getSender()).id;
+						//byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
 								DedupChunkInterface buff = chunks.get(i);
 								if (doop)
 									buff.setDoop(1);
-								buff.addHashLoc(id);
+								// TODO Fix this!!!!!!
+								//buff.addHashLoc(id);
 								buff.setBatchwritten(true);
 								// proc++;
 							}

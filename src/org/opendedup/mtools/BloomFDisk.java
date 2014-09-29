@@ -1,7 +1,6 @@
 package org.opendedup.mtools;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -18,8 +17,8 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;

@@ -42,14 +42,14 @@ public interface DedupFile {
 	public abstract DedupChunkInterface getWriteBuffer(long position)
 			throws FileClosedException, IOException;
 
-	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash, int doop)
+	public void updateMap(DedupChunkInterface writeBuffer,int doop)
 			throws FileClosedException, IOException;
 
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
 	
 	public void removeBufferFromFlush(DedupChunkInterface writeBuffer);
 
-	public void updateMap(DedupChunkInterface writeBuffer, byte[] hash,
+	public void updateMap(DedupChunkInterface writeBuffer,
 			int doop, boolean propigateEvent) throws FileClosedException,
 			IOException;
 

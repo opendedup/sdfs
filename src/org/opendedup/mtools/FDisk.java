@@ -16,8 +16,8 @@ import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
-import org.opendedup.sdfs.io.SparseDataChunk.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -33,10 +33,11 @@ public class FDisk {
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads + 1,
-			Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
+			Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
+			worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
-	
+
 	public FDisk(SDFSEvent evt) throws FDiskException {
 		init(evt);
 	}
@@ -67,9 +68,10 @@ public class FDisk {
 			this.traverse(f);
 			executor.shutdown();
 			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				  SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
-				}
-			if(failed)
+				SDFSLogger.getLog().debug(
+						"Awaiting fdisk completion of threads.");
+			}
+			if (failed)
 				throw new IOException("FDisk traverse failed");
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000
@@ -90,17 +92,17 @@ public class FDisk {
 
 	private void traverse(File dir) throws IOException {
 		if (dir.isDirectory()) {
-			if(failed)
+			if (failed)
 				throw new IOException("FDisk traverse failed");
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));
 			}
 		} else {
-			if(failed)
+			if (failed)
 				throw new IOException("FDisk traverse failed");
 			if (dir.getPath().endsWith(".map")) {
-				executor.execute(new CheckDedupFile(this,dir));
+				executor.execute(new CheckDedupFile(this, dir));
 			}
 		}
 	}
@@ -110,13 +112,15 @@ public class FDisk {
 		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
 		for (SparseDataChunk ck : pchunks) {
-			byte[] exists = ck.getHashLoc();
-			if (exists[0] == -1) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"could not find "
-									+ StringUtils.getHexString(ck.getHash()));
-				corruptBlocks++;
+			for (HashLocPair p : ck.getFingers()) {
+				byte[] exists = p.hashloc;
+				if (exists[0] == -1) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"could not find "
+										+ StringUtils.getHexString(p.hash));
+					corruptBlocks++;
+				}
 			}
 		}
 		return corruptBlocks;
@@ -137,7 +141,8 @@ public class FDisk {
 				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
+					SparseDataChunk ck = new SparseDataChunk(val,
+							mp.getVersion());
 					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 							List<HashLocPair> al = ck.getFingers();
@@ -157,13 +162,13 @@ public class FDisk {
 									corruptBlocks++;
 								} else if (SDFSLogger.isDebug()) {
 									SDFSLogger
-									.getLog()
-									.debug("file ["
-											+ mapFile
-											+ "] found "
-											+ StringUtils
-													.getHexString(p.hash));
-									
+											.getLog()
+											.debug("file ["
+													+ mapFile
+													+ "] found "
+													+ StringUtils
+															.getHexString(p.hash));
+
 								}
 							}
 						} else {
