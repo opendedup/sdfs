@@ -384,7 +384,10 @@ public class SparseDedupFile implements DedupFile {
 							dups = writeBuffer.capacity();
 						p.len = b.length;
 						p.pos = 0;
-						writeBuffer.getFingers().set(0, p);
+						if(writeBuffer.getFingers().size() == 0)
+							writeBuffer.getFingers().add(p);
+						else
+							writeBuffer.getFingers().set(0, p);
 						
 					} else {
 						VariableHashEngine hc = (VariableHashEngine) hashPool

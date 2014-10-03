@@ -1,11 +1,11 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,10 +15,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.MurmurHash3;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 /**
  * 
@@ -307,8 +309,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					}
 					catch (Exception e) {
 						SDFSLogger.getLog().error("pos = " + this.position
-						 + " ck sz=" + sh.ck.length + " hcb pos=" +
-						 hcb.position() + " cks sz=" +cks.size() + " len="
+						 + " ck nlen=" + sh.nlen + " ck offset="+ sh.offset  +" ck len=" +sh.ck.length + " hcb pos=" + hcb.position() +" ck slen=" +sh.len +
+						  " len="
 						 + (hcb.capacity()));
 						throw new IOException(e);
 					}
@@ -732,7 +734,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public int hashCode() {
 		this.lock.lock();
 		try {
-			return MurmurHash3.MurmurHash3_x64_32(buf.array(), 6442);
+			HashFunction hf = Hashing.murmur3_128(6442);
+			return hf.hashBytes(buf.array()).asInt();
 		} finally {
 			this.lock.unlock();
 		}
@@ -884,7 +887,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
-				this.ck = HCServiceProxy.fetchChunk(hash, hashloc);
+				this.ck = Arrays.copyOf(HCServiceProxy.fetchChunk(hash, hashloc), len);
 				l.commandResponse(this);
 			} catch (Exception e) {
 				l.commandException(e);

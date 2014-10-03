@@ -74,7 +74,7 @@ public class SparseDataChunk implements Externalizable {
 				if (ar.size() == (i + 1)) {
 					_h = h.clone();
 					int os = _pos - _h.pos;
-					_h.offset = os + _h.offset;
+					_h.offset += os;
 					_h.nlen -= os;
 					return _h;
 				}
@@ -101,6 +101,7 @@ public class SparseDataChunk implements Externalizable {
 			if (ep > Main.CHUNK_LENGTH)
 				throw new IOException("Overflow ep=" + ep);
 			ArrayList<HashLocPair> rm = null;
+			ArrayList<HashLocPair> am = null;
 			// SDFSLogger.getLog().info("p = " + p);
 
 			for (HashLocPair h : ar) {
@@ -110,10 +111,25 @@ public class SparseDataChunk implements Externalizable {
 						if (rm == null)
 							rm = new ArrayList<HashLocPair>();
 						rm.add(h);
-					} else if (h.pos < p.pos && hep > p.pos) {
-						h.nlen = (p.pos - h.pos);
-						// SDFSLogger.getLog().info("1 changing "+ h.pos
-						// +" len to " + h.nlen);
+					} else if (h.pos <= p.pos && hep > p.pos) {
+						if(hep > ep) {
+							int offset = ep - h.pos;
+							HashLocPair _h = h.clone();
+							_h.offset += offset;
+							_h.nlen -=offset;
+							_h.pos = ep;
+							_h.hashloc[0]=1;
+							if (am == null)
+								am = new ArrayList<HashLocPair>();
+							am.add(_h);
+						}
+						if(h.pos < p.pos)
+							h.nlen = (p.pos - h.pos);
+						else {
+							if (rm == null)
+								rm = new ArrayList<HashLocPair>();
+							rm.add(h);
+						}
 					} else if (h.pos > p.pos && h.pos <= ep) {
 						int no = ep - h.pos;
 						// int oh = h.pos;
@@ -127,6 +143,11 @@ public class SparseDataChunk implements Externalizable {
 			if (rm != null) {
 				for (HashLocPair z : rm) {
 					ar.remove(z);
+				}
+			}
+			if (am != null) {
+				for (HashLocPair z : am) {
+					ar.add(z);
 				}
 			}
 			p.hashloc[0]=1;
@@ -151,10 +172,12 @@ public class SparseDataChunk implements Externalizable {
 			Collections.sort(this.ar);
 			if(ar.size() > (HashFunctionPool.max_hash_cluster*2))
 				throw new IOException("Buffer overflow ar size = " + ar.size() + " max size = " +(HashFunctionPool.max_hash_cluster*2));
+			this.len = 0;
 			for (HashLocPair p : ar) {
 				if(p.hashloc[0] ==1)
 					this.doop += p.nlen;
 				buf.put(p.asArray());
+				this.len += p.nlen;
 			}
 			buf.putInt(this.doop);
 			return buf.array();
