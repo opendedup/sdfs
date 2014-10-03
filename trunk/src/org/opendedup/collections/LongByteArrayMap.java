@@ -1,6 +1,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -18,8 +19,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.OSValidator;
-
-import sun.nio.ch.FileChannelImpl;
 
 public class LongByteArrayMap implements DataMapInterface {
 	// private static final byte swversion = Main.MAPVERSION;
@@ -45,7 +44,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	File dbFile = null;
 	Path bdbf = null;
 	// FileChannel iterbdb = null;
-	FileChannelImpl pbdb = null;
+	FileChannel pbdb = null;
 	RandomAccessFile rf = null;
 	private int offset = 0;
 	private int arrayLength = _v1arrayLength;
@@ -288,7 +287,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				}
 				rf = new RandomAccessFile(filePath, "rw");
 
-				pbdb = (FileChannelImpl) rf.getChannel();
+				pbdb = rf.getChannel();
 				ByteBuffer buf = ByteBuffer.allocate(3);
 				pbdb.position(0);
 				pbdb.read(buf);

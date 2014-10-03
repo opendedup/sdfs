@@ -219,7 +219,7 @@ public class VolumeConfigWriter {
 		
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
-			this.hash_db_class = "org.opendedup.collections.MaxFileBasedCSMap";
+			this.hash_db_class = "com.opendedup.collections.MaxFileBasedCSMap";
 		}
 
 		if (cmd.hasOption("io-safe-sync")) {
@@ -229,6 +229,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-write-threads")) {
 			this.write_threads = Short.parseShort(cmd
 					.getOptionValue("io-write-threads"));
+		} else if(this.write_threads < 8) {
+			this.write_threads = 8;
 		}
 		if (cmd.hasOption("io-chunk-size")) {
 			this.chunk_size = Short.parseShort(cmd
@@ -508,7 +510,7 @@ public class VolumeConfigWriter {
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("hash-type", this.hashType);
 		if(ext)
-			io.setAttribute("max-variable-segment-size","16");
+			io.setAttribute("max-variable-segment-size","12");
 		root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");

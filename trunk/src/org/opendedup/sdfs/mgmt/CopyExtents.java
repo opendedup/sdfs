@@ -69,8 +69,6 @@ public class CopyExtents {
 					int _so = (int) (_sstart - _spos);
 					int _do = (int) (_dstart - _dpos);
 
-					if (_spos != _sstart || _dstart != _dpos
-							|| Main.CHUNK_LENGTH > _rem) {
 
 						SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 						SparseDataChunk ddc = ddf.getSparseDataChunk(_dpos);
@@ -112,11 +110,6 @@ public class CopyExtents {
 						 * bf.position(0); dch.writeFile(bf, wl, 0, _dstart,
 						 * false); br += wl; written += wl; }
 						 */
-					} else {
-						ddf.putSparseDataChunk(written + dstart,
-								sdf.getSparseDataChunk(written + sstart));
-						written += Main.CHUNK_LENGTH;
-					}
 
 				}
 			} finally {

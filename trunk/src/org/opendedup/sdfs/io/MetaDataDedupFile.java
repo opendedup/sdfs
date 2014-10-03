@@ -384,6 +384,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				in = new ObjectInputStream(new FileInputStream(path));
 				mf = (MetaDataDedupFile) in.readObject();
 				mf.path = path;
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"reading in file " + mf.path + " df=" + mf.dfGuid);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to de-serialize " + path, e);
 				mf = new MetaDataDedupFile(path);
@@ -1144,6 +1147,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the length
 	 */
 	public long length() {
+		if(SDFSLogger.isDebug())
+			SDFSLogger.getLog().info("len=" + this.length);
 		return length;
 	}
 
@@ -1312,9 +1317,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} finally {
 			this.writeLock.unlock();
 		}
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug(
-					"reading in file " + this.path + " df=" + this.dfGuid);
+		
 
 	}
 
