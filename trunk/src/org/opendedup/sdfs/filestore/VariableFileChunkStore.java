@@ -93,6 +93,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					rf.seek(0);
 					this.size = new AtomicLong(rf.readLong());
 					this.compressedLength = new AtomicLong(rf.readLong());
+					if (this.size.get() < 0)
+						this.size.set(0);
+					if(this.compressedLength.get() < 0)
+						this.compressedLength.set(0);
 					rf.close();
 					rf = null;
 					lsf.delete();
@@ -405,6 +409,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			store.deleteChunk(hash, iStart, iLen);
 			this.size.addAndGet(-1 * cLen);
 			this.compressedLength.addAndGet(-1 * iLen);
+			if (this.size.get() < 0)
+				this.size.set(0);
+			if(this.compressedLength.get() < 0)
+				this.compressedLength.set(0);
 			rf.write(ByteBuffer.wrap(iFree), start);
 		} finally {
 			pool.returnObject(rf);
