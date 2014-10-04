@@ -56,7 +56,7 @@ public class ProcessVolumeInfo {
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
 									0);
 				} else {
-					double dedupRate = (((double) dseSz / (double) capacitySz) * 100);
+					double dedupRate = (1-((double) dseSz / (double) capacitySz) * 100);
 					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");
 					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
