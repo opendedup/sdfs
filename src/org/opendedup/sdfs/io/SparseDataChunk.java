@@ -29,9 +29,22 @@ public class SparseDataChunk implements Externalizable {
 
 	}
 
-	public SparseDataChunk(byte[] rawData, int version) throws IOException {
+	public SparseDataChunk(byte[] rawData, byte version) throws IOException {
+		this.version = version;
+		this.marshall(rawData);
+	}
 
-		ByteBuffer buf = ByteBuffer.wrap(rawData);
+	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData,
+			byte version) {
+		this.version = version;
+		this.localData = localData;
+		this.doop = doop;
+		this.ar = ar;
+
+	}
+	
+	private void marshall(byte [] raw) throws IOException {
+		ByteBuffer buf = ByteBuffer.wrap(raw);
 
 		buf.get();
 		buf.getInt();
@@ -47,15 +60,6 @@ public class SparseDataChunk implements Externalizable {
 				len = ep;
 		}
 		doop = buf.getInt();
-	}
-
-	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData,
-			byte version) {
-		this.version = version;
-		this.localData = localData;
-		this.doop = doop;
-		this.ar = ar;
-
 	}
 
 	public int getDoop() {
@@ -211,15 +215,18 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	@Override
-	public void readExternal(ObjectInput arg0) throws IOException,
+	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
-		// TODO Auto-generated method stub
+		byte [] b = new byte[in.readInt()];
+		this.marshall(b);
 
 	}
 
 	@Override
-	public void writeExternal(ObjectOutput arg0) throws IOException {
-		// TODO Auto-generated method stub
+	public void writeExternal(ObjectOutput out) throws IOException {
+		byte [] b= this.getBytes();
+		out.writeInt(b.length);
+		out.write(b);
 
 	}
 
