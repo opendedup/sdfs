@@ -605,6 +605,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
+				extended.setAttribute("delete-unclaimed", "true");
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -632,6 +633,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
+				extended.setAttribute("delete-unclaimed", "true");
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
