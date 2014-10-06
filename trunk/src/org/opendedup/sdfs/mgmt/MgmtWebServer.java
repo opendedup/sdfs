@@ -57,8 +57,8 @@ public class MgmtWebServer implements Container {
 
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
-
 			String cmdOptions = request.getQuery().get("options");
+			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" +cmdOptions);
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder builder;

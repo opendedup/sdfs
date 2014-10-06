@@ -48,7 +48,7 @@ public class MgmtServerConnection {
 				prot = "https";
 			}
 			String req = prot + "://" + server + ":" + port + "/?" + url;
-			// SDFSLogger.getLog().info(req);
+			SDFSLogger.getLog().debug(req);
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)

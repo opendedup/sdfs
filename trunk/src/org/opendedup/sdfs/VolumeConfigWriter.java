@@ -291,7 +291,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 1024;
 				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
@@ -324,7 +324,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 1024;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -342,7 +342,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 128;
+					this.chunk_size = 1024;
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -510,7 +510,7 @@ public class VolumeConfigWriter {
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("hash-type", this.hashType);
 		if(ext)
-			io.setAttribute("max-variable-segment-size","12");
+			io.setAttribute("max-variable-segment-size","32");
 		root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");
