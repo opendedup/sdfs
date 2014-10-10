@@ -20,9 +20,10 @@ public class SparseDataChunk implements Externalizable {
 	private boolean localData = false;
 	// private int RAWDL;
 	private long fpos;
-	private byte version = 2;
 	private static final long serialVersionUID = -2782607786999940224L;
 	public int len = 0;
+	public byte flags = 0; 
+	public static final int RECONSTRUCTED = 1;  // 0001
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 
 	public SparseDataChunk() {
@@ -30,13 +31,11 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	public SparseDataChunk(byte[] rawData, byte version) throws IOException {
-		this.version = version;
 		this.marshall(rawData);
 	}
 
 	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData,
 			byte version) {
-		this.version = version;
 		this.localData = localData;
 		this.doop = doop;
 		this.ar = ar;
@@ -46,7 +45,7 @@ public class SparseDataChunk implements Externalizable {
 	private void marshall(byte [] raw) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(raw);
 
-		buf.get();
+		this.flags = buf.get();
 		buf.getInt();
 		int zlen = buf.getInt();
 		ar = new ArrayList<HashLocPair>(zlen);
@@ -156,6 +155,7 @@ public class SparseDataChunk implements Externalizable {
 			}
 			p.hashloc[0]=1;
 			ar.add(p);
+			this.flags=RECONSTRUCTED;
 			Collections.sort(this.ar);
 		} finally {
 			l.unlock();
@@ -170,7 +170,7 @@ public class SparseDataChunk implements Externalizable {
 					+ (ar.size() * HashLocPair.BAL)]);
 			this.prevdoop = this.doop;
 			this.doop = 0;
-			buf.put(this.version);
+			buf.put(this.flags);
 			buf.putInt(buf.capacity());
 			buf.putInt(this.ar.size());
 			Collections.sort(this.ar);
@@ -232,6 +232,13 @@ public class SparseDataChunk implements Externalizable {
 
 	public int getPrevdoop() {
 		return prevdoop;
+	}
+	
+	public boolean isRecontructed() {
+		if(this.flags == 0)
+			return false;
+		else
+			return true;
 	}
 
 }
