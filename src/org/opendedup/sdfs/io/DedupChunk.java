@@ -17,6 +17,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private boolean newChunk = false;
 	private boolean writable = false;
 	private int doop = 0;
+	private boolean reconstructed = false;
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 
 	public DedupChunk(long position) {
@@ -32,15 +33,13 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(long position, int length, boolean newChunk,List<HashLocPair> ar
+	public DedupChunk(long position, int length, boolean newChunk,List<HashLocPair> ar,boolean reconstructed
 			) {
-		
 		this.length = length;
 		this.position = position;
 		this.newChunk = newChunk;
 		this.ar = ar;
-		
-			
+		this.reconstructed = reconstructed;	
 	}
 
 	
@@ -285,6 +284,11 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	public void setAR(List<HashLocPair> al) {
 		this.ar = al;
 		
+	}
+
+	@Override
+	public boolean getReconstructed() {
+		return this.reconstructed;
 	}
 
 }

@@ -688,7 +688,7 @@ public class SparseDedupFile implements DedupFile {
 			ck = this.getHash(chunkPos, true);
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(chunkPos,
-						ck.getLength(),this,ck.getFingers());
+						ck.getLength(),this,ck.getFingers(),ck.getReconstructed());
 			} else {
 				writeBuffer = new WritableCacheBuffer(ck, this);
 				writeBuffer.setPrevDoop(ck.getDoop());
@@ -1148,7 +1148,7 @@ public class SparseDedupFile implements DedupFile {
 				//boolean dataEmpty = !pck.isLocalData();
 				//if (dataEmpty) {
 					ck = new DedupChunk(place,
-							Main.CHUNK_LENGTH, false, pck.getFingers());
+							Main.CHUNK_LENGTH, false, pck.getFingers(),pck.isRecontructed());
 				//} else {
 				//	byte dk[] = chunkStore.get(place);
 				//	ck = new DedupChunk(dk, place,
@@ -1231,7 +1231,7 @@ public class SparseDedupFile implements DedupFile {
 
 	private DedupChunk createNewChunk(long location) {
 		DedupChunk ck = new DedupChunk(
-				location, Main.CHUNK_LENGTH, true, new ArrayList<HashLocPair>());
+				location, Main.CHUNK_LENGTH, true, new ArrayList<HashLocPair>(),false);
 		return ck;
 	}
 
@@ -1290,5 +1290,7 @@ public class SparseDedupFile implements DedupFile {
 	public Lock getWriteLock() {
 		return globalLock.writeLock();
 	}
+	
+	
 
 }
