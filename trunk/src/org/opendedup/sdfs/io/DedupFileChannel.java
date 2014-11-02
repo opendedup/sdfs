@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -9,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.RandomGUID;
 
 import com.google.common.eventbus.EventBus;
 
@@ -33,6 +33,7 @@ public class DedupFileChannel {
 	private boolean closed = false;
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
+	private Long id = RandomGUID.getLong();
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -61,6 +62,10 @@ public class DedupFileChannel {
 		} finally {
 			this.closeLock.unlock();
 		}
+	}
+	
+	public long getID() {
+		return id;
 	}
 
 	/**
