@@ -61,8 +61,7 @@ public class ProcessBatchGetBlocks {
 			for (int i = 0; i < hck.size(); i++) {
 				HashChunk _hc = hck.get(i);
 				imsz += _hc.getData().length;
-				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(), 0,
-						_hc.getData().length, true, null);
+				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(), true, null);
 			}
 			SDFSLogger.getLog().debug("imported " + hck.size());
 			return imsz;

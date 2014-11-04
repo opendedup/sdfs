@@ -74,21 +74,19 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hs.bdb;
 	}
 
-	public boolean writeChunk(byte[] hash, byte[] aContents, int position,
-			int len, boolean compressed) throws IOException,
+	public boolean writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
 			HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
 					+ "]");
 		chunksRead++;
-		kBytesRead = kBytesRead + (position / KBYTE);
 		boolean written = hs.addHashChunk(new HashChunk(hash, aContents,
 				compressed));
 		if (written) {
 			unComittedChunks++;
 			chunksWritten++;
-			kBytesWrite = kBytesWrite + (position / KBYTE);
+			kBytesWrite = kBytesWrite + (aContents.length / KBYTE);
 			if (unComittedChunks > MAX_UNCOMITTEDCHUNKS) {
 				commitChunks();
 			}
@@ -109,8 +107,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 			ArrayList<HashChunk> hck = hc.fetchChunks(al);
 			for (int i = 0; i < hck.size(); i++) {
 				HashChunk _hc = hck.get(i);
-				writeChunk(_hc.getName(), _hc.getData(), 0,
-						_hc.getData().length, false);
+				writeChunk(_hc.getName(), _hc.getData(),  false);
 			}
 		} finally {
 			hc.close();
@@ -128,6 +125,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;
+		this.kBytesRead = kBytesFetched;
+		this.chunksRead = this.chunksFetched;
 		return hashChunk;
 	}
 

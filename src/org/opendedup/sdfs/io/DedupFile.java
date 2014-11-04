@@ -128,7 +128,7 @@ public interface DedupFile {
 	 *            written
 	 * @throws IOException
 	 */
-	public abstract void writeCache(DedupChunkInterface writeBuffer)
+	public abstract void writeCache(WritableCacheBuffer writeBuffer)
 			throws FileClosedException, IOException, HashtableFullException;
 
 	/**

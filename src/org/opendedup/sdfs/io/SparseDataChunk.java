@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.Externalizable;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -10,7 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 public class SparseDataChunk implements Externalizable {
@@ -22,8 +24,8 @@ public class SparseDataChunk implements Externalizable {
 	private long fpos;
 	private static final long serialVersionUID = -2782607786999940224L;
 	public int len = 0;
-	public byte flags = 0; 
-	public static final int RECONSTRUCTED = 1;  // 0001
+	public byte flags = 0;
+	public static final int RECONSTRUCTED = 1; // 0001
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 
 	public SparseDataChunk() {
@@ -41,8 +43,8 @@ public class SparseDataChunk implements Externalizable {
 		this.ar = ar;
 
 	}
-	
-	private void marshall(byte [] raw) throws IOException {
+
+	private void marshall(byte[] raw) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(raw);
 
 		this.flags = buf.get();
@@ -75,18 +77,57 @@ public class SparseDataChunk implements Externalizable {
 
 				h = ar.get(i);
 				if (ar.size() == (i + 1)) {
-					_h = h.clone();
-					int os = _pos - _h.pos;
-					_h.offset += os;
-					_h.nlen -= os;
+					int zp = h.pos + h.nlen;
+					if (_pos < h.pos) {
+						_h = new HashLocPair();
+						_h.np = true;
+						_h.nlen = h.pos - _pos;
+						_h.pos = _pos;
+					} else if (_pos >= zp) {
+						_h = new HashLocPair();
+						_h.np = true;
+						_h.nlen = Main.CHUNK_LENGTH - _pos;
+						_h.pos = _pos;
+					} else {
+						_h = h.clone();
+						int os = _pos - _h.pos;
+						_h.offset += os;
+						_h.nlen -= os;
+						_h.pos = _pos;
+						if (_h.isInvalid()) {
+							SDFSLogger.getLog().error(
+									"nlen error=" + _h.toString());
+							SDFSLogger.getLog().error(
+									"h error=" + h.toString() + "os=");
+							SDFSLogger.getLog().error("_pos=" + _pos);
+						}
+					}
 					return _h;
 				}
 				HashLocPair nh = ar.get(i + 1);
 				if (_pos >= h.pos && _pos < nh.pos) {
-					_h = h.clone();
-					int os = _pos - _h.pos;
-					_h.offset += os;
-					_h.nlen -= os;
+					int _ep = h.pos + h.nlen;
+					if (_ep <= _pos) {
+						_h = new HashLocPair();
+						_h.np = true;
+						_h.nlen = nh.pos - _pos;
+						_h.pos = _pos;
+					} else {
+						_h = h.clone();
+						int os = _pos - _h.pos;
+						_h.offset += os;
+						_h.nlen -= os;
+						_h.pos = _pos;
+						if (_h.isInvalid()) {
+							SDFSLogger.getLog().error(
+									"knlen error=" + _h.toString());
+							SDFSLogger.getLog().error(
+									"kknlen error=" + h.toString() + " os=" + os);
+							SDFSLogger.getLog().error(
+									"kknlen nh error=" + nh.toString() + " os=" + os);
+							SDFSLogger.getLog().error("_pos=" + _pos);
+						}
+					}
 					return _h;
 				}
 			}
@@ -109,39 +150,54 @@ public class SparseDataChunk implements Externalizable {
 
 			for (HashLocPair h : ar) {
 				int hep = h.pos + h.nlen;
-					if (h.pos >= p.pos && hep <= ep) {
-						// SDFSLogger.getLog().info("0 removing h = " + h);
+				if (h.pos >= p.pos && hep <= ep) {
+					// SDFSLogger.getLog().info("0 removing h = " + h);
+					if (rm == null)
+						rm = new ArrayList<HashLocPair>();
+					rm.add(h);
+				} else if (h.pos <= p.pos && hep > p.pos) {
+					if (hep > ep) {
+						int offset = ep - h.pos;
+						HashLocPair _h = h.clone();
+						_h.offset += offset;
+						_h.nlen -= offset;
+						_h.pos = ep;
+						_h.hashloc[0] = 1;
+						if (am == null)
+							am = new ArrayList<HashLocPair>();
+						if (_h.isInvalid()) {
+							SDFSLogger.getLog().error("zoffset = " + offset);
+							SDFSLogger.getLog().error("p = " + p.toString());
+							SDFSLogger.getLog().error("h = " + h.toString());
+						}
+
+						am.add(_h);
+					}
+					if (h.pos < p.pos)
+						h.nlen = (p.pos - h.pos);
+					else {
 						if (rm == null)
 							rm = new ArrayList<HashLocPair>();
 						rm.add(h);
-					} else if (h.pos <= p.pos && hep > p.pos) {
-						if(hep > ep) {
-							int offset = ep - h.pos;
-							HashLocPair _h = h.clone();
-							_h.offset += offset;
-							_h.nlen -=offset;
-							_h.pos = ep;
-							_h.hashloc[0]=1;
-							if (am == null)
-								am = new ArrayList<HashLocPair>();
-							am.add(_h);
-						}
-						if(h.pos < p.pos)
-							h.nlen = (p.pos - h.pos);
-						else {
-							if (rm == null)
-								rm = new ArrayList<HashLocPair>();
-							rm.add(h);
-						}
-					} else if (h.pos > p.pos && h.pos <= ep) {
-						int no = ep - h.pos;
-						// int oh = h.pos;
-						h.pos = (p.pos + p.nlen);
-						h.offset += no;
-						h.nlen -= no;
-						// SDFSLogger.getLog().info("2 changing pos  from " +oh
-						// +" to " + h.pos + " offset = " + h.offset);
 					}
+				} else if (h.pos > p.pos && h.pos < ep) {
+					HashLocPair _h = h.clone();
+					int no = ep - h.pos;
+					// int oh = h.pos;
+					h.pos = (p.pos + p.nlen);
+					h.offset += no;
+					h.nlen -= no;
+					if (h.isInvalid()) {
+						SDFSLogger.getLog().error("offset = " + no);
+						SDFSLogger.getLog().error("p = " + p.toString());
+						SDFSLogger.getLog().error("h = " + _h.toString());
+					}
+					// SDFSLogger.getLog().info("2 changing pos  from " +oh
+					// +" to " + h.pos + " offset = " + h.offset);
+				}
+				if (h.isInvalid()) {
+					SDFSLogger.getLog().error("h = " + h.toString());
+				}
 			}
 			if (rm != null) {
 				for (HashLocPair z : rm) {
@@ -153,9 +209,9 @@ public class SparseDataChunk implements Externalizable {
 					ar.add(z);
 				}
 			}
-			p.hashloc[0]=1;
+			p.hashloc[0] = 1;
 			ar.add(p);
-			this.flags=RECONSTRUCTED;
+			this.flags = RECONSTRUCTED;
 			Collections.sort(this.ar);
 		} finally {
 			l.unlock();
@@ -174,11 +230,18 @@ public class SparseDataChunk implements Externalizable {
 			buf.putInt(buf.capacity());
 			buf.putInt(this.ar.size());
 			Collections.sort(this.ar);
-			if(ar.size() > (HashFunctionPool.max_hash_cluster*2))
-				throw new IOException("Buffer overflow ar size = " + ar.size() + " max size = " +(HashFunctionPool.max_hash_cluster*2));
+			if (ar.size() > (LongByteArrayMap.MAX_ELEMENTS_PER_AR)) {
+				SDFSLogger.getLog().error(
+						"Buffer overflow ar size = " + ar.size()
+								+ " max size = "
+								+ (LongByteArrayMap.MAX_ELEMENTS_PER_AR));
+				throw new IOException("Buffer overflow ar size = " + ar.size()
+						+ " max size = "
+						+ (LongByteArrayMap.MAX_ELEMENTS_PER_AR));
+			}
 			this.len = 0;
 			for (HashLocPair p : ar) {
-				if(p.hashloc[0] ==1)
+				if (p.hashloc[0] == 1)
 					this.doop += p.nlen;
 				buf.put(p.asArray());
 				this.len += p.nlen;
@@ -217,14 +280,14 @@ public class SparseDataChunk implements Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException,
 			ClassNotFoundException {
-		byte [] b = new byte[in.readInt()];
+		byte[] b = new byte[in.readInt()];
 		this.marshall(b);
 
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		byte [] b= this.getBytes();
+		byte[] b = this.getBytes();
 		out.writeInt(b.length);
 		out.write(b);
 
@@ -233,9 +296,9 @@ public class SparseDataChunk implements Externalizable {
 	public int getPrevdoop() {
 		return prevdoop;
 	}
-	
+
 	public boolean isRecontructed() {
-		if(this.flags == 0)
+		if (this.flags == 0)
 			return false;
 		else
 			return true;

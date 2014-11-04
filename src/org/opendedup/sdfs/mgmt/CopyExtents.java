@@ -37,9 +37,9 @@ public class CopyExtents {
 			throw new IOException("Path not found [" + dstfile + "]");
 		MetaDataDedupFile smf = MetaFileStore.getMF(f);
 		MetaDataDedupFile dmf = MetaFileStore.getMF(nf);
-		//SDFSLogger.getLog().info(
-		//		"Received " + srcfile + " to " + dstfile + " len = " + len
-		//				+ " sstart=" + sstart + " dstart=" + dstart);
+		// SDFSLogger.getLog().info(
+		// "Received " + srcfile + " to " + dstfile + " len = " + len
+		// + " sstart=" + sstart + " dstart=" + dstart);
 		/*
 		 * 
 		 * if (dmf.getBackingFile() == null) { dmf.setBackingFile(f.getPath());
@@ -69,10 +69,10 @@ public class CopyExtents {
 					int _so = (int) (_sstart - _spos);
 					int _do = (int) (_dstart - _dpos);
 
-
-						SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
-						SparseDataChunk ddc = ddf.getSparseDataChunk(_dpos);
-						HashLocPair p = sdc.getWL(_so);
+					SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
+					SparseDataChunk ddc = ddf.getSparseDataChunk(_dpos);
+					HashLocPair p = sdc.getWL(_so);
+					
 						if (p.nlen > _rem) {
 							p.nlen = (int) _rem;
 						}
@@ -81,35 +81,40 @@ public class CopyExtents {
 						if (ep > Main.CHUNK_LENGTH) {
 							p.nlen = Main.CHUNK_LENGTH - p.pos;
 						}
-						//SDFSLogger.getLog().info(
-						//		"at pos=" + _dstart + " putting " + p);
-						ddc.putHash(p);
-						ddf.putSparseDataChunk(_dpos,ddc);
-						written += p.nlen;
 						/*
-						 * boolean bw = false;
-						 * 
-						 * HashLocPair p = sdc.getHash(_so); if (p != null &&
-						 * p.len <= _rem) {
-						 * 
-						 * 
-						 * p.pos = _do; bw = ddc.putHash(p); } if (bw) { written
-						 * += p.len; fr += p.len; } else { int _wl =
-						 * sdc.getWL(_so); if (_wl > -1) wl = _wl;
-						 * 
-						 * int _depos = _do + wl; if (_depos >
-						 * Main.CHUNK_LENGTH) { wl = Main.CHUNK_LENGTH - _do;
-						 * SDFSLogger.getLog().info( srcfile +
-						 * " changing wl from " + _wl + " to " + wl); }
-						 * DeferredWrite dr = new DeferredWrite(); dr.sp =
-						 * _sstart; dr.wl = wl; dr.dp = _dstart; al.add(dr); /*
-						 * SDFSLogger.getLog().info("reading " + wl); ByteBuffer
-						 * bf = ByteBuffer.allocate(wl); sch.read(bf, 0, wl,
-						 * _sstart);
-						 * 
-						 * bf.position(0); dch.writeFile(bf, wl, 0, _dstart,
-						 * false); br += wl; written += wl; }
+						 * SDFSLogger.getLog().info( "at pos=" + _dstart +
+						 * " putting " + p);
 						 */
+					if (!p.np) {
+						ddc.putHash(p);
+						ddf.putSparseDataChunk(_dpos, ddc);
+					}
+					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+
+					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+					written += p.nlen;
+					/*
+					 * boolean bw = false;
+					 * 
+					 * HashLocPair p = sdc.getHash(_so); if (p != null && p.len
+					 * <= _rem) {
+					 * 
+					 * 
+					 * p.pos = _do; bw = ddc.putHash(p); } if (bw) { written +=
+					 * p.len; fr += p.len; } else { int _wl = sdc.getWL(_so); if
+					 * (_wl > -1) wl = _wl;
+					 * 
+					 * int _depos = _do + wl; if (_depos > Main.CHUNK_LENGTH) {
+					 * wl = Main.CHUNK_LENGTH - _do; SDFSLogger.getLog().info(
+					 * srcfile + " changing wl from " + _wl + " to " + wl); }
+					 * DeferredWrite dr = new DeferredWrite(); dr.sp = _sstart;
+					 * dr.wl = wl; dr.dp = _dstart; al.add(dr); /*
+					 * SDFSLogger.getLog().info("reading " + wl); ByteBuffer bf
+					 * = ByteBuffer.allocate(wl); sch.read(bf, 0, wl, _sstart);
+					 * 
+					 * bf.position(0); dch.writeFile(bf, wl, 0, _dstart, false);
+					 * br += wl; written += wl; }
+					 */
 
 				}
 			} finally {

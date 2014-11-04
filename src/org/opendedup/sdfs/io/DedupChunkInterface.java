@@ -14,7 +14,7 @@ public interface DedupChunkInterface {
 	public abstract int getLength();
 	
 	public boolean getReconstructed();
-
+	public void setReconstructed(boolean re);
 	/**
 	 * 
 	 * @return the file position within the DedupFile

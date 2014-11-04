@@ -341,15 +341,14 @@ public class HCServiceProxy {
 	}
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean sendChunk) throws IOException,
+			 boolean sendChunk) throws IOException,
 			HashtableFullException {
 		boolean doop = false;
 		byte[] b = new byte[8];
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			if (!doop && sendChunk) {
-				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
-						Main.CHUNK_LENGTH, false);
+			if (sendChunk) {
+				doop = HCServiceProxy.hcService.writeChunk(hash, aContents,  false);
 			}
 			b[1] = -2;
 		} else {
@@ -425,15 +424,14 @@ public class HCServiceProxy {
 	}
 
 	public static byte[] writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean sendChunk, byte[] ignoredHosts)
+			 boolean sendChunk, byte[] ignoredHosts)
 			throws IOException, HashtableFullException {
 		boolean doop = false;
 		byte[] b = new byte[8];
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (!doop && sendChunk) {
-				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, 0,
-						Main.CHUNK_LENGTH, false);
+				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, false);
 			}
 			b[1] = -2;
 		} else {

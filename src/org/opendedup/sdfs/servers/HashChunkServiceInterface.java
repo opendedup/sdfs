@@ -21,8 +21,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract AbstractChunkStore getChuckStore();
 
-	public abstract boolean writeChunk(byte[] hash, byte[] aContents,
-			int position, int len, boolean compressed) throws IOException,
+	public abstract boolean writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
 			HashtableFullException;
 
 	public abstract void remoteFetchChunks(ArrayList<String> al, String server,

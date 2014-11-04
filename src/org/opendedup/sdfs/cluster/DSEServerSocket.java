@@ -260,7 +260,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 						if (ck != null) {
 							boolean dup = false;
 							byte[] b = HCServiceProxy.writeChunk(ck.getName(),
-									ck.getData(), 0, ck.getData().length, true);
+									ck.getData(), true);
 							if (b[0] == 1)
 								dup = true;
 							rsults.add(i, Boolean.valueOf(dup));
@@ -286,8 +286,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] chunkBytes = new byte[len];
 				buf.get(chunkBytes);
 				boolean dup = false;
-				byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, len,
-						len, true);
+				byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes,  true);
 				if (b[0] == 1)
 					dup = true;
 				// SDFSLogger.getLog().debug("Writing " +

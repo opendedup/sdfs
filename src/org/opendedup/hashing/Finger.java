@@ -17,7 +17,7 @@ public class Finger implements Runnable {
 	public void run() {
 		try {
 			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
-					this.chunk.length, this.chunk.length, this.dedup);
+					this.dedup);
 			l.commandResponse(this);
 
 		} catch (Throwable e) {

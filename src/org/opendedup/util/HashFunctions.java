@@ -241,7 +241,7 @@ public class HashFunctions {
 			rnd.nextBytes(b);
 
 			byte[] hash = HashFunctions.getMD5ByteHash(b);
-			HCServiceProxy.writeChunk(hash, b, 0, b.length, false);
+			HCServiceProxy.writeChunk(hash, b, false);
 		}
 		System.out.println("Took " + (System.currentTimeMillis() - start)
 				+ " ms");
