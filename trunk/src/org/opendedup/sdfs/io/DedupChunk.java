@@ -291,4 +291,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 		return this.reconstructed;
 	}
 
+	@Override
+	public void setReconstructed(boolean re) {
+		this.reconstructed = re;
+	}
+
 }

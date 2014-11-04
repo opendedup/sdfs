@@ -21,12 +21,11 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.OSValidator;
 
 public class LongByteArrayMap implements DataMapInterface {
-	// private static final byte swversion = Main.MAPVERSION;
-	// RandomAccessFile bdbf = null;
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)
 			* HashFunctionPool.max_hash_cluster;
 	private static final int _v1arrayLength = 4 + ((HashFunctionPool.hashLength + 8) * HashFunctionPool.max_hash_cluster);
-	private static final int _v2arrayLength = 1 + 4 + 4 + 4 +(HashLocPair.BAL * HashFunctionPool.max_hash_cluster*2);
+	public static final int MAX_ELEMENTS_PER_AR = HashFunctionPool.max_hash_cluster*2;
+	private static final int _v2arrayLength = 1 + 4 + 4 + 4 +(HashLocPair.BAL * MAX_ELEMENTS_PER_AR);
 	private static final int _v1offset = 64;
 	private static final int _v2offset = 256;
 	private static final short magicnumber = 6442;

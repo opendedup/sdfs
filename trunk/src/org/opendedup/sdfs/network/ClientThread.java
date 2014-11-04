@@ -125,8 +125,7 @@ public class ClientThread extends Thread {
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
 					boolean done = false;
-					byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, len,
-							len, true);
+					byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, true);
 
 					if (b[0] == 1)
 						done = true;
@@ -166,8 +165,7 @@ public class ClientThread extends Thread {
 							if (ck != null) {
 								boolean dup = false;
 								byte[] b = HCServiceProxy.writeChunk(
-										ck.getName(), ck.getData(), 0,
-										ck.getData().length, true);
+										ck.getName(), ck.getData(),  true);
 								if (b[0] == 1)
 									dup = true;
 								rsults.add(i, Boolean.valueOf(dup));

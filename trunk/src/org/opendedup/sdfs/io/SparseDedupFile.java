@@ -49,7 +49,7 @@ public class SparseDedupFile implements DedupFile {
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
 	private static EventBus eventBus = new EventBus();
-	private transient MetaDataDedupFile mf;
+	public transient MetaDataDedupFile mf;
 	private transient final ArrayList<DedupFileChannel> channels = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
@@ -74,13 +74,14 @@ public class SparseDedupFile implements DedupFile {
 			HashFunctionPool.max_hash_cluster);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private boolean deleted = false;
-	private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
+	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, executionHandler);
 	private boolean dirty = false;
-	private boolean toOccured = false;
-	private boolean errOccured = false;
+	protected boolean toOccured = false;
+	protected boolean errOccured = false;
 	public boolean isCopyExt;
+	private boolean reconstructed = false;
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -342,7 +343,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	@Override
-	public void writeCache(DedupChunkInterface writeBuffer) throws IOException,
+	public void writeCache(WritableCacheBuffer writeBuffer) throws IOException,
 			HashtableFullException, FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
@@ -378,8 +379,7 @@ public class SparseDedupFile implements DedupFile {
 						}
 						byte[] b = writeBuffer.getFlushedBuffer();
 						p.hashloc = HCServiceProxy.writeChunk(p.hash, b,
-								writeBuffer.getLength(),
-								writeBuffer.capacity(), mf.isDedup());
+								 mf.isDedup());
 						if (p.hashloc[0] == 1)
 							dups = writeBuffer.capacity();
 						p.len = b.length;
@@ -446,7 +446,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 								if (Main.writeTimeoutSeconds > 0
 										&& wl > (Main.writeTimeoutSeconds * tm)) {
-									int nt = (tm * wl) / 1000;
+									int nt = wl / 1000;
 									this.toOccured = true;
 									throw new IOException(
 											"Write Timed Out after ["
@@ -530,6 +530,9 @@ public class SparseDedupFile implements DedupFile {
 
 			}
 
+		} else if(writeBuffer.isHlAdded()) {
+			
+			this.updateMap(writeBuffer, writeBuffer.getPrevDoop());
 		}
 
 	}
@@ -636,17 +639,13 @@ public class SparseDedupFile implements DedupFile {
 			if (z > 6000)
 				throw new IOException("Waiting for flush timed out");
 		}
+		if(buf.getFingers().size() > LongByteArrayMap.MAX_ELEMENTS_PER_AR)
+			SDFSLogger.getLog().error("eeeks " + buf.getFingers().size() + " > " + LongByteArrayMap.MAX_ELEMENTS_PER_AR);
 		bdb.put(pos, buf.getBytes());
 		long epos = pos + buf.len;
 		if (epos > mf.length())
 			mf.setLength(epos, false);
-		mf.getIOMonitor().addVirtualBytesWritten(
-				buf.len, true);
-		mf.getIOMonitor().addActualBytesWritten(
-				buf.len
-						- (buf.getDoop() - buf.getPrevdoop()), true);
-		mf.getIOMonitor().addDulicateData(
-				(buf.getDoop() - buf.getPrevdoop()), true);
+		this.reconstructed = true;
 		return buf.len;
 	}
 
@@ -686,12 +685,17 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			WritableCacheBuffer writeBuffer = null;
 			ck = this.getHash(chunkPos, true);
+			
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(chunkPos,
 						ck.getLength(),this,ck.getFingers(),ck.getReconstructed());
+				if(this.reconstructed)
+					writeBuffer.setReconstructed(true);
 			} else {
 				writeBuffer = new WritableCacheBuffer(ck, this);
 				writeBuffer.setPrevDoop(ck.getDoop());
+				if(this.reconstructed)
+					writeBuffer.setReconstructed(true);
 			}
 			// need to fix this
 

@@ -14,7 +14,7 @@ public class HashLocPair implements Comparable<HashLocPair> {
 	public int pos;
 	public int offset;
 	public int nlen;
-
+	public boolean np;
 	public byte[] asArray() throws IOException {
 		ByteBuffer bf = ByteBuffer.wrap(new byte[BAL]);
 		bf.put(hash);
@@ -30,6 +30,10 @@ public class HashLocPair implements Comparable<HashLocPair> {
 	private void checkCorrupt () throws IOException {
 		if(len <0 || pos <0 || offset <0 || nlen < 0)
 			throw new IOException("data is corrupt " +this);
+	}
+	
+	public boolean isInvalid() {
+		return (len <=0 || pos <0 || offset <0 || nlen <= 0);
 	}
 
 	public HashLocPair() {
