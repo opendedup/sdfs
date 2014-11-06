@@ -549,6 +549,8 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
 		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
+		root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
+		root.setAttribute("dse-size", Long.toString(HCServiceProxy.getDSESize()));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);

@@ -15,6 +15,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
+
 public class SparseDataChunk implements Externalizable {
 	private ReentrantLock l = new ReentrantLock();
 	private int doop;
@@ -66,81 +67,45 @@ public class SparseDataChunk implements Externalizable {
 	public int getDoop() {
 		return doop;
 	}
+	
+	
 
 	public HashLocPair getWL(int _pos) {
 		l.lock();
-		HashLocPair _h = null;
-		HashLocPair h = null;
 		try {
-
-			for (int i = 0; i < ar.size(); i++) {
-
-				h = ar.get(i);
-				if (ar.size() == (i + 1)) {
-					int zp = h.pos + h.nlen;
-					if (_pos < h.pos) {
-						_h = new HashLocPair();
-						_h.np = true;
-						_h.nlen = h.pos - _pos;
-						_h.pos = _pos;
-					} else if (_pos >= zp) {
-						_h = new HashLocPair();
-						_h.np = true;
-						_h.nlen = Main.CHUNK_LENGTH - _pos;
-						_h.pos = _pos;
-					} else {
-						_h = h.clone();
-						int os = _pos - _h.pos;
-						_h.offset += os;
-						_h.nlen -= os;
-						_h.pos = _pos;
-						if (_h.isInvalid()) {
-							SDFSLogger.getLog().error(
-									"nlen error=" + _h.toString());
-							SDFSLogger.getLog().error(
-									"h error=" + h.toString() + "os=");
-							SDFSLogger.getLog().error("_pos=" + _pos);
-						}
-					}
+			for (HashLocPair h : ar) {
+				int ep = h.pos + h.nlen;
+				
+				if (_pos >= h.pos && _pos < ep) {
+					HashLocPair _h = h.clone();
+					int os = _pos - _h.pos;
+					_h.offset += os;
+					_h.nlen -= os;
+					_h.pos = _pos;
 					return _h;
 				}
-				HashLocPair nh = ar.get(i + 1);
-				if (_pos >= h.pos && _pos < nh.pos) {
-					int _ep = h.pos + h.nlen;
-					if (_ep <= _pos) {
-						_h = new HashLocPair();
-						_h.np = true;
-						_h.nlen = nh.pos - _pos;
-						_h.pos = _pos;
-					} else {
-						_h = h.clone();
-						int os = _pos - _h.pos;
-						_h.offset += os;
-						_h.nlen -= os;
-						_h.pos = _pos;
-						if (_h.isInvalid()) {
-							SDFSLogger.getLog().error(
-									"knlen error=" + _h.toString());
-							SDFSLogger.getLog().error(
-									"kknlen error=" + h.toString() + " os=" + os);
-							SDFSLogger.getLog().error(
-									"kknlen nh error=" + nh.toString() + " os=" + os);
-							SDFSLogger.getLog().error("_pos=" + _pos);
-						}
-					}
+				else if(h.pos > _pos) {
+					HashLocPair _h = new HashLocPair();
+					_h.pos = _pos;
+					_h.nlen = h.pos - _pos;
+					_h.np = true;
 					return _h;
 				}
 			}
+			HashLocPair _h =null;
+			_h = new HashLocPair();
+			_h.pos = _pos;
+			_h.nlen = Main.CHUNK_LENGTH - _pos;
+			_h.np = true;
+			return _h;
 		} finally {
 			l.unlock();
 		}
-		return _h;
+		
 
 	}
-
-	public void putHash(HashLocPair p) throws IOException {
-		l.lock();
-		try {
+	
+	public static void insertHashLocPair(List<HashLocPair> ar,HashLocPair p) throws IOException {
 			int ep = p.pos + p.nlen;
 			if (ep > Main.CHUNK_LENGTH)
 				throw new IOException("Overflow ep=" + ep);
@@ -150,7 +115,9 @@ public class SparseDataChunk implements Externalizable {
 
 			for (HashLocPair h : ar) {
 				int hep = h.pos + h.nlen;
-				if (h.pos >= p.pos && hep <= ep) {
+				if(h.pos >= ep)
+					break;
+				else if (h.pos >= p.pos && hep <= ep) {
 					// SDFSLogger.getLog().info("0 removing h = " + h);
 					if (rm == null)
 						rm = new ArrayList<HashLocPair>();
@@ -165,11 +132,7 @@ public class SparseDataChunk implements Externalizable {
 						_h.hashloc[0] = 1;
 						if (am == null)
 							am = new ArrayList<HashLocPair>();
-						if (_h.isInvalid()) {
-							SDFSLogger.getLog().error("zoffset = " + offset);
-							SDFSLogger.getLog().error("p = " + p.toString());
-							SDFSLogger.getLog().error("h = " + h.toString());
-						}
+						
 
 						am.add(_h);
 					}
@@ -180,18 +143,13 @@ public class SparseDataChunk implements Externalizable {
 							rm = new ArrayList<HashLocPair>();
 						rm.add(h);
 					}
-				} else if (h.pos > p.pos && h.pos < ep) {
-					HashLocPair _h = h.clone();
+				} else if (h.pos >= p.pos && h.pos <= ep && hep > ep) {
 					int no = ep - h.pos;
 					// int oh = h.pos;
-					h.pos = (p.pos + p.nlen);
+					h.pos = ep;
 					h.offset += no;
 					h.nlen -= no;
-					if (h.isInvalid()) {
-						SDFSLogger.getLog().error("offset = " + no);
-						SDFSLogger.getLog().error("p = " + p.toString());
-						SDFSLogger.getLog().error("h = " + _h.toString());
-					}
+					
 					// SDFSLogger.getLog().info("2 changing pos  from " +oh
 					// +" to " + h.pos + " offset = " + h.offset);
 				}
@@ -211,8 +169,15 @@ public class SparseDataChunk implements Externalizable {
 			}
 			p.hashloc[0] = 1;
 			ar.add(p);
+			
+			Collections.sort(ar);
+	}
+
+	public void putHash(HashLocPair p) throws IOException {
+		l.lock();
+		try {
+			insertHashLocPair(ar,p);
 			this.flags = RECONSTRUCTED;
-			Collections.sort(this.ar);
 		} finally {
 			l.unlock();
 		}

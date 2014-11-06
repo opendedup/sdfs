@@ -20,7 +20,6 @@ public class OpenFile {
 
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
-
 			Document doc = XMLUtils.getXMLDoc("open-file");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath(),file);
