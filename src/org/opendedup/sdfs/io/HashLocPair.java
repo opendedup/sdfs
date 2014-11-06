@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.rabin.utils.StringUtils;
+
+import com.google.common.collect.Range;
 
 public class HashLocPair implements Comparable<HashLocPair> {
 	public static final int BAL = HashFunctionPool.hashLength + 8 + 4 + 4+4+4;
@@ -74,8 +77,17 @@ public class HashLocPair implements Comparable<HashLocPair> {
 		return p;
 	}
 	
+	public Range<Integer> getRange() {
+		return Range.closed(pos, pos + nlen);
+	}
+	
 	public String toString() {
-		return "pos=" +pos + " len=" + len + " offset=" + offset + " nlen=" + nlen + " ep=" + (pos + nlen);
+		String hashlocs = "[";
+		for(byte b : this.hashloc) {
+			hashlocs = hashlocs + Byte.toString(b) + " ";
+		}
+		hashlocs = hashlocs + "]";
+		return "pos=" +pos + " len=" + len + " offset=" + offset + " nlen=" + nlen + " ep=" + (pos + nlen) + " hash=" +StringUtils.getHexString(hash) + " hashlocs=" +hashlocs;
 	}
 
 }

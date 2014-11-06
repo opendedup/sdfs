@@ -90,8 +90,8 @@ public class CopyExtents {
 						ddf.putSparseDataChunk(_dpos, ddc);
 					}
 					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
-
 					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+					
 					written += p.nlen;
 					/*
 					 * boolean bw = false;
