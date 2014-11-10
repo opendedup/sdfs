@@ -20,7 +20,6 @@ public class SparseDataChunk implements Externalizable {
 	private ReentrantLock l = new ReentrantLock();
 	private int doop;
 	private int prevdoop;
-	private boolean localData = false;
 	// private int RAWDL;
 	private long fpos;
 	private static final long serialVersionUID = -2782607786999940224L;
@@ -39,7 +38,6 @@ public class SparseDataChunk implements Externalizable {
 
 	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData,
 			byte version) {
-		this.localData = localData;
 		this.doop = doop;
 		this.ar = ar;
 
@@ -70,12 +68,11 @@ public class SparseDataChunk implements Externalizable {
 	
 	
 
-	public HashLocPair getWL(int _pos) {
+	public HashLocPair getWL(int _pos) throws IOException {
 		l.lock();
 		try {
 			for (HashLocPair h : ar) {
 				int ep = h.pos + h.nlen;
-				
 				if (_pos >= h.pos && _pos < ep) {
 					HashLocPair _h = h.clone();
 					int os = _pos - _h.pos;
@@ -84,20 +81,11 @@ public class SparseDataChunk implements Externalizable {
 					_h.pos = _pos;
 					return _h;
 				}
-				else if(h.pos > _pos) {
-					HashLocPair _h = new HashLocPair();
-					_h.pos = _pos;
-					_h.nlen = h.pos - _pos;
-					_h.np = true;
-					return _h;
-				}
 			}
-			HashLocPair _h =null;
-			_h = new HashLocPair();
-			_h.pos = _pos;
-			_h.nlen = Main.CHUNK_LENGTH - _pos;
-			_h.np = true;
-			return _h;
+			for (HashLocPair h : ar) {
+				SDFSLogger.getLog().info(h);
+			}
+			throw new IOException("Position not found " + _pos);
 		} finally {
 			l.unlock();
 		}
@@ -122,6 +110,16 @@ public class SparseDataChunk implements Externalizable {
 					if (rm == null)
 						rm = new ArrayList<HashLocPair>();
 					rm.add(h);
+				} else if (h.pos >= p.pos && h.pos < ep && hep > ep) {
+					int no = ep - h.pos;
+					// int oh = h.pos;
+					h.pos = ep;
+					h.offset += no;
+					h.nlen -= no;
+					h.hashloc[5] = 1;
+					
+					// SDFSLogger.getLog().info("2 changing pos  from " +oh
+					// +" to " + h.pos + " offset = " + h.offset);
 				} else if (h.pos <= p.pos && hep > p.pos) {
 					if (hep > ep) {
 						int offset = ep - h.pos;
@@ -130,29 +128,24 @@ public class SparseDataChunk implements Externalizable {
 						_h.nlen -= offset;
 						_h.pos = ep;
 						_h.hashloc[0] = 1;
+						_h.hashloc[6] = 1;
 						if (am == null)
 							am = new ArrayList<HashLocPair>();
-						
-
+					
 						am.add(_h);
 					}
-					if (h.pos < p.pos)
+					if (h.pos < p.pos) {
+						h.hashloc[7] = 1;
 						h.nlen = (p.pos - h.pos);
-					else {
+					}else {
+						SDFSLogger.getLog().info("should not get here");
+						SDFSLogger.getLog().info(p);
+						SDFSLogger.getLog().info(h);
 						if (rm == null)
 							rm = new ArrayList<HashLocPair>();
 						rm.add(h);
 					}
-				} else if (h.pos >= p.pos && h.pos <= ep && hep > ep) {
-					int no = ep - h.pos;
-					// int oh = h.pos;
-					h.pos = ep;
-					h.offset += no;
-					h.nlen -= no;
-					
-					// SDFSLogger.getLog().info("2 changing pos  from " +oh
-					// +" to " + h.pos + " offset = " + h.offset);
-				}
+				} 
 				if (h.isInvalid()) {
 					SDFSLogger.getLog().error("h = " + h.toString());
 				}
@@ -216,14 +209,6 @@ public class SparseDataChunk implements Externalizable {
 		} finally {
 			l.unlock();
 		}
-	}
-
-	public boolean isLocalData() {
-		return localData;
-	}
-
-	public void setLocalData(boolean local) {
-		this.localData = local;
 	}
 
 	public void setDoop(int doop) {

@@ -321,7 +321,6 @@ public class SparseDedupFile implements DedupFile {
 					break;
 				}
 				if (i > 30000) {
-
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()
@@ -532,6 +531,7 @@ public class SparseDedupFile implements DedupFile {
 
 		} else if(writeBuffer.isHlAdded()) {
 			
+			this.dirty = true;
 			this.updateMap(writeBuffer, writeBuffer.getPrevDoop());
 		}
 
@@ -987,6 +987,10 @@ public class SparseDedupFile implements DedupFile {
 			if (this.toOccured) {
 				this.toOccured = false;
 				throw new IOException("timeout occured");
+			}
+			if (this.errOccured) {
+				this.errOccured = false;
+				throw new IOException("write error occured");
 			}
 			if (!storageConnected)
 				throw new IOException("storage offline");

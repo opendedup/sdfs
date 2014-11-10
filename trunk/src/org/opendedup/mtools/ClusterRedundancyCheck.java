@@ -195,7 +195,6 @@ public class ClusterRedundancyCheck {
 					ck.setFpos((prevpos / mp.getFree().length)
 							* Main.CHUNK_LENGTH);
 					HashLocPair p = ck.getFingers().get(0);
-					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 							byte[] exists = HCServiceProxy.hashExists(
 									p.hash, true);
@@ -267,7 +266,6 @@ public class ClusterRedundancyCheck {
 										MAX_BATCH_SIZE);
 							}
 						}
-					}
 				}
 			}
 

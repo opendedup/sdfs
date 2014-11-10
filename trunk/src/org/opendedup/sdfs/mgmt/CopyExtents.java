@@ -1,13 +1,15 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
 
+import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
@@ -48,7 +50,8 @@ public class CopyExtents {
 		 * nf.getPath(), false, evt); } else if (dmf.getBackingFile() !=
 		 * f.getPath()) { SDFSLogger.getLog().warn("Looks like opt-synth");
 		 * dmf.setInterWeaveCP(true); } if (dmf.isInterWeaveCP()) {
-		 */if (smf.length() < len)
+		 */
+		if (smf.length() < len)
 			len = smf.length();
 		SparseDedupFile sdf = (SparseDedupFile) smf.getDedupFile();
 		SparseDedupFile ddf = (SparseDedupFile) dmf.getDedupFile();
@@ -71,52 +74,54 @@ public class CopyExtents {
 
 					SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 					SparseDataChunk ddc = ddf.getSparseDataChunk(_dpos);
-					HashLocPair p = sdc.getWL(_so);
-					
+					if (ddc.getFingers().size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
+						SDFSLogger
+								.getLog()
+								.warn("SparseDataChunk array is larger that available capacity, rehashing");
+						DedupFileChannel dch = ddf.getChannel(-34);
+						DedupFileChannel sch = sdf.getChannel(-34);
+						int wb = 0;
+						if (_rem >= Main.CHUNK_LENGTH)
+							wb = Main.CHUNK_LENGTH;
+						else
+							wb = (int) _rem;
+						ByteBuffer buf = ByteBuffer.allocateDirect(wb);
+						sch.read(buf, 0, wb, _spos);
+						buf.position(0);
+						dch.writeFile(buf, wb, 0, _do, true);
+						ddf.writeCache();
+						ddf.unRegisterChannel(dch, -34);
+						sdf.unRegisterChannel(sch, -34);
+						
+						written += wb;
+					} else {
+						HashLocPair p = sdc.getWL(_so);
+						p.hashloc[7]=1;
 						if (p.nlen > _rem) {
 							p.nlen = (int) _rem;
+							p.hashloc[7]=2;
 						}
 						p.pos = _do;
 						int ep = p.pos + p.nlen;
 						if (ep > Main.CHUNK_LENGTH) {
 							p.nlen = Main.CHUNK_LENGTH - p.pos;
+							p.hashloc[7]=3;
 						}
 						/*
 						 * SDFSLogger.getLog().info( "at pos=" + _dstart +
 						 * " putting " + p);
 						 */
-					if (!p.np) {
 						ddc.putHash(p);
 						ddf.putSparseDataChunk(_dpos, ddc);
+						ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen,
+								true);
+						ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+
+						written += p.nlen;
 					}
-					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
-					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
-					
-					written += p.nlen;
-					/*
-					 * boolean bw = false;
-					 * 
-					 * HashLocPair p = sdc.getHash(_so); if (p != null && p.len
-					 * <= _rem) {
-					 * 
-					 * 
-					 * p.pos = _do; bw = ddc.putHash(p); } if (bw) { written +=
-					 * p.len; fr += p.len; } else { int _wl = sdc.getWL(_so); if
-					 * (_wl > -1) wl = _wl;
-					 * 
-					 * int _depos = _do + wl; if (_depos > Main.CHUNK_LENGTH) {
-					 * wl = Main.CHUNK_LENGTH - _do; SDFSLogger.getLog().info(
-					 * srcfile + " changing wl from " + _wl + " to " + wl); }
-					 * DeferredWrite dr = new DeferredWrite(); dr.sp = _sstart;
-					 * dr.wl = wl; dr.dp = _dstart; al.add(dr); /*
-					 * SDFSLogger.getLog().info("reading " + wl); ByteBuffer bf
-					 * = ByteBuffer.allocate(wl); sch.read(bf, 0, wl, _sstart);
-					 * 
-					 * bf.position(0); dch.writeFile(bf, wl, 0, _dstart, false);
-					 * br += wl; written += wl; }
-					 */
 
 				}
+				ddf.writeCache();
 			} finally {
 				long el = written + dstart;
 				if (el > dmf.length()) {

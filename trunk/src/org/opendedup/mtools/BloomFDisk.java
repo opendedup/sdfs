@@ -134,12 +134,10 @@ public class BloomFDisk {
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
-					if (!ck.isLocalData()) {
 						List<HashLocPair> al = ck.getFingers();
 						for (HashLocPair p : al) {
 							bf.put(p.hash);
 						}
-					}
 				}
 			}
 		} catch (Throwable e) {

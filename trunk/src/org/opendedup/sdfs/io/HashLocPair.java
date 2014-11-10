@@ -17,7 +17,6 @@ public class HashLocPair implements Comparable<HashLocPair> {
 	public int pos;
 	public int offset;
 	public int nlen;
-	public boolean np;
 	public byte[] asArray() throws IOException {
 		ByteBuffer bf = ByteBuffer.wrap(new byte[BAL]);
 		bf.put(hash);

@@ -61,11 +61,11 @@ public class MetaFileImport {
 				while (val != null) {
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
-						if (!ck.isLocalData()) {
-							for (HashLocPair p : ck.getFingers()) {
-							byte[] exists = HCServiceProxy.hashExists(
-									p.hash, false);
+						SparseDataChunk ck = new SparseDataChunk(val,
+								mp.getVersion());
+						for (HashLocPair p : ck.getFingers()) {
+							byte[] exists = HCServiceProxy.hashExists(p.hash,
+									false);
 							if (exists[0] == -1) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger
@@ -77,7 +77,6 @@ public class MetaFileImport {
 															.getHexString(p.hash));
 								corruption = true;
 								corruptBlocks++;
-							}
 							}
 						}
 					}

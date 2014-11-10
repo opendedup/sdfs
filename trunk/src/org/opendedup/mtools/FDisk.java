@@ -143,41 +143,37 @@ public class FDisk {
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val,
 							mp.getVersion());
-					if (!ck.isLocalData()) {
-						if (Main.chunkStoreLocal) {
-							List<HashLocPair> al = ck.getFingers();
-							for (HashLocPair p : al) {
-								byte[] exists = HCServiceProxy.hashExists(
-										p.hash, false,
-										Main.volume.getClusterCopies());
-								if (exists[0] == -1) {
-									if (SDFSLogger.isDebug())
-										SDFSLogger
-												.getLog()
-												.debug("file ["
-														+ mapFile
-														+ "] could not find "
-														+ StringUtils
-																.getHexString(p.hash));
-									corruptBlocks++;
-								} else if (SDFSLogger.isDebug()) {
+					if (Main.chunkStoreLocal) {
+						List<HashLocPair> al = ck.getFingers();
+						for (HashLocPair p : al) {
+							byte[] exists = HCServiceProxy.hashExists(p.hash,
+									false, Main.volume.getClusterCopies());
+							if (exists[0] == -1) {
+								if (SDFSLogger.isDebug())
 									SDFSLogger
 											.getLog()
 											.debug("file ["
 													+ mapFile
-													+ "] found "
+													+ "] could not find "
 													+ StringUtils
 															.getHexString(p.hash));
+								corruptBlocks++;
+							} else if (SDFSLogger.isDebug()) {
+								SDFSLogger.getLog().debug(
+										"file ["
+												+ mapFile
+												+ "] found "
+												+ StringUtils
+														.getHexString(p.hash));
 
-								}
 							}
-						} else {
-							chunks.add(ck);
-							if (chunks.size() >= MAX_BATCH_SIZE) {
-								corruptBlocks += batchCheck(chunks);
-								chunks = new ArrayList<SparseDataChunk>(
-										MAX_BATCH_SIZE);
-							}
+						}
+					} else {
+						chunks.add(ck);
+						if (chunks.size() >= MAX_BATCH_SIZE) {
+							corruptBlocks += batchCheck(chunks);
+							chunks = new ArrayList<SparseDataChunk>(
+									MAX_BATCH_SIZE);
 						}
 					}
 				}
