@@ -195,7 +195,6 @@ public class FFDisk {
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
-					if (!ck.isLocalData()) {
 						if (Main.chunkStoreLocal) {
 							List<HashLocPair> al = ck.getFingers();
 							for (HashLocPair p : al) {
@@ -231,7 +230,6 @@ public class FFDisk {
 										MAX_BATCH_SIZE);
 							}
 						}
-					}
 				}
 			}
 			if (chunks.size() > 0) {

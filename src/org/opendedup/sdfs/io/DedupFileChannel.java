@@ -33,7 +33,7 @@ public class DedupFileChannel {
 	private boolean closed = false;
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
-	private Long id = RandomGUID.getLong();
+	private String id = RandomGUID.getGuid();
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -64,7 +64,7 @@ public class DedupFileChannel {
 		}
 	}
 	
-	public long getID() {
+	public String getID() {
 		return id;
 	}
 
