@@ -2,8 +2,8 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
 
+
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.XMLUtils;
@@ -41,8 +41,6 @@ public class GetDSE {
 					Boolean.toString(Main.serverUseSSL));
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to fulfill request on file " + file, e);
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 		}
