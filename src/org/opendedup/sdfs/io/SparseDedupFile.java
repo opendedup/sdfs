@@ -324,7 +324,7 @@ public class SparseDedupFile implements DedupFile {
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()
-							.info("WriteCache has take over [" + sec
+							.warn("WriteCache has take over [" + sec
 									+ "] seconds. There are still "
 									+ this.flushingBuffers.size() + " in flush");
 					i = 0;
@@ -438,7 +438,7 @@ public class SparseDedupFile implements DedupFile {
 									int nt = wl / 1000;
 									SDFSLogger
 											.getLog()
-											.warn("Slow io, waited ["
+											.debug("Slow io, waited ["
 													+ nt
 													+ "] seconds for all writes to complete.");
 									al = 0;
