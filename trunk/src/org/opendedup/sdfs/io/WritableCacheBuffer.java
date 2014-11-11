@@ -248,7 +248,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						int nt = wl / 1000;
 						SDFSLogger
 								.getLog()
-								.warn("Slow io, waited ["
+								.debug("Slow io, waited ["
 										+ nt
 										+ "] seconds for all reads to complete.");
 						al = 0;
