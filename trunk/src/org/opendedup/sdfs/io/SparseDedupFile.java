@@ -19,7 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
-import org.opendedup.collections.LargeLongByteArrayMap;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
@@ -53,7 +52,6 @@ public class SparseDedupFile implements DedupFile {
 	private transient final ArrayList<DedupFileChannel> channels = new ArrayList<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
-	private transient String chunkStorePath = null;
 	private DedupFileChannel staticChannel = null;
 	public long lastSync = 0;
 	public static boolean storageConnected = true;
@@ -66,7 +64,6 @@ public class SparseDedupFile implements DedupFile {
 			((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
 	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock syncLock = new ReentrantLock();
-	private LargeLongByteArrayMap chunkStore = null;
 	private static int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final ConcurrentHashMap<Long, DedupChunkInterface> flushingBuffers = new ConcurrentHashMap<Long, DedupChunkInterface>(
 			1024, .75f, Main.writeThreads * 3);
@@ -202,7 +199,6 @@ public class SparseDedupFile implements DedupFile {
 				SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
 			}
 			bdb.copy(_dbf.getPath());
-			chunkStore.copy(_dbc.getPath());
 
 			snapmf.setDedupFile(_df);
 			return _df;
@@ -240,8 +236,6 @@ public class SparseDedupFile implements DedupFile {
 			this.writeCache();
 			this.sync(true);
 			bdb.copy(dest.getPath() + File.separator + this.GUID + ".map");
-			chunkStore.copy(dest.getPath() + File.separator + this.GUID
-					+ ".chk");
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to copy to" + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
@@ -564,8 +558,6 @@ public class SparseDedupFile implements DedupFile {
 					chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), false, this.bdb.getVersion());
 				} else {
 					chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), true, this.bdb.getVersion());
-					this.chunkStore.put(filePosition,
-							writeBuffer.getFlushedBuffer());
 				}
 			}
 			bdb.put(filePosition, chunk.getBytes());
@@ -974,10 +966,7 @@ public class SparseDedupFile implements DedupFile {
 				this.bdb = null;
 				this.closed = true;
 
-				try {
-					this.chunkStore.close();
-				} catch (Exception e) {
-				}
+				
 				if (!this.deleted) {
 					MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
 					MetaFileStore.getMF(mf.getPath()).sync();
@@ -999,7 +988,6 @@ public class SparseDedupFile implements DedupFile {
 		} finally {
 			DedupFileStore.removeOpenDedupFile(this.GUID);
 			bdb = null;
-			chunkStore = null;
 			this.closed = true;
 			this.dirty = false;
 			this.channelLock.unlock();
@@ -1086,16 +1074,12 @@ public class SparseDedupFile implements DedupFile {
 						+ this.GUID);
 				File dbf = new File(directory.getPath() + File.separator
 						+ this.GUID + ".map");
-				File dbc = new File(directory.getPath() + File.separator
-						+ this.GUID + ".chk");
+				
 				this.databaseDirPath = directory.getPath();
 				this.databasePath = dbf.getPath();
-				this.chunkStorePath = dbc.getPath();
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
-				this.chunkStore = new LargeLongByteArrayMap(chunkStorePath, -1,
-						Main.CHUNK_LENGTH);
 				if (mf.getDev() != null) {
 					this.bdb = new BlockDevSocket(mf.getDev(),
 							this.databasePath);
@@ -1200,8 +1184,6 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			this.writeCache();
 			this.bdb.remove(place);
-			if (!mf.isDedup())
-				this.chunkStore.remove(place);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to remove chunk at position " + place, e);
@@ -1227,8 +1209,6 @@ public class SparseDedupFile implements DedupFile {
 				this.mf.getIOMonitor().clearAllCounters(true);
 			}
 			this.bdb.truncate(size);
-			if (!mf.isDedup())
-				this.chunkStore.setLength(size);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to truncate to " + size, e);
 			throw new IOException(e);

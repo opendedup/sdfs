@@ -10,13 +10,16 @@ import org.opendedup.rabin.utils.StringUtils;
 import com.google.common.collect.Range;
 
 public class HashLocPair implements Comparable<HashLocPair> {
-	public static final int BAL = HashFunctionPool.hashLength + 8 + 4 + 4+4+4;
+	public static final int BAL = HashFunctionPool.hashLength + 8 + 4 + 4 + 4
+			+ 4;
 	public byte[] hash;
 	public byte[] hashloc;
+	public byte[] data;
 	public int len;
 	public int pos;
 	public int offset;
 	public int nlen;
+
 	public byte[] asArray() throws IOException {
 		ByteBuffer bf = ByteBuffer.wrap(new byte[BAL]);
 		bf.put(hash);
@@ -28,18 +31,35 @@ public class HashLocPair implements Comparable<HashLocPair> {
 		this.checkCorrupt();
 		return bf.array();
 	}
-	
-	private void checkCorrupt () throws IOException {
-		if(len <0 || pos <0 || offset <0 || nlen < 0)
-			throw new IOException("data is corrupt " +this);
+
+	private void checkCorrupt() throws IOException {
+		if (len < 0 || pos < 0 || offset < 0 || nlen < 0)
+			throw new IOException("data is corrupt " + this);
 	}
-	
+
 	public boolean isInvalid() {
-		return (len <=0 || pos <0 || offset <0 || nlen <= 0);
+		return (len <= 0 || pos < 0 || offset < 0 || nlen <= 0);
 	}
 
 	public HashLocPair() {
 
+	}
+
+	private int currentPos = 1;
+
+	public synchronized void addHashLoc(byte loc) {
+		// SDFSLogger.getLog().info("set " + this.currentPos + " to " + loc);
+		if (currentPos < this.hashloc.length) {
+			if (this.hashloc[0] == -1)
+				this.hashloc[0] = 0;
+			this.hashloc[currentPos] = loc;
+			this.currentPos++;
+		}
+	}
+
+	public void resetHashLoc() {
+		this.hashloc = new byte[8];
+		this.hashloc[0] = -1;
 	}
 
 	public HashLocPair(byte[] b) throws IOException {
@@ -75,18 +95,20 @@ public class HashLocPair implements Comparable<HashLocPair> {
 		p.nlen = nlen;
 		return p;
 	}
-	
+
 	public Range<Integer> getRange() {
 		return Range.closed(pos, pos + nlen);
 	}
-	
+
 	public String toString() {
 		String hashlocs = "[";
-		for(byte b : this.hashloc) {
+		for (byte b : this.hashloc) {
 			hashlocs = hashlocs + Byte.toString(b) + " ";
 		}
 		hashlocs = hashlocs + "]";
-		return "pos=" +pos + " len=" + len + " offset=" + offset + " nlen=" + nlen + " ep=" + (pos + nlen) + " hash=" +StringUtils.getHexString(hash) + " hashlocs=" +hashlocs;
+		return "pos=" + pos + " len=" + len + " offset=" + offset + " nlen="
+				+ nlen + " ep=" + (pos + nlen) + " hash="
+				+ StringUtils.getHexString(hash) + " hashlocs=" + hashlocs;
 	}
 
 }

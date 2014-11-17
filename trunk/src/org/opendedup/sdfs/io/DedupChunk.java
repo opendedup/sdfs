@@ -190,12 +190,6 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public byte[] getFlushedBuffer() throws BufferClosedException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public boolean isClosed() {
 		// TODO Auto-generated method stub
 		return false;

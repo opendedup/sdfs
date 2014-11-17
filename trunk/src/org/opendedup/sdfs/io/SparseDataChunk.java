@@ -116,7 +116,6 @@ public class SparseDataChunk implements Externalizable {
 					h.pos = ep;
 					h.offset += no;
 					h.nlen -= no;
-					h.hashloc[5] = 1;
 					
 					// SDFSLogger.getLog().info("2 changing pos  from " +oh
 					// +" to " + h.pos + " offset = " + h.offset);
@@ -128,14 +127,12 @@ public class SparseDataChunk implements Externalizable {
 						_h.nlen -= offset;
 						_h.pos = ep;
 						_h.hashloc[0] = 1;
-						_h.hashloc[6] = 1;
 						if (am == null)
 							am = new ArrayList<HashLocPair>();
 					
 						am.add(_h);
 					}
 					if (h.pos < p.pos) {
-						h.hashloc[7] = 1;
 						h.nlen = (p.pos - h.pos);
 					}else {
 						SDFSLogger.getLog().info("should not get here");

@@ -30,7 +30,7 @@ import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.io.DedupChunkInterface;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -518,8 +518,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static List<DedupChunkInterface> batchWriteHash(
-			List<DedupChunkInterface> hashes) throws IOException {
+	public static List<HashLocPair> batchWriteHash(
+			List<HashLocPair> hashes) throws IOException {
 		if (Main.chunkStoreLocal) {
 			throw new IOException("not implemented for localstore");
 

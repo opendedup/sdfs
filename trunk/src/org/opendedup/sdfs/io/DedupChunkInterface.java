@@ -77,8 +77,6 @@ public interface DedupChunkInterface {
 
 	public abstract long getEndPosition();
 
-	public byte[] getFlushedBuffer() throws BufferClosedException;
-
 	public boolean isClosed();
 
 	public void flush() throws BufferClosedException;
