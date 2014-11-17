@@ -63,6 +63,7 @@ public class CopyExtents {
 			l.lock();
 			try {
 				ddf.writeCache();
+				sdf.writeCache();
 				while (written < len) {
 					long _sstart = written + sstart;
 					long _dstart = written + dstart;
@@ -77,7 +78,7 @@ public class CopyExtents {
 					if (ddc.getFingers().size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
 						SDFSLogger
 								.getLog()
-								.warn("SparseDataChunk array is larger that available capacity, rehashing");
+								.debug("SparseDataChunk array is larger that available capacity for " +  dstfile + " at " + _dstart);
 						DedupFileChannel dch = ddf.getChannel(-34);
 						DedupFileChannel sch = sdf.getChannel(-34);
 						int wb = 0;
@@ -86,9 +87,9 @@ public class CopyExtents {
 						else
 							wb = (int) _rem;
 						ByteBuffer buf = ByteBuffer.allocateDirect(wb);
-						sch.read(buf, 0, wb, _spos);
+						sch.read(buf, 0, wb, _sstart);
 						buf.position(0);
-						dch.writeFile(buf, wb, 0, _do, true);
+						dch.writeFile(buf, wb, 0, _dstart, true);
 						ddf.writeCache();
 						ddf.unRegisterChannel(dch, -34);
 						sdf.unRegisterChannel(sch, -34);
@@ -131,7 +132,7 @@ public class CopyExtents {
 			}
 			root.setAttribute("written", Long.toString(written));
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error in copy extent", e);
+			SDFSLogger.getLog().error("error in copy extent src=" +srcfile + " dst=" +dstfile, e);
 			throw e;
 		} finally {
 		}

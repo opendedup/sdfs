@@ -292,19 +292,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} else {
 				this.buf = ByteBuffer.wrap(HCServiceProxy.fetchChunk(
 						this.ar.get(0).hash, this.ar.get(0).hashloc));
-				/*
-				 * if(SDFSLogger.isDebug()) { try { AbstractHashEngine eng =
-				 * HashFunctionPool.getHashEngine(); byte [] _hash =
-				 * eng.getHash(this.buf.array()); if(!Arrays.areEqual(_hash,
-				 * this.hash)) {
-				 * SDFSLogger.getLog().debug("data is not consistent _hash=" +
-				 * StringUtils.getHexString(_hash) + " and hash=" +
-				 * StringUtils.getHexString(this.hash)); }
-				 * 
-				 * } catch (Exception e) { // TODO Auto-generated catch block
-				 * SDFSLogger.getLog().error("error hashing in debug mode", e);
-				 * } }
-				 */
+				
 			}
 		}
 	}
@@ -404,7 +392,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} else {
 				
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-					SDFSLogger.getLog().warn("Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR);
+					SDFSLogger.getLog().debug("Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR + " at " + (this.getFilePosition() + pos) + " for file " + this.df.mf.getPath() );
 					this.writeBlock(b, pos);
 				}
 				else if (this.buf == null && ar.size() > 0 && this.reconstructed
@@ -723,26 +711,22 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public void close() throws IOException {
 		this.lock.lock();
 		try {
-
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog()
 							.debug("#### " + this.getFilePosition()
 									+ " not flushing ");
 			}
-
 			else if (this.closed) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							this.getFilePosition() + " already closed");
 			} else if (this.dirty || this.hlAdded) {
 				this.df.writeCache(this);
-				df.removeBufferFromFlush(this);
 				this.closed = true;
 				this.flushing = false;
 				this.dirty = false;
 				this.hlAdded = false;
-
 			} else {
 				this.closed = true;
 				this.flushing = false;

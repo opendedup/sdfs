@@ -19,24 +19,23 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.io.BufferClosedException;
-import org.opendedup.sdfs.io.DedupChunkInterface;
+import org.opendedup.sdfs.io.HashLocPair;
 
 public class BatchWriteHashCmd implements IOClientCmd {
-	List<DedupChunkInterface> chunks;
+	List<HashLocPair> chunks;
 	QuickList<HashChunk> hk;
 	boolean exists = false;
 	RequestOptions opts = null;
 	int sz = 0;
 
-	public BatchWriteHashCmd(List<DedupChunkInterface> chunks) {
+	public BatchWriteHashCmd(List<HashLocPair> chunks) {
 		this.chunks = chunks;
 		sz = chunks.size();
 		hk = new QuickList<HashChunk>(sz);
 		// long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
-			DedupChunkInterface buff = chunks.get(i);
-			byte[] hashloc = buff.getFingers().get(0).hashloc;
+			HashLocPair buff = chunks.get(i);
+			byte[] hashloc = buff.hashloc;
 			int ncopies = 0;
 			for (int z = 1; z < 8; z++) {
 				if (hashloc[z] > (byte) 0) {
@@ -44,15 +43,9 @@ public class BatchWriteHashCmd implements IOClientCmd {
 				}
 			}
 			if (ncopies == 0) {
-				// TODO Fix this!!!!!!
-				//buff.resetHashLoc();
-				try {
+				buff.resetHashLoc();
 					hk.add(i,
-							new HashChunk(buff.getFingers().get(0).hash, buff
-									.getFlushedBuffer(), false));
-				} catch (BufferClosedException e) {
-					hk.add(i, null);
-				}
+							new HashChunk(buff.hash, buff.data, false));
 			} else {
 				hk.add(i, null);
 			}
@@ -123,16 +116,15 @@ public class BatchWriteHashCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						//byte id = soc.serverState.get(rsp.getSender()).id;
+						byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
-								DedupChunkInterface buff = chunks.get(i);
-								if (doop)
-									buff.setDoop(1);
+								HashLocPair buff = chunks.get(i);
+								if(doop)
+								buff.hashloc[0]=1;
 								// TODO Fix this!!!!!!
-								//buff.addHashLoc(id);
-								buff.setBatchwritten(true);
+								buff.addHashLoc(id);
 								// proc++;
 							}
 						}
@@ -149,7 +141,7 @@ public class BatchWriteHashCmd implements IOClientCmd {
 		}
 	}
 
-	public List<DedupChunkInterface> getHashes() {
+	public List<HashLocPair> getHashes() {
 		return this.chunks;
 	}
 
