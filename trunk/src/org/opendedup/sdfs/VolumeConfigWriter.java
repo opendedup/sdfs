@@ -67,7 +67,6 @@ public class VolumeConfigWriter {
 	long chunk_store_allocation_size = 0;
 	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 59 23 * * ?";
-	String volume_list_file = "/etc/sdfs/volume-list.xml";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;

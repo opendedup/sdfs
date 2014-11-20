@@ -172,6 +172,12 @@ public class SparseDataChunk implements Externalizable {
 			l.unlock();
 		}
 	}
+	
+	public void setRecontructed(boolean reconstructed) {
+		if(reconstructed)
+			this.flags = RECONSTRUCTED;
+			
+	}
 
 	public byte[] getBytes() throws IOException {
 		l.lock();

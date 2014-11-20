@@ -1,19 +1,17 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.locks.Lock;
 
-import org.opendedup.collections.LongByteArrayMap;
+import java.io.IOException;
+import java.util.concurrent.locks.Lock;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -62,8 +60,6 @@ public class CopyExtents {
 			Lock l = ddf.getWriteLock();
 			l.lock();
 			try {
-				ddf.writeCache();
-				sdf.writeCache();
 				while (written < len) {
 					long _sstart = written + sstart;
 					long _dstart = written + dstart;
@@ -74,55 +70,28 @@ public class CopyExtents {
 					int _do = (int) (_dstart - _dpos);
 
 					SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
-					SparseDataChunk ddc = ddf.getSparseDataChunk(_dpos);
-					if (ddc.getFingers().size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-						SDFSLogger
-								.getLog()
-								.debug("SparseDataChunk array is larger that available capacity for " +  dstfile + " at " + _dstart);
-						DedupFileChannel dch = ddf.getChannel(-34);
-						DedupFileChannel sch = sdf.getChannel(-34);
-						int wb = 0;
-						if (_rem >= Main.CHUNK_LENGTH)
-							wb = Main.CHUNK_LENGTH;
-						else
-							wb = (int) _rem;
-						ByteBuffer buf = ByteBuffer.allocateDirect(wb);
-						sch.read(buf, 0, wb, _sstart);
-						buf.position(0);
-						dch.writeFile(buf, wb, 0, _dstart, true);
-						ddf.writeCache();
-						ddf.unRegisterChannel(dch, -34);
-						sdf.unRegisterChannel(sch, -34);
-						
-						written += wb;
-					} else {
-						HashLocPair p = sdc.getWL(_so);
-						p.hashloc[7]=1;
-						if (p.nlen > _rem) {
-							p.nlen = (int) _rem;
-							p.hashloc[7]=2;
-						}
-						p.pos = _do;
-						int ep = p.pos + p.nlen;
-						if (ep > Main.CHUNK_LENGTH) {
-							p.nlen = Main.CHUNK_LENGTH - p.pos;
-							p.hashloc[7]=3;
-						}
-						/*
-						 * SDFSLogger.getLog().info( "at pos=" + _dstart +
-						 * " putting " + p);
-						 */
-						ddc.putHash(p);
-						ddf.putSparseDataChunk(_dpos, ddc);
-						ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen,
-								true);
-						ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+					WritableCacheBuffer ddc = (WritableCacheBuffer) ddf
+							.getWriteBuffer(_dpos);
 
-						written += p.nlen;
+					HashLocPair p = sdc.getWL(_so);
+					p.hashloc[7] = 1;
+					if (p.nlen > _rem) {
+						p.nlen = (int) _rem;
+						p.hashloc[7] = 2;
 					}
+					p.pos = _do;
+					int ep = p.pos + p.nlen;
+					if (ep > Main.CHUNK_LENGTH) {
+						p.nlen = Main.CHUNK_LENGTH - p.pos;
+						p.hashloc[7] = 3;
+					}
+					ddc.copyExtent(p);
+					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+
+					written += p.nlen;
 
 				}
-				ddf.writeCache();
 			} finally {
 				long el = written + dstart;
 				if (el > dmf.length()) {
@@ -132,7 +101,9 @@ public class CopyExtents {
 			}
 			root.setAttribute("written", Long.toString(written));
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error in copy extent src=" +srcfile + " dst=" +dstfile, e);
+			SDFSLogger.getLog().error(
+					"error in copy extent src=" + srcfile + " dst=" + dstfile,
+					e);
 			throw e;
 		} finally {
 		}
