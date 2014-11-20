@@ -551,6 +551,7 @@ public class SparseDedupFile implements DedupFile {
 			if (this.bdb.getVersion() > 0) {
 				chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), false,
 						this.bdb.getVersion());
+				chunk.setRecontructed(chunk.isRecontructed());
 				// SDFSLogger.getLog().info("Hash Size =" + hash.length +
 				// " hashloc len = " + writeBuffer.getHashLoc().length);
 			} else {
