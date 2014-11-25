@@ -89,7 +89,6 @@ public class HCServiceProxy {
 			return hcService.processHashClaims(evt, bf);
 		else {
 			new ClaimHashesCmd(evt).executeCmd(cs);
-
 		}
 		return 0;
 	}
