@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -13,16 +14,15 @@ import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
-import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.HashLocPair;
 
 public class BatchHashExistsCmd implements IOClientCmd {
-	List<SparseDataChunk> hashes;
+	List<HashLocPair> hashes;
 	boolean exists = false;
 	RequestOptions opts = null;
 
-	public BatchHashExistsCmd(List<SparseDataChunk> hashes) {
+	public BatchHashExistsCmd(List<HashLocPair> hashes) {
 		this.hashes = hashes;
-
 	}
 
 	@Override
@@ -43,13 +43,10 @@ public class BatchHashExistsCmd implements IOClientCmd {
 			// List<Address> servers = soc.getServers();
 			RspList<Object> lst = soc.disp.castMessage(null, new Message(null,
 					null, buf.array()), opts);
-			for (int i = 0; i < hashes.size(); i++) {
-				//SparseDataChunk ck = hashes.get(i);
-				// TODO Fix this!!!!!!
-				/*
-				if (ck != null)
-					ck.resetHashLoc();
-					*/
+			for (HashLocPair p : hashes) {
+				
+				if (p != null)
+					p.resetHashLoc();
 			}
 			for (Rsp<Object> rsp : lst) {
 				if (rsp.hasException()) {
@@ -69,15 +66,12 @@ public class BatchHashExistsCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						//byte id = soc.serverState.get(rsp.getSender()).id;
+						byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							boolean exists = rst.get(i);
 							if (exists) {
-								// TODO Fix this!!!!!!
-								/*
-								if (hashes.get(i) != null)
+									if (hashes.get(i) != null)
 									this.hashes.get(i).addHashLoc(id);
-									*/
 							}
 						}
 					}
@@ -90,7 +84,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 		}
 	}
 
-	public List<SparseDataChunk> getHashes() {
+	public List<HashLocPair> getHashes() {
 		return this.hashes;
 	}
 

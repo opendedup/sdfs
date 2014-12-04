@@ -80,6 +80,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String version = Main.version;
 	private BlockDev blkdev = null;
 	private boolean dirty = false;
+	private long attributes = 0;
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -558,6 +559,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			_mf.group_id = this.group_id;
 			_mf.permissions = this.permissions;
 			_mf.dedup = this.dedup;
+			_mf.attributes = this.attributes;
 			this.getGUID();
 			if (!this.dedup) {
 				try {
@@ -1302,6 +1304,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					in.readFully(vb);
 					this.version = new String(vb);
 				} 
+				if (in.available() > 0) {
+					this.attributes = in.readLong();
+				} 
 				/*
 				if(in.available() > 0) {
 					int vlen = in.readInt();
@@ -1369,6 +1374,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			byte[] vb = this.version.getBytes();
 			out.writeInt(vb.length);
 			out.write(vb);
+			out.writeLong(attributes);
 			/*
 			if(this.backingFile == null)
 				out.writeInt(0);
@@ -1459,5 +1465,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public void setSymlinkPath(String symlinkPath, boolean propigateEvent) {
 		this.symlinkPath = symlinkPath;
+	}
+
+	public long getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(long attributes) {
+		this.attributes = attributes;
 	}
 }

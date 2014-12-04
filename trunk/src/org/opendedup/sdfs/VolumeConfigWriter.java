@@ -1,8 +1,8 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
-
 import java.io.IOException;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -539,6 +539,10 @@ public class VolumeConfigWriter {
 				Boolean.toString(clusterRackAware));
 		vol.setAttribute("read-timeout-seconds", Integer.toString(this.read_timeout));
 		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
+		int sn = new Random().nextInt();
+		if(sn < 0)
+			sn = sn *-1;
+		vol.setAttribute("serial-number", Integer.toString(sn));
 		root.appendChild(vol);
 
 		Element cs = xmldoc.createElement("local-chunkstore");

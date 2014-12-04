@@ -2,6 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.File;
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.LargeBloomFilter;
@@ -505,8 +505,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static List<SparseDataChunk> batchHashExists(
-			List<SparseDataChunk> hashes) throws IOException {
+	public static List<HashLocPair> batchHashExists(
+			List<HashLocPair> hashes) throws IOException {
 		if (Main.chunkStoreLocal) {
 			throw new IOException("not implemented for localstore");
 

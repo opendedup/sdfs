@@ -123,10 +123,13 @@ public class ClusterRedundancyCheck {
 
 	private int batchCheck(ArrayList<SparseDataChunk> chunks,
 			DataMapInterface mp) throws IOException, HashtableFullException {
-		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+		ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
+		for(SparseDataChunk ck : chunks) {
+			al.addAll(ck.getFingers());
+		}
+		List<HashLocPair> pchunks = HCServiceProxy.batchHashExists(al);
 		int corruptBlocks = 0;
-		for (SparseDataChunk ck : pchunks) {
-			HashLocPair p = ck.getFingers().get(0);
+		for (HashLocPair p : pchunks) {
 			byte[] exists = p.hashloc;
 			if (exists[0] == -1) {
 				if (SDFSLogger.isDebug())
@@ -165,12 +168,15 @@ public class ClusterRedundancyCheck {
 					if (!brequals(currenthl, exists)) {
 						p.hashloc = exists;
 					}
-					mp.put(ck.getFpos(), ck.getBytes());
 				} catch (IOException e) {
 					this.failedRendundantBlocks++;
 				}
 
 			}
+			for(SparseDataChunk ck : chunks) {
+				mp.put(ck.getFpos(), ck.getBytes());
+			}
+			
 		}
 		return corruptBlocks;
 	}

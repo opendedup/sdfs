@@ -148,12 +148,11 @@ public class FFDisk {
 		}
 	}
 
-	private int batchCheck(ArrayList<SparseDataChunk> chunks)
+	private int batchCheck(ArrayList<HashLocPair> chunks)
 			throws IOException {
-		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+		List<HashLocPair> pchunks = HCServiceProxy.batchHashExists(chunks);
 		int corruptBlocks = 0;
-		for (SparseDataChunk ck : pchunks) {
-			for (HashLocPair p : ck.getFingers()) {
+		for (HashLocPair p : pchunks) {
 			byte[] exists = p.hashloc;
 			if (exists[0] == -1) {
 				if (SDFSLogger.isDebug())
@@ -161,7 +160,6 @@ public class FFDisk {
 							"could not find "
 									+ StringUtils.getHexString(p.hash));
 				corruptBlocks++;
-			}
 			}
 		}
 		return corruptBlocks;
@@ -182,7 +180,7 @@ public class FFDisk {
 					+ guid + ".map");
 			mp = new LongByteArrayMap(dbf.getPath());
 			long prevpos = 0;
-			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(
+			ArrayList<HashLocPair> chunks = new ArrayList<HashLocPair>(
 					MAX_BATCH_SIZE);
 			byte[] val = new byte[0];
 			mp.iterInit();
@@ -223,10 +221,10 @@ public class FFDisk {
 								}
 							}
 						} else {
-							chunks.add(ck);
+							chunks.addAll(ck.getFingers());
 							if (chunks.size() >= MAX_BATCH_SIZE) {
 								corruptBlocks += batchCheck(chunks);
-								chunks = new ArrayList<SparseDataChunk>(
+								chunks = new ArrayList<HashLocPair>(
 										MAX_BATCH_SIZE);
 							}
 						}

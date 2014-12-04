@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -63,13 +64,13 @@ public class Volume implements java.io.Serializable {
 	public Address host = null;
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
+	private int serialNumber = 0;
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
 	public transient VolumeSocket soc = null;
 	private ReentrantLock devLock = new ReentrantLock();
-	
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -104,16 +105,16 @@ public class Volume implements java.io.Serializable {
 	public void closeAllDevices() {
 		SDFSLogger.getLog().warn("Closing all devices");
 		devLock.lock();
-		try{
-		for (BlockDev dev : devices) {
-			try {
-				SDFSLogger.getLog().warn("Closing " + dev.devName);
-				dev.stopDev();
-				SDFSLogger.getLog().warn("Closed " + dev.devName);
-			} catch (Exception e) {
+		try {
+			for (BlockDev dev : devices) {
+				try {
+					SDFSLogger.getLog().warn("Closing " + dev.devName);
+					dev.stopDev();
+					SDFSLogger.getLog().warn("Closed " + dev.devName);
+				} catch (Exception e) {
 
+				}
 			}
-		}
 		} finally {
 			devLock.unlock();
 		}
@@ -121,13 +122,15 @@ public class Volume implements java.io.Serializable {
 
 	private void startAllOnStartupDevices() {
 		devLock.lock();
-		try{
+		try {
 			for (BlockDev dev : devices) {
 				try {
 					if (dev.startOnInit)
 						this.startDev(dev.devName);
 				} catch (Exception e) {
-					SDFSLogger.getLog().error("unable to start block device [" + dev.devName + "]",e);
+					SDFSLogger.getLog().error(
+							"unable to start block device [" + dev.devName
+									+ "]", e);
 				}
 			}
 		} finally {
@@ -173,11 +176,13 @@ public class Volume implements java.io.Serializable {
 			this.name = vol.getAttribute("name");
 		else
 			this.name = pathF.getParentFile().getName();
-		if(vol.hasAttribute("read-timeout-seconds"))
-			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
-		if(vol.hasAttribute("write-timeout-seconds"))
-			Main.writeTimeoutSeconds = Integer.parseInt(vol.getAttribute("write-timeout-seconds"));
-		if(vol.hasAttribute("sync-files"))
+		if (vol.hasAttribute("read-timeout-seconds"))
+			Main.readTimeoutSeconds = Integer.parseInt(vol
+					.getAttribute("read-timeout-seconds"));
+		if (vol.hasAttribute("write-timeout-seconds"))
+			Main.writeTimeoutSeconds = Integer.parseInt(vol
+					.getAttribute("write-timeout-seconds"));
+		if (vol.hasAttribute("sync-files"))
 			Main.syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
 		if (vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol
@@ -207,6 +212,15 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
+		if (vol.hasAttribute("serial-number"))
+			this.serialNumber = Integer.getInteger(vol
+					.getAttribute("serial-number"));
+		else {
+			int sn = new Random().nextInt();
+			if (sn < 0)
+				sn = sn * -1;
+			this.serialNumber = sn;
+		}
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));
@@ -219,7 +233,7 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("closed-gracefully")) {
 			Main.closedGracefully = Boolean.parseBoolean(vol
 					.getAttribute("closed-gracefully"));
-			if(!Main.closedGracefully)
+			if (!Main.closedGracefully)
 				Main.runConsistancyCheck = true;
 		}
 		if (vol.hasAttribute("allow-external-links"))
@@ -275,7 +289,7 @@ public class Volume implements java.io.Serializable {
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {
 		devLock.lock();
-		try{
+		try {
 			long sz = 0;
 			for (BlockDev _dev : this.devices) {
 				if (dev.devName.equalsIgnoreCase(_dev.devName))
@@ -311,7 +325,7 @@ public class Volume implements java.io.Serializable {
 	public synchronized BlockDev removeBlockDev(String devName)
 			throws Exception {
 		devLock.lock();
-		try{
+		try {
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
 					try {
@@ -336,7 +350,7 @@ public class Volume implements java.io.Serializable {
 
 	public synchronized BlockDev getBlockDev(String devName) throws IOException {
 		devLock.lock();
-		try{
+		try {
 			for (BlockDev _dev : this.devices) {
 				if (_dev.devName.equalsIgnoreCase(devName)) {
 					return _dev;
@@ -532,6 +546,7 @@ public class Volume implements java.io.Serializable {
 				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
+		root.setAttribute("serial-number", Integer.toString(this.serialNumber));
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
@@ -546,11 +561,15 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
-		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
-		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("read-timeout-seconds",
+				Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds",
+				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
-		root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
-		root.setAttribute("dse-size", Long.toString(HCServiceProxy.getDSESize()));
+		root.setAttribute("dse-comp-size",
+				Long.toString(HCServiceProxy.getDSECompressedSize()));
+		root.setAttribute("dse-size",
+				Long.toString(HCServiceProxy.getDSESize()));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
@@ -575,6 +594,7 @@ public class Volume implements java.io.Serializable {
 				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
+		root.setAttribute("serial-number", Integer.toString(this.serialNumber));
 		root.setAttribute("name", this.name);
 		root.setAttribute("dse-size",
 				Long.toString(HCServiceProxy.getDSESize()));
@@ -596,8 +616,10 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
-		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
-		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("read-timeout-seconds",
+				Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds",
+				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
@@ -672,5 +694,13 @@ public class Volume implements java.io.Serializable {
 
 	public void setClusterRackAware(boolean clusterRackAware) {
 		this.clusterRackAware = clusterRackAware;
+	}
+
+	public int getSerialNumber() {
+		return serialNumber;
+	}
+
+	public void setSerialNumber(int serialNumber) {
+		this.serialNumber = serialNumber;
 	}
 }
