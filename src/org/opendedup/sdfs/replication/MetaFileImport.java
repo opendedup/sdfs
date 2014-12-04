@@ -116,17 +116,16 @@ public class MetaFileImport implements Serializable {
 		return this.corruption;
 	}
 
-	private boolean batchCheck(ArrayList<SparseDataChunk> chunks,
+	private boolean batchCheck(ArrayList<HashLocPair> chunks,
 			MetaDataDedupFile mf) throws IOException {
-		List<SparseDataChunk> pchunks = HCServiceProxy.batchHashExists(chunks);
+		List<HashLocPair> pchunks = HCServiceProxy.batchHashExists(chunks);
 		if (pchunks.size() != chunks.size()) {
 			SDFSLogger.getLog().warn(
 					"requested " + chunks.size() + " but received "
 							+ pchunks.size());
 		}
 		boolean corruption = false;
-		for (SparseDataChunk ck : pchunks) {
-			for(HashLocPair p : ck.getFingers()) {
+			for(HashLocPair p : chunks) {
 			byte[] eb = p.hashloc;
 			boolean exists = false;
 			if (eb[0] == 1)
@@ -164,7 +163,6 @@ public class MetaFileImport implements Serializable {
 				}
 			}
 			}
-		}
 		return corruption;
 	}
 
@@ -173,7 +171,7 @@ public class MetaFileImport implements Serializable {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
-		ArrayList<SparseDataChunk> bh = new ArrayList<SparseDataChunk>(
+		ArrayList<HashLocPair> bh = new ArrayList<HashLocPair>(
 				MAX_BATCHHASH_SIZE);
 		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
@@ -268,12 +266,12 @@ public class MetaFileImport implements Serializable {
 								}
 							}
 						} else {
-							bh.add(ck);
+							bh.addAll(ck.getFingers());
 							if (bh.size() >= MAX_BATCHHASH_SIZE) {
 								boolean cp = batchCheck(bh, mf);
 								if (cp)
 									corruption = true;
-								bh = new ArrayList<SparseDataChunk>(
+								bh = new ArrayList<HashLocPair>(
 										MAX_BATCHHASH_SIZE);
 							}
 

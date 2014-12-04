@@ -123,7 +123,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		this.length = dk.getLength();
 		this.newChunk = dk.isNewChunk();
 		this.prevDoop = dk.getPrevDoop();
-		
+
 		this.reconstructed = dk.getReconstructed();
 		this.ar = dk.getFingers();
 		this.df = (SparseDedupFile) df;
@@ -273,18 +273,31 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							+ l.getDNEX() + " errors found");
 				hcb.position(0);
 				for (Shard sh : cks) {
-					try {
-						hcb.position(sh.pos);
-						hcb.put(sh.ck, sh.offset, sh.nlen);
-					} catch (Exception e) {
-						SDFSLogger.getLog().error(
-								"pos = " + this.position + " ck nlen="
-										+ sh.nlen + " ck offset=" + sh.offset
-										+ " ck len=" + sh.ck.length
-										+ " hcb pos=" + hcb.position()
-										+ " ck slen=" + sh.len + " len="
-										+ (hcb.capacity()));
-						throw new IOException(e);
+					if (sh.pos == -1) {
+						try {
+							hcb.put(sh.ck);
+						} catch (Exception e) {
+							// SDFSLogger.getLog().info("pos = " + this.position
+							// + "ck sz=" + sh.ck.length + " hcb sz=" +
+							// hcb.position() + " cks sz=" +cks.size() + " len="
+							// + (hcb.position() +sh.ck.length));
+							throw new IOException(e);
+						}
+					} else {
+						try {
+							hcb.position(sh.pos);
+							hcb.put(sh.ck, sh.offset, sh.nlen);
+						} catch (Exception e) {
+							SDFSLogger.getLog().error(
+									"pos = " + this.position + " ck nlen="
+											+ sh.nlen + " ck offset="
+											+ sh.offset + " ck len="
+											+ sh.ck.length + " hcb pos="
+											+ hcb.position() + " ck slen="
+											+ sh.len + " len="
+											+ (hcb.capacity()));
+							throw new IOException(e);
+						}
 					}
 				}
 				this.buf = ByteBuffer.wrap(hcb.array());
@@ -389,10 +402,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.buf = ByteBuffer.wrap(b);
 				this.setDirty(true);
 			} else {
-				
 
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-					
+
 					this.writeBlock(b, pos);
 					this.ar = new ArrayList<HashLocPair>();
 				} else if (this.buf == null && this.reconstructed
@@ -417,7 +429,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							df.mf.getIOMonitor().addVirtualBytesWritten(
 									b.length, true);
 							df.mf.getIOMonitor().addActualBytesWritten(
-									b.length - dups, true);	
+									b.length - dups, true);
 							df.mf.getIOMonitor().addDulicateData(dups, true);
 							this.prevDoop += dups;
 							SparseDataChunk.insertHashLocPair(ar, p);
@@ -473,7 +485,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			throw new BufferClosedException("Buffer Flushing");
 		this.lock.lock();
 		try {
-			if(!this.isDirty() && this.buf != null) {
+			if (!this.isDirty() && this.buf != null) {
 				this.buf = null;
 			}
 			if (this.buf != null
@@ -486,12 +498,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 									+ " for file " + this.df.mf.getPath());
 				byte[] b = HCServiceProxy.fetchChunk(p.hash, p.hashloc);
 				ByteBuffer bf = ByteBuffer.wrap(b);
-				byte [] z = new byte[p.nlen];
+				byte[] z = new byte[p.nlen];
 				bf.position(p.offset);
 				bf.get(z);
-				this.writeBlock(
-						z,
-						p.pos);
+				this.writeBlock(z, p.pos);
 			} else {
 				try {
 					this.reconstructed = true;
@@ -1046,12 +1056,22 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		@Override
 		public void run() {
-			try {
-				this.ck = Arrays.copyOf(
-						HCServiceProxy.fetchChunk(hash, hashloc), len);
-				l.commandResponse(this);
-			} catch (Exception e) {
-				l.commandException(e);
+			if (pos == -1) {
+				try {
+					this.ck = HCServiceProxy.fetchChunk(hash, hashloc);
+					l.commandResponse(this);
+				} catch (Exception e) {
+					l.commandException(e);
+				}
+			} else {
+				try {
+
+					this.ck = Arrays.copyOf(
+							HCServiceProxy.fetchChunk(hash, hashloc), len);
+					l.commandResponse(this);
+				} catch (Exception e) {
+					l.commandException(e);
+				}
 			}
 		}
 	}

@@ -37,7 +37,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.filestore.HashChunk;
-import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -218,7 +218,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			case NetworkCMDS.BATCH_HASH_EXISTS_CMD: {
 				byte[] arb = new byte[buf.getInt()];
 				buf.get(arb);
-				List<SparseDataChunk> chunks = (List<SparseDataChunk>) Util
+				List<HashLocPair> chunks = (List<HashLocPair>) Util
 						.objectFromByteBuffer(arb);
 				QuickList<Boolean> rsults = new QuickList<Boolean>(
 						chunks.size());
@@ -226,7 +226,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					try {
 						if (chunks.get(i) != null)
 							rsults.add(i, Boolean.valueOf(HCServiceProxy
-									.hashExists(chunks.get(i).getFingers().get(0).hash)));
+									.hashExists(chunks.get(i).hash)));
 						else
 							rsults.add(i, Boolean.valueOf(false));
 					} catch (Exception e) {

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -27,6 +28,7 @@ public class SparseDataChunk implements Externalizable {
 	public static final int RECONSTRUCTED = 1; // 0001
 	private byte version = 0;
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
+	private static final byte[] hlf = new byte[HashFunctionPool.hashLength];
 
 	public SparseDataChunk() {
 
@@ -65,7 +67,27 @@ public class SparseDataChunk implements Externalizable {
 			p.nlen = p.len;
 			p.offset = 0;
 			ar.add(p);
+		} else if (version == 1) {
+			this.doop = buf.getInt();
+			ar = new ArrayList<HashLocPair>();
+			for (int i = 0; i < HashFunctionPool.max_hash_cluster; i++) {
+				byte[] hash = new byte[HashFunctionPool.hashLength];
+				buf.get(hash);
+				if (!Arrays.areEqual(hash, hlf)) {
+					HashLocPair p = new HashLocPair();
+					p.hash = hash;
+					p.pos = -1;
+					ar.add(p);
+				}
+			}
+			for (HashLocPair p : ar) {
+				byte[] b = new byte[8];
+				buf.get(b);
+				p.hashloc = b;
+			}
+
 		} else {
+
 			this.flags = buf.get();
 			buf.getInt();
 			int zlen = buf.getInt();
@@ -212,6 +234,18 @@ public class SparseDataChunk implements Externalizable {
 				buf.put((byte) 0);
 				buf.put(ar.get(0).hashloc);
 				return buf.array();
+			} else if (this.version == 1) {
+				ByteBuffer buf = ByteBuffer
+						.wrap(new byte[LongByteArrayMap._v1arrayLength]);
+				buf.putInt(doop);
+				for (HashLocPair p : ar) {
+					buf.put(p.hash);
+				}
+				for (HashLocPair p : ar) {
+					buf.put(p.hashloc);
+				}
+				return buf.array();
+
 			} else {
 				ByteBuffer buf = null;
 				buf = ByteBuffer.wrap(new byte[1 + 4 + 4 + 4

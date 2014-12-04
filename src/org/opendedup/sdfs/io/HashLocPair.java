@@ -1,6 +1,9 @@
 package org.opendedup.sdfs.io;
 
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -9,7 +12,7 @@ import org.opendedup.rabin.utils.StringUtils;
 
 import com.google.common.collect.Range;
 
-public class HashLocPair implements Comparable<HashLocPair> {
+public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public static final int BAL = HashFunctionPool.hashLength + 8 + 4 + 4 + 4
 			+ 4;
 	public byte[] hash;
@@ -109,6 +112,29 @@ public class HashLocPair implements Comparable<HashLocPair> {
 		return "pos=" + pos + " len=" + len + " offset=" + offset + " nlen="
 				+ nlen + " ep=" + (pos + nlen) + " hash="
 				+ StringUtils.getHexString(hash) + " hashlocs=" + hashlocs;
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		in.readInt();
+		this.hash = new byte[in.readInt()];
+		in.read(this.hash);
+		this.hashloc = new byte[8];
+		in.read(this.hashloc);
+		
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		ByteBuffer bf = ByteBuffer.wrap(new byte[4+this.hash.length+this.hashloc.length]);
+		bf.putInt(this.hash.length);
+		bf.put(hash);
+		bf.put(hashloc);
+		byte[] b = bf.array();
+		out.writeInt(b.length);
+		out.write(b);
+		
 	}
 
 }
