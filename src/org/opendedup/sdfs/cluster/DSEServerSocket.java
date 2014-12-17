@@ -32,6 +32,7 @@ import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.collections.QuickList;
+import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
@@ -39,12 +40,16 @@ import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.Volume;
+import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.FindOpenPort;
+import org.opendedup.util.LBF;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
 
+import com.google.common.hash.BloomFilter;
 
 public class DSEServerSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -67,7 +72,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	final HashMap<String, Volume> volumes = new HashMap<String, Volume>();
 	LockService lock_service = null;
 	private boolean peermaster = false;
-	public final ReentrantLock gcUpdateLock = new ReentrantLock();
+	private final ReentrantLock gcUpdateLock = new ReentrantLock();
+	LBF[] lbf = null;
 
 	public DSEServerSocket(String config, String clusterID, byte id,
 			ArrayList<String> remoteVolumes) throws Exception {
@@ -238,6 +244,22 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				rtrn = rsults;
 				break;
 			}
+			case NetworkCMDS.RUN_FDISK: {
+				SDFSEvent evt = SDFSEvent
+						.gcInfoEvent("Initiate BoomFilter for " + msg.getSrc()
+								+ " @ " + this.channel.getName());
+				this.gcUpdateLock.lock();
+				try {
+					this.lbf = new LargeBloomFilter(buf.getLong(), .10)
+							.getArray();
+				} finally {
+					gcUpdateLock.unlock();
+				}
+				evt.endEvent("Created BoomFilter for " + msg.getSrc() + " @ "
+						+ this.channel.getName());
+				rtrn = evt;
+				break;
+			}
 			case NetworkCMDS.BATCH_WRITE_HASH_CMD: {
 				// long tm = System.currentTimeMillis();
 				byte[] arb = new byte[buf.getInt()];
@@ -286,7 +308,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] chunkBytes = new byte[len];
 				buf.get(chunkBytes);
 				boolean dup = false;
-				byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes,  true);
+				byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, true);
 				if (b[0] == 1)
 					dup = true;
 				// SDFSLogger.getLog().debug("Writing " +
@@ -321,18 +343,36 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				rtrn = evt;
 				break;
 			}
+			case NetworkCMDS.SEND_BF: {
+				int id = buf.getInt();
+				byte[] ob = new byte[buf.getInt()];
+				int ucl = buf.getInt();
+				buf.get(ob);
+				ob = CompressionUtils.decompressLz4(ob, ucl);
+				BloomFilter<KeyBlob> bfs = BloomFilter.readFrom(new ByteArrayInputStream(ob), LBF.getFunnel());
+				this.gcUpdateLock.lock();
+				try {
+					lbf[id].putAll(new LBF(bfs));
+				} finally {
+					this.gcUpdateLock.unlock();
+				}
+				break;
+			}
 			case NetworkCMDS.RUN_CLAIMBF: {
 				byte[] ob = new byte[buf.getInt()];
 				buf.get(ob);
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
-				byte[] bb = new byte[buf.getInt()];
-				buf.get(bb);
-				LargeBloomFilter bf = (LargeBloomFilter) Util
-						.objectFromByteBuffer(bb);
-				HCServiceProxy.processHashClaims(evt, bf);
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"sending back bloom claim chunks cmd");
+				this.gcUpdateLock.lock();
+				try {
+					LargeBloomFilter bf = new LargeBloomFilter(lbf);
+					HCServiceProxy.processHashClaims(evt, bf);
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug(
+								"sending back bloom claim chunks cmd");
+				} finally {
+					lbf = null;
+					this.gcUpdateLock.unlock();
+				}
 				rtrn = evt;
 				break;
 			}
@@ -351,7 +391,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					force = true;
 				byte[] ob = new byte[buf.getInt()];
 				buf.get(ob);
-				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
+				FDiskEvent evt = (FDiskEvent) Util.objectFromByteBuffer(ob);
 				HCServiceProxy.removeStailHashes(ms, force, evt);
 				rtrn = evt;
 				break;

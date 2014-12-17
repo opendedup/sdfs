@@ -26,7 +26,7 @@ public class ClusteredPFullGC implements GCControllerImpl {
 			task.longMsg = "Running Garbage Collection because percentage full is "
 					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
-				ManualGC.clearChunks(1);
+				ManualGC.clearChunks();
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				SDFSLogger.getLog()

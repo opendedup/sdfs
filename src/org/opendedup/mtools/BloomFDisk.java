@@ -14,12 +14,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
+import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
@@ -30,8 +30,7 @@ import com.google.common.hash.PrimitiveSink;
 
 public class BloomFDisk {
 	private AtomicLong files = new AtomicLong(0);
-	private SDFSEvent fEvt = null;
-	private AtomicLong entries = new AtomicLong(0);
+	private FDiskEvent fEvt = null;
 	transient LargeBloomFilter bf = null;
 	private boolean failed = false;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
@@ -42,10 +41,15 @@ public class BloomFDisk {
 			executionHandler);
 	
 	public BloomFDisk(SDFSEvent evt) throws FDiskException {
-		init(evt);
+		long entries = HCServiceProxy.getSize();
+		init(evt,entries);
+	}
+	
+	public BloomFDisk(SDFSEvent evt,long entries) throws FDiskException {
+		init(evt,entries);
 	}
 
-	private void init(SDFSEvent evt) throws FDiskException {
+	private void init(SDFSEvent evt, long entries) throws FDiskException {
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
 			SDFSEvent
@@ -64,13 +68,9 @@ public class BloomFDisk {
 					evt);
 			fEvt.maxCt = sz;
 			
-			if(Main.chunkStoreLocal)
-				this.entries = new AtomicLong(HCServiceProxy.getSize());
-			else
-				this.entries = new AtomicLong(Main.volume.getActualWriteBytes()
-						/ HashFunctionPool.avg_page_size);
-			SDFSLogger.getLog().info("entries = " + this.entries.get());
-			bf = new LargeBloomFilter( this.entries.get(), .10);
+
+			SDFSLogger.getLog().info("entries = " + entries);
+			this.bf = new LargeBloomFilter(entries, .10);
 			SDFSLogger.getLog().info(
 					"Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
@@ -179,7 +179,6 @@ public class BloomFDisk {
 		public void run() {
 				fd.checkDedupFile(f);
 		}
-		
 	}
 	
 	private final static class ProcessPriorityThreadFactory implements ThreadFactory {

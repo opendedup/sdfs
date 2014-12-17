@@ -207,7 +207,7 @@ public class SDFSCmds {
 					SDFSLogger.getLog().debug(
 							"Clearing store of data older that [" + minutes
 									+ "]");
-					ManualGC.clearChunks(minutes);
+					ManualGC.clearChunks();
 				} catch (Exception e) {
 					status = "command failed : " + e.getMessage();
 				}

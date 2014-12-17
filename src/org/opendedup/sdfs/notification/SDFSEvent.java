@@ -314,14 +314,14 @@ public class SDFSEvent implements java.io.Serializable {
 		return event;
 	}
 
-	public static SDFSEvent fdiskInfoEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg, RUNNING);
+	public static FDiskEvent fdiskInfoEvent(String shortMsg) {
+		FDiskEvent event = new FDiskEvent(shortMsg);
 		
 		return event;
 	}
 	
-	public static SDFSEvent fdiskInfoEvent(String shortMsg, SDFSEvent evt) {
-		SDFSEvent event = new SDFSEvent(FDISK, getTarget(), shortMsg, RUNNING);
+	public static FDiskEvent fdiskInfoEvent(String shortMsg, SDFSEvent evt) {
+		FDiskEvent event = new FDiskEvent(shortMsg);
 		try {
 			evt.addChild(event);
 		} catch (Exception e) {

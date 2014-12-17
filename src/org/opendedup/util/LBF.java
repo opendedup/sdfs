@@ -1,5 +1,6 @@
 package org.opendedup.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,14 +13,35 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 
 import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.PrimitiveSink;
 
 public class LBF implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public transient BloomFilter<KeyBlob> bfs = null;
 	public transient ReentrantLock l = new ReentrantLock();
+	private static Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
-	LBF(BloomFilter<KeyBlob> bf) {
-		this.bfs = bf;
+		/**
+		 * 
+		 */
+
+		@Override
+		public void funnel(KeyBlob key, PrimitiveSink into) {
+			into.putBytes(key.key);
+		}
+	};
+
+	public LBF(int sz,double fpp) {
+		this.bfs = BloomFilter.create(getFunnel(), sz,fpp);
+	}
+	
+	public LBF(BloomFilter<KeyBlob> bfs) {
+		this.bfs = bfs;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,6 +75,10 @@ public class LBF implements Serializable {
 		}
 	}
 	
+	public void putAll(LBF that) {
+		bfs.putAll(that.bfs);
+	}
+	
 	public void save(File f) throws IOException {
 		FileOutputStream fout = new FileOutputStream(f);
 		ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -62,5 +88,16 @@ public class LBF implements Serializable {
 		fout.flush();
 		fout.close();
 	}
-
+	
+	public byte [] getBytes() throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		this.bfs.writeTo(baos);
+		return baos.toByteArray();
+	}
+	
+	public static Funnel<KeyBlob> getFunnel() {
+		
+		return kbFunnel;
+	}
+ 
 }

@@ -71,7 +71,7 @@ public class DSECompaction {
 		SDFSLogger.infoConsoleMsg("Step 1 of 3 - Running Garbage Collection");
 		long z = 0;
 		try {
-			z = ManualGC.clearChunks(1);
+			z = ManualGC.clearChunks();
 		} catch (InterruptedException e1) {
 			SDFSLogger.infoConsoleMsg("Unable to finish becasue interrupted");
 			System.exit(-1);

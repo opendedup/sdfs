@@ -1,13 +1,12 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
-
-import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -15,12 +14,12 @@ public class ManualGC {
 
 	public static SDFSEvent evt = null;
 
-	public static long clearChunks(int minutes) throws InterruptedException,
+	public static long clearChunks() throws InterruptedException,
 			IOException {
-		return clearChunksMills((long) minutes * 60 * 1000);
+		return clearChunksMills();
 	}
 
-	public static synchronized long clearChunksMills(long milliseconds)
+	public static synchronized long clearChunksMills()
 			throws InterruptedException, IOException {
 		Lock l = null;
 		if (Main.chunkStoreLocal) {
@@ -44,7 +43,7 @@ public class ManualGC {
 			evt.maxCt = 100;
 			evt.curCt = 0;
 			try {
-				runGC(milliseconds);
+				runGC();
 			} catch (IOException e) {
 				if (!Main.firstRun)
 					throw e;
@@ -65,7 +64,7 @@ public class ManualGC {
 				}
 				wevt.endEvent("Done Waiting");
 				try {
-					rm = rm + runGC(10 * 1000);
+					rm = rm + runGC();
 				} finally {
 					try {
 						Main.pFullSched.recalcScheduler();
@@ -82,9 +81,8 @@ public class ManualGC {
 		}
 	}
 
-	private static long runGC(long milliseconds) throws IOException {
+	private static long runGC() throws IOException {
 		long rm = 0;
-		long tm = System.currentTimeMillis();
 		try {
 
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
@@ -93,9 +91,10 @@ public class ManualGC {
 				rm = HCServiceProxy.processHashClaims(evt,fd.getResults());
 				evt.curCt = 66;
 			} else {
-				HCServiceProxy.runFDisk(evt);
+				FDiskEvent fevt = SDFSEvent.fdiskInfoEvent("running distributed fdisk", evt);
+				HCServiceProxy.runFDisk(fevt);
 				evt.curCt = 33;
-				HCServiceProxy.processHashClaims(evt);
+				HCServiceProxy.processHashClaims(evt,null);
 				evt.curCt = 66;
 			}
 
@@ -106,19 +105,6 @@ public class ManualGC {
 					SDFSEvent.ERROR);
 			evt.success = false;
 			throw new IOException(e);
-		}
-		try {
-			if (Main.chunkStoreLocal && Main.volume.getName() == null) {
-			long dur = System.currentTimeMillis() - tm;
-			long nmc = dur + milliseconds;
-			SDFSLogger.getLog().debug(
-					"Will Request cluster remove data  not claimed since "
-							+ new Date(System.currentTimeMillis() - nmc));
-			rm = HCServiceProxy.removeStailHashes(dur + milliseconds, false,
-					evt);
-			}
-		} finally {
-
 		}
 		return rm;
 	}
