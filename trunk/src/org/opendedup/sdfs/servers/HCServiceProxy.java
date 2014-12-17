@@ -1,8 +1,6 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
-
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
+import org.opendedup.sdfs.cluster.cmds.BFClaimHashesCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchHashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.BatchWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
@@ -33,6 +32,7 @@ import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
+import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.LargeBloomFilter;
 
@@ -88,7 +88,7 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal)
 			return hcService.processHashClaims(evt, bf);
 		else {
-			new ClaimHashesCmd(evt).executeCmd(cs);
+			new BFClaimHashesCmd(evt).executeCmd(cs);
 		}
 		return 0;
 	}
@@ -103,7 +103,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized long removeStailHashes(long ms,
-			boolean forceRun, SDFSEvent evt) throws IOException {
+			boolean forceRun, FDiskEvent evt) throws IOException {
 		if (Main.chunkStoreLocal) {
 			long tm = System.currentTimeMillis() - ms;
 			return hcService.removeStailHashes(tm, forceRun, evt);
@@ -220,7 +220,10 @@ public class HCServiceProxy {
 	}
 
 	public static AbstractChunkStore getChunkStore() {
-		return hcService.getChuckStore();
+		if(Main.chunkStoreLocal)
+			return hcService.getChuckStore();
+		else
+			return null;
 	}
 
 	public static int getPageSize() {
@@ -461,18 +464,14 @@ public class HCServiceProxy {
 		return b;
 	}
 
-	public static void runFDisk(SDFSEvent evt) throws FDiskException,
+	public static void runFDisk(FDiskEvent evt) throws FDiskException,
 			IOException {
 		if (Main.chunkStoreLocal)
 			new FDisk(evt);
 		else {
-			FDiskCmd cmd = new FDiskCmd();
+			long sz = HCServiceProxy.getSize();
+			FDiskCmd cmd = new FDiskCmd(sz,evt);
 			cmd.executeCmd(cs);
-			List<SDFSEvent> events = cmd.getResults();
-			for (SDFSEvent event : events) {
-				evt.addChild(event.getChildren().get(0));
-			}
-
 		}
 	}
 

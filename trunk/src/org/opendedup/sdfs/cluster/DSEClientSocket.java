@@ -34,18 +34,20 @@ import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
 import org.opendedup.sdfs.cluster.cmds.FindGCMasterCmd;
 import org.opendedup.sdfs.cluster.cmds.ListVolsCmd;
 import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
+import org.opendedup.sdfs.cluster.cmds.SendBloomFilterCmd;
 import org.opendedup.sdfs.cluster.cmds.SetGCScheduleCmd;
 import org.opendedup.sdfs.cluster.cmds.StopGCMasterCmd;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.LBF;
 
 public class DSEClientSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -277,8 +279,13 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			SDFSEvent evt = SDFSEvent
 					.gcInfoEvent("Remote SDFS Volume Cleanup Initiated by "
 							+ msg.getSrc() + " for " + Main.volume.getName());
-			new FDisk(evt);
-			rtrn = evt;
+			BloomFDisk fd = new BloomFDisk(evt,buf.getLong());
+			LBF[] lbfs = fd.getResults().getArray();
+			for(int i = 0; i < lbfs.length;i++) {
+				SendBloomFilterCmd sbf = new SendBloomFilterCmd(i,lbfs[i]);
+				sbf.executeCmd(this);
+			}
+			rtrn = evt.getChildren().get(0);
 			break;
 		}
 		case NetworkCMDS.LIST_VOLUMES: {

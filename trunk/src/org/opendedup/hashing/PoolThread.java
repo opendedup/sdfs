@@ -1,7 +1,7 @@
 package org.opendedup.hashing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,7 +11,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -54,8 +53,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							}
 						}
 					} else {
-						QuickList<SparseDataChunk> cks = new QuickList<SparseDataChunk>(
-								maxTasks);
+
 						if (HashFunctionPool.max_hash_cluster == 1) {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer runnable = tasks.get(i);
@@ -75,17 +73,14 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.len = b.length;
 									p.hashloc = new byte[8];
 									p.hash = hash;
+									p.data = b;
 									ar.add(p);
-									SparseDataChunk ck = new SparseDataChunk(0,
-											ar, false, (byte) 2);
-
-									cks.add(i, ck);
+									runnable.setAR(ar);
 								} catch (BufferClosedException e) {
-									cks.add(i, null);
+									
 								} finally {
 									SparseDedupFile.hashPool.returnObject(hc);
 								}
-
 							}
 						} else {
 							for (int i = 0; i < ts; i++) {
@@ -104,6 +99,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.len = f.len;
 									p.offset = 0;
 									p.nlen = f.len;
+									p.data = f.chunk;
 									p.pos = _pos;
 									_pos += f.chunk.length;
 									ar.add(p);
@@ -112,31 +108,28 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							}
 						}
 						ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
-						for (SparseDataChunk ck : cks) {
-							al.addAll(ck.getFingers());
+						
+						for(int i = 0; i < tasks.size();i++) {
+							WritableCacheBuffer ck = tasks.get(i);
+							if(ck == null)
+								break;
+							else
+								al.addAll(ck.getFingers());
 						}
+						
 						HCServiceProxy.batchHashExists(al);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
-							SparseDataChunk ck = cks.get(i);
-							if (ck != null) {
-								HashLocPair p = ck.getFingers().get(0);
-								HashLocPair lp = runnable.getFingers().get(0);
-								if (Arrays.equals(lp.hash, p.hash)) {
-									runnable.getFingers().set(0, p);
+							if (runnable != null) {
+
 									try {
 										runnable.endClose();
 									} catch (Exception e) {
 										SDFSLogger.getLog().warn(
 												"unable to close block", e);
 									}
-								} else {
-									SDFSLogger.getLog().fatal(
-											"there is a hash mismatch!");
-								}
 							}
 						}
-						cks = null;
 					}
 				} else {
 					Thread.sleep(5);

@@ -17,7 +17,7 @@ public class GCJob implements Job {
 			SDFSEvent task = SDFSEvent
 					.gcInfoEvent("Running Scheduled Volume Garbage Collection");
 			try {
-				ManualGC.clearChunks(1);
+				ManualGC.clearChunks();
 				task.endEvent("Garbage Collection Succeeded");
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("Garbage Collection failed", e);

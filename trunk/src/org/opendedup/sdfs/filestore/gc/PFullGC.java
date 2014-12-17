@@ -38,7 +38,7 @@ public class PFullGC implements GCControllerImpl {
 			task.longMsg = "Running Garbage Collection because percentage full is "
 					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
-				ManualGC.clearChunks(1);
+				ManualGC.clearChunks();
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				double pFull = (this.prevPFull * 100);
@@ -75,13 +75,7 @@ public class PFullGC implements GCControllerImpl {
 				pFull = (double) HCServiceProxy.getSize()
 						/ (double) HCServiceProxy.getMaxSize();
 			}
-			double dsePFull = 0;
-			if (HCServiceProxy.getChunkStore().size() > 0) {
-				dsePFull = (double) HCServiceProxy.getChunkStore().size()
-						/ (double) Main.chunkStoreAllocationSize;
-			}
-			if (dsePFull > pFull)
-				pFull = dsePFull;
+			
 			return pFull;
 		} finally {
 			if (l != null)

@@ -25,16 +25,14 @@ public class CleanStoreCmd implements Runnable {
 	public void run() {
 		try {
 
-			long chunks = ManualGC.clearChunks(minutes);
+			long chunks = ManualGC.clearChunks();
 
 			SDFSLogger.getLog().info(
-					"Expunged [" + chunks + "] unclaimed chunks in  ["
-							+ minutes + "] ");
+					"Expunged [" + chunks + "] unclaimed ");
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()
-					.error("ERROR Clean Store: unable to cleand dedup storage engine of data not claimed in  ["
-							+ minutes + "] because :" + e.toString(), e);
+					.error("ERROR Clean Store: unable to cleand dedup storage engine of data not claimed in because :" + e.toString(), e);
 
 		}
 

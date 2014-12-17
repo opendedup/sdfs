@@ -349,12 +349,12 @@ public class SparseDedupFile implements DedupFile {
 				
 				int dups = 0;
 				if (writeBuffer.isBatchProcessed()) {
-						HashLocPair p = writeBuffer.getFingers().get(0);
+					for(HashLocPair p: writeBuffer.getFingers()) {
 						if (!writeBuffer.isBatchwritten())
 						p.hashloc = HCServiceProxy.writeChunk(p.hash,
-								writeBuffer.getFlushedBuffer(),
+								p.data,
 								p.hashloc);
-
+					}
 				} else {
 					if (HashFunctionPool.max_hash_cluster == 1) {
 						HashLocPair p = null;

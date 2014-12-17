@@ -212,9 +212,11 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
-		if (vol.hasAttribute("serial-number"))
-			this.serialNumber = Integer.getInteger(vol
+		
+		if (vol.hasAttribute("serial-number")) {
+			this.serialNumber = Integer.parseInt(vol
 					.getAttribute("serial-number"));
+	}
 		else {
 			int sn = new Random().nextInt();
 			if (sn < 0)

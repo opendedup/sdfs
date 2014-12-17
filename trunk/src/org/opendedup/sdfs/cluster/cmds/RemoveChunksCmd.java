@@ -15,6 +15,7 @@ import org.jgroups.util.Util;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
+import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class RemoveChunksCmd implements IOPeerCmd {
@@ -25,12 +26,11 @@ public class RemoveChunksCmd implements IOPeerCmd {
 	SDFSEvent evt = null;
 	public long processed;
 
-	public RemoveChunksCmd(long time, boolean force, SDFSEvent evt) {
+	public RemoveChunksCmd(long time, boolean force, FDiskEvent evt) {
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
 		this.time = time;
 		this.force = force;
 		this.evt = evt;
-
 	}
 
 	@Override
