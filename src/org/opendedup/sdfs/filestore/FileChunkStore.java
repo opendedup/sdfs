@@ -294,6 +294,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
+		if(chunk.length != Main.CHUNK_LENGTH)
+			throw new IOException("chunk size mismatch [" + chunk.length + "] != [" +Main.CHUNK_LENGTH + "]");
 		long pos = -1;
 		FileChannel rf = null;
 		try {

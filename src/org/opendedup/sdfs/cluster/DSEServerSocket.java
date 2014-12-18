@@ -303,8 +303,6 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
 				int len = buf.getInt();
-				if (len != Main.CHUNK_LENGTH)
-					throw new IOException("invalid chunk length " + len);
 				byte[] chunkBytes = new byte[len];
 				buf.get(chunkBytes);
 				boolean dup = false;

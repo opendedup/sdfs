@@ -155,8 +155,8 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			}
 		}
 		
-		tEvt.endEvent("claimed [" + claims + "] records");
-		SDFSLogger.getLog().info("claimed [" + claims + "] records");
+		tEvt.endEvent("reclaimed [" + claims + "] records");
+		SDFSLogger.getLog().info("reclaimed [" + claims + "] records");
 		return claims;
 	}
 
