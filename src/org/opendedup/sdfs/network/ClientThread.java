@@ -120,8 +120,6 @@ public class ClientThread extends Thread {
 					byte[] hash = new byte[is.readShort()];
 					is.readFully(hash);
 					int len = is.readInt();
-					if (len != Main.CHUNK_LENGTH)
-						throw new IOException("invalid chunk length " + len);
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
 					boolean done = false;
