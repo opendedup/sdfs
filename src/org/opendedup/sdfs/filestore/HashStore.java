@@ -146,10 +146,9 @@ public class HashStore {
 			directory.mkdirs();
 		File dbf = new File(directory.getPath() + File.separator + "hashstore-"
 				+ this.getName());
-
-		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize));
+		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		if (HashFunctionPool.max_hash_cluster > 1)
-			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size);
+			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
 		try {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);

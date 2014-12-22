@@ -272,7 +272,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						// this.version);
 						ByteBuffer buf = ByteBuffer.allocate(3);
 						buf.putShort(magicnumber);
-						buf.put(version);
+						buf.put(this.version);
 						buf.position(0);
 						bdb.position(0);
 						bdb.write(buf);
@@ -296,7 +296,6 @@ public class LongByteArrayMap implements DataMapInterface {
 				} else {
 					this.version = 0;
 				}
-				// SDFSLogger.getLog().info("File version is " + this.version);
 				this.intVersion();
 				// initiall allocate 32k
 				this.closed = false;
