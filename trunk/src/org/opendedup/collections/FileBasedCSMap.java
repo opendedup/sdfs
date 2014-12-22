@@ -368,6 +368,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
+		
 		return this.getMap(key).get(key);
 	}
 
@@ -379,7 +380,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (ps != -1) {
 			return ChunkData.getChunk(key, ps);
 		} else {
-			SDFSLogger.getLog().info(
+			SDFSLogger.getLog().warn(
 					"found no data for key [" + StringUtils.getHexString(key)
 							+ "]");
 			return null;

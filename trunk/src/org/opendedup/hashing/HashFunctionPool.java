@@ -33,7 +33,6 @@ public class HashFunctionPool {
 			Main.MAPVERSION = 2;
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
-
 	}
 
 	public HashFunctionPool(int size) {

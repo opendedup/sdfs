@@ -30,6 +30,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
 	MappedByteBuffer values = null;
 	MappedByteBuffer times = null;
+	String fn = null;
 	private int size = 0;
 	private String path = null;
 	private FileChannel kFC = null;
@@ -217,7 +218,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 		tRaf = FileChannel.open(Paths.get(path + ".ctimes"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
-
+		this.fn = new File(path + ".keys").getPath();
 		this.kFC = FileChannel.open(Paths.get(path + ".keys"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
@@ -432,7 +433,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		byte[] cur = new byte[FREE.length];
 		keys.position(index);
 		keys.get(cur);
-
 		if (Arrays.equals(cur, key)) {
 			return index;
 		}
@@ -677,6 +677,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 			if (pos == -1) {
 				return -1;
 			} else {
+				
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long val = this.values.getLong();
