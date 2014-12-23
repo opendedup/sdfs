@@ -294,8 +294,8 @@ public class FileChunkStore implements AbstractChunkStore {
 			throws IOException {
 		if (this.closed)
 			throw new IOException("ChunkStore is closed");
-		if(chunk.length != Main.CHUNK_LENGTH)
-			throw new IOException("chunk size mismatch [" + chunk.length + "] != [" +Main.CHUNK_LENGTH + "]");
+		if (len > pageSize)
+			throw new IOException("length is greater than page size");
 		long pos = -1;
 		FileChannel rf = null;
 		try {
@@ -354,7 +354,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("length is greater than page size");
 		if (len == -1)
 			len = pageSize;
-		byte[] b = new byte[len];
+		byte[] b = new byte[pageSize];
 		FileChannel rf = pool.borrowObject();
 		try {
 			rf.read(ByteBuffer.wrap(b), start);
