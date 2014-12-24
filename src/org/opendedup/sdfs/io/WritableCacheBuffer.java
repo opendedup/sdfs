@@ -3,7 +3,6 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -185,7 +184,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		if (this.buf == null) {
 			this.hlAdded = false;
 			if (HashFunctionPool.max_hash_cluster > 1) {
-				ByteBuffer hcb = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+				this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
 				final ArrayList<Shard> cks = new ArrayList<Shard>();
 				int i = 0;
 				// long fp = this.position;
@@ -271,11 +270,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (l.getDNEX() > 0)
 					throw new IOException("error while getting blocks "
 							+ l.getDNEX() + " errors found");
-				hcb.position(0);
+				buf.position(0);
 				for (Shard sh : cks) {
 					if (sh.pos == -1) {
 						try {
-							hcb.put(sh.ck);
+							buf.put(sh.ck);
 						} catch (Exception e) {
 							// SDFSLogger.getLog().info("pos = " + this.position
 							// + "ck sz=" + sh.ck.length + " hcb sz=" +
@@ -285,22 +284,23 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						}
 					} else {
 						try {
-							hcb.position(sh.pos);
-							hcb.put(sh.ck, sh.offset, sh.nlen);
+							
+							buf.position(sh.pos);
+							buf.put(sh.ck, sh.offset, sh.nlen);
 						} catch (Exception e) {
 							SDFSLogger.getLog().error(
 									"pos = " + this.position + " ck nlen="
 											+ sh.nlen + " ck offset="
 											+ sh.offset + " ck len="
 											+ sh.ck.length + " hcb pos="
-											+ hcb.position() + " ck slen="
+											+ buf.position() + " ck slen="
 											+ sh.len + " len="
-											+ (hcb.capacity()));
+											+ (buf.capacity()));
 							throw new IOException(e);
 						}
 					}
 				}
-				this.buf = ByteBuffer.wrap(hcb.array());
+				
 			} else {
 				this.buf = ByteBuffer.wrap(HCServiceProxy.fetchChunk(
 						this.ar.get(0).hash, this.ar.get(0).hashloc));
@@ -345,13 +345,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private void writeBlock(byte[] b, int pos) throws IOException {
 		try {
 			this.initBuffer();
+			buf.position(pos);
+			buf.put(b);
+			this.hlAdded = false;
+			this.dirty = true;
 		} catch (InterruptedException e) {
 			throw new IOException(e);
 		}
-		buf.position(pos);
-		buf.put(b);
-		this.hlAdded = false;
-		this.dirty = true;
+		
 	}
 
 	public HashLocPair getPair(int pos) {
@@ -404,7 +405,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} else {
 
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-
+					
 					this.writeBlock(b, pos);
 					this.ar = new ArrayList<HashLocPair>();
 				} else if (this.buf == null && this.reconstructed
@@ -1056,23 +1057,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		@Override
 		public void run() {
-			if (pos == -1) {
 				try {
-					this.ck = HCServiceProxy.fetchChunk(hash, hashloc);
+					ck = HCServiceProxy.fetchChunk(hash, hashloc);
 					l.commandResponse(this);
 				} catch (Exception e) {
 					l.commandException(e);
 				}
-			} else {
-				try {
-
-					this.ck = Arrays.copyOf(
-							HCServiceProxy.fetchChunk(hash, hashloc), len);
-					l.commandResponse(this);
-				} catch (Exception e) {
-					l.commandException(e);
-				}
-			}
+			
+			
 		}
 	}
 
