@@ -354,7 +354,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("length is greater than page size");
 		if (len == -1)
 			len = pageSize;
-		byte[] b = new byte[pageSize];
+		byte[] b = new byte[len];
 		FileChannel rf = pool.borrowObject();
 		try {
 			rf.read(ByteBuffer.wrap(b), start);
@@ -463,7 +463,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		FileChunkStore store = null;
 		int interval = 2 * 1000;
 		Thread th = null;
-
+		
 		SyncThread(FileChunkStore store) {
 			this.store = store;
 			th = new Thread(this);
