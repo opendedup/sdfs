@@ -567,4 +567,22 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void setReadSpeed(int bps) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setWriteSpeed(int bps) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setCacheSize(long bps) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

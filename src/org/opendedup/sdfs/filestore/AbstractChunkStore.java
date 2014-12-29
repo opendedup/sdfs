@@ -24,6 +24,12 @@ import org.w3c.dom.Element;
 public interface AbstractChunkStore {
 
 	public abstract long getFreeBlocks();
+	
+	public abstract void setReadSpeed(int kbps);
+	
+	public abstract void setWriteSpeed(int kbps);
+	
+	public abstract void setCacheSize(long sz);
 
 	/**
 	 * Closes the chunk store, if this is required
