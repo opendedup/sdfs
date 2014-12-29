@@ -23,10 +23,10 @@ import org.xerial.snappy.Snappy;
 
 public class CompressionUtils {
 
-	static final LZ4Compressor lz4Compressor = LZ4Factory.safeInstance()
+	static final LZ4Compressor lz4Compressor = LZ4Factory.nativeInstance()
 			.fastCompressor();
 	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory
-			.safeInstance().fastDecompressor();
+			.nativeInstance().fastDecompressor();
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression
