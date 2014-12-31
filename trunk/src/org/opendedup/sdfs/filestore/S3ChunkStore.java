@@ -534,4 +534,28 @@ public class S3ChunkStore implements AbstractChunkStore {
 		
 	}
 
+	@Override
+	public int getReadSpeed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getWriteSpeed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getCacheSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long getMaxCacheSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

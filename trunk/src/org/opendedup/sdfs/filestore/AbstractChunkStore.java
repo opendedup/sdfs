@@ -25,11 +25,19 @@ public interface AbstractChunkStore {
 
 	public abstract long getFreeBlocks();
 	
+	public abstract int getReadSpeed();
+	
+	public abstract int getWriteSpeed();
+	
+	public abstract long getCacheSize();
+	
+	public abstract long getMaxCacheSize();
+	
 	public abstract void setReadSpeed(int kbps);
 	
 	public abstract void setWriteSpeed(int kbps);
 	
-	public abstract void setCacheSize(long sz);
+	public abstract void setCacheSize(long sz) throws IOException;
 
 	/**
 	 * Closes the chunk store, if this is required

@@ -70,5 +70,19 @@ public interface HashChunkServiceInterface {
 	public abstract void sync() throws IOException;
 
 	public abstract void init() throws IOException;
+	
+	public abstract void setReadSpeed(int speed) ;
+	
+	public abstract void setWriteSpeed(int speed) ;
+	
+	public abstract long getCacheSize();
+	
+	public abstract long getMaxCacheSize();
+	
+	public abstract int getReadSpeed();
+	
+	public abstract int getWriteSpeed();
+	
+	public abstract void setCacheSize(long sz) throws IOException;
 
 }

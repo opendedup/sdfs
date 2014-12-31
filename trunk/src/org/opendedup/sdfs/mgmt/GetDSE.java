@@ -37,6 +37,10 @@ public class GetDSE {
 			root.setAttribute("storage-type", Main.chunkStoreClass);
 			root.setAttribute("listen-port", Integer.toString(Main.serverPort));
 			root.setAttribute("listen-hostname", Main.serverHostName);
+			root.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
+			root.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
+			root.setAttribute("cache-size", Long.toString(HCServiceProxy.getCacheSize()));
+			root.setAttribute("max-cache-size", Long.toString(HCServiceProxy.getMaxCacheSize()));
 			root.setAttribute("listen-encrypted",
 					Boolean.toString(Main.serverUseSSL));
 			return (Element) root.cloneNode(true);

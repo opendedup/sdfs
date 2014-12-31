@@ -60,6 +60,21 @@ public class SDFSCmdline {
 					.getOptionValue("cluster-volume-remove"));
 			System.exit(0);
 		}
+		if (cmd.hasOption("set-cache-size")) {
+			ProcessSetCache.runCmd(cmd
+					.getOptionValue("set-cache-size"));
+			System.exit(0);
+		}
+		if (cmd.hasOption("set-read-speed")) {
+			ProcessSetReadSpeed.runCmd(cmd
+					.getOptionValue("set-read-speed"));
+			System.exit(0);
+		}
+		if (cmd.hasOption("set-write-speed")) {
+			ProcessSetWriteSpeed.runCmd(cmd
+					.getOptionValue("set-write-speed"));
+			System.exit(0);
+		}
 		if (cmd.hasOption("cluster-volume-add")) {
 			ProcessClusterVolumeAdd.runCmd(cmd
 					.getOptionValue("cluster-volume-add"));
@@ -390,6 +405,21 @@ public class SDFSCmdline {
 				.withDescription(
 						"The server password associated with the archive imported "
 								+ "--replication-master-password=<server-password> ")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("set-cache-size")
+				.withDescription(
+						"Sets the Storage Cache Size if supported by the DSE")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("set-read-speed")
+				.withDescription(
+						"Sets the Maximum Read Speed if supported by the DSE in KB/s")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("set-write-speed")
+				.withDescription(
+						"Sets the Maximum Write Speed if supported by the DSE in KB/s")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")
