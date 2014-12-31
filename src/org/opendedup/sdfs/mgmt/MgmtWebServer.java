@@ -123,7 +123,50 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("deletearchive")) {
+					}
+					else if (cmd.equalsIgnoreCase("setcachesz")) {
+						try {
+							Element msg =new SetCacheSize().getResult(
+									request.getQuery().get("sz"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("setreadspeed")) {
+						try {
+							Element msg =new SetReadSpeed().getResult(
+									request.getQuery().get("sp"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("setwritespeed")) {
+						try {
+							Element msg =new SetWriteSpeed().getResult(
+									request.getQuery().get("sp"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("deletearchive")) {
 						try {
 							String msg = new DeleteArchiveCmd().getResult(
 									cmdOptions, file);

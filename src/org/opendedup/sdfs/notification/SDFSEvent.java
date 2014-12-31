@@ -70,6 +70,9 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type PSWD = new Type("Password Changed");
 	public transient static final Type DSKFL = new Type("Disk Full");
 	public transient static final Type RDER = new Type("Read Error");
+	public transient static final Type CSZ = new Type("Set Cache Size");
+	public transient static final Type RSP = new Type("Set Read Speed");
+	public transient static final Type WSP = new Type("Set Write Speed");
 	public transient static final Type WER = new Type("Write Error");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
@@ -157,6 +160,23 @@ public class SDFSEvent implements java.io.Serializable {
 			evt.addChild(event);
 		} catch (Exception e) {
 		}
+		return event;
+	}
+	
+	public static SDFSEvent cszEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(CSZ, getTarget(), shortMsg, RUNNING);
+		
+		return event;
+	}
+	public static SDFSEvent rspEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(RSP, getTarget(), shortMsg, RUNNING);
+		
+		return event;
+	}
+	
+	public static SDFSEvent wspEvent(String shortMsg) {
+		SDFSEvent event = new SDFSEvent(WSP, getTarget(), shortMsg, RUNNING);
+		
 		return event;
 	}
 

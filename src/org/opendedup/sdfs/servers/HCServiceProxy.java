@@ -112,7 +112,52 @@ public class HCServiceProxy {
 			cmd.executeCmd(cs);
 			return cmd.removedHashesCount();
 		}
-
+	}
+	
+	public static synchronized long getCacheSize() {
+		if (Main.chunkStoreLocal) {
+			return hcService.getCacheSize();
+		}
+		else return 0;
+	}
+	
+	public static synchronized long getMaxCacheSize() {
+		if (Main.chunkStoreLocal) {
+			return hcService.getMaxCacheSize();
+		}
+		else return 0;
+	}
+	
+	public static synchronized int getReadSpeed() {
+		if (Main.chunkStoreLocal) {
+			return hcService.getReadSpeed();
+		}
+		else return 0;
+	}
+	
+	public static synchronized int getWriteSpeed() {
+		if (Main.chunkStoreLocal) {
+			return hcService.getWriteSpeed();
+		}
+		else return 0;
+	}
+	
+	public static synchronized void setReadSpeed(int speed) {
+		if (Main.chunkStoreLocal) {
+			hcService.setReadSpeed(speed);
+		}
+	}
+	
+	public static synchronized void setWriteSpeed(int speed) {
+		if (Main.chunkStoreLocal) {
+			hcService.setWriteSpeed(speed);
+		}
+	}
+	
+	public static synchronized void setCacheSize(long sz) throws IOException {
+		if (Main.chunkStoreLocal) {
+			hcService.setCacheSize(sz);
+		}
 	}
 
 	public static long getChunksFetched() {

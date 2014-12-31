@@ -96,7 +96,19 @@ public class HashChunkService implements HashChunkServiceInterface {
 			return true;
 		}
 	}
-
+	
+	public void setReadSpeed(int speed) {
+		fileStore.setReadSpeed((int)speed);
+	}
+	
+	public void setWriteSpeed(int speed) {
+		fileStore.setWriteSpeed((int)speed);
+	}
+	
+	public void setCacheSize(long sz) throws IOException {
+		fileStore.setCacheSize(sz);
+	}
+	
 	public void remoteFetchChunks(ArrayList<String> al, String server,
 			String password, int port, boolean useSSL) throws IOException,
 			HashtableFullException {
@@ -217,6 +229,26 @@ public class HashChunkService implements HashChunkServiceInterface {
 	public void sync() throws IOException {
 		fileStore.sync();
 		
+	}
+
+	@Override
+	public long getCacheSize() {
+		return fileStore.getCacheSize();
+	}
+	
+	@Override
+	public long getMaxCacheSize() {
+		return fileStore.getMaxCacheSize();
+	}
+
+	@Override
+	public int getReadSpeed() {
+		return fileStore.getReadSpeed();
+	}
+
+	@Override
+	public int getWriteSpeed() {
+		return fileStore.getWriteSpeed();
 	}
 
 }

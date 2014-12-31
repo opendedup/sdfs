@@ -16,6 +16,8 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -455,6 +457,20 @@ public class Config {
 		cli.setAttribute("enable-auth",
 				Boolean.toString(Main.sdfsCliRequireAuth));
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
+		Element localChunkStore = (Element) doc.getElementsByTagName(
+				"local-chunkstore").item(0);
+		if (Main.chunkStoreLocal) {
+			if (localChunkStore.getElementsByTagName("extended-config")
+					.getLength() > 0) {
+				Element chunkStoreConfig = (Element) localChunkStore
+						.getElementsByTagName("extended-config").item(0);
+				chunkStoreConfig.setAttribute("local-cache-size", StorageUnit.of(HCServiceProxy.getMaxCacheSize())
+						.format(HCServiceProxy.getMaxCacheSize()));
+				chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
+				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
+			}
+		}
+		
 		try {
 			// Prepare the DOM document for writing
 			Source source = new DOMSource(doc);
