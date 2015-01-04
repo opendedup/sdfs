@@ -1,10 +1,10 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -132,7 +132,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return exists;
 	}
 
-	public HashChunk fetchChunk(byte[] hash) throws IOException {
+	public HashChunk fetchChunk(byte[] hash) throws IOException, DataArchivedException {
 		HashChunk hashChunk = hs.getHashChunk(hash);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
@@ -249,6 +249,16 @@ public class HashChunkService implements HashChunkServiceInterface {
 	@Override
 	public int getWriteSpeed() {
 		return fileStore.getWriteSpeed();
+	}
+
+	@Override
+	public String restoreBlock(byte[] hash) throws IOException {
+		return hs.restoreBlock(hash);
+	}
+
+	@Override
+	public boolean blockRestored(String id) throws IOException{
+		return hs.blockRestored(id);
 	}
 
 }

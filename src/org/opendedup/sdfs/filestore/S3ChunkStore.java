@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -556,6 +555,18 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public long getMaxCacheSize() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
+
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

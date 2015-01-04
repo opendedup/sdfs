@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.bouncycastle.util.Arrays;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -206,7 +207,7 @@ public class ChunkData {
 		return hash;
 	}
 
-	public static byte[] getChunk(byte[] hash, long pos) throws IOException {
+	public static byte[] getChunk(byte[] hash, long pos) throws IOException,DataArchivedException {
 		try {
 			return HCServiceProxy.getChunkStore().getChunk(hash, pos,
 					Main.chunkStorePageSize);
@@ -219,7 +220,7 @@ public class ChunkData {
 
 	}
 
-	public byte[] getData() throws IOException {
+	public byte[] getData() throws IOException,DataArchivedException {
 		if (this.chunk == null) {
 			return HCServiceProxy.getChunkStore().getChunk(hash, this.cPos,
 					this.cLen);

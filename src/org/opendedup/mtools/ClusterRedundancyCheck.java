@@ -168,7 +168,7 @@ public class ClusterRedundancyCheck {
 					if (!brequals(currenthl, exists)) {
 						p.hashloc = exists;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					this.failedRendundantBlocks++;
 				}
 

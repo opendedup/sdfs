@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
-
 import org.w3c.dom.Element;
 
 /**
@@ -164,6 +163,18 @@ public class NullChunkStore implements AbstractChunkStore {
 	public long getMaxCacheSize() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
+
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

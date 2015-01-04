@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
@@ -142,7 +143,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public byte[] getReadChunk(int startPos, int len) throws IOException,
-			BufferClosedException {
+			BufferClosedException, DataArchivedException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"reading " + df.getMetaFile().getPath() + " df="
@@ -179,7 +180,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	}
 
-	private void initBuffer() throws IOException, InterruptedException {
+	private void initBuffer() throws IOException, InterruptedException, DataArchivedException {
 		if (this.buf == null) {
 			this.hlAdded = false;
 			if (HashFunctionPool.max_hash_cluster > 1) {
@@ -341,7 +342,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return endPosition;
 	}
 
-	private void writeBlock(byte[] b, int pos) throws IOException {
+	private void writeBlock(byte[] b, int pos) throws IOException, DataArchivedException {
 		try {
 			this.initBuffer();
 			buf.position(pos);
@@ -372,7 +373,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	@Override
 	public void write(byte[] b, int pos) throws BufferClosedException,
-			IOException {
+			IOException, DataArchivedException {
 		if (SDFSLogger.isDebug()) {
 			SDFSLogger.getLog().debug(
 					"writing " + df.getMetaFile().getPath() + "df="
@@ -478,7 +479,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void copyExtent(HashLocPair p) throws IOException,
-			BufferClosedException {
+			BufferClosedException, DataArchivedException {
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed while writing");
 		if (this.flushing)
