@@ -373,7 +373,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public byte[] getData(byte[] key) throws IOException {
+	public byte[] getData(byte[] key) throws IOException, DataArchivedException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long ps = this.get(key);

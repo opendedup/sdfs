@@ -1,16 +1,17 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.sdfs.servers.HashChunkServiceInterface;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
@@ -133,6 +134,17 @@ public class HashStore {
 	public boolean hashExists(byte[] hash) throws IOException {
 		return this.bdb.containsKey(hash);
 	}
+	
+	
+	public String restoreBlock(byte[] hash) throws IOException {
+		long id = this.bdb.get(hash);
+		return HCServiceProxy.getChunkStore().restoreBlock(id, hash);
+	}
+	
+	public boolean blockRestored(String id) throws IOException {
+		return HCServiceProxy.getChunkStore().blockRestored(id);
+	}
+	
 
 	/**
 	 * The method used to open and connect to the TC database.
@@ -178,8 +190,9 @@ public class HashStore {
 	 * @param hash
 	 *            the md5 or sha hash to store
 	 * @return a hashchunk or null if the hash is not in the database.
+	 * @throws DataArchivedException 
 	 */
-	public HashChunk getHashChunk(byte[] hash) throws IOException {
+	public HashChunk getHashChunk(byte[] hash) throws IOException, DataArchivedException {
 		HashChunk hs = null;
 		// String hStr = StringUtils.getHexString(hash);
 		/*
@@ -194,7 +207,6 @@ public class HashStore {
 		 * } t++; } } else { if(this.readingBuffers.size() < mapSize)
 		 * this.readingBuffers.put(hStr, hs); }
 		 */
-		try {
 			byte[] data = bdb.getData(hash);
 			if (data == null && Arrays.equals(hash, blankHash)) {
 				hs = new HashChunk(hash, new byte[blankData.length], false);
@@ -202,12 +214,6 @@ public class HashStore {
 			hs = new HashChunk(hash, data, false);
 			// this.cacheBuffers.put(hStr, hs);
 
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal(
-					"unable to get hash " + StringUtils.getHexString(hash), e);
-		} finally {
-			// this.readingBuffers.remove(hStr);
-		}
 		return hs;
 	}
 

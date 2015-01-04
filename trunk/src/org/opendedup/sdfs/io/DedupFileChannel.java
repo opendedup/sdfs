@@ -302,7 +302,7 @@ public class DedupFileChannel {
 			} finally {
 				this.closeLock.unlock();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"error while writing to " + this.df.getMetaFile().getPath() + " "
 							+ e.toString(), e);

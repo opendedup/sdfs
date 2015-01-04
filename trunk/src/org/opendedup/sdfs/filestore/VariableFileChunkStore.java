@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -608,5 +607,16 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
 
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 }

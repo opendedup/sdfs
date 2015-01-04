@@ -3,6 +3,8 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 import java.util.List;
 
+import org.opendedup.collections.DataArchivedException;
+
 public interface DedupChunkInterface {
 
 
@@ -21,7 +23,7 @@ public interface DedupChunkInterface {
 	 */
 	public abstract long getFilePosition();
 
-	public abstract byte[] getReadChunk(int start,int end) throws IOException,BufferClosedException;
+	public abstract byte[] getReadChunk(int start,int end) throws IOException,BufferClosedException,DataArchivedException;
 
 	public List<HashLocPair> getFingers();
 	/**
@@ -103,7 +105,7 @@ public interface DedupChunkInterface {
 	 */
 
 	public abstract void write(byte[] b, int pos) throws BufferClosedException,
-			IOException;
+			IOException,DataArchivedException;
 
 	public abstract void truncate(int len) throws BufferClosedException;
 

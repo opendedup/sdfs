@@ -1,13 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 //import org.apache.lucene.store.NativePosixUtil;
 import org.apache.lucene.util.OpenBitSet;
@@ -553,6 +553,19 @@ public class FileChunkStore implements AbstractChunkStore {
 	public long getMaxCacheSize() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
+
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

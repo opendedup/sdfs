@@ -42,7 +42,7 @@ public interface AbstractHashesMap {
 
 	public abstract long get(byte[] key) throws IOException;
 
-	public abstract byte[] getData(byte[] key) throws IOException;
+	public abstract byte[] getData(byte[] key) throws IOException, DataArchivedException;
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
 

@@ -332,4 +332,16 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
+
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }

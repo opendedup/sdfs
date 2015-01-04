@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -453,6 +452,18 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	public long getMaxCacheSize() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public String restoreBlock(long id, byte[] hash) {
+		return null;
+		
+	}
+
+	@Override
+	public boolean blockRestored(String id) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

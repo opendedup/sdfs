@@ -23,6 +23,10 @@ import org.w3c.dom.Element;
 
 public interface AbstractChunkStore {
 
+	public String restoreBlock(long id, byte[] hash);
+	
+	public boolean blockRestored(String id);
+
 	public abstract long getFreeBlocks();
 	
 	public abstract int getReadSpeed();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.opendedup.collections.AbstractHashesMap;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
@@ -98,7 +99,7 @@ public class HCServiceProxy {
 		return hcService.hashExists(hash);
 	}
 
-	public static HashChunk fetchHashChunk(byte[] hash) throws IOException {
+	public static HashChunk fetchHashChunk(byte[] hash) throws IOException, DataArchivedException {
 		return hcService.fetchChunk(hash);
 	}
 
@@ -592,7 +593,7 @@ public class HCServiceProxy {
 	}
 
 	public static byte[] fetchChunk(byte[] hash, byte[] hashloc)
-			throws IOException {
+			throws IOException, DataArchivedException {
 
 		if (Main.chunkStoreLocal) {
 			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
@@ -673,6 +674,14 @@ public class HCServiceProxy {
 		public int hashCode() {
 			return Arrays.hashCode(data);
 		}
+	}
+	
+	public static String restoreBlock(byte[] hash) throws IOException {
+		return hcService.restoreBlock(hash);
+	}
+
+	public static boolean blockRestored(String id) throws IOException{
+		return hcService.blockRestored(id);
 	}
 
 }
