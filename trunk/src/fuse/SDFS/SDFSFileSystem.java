@@ -1,8 +1,6 @@
 package fuse.SDFS;
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -14,6 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -433,15 +432,18 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throws FuseException {
 		// SDFSLogger.getLog().info("1911");
 		if (Main.volume.isOffLine())
-			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
+			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-		} catch (Exception e) {
+		}catch (DataArchivedException e) {
+			throw new FuseException("File Archived").initErrno(Errno.ENODATA);
+		}
+		catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + path, e);
-			throw new FuseException("error opening " + path)
+			throw new FuseException("error reading " + path)
 					.initErrno(Errno.ENODATA);
 		} finally {
 		}

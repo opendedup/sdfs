@@ -23,11 +23,14 @@ public class VariableHashEngine implements AbstractHashEngine {
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	static final long bytesPerWindow = 48;
-	private EnhancedFingerFactory ff = new EnhancedFingerFactory(p, bytesPerWindow,
-			boundaryDetector, minLen, maxLen);
+	private EnhancedFingerFactory ff = null;
 	HashFunction hf = Hashing.murmur3_128(seed);
 	
 	public VariableHashEngine() throws NoSuchAlgorithmException {
+		while(ff == null) {
+			ff = new EnhancedFingerFactory(p, bytesPerWindow,
+					boundaryDetector, minLen, maxLen);
+		}
 
 	}
 

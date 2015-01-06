@@ -48,7 +48,8 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			bdbf.close();
+			if (bdbf != null)
+				bdbf.close();
 			bdbf = null;
 		}
 	}
@@ -61,7 +62,8 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			bdbf.close();
+			if (bdbf != null)
+				bdbf.close();
 			bdbf = null;
 		}
 	}
@@ -77,21 +79,25 @@ public class LargeLongByteArrayMap implements AbstractMap {
 	@Override
 	public void close() {
 		this.hashlock.writeLock().lock();
-		this.closed = true;
-		if (this.dirty) {
-			RandomAccessFile bdbf = null;
-			try {
-				bdbf = new RandomAccessFile(fileName, "rw");
-				bdbf.getFD().sync();
-			} catch (Exception e) {
-			} finally {
+		try {
+			this.closed = true;
+			if (this.dirty) {
+				RandomAccessFile bdbf = null;
 				try {
-					bdbf.close();
-				} catch (IOException e) {
+					bdbf = new RandomAccessFile(fileName, "rw");
+					bdbf.getFD().sync();
+				} catch (Exception e) {
+				} finally {
+					try {
+						bdbf.close();
+					} catch (IOException e) {
 
+					}
+					this.dirty = false;
 				}
-				this.dirty = false;
 			}
+
+		} finally {
 			this.hashlock.writeLock().unlock();
 		}
 	}
@@ -129,22 +135,25 @@ public class LargeLongByteArrayMap implements AbstractMap {
 
 	public void put(long pos, byte[] data) throws IOException {
 		this.hashlock.writeLock().lock();
-		this.dirty = true;
-		if (data.length != this.arraySize)
-			throw new IOException(" size mismatch " + data.length
-					+ " does not equal " + this.arraySize);
-
-		RandomAccessFile rf = null;
 		try {
-			rf = new RandomAccessFile(this.fileName, "rw");
-			rf.seek(pos);
-			rf.write(data);
-		} catch (Exception e) {
-			throw new IOException(e);
+			this.dirty = true;
+			if (data.length != this.arraySize)
+				throw new IOException(" size mismatch " + data.length
+						+ " does not equal " + this.arraySize);
+
+			RandomAccessFile rf = null;
+			try {
+				rf = new RandomAccessFile(this.fileName, "rw");
+				rf.seek(pos);
+				rf.write(data);
+			} catch (Exception e) {
+				throw new IOException(e);
+			} finally {
+				rf.close();
+				rf = null;
+			}
 		} finally {
 			this.hashlock.writeLock().unlock();
-			rf.close();
-			rf = null;
 
 		}
 	}
@@ -166,11 +175,14 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
+			try{
+			rf.close();
+			rf = null;
+			}catch(Exception e) {}
 			if (checkForLock) {
 				this.hashlock.writeLock().lock();
 			}
-			rf.close();
-			rf = null;
+			
 		}
 	}
 

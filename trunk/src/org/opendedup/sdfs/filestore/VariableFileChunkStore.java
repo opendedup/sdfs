@@ -293,6 +293,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			// encrypt + " store=" +store.getName() );
 			long pos = -1;
 			reservePositionlock.lock();
+			try{
 			if (this.freeSlots != null) {
 				pos = this.freeSlots.nextSetBit(smallestFree);
 				if (pos < 0) {
@@ -308,8 +309,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				pos = this.currentLength.get();
 				this.currentLength.addAndGet(this.iPageSize);
 			}
+			}finally {
 			reservePositionlock.unlock();
-
+			}
 			byte comp = 1;
 			byte enc = 0;
 			if (!compress)

@@ -520,7 +520,22 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("importarchive")) {
+					}else if (cmd.equalsIgnoreCase("restorearchive")) {
+						try {
+							Element msg = new RestoreArchiveCmd().getResult(
+									file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"replication finished successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("error",e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("importarchive")) {
 						try {
 							String server = request.getQuery().get("server");
 							String password = request.getQuery().get("spasswd");

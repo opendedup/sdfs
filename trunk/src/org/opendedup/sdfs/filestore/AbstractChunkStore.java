@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+import org.opendedup.collections.DataArchivedException;
 import org.w3c.dom.Element;
 
 /**
@@ -23,7 +24,7 @@ import org.w3c.dom.Element;
 
 public interface AbstractChunkStore {
 
-	public String restoreBlock(long id, byte[] hash);
+	public String restoreBlock(long id, byte[] hash) throws IOException;
 	
 	public boolean blockRestored(String id);
 
@@ -139,7 +140,7 @@ public interface AbstractChunkStore {
 	 * @throws IOException
 	 */
 	public abstract byte[] getChunk(byte[] hash, long start, int len)
-			throws IOException;
+			throws IOException,DataArchivedException;
 
 	/**
 	 * tunes the chunk store to a specific size

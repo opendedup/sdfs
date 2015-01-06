@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.notification;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.logging.SDFSEventLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.XMLUtils;
@@ -73,6 +73,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type CSZ = new Type("Set Cache Size");
 	public transient static final Type RSP = new Type("Set Read Speed");
 	public transient static final Type WSP = new Type("Set Write Speed");
+	public transient static final Type ARCHIVERESTORE = new Type("Restore from Glacier");
 	public transient static final Type WER = new Type("Write Error");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
@@ -160,6 +161,12 @@ public class SDFSEvent implements java.io.Serializable {
 			evt.addChild(event);
 		} catch (Exception e) {
 		}
+		return event;
+	}
+	
+	public static SDFSEvent archiveRestoreEvent(MetaDataDedupFile f) {
+		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(), "Restoring " +f.getPath(), RUNNING);
+		
 		return event;
 	}
 	

@@ -265,7 +265,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long bytesRead() {
-		return this.bytesRead();
+		return 0;
 	}
 
 	/*
@@ -275,7 +275,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	 */
 	@Override
 	public long bytesWritten() {
-		return this.bytesWritten();
+		return 0;
 	}
 
 	@Override
@@ -378,6 +378,7 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		long pos = start / this.pageSize;
 		this.rlock.lock();
+		try{
 		if (this.freeSlots == null) {
 			this.freeSlots = new OpenBitSet();
 			this.smallestFree = 0;
@@ -386,7 +387,9 @@ public class FileChunkStore implements AbstractChunkStore {
 			this.smallestFree = pos;
 		this.freeSlots.ensureCapacity(pos);
 		this.freeSlots.set(pos);
+		}finally {
 		this.rlock.unlock();
+		}
 		/*
 		 * RandomAccessFile raf = new RandomAccessFile(f, "rw");
 		 * raf.seek(start); raf.write(0); raf.close();

@@ -268,9 +268,11 @@ public class MetaFileStore {
 	}
 
 	public static boolean removeMetaFile(String path, boolean propigateEvent) {
-		getMFLock.lock();
+		
+	
 		if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
+		getMFLock.lock();
 		try {
 			if(new File(path).exists()) {
 			MetaDataDedupFile mf = null;
