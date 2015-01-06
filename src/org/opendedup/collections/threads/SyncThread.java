@@ -8,7 +8,7 @@ public class SyncThread implements Runnable {
 
 	public SyncThread(AbstractMap m) {
 		map = m;
-		Thread th = new Thread(this);
+		th = new Thread(this);
 		th.start();
 	}
 

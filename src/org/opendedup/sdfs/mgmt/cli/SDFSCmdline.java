@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.mgmt.cli;
 
+import java.net.ConnectException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
@@ -15,6 +17,9 @@ public class SDFSCmdline {
 		PosixParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
+		try {
+			
+		
 		if (cmd.hasOption("help") || args.length == 0) {
 			printHelp(options);
 			System.exit(1);
@@ -35,13 +40,25 @@ public class SDFSCmdline {
 		if (cmd.hasOption("file-info")) {
 			if (cmd.hasOption("file-path")) {
 				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
-
+				System.exit(0);
 			} else {
 				SDFSLogger
 						.getBasicLog()
 						.warn("file info request failed. --file-path option is required");
+				System.exit(1);
 			}
-			System.exit(0);
+			
+		}
+		if(cmd.hasOption("restore-from-archive")) {
+			if (cmd.hasOption("file-path")) {
+				ProcessRestoreArchiveCmd.runCmd(cmd.getOptionValue("file-path"));
+				System.exit(0);
+			} else {
+				SDFSLogger
+						.getBasicLog()
+						.warn("restore from archive request failed. --file-path option is required");
+				System.exit(1);
+			}
 		}
 		if (cmd.hasOption("dse-info")) {
 			ProcessDSEInfo.runCmd();
@@ -244,6 +261,10 @@ public class SDFSCmdline {
 			ProcessShutdown.runCmd();
 			System.exit(0);
 		}
+		}catch(ConnectException e) {
+			System.err.println("Volume not available");
+			System.exit(1);
+		}
 	}
 
 	@SuppressWarnings("static-access")
@@ -285,6 +306,12 @@ public class SDFSCmdline {
 				.withDescription(
 						"Returns io file attributes such as dedup rate and file io statistics. "
 								+ "\n e.g. --file-info --file-path=<path to file or folder>")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("restore-from-archive")
+				.withDescription(
+						"Restores archived data blocks within file from glacier. "
+								+ "\n e.g. --restore-from-archive --file-path=<path to file or folder>")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-info")

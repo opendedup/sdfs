@@ -2,16 +2,20 @@ package org.opendedup.sdfs.io;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.hashing.Finger;
 
 public abstract class AsyncChunkWriteActionListener {
 	AtomicInteger dn = new AtomicInteger(0);
 	AtomicInteger exdn = new AtomicInteger(0);
+	DataArchivedException dar = null;
 	int sz = 0;
 
 	public abstract void commandException(Finger result, Throwable e);
 
 	public abstract void commandResponse(Finger result);
+	
+	public abstract void commandArchiveException(DataArchivedException e);
 
 	public int incrementandGetDN() {
 		return dn.incrementAndGet();

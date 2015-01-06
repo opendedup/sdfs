@@ -45,9 +45,9 @@ public class ConsistancyCheck {
 					}
 					records++;
 					long pos = map.get(data.getHash());
-					if (pos < 0) {
-						map.put(data);
-						recordsRecovered++;
+					if (pos == -1) {
+						if(map.put(data))
+							recordsRecovered++;
 					}
 					evt.curCt = currentCount;
 					try {

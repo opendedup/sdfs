@@ -48,14 +48,7 @@ public class SDFSService {
 		MgmtWebServer.start(useSSL);
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
-		try {
-			if (Main.volume.getName() == null)
-				Main.volume.setName(configFile);
-			Main.volume.setClosedGracefully(false);
-			Config.writeSDFSConfigFile(configFile);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to write volume config.", e);
-		}
+		
 		System.out.println("Initializing HashFunction");
 		SDFSLogger.getLog().info("Initializing HashFunction");
 		SparseDedupFile.hashPool.hashCode();
@@ -86,8 +79,17 @@ public class SDFSService {
 
 			Main.pFullSched = new StandAloneGCScheduler();
 		}
+		
 
 		Main.mountEvent.endEvent("Volume Mounted");
+		try {
+			if (Main.volume.getName() == null)
+				Main.volume.setName(configFile);
+			Main.volume.setClosedGracefully(false);
+			Config.writeSDFSConfigFile(configFile);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("Unable to write volume config.", e);
+		}
 		Main.volume.init();
 		SDFSLogger.getLog().debug(
 				"############### SDFSService Started ##################");

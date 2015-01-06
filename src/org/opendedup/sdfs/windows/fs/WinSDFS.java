@@ -26,6 +26,7 @@ package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.CreationDisposition.CREATE_ALWAYS;
 
+
 import static net.decasdev.dokan.CreationDisposition.CREATE_NEW;
 import static net.decasdev.dokan.CreationDisposition.OPEN_ALWAYS;
 import static net.decasdev.dokan.CreationDisposition.OPEN_EXISTING;
@@ -39,6 +40,7 @@ import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_PATH_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_READ_FAULT;
 import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
+
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
@@ -294,7 +296,7 @@ public class WinSDFS implements DokanOperations {
 			if (read == -1)
 				read = 0;
 			return read;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("unable to read file " + fileName, e);
 			throw new DokanOperationException(ERROR_READ_FAULT);
 		}

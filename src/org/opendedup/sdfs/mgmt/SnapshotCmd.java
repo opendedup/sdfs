@@ -18,7 +18,6 @@ public class SnapshotCmd implements Runnable {
 	SDFSEvent evt;
 
 	public Element getResult(String cmd, String file) throws IOException {
-		SDFSLogger.getLog().info(cmd + " file=" + file);
 		this.srcPath = file;
 		this.dstPath = cmd;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);

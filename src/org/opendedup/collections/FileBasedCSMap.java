@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
@@ -10,7 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
-import org.opendedup.collections.threads.SyncThread;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
@@ -42,7 +42,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// TODO change the kBufMazSize so it not reflective to the pageSize
 	private byte[] FREE = new byte[HashFunctionPool.hashLength];
 	private boolean firstGCRun = true;
-	private SyncThread st = null;
 	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent(
 			"Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
@@ -448,10 +447,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			try {
-				st.close();
-			} catch (Exception e) {
-			}
+			
 			for (int i = 0; i < this.maps.length; i++) {
 				this.maps[i].close();
 				this.maps[i] = null;

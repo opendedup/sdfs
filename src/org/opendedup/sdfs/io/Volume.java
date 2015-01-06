@@ -212,12 +212,11 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
-		
+
 		if (vol.hasAttribute("serial-number")) {
 			this.serialNumber = Integer.parseInt(vol
 					.getAttribute("serial-number"));
-	}
-		else {
+		} else {
 			int sn = new Random().nextInt();
 			if (sn < 0)
 				sn = sn * -1;
@@ -568,10 +567,15 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("write-timeout-seconds",
 				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
-		root.setAttribute("dse-comp-size",
-				Long.toString(HCServiceProxy.getDSECompressedSize()));
-		root.setAttribute("dse-size",
-				Long.toString(HCServiceProxy.getDSESize()));
+		try {
+			root.setAttribute("dse-comp-size",
+					Long.toString(HCServiceProxy.getDSECompressedSize()));
+			root.setAttribute("dse-size",
+					Long.toString(HCServiceProxy.getDSESize()));
+		} catch (Exception e) {
+			root.setAttribute("dse-comp-size", Long.toString(0));
+			root.setAttribute("dse-size", Long.toString(0));
+		}
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();
 			doc.adoptNode(el);

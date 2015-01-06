@@ -18,6 +18,8 @@ public class SetCacheSize implements Runnable{
 	public Element getResult(String sz) throws IOException, ParserConfigurationException {
 		evt = SDFSEvent.cszEvent("Setting Cache Size");
 		this.sz = sz;
+		Thread th = new Thread(this);
+		th.start();
 		return evt.toXML();
 		
 	}
