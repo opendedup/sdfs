@@ -44,9 +44,6 @@ public interface HashChunkServiceInterface {
 	public abstract long processHashClaims(SDFSEvent evt,
 			LargeBloomFilter bf) throws IOException;
 
-	public abstract long removeStailHashes(long ms, boolean forceRun,
-			SDFSEvent evt) throws IOException;
-
 	public abstract void commitChunks();
 	
 	public abstract AbstractHashesMap getHashesMap();

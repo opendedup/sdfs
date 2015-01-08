@@ -49,9 +49,6 @@ public interface AbstractHashesMap {
 	public abstract boolean isClaimed(ChunkData cm)
 			throws KeyNotFoundException, IOException;
 
-	public abstract long removeRecords(long ms, boolean forceRun, SDFSEvent evt)
-			throws IOException;
-
 	public abstract void sync() throws IOException;
 
 	public abstract void close();

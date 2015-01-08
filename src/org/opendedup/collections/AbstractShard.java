@@ -78,6 +78,5 @@ public interface AbstractShard {
 
 	public abstract void sync() throws SyncFailedException, IOException;
 
-	public abstract long removeNextOldRecord(long time) throws IOException;
 
 }

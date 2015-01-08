@@ -2,6 +2,7 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.ByteArrayInputStream;
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +40,6 @@ import org.opendedup.sdfs.cluster.cmds.NetworkCMDS;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.Volume;
-import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
@@ -371,26 +370,6 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					lbf = null;
 					this.gcUpdateLock.unlock();
 				}
-				rtrn = evt;
-				break;
-			}
-			case NetworkCMDS.RUN_REMOVE: {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("recieved remove chunks cmd");
-				long ms = buf.getLong();
-				long timestamp = System.currentTimeMillis() - ms;
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"recieved remove chunks cmd after ["
-									+ new Date(timestamp) + "]");
-				byte fb = buf.get();
-				boolean force = false;
-				if (fb == 1)
-					force = true;
-				byte[] ob = new byte[buf.getInt()];
-				buf.get(ob);
-				FDiskEvent evt = (FDiskEvent) Util.objectFromByteBuffer(ob);
-				HCServiceProxy.removeStailHashes(ms, force, evt);
 				rtrn = evt;
 				break;
 			}

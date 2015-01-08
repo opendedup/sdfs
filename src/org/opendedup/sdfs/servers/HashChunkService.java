@@ -160,11 +160,6 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hs.processHashClaims(evt, bf);
 	}
 
-	public long removeStailHashes(long ms, boolean forceRun, SDFSEvent evt)
-			throws IOException {
-		return hs.evictChunks(ms, forceRun, evt);
-	}
-
 	public void commitChunks() {
 		// H2HashStore.commitTransactions();
 		unComittedChunks = 0;

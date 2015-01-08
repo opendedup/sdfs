@@ -226,11 +226,6 @@ public class HashStore {
 		return this.bdb.claimRecords(evt, bf);
 	}
 
-	public long evictChunks(long time, boolean forceRun, SDFSEvent evt)
-			throws IOException {
-		return this.bdb.removeRecords(time, forceRun, evt);
-	}
-
 	/**
 	 * Adds a block of data to the TC hash store and the chunk store.
 	 * 

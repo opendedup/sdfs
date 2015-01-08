@@ -5,7 +5,6 @@ import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,7 +16,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.NextPrime;
@@ -41,7 +39,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	private long maxSz = 0;
 	// TODO change the kBufMazSize so it not reflective to the pageSize
 	private byte[] FREE = new byte[HashFunctionPool.hashLength];
-	private boolean firstGCRun = true;
 	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent(
 			"Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
@@ -229,58 +226,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.getMap(key).containsKey(key);
 	}
 
-	@Override
-	public synchronized long removeRecords(long time, boolean forceRun,
-			SDFSEvent evt) throws IOException {
-		SDFSLogger.getLog().info(
-				"Garbage collection starting for records older than "
-						+ new Date(time));
-		SDFSEvent tEvt = SDFSEvent
-				.claimInfoEvent(
-						"Garbage collection starting for records older than "
-								+ new Date(time) + " from [" + this.fileName
-								+ "]", evt);
-		tEvt.maxCt = this.maps.length;
-		long rem = 0;
-		if (forceRun)
-			this.firstGCRun = false;
-		if (this.firstGCRun) {
-			this.firstGCRun = false;
-			tEvt.endEvent(
-					"Garbage collection aborted because it is the first run",
-					SDFSEvent.WARN);
-			throw new IOException(
-					"Garbage collection aborted because it is the first run");
-
-		} else {
-			if (this.isClosed())
-				throw new IOException("Hashtable " + this.fileName
-						+ " is close");
-			for (int i = 0; i < maps.length; i++) {
-				tEvt.curCt++;
-				if (maps[i] != null) {
-					maps[i].iterInit();
-					long fPos = maps[i].removeNextOldRecord(time);
-					while (fPos != -1) {
-						this.kSz.decrementAndGet();
-						rem++;
-						fPos = maps[i].removeNextOldRecord(time);
-					}
-				}
-			}
-		}
-		this.kSz = new AtomicLong(0);
-		for (int i = 0; i < maps.length; i++) {
-			this.kSz.addAndGet(maps[i].size());
-		}
-		tEvt.actionCount = rem;
-		tEvt.endEvent("Removed [" + rem + "] records. Free slots ["
-				+ HCServiceProxy.getFreeBlocks() + "]");
-		SDFSLogger.getLog().info(
-				"Removed [" + rem + "] records. Free slots ["
-						+ HCServiceProxy.getFreeBlocks() + "]");
-		return rem;
-	}
+	
 
 	@Override
 	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
@@ -497,7 +443,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
 				+ " ms at pos " + b.get(hash1));
 		b.claimRecords(SDFSEvent.gcInfoEvent("testing 123"));
-		b.removeRecords(10, true, SDFSEvent.gcInfoEvent("testing 123"));
 		b.close();
 
 	}

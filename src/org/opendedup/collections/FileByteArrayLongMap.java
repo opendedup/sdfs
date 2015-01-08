@@ -35,7 +35,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 	private String path = null;
 	private FileChannel kFC = null;
 	private FileChannel vRaf = null;
-	private FileChannel tRaf = null;
 	private ReentrantLock hashlock = new ReentrantLock();
 	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
@@ -214,10 +213,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		vRaf = FileChannel.open(Paths.get(path + ".pos"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
 				StandardOpenOption.WRITE, StandardOpenOption.READ);
-
-		tRaf = FileChannel.open(Paths.get(path + ".ctimes"),
-				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
-				StandardOpenOption.WRITE, StandardOpenOption.READ);
 		this.fn = new File(path + ".keys").getPath();
 		this.kFC = FileChannel.open(Paths.get(path + ".keys"),
 				StandardOpenOption.CREATE, StandardOpenOption.SPARSE,
@@ -249,7 +244,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		keys.load();
 		this.values = vRaf.map(MapMode.READ_WRITE, 0, size * 8);
 		values.load();
-		this.times = tRaf.map(MapMode.READ_WRITE, 0, size * 8);
 		times.load();
 		if (bgst < 0) {
 			SDFSLogger.getLog()
@@ -729,12 +723,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 
 		}
 		try {
-			this.tRaf.force(true);
-			this.tRaf.close();
-		} catch (Exception e) {
-
-		}
-		try {
 			File f = new File(path + ".vmp");
 			FileOutputStream fout = new FileOutputStream(f);
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -843,7 +831,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 	public void sync() throws SyncFailedException, IOException {
 		keys.force();
 		vRaf.force(true);
-		tRaf.force(true);
 		File f = new File(path + ".vmp");
 		FileOutputStream fout = new FileOutputStream(f);
 		ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -852,51 +839,5 @@ public class FileByteArrayLongMap implements AbstractShard {
 		oon.close();
 		fout.flush();
 		fout.close();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.collections.AbstractShard#removeNextOldRecord(long)
-	 */
-
-	@Override
-	public synchronized long removeNextOldRecord(long time) throws IOException {
-		while (iterPos < size) {
-			long val = -1;
-			this.hashlock.lock();
-			try {
-				if (this.mapped.get(iterPos)) {
-					this.times.position(iterPos * 8);
-					long tm = this.times.getLong();
-					if (tm < time) {
-						boolean claimed = claims.get(iterPos);
-						if (!claimed) {
-							byte[] key = new byte[FREE.length];
-							keys.position(iterPos * FREE.length);
-							keys.get(key);
-							keys.position(iterPos * FREE.length);
-							keys.put(REMOVED);
-							this.values.position(iterPos * 8);
-							val = this.values.getLong();
-							ChunkData ck = new ChunkData(val, key);
-							ck.setmDelete(true);
-							this.values.position(iterPos * 8);
-							this.values.putLong(0);
-							this.times.position(iterPos * 8);
-							this.times.putLong(0);
-							this.claims.clear(iterPos);
-							this.mapped.clear(iterPos);
-							this.sz.decrementAndGet();
-							return val;
-						}
-					}
-				}
-			} finally {
-				iterPos++;
-				this.hashlock.unlock();
-			}
-		}
-		return -1;
 	}
 }
