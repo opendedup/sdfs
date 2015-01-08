@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RedundancyNotMetException;
-import org.opendedup.sdfs.cluster.cmds.RemoveChunksCmd;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -101,18 +101,6 @@ public class HCServiceProxy {
 
 	public static HashChunk fetchHashChunk(byte[] hash) throws IOException, DataArchivedException {
 		return hcService.fetchChunk(hash);
-	}
-
-	public static synchronized long removeStailHashes(long ms,
-			boolean forceRun, FDiskEvent evt) throws IOException {
-		if (Main.chunkStoreLocal) {
-			long tm = System.currentTimeMillis() - ms;
-			return hcService.removeStailHashes(tm, forceRun, evt);
-		} else {
-			RemoveChunksCmd cmd = new RemoveChunksCmd(ms, forceRun, evt);
-			cmd.executeCmd(cs);
-			return cmd.removedHashesCount();
-		}
 	}
 	
 	public static synchronized long getCacheSize() {

@@ -319,10 +319,6 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = null;
 			break;
 		}
-		case NetworkCMDS.RUN_REMOVE: {
-			rtrn = null;
-			break;
-		}
 		case NetworkCMDS.HASH_EXISTS_CMD: {
 			rtrn = Boolean.valueOf(false);
 			break;
