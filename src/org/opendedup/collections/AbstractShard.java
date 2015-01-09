@@ -13,12 +13,6 @@ public interface AbstractShard {
 
 	public abstract byte[] nextKey() throws IOException;
 
-	public abstract byte[] nextClaimedKey(boolean clearClaim)
-			throws IOException;
-
-	public abstract long nextClaimedValue(boolean clearClaim)
-			throws IOException;
-
 	public abstract long getBigestKey() throws IOException;
 
 	/**

@@ -50,6 +50,8 @@ public class MetaFileStore {
 			SDFSLogger.getLog().fatal(
 					"Incompatible volume must be at least version 0.9.0 current volume vesion is ["
 							+ Main.version + "]");
+			System.err.println("Incompatible volume must be at least version 0.9.0 current volume vesion is ["
+							+ Main.version + "]");
 			System.exit(-1);
 		}
 

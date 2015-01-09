@@ -57,11 +57,11 @@ public class FuseMount {
 				.getThreadGroup(), "FUSE Threads");
 		threadGroup.setDaemon(true);
 
-		log.info("Mounted filesystem");
-
+		//log.info("Mounted filesystem");
+		System.out.println("Mounted Filesystem");
 		mount(args, fuseFS, threadGroup);
-
-		log.info("Filesystem is unmounted");
+		System.out.println("Filesystem is unmounted");
+		//log.info("Filesystem is unmounted");
 
 		if (log.isDebugEnabled()) {
 			int n = threadGroup.activeCount();
@@ -89,9 +89,12 @@ public class FuseMount {
 			@Override
 			public void run() {
 				try {
-					log.info("Mounted filesystem");
+					//log.info("Mounted filesystem");
+					System.out.println("Mounted Filesystem");
 					mount(args, fuseFS, group);
-					log.info("Filesystem is unmounted");
+					System.out.println("Filesystem is unmounted");
+					//log.info("Filesystem is unmounted");
+					
 					if (log.isDebugEnabled()) {
 						int n = group.activeCount();
 						log.debug("ThreadGroup(\"" + group.getName()

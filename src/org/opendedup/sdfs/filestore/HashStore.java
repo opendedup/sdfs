@@ -170,15 +170,19 @@ public class HashStore {
 			bdb.init(entries, dbf.getPath());
 		} catch (InstantiationException e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			e.printStackTrace();
 			System.exit(-1);
 		} catch (IllegalAccessException e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			e.printStackTrace();
 			System.exit(-1);
 		} catch (ClassNotFoundException e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			e.printStackTrace();
 			System.exit(-1);
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			e.printStackTrace();
 			System.exit(-1);
 		}
 
