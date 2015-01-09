@@ -109,6 +109,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 					Main.cloudSecretKey);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}

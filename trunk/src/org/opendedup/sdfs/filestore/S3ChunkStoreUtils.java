@@ -57,7 +57,6 @@ public class S3ChunkStoreUtils {
 			System.exit(1);
 		}
 		if (cmd.hasOption("delete-bucket")) {
-			System.out.println("000000000000000000000");
 			deleteBucket(cmd.getOptionValue("delete-bucket").toLowerCase(),
 					cmd.getOptionValue("aws-access-key"),
 					cmd.getOptionValue("aws-secret-key"));

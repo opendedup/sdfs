@@ -29,7 +29,6 @@ import org.opendedup.util.LargeBloomFilter;
 public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
 	MappedByteBuffer values = null;
-	MappedByteBuffer times = null;
 	String fn = null;
 	private int size = 0;
 	private String path = null;
@@ -99,70 +98,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 		return null;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.collections.AbstractShard#nextClaimedKey(boolean)
-	 */
-	@Override
-	public byte[] nextClaimedKey(boolean clearClaim) {
-		while (iterPos < size) {
-			byte[] key = new byte[FREE.length];
-			keys.position(iterPos * FREE.length);
-			this.hashlock.lock();
-			try {
-				keys.get(key);
-				iterPos++;
-				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					boolean claimed = claims.get(iterPos - 1);
-					if (clearClaim) {
-						claims.clear(iterPos - 1);
-					}
-					if (claimed)
-						return key;
-				}
-			} catch (Exception e) {
-
-			} finally {
-				this.hashlock.unlock();
-			}
-		}
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.collections.AbstractShard#nextClaimedValue(boolean)
-	 */
-	@Override
-	public long nextClaimedValue(boolean clearClaim) throws IOException {
-		while (iterPos < size) {
-			long val = -1;
-			this.hashlock.lock();
-			try {
-				values.position(iterPos * 8);
-				val = values.getLong();
-				if (val >= 0) {
-					boolean claimed = claims.get(iterPos);
-					if (clearClaim) {
-						this.mapped.set(iterPos);
-						claims.clear(iterPos);
-						this.times.position(iterPos * 8);
-						this.times.putLong(System.currentTimeMillis());
-					}
-					if (claimed)
-						return val;
-				}
-
-			} finally {
-				iterPos++;
-				this.hashlock.unlock();
-			}
-		}
-		return -1;
-	}
+	
 
 	private void recreateMap() {
 		mapped = new BitSet(size);
@@ -244,7 +180,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		keys.load();
 		this.values = vRaf.map(MapMode.READ_WRITE, 0, size * 8);
 		values.load();
-		times.load();
 		if (bgst < 0) {
 			SDFSLogger.getLog()
 					.info("Hashtable " + path
@@ -376,8 +311,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 					fp = fp * -1;
 					this.values.position(pos);
 					this.values.putLong(fp);
-					this.times.position(pos);
-					this.times.putLong(0);
 					pos = (pos / 8);
 					this.claims.clear(pos);
 					this.mapped.clear(pos);
@@ -768,8 +701,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 					claims.clear(iterPos);
 					if (claimed) {
 						this.mapped.set(iterPos);
-						this.times.position(iterPos * 8);
-						this.times.putLong(System.currentTimeMillis());
 						k++;
 					}
 				} finally {

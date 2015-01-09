@@ -113,6 +113,7 @@ public class AWSS3ChunkStore implements AbstractChunkStore {
 			System.out.println(utils.toString());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}

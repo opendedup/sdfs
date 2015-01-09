@@ -74,6 +74,7 @@ public class DSECompaction {
 			z = ManualGC.clearChunks();
 		} catch (InterruptedException e1) {
 			SDFSLogger.infoConsoleMsg("Unable to finish becasue interrupted");
+			e1.printStackTrace();
 			System.exit(-1);
 		}
 		SDFSLogger.infoConsoleMsg("Cleared [" + z
