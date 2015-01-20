@@ -93,7 +93,7 @@ public class VolumeConfigWriter {
 	boolean sdfsCliRequireAuth = false;
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
-
+	String bucketLocation = null;
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	boolean networkEnable = false;
@@ -274,6 +274,10 @@ public class VolumeConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
+		if (cmd.hasOption("aws-bucket-location")) {
+			this.bucketLocation =cmd
+					.getOptionValue("aws-bucket-location");
+		}
 		if (cmd.hasOption("azure-enabled")) {
 			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("azure-enabled"));
@@ -300,12 +304,10 @@ public class VolumeConfigWriter {
 				}
 				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkBucketUnique(cloudAccessKey,
 						cloudSecretKey, cloudBucketName)) {
-					System.out.println("Error : Unable to create volume");
-					System.out.println("cloud-bucket-name is not unique");
-					System.exit(-1);
+					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
+					System.out.println("Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
+					
 				}
-				
-
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out
@@ -610,6 +612,12 @@ public class VolumeConfigWriter {
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if(this.bucketLocation!=null)
+				extended.setAttribute("default-bucket-location", this.bucketLocation);
+				cs.appendChild(extended);
+			} else if(bucketLocation != null) {
+				Element extended  = xmldoc.createElement("extended-config");
+				extended.setAttribute("default-bucket-location", this.bucketLocation);
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -720,6 +728,11 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\".")
 				.hasArg(true).withArgName("password").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-bucket-location")
+				.withDescription(
+						"The aws location for this bucket")
+				.hasArg(true).withArgName("aws location").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-require-auth")
 				.withDescription(
