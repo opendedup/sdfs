@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 
 /**
@@ -40,7 +41,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract DedupChunkInterface getWriteBuffer(long position)
-			throws FileClosedException, IOException;
+			throws FileClosedException, IOException, DataArchivedException;
 
 	public void updateMap(DedupChunkInterface writeBuffer,int doop)
 			throws FileClosedException, IOException;
@@ -129,7 +130,7 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void writeCache(WritableCacheBuffer writeBuffer)
-			throws FileClosedException, IOException, HashtableFullException;
+			throws FileClosedException, IOException, HashtableFullException,DataArchivedException;
 
 	/**
 	 * 

@@ -26,7 +26,6 @@ package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.CreationDisposition.CREATE_ALWAYS;
 
-
 import static net.decasdev.dokan.CreationDisposition.CREATE_NEW;
 import static net.decasdev.dokan.CreationDisposition.OPEN_ALWAYS;
 import static net.decasdev.dokan.CreationDisposition.OPEN_EXISTING;
@@ -312,7 +311,7 @@ public class WinSDFS implements DokanOperations {
 		try {
 			ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			// log("wrote " + new String(b));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("unable to write to file" + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
@@ -339,6 +338,7 @@ public class WinSDFS implements DokanOperations {
 		try {
 			ch.force(true);
 		} catch (Exception e) {
+			
 			log.error("unable to sync file " + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
@@ -356,11 +356,11 @@ public class WinSDFS implements DokanOperations {
 					Main.volume.getCapacity(), 1, 1);
 		}
 		try {
-		MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(fileName)
-				.getPath());
-		MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
-		return fi.toByHandleFileInformation();
-		}catch (Exception e) {
+			MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(
+					fileName).getPath());
+			MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
+			return fi.toByHandleFileInformation();
+		} catch (Exception e) {
 			log.error("unable to sync file " + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
@@ -414,10 +414,10 @@ public class WinSDFS implements DokanOperations {
 		// log("[onSetFileTime] " + fileName);
 		File f = this.resolvePath(fileName);
 		try {
-		MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-		mf.setLastAccessed(atime * 1000L, true);
-		mf.setLastModified(mtime * 1000L, true);
-		}catch (Exception e) {
+			MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+			mf.setLastAccessed(atime * 1000L, true);
+			mf.setLastModified(mtime * 1000L, true);
+		} catch (Exception e) {
 			log.error("unable to set file " + fileName, e);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
@@ -440,9 +440,14 @@ public class WinSDFS implements DokanOperations {
 			}
 		}
 		File f = this.resolvePath(fileName);
-		if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
-			log.warn("unable to delete file " + f.getPath());
-			throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
+		try {
+			if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
+				log.warn("unable to delete file " + f.getPath());
+				throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
+			}
+		} catch (Exception e) {
+			log.debug("unable to delete folder " + f.getPath());
+			throw new DokanOperationException(WinError.ERROR_ACCESS_DENIED);
 		}
 		//
 	}
@@ -452,9 +457,14 @@ public class WinSDFS implements DokanOperations {
 			throws DokanOperationException {
 		// log("[onDeleteDirectory] " + path);
 		File f = resolvePath(path);
-		if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
+		try {
+			if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
+				log.debug("unable to delete folder " + f.getPath());
+				throw new DokanOperationException(WinError.ERROR_DIR_NOT_EMPTY);
+			}
+		} catch (Exception e) {
 			log.debug("unable to delete folder " + f.getPath());
-			throw new DokanOperationException(WinError.ERROR_DIR_NOT_EMPTY);
+			throw new DokanOperationException(WinError.ERROR_ACCESS_DENIED);
 		}
 	}
 
@@ -467,7 +477,7 @@ public class WinSDFS implements DokanOperations {
 		File f = null;
 		try {
 			f = resolvePath(from);
-			MetaFileStore.rename(f.getPath(),this.mountedVolume + to);
+			MetaFileStore.rename(f.getPath(), this.mountedVolume + to);
 			DedupFileChannel ch = this.dedupChannels.get(arg3.handle);
 			if (ch != null) {
 				this.channelLock.lock();

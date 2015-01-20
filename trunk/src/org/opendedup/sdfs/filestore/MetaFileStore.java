@@ -54,7 +54,6 @@ public class MetaFileStore {
 							+ Main.version + "]");
 			System.exit(-1);
 		}
-
 	}
 
 	/**

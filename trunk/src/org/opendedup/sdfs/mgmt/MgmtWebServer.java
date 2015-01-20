@@ -152,6 +152,19 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					}
+					else if(cmd.equalsIgnoreCase("syncfiles")) {
+						try {
+							Element msg =new SyncFSCmd().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
 					else if (cmd.equalsIgnoreCase("setwritespeed")) {
 						try {
 							Element msg =new SetWriteSpeed().getResult(

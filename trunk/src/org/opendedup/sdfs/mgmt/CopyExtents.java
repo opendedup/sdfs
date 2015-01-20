@@ -1,10 +1,12 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
+
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -85,7 +87,15 @@ public class CopyExtents {
 						p.nlen = Main.CHUNK_LENGTH - p.pos;
 						p.hashloc[7] = 3;
 					}
+					try {
 					ddc.copyExtent(p);
+					}catch(DataArchivedException e) {
+						if(Main.checkArchiveOnRead){
+							SDFSLogger.getLog().warn("Archived data found in "+ sdf.getMetaFile().getPath()+ " at " + _spos + ". Recovering data from archive. This may take up to 4 hours");
+							RestoreArchive.recoverArchives(smf);
+						}
+						else throw e;
+					}
 					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
 					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
 

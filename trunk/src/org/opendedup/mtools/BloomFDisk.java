@@ -40,6 +40,10 @@ public class BloomFDisk {
 			Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
 	
+	public BloomFDisk() {
+		
+	}
+	
 	public BloomFDisk(SDFSEvent evt) throws FDiskException {
 		long entries = HCServiceProxy.getSize();
 		init(evt,entries);
@@ -48,8 +52,14 @@ public class BloomFDisk {
 	public BloomFDisk(SDFSEvent evt,long entries) throws FDiskException {
 		init(evt,entries);
 	}
+	
+	public SDFSEvent getEvt() {
+		return this.fEvt;
+	}
 
-	private void init(SDFSEvent evt, long entries) throws FDiskException {
+	public void init(SDFSEvent evt, long entries) throws FDiskException {
+		if(entries ==  0)
+			entries = HCServiceProxy.getSize();
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
 			SDFSEvent

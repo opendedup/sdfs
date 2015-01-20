@@ -1283,9 +1283,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			this.vmdk = in.readBoolean();
 			// owner id is ignored
-			in.readInt();
+			this.owner_id = in.readInt();
 			// group id is ignored
-			in.readInt();
+			this.group_id = in.readInt();
 			byte[] hmb = new byte[in.readInt()];
 			in.readFully(hmb);
 			this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
@@ -1300,6 +1300,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.attributes = in.readLong();
 				} 
+				if(in.available() > 0) {
+					this.mode = in.readInt();
+				}
 				/*
 				if(in.available() > 0) {
 					int vlen = in.readInt();
@@ -1368,6 +1371,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeInt(vb.length);
 			out.write(vb);
 			out.writeLong(attributes);
+			out.writeInt(this.mode);
 			/*
 			if(this.backingFile == null)
 				out.writeInt(0);

@@ -67,6 +67,7 @@ public class VolumeConfigWriter {
 	long chunk_store_allocation_size = 0;
 	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	String fdisk_schedule = "0 59 23 * * ?";
+	String syncfs_schedule = "4 59 23 * * ?";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
@@ -544,7 +545,6 @@ public class VolumeConfigWriter {
 			sn = sn *-1;
 		vol.setAttribute("serial-number", Integer.toString(sn));
 		root.appendChild(vol);
-
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
@@ -601,7 +601,7 @@ public class VolumeConfigWriter {
 				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("block-size", "20MB");
+				extended.setAttribute("block-size", "20 MB");
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "6000");
 				extended.setAttribute("sync-files", "true");
@@ -609,6 +609,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
+				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -629,7 +630,7 @@ public class VolumeConfigWriter {
 				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("block-size", "10MB");
+				extended.setAttribute("block-size", "10 MB");
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "6000");
 				extended.setAttribute("sync-files", "true");
@@ -637,6 +638,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
+				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
