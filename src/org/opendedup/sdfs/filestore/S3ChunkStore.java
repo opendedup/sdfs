@@ -345,7 +345,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 	public void init(Element config) throws IOException {
 		this.name = Main.cloudBucket;
 		try {
-
+			String bucketLocation = null;
+			if (config.hasAttribute("default-bucket-location")) {
+				bucketLocation = config.getAttribute("default-bucket-location");
+			}
 			pool = new S3ServicePool(S3ChunkStore.awsCredentials,
 					Main.dseIOThreads);
 			RestS3Service s3Service = pool.borrowObject();
@@ -353,7 +356,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
 
 			if (s3Bucket == null) {
+				if(bucketLocation == null)
 				s3Bucket = s3Service.createBucket(this.name);
+				else
+					s3Bucket = s3Service.createBucket(this.name,bucketLocation);
 				SDFSLogger.getLog().info("created new store " + name);
 				S3Object s3Object = new S3Object("bucketinfo");
 				s3Object.addMetadata("currentsize", "-1");

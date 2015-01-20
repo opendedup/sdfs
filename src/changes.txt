@@ -1,3 +1,9 @@
+Version 2.0.9
+	Fixes :
+	* Fixed Block Chunk Store errors when writing with variable block deduplication
+	Enhancements :
+	* Garbage collection now done using new method that will increase performance
+	* Cloud Storage bucket location can now be defined using --aws-bucket-location
 Version 2.0.8
 	Fixes :
 	* Fixed More Replication Symlink issues.
