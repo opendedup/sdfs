@@ -1,8 +1,8 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -16,7 +16,7 @@ public class RestoreArchiveCmd {
 
 	String srcPath;
 
-	public Element getResult(String file) throws IOException {
+	public Element getResult(String file) throws IOException, ExecutionException {
 		this.srcPath = file;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		if (!f.exists())

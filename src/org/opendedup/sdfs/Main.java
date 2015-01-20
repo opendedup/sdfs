@@ -21,6 +21,8 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
+	public static boolean checkArchiveOnOpen= false;
+	public static boolean checkArchiveOnRead = false;
 	
 	public static int writeTimeoutSeconds = 300;
 	public static int readTimeoutSeconds = 300;

@@ -8,7 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 
 import com.google.common.eventbus.EventBus;
@@ -50,9 +52,28 @@ public class DedupFileChannel {
 		this.flags = flags;
 		SparseDedupFile sdf = (SparseDedupFile) df;
 		eventBus.register(sdf.bdb);
+		if(Main.checkArchiveOnOpen) {
+			this.recoverArchives();
+		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"Initializing Cache " + df.getMetaFile().getPath());
+	}
+	
+	private void recoverArchives() throws IOException {
+		RestoreArchive ar = new RestoreArchive(df.getMetaFile());
+		Thread th = new Thread(ar);
+		th.start();
+		while(!ar.fEvt.isDone()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+		}
+		if(ar.fEvt.level != SDFSEvent.INFO) {
+			throw new IOException("unable to restore all archived data for " + df.getMetaFile().getPath());
+		}
 	}
 
 	public boolean isClosed() {
@@ -209,9 +230,10 @@ public class DedupFileChannel {
 	 * @param offset
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
+	 * @throws DataArchivedException 
 	 */
 	public void writeFile(ByteBuffer buf, int len, int pos, long offset,
-			boolean propigate) throws java.io.IOException {
+			boolean propigate) throws java.io.IOException, DataArchivedException {
 
 		if (SDFSLogger.isDebug()) {
 			SDFSLogger.getLog().debug(
@@ -271,7 +293,8 @@ public class DedupFileChannel {
 				while (writeBuffer == null) {
 					try {
 						writeBuffer = df.getWriteBuffer(filePos);
-						writeBuffer.write(b, startPos);
+							writeBuffer.write(b, startPos);
+						
 						if (_len != Main.CHUNK_LENGTH && propigate
 								&& df.getMetaFile().getDev() != null) {
 							eventBus.post(new BlockDeviceSmallWriteEvent(df
@@ -296,7 +319,14 @@ public class DedupFileChannel {
 				}
 
 			}
-		} catch (FileClosedException e) {
+		} catch(DataArchivedException e) {
+			if(Main.checkArchiveOnRead) {
+				SDFSLogger.getLog().warn("Archived data found in "+ df.getMetaFile().getPath()+ " at " + pos + ". Recovering data from archive. This may take up to 4 hours");
+				this.recoverArchives();
+				this.writeFile(buf, len, pos, offset, propigate);
+			}
+			else throw e;
+		}catch (FileClosedException e) {
 			SDFSLogger.getLog()
 					.warn(df.getMetaFile().getPath()
 							+ " is closed but still writing");
@@ -454,6 +484,7 @@ public class DedupFileChannel {
 							if (bytesLeft < _len)
 								_len = bytesLeft;
 							_rb = readBuffer.getReadChunk(startPos, _len);
+							
 							buf.put(_rb);
 							df.getMetaFile().getIOMonitor()
 									.addBytesRead(_len, true);
@@ -469,7 +500,14 @@ public class DedupFileChannel {
 							readBuffer = null;
 						}
 					}
-				} catch (FileClosedException e) {
+				} catch(DataArchivedException e) {
+					if(Main.checkArchiveOnRead){
+						SDFSLogger.getLog().warn("Archived data found in "+ df.getMetaFile().getPath()+ " at " + startPos + ". Recovering data from archive. This may take up to 4 hours");
+						this.recoverArchives();
+						this.read(buf, bufPos, siz, filePos);
+					}
+					else throw e;
+				}catch (FileClosedException e) {
 					SDFSLogger.getLog().warn(
 							df.getMetaFile().getPath()
 									+ " is closed but still writing");

@@ -101,6 +101,10 @@ public class SDFSCmdline {
 			ProcessClusterPromoteToGC.runCmd();
 			System.exit(0);
 		}
+		if (cmd.hasOption("cloud-sync-fs")) {
+			ProcessSyncFSCmd.runCmd();
+			System.exit(0);
+		}
 		if (cmd.hasOption("cluster-get-gc-master")) {
 			ProcessGetGCMaster.runCmd();
 			System.exit(0);
@@ -286,6 +290,9 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder.withLongOpt("change-password")
 				.withDescription("Change the administrative password.")
 				.hasArg(true).create());
+		options.addOption(OptionBuilder.withLongOpt("cloud-sync-fs")
+				.withDescription("Verify Files are sync'd with cloud storage backend.")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("password")
 				.withDescription(

@@ -13,7 +13,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.FDisk;
+import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
@@ -501,7 +501,7 @@ public class HCServiceProxy {
 	public static void runFDisk(FDiskEvent evt) throws FDiskException,
 			IOException {
 		if (Main.chunkStoreLocal)
-			new FDisk(evt);
+			new BloomFDisk(evt);
 		else {
 			long sz = HCServiceProxy.getSize();
 			FDiskCmd cmd = new FDiskCmd(sz,evt);

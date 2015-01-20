@@ -438,10 +438,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
-		}catch (DataArchivedException e) {
+		} catch (DataArchivedException e) {
 			throw new FuseException("File Archived").initErrno(Errno.ENODATA);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + path, e);
 			throw new FuseException("error reading " + path)
 					.initErrno(Errno.ENODATA);
@@ -535,14 +534,25 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				if (f.getName().equals(".") || f.getName().equals(".."))
 					return 0;
 				else {
-					if (MetaFileStore.removeMetaFile(f.getPath()))
-						return 0;
-					else {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug(
-									"unable to delete folder " + f.getPath());
-						throw new FuseException().initErrno(Errno.ENOTEMPTY);
+					try {
+						boolean del = MetaFileStore.removeMetaFile(f.getPath());
+						if (del)
+							return 0;
+						else {
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug(
+										"unable to delete folder "
+												+ f.getPath());
+							throw new FuseException()
+									.initErrno(Errno.ENOTEMPTY);
+						}
+
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug(
+								"unable to delete folder " + f.getPath());
+						throw new FuseException().initErrno(Errno.EACCES);
 					}
+
 				}
 			}
 		} finally {
@@ -633,19 +643,19 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				try {
 					this.getFileChannel(path, -1).getDedupFile().forceClose();
 				} catch (IOException e) {
-					SDFSLogger.getLog().error("unable to close file " + path, e);
+					SDFSLogger.getLog()
+							.error("unable to close file " + path, e);
 				}
 			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				Path p = new File(mountedVolume + path).toPath();
 				// SDFSLogger.getLog().info("deleting symlink " + f.getPath());
 				try {
-				if (!Files.deleteIfExists(p))
-					throw new FuseException().initErrno(Errno.EACCES);
-				return 0;
-				}catch (IOException e) {
-					SDFSLogger.getLog().warn(
-							"unable to delete symlink " + p);
+					if (!Files.deleteIfExists(p))
+						throw new FuseException().initErrno(Errno.EACCES);
+					return 0;
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn("unable to delete symlink " + p);
 					throw new FuseException().initErrno(Errno.ENOSYS);
 				}
 			} else {
@@ -665,7 +675,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					throw new FuseException().initErrno(Errno.EACCES);
 				}
 			}
-		}  finally {
+		} finally {
 		}
 	}
 
@@ -710,7 +720,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			DedupFileChannel ch = (DedupFileChannel) fh;
 			try {
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + path, e);
 				throw new FuseException().initErrno(Errno.EACCES);
 			}
@@ -947,10 +957,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 						throw new FuseException().initErrno(Errno.ENODATA);
 				}
 			}
-		}catch(FuseException e) {
+		} catch (FuseException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {

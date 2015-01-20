@@ -1,7 +1,6 @@
 package org.opendedup.mtools;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +42,22 @@ public class RestoreArchive implements Runnable {
 		this.initiateArchive(dbf);
 		
 
+	}
+	
+	public static void recoverArchives(MetaDataDedupFile f) throws IOException {
+		RestoreArchive ar = new RestoreArchive(f);
+		Thread th = new Thread(ar);
+		th.start();
+		while(!ar.fEvt.isDone()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+		}
+		if(ar.fEvt.level != SDFSEvent.INFO) {
+			throw new IOException("unable to restore all archived data for " + f.getPath());
+		}
 	}
 
 	private void initiateArchive(File mapFile) throws IOException {
@@ -87,7 +102,6 @@ public class RestoreArchive implements Runnable {
 			this.init();
 			while (this.restoreRequests.size() > 0) {
 				ArrayList<String> al = new ArrayList<String>();
-				try {
 					for (String id : this.restoreRequests) {
 						try {
 							SDFSLogger.getLog().debug("will check " + id);
@@ -100,7 +114,8 @@ public class RestoreArchive implements Runnable {
 							} else {
 								SDFSLogger.getLog().debug("not restored " + id);
 							}
-						} catch (IOException e) {
+						} catch (Exception e) {
+							
 							SDFSLogger.getLog().error(
 									"unable to check restore for " + id, e);
 						}
@@ -112,16 +127,13 @@ public class RestoreArchive implements Runnable {
 					al = null;
 					if(this.restoreRequests.size() > 0)
 						Thread.sleep(15 * 60 * 1000);
-				} catch (InterruptedException e) {
-					break;
-				}
 			}
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / (1000 * 60)
 							+ "] Minutes to import [" + totalArchives.get() + "]");
 			fEvt.endEvent("Archive Restore Succeeded for " + f.getPath());
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("archive restore failed", e);
+			SDFSLogger.getLog().error("archive restore failed", e);
 			fEvt.endEvent("Archive Restore failed because [" + e.toString()
 					+ "]", SDFSEvent.ERROR);
 		}

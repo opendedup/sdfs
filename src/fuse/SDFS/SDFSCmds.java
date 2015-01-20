@@ -2,7 +2,7 @@ package fuse.SDFS;
 
 import java.io.File;
 
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -317,7 +317,7 @@ public class SDFSCmds {
 							+ "Destination [" + dstPath + "]", f));
 			return "SUCCESS Snapshot Success: took snapshot Source [" + srcPath
 					+ "] " + "Destination [" + dstPath + "]";
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("ERROR Snapshot Failed: unable to take snapshot Source ["
 					+ srcPath + "] " + "Destination [" + dstPath
 					+ "] because :" + e.toString(), e);

@@ -1,6 +1,8 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -337,7 +339,7 @@ public class SparseDedupFile implements DedupFile {
 
 	@Override
 	public void writeCache(WritableCacheBuffer writeBuffer) throws IOException,
-			HashtableFullException, FileClosedException {
+			HashtableFullException, FileClosedException, DataArchivedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
@@ -504,7 +506,7 @@ public class SparseDedupFile implements DedupFile {
 									if (p.hashloc[0] == 1)
 										dups = dups + f.len;
 									ar.add(p);
-								} catch (Throwable e) {
+								} catch (Exception e) {
 									SDFSLogger.getLog().warn(
 											"unable to write object finger", e);
 									throw e;
@@ -514,9 +516,12 @@ public class SparseDedupFile implements DedupFile {
 							}
 							writeBuffer.setDoop(dups);
 							writeBuffer.setAR(ar);
-						} catch (Throwable e) {
+						} catch(DataArchivedException e) {
+							throw e;
+						}
+						catch (Exception e) {
 							this.errOccured = true;
-							throw new IOException(e);
+							throw e;
 						} finally {
 							hashPool.returnObject(hc);
 						}
@@ -536,11 +541,15 @@ public class SparseDedupFile implements DedupFile {
 				mf.getIOMonitor().addDulicateData(
 						(dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, dups);
-			} catch (Exception e) {
+			}catch(DataArchivedException e) {
+				throw e;
+			}
+			catch (Exception e) {
 				SDFSLogger.getLog().fatal(
 						"unable to add chunk at position "
 								+ writeBuffer.getFilePosition(), e);
 				this.errOccured = true;
+				throw new IOException(e);
 			} finally {
 
 			}
@@ -682,7 +691,6 @@ public class SparseDedupFile implements DedupFile {
 			if (this.errOccured) {
 				throw new IOException("write error occured");
 			}
-
 			if (!storageConnected)
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
@@ -692,7 +700,8 @@ public class SparseDedupFile implements DedupFile {
 				} else {
 					return this.writeBuffers.get(chunkPos);
 				}
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				throw new IOException(e);
 			}
 		} finally {
@@ -995,9 +1004,13 @@ public class SparseDedupFile implements DedupFile {
 				this.closed = true;
 
 				if (!this.deleted) {
+					try {
 					MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
 					MetaFileStore.getMF(mf.getPath()).sync();
 					eventBus.post(new SFileWritten(this));
+					}catch(Exception e) {
+						SDFSLogger.getLog().error("error while syncing file in close",e);
+					}
 				}
 			}
 			if (this.toOccured) {

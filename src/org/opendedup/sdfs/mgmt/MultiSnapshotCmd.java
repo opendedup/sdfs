@@ -50,7 +50,7 @@ public class MultiSnapshotCmd implements XtendedCmd {
 
 				MetaFileStore.snapshot(f.getPath(), nf.getPath(), false, sevt);
 
-			} catch (IOException e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"Snapshot Failed: unable to take snapshot Source ["
 								+ srcPath + "] " + "Destination [" + dstPath
