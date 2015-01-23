@@ -1,6 +1,7 @@
 package fuse.SDFS;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -11,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.List;
 
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
@@ -829,15 +832,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					dst.put(sdfsCmds.getAttr(name, path).getBytes());
 				else {
 					File f = this.resolvePath(path);
-
-					MetaDataDedupFile mf = MetaFileStore.getMF(f);
-					String val = mf.getXAttribute(name);
-					if (val != null) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("val=" + val);
-						dst.put(val.getBytes());
-					} else
-						throw new FuseException().initErrno(Errno.ENODATA);
+						Path _p = f.toPath();
+						UserDefinedFileAttributeView view = Files.getFileAttributeView(_p,
+						        UserDefinedFileAttributeView.class);
+						view.read(name, dst);
+					
 				}
 			}
 		} catch (Exception e) {
@@ -853,8 +852,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			throws FuseException {
 		this.resolvePath(path);
 		try {
-			if (name.startsWith("security.capability"))
-				return 0;
 			if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs")
 					|| name.startsWith("user.dse")) {
 				try {
@@ -866,12 +863,19 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 			} else {
 				File f = this.resolvePath(path);
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				String val = mf.getXAttribute(name);
-				if (val != null)
-					sizeSetter.setSize(val.getBytes().length);
+				
+					Path _p = f.toPath();
+					UserDefinedFileAttributeView view = Files.getFileAttributeView(_p,
+					        UserDefinedFileAttributeView.class);
+					sizeSetter.setSize(view.size(name));
+				
 			}
-		} catch (Exception e) {
+			
+		} catch(java.nio.file.FileSystemException e) {
+			if(SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
@@ -886,11 +890,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = this.resolvePath(path);
 			if (!f.exists())
 				throw new FuseException().initErrno(Errno.ENFILE);
-			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			String[] atters = mf.getXAttersNames();
-			for (int i = 0; i < atters.length; i++) {
-				lister.add(atters[i]);
-			}
+				Path _p = f.toPath();
+				UserDefinedFileAttributeView view = Files.getFileAttributeView(_p,
+				        UserDefinedFileAttributeView.class);
+				List<String> l = view.list();
+				for(String s : l) {
+					lister.add(s);
+				}
+		
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
@@ -921,8 +929,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				sdfsCmds.runCMD(path, name, valStr);
 			} else {
 				File f = this.resolvePath(path);
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.addXAttribute(name, valStr);
+					Path _path = f.toPath();
+					UserDefinedFileAttributeView view = Files
+							.getFileAttributeView(_path,
+									UserDefinedFileAttributeView.class);
+					view.write(name, value);
+					if(SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("set " + name + " to " + valStr);
+				
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
@@ -946,15 +960,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					dst.put(sdfsCmds.getAttr(name, path).getBytes());
 				else {
 					File f = this.resolvePath(path);
-
-					MetaDataDedupFile mf = MetaFileStore.getMF(f);
-					String val = mf.getXAttribute(name);
-					if (val != null) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("val=" + val);
-						dst.put(val.getBytes());
-					} else
-						throw new FuseException().initErrno(Errno.ENODATA);
+						Path _p = f.toPath();
+						UserDefinedFileAttributeView view = Files.getFileAttributeView(_p,
+						        UserDefinedFileAttributeView.class);
+						view.read(name, dst);
+					
 				}
 			}
 		} catch (FuseException e) {
@@ -981,8 +991,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				sdfsCmds.runCMD(path, name, valStr);
 			} else {
 				File f = this.resolvePath(path);
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.addXAttribute(name, valStr);
+					Path _path = f.toPath();
+					UserDefinedFileAttributeView view = Files
+							.getFileAttributeView(_path,
+									UserDefinedFileAttributeView.class);
+					view.write(name, value);
+				
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
