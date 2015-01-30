@@ -29,6 +29,7 @@ public class MountSDFS {
 				"o",
 				true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
+		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption("d", false, "debug output");
 		options.addOption("s", false, "Run single threaded");
 		options.addOption("m", true,
@@ -94,6 +95,11 @@ public class MountSDFS {
 			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
+		if(cmd.hasOption("cfr")) {
+			Main.syncDL = true;
+			Main.runConsistancyCheck = true;
+		}
+			
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
 					+ "-volume-cfg.xml");

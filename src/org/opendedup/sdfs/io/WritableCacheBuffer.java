@@ -149,13 +149,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					"reading " + df.getMetaFile().getPath() + " df="
 							+ df.getGUID() + " fpos=" + this.position
 							+ " start=" + startPos + " len=" + len);
-
+		this.lock.lock();
+		try {
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed");
 		if (this.flushing)
 			throw new BufferClosedException("Buffer Flushing");
-		this.lock.lock();
-		try {
 			try {
 				this.initBuffer();
 			} catch (InterruptedException e) {
