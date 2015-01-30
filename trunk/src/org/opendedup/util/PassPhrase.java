@@ -45,6 +45,7 @@ import java.security.SecureRandom;
 public class PassPhrase {
 	/** Minimum length for a decent password */
 	public static final int MIN_LENGTH = 64;
+	public static final int PASSWD_MIN_LENGTH = 12;
 
 	/** The random number generator. */
 	protected static java.security.SecureRandom r = new java.security.SecureRandom();
@@ -66,6 +67,14 @@ public class PassPhrase {
 	public static String getNext() {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < MIN_LENGTH; i++) {
+			sb.append(goodChar[r.nextInt(goodChar.length)]);
+		}
+		return sb.toString();
+	}
+	
+	public static String getPasswdNext() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < PASSWD_MIN_LENGTH; i++) {
 			sb.append(goodChar[r.nextInt(goodChar.length)]);
 		}
 		return sb.toString();

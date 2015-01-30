@@ -116,6 +116,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
+		this.dirty = true;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),
 				LinkOption.NOFOLLOW_LINKS);
@@ -182,19 +183,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void addXAttribute(String name, String value, boolean propigateEvent) {
 		extendedAttrs.put(name, value);
 	}
-	
+
 	public void setBackingFile(String file) {
 		this.backingFile = file;
 	}
-	
+
 	public String getBackingFile() {
 		return this.backingFile;
 	}
-	
+
 	public void setInterWeaveCP(boolean interweave) {
 		this.iterWeaveCP = interweave;
 	}
-	
+
 	public boolean isInterWeaveCP() {
 		return this.iterWeaveCP;
 	}
@@ -606,6 +607,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			Main.volume.addVirtualBytesWritten(this.getIOMonitor()
 					.getVirtualBytesWritten(), true);
 			_mf.setVmdk(this.isVmdk(), true);
+			_mf.dirty = true;
 			_mf.unmarshal();
 			evt.curCt = evt.curCt + 1;
 			return _mf;
@@ -721,7 +723,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 								Path sdbf = new File(sdbdirectory.getPath()
 										+ File.separator + file.dfGuid + ".map")
 										.toPath();
-								
+
 								File ddbdir = new File(npath + File.separator
 										+ "ddb" + File.separator
 										+ file.dfGuid.substring(0, 2)
@@ -730,7 +732,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 								Path ddbf = new File(ddbdir.getPath()
 										+ File.separator + file.dfGuid + ".map")
 										.toPath();
-								
+
 								Files.copy(sdbf, ddbf,
 										StandardCopyOption.REPLACE_EXISTING,
 										StandardCopyOption.COPY_ATTRIBUTES);
@@ -989,10 +991,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					return false;
 				}
 			} else if (f.isDirectory()) {
-				return f.renameTo(new File(dest));
+				eventBus.post(new MFileDeleted(this,true));
+				boolean rn = f.renameTo(new File(dest));
+				if (rn) {
+					this.path = dest;
+				}
+				eventBus.post(new MFileWritten(this));
+				return rn;
 			} else {
 				MetaFileStore.removeMetaFile(dest, true);
-				DedupFileStore.updateDedupFile(this);
+				if (this.dfGuid != null)
+					DedupFileStore.updateDedupFile(this);
 				boolean rename = f.renameTo(new File(dest));
 
 				if (rename) {
@@ -1115,6 +1124,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	}
 
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
+	}
+
 	/**
 	 * @param lastModified
 	 *            the lastModified to set
@@ -1142,7 +1155,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the length
 	 */
 	public long length() {
-		if(SDFSLogger.isDebug())
+		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().info("len=" + this.length);
 		return length;
 	}
@@ -1296,29 +1309,24 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					byte[] vb = new byte[vlen];
 					in.readFully(vb);
 					this.version = new String(vb);
-				} 
+				}
 				if (in.available() > 0) {
 					this.attributes = in.readLong();
-				} 
-				if(in.available() > 0) {
+				}
+				if (in.available() > 0) {
 					this.mode = in.readInt();
 				}
 				/*
-				if(in.available() > 0) {
-					int vlen = in.readInt();
-					byte[] vb = new byte[vlen];
-					in.readFully(vb);
-					this.backingFile = new String(vb);
-					this.iterWeaveCP = in.readBoolean();
-				}
-				*/
+				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
+				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
+				 * String(vb); this.iterWeaveCP = in.readBoolean(); }
+				 */
 			} catch (Exception e) {
 
 			}
 		} finally {
 			this.writeLock.unlock();
 		}
-		
 
 	}
 
@@ -1373,15 +1381,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeLong(attributes);
 			out.writeInt(this.mode);
 			/*
-			if(this.backingFile == null)
-				out.writeInt(0);
-			else {
-				byte [] bb = this.backingFile.getBytes();
-				out.writeInt(bb.length);
-				out.write(bb);
-			}
-			out.writeBoolean(this.iterWeaveCP);
-				*/
+			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
+			 * this.backingFile.getBytes(); out.writeInt(bb.length);
+			 * out.write(bb); } out.writeBoolean(this.iterWeaveCP);
+			 */
 		} finally {
 			this.writeLock.unlock();
 		}

@@ -1,7 +1,6 @@
 package fuse.SDFS;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -21,6 +20,10 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileWritten;
+
+import com.google.common.eventbus.EventBus;
 
 import fuse.Errno;
 import fuse.Filesystem3;
@@ -45,6 +48,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	static int mbc = 1024 * 1024;
 	static int kbc = 1024;
 	private SDFSCmds sdfsCmds;
+	private static EventBus eventBus = new EventBus();
+	
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
+	}
 
 	public SDFSFileSystem(String mountedVolume, String mountPoint) {
 
@@ -350,6 +358,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 			try {
 				MetaFileStore.mkDir(f, mode);
+				eventBus.post(new MFileWritten(MetaFileStore.getMF(f)));
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("error while making dir " + path, e);
 				throw new FuseException("access denied for " + path)
@@ -609,6 +618,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			// "symlink " + src.getPath() + " to " + dst.getPath());
 			try {
 				Files.createSymbolicLink(dstP, srcP);
+				SDFSLogger.getLog().info("zzzz=" + dst.getPath() + " " + MetaFileStore.getMF(dst.getPath()).isSymlink());
+				eventBus.post(new MFileWritten(MetaFileStore.getMF(dst.getPath())));
 			} catch (IOException e) {
 
 				SDFSLogger.getLog().error(
@@ -637,7 +648,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int unlink(String path) throws FuseException {
-		// SDFSLogger.getLog().info("18 " + path);
 		// Thread.currentThread().setName("19 "+Long.toString(System.currentTimeMillis()));
 		try {
 			if (SDFSLogger.isDebug())
@@ -654,8 +664,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				Path p = new File(mountedVolume + path).toPath();
 				// SDFSLogger.getLog().info("deleting symlink " + f.getPath());
 				try {
-					if (!Files.deleteIfExists(p))
+					MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
+					eventBus.post(new MFileDeleted(mf));
+					if (!Files.deleteIfExists(p)) {
+						eventBus.post(new MFileWritten(mf));
 						throw new FuseException().initErrno(Errno.EACCES);
+					}
+					
 					return 0;
 				} catch (IOException e) {
 					SDFSLogger.getLog().warn("unable to delete symlink " + p);
@@ -695,7 +710,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 				Path p = f.toPath();
 				Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
-
+				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				if(mf.isFile())
+					mf.setDirty(true);
+				eventBus.post(new MFileWritten(mf));
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable change utime path " + path, e);
@@ -839,7 +857,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					
 				}
 			}
-		} catch (Exception e) {
+		} catch(java.nio.file.FileSystemException e) {
+			if(SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
@@ -936,6 +958,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					view.write(name, value);
 					if(SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("set " + name + " to " + valStr);
+					MetaDataDedupFile mf = MetaFileStore.getMF(f);
+					if(mf.isFile())
+						mf.setDirty(true);
+					eventBus.post(new MFileWritten(mf));
+					
 				
 			}
 		} catch (Exception e) {
@@ -967,7 +994,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					
 				}
 			}
-		} catch (FuseException e) {
+		} catch(java.nio.file.FileSystemException e) {
+			if(SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug("error getting exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}
+		catch (FuseException e) {
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);
@@ -991,12 +1023,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				sdfsCmds.runCMD(path, name, valStr);
 			} else {
 				File f = this.resolvePath(path);
-					Path _path = f.toPath();
-					UserDefinedFileAttributeView view = Files
-							.getFileAttributeView(_path,
-									UserDefinedFileAttributeView.class);
-					view.write(name, value);
-				
+				Path _path = f.toPath();
+				UserDefinedFileAttributeView view = Files
+						.getFileAttributeView(_path,
+								UserDefinedFileAttributeView.class);
+				view.write(name, value);
+				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				if(mf.isFile())
+					mf.setDirty(true);
+				eventBus.post(new MFileWritten(mf));
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);

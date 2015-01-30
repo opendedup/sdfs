@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -13,9 +12,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
+import com.google.common.eventbus.EventBus;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
 import com.googlecode.concurrentlinkedhashmap.EvictionListener;
@@ -31,6 +33,12 @@ import com.googlecode.concurrentlinkedhashmap.EvictionListener;
  * 
  */
 public class MetaFileStore {
+	
+private static EventBus eventBus = new EventBus();
+	
+	public static void registerListener(Object obj) {
+		eventBus.register(obj);
+	}
 	
 	
 
@@ -309,7 +317,12 @@ public class MetaFileStore {
 							return sd;
 						}
 					}
-					return Files.deleteIfExists(p);
+					
+					mf = getMF(new File(path));
+					eventBus.post(new MFileDeleted(mf,true));
+					boolean del= Files.deleteIfExists(p);
+					if (!del)
+						eventBus.post(new MFileWritten(mf));
 				}
 				 else {
 					mf = getMF(new File(path));

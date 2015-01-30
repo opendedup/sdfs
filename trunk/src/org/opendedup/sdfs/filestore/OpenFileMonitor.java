@@ -77,6 +77,8 @@ public class OpenFileMonitor implements Runnable {
 										.warn("Unable close file for "
 												+ df.getMetaFile().getPath(), e);
 							}
+						} else if(!Main.safeSync) {
+							df.sync(true);
 						}
 					} catch (NoSuchFileException e) {
 						try {

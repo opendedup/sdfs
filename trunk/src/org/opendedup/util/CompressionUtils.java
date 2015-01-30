@@ -17,6 +17,8 @@ import net.jpountz.lz4.LZ4Factory;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.xerial.snappy.Snappy;
+import org.xerial.snappy.SnappyInputStream;
+import org.xerial.snappy.SnappyOutputStream;
 
 //import org.h2.compress.LZFInputStream;
 //import org.h2.compress.LZFOutputStream;
@@ -110,6 +112,31 @@ public class CompressionUtils {
 		FileOutputStream fos =new FileOutputStream(dst);
         FileInputStream fis =new FileInputStream(src);
         LZ4BlockInputStream is = new LZ4BlockInputStream(fis,lz4Decompressor);
+        IOUtils.copy(is, fos);
+        fos.flush();
+        fos.close();
+        fis.close();
+	}
+	
+	public static void compressFileSnappy(File src,File dst) throws IOException {
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos =new FileOutputStream(dst);
+        FileInputStream fis =new FileInputStream(src);
+        SnappyOutputStream os = new SnappyOutputStream(fos);
+        IOUtils.copy(fis, os);
+        os.flush();
+        os.close();
+        fis.close();
+        
+	}
+	
+	public static void decompressFileSnappy(File src,File dst) throws IOException {
+		if(!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos =new FileOutputStream(dst);
+        FileInputStream fis =new FileInputStream(src);
+        SnappyInputStream is = new SnappyInputStream(fis);
         IOUtils.copy(is, fos);
         fos.flush();
         fos.close();

@@ -182,8 +182,11 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("write-timeout-seconds"))
 			Main.writeTimeoutSeconds = Integer.parseInt(vol
 					.getAttribute("write-timeout-seconds"));
-		if (vol.hasAttribute("sync-files"))
-			Main.syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
+		if (vol.hasAttribute("sync-files")) {
+			boolean syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
+			if(syncDL)
+				Main.syncDL = true;
+		}
 		if (vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol
 					.getAttribute("use-dse-size"));
