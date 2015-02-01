@@ -559,7 +559,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 									.initErrno(Errno.ENOTEMPTY);
 						}
 
-					} catch (Exception e) {
+					}catch(FuseException e) {
+						throw e;
+					}
+					catch (Exception e) {
 						SDFSLogger.getLog().debug(
 								"unable to delete folder " + f.getPath());
 						throw new FuseException().initErrno(Errno.EACCES);
@@ -679,10 +682,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			} else {
 
 				File f = this.resolvePath(path);
-				// SDFSLogger.getLog().info("deleting file " + f.getPath());
+				SDFSLogger.getLog().info("deleting file " + f.getPath());
 				try {
-					if (MetaFileStore.removeMetaFile(f.getPath()))
+					if (MetaFileStore.removeMetaFile(f.getPath())) {
+						//SDFSLogger.getLog().info("deleted file " + f.getPath());	
 						return 0;
+					}
 					else {
 						SDFSLogger.getLog().warn(
 								"unable to delete folder " + f.getPath());

@@ -180,7 +180,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 					prevm = this.pmAddr;
 				} else {
 					SDFSLogger.getLog().info(
-							"eeks " + prevm.toString() + " - "
+							prevm.toString() + " - "
 									+ this.pmAddr.toString());
 				}
 			}

@@ -465,7 +465,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			iterFC.close();
 			return null;
 		}
-		FileChunkStore store = null;
+		//FileChunkStore store = null;
 		ByteBuffer buf = ByteBuffer.wrap(new byte[this.iPageSize]);
 		long pos = -1;
 		byte comp = 0;
@@ -487,7 +487,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				enc = buf.get();
 				byte[] _hash = new byte[HashFunctionPool.hashLength];
 				buf.get(_hash);
-				store = this.getStore(iLen);
+				//store = this.getStore(iLen);
 				/*
 				byte[] chunk = store.getChunk(_hash, iStart, iLen);
 				// SDFSLogger.getLog().info("getting data from [" +iLen+"] [" +
@@ -513,8 +513,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		} catch (Throwable e) {
 			SDFSLogger
 					.getLog()
-					.error("unable to fetch chunk at position " + pos + "size="
-							+ store.getName() + " comp=" + comp + " enc=" + enc,
+					.error("unable to fetch chunk at position " + pos + " comp=" + comp + " enc=" + enc,
 							e);
 			throw new IOException(e);
 		} finally {
@@ -532,7 +531,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		this.iterlock.lock();
 		try {
 			//hc = HashFunctionPool.getHashEngine();
-			this.iterFC = chunkDataWriter.getChannel();
+			this.iterFC = new RandomAccessFile(f,"rw").getChannel();
 			this.iterFC.position(0);
 			this.size.set(0);
 			this.compressedLength.set(0);

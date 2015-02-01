@@ -103,7 +103,7 @@ public class BloomFDisk {
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
 					SDFSEvent.ERROR);
 			this.failed = true;
-
+			throw new FDiskException(e);
 		}
 	}
 

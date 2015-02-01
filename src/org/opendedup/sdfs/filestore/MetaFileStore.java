@@ -278,7 +278,6 @@ private static EventBus eventBus = new EventBus();
 
 	public static boolean removeMetaFile(String path, boolean propigateEvent) {
 		
-	
 		if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
 		getMFLock.lock();
@@ -320,8 +319,8 @@ private static EventBus eventBus = new EventBus();
 					
 					mf = getMF(new File(path));
 					eventBus.post(new MFileDeleted(mf,true));
-					boolean del= Files.deleteIfExists(p);
-					if (!del)
+					deleted= Files.deleteIfExists(p);
+					if (!deleted)
 						eventBus.post(new MFileWritten(mf));
 				}
 				 else {
