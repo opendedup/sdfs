@@ -135,9 +135,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 			RestS3Service s3Service = new RestS3Service(creds);
 			S3Bucket s3Bucket = s3Service.getBucket(bucketName);
 			if (s3Bucket == null) {
-				s3Bucket = s3Service.createBucket(bucketName);
+				return true;
+				//s3Bucket = s3Service.createBucket(bucketName);
 			}
-			return true;
+			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to create aws bucket", e);
 			return false;

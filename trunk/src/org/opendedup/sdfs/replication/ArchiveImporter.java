@@ -126,6 +126,7 @@ public class ArchiveImporter {
 						throw e;
 					}
 					SDFSLogger.getLog().info("setting up staging at " + fDstFiles.getPath());
+					fDstFiles.getParentFile().mkdirs();
 					String cpCmd = "cp -rfa " + srcFiles + " " + fDstFiles;
 					
 					xt = ProcessWorker.runProcess(cpCmd);

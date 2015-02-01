@@ -535,9 +535,14 @@ public class SparseDedupFile implements DedupFile {
 				 */
 				mf.getIOMonitor().addVirtualBytesWritten(
 						writeBuffer.capacity(), true);
-				mf.getIOMonitor().addActualBytesWritten(
-						writeBuffer.capacity()
-								- (dups - writeBuffer.getPrevDoop()), true);
+				if(writeBuffer.isNewChunk()) {
+					mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - writeBuffer.getDoop(), true);
+				} else{
+				int prev = (writeBuffer.capacity() - writeBuffer.getPrevDoop());
+				int nw = writeBuffer.capacity() - writeBuffer.getDoop();
+				
+				mf.getIOMonitor().addActualBytesWritten(nw - prev, true);
+				}
 				mf.getIOMonitor().addDulicateData(
 						(dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, dups);
@@ -668,7 +673,7 @@ public class SparseDedupFile implements DedupFile {
 		}
 		if (buf.getFingers().size() > LongByteArrayMap.MAX_ELEMENTS_PER_AR)
 			SDFSLogger.getLog().error(
-					"eeeks " + buf.getFingers().size() + " > "
+					 buf.getFingers().size() + " > "
 							+ LongByteArrayMap.MAX_ELEMENTS_PER_AR);
 		bdb.put(pos, buf.getBytes());
 		long epos = pos + buf.len;
