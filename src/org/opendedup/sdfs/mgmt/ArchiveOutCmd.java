@@ -105,7 +105,6 @@ public class ArchiveOutCmd implements Runnable {
 				throw new IOException(nft.getPath() + " does not exist");
 			eevt.endEvent("Archiving out " + srcPath + " successful");
 			sc = "successful";
-
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(
 					"Unable to archive out [" + srcPath + "] because :"

@@ -305,7 +305,6 @@ public class MetaFileImport implements Serializable {
 		}
 		this.filesProcessed++;
 		levt.filesImported = this.filesProcessed;
-
 	}
 
 	public long getFilesProcessed() {
