@@ -27,7 +27,7 @@ public class Main {
 	public static int writeTimeoutSeconds = 300;
 	public static int readTimeoutSeconds = 300;
 	// public static VolumeConfigWriterThread wth = null;
-	public static boolean runConsistancyCheck = true;
+	public static boolean runConsistancyCheck = false;
 
 	public static boolean blockDev = false;
 
