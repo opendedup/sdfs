@@ -425,6 +425,32 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 		init(path);
 	}
+	
+	/**
+	 * 
+	 * @param path
+	 *            the path to the dedup file.
+	 */
+	private MetaDataDedupFile(String path,MetaDataDedupFile mf) {
+		this.path = path;
+		this.directory = mf.directory;
+		mf.execute = mf.execute;
+		this.hidden = mf.hidden;
+		this.lastModified = mf.lastModified;
+		this.setLength(mf.length, false, true);
+		this.ownerExecOnly = mf.ownerExecOnly;
+		this.ownerReadOnly = mf.ownerReadOnly;
+		this.ownerWriteOnly = mf.ownerWriteOnly;
+		this.read = mf.read;
+		this.write = mf.write;
+		this.owner_id = mf.owner_id;
+		this.group_id = mf.group_id;
+		this.permissions = mf.permissions;
+		this.dedup = mf.dedup;
+		this.attributes = mf.attributes;
+		monitor = new IOMonitor(this);
+		this.dirty = true;
+	}
 
 	/**
 	 * 
@@ -545,22 +571,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
-			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath);
-			_mf.directory = this.directory;
-			_mf.execute = this.execute;
-			_mf.hidden = this.hidden;
-			_mf.lastModified = this.lastModified;
-			_mf.setLength(this.length, false, true);
-			_mf.ownerExecOnly = this.ownerExecOnly;
-			_mf.ownerReadOnly = this.ownerReadOnly;
-			_mf.ownerWriteOnly = this.ownerWriteOnly;
-			_mf.read = this.read;
-			_mf.write = this.write;
-			_mf.owner_id = this.owner_id;
-			_mf.group_id = this.group_id;
-			_mf.permissions = this.permissions;
-			_mf.dedup = this.dedup;
-			_mf.attributes = this.attributes;
+			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath,this);
 			this.getGUID();
 			if (!this.dedup) {
 				try {
@@ -609,6 +620,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			_mf.setVmdk(this.isVmdk(), true);
 			_mf.dirty = true;
 			_mf.unmarshal();
+			_mf.sync();
 			evt.curCt = evt.curCt + 1;
 			return _mf;
 		} else {

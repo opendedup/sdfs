@@ -164,7 +164,7 @@ public class MountSDFS {
 			fal.add(cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
+			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
 					+ ":" + Main.sdfsCliPort);
 		}
 		try {
