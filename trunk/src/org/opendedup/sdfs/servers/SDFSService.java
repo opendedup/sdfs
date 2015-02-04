@@ -62,7 +62,7 @@ public class SDFSService {
 		if (Main.chunkStoreLocal) {
 			try {
 
-				if (Main.enableNetworkChunkStore && !Main.runCompact) {
+				if (Main.volume == null && !Main.runCompact) {
 					ndServer = new NetworkDSEServer();
 					new Thread(ndServer).start();
 				}

@@ -525,7 +525,7 @@ public class MgmtWebServer implements Container {
 									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"replication finished successfully");
+									"snapshot finished successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
