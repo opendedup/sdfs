@@ -141,8 +141,6 @@ public class VolumeConfigWriter {
 		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator
 				+ "logs" + File.separator + "volume-" + volume_name
 				+ "-perf.json";
-		if (OSValidator.isWindows())
-			hash_db_class = "org.opendedup.collections.FileBasedCSMap";
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
 		base_path = OSValidator.getProgramBasePath() + "volumes"
 				+ File.separator + volume_name;

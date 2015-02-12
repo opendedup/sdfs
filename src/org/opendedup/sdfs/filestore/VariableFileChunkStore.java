@@ -53,7 +53,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 */
 	public VariableFileChunkStore() {
 		if(Main.volume != null && HashFunctionPool.max_hash_cluster > 1) {
-			storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
+			storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize+(128*2));
 		}
 		SDFSLogger.getLog().debug("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
@@ -281,8 +281,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					compress = true;
 				}
 			}
+			else {
+				data = b;
+			}
 			if (Main.chunkStoreEncryptionEnabled) {
-				data = EncryptUtils.encrypt(data);
+				data = EncryptUtils.encryptCBC(data);
 				encrypt = true;
 			}
 
