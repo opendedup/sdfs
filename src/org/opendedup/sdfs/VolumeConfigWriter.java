@@ -274,6 +274,10 @@ public class VolumeConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("aws-enabled"));
 		}
+		if (cmd.hasOption("google-enabled")) {
+			this.gsEnabled = Boolean.parseBoolean(cmd
+					.getOptionValue("google-enabled"));
+		}
 		if (cmd.hasOption("aws-bucket-location")) {
 			this.bucketLocation =cmd
 					.getOptionValue("aws-bucket-location");
@@ -627,6 +631,28 @@ public class VolumeConfigWriter {
 			aws.setAttribute("gs-access-key", this.cloudAccessKey);
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
+			if(ext) {
+				this.chunk_size = 1024;
+				
+				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
+				Element extended  = xmldoc.createElement("extended-config");
+				extended.setAttribute("block-size", "20 MB");
+				extended.setAttribute("allow-sync", "false");
+				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("sync-files", "true");
+				extended.setAttribute("local-cache-size","10GB");
+				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("io-threads", "16");
+				extended.setAttribute("delete-unclaimed", "true");
+				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if(this.bucketLocation!=null)
+				extended.setAttribute("default-bucket-location", this.bucketLocation);
+				cs.appendChild(extended);
+			} else if(bucketLocation != null) {
+				Element extended  = xmldoc.createElement("extended-config");
+				extended.setAttribute("default-bucket-location", this.bucketLocation);
+				cs.appendChild(extended);
+			}
 			cs.appendChild(aws);
 		} else if (this.azureEnabled) {
 			Element aws = xmldoc.createElement("azure-store");
@@ -995,7 +1021,7 @@ public class VolumeConfigWriter {
 						"Compress chunks before they are stored. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("gs-enabled")
+				.withLongOpt("google-enabled")
 				.withDescription(
 						"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());

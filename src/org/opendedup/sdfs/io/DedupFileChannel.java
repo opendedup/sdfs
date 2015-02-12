@@ -484,8 +484,8 @@ public class DedupFileChannel {
 							if (bytesLeft < _len)
 								_len = bytesLeft;
 							_rb = readBuffer.getReadChunk(startPos, _len);
-							
-							buf.put(_rb);
+							int nl = buf.remaining();
+							buf.put(_rb, 0, nl);
 							df.getMetaFile().getIOMonitor()
 									.addBytesRead(_len, true);
 							currentLocation = currentLocation + _len;

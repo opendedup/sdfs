@@ -114,6 +114,7 @@ public class Config {
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe
 						.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
+			int googleSz = doc.getElementsByTagName("google-store").getLength();
 			if (cbe.hasAttribute("cluster-id"))
 				Main.DSEClusterID = cbe.getAttribute("cluster-id");
 			if (cbe.hasAttribute("cluster-member-id"))
@@ -137,8 +138,19 @@ public class Config {
 						.getAttribute("io-threads"));
 			}
 			if (awsSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+				if(aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
+				Main.cloudAccessKey = aws.getAttribute("gs-access-key");
+				Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
+				Main.cloudBucket = aws.getAttribute("gs-bucket-name");
+			}
+			if (googleSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
+				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
 				if(aws.hasAttribute("chunkstore-class"))
 					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
@@ -391,6 +403,18 @@ public class Config {
 					"######### Will allocate " + Main.chunkStoreAllocationSize
 							+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
+			int googleSz = doc.getElementsByTagName("google-store").getLength();
+			if (googleSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
+				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
+				if(aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
+				Main.cloudAccessKey = aws.getAttribute("gs-access-key");
+				Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
+				Main.cloudBucket = aws.getAttribute("gs-bucket-name");
+			}
 			if (awsSz > 0) {
 
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
