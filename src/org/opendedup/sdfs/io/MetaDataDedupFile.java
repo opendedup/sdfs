@@ -836,7 +836,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if serialized
 	 */
-	private boolean unmarshal() {
+	public boolean unmarshal() {
 		return this.writeFile();
 	}
 
@@ -1237,7 +1237,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
-		this.unmarshal();
+			this.unmarshal();
 	}
 
 	/**
@@ -1253,7 +1253,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param lastAccessed
 	 * @param propigateEvent
 	 *            TODO
-	 */
+	**/
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		// this.dirty = true;
 		this.lastAccessed = lastAccessed;

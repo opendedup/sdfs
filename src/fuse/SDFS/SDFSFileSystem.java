@@ -386,7 +386,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				throw new FuseException("file exists").initErrno(Errno.EPERM);
 			} else {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.sync();
+				mf.unmarshal();
+				/*
 				// Wait up to 5 seconds for file to be created
 				int z = 5000;
 				int i = 0;
@@ -406,6 +407,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					}
 
 				}
+				*/
 				try {
 					mf.setMode(mode);
 				} finally {
