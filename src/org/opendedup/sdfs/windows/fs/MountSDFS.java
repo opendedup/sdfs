@@ -13,6 +13,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
+import org.opendedup.sdfs.windows.utils.DriveIcon;
 import org.opendedup.util.OSValidator;
 
 public class MountSDFS {
@@ -142,7 +143,14 @@ public class MountSDFS {
 			for (int i = 0; i < sFal.length; i++) {
 				System.out.println(sFal[i]);
 			}
+			try {
+			DriveIcon.addIcon(cmd.getOptionValue("m"));
+			}catch(Exception e) {
+				e.printStackTrace();
+				System.err.println("Unable to add icon for drive " + cmd.getOptionValue("m"));
+			}
 			WinSDFS sdfs = new WinSDFS();
+			
 			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath());
 		} catch (Exception e) {
 			e.printStackTrace();

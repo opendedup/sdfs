@@ -35,6 +35,7 @@ import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 public class MetaDataFileInfo {
@@ -74,7 +75,7 @@ public class MetaDataFileInfo {
 
 	ByHandleFileInformation toByHandleFileInformation() {
 		return new ByHandleFileInformation(fileAttribute, creationTime,
-				lastAccessTime, lastWriteTime, WinSDFS.volumeSerialNumber,
+				lastAccessTime, lastWriteTime, Main.volume.getSerialNumber(),
 				getFileSize(), 1, fileIndex);
 	}
 

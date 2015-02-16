@@ -75,7 +75,6 @@ public class WinSDFS implements DokanOperations {
 
 	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES
 			| FILE_UNICODE_ON_DISK | FILE_SUPPORTS_SPARSE_FILES;
-	final static int volumeSerialNumber = 64426442;
 	/** Next handle */
 	long nextHandleNo = 1;
 	final long rootCreateTime = FileTimeUtils.toFileTime(new Date());
@@ -347,7 +346,7 @@ public class WinSDFS implements DokanOperations {
 		if (fileName.equals("\\")) {
 			return new ByHandleFileInformation(FILE_ATTRIBUTE_NORMAL
 					| FILE_ATTRIBUTE_DIRECTORY, rootCreateTime, rootCreateTime,
-					rootLastWrite, volumeSerialNumber,
+					rootLastWrite, Main.volume.getSerialNumber(),
 					Main.volume.getCapacity(), 1, 1);
 		}
 		try {
@@ -521,7 +520,7 @@ public class WinSDFS implements DokanOperations {
 		info.maximumComponentLength = 256;
 		info.volumeName = "Dedup Filesystem";
 		info.fileSystemName = "SDFS";
-		info.volumeSerialNumber = volumeSerialNumber;
+		info.volumeSerialNumber = Main.volume.getSerialNumber();
 		return info;
 	}
 

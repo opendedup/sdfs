@@ -1,8 +1,11 @@
 package org.opendedup.sdfs.windows.fs;
 
+
+
 import net.decasdev.dokan.Dokan;
 
 import org.opendedup.sdfs.servers.SDFSService;
+import org.opendedup.sdfs.windows.utils.DriveIcon;
 
 class ShutdownHook extends Thread {
 	private SDFSService service;
@@ -25,6 +28,13 @@ class ShutdownHook extends Thread {
 			Dokan.removeMountPoint(driveLetter);
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				DriveIcon.deleteIcon(driveLetter);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 		}
 		System.out.println("SDFS Shut Down Cleanly");
 
