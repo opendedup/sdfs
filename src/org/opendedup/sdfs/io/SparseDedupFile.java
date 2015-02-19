@@ -960,6 +960,8 @@ public class SparseDedupFile implements DedupFile {
 	public void forceClose() throws IOException {
 		this.syncLock.lock();
 		this.channelLock.lock();
+		Lock l = this.globalLock.writeLock();
+		l.lock();
 		try {
 			if (!this.closed) {
 				if (SDFSLogger.isDebug())
@@ -1048,6 +1050,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			this.channelLock.unlock();
 			this.syncLock.unlock();
+			l.unlock();
 		}
 	}
 
