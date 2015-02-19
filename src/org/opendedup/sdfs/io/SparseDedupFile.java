@@ -81,6 +81,11 @@ public class SparseDedupFile implements DedupFile {
 	protected boolean errOccured = false;
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
+	
+	static {
+		maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
+		SDFSLogger.getLog().info("Maximum Write Buffers are " + maxWriteBuffers);
+	}
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);

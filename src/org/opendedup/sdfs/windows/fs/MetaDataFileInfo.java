@@ -24,8 +24,8 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_DIRECTORY;
-import static net.decasdev.dokan.FileAttribute.FILE_ATTRIBUTE_NORMAL;
+import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY;
+import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_NORMAL;
 
 import java.util.Date;
 
@@ -43,7 +43,7 @@ public class MetaDataFileInfo {
 
 	String fileName;
 	final boolean isDirectory;
-	private int fileAttribute = FILE_ATTRIBUTE_NORMAL;
+	private int fileAttribute = FILE_ATTRIBUTE_NORMAL.getValue();
 	long creationTime = 0;
 	long lastAccessTime = 0;
 	long lastWriteTime = 0;
@@ -56,7 +56,8 @@ public class MetaDataFileInfo {
 		this.isDirectory = mf.isDirectory();
 		fileIndex = getNextFileIndex();
 		if (isDirectory)
-			fileAttribute |= FILE_ATTRIBUTE_DIRECTORY;
+			fileAttribute |= FILE_ATTRIBUTE_DIRECTORY.getValue();
+		
 		creationTime = FileTimeUtils.toFileTime(new Date(0));
 		lastAccessTime = FileTimeUtils
 				.toFileTime(new Date(mf.getLastAccessed()));

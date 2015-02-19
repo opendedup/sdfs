@@ -22,6 +22,7 @@ import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.OSValidator;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -68,6 +69,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	static {
 		if (maxTasks > 120)
 			maxTasks = 120;
+		if(OSValidator.isWindows() && maxTasks > 10)
+			maxTasks = 10;
 		SDFSLogger.getLog().info(
 				"WriteCacheBuffer Pool List Size will be " + maxTasks);
 		worksQueue = new LinkedBlockingQueue<Runnable>(maxTasks);

@@ -13,6 +13,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
@@ -41,6 +45,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	public String mountedVolume;
 	public String mountPoint;
+	public static long MAXHDL = Long.MAX_VALUE - 10000;
 	private static final int BLOCK_SIZE = 32768;
 	private static final int NAME_LENGTH = 2048;
 	static long tbc = 1099511627776L;
@@ -49,6 +54,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	static int kbc = 1024;
 	private SDFSCmds sdfsCmds;
 	private static EventBus eventBus = new EventBus();
+	ConcurrentHashMap<Long,DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long,DedupFileChannel>();
+	long handleGen = 0;
 	
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -146,13 +153,43 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		}
 		return 0;
 	}
+	
+	private DedupFileChannel getFileChannel(String path, long handleNo,int flags)
+			throws FuseException {
+		DedupFileChannel ch = this.dedupChannels.get(handleNo);
+		if (ch == null) {
+			File f = this.resolvePath(path);
+			try {
+				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+				ch = mf.getDedupFile().getChannel(flags);
+				try {
+					if (this.dedupChannels.containsKey(handleNo)) {
+						ch.getDedupFile().unRegisterChannel(ch, flags);
+						ch = this.dedupChannels.get(handleNo);
+					} else {
+						this.dedupChannels.put(handleNo, ch);
+					}
+				} catch (Exception e) {
+
+				} finally {
+					SDFSLogger.getLog().debug("number of channels is "
+							+ this.dedupChannels.size());
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to open file" + f.getPath(), e);
+				throw new FuseException("unable to open file " + path)
+				.initErrno(Errno.EINVAL);
+			}
+		}
+		return ch;
+	}
 
 	@Override
 	public int flush(String path, Object fh) throws FuseException {
 		// SDFSLogger.getLog().info("109");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
-		DedupFileChannel ch = (DedupFileChannel) fh;
+		DedupFileChannel ch = this.getFileChannel(path, (Long)fh, -1);
 		try {
 			ch.force(true);
 		} catch (Exception e) {
@@ -170,7 +207,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// SDFSLogger.getLog().info("1000");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
-		DedupFileChannel ch = (DedupFileChannel) fh;
+		DedupFileChannel ch = this.getFileChannel(path, (Long)fh, -1);
 		try {
 			if (Main.safeSync) {
 				if (SDFSLogger.isDebug())
@@ -422,7 +459,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		}
 		return 0;
 	}
-
+	ReentrantLock ol = new ReentrantLock();
 	@Override
 	public int open(String path, int flags, FuseOpenSetter openSetter)
 			throws FuseException {
@@ -432,7 +469,17 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		try {
-			openSetter.setFh(this.getFileChannel(path, flags));
+			long z = 0;
+			ol.lock();
+			try{
+				handleGen++;
+			z = handleGen;
+			if(handleGen >MAXHDL )
+				handleGen = 0;
+			}finally{
+				ol.unlock();
+			}
+			openSetter.setFh(this.getFileChannel(path, z,flags));
 		} catch (FuseException e) {
 			SDFSLogger.getLog().error("error while opening file", e);
 			throw e;
@@ -448,7 +495,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		if (Main.volume.isOffLine())
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
-			DedupFileChannel ch = (DedupFileChannel) fh;
+			DedupFileChannel ch = this.getFileChannel(path, (Long)fh, -1);
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
 				read = 0;
@@ -491,9 +538,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		try {
 			if (!Main.safeClose)
 				return 0;
-			DedupFileChannel ch = (DedupFileChannel) fh;
+			DedupFileChannel ch = this.dedupChannels.remove((Long)fh);
 			try {
 				ch.getDedupFile().unRegisterChannel(ch, flags);
+				
 				fh = null;
 				ch = null;
 			} catch (Exception e) {
@@ -744,7 +792,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			 * log.info("writing data to  " +path + " at " + offset +
 			 * " and length of " + buf.capacity());
 			 */
-			DedupFileChannel ch = (DedupFileChannel) fh;
+			DedupFileChannel ch =this.getFileChannel(path, (Long)fh, -1);
 			try {
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			} catch (Exception e) {
