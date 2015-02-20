@@ -619,6 +619,7 @@ public class HCServiceProxy {
 
 	public static void close() {
 		hcService.close();
+		SDFSLogger.getLog().info("Deleting lock file");
 		File file = new File(Main.hashDBStore + File.separator + ".lock");
 		file.delete();
 	}

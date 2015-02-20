@@ -479,10 +479,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}finally{
 				ol.unlock();
 			}
-			openSetter.setFh(this.getFileChannel(path, z,flags));
-		} catch (FuseException e) {
+			this.getFileChannel(path, z, flags);
+			openSetter.setFh(z);
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while opening file", e);
-			throw e;
+			throw new FuseException("error opending " + path)
+			.initErrno(Errno.ENODATA);
 		} finally {
 		}
 		return 0;

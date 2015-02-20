@@ -25,7 +25,7 @@ public class SDFSService {
 	public static boolean isStopped() {
 		return stopped;
 	}
-	
+
 	public SDFSService(String configFile, ArrayList<String> volumes) {
 
 		this.configFile = configFile;
@@ -48,14 +48,16 @@ public class SDFSService {
 		MgmtWebServer.start(useSSL);
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
-		
+
 		System.out.println("Initializing HashFunction");
 		SDFSLogger.getLog().info("Initializing HashFunction");
 		SparseDedupFile.hashPool.hashCode();
 		System.out.println("HashFunction Initialized");
 		SDFSLogger.getLog().info("HashFunction Initialized");
-		if(HashFunctionPool.max_hash_cluster > 1)
-			SDFSLogger.getLog().info("HashFunction Min Block Size=" + VariableHashEngine.minLen + " Max Block Size=" + VariableHashEngine.maxLen);
+		if (HashFunctionPool.max_hash_cluster > 1)
+			SDFSLogger.getLog().info(
+					"HashFunction Min Block Size=" + VariableHashEngine.minLen
+							+ " Max Block Size=" + VariableHashEngine.maxLen);
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
@@ -79,7 +81,6 @@ public class SDFSService {
 
 			Main.pFullSched = new StandAloneGCScheduler();
 		}
-		
 
 		Main.mountEvent.endEvent("Volume Mounted");
 		try {
@@ -128,16 +129,22 @@ public class SDFSService {
 			SDFSLogger.getLog().info(
 					"######### Shutting down HashStore ###################");
 			HCServiceProxy.close();
+			SDFSLogger.getLog().info(
+					"######### HashStore Closed ###################");
+			Main.volume.setClosedGracefully(true);
+			try {
+				Config.writeSDFSConfigFile(configFile);
+			} catch (Exception e) {
+
+			}
 			if (Main.enableNetworkChunkStore && !Main.runCompact) {
 				ndServer.close();
-			} else {
-
 			}
 		}
 		try {
 			Main.volume.setClosedGracefully(true);
 			Config.writeSDFSConfigFile(configFile);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		evt.endEvent("Volume Unmounted");

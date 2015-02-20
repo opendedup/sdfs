@@ -198,9 +198,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public void close() {
+		SDFSLogger.getLog().info("Closing Block Store");
 		fileStore.close();
+		SDFSLogger.getLog().info("Closing Hash Store");
 		hs.close();
-
 	}
 
 	public void init() throws IOException {
