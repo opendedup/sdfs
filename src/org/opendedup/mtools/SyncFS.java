@@ -57,6 +57,8 @@ public class SyncFS {
 					.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
 							+ Main.volume.getName() + " file size = " + sz);
 			fEvt.maxCt = sz;
+			if(fEvt.maxCt == 0)
+				fEvt.maxCt = 1;
 
 			SDFSLogger.getLog().info("entries = " + entries);
 			SDFSLogger.getLog().info(
@@ -81,7 +83,7 @@ public class SyncFS {
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
 					/ 1000 + "] seconds to check ["
 					+ (files.get() + this.errorfiles.get())
-					+ "] files. Rrrors checking [" + errorfiles.get()
+					+ "] files. Errors checking [" + errorfiles.get()
 					+ "] files");
 		} catch (Exception e) {
 			SDFSLogger.getLog()
