@@ -218,7 +218,7 @@ public class VolumeConfigWriter {
 		
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
-			this.hash_db_class = "com.opendedup.collections.MaxFileBasedCSMap";
+			this.hash_db_class = "org.opendedup.collections.ProgessiveFileBasedCSMap";
 		}
 
 		if (cmd.hasOption("io-safe-sync")) {
