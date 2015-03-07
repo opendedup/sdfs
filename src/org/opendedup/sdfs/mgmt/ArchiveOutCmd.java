@@ -32,15 +32,16 @@ public class ArchiveOutCmd implements Runnable {
 
 	private synchronized Element archiveOut(String srcPath) throws IOException {
 		this.srcPath = srcPath;
+		String guid = RandomGUID.getGuid();
 		f = new File(Main.volume.getPath() + File.separator + srcPath);
 		SDFSLogger.getLog().debug("Relication base path = " + f.getPath());
 		vp = new File(Main.volume.getPath()).getParentFile();
 		SDFSLogger.getLog().debug("Volume parent folder = " + vp.getPath());
-		af = new File(vp.getPath() + File.separator + "archives"
-				+ File.separator + RandomGUID.getGuid());
+		af = new File("sdfsarchives"
+				+ File.separator + guid+File.separator + srcPath );
 		SDFSLogger.getLog().debug("Replication snapshot = " + af.getPath());
 		nf = new File(vp.getPath() + File.separator + "archives"
-				+ File.separator + RandomGUID.getGuid());
+				+ File.separator + guid);
 		SDFSLogger.getLog().debug("Replication staging = " + nf.getPath());
 		nft = new File(nf.getPath() + ".tar.gz");
 		SDFSLogger.getLog().debug("Created replication snapshot");
@@ -78,7 +79,7 @@ public class ArchiveOutCmd implements Runnable {
 			eevt.curCt = 0;
 			mf.copyTo(nf.getPath(), true, true);
 			eevt.curCt = 1;
-			MetaFileStore.removeMetaFile(af.getPath(), true);
+			//MetaFileStore.removeMetaFile(af.getPath(), true);
 			eevt.curCt = 2;
 			SDFSLogger.getLog().debug("Copied out replication snapshot");
 			if (OSValidator.isWindows()) {
@@ -109,6 +110,11 @@ public class ArchiveOutCmd implements Runnable {
 			SDFSLogger.getLog().error(
 					"Unable to archive out [" + srcPath + "] because :"
 							+ e.toString(), e);
+			try {
+				MetaFileStore.removeMetaFile(af.getPath(), true);
+			} catch(Exception e1) {
+				
+			}
 			evt.endEvent("Archive Out failed", SDFSEvent.ERROR, e);
 
 		} finally {
