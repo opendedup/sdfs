@@ -138,7 +138,9 @@ public class SDFSService {
 
 			}
 			if (Main.enableNetworkChunkStore && !Main.runCompact) {
+				try {
 				ndServer.close();
+				}catch(Exception e) {}
 			}
 		}
 		try {

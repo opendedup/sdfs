@@ -489,7 +489,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				SDFSLogger.getLog().warn("Recreating BloomFilters...");
 				this.loadEvent.shortMsg = "Recreating BloomFilters";
 				lbf = new LargeBloomFilter(maxSz, .03);
-				executor = new ThreadPoolExecutor(4, 4, 10, TimeUnit.SECONDS,
+				executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 						worksQueue, new ProcessPriorityThreadFactory(
 								Thread.MIN_PRIORITY), executionHandler);
 				CommandLineProgressBar bar = new CommandLineProgressBar(

@@ -37,7 +37,7 @@ public class ArchiveOutCmd implements Runnable {
 		SDFSLogger.getLog().debug("Relication base path = " + f.getPath());
 		vp = new File(Main.volume.getPath()).getParentFile();
 		SDFSLogger.getLog().debug("Volume parent folder = " + vp.getPath());
-		af = new File("sdfsarchives"
+		af = new File(Main.volume.getPath() + File.separator +"sdfsactiverepl"
 				+ File.separator + guid+File.separator + srcPath );
 		SDFSLogger.getLog().debug("Replication snapshot = " + af.getPath());
 		nf = new File(vp.getPath() + File.separator + "archives"
@@ -46,7 +46,8 @@ public class ArchiveOutCmd implements Runnable {
 		nft = new File(nf.getPath() + ".tar.gz");
 		SDFSLogger.getLog().debug("Created replication snapshot");
 		evt = SDFSEvent.archiveOutEvent("Archiving out " + srcPath);
-		evt.extendedInfo = nft.getPath();
+		evt.extendedInfo = nft.getPath() + "," + "sdfsactiverepl"
+				+ File.separator + guid;
 		try {
 			Thread th = new Thread(this);
 			th.start();
@@ -100,8 +101,8 @@ public class ArchiveOutCmd implements Runnable {
 			evt.curCt = 4;
 
 			if (nft.exists())
-				evt.endEvent("Archive Out complete from " + srcPath + " to "
-						+ nft.getPath());
+				evt.endEvent("Archive Out of " + srcPath + " to "
+						+ nft.getPath() +" completed successfully");
 			else
 				throw new IOException(nft.getPath() + " does not exist");
 			eevt.endEvent("Archiving out " + srcPath + " successful");

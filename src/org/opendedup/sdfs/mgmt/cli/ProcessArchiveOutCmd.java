@@ -15,7 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessArchiveOutCmd {
-	public static String runCmd(String file, String dir) throws IOException {
+	public static ArchiveOutResult runCmd(String file, String dir) throws IOException {
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
 		file = URLEncoder.encode(file, "UTF-8");
 		StringBuilder sb = new StringBuilder();
@@ -25,7 +25,11 @@ public class ProcessArchiveOutCmd {
 		Document doc = MgmtServerConnection.getResponse(sb.toString());
 		Element root = doc.getDocumentElement();
 		Element evt = (Element) root.getElementsByTagName("event").item(0);
-		File f = new File(evt.getAttribute("extended-info"));
+		String st = evt.getAttribute("extended-info");
+		
+		ArchiveOutResult rslt = new ArchiveOutResult();
+		rslt.fPath = st.split(",")[1];
+		File f = new File(st.split(",")[0]);
 		String uuid = evt.getAttribute("uuid");
 		long maxcount = Long.parseLong(evt.getAttribute("max-count"));
 		CommandLineProgressBar bar = null;
@@ -128,7 +132,8 @@ public class ProcessArchiveOutCmd {
 			in.close();
 			out.close();
 			m.releaseConnection();
-			return nf.getPath();
+			rslt.arPath = nf.getPath();
+			return rslt;
 		} finally {
 			if (in != null)
 				in.close();
@@ -136,6 +141,11 @@ public class ProcessArchiveOutCmd {
 				m.releaseConnection();
 		}
 
+	}
+	
+	public static class ArchiveOutResult {
+		public String arPath;
+		public String fPath;
 	}
 
 }

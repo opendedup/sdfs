@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,6 +25,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
 import org.opendedup.sdfs.mgmt.cli.ProcessArchiveOutCmd;
+import org.opendedup.sdfs.mgmt.cli.ProcessArchiveOutCmd.ArchiveOutResult;
 import org.opendedup.sdfs.mgmt.cli.ProcessDeleteFileCmd;
 import org.opendedup.sdfs.mgmt.cli.ProcessImportArchiveCmd;
 import org.w3c.dom.DOMImplementation;
@@ -57,6 +57,7 @@ public class ReplicationService implements Serializable {
 	public int maxSz;
 	public String schedType;
 	public String schedt = "";
+	public String remoteSnapPath = null;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
@@ -155,6 +156,13 @@ public class ReplicationService implements Serializable {
 			this.persistResults();
 
 		} finally {
+			if(this.remoteSnapPath != null) {
+				try {
+					ProcessDeleteFileCmd.execute(this.remoteSnapPath);
+				}catch(Exception e) {
+					SDFSLogger.getLog().error("unable to delete " + this.remoteSnapPath, e);
+				}
+			}
 			if (archive != null) {
 				File arcF = new File(archive);
 				arcF.delete();
@@ -240,7 +248,9 @@ public class ReplicationService implements Serializable {
 		MgmtServerConnection.password = password;
 		MgmtServerConnection.port = port;
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
-		return ProcessArchiveOutCmd.runCmd(file, tempDir);
+		ArchiveOutResult rslt = ProcessArchiveOutCmd.runCmd(file, tempDir);
+		this.remoteSnapPath = rslt.fPath;
+		return rslt.arPath;
 
 	}
 
