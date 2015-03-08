@@ -1,3 +1,13 @@
+Version 2.0.11
+	Fixes :
+	* Fixed copy of files with non-english characters
+	* Fixed JNI hook to fuse referencing non-existent objects.
+	* Fixed replication service failures when replication occurs during garbage collection process
+	* Fixed org.opendedup.collections.ProgessiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
+	* Fixed volume state shown and unclean after unmount.
+	* Updated shared libs to latest compatible versions.
+	Enhancements :
+	* Added org.opendedup.collections.ProgessiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
 Version 2.0.9
 	Fixes :
 	* Fixed Block Chunk Store errors when writing with variable block deduplication
