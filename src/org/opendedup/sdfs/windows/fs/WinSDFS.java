@@ -31,7 +31,6 @@ import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_PATH_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_READ_FAULT;
 import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
-
 import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY;
 import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_NORMAL;
 
@@ -82,7 +81,7 @@ public class WinSDFS implements DokanOperations {
 	private String driveLetter = "S:\\";
 	private Logger log = SDFSLogger.getLog();
 	ConcurrentHashMap<Long,DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long,DedupFileChannel>();
-
+	
 	/*
 	 * private transient ConcurrentLinkedHashMap<String, DedupFileChannel>
 	 * dedupChannels = new Builder<String, DedupFileChannel>()
@@ -163,8 +162,14 @@ public class WinSDFS implements DokanOperations {
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode,
 			int creationDisposition, int flagsAndAttributes, DokanFileInfo arg5)
 			throws DokanOperationException {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		 CreationDisposition disposition = CreationDisposition.build(creationDisposition);
-		log.debug("[onCreateFile] " + fileName + ", creationDisposition = "
+		log.info("[onCreateFile] " + fileName + ", creationDisposition = "
 		+ disposition);
 		if (fileName.equals("\\")) {
 			switch (disposition) {
@@ -183,9 +188,22 @@ public class WinSDFS implements DokanOperations {
 			case CREATE_NEW:
 				throw new DokanOperationException(ERROR_ALREADY_EXISTS);
 			case OPEN_ALWAYS:
+				return getNextHandle();
 			case OPEN_EXISTING:
 				return getNextHandle();
 			case CREATE_ALWAYS:
+				try {
+					long fileHandle = getNextHandle();
+					this.getFileChannel(fileName, fileHandle).truncateFile(0);
+					this.closeFileChannel(fileHandle);
+					return fileHandle;
+				} catch (IOException e) {
+					log.error(
+							"unable to clear file "
+									+ this.resolvePath(fileName).getPath(), e);
+					throw new DokanOperationException(
+							WinError.ERROR_WRITE_FAULT);
+				}
 			case TRUNCATE_EXISTING:
 				try {
 					long fileHandle = getNextHandle();
@@ -220,6 +238,18 @@ public class WinSDFS implements DokanOperations {
 				}
 				return getNextHandle();
 			case CREATE_ALWAYS:
+				if (Main.volume.isFull())
+					throw new DokanOperationException(ERROR_DISK_FULL);
+				try {
+
+					log.debug("creating " + fileName);
+					MetaDataDedupFile mf = MetaFileStore.getMF(path);
+					mf.sync(true);
+				} catch (Exception e) {
+					log.error("unable to create file " + path, e);
+					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
+				}
+				return getNextHandle();
 			case OPEN_ALWAYS:
 				if (Main.volume.isFull())
 					throw new DokanOperationException(ERROR_DISK_FULL);
@@ -233,6 +263,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				return getNextHandle();
 			case OPEN_EXISTING:
+				throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 			case TRUNCATE_EXISTING:
 				throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 			case UNDEFINED:
@@ -308,16 +339,23 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg3) throws DokanOperationException {
 		if (Main.volume.isFull())
 			throw new DokanOperationException(ERROR_DISK_FULL);
-		log.debug("[onWriteFile] " + fileName);
+		log.info("[onWriteFile] " + fileName);
 		DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
 		try {
+			/*
+			WriteThread th = new WriteThread();
+			th.buf = buf;
+			th.offset = offset;
+			th.ch = ch;
+			executor.execute(th);
+			*/
 			ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			// log("wrote " + new String(b));
 		} catch (Exception e) {
-			log.error("unable to write to file" + fileName, e);
+			log.error("Unable to write " + fileName + " at " + offset);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
-		return buf.capacity();
+		return buf.position();
 	}
 
 	@Override

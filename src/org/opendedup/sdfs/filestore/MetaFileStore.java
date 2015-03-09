@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -17,10 +18,12 @@ import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap.Builder;
-import com.googlecode.concurrentlinkedhashmap.EvictionListener;
 
 /**
  * 
@@ -42,16 +45,26 @@ private static EventBus eventBus = new EventBus();
 	
 	
 
-	private static ConcurrentLinkedHashMap<String, MetaDataDedupFile> pathMap = new Builder<String, MetaDataDedupFile>()
-			.concurrencyLevel(Main.writeThreads).maximumWeightedCapacity(5000)
-			.listener(new EvictionListener<String, MetaDataDedupFile>() {
+	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder
+			.newBuilder().concurrencyLevel(Main.writeThreads).maximumSize(5000).removalListener(
+					new RemovalListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
 				@Override
-				public void onEviction(String key, MetaDataDedupFile file) {
-					file.sync();
+				public void onRemoval(
+						RemovalNotification<String, MetaDataDedupFile> removal) {
+					if(removal.getValue().exists())
+						removal.getValue().sync();
 				}
-			}).build();
+					}).build(new CacheLoader<String, MetaDataDedupFile>() {
+
+						@Override
+						public MetaDataDedupFile load(String path)
+								throws Exception {
+							return MetaDataDedupFile.getFile(path);
+						}
+						
+					});
 
 	static {
 		if (Main.version.startsWith("0.8")) {
@@ -64,15 +77,6 @@ private static EventBus eventBus = new EventBus();
 		}
 	}
 
-	/**
-	 * caches a file to the pathmap
-	 * 
-	 * @param mf
-	 */
-	private static void cacheMF(MetaDataDedupFile mf) {
-		if (mf != null && !mf.isSymlink())
-			pathMap.put(mf.getPath(), mf);
-	}
 
 	public static void rename(String src, String dst) throws IOException {
 		getMFLock.lock();
@@ -83,8 +87,8 @@ private static EventBus eventBus = new EventBus();
 								+ "]");
 			MetaDataDedupFile mf = getMF(src);
 			mf.renameTo(dst);
-			pathMap.remove(src);
-			pathMap.remove(dst);
+			pathMap.invalidate(src);
+			pathMap.invalidate(dst);
 			pathMap.put(dst, mf);
 		} finally {
 			getMFLock.unlock();
@@ -98,7 +102,7 @@ private static EventBus eventBus = new EventBus();
 	 *            the path of the MetaDataDedupFile
 	 */
 	public static void removedCachedMF(String path) {
-		pathMap.remove(path);
+		pathMap.invalidate(path);
 	}
 
 	/**
@@ -110,21 +114,13 @@ private static EventBus eventBus = new EventBus();
 	private static ReentrantLock getMFLock = new ReentrantLock();
 
 	public static MetaDataDedupFile getMF(File f) {
-		MetaDataDedupFile mf = null;
+		try {
+		return pathMap.get(f.getPath());
 
-		mf = pathMap.get(f.getPath());
-
-		if (mf == null) {
-			getMFLock.lock();
-			try {
-				mf = MetaDataDedupFile.getFile(f.getPath());
-				cacheMF(mf);
-			} finally {
-				getMFLock.unlock();
-			}
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to get " + f.getPath(),e);
+			return null;
 		}
-
-		return mf;
 
 	}
 	
@@ -248,17 +244,7 @@ private static EventBus eventBus = new EventBus();
 	 */
 	public static boolean commit() {
 		try {
-			Object[] files = pathMap.values().toArray();
-			int z = 0;
-			for (int i = 0; i < files.length; i++) {
-				MetaDataDedupFile buf = (MetaDataDedupFile) files[i];
-				if(buf.exists())
-					buf.sync();
-				z++;
-			}
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("flushed " + z + " files ");
-			// recman.commit();
+			pathMap.invalidateAll();
 			return true;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to commit transaction", e);
@@ -326,7 +312,7 @@ private static EventBus eventBus = new EventBus();
 				}
 				 else {
 					mf = getMF(new File(path));
-					pathMap.remove(mf.getPath());
+					pathMap.invalidate(mf.getPath());
 
 					Main.volume.updateCurrentSize(-1 * mf.length(), true);
 					try {
@@ -376,7 +362,7 @@ private static EventBus eventBus = new EventBus();
 			}else 
 				return true;
 		} finally {
-			pathMap.remove(path);
+			pathMap.invalidate(path);
 			getMFLock.unlock();
 		}
 	}
