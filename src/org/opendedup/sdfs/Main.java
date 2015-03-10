@@ -115,7 +115,7 @@ public class Main {
 
 	// public static String hashesDBClass =
 	// "com.opendedup.collections.FileBasedCSMap";
-	public static String hashesDBClass = "org.opendedup.collections.ProgessiveFileBasedCSMap";
+	public static String hashesDBClass = "org.opendedup.collections.ProgressiveFileBasedCSMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
