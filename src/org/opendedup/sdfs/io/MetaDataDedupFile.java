@@ -1168,7 +1168,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public long length() {
 		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().info("len=" + this.length);
+			SDFSLogger.getLog().debug("len=" + this.length);
 		return length;
 	}
 

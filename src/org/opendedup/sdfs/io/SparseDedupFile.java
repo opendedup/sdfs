@@ -1315,7 +1315,7 @@ public class SparseDedupFile implements DedupFile {
 		DedupChunkInterface _wb = this.flushingBuffers.remove(writeBuffer
 				.getFilePosition());
 		if (SDFSLogger.isDebug()) {
-			if (_wb.hashCode() != writeBuffer.hashCode()) {
+			if (_wb != null && _wb.hashCode() != writeBuffer.hashCode()) {
 				SDFSLogger.getLog().info("on remove hashcodes are not equal");
 			}
 		}
