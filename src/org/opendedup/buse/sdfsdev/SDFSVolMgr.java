@@ -1,7 +1,6 @@
 package org.opendedup.buse.sdfsdev;
 
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -24,6 +23,7 @@ public class SDFSVolMgr {
 		Options options = new Options();
 		options.addOption("d", false, "verbose debug output");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
+		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("c", false,
@@ -47,6 +47,7 @@ public class SDFSVolMgr {
 
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
+		int port = -1;
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -63,6 +64,9 @@ public class SDFSVolMgr {
 			while (st.hasMoreTokens()) {
 				volumes.add(st.nextToken());
 			}
+		}
+		if(cmd.hasOption("p")) {
+			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 		String volname = "SDFS";
 		if (cmd.hasOption("nocheck")) {
@@ -126,7 +130,7 @@ public class SDFSVolMgr {
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start(useSSL);
+			sdfsService.start(useSSL,port);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

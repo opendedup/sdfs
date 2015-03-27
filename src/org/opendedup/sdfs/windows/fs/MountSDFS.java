@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.windows.fs;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -23,11 +24,12 @@ public class MountSDFS {
 		options.addOption("m", true,
 				"the drive letter for SDFS file system \n e.g. \'S\'");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
+		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption(
 				"vc",
 				true,
 				"sdfs volume configuration file to mount \ne.g. "
-						+ OSValidator.getConfigPath() + "dedup-volume-cfg.xml");
+						+ "c:\\program files\\sdfs\\etc\\dedup-volume-cfg.xml");
 		options.addOption("nossl", false,
 				"If set ssl will not be used sdfscli traffic.");
 		options.addOption("c", false,
@@ -45,8 +47,9 @@ public class MountSDFS {
 		return options;
 	}
 
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) throws ParseException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		checkJavaVersion();
+		int port = -1;
 		String volumeConfigFile = null;
 		boolean useSSL = true;
 		CommandLineParser parser = new PosixParser();
@@ -78,6 +81,9 @@ public class MountSDFS {
 			while (st.hasMoreTokens()) {
 				volumes.add(st.nextToken());
 			}
+		}
+		if(cmd.hasOption("p")) {
+			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 
 		if (cmd.hasOption("v")) {
@@ -127,7 +133,7 @@ public class MountSDFS {
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 
 		try {
-			sdfsService.start(useSSL);
+			sdfsService.start(useSSL,port);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

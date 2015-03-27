@@ -35,8 +35,10 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(boolean useSSL) throws Exception {
+	public void start(boolean useSSL,int port) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
+		if(port != -1)
+			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
 			System.err
 					.println("This version is not backwards compatible with previous versions of SDFS");

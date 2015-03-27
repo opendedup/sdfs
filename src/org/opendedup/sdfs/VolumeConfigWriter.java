@@ -45,7 +45,7 @@ public class VolumeConfigWriter {
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
-	boolean safe_sync = false;
+	boolean safe_sync = true;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	short chunk_size = 4;

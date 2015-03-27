@@ -2,6 +2,8 @@ package org.opendedup.util;
 
 import java.io.File;
 
+import org.opendedup.sdfs.windows.utils.WinRegistry;
+
 public class OSValidator {
 
 	public static void main(String[] args) {
@@ -49,8 +51,13 @@ public class OSValidator {
 		if (isUnix() || isMac())
 			return "/opt/sdfs/";
 		else {
+			try {
+				return  WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS", "path") + 
+						File.separator;
+			}catch(Exception e) {
 			return System.getenv("programfiles") + File.separator + "sdfs"
 					+ File.separator;
+			}
 		}
 	}
 
@@ -58,7 +65,12 @@ public class OSValidator {
 		if (isUnix() || isMac())
 			return "/etc/sdfs/";
 		else
+			try {
+				return  WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS", "path") + 
+					File.separator+ "etc" + File.separator;
+			}catch(Exception e) {
 			return System.getenv("programfiles") + File.separator + "sdfs"
 					+ File.separator + "etc" + File.separator;
+			}
 	}
 }

@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -764,8 +765,10 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			} else {
 				if (!cm.recoverd) {
 					try {
-					cm.persistData(true);
-					}catch(HashExistsException e) {
+						cm.persistData(true);
+					}catch(
+							HashExistsException e) {
+						SDFSLogger.getLog().warn("eeeks",e);
 						return false;
 					}
 				}

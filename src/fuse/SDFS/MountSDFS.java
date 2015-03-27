@@ -32,6 +32,7 @@ public class MountSDFS {
 		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption("d", false, "debug output");
 		options.addOption("s", false, "Run single threaded");
+		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -56,6 +57,7 @@ public class MountSDFS {
 
 	public static void main(String[] args) throws ParseException {
 		checkJavaVersion();
+		int port = -1;
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -73,6 +75,9 @@ public class MountSDFS {
 		}
 		if (cmd.hasOption("s")) {
 			fal.add("-s");
+		}
+		if(cmd.hasOption("p")) {
+			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 		if (cmd.hasOption("rv")) {
 			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
@@ -149,7 +154,7 @@ public class MountSDFS {
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start(useSSL);
+			sdfsService.start(useSSL,port);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
