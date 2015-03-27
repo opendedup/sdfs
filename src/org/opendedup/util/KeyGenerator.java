@@ -1,25 +1,28 @@
 package org.opendedup.util;
 
 import java.io.File;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.opendedup.logging.SDFSLogger;
 
-import sun.security.x509.CertAndKeyGen;
-import sun.security.x509.X500Name;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.opendedup.logging.SDFSLogger;
 
 public class KeyGenerator {
 
@@ -30,21 +33,29 @@ public class KeyGenerator {
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(null, null);
 
-		CertAndKeyGen keypair = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
 
-		X500Name x500Name = new X500Name(InetAddress.getLocalHost()
-				.getCanonicalHostName(), "sdfs", "opendedup", "portland", "or",
-				"US");
+		// yesterday
+	    
+	    // GENERATE THE PUBLIC/PRIVATE RSA KEY PAIR
+	    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
+	    keyPairGenerator.initialize(1024, new SecureRandom());
 
-		keypair.generate(1024);
-		PrivateKey privKey = keypair.getPrivateKey();
+	    KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-		X509Certificate[] chain = new X509Certificate[1];
+	    // GENERATE THE X509 CERTIFICATE
+	    X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
 
-		chain[0] = keypair.getSelfCertificate(x500Name, new Date(),
-				(long) 1096 * 24 * 60 * 60);
+	    certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
+	    certGen.setIssuerDN(new X509Principal("CN=sdfs, OU=None, O=None L=None, C=None"));
+	    certGen.setSubjectDN(new X509Principal("CN=sdfs, OU=None, O=None L=None, C=None"));
+	    certGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));
+	    certGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365*10)));
+	    certGen.setPublicKey(keyPair.getPublic());
+	    certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-		keyStore.setKeyEntry("sdfs", privKey, "sdfs".toCharArray(), chain);
+	    X509Certificate cert = certGen.generate(keyPair.getPrivate(), "BC");
+
+		keyStore.setKeyEntry("sdfs", keyPair.getPrivate(), "sdfs".toCharArray(),  new java.security.cert.Certificate[]{cert});
 
 		keyStore.store(new FileOutputStream(key), "sdfs".toCharArray());
 		SDFSLogger.getLog().info(
@@ -52,6 +63,10 @@ public class KeyGenerator {
 
 	}
 	
+	static {
+	    // adds the Bouncy castle provider to java security
+	    Security.addProvider(new BouncyCastleProvider());
+	}
 	
 
 }
