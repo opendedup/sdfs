@@ -425,13 +425,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 		init(path);
 	}
-	
+
 	/**
 	 * 
 	 * @param path
 	 *            the path to the dedup file.
 	 */
-	private MetaDataDedupFile(String path,MetaDataDedupFile mf) {
+	private MetaDataDedupFile(String path, MetaDataDedupFile mf) {
 		this.path = path;
 		this.directory = mf.directory;
 		mf.execute = mf.execute;
@@ -571,7 +571,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 			if (!f.getParentFile().exists())
 				f.getParentFile().mkdirs();
-			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath,this);
+			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath, this);
 			this.getGUID();
 			if (!this.dedup) {
 				try {
@@ -869,6 +869,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return creates a blank new file
 	 */
 	public boolean createNewFile() {
+		this.dirty = true;
 		return this.unmarshal();
 	}
 
@@ -1003,7 +1004,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					return false;
 				}
 			} else if (f.isDirectory()) {
-				eventBus.post(new MFileDeleted(this,true));
+				eventBus.post(new MFileDeleted(this, true));
 				boolean rn = f.renameTo(new File(dest));
 				if (rn) {
 					this.path = dest;
@@ -1189,11 +1190,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setLength(long l, boolean serialize, boolean propigateEvent) {
 
 		long len = l - this.length;
-		Main.volume.updateCurrentSize(len, true);
-		this.length = l;
-		this.dirty = true;
-		if (serialize)
-			this.unmarshal();
+		if (len != 0) {
+			Main.volume.updateCurrentSize(len, true);
+			this.length = l;
+			this.dirty = true;
+			if (serialize)
+				this.unmarshal();
+		}
 	}
 
 	/**
@@ -1237,7 +1240,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
-			this.unmarshal();
+		this.unmarshal();
 	}
 
 	/**
@@ -1253,7 +1256,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param lastAccessed
 	 * @param propigateEvent
 	 *            TODO
-	**/
+	 **/
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		// this.dirty = true;
 		this.lastAccessed = lastAccessed;

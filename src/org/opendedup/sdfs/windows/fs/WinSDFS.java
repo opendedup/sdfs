@@ -117,7 +117,7 @@ public class WinSDFS implements DokanOperations {
 
 		this.mountedVolume = mountedVolume;
 		DokanOptions dokanOptions = new DokanOptions();
-		dokanOptions.optionsMode = DokanOptionsMode.Mode.KEEP_ALIVE.getValue();
+		dokanOptions.optionsMode = DokanOptionsMode.Mode.KEEP_ALIVE.getValue() + DokanOptionsMode.Mode.REMOVABLE_DRIVE.getValue();
 		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = 0;
 		this.driveLetter = driveLetter;
@@ -288,7 +288,7 @@ public class WinSDFS implements DokanOperations {
 			}
 			throw new DokanOperationException(WinError.ERROR_INVALID_FUNCTION);
 		} catch (DokanOperationException e) {
-			log.info("dokan error", e);
+			log.debug("dokan error", e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to create file", e);
@@ -300,7 +300,7 @@ public class WinSDFS implements DokanOperations {
 	public long onOpenDirectory(String pathName, DokanFileInfo arg1)
 			throws DokanOperationException {
 		try {
-			log.info("[onOpenDirectory] " + pathName);
+			log.debug("[onOpenDirectory] " + pathName);
 			if (pathName.equals("\\"))
 				return getNextHandle();
 			pathName = Utils.trimTailBackSlash(pathName);
@@ -310,7 +310,7 @@ public class WinSDFS implements DokanOperations {
 			else
 				throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
 		} catch (DokanOperationException e) {
-			log.info("dokan error", e);
+			log.debug("dokan error", e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to create directory", e);
@@ -324,7 +324,7 @@ public class WinSDFS implements DokanOperations {
 		try {
 			if (Main.volume.isFull())
 				throw new DokanOperationException(ERROR_DISK_FULL);
-			log.info("[onCreateDirectory] " + pathName);
+			log.debug("[onCreateDirectory] " + pathName);
 			pathName = Utils.trimTailBackSlash(pathName);
 			File f = new File(this.mountedVolume + pathName);
 			if (f.exists()) {
@@ -333,7 +333,7 @@ public class WinSDFS implements DokanOperations {
 			}
 			f.mkdir();
 		} catch (DokanOperationException e) {
-			log.info("dokan error", e);
+			log.debug("dokan error", e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to create directory", e);
@@ -346,7 +346,7 @@ public class WinSDFS implements DokanOperations {
 			throws DokanOperationException {
 		if (!fileName.equals("\\")) {
 			try {
-				log.info("[onCleanup] " + fileName);
+				log.debug("[onCleanup] " + fileName);
 				DedupFileChannel ch = this
 						.getFileChannel(fileName, arg1.handle);
 				ch.force(true);
@@ -362,7 +362,7 @@ public class WinSDFS implements DokanOperations {
 			throws DokanOperationException {
 		if (!path.equals("\\")) {
 		try {
-			log.info("[onClose] " + path);
+			log.debug("[onClose] " + path);
 			this.closeFileChannel(arg1.handle);
 		} catch (Exception e) {
 			log.error("unable to close file " + path, e);
@@ -375,7 +375,7 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg3) throws DokanOperationException {
 
 		try {
-			log.info("[onReadFile] " + fileName);
+			log.debug("[onReadFile] " + fileName);
 			DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			if (read == -1)
@@ -393,7 +393,7 @@ public class WinSDFS implements DokanOperations {
 		try {
 			if (Main.volume.isFull())
 				throw new DokanOperationException(ERROR_DISK_FULL);
-			log.info("[onWriteFile] " + fileName + " sz=" + buf.capacity());
+			log.debug("[onWriteFile] " + fileName + " sz=" + buf.capacity());
 			DedupFileChannel ch = this.getFileChannel(fileName, arg3.handle);
 			/*
 			 * WriteThread th = new WriteThread(); th.buf = buf; th.offset =
@@ -445,7 +445,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public ByHandleFileInformation onGetFileInformation(String fileName,
 			DokanFileInfo arg1) throws DokanOperationException {
-		log.info("[onGetFileInformation] " + fileName);
+		log.debug("[onGetFileInformation] " + fileName);
 		try {
 			if (fileName.equals("\\")) {
 				return new ByHandleFileInformation(
@@ -469,7 +469,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public Win32FindData[] onFindFiles(String pathName, DokanFileInfo arg1)
 			throws DokanOperationException {
-		log.info("[onFindFiles] " + pathName);
+		log.debug("[onFindFiles] " + pathName);
 		File f = null;
 		try {
 			f = resolvePath(pathName);
@@ -494,14 +494,14 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public Win32FindData[] onFindFilesWithPattern(String pathName, String arg1,
 			DokanFileInfo arg2) throws DokanOperationException {
-		log.info("[onFindFilesWithPattern] " + pathName);
+		log.debug("[onFindFilesWithPattern] " + pathName);
 		return null;
 	}
 
 	@Override
 	public void onSetFileAttributes(String fileName, int fileAttributes,
 			DokanFileInfo arg2) throws DokanOperationException {
-		log.info("[onSetFileAttributes] " + fileName);
+		log.debug("[onSetFileAttributes] " + fileName);
 		/*
 		 * MemFileInfo fi = fileInfoMap.get(fileName); if (fi == null) throw new
 		 * DokanOperationException(ERROR_FILE_NOT_FOUND); fi.fileAttribute =
@@ -512,7 +512,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public void onSetFileTime(String fileName, long creationTime, long atime,
 			long mtime, DokanFileInfo arg4) throws DokanOperationException {
-		log.info("[onSetFileTime] " + fileName);
+		log.debug("[onSetFileTime] " + fileName);
 
 		try {
 			File f = this.resolvePath(fileName);
@@ -528,7 +528,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public void onDeleteFile(String fileName, DokanFileInfo arg1)
 			throws DokanOperationException {
-		log.info("[onDeleteFile] " + fileName);
+		log.debug("[onDeleteFile] " + fileName);
 		try {
 			DedupFileChannel ch = this.getFileChannel(fileName, arg1.handle);
 			if (ch != null) {
@@ -611,7 +611,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public DokanDiskFreeSpace onGetDiskFreeSpace(DokanFileInfo arg0)
 			throws DokanOperationException {
-		log.info("[onGetDiskFreeSpace]");
+		log.debug("[onGetDiskFreeSpace]");
 		try {
 			DokanDiskFreeSpace free = new DokanDiskFreeSpace();
 			free.freeBytesAvailable = Main.volume.getCapacity()
@@ -629,7 +629,7 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public DokanVolumeInformation onGetVolumeInformation(String arg0,
 			DokanFileInfo arg1) throws DokanOperationException {
-		log.info("[onGetVolumeInformation]");
+		log.debug("[onGetVolumeInformation]");
 		try {
 			DokanVolumeInformation info = new DokanVolumeInformation();
 			info.fileSystemFlags = SUPPORTED_FLAGS;

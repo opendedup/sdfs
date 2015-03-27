@@ -64,9 +64,7 @@ public class VolumeFullThread implements Runnable {
 					+ avail + "]");
 			return true;
 		}
-		if (vol.fullPercentage < 0 || vol.currentSize.get() == 0)
-			return false;
-		else if ((vol.getCurrentSize() + offset) >= vol.getCapacity()) {
+		if ((vol.getCurrentSize() + offset) >= vol.getCapacity()) {
 			SDFSLogger.getLog().warn(
 					"Drive is almost full. Current Size ["
 							+ vol.getCurrentSize() + "] and capacity is ["
