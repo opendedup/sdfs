@@ -147,7 +147,7 @@ public class MountSDFS {
 			String[] sFal = new String[fal.size()];
 			fal.toArray(sFal);
 			for (int i = 0; i < sFal.length; i++) {
-				System.out.println(sFal[i]);
+				//System.out.println(sFal[i]);
 			}
 			try {
 			DriveIcon.addIcon(cmd.getOptionValue("m"));

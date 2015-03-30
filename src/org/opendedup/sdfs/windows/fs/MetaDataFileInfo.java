@@ -81,11 +81,11 @@ public class MetaDataFileInfo {
 				getFileSize(), 1, fileIndex);
 	}
 
-	long getFileSize() {
+	long getFileSizes() {
 		return mf.length();
 	}
 
-	static long getNextFileIndex() {
+	static synchronized long getNextFileIndex() {
 		if (nextFileIndex == Long.MAX_VALUE)
 			nextFileIndex = 0;
 		return nextFileIndex++;
