@@ -18,7 +18,7 @@ public class DSECompaction {
 		SDFSEvent evt = SDFSEvent.compactEvent();
 		try {
 
-			ostore.iterationInit();
+			ostore.iterationInit(true);
 			ChunkData data = ostore.getNextChunck();
 			long records = 0;
 			int count = 0;

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -449,7 +450,7 @@ public class FileChunkStore implements AbstractChunkStore {
 	private ReentrantLock iterlock = new ReentrantLock();
 
 	@Override
-	public void iterationInit() throws IOException {
+	public void iterationInit(boolean deep) throws IOException {
 		this.iterlock.lock();
 		try {
 			hc = HashFunctionPool.getHashEngine();

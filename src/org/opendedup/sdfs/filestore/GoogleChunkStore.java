@@ -255,7 +255,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void iterationInit() throws IOException {
+	public void iterationInit(boolean deep) throws IOException {
 		// TODO Auto-generated method stub
 
 	}

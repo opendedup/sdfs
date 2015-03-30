@@ -415,7 +415,7 @@ public class AWSS3ChunkStore implements AbstractChunkStore {
 	String lastKey = null;
 
 	@Override
-	public void iterationInit() {
+	public void iterationInit(boolean deep) {
 		bs3Service = new AmazonS3Client(awsCredentials);
 		obj = bs3Service.listObjects(this.name).getObjectSummaries();
 		this.compressedLength.set(0);

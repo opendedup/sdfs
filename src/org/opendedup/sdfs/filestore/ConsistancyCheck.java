@@ -12,7 +12,7 @@ public class ConsistancyCheck {
 	public static synchronized void runCheck(AbstractHashesMap map,
 			AbstractChunkStore store) {
 		try {
-			store.iterationInit();
+			store.iterationInit(false);
 			ChunkData data = store.getNextChunck();
 			if(data ==  null)
 				return;

@@ -81,7 +81,7 @@ public class MetaDataFileInfo {
 				getFileSize(), 1, fileIndex);
 	}
 
-	long getFileSizes() {
+	long getFileSize() {
 		return mf.length();
 	}
 

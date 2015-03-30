@@ -475,7 +475,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	String lastKey = null;
 
 	@Override
-	public void iterationInit() {
+	public void iterationInit(boolean deep) {
 
 		try {
 			bs3Service = new RestS3Service(awsCredentials);

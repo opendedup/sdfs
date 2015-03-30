@@ -79,7 +79,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void iterationInit() {
+	public void iterationInit(boolean deep) {
 		// TODO Auto-generated method stub
 
 	}

@@ -325,7 +325,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	CloudBlobContainer iContainer = null;
 
 	@Override
-	public void iterationInit() {
+	public void iterationInit(boolean deep) {
 		if (iContainer == null)
 
 			iter = iContainer.listBlobs().iterator();
