@@ -218,6 +218,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
+			if(OSValidator.isWindows())
+				safe_sync = false;
 		}
 
 		if (cmd.hasOption("io-safe-sync")) {
@@ -608,8 +610,9 @@ public class VolumeConfigWriter {
 				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				if(OSValidator.isWindows())
+				if(OSValidator.isWindows()) {
 					extended.setAttribute("block-size", "2 MB");
+				}
 				else
 					extended.setAttribute("block-size", "20 MB");
 				extended.setAttribute("allow-sync", "false");

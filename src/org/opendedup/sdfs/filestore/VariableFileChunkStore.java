@@ -29,7 +29,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	private final int iPageSize = 4 + 4 + 8 + 1 + 1
 			+ HashFunctionPool.hashLength;
 	private boolean closed = false;
-	private static File chunk_location = new File(Main.chunkStore);
+	private static File chunk_location = null;
 	private int[] storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
 	private FileChunkStore[] st = new FileChunkStore[storeLengths.length];
 	private FileChannel fc = null;
@@ -54,14 +54,19 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 * @param name
 	 *            the name of the chunk store.
 	 */
+	
 	public VariableFileChunkStore() {
+		createCS(Main.chunkStore);
+	}
+	
+	private void createCS(String location) {
 		if (Main.volume != null && HashFunctionPool.max_hash_cluster > 1) {
 			storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
 		}
 		SDFSLogger.getLog().debug("Opening Variable Length Chunk Store");
 		Arrays.fill(FREE, (byte) 0);
 		try {
-			File chunk_location = new File(Main.chunkStore);
+			chunk_location = new File(location);
 			if (!chunk_location.exists()) {
 				chunk_location.mkdirs();
 			}
@@ -143,6 +148,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			System.exit(-1);
 		}
 	}
+	
+	public VariableFileChunkStore(String location) {
+		
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -157,36 +166,61 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 			} catch (Exception e) {
 			}
-			try {
-				this.pool.close();
-			} catch (Exception e) {
+			
+			
 
-			}
-			try {
-				if (this.freeSlots != null) {
-					OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
-					SDFSLogger.getLog().debug("Persisted Free Slots");
-					this.freeSlots = null;
-				}
-			} catch (Exception e) {
-			}
-			try {
-				RandomAccessFile rf = new RandomAccessFile(lsf, "rw");
-				rf.seek(0);
-				rf.writeLong(this.size.get());
-				rf.writeLong(this.compressedLength.get());
-				SDFSLogger.getLog().debug("Persisted FileSize");
-				rf.getFD().sync();
-				rf.close();
-			} catch (Exception e) {
-			}
+		}
+		try {
+			this.pool.close();
+		} catch (Exception e) {
 
+		}
+		try {
+			if (this.freeSlots != null) {
+				OpenBitSetSerialize.writeOut(bsf.getPath(), this.freeSlots);
+				SDFSLogger.getLog().debug("Persisted Free Slots");
+				this.freeSlots = null;
+			}
+		} catch (Exception e) {
+		}
+		try {
+			RandomAccessFile rf = new RandomAccessFile(lsf, "rw");
+			rf.seek(0);
+			rf.writeLong(this.size.get());
+			rf.writeLong(this.compressedLength.get());
+			SDFSLogger.getLog().debug("Persisted FileSize");
+			rf.getFD().sync();
+			rf.close();
+		} catch (Exception e) {
 		}
 
 	}
 	
 	public void deleteStore() {
-		
+			SDFSLogger.getLog().debug("Closing chunkstore " + this.name);
+			try {
+				f.delete();
+
+			} catch (Exception e) {
+				
+			}
+			try {
+					bsf.delete();
+			} catch (Exception e) {
+			}
+			try {
+				lsf.delete();
+				}catch(Exception e) {}
+			for (FileChunkStore store : st) {
+				try {
+					store.deleteStore();
+
+				} catch (Exception e) {
+				}
+				
+				
+
+			}
 	}
 
 	public void sync() throws IOException {
@@ -636,5 +670,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	public boolean blockRestored(String id) {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public void compact() {
 	}
 }

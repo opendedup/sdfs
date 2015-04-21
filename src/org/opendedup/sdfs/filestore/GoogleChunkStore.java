@@ -344,4 +344,16 @@ public class GoogleChunkStore implements AbstractChunkStore {
 		return true;
 	}
 
+	@Override
+	public void deleteStore() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -194,7 +194,7 @@ public class DedupFileChannel {
 	 * @throws FileClosedException
 	 */
 	public void force(boolean metaData) throws IOException, FileClosedException {
-		Lock l = df.getReadLock();
+		Lock l = df.getWriteLock();
 		l.lock();
 		try {
 			df.sync(false);
@@ -234,12 +234,12 @@ public class DedupFileChannel {
 	 */
 	public void writeFile(ByteBuffer buf, int len, int pos, long offset,
 			boolean propigate) throws java.io.IOException, DataArchivedException {
-
+		
 		if (SDFSLogger.isDebug()) {
 			SDFSLogger.getLog().debug(
-					"fc writing " + df.getMetaFile().getPath() + " at "
-							+ offset + " " + buf.capacity() + " bytes len="
-							+ len + " pos=" + pos);
+					"fc writing " + df.getMetaFile().getPath() + " spos="
+							+ offset + " buffcap=" + buf.capacity() + " len="
+							+ len + " bcpos=" + pos);
 			if (df.getMetaFile().getPath().endsWith(".vmx")
 					|| df.getMetaFile().getPath().endsWith(".vmx~")) {
 				byte[] _zb = new byte[len];
@@ -279,7 +279,7 @@ public class DedupFileChannel {
 				/*
 				 * if (_len == Main.CHUNK_LENGTH) newBuf = true;
 				 */
-
+				
 				byte[] b = new byte[_len];
 				try {
 					buf.get(b);
@@ -449,11 +449,13 @@ public class DedupFileChannel {
 	public int read(ByteBuffer buf, int bufPos, int siz, long filePos)
 			throws IOException, DataArchivedException {
 		// this.addAio();
+		
+		
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"reading " + df.getMetaFile().getPath() + " at " + filePos
-							+ " " + buf.capacity() + " bytes" + " bufpos="
-							+ bufPos + " siz=" + siz);
+					"fc reading " + df.getMetaFile().getPath() + " spos="
+							+ filePos + " buffcap=" + buf.capacity() + " len="
+							+ siz + " bcpos=" + bufPos);
 		Lock l = df.getReadLock();
 		l.lock();
 		try {

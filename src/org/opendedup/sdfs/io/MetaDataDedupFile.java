@@ -66,6 +66,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean ownerExecOnly = false;
 	private boolean ownerReadOnly = false;
 	private String dfGuid = null;
+
+	public boolean deleteOnClose = false;
 	private String guid = "";
 	private IOMonitor monitor;
 	private boolean vmdk;
@@ -1331,6 +1333,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.mode = in.readInt();
 				}
+				if(in.available() > 0) {
+					this.deleteOnClose = in.readBoolean();
+				}
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1395,6 +1400,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.write(vb);
 			out.writeLong(attributes);
 			out.writeInt(this.mode);
+			out.writeBoolean(this.deleteOnClose);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);

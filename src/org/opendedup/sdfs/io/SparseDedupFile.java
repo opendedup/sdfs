@@ -796,9 +796,11 @@ public class SparseDedupFile implements DedupFile {
 					tm = System.currentTimeMillis();
 				long wsz = this.writeBuffers.size();
 				int fsz = this.flushingBuffers.size();
+				
 				this.writeCache();
 				if (SDFSLogger.isDebug())
 					wt = System.currentTimeMillis() - tm;
+				
 				this.bdb.sync();
 				if (SDFSLogger.isDebug())
 					st = System.currentTimeMillis() - tm - wt;
@@ -1047,12 +1049,13 @@ public class SparseDedupFile implements DedupFile {
 				this.closed = true;
 				this.dirty = false;
 			} catch (Exception e) {
-			}
+			}	
 			this.channelLock.unlock();
 			this.syncLock.unlock();
 			l.unlock();
 		}
 	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -1304,7 +1307,7 @@ public class SparseDedupFile implements DedupFile {
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer) {
 		if (SDFSLogger.isDebug()) {
 			if (this.flushingBuffers.containsKey(writeBuffer.getFilePosition())) {
-				SDFSLogger.getLog().info("buffer already contains key");
+				SDFSLogger.getLog().debug("buffer already contains key");
 			}
 		}
 		this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
@@ -1316,7 +1319,7 @@ public class SparseDedupFile implements DedupFile {
 				.getFilePosition());
 		if (SDFSLogger.isDebug()) {
 			if (_wb != null && _wb.hashCode() != writeBuffer.hashCode()) {
-				SDFSLogger.getLog().info("on remove hashcodes are not equal");
+				SDFSLogger.getLog().debug("on remove hashcodes are not equal");
 			}
 		}
 	}

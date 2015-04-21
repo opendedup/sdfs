@@ -66,7 +66,7 @@ public class DSECompaction {
 	}
 
 	public static synchronized void runCheck(AbstractHashesMap map,
-			FileChunkStore ostore) throws IOException {
+			AbstractChunkStore ostore) throws IOException {
 		SDFSLogger.infoConsoleMsg("Initiating Compaction Process");
 		SDFSLogger.infoConsoleMsg("Step 1 of 3 - Running Garbage Collection");
 		long z = 0;
@@ -81,7 +81,7 @@ public class DSECompaction {
 				+ "] records during garbage collection");
 		SDFSLogger.infoConsoleMsg("Step 2 of 3 - Initializing Compaction");
 		map.initCompact();
-		File newStorePath = new File(ostore.f.getPath() + ".new");
+		File newStorePath = new File("changethis" + ".new");
 		FileChunkStore nstore = new FileChunkStore(newStorePath.getPath());
 		try {
 			runCheck(map, nstore, ostore);
@@ -96,10 +96,10 @@ public class DSECompaction {
 		}
 		long osz = ostore.size();
 		long nsz = nstore.size();
-		String ostorePath = ostore.f.getPath();
+		//String ostorePath = ostore.f.getPath();
 		ostore.close();
 		nstore.close();
-		File f = new File(ostorePath);
+		File f = new File("changethis");
 		f.delete();
 		newStorePath.renameTo(f);
 		SDFSLogger

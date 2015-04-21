@@ -4,6 +4,7 @@ import java.io.IOException;
 
 
 
+
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -14,8 +15,10 @@ import org.opendedup.sdfs.Main;
 public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
+	private static Logger fslog = Logger.getLogger("fs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
+	private static boolean fsdebug = false;
 	static {
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
@@ -24,18 +27,25 @@ public class SDFSLogger {
 		try {
 
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%t] %p %c %x - %m%n"), Main.logPath, true);
+					"%d [%c] [%t] %x - %m%n"), Main.logPath, true);
 			app.setMaxBackupIndex(2);
 			app.setMaxFileSize("10MB");
 		} catch (IOException e) {
 			log.debug("unable to change appender", e);
 		}
 		log.addAppender(app);
+		fslog.addAppender(app);
 		log.setLevel(Level.INFO);
+		fslog.setLevel(Level.DEBUG);
 	}
 
 	public static Logger getLog() {
 		return log;
+		
+	}
+	
+	public static Logger getFSLog() {
+		return fslog;
 	}
 
 	public static void infoConsoleMsg(String msg) {
@@ -50,6 +60,10 @@ public class SDFSLogger {
 	public static boolean isDebug() {
 		return debug;
 	}
+	
+	public static boolean isFSDebug() {
+		return fsdebug;
+	}
 
 	public static void setLevel(int level) {
 		if (level == 0) {
@@ -58,6 +72,16 @@ public class SDFSLogger {
 		} else {
 			log.setLevel(Level.INFO);
 			debug = false;
+		}
+	}
+	
+	public static void setFSLevel(int level) {
+		if (level == 0) {
+			fslog.setLevel(Level.DEBUG);
+			fsdebug = true;
+		} else {
+			fslog.setLevel(Level.INFO);
+			fsdebug = false;
 		}
 	}
 
@@ -70,7 +94,7 @@ public class SDFSLogger {
 		RollingFileAppender app = null;
 		try {
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%t] %p %c %x - %m%n"), file, true);
+					"%d [%c] [%t] %x - %m%n"), file, true);
 			app.setMaxBackupIndex(2);
 			app.setMaxFileSize("10MB");
 		} catch (IOException e) {
@@ -78,6 +102,8 @@ public class SDFSLogger {
 			e.printStackTrace();
 		}
 		log.addAppender(app);
+		fslog.addAppender(app);
 		log.setLevel(Level.INFO);
+		fslog.setLevel(Level.DEBUG);
 	}
 }

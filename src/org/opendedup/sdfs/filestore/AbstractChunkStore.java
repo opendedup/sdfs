@@ -42,6 +42,10 @@ public interface AbstractChunkStore {
 	
 	public abstract void setWriteSpeed(int kbps);
 	
+	public abstract void deleteStore();
+	
+	public abstract void compact();
+	
 	public abstract void setCacheSize(long sz) throws IOException;
 
 	/**

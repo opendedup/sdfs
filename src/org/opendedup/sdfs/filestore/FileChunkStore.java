@@ -572,4 +572,26 @@ public class FileChunkStore implements AbstractChunkStore {
 		return true;
 	}
 
+	@Override
+	public void deleteStore() {
+		SDFSLogger.getLog().debug("Closing chunkstore " + this.name);
+		try {
+			f.delete();
+
+		} catch (Exception e) {
+			
+		}
+		try {
+				bsf.delete();
+		} catch (Exception e) {
+		}
+		
+	}
+
+	@Override
+	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
