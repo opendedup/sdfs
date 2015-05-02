@@ -1,0 +1,12 @@
+[Unit]
+Description=Mount sdfs filesystems
+After=local-fs.target
+Before=systemd-logind.service
+
+[Service]
+Type=notify
+ExecStart=/opt/sdfs/sdfs_manage.sh mount %I
+ExecStop=/opt/sdfs/sdfs_manage.sh umount %I
+
+[Install]
+WantedBy=multi-user.target
