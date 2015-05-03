@@ -4,7 +4,14 @@ export PID="$BASHPID"
 export COMMAND="$1"
 export POOL_NAME="$2"
 export MOUNT_POINT=""
-export LOCK_FILE=/run/sdfs/"$POOL_NAME".lock
+export LOCK_FILE=""
+
+CONFIG=/etc/default/sdfs
+[ -f $CONFIG ] && . $CONFIG
+
+RUN_DIR=${RUN_DIR:-"/run/sdfs/"}
+mkdir -p /run/sdfs/
+LOCK_FILE="$RUN_DIR"/"$POOL_NAME".lock
 
 startup_checks(){
     if [ ! -f "$FSTAB" ]; then
@@ -74,5 +81,4 @@ elif [ "$1" == "umount" ]; then
         sleep 1
     done
 fi
-
 exit 0

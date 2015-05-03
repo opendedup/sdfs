@@ -6,10 +6,10 @@ export DAEMON=false
 export POOL_NAME=""
 export MOUNT_POINT=""
 
-export JAVA_BIN=/usr/share/sdfs/jre1.7.0/bin/java
-if [ ! -x $JAVA_BIN ]; then
-    JAVA_BIN=java
-fi
+CONFIG=/etc/default/sdfs
+[ -f $CONFIG ] && . $CONFIG
+
+RUN_DIR=${RUN_DIR:-"/run/sdfs/"}
 
 show_help(){
     echo "$(basename $0) [options] POOL_NAME MOUNT_POINT"
@@ -19,26 +19,30 @@ show_help(){
     echo "-f        foreground (default)"
 }
 
-for i in ${ARGS[@]}; do
-    if [ "-h" == "$i" ]; then
-        show_help
-        exit 0
-    elif [ "-d" == "$i" ]; then
-        DAEMON=true
-        exclude="-d"
-        ARGS=( ${ARGS[@]/$exclude} )
-    elif [ "-f" == "$i" ]; then
-        DAEMON=false
-        exclude="-f"
-        ARGS=( ${ARGS[@]/$exclude} )
-    fi
-done
+parse_args(){
+    for i in ${ARGS[@]}; do
+        if [ "-h" == "$i" ]; then
+            show_help
+            exit 0
+        elif [ "-d" == "$i" ]; then
+            DAEMON=true
+            exclude="-d"
+            ARGS=( ${ARGS[@]/$exclude} )
+        elif [ "-f" == "$i" ]; then
+            DAEMON=false
+            exclude="-f"
+            ARGS=( ${ARGS[@]/$exclude} )
+        fi
+    done
 
-POOL_NAME=${ARGS[0]}
-MOUNT_POINT=${ARGS[1]}
+    POOL_NAME=${ARGS[0]}
+    MOUNT_POINT=${ARGS[1]}
+}
 
-mkdir -p /run/sdfs/
-LOCK_FILE=/run/sdfs/"$POOL_NAME".lock
+parse_args
+
+mkdir -p "$RUN_DIR"
+LOCK_FILE="$RUN_DIR"/"$POOL_NAME".lock
 
 if [ -f "$LOCK_FILE" ]; then
     . "$LOCK_FILE"
@@ -63,11 +67,11 @@ trap "safe_unmount" SIGINT SIGTERM
 
 fuse_mount(){
     sdfs_libs=${sdfs_libs:-'/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/*'}
-    "$JAVA_BIN" \
+    "${JAVA_BIN:-"java"}" \
     -Djava.library.path=/usr/share/sdfs/bin/ \
     -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
     -Dfuse.logging.level=INFO \
-    -Xmx2g \
+    -Xmx${MEM_MAX:-"2g"} \
     -Xms2g \
     -XX:+UseCompressedOops \
     -XX:+DisableExplicitGC \
@@ -81,24 +85,25 @@ fuse_mount(){
     [ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
 }
 
-fuse_mount "$POOL_NAME" "$MOUNT_POINT" &
+start_handler(){
+    fuse_mount "$POOL_NAME" "$MOUNT_POINT" &
 
-MAIN_PID=$!
+    MAIN_PID=$!
+    while ! mountpoint -q "$MOUNT_POINT"; do
+        sleep 1
+        if ! kill -0 "$MAIN_PID" &> /dev/null; then
+            echo "Engine crashed before mount are completed"
+            exit 1
+        fi
+    done
+    {
+        # store info about java engine pid and mount point for it
+        echo "MAIN_PID=$MAIN_PID"
+        echo "MOUNT_POINT=$MOUNT_POINT"
+    } > "$LOCK_FILE"
+}
 
-while ! mountpoint -q "$MOUNT_POINT"; do
-    sleep 1
-    if ! kill -0 "$MAIN_PID" &> /dev/null; then
-        echo "Engine crashed before mount are completed"
-        exit 1
-    fi
-done
-
-{
-    # store info about java engine pid and mount point for it
-    echo "export MAIN_PID=$MAIN_PID"
-    echo "export MOUNT_POINT=$MOUNT_POINT"
-} > "$LOCK_FILE"
-
+start_handler
 
 if ! $DAEMON; then
     wait
