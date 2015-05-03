@@ -1,6 +1,98 @@
+#!/bin/bash
 export MALLOC_CHECK_=0
-/usr/share/sdfs/jre1.7.0/bin/java -Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
- -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
-  -XX:+UseCompressedOops -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 -XX:InitialSurvivorRatio=3 \
-  -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true \
- -classpath /home/samsilverberg/workspace_sdfs/sdfs/bin/:/home/samsilverberg/java_api/sdfs-bin/lib/*  fuse.SDFS.MountSDFS $*
+export ARGS=($@)
+export LOCK_FILE=""
+export DAEMON=false
+export POOL_NAME=""
+export MOUNT_POINT=""
+
+export JAVA_BIN=/usr/share/sdfs/jre1.7.0/bin/java
+if [ ! -x $JAVA_BIN ]; then
+    JAVA_BIN=java
+fi
+
+show_help(){
+    echo "$(basename $0) [options] POOL_NAME MOUNT_POINT"
+    echo "Run in foreground by default"
+    echo "-h        show help"
+    echo "-d        daemonize"
+    echo "-f        foreground (default)"
+}
+
+for i in ${ARGS[@]}; do
+    if [ "-h" == "$i" ]; then
+        show_help
+        exit 0
+    elif [ "-d" == "$i" ]; then
+        DAEMON=true
+        exclude="-d"
+        ARGS=( ${ARGS[@]/$exclude} )
+    elif [ "-f" == "$i" ]; then
+        DAEMON=false
+        exclude="-f"
+        ARGS=( ${ARGS[@]/$exclude} )
+    fi
+done
+
+POOL_NAME=${ARGS[0]}
+MOUNT_POINT=${ARGS[1]}
+
+mkdir -p /run/sdfs/
+LOCK_FILE=/run/sdfs/"$POOL_NAME".lock
+
+if [ -f "$LOCK_FILE" ]; then
+    . "$LOCK_FILE"
+    echo "$POOL_NAME seems to be mounted at $MOUNT_POINT"
+    echo "check following info:"
+    cat "$LOCK_FILE"
+    echo "if you sure what something wrong, delete $LOCK_FILE"
+    exit 1
+fi
+
+safe_unmount(){
+    . "$LOCK_FILE"
+    if mountpoint -q "$MOUNT_POINT"; then
+        umount "$MOUNT_POINT"
+    fi
+    while kill -0 "$MAIN_PID" &> /dev/null; do
+        sleep 1
+    done
+}
+
+trap "safe_unmount" SIGINT SIGTERM
+
+fuse_mount(){
+    sdfs_libs=${sdfs_libs:-'/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/*'}
+    "$JAVA_BIN" \
+    -Djava.library.path=/usr/share/sdfs/bin/ \
+    -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
+    -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
+    -XX:+UseCompressedOops \
+    -XX:+DisableExplicitGC \
+    -XX:+UseParallelGC \
+    -XX:+UseParallelOldGC \
+    -XX:ParallelGCThreads=4 \
+    -XX:InitialSurvivorRatio=3 \
+    -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true \
+    -classpath ${sdfs_libs} \
+    fuse.SDFS.MountSDFS "$POOL_NAME" "$MOUNT_POINT"
+    [ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
+}
+
+fuse_mount "$POOL_NAME" "$MOUNT_POINT" &
+
+MAIN_PID=$!
+
+{
+    # store info about java engine pid and mount point for it
+    echo "export MAIN_PID=$MAIN_PID"
+    echo "export MOUNT_POINT=$MOUNT_POINT"
+} > "$LOCK_FILE"
+
+
+if ! $DAEMON; then
+    wait
+    [ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
+fi
+
+exit 0

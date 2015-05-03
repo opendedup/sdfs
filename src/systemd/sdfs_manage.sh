@@ -81,7 +81,7 @@ elif [ "$1" == "umount" ]; then
     if mountpoint -q "$MOUNT_POINT"; then
         umount "$MOUNT_POINT"
     fi
-    while kill -0 "$MAIN_PID"; do
+    while kill -0 "$MAIN_PID" &> /dev/null; do
         sleep 1
     done
 fi
