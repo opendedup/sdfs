@@ -66,7 +66,9 @@ fuse_mount(){
     "$JAVA_BIN" \
     -Djava.library.path=/usr/share/sdfs/bin/ \
     -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
-    -Dfuse.logging.level=INFO -Xmx2g  -Xms2g \
+    -Dfuse.logging.level=INFO \
+    -Xmx2g \
+    -Xms2g \
     -XX:+UseCompressedOops \
     -XX:+DisableExplicitGC \
     -XX:+UseParallelGC \
@@ -83,6 +85,14 @@ fuse_mount "$POOL_NAME" "$MOUNT_POINT" &
 
 MAIN_PID=$!
 
+while ! mountpoint -q "$MOUNT_POINT"; do
+    sleep 1
+    if ! kill -0 "$MAIN_PID" &> /dev/null; then
+        echo "Engine crashed before mount are completed"
+        exit 1
+    fi
+done
+
 {
     # store info about java engine pid and mount point for it
     echo "export MAIN_PID=$MAIN_PID"
@@ -92,7 +102,6 @@ MAIN_PID=$!
 
 if ! $DAEMON; then
     wait
-    [ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
 fi
 
 exit 0

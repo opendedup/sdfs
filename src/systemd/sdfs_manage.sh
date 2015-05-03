@@ -55,23 +55,12 @@ check_fstab(){
 
 if [ "$1" == "mount" ]; then
     check_fstab
-    mount.sdfs "$POOL_NAME" "$MOUNT_POINT" &
-    MAIN_PID=$!
-    {
-        # store info about java engine pid and mount point for it
-        echo "export MAIN_PID=$MAIN_PID"
-        echo "export MOUNT_POINT=$MOUNT_POINT"
-    } > "$LOCK_FILE"
-    while ! mountpoint -q "$MOUNT_POINT"; do
-        sleep 1
-        if ! kill -0 "$MAIN_PID"; then
-            echo "Engine crashed before mount are completed"
-            exit 1
-        fi
-    done
+    mount.sdfs "$POOL_NAME" "$MOUNT_POINT" -d
     systemd-notify --ready --pid="$PID"
     # Wait before engine has successfully stoped
-    wait
+    while [ -f "$LOCK_FILE" ]; do
+        sleep 1
+    done
 elif [ "$1" == "umount" ]; then
     if [ ! -f "$LOCK_FILE" ]; then
         echo "$POOL_NAME can't maintain umount for it"
@@ -85,7 +74,5 @@ elif [ "$1" == "umount" ]; then
         sleep 1
     done
 fi
-
-[ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
 
 exit 0
