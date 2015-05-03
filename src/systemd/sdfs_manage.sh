@@ -60,14 +60,18 @@ check_fstab(){
     fi
 }
 
-if [ "$1" == "mount" ]; then
-    check_fstab
-    mount.sdfs "$POOL_NAME" "$MOUNT_POINT" -d
-    systemd-notify --ready --pid="$PID"
+notify_when_done(){
     # Wait before engine has successfully stoped
-    while [ -f "$LOCK_FILE" ]; do
+    while [ ! -f "$LOCK_FILE" ]; do
         sleep 1
     done
+    systemd-notify --ready --pid="$PID"
+}
+
+if [ "$1" == "mount" ]; then
+    check_fstab
+    notify_when_done &
+    mount.sdfs "$POOL_NAME" "$MOUNT_POINT"
 elif [ "$1" == "umount" ]; then
     if [ ! -f "$LOCK_FILE" ]; then
         echo "$POOL_NAME can't maintain umount for it"
