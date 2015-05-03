@@ -58,7 +58,7 @@ safe_unmount(){
     if mountpoint -q "$MOUNT_POINT"; then
         umount "$MOUNT_POINT"
     fi
-    while kill -0 "$MAIN_PID" &> /dev/null; do
+    while [ -d "$MAIN_PID" ]; do
         sleep 1
     done
 }
@@ -91,7 +91,7 @@ start_handler(){
     MAIN_PID=$!
     while ! mountpoint -q "$MOUNT_POINT"; do
         sleep 1
-        if ! kill -0 "$MAIN_PID" &> /dev/null; then
+        if [ ! -d "/proc/$MAIN_PID" ]; then
             echo "Engine crashed before mount are completed"
             exit 1
         fi
