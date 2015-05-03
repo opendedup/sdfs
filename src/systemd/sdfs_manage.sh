@@ -78,9 +78,10 @@ elif [ "$1" == "umount" ]; then
         exit 1
     fi
     . "$LOCK_FILE"
-    if mountpoint -q "$MOUNT_POINT"; then
+    while mountpoint -q "$MOUNT_POINT"; do
         umount "$MOUNT_POINT"
-    fi
+        sleep 1
+    done
     while [ -d "/proc/$MAIN_PID" ]; do
         sleep 1
     done
