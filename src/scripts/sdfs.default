@@ -1,0 +1,21 @@
+# /etc/default/sdfs
+
+## Uncomment for enable
+
+################################################################################
+## Path to Java 7
+#
+# JAVA_BIN=java
+
+################################################################################
+## Run dir for store lock file
+#
+# RUN_DIR=/run/sdfs/
+
+################################################################################
+## To calculate how much RAM you will need for a specific volume
+## divide the volume size (in bytes) by the chunk size (in bytes)
+## and multiply that times 33.
+## Memory Requirements Calculation: (volume size/chunk size)*33
+#
+# MAX_MEM=2g

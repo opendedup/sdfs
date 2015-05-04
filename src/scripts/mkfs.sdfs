@@ -1,0 +1,15 @@
+#!/bin/bash
+
+CONFIG=/etc/default/sdfs
+[ -f $CONFIG ] && . $CONFIG
+
+RUN_DIR=${RUN_DIR:-"/run/sdfs/"}
+
+mkfs_sdfs(){
+    "${JAVA_BIN:-"java"}" \
+    -Dfile.encoding=UTF-8 \
+    -classpath /home/samsilverberg/workspace_sdfs/sdfs/bin/:/home/samsilverberg/java_api/sdfs-bin/lib/* \
+    org.opendedup.sdfs.VolumeConfigWriter $@
+}
+
+mkfs_sdfs $@

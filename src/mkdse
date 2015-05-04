@@ -1,2 +1,0 @@
-java -Dfile.encoding=UTF-8 -classpath /home/samsilverberg/workspace_sdfs/sdfs/bin/:/home/samsilverberg/java_api/sdfs-bin/lib/* org.opendedup.sdfs.DSEConfigWriter "$@"
-

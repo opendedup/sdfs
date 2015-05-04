@@ -1,0 +1,112 @@
+#!/bin/bash
+export MALLOC_CHECK_=0
+export ARGS=($@)
+export LOCK_FILE=""
+export DAEMON=false
+export POOL_NAME=""
+export MOUNT_POINT=""
+
+CONFIG=/etc/default/sdfs
+[ -f $CONFIG ] && . $CONFIG
+
+RUN_DIR=${RUN_DIR:-"/run/sdfs/"}
+
+show_help(){
+    echo "$(basename $0) [options] POOL_NAME MOUNT_POINT"
+    echo "Run in foreground by default"
+    echo "-h        show help"
+    echo "-d        daemonize"
+    echo "-f        foreground (default)"
+}
+
+parse_args(){
+    for i in ${ARGS[@]}; do
+        if [ "-h" == "$i" ]; then
+            show_help
+            exit 0
+        elif [ "-d" == "$i" ]; then
+            DAEMON=true
+            exclude="-d"
+            ARGS=( ${ARGS[@]/$exclude} )
+        elif [ "-f" == "$i" ]; then
+            DAEMON=false
+            exclude="-f"
+            ARGS=( ${ARGS[@]/$exclude} )
+        fi
+    done
+
+    POOL_NAME=${ARGS[0]}
+    MOUNT_POINT=${ARGS[1]}
+}
+
+parse_args
+
+mkdir -p "$RUN_DIR"
+LOCK_FILE="$RUN_DIR"/"$POOL_NAME".lock
+
+if [ -f "$LOCK_FILE" ]; then
+    . "$LOCK_FILE"
+    echo "$POOL_NAME seems to be mounted at $MOUNT_POINT"
+    echo "check following info:"
+    cat "$LOCK_FILE"
+    echo "if you sure what something wrong, delete $LOCK_FILE"
+    exit 1
+fi
+
+safe_unmount(){
+    . "$LOCK_FILE"
+    if mountpoint -q "$MOUNT_POINT"; then
+        umount "$MOUNT_POINT"
+    fi
+    while [ -d "$MAIN_PID" ]; do
+        sleep 1
+    done
+}
+
+trap "safe_unmount" SIGINT SIGTERM
+
+fuse_mount(){
+    sdfs_libs=${sdfs_libs:-'/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/*'}
+    "${JAVA_BIN:-"java"}" \
+    -Djava.library.path=/usr/share/sdfs/bin/ \
+    -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog \
+    -Dfuse.logging.level=INFO \
+    -Xmx${MEM_MAX:-"2g"} \
+    -Xms2g \
+    -XX:+UseCompressedOops \
+    -XX:+DisableExplicitGC \
+    -XX:+UseParallelGC \
+    -XX:+UseParallelOldGC \
+    -XX:ParallelGCThreads=4 \
+    -XX:InitialSurvivorRatio=3 \
+    -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true \
+    -classpath ${sdfs_libs} \
+    fuse.SDFS.MountSDFS "$POOL_NAME" "$MOUNT_POINT"
+    [ -f "$LOCK_FILE" ] && rm "$LOCK_FILE"
+}
+
+start_handler(){
+    fuse_mount "$POOL_NAME" "$MOUNT_POINT" &
+
+    MAIN_PID=$!
+    while ! mountpoint -q "$MOUNT_POINT"; do
+        sleep 1
+        if [ ! -d "/proc/$MAIN_PID" ]; then
+            echo "Engine crashed before mount are completed"
+            exit 1
+        fi
+    done
+    {
+        # store info about java engine pid and mount point for it
+        echo "MAIN_PID=$MAIN_PID"
+        echo "MOUNT_POINT=$MOUNT_POINT"
+    } > "$LOCK_FILE"
+}
+
+start_handler
+
+if ! $DAEMON; then
+    wait
+fi
+
+exit 0
