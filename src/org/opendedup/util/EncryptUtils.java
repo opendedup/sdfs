@@ -3,12 +3,10 @@ package org.opendedup.util;
 import java.io.File;
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Security;
 
 import javax.crypto.Cipher;
@@ -32,18 +30,14 @@ public class EncryptUtils {
 		try {
 			keyBytes = HashFunctions
 					.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
+			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+			key = new SecretKeySpec(keyBytes, "AES");
+		}  catch (Exception e) {
+			SDFSLogger.getLog().error("uable to create key", e);
 			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.exit(-1);
 		}
-		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		key = new SecretKeySpec(keyBytes, "AES");
+		
 	}
 
 	public static byte[] encrypt(byte[] chunk) throws IOException {
