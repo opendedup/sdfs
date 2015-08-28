@@ -40,7 +40,7 @@ public class JSONVolPerfLayout extends Layout {
 
 	private JsonGenerator createJsonGenerator(StringWriter stringWriter)
 			throws IOException {
-		JsonGenerator g = jsonFactory.createJsonGenerator(stringWriter);
+		JsonGenerator g = jsonFactory.createGenerator(stringWriter);
 		return g;
 	}
 

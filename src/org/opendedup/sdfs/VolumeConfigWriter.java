@@ -310,7 +310,6 @@ public class VolumeConfigWriter {
 						cloudSecretKey, cloudBucketName)) {
 					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
 					System.out.println("Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
-					
 				}
 			} else {
 				System.out.println("Error : Unable to create volume");
