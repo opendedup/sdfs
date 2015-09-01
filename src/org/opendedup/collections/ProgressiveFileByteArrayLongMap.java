@@ -19,6 +19,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.AbstractShard;
@@ -26,6 +27,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StorageUnit;
@@ -388,13 +390,17 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
+	AtomicLong ct = new AtomicLong();
+	AtomicLong mt = new AtomicLong();
 	@Override
 	public boolean containsKey(byte[] key) {
 		try {
+			long v = ct.incrementAndGet();
 			this.hashlock.lock();
 			KeyBlob kb = new KeyBlob(key);
 			if (!runningGC && !bf.mightContain(kb))
 				return false;
+			
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
@@ -403,6 +409,9 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.bf.put(kb);
 				return true;
 			}
+			long mv = mt.incrementAndGet();
+			double pc = (double)mv/(double)v;
+			SDFSLogger.getLog().info("miss in " + this.path + " pc=" + pc);
 			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -1237,7 +1246,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		long tm = System.currentTimeMillis();
 		if((tm - this.lastloaded) > minTmBetweenLoads) {
 		try {
-			if (!clRunning) {
+			if (!clRunning && Main.readAheadMap) {
 				if(SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("caching " + this.path);
 				clRunning = true;

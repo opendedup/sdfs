@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-import static net.decasdev.dokan.WinError.ERROR_ALREADY_EXISTS;
+import static net.decasdev.dokan.*;
 
 
 

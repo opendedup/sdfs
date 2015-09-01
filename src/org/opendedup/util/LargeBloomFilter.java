@@ -31,7 +31,7 @@ public class LargeBloomFilter  implements Serializable {
 		}
 	}
 
-	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
+	public LargeBloomFilter(File dir, long sz, boolean fb)
 			throws IOException {
 		bfs = new LBF[256];
 		CommandLineProgressBar bar = null;

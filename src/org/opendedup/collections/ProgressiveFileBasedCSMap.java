@@ -59,7 +59,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			"Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
-	private int hashTblSz = 1250000;
+	private int hashTblSz = 500000;
 	private ArrayBlockingQueue<ProgressiveFileByteArrayLongMap> activeReadMaps = new ArrayBlockingQueue<ProgressiveFileByteArrayLongMap>(
 			Main.writeThreads);
 	private BlockingQueue<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayBlockingQueue<ProgressiveFileByteArrayLongMap>(
@@ -99,11 +99,14 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		this.closed = false;
 		// st = new SyncThread(this);
 	}
-
+	AtomicLong ct = new AtomicLong();
+	AtomicLong mt = new AtomicLong();
 	private AbstractShard getReadMap(byte[] hash) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
+		long v = ct.incrementAndGet();
 		try {
+			
 			if (!runningGC && !lbf.mightContain(hash)) {
 				// SDFSLogger.getLog().info("not in bloom filter");
 				return null;
@@ -120,10 +123,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		iter = maps.iterator();
 		while (iter.hasNext()) {
 			ProgressiveFileByteArrayLongMap _m = iter.next();
-			if (_m.containsKey(hash)) {
+			if (!activeReadMaps.contains(_m) && _m.containsKey(hash)) {
 				al.lock();
 				try {
-					if (!activeReadMaps.contains(_m)) {
 						// SDFSLogger.getLog().info("adding active " +
 						// _m.toString());
 						if (activeReadMaps.remainingCapacity() == 0) {
@@ -148,13 +150,17 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 								SDFSLogger.getLog().debug(
 										"unable to cache " + _m, e);
 						}
-
-					}
 				} finally {
 					al.unlock();
 				}
 				return _m;
 			}
+		}
+		if(!runningGC) {
+			long mv = mt.incrementAndGet();
+			double pc = (double)mv/(double)v;
+			SDFSLogger.getLog().info("might be in bloom filter " + runningGC + " pc=" + pc);
+			
 		}
 		return null;
 	}
@@ -295,7 +301,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		l.lock();
 		this.runningGC = true;
 		lbf = null;
-		lbf = new LargeBloomFilter(maxSz, .03);
+		lbf = new LargeBloomFilter(maxSz, .01);
 		l.unlock();
 		try {
 			SDFSLogger.getLog().info(
@@ -435,15 +441,15 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		SDFSLogger.getLog().info("Folder = " + _fs.getPath());
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		long rsz = 0;
-		long _tbs = maxSz / (128);
+		long _tbs = maxSz / (768);
 		int max = Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL;
 		if (_tbs > max) {
 			this.hashTblSz = max;
 		} else if (_tbs > this.hashTblSz) {
 			this.hashTblSz = (int) _tbs;
 		}
-		SDFSLogger.getLog().debug(
-				"maxsz=" + this.maxSz + " _tbs=" + _tbs + " hashTblSz="
+		SDFSLogger.getLog().info(
+				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs + " hashTblSz="
 						+ this.hashTblSz);
 		File[] files = _fs.getParentFile().listFiles(new DBFileFilter());
 		if (files.length > 0) {
@@ -480,15 +486,14 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 
 		this.loadEvent.shortMsg = "Loading BloomFilters";
 		if (maps.size() == 0)
-			lbf = new LargeBloomFilter(maxSz, .03);
+			lbf = new LargeBloomFilter(maxSz, .01);
 		else {
 			try {
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .03,
-						true);
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz,true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("Recreating BloomFilters...");
 				this.loadEvent.shortMsg = "Recreating BloomFilters";
-				lbf = new LargeBloomFilter(maxSz, .03);
+				lbf = new LargeBloomFilter(maxSz, .01);
 				executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 						worksQueue, new ProcessPriorityThreadFactory(
 								Thread.MIN_PRIORITY), executionHandler);
@@ -639,7 +644,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		l.lock();
 		ProgressiveFileByteArrayLongMap bm = null;
 		try {
-			if (lbf.mightContain(cm.getHash())) {
 				// long tm = System.currentTimeMillis();
 				if (this.getReadMap(cm.getHash()) == null) {
 					// this.misses.incrementAndGet();
@@ -674,34 +678,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					// tm = System.currentTimeMillis() - tm;
 				}
 				// this.msTr.addAndGet(tm);
-			} else {
-				if (persist) {
-					try {
-						bm = this.getWriteMap();
-						added = bm.put(cm);
-					} catch (HashtableFullException e) {
-						bm.active = false;
-						bm = this.createWriteMap();
-						added = bm.put(cm);
-					}
-					if (added) {
-						this.lbf.put(cm.getHash());
-						this.kSz.incrementAndGet();
-					}
-				} else {
-					try {
-						bm = this.getWriteMap();
-						added = bm.put(cm.getHash(), cm.getcPos());
-						this.lbf.put(cm.getHash());
-					} catch (HashtableFullException e) {
-						bm.active = false;
-						bm = this.createWriteMap();
-						added = bm.put(cm.getHash(), cm.getcPos());
-						this.lbf.put(cm.getHash());
-
-					}
-				}
-			}
+			
 		} finally {
 			try {
 			if (bm != null) {
