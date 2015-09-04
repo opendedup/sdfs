@@ -43,6 +43,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	private static final long serialVersionUID = 1L;
 	transient MappedByteBuffer keys = null;
 	transient private int size = 0;
+	transient private int maxSz = 0;
+	transient private double loadFactor = .75;
 	transient private String path = null;
 	transient private FileChannel kFC = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8;
@@ -56,13 +58,15 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	transient private BitSet removed = null;
 	transient private BitSet mapped = null;
 	transient private AtomicInteger sz = new AtomicInteger(0);
-	transient BloomFilter<KeyBlob> bf = null;
-	transient boolean runningGC;
-	transient long bgst = 0;
-	transient protected boolean full = false;
+	transient private BloomFilter<KeyBlob> bf = null;
+	transient private boolean runningGC;
+	transient private long bgst = 0;
+	transient boolean full = false;
 	transient private long lastloaded = 0;
 	transient private static long minTmBetweenLoads = 5 * 60* 1000;
-	transient boolean active = false;
+	transient private boolean active = false;
+	
+	
 
 	static {
 		FREE = new byte[HashFunctionPool.hashLength];
@@ -75,7 +79,15 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		this.size = size;
 		this.path = path;
 	}
-
+	
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	
+	public boolean isActive() {
+		return this.active;
+	}
+ 
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -86,20 +98,14 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		this.iterPos = 0;
 	}
 
-	public boolean mightContain(byte[] key) {
-		this.hashlock.lock();
-		KeyBlob kb = new KeyBlob(key);
-
-		if (!runningGC && !bf.mightContain(kb))
-			return false;
-		else
-			return true;
-	}
+	
 
 	public boolean isFull() {
 		if (full)
 			return true;
-		return this.sz.get() >= (size * .75);
+		else
+			full = this.sz.get() >= maxSz;
+		return full;
 	}
 
 	/*
@@ -206,8 +212,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		mapped.clear();
 		removed = new BitSet(size);
 		removed.clear();
-		int bsz = (int)(size * .75);
-		bf = BloomFilter.create(kbFunnel, bsz, .01);
+		bf = BloomFilter.create(kbFunnel, mapped.cardinality(), .01);
 		this.iterInit();
 		byte[] key = this._nextKey();
 		while (key != null)
@@ -253,12 +258,14 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		File posFile = new File(path + ".keys");
 		boolean newInstance = !posFile.exists();
 		if (posFile.exists()) {
-			int sz = (int) (posFile.length()) / (EL);
-			if(sz != size) {
-				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + sz+ "] instead of [" + size + "]");
-				this.size = sz;
+			int _sz = (int) (posFile.length()) / (EL);
+			if(_sz != size) {
+				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz+ "] instead of [" + size + "]");
+				this.size = _sz;
 			}
 		}
+		this.maxSz = (int)(size * loadFactor);
+		SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
 		@SuppressWarnings("resource")
 		RandomAccessFile _kRaf = new RandomAccessFile(path + ".keys", "rw");
 		this.kFC = _kRaf.getChannel();
@@ -284,8 +291,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		if (newInstance) {
 			mapped = new BitSet(size);
 			removed = new BitSet(size);
-			int bsz = (int)(size * .75);
-			bf = BloomFilter.create(kbFunnel, bsz, .01);
+			bf = BloomFilter.create(kbFunnel, size, .01);
 			this.full = false;
 		} else {
 			File f = new File(path + ".bpos");
@@ -381,7 +387,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		claims = new BitSet(size);
 		claims.clear();
 		double pfull = (double)this.sz.get() /(double)size;
-		SDFSLogger.getLog().debug("Percentage full="+pfull + " full=" + this.full);
+		SDFSLogger.getLog().info("Percentage full="+pfull + " full=" + this.full);
 		return bgst;
 	}
 
@@ -390,12 +396,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
-	AtomicLong ct = new AtomicLong();
-	AtomicLong mt = new AtomicLong();
+	//AtomicLong ct = new AtomicLong();
+	//AtomicLong mt = new AtomicLong();
 	@Override
 	public boolean containsKey(byte[] key) {
 		try {
-			long v = ct.incrementAndGet();
+			//long v = ct.incrementAndGet();
 			this.hashlock.lock();
 			KeyBlob kb = new KeyBlob(key);
 			if (!runningGC && !bf.mightContain(kb))
@@ -409,9 +415,15 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.bf.put(kb);
 				return true;
 			}
+			/*
+			if(!runningGC) {
 			long mv = mt.incrementAndGet();
 			double pc = (double)mv/(double)v;
 			SDFSLogger.getLog().info("miss in " + this.path + " pc=" + pc);
+			} else {
+				SDFSLogger.getLog().info("running gc");
+			}
+			*/
 			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -585,12 +597,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		if (Arrays.equals(current, key)) {
 			return index;
 		}
-
-		if (Arrays.equals(current, FREE)) {
-
-			SDFSLogger.getLog().warn("Should not be here in hashmap in index");
-			return -1;
-		}
 		return indexRehashed(key, index, hash, current);
 	}
 
@@ -622,24 +628,16 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				index += length;
 			}
 			if (!this.isFree(index / EL)) {
-
+				
 				keys.position(index);
 				keys.get(cur);
-				//
-				if (Arrays.equals(cur, FREE)) {
-
-					SDFSLogger.getLog().warn(
-							"Should not be here in hashmap in indexRehashed");
-					return -1;
-				}
-				//
 				if (Arrays.equals(cur, key))
 					return index;
 			} else {
 				return -1;
 			}
 		} while (index != loopIndex);
-
+		SDFSLogger.getLog().info("looped through everything");
 		return -1;
 	}
 
@@ -657,11 +655,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			keys.position(index);
 			keys.get(current);
 
-			if (Arrays.equals(current, FREE)) {
-				SDFSLogger.getLog().warn(
-						"Should not be here in hashmap in insertionIndex");
-				return index;
-			} else if (Arrays.equals(current, key)) {
+			if (Arrays.equals(current, key)) {
 				return -index - 1; // already stored
 			}
 		}
@@ -747,7 +741,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		try {
 			byte[] key = cm.getHash();
 			this.hashlock.lock();
-			if (this.full || this.sz.get() >= size) {
+			if (this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
@@ -805,7 +799,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			IOException {
 		try {
 			this.hashlock.lock();
-			if (this.full || this.sz.get() >= size) {
+			if (this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
@@ -1106,11 +1100,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	@Override
 	public long claimRecords(LargeBloomFilter nbf) throws IOException {
 		this.iterInit();
-		long sz = 0;
+		long _sz = 0;
 		this.hashlock.lock();
 		try {
-			int bsz = (int)(size * .75);
-			bf = BloomFilter.create(kbFunnel, bsz, .01);
+			int asz = size;
+			if(!this.active)
+				asz = this.mapped.cardinality();
+			bf = BloomFilter.create(kbFunnel, asz, .01);
 			this.runningGC = true;
 		} finally {
 			this.hashlock.unlock();
@@ -1134,7 +1130,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 							this.mapped.clear(iterPos);
 							this.sz.decrementAndGet();
 							this.removed.set(iterPos);
-							sz++;
+							_sz++;
 						} else {
 							this.mapped.set(iterPos);
 							bf.put(new KeyBlob(key));
@@ -1147,7 +1143,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.hashlock.unlock();
 				}
 			}
-			return sz;
+			return _sz;
 		} finally {
 			this.hashlock.lock();
 			this.runningGC = false;
@@ -1158,11 +1154,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf)
 			throws IOException {
 		this.iterInit();
-		long sz = 0;
+		long _sz = 0;
 		this.hashlock.lock();
 		try {
-			int bsz = (int)(size * .75);
-			bf = BloomFilter.create(kbFunnel, bsz, .01);
+			if(this.active)
+			bf = BloomFilter.create(kbFunnel, size, .01);
+			else
+				bf = BloomFilter.create(kbFunnel, sz.get(), .01);
 			this.runningGC = true;
 		} finally {
 			this.hashlock.unlock();
@@ -1186,7 +1184,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 							this.mapped.clear(iterPos);
 							this.sz.decrementAndGet();
 							this.removed.set(iterPos);
-							sz++;
+							_sz++;
 						} else {
 							this.mapped.set(iterPos);
 							bf.put(new KeyBlob(key));
@@ -1200,7 +1198,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.hashlock.unlock();
 				}
 			}
-			return sz;
+			return _sz;
 		} finally {
 			this.hashlock.lock();
 			this.runningGC = false;

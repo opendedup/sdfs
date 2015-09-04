@@ -54,11 +54,11 @@ public enum StorageUnit {
 	}
 
 	public String format(double number) {
-		return nf.format(number / divider) + " " + symbol;
+		return nf.format(number / (double)divider) + " " + symbol;
 	}
 
 	public String format(long number) {
-		return nf.format(number / divider) + " " + symbol;
+		return nf.format(number / (double)divider) + " " + symbol;
 	}
 
 	private static java.text.NumberFormat nf = java.text.NumberFormat
@@ -66,7 +66,7 @@ public enum StorageUnit {
 	static {
 		nf.setGroupingUsed(false);
 		nf.setMinimumFractionDigits(0);
-		nf.setMaximumFractionDigits(1);
+		nf.setMaximumFractionDigits(2);
 	}
 
 	public static void main(String[] args) {

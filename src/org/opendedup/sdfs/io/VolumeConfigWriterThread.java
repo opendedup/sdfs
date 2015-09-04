@@ -33,8 +33,8 @@ public class VolumeConfigWriterThread implements Runnable {
 		while (!closed) {
 
 			try {
-				Thread.sleep(duration);
 				writeConfig();
+				Thread.sleep(duration);
 			} catch (Exception e) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("Unable to write volume config.",
