@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.bouncycastle.util.Arrays;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -474,6 +475,13 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		// TODO Auto-generated method stub
 		
 	}

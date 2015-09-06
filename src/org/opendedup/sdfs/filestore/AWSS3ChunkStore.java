@@ -37,7 +37,7 @@ import com.google.common.cache.LoadingCache;
  *         this chunk store since S3 charges per http request.
  * 
  */
-public class AWSS3ChunkStore implements AbstractChunkStore {
+public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 	private static BasicAWSCredentials awsCredentials = null;
 	private String name;
 	private AWSS3ServicePool pool = null;

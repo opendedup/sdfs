@@ -36,6 +36,8 @@ public interface HashChunkServiceInterface {
 			HashtableFullException;
 
 	public abstract HashChunk fetchChunk(byte[] hash) throws IOException,DataArchivedException;
+	
+	public abstract void cacheChunk(byte[] hash) throws IOException,DataArchivedException;
 
 	public abstract byte getHashRoute(byte[] hash);
 

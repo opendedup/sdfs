@@ -596,6 +596,13 @@ public class HCServiceProxy {
 			}
 		}
 	}
+	
+	public static void cacheData(byte[] hash, byte[] hashloc)
+			throws IOException, DataArchivedException {
+
+		if (Main.chunkStoreLocal) 
+			HCServiceProxy.hcService.cacheChunk(hash);
+	}
 
 	public static long getChunksRead() {
 		return hcService.getChunksRead();

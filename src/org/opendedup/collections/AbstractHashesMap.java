@@ -39,6 +39,8 @@ public interface AbstractHashesMap {
 			throws IOException, HashtableFullException;
 
 	public abstract boolean update(ChunkData cm) throws IOException;
+	
+	public abstract void cache(byte [] key) throws IOException;
 
 	public abstract long get(byte[] key) throws IOException;
 

@@ -15,6 +15,7 @@ import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.model.StorageObject;
 import org.jets3t.service.security.AWSCredentials;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.CompressionUtils;
@@ -585,6 +586,13 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		// TODO Auto-generated method stub
 		
 	}

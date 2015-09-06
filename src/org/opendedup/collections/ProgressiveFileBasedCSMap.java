@@ -972,4 +972,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		}
 
 	}
+
+	@Override
+	public void cache(byte[] key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

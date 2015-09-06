@@ -220,6 +220,10 @@ public class HashStore {
 
 		return hs;
 	}
+	
+	public void cacheChunk(byte [] hash) throws IOException, DataArchivedException {
+		bdb.cache(hash);
+	}
 
 	public void processHashClaims(SDFSEvent evt) throws IOException {
 		this.bdb.claimRecords(evt);

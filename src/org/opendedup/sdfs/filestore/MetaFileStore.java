@@ -286,7 +286,11 @@ private static EventBus eventBus = new EventBus();
 					isDir = new File(path).isDirectory();
 				}
 				if (isSymlink) {
-					return Files.deleteIfExists(p);
+					mf = getMF(new File(path));
+					eventBus.post(new MFileDeleted(mf,true));
+					deleted = Files.deleteIfExists(p);
+					if (!deleted)
+						eventBus.post(new MFileWritten(mf));
 				}
 				else if (isDir) {
 					File ps = new File(path);

@@ -160,10 +160,12 @@ public class ArchiveImporter {
 					}
 
 				}
+				SDFSLogger.getLog().info("1");
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
 						+ sdest, server, password, port, maxSz, evt, useSSL);
-
+				SDFSLogger.getLog().info("2");
 				imp.runImport();
+				SDFSLogger.getLog().info("3");
 				if (imp.isCorrupt()) {
 
 					// evt.endEvent("Import failed for " + srcArchive +

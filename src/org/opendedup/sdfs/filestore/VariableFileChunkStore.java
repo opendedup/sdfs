@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.hashing.AbstractHashEngine;
 //import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
@@ -674,5 +675,12 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void compact() {
+	}
+
+	@Override
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
+		// TODO Auto-generated method stub
+		
 	}
 }

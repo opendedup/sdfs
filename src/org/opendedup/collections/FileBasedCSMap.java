@@ -491,4 +491,10 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		FileUtils.deleteDirectory(new File(this.fileName));
 
 	}
+
+	@Override
+	public void cache(byte[] key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

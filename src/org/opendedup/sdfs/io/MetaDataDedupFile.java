@@ -913,9 +913,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
+			eventBus.post(new MFileDeleted(this));
 			boolean del = f.delete();
-			if (del)
-				eventBus.post(new MFileDeleted(this));
+			
 			return del;
 		} finally {
 			this.writeLock.unlock();

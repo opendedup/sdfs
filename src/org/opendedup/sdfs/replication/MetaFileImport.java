@@ -57,7 +57,9 @@ public class MetaFileImport implements Serializable {
 		hashes = new ArrayList<byte[]>();
 		startTime = System.currentTimeMillis();
 		File f = new File(path);
+		SDFSLogger.getLog().info("getting file counts for  " + f.getPath());
 		levt.maxCt = FileCounts.getDBFileSize(f, false);
+		SDFSLogger.getLog().info("got file counts");
 		this.server = server;
 		this.password = password;
 		this.port = port;

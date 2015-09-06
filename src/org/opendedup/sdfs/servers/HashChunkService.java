@@ -141,6 +141,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 		this.chunksRead = this.chunksFetched;
 		return hashChunk;
 	}
+	
+	public void cacheChunk(byte [] hash) throws IOException, DataArchivedException {
+		hs.cacheChunk(hash);
+	}
 
 	public byte getHashRoute(byte[] hash) {
 		byte hashRoute = (byte) (hash[1] / (byte) 16);
