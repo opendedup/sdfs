@@ -218,6 +218,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
+			this.chunk_store_class = "com.opendedup.sdfs.filestore.cloud.BatchFileChunkStore";
 			if(OSValidator.isWindows())
 				safe_sync = false;
 		}
@@ -682,6 +683,18 @@ public class VolumeConfigWriter {
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
+		} else if(ext) {
+			this.chunk_size = 1024;
+			Element extended  = xmldoc.createElement("extended-config");
+			extended.setAttribute("block-size", "30 MB");
+			extended.setAttribute("allow-sync", "false");
+			extended.setAttribute("upload-thread-sleep-time", "6000");
+			extended.setAttribute("sync-files", "false");
+			extended.setAttribute("local-cache-size","10GB");
+			extended.setAttribute("map-cache-size", "200");
+			extended.setAttribute("io-threads", "16");
+			extended.setAttribute("delete-unclaimed", "true");
+			cs.appendChild(extended);
 		}
 		root.appendChild(cs);
 		try {

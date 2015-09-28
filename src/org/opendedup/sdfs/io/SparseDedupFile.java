@@ -89,7 +89,9 @@ public class SparseDedupFile implements DedupFile {
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
+		
 	}
+	
 
 	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder
 			.newBuilder().maximumSize(maxWriteBuffers + 1)
@@ -340,6 +342,23 @@ public class SparseDedupFile implements DedupFile {
 
 	public void setMetaDataDedupFile(MetaDataDedupFile mf) {
 		this.mf = mf;
+	
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.GUID.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o)
+	{
+	    return this.GUID.equals(o.toString());
+	}
+	
+	@Override
+	public String toString() {
+		return this.GUID;
 	}
 
 	@Override

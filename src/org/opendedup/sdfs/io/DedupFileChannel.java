@@ -55,6 +55,11 @@ public class DedupFileChannel {
 		if(Main.checkArchiveOnOpen) {
 			this.recoverArchives();
 		}
+		try {
+		ReadAhead.getReadAhead(file);
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to load readahead for " + df.mf.getPath(), e);
+		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"Initializing Cache " + df.getMetaFile().getPath());
