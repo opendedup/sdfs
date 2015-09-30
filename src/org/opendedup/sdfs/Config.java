@@ -75,8 +75,9 @@ public class Config {
 			}
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
-			if(cbe.hasAttribute("average-chunk-size")) {
-				HashFunctionPool.avg_page_size = Integer.parseInt(cbe.getAttribute("average-chunk-size"));
+			if (cbe.hasAttribute("average-chunk-size")) {
+				HashFunctionPool.avg_page_size = Integer.parseInt(cbe
+						.getAttribute("average-chunk-size"));
 			}
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
@@ -104,7 +105,7 @@ public class Config {
 				Main.chunkStoreEncryptionKey = cbe
 						.getAttribute("encryption-key");
 			}
-			if(cbe.hasAttribute("encryption-iv"))
+			if (cbe.hasAttribute("encryption-iv"))
 				Main.chunkStoreEncryptionIV = cbe.getAttribute("encryption-iv");
 			if (cbe.hasAttribute("compress")) {
 				Main.compress = Boolean.parseBoolean(cbe
@@ -140,7 +141,7 @@ public class Config {
 			if (awsSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
 				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
-				if(aws.hasAttribute("chunkstore-class"))
+				if (aws.hasAttribute("chunkstore-class"))
 					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
@@ -150,8 +151,9 @@ public class Config {
 			}
 			if (googleSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-				if(aws.hasAttribute("chunkstore-class"))
+				Element aws = (Element) doc
+						.getElementsByTagName("google-store").item(0);
+				if (aws.hasAttribute("chunkstore-class"))
 					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
@@ -164,8 +166,9 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
 				Element azure = (Element) doc.getElementsByTagName("azure")
 						.item(0);
-				if(azure.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
+				if (azure.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = azure
+							.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
@@ -187,10 +190,14 @@ public class Config {
 				if (!f.mkdirs())
 					throw new IOException("Unable to create " + f.getPath());
 			}
-			if(Main.chunkStoreEncryptionEnabled)
-				SDFSLogger.getLog().info("################## Encryption is enabled ##################");
+			if (Main.chunkStoreEncryptionEnabled)
+				SDFSLogger
+						.getLog()
+						.info("################## Encryption is enabled ##################");
 			else
-				SDFSLogger.getLog().info("################## Encryption is NOT enabled ##################");
+				SDFSLogger
+						.getLog()
+						.info("################## Encryption is NOT enabled ##################");
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to parse config file [" + fileName + "]", e);
@@ -291,10 +298,11 @@ public class Config {
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-		if(cache.hasAttribute("max-variable-segment-size")) {
-			VariableHashEngine.maxLen = Integer.parseInt(cache.getAttribute("max-variable-segment-size"))*1024;
+		if (cache.hasAttribute("max-variable-segment-size")) {
+			VariableHashEngine.maxLen = Integer.parseInt(cache
+					.getAttribute("max-variable-segment-size")) * 1024;
 		} else {
-			VariableHashEngine.maxLen =Main.CHUNK_LENGTH;
+			VariableHashEngine.maxLen = Main.CHUNK_LENGTH;
 		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 
@@ -323,8 +331,9 @@ public class Config {
 				"local-chunkstore").item(0);
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
-		if(localChunkStore.hasAttribute("average-chunk-size")) {
-			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
+		if (localChunkStore.hasAttribute("average-chunk-size")) {
+			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore
+					.getAttribute("average-chunk-size"));
 		}
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
@@ -375,13 +384,13 @@ public class Config {
 						.getAttribute("max-repl-batch-sz"));
 			if (localChunkStore.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean
-						.parseBoolean(localChunkStore
-								.getAttribute("encrypt"));
+						.parseBoolean(localChunkStore.getAttribute("encrypt"));
 				Main.chunkStoreEncryptionKey = localChunkStore
 						.getAttribute("encryption-key");
 			}
-			if(localChunkStore.hasAttribute("encryption-iv"))
-				Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
+			if (localChunkStore.hasAttribute("encryption-iv"))
+				Main.chunkStoreEncryptionIV = localChunkStore
+						.getAttribute("encryption-iv");
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 			Element networkcs = (Element) doc.getElementsByTagName("network")
 					.item(0);
@@ -406,8 +415,9 @@ public class Config {
 			int googleSz = doc.getElementsByTagName("google-store").getLength();
 			if (googleSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-				if(aws.hasAttribute("chunkstore-class"))
+				Element aws = (Element) doc
+						.getElementsByTagName("google-store").item(0);
+				if (aws.hasAttribute("chunkstore-class"))
 					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
@@ -420,12 +430,18 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) localChunkStore.getElementsByTagName(
 						"aws").item(0);
-				if(aws.hasAttribute("chunkstore-class"))
+				if (aws.hasAttribute("chunkstore-class"))
 					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
-				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
-				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
+				if (aws.hasAttribute("aws-aim")) {
+					Main.useAim = Boolean.parseBoolean(aws
+							.getAttribute("aws-aim"));
+				}
+				if (!Main.useAim) {
+					Main.cloudAccessKey = aws.getAttribute("aws-access-key");
+					Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
+				}
 				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
 			}
 			int azureSz = doc.getElementsByTagName("azure-store").getLength();
@@ -433,8 +449,9 @@ public class Config {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
 				Element azure = (Element) doc.getElementsByTagName(
 						"azure-store").item(0);
-				if(azure.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
+				if (azure.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = azure
+							.getAttribute("chunkstore-class");
 				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
 				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
@@ -443,10 +460,14 @@ public class Config {
 			}
 
 		}
-		if(Main.chunkStoreEncryptionEnabled)
-			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
+		if (Main.chunkStoreEncryptionEnabled)
+			SDFSLogger
+					.getLog()
+					.info("################## Encryption is enabled ##################");
 		else
-			SDFSLogger.getLog().info("################## Encryption is NOT enabled ##################");
+			SDFSLogger
+					.getLog()
+					.info("################## Encryption is NOT enabled ##################");
 
 		/*
 		 * IOMeter meter = new IOMeter(Main.ioLogFile); Thread th = new
@@ -488,13 +509,16 @@ public class Config {
 					.getLength() > 0) {
 				Element chunkStoreConfig = (Element) localChunkStore
 						.getElementsByTagName("extended-config").item(0);
-				chunkStoreConfig.setAttribute("local-cache-size", StorageUnit.of(HCServiceProxy.getMaxCacheSize())
-						.format(HCServiceProxy.getMaxCacheSize()));
-				chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
-				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
+				chunkStoreConfig.setAttribute("local-cache-size",
+						StorageUnit.of(HCServiceProxy.getMaxCacheSize())
+								.format(HCServiceProxy.getMaxCacheSize()));
+				chunkStoreConfig.setAttribute("read-speed",
+						Integer.toString(HCServiceProxy.getReadSpeed()));
+				chunkStoreConfig.setAttribute("write-speed",
+						Integer.toString(HCServiceProxy.getWriteSpeed()));
 			}
 		}
-		
+
 		try {
 			// Prepare the DOM document for writing
 			Source source = new DOMSource(doc);

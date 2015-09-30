@@ -328,6 +328,11 @@ public class Main {
 	 * The awsSecretKey. This is used on the client.
 	 */
 	public static String cloudSecretKey = null;
+	
+	/**
+	 * use Aim for AWS S3 authentication
+	 */
+	public static boolean useAim;
 
 	/** Azure login info **/
 	public static boolean AZUREChunkStore = false;
@@ -336,7 +341,7 @@ public class Main {
 	public static String AZURE_BLOB_HOST_NAME = null;
 
 	/**
-	 * Compress AWS data using zlib
+	 * Compress AWS data using speedy
 	 */
 	public static boolean compress = false;
 

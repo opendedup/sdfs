@@ -107,6 +107,7 @@ public class VolumeConfigWriter {
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 	private boolean clusterRackAware = false;
 	private boolean ext = false;
+	private boolean awsAim = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -222,6 +223,8 @@ public class VolumeConfigWriter {
 			if(OSValidator.isWindows())
 				safe_sync = false;
 		}
+		if(cmd.hasOption("aws-use-aim"))
+			this.awsAim=true;
 
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
@@ -287,27 +290,29 @@ public class VolumeConfigWriter {
 			this.azureEnabled = Boolean.parseBoolean(cmd
 					.getOptionValue("azure-enabled"));
 		}
-
 		if (cmd.hasOption("gc-class")) {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
 		if (this.awsEnabled) {
-			if (cmd.hasOption("cloud-secret-key")
-					&& cmd.hasOption("cloud-access-key")
+			if (awsAim || (cmd.hasOption("cloud-secret-key")
+					&& cmd.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
+				if(!awsAim) {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				}
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+				
+				if (!awsAim && !cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
 							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkBucketUnique(cloudAccessKey,
+				if (!awsAim && !cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkBucketUnique(cloudAccessKey,
 						cloudSecretKey, cloudBucketName)) {
 					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
 					System.out.println("Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
@@ -602,19 +607,18 @@ public class VolumeConfigWriter {
 		if (this.awsEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
-			aws.setAttribute("aws-access-key", this.cloudAccessKey);
-			aws.setAttribute("aws-secret-key", this.cloudSecretKey);
+			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
+			if(!awsAim) {
+				aws.setAttribute("aws-access-key", this.cloudAccessKey);
+				aws.setAttribute("aws-secret-key", this.cloudSecretKey);
+			}
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if(ext) {
 				this.chunk_size = 256;
 				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				if(OSValidator.isWindows()) {
-					extended.setAttribute("block-size", "2 MB");
-				}
-				else
-					extended.setAttribute("block-size", "20 MB");
+				extended.setAttribute("block-size", "20 MB");
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "6000");
 				extended.setAttribute("sync-files", "true");
@@ -1054,6 +1058,7 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
 				.hasArg().withArgName("IPv4 Address").create());
+		options.addOption("aws-use-aim", false, "Use aim authentication for access to AWS S3");
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-port")
 				.withDescription(

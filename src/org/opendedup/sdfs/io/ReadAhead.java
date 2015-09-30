@@ -16,8 +16,6 @@ import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 public  class ReadAhead  implements Runnable {
 	SparseDedupFile df;
