@@ -9,4 +9,6 @@ public interface AbstractHashEngine {
 	public void destroy();
 	
 	public int getMaxLen();
+	
+	public int getMinLen();
 }

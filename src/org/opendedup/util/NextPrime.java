@@ -1,5 +1,7 @@
 package org.opendedup.util;
 
+import java.io.IOException;
+
 public class NextPrime {
 
 	public static long getNextPrimeL(long input) {
@@ -33,7 +35,7 @@ public class NextPrime {
 		}
 	}
 
-	public static int getNextPrimeI(long input) throws Exception {
+	public static int getNextPrimeI(long input) throws IOException {
 		long root;
 		boolean isPrime = false;
 		if (input <= 2) {
@@ -60,7 +62,7 @@ public class NextPrime {
 			}
 			if (isPrime == true) {
 				if (i > Integer.MAX_VALUE)
-					throw new Exception(
+					throw new IOException(
 							"Next Prime is Greater than max Int value");
 				return (int) i;
 			}

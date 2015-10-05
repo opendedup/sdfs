@@ -59,7 +59,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean hlAdded = false;
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 	int sz;
-	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * 2;
+	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 	private static BlockingQueue<Runnable> worksQueue = null;
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor executor = null;
@@ -249,7 +249,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					executor.execute(sh);
 				}
 				int wl = 0;
-				int tm = 1000;
 				int al = 0;
 				while (l.getDN() < sz && l.getDNEX() == 0) {
 					if (al == 30) {
@@ -261,14 +260,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 										+ "] seconds for all reads to complete.");
 						al = 0;
 					}
-					if (Main.readTimeoutSeconds > 0
-							&& wl > (Main.writeTimeoutSeconds * tm)) {
-						int nt = (tm * wl) / 1000;
-						throw new IOException("cache Timed Out after [" + nt
-								+ "] seconds. Expected [" + sz
-								+ "] block read but only [" + l.getDN()
-								+ "] were completed");
-					}
+					
 					if (l.getDAR() != null) {
 						throw l.getDAR();
 					}
@@ -1218,9 +1210,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
-				if (cache)
+				if (cache) {
 					HCServiceProxy.cacheData(hash, hashloc);
-				else
+				}else
 					ck = HCServiceProxy.fetchChunk(hash, hashloc);
 				l.commandResponse(this);
 			} catch (DataArchivedException e) {

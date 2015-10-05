@@ -223,7 +223,7 @@ public class VolumeConfigWriter {
 			if(OSValidator.isWindows())
 				safe_sync = false;
 		}
-		if(cmd.hasOption("aws-use-aim"))
+		if(cmd.hasOption("aws-aim"))
 			this.awsAim=true;
 
 		if (cmd.hasOption("io-safe-sync")) {
@@ -1058,7 +1058,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
 				.hasArg().withArgName("IPv4 Address").create());
-		options.addOption("aws-use-aim", false, "Use aim authentication for access to AWS S3");
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-aim")
+				.withDescription("Use aim authentication for access to AWS S3")
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("dse-listen-port")
 				.withDescription(

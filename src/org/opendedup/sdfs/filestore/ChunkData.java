@@ -219,6 +219,16 @@ public class ChunkData {
 		}
 
 	}
+	
+	public static void cacheChunk(byte[] hash, long pos) throws IOException,DataArchivedException {
+		try {
+			HCServiceProxy.getChunkStore().cacheData(hash, pos,
+					Main.chunkStorePageSize);
+		} catch (IOException e) {
+				throw e;
+		}
+
+	}
 
 	public byte[] getData() throws IOException,DataArchivedException {
 		if (this.chunk == null) {

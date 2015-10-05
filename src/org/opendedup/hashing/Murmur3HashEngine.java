@@ -38,4 +38,10 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 		// TODO Auto-generated method stub
 		return Main.CHUNK_LENGTH;
 	}
+
+	@Override
+	public int getMinLen() {
+		// TODO Auto-generated method stub
+		return Main.CHUNK_LENGTH;
+	}
 }

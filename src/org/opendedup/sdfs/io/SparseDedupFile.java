@@ -323,7 +323,7 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().warn("interrupted");
 					break;
 				}
-				if (i > 30000) {
+				if (i > 120000) {
 					int sec = (i / 1000) * x;
 					SDFSLogger
 							.getLog()

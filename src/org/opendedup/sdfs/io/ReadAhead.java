@@ -24,7 +24,7 @@ public  class ReadAhead  implements Runnable {
 			2);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+			Main.writeThreads*4, Main.writeThreads*4, 10, TimeUnit.SECONDS,
 			worksQueue, executionHandler);
 	private static LoadingCache<SparseDedupFile, ReadAhead> readAheads = CacheBuilder
 			.newBuilder().maximumSize(Main.writeThreads + 1)

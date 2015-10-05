@@ -44,6 +44,12 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 	@Override
 	public int getMaxLen() {
 		// TODO Auto-generated method stub
-		return Main.chunkStorePageSize;
+		return Main.CHUNK_LENGTH;
+	}
+
+	@Override
+	public int getMinLen() {
+		// TODO Auto-generated method stub
+		return Main.CHUNK_LENGTH;
 	}
 }
