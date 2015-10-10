@@ -35,8 +35,8 @@ import org.simpleframework.http.Path;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
-import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.Server;
+import org.simpleframework.http.core.ContainerSocketProcessor;
+import org.simpleframework.transport.SocketProcessor;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 import org.w3c.dom.DOMImplementation;
@@ -54,7 +54,7 @@ public class MgmtWebServer implements Container {
 			Path reqPath = request.getPath();
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
-
+			
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
 			String cmdOptions = request.getQuery().get("options");
@@ -821,6 +821,7 @@ public class MgmtWebServer implements Container {
 			KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			NoSuchProviderException, SignatureException, IOException,
 			UnrecoverableKeyException, KeyManagementException {
+		SSLContext sslContext = null;
 		if (Main.sdfsCliEnabled) {
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent()
@@ -838,40 +839,28 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-				SSLContext sslContext = SSLContext.getInstance("SSLv3");
+				sslContext = SSLContext.getInstance("SSLv3");
 				// sslContext.init(keyManagerFactory.getKeyManagers(), new
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+			}
 				Container container = new MgmtWebServer();
-				Server s = new ContainerServer(container);
-				connection = new SocketConnection(s);
+				SocketProcessor server=  new ContainerSocketProcessor(container, 2);
+				connection = new SocketConnection(server);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 				SocketAddress address = new InetSocketAddress(
 						Main.sdfsCliListenAddr, Main.sdfsCliPort);
+				
+				connection = new SocketConnection(server);
+				if(sslContext != null)
 				connection.connect(address, sslContext);
+				else
+					connection.connect(address);
 				SDFSLogger.getLog().info(
 						"###################### SDFSCLI SSL Management WebServer Started at "
 								+ address.toString()
 								+ " #########################");
-			} else {
-				try {
-					Container container = new MgmtWebServer();
-					Server s = new ContainerServer(container);
-					connection = new SocketConnection(s);
-					Main.sdfsCliPort = FindOpenPort
-							.pickFreePort(Main.sdfsCliPort);
-					SocketAddress address = new InetSocketAddress(
-							Main.sdfsCliListenAddr, Main.sdfsCliPort);
-					connection.connect(address);
-					SDFSLogger.getLog().info(
-							"###################### SDFSCLI Management WebServer Started at "
-									+ address.toString()
-									+ " #########################");
-				} catch (IOException e) {
-					SDFSLogger.getLog().error(
-							"unable to start Web Management Server", e);
-				}
-			}
+			
 		}
 	}
 
