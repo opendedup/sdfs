@@ -25,6 +25,7 @@ public class MountSDFS {
 				"the drive letter for SDFS file system \n e.g. \'S\'");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
+		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption(
 				"vc",
 				true,
@@ -74,6 +75,10 @@ public class MountSDFS {
 			Main.runCompact = true;
 			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
+		}
+		if(cmd.hasOption("cfr")) {
+			Main.syncDL = true;
+			Main.runConsistancyCheck = true;
 		}
 		if (cmd.hasOption("rv")) {
 			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),

@@ -56,11 +56,11 @@ public  class ReadAhead  implements Runnable {
 					buf.cacheChunk();
 				}
 			} catch (IOException e) {
-				SDFSLogger.getLog().error("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
+				SDFSLogger.getLog().debug("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
 			} catch (InterruptedException e) {
-				SDFSLogger.getLog().error("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
+				SDFSLogger.getLog().debug("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
 			} catch (DataArchivedException e) {
-				SDFSLogger.getLog().error("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
+				SDFSLogger.getLog().debug("error caching chunk [" +buf.getFilePosition() +"] in " + df.getDatabasePath(),e);
 			}
 		}
 	}
@@ -77,10 +77,10 @@ public  class ReadAhead  implements Runnable {
 				executor.execute(ck);
 				i = buf.getEndPosition();
 			} catch (IOException e) {
-				SDFSLogger.getLog().error("error caching chunk [" +i +"] in " + df.getDatabasePath(),e);
+				SDFSLogger.getLog().debug("error caching chunk [" +i +"] in " + df.getDatabasePath(),e);
 				break;
 			} catch (FileClosedException e) {
-				SDFSLogger.getLog().error("error caching chunk [" +i +"] in " + df.getDatabasePath(),e);
+				SDFSLogger.getLog().debug("error caching chunk [" +i +"] in " + df.getDatabasePath(),e);
 				break;
 			}
 		}

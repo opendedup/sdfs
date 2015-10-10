@@ -24,7 +24,8 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-import static net.decasdev.dokan.*;
+
+
 
 
 
@@ -319,7 +320,9 @@ public class WinSDFS implements DokanOperations {
 					throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
 				}
 				// ch.force(true);
-			} catch (Exception e) {
+			} catch(DokanOperationException e) {
+				throw e;
+			}catch (Exception e) {
 				log.error("unable to cleanup file " + fileName, e);
 				throw new DokanOperationException(ERROR_WRITE_FAULT);
 			}
@@ -338,6 +341,8 @@ public class WinSDFS implements DokanOperations {
 				if(arg1.deleteOnClose) {
 					this.onDeleteFile(path, arg1);
 				}
+			} catch(DokanOperationException e) {
+				throw e;
 			} catch (Exception e) {
 				log.error("unable to close file " + path, e);
 			}
@@ -882,7 +887,7 @@ public class WinSDFS implements DokanOperations {
 		File _f = new File(mountedVolume + path);
 		if (!_f.exists()) {
 			_f = null;
-			log.error("No such node " + path);
+			log.debug("No such node " + path);
 			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
 		}
 		return _f;
@@ -922,7 +927,7 @@ public class WinSDFS implements DokanOperations {
 				*/
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while writing data", e);
+				SDFSLogger.getLog().debug("error while writing data", e);
 				errRtn = e;
 			}
 			done = true;
@@ -946,7 +951,7 @@ public class WinSDFS implements DokanOperations {
 				DedupFileChannel ch = getFileChannel(fileName, info.handle);
 				ch.read(buf, 0, buf.capacity(), pos);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while writing data", e);
+				SDFSLogger.getLog().debug("error while reading data", e);
 				errRtn = e;
 			}
 			done = true;
@@ -972,7 +977,7 @@ public class WinSDFS implements DokanOperations {
 				ch.truncateFile(sz);
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while truncating file", e);
+				SDFSLogger.getLog().debug("error while truncating file", e);
 				errRtn = e;
 			}
 			done = true;
@@ -999,7 +1004,7 @@ public class WinSDFS implements DokanOperations {
 				ch.force(true);
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while writing data", e);
+				SDFSLogger.getLog().debug("error while sync data", e);
 				errRtn = e;
 			}finally {
 			done = true;
@@ -1039,7 +1044,7 @@ public class WinSDFS implements DokanOperations {
 			}
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error while reading data", e);
+			SDFSLogger.getLog().debug("error while reading data", e);
 			errRtn = e;
 		}
 		}
@@ -1066,7 +1071,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				filedata = files.toArray(new Win32FindData[0]);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while listing files", e);
+				SDFSLogger.getLog().debug("error while listing files", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1094,7 +1099,7 @@ public class WinSDFS implements DokanOperations {
 				mf.setLastAccessed(atime * 1000L, true);
 				mf.setLastModified(mtime * 1000L, true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while setting time", e);
+				SDFSLogger.getLog().debug("error while setting time", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1123,7 +1128,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				log.debug("deleteted file " + fileName);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while deleting file", e);
+				SDFSLogger.getLog().debug("error while deleting file", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1151,8 +1156,9 @@ public class WinSDFS implements DokanOperations {
 							WinError.ERROR_DIR_NOT_EMPTY);
 				}
 				log.debug("deleteted folder " + path);
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while deleting folder", e);
+			} 
+			catch (Exception e) {
+				SDFSLogger.getLog().debug("error while deleting folder", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1177,7 +1183,7 @@ public class WinSDFS implements DokanOperations {
 				MetaFileStore.rename(f.getPath(), mountedVolume + to);
 				log.debug("moved " + from + " to " + to);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while setting moving file", e);
+				SDFSLogger.getLog().debug("error while setting moving file", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1203,7 +1209,7 @@ public class WinSDFS implements DokanOperations {
 				MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
 				info =  fi.toByHandleFileInformation();
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error while setting moving file", e);
+				SDFSLogger.getLog().debug("error while setting moving file", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1319,9 +1325,9 @@ public class WinSDFS implements DokanOperations {
 				if (fileName.equals("\\")) {
 					switch (disposition) {
 					case CREATE_NEW:
-						throw new DokanOperationException(ERROR_ALREADY_EXISTS);
+						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 					case CREATE_ALWAYS:
-						throw new DokanOperationException(ERROR_ALREADY_EXISTS);
+						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 					case OPEN_ALWAYS:
 						nextHandle =  getNextHandle();
 						break;
@@ -1338,7 +1344,7 @@ public class WinSDFS implements DokanOperations {
 				} else if (new File(mountedVolume + fileName).exists()) {
 					switch (disposition) {
 					case CREATE_NEW:
-						throw new DokanOperationException(ERROR_ALREADY_EXISTS);
+						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 					case OPEN_ALWAYS:
 						nextHandle = getNextHandle();
 						if(deleteOnClose) {
@@ -1363,7 +1369,7 @@ public class WinSDFS implements DokanOperations {
 								MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
 								mf.deleteOnClose = deleteOnClose;
 							}
-							throw new DokanOperationException(ERROR_ALREADY_EXISTS);
+							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 						} catch (IOException e) {
 							log.error(
 									"unable to clear file "

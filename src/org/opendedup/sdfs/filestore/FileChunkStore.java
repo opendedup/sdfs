@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -10,9 +9,11 @@ import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantLock;
 
 
+
 //import org.apache.lucene.store.NativePosixUtil;
 import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -590,6 +591,13 @@ public class FileChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		// TODO Auto-generated method stub
 		
 	}

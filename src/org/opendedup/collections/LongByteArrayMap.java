@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -13,13 +14,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.OSValidator;
+
 
 public class LongByteArrayMap implements DataMapInterface {
 	private static final int _arrayLength = (1 + HashFunctionPool.hashLength + 1 + 8)
@@ -31,7 +36,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static final int _v2offset = 256;
 	private static final short magicnumber = 6442;
 	String filePath = null;
-	private ReentrantLock hashlock = new ReentrantLock();
+	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 	private boolean closed = true;
 	public static byte[] _FREE = new byte[_arrayLength];
 	public static byte[] _V1FREE = new byte[_v1arrayLength];
@@ -83,12 +88,13 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void iterInit() throws IOException {
-		iterlock.lock();
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			this.iterPos = 0;
 
 		} finally {
-			iterlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -106,8 +112,6 @@ public class LongByteArrayMap implements DataMapInterface {
 		return (this.iterPos * arrayLength);
 	}
 
-	private ReentrantLock iterlock = new ReentrantLock();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -115,7 +119,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public long nextKey() throws IOException {
-		iterlock.lock();
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		try {
 			long _cpos = getInternalIterFPos();
 			while (_cpos < flen) {
@@ -145,7 +150,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 			return -1;
 		} finally {
-			iterlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -156,7 +161,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public byte[] nextValue() throws IOException {
-		iterlock.lock();
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		try {
 			long _cpos = getInternalIterFPos();
 			while (_cpos < flen) {
@@ -173,23 +179,19 @@ public class LongByteArrayMap implements DataMapInterface {
 				}
 			}
 			if (getInternalIterFPos() < pbdb.size()) {
-				this.hashlock.lock();
-				try {
 					flen = this.pbdb.size();
-				} finally {
-					this.hashlock.unlock();
-				}
 				return this.nextValue();
 			}
 			return null;
 		} finally {
-			iterlock.unlock();
+			l.unlock();
 		}
 
 	}
 
 	public LongKeyValue nextKeyValue() throws IOException {
-		iterlock.lock();
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		try {
 			long _cpos = getInternalIterFPos();
 			while (_cpos < flen) {
@@ -207,17 +209,14 @@ public class LongByteArrayMap implements DataMapInterface {
 				}
 			}
 			if (getInternalIterFPos() < pbdb.size()) {
-				this.hashlock.lock();
-				try {
+				
 					flen = this.pbdb.size();
-				} finally {
-					this.hashlock.unlock();
-				}
+				
 				return this.nextKeyValue();
 			}
 			return null;
 		} finally {
-			iterlock.unlock();
+			l.unlock();
 		}
 
 	}
@@ -252,9 +251,11 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	private void openFile() throws IOException {
 		if (this.closed) {
-			this.hashlock.lock();
-			bdbf = Paths.get(filePath);
+			WriteLock l = this.hashlock.writeLock();
+			l.lock();
 			try {
+			bdbf = Paths.get(filePath);
+			
 				dbFile = new File(filePath);
 				boolean fileExists = dbFile.exists();
 				if (SDFSLogger.isDebug())
@@ -304,7 +305,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				SDFSLogger.getLog().error("unable to open file " + filePath, e);
 				throw new IOException(e);
 			} finally {
-				this.hashlock.unlock();
+				l.unlock();
 			}
 		}
 	}
@@ -320,30 +321,36 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * @see org.opendedup.collections.DataMap#put(long, byte[])
 	 */
 	@Override
-	public void put(long pos, byte[] data) throws IOException {
+	public void put(long pos, byte[] data) throws IOException, FileClosedException {
+		long fpos = 0;
+		fpos = this.getMapFilePosition(pos);
+
+		//
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
+		try{
+		
 		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.filePath + "] is close");
+			throw new FileClosedException("hashtable [" + this.filePath + "] is close");
 		}
 		/*
 		if (data.length != arrayLength)
 			throw new IOException("data length " + data.length
 					+ " does not equal " + arrayLength);
 		*/
-		long fpos = 0;
-		fpos = this.getMapFilePosition(pos);
-
-		//
-		this.hashlock.lock();
+		;
 		if (fpos > flen)
 			flen = fpos;
-		this.hashlock.unlock();
 		// rf.seek(fpos);
 		// rf.write(data);
 		pbdb.write(ByteBuffer.wrap(data), fpos);
+		}finally {
+		l.unlock();
+		}
 	}
 
 	@Override
-	public void putIfNull(long pos, byte[] data) throws IOException {
+	public void putIfNull(long pos, byte[] data) throws IOException, FileClosedException {
 		byte[] b = this.get(pos);
 		if (b == null) {
 			this.put(pos, data);
@@ -356,8 +363,10 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * @see org.opendedup.collections.DataMap#trim(long, int)
 	 */
 	@Override
-	public synchronized void trim(long pos, int len) {
-
+	public synchronized void trim(long pos, int len) throws FileClosedException {
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
+		try {
 		double spos = Math.ceil(((double) pos / (double) Main.CHUNK_LENGTH));
 		long ep = pos + len;
 		double epos = Math.floor(((double) ep / (double) Main.CHUNK_LENGTH));
@@ -395,6 +404,10 @@ public class LongByteArrayMap implements DataMapInterface {
 			}
 
 		}
+		}
+		finally {
+			l.unlock();
+		}
 	}
 
 	/*
@@ -404,7 +417,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void truncate(long length) throws IOException {
-		this.hashlock.lock();
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
 		long fpos = 0;
 		FileChannel _bdb = null;
 		try {
@@ -422,7 +436,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			} catch (Exception e) {
 			}
 			this.flen = fpos;
-			this.hashlock.unlock();
+			l.unlock();
 		}
 
 	}
@@ -438,19 +452,25 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * @see org.opendedup.collections.DataMap#remove(long)
 	 */
 	@Override
-	public void remove(long pos) throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.filePath + "] is close");
-		}
-		this.hashlock.lock();
-		long fpos = 0;
+	public void remove(long pos) throws IOException, FileClosedException {
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
 		FileChannel _bdb = null;
 		try {
+		if (this.isClosed()) {
+			throw new FileClosedException("hashtable [" + this.filePath + "] is close");
+		}
+		
+		long fpos = 0;
+		
 			fpos = this.getMapFilePosition(pos);
 			_bdb = (FileChannel) Files.newByteChannel(bdbf,
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ, StandardOpenOption.SPARSE);
 			_bdb.write(ByteBuffer.wrap(FREE), fpos);
+		}catch(FileClosedException e) {
+				throw e;
+			
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -458,7 +478,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				_bdb.close();
 			} catch (Exception e) {
 			}
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -473,13 +493,17 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * @see org.opendedup.collections.DataMap#get(long)
 	 */
 	@Override
-	public byte[] get(long pos) throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.filePath + "] is close");
-		}
-
+	public byte[] get(long pos) throws IOException, FileClosedException {
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		long fpos = 0;
 		try {
+		if (this.isClosed()) {
+			throw new FileClosedException("hashtable [" + this.filePath + "] is close");
+		}
+
+		
+		
 			fpos = this.getMapFilePosition(pos);
 
 			if (fpos > flen)
@@ -499,7 +523,10 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (Arrays.equals(buf, FREE))
 				return null;
 			return buf;
-		} catch (BufferUnderflowException e) {
+		}catch(FileClosedException e) {
+			throw e;
+		}
+		catch (BufferUnderflowException e) {
 			return null;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
@@ -507,6 +534,7 @@ public class LongByteArrayMap implements DataMapInterface {
 							+ dbFile.length(), e);
 			throw new IOException(e);
 		} finally {
+			l.unlock();
 
 		}
 	}
@@ -518,7 +546,13 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void sync() throws IOException {
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
+		try {
 		this.pbdb.force(false);
+		}finally {
+			l.unlock();
+		}
 
 		/*
 		 * FileChannel _bdb = null; try { _bdb = (FileChannel)
@@ -543,7 +577,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void vanish() throws IOException {
-		this.hashlock.lock();
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			if (!this.isClosed())
 				this.close();
@@ -552,7 +587,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -563,7 +598,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void copy(String destFilePath) throws IOException {
-		this.hashlock.lock();
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		FileChannel srcC = null;
 		FileChannel dstC = null;
 		try {
@@ -615,7 +651,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				dstC.close();
 			} catch (Exception e) {
 			}
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -626,12 +662,13 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public long size() {
-		this.hashlock.lock();
+		ReadLock l = this.hashlock.readLock();
+		l.lock();
 		try {
 			long sz = (this.dbFile.length() - this.offset) / this.arrayLength;
 			return sz;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -642,7 +679,8 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public void close() {
-		this.hashlock.lock();
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
 		dbFile = null;
 		if (!this.isClosed()) {
 			this.closed = true;
@@ -651,12 +689,13 @@ public class LongByteArrayMap implements DataMapInterface {
 			pbdb.force(true);
 			pbdb.close();
 		} catch (Exception e) {
-		} finally {
-			this.hashlock.unlock();
-		}
+		} 
 		try {
 			this.rf.close();
 		} catch (Exception e) {
+		}
+		finally {
+			l.unlock();
 		}
 	}
 

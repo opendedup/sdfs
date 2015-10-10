@@ -1,12 +1,12 @@
 package org.opendedup.collections;
 
 import java.util.Collections;
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.opendedup.logging.SDFSLogger;
 
 
 public class SortedReadMapList implements Runnable {

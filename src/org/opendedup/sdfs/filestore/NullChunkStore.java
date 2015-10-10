@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+import org.opendedup.collections.DataArchivedException;
 import org.w3c.dom.Element;
 
 /**
@@ -185,6 +186,13 @@ public class NullChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void compact() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		// TODO Auto-generated method stub
 		
 	}

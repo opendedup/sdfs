@@ -25,8 +25,6 @@ public class HashFunctionPool {
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
 			hashLength = Tiger16HashEngine.getHashLenth();
-		} else if (Main.hashType.equalsIgnoreCase(TIGER_24)) {
-			hashLength = TigerHashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
@@ -89,8 +87,6 @@ public class HashFunctionPool {
 		AbstractHashEngine hc = null;
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
 			hc = new Tiger16HashEngine();
-		} else if (Main.hashType.equalsIgnoreCase(TIGER_24)) {
-			hc = new TigerHashEngine();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hc = new Murmur3HashEngine();
 		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {

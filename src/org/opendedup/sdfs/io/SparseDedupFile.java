@@ -1233,7 +1233,10 @@ public class SparseDedupFile implements DedupFile {
 			} else {
 				return ck;
 			}
-		} catch (Exception e) {
+		}catch(FileClosedException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to fetch chunk at position " + place, e);
 
@@ -1345,7 +1348,11 @@ public class SparseDedupFile implements DedupFile {
 
 	@Override
 	public void trim(long start, int len) throws IOException {
-		this.bdb.trim(start, len);
+		try {
+			this.bdb.trim(start, len);
+		} catch (FileClosedException e) {
+			throw new IOException(e);
+		}
 	}
 
 	ReentrantReadWriteLock globalLock = new ReentrantReadWriteLock();

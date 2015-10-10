@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +35,7 @@ import org.opendedup.collections.LongKeyValue;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BlockDev;
+import org.opendedup.sdfs.io.FileClosedException;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -172,7 +172,11 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 					if (kv == null)
 						done = true;
 					else {
-						map.putIfNull(kv.getKey(), kv.getValue());
+						try {
+							map.putIfNull(kv.getKey(), kv.getValue());
+						} catch (FileClosedException e) {
+							throw new IOException(e);
+						}
 					}
 				}
 				if (!done && prevm.equals(this.pmAddr)) {
@@ -537,7 +541,11 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 				throw new IOException(e);
 			}
 		} else {
-			map.trim(pos, len);
+			try {
+				map.trim(pos, len);
+			} catch (FileClosedException e) {
+				throw new IOException(e);
+			}
 		}
 
 	}
@@ -593,14 +601,22 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 				throw new IOException(e);
 			}
 		} else {
-			map.remove(pos);
+			try {
+				map.remove(pos);
+			} catch (FileClosedException e) {
+				throw new IOException(e);
+			}
 		}
 
 	}
 
 	@Override
 	public byte[] get(long pos) throws IOException {
-		return map.get(pos);
+		try {
+			return map.get(pos);
+		} catch (FileClosedException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -637,7 +653,6 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	@Override
 	public void copy(String destFilePath) throws IOException {
 		map.copy(destFilePath);
-
 	}
 
 	@Override

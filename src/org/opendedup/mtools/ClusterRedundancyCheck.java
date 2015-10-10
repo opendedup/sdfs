@@ -10,6 +10,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
@@ -122,7 +123,7 @@ public class ClusterRedundancyCheck {
 	}
 
 	private int batchCheck(ArrayList<SparseDataChunk> chunks,
-			DataMapInterface mp) throws IOException, HashtableFullException {
+			DataMapInterface mp) throws IOException, HashtableFullException,FileClosedException {
 		ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
 		for(SparseDataChunk ck : chunks) {
 			al.addAll(ck.getFingers());
