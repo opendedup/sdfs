@@ -31,6 +31,7 @@ package org.opendedup.sdfs.windows.fs;
 
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
+
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
@@ -38,7 +39,7 @@ import static net.decasdev.dokan.WinError.ERROR_PATH_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_READ_FAULT;
 import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
 //import static net.decasdev.dokan.WinError.ERROR_IO_PENDING;
-import static net.decasdev.dokan.WinError.ERROR_NOT_ENOUGH_MEMORY;
+import static net.decasdev.dokan.WinError.ERROR_MAX_THRDS_REACHED;
 
 
 
@@ -142,6 +143,7 @@ public class WinSDFS implements DokanOperations {
 		dokanOptions.optionsMode = DokanOptionsMode.Mode.KEEP_ALIVE.getValue();
 		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
+		dokanOptions.metaFilePath = mountedVolume;
 		
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
@@ -215,7 +217,7 @@ public class WinSDFS implements DokanOperations {
 				return sn.nextHandle;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (DokanOperationException e) {
 			log.debug("dokan error", e);
@@ -278,7 +280,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (DokanOperationException e) {
 			log.debug("dokan error", e);
@@ -317,7 +319,7 @@ public class WinSDFS implements DokanOperations {
 						throw sn.errRtn;
 				} catch (RejectedExecutionException e) {
 					log.warn("Threads exhausted");
-					throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+					throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 				}
 				// ch.force(true);
 			} catch(DokanOperationException e) {
@@ -380,7 +382,7 @@ public class WinSDFS implements DokanOperations {
 					throw wr.errRtn;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 			// int read = ch.read(buf, 0, buf.capacity(), offset);
 			// if (read == -1)
@@ -427,8 +429,8 @@ public class WinSDFS implements DokanOperations {
 					throw wr.errRtn;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
-				// throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
+				// throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 			// ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			return buf.position();
@@ -484,7 +486,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (Exception e) {
 
@@ -521,7 +523,7 @@ public class WinSDFS implements DokanOperations {
 					return sn.info;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (Exception e) {
 			log.error("unable to get file info " + fileName, e);
@@ -554,7 +556,7 @@ public class WinSDFS implements DokanOperations {
 					return sn.filedata;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (Exception e) {
 
@@ -609,7 +611,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 
 		} catch (DokanOperationException e) {
@@ -640,8 +642,8 @@ public class WinSDFS implements DokanOperations {
 				throw wr.errRtn;
 		} catch (RejectedExecutionException e) {
 			log.warn("Threads exhausted");
-			throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
-			// throw new DokanOperationException(ERROR_NOT_ENOUGH_MEMORY);
+			throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
+			// throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 		}
 	}
 
