@@ -12,7 +12,7 @@ Optional Packages
 	LIO - for ISCSI support
 	Installation
 
-Ubuntu/Debian (Ubuntu 13.10)
+Ubuntu/Debian (Ubuntu 15.10)
 
 	Step 1: Install Java JRE
 		sudo apt-get install openjdk-7-jre-headless
