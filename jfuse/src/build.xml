@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+
+<project name="fuse-j" basedir="." default="all">
+
+   <!-- Set up project.class.path -->
+   <path id="project.class.path">
+
+      <fileset dir="lib">
+         <include name="**/*.jar"/>
+      </fileset>
+
+      <pathelement location="build"/>
+
+      <!-- append the external classpath -->
+      <pathelement path="${java.class.path}"/>
+
+   </path>
+
+   <!-- Init -->
+   <target name="init">
+
+      <!-- other build properties defined in external file specific for particular environment -->
+      <property file="build.properties"/>
+
+      <!-- the lowercase name of the project - used in some filenames... -->
+      <property name="name" value="fuse-j"/>
+
+      <!-- where sources live -->
+      <property name="src.dir" value="src"/>
+
+      <!-- where ALL libraries (jar files) are -->
+      <property name="lib.dir" value="lib"/>
+
+      <!-- where JNI native library is built -->
+      <property name="jni.dir" value="jni"/>
+
+      <!-- where classes are built -->
+      <property name="build.dir" value="build"/>
+
+      <!-- where javadocs are built -->
+      <property name="javadoc.dir" value="javadoc"/>
+
+      <!-- where distribution jars are generated -->
+      <property name="dist.dir" value="dist"/>
+
+      <!-- by default (if not specified in build.properties file) SUN JDK is one level higher then JRE (java.home) -->
+      <property name="jdk.home" value="${java.home}/.."/>
+
+      <!-- by default (if not specified in build.properties file) FUSE is installed in /usr/local -->
+      <property name="fuse.home" value="/usr/local"/>
+
+      <!-- do not change this one... -->
+      <property name="lib.so" value="libjavafs.so"/>
+
+   </target>
+
+
+   <!-- prepare output directories -->
+   <target name="prepare" depends="init">
+      <mkdir dir="${build.dir}"/>
+      <mkdir dir="${javadoc.dir}"/>
+      <mkdir dir="${dist.dir}"/>
+   </target>
+
+
+   <!-- compile sources to classes -->
+   <target name="compile" depends="prepare">
+
+      <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" deprecation="true" source="1.5" target="1.5" encoding="UTF-8">
+         <classpath refid="project.class.path"/>
+      </javac>
+
+   </target>
+
+
+   <!-- build javadocs -->
+   <target name="javadoc" depends="prepare">
+
+      <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}">
+         <classpath refid="project.class.path"/>
+         <packageset dir="${src.dir}" excludes="java2c/**"/>
+      </javadoc>
+
+   </target>
+
+
+   <!-- packs classes and resources into a jar file -->
+   <target name="dist" depends="compile,javadoc">
+
+      <jar jarfile="${dist.dir}/${name}.jar" compress="true">
+
+         <zipfileset dir="${build.dir}" prefix="">
+            <include name="fuse/**/*"/>
+         </zipfileset>
+
+         <zipfileset dir="${src.dir}" prefix="" excludes="**/*.java">
+            <include name="fuse/**/*"/>
+         </zipfileset>
+
+      </jar>
+
+      <jar jarfile="${dist.dir}/${name}-javadoc.jar" compress="true">
+
+         <zipfileset dir="${javadoc.dir}" prefix="">
+            <include name="**/*"/>
+         </zipfileset>
+
+      </jar>
+
+   </target>
+
+
+   <!-- compiles JNI native code -->
+   <target name="jni" depends="compile">
+
+      <java classname="java2c.CAPIGenerator">
+         <classpath refid="project.class.path"/>
+         <arg file="${jni.dir}/javafs_bindings.h"/>
+         <arg file="${jni.dir}/javafs_bindings.c"/>
+         <arg value="javafs.h"/>
+      </java>
+
+      <ant dir="${jni.dir}" target="all"/>
+
+   </target>
+
+
+   <target name="jni-clean">
+
+      <ant dir="${jni.dir}" target="clean"/>
+
+   </target>
+
+
+   <target name="all" depends="dist,jni">
+      <echo message="FUSE-J is built in the ${dist.dir}/${name}.jar"/>
+      <echo message="JNI native library is built in ${jni.dir}/${lib.so}"/>
+   </target>
+
+
+   <!-- Clean everything -->
+   <target name="clean" depends="init,jni-clean">
+      <delete dir="${dist.dir}"/>
+      <delete dir="${javadoc.dir}"/>
+      <delete dir="${build.dir}"/>
+   </target>
+
+</project>
