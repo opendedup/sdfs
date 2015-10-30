@@ -59,8 +59,8 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 
 	// called on every filehandle close, fh is filehandle passed from open
 	@Override
-	public int flush(String path, Object fh) throws FuseException {
-		fs2.flush(path, (fh == null) ? 0L : ((Long) fh).longValue());
+	public int flush(String path, long fh) throws FuseException {
+		fs2.flush(path,fh);
 
 		return 0;
 	}
@@ -69,9 +69,9 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	// isDatasync indicates that only the user data should be flushed, not the
 	// meta data
 	@Override
-	public int fsync(String path, Object fh, boolean isDatasync)
+	public int fsync(String path, long fh, boolean isDatasync)
 			throws FuseException {
-		fs2.fsync(path, (fh == null) ? 0L : ((Long) fh).longValue(), isDatasync);
+		fs2.fsync(path,fh, isDatasync);
 
 		return 0;
 	}
@@ -117,9 +117,9 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 
 	// fh is filehandle passed from open
 	@Override
-	public int read(String path, Object fh, ByteBuffer buf, long offset)
+	public int read(String path, long fh, ByteBuffer buf, long offset)
 			throws FuseException {
-		fs2.read(path, (fh == null) ? 0L : ((Long) fh).longValue(), buf, offset);
+		fs2.read(path, fh, buf, offset);
 
 		return 0;
 	}
@@ -133,8 +133,8 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 
 	// called when last filehandle is closed, fh is filehandle passed from open
 	@Override
-	public int release(String path, Object fh, int flags) throws FuseException {
-		fs2.release(path, (fh == null) ? 0L : ((Long) fh).longValue(), flags);
+	public int release(String path, long fh, int flags) throws FuseException {
+		fs2.release(path, fh, flags);
 
 		return 0;
 	}
@@ -195,9 +195,9 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	// fh is filehandle passed from open,
 	// isWritepage indicates that write was caused by a writepage
 	@Override
-	public int write(String path, Object fh, boolean isWritepage,
+	public int write(String path, long fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException {
-		fs2.write(path, (fh == null) ? 0L : ((Long) fh).longValue(),
+		fs2.write(path,fh,
 				isWritepage, buf, offset);
 
 		return 0;

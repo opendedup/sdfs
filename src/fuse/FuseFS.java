@@ -55,16 +55,16 @@ public interface FuseFS extends FilesystemConstants {
 
 	public int open(ByteBuffer path, int flags, FuseOpenSetter openSetter);
 
-	public int read(ByteBuffer path, Object fh, ByteBuffer buf, long offset);
+	public int read(ByteBuffer path, long fh, ByteBuffer buf, long offset);
 
-	public int write(ByteBuffer path, Object fh, boolean isWritepage,
+	public int write(ByteBuffer path, long fh, boolean isWritepage,
 			ByteBuffer buf, long offset);
 
-	public int flush(ByteBuffer path, Object fh);
+	public int flush(ByteBuffer path, long fh);
 
-	public int release(ByteBuffer path, Object fh, int flags);
+	public int release(ByteBuffer path, long fh, int flags);
 
-	public int fsync(ByteBuffer path, Object fh, boolean isDatasync);
+	public int fsync(ByteBuffer path, long fh, boolean isDatasync);
 
 	//
 	// extended attributes support contributed by Steven Pearson

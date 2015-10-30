@@ -104,6 +104,10 @@ private static EventBus eventBus = new EventBus();
 	public static void removedCachedMF(String path) {
 		pathMap.invalidate(path);
 	}
+	
+	public static void addToCache(MetaDataDedupFile mf) {
+		pathMap.put(mf.getPath(), mf);
+	}
 
 	/**
 	 * 
@@ -115,13 +119,11 @@ private static EventBus eventBus = new EventBus();
 
 	public static MetaDataDedupFile getMF(File f) {
 		try {
-		return pathMap.get(f.getPath());
-
+			return pathMap.get(f.getPath());
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("unable to get " + f.getPath(),e);
 			return null;
 		}
-
 	}
 	
 	public static void mkDir(File f, int mode) throws IOException {
@@ -333,7 +335,7 @@ private static EventBus eventBus = new EventBus();
 					}
 					if (mf.getDfGuid() != null) {
 						try {
-							deleted = mf.getDedupFile().delete(true);
+							deleted = mf.getDedupFile(false).delete(true);
 						} catch (Exception e) {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(

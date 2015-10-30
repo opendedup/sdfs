@@ -28,7 +28,7 @@ public class OpenFile {
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath(),file);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			DedupFileChannel ch = mf.getDedupFile().getChannel(-33);
+			DedupFileChannel ch = mf.getDedupFile(true).getChannel(-33);
 			root.setAttribute("fd", ch.getID());
 			OpenChannels.put(ch.getID(), ch);
 			return (Element) root.cloneNode(true);

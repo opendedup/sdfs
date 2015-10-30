@@ -16,7 +16,7 @@ import fuse.util.Struct;
  * return filehandle and open options from it.
  */
 public class FuseOpendir extends Struct implements FuseOpendirSetter {
-	public Object fh;
+	public long fh = -1;
 
 	/**
 	 * Callback for filehandle API
@@ -26,7 +26,7 @@ public class FuseOpendir extends Struct implements FuseOpendirSetter {
 	 *            the filehandle to return from <code>opendir()<code> method.
 	 */
 	@Override
-	public void setFh(Object fh) {
+	public void setFh(long fh) {
 		this.fh = fh;
 	}
 

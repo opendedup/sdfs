@@ -150,7 +150,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
-				this.getDedupFile().optimize();
+				this.getDedupFile(true).optimize();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				SDFSLogger.getLog().error(
@@ -382,6 +382,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 		} else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
+			MetaFileStore.addToCache(mf);
 		} else {
 			ObjectInputStream in = null;
 			try {
@@ -391,9 +392,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							"reading in file " + mf.path + " df=" + mf.dfGuid);
+				MetaFileStore.addToCache(mf);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to de-serialize " + path, e);
 				mf = new MetaDataDedupFile(path);
+				MetaFileStore.addToCache(mf);
 			} finally {
 				if (in != null) {
 					try {
@@ -462,20 +465,32 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public MetaDataDedupFile() {
 	}
 
-	/**
-	 * 
-	 * @param parent
-	 *            the parent folder
-	 * @param child
-	 *            the file name
-	 */
-	public MetaDataDedupFile(File parent, String child) {
-
-		String pth = parent.getAbsolutePath() + File.separator + child;
-		init(pth);
+	public DedupFile getDedupFile(boolean addtoopen) throws IOException {
+		this.writeLock.lock();
+		try {
+			if (this.dfGuid == null) {
+				DedupFile df = new SparseDedupFile(this);
+				this.dfGuid = df.getGUID();
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug(
+							"No DF EXISTS .... Set dedup file for "
+									+ this.getPath() + " to " + this.dfGuid);
+				if(addtoopen)
+					DedupFileStore.addOpenDedupFiles(df);
+				this.sync();
+				return df;
+			} else {
+				if(addtoopen)
+					return DedupFileStore.openDedupFile(this);
+				else
+					return DedupFileStore.getDedupFile(this);
+			}
+		} finally {
+			writeLock.unlock();
+		}
 	}
-
-	public DedupFile getDedupFile() throws IOException {
+	
+	public DedupFile sgetDedupFile() throws IOException {
 		this.writeLock.lock();
 		try {
 			if (this.dfGuid == null) {
@@ -727,7 +742,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 										+ " guid :" + file.getDfGuid());
 					if (file.dfGuid != null) {
 						if (DedupFileStore.fileOpen(file))
-							file.getDedupFile().copyTo(npath, true);
+							file.getDedupFile(false).copyTo(npath, true);
 						else {
 							File sdbdirectory = new File(Main.dedupDBStore
 									+ File.separator

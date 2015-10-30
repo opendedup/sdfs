@@ -19,5 +19,5 @@ public interface FuseOpendirSetter {
 	 * @param fh
 	 *            the filehandle to return from <code>opendir()</code> method.
 	 */
-	public void setFh(Object fh);
+	public void setFh(long fh);
 }

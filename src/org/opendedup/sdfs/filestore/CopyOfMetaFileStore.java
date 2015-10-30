@@ -337,7 +337,7 @@ public class CopyOfMetaFileStore {
 						}
 						if (mf.getDfGuid() != null) {
 							try {
-								deleted = mf.getDedupFile().delete(true);
+								deleted = mf.getDedupFile(false).delete(true);
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger.getLog().debug(

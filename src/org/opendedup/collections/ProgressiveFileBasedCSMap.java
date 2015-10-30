@@ -181,7 +181,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		long pos = -1;
 		Lock l = gcLock.readLock();
 		l.lock();
-		long v = ct.incrementAndGet();
 		try {
 			if (!runningGC && !lbf.mightContain(hash))
 				return pos;
@@ -207,13 +206,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					return pos;
 				} 
 			}
-			mt.incrementAndGet();
-			if(ict.incrementAndGet() > 1000) {
-				ict.set(0);
-				double pc = (double)mt.get()/(double)v;
-				SDFSLogger.getLog().info("overall miss rate is pc=" + pc);
-				
-			}
+			
 		return pos;
 	}
 

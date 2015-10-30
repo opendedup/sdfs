@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -122,7 +123,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 				f.getParentFile().mkdirs();
 			this.name = "chunks";
 			p = f.toPath();
-			chunkDataWriter = new RandomAccessFile(f, "rw");
+			chunkDataWriter = extracted();
 			this.currentLength.set(chunkDataWriter.length());
 			this.closed = false;
 			fc = chunkDataWriter.getChannel();
@@ -487,7 +488,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			this.closed = true;
 			this.closeStore();
 
-			RandomAccessFile raf = new RandomAccessFile(f, "rw");
+			RandomAccessFile raf = extracted();
 			raf.getChannel().force(true);
 			raf.close();
 		} catch (Exception e) {
@@ -583,7 +584,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		this.deep = deep;
 		try {
 			hc = HashFunctionPool.getHashEngine();
-			this.iterFC = new RandomAccessFile(f, "rw").getChannel();
+			this.iterFC = extracted().getChannel();
 			this.iterFC.position(0);
 			this.size.set(0);
 			this.compressedLength.set(0);
@@ -592,6 +593,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		} finally {
 			this.iterlock.unlock();
 		}
+	}
+
+	private RandomAccessFile extracted() throws FileNotFoundException {
+		return new RandomAccessFile(f, "rw");
 	}
 
 	@Override

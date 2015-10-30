@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.AbstractShard;
@@ -408,18 +408,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
-	AtomicLong ct = new AtomicLong();
-	AtomicLong bt = new AtomicLong();
-	AtomicLong mt = new AtomicLong();
 	@Override
 	public boolean containsKey(byte[] key) {
 		try {
 			
 			this.hashlock.lock();
-			long v = ct.incrementAndGet();
 			KeyBlob kb = new KeyBlob(key);
 			if (!runningGC && !bf.mightContain(kb)) {
-				bt.incrementAndGet();
 				return false;
 			}
 			int index = index(key);
@@ -431,13 +426,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				this.lastFound = System.currentTimeMillis();
 				return true;
 			}
-			long mv = mt.incrementAndGet();
-			if(!runningGC) {
-			double pc = (double)mv/(double)v;
-			SDFSLogger.getLog().info("miss in " + this.path + " pc=" + pc);
-			} else {
-				SDFSLogger.getLog().info("running gc");
-			}
+			
 			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);

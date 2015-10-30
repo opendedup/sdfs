@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
@@ -10,6 +11,7 @@ import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
@@ -53,14 +55,18 @@ public class CopyExtents {
 		 */
 		if (smf.length() < len)
 			len = smf.length();
-		SparseDedupFile sdf = (SparseDedupFile) smf.getDedupFile();
-		SparseDedupFile ddf = (SparseDedupFile) dmf.getDedupFile();
+		SparseDedupFile sdf = (SparseDedupFile) smf.getDedupFile(true);
+		SparseDedupFile ddf = (SparseDedupFile) dmf.getDedupFile(true);
+		long _spos = -1;
+		long _dpos = -1;
 		try {
 			long written = 0;
-			long _spos = this.getChuckPosition(sstart);
-			long _dpos = this.getChuckPosition(dstart);
+			_spos = this.getChuckPosition(sstart);
+			_dpos = this.getChuckPosition(dstart);
 			Lock l = ddf.getWriteLock();
 			l.lock();
+			DedupFileChannel sch = sdf.getChannel(-1);
+			DedupFileChannel dch = ddf.getChannel(-1);
 			try {
 				while (written < len) {
 					long _sstart = written + sstart;
@@ -74,8 +80,9 @@ public class CopyExtents {
 					SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 					WritableCacheBuffer ddc = (WritableCacheBuffer) ddf
 							.getWriteBuffer(_dpos);
-
+					
 					HashLocPair p = sdc.getWL(_so);
+					
 					p.hashloc[7] = 1;
 					if (p.nlen > _rem) {
 						p.nlen = (int) _rem;
@@ -88,21 +95,24 @@ public class CopyExtents {
 						p.hashloc[7] = 3;
 					}
 					try {
-					ddc.copyExtent(p);
+						ddc.copyExtent(p);
 					}catch(DataArchivedException e) {
 						if(Main.checkArchiveOnRead){
 							SDFSLogger.getLog().warn("Archived data found in "+ sdf.getMetaFile().getPath()+ " at " + _spos + ". Recovering data from archive. This may take up to 4 hours");
 							RestoreArchive.recoverArchives(smf);
+							return getResult(srcfile, dstfile, sstart,len, dstart);
 						}
 						else throw e;
 					}
 					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
 					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
-
+					ddf.mf.setLastModified(System.currentTimeMillis());
 					written += p.nlen;
 
 				}
 			} finally {
+				sdf.unRegisterChannel(sch, -1);
+				ddf.unRegisterChannel(dch, -1);
 				long el = written + dstart;
 				if (el > dmf.length()) {
 					dmf.setLength(el, false);
@@ -112,7 +122,7 @@ public class CopyExtents {
 			root.setAttribute("written", Long.toString(written));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"error in copy extent src=" + srcfile + " dst=" + dstfile,
+					"error in copy extent src=" + srcfile + " dst=" + dstfile + " sstart=" + sstart + " dstart=" +dstart + " len=" + len + " spos" + _spos + " dpos=" + _dpos,
 					e);
 			throw e;
 		} finally {

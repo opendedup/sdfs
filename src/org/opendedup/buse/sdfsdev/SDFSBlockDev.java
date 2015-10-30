@@ -43,7 +43,7 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		if (!f.exists())
 			throw new IOException("device " + devicePath + " not found.");
 		MetaDataDedupFile mf = dev.getMF();
-		this.ch = mf.getDedupFile().getChannel(0);
+		this.ch = mf.getDedupFile(true).getChannel(0);
 	}
 
 	@Override

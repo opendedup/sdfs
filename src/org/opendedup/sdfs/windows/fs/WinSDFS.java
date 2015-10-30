@@ -826,7 +826,7 @@ public class WinSDFS implements DokanOperations {
 			File f = resolvePath(path);
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-				ch = mf.getDedupFile().getChannel(-1);
+				ch = mf.getDedupFile(true).getChannel(-1);
 					if (dedupChannels.containsKey(handleNo)) {
 						ch.getDedupFile().unRegisterChannel(ch, -1);
 						ch = dedupChannels.get(handleNo);

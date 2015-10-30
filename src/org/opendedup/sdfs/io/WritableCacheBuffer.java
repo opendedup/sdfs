@@ -93,6 +93,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		this.df = df;
 		this.reconstructed = reconstructed;
 		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+		
 
 		// this.currentLen = 0;
 		this.setLength(Main.CHUNK_LENGTH);
@@ -147,6 +148,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	public byte[] getReadChunk(int startPos, int len) throws IOException,
 			BufferClosedException, DataArchivedException {
+		
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"reading " + df.getMetaFile().getPath() + " df="
@@ -187,11 +189,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		if (this.buf == null) {
 			this.hlAdded = false;
 			if (HashFunctionPool.max_hash_cluster > 1) {
-				this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+				
 				final ArrayList<Shard> cks = new ArrayList<Shard>();
 				int i = 0;
 				// long fp = this.position;
-
+				
 				for (HashLocPair p : ar) {
 
 					if (p.hashloc[1] != 0) {
@@ -294,12 +296,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.hlAdded = false;
 			if (HashFunctionPool.max_hash_cluster > 1) {
 				this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
+				
 				final ArrayList<Shard> cks = new ArrayList<Shard>();
 				int i = 0;
 				// long fp = this.position;
-
+				
 				for (HashLocPair p : ar) {
-
+					
 					if (p.hashloc[1] != 0) {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
@@ -528,6 +531,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			 */
 			if (pos == 0 && b.length == Main.CHUNK_LENGTH) {
 				this.buf = ByteBuffer.wrap(b);
+				
 				this.setDirty(true);
 			} else {
 
@@ -619,7 +623,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			if (this.buf != null
 					|| this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR)
-					SDFSLogger.getLog().info(
+					SDFSLogger.getLog().debug(
 							"copy extent Chuck Array Size greater than "
 									+ LongByteArrayMap.MAX_ELEMENTS_PER_AR
 									+ " at " + (this.getFilePosition() + p.pos)
@@ -988,7 +992,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				throw new BufferClosedException("Buffer not flushed");
 			}
 			if (this.buf == null)
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						this.getFilePosition() + " buffer is null");
 			byte[] b = new byte[this.buf.capacity()];
 			System.arraycopy(this.buf.array(), 0, b, 0, b.length);

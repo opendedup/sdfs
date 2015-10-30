@@ -329,7 +329,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int read(ByteBuffer path, Object fh, ByteBuffer buf, long offset) {
+	public int read(ByteBuffer path, long fh, ByteBuffer buf, long offset) {
 		String pathStr = cs.decode(path).toString();
 
 		if (log != null && log.isDebugEnabled()) {
@@ -345,7 +345,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int write(ByteBuffer path, Object fh, boolean isWritepage,
+	public int write(ByteBuffer path, long fh, boolean isWritepage,
 			ByteBuffer buf, long offset) {
 		String pathStr = cs.decode(path).toString();
 
@@ -363,7 +363,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int flush(ByteBuffer path, Object fh) {
+	public int flush(ByteBuffer path, long fh) {
 		String pathStr = cs.decode(path).toString();
 
 		if (log != null && log.isDebugEnabled()) {
@@ -378,7 +378,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int release(ByteBuffer path, Object fh, int flags) {
+	public int release(ByteBuffer path, long fh, int flags) {
 		String pathStr = cs.decode(path).toString();
 
 		if (log != null && log.isDebugEnabled()) {
@@ -394,7 +394,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int fsync(ByteBuffer path, Object fh, boolean isDatasync) {
+	public int fsync(ByteBuffer path, long fh, boolean isDatasync) {
 		String pathStr = cs.decode(path).toString();
 
 		if (log != null && log.isDebugEnabled()) {

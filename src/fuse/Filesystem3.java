@@ -87,23 +87,23 @@ public interface Filesystem3 extends FilesystemConstants {
 			throws FuseException;
 
 	// fh is filehandle passed from open
-	public int read(String path, Object fh, ByteBuffer buf, long offset)
+	public int read(String path, long fh, ByteBuffer buf, long offset)
 			throws FuseException;
 
 	// fh is filehandle passed from open,
 	// isWritepage indicates that write was caused by a writepage
-	public int write(String path, Object fh, boolean isWritepage,
+	public int write(String path, long fh, boolean isWritepage,
 			ByteBuffer buf, long offset) throws FuseException;
 
 	// called on every filehandle close, fh is filehandle passed from open
-	public int flush(String path, Object fh) throws FuseException;
+	public int flush(String path, long fh) throws FuseException;
 
 	// called when last filehandle is closed, fh is filehandle passed from open
-	public int release(String path, Object fh, int flags) throws FuseException;
+	public int release(String path, long fh, int flags) throws FuseException;
 
 	// Synchronize file contents, fh is filehandle passed from open,
 	// isDatasync indicates that only the user data should be flushed, not the
 	// meta data
-	public int fsync(String path, Object fh, boolean isDatasync)
+	public int fsync(String path, long fh, boolean isDatasync)
 			throws FuseException;
 }

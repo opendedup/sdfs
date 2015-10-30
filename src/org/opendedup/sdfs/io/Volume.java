@@ -43,6 +43,7 @@ public class Volume implements java.io.Serializable {
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
 	long absoluteLength = -1;
+	private static boolean storageConnected = true;
 	private AtomicLong duplicateBytes = new AtomicLong(0);
 	private AtomicDouble virtualBytesWritten = new AtomicDouble(0);
 	private AtomicDouble readBytes = new AtomicDouble(0);
@@ -78,6 +79,21 @@ public class Volume implements java.io.Serializable {
 
 	public VolumeSocket getSoc() {
 		return this.soc;
+	}
+	
+	public static void setStorageConnected(boolean connected) {
+		if(connected && !storageConnected) {
+			SDFSEvent.recoEvent();
+		}
+		
+		if(!connected && storageConnected) {
+			SDFSEvent.discoEvent();
+		}
+		storageConnected = connected;
+	}
+	
+	public static boolean getStorageConnected() {
+		return storageConnected;
 	}
 
 	public void setVolumeFull(boolean full) {

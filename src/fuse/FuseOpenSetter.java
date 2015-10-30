@@ -19,7 +19,7 @@ public interface FuseOpenSetter {
 	 * @param fh
 	 *            the filehandle to return from <code>open()<code> method.
 	 */
-	public void setFh(Object fh);
+	public void setFh(long fh);
 
 	/**
 	 * Sets/gets the direct_io FUSE option for this opened file

@@ -257,7 +257,7 @@ public class SDFSCmds {
 					+ "] is a directory. This command cannot be executed on directories";
 		else {
 			try {
-				MetaFileStore.getMF(internalPath).getDedupFile().writeCache();
+				MetaFileStore.getMF(internalPath).getDedupFile(false).writeCache();
 				return "SUCCESS Flush File : Write Cache Flushed for "
 						+ externalPath;
 			} catch (Exception e) {
@@ -272,7 +272,7 @@ public class SDFSCmds {
 	private String optimize(String srcPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);
 		try {
-			MetaFileStore.getMF(f.getPath()).getDedupFile().optimize();
+			MetaFileStore.getMF(f.getPath()).getDedupFile(false).optimize();
 			return "SUCCESS Optimization Success: optimized [" + srcPath + "]";
 		} catch (Exception e) {
 			log.error("ERROR Optimize Failed: unable to optimize Source ["

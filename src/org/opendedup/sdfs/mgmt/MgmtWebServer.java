@@ -408,7 +408,13 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					}
-
+					else if (cmd.equalsIgnoreCase("close-file")) {
+							new CloseFile().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						
+					}
 					else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
@@ -845,7 +851,7 @@ public class MgmtWebServer implements Container {
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 			}
 				Container container = new MgmtWebServer();
-				SocketProcessor server=  new ContainerSocketProcessor(container, 2);
+				SocketProcessor server=  new ContainerSocketProcessor(container, 24);
 				connection = new SocketConnection(server);
 				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 				SocketAddress address = new InetSocketAddress(

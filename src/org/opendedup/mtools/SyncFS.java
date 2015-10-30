@@ -115,7 +115,7 @@ public class SyncFS {
 	private void checkDedupFile(MetaDataDedupFile mf) {
 		try {
 			eventBus.post(new MFileSync(mf));
-			if(mf.getDedupFile() != null) {
+			if(mf.getDedupFile(false) != null) {
 				File directory = new File(Main.dedupDBStore + File.separator
 						+ mf.getDfGuid().substring(0, 2) + File.separator
 						+ mf.getDfGuid());

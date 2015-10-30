@@ -63,11 +63,15 @@ public class IOMonitor implements java.io.Serializable {
 	public void addBytesRead(int len, boolean propigateEvent) {
 		this.addRIO(true);
 		this.bytesRead.addAndGet(len);
+		if(this.bytesRead.get() < 0)
+			this.bytesRead.set(0);
 		Main.volume.addReadBytes(len, true);
 	}
 
 	public void addActualBytesWritten(int len, boolean propigateEvent) {
 		this.actualBytesWritten.addAndGet(len);
+		if(this.actualBytesWritten.get() < 0)
+			this.actualBytesWritten.set(0);
 		Main.volume.addActualWriteBytes(len, true);
 	}
 
@@ -86,11 +90,15 @@ public class IOMonitor implements java.io.Serializable {
 	public void addVirtualBytesWritten(int len, boolean propigateEvent) {
 		this.addWIO(true);
 		this.virtualBytesWritten.addAndGet(len);
+		if(this.virtualBytesWritten.get() < 0)
+			this.virtualBytesWritten.set(0);
 		Main.volume.addVirtualBytesWritten(len, true);
 	}
 
 	public void setVirtualBytesWritten(long len, boolean propigateEvent) {
 		this.virtualBytesWritten.addAndGet(len);
+		if(this.virtualBytesWritten.get() < 0)
+			this.virtualBytesWritten.set(0);
 	}
 
 	public long getDuplicateBlocks() {
@@ -99,16 +107,21 @@ public class IOMonitor implements java.io.Serializable {
 
 	public void setDuplicateBlocks(long duplicateBlocks, boolean propigateEvent) {
 		this.duplicateBlocks.set(duplicateBlocks);
+		if(this.duplicateBlocks.get() <0)
+			this.duplicateBlocks.set(0);
 	}
 
 	public void setActualBytesWritten(long actualBytesWritten,
 			boolean propigateEvent) {
 		this.actualBytesWritten.set(actualBytesWritten);
+		if(this.actualBytesWritten.get() < 0)
+			this.actualBytesWritten.set(0);
 	}
 
 	public void setBytesRead(long bytesRead, boolean propigateEvent) {
 		this.bytesRead.set(bytesRead);
-
+		if(this.bytesRead.get() <0)
+			this.bytesRead.set(0);
 	}
 
 	public void removeDuplicateBlock(boolean propigateEvent) {

@@ -75,6 +75,8 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type WSP = new Type("Set Write Speed");
 	public transient static final Type ARCHIVERESTORE = new Type("Restore from Glacier");
 	public transient static final Type WER = new Type("Write Error");
+	public transient static final Type DISCO = new Type("Storage Pool Disconnected");
+	public transient static final Type RECO = new Type("Storage Pool Reconnected");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
@@ -179,6 +181,16 @@ public class SDFSEvent implements java.io.Serializable {
 		SDFSEvent event = new SDFSEvent(RSP, getTarget(), shortMsg, RUNNING);
 		
 		return event;
+	}
+	
+	public static void discoEvent() {
+		SDFSEvent event = new SDFSEvent(DISCO, getTarget(), "Storage Pool Disconnected", RUNNING);
+		event.endEvent();
+	}
+	
+	public static void recoEvent() {
+		SDFSEvent event = new SDFSEvent(RECO, getTarget(), "Storage Pool Reconnected", RUNNING);
+		event.endEvent();
 	}
 	
 	public static SDFSEvent wspEvent(String shortMsg) {

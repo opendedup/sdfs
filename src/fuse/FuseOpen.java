@@ -16,7 +16,7 @@ import fuse.util.Struct;
  * filehandle and open options from it.
  */
 public class FuseOpen extends Struct implements FuseOpenSetter {
-	public Object fh;
+	public long fh;
 	public boolean directIO;
 	public boolean keepCache;
 
@@ -28,7 +28,7 @@ public class FuseOpen extends Struct implements FuseOpenSetter {
 	 *            the filehandle to return from <code>open()<code> method.
 	 */
 	@Override
-	public void setFh(Object fh) {
+	public void setFh(long fh) {
 		this.fh = fh;
 	}
 

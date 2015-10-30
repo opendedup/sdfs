@@ -22,7 +22,7 @@ public class FlushBuffersCmd implements XtendedCmd {
 		else if (cmd.equalsIgnoreCase("file")) {
 			try {
 
-				MetaFileStore.getMF(f.getPath()).getDedupFile().writeCache();
+				MetaFileStore.getMF(f.getPath()).getDedupFile(false).writeCache();
 				return "SUCCESS Flush File : Write Cache Flushed for " + file;
 			} catch (Exception e) {
 				String errorMsg = "ERROR Flush File Failed :for " + file;
