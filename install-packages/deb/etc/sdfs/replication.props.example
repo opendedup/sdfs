@@ -1,0 +1,46 @@
+#Replication master settings
+#IP address of the server where the master volume is located
+replication.master=master-ip
+
+#the password of the master. This defaults to "admin"
+replication.master.password=admin
+
+#The sdfscli port on the master server. This defaults to 6442
+replication.master.port=6442
+
+#The sdfs dse port (2222) will use SSL transport for data transfer.To see if the master dse is using ssl run sdfscli --password xxx --dse-info. Look at the output of option
+"DSE Listen SSL". This defualts to false if not set.
+replication.master.useSSL=true
+
+#The folder within the volume that should be replicated. If you would like to replicate the entire volume use "/"
+replication.master.folder=/
+
+#Replication slave settings
+#The local ip address that the sdfscli is listening on for the slave volume.
+replication.slave=localhost
+
+#the password used on the sdfscli for the slave volume. This defaults to admin
+replication.slave.password=admin
+
+#The tcp port the sdfscli is listening on for the slave
+replication.slave.port=6442
+
+#The folder where you would like to replicate to wild cards are %d (date as yyMMddHHmmss) %h (remote host) 
+#the slave folder to replicated to e.g. backup-%h-%d will output "backup-<master-name>-<timestamp>
+replication.slave.folder=backup-%h-%d
+
+#Replication service settings
+#The folder where the SDFS master snapshot will be downloaded to on the slave. The snapshot tar archive is deleted after import.
+archive.staging=/tmp
+
+#The log file that will output replication status
+logfile=/var/log/sdfs/replication.log
+
+#Schedule cron = as a cron job, single = run one time
+schedule.type=cron
+
+#Every 30 minutes take a look at http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-06 for scheduling tutorial
+schedule.cron=0 0/30 * * * ?
+
+# Set the number of replication copies to keep. It runs in FIFO order and if set to -1 all copies will be kept.
+replication.copies=-1

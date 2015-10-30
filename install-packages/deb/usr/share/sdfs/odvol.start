@@ -1,0 +1,3 @@
+export LD_LIBRARY_PATH=/usr/share/sdfs/bin/:$LD_LIBRARY_PATH
+java -Djava.library.path=/usr/share/sdfs/bin/ -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
+ -Dfuse.logging.level=INFO -Xmx2g -Xms2g -server -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=90 -Djava.awt.headless=$ -XX:+UseCompressedOops -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* org.opendedup.buse.sdfsdev.SDFSVolMgr "$@" 

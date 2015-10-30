@@ -1,0 +1,11 @@
+Package: SDFS
+Architecture: amd64
+Section: System Adminitration
+Priority: extra
+Maintainer: Sam Silverberg <sam.silverberg@gmail.com>
+Version: 3.0.0
+Homepage: http://www.opendedup.org
+Depends: fuse,libfuse2,oracle-java8-unlimited-jce-policy,oracle-java8-installer,ssh,openssh-server
+Description: SDFS is an inline deduplication based filesystem
+	.
+	SDFS is a distributed and expandable filesystem designed to provide inline fixed and variable block deduplication and flexiblity for applications. Services such as backup, archiving, NAS storage, and Virtual Machine primary and secondary storage can benefit greatly from SDFS. SDFS Can be deployed in both a stand alone and distributed, multi node configuration. As a standalone volume and filesystem SDFS provides inline deduplication, replication, and unlimited snapshot capabilities. In a multi node configuration, SDFS also adds global, intra-volume, deduplication, block storage redundancy, and bock storage expandability.  In a multinode configuration,  SDFS Volumes will store and share unique data blocks with other volumes within the cluster. These volumes can also specify a level of redundancy for data stored in the cluster.
