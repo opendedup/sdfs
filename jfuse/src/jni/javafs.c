@@ -772,13 +772,10 @@ static int javafs_open(const char *path, struct fuse_file_info *ffi)
 
       jerrno = (*env)->CallIntMethod(env, fuseFS, FuseFS->method.open__Ljava_nio_ByteBuffer_ILfuse_FuseOpenSetter_, jPath, (jint)(ffi->flags), jOpen);
       if (exception_check_jerrno(env, &jerrno)) break;
-	printf("poop");
       // if fh is non null then create a global reference to it (will be released in release callback)
       jFh = (*env)->GetLongField(env, jOpen, FuseOpen->field.fh);
-printf("poo1p");
       // every sane platform should store a pointer into unsigned long without a problem
       ffi->fh = jFh;
-printf("poop2");
       ffi->direct_io = ((*env)->GetBooleanField(env, jOpen, FuseOpen->field.directIO) == JNI_TRUE)? 1 : 0;
       ffi->keep_cache = ((*env)->GetBooleanField(env, jOpen, FuseOpen->field.keepCache) == JNI_TRUE)? 1 : 0;
 
