@@ -97,6 +97,7 @@ public class ProcessFileInfo {
 							System.out.printf("dedup rate : %d%%\n", 0);
 						} else {
 							double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
+							if(Double.isFinite(dedupRate)) {
 							DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
 							twoDForm.applyPattern("#.##");
 							dedupRate = Double.valueOf(twoDForm
@@ -104,6 +105,10 @@ public class ProcessFileInfo {
 
 							System.out.printf("dedup rate : %s%%\n",
 									Double.toString(dedupRate));
+							}else {
+								System.out.printf("dedup rate : %s%%\n",
+										"0");
+							}
 
 						}
 					}

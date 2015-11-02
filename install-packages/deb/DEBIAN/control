@@ -3,7 +3,7 @@ Architecture: amd64
 Section: System Adminitration
 Priority: extra
 Maintainer: Sam Silverberg <sam.silverberg@gmail.com>
-Version: 3.0.0
+Version: 3.0.1
 Homepage: http://www.opendedup.org
 Depends: fuse,libfuse2,oracle-java8-unlimited-jce-policy,oracle-java8-installer,ssh,openssh-server
 Description: SDFS is an inline deduplication based filesystem
