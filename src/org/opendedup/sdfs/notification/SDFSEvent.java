@@ -153,6 +153,7 @@ public class SDFSEvent implements java.io.Serializable {
 				this.children.get(i).endEvent();
 		}
 		this.endTime = System.currentTimeMillis();
+		this.level = SDFSEvent.INFO;
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
@@ -185,11 +186,13 @@ public class SDFSEvent implements java.io.Serializable {
 	
 	public static void discoEvent() {
 		SDFSEvent event = new SDFSEvent(DISCO, getTarget(), "Storage Pool Disconnected", RUNNING);
+		event.maxCt =1;
 		event.endEvent();
 	}
 	
 	public static void recoEvent() {
 		SDFSEvent event = new SDFSEvent(RECO, getTarget(), "Storage Pool Reconnected", RUNNING);
+		event.maxCt =1;
 		event.endEvent();
 	}
 	

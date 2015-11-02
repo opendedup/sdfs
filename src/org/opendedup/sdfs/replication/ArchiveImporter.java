@@ -141,10 +141,12 @@ public class ArchiveImporter {
 					File ddb = new File(Main.dedupDBStore + File.separator);
 					if (!ddb.exists())
 						ddb.mkdirs();
+					if(srcFiles.exists()) {
 					cpCmd = "cp -rfa " + srcFiles + File.separator + " " + ddb.getParentFile().getPath();
 					xt = ProcessWorker.runProcess(cpCmd);
 					if(xt != 0)
 						throw new IOException("copy failed in " +cpCmd + " exit value was " + xt);
+					}
 					SDFSLogger.getLog().info(
 							"executed " + cpCmd + " exit code was "
 									+ xt);
