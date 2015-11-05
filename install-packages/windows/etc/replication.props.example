@@ -1,0 +1,20 @@
+#Replication master settings
+replication.master=192.168.0.201
+replication.master.password=admin
+replication.master.port=6442
+replication.master.folder=nfs
+
+#Replication slave settings
+replication.slave=localhost
+replication.slave.password=admin
+replication.slave.port=6443
+#The folder where you would like to replicate to wild cards are %d (date as yyMMddHHmmss) %h (remote host) 
+replication.slave.folder=root_backup-%h-%d
+
+#Replication service settings
+archive.staging=/tmp
+logfile=/var/log/sdfs/replication.log
+#Schedule chron = as a cron job, single = run one time
+schedule.type=cron
+#Every 30 minutes take a look at http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-06 for scheduling tutorial
+schedule.cron=0 0/30 * * * ?

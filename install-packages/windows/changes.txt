@@ -1,0 +1,408 @@
+Version 2.0.12
+	Fixes :
+	* Windows - Jdokan filesystem api timeout
+	* Windows - Rename files not working
+Version 2.0.11
+	Fixes :
+	* Fixed copy of files with non-english characters
+	* Fixed JNI hook to fuse referencing non-existent objects.
+	* Fixed replication service failures when replication occurs during garbage collection process
+	* Fixed org.opendedup.collections.ProgessiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
+	* Fixed volume state shown and unclean after unmount.
+	* Updated shared libs to latest compatible versions.
+	Enhancements :
+	* Added org.opendedup.collections.ProgessiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
+Version 2.0.9
+	Fixes :
+	* Fixed Block Chunk Store errors when writing with variable block deduplication
+	Enhancements :
+	* Garbage collection now done using new method that will increase performance
+	* Cloud Storage bucket location can now be defined using --aws-bucket-location
+Version 2.0.8
+	Fixes :
+	* Fixed More Replication Symlink issues.
+	* Fixed random deadlock under high load
+	* Nested Snapshots looping
+	* Fixed odvol mapping files and releasing them. This cause a hang during creation and subsequent restarts
+	Enhancements :
+	* Added more replication resilience
+Version 2.0.2
+	Fixes :
+	* Fixed More Symlink issues.
+	* Fixed random IO corruption under high load
+	* Fixed concurrent file read and delete issues
+	* Fixed libfuse.so issue where Native library was used over custom library.
+	Enhancements :
+	* Improved read/write performance by 20%-50%
+Version 2.0.1
+	Fixes :
+	* Fixed Replication Reporting of progress by bytes transferred.
+	* Fixed Symlink issues when file does not exist.
+	* Fixed Symlink permissions
+	* Fixed Clustered DSE buffersize mismatch issue.
+	* Update the Guava library to 1.7 release.
+Version 2.0
+	Fixes :
+	* Fixed Replication Action opening to many ports.
+	* Fixed Temp files not deleting during replication.
+	* Update the Guava library to 1.6 release.
+	Enhancements :
+	* Added Beta Hashmap for faster hashtable lookups and storage. This hashmap, MaxFileBasedCSMap, uses a bloomfilter and bitmap to speed up lookups within the hashtable. 
+	It will also require less resident memory that the current implementation. To use this hashmap add the option --chunk-store-hashdb-class="org.opendedup.collections.MaxFileBasedCSMap"
+Version 2.0-RC2
+	Fixes :
+	* Fixed Redhat/Centos 6.5 Library dependency issue
+	* Fixed write failures due to slow disk subsystem. This issue only effects Variable Block Deduplication
+	* Fixed slow performance for large volumes due to the impact of bitmap scans for every put
+	* Fixed sync error loop in FileStore
+	* Fixed replication script to point to updated libraries.
+	* Fixed  Rabin hashing memory allocation performance issue.
+Version 2.0-RC1
+	Fixes :
+	* Fixed VARIABLE_MURMUR3 command line issue.
+	* Fixed Disk full reporting for block device.
+	* Fixed Missing library from replication
+	* Fixed Azure Cloud Storage DSE to conform to 2.0 framework. Azure now uses LZ4 compression
+	* recompiled fuse, java fuse, buse, and java buse c libs.
+	Enhancements :
+	* Added event alerting when disk full
+	* Added event alerting when read and write errors
+	* Added required fuse library to distribution /bin directory so SDFS no longer requires update of fuse libs.
+	* Updated required java jar libraries to later versions
+Version 2.0-beta5
+	Enhancements:
+	* Variable block deduplication. Rabin Windowing used to create variable block chunks for storage. Currently this method only
+	works for local storage and cloud storage. It will not work for clustered dse configuration. To enable this feature use mkfs.sdfs --hash-type=VARIABLE_MURMUR3
+	* Variable block compression. LZ4 is now used for all variable block compression
+	* Improved cloud storage performance for aws. Using variable block storage perfomance improves by 2x.
+	* Better block storage reporting sdfs.cli now will report on compressed blocks and actual blocks stored.
+Version 2.0-beta3
+	Fixes:
+	* Fixed reclaim for file based chunkstore
+	Enhancements:
+	* Include basic structure for variable based deduplication. Beta 4 will include basic support for variable block deduplication.
+Version 2.0-beta2
+	Fixes:	
+	* Fixed garbage various collection issues for volumes over 8TB
+	* Fixed replication copies issue. 
+	Enhancements
+	* Added virtual volume manager. Opendedup can now run as a virual block device and dedup any filesystem on top of it.
+	  Opendedup has tested, EXT4, btrfs, and OCFS2 for validation and QA. All perform and function as if they are running on block device.
+	  Take a look at odvol.make odvol.start odvol.cli for more details. There is also a quickstart guide at 
+          http://www.opendedup.org/quickstart-guide-for-opendedup-volume-manager-20
+	* Improved read performance. There are various improvements to read performance that can increase read speeds by up to 
+	  20% based on benchmark testing performed.
+Version 2.0-beta1
+	Enhancements - Major new version see http://www.opendedup.org/sdfs-20-administration-guide for more detail.
+	* This version is not backwards compatible with older versions because of design changes for clustering
+	* Refactored Cluster DSE Support with major new features, these include.
+		* SDFS High Availability : All block data can is replicated across up to 7 Block Storage nodes (2 by default).
+		* Global Deduplication across all SDFS volumes in a cluster
+		* Block Storage Node dynamically expandable to up to 126 independent storage pools
+		* Very low Intra-Cluster network IO since only globally unique blocks are written 
+	* Refactored filesystem Sync action
+	* Refactored XML configuration
+	* Refactored Replication :Now all traffice is encrypted over a single SSL port (6442)
+Version 1.2.1
+	Fixes:
+	* Free space calculation was causing problems with new volumes in 1.2.0 not being able to be more than .95 full.
+	Enhancements:
+	* Changed syncthread within hashstore to flush to filesystem based on OS parameters. This should reduce CPU utilization
+	by 15%.
+Version 1.2.0
+	Fixes:
+	* Memory leak during high utilization on slow disk
+	* Deadlock under high concurrency when snapshot systems
+	* Snappy compression error within replication process and FileBasedChunkStore
+	* FileBasedChunkStore issues have been addressed
+	* Garbage collection performance within hashtables was not collecting duplicated chunks if there were two blocks 
+	  with stored in the chunkstore.
+	* PFull garbage collection was calculating next run incorrectly
+	* Fixes to allow for Windows port of SDFS to run with 1.2.0
+	* Will disallow write access on volumes over 95% full
+	* Fixed replication status output.
+	Enhancements
+	* Better Performance with default parameters. By default SDFS will use the murmur3 hashing for all new volumes.
+	* Default volume write block when volume is 95% full.
+	* New Volumes will by default report dse capacity as volume capacity and current size.
+	* SSL transport is now used by new volumes for DSE block transfer/replication traffic. To see if the master dse is 
+	  using ssl run sdfscli --password xxx --dse-info. Look at the output of option "DSE Listen SSL". This defualts to 
+	  true for all new volumes. 
+	* Added the replication.properties option replication.master.useSSL. If set to true SSL will be used by the slave when
+	  connecting to the master dse port. By default this option is set to false.
+	* Enhanced performance monitoring can be enabled from the sdfscli --perfmon-on = true
+	* Changed SDFS java start parameters to "-XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 
+	  -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=90 -Djava.awt.headless=true"
+	* Added scheduled GC that will run every night at 23:59.
+Version 1.1.9
+	Fixes:
+	* Fixed concurrency issue that caused error under high IO.
+	* Fixed erroneous errors during compaction on volumes where replication is enabled
+	* Fixed S3 errors during volume creation
+	Enhancements
+	* Added replication command line status output
+	* Added status output for all post mount commands
+	* Added experimental file based chunk store that adds all unique chunks as individual files instead of to one big file. the 
+	  file based chunk store also allows for compression and encryption. To enable this chunkstore use 
+	  "--chunkstore-class=org.opendedup.sdfs.filestore.FileBasedChunkStore" during mkfs.sdfs. Compression, if enabled, uses
+	  Snappy (http://code.google.com/p/snappy/). To enable compression use --chunk-store-compress="true".
+	* Added experimental support for file based hash table. This hash table requires less memory and mounts faster
+	  at the expense of read and write speed. It uses mapped files to store hash keys. To enable this hashstore use
+	  "--chunk-store-hashdb-class=org.opendedup.collections.FileBasedCSMap" during mkfs.sdfs.
+	* Changes mkfs.sdfs syntax from --cloud-compress to --chunk-store-compress.
+
+Version 1.1.8
+	Fixes:
+	* Fixed critical issue with replication of folders with special or non-english characters
+	* Fixed reporting of deduplication rate and capacity for replication on a file basis.
+	Enhancements:
+	* Added ability to replicate individual files.
+	* Added ability to change replication batch size with parameter "replication.batchsize" within the replication properties file
+	* Added parameter replication.master.dataport to the replication properties file
+	* Replication master information no longer needs to be set when volume is create on the slave. The replication master information is
+	  now set within the replication properties file. This means the slave can now replicate from multiple masters.
+	* Added replication.copies paramenter to allow a maximum number of replication copies kept on  the slave. This will use First In First Out.
+	  It must be used in combination with the replication.slave.folder option %d. If set to -1 it is ignored 
+Version 1.1.7
+	Fixes:
+	* Critical issue with linux MV command
+	Enhancements
+	* Snappy compression is used for replication
+	* Increased replication buffer
+Version 1.1.6
+	Fixes:
+	* Cloud Storage increments length correctly now. 
+	* Fixed Symlink issues
+	* Was exiting on NullPointerException for replication rollback
+	* Force Compact (--forcecompact) option typo fixed
+	Enhancements
+	* Refactored cloud storage options. Changed all cloud provider specific options to generic options "cloud-access-key,cloud-bucket-name,cloud-compress,cloud-secret-key"
+	* Changed CSByteArrayLongMap claimed array from byte array to bitmap
+	* Added Murmur3 hash at a an option for hashing keys
+	* Changed hash-length mkfs option to hash-type. This option has to possible values tiger16|tiger24|murmur3_128. Murmur has is a newer hashing computation that can 
+	improve IO performance by as much as 40%.You cannot change the hash on an existing volume.
+	* Added azure as a cloud storage provider.
+	* Added progress bar to loading, DSE Compaction, and Consistancy Check
+	* Added attribute to volume tag within xml configuration "allow-external-links" that allows/disallows symlinks from external filesystems. By default this is set 
+	to true.
+	* Improved getattr performance. Removed file.list for folder size and redundant lookups if it is a folder/file
+Version 1.1.5
+	Fixes :
+	* Replication null pointer error for files without data
+	* Replication adds guid to end out target folder
+	* Create volume --sdfscli-requre-auth was a typo should have been --sdfscli-require-auth
+	* Snapshots were not working when safeclose=false
+	* SDFS Volume no longer exits if unable to connect to upstream host
+	* Create Volumes with decimal capacity sizes
+	* DSE Size was not reporting correctly on remount
+	* Garbage Collection was to clearing out old data on first run after remount
+	Enhancements
+	* Added experimental compaction feature "-c" and the "-forcecompact" to mount options to 
+	compact a volume on mount. 
+Version 1.1.3
+	Fixes:
+	* cp -a no longer creates corrupt files
+	* files close properly when safeclose enabled without error
+	* Lots of other small fixes in code
+	Enhancements
+	* SDFS Garbage Collection improvements
+	* Snapshot performance improvements
+Version 1.1.2
+	Fixes:
+	* Consistancy Checker fixed for recovery of corrupt blocks
+	* Garbage Collection fixed for garbage collection during high io
+	Enhancements
+	* Added sdfscli notification for file system events
+	* Added periodic flush of all buffers for open files
+Version 1.1.0
+	Fixes:
+	* More graceful removal of garbage collected blocks
+	Enhancements
+	* SDFS Volume Replication
+	* S3 Performance Improvements
+Version 1.0.9
+	Fixes:
+	* Mapped Files now being cleaned up when deleted as part of parent folder
+	* Garbage Collection now occurs on 10% increments.
+	Enhancements
+	* SDFSCli new commands "expandvolume","mkdir" and "delete-file"
+	* SDFSCli authentication option added
+Version 1.0.8
+	Fixes:
+	* Windows Not Deleting files
+	Enhancements
+	* Update JDokan Lib for better compliance with Dokan 6.0 and Performance	
+Version 1.0.7
+	Fixes:
+	* Log files now roll after 10MB
+	* Windows Class path wrong
+	* SDFS S3 Storage was not working correctly
+	* Logging too verbose for write buffers 
+	Enhancements
+	* Ability to config debug logging within the sdfs config set log-level to 0
+	* Periodically persist (every 30 seconds) volume config to /etc/sdfs.
+	* Added Google Storage as a target for cloud based DSE(dedupe data).
+	
+Version 1.0.6
+	Fixes :
+	* Fixed corruption issue where files were not closing properly when safeclose was set to false.
+	* Fixed HashStore not closing properly on shutdown
+	* Fixed Garbage Collection of files not being claimed properly in some cases
+	* Recompiled the java fuse library for latest java build
+	* Added latest java build to the library (b144)
+	* Fixed exit value on mount.sdfs error exit
+	* Fixed sdfs.log location to /var/log/sdfs.log
+	* Fixed java hangs on  umount
+	
+Version 1.0.5
+	Fixes :
+	* Fixed garbage collection on large files. Files over 500GB were not being claimed correctly because of the use of 32 bit integers.
+	* Fixed for newest version of Java 7. Please update your java to the latest version to use this file.
+	Enhancements :
+	* SDFS now logs to files located in /var/log/sdfs/<config-name>.log. Logs roll after 10MB and one archive log is kept.
+	* Added new Garbage Collection Framework.
+		1. Threshold GC - Garbage Collection runs when DSE grows by a 10% step. This GC trades off better performance for higher
+		realtime storage utilization. To enable this GC edit the local-chunkstore tag within the volume config and modify/add the 
+		attribute gc-name="org.opendedup.sdfs.filestore.gc.PFullGC".
+	* Added mkfs.sdfs commandline parameter gc-class. This can be used to set the garbage collection strategy at volume creation. 
+	  The current option for this is  org.opendedup.sdfs.filestore.gc.PFullGC.
+	* Added output to sdfscli --dse-info parameter called "DSE Percent Full". This calculates the percentage full for the dse.
+	* Changed mkfs.sdfs commandline attribute --chunk-store-size to take MB/GB/TB
+		e.g. --chunk-store-size=100GB
+	* Optimize file option no longer takes a length.
+	* Faster throughput through better threading
+	
+
+Version 1.0.1
+	Fixes :
+	* Snapshots were not functioning correctly
+	* Volume creation to did not correctly report volume sizes
+	* Memory utilization with lots of unclaimed hashes in the DSE
+	* Garbage collection on sparse files was broken.
+	Enhancements:
+	* Near IO line speed performance at 4k block sizes
+	* better threading and locking contention
+	* Faster tiger hashing
+	* Lowered memory requirements by 1/3 for new volumes and new DSE. Memory requirements for DSE Was 33 bytes for each
+	unique hash and is 23 now.
+
+Version 1.0.0
+	Fixes :
+	* Fixed : Volume Capacity configuration did not get set appropriately when TB was set as unit for capacity.
+	Enhancements :
+	* Windows : Added SDFS system variable.
+	* Performance : Changed memory allocation for write buffers and threads per volume. This should increase performance by about 10% 
+	for newer volumes
+	* Performance : NFS performance should be on par between safeclose="true" and safeclose="false"
+	* Performance : Some slight memory enhancements.
+Version 0.9.7
+	Fixes
+	* SDFSCli : fixed command line for dedup-all. It was not parsing correctly
+	* SDFSCli : fixed dedup rate % calculation to accurately represent actual dedup rates.
+	* SDFSCli : fixed snapshot command to correctly reflect snapshot destination.
+	Enhancements :
+	* IO : Changed IO for file reads and writes. Should reduce memory requirements without reduced performance.
+	* SDFSCli : Added command to clear old data manually from the SDFS Volume
+	* Garbage Collection : Garbage collection plays nicely and does not take up a lot of IO when performed.
+	* Volume : Added "maximum-percentage-full" option to sdfs configuration xml file. This will allow volumes to
+	define the maximum size of a volume for writes. to set it to 100% of the volume capacity set maximum-percentage-full="100". The
+	attribute itself goes into the <volume> tag. e.g. <volume maximum-percentage-full="200" [other options].... />. It it set to a "-1"
+	it will be ignored.
+Version 0.9.6 9/20/2010
+	This versions focuses on fixes to Windows port of SDFS and memory utilization. 
+	
+	Fixes
+	* Windows : Error when deleting files has been fixed
+	* Linux : Fixed reporting "du -h". Now gives actual deduplication rates.
+	* Both : Routing Config File was not being read when starting in network mode.
+		
+	Enhancements
+	* Files can now be an unlimited size. Files used to be limited to approximately 250GB in size. This has been expanded to the size
+	allotted by the underlying file system.
+	* Better memory utilization. Changes to file maps should allow for better memory utilization for larger files.
+Version 0.9.5 9/12/2010
+	This version focuses on porting SDFS to Windows. SDFS can now be mounted on Windows (tested with Windows 7). Dokan and Java 7(32 bit) 
+	are required for Windows Support. Windows support is experimental and not well tested. All features should work the same own Windows
+	as they do on Linux except for permissions and symlinks. SDFS on Windows currently has no permissions.
+	
+	Enhancements :
+	* Windows (32bit) Support. 
+	* New Command Line Interface for getting file statistics and creating snapshots. Command line help is available using sdfscli --help. 
+Version 0.9.4 8/27/2010
+	This version focuses on enabling cloud based storage deduplication. The storage backend for the dedup storage engine has been rewritten to
+	allow for cloud storage. Amazon S3 is the first storage provider that has been added but others will be added as requested. Basically all 
+	data will be stored to the cloud storage provider and meta-data will sit on the local filesystem where the SDFS volume was mounted from.
+	Enhancements :
+	* Amazon S3 Storage enabled. This will allow users to store unique chunks to an S3 backend. 
+	* AES 256 bit Encryption of data to cloud dedup storage engine. 
+	* Compression for S3 cloud storage. 
+	* Improved read performance through caching requests.
+Version 0.9.3 8/15/2010
+	Fixes
+	* Fixed Verbose Logging. All logging is now outputted to log4j.
+	* Fixed Nonempry dirs deleted by rmdir
+	* Fixed extended attributes and dedupAll bit not being read from file meta-data
+Version 0.9.2 5/2/2010
+	Fixes	
+	* Major Bug Fixed that removed data after time through garbage collection. All users should update to this release immediately.
+	* Minor issue with copying attributes.
+Version 0.9.1 4/24/2010
+	Bug fixes and performance enhancements identified during testing on LVM volumes and NFS.
+	Fixes :
+	* Getting extended attributes that do not exist not exits as expected. This fix was needed for mounting of NFS mounted volumes
+	Enhancements :
+	* Caching of permissions improves performance for NFS writes.
+Version 0.9.0 4/18/2010
+	First Release of the 0.9.x tree. 0.9 will focus primarily of Volume Replication and bug fixes. SDFS has introduced a new 
+	data scheme for file system meta data. This new scheme is not compatible with older volumes. If you would like to migrate
+	to the newer volume structure you will need to copy data directly to a new SDFS volume. The DSE data structure is the same.
+	Future versions will all be backwards compatible.
+	Fixes :
+	* Data Storage Issue within DSE: The DSE would only store 75% of the allocation size. This has been fixed and the DSE will now
+	be able to be fully allocated.
+	* Infinite Loop with Gabage Collection: There is an error within the Trove4J library used by the DSE that cause an infinite loop.
+	A work around is in place that should help avoid the issue.
+	* Possible infinite loop with DSE: There was an outlier condition found that cause the data storeage routine to hit an infinite loop.
+	* Volumes not cleanly unmounted: A volume in not unmounted always when the application is killed.
+	* ACLs for Directories and Symlinks: The mode was not being set correctly for directories and symlinks inheriting the permissions
+	from the linked file
+	Enhancements:
+	* The data structure for file meta data has been changed to support volume replication and better performance for storing small 
+	files. This change breaks compatibility with previous versions for SDFS. This is a one time change. Future versions will all be 
+	backwards compatible.
+	* Data Storage Performance has been increased by approximately 15% due to various DSE enhancements.
+	* Better performance for file level snapshots.
+	* Enables volume replication through rsync of volume namespace. DSE replication will be coming in later 0.9.x versions.
+Version 0.8.15 4/12/2010
+	This release focuses on enhancements and bug fixes found during scalability testing. 
+	
+	Fixes :
+	* Symlink permission issues. Permissions were inherited from linked file. They are now independent. This is 
+	consistent with native fs behaviors.
+	* Fixed artificial limit found for hash tables. It is now possible to create volumes larger than 1TB at 4k chunk size.
+	* Memory allocation fix. 1.6 GB memory was reclaimed. It is now possible to run small volumes of SDFS in under 100mb of RAM.
+	Enhancements :
+	* Minor ehancements that in total should increase performance by around 10%.  
+	* Added warning and throws exception when the DSE is full. This is the first of many enhancements to come in this area.
+	 
+	
+Version 0.8.14 4/4/2010
+	This release was focused on bug fixes and enhancements related to performance testing. Take a look at 
+	http://opendedup.org/index.php/perfmon for more details on performance metrics.
+
+	Fixes:
+	
+	* File permissions when folders are created is now set properly
+	* Fixed issue where SDFS kept file maps open even when files were closed
+	* Last Modified for files are now being set correctly, when the file is written too.
+	* Deleting of directories works correctly. When rmdir is called it will remove all children
+	* When files are deleted that are removed from the file map table. This was not the case in previous versions.
+	
+	Enhancements
+	
+	* Performance tuning for reading with larger chunk sizes (64k,128k). The previous default for volume creation 
+	required the read-ahead was set to "8". This is not efficient for large block sizes and has been fixed to and
+	set to "1" if the block size is greater that 32k.
+	
+	
+	
