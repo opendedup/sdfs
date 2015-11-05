@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '2.0.13'
+!define VERSION '3.0.1'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -27,7 +27,7 @@
 ;General
   ;Name and file
   Name "SDFS Cloud File System ${VERSION}"
-  OutFile "SDFS-${VERSION}-Setup.exe"
+  OutFile "..\SDFS-${VERSION}-Setup.exe"
 
   ;Default installation folder
   InstallDir $PROGRAMFILES64\sdfs
@@ -62,26 +62,6 @@
 ;--------------------------------
 ;Installer Sections
 
-!macro GetVC++
-  ClearErrors
-  ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\VisualStudio\12.0\VC\Runtimes\x64\" "Installed"
-  IfErrors 0 NewVCplusplus
-  Pop $0
-  DetailPrint "Pausing installation while downloaded VC++ installer runs."
-  DetailPrint "Installation could take several minutes to complete."
-  ExecWait '$INSTDIR\vcredist_x64.exe /passive /norestart'
-		
-  NewVCplusplus:
-	  Pop $7
-	  Pop $6
-	  Pop $5
-	  Pop $4
-	  Pop $3
-	  Pop $2
-	  Pop $1
-	  Pop $0
-!macroend
-
 Function .onInit
  ${If} ${RunningX64}
     ${If} ${IsWin2008R2}
@@ -109,12 +89,11 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File lib\*
+  File ..\deb\usr\share\sdfs\lib\*
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder
   WriteRegStr HKLM "Software\SDFS" "path" $INSTDIR
-  !insertmacro GetVC++
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -128,7 +107,7 @@ Section "SDFS Setup" SecMain
     "$INSTDIR" "(BU)" "GenericRead + GenericWrite"
 SectionEnd
 Section "Dokan Setup" SecDokan
-	ExecWait '"$INSTDIR\DokanInstall_0.7.4.exe"'
+	ExecWait '"$INSTDIR\DokanInstall_0.8.0_redist-RC2.exe"'
 SectionEnd
 Section "-Quick Start Guide"
 	ExecShell "open" "http://www.opendedup.org/wqs"
