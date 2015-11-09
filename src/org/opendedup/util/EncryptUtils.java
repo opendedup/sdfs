@@ -23,7 +23,7 @@ import org.opendedup.sdfs.Main;
 public class EncryptUtils {
 	private static byte[] keyBytes = null;
 	private static SecretKeySpec key = null;
-	private static byte[] iv = StringUtils
+	private static final byte[] iv = StringUtils
 			.getHexBytes(Main.chunkStoreEncryptionIV);
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
@@ -170,6 +170,40 @@ public class EncryptUtils {
 		fos.flush();
 		fos.close();
 		cis.close();
+	}
+	
+	private static final ThreadLocal<Cipher> localDigest = new ThreadLocal<Cipher>() {
+	    @Override
+	    protected Cipher initialValue() {
+	        try {
+	            return Cipher.getInstance("AES/CBC/PKCS5Padding");
+	        } catch (Exception e) {
+	            // ugly but necessary
+	            throw new RuntimeException(e);
+	        }
+	    }
+	};
+
+	public static void main(String[] args) {
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	    new Thread(new MyRunnable()).start();
+	}
+
+	private static class MyRunnable implements Runnable {
+	    @Override
+	    public void run() {
+	    	try{
+	        Cipher cipher = localDigest.get();
+	        System.out.println("Got digest " + System.identityHashCode(cipher));
+	    	}catch(Exception e) {
+	    		e.printStackTrace();
+	    	}
+	    }
 	}
 
 }

@@ -73,7 +73,6 @@ public class RestoreArchive implements Runnable {
 							mp.getVersion());
 					List<HashLocPair> al = ck.getFingers();
 					for (HashLocPair p : al) {
-						
 						String req = HCServiceProxy.restoreBlock(p.hash);
 						if (req != null && !this.restoreRequests.contains(req)) {
 							this.restoreRequests.add(req);
