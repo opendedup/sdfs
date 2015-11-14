@@ -49,6 +49,7 @@ public class MetaDataFileInfo {
 	long lastAccessTime = 0;
 	long lastWriteTime = 0;
 	final long fileIndex;
+	final long fileSize;
 	MetaDataDedupFile mf = null;
 
 	MetaDataFileInfo(String fileName, MetaDataDedupFile mf) {
@@ -63,6 +64,7 @@ public class MetaDataFileInfo {
 		lastAccessTime = FileTimeUtils
 				.toFileTime(new Date(mf.getLastAccessed()));
 		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));
+		fileSize = mf.length();
 		SDFSLogger.getLog().debug("created file info for " + fileName);
 	}
 
@@ -70,7 +72,7 @@ public class MetaDataFileInfo {
 		String lName = FilenameUtils.getName(fileName);
 		String sName = Utils.toShortName(fileName);
 		Win32FindData d = new Win32FindData(fileAttribute, creationTime,
-				lastAccessTime, lastWriteTime, getFileSize(), 0, 0, lName,
+				lastAccessTime, lastWriteTime, fileSize, 0, 0, lName,
 				sName);
 		return d;
 	}
@@ -78,11 +80,7 @@ public class MetaDataFileInfo {
 	ByHandleFileInformation toByHandleFileInformation() {
 		return new ByHandleFileInformation(fileAttribute, creationTime,
 				lastAccessTime, lastWriteTime, Main.volume.getSerialNumber(),
-				getFileSize(), 1, fileIndex);
-	}
-
-	long getFileSize() {
-		return mf.length();
+				fileSize, 1, fileIndex);
 	}
 
 	static synchronized long getNextFileIndex() {

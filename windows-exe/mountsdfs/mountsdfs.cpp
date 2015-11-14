@@ -15,7 +15,7 @@
 #include <io.h>
 #include <fcntl.h>
 #include <cstdio>
-
+#include <signal.h>
 #include <comdef.h>
 
 #define BUFSIZE 8192 
@@ -70,8 +70,19 @@ TCHAR * ReadRegValue(HKEY root, LPCSTR key, LPCSTR name)
 	return szBuffer;
 }
 
+void signalHandler(int signum)
+{
+	//TerminateProcess(piProcInfo.hProcess, 0);
+	//WaitForSingleObject(piProcInfo.hProcess, INFINITE);
+	// cleanup and close up stuff here  
+	// terminate program  
+
+}
+
 int _tmain(int argc, TCHAR *argv[])
 {
+	signal(SIGINT, signalHandler);
+
 	SECURITY_ATTRIBUTES saAttr;
 
 	//printf("\n->Start of parent execution.\n");
@@ -103,63 +114,75 @@ int _tmain(int argc, TCHAR *argv[])
 		ErrorExit(TEXT("Stdin SetHandleInformation"));
 	TCHAR cmd[2048];
 	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
+	
 	TCHAR path[512];
 	_tcscpy_s(path, val);
+	//_tprintf("path=%s\n", path);
+	bool mt = false;
+	bool cpt = false;
 	TCHAR configFile[512];
-	TCHAR *rf = configFile;
-	__int64 mem = 1000;
+	__int64 mem = 256;
 	for (int i = 1; i < argc; i++) {
+		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
+			mem = _ttoi(argv[i + 1]);
+			break;
+		}
 		if (!_tcsncmp(argv[i], _T("-v"), 2)) {
 			_tcscpy_s(configFile, val);
 			_tcsncat_s(configFile, _T("\\etc\\"), 512);
 			_tcsncat_s(configFile, argv[i + 1], 512);
 			_tcsncat_s(configFile, _T("-volume-cfg.xml"), 512);
+			mt = true;
 		}
 		if (!_tcsncmp(argv[i], _T("-vc"), 3)) {
 			_tcscpy_s(configFile, argv[i + 1]);
+			mt = true;
 		}
 
 	}
-	if (FileExists(configFile)) {
+	if (mt && FileExists(configFile)) {
 		_tprintf("path=%s\n", configFile);
 	}
-	else {
+	else if (mt) {
 		_tprintf("path does not exist %s\n", configFile);
 		exit(1);
 	}
-	HANDLE hFile = CreateFile(configFile,               // file to open
-		GENERIC_READ, 0, 0,
-		OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);                 // no attr. template
+	if (mt) {
+		mem = 1000;
+		HANDLE hFile = CreateFile(configFile,               // file to open
+			GENERIC_READ, 0, 0,
+			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);                 // no attr. template
 
-	if (hFile == INVALID_HANDLE_VALUE)
-	{
-		_tprintf(TEXT("Terminal failure: unable to open file \"%s\" for read.\n"), configFile);
-		return 1;
-	}
-	else {
-		tinyxml2::XMLDocument doc(true, COLLAPSE_WHITESPACE);
-		int file_descriptor = _open_osfhandle((intptr_t)hFile, _O_RDONLY);
-		if (file_descriptor != -1) {
-			FILE* file = _fdopen(file_descriptor, "r");
-			std::string contents;
-			std::fseek(file, 0, SEEK_END);
-			contents.resize(std::ftell(file));
-			std::rewind(file);
-			std::fread(&contents[0], 1, contents.size(), file);
-			std::fclose(file);
-			printf("array == %s\n", contents.c_str());
-			doc.Parse(contents.c_str());
-			if (doc.ErrorID() == 0) {
-				string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
-				std::stringstream sstr(ssz);
-				__int64 sz;
-				sstr >> sz;
-				long gb = sz / (1073741824);
-				mem += .4 * gb;
-				cout << sz << " asz= "<<gb<< " mem="<< mem<<"\n";
-			}
-			else {
-				printf("Error ID: %s\n", doc.ErrorName());
+		if (hFile == INVALID_HANDLE_VALUE)
+		{
+			_tprintf(TEXT("Terminal failure: unable to open file \"%s\" for read.\n"), configFile);
+			return 1;
+		}
+		else {
+			tinyxml2::XMLDocument doc(true, COLLAPSE_WHITESPACE);
+			int file_descriptor = _open_osfhandle((intptr_t)hFile, _O_RDONLY);
+			if (file_descriptor != -1) {
+				FILE* file = _fdopen(file_descriptor, "r");
+				std::string contents;
+				std::fseek(file, 0, SEEK_END);
+				contents.resize(std::ftell(file));
+				std::rewind(file);
+				std::fread(&contents[0], 1, contents.size(), file);
+				std::fclose(file);
+				printf("array == %s\n", contents.c_str());
+				doc.Parse(contents.c_str());
+				if (doc.ErrorID() == 0) {
+					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
+					std::stringstream sstr(ssz);
+					__int64 sz;
+					sstr >> sz;
+					long gb = sz / (1073741824);
+					mem += .4 * gb;
+					cout << sz << " asz= " << gb << " mem=" << mem << "\n";
+				}
+				else {
+					printf("Error ID: %s\n", doc.ErrorName());
+				}
 			}
 		}
 	}
@@ -171,7 +194,7 @@ int _tmain(int argc, TCHAR *argv[])
 	strstream >> number;
 	_tcscpy_s(cmd, path);
 	_tcsncat_s(cmd, _T("\\bin\\jre\\bin\\java.exe "), 2048);
-	_tcsncat_s(cmd, _T("-Djava.library.path=\""),2048);
+	_tcsncat_s(cmd, _T("-Djava.library.path=\""), 2048);
 	_tcsncat_s(cmd, path, 2048);
 	_tcsncat_s(cmd, _T("bin/\"  -Xmx"), 2048);
 	_tcsncat_s(cmd, buf, 2048);
@@ -183,17 +206,26 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcsncat_s(cmd, "\\lib\\*\" org.opendedup.sdfs.windows.fs.MountSDFS", 2048);
 
 	for (int i = 1; i < argc; i++) {
-		_tcsncat_s(cmd, _T(" "), 1024);
-		_tcsncat_s(cmd, argv[i], 1024);
+		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
+			i++;
+		}
+		else if (!_tcsncmp(argv[i], _T("-cp"), 4)) {
+			cpt = true;
+		}
+		else {
+			_tcsncat_s(cmd, _T(" "), 1024);
+			_tcsncat_s(cmd, argv[i], 1024);
+		}
 	}
-	_tprintf("cmd=%s\n", cmd);
+	if (cpt)
+		_tprintf("cmd=%s\n", cmd);
 	CreateChildProcess(cmd);
 
 	_beginthread(ReadFromPipe, 0, NULL);
 	DWORD exit_code;
 	if (NULL != piProcInfo.hProcess)
 	{
-		WaitForSingleObject(piProcInfo.hProcess, 5000); // Change to 'INFINITE' wait if req'd
+		WaitForSingleObject(piProcInfo.hProcess, INFINITE); // Change to 'INFINITE' wait if req'd
 		if (FALSE == GetExitCodeProcess(piProcInfo.hProcess, &exit_code))
 		{
 			/*

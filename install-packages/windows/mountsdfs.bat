@@ -1,2 +1,0 @@
-@echo off
-bin\jre\bin\java -Djava.library.path=bin\ -Xmx1200M  -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -XX:ParallelGCThreads=4 -XX:InitialSurvivorRatio=3 -XX:TargetSurvivorRatio=50 -Djava.awt.headless=true -server -classpath lib\sdfs.jar;lib\* org.opendedup.sdfs.windows.fs.MountSDFS %*

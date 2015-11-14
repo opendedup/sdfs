@@ -24,13 +24,8 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-
-
-
-
-
-
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
+
 
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
@@ -40,9 +35,6 @@ import static net.decasdev.dokan.WinError.ERROR_READ_FAULT;
 import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
 //import static net.decasdev.dokan.WinError.ERROR_IO_PENDING;
 import static net.decasdev.dokan.WinError.ERROR_MAX_THRDS_REACHED;
-
-
-
 
 import java.io.File;
 import java.io.IOException;
@@ -65,14 +57,12 @@ import net.decasdev.dokan.DokanDiskFreeSpace;
 import net.decasdev.dokan.DokanFileInfo;
 import net.decasdev.dokan.DokanOperationException;
 import net.decasdev.dokan.DokanOperations;
-import net.decasdev.dokan.DokanOptionsMode;
 import net.decasdev.dokan.DokanOptions;
 import net.decasdev.dokan.DokanVolumeInformation;
 import net.decasdev.dokan.FileFlag.FileFlags;
 import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 import net.decasdev.dokan.WinError;
-
 
 import net.decasdev.dokan.FileFlag;
 
@@ -89,6 +79,7 @@ public class WinSDFS implements DokanOperations {
 	public static final int FILE_CASE_PRESERVED_NAMES = 0x00000002;
 	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
 	public static final int FILE_UNICODE_ON_DISK = 0x00000004;
+	public static final int FILE_DIRECTORY_FILE = 0x00000001;
 	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES
 			| FILE_UNICODE_ON_DISK | FILE_SUPPORTS_SPARSE_FILES;
 	/** Next handle */
@@ -99,14 +90,15 @@ public class WinSDFS implements DokanOperations {
 	private static String driveLetter = "S:\\";
 	private static Logger log = SDFSLogger.getFSLog();
 	static ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
-	//private static RejectedExecutionHandler executionHandler = new BlockPolicy();
+	// private static RejectedExecutionHandler executionHandler = new
+	// BlockPolicy();
 	private static BlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>(
 			1024);
 	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue);
 	private static final int CHANNEL_TIMEOUT = 1000;
-	private static final int RESET_DURATION = 4*60*1000;
+	private static final int RESET_DURATION = 4 * 60 * 1000;
 
 	/*
 	 * private transient ConcurrentLinkedHashMap<String, DedupFileChannel>
@@ -129,22 +121,21 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	void showVersions() {
-		//int version = Dokan.getVersion();
-		//System.out.println("version = " + version);
-		//int driverVersion = Dokan.getDriverVersion();
-		//System.out.println("driverVersion = " + driverVersion);
+		// int version = Dokan.getVersion();
+		// System.out.println("version = " + version);
+		// int driverVersion = Dokan.getDriverVersion();
+		// System.out.println("driverVersion = " + driverVersion);
 	}
 
 	void mount(String _driveLetter, String _mountedVolume) {
-		SDFSLogger.setFSLevel(1);
+		SDFSLogger.setFSLevel(0);
 		mountedVolume = _mountedVolume;
 		driveLetter = _driveLetter;
 		DokanOptions dokanOptions = new DokanOptions();
-		dokanOptions.optionsMode = DokanOptionsMode.Mode.KEEP_ALIVE.getValue();
 		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
 		dokanOptions.metaFilePath = mountedVolume;
-		
+
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
 		System.out.println("Volume Mounted to " + driveLetter);
@@ -194,10 +185,12 @@ public class WinSDFS implements DokanOperations {
 
 	@Override
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode,
-			int creationDisposition, int flagsAndAttributes, DokanFileInfo arg5)
-			throws DokanOperationException {
+			int creationDisposition, int flagsAndAttributes, int createOptions,
+			DokanFileInfo fileInfo) throws DokanOperationException {
 		try {
-			CreateFileThread sn = new CreateFileThread(fileName,desiredAccess,shareMode,creationDisposition,flagsAndAttributes,arg5,this);
+			CreateFileThread sn = new CreateFileThread(fileName, desiredAccess,
+					shareMode, creationDisposition, createOptions,
+					flagsAndAttributes, fileInfo, this);
 			try {
 
 				int z = 0;
@@ -208,8 +201,10 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!sn.done) {
 						z++;
-						Dokan.resetTimeout(RESET_DURATION, arg5);
-						log.debug("onCreateFile did not finish in "+(z*CHANNEL_TIMEOUT)/1000+" seconds. slow io." + arg5.dokanContext);
+						Dokan.resetTimeout(RESET_DURATION, fileInfo);
+						log.debug("onCreateFile did not finish in "
+								+ (z * CHANNEL_TIMEOUT) / 1000
+								+ " seconds. slow io." + fileInfo.dokanContext);
 					}
 				}
 				if (sn.errRtn != null)
@@ -225,69 +220,6 @@ public class WinSDFS implements DokanOperations {
 		} catch (Exception e) {
 			log.error("unable to create file", e);
 			throw new DokanOperationException(WinError.ERROR_INVALID_FUNCTION);
-		}
-	}
-
-	@Override
-	public long onOpenDirectory(String pathName, DokanFileInfo arg1)
-			throws DokanOperationException {
-		try {
-			if (SDFSLogger.isFSDebug())
-				log.debug("[onOpenDirectory] " + pathName);
-			if (pathName.equals("\\"))
-				return getNextHandle();
-			pathName = Utils.trimTailBackSlash(pathName);
-			File _f = new File(mountedVolume + pathName);
-			if (_f.exists())
-				return getNextHandle();
-			else
-				throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
-		} catch (DokanOperationException e) {
-			log.debug("dokan error", e);
-			throw e;
-		} catch (Exception e) {
-			log.error("unable to create directory", e);
-			throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
-		}
-	}
-
-	@Override
-	public void onCreateDirectory(String pathName, DokanFileInfo file)
-			throws DokanOperationException {
-		try {
-			if (Main.volume.isFull())
-				throw new DokanOperationException(ERROR_DISK_FULL);
-			if (SDFSLogger.isFSDebug())
-				log.debug("[onCreateDirectory] " + pathName);
-			
-			pathName = Utils.trimTailBackSlash(pathName);
-			MkDirThread sn = new MkDirThread();
-			sn.pathName = pathName;
-			try {
-				executor.execute(sn);
-				int z = 0;
-				while (!sn.done) {
-					synchronized (sn) {
-						sn.wait(CHANNEL_TIMEOUT);
-					}
-					if (!sn.done) {
-						z++;
-						Dokan.resetTimeout(RESET_DURATION, file);
-						log.debug("onCreateDirectory did not finish in "+ (CHANNEL_TIMEOUT*z)/1000+" seconds. slow io." + file.dokanContext);
-					}
-				}
-				if (sn.errRtn != null)
-					throw sn.errRtn;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
-		} catch (DokanOperationException e) {
-			log.debug("dokan error", e);
-			throw e;
-		} catch (Exception e) {
-			log.error("unable to create directory", e);
-			throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 		}
 	}
 
@@ -312,7 +244,9 @@ public class WinSDFS implements DokanOperations {
 						if (!sn.done) {
 							z++;
 							Dokan.resetTimeout(RESET_DURATION, arg1);
-							log.debug("sync did not finish in "+(z*CHANNEL_TIMEOUT)/1000+" seconds. slow io." + arg1.dokanContext);
+							log.debug("sync did not finish in "
+									+ (z * CHANNEL_TIMEOUT) / 1000
+									+ " seconds. slow io." + arg1.dokanContext);
 						}
 					}
 					if (sn.errRtn != null)
@@ -322,9 +256,9 @@ public class WinSDFS implements DokanOperations {
 					throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 				}
 				// ch.force(true);
-			} catch(DokanOperationException e) {
+			} catch (DokanOperationException e) {
 				throw e;
-			}catch (Exception e) {
+			} catch (Exception e) {
 				log.error("unable to cleanup file " + fileName, e);
 				throw new DokanOperationException(ERROR_WRITE_FAULT);
 			}
@@ -338,12 +272,12 @@ public class WinSDFS implements DokanOperations {
 			try {
 				if (SDFSLogger.isFSDebug())
 					log.debug("[onClose] " + path);
-				
+
 				this.closeFileChannel(arg1.handle, arg1);
-				if(arg1.deleteOnClose) {
+				if (arg1.deleteOnClose) {
 					this.onDeleteFile(path, arg1);
 				}
-			} catch(DokanOperationException e) {
+			} catch (DokanOperationException e) {
 				throw e;
 			} catch (Exception e) {
 				log.error("unable to close file " + path, e);
@@ -356,11 +290,12 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg3) throws DokanOperationException {
 
 		try {
-			//if (SDFSLogger.isFSDebug())
-			//	log.debug("[onReadFile] " + fileName + " " +offset + " " + buf.capacity() + " " + buf.position());
+			if (SDFSLogger.isFSDebug())
+				log.debug("[onReadFile] " + fileName + " " + offset + " "
+						+ buf.capacity() + " " + buf.position());
 			ReadThread wr = new ReadThread();
 			wr.buf = buf;
-			wr.info= arg3;
+			wr.info = arg3;
 			wr.fileName = fileName;
 			wr.pos = offset;
 			try {
@@ -371,10 +306,12 @@ public class WinSDFS implements DokanOperations {
 					synchronized (wr) {
 						wr.wait(CHANNEL_TIMEOUT);
 					}
-					
+
 					if (!wr.done) {
 						z++;
-						log.debug("write did not finish in "+(z*CHANNEL_TIMEOUT)/1000+"seconds. slow io." + arg3.dokanContext);
+						log.debug("write did not finish in "
+								+ (z * CHANNEL_TIMEOUT) / 1000
+								+ "seconds. slow io." + arg3.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg3);
 					}
 				}
@@ -387,7 +324,7 @@ public class WinSDFS implements DokanOperations {
 			// int read = ch.read(buf, 0, buf.capacity(), offset);
 			// if (read == -1)
 			// read = 0;
-			return buf.capacity();
+			return wr.read;
 		} catch (Exception e) {
 			log.error("unable to read file " + fileName, e);
 			throw new DokanOperationException(ERROR_READ_FAULT);
@@ -400,9 +337,10 @@ public class WinSDFS implements DokanOperations {
 		try {
 			if (Main.volume.isFull())
 				throw new DokanOperationException(ERROR_DISK_FULL);
-			//log.debug("[onWriteFile] " + fileName + " sz=" + buf.capacity() + " offset=" + offset);
-			
-			
+			if (SDFSLogger.isFSDebug())
+				log.debug("[onWriteFile] " + fileName + " sz=" + buf.capacity()
+						+ " offset=" + offset);
+
 			/*
 			 * WriteThread th = new WriteThread(); th.buf = buf; th.offset =
 			 * offset; th.ch = ch; executor.execute(th);
@@ -421,7 +359,9 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!wr.done) {
 						z++;
-						log.debug("write did not finish in " + (z*CHANNEL_TIMEOUT)/1000+" seconds. slow io. ct=" + arg3.dokanContext);
+						log.debug("write did not finish in "
+								+ (z * CHANNEL_TIMEOUT) / 1000
+								+ " seconds. slow io. ct=" + arg3.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg3);
 					}
 				}
@@ -452,7 +392,7 @@ public class WinSDFS implements DokanOperations {
 		try {
 			if (SDFSLogger.isFSDebug())
 				log.debug("[onSetEndOfFile] " + fileName);
-			truncateFile(fileName,length,arg2);
+			truncateFile(fileName, length, arg2);
 		} catch (Exception e) {
 			log.error("Unable to set length  of " + fileName + " to " + length);
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
@@ -478,7 +418,9 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!sn.done) {
 						z++;
-						log.debug("fsync did not finish in "+(z*CHANNEL_TIMEOUT)/1000+" seconds. slow io." + arg1.dokanContext);
+						log.debug("fsync did not finish in "
+								+ (z * CHANNEL_TIMEOUT) / 1000
+								+ " seconds. slow io." + arg1.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -513,7 +455,9 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!sn.done) {
 						z++;
-						log.debug("ByHandleFileInformation did not finish in "+(z*CHANNEL_TIMEOUT)/1000+" seconds. slow io." + arg1.dokanContext);
+						log.debug("ByHandleFileInformation did not finish in "
+								+ (z * CHANNEL_TIMEOUT) / 1000
+								+ " seconds. slow io." + arg1.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -546,7 +490,8 @@ public class WinSDFS implements DokanOperations {
 						sn.wait(CHANNEL_TIMEOUT);
 					}
 					if (!sn.done) {
-						log.debug("sync did not finish in 5 seconds. slow io." + arg1.dokanContext);
+						log.debug("sync did not finish in 5 seconds. slow io."
+								+ arg1.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -603,7 +548,8 @@ public class WinSDFS implements DokanOperations {
 						sn.wait(CHANNEL_TIMEOUT);
 					}
 					if (!sn.done) {
-						log.debug("onSetFileTime did not finish in 5 seconds. slow io." + arg4.dokanContext);
+						log.debug("onSetFileTime did not finish in 5 seconds. slow io."
+								+ arg4.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg4);
 					}
 				}
@@ -621,8 +567,9 @@ public class WinSDFS implements DokanOperations {
 			throw new DokanOperationException(ERROR_WRITE_FAULT);
 		}
 	}
-	
-	private void truncateFile(String fileName, long sz,DokanFileInfo nfo) throws Exception {
+
+	private void truncateFile(String fileName, long sz, DokanFileInfo nfo)
+			throws Exception {
 		TruncateThread wr = new TruncateThread();
 		wr.fileName = fileName;
 		wr.info = nfo;
@@ -634,7 +581,8 @@ public class WinSDFS implements DokanOperations {
 					wr.wait(CHANNEL_TIMEOUT);
 				}
 				if (!wr.done) {
-					log.debug("truncate did not finish in 5 seconds. slow io." + nfo.dokanContext);
+					log.debug("truncate did not finish in 5 seconds. slow io."
+							+ nfo.dokanContext);
 					Dokan.resetTimeout(RESET_DURATION, nfo);
 				}
 			}
@@ -669,7 +617,8 @@ public class WinSDFS implements DokanOperations {
 					sn.wait(CHANNEL_TIMEOUT);
 				}
 				if (!sn.done) {
-					log.debug("onDeleteFile did not finish in 5 seconds. slow io." + arg1.dokanContext);
+					log.debug("onDeleteFile did not finish in 5 seconds. slow io."
+							+ arg1.dokanContext);
 					Dokan.resetTimeout(RESET_DURATION, arg1);
 				}
 			}
@@ -698,7 +647,8 @@ public class WinSDFS implements DokanOperations {
 					sn.wait(CHANNEL_TIMEOUT);
 				}
 				if (!sn.done) {
-					log.debug("onDeleteDirectory did not finish in 5 seconds. slow io."  + arg1.dokanContext);
+					log.debug("onDeleteDirectory did not finish in 5 seconds. slow io."
+							+ arg1.dokanContext);
 					Dokan.resetTimeout(RESET_DURATION, arg1);
 				}
 			}
@@ -717,26 +667,27 @@ public class WinSDFS implements DokanOperations {
 			DokanFileInfo arg3) throws DokanOperationException {
 		if (SDFSLogger.isFSDebug())
 			log.debug("==> [onMoveFile] " + from + " -> " + to
-				+ ", replaceExisiting = " + replaceExisiting);
-		if(arg3 != null) {
+					+ ", replaceExisiting = " + replaceExisiting);
+		if (arg3 != null) {
 			log.debug("dokanfileinfo " + arg3.handle);
 		}
 		try {
-				MoveFileThread sn = new MoveFileThread();
-				sn.from = from;
-				sn.to = to;
-				executor.execute(sn);
-				while (!sn.done) {
-					synchronized (sn) {
-						sn.wait(CHANNEL_TIMEOUT);
-					}
-					if (!sn.done) {
-						log.debug("sync did not finish in 5 seconds. slow io." + arg3.dokanContext);
-						Dokan.resetTimeout(RESET_DURATION, arg3);
-					}
+			MoveFileThread sn = new MoveFileThread();
+			sn.from = from;
+			sn.to = to;
+			executor.execute(sn);
+			while (!sn.done) {
+				synchronized (sn) {
+					sn.wait(CHANNEL_TIMEOUT);
 				}
-				if (sn.errRtn != null)
-					throw sn.errRtn;
+				if (!sn.done) {
+					log.debug("sync did not finish in 5 seconds. slow io."
+							+ arg3.dokanContext);
+					Dokan.resetTimeout(RESET_DURATION, arg3);
+				}
+			}
+			if (sn.errRtn != null)
+				throw sn.errRtn;
 		} catch (Exception e) {
 			log.error("unable to move file " + from + " to " + to, e);
 			throw new DokanOperationException(ERROR_FILE_EXISTS);
@@ -762,7 +713,7 @@ public class WinSDFS implements DokanOperations {
 	public DokanDiskFreeSpace onGetDiskFreeSpace(DokanFileInfo arg0)
 			throws DokanOperationException {
 		if (SDFSLogger.isFSDebug())
-		log.debug("[onGetDiskFreeSpace]");
+			log.debug("[onGetDiskFreeSpace]");
 		try {
 			DokanDiskFreeSpaceThread sn = new DokanDiskFreeSpaceThread();
 			executor.execute(sn);
@@ -771,9 +722,10 @@ public class WinSDFS implements DokanOperations {
 					sn.wait(CHANNEL_TIMEOUT);
 				}
 				if (!sn.done) {
-					log.debug("onGetDiskFreeSpace did not finish in 5 seconds. slow io." + arg0.dokanContext);
+					log.debug("onGetDiskFreeSpace did not finish in 5 seconds. slow io."
+							+ arg0.dokanContext);
 					Dokan.resetTimeout(RESET_DURATION, arg0);
-				} 
+				}
 			}
 			if (sn.errRtn != null)
 				throw sn.errRtn;
@@ -789,7 +741,7 @@ public class WinSDFS implements DokanOperations {
 	public DokanVolumeInformation onGetVolumeInformation(String arg0,
 			DokanFileInfo arg1) throws DokanOperationException {
 		if (SDFSLogger.isFSDebug())
-		log.debug("[onGetVolumeInformation]");
+			log.debug("[onGetVolumeInformation]");
 		try {
 			DokanVolumeInformation info = new DokanVolumeInformation();
 			info.fileSystemFlags = SUPPORTED_FLAGS;
@@ -827,12 +779,12 @@ public class WinSDFS implements DokanOperations {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 				ch = mf.getDedupFile(true).getChannel(-1);
-					if (dedupChannels.containsKey(handleNo)) {
-						ch.getDedupFile().unRegisterChannel(ch, -1);
-						ch = dedupChannels.get(handleNo);
-					} else {
-						dedupChannels.put(handleNo, ch);
-					}
+				if (dedupChannels.containsKey(handleNo)) {
+					ch.getDedupFile().unRegisterChannel(ch, -1);
+					ch = dedupChannels.get(handleNo);
+				} else {
+					dedupChannels.put(handleNo, ch);
+				}
 			} catch (Exception e) {
 				log.error("unable to open file" + f.getPath(), e);
 				throw new DokanOperationException(WinError.ERROR_GEN_FAILURE);
@@ -842,38 +794,39 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	private void closeFileChannel(long handleNo, DokanFileInfo info) {
-		
-		
-			try {
-				CloseThread cl = new CloseThread();
-				cl.handleNo = handleNo;
-				try {
 
-					executor.execute(cl);
-					int z =0;
-					while (!cl.done) {
-						synchronized (cl) {
-							cl.wait(CHANNEL_TIMEOUT);
-						}
-						if (!cl.done && info != null) {
-							z++;
-							log.debug("waiting for close for " +(z*CHANNEL_TIMEOUT)/1000 + " " + info.dokanContext);
-							Dokan.resetTimeout(RESET_DURATION, info);
-						} else {
-							return;
-						}
+		try {
+			CloseThread cl = new CloseThread();
+			cl.handleNo = handleNo;
+			try {
+
+				executor.execute(cl);
+				int z = 0;
+				while (!cl.done) {
+					synchronized (cl) {
+						cl.wait(CHANNEL_TIMEOUT);
 					}
-					if (cl.errRtn != null)
-						throw cl.errRtn;
-				} catch (RejectedExecutionException e) {
-					log.warn("Threads exhausted in close");
+					if (!cl.done && info != null) {
+						z++;
+						log.debug("waiting for close for "
+								+ (z * CHANNEL_TIMEOUT) / 1000 + " "
+								+ info.dokanContext);
+						Dokan.resetTimeout(RESET_DURATION, info);
+					} else {
+						return;
+					}
 				}
-				// ch.getDedupFile().unRegisterChannel(ch, -1);
-			} catch (Exception e) {
-				log.error("unable to close channel" + handleNo, e);
-			} finally {
-				log.debug("number of channels is " + dedupChannels.size());
+				if (cl.errRtn != null)
+					throw cl.errRtn;
+			} catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted in close");
 			}
+			// ch.getDedupFile().unRegisterChannel(ch, -1);
+		} catch (Exception e) {
+			log.error("unable to close channel" + handleNo, e);
+		} finally {
+			log.debug("number of channels is " + dedupChannels.size());
+		}
 	}
 
 	/*
@@ -894,8 +847,7 @@ public class WinSDFS implements DokanOperations {
 		}
 		return _f;
 	}
-	
-	
+
 	private static class WriteThread implements Runnable {
 		public DokanFileInfo info;
 		public String fileName;
@@ -903,30 +855,25 @@ public class WinSDFS implements DokanOperations {
 		public ByteBuffer buf;
 		Exception errRtn;
 		boolean done;
+
 		@Override
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName, info.handle);
-				if(info.writeToEndOfFile) {
+				if (info.writeToEndOfFile) {
 					log.debug("writing to end of file" + ch.getFile().length());
 					pos = ch.getFile().length();
 				}
 				ch.writeFile(buf, buf.capacity(), 0, pos, true);
-				
-				
+
 				/*
-				ch.force(true);
-				byte [] z = new byte [buf.capacity()] ;
-				byte [] r = new byte [buf.capacity()];
-				buf.position(0);
-				buf.get(z);
-				ch.read(ByteBuffer.wrap(r), 0, r.length, pos);
-				int i = hf.hashBytes(z).asInt();
-				int o = hf.hashBytes(r).asInt();
-				if(i != o) {
-					log.warn("i=" +i + " o=" +o + " pos=" + pos);
-				}
-				*/
+				 * ch.force(true); byte [] z = new byte [buf.capacity()] ; byte
+				 * [] r = new byte [buf.capacity()]; buf.position(0);
+				 * buf.get(z); ch.read(ByteBuffer.wrap(r), 0, r.length, pos);
+				 * int i = hf.hashBytes(z).asInt(); int o =
+				 * hf.hashBytes(r).asInt(); if(i != o) { log.warn("i=" +i +
+				 * " o=" +o + " pos=" + pos); }
+				 */
 
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while writing data", e);
@@ -939,7 +886,7 @@ public class WinSDFS implements DokanOperations {
 
 		}
 	}
-	
+
 	private static class ReadThread implements Runnable {
 		public DokanFileInfo info;
 		public String fileName;
@@ -947,11 +894,13 @@ public class WinSDFS implements DokanOperations {
 		public ByteBuffer buf;
 		Exception errRtn;
 		boolean done;
+		public int read = 0;
+
 		@Override
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName, info.handle);
-				ch.read(buf, 0, buf.capacity(), pos);
+				read = ch.read(buf, 0, buf.capacity(), pos);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while reading data", e);
 				errRtn = e;
@@ -963,7 +912,7 @@ public class WinSDFS implements DokanOperations {
 
 		}
 	}
-	
+
 	private static class TruncateThread implements Runnable {
 
 		public long sz;
@@ -971,6 +920,7 @@ public class WinSDFS implements DokanOperations {
 		boolean done;
 		public DokanFileInfo info;
 		public String fileName;
+
 		@Override
 		public void run() {
 
@@ -986,7 +936,6 @@ public class WinSDFS implements DokanOperations {
 			synchronized (this) {
 				this.notifyAll();
 			}
-			
 
 		}
 	}
@@ -1008,13 +957,12 @@ public class WinSDFS implements DokanOperations {
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while sync data", e);
 				errRtn = e;
-			}finally {
-			done = true;
-			synchronized (this) {
-				this.notifyAll();
+			} finally {
+				done = true;
+				synchronized (this) {
+					this.notifyAll();
+				}
 			}
-			}
-			
 
 		}
 	}
@@ -1027,28 +975,29 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-			
-			try {
-				
-				DedupFileChannel ch = dedupChannels.remove(handleNo);
-				if(ch != null) {
-					ch.getDedupFile().unRegisterChannel(ch, -1);
-				}
-				if(ch.getFile().deleteOnClose) {
-						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true);
-						log.debug("Deleted file on close");
-				}
-			}finally {
-			done = true;
-			synchronized (this) {
-				this.notifyAll();
-			}
-			}
 
-		} catch (Exception e) {
-			SDFSLogger.getLog().debug("error while reading data", e);
-			errRtn = e;
-		}
+				try {
+
+					DedupFileChannel ch = dedupChannels.remove(handleNo);
+					if (ch != null) {
+						ch.getDedupFile().unRegisterChannel(ch, -1);
+					}
+					if (ch.getFile().deleteOnClose) {
+						MetaFileStore.removeMetaFile(ch.getFile().getPath(),
+								true);
+						log.debug("Deleted file on close");
+					}
+				} finally {
+					done = true;
+					synchronized (this) {
+						this.notifyAll();
+					}
+				}
+
+			} catch (Exception e) {
+				SDFSLogger.getLog().debug("error while reading data", e);
+				errRtn = e;
+			}
 		}
 	}
 
@@ -1123,7 +1072,7 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				File f = resolvePath(fileName);
-			
+
 				if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
 					log.warn("unable to delete file " + f.getPath());
 					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
@@ -1151,15 +1100,14 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				File f = resolvePath(path);
-				
+
 				if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
 					log.error("unable to delete folder " + f.getPath());
 					throw new DokanOperationException(
 							WinError.ERROR_DIR_NOT_EMPTY);
 				}
 				log.debug("deleteted folder " + path);
-			} 
-			catch (Exception e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while deleting folder", e);
 				errRtn = e;
 			}
@@ -1196,7 +1144,7 @@ public class WinSDFS implements DokanOperations {
 		}
 
 	}
-	
+
 	private static class GetFileInfoThread implements Runnable {
 		String fileName;
 		ByHandleFileInformation info;
@@ -1206,10 +1154,10 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-				MetaDataDedupFile mf = MetaFileStore.getMF(resolvePath(fileName)
-						.getPath());
+				MetaDataDedupFile mf = MetaFileStore
+						.getMF(resolvePath(fileName).getPath());
 				MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
-				info =  fi.toByHandleFileInformation();
+				info = fi.toByHandleFileInformation();
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while setting moving file", e);
 				errRtn = e;
@@ -1222,7 +1170,7 @@ public class WinSDFS implements DokanOperations {
 		}
 
 	}
-	
+
 	private static class DokanDiskFreeSpaceThread implements Runnable {
 		DokanDiskFreeSpace info;
 		boolean done;
@@ -1240,34 +1188,6 @@ public class WinSDFS implements DokanOperations {
 				this.info = free;
 			} catch (Exception e) {
 				log.error("error getting free disk space", e);
-				errRtn =e;
-			}
-			done = true;
-			synchronized (this) {
-				this.notifyAll();
-			}
-
-		}
-
-	}
-
-	private static class MkDirThread implements Runnable {
-		String pathName;
-		boolean done;
-		Exception errRtn;
-
-		@Override
-		public void run() {
-			try {
-				File f = new File(mountedVolume + pathName);
-				if (f.exists()) {
-					f = null;
-					throw new DokanOperationException(
-							WinError.ERROR_ALREADY_EXISTS);
-				}
-				f.mkdir();
-			} catch (Exception e) {
-				//SDFSLogger.getLog().error("error while setting time", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1278,7 +1198,7 @@ public class WinSDFS implements DokanOperations {
 		}
 
 	}
-	
+
 	private static class CreateFileThread implements Runnable {
 
 		boolean done;
@@ -1288,179 +1208,271 @@ public class WinSDFS implements DokanOperations {
 		int shareMode;
 		int creationDisposition;
 		int flagsAndAttributes;
+		int createOptions;
 		long nextHandle = -1;
 		DokanFileInfo arg5;
 		WinSDFS fs;
-		
-		public CreateFileThread(String fileName, int desiredAccess, int shareMode,
-			int creationDisposition, int flagsAndAttributes,DokanFileInfo arg5,WinSDFS fs) {
+
+		public CreateFileThread(String fileName, int desiredAccess,
+				int shareMode, int creationDisposition, int createOptions,
+				int flagsAndAttributes, DokanFileInfo arg5, WinSDFS fs) {
 			this.fileName = fileName;
 			this.desiredAccess = desiredAccess;
 			this.shareMode = shareMode;
 			this.creationDisposition = creationDisposition;
 			this.flagsAndAttributes = flagsAndAttributes;
+			this.createOptions = createOptions;
 			this.fs = fs;
 			this.arg5 = arg5;
 		}
-		
+
 		@Override
 		public void run() {
 			try {
 				CreationDisposition disposition = CreationDisposition
 						.build(creationDisposition);
 				if (SDFSLogger.isFSDebug())
-					log.debug("[onCreateFile] " + fileName + ", creationDisposition = "
-						+ disposition + " shareMode=" + shareMode
-						+ " desiredAccess=" + desiredAccess
-						+ " flagsAndAttributes=" + flagsAndAttributes);
-				EnumSet<FileFlags> flags = FileFlag.getFlags(flagsAndAttributes);
-				boolean deleteOnClose = false;
-					if(flags.contains(FileFlags.FILE_FLAG_DELETE_ON_CLOSE)) {
-						deleteOnClose = true;
+					log.debug("[onCreateFile] " + fileName
+							+ ", creationDisposition = " + disposition
+							+ " shareMode=" + shareMode + " desiredAccess="
+							+ desiredAccess + " flagsAndAttributes="
+							+ flagsAndAttributes + " createOptions="
+							+ createOptions);
+				EnumSet<FileFlags> flags = FileFlag
+						.getFlags(flagsAndAttributes);
+				if ((createOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE) {
+					switch (disposition) {
+					case FILE_CREATE:
+						File f = new File(mountedVolume + fileName);
+						if (f.exists()) {
+							f = null;
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						}
+						f.mkdir();
+						nextHandle = getNextHandle();
+						break;
+					case FILE_OPEN:
+					case FILE_OPEN_IF:
+						try {
+							if (SDFSLogger.isFSDebug())
+								log.debug("[onCreateFile] " + fileName);
+							if (fileName.equals("\\"))
+								nextHandle = getNextHandle();
+							fileName = Utils.trimTailBackSlash(fileName);
+							File _f = new File(mountedVolume + fileName);
+							if (_f.exists())
+								nextHandle = getNextHandle();
+							else
+								throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
+						} catch (DokanOperationException e) {
+							log.debug("dokan error", e);
+							throw e;
+						} catch (Exception e) {
+							log.error("unable to create directory", e);
+							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
+						}
+						break;
+					default:
+						log.error("wring disposition " + disposition);
+						throw new DokanOperationException(WinError.ERROR_BAD_ARGUMENTS);
 						
 					}
+				} else {
+					boolean deleteOnClose = false;
+					if (flags.contains(FileFlags.FILE_FLAG_DELETE_ON_CLOSE)) {
+						deleteOnClose = true;
+
+					}
 					if (SDFSLogger.isFSDebug()) {
-						for(FileFlags f : flags) {
+						for (FileFlags f : flags) {
 							log.debug("flag = " + f.name());
 						}
 					}
-				if (fileName.equals("\\")) {
-					switch (disposition) {
-					case CREATE_NEW:
-						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
-					case CREATE_ALWAYS:
-						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
-					case OPEN_ALWAYS:
-						nextHandle =  getNextHandle();
-						break;
-					case OPEN_EXISTING:
-						nextHandle = getNextHandle();
-						break;
-					case TRUNCATE_EXISTING:
-						nextHandle = getNextHandle();
-						break;
-					case UNDEFINED:
-						assert (false);
-						
-					}
-				} else if (new File(mountedVolume + fileName).exists()) {
-					switch (disposition) {
-					case CREATE_NEW:
-						throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
-					case OPEN_ALWAYS:
-						nextHandle = getNextHandle();
-						if(deleteOnClose) {
-							MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
-							mf.deleteOnClose = deleteOnClose;
-						}
-						break;
-					case OPEN_EXISTING:
-						nextHandle = getNextHandle();
-						if(deleteOnClose) {
-							MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
-							mf.deleteOnClose = deleteOnClose;
-						}
-						break;
-					case CREATE_ALWAYS:
-						try {
+					if (fileName.equals("\\")) {
+						switch (disposition) {
+						case FILE_CREATE:
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						case FILE_SUPERSEDE:
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						case FILE_OPEN:
 							nextHandle = getNextHandle();
-							arg5.handle = nextHandle;
-							fs.truncateFile(fileName,0,arg5);
-							fs.closeFileChannel(nextHandle, arg5);
-							if(deleteOnClose) {
-								MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
+							break;
+						case FILE_OPEN_IF:
+							nextHandle = getNextHandle();
+							break;
+						case FILE_OVERWRITE:
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						case FILE_OVERWRITE_IF:
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						case UNDEFINED:
+							assert (false);
+
+						}
+					} else if (new File(mountedVolume + fileName).exists()) {
+						switch (disposition) {
+						case FILE_CREATE:
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
+						case FILE_OPEN_IF:
+							nextHandle = getNextHandle();
+							if (deleteOnClose) {
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(mountedVolume + fileName);
 								mf.deleteOnClose = deleteOnClose;
 							}
-							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
-						} catch (IOException e) {
-							log.error(
-									"unable to clear file "
-											+ resolvePath(fileName).getPath(), e);
-							throw new DokanOperationException(
-									WinError.ERROR_WRITE_FAULT);
-						}
-					case TRUNCATE_EXISTING:
-						try {
+							break;
+						case FILE_OPEN:
 							nextHandle = getNextHandle();
-							arg5.handle = nextHandle;
-							fs.truncateFile(fileName,0,arg5);
-							fs.closeFileChannel(nextHandle, arg5);
-							if(deleteOnClose) {
-								MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
+							if (deleteOnClose) {
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(mountedVolume + fileName);
 								mf.deleteOnClose = deleteOnClose;
 							}
-						} catch (IOException e) {
-							log.error(
-									"unable to clear file "
-											+ resolvePath(fileName).getPath(), e);
+							break;
+						case FILE_SUPERSEDE:
+							try {
+								nextHandle = getNextHandle();
+								arg5.handle = nextHandle;
+								fs.truncateFile(fileName, 0, arg5);
+								fs.closeFileChannel(nextHandle, arg5);
+								if (deleteOnClose) {
+									MetaDataDedupFile mf = MetaFileStore
+											.getMF(mountedVolume + fileName);
+									mf.deleteOnClose = deleteOnClose;
+								}
+							} catch (IOException e) {
+								log.error("unable to clear file "
+										+ resolvePath(fileName).getPath(), e);
+								throw new DokanOperationException(
+										WinError.ERROR_WRITE_FAULT);
+							}
+							break;
+						case FILE_OVERWRITE:
 							throw new DokanOperationException(
-									WinError.ERROR_WRITE_FAULT);
+									WinError.ERROR_ALREADY_EXISTS);
+						case UNDEFINED:
+							assert (false);
+						case FILE_OVERWRITE_IF:
+							try {
+								nextHandle = getNextHandle();
+								arg5.handle = nextHandle;
+								fs.truncateFile(fileName, 0, arg5);
+								fs.closeFileChannel(nextHandle, arg5);
+								if (deleteOnClose) {
+									MetaDataDedupFile mf = MetaFileStore
+											.getMF(mountedVolume + fileName);
+									mf.deleteOnClose = deleteOnClose;
+								}
+							} catch (IOException e) {
+								log.error("unable to clear file "
+										+ resolvePath(fileName).getPath(), e);
+								throw new DokanOperationException(
+										WinError.ERROR_WRITE_FAULT);
+							}
+							break;
+						default:
+							break;
 						}
-						break;
-					case UNDEFINED:
-						assert (false);
+					} else {
+						String path = mountedVolume + fileName;
+						switch (disposition) {
+
+						case FILE_CREATE:
+							if (Main.volume.isFull())
+								throw new DokanOperationException(
+										ERROR_DISK_FULL);
+							try {
+
+								if (SDFSLogger.isFSDebug())
+									log.debug("creating " + fileName);
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(path);
+								mf.sync(true);
+								mf.deleteOnClose = deleteOnClose;
+							} catch (Exception e) {
+								log.error("unable to create file " + path, e);
+								throw new DokanOperationException(
+										ERROR_FILE_NOT_FOUND);
+							}
+							nextHandle = getNextHandle();
+							break;
+						case FILE_OVERWRITE_IF:
+							if (Main.volume.isFull())
+								throw new DokanOperationException(
+										ERROR_DISK_FULL);
+							try {
+
+								if (SDFSLogger.isFSDebug())
+									log.debug("creating " + fileName);
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(path);
+								mf.sync(true);
+								mf.deleteOnClose = deleteOnClose;
+							} catch (Exception e) {
+								log.error("unable to create file " + path, e);
+								throw new DokanOperationException(
+										ERROR_FILE_NOT_FOUND);
+							}
+							nextHandle = getNextHandle();
+							break;
+						case FILE_OPEN_IF:
+							if (Main.volume.isFull())
+								throw new DokanOperationException(
+										ERROR_DISK_FULL);
+							try {
+								if (SDFSLogger.isFSDebug())
+									log.debug("creating " + fileName);
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(path);
+								mf.sync(true);
+								mf.deleteOnClose = deleteOnClose;
+							} catch (Exception e) {
+								log.error("unable to create file " + path, e);
+								throw new DokanOperationException(
+										ERROR_FILE_NOT_FOUND);
+							}
+							nextHandle = getNextHandle();
+							break;
+						case FILE_OPEN:
+							throw new DokanOperationException(
+									ERROR_FILE_NOT_FOUND);
+						case FILE_OVERWRITE:
+							throw new DokanOperationException(
+									ERROR_FILE_NOT_FOUND);
+						case UNDEFINED:
+							assert (false);
+						case FILE_SUPERSEDE:
+							if (Main.volume.isFull())
+								throw new DokanOperationException(
+										ERROR_DISK_FULL);
+							try {
+
+								if (SDFSLogger.isFSDebug())
+									log.debug("creating " + fileName);
+								MetaDataDedupFile mf = MetaFileStore
+										.getMF(path);
+								mf.sync(true);
+								mf.deleteOnClose = deleteOnClose;
+							} catch (Exception e) {
+								log.error("unable to create file " + path, e);
+								throw new DokanOperationException(
+										ERROR_FILE_NOT_FOUND);
+							}
+							nextHandle = getNextHandle();
+							break;
+						default:
+							break;
+						}
 					}
-				} else {
-					String path = mountedVolume + fileName;
-					switch (disposition) {
-
-					case CREATE_NEW:
-						if (Main.volume.isFull())
-							throw new DokanOperationException(ERROR_DISK_FULL);
-						try {
-
-							if (SDFSLogger.isFSDebug())
-								log.debug("creating " + fileName);
-							MetaDataDedupFile mf = MetaFileStore.getMF(path);
-							mf.sync(true);
-							mf.deleteOnClose = deleteOnClose;
-						} catch (Exception e) {
-							log.error("unable to create file " + path, e);
-							throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-						}
-						nextHandle = getNextHandle();
-						break;
-					case CREATE_ALWAYS:
-						if (Main.volume.isFull())
-							throw new DokanOperationException(ERROR_DISK_FULL);
-						try {
-
-							if (SDFSLogger.isFSDebug())
-								log.debug("creating " + fileName);
-							MetaDataDedupFile mf = MetaFileStore.getMF(path);
-							mf.sync(true);
-							mf.deleteOnClose = deleteOnClose;
-						} catch (Exception e) {
-							log.error("unable to create file " + path, e);
-							throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-						}
-						nextHandle = getNextHandle();
-						break;
-					case OPEN_ALWAYS:
-						if (Main.volume.isFull())
-							throw new DokanOperationException(ERROR_DISK_FULL);
-						try {
-							if (SDFSLogger.isFSDebug())
-								log.debug("creating " + fileName);
-							MetaDataDedupFile mf = MetaFileStore.getMF(path);
-							mf.sync(true);
-							mf.deleteOnClose = deleteOnClose;
-						} catch (Exception e) {
-							log.error("unable to create file " + path, e);
-							throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-						}
-						nextHandle = getNextHandle();
-						break;
-					case OPEN_EXISTING:
-						throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-					case TRUNCATE_EXISTING:
-						throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-					case UNDEFINED:
-						assert (false);
-					}
+					if (nextHandle < 0)
+						throw new DokanOperationException(
+								WinError.ERROR_INVALID_FUNCTION);
 				}
-				if(nextHandle < 0)
-					throw new DokanOperationException(WinError.ERROR_INVALID_FUNCTION);
 			} catch (Exception e) {
 				errRtn = e;
 			} finally {
@@ -1469,8 +1481,8 @@ public class WinSDFS implements DokanOperations {
 					this.notifyAll();
 				}
 			}
-			
+
 		}
-		
+
 	}
 }

@@ -14,6 +14,7 @@
 ;--------------------------------
 ;Include Modern UI
 !include LogicLib.nsh
+!include "EnvVarUpdate.nsh"
 !include x64.nsh
 !include "MUI2.nsh"
 !include WinVer.nsh
@@ -94,7 +95,7 @@ Section "SDFS Setup" SecMain
   File etc\*
   ;Store installation folder
   WriteRegStr HKLM "Software\SDFS" "path" $INSTDIR
-
+  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -148,6 +149,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\bin"
   RMDir /r "$INSTDIR\lib"
   ReadRegStr $0 HKLM "Software\SDFS" "path"
+  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" $INSTDIR
   DeleteRegKey HKLM "Software\SDFS"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS"
 SectionEnd

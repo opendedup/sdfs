@@ -36,6 +36,7 @@ public class SDFSLogger {
 		log.addAppender(app);
 		fslog.addAppender(app);
 		log.setLevel(Level.INFO);
+		fsdebug = true;
 		fslog.setLevel(Level.DEBUG);
 	}
 
