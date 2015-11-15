@@ -220,8 +220,6 @@ public class VolumeConfigWriter {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
 			this.chunk_store_class = "com.opendedup.sdfs.filestore.cloud.BatchFileChunkStore";
-			if(OSValidator.isWindows())
-				safe_sync = false;
 		}
 		if(cmd.hasOption("aws-aim"))
 			this.awsAim=true;
@@ -618,9 +616,9 @@ public class VolumeConfigWriter {
 				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("block-size", "20 MB");
+				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("upload-thread-sleep-time", "30000");
 				extended.setAttribute("sync-files", "true");
 				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
@@ -647,9 +645,9 @@ public class VolumeConfigWriter {
 				
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("block-size", "20 MB");
+				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("upload-thread-sleep-time", "30000");
 				extended.setAttribute("sync-files", "true");
 				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
@@ -675,9 +673,9 @@ public class VolumeConfigWriter {
 				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("block-size", "10 MB");
+				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "6000");
+				extended.setAttribute("upload-thread-sleep-time", "30000");
 				extended.setAttribute("sync-files", "true");
 				extended.setAttribute("local-cache-size","10GB");
 				extended.setAttribute("map-cache-size", "200");
@@ -692,7 +690,7 @@ public class VolumeConfigWriter {
 			Element extended  = xmldoc.createElement("extended-config");
 			extended.setAttribute("block-size", "30 MB");
 			extended.setAttribute("allow-sync", "false");
-			extended.setAttribute("upload-thread-sleep-time", "6000");
+			extended.setAttribute("upload-thread-sleep-time", "15000");
 			extended.setAttribute("sync-files", "false");
 			extended.setAttribute("local-cache-size","10GB");
 			extended.setAttribute("map-cache-size", "200");

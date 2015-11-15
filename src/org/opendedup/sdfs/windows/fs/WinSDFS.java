@@ -26,7 +26,6 @@ package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
 
-
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
@@ -39,7 +38,6 @@ import static net.decasdev.dokan.WinError.ERROR_MAX_THRDS_REACHED;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
@@ -128,7 +126,7 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	void mount(String _driveLetter, String _mountedVolume) {
-		SDFSLogger.setFSLevel(0);
+		SDFSLogger.setFSLevel(1);
 		mountedVolume = _mountedVolume;
 		driveLetter = _driveLetter;
 		DokanOptions dokanOptions = new DokanOptions();
@@ -490,7 +488,7 @@ public class WinSDFS implements DokanOperations {
 						sn.wait(CHANNEL_TIMEOUT);
 					}
 					if (!sn.done) {
-						log.debug("sync did not finish in 5 seconds. slow io."
+						log.debug("find files did not finish in 5 seconds. slow io."
 								+ arg1.dokanContext);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
@@ -1012,22 +1010,26 @@ public class WinSDFS implements DokanOperations {
 			try {
 				File f = WinSDFS.resolvePath(pathName);
 				File[] mfs = f.listFiles();
-				ArrayList<Win32FindData> files = new ArrayList<Win32FindData>();
-				for (int i = 0; i < mfs.length; i++) {
-					File _mf = mfs[i];
+				if (mfs == null)
+					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
+				SDFSLogger.getFSLog().debug("found " + mfs.length + "ojects");
+				filedata = new Win32FindData[mfs.length];
+				int i = 0;
+				for (File _mf : mfs) {
 					MetaDataDedupFile mf = MetaFileStore.getMF(_mf.getPath());
 					MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(),
 							mf);
-					files.add(fi.toWin32FindData());
+					filedata[i] = fi.toWin32FindData();
+					i++;
 				}
-				filedata = files.toArray(new Win32FindData[0]);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while listing files", e);
 				errRtn = e;
-			}
-			done = true;
-			synchronized (this) {
-				this.notifyAll();
+			} finally {
+				done = true;
+				synchronized (this) {
+					this.notifyAll();
+				}
 			}
 			// log("[onFindFiles] " + files);
 
@@ -1241,6 +1243,7 @@ public class WinSDFS implements DokanOperations {
 				EnumSet<FileFlags> flags = FileFlag
 						.getFlags(flagsAndAttributes);
 				if ((createOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE) {
+					log.debug("in directory");
 					switch (disposition) {
 					case FILE_CREATE:
 						File f = new File(mountedVolume + fileName);
@@ -1256,29 +1259,34 @@ public class WinSDFS implements DokanOperations {
 					case FILE_OPEN_IF:
 						try {
 							if (SDFSLogger.isFSDebug())
-								log.debug("[onCreateFile] " + fileName);
+								log.debug("[onCreateFile] file_open " + fileName);
 							if (fileName.equals("\\"))
 								nextHandle = getNextHandle();
 							fileName = Utils.trimTailBackSlash(fileName);
 							File _f = new File(mountedVolume + fileName);
-							if (_f.exists())
+							if (_f.exists() && _f.isDirectory()) {
 								nextHandle = getNextHandle();
+							}
 							else
-								throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
+								throw new DokanOperationException(
+										ERROR_PATH_NOT_FOUND);
 						} catch (DokanOperationException e) {
 							log.debug("dokan error", e);
 							throw e;
 						} catch (Exception e) {
 							log.error("unable to create directory", e);
-							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
+							throw new DokanOperationException(
+									WinError.ERROR_ALREADY_EXISTS);
 						}
 						break;
 					default:
 						log.error("wring disposition " + disposition);
-						throw new DokanOperationException(WinError.ERROR_BAD_ARGUMENTS);
-						
+						throw new DokanOperationException(
+								WinError.ERROR_BAD_ARGUMENTS);
+
 					}
 				} else {
+					log.debug("in directory");
 					boolean deleteOnClose = false;
 					if (flags.contains(FileFlags.FILE_FLAG_DELETE_ON_CLOSE)) {
 						deleteOnClose = true;
@@ -1332,6 +1340,7 @@ public class WinSDFS implements DokanOperations {
 								MetaDataDedupFile mf = MetaFileStore
 										.getMF(mountedVolume + fileName);
 								mf.deleteOnClose = deleteOnClose;
+								
 							}
 							break;
 						case FILE_SUPERSEDE:
