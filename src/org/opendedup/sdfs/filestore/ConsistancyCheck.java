@@ -60,6 +60,7 @@ public class ConsistancyCheck {
 						corruption ++;
 						SDFSLogger.getLog().warn(
 								"Data Corruption found in datastore", e);
+						break;
 					}
 				}
 			}

@@ -125,8 +125,11 @@ public class WinSDFS implements DokanOperations {
 		// System.out.println("driverVersion = " + driverVersion);
 	}
 
-	void mount(String _driveLetter, String _mountedVolume) {
-		SDFSLogger.setFSLevel(1);
+	void mount(String _driveLetter, String _mountedVolume,boolean debug) {
+		if(debug)
+			SDFSLogger.setFSLevel(0);
+		else
+			SDFSLogger.setFSLevel(1);
 		mountedVolume = _mountedVolume;
 		driveLetter = _driveLetter;
 		DokanOptions dokanOptions = new DokanOptions();
@@ -1216,8 +1219,8 @@ public class WinSDFS implements DokanOperations {
 		WinSDFS fs;
 
 		public CreateFileThread(String fileName, int desiredAccess,
-				int shareMode, int creationDisposition, int createOptions,
-				int flagsAndAttributes, DokanFileInfo arg5, WinSDFS fs) {
+				int shareMode, int creationDisposition,int flagsAndAttributes, int createOptions,
+				 DokanFileInfo arg5, WinSDFS fs) {
 			this.fileName = fileName;
 			this.desiredAccess = desiredAccess;
 			this.shareMode = shareMode;
@@ -1242,10 +1245,13 @@ public class WinSDFS implements DokanOperations {
 							+ createOptions);
 				EnumSet<FileFlags> flags = FileFlag
 						.getFlags(flagsAndAttributes);
-				if ((createOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE) {
+				if ((createOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE || flags.contains(FileFlags.FILE_DIRECTORY_FILE)) {
 					log.debug("in directory");
+					File _f;
 					switch (disposition) {
 					case FILE_CREATE:
+						if (SDFSLogger.isFSDebug())
+							log.debug("[onCreateFile] directory_create " + fileName);
 						File f = new File(mountedVolume + fileName);
 						if (f.exists()) {
 							f = null;
@@ -1256,15 +1262,31 @@ public class WinSDFS implements DokanOperations {
 						nextHandle = getNextHandle();
 						break;
 					case FILE_OPEN:
+						if (SDFSLogger.isFSDebug())
+							log.debug("[onCreateFile] directory_open " + fileName);
+						if (fileName.equals("\\"))
+							nextHandle = getNextHandle();
+						fileName = Utils.trimTailBackSlash(fileName);
+						_f = new File(mountedVolume + fileName);
+						if (_f.exists() && _f.isDirectory()) {
+							nextHandle = getNextHandle();
+						}
+						else
+							throw new DokanOperationException(
+									ERROR_PATH_NOT_FOUND);
+						break;
 					case FILE_OPEN_IF:
 						try {
 							if (SDFSLogger.isFSDebug())
-								log.debug("[onCreateFile] file_open " + fileName);
+								log.debug("[onCreateFile] directory_open_if " + fileName);
 							if (fileName.equals("\\"))
 								nextHandle = getNextHandle();
 							fileName = Utils.trimTailBackSlash(fileName);
-							File _f = new File(mountedVolume + fileName);
+							_f = new File(mountedVolume + fileName);
 							if (_f.exists() && _f.isDirectory()) {
+								nextHandle = getNextHandle();
+							} else if(!_f.exists()) {
+								_f.mkdir();
 								nextHandle = getNextHandle();
 							}
 							else
@@ -1286,11 +1308,10 @@ public class WinSDFS implements DokanOperations {
 
 					}
 				} else {
-					log.debug("in directory");
+					log.debug("in file");
 					boolean deleteOnClose = false;
-					if (flags.contains(FileFlags.FILE_FLAG_DELETE_ON_CLOSE)) {
+					if (flags.contains(FileFlags.FILE_DELETE_ON_CLOSE)) {
 						deleteOnClose = true;
-
 					}
 					if (SDFSLogger.isFSDebug()) {
 						for (FileFlags f : flags) {

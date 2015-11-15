@@ -59,7 +59,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			"Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
-	private int hashTblSz = 10000000;
+	private int hashTblSz = 100000;
 	private BlockingQueue<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayBlockingQueue<ProgressiveFileByteArrayLongMap>(
 			1);
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
@@ -294,10 +294,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				ProgressiveFileByteArrayLongMap m = null;
 				try {
 					m = iter.next();
-					if (m.isFull() && !m.isActive()) {
-						double pf = (double) m.size() / (double) m.maxSize();
-						// SDFSLogger.getLog().info("pfull=" + pf);
-						if (pf < .4 || pf == Double.NaN) {
+					if (!m.isFull() && !m.isActive()) {
+						
 							// SDFSLogger.getLog().info("deleting " +
 							// m.toString());
 							m.iterInit();
@@ -325,8 +323,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							m.vanish();
 
 							m = null;
-
-						}
 					}
 				} catch (Exception e) {
 					tEvt.endEvent(
@@ -392,17 +388,18 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		SDFSLogger.getLog().info("Folder = " + _fs.getPath());
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		long rsz = 0;
-		long _tbs = maxSz / (256);
+		long _tbs = maxSz / (64);
 		int max = Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL;
 		if (_tbs > max) {
 			this.hashTblSz = max;
 		} else if (_tbs > this.hashTblSz) {
 			this.hashTblSz = (int) _tbs;
 		}
-		SDFSLogger.getLog().info(
-				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs + " hashTblSz="
-						+ this.hashTblSz);
+		long otb = this.hashTblSz;
 		this.hashTblSz =  NextPrime.getNextPrimeI((int) (this.hashTblSz));
+		SDFSLogger.getLog().info(
+				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs + " calculated hashtblesz=" +otb+" hashTblSz="
+						+ this.hashTblSz);
 		File[] files = _fs.getParentFile().listFiles(new DBFileFilter());
 		if (files.length > 0) {
 			CommandLineProgressBar bar = new CommandLineProgressBar(

@@ -219,7 +219,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
-			this.chunk_store_class = "com.opendedup.sdfs.filestore.cloud.BatchFileChunkStore";
+			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		}
 		if(cmd.hasOption("aws-aim"))
 			this.awsAim=true;

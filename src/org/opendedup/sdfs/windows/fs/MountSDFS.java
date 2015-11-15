@@ -25,6 +25,7 @@ public class MountSDFS {
 				"the drive letter for SDFS file system \n e.g. \'S\'");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
+		options.addOption("d", false, "turn on filesystem debugging");
 		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption(
 				"vc",
@@ -53,6 +54,7 @@ public class MountSDFS {
 		int port = -1;
 		String volumeConfigFile = null;
 		boolean useSSL = true;
+		boolean debug = false;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
@@ -79,6 +81,9 @@ public class MountSDFS {
 		if(cmd.hasOption("cfr")) {
 			Main.syncDL = true;
 			Main.runConsistancyCheck = true;
+		}
+		if(cmd.hasOption("d")) {
+			debug = true;
 		}
 		if (cmd.hasOption("rv")) {
 			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
@@ -162,7 +167,7 @@ public class MountSDFS {
 			}
 			WinSDFS sdfs = new WinSDFS();
 			
-			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath());
+			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath(),debug);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
