@@ -108,7 +108,7 @@ Section "SDFS Setup" SecMain
     "$INSTDIR" "(BU)" "GenericRead + GenericWrite"
 SectionEnd
 Section "Dokan Setup" SecDokan
-	ExecWait '"$INSTDIR\DokanInstall_0.8.0_redist-RC2.exe"'
+	ExecWait '"$INSTDIR\DokanInstall_0.8.0_redist-RC3.exe"'
 SectionEnd
 Section "-Quick Start Guide"
 	ExecShell "open" "http://www.opendedup.org/wqs"

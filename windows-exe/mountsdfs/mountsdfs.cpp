@@ -141,7 +141,7 @@ int _tmain(int argc, TCHAR *argv[])
 
 	}
 	if (mt && FileExists(configFile)) {
-		_tprintf("path=%s\n", configFile);
+		//_tprintf("path=%s\n", configFile);
 	}
 	else if (mt) {
 		_tprintf("path does not exist %s\n", configFile);
@@ -169,7 +169,7 @@ int _tmain(int argc, TCHAR *argv[])
 				std::rewind(file);
 				std::fread(&contents[0], 1, contents.size(), file);
 				std::fclose(file);
-				printf("array == %s\n", contents.c_str());
+				//printf("array == %s\n", contents.c_str());
 				doc.Parse(contents.c_str());
 				if (doc.ErrorID() == 0) {
 					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
@@ -178,10 +178,11 @@ int _tmain(int argc, TCHAR *argv[])
 					sstr >> sz;
 					long gb = sz / (1073741824);
 					mem += .4 * gb;
-					cout << sz << " asz= " << gb << " mem=" << mem << "\n";
+					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
 				}
 				else {
-					printf("Error ID: %s\n", doc.ErrorName());
+					printf("XML Parsing Error ID: %s\n", doc.ErrorName());
+					exit(1);
 				}
 			}
 		}
@@ -218,7 +219,7 @@ int _tmain(int argc, TCHAR *argv[])
 		}
 	}
 	if (cpt)
-		_tprintf("cmd=%s\n", cmd);
+		//_tprintf("cmd=%s\n", cmd);
 	CreateChildProcess(cmd);
 
 	_beginthread(ReadFromPipe, 0, NULL);
