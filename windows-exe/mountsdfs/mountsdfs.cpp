@@ -218,10 +218,7 @@ int _tmain(int argc, TCHAR *argv[])
 			_tcsncat_s(cmd, argv[i], 1024);
 		}
 	}
-	if (cpt)
-		//_tprintf("cmd=%s\n", cmd);
 	CreateChildProcess(cmd);
-
 	_beginthread(ReadFromPipe, 0, NULL);
 	DWORD exit_code;
 	if (NULL != piProcInfo.hProcess)
