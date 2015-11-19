@@ -139,7 +139,7 @@ public class WinSDFS implements DokanOperations {
 
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
-		System.out.println("Volume Mounted to " + driveLetter);
+		System.out.println("mounted");
 		int result = Dokan.mount(dokanOptions, this);
 
 		// log("[MemoryFS] result = " + result);
@@ -177,7 +177,7 @@ public class WinSDFS implements DokanOperations {
 			System.exit(1);
 		}
 	}
-
+	
 	static synchronized long getNextHandle() {
 		if (nextHandleNo == Long.MAX_VALUE)
 			nextHandleNo = 0;
@@ -760,7 +760,9 @@ public class WinSDFS implements DokanOperations {
 	@Override
 	public void onUnmount(DokanFileInfo arg0) throws DokanOperationException {
 		log.debug("[onUnmount]");
+		try {
 		Dokan.removeMountPoint(driveLetter);
+		}catch(Exception e) {}
 		Collection<DedupFileChannel> iter = dedupChannels.values();
 		for (DedupFileChannel ch : iter) {
 			try {
@@ -769,7 +771,7 @@ public class WinSDFS implements DokanOperations {
 
 			}
 		}
-		System.exit(1);
+		System.exit(0);
 	}
 
 	private static DedupFileChannel getFileChannel(String path, long handleNo)

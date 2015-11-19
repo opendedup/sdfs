@@ -614,7 +614,7 @@ public class VolumeConfigWriter {
 			if(ext) {
 				this.chunk_size = 256;
 				
-				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
@@ -643,7 +643,7 @@ public class VolumeConfigWriter {
 			if(ext) {
 				this.chunk_size = 1024;
 				
-				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
@@ -671,7 +671,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			if(ext) {
 				this.chunk_size = 1024;
-				aws.setAttribute("chunkstore-class", "com.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");

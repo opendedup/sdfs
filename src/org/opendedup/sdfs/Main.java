@@ -43,7 +43,7 @@ public class Main {
 	public static byte MAPVERSION = 0;
 
 	public static String sdfsPassword = "";
- public static boolean readAheadMap = false;
+	public static boolean readAheadMap = false;
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
 

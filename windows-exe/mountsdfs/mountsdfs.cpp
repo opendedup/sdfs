@@ -26,7 +26,7 @@ HANDLE g_hChildStd_OUT_Rd = NULL;
 HANDLE hParentStdOut = NULL;
 HANDLE g_hChildStd_OUT_Wr = NULL;
 PROCESS_INFORMATION piProcInfo;
-
+STARTUPINFO siStartInfo;
 void CreateChildProcess(TCHAR *p);
 void WriteToPipe(void);
 void ReadFromPipe(void *param);
@@ -36,7 +36,7 @@ bool processCompleted = false;
 bool dataWritten = false;
 using namespace std;
 using namespace tinyxml2;
-
+bool mounted = false;
 int FileExists(TCHAR * file)
 {
 	WIN32_FIND_DATA FindFileData;
@@ -219,33 +219,38 @@ int _tmain(int argc, TCHAR *argv[])
 		}
 	}
 	CreateChildProcess(cmd);
+	DWORD exit_code = 0;
 	_beginthread(ReadFromPipe, 0, NULL);
-	DWORD exit_code;
+	
 	if (NULL != piProcInfo.hProcess)
 	{
-		WaitForSingleObject(piProcInfo.hProcess, INFINITE); // Change to 'INFINITE' wait if req'd
-		if (FALSE == GetExitCodeProcess(piProcInfo.hProcess, &exit_code))
-		{
-			/*
-			std::cerr << "GetExitCodeProcess() failure: " <<
-			GetLastError() << "\n";
-			*/
+		while (!processCompleted) {
+			WaitForSingleObject(piProcInfo.hProcess, 1500); // Change to 'INFINITE' wait if req'd
+			if (FALSE == GetExitCodeProcess(piProcInfo.hProcess, &exit_code))
+			{
+				/*
+				std::cerr << "GetExitCodeProcess() failure: " <<
+				GetLastError() << "\n";
+				*/
+			}
+			else if (STILL_ACTIVE == exit_code)
+			{
+				//std::cout << "Still running\n";
+			}
+			else
+			{
+				/*
+				std::cout << "exit code=" << exit_code << "\n";
+				*/
+				break;
+			}
 		}
-		else if (STILL_ACTIVE == exit_code)
-		{
-			//std::cout << "Still running\n";
-		}
-		else
-		{
-			/*
-			std::cout << "exit code=" << exit_code << "\n";
-			*/
-			CloseHandle(piProcInfo.hProcess);
-		}
-
+		CloseHandle(siStartInfo.hStdError);
+		CloseHandle(siStartInfo.hStdOutput);
+		CloseHandle(siStartInfo.hStdInput);
+		CloseHandle(piProcInfo.hProcess);
+		
 	}
-
-	//printf("\n->End of parent execution.\n");
 
 	// The remaining open handles are cleaned up when this process terminates. 
 	// To avoid resource leaks in a larger application, close handles explicitly. 
@@ -256,7 +261,7 @@ int _tmain(int argc, TCHAR *argv[])
 void CreateChildProcess(TCHAR *p)
 // Create a child process that uses the previously created pipes for STDIN and STDOUT.
 {
-	STARTUPINFO siStartInfo;
+	
 	BOOL bSuccess = FALSE;
 
 	// Set up members of the PROCESS_INFORMATION structure. 
@@ -315,8 +320,18 @@ void ReadFromPipe(void *param)
 	while (!processCompleted)
 	{
 		rSuccess = ReadFile(g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL);
-		bSuccess = WriteFile(hParentStdOut, chBuf,
-			dwRead, &dwWritten, NULL);
+		std::string contents = string(chBuf);
+		if (strcmp(chBuf, "mounted") == 1) {
+			bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
+				dwRead, &dwWritten, NULL);
+			processCompleted = true;
+			break;
+		}
+		else {
+
+			bSuccess = WriteFile(hParentStdOut, contents.c_str(),
+				dwRead, &dwWritten, NULL);
+		}
 		if (!bSuccess) {
 			break;
 		}

@@ -11,6 +11,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonInitException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendedup.logging.SDFSLogger;
@@ -20,9 +23,11 @@ import org.opendedup.util.OSValidator;
 
 import fuse.FuseMount;
 
-public class MountSDFS {
+public class MountSDFS implements Daemon, Runnable{
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
-
+	private static String[] sFal = null;
+	private static SDFSService sdfsService;
+	private static String mountOptions;
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
@@ -56,6 +61,40 @@ public class MountSDFS {
 	}
 
 	public static void main(String[] args) throws ParseException {
+		setup(args);
+		try {
+			
+			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
+					Main.volumeMountPoint), log);
+			System.exit(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void printHelp(Options options) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter
+				.printHelp(
+						"mount.sdfs -o <fuse options> -m <mount point> "
+								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
+						options);
+	}
+
+	private static void checkJavaVersion() {
+		Properties sProp = java.lang.System.getProperties();
+		String sVersion = sProp.getProperty("java.version");
+		sVersion = sVersion.substring(0, 3);
+		Float f = Float.valueOf(sVersion);
+		if (f.floatValue() < (float) 1.7) {
+			System.out.println("Java version must be 1.7 or newer");
+			System.out
+					.println("To get Java 7 go to https://jdk7.dev.java.net/");
+			System.exit(-1);
+		}
+	}
+	
+	private static void setup(String [] args) throws ParseException {
 		checkJavaVersion();
 		int port = -1;
 		String volumeConfigFile = null;
@@ -149,7 +188,7 @@ public class MountSDFS {
 		if (OSValidator.isWindows())
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
-		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
+		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
@@ -163,6 +202,7 @@ public class MountSDFS {
 		}
 		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
 				cmd.getOptionValue("m"));
+		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
@@ -172,39 +212,57 @@ public class MountSDFS {
 			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
 					+ ":" + Main.sdfsCliPort);
 		}
+		sFal = new String[fal.size()];
+		fal.toArray(sFal);
+		for (int i = 0; i < sFal.length; i++) {
+			SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
+		}
+	}
+
+	@Override
+	public void destroy() {
+		sdfsService = null;
+		mountOptions = null;
+	}
+
+	@Override
+	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
+		setup(arg0.getArguments());
+		
+	}
+
+	@Override
+	public void start() throws Exception {
+		MountSDFS sd = new MountSDFS();
+		Thread th = new Thread(sd);
+		th.start();
+		
+	}
+
+	@Override
+	public void stop() throws Exception {
+		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
+		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
+		sdfsService.stop();
+		SDFSLogger.getLog().info("All Data Flushed");
 		try {
-			String[] sFal = new String[fal.size()];
-			fal.toArray(sFal);
-			for (int i = 0; i < sFal.length; i++) {
-				SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
-			}
+			Process p = Runtime.getRuntime().exec("umount " + mountOptions);
+			p.waitFor();
+		} catch (Exception e) {
+		}
+		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
+		
+	}
+
+	@Override
+	public void run() {
+		try {
 			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
 					Main.volumeMountPoint), log);
-			System.exit(0);
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	private static void printHelp(Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter
-				.printHelp(
-						"mount.sdfs -o <fuse options> -m <mount point> "
-								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
-						options);
-	}
-
-	private static void checkJavaVersion() {
-		Properties sProp = java.lang.System.getProperties();
-		String sVersion = sProp.getProperty("java.version");
-		sVersion = sVersion.substring(0, 3);
-		Float f = Float.valueOf(sVersion);
-		if (f.floatValue() < (float) 1.7) {
-			System.out.println("Java version must be 1.7 or newer");
-			System.out
-					.println("To get Java 7 go to https://jdk7.dev.java.net/");
-			System.exit(-1);
-		}
+		
 	}
 }
