@@ -112,6 +112,7 @@ public class SimpleByteArrayLongMap {
 		rf = new RandomAccessFile(path,"rw");
 		rf.setLength(EL*size);
 		this.kFC = rf.getChannel();
+		this.closed = false;
 	}
 
 	/**
@@ -121,9 +122,11 @@ public class SimpleByteArrayLongMap {
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
 	 */
-	public boolean containsKey(byte[] key) {
+	public boolean containsKey(byte[] key) throws MapClosedException {
 		try {
 			this.hashlock.lock();
+			if(this.closed)
+				throw new MapClosedException();
 			int index = index(key);
 			if (index >= 0) {
 				return true;
@@ -216,6 +219,8 @@ public class SimpleByteArrayLongMap {
 		return -1;
 	}
 	
+	boolean closed= false;
+	
 	public void vanish() {
 		this.hashlock.lock();
 		try {
@@ -303,10 +308,11 @@ public class SimpleByteArrayLongMap {
 	}
 	
 	ByteBuffer vb = ByteBuffer.allocateDirect(EL);
-	public boolean put(byte[] key, int value) {
+	public boolean put(byte[] key, int value) throws MapClosedException{
 		this.hashlock.lock();
 		try {
-			
+			if(this.closed)
+				throw new MapClosedException();
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
 				int npos = -pos -1;
@@ -330,9 +336,11 @@ public class SimpleByteArrayLongMap {
 		}
 	}
 		
-	public int get(byte[] key) {
+	public int get(byte[] key) throws MapClosedException {
 		try {
 			this.hashlock.lock();
+			if(this.closed)
+				throw new MapClosedException();
 			if (key == null)
 				return -1;
 			int pos = this.index(key);
@@ -358,6 +366,7 @@ public class SimpleByteArrayLongMap {
 
 	public void close() {
 		this.hashlock.lock();
+		this.closed = true;
 		try {
 			this.kFC.close();
 		} catch (Exception e) {

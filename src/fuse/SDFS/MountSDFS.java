@@ -259,6 +259,7 @@ public class MountSDFS implements Daemon, Runnable{
 		try {
 			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
 					Main.volumeMountPoint), log);
+			System.exit(0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

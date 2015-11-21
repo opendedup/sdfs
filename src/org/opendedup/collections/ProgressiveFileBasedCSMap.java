@@ -73,12 +73,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	private transient ThreadPoolExecutor executor = null;
 	boolean ilg = false;
 	int currentAWPos = 0;
-
 	// private BloomFileByteArrayLongMap activeWMap = null;
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 	private boolean runningGC = false;
-
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
@@ -370,6 +368,22 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		}
 
 	}
+	
+	public void setMaxSize(long maxSz) throws IOException {
+		this.maxSz = maxSz;
+		long _tbs = maxSz / (64);
+		int max = Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL;
+		if (_tbs > max) {
+			this.hashTblSz = max;
+		} else if (_tbs > this.hashTblSz) {
+			this.hashTblSz = (int) _tbs;
+		}
+		long otb = this.hashTblSz;
+		this.hashTblSz =  NextPrime.getNextPrimeI((int) (this.hashTblSz));
+		SDFSLogger.getLog().info(
+				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs + " calculated hashtblesz=" +otb+" hashTblSz="
+						+ this.hashTblSz);
+	}
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -388,18 +402,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		SDFSLogger.getLog().info("Folder = " + _fs.getPath());
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		long rsz = 0;
-		long _tbs = maxSz / (64);
-		int max = Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL;
-		if (_tbs > max) {
-			this.hashTblSz = max;
-		} else if (_tbs > this.hashTblSz) {
-			this.hashTblSz = (int) _tbs;
-		}
-		long otb = this.hashTblSz;
-		this.hashTblSz =  NextPrime.getNextPrimeI((int) (this.hashTblSz));
-		SDFSLogger.getLog().info(
-				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs + " calculated hashtblesz=" +otb+" hashTblSz="
-						+ this.hashTblSz);
+		this.setMaxSize(maxSz);
 		File[] files = _fs.getParentFile().listFiles(new DBFileFilter());
 		if (files.length > 0) {
 			CommandLineProgressBar bar = new CommandLineProgressBar(

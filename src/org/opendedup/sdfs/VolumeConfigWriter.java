@@ -73,6 +73,7 @@ public class VolumeConfigWriter {
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
 	String cloudAccessKey = "";
+	String cacheSize = "10GB";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
@@ -84,8 +85,8 @@ public class VolumeConfigWriter {
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 
-	String hashType = HashFunctionPool.MURMUR3_16;
-	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
+	String hashType = HashFunctionPool.VARIABLE_MURMUR3;
+	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
@@ -106,7 +107,7 @@ public class VolumeConfigWriter {
 	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
 	private boolean clusterRackAware = false;
-	private boolean ext = false;
+	private boolean ext = true;
 	private boolean awsAim = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
@@ -187,7 +188,7 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 			if (ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 				this.chunk_size = 256;
 				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
@@ -198,7 +199,7 @@ public class VolumeConfigWriter {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-encrypt"));
 			if (this.chunk_store_encrypt)
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		}
 		if (cmd.hasOption("chunk-store-encryption-key")) {
 			String key = cmd.getOptionValue("chunk-store-encryption-key");
@@ -237,6 +238,10 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-chunk-size")) {
 			this.chunk_size = Short.parseShort(cmd
 					.getOptionValue("io-chunk-size"));
+		}
+		if(cmd.hasOption("local-cache-size")) {
+			this.cacheSize = cmd.getOptionValue("local-cache-size");
+			StringUtils.parseSize(this.cacheSize);
 		}
 		
 		if (cmd.hasOption("io-max-open-files")) {
@@ -368,7 +373,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("chunk-store-compress"));
 			if (this.compress && !this.awsEnabled && !this.gsEnabled
 					&& this.azureEnabled) {
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 			}
 		}
 		if (cmd.hasOption("volume-maximum-full-percentage")) {
@@ -618,10 +623,10 @@ public class VolumeConfigWriter {
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "30000");
+				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size","10GB");
-				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
@@ -647,10 +652,10 @@ public class VolumeConfigWriter {
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "30000");
+				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size","10GB");
-				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
@@ -675,10 +680,10 @@ public class VolumeConfigWriter {
 				Element extended  = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", "40 MB");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "30000");
+				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size","10GB");
-				extended.setAttribute("map-cache-size", "200");
+				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
@@ -692,8 +697,8 @@ public class VolumeConfigWriter {
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "15000");
 			extended.setAttribute("sync-files", "false");
-			extended.setAttribute("local-cache-size","10GB");
-			extended.setAttribute("map-cache-size", "200");
+			extended.setAttribute("local-cache-size",this.cacheSize);
+			extended.setAttribute("map-cache-size", "100");
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
 			cs.appendChild(extended);
@@ -873,6 +878,12 @@ public class VolumeConfigWriter {
 								+ "If the number of files is exceeded the least recently used will be closed. \n Defaults to: \n 1024")
 				.hasArg().withArgName("NUMBER").create());
 		options.addOption(OptionBuilder
+				.withLongOpt("local-cache-size")
+				.withDescription(
+						"The local read cache size for data uploaded to the cloud. "
+								+ "\n Defaults to: \n 10 GB")
+				.hasArg().withArgName("Size + [MB,GB,TB]").create());
+		options.addOption(OptionBuilder
 				.withLongOpt("io-meta-file-cache")
 				.withDescription(
 						"The maximum number metadata files to be cached at any one time. "
@@ -947,12 +958,6 @@ public class VolumeConfigWriter {
 								+ File.separator + "hdb").hasArg()
 				.withArgName("PATH").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("chunk-store-pre-allocate")
-				.withDescription(
-						"Pre-allocate the chunk store if true."
-								+ " \nDefaults to: \n false").hasArg()
-				.withArgName("true|false").create());
-		options.addOption(OptionBuilder
 				.withLongOpt("chunkstore-class")
 				.withDescription(
 						"The class for the specific chunk store to be used. \n Defaults to org.opendedup.sdfs.filestore.FileChunkStore")
@@ -987,7 +992,7 @@ public class VolumeConfigWriter {
 								+ " "
 								+ HashFunctionPool.VARIABLE_MURMUR3
 								+ " This Defaults to "
-								+ HashFunctionPool.MURMUR3_16)
+								+ HashFunctionPool.VARIABLE_MURMUR3)
 				.hasArg()
 				.withArgName(
 						HashFunctionPool.TIGER_16 + "|"

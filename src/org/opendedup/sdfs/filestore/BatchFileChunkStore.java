@@ -235,6 +235,9 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			int sz = Integer.parseInt(config.getAttribute("io-threads"));
 			Main.dseIOThreads = sz;
 		}
+		if(config.hasAttribute("allow-sync")){
+			HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
+		}
 
 		try {
 			File f = new File(this.container_location, "BucketInfo");
@@ -290,12 +293,16 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			if(cm == null)
 				return null;
 			kv = cm.next();
+			
 			}catch(Exception e) {
 				throw new IOException(e);
 			}
 			
 		}
-		return new ChunkData(kv.getKey(), hid);
+		if(kv== null)
+			return getNextChunck();
+		else
+			return new ChunkData(kv.getKey(), hid);
 	}
 
 	private HashMap<String, String> readHashMap(long id) throws IOException, ClassNotFoundException {
@@ -416,7 +423,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								delobj = Integer.parseInt((String) metaData.get("deleted-objects"));
 							
 							delobj = delobj + odel.get(k);
-							SDFSLogger.getLog().info("remove requests for " +
+							SDFSLogger.getLog().debug("remove requests for " +
 									 k + "=" + odel.get(k) + " delob="+delobj + " bsz=" + metaData.get("bsize"));
 							if (objs <= delobj) {
 
@@ -442,7 +449,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								}
 								HashBlobArchive.removeCache(k.longValue());
 							} else {
-								 SDFSLogger.getLog().info("updating " +
+								 SDFSLogger.getLog().debug("updating " +
 								 k + " sz=" +objs);
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);

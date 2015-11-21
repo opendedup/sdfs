@@ -157,6 +157,27 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
+	public void endErrorEvent() {
+		for (int i = 0; i < this.children.size(); i++) {
+			if (this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent();
+		}
+		this.endTime = System.currentTimeMillis();
+		this.level = SDFSEvent.ERROR;
+		this.curCt = this.maxCt;
+		SDFSEventLogger.log(this);
+	}
+	
+	public void endWarnEvent() {
+		for (int i = 0; i < this.children.size(); i++) {
+			if (this.children.get(i).endTime == -1)
+				this.children.get(i).endEvent();
+		}
+		this.endTime = System.currentTimeMillis();
+		this.level = SDFSEvent.WARN;
+		this.curCt = this.maxCt;
+		SDFSEventLogger.log(this);
+	}
 
 	public static SDFSEvent archiveImportEvent(String shortMsg, SDFSEvent evt) {
 		SDFSEvent event = new SDFSEvent(AIMPORT, getTarget(), shortMsg, RUNNING);
@@ -187,7 +208,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public static void discoEvent() {
 		SDFSEvent event = new SDFSEvent(DISCO, getTarget(), "Storage Pool Disconnected", RUNNING);
 		event.maxCt =1;
-		event.endEvent();
+		event.endWarnEvent();
 	}
 	
 	public static void recoEvent() {
@@ -222,14 +243,14 @@ public class SDFSEvent implements java.io.Serializable {
 		SDFSEvent event = new SDFSEvent(RDER, getTarget(),
 				"Read Error Detected", ERROR);
 		event.maxCt = 1;
-		event.endEvent();
+		event.endErrorEvent();
 	}
 
 	public static void wrErrEvent() {
 		SDFSEvent event = new SDFSEvent(WER, getTarget(),
 				"Write Error Detected", ERROR);
 		event.maxCt = 1;
-		event.endEvent();
+		event.endErrorEvent();
 	}
 
 	public static SDFSEvent testEvent(String shortMsg) {
