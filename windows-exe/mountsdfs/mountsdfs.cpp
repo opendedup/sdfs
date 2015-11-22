@@ -37,6 +37,7 @@ bool dataWritten = false;
 using namespace std;
 using namespace tinyxml2;
 bool mounted = false;
+bool cpt = false;
 int FileExists(TCHAR * file)
 {
 	WIN32_FIND_DATA FindFileData;
@@ -119,7 +120,7 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcscpy_s(path, val);
 	//_tprintf("path=%s\n", path);
 	bool mt = false;
-	bool cpt = false;
+	
 	TCHAR configFile[512];
 	__int64 mem = 256;
 	for (int i = 1; i < argc; i++) {
@@ -210,7 +211,7 @@ int _tmain(int argc, TCHAR *argv[])
 		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
 			i++;
 		}
-		else if (!_tcsncmp(argv[i], _T("-cp"), 4)) {
+		else if (!_tcsncmp(argv[i], _T("-cp"), 3)) {
 			cpt = true;
 		}
 		else {
@@ -245,9 +246,6 @@ int _tmain(int argc, TCHAR *argv[])
 				break;
 			}
 		}
-		CloseHandle(siStartInfo.hStdError);
-		CloseHandle(siStartInfo.hStdOutput);
-		CloseHandle(siStartInfo.hStdInput);
 		CloseHandle(piProcInfo.hProcess);
 		
 	}
@@ -279,13 +277,16 @@ void CreateChildProcess(TCHAR *p)
 	siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
 	// Create the child process. 
+	DWORD dp = DETACHED_PROCESS;
+	if (cpt)
+		dp = 0;
 
 	bSuccess = CreateProcess(NULL,
 		p,     // command line 
 		NULL,          // process security attributes 
 		NULL,          // primary thread security attributes 
 		TRUE,          // handles are inherited 
-		DETACHED_PROCESS,             // creation flags 
+		dp,             // creation flags 
 		NULL,          // use parent's environment 
 		NULL,          // use parent's current directory 
 		&siStartInfo,  // STARTUPINFO pointer 
@@ -321,7 +322,7 @@ void ReadFromPipe(void *param)
 	{
 		rSuccess = ReadFile(g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL);
 		std::string contents = string(chBuf);
-		if (strcmp(chBuf, "mounted") == 1) {
+		if (!cpt && strcmp(chBuf, "mounted") == 1) {
 			bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
 				dwRead, &dwWritten, NULL);
 			processCompleted = true;
@@ -333,12 +334,14 @@ void ReadFromPipe(void *param)
 				dwRead, &dwWritten, NULL);
 		}
 		if (!bSuccess) {
+			processCompleted = true;
 			break;
 		}
 		else {
 			dataWritten = true;
 		}
 		if (!rSuccess || dwRead == 0) {
+			processCompleted = true;
 			break;
 		}
 	}
