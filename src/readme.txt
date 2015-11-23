@@ -6,13 +6,10 @@ Requirements
 
 System Requirements
 
-	1. x64 Linux Distribution. The application was tested and developed on ubuntu 13.1.0 and CentOS 6.5
-	2. Modified Fuse 2.8+ .
-		* Debian Packages for this are available at https://opendedup.googlecode.com/files/fuse_2.9.2-opendedup_amd64.tar.gz
-		* RPM Package is available at https://opendedup.googlecode.com/files/sdfs_fuse_rpm.tar.gz
-		* Source Patch is available at https://opendedup.googlecode.com/files/opendedup-thread-spawn-prevent
-	3. At least 4 GB of RAM
-	4. Java 7 - available at https://jdk7.dev.java.net/
+	1. x64 Linux Distribution. The application was tested and developed on ubuntu 14.0.4 and CentOS 7
+	2. At least 4 GB of RAM
+	3. Java 8 - available at https://jdk8.dev.java.net/
+	4. JSVC (http://commons.apache.org/proper/commons-daemon/jsvc.html)
 	
 Optional Packages
 
@@ -21,55 +18,35 @@ Optional Packages
 
 Installation
 
-Ubuntu/Debian (Ubuntu 13.10)
+Ubuntu/Debian (Ubuntu 14.04+)
 
-	Step 1: Download and Install the modified fuse libraries
+	Step 1: Download the latest sdfs version
+		wget http://opendedup.org/downloads/sdfs-latest.deb
 
-		wget https://opendedup.googlecode.com/files/fuse_2.9.2-opendedup_amd64.tar.gz
-		tar -xvf fuse_2.9.2-opendedup_amd64.tar.gz
-		cd fuse_2.9.2-opendedup_amd64/
-		sudo dpkg -i fuse_2.9.2-opendedup_amd64.deb libfuse2_2.9.2-opendedup_amd64.deb
-	
-	Step 2: Install Java JRE
-
-		sudo apt-get install openjdk-7-jre-headless
-
-	Step 3: Install SDFS File System
-
-		wget https://opendedup.googlecode.com/files/sdfs-2.0-beta1_amd64.deb
-		sudo dpkg -i sdfs-2.0-beta1_amd64.deb
-	Step 4: Change the maximum number of open files allowed
-
+	Step 2: Install sdfs and dependencies
+		sudo apt-get install fuse libfuse2 ssh openssh-server jsvc libxml2-utils
+		sudo dpkg -i sdfs-latest.deb
+		 
+	Step 3: Change the maximum number of open files allowed
 		echo "* hardnofile 65535" >> /etc/security/limits.conf
 		echo "* soft nofile 65535" >> /etc/security/limits.conf
 		exit
 	Step 5: Log Out and Proceed to Initialization Instructions
 
-CentOS/RedHat (Centos 6.5)
+CentOS/RedHat (Centos 7.0+)
 
-	Step 1: Log in as root
+	Step 1: Download the latest sdfs version
+		wget http://opendedup.org/downloads/sdfs-latest.rpm
 
-	Step 2: Download and Install the modified fuse libraries as root
-
-		wget https://opendedup.googlecode.com/files/sdfs_fuse_rpm.tar.gz
-		tar -xzf sdfs_fuse_rpm.tar.gz
-		cd x86_64/
-		rpm -Uv --force fuse-2.8.3-4.el6.x86_64.rpm fuse-libs-2.8.3-4.el6.x86_64.rpm
-
-	Step 3: Install Java JRE
-
-  		yum install java
-
-	Step 4: Install the SDFS File System
-
-		wget https://opendedup.googlecode.com/files/SDFS-2.0.0-1.x86_64.rpm
-		rpm -iv SDFS-2.0.0-1.x86_64.rpm
-
-	Step 5: Change the maximum number of open files allowed
-
+	Step 2: Install sdfs and dependencies
+		yum install jsvc libxml2 java-1.8.0-openjdk
+		rpm -iv --force sdfs-latest.rpm
+		 
+	Step 3: Change the maximum number of open files allowed
 		echo "* hardnofile 65535" >> /etc/security/limits.conf
 		echo "* soft nofile 65535" >> /etc/security/limits.conf
 		exit
+	Step 5: Log Out and Proceed to Initialization Instructions
 
 	Step 6: Disable the IPTables firewall
 
@@ -81,19 +58,35 @@ CentOS/RedHat (Centos 6.5)
 
 Initialization Instructions for Standalone Volumes
 
+
 	Step 1: Log into the linux system as root or use sudo
 
-	Step 2: Create the SDFS Volume. This will create a volume with 256 GB of capacity using a 4K block size.
-
+	Step 2: Create the SDFS Volume. This will create a volume with 256 GB of capacity using a Variable block size.
+		**Local Storage**
 		sudo mkfs.sdfs --volume-name=pool0 --volume-capacity=256GB
 
+		**AWS Storage**
+		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --aws-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
+		**Azure Storage**
+		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --azure-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
+		**Google Storage**
+		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --google-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
+		
 	Step 3: Create a mount point on the filesystem for the volume
 
 		sudo mkdir /media/pool0
 
 	Step 4: Mount the Volume
 
-		sudo mount.sdfs pool0 /media/pool0/ &
+		sudo mount -t sdfs pool0 /media/pool0/
+
+	Set 5: Add the filesystem to fstab
+		pool0           /media/pool0    sdfs    defaults                0       0
+		
+
 
 Initialization Instructions for A Multi-Node Configuration
 
