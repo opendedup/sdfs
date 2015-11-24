@@ -139,7 +139,7 @@ public class WinSDFS implements DokanOperations {
 
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
-		System.out.println("mounted");
+		System.out.println("volumemounted");
 		int result = Dokan.mount(dokanOptions, this);
 
 		// log("[MemoryFS] result = " + result);

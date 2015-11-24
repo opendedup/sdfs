@@ -102,7 +102,7 @@ int _tmain(int argc, TCHAR *argv[])
 	DWORD exit_code;
 	if (NULL != piProcInfo.hProcess)
 	{
-		WaitForSingleObject(piProcInfo.hProcess, 5000); // Change to 'INFINITE' wait if req'd
+		WaitForSingleObject(piProcInfo.hProcess, INFINITE); // Change to 'INFINITE' wait if req'd
 		if (FALSE == GetExitCodeProcess(piProcInfo.hProcess, &exit_code))
 		{
 			/*
