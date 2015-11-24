@@ -63,7 +63,6 @@ public class MgmtWebServer implements Container {
 					.newInstance();
 			DocumentBuilder builder;
 			builder = factory.newDocumentBuilder();
-
 			DOMImplementation impl = builder.getDOMImplementation();
 			// Document.
 			Document doc = impl.createDocument(null, "result", null);
@@ -81,7 +80,7 @@ public class MgmtWebServer implements Container {
 						auth = true;
 				} else {
 					SDFSLogger.getLog().warn(
-							"could not authenticate user  to cli");
+							"could not authenticate user to cli");
 				}
 			} else {
 				auth = true;
@@ -685,8 +684,7 @@ public class MgmtWebServer implements Container {
 						result.setAttribute("msg", msg);
 					} else if (cmd.equalsIgnoreCase("cleanstore")) {
 						try {
-							Element msg = new CleanStoreCmd().getResult(
-									cmdOptions, null);
+							Element msg = new CleanStoreCmd().getResult();
 							result.setAttribute("status", "success");
 							doc.adoptNode(msg);
 							result.appendChild(msg);

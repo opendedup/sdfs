@@ -7,10 +7,8 @@ import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.w3c.dom.Element;
 
 public class CleanStoreCmd implements Runnable {
-	int minutes = 0;
 
-	public Element getResult(String cmd, String file) throws IOException {
-		minutes = Integer.parseInt(cmd);
+	public Element getResult() throws IOException {
 		Thread th = new Thread(this);
 		th.start();
 		try {

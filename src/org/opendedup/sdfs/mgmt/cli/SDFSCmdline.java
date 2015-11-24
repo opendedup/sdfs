@@ -189,8 +189,7 @@ public class SDFSCmdline {
 			System.exit(0);
 		}
 		if (cmd.hasOption("cleanstore")) {
-			ProcessCleanStore.runCmd(Integer.parseInt(cmd
-					.getOptionValue("cleanstore")));
+			ProcessCleanStore.runCmd();
 			System.exit(0);
 		}
 		if (cmd.hasOption("fdisk")) {
@@ -494,7 +493,7 @@ public class SDFSCmdline {
 				.withDescription(
 						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
 								+ "if the dedup storage engine is local and not in network mode")
-				.hasArg().withArgName("minutes").create());
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-add")
 				.withDescription(

@@ -9,17 +9,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessCleanStore {
-	public static void runCmd(int minutes) {
+	public static void runCmd() {
 		try {
 			String file = URLEncoder.encode("null", "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			System.out
-					.printf("Cleaning store of data older that [%d] minutes\n",
-							minutes);
+					.printf("Cleaning store\n");
 			System.out.flush();
 			formatter.format("file=%s&cmd=%s&options=%s", file, "cleanstore",
-					Integer.toString(minutes));
+					"1");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
@@ -34,7 +33,7 @@ public class ProcessCleanStore {
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
 				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
-						"event", Integer.toString(minutes),
+						"event", "1",
 						URLEncoder.encode(uuid, "UTF-8"));
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
