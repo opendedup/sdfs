@@ -198,7 +198,7 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcsncat_s(cmd, _T("\\bin\\jre\\bin\\java.exe "), 2048);
 	_tcsncat_s(cmd, _T("-Djava.library.path=\""), 2048);
 	_tcsncat_s(cmd, path, 2048);
-	_tcsncat_s(cmd, _T("bin/\"  -Xmx"), 2048);
+	_tcsncat_s(cmd, _T("\\bin/\"  -Xmx"), 2048);
 	_tcsncat_s(cmd, buf, 2048);
 	_tcsncat_s(cmd, _T(" -XX:+UseG1GC -Djava.awt.headless=true -server "), 2048);
 	_tcsncat_s(cmd, _T("-cp \""), 2048);
@@ -222,7 +222,8 @@ int _tmain(int argc, TCHAR *argv[])
 	CreateChildProcess(cmd);
 	DWORD exit_code = 0;
 	_beginthread(ReadFromPipe, 0, NULL);
-	
+	if (cpt)
+	_tprintf("cp=%s", cmd);
 	if (NULL != piProcInfo.hProcess)
 	{
 		while (!processCompleted) {

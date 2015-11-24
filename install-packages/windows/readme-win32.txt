@@ -4,16 +4,16 @@ What is this?
 
 System Requirements
   
-  * Windows (7,XP,Vista,2003,2008) Distribution. The application was tested and developed on Windows 7 (64bit)
-  * Dokan 5.3+.  Dokan can be downloaded from http://dokan-dev.net/en/
+  * Windows x64 (7,10,2008,2012) Distribution. The application was tested and developed on Windows 10 (64bit)
+  * Dokany 8.0+ (Included in package) 
   * 2 GB of Available RAM
-  * Java 7 (32 bit) - included in package.
+  * Java 8 (64 bit) - included in package.
 
 
 Getting Started
 
-  Step 1: Install the Dokan library and driver. It can be downloaded from:
-  	http://dokan-dev.net/wp-content/uploads/dokaninstall_053.exe
+  Step 1: Install the . It can be downloaded from:
+  	http://www.opendedup.org/downloads/sdfs-latest-setup.exe
   
   Step 1: Create an sdfs file system.
 	To create and SDFS file System you must run the mksdfs command from within the SDFS binary directory. Make sure you have "Full Control
@@ -32,8 +32,29 @@ Getting Started
 	      e.g.
 		mountsdfs -v sdfs_vol1 -m S
 
-Known Limitation(s)
+  Step 3: Unmount volume
+	To unmount the volume run sdfscli --shutdown
 
-	Testing has been limited thus far. Please test and report bugs	
+  Step 3: Mount sdfs as a service
+	To have sdfs run on boot you will need to use the sc tool to add each volume you want to mount as a service. The service will not show
+	that it is running because mountsdfs is not yet built as a service, but the volume will be mounted. Below is how you add an sdfs volume as a
+	service.
+		sc create sdfs<drive-letter> binPath="\"C:\Program Files\sdfs\mountsdfs.exe\" -v sdfs -m <drive-letter> -cp" DisplayName="SDFS <drive-letter> Drive" start=auto
+	e.g.
+		sc create sdfss binPath="\"C:\Program Files\sdfs\mountsdfs.exe\" -v sdfs_vol1 -m s -cp" DisplayName="SDFS s Drive" start=auto
+
+Using Cloud storage with SDFS
+
+SDFS can use cloud object storage to store data. To enable this make the volume with the following commands:
+
+	**AWS Storage**
+	mksdfs  --volume-name=pool0 --volume-capacity=1TB --aws-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
+	**Azure Storage**
+	mksdfs  --volume-name=pool0 --volume-capacity=1TB --azure-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
+	**Google Storage**
+	mksdfs  --volume-name=pool0 --volume-capacity=1TB --google-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		
 
 For more information take a look at the opendedup website at www.opendedup.org

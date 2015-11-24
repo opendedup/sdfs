@@ -18,254 +18,260 @@ public class SDFSCmdline {
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
 		try {
-			
-		
-		if (cmd.hasOption("help") || args.length == 0) {
-			printHelp(options);
-			System.exit(1);
-		}
-		boolean quiet = false;
-		if (cmd.hasOption("debug"))
-			SDFSLogger.setLevel(0);
-		if (cmd.hasOption("nossl"))
-			MgmtServerConnection.useSSL = false;
-		if (cmd.hasOption("server"))
-			MgmtServerConnection.server = cmd.getOptionValue("server");
-		if (cmd.hasOption("password"))
-			MgmtServerConnection.password = cmd.getOptionValue("password");
-		if (cmd.hasOption("port"))
-			MgmtServerConnection.port = Integer.parseInt(cmd
-					.getOptionValue("port"));
 
-		if (cmd.hasOption("file-info")) {
-			if (cmd.hasOption("file-path")) {
-				ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
-				System.exit(0);
-			} else {
-				SDFSLogger
-						.getBasicLog()
-						.warn("file info request failed. --file-path option is required");
+			if (cmd.hasOption("help") || args.length == 0) {
+				printHelp(options);
 				System.exit(1);
 			}
-			
-		}
-		if(cmd.hasOption("restore-from-archive")) {
-			if (cmd.hasOption("file-path")) {
-				ProcessRestoreArchiveCmd.runCmd(cmd.getOptionValue("file-path"));
+			boolean quiet = false;
+			if (cmd.hasOption("debug"))
+				SDFSLogger.setLevel(0);
+			if (cmd.hasOption("nossl"))
+				MgmtServerConnection.useSSL = false;
+			if (cmd.hasOption("server"))
+				MgmtServerConnection.server = cmd.getOptionValue("server");
+			if (cmd.hasOption("password"))
+				MgmtServerConnection.password = cmd.getOptionValue("password");
+			if (cmd.hasOption("port"))
+				MgmtServerConnection.port = Integer.parseInt(cmd
+						.getOptionValue("port"));
+
+			if (cmd.hasOption("file-info")) {
+				if (cmd.hasOption("file-path")) {
+					ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
+					System.exit(0);
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("file info request failed. --file-path option is required");
+					System.exit(1);
+				}
+
+			}
+			if (cmd.hasOption("restore-from-archive")) {
+				if (cmd.hasOption("file-path")) {
+					ProcessRestoreArchiveCmd.runCmd(cmd
+							.getOptionValue("file-path"));
+					System.exit(0);
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("restore from archive request failed. --file-path option is required");
+					System.exit(1);
+				}
+			}
+			if (cmd.hasOption("dse-info")) {
+				ProcessDSEInfo.runCmd();
 				System.exit(0);
-			} else {
-				SDFSLogger
-						.getBasicLog()
-						.warn("restore from archive request failed. --file-path option is required");
-				System.exit(1);
 			}
-		}
-		if (cmd.hasOption("dse-info")) {
-			ProcessDSEInfo.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-dse-info")) {
-			ProcessClusterDSEInfo.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-volumes")) {
-			ProcessClusterVolumesList.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-volume-remove")) {
-			ProcessClusterVolumeRemove.runCmd(cmd
-					.getOptionValue("cluster-volume-remove"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("set-cache-size")) {
-			ProcessSetCache.runCmd(cmd
-					.getOptionValue("set-cache-size"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("set-read-speed")) {
-			ProcessSetReadSpeed.runCmd(cmd
-					.getOptionValue("set-read-speed"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("set-write-speed")) {
-			ProcessSetWriteSpeed.runCmd(cmd
-					.getOptionValue("set-write-speed"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-volume-add")) {
-			ProcessClusterVolumeAdd.runCmd(cmd
-					.getOptionValue("cluster-volume-add"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-make-gc-master")) {
-			ProcessClusterPromoteToGC.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cloud-sync-fs")) {
-			ProcessSyncFSCmd.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-get-gc-master")) {
-			ProcessGetGCMaster.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("set-gc-schedule")) {
-			ProcessSetGCSchedule.runCmd(cmd.getOptionValue("set-gc-schedule"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("get-gc-schedule")) {
-			ProcessGetGCSchedule.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("volume-info")) {
-			ProcessVolumeInfo.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("cluster-redundancy-check")) {
-			ProcessClusterRedundancyCheck.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("debug-info")) {
-			ProcessDebugInfo.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("perfmon-on")) {
-			ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
-		}
-		if (cmd.hasOption("import-archive")) {
-			String server = cmd.getOptionValue("replication-master");
-			String password = cmd.getOptionValue("replication-master-password");
-			int port = 6442;
-			int maxSz = -1;
-			if (cmd.hasOption("replication-master-port"))
-				port = Integer.parseInt(cmd
-						.getOptionValue("replication-master-port"));
-			if (cmd.hasOption("replication-batch-size"))
-				maxSz = Integer.parseInt(cmd
-						.getOptionValue("replication-batch-size"));
-			ProcessImportArchiveCmd.runCmd(
-					cmd.getOptionValue("import-archive"),
-					cmd.getOptionValue("file-path"), server, password, port,
-					quiet, maxSz);
-		}
-		if (cmd.hasOption("archive-out")) {
-			ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"), ".");
-		}
+			if (cmd.hasOption("cluster-dse-info")) {
+				ProcessClusterDSEInfo.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-volumes")) {
+				ProcessClusterVolumesList.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-volume-remove")) {
+				ProcessClusterVolumeRemove.runCmd(cmd
+						.getOptionValue("cluster-volume-remove"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("set-cache-size")) {
+				ProcessSetCache.runCmd(cmd.getOptionValue("set-cache-size"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("set-read-speed")) {
+				ProcessSetReadSpeed
+						.runCmd(cmd.getOptionValue("set-read-speed"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("set-write-speed")) {
+				ProcessSetWriteSpeed.runCmd(cmd
+						.getOptionValue("set-write-speed"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-volume-add")) {
+				ProcessClusterVolumeAdd.runCmd(cmd
+						.getOptionValue("cluster-volume-add"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-make-gc-master")) {
+				ProcessClusterPromoteToGC.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("cloud-sync-fs")) {
+				ProcessSyncFSCmd.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-get-gc-master")) {
+				ProcessGetGCMaster.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("set-gc-schedule")) {
+				ProcessSetGCSchedule.runCmd(cmd
+						.getOptionValue("set-gc-schedule"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("get-gc-schedule")) {
+				ProcessGetGCSchedule.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("volume-info")) {
+				ProcessVolumeInfo.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("cluster-redundancy-check")) {
+				ProcessClusterRedundancyCheck.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("debug-info")) {
+				ProcessDebugInfo.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("perfmon-on")) {
+				ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
+			}
+			if (cmd.hasOption("import-archive")) {
+				String server = cmd.getOptionValue("replication-master");
+				String password = cmd
+						.getOptionValue("replication-master-password");
+				int port = 6442;
+				int maxSz = -1;
+				if (cmd.hasOption("replication-master-port"))
+					port = Integer.parseInt(cmd
+							.getOptionValue("replication-master-port"));
+				if (cmd.hasOption("replication-batch-size"))
+					maxSz = Integer.parseInt(cmd
+							.getOptionValue("replication-batch-size"));
+				ProcessImportArchiveCmd.runCmd(
+						cmd.getOptionValue("import-archive"),
+						cmd.getOptionValue("file-path"), server, password,
+						port, quiet, maxSz);
+			}
+			if (cmd.hasOption("archive-out")) {
+				ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"),
+						".");
+			}
 
-		if (cmd.hasOption("snapshot")) {
-			if (cmd.hasOption("file-path") && cmd.hasOption("snapshot-path")) {
-				ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),
-						cmd.getOptionValue("snapshot-path"));
-			} else {
-				SDFSLogger
-						.getBasicLog()
-						.warn("snapshot request failed. --file-path and --snapshot-path options are required");
+			if (cmd.hasOption("snapshot")) {
+				if (cmd.hasOption("file-path")
+						&& cmd.hasOption("snapshot-path")) {
+					ProcessSnapshotCmd.runCmd(cmd.getOptionValue("file-path"),
+							cmd.getOptionValue("snapshot-path"));
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("snapshot request failed. --file-path and --snapshot-path options are required");
+				}
+				System.exit(0);
 			}
-			System.exit(0);
-		}
-		if (cmd.hasOption("flush-file-buffers")) {
-			if (cmd.hasOption("file-path")) {
-				ProcessFlushBuffersCmd.runCmd("file",
-						cmd.getOptionValue("file-path"));
-			} else {
-				SDFSLogger.getBasicLog().warn(
-						"flush file request failed. --file-path");
+			if (cmd.hasOption("flush-file-buffers")) {
+				if (cmd.hasOption("file-path")) {
+					ProcessFlushBuffersCmd.runCmd("file",
+							cmd.getOptionValue("file-path"));
+				} else {
+					SDFSLogger.getBasicLog().warn(
+							"flush file request failed. --file-path");
+				}
+				System.exit(0);
 			}
-			System.exit(0);
-		}
-		if (cmd.hasOption("flush-all-buffers")) {
-			ProcessFlushBuffersCmd.runCmd("all", "/");
-		}
-		if (cmd.hasOption("dedup-file")) {
-			if (cmd.hasOption("file-path")
-					&& cmd.getOptionValue("dedup-file") != null) {
-				ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"),
-						cmd.getOptionValue("dedup-file"));
-			} else {
-				SDFSLogger
-						.getBasicLog()
-						.warn("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
+			if (cmd.hasOption("flush-all-buffers")) {
+				ProcessFlushBuffersCmd.runCmd("all", "/");
 			}
-			System.exit(0);
-		}
-		if (cmd.hasOption("cleanstore")) {
-			ProcessCleanStore.runCmd(Integer.parseInt(cmd
-					.getOptionValue("cleanstore")));
-			System.exit(0);
-		}
-		if (cmd.hasOption("fdisk")) {
-			ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("change-password")) {
-			ProcessSetPasswordCmd.runCmd(cmd.getOptionValue("change-password"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("expandvolume")) {
-			ProcessXpandVolumeCmd.runCmd(cmd.getOptionValue("expandvolume"));
-			System.exit(0);
-		}
-		if (cmd.hasOption("partition-add")) {
-			String[] vals = cmd.getOptionValues("partition-add");
-			if (vals.length != 3) {
-				System.err
-						.println("device-name size start-on-vol-startup are required options");
-				System.exit(-1);
+			if (cmd.hasOption("dedup-file")) {
+				if (cmd.hasOption("file-path")
+						&& cmd.getOptionValue("dedup-file") != null) {
+					ProcessDedupAllCmd.runCmd(cmd.getOptionValue("file-path"),
+							cmd.getOptionValue("dedup-file"));
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("dedup file request failed. --dedup-all=(true|false) --file-path=(path to file)");
+				}
+				System.exit(0);
 			}
-			ProcessBlockDeviceAdd.runCmd(vals[0], vals[1],
-					Boolean.parseBoolean(vals[2]));
-			System.exit(0);
-		}
+			if (cmd.hasOption("cleanstore")) {
+				ProcessCleanStore.runCmd(Integer.parseInt(cmd
+						.getOptionValue("cleanstore")));
+				System.exit(0);
+			}
+			if (cmd.hasOption("fdisk")) {
+				ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("change-password")) {
+				ProcessSetPasswordCmd.runCmd(cmd
+						.getOptionValue("change-password"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("expandvolume")) {
+				ProcessXpandVolumeCmd
+						.runCmd(cmd.getOptionValue("expandvolume"));
+				System.exit(0);
+			}
+			if (cmd.hasOption("partition-add")) {
+				String[] vals = cmd.getOptionValues("partition-add");
+				if (vals.length != 3) {
+					System.err
+							.println("device-name size start-on-vol-startup are required options");
+					System.exit(-1);
+				}
+				ProcessBlockDeviceAdd.runCmd(vals[0], vals[1],
+						Boolean.parseBoolean(vals[2]));
+				System.exit(0);
+			}
 
-		if (cmd.hasOption("partition-update")) {
-			String[] vals = cmd.getOptionValues("partition-update");
-			if (vals.length != 3) {
-				System.err
-						.println("device-name <size|autostart> <value> are required options");
-				System.exit(-1);
+			if (cmd.hasOption("partition-update")) {
+				String[] vals = cmd.getOptionValues("partition-update");
+				if (vals.length != 3) {
+					System.err
+							.println("device-name <size|autostart> <value> are required options");
+					System.exit(-1);
+				}
+				ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
+				System.exit(0);
 			}
-			ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
-			System.exit(0);
-		}
-		
-		if (cmd.hasOption("copy-extents")) {
-			String[] vals = cmd.getOptionValues("copy-extents");
-			if (vals.length != 3) {
-				System.err
-						.println("copy-extents <source-start> <len> <destination-start>");
-				System.exit(-1);
-			}
-			String sfile = cmd.getOptionValue("file-path");
-			String dfile = cmd.getOptionValue("snapshot-path");
-			ProcessCopyExtents.runCmd(sfile,dfile,Long.parseLong(vals[0]), Long.parseLong(vals[1]), Long.parseLong(vals[2]));
-			System.exit(0);
-		}
-		
 
-		if (cmd.hasOption("partition-rm")) {
-			String val = cmd.getOptionValue("partition-rm");
-			ProcessBlockDeviceRm.runCmd(val);
-			System.exit(0);
-		}
-		if (cmd.hasOption("partition-start")) {
-			String val = cmd.getOptionValue("partition-start");
-			ProcessBlockDeviceStart.runCmd(val);
-			System.exit(0);
-		}
-		if (cmd.hasOption("partition-stop")) {
-			String val = cmd.getOptionValue("partition-stop");
-			ProcessBlockDeviceStop.runCmd(val);
-			System.exit(0);
-		}
-		if (cmd.hasOption("partition-list")) {
-			ProcessBlockDeviceList.runCmd();
-			System.exit(0);
-		}
-		if (cmd.hasOption("shutdown")) {
-			ProcessShutdown.runCmd();
-			System.exit(0);
-		}
-		}catch(ConnectException e) {
+			if (cmd.hasOption("copy-extents")) {
+				String[] vals = cmd.getOptionValues("copy-extents");
+				if (vals.length != 3) {
+					System.err
+							.println("copy-extents <source-start> <len> <destination-start>");
+					System.exit(-1);
+				}
+				String sfile = cmd.getOptionValue("file-path");
+				String dfile = cmd.getOptionValue("snapshot-path");
+				ProcessCopyExtents.runCmd(sfile, dfile,
+						Long.parseLong(vals[0]), Long.parseLong(vals[1]),
+						Long.parseLong(vals[2]));
+				System.exit(0);
+			}
+
+			if (cmd.hasOption("partition-rm")) {
+				String val = cmd.getOptionValue("partition-rm");
+				ProcessBlockDeviceRm.runCmd(val);
+				System.exit(0);
+			}
+			if (cmd.hasOption("partition-start")) {
+				String val = cmd.getOptionValue("partition-start");
+				ProcessBlockDeviceStart.runCmd(val);
+				System.exit(0);
+			}
+			if (cmd.hasOption("partition-stop")) {
+				String val = cmd.getOptionValue("partition-stop");
+				ProcessBlockDeviceStop.runCmd(val);
+				System.exit(0);
+			}
+			if (cmd.hasOption("partition-list")) {
+				ProcessBlockDeviceList.runCmd();
+				System.exit(0);
+			}
+			if (cmd.hasOption("shutdown")) {
+				ProcessShutdown.runCmd();
+				System.exit(0);
+			}
+		} catch (ConnectException e) {
 			System.err.println("Volume not available");
 			System.exit(1);
 		}
@@ -290,8 +296,10 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder.withLongOpt("change-password")
 				.withDescription("Change the administrative password.")
 				.hasArg(true).create());
-		options.addOption(OptionBuilder.withLongOpt("cloud-sync-fs")
-				.withDescription("Verify Files are sync'd with cloud storage backend.")
+		options.addOption(OptionBuilder
+				.withLongOpt("cloud-sync-fs")
+				.withDescription(
+						"Verify Files are sync'd with cloud storage backend.")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("password")
@@ -347,11 +355,8 @@ public class SDFSCmdline {
 						"Returns A List of SDFS Volumes in the cluster. "
 								+ "\n e.g. --cluster-volumes").hasArg(false)
 				.create());
-		options.addOption(OptionBuilder
-				.withLongOpt("fdisk")
-				.withDescription(
-						"Runs fdisk on volume.")
-				.hasArg(true).create());
+		options.addOption(OptionBuilder.withLongOpt("fdisk")
+				.withDescription("Runs fdisk on volume.").hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-volume-remove")
 				.withDescription(
@@ -379,8 +384,8 @@ public class SDFSCmdline {
 				.withDescription("Shuts down the volume").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("copy-extents")
-				.withDescription("Copies Extent from one file to another").hasArgs(3)
-				.create());
+				.withDescription("Copies Extent from one file to another")
+				.hasArgs(3).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("set-gc-schedule")
 				.withDescription(
