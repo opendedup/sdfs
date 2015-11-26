@@ -48,7 +48,7 @@ public class VolumeConfigWriter {
 	boolean safe_sync = true;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
-	short chunk_size = 4;
+	short chunk_size = 256;
 	int max_file_write_buffers = 24;
 	int max_open_files = 1024;
 	int meta_file_cache = 1024;
