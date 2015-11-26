@@ -206,7 +206,8 @@ public class MountSDFS implements Daemon, Runnable{
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
-			fal.add(cmd.getOptionValue("o"));
+			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
+					+ ":" + Main.sdfsCliPort +","+cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
 			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
