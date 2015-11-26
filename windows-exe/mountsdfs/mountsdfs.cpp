@@ -198,7 +198,7 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcsncat_s(cmd, _T("\\bin\\jre\\bin\\java.exe "), 2048);
 	_tcsncat_s(cmd, _T("-Djava.library.path=\""), 2048);
 	_tcsncat_s(cmd, path, 2048);
-	_tcsncat_s(cmd, _T("bin/\"  -Xmx"), 2048);
+	_tcsncat_s(cmd, _T("\\bin/\"  -Xmx"), 2048);
 	_tcsncat_s(cmd, buf, 2048);
 	_tcsncat_s(cmd, _T(" -XX:+UseG1GC -Djava.awt.headless=true -server "), 2048);
 	_tcsncat_s(cmd, _T("-cp \""), 2048);
@@ -222,7 +222,8 @@ int _tmain(int argc, TCHAR *argv[])
 	CreateChildProcess(cmd);
 	DWORD exit_code = 0;
 	_beginthread(ReadFromPipe, 0, NULL);
-	
+	if (cpt)
+	_tprintf("cp=%s", cmd);
 	if (NULL != piProcInfo.hProcess)
 	{
 		while (!processCompleted) {
@@ -322,7 +323,7 @@ void ReadFromPipe(void *param)
 	{
 		rSuccess = ReadFile(g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL);
 		std::string contents = string(chBuf);
-		if (!cpt && strcmp(chBuf, "mounted") == 1) {
+		if (!cpt && strcmp(chBuf, "volumemounted") > 0) {
 			bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
 				dwRead, &dwWritten, NULL);
 			processCompleted = true;
@@ -353,29 +354,5 @@ void ErrorExit(PTSTR lpszFunction)
 // Format a readable error message, display a message box, 
 // and exit from the application.
 {
-	LPVOID lpMsgBuf;
-	LPVOID lpDisplayBuf;
-	DWORD dw = GetLastError();
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf,
-		0, NULL);
-
-	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40)*sizeof(TCHAR));
-	StringCchPrintf((LPTSTR)lpDisplayBuf,
-		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-		TEXT("%s failed with error %d: %s"),
-		lpszFunction, dw, lpMsgBuf);
-	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-
-	LocalFree(lpMsgBuf);
-	LocalFree(lpDisplayBuf);
-	ExitProcess(1);
+	
 }

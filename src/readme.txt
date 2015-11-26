@@ -66,13 +66,13 @@ Initialization Instructions for Standalone Volumes
 		sudo mkfs.sdfs --volume-name=pool0 --volume-capacity=256GB
 
 		**AWS Storage**
-		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --aws-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		sudo mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --aws-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
 		
 		**Azure Storage**
-		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --azure-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		sudo mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --azure-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
 		
 		**Google Storage**
-		mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --google-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
+		sudo mkfs.sdfs --volume-name=pool0 --volume-capacity=1TB --google-enabled true --cloud-access-key <access-key> --cloud-secret-key <secret-key> --cloud-bucket-name <unique bucket name>
 		
 		
 	Step 3: Create a mount point on the filesystem for the volume
