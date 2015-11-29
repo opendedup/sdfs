@@ -1,1 +1,1 @@
-java -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* org.opendedup.sdfs.mgmt.cli.SDFSCmdline "$@"
+/usr/share/sdfs/bin/jre/bin/java -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* org.opendedup.sdfs.mgmt.cli.SDFSCmdline "$@"

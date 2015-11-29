@@ -8,8 +8,6 @@ System Requirements
 
 	1. x64 Linux Distribution. The application was tested and developed on ubuntu 14.0.4 and CentOS 7
 	2. At least 4 GB of RAM
-	3. Java 8 - available at https://jdk8.dev.java.net/
-	4. JSVC (http://commons.apache.org/proper/commons-daemon/jsvc.html)
 	
 Optional Packages
 
@@ -31,7 +29,7 @@ Ubuntu/Debian (Ubuntu 14.04+)
 		echo "* hardnofile 65535" >> /etc/security/limits.conf
 		echo "* soft nofile 65535" >> /etc/security/limits.conf
 		exit
-	Step 5: Log Out and Proceed to Initialization Instructions
+	Step 4: Log Out and Proceed to Initialization Instructions
 
 CentOS/RedHat (Centos 7.0+)
 
@@ -46,15 +44,15 @@ CentOS/RedHat (Centos 7.0+)
 		echo "* hardnofile 65535" >> /etc/security/limits.conf
 		echo "* soft nofile 65535" >> /etc/security/limits.conf
 		exit
-	Step 5: Log Out and Proceed to Initialization Instructions
+	Step 4: Log Out and Proceed to Initialization Instructions
 
-	Step 6: Disable the IPTables firewall
+	Step 5: Disable the IPTables firewall
 
 		service iptables save
 		service iptables stop
 		chkconfig iptables off
 
-	Step 7: Log Out and Proceed to Initialization Instructions
+	Step 6: Log Out and Proceed to Initialization Instructions
 
 Initialization Instructions for Standalone Volumes
 

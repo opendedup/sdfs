@@ -15,7 +15,7 @@ Getting Started
   Step 1: Install the . It can be downloaded from:
   	http://www.opendedup.org/downloads/sdfs-latest-setup.exe
   
-  Step 1: Create an sdfs file system.
+  Step 2: Create an sdfs file system.
 	To create and SDFS file System you must run the mksdfs command from within the SDFS binary directory. Make sure you have "Full Control
 	permissions to the "c:\program files\sdfs" directory.
 	
@@ -25,17 +25,17 @@ Getting Started
 	      e.g.
 		mksdfs --volume-name=sdfs_vol1 --volume-capacity=100GB
 
-  Step 2: Mount the sdfs
+  Step 3: Mount the sdfs
 
 	To mount SDFS run the following command:
 		mountsdfs -v <volume-name> -m <mount-point>
 	      e.g.
 		mountsdfs -v sdfs_vol1 -m S
 
-  Step 3: Unmount volume
+  Step 4: Unmount volume
 	To unmount the volume run sdfscli --shutdown
 
-  Step 3: Mount sdfs as a service
+  Step 5: Mount sdfs as a service
 	To have sdfs run on boot you will need to use the sc tool to add each volume you want to mount as a service. The service will not show
 	that it is running because mountsdfs is not yet built as a service, but the volume will be mounted. Below is how you add an sdfs volume as a
 	service.
