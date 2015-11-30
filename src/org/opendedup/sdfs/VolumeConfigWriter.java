@@ -221,6 +221,9 @@ public class VolumeConfigWriter {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
 			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
+		} else if (cmd.hasOption("noext")) {
+			this.ext = false;
+			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
 		}
 		if(cmd.hasOption("aws-aim"))
 			this.awsAim=true;
@@ -1129,6 +1132,8 @@ public class VolumeConfigWriter {
 				.withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("ext").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("noext").create());
 		return options;
 	}
 

@@ -531,7 +531,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						this.glacierDays)
 						.withStorageClass(StorageClass.Glacier);
 				BucketLifecycleConfiguration.Rule ruleArchiveAndExpire = new BucketLifecycleConfiguration.Rule()
-						.withId("Automated Archive Rule for Block Data")
+						.withId("SDFS Automated Archive Rule for Block Data")
 						.withPrefix("blocks/")
 						.withTransition(transToArchive)
 						.withStatus(

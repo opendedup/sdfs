@@ -15,6 +15,7 @@ import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.model.StorageObject;
 import org.jets3t.service.security.AWSCredentials;
+import org.jets3t.service.security.AWSEC2IAMSessionCredentials;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -106,8 +107,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	static {
 		try {
+			if(Main.useAim) {
+				awsCredentials = AWSEC2IAMSessionCredentials.loadFromEC2InstanceData(true);
+			} else {
 			awsCredentials = new AWSCredentials(Main.cloudAccessKey,
 					Main.cloudSecretKey);
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
 			e.printStackTrace();
