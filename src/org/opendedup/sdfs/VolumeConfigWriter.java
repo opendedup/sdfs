@@ -193,6 +193,8 @@ public class VolumeConfigWriter {
 				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
+			} else {
+				this.chunk_size = 4;
 			}
 		}
 		if (cmd.hasOption("chunk-store-encrypt")) {
