@@ -464,26 +464,31 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				ObjectMetadata md = new ObjectMetadata();
 				md.addUserMetadata("currentsize", "0");
 				md.addUserMetadata("currentcompressedsize", "0");
-				md.setContentLength(0);
+				byte [] sz = "bucketinfodatanow".getBytes();
+				md.setContentLength(sz.length);
 				s3Service.putObject(this.name, "bucketinfo",
-						new ByteArrayInputStream(new byte[0]), md);
+						new ByteArrayInputStream(sz), md);
 			} else {
-
 				Map<String, String> obj = null;
 				ObjectMetadata omd = null;
 				try {
-					omd = s3Service.getObjectMetadata(this.name, "bucketinfo");
+					omd = s3Service.getObjectMetadata(this.name,
+							"bucketinfo");
 					obj = omd.getUserMetadata();
+					obj.get("currentsize");
 				} catch (Exception e) {
+					omd = null;
 					SDFSLogger.getLog().debug(
 							"unable to find bucketinfo object", e);
 				}
-				if (obj == null) {
+				if (omd == null) {
 					ObjectMetadata md = new ObjectMetadata();
 					md.addUserMetadata("currentsize", "0");
 					md.addUserMetadata("currentcompressedsize", "0");
+					byte [] sz = "bucketinfodatanow".getBytes();
+					md.setContentLength(sz.length);
 					s3Service.putObject(this.name, "bucketinfo",
-							new ByteArrayInputStream(new byte[0]), md);
+							new ByteArrayInputStream(sz), md);
 				} else {
 					if (obj.containsKey("currentsize")) {
 						long cl = Long.parseLong((String) obj
@@ -526,7 +531,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1,
 					Main.dseIOThreads + 1, 10, TimeUnit.SECONDS, worksQueue,
 					executionHandler);
-			if (this.glacierDays > 0) {
+			if (this.glacierDays > 0 && !this.genericS3) {
 				Transition transToArchive = new Transition().withDays(
 						this.glacierDays)
 						.withStorageClass(StorageClass.Glacier);
@@ -545,7 +550,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				// Save configuration.
 				s3Service.setBucketLifecycleConfiguration(this.name,
 						configuration);
-			} else {
+			} else if(!this.genericS3) {
 				s3Service.deleteBucketLifecycleConfiguration(this.name);
 			}
 			HashBlobArchive.init(this);
@@ -713,8 +718,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc) throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(arc.getID(),
+	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
+		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
 		try {
@@ -764,7 +769,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					new ByteArrayInputStream(hs), md);
 			s3Service.putObject(req);
 		} catch (Throwable e) {
-			SDFSLogger.getLog().fatal("unable to upload " + arc.getID(), e);
+			SDFSLogger.getLog().fatal("unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
 
@@ -1568,7 +1573,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public boolean checkAccess() {
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
-
 			try {
 				ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
 						"bucketinfo");

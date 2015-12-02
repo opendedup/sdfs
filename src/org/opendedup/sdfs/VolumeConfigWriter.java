@@ -109,6 +109,8 @@ public class VolumeConfigWriter {
 	private boolean clusterRackAware = false;
 	private boolean ext = true;
 	private boolean awsAim = false;
+	private boolean genericS3 = false;
+	private String cloudUrl;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -193,6 +195,8 @@ public class VolumeConfigWriter {
 				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
+			} else {
+				this.chunk_size = 4;
 			}
 		}
 		if (cmd.hasOption("chunk-store-encrypt")) {
@@ -402,6 +406,10 @@ public class VolumeConfigWriter {
 					.getOptionValue("listen-port"));
 		}
 
+		if(cmd.hasOption("cloud-url")) {
+			this.cloudUrl = cmd.getOptionValue("cloud-url");
+			this.genericS3 = true;
+		}
 		if (cmd.hasOption("cluster-dse-password"))
 			this.clusterDSEPassword = cmd
 					.getOptionValue("cluster-dse-password");
@@ -633,6 +641,13 @@ public class VolumeConfigWriter {
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if(this.genericS3) {
+					Element cp  = xmldoc.createElement("connection-props");
+					cp.setAttribute("s3-target", this.cloudUrl);
+					extended.setAttribute("disableDNSBucket", "true");
+					extended.appendChild(cp);
+				}
+					
 				if(this.bucketLocation!=null)
 				extended.setAttribute("default-bucket-location", this.bucketLocation);
 				cs.appendChild(extended);
@@ -809,6 +824,11 @@ public class VolumeConfigWriter {
 						"the folder path for all volume data and meta data.\n Defaults to: \n "
 								+ OSValidator.getProgramBasePath()
 								+ "<volume name>").hasArg().withArgName("PATH")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cloud-url")
+				.withDescription(
+						"The url of the blob server. e.g. http://s3server.localdomain/s3/").hasArg().withArgName("url")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("base-path")

@@ -49,7 +49,6 @@ public class S3ChunkStore implements AbstractChunkStore {
 			.maximumSize(cacheSize).concurrencyLevel(72)
 			.build(new CacheLoader<String, byte[]>() {
 				public byte[] load(String hashString) throws IOException {
-
 					RestS3Service s3Service = null;
 					try {
 						s3Service = pool.borrowObject();
