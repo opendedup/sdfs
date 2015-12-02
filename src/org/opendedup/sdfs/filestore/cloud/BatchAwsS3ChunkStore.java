@@ -718,8 +718,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc) throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(arc.getID(),
+	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
+		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
 		try {
@@ -769,7 +769,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					new ByteArrayInputStream(hs), md);
 			s3Service.putObject(req);
 		} catch (Throwable e) {
-			SDFSLogger.getLog().fatal("unable to upload " + arc.getID(), e);
+			SDFSLogger.getLog().fatal("unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
 

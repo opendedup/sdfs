@@ -11,13 +11,19 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonInitException;
 import org.opendedup.buse.driver.BUSEMkDev;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 
-public class SDFSVolMgr {
+public class SDFSVolMgr implements Daemon{
+	private static SDFSService sdfsService = null;
+	private static int port;
+	private static boolean useSSL;
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -46,12 +52,35 @@ public class SDFSVolMgr {
 	}
 
 	public static void main(String[] args) throws ParseException {
+		setup(args);
+		try {
+			sdfsService.start(useSSL,port);
+		} catch (Throwable e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			System.out.println("Exiting because " + e1.toString());
+			System.exit(-1);
+		}
+		try {
+			SDFSLogger.getLog().info("Volume name is " + Main.volume.getName());
+			VolumeShutdownHook.service = sdfsService;
+			VolumeShutdownHook shutdownHook = new VolumeShutdownHook();
+			Runtime.getRuntime().addShutdownHook(shutdownHook);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		
+	}
+	
+	
+	private static void setup(String [] args) throws ParseException {
 		checkJavaVersion();
-		int port = -1;
+		port = -1;
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
-		boolean useSSL = true;
+		useSSL = true;
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> volumes = new ArrayList<String>();
 		if (cmd.hasOption("h")) {
@@ -124,28 +153,11 @@ public class SDFSVolMgr {
 		Main.blockDev = true;
 		
 		BUSEMkDev.init();
-		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
+		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
-		try {
-			sdfsService.start(useSSL,port);
-		} catch (Throwable e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			System.out.println("Exiting because " + e1.toString());
-			System.exit(-1);
-		}
-		try {
-			SDFSLogger.getLog().info("Volume name is " + Main.volume.getName());
-			VolumeShutdownHook.service = sdfsService;
-			VolumeShutdownHook shutdownHook = new VolumeShutdownHook();
-			Runtime.getRuntime().addShutdownHook(shutdownHook);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-
 		
 	}
 
@@ -169,5 +181,32 @@ public class SDFSVolMgr {
 					.println("To get Java 7 go to https://jdk7.dev.java.net/");
 			System.exit(-1);
 		}
+	}
+
+	@Override
+	public void destroy() {
+		sdfsService = null;
+		
+	}
+
+	@Override
+	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
+		setup(arg0.getArguments());
+		
+	}
+
+	@Override
+	public void start() throws Exception {
+		sdfsService.start(useSSL,port);
+		
+	}
+
+	@Override
+	public void stop() throws Exception {
+		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
+		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
+		sdfsService.stop();
+		SDFSLogger.getLog().info("All Data Flushed");
+		
 	}
 }

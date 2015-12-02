@@ -489,8 +489,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc) throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(arc.getID(),
+	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
+		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
 		byte[] chunks = arc.getBytes();
@@ -569,7 +569,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			s3IS.close();
 			s3IS = null;
 		} catch (Throwable e) {
-			SDFSLogger.getLog().error("unable to write archive " + arc.getID(),
+			SDFSLogger.getLog().error("unable to write archive " + arc.getID() + " with id " +id,
 					e);
 			throw new IOException(e);
 		} finally {

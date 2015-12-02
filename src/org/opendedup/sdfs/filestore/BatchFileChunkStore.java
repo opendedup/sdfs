@@ -373,12 +373,12 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc) throws IOException {
+	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
 		try {
 			HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("objects", Integer.toString(arc.getSz()));
 			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
-			this.writeHashMap(metaData, arc.getID());
+			this.writeHashMap(metaData,id);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write archive " + arc.getID(), e);
 			throw new IOException(e);
@@ -453,6 +453,9 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								 k + " sz=" +objs);
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
+								
+								long cl = HashBlobArchive.compactArchive(k);
+								SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
 							}
 						} catch (Exception e) {
 							SDFSLogger.getLog().warn("Unable to delete object " + k, e);
