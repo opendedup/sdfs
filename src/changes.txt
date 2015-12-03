@@ -1,3 +1,33 @@
+Version 3.0.2
+	Fixes :
+	* Cloud storage libs overlap for Joda
+	* Included export encryption libs
+	* Compaction of hashmaps now working properly
+	
+Version 3.0.1
+	This is a major new release of SDFS with a rewrite of the storage subsystem. This release includes enhancements to the following elements
+
+	Cloud Storage Enhancements :
+	* In-Line deduplication to a Cloud Storage Backend - SDFS can send all of its data to AWS, AZURE, or Google. 2.Performance Improvements - Compressed Multi-Threaded upload and download of data to the cloud
+	* Local Cache - SDFS will cache the most recently accessed data locally. This is configurable but set to 10 GB by Default
+	* Security - All data can be encrypted using AES-CBC 256 when sent to the cloud
+	* Throttling - Upload and download speeds can be throttled.
+	* Cloud Recovery/Replication - All local metadata is replicated to the cloud and can be recovered back to local volume.
+	* Glacier Support - Supports S3 Lifecycle policies and retrieving data from Glacier
+	* AWS Region Support - Supports all AWS Regions
+	* Amazon AIM Support
+	
+	Scalability Improvements:
+	* Tested to over 100TB of backend storage.
+	* Requires only 400MB of memory per TB of unique storage
+	* Unlimited Snapshots
+	* No compaction necessary sing orphaned data physically removed from underlying filesystem after garbage collection.
+	
+	General Enhancements :
+	* Mounts from fstab and using native linux mount commands (mount -t sdfs)
+	* Faster Volume Replication
+	* Local Encryption support - Uses AES-CBC 256
+	* Faster Garbage Collection - 300% improvement
 Version 2.0.11
 	Fixes :
 	* Fixed copy of files with non-english characters

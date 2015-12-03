@@ -37,8 +37,11 @@ public  class ReadAhead  implements Runnable {
 
 			});
 	
-	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException {
-		return readAheads.get(df);
+	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
+		if(Main.readAhead)
+			return readAheads.get(df);
+		else
+			throw new IOException("ReadAhead disabled");
 	}
 	
 	private ReadAhead(SparseDedupFile df) {

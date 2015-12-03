@@ -315,9 +315,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							int mapsz = maps.size();
 							maps.remove(m);
 							mapsz = mapsz - maps.size();
-							// SDFSLogger.getLog().info(
-							// "removing map " + m.toString() + " sz="
-							// + maps.size() + " rm=" + mapsz);
+							 SDFSLogger.getLog().info(
+							 "removing map " + m.toString() + " sz="
+							 + maps.size() + " rm=" + mapsz);
 							m.vanish();
 
 							m = null;
@@ -430,7 +430,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					this.loadCacheExecutor.execute(m);
 				} else {
 					m.setActive( false);
-					m.full = true;
 				}
 			}
 			bar.finish();

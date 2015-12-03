@@ -211,7 +211,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	}
 
 	private void recreateMap() {
-		this.full = true;
 		mapped = new BitSet(size);
 		mapped.clear();
 		removed = new BitSet(size);
@@ -224,6 +223,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		SDFSLogger.getLog().warn(
 				"Recovered Hashmap " + this.path + " entries = "
 						+ mapped.cardinality());
+		
 	}
 
 	/*
@@ -310,7 +310,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 							+ ".bpos", "rw");
 					_bpos.seek(0);
 					bgst = _bpos.readLong();
-					this.full = _bpos.readBoolean();
 					try {
 						this.lastFound = _bpos.readLong();
 					}catch(Exception e) {

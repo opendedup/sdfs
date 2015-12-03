@@ -111,6 +111,7 @@ public class VolumeConfigWriter {
 	private boolean awsAim = false;
 	private boolean genericS3 = false;
 	private String cloudUrl;
+	private boolean readAhead = false;
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -313,6 +314,7 @@ public class VolumeConfigWriter {
 				}
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
+				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
 				
@@ -344,6 +346,7 @@ public class VolumeConfigWriter {
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
+				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
 			} else {
@@ -361,6 +364,7 @@ public class VolumeConfigWriter {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.readAhead = true;
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
@@ -536,6 +540,7 @@ public class VolumeConfigWriter {
 		io.setAttribute("safe-sync", Boolean.toString(this.safe_sync));
 		io.setAttribute("write-threads", Integer.toString(this.write_threads));
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
+		io.setAttribute("read-ahead", Boolean.toString(this.readAhead));
 		io.setAttribute("hash-type", this.hashType);
 		if(ext)
 			io.setAttribute("max-variable-segment-size","32");

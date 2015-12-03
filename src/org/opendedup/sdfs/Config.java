@@ -278,6 +278,9 @@ public class Config {
 		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
+		if(cache.hasAttribute("read-ahead")) {
+			Main.readAhead = Boolean.parseBoolean(cache.getAttribute("read-ahead"));
+		}
 		Main.safeClose = Boolean.parseBoolean(cache.getAttribute("safe-close"));
 		// Makes sure writes are sync'd when set to true.
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));

@@ -433,6 +433,17 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 										SDFSLogger.getLog().warn("Not deleting " + k + " claims=" + claims);
 										metaData.put("objects", Integer.toString(claims));
 										metaData.put("deleted-objects", "0");
+										metaData.put("deleted-objects", Integer.toString(delobj));
+										this.writeHashMap(metaData, k);
+										/*
+										try {
+										long cl = HashBlobArchive.compactArchive(k);
+										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
+										SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
+										}catch(Exception e) {
+											
+										}
+										*/
 									} else {
 										HashBlobArchive.deleteArchive(k);
 										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
@@ -453,9 +464,16 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								 k + " sz=" +objs);
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
-								
+								/*
+								try {
 								long cl = HashBlobArchive.compactArchive(k);
+								
+								HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
 								SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
+								}catch(Exception e) {
+									
+								}
+								*/
 							}
 						} catch (Exception e) {
 							SDFSLogger.getLog().warn("Unable to delete object " + k, e);

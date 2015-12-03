@@ -1,3 +1,9 @@
+Version 3.0.2
+	Fixes :
+	* Cloud storage libs overlap for Joda
+	* Included export encryption libs
+	* Compaction of hashmaps now working properly
+	
 Version 3.0.1
 	This is a major new release of SDFS with a rewrite of the storage subsystem. This release includes enhancements to the following elements
 
