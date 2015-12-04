@@ -352,7 +352,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 		this.name = Main.cloudBucket;
 		try {
 			String bucketLocation = null;
-			if (config.hasAttribute("default-bucket-location")) {
+			if (config != null && config.hasAttribute("default-bucket-location")) {
 				bucketLocation = config.getAttribute("default-bucket-location");
 			}
 			pool = new S3ServicePool(S3ChunkStore.awsCredentials,

@@ -784,7 +784,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 					if (!f.exists() || f.length() == 0) {
 						RandomAccessFile rf = null;
 						try {
-							SDFSLogger.getLog().info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 							byte[] b = store.getBytes(this.id);
 							if (rrl != null) {
 								int _sz = 1;
@@ -833,7 +832,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 				blockMap = maps.get(this.id);
 			if (blockMap.containsKey(hash)) {
 				pos = blockMap.get(hash);
-				try {
 					// rf.seek(pos - HashFunctionPool.hashLength);
 					byte[] h = new byte[4];
 					ByteBuffer hb = ByteBuffer.wrap(h);
@@ -847,12 +845,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 					nlen = hb.getInt();
 					ub = new byte[nlen];
 					ch.read(ByteBuffer.wrap(ub), pos + 4);
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("Exception,possible data corruption at " + pos + " nlen " + nlen + " flen "
-							+ f.length() + " file=" + f.getPath(), e);
-					throw new IOException("Exception,possible data corruption at " + pos + " nlen " + nlen + " flen "
-							+ f.length() + " file=" + f.getPath());
-				}
 			} else {
 				throw new IOException("requested block not found in " + f.getPath());
 			}
@@ -872,7 +864,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (ClosedChannelException e) {
 			return getChunk(hash);
 		} catch (MapClosedException e) {
-			SDFSLogger.getLog().warn("map closed");
 			return getChunk(hash);
 		} catch (IOException e) {
 			throw e;

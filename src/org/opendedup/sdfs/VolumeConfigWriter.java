@@ -228,7 +228,8 @@ public class VolumeConfigWriter {
 			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		} else if (cmd.hasOption("noext")) {
 			this.ext = false;
-			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
+			this.hash_db_class = "org.opendedup.collections.MaxFileBasedCSMap";
+			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
 		if(cmd.hasOption("aws-aim"))
 			this.awsAim=true;
