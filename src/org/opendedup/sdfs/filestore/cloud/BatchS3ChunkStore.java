@@ -752,12 +752,6 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 			s3Object.closeDataInputStream();
 			byte[] hs = arc.getHashesString().getBytes();
 			sz = hs.length;
-			if (Main.compress) {
-				hs = CompressionUtils.compressLz4(hs);
-			}
-			if (Main.chunkStoreEncryptionEnabled) {
-				hs = EncryptUtils.encryptCBC(hs);
-			}
 			s3Object = new S3Object("keys/" + haName, hs);
 			s3Object.addMetadata("size", Integer.toString(sz));
 			s3Object.addMetadata("lz4compress", Boolean.toString(Main.compress));
@@ -788,35 +782,21 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 				Main.chunkStoreEncryptionEnabled);
 		StorageObject obj = s3Service.getObject(this.name, "blocks/" + haName);
 
-		boolean encrypt = false;
 		boolean compress = false;
-		boolean lz4compress = false;
 
 		int cl = (int) obj.getContentLength();
 		byte[] data = new byte[cl];
 		DataInputStream in = new DataInputStream(obj.getDataInputStream());
 		in.readFully(data);
 		obj.closeDataInputStream();
-
-		int size = Integer.parseInt((String) obj.getMetadata("size"));
-		if (obj.containsMetadata("encrypt")) {
-			encrypt = Boolean.parseBoolean((String) obj.getMetadata("encrypt"));
-		}
+		
 		if (obj.containsMetadata("compress")) {
 			compress = Boolean.parseBoolean((String) obj
 					.getMetadata("compress"));
-		} else if (obj.containsMetadata("lz4compress")) {
-			lz4compress = Boolean.parseBoolean((String) obj
-					.getMetadata("lz4compress"));
-		}
+		} 
 
-		if (encrypt)
-			data = EncryptUtils.decryptCBC(data);
 		if (compress)
 			data = CompressionUtils.decompressZLIB(data);
-		else if (lz4compress) {
-			data = CompressionUtils.decompressLz4(data, size);
-		}
 		if (obj.containsMetadata("deleted")) {
 			boolean del = Boolean.parseBoolean((String) obj
 					.getMetadata("deleted"));

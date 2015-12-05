@@ -781,9 +781,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
-		boolean encrypt = false;
 		boolean compress = false;
-		boolean lz4compress = false;
 		try {
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
@@ -867,25 +865,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			if (!Arrays.equals(shash, chash))
 				throw new IOException("download corrupt at " + id);
 			Map<String, String> mp = omd.getUserMetadata();
-			int size = Integer.parseInt((String) mp.get("size"));
-			if (mp.containsKey("encrypt")) {
-				encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
-			}
+			
 			if (mp.containsKey("compress")) {
 				compress = Boolean.parseBoolean((String) mp.get("compress"));
-			} else if (mp.containsKey("lz4compress")) {
-				lz4compress = Boolean.parseBoolean((String) mp
-						.get("lz4compress"));
 			}
 
 			tm = System.currentTimeMillis();
-			if (encrypt)
-				data = EncryptUtils.decryptCBC(data);
 			if (compress)
 				data = CompressionUtils.decompressZLIB(data);
-			else if (lz4compress) {
-				data = CompressionUtils.decompressLz4(data, size);
-			}
 			if (mp.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean((String) mp.get("deleted"));
 				if (del) {

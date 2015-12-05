@@ -590,25 +590,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			blob.download(out);
 			HashMap<String, String> metaData = blob.getMetadata();
 			byte[] data = out.toByteArray();
-			int size = 0;
-			if (metaData.containsKey("encrypt")
-					&& metaData.get("encrypt").equalsIgnoreCase("true")) {
-				data = EncryptUtils.decryptCBC(data);
-			}
-			if (metaData.containsKey("compress")
-					&& metaData.get("compress").equalsIgnoreCase("true")) {
-				data = CompressionUtils.decompressZLIB(data);
-
-			}
-			if (metaData.containsKey("scompress")
-					&& metaData.get("scompress").equalsIgnoreCase("true")) {
-				data = CompressionUtils.decompressSnappy(data);
-			}
-			if (metaData.containsKey("lz4Compress")
-					&& metaData.get("lz4Compress").equalsIgnoreCase("true")) {
-				size = Integer.parseInt(metaData.get("size"));
-				data = CompressionUtils.decompressLz4(data, size);
-			}
 			if (metaData.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean(metaData.get("deleted"));
 				if (del) {
