@@ -414,8 +414,14 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 						try {
 							File blob = HashBlobArchive.getPath(k);
-							HashMap<String, String> metaData = this.readHashMap(k);
-							int objs = Integer.parseInt(metaData.get("objects"));
+							HashMap<String, String> metaData = null;
+							int objs = 0;
+							try {
+								metaData = this.readHashMap(k);
+								objs = Integer.parseInt(metaData.get("objects"));
+							}catch(Exception e) {
+								metaData = new HashMap<String,String>();
+							}
 							// SDFSLogger.getLog().info("remove requests for " +
 							// hashString + "=" + odel.get(k));
 							int delobj = 0;
@@ -435,7 +441,6 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 										metaData.put("deleted-objects", "0");
 										metaData.put("deleted-objects", Integer.toString(delobj));
 										this.writeHashMap(metaData, k);
-										/*
 										try {
 										long cl = HashBlobArchive.compactArchive(k);
 										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
@@ -443,7 +448,6 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 										}catch(Exception e) {
 											
 										}
-										*/
 									} else {
 										HashBlobArchive.deleteArchive(k);
 										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
@@ -464,7 +468,6 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								 k + " sz=" +objs);
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
-								/*
 								try {
 								long cl = HashBlobArchive.compactArchive(k);
 								
@@ -473,7 +476,6 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								}catch(Exception e) {
 									
 								}
-								*/
 							}
 						} catch (Exception e) {
 							SDFSLogger.getLog().warn("Unable to delete object " + k, e);

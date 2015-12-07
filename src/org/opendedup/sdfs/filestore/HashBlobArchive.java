@@ -686,6 +686,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 		Lock l = this.lock.writeLock();
 		l.lock();
 		try {
+			SimpleByteArrayLongMap m = wMaps.remove(this.id);
+			if(m!=null) {
+				try {
+					m.close();
+				}catch(Exception e) {
+					
+				}
+			}
+			FileChannel ch = wOpenFiles.remove(this.id);
+			if(ch!=null) {
+				try {
+					ch.close();
+				}catch(Exception e) {
+					
+				}
+			}
 			archives.invalidate(this.id);
 			maps.invalidate(this.id);
 			openFiles.invalidate(this.id);
@@ -694,8 +710,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			f.delete();
 			File lf = new File(f.getPath() + ".map");
 			lf.delete();
-			wMaps.remove(this.id);
-			wOpenFiles.remove(this.id);
+			
 			rchunks.remove(this.id);
 		} catch(Exception e) {
 			SDFSLogger.getLog().error("error deleting object",e);
@@ -710,12 +725,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 			l.lock();
 			try {
 				SDFSLogger.getLog().debug("removed " + f.getPath());
-				f.delete();
-				File lf = new File(f.getPath() + ".map");
-				lf.delete();
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
 				openFiles.invalidate(this.id);
+				f.delete();
+				File lf = new File(f.getPath() + ".map");
+				lf.delete();
+				
 			} finally {
 				l.unlock();
 			}
@@ -1092,8 +1108,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			Files.move(omf.toPath(), mf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			this.cached = true;
 			archives.put(nid, this);
-			wOpenFiles.remove(this.id);
-			wMaps.remove(this.id);
+			
 			rchunks.remove(this.id);
 			this.id = nid;
 		} catch (Exception e) {
@@ -1124,8 +1139,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 			} else if (f.exists()) {
 				this.delete();
 			} else {
-				wOpenFiles.remove(this.id);
-				wMaps.remove(this.id);
+				FileChannel ch = wOpenFiles.remove(this.id);
+				if (ch != null) {
+					try {
+						ch.close();
+					}catch(Exception e) {
+						
+					}
+				}
+				SimpleByteArrayLongMap om = wMaps.remove(this.id);
+				if (om != null) {
+					try {
+						om.close();
+					}catch(Exception e) {
+						
+					}
+				}
 				rchunks.remove(this.id);
 			}
 

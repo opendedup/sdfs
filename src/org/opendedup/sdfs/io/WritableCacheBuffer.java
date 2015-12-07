@@ -322,6 +322,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 					@Override
 					public void commandException(Exception e) {
+						SDFSLogger.getLog().error("error getting block",e);
 						this.incrementAndGetDNEX();
 						synchronized (this) {
 							this.notifyAll();
