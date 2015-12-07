@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -655,6 +656,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				synchronized (this) {
 					this.notifyAll();
 				}
+				SDFSLogger.getLog().info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
 				throw new ArchiveFullException();
 			}
 
@@ -864,19 +866,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 			} else {
 				throw new IOException("requested block not found in " + f.getPath());
 			}
-			/*
-			 * byte[] b = new byte[hash.length]; ByteBuffer buf = ByteBuffer
-			 * .allocateDirect(4 + 4 + HashFunctionPool.hashLength); ch =
-			 * rf.getChannel(); while (ch.position() < ch.size()) {
-			 * buf.position(0); ch.read(buf); buf.position(0); buf.getInt();
-			 * buf.get(b); pos = (int) ch.position() - 4; blockMap.put(hash,
-			 * pos); if (Arrays.equals(b, hash)) { nlen = buf.getInt(); byte[]
-			 * chk = new byte[nlen]; ByteBuffer.wrap(chk);
-			 * ch.read(ByteBuffer.wrap(chk)); return chk; } else { int _nlen =
-			 * buf.getInt(); if ((ch.position() + _nlen) < ch.size())
-			 * ch.position(ch.position() + _nlen); } } buf = null; throw new
-			 * IOException("hash not found");
-			 */
 		} catch (ClosedChannelException e) {
 			return getChunk(hash);
 		} catch (MapClosedException e) {
@@ -1051,6 +1040,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							Thread.sleep(100);
 						}
 					} else {
+						
 						_har.delete();
 						return 0;
 					}
@@ -1062,6 +1052,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to compact " + id, e);
+			HashBlobArchive.compressedLength.addAndGet(-1 * _har.f.length());
+			HashBlobArchive.currentLength.addAndGet(-1 * _har.uncompressedLength.get());
 			_har.delete();
 			throw new IOException(e);
 		}

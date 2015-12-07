@@ -12,3 +12,4 @@ windows-exe/Debug/
 windows-exe/Release/
 windows-exe/ipch/
 /test.sh
+install-packages/SDFS-3.0.3-Setup.exe

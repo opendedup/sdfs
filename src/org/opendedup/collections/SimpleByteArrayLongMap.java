@@ -132,7 +132,9 @@ public class SimpleByteArrayLongMap {
 				return true;
 			}
 			return false;
-		} catch (Exception e) {
+		} catch(MapClosedException e) {
+			throw e;
+		}	catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
@@ -327,7 +329,9 @@ public class SimpleByteArrayLongMap {
 			vb.position(0);
 			this.currentSz++;
 			return pos > -1 ? true : false;
-		} catch (Exception e) {
+		} catch(MapClosedException e){
+			throw e;
+		}catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			e.printStackTrace();
 			return false;
@@ -355,7 +359,9 @@ public class SimpleByteArrayLongMap {
 				return val;
 
 			}
-		} catch (Exception e) {
+		} catch(MapClosedException e){
+			throw e;
+		}catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {

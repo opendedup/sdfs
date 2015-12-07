@@ -449,9 +449,10 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 											
 										}
 									} else {
+										long fs = blob.length();
 										HashBlobArchive.deleteArchive(k);
 										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-										HashBlobArchive.compressedLength.addAndGet(-1 * blob.length());
+										HashBlobArchive.compressedLength.addAndGet(-1 *fs);
 										File _f = new File(HashBlobArchive.getPath(k).getPath() + ".md");
 										_f.delete();
 									}
