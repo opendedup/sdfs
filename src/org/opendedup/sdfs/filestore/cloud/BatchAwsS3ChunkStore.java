@@ -522,10 +522,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 								.warn("The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
 					}
 					omd.setUserMetadata(obj);
+					try {
 					CopyObjectRequest reg = new CopyObjectRequest(this.name,
 							"bucketinfo", this.name, "bucketinfo")
 							.withNewObjectMetadata(omd);
 					s3Service.copyObject(reg);
+					}catch(Exception e) {
+						SDFSLogger.getLog().warn("unable to update bucket info in init",e);
+					}
 				}
 			}
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1,
@@ -563,7 +567,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		}
 
 	}
-
+	int k = 0;
 	@Override
 	public ChunkData getNextChunck() throws IOException {
 		if (ht == null || !ht.hasMoreElements()) {
@@ -574,7 +578,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw new IOException(e);
 			}
 			if (rs == null) {
+				SDFSLogger.getLog().info("no more " + k);
 				return null;
+			} else {
+				k++;
 			}
 			ht = rs.st;
 			hid = rs.id;

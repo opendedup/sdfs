@@ -27,6 +27,7 @@ public class MountSDFS {
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("d", false, "turn on filesystem debugging");
 		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
+		options.addOption("cc",false,"Runs Consistency Check");
 		options.addOption(
 				"vc",
 				true,
@@ -80,6 +81,9 @@ public class MountSDFS {
 		}
 		if(cmd.hasOption("cfr")) {
 			Main.syncDL = true;
+			Main.runConsistancyCheck = true;
+		}
+		if(cmd.hasOption("cc")) {
 			Main.runConsistancyCheck = true;
 		}
 		if(cmd.hasOption("d")) {

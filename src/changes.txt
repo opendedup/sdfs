@@ -1,6 +1,7 @@
 Version 3.0.3
 	Fixes :
-	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table. 
+	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table.
+	* Volume recovery now working properly. Was not grabbing hashmaps properly from cloud providers.
 Version 3.0.2
 	Fixes :
 	* Cloud storage libs overlap for Joda

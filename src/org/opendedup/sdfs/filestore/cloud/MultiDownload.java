@@ -13,14 +13,14 @@ import org.opendedup.sdfs.filestore.StringResult;
 
 public class MultiDownload implements Runnable {
 	AbstractBatchStore cs = null;
-	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(Main.dseIOThreads*2);
+	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(Main.dseIOThreads * 2);
 	private boolean done = false;
 	private Exception ex;
-	
-	
+
 	public MultiDownload(AbstractBatchStore cs) {
 		this.cs = cs;
 	}
+
 	Iterator<String> ck = null;
 
 	public void iterationInit(boolean deep, String folder) {
@@ -31,23 +31,24 @@ public class MultiDownload implements Runnable {
 			SDFSLogger.getLog().error("unable to initialize", e);
 		}
 	}
-	
+
 	public StringResult getStringTokenizer() throws Exception {
-		while(!done) {
-			if(ex != null)
+		while (true) {
+			if (ex != null)
 				throw ex;
 			StringResult st = sbs.poll(1, TimeUnit.SECONDS);
-			if(st != null) {
+			if (st != null) {
 				return st;
-			}
+			} else if(this.done)
+				break;
 		}
 		return null;
 	}
 
 	@Override
 	public void run() {
-		ArrayList<KeyGetter>al = new ArrayList<KeyGetter>(); 
-		for(int i = 0; i<Main.dseIOThreads;i++) {
+		ArrayList<KeyGetter> al = new ArrayList<KeyGetter>();
+		for (int i = 0; i < Main.dseIOThreads; i++) {
 			KeyGetter kg = new KeyGetter();
 			kg.md = this;
 			Thread th = new Thread(kg);
@@ -55,29 +56,29 @@ public class MultiDownload implements Runnable {
 			al.add(kg);
 		}
 		try {
-		while(al.size() > 0) {
-			Thread.sleep(100);
-			ArrayList<KeyGetter>_al = new ArrayList<KeyGetter>(); 
-			for(KeyGetter kd : al) {
-				if(kd.ex != null) {
-					ex = kd.ex;
+			while (al.size() > 0) {
+				Thread.sleep(100);
+				ArrayList<KeyGetter> _al = new ArrayList<KeyGetter>();
+				for (KeyGetter kd : al) {
+					if (kd.ex != null) {
+						ex = kd.ex;
+					}
+					if (!kd.done) {
+						_al.add(kd);
+					}
+
 				}
-				if(!kd.done) {
-					_al.add(kd);
+				if (_al.size() == 0) {
+					this.done = true;
 				}
-					
+				al = _al;
 			}
-			if(_al.size() == 0) {
-				this.done = true;
-			}
-			al =_al;
+		} catch (Exception e) {
+
 		}
-		}catch(Exception e) {
-			
-		}
-		
+
 	}
-	
+
 	private synchronized String getNextKey() throws IOException {
 		try {
 			if (ck == null || !ck.hasNext()) {
@@ -93,32 +94,31 @@ public class MultiDownload implements Runnable {
 		}
 		return null;
 	}
-	
+
 	private void addStringResult(String key) throws IOException, InterruptedException {
 		this.sbs.put(cs.getStringResult(key));
 	}
-	
+
 	private static final class KeyGetter implements Runnable {
-		MultiDownload md= null;
+		MultiDownload md = null;
 		Exception ex = null;
 		boolean done = false;
+
 		@Override
 		public void run() {
 			try {
-			String st = md.getNextKey();
-			while(st != null) {
-				md.addStringResult(st);
-				st = md.getNextKey();
-			}
-			}catch(Exception e) {
+				String st = md.getNextKey();
+				while (st != null) {
+					md.addStringResult(st);
+					st = md.getNextKey();
+				}
+			} catch (Exception e) {
 				this.ex = e;
 			}
-			done=true;
-			
+			done = true;
+
 		}
-		
+
 	}
-	
-	
 
 }

@@ -38,6 +38,7 @@ public class MountSDFS implements Daemon, Runnable{
 		options.addOption("d", false, "debug output");
 		options.addOption("s", false, "Run single threaded");
 		options.addOption("p", true, "port to use for sdfs cli");
+		options.addOption("cc",false,"Runs Consistency Check");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -108,6 +109,9 @@ public class MountSDFS implements Daemon, Runnable{
 		if (cmd.hasOption("h")) {
 			printHelp(options);
 			System.exit(1);
+		}
+		if(cmd.hasOption("cc")) {
+			Main.runConsistancyCheck = true;
 		}
 		if (cmd.hasOption("d")) {
 			fal.add("-d");
