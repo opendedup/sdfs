@@ -1,3 +1,7 @@
+Version 3.0.4
+	Fixes :
+	* Fixed xml commandline parsing in mount.sdfs script
+	* Replaced Oracle JRE with Zulu Openjdk jre
 Version 3.0.3
 	Fixes :
 	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table.

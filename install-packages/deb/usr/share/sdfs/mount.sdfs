@@ -1,5 +1,5 @@
 #!/bin/bash
-modprobe fuse
+modprobe fuse > /dev/null
 MEMORY="1000"
 CFG=""
 MPTG=4
@@ -28,7 +28,7 @@ fi
 
 if [ ! -n "$MEM" ]; then
 if [ -n "$CFG" ] && [ -f "$CFG" ]; then
-        ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d \");
+        ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
         MEMORY=$(((ac/10737418240*MPTG)+1000))
 fi
 else
