@@ -40,10 +40,10 @@ java/lang
 sun/text
 javax/xml
 META-INF/services/javax.sound.sampled.spi.MixerProvider
-com/sun/xml/
 META-INF/services/com.sun.tools.internal.xjc.Plugin
 com/sun/java/swing/
 com/sun/jndi/
+com/sun/xml/
 com/sun/org/
 META-INF/services/javax.sound.sampled.spi.FormatConversionProvider
 ! rt.jar
@@ -76,9 +76,9 @@ org/xml/
 org/omg/
 com/sun/security/
 com/sun/xml/
+com/sun/java_cup/
 com/sun/java/swing/
 com/oracle/
-com/sun/java_cup/
 com/sun/jndi/
 com/sun/accessibility/
 com/sun/org/
