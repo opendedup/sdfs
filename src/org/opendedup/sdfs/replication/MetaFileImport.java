@@ -1,14 +1,15 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,8 +50,7 @@ public class MetaFileImport implements Serializable {
 	private boolean useSSL;
 	private Exception lastException;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ThreadPoolExecutor executor =  new ThreadPoolExecutor(Main.writeThreads,
 			Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
 			executionHandler);

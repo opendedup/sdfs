@@ -43,7 +43,7 @@ public class Main {
 	public static byte MAPVERSION = 0;
 
 	public static String sdfsPassword = "";
-	public static boolean readAheadMap = false;
+	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
 
@@ -95,7 +95,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.0.4";
+	public static String version = "3.1.0";
 	
 	public static boolean readAhead = false;
 

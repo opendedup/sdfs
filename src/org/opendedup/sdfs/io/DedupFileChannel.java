@@ -462,7 +462,7 @@ public class DedupFileChannel {
 				byte[] _rb = null;
 				try {
 					while (readBuffer == null) {
-						readBuffer = df.getWriteBuffer(currentLocation);
+						readBuffer = df.getReadBuffer(currentLocation);
 						try {
 							startPos = (int) (currentLocation - readBuffer.getFilePosition());
 							int _len = readBuffer.getLength() - startPos;
@@ -642,6 +642,7 @@ public class DedupFileChannel {
 	public int getFlags() {
 		return flags;
 	}
+	
 
 	public void setFlags(int flags) {
 		this.flags = flags;

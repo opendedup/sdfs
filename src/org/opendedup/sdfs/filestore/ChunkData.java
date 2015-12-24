@@ -3,9 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.DataArchivedException;
-import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -23,7 +21,6 @@ import org.opendedup.util.StringUtils;
 public class ChunkData {
 	public static final int RAWDL = 1 + 2 + 32 + 8 + 8 + 8 + 4 + 8;
 	public static final int CLAIMED_OFFSET = 1 + 2 + 32 + 8;
-	private static byte[] BLANKCM = new byte[RAWDL];
 	private boolean mDelete = false;
 	private short hashLen = 0;
 	private byte[] hash = null;
@@ -37,17 +34,8 @@ public class ChunkData {
 	public boolean recoverd = false;
 	public boolean blank;
 
-	private static byte[] blankHash = null;;
 
-	static {
-		Arrays.fill(BLANKCM, (byte) 0);
-		try {
-			blankHash = HashFunctionPool.getHashEngine().getHash(
-					new byte[Main.chunkStorePageSize]);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	
 
 	public ChunkData() {
 		this.blank = true;
@@ -212,9 +200,7 @@ public class ChunkData {
 			return HCServiceProxy.getChunkStore().getChunk(hash, pos,
 					Main.chunkStorePageSize);
 		} catch (IOException e) {
-			if (Arrays.areEqual(hash, blankHash))
-				return new byte[Main.chunkStorePageSize];
-			else
+			
 				throw e;
 		}
 

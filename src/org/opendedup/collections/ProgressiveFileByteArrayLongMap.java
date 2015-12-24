@@ -2,10 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
-
-
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,20 +11,23 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.AbstractShard;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
+import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StorageUnit;
@@ -39,13 +38,13 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializable,
-		Runnable, Comparable<ProgressiveFileByteArrayLongMap>	{
+public class ProgressiveFileByteArrayLongMap
+		implements AbstractShard, Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	transient MappedByteBuffer keys = null;
+	// transient MappedByteBuffer keys = null;
 	transient private int size = 0;
 	transient private int maxSz = 0;
 	transient private double loadFactor = .75;
@@ -53,7 +52,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	transient private FileChannel kFC = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8;
 	transient private static final int VP = HashFunctionPool.hashLength;
-	transient private ReentrantLock hashlock = new ReentrantLock();
+	transient private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
+	transient private ReentrantReadWriteLock claimlock = new ReentrantReadWriteLock();
 	transient public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	transient public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	transient private int iterPos = 0;
@@ -66,12 +66,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	transient private boolean runningGC;
 	transient private long bgst = 0;
 	transient boolean full = false;
-	transient private long lastloaded = 0;
-	transient private static long minTmBetweenLoads = 5 * 60* 1000;
 	transient private boolean active = false;
+	transient private boolean cached = false;
 	public transient long lastFound = 0;
-	
-	
+	private static transient BlockingQueue<Runnable> loadCacheQueue = new SynchronousQueue<Runnable>();
+	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS,
+			loadCacheQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
+
 	static {
 		FREE = new byte[HashFunctionPool.hashLength];
 		REMOVED = new byte[HashFunctionPool.hashLength];
@@ -83,15 +84,32 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		this.size = size;
 		this.path = path;
 	}
-	
+
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
+
 	public boolean isActive() {
 		return this.active;
 	}
- 
+
+	public void cache() {
+		if (!cached) {
+			this.hashlock.writeLock().lock();
+			try {
+				if(!this.cached) {
+					loadCacheExecutor.execute(this);
+					this.cached = true;
+				}
+			} catch (Exception e) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("unable to cache " + this, e);
+			}finally {
+				this.hashlock.writeLock().unlock();
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -102,8 +120,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		this.iterPos = 0;
 	}
 
-	
-
 	public boolean isFull() {
 		if (full)
 			return true;
@@ -112,20 +128,25 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		return full;
 	}
 
+	public boolean isMaxed() {
+		double nms = (double) maxSz + ((double) maxSz * .1);
+		return this.sz.get() >= nms;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#nextKey()
 	 */
 	@Override
-	public byte[] nextKey() {
+	public byte[] nextKey() throws IOException {
 		while (iterPos < size) {
-			this.hashlock.lock();
+			Lock l = this.hashlock.writeLock();
+			l.lock();
 			try {
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
-					keys.position(iterPos * EL);
-					keys.get(key);
+					kFC.read(ByteBuffer.wrap(key), iterPos * EL);
 					iterPos++;
 					if (Arrays.equals(key, REMOVED)) {
 						this.removed.set(iterPos - 1);
@@ -142,21 +163,24 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					iterPos++;
 				}
 			} finally {
-				this.hashlock.unlock();
+				l.unlock();
 			}
 
 		}
 		return null;
 	}
 
-	public KVPair nextKeyValue() {
+	public KVPair nextKeyValue() throws IOException {
 		while (iterPos < size) {
-			this.hashlock.lock();
+			Lock l = this.hashlock.writeLock();
+			l.lock();
 			try {
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
-					keys.position(iterPos * EL);
-					keys.get(key);
+					ByteBuffer buf = ByteBuffer.allocate(FREE.length + 8);
+					kFC.read(buf, iterPos * EL);
+					buf.position(0);
+					buf.get(key);
 					iterPos++;
 					if (Arrays.equals(key, REMOVED)) {
 						this.removed.set(iterPos - 1);
@@ -167,7 +191,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 						this.bf.put(new KeyBlob(key));
 						KVPair p = new KVPair();
 						p.key = key;
-						p.value = keys.getLong();
+						p.value = buf.getLong();
 						return p;
 					} else {
 						this.mapped.clear(iterPos - 1);
@@ -176,20 +200,20 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					iterPos++;
 				}
 			} finally {
-				this.hashlock.unlock();
+				l.unlock();
 			}
 
 		}
 		return null;
 	}
 
-	public byte[] _nextKey() {
+	public byte[] _nextKey() throws IOException {
 		while (iterPos < size) {
-			this.hashlock.lock();
+			Lock l = this.hashlock.writeLock();
+			l.lock();
 			try {
 				byte[] key = new byte[FREE.length];
-				keys.position(iterPos * EL);
-				keys.get(key);
+				kFC.read(ByteBuffer.wrap(key), iterPos * EL);
 				iterPos++;
 				if (Arrays.equals(key, REMOVED)) {
 					this.removed.set(iterPos - 1);
@@ -203,14 +227,14 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.mapped.clear(iterPos - 1);
 				}
 			} finally {
-				this.hashlock.unlock();
+				l.unlock();
 			}
 
 		}
 		return null;
 	}
 
-	private void recreateMap() {
+	private void recreateMap() throws IOException {
 		mapped = new BitSet(size);
 		mapped.clear();
 		removed = new BitSet(size);
@@ -220,10 +244,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		byte[] key = this._nextKey();
 		while (key != null)
 			key = this._nextKey();
-		SDFSLogger.getLog().warn(
-				"Recovered Hashmap " + this.path + " entries = "
-						+ mapped.cardinality());
-		
+		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + mapped.cardinality());
+
 	}
 
 	/*
@@ -235,18 +257,22 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	public long getBigestKey() throws IOException {
 		this.iterInit();
 		long _bgst = 0;
+		Lock l = this.hashlock.readLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
+
 			while (iterPos < size) {
 				long val = -1;
-				keys.position((iterPos * EL) + VP);
-				val = keys.getLong();
+				ByteBuffer z = ByteBuffer.allocate(8);
+				kFC.read(z, (iterPos * EL) + VP);
+				z.position(0);
+				val = z.getLong();
 				iterPos++;
 				if (val > _bgst)
 					_bgst = val;
 			}
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 		return _bgst;
 	}
@@ -263,17 +289,16 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		boolean newInstance = !posFile.exists();
 		if (posFile.exists()) {
 			int _sz = (int) (posFile.length()) / (EL);
-			if(_sz != size) {
-				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz+ "] instead of [" + size + "]");
+			if (_sz != size) {
+				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz + "] instead of [" + size + "]");
 				this.size = _sz;
 			}
 		}
-		this.maxSz = (int)(size * loadFactor);
+		this.maxSz = (int) (size * loadFactor);
 		SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
 		@SuppressWarnings("resource")
 		RandomAccessFile _kRaf = new RandomAccessFile(path + ".keys", "rw");
-		if(newInstance)
-			this.lastloaded = System.currentTimeMillis();
+
 		this.kFC = _kRaf.getChannel();
 		try {
 			/*
@@ -306,15 +331,16 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				SDFSLogger.getLog().warn("bpos does not exist");
 			} else {
 				try {
-					RandomAccessFile _bpos = new RandomAccessFile(path
-							+ ".bpos", "rw");
+					RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 					_bpos.seek(0);
 					bgst = _bpos.readLong();
+					this.full = _bpos.readBoolean();
 					try {
 						this.lastFound = _bpos.readLong();
-					}catch(Exception e) {
-						
+					} catch (Exception e) {
+
 					}
+					this.lastFound = System.currentTimeMillis();
 					_bpos.close();
 					f.delete();
 				} catch (Exception e) {
@@ -372,24 +398,18 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				}
 				f.delete();
 			}
-			if(SDFSLogger.isDebug()) {
-			long mem = MemoryMeasurer
-					.measureBytes(bf);
-			SDFSLogger.getLog().info(
-					"BF Archive Memory Size="
-							+ StorageUnit.of(mem).format(mem));
+			if (SDFSLogger.isDebug()) {
+				long mem = MemoryMeasurer.measureBytes(bf);
+				SDFSLogger.getLog().info("BF Archive Memory Size=" + StorageUnit.of(mem).format(mem));
 			}
 		}
-		keys = this.kFC.map(MapMode.READ_WRITE, 0, size * EL);
-		if(this.lastFound == 0)
+		if (this.lastFound == 0)
 			this.lastFound = new File(path + ".keys").lastModified();
 		if (!closedCorrectly) {
 			this.recreateMap();
 		}
 		if (bgst < 0) {
-			SDFSLogger.getLog()
-					.info("Hashtable " + path
-							+ " did not close correctly. scanning ");
+			SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
 			bgst = this.getBigestKey();
 
 		}
@@ -397,8 +417,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 
 		claims = new BitSet(size);
 		claims.clear();
-		double pfull = (double)this.sz.get() /(double)size;
-		SDFSLogger.getLog().info("Percentage full="+pfull + " full=" + this.full);
+		double pfull = (double) this.sz.get() / (double) size;
+		SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" + this.full);
 		return bgst;
 	}
 
@@ -409,9 +429,10 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public boolean containsKey(byte[] key) {
+		Lock l = this.hashlock.readLock();
+		l.lock();
 		try {
-			
-			this.hashlock.lock();
+
 			KeyBlob kb = new KeyBlob(key);
 			if (!runningGC && !bf.mightContain(kb)) {
 				return false;
@@ -419,19 +440,21 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
+				Lock cl = claimlock.writeLock();
+				cl.lock();
 				this.claims.set(pos);
+				cl.unlock();
 				if (this.runningGC)
 					this.bf.put(kb);
 				this.lastFound = System.currentTimeMillis();
 				return true;
 			}
-			
 			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -441,22 +464,25 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * @see org.opendedup.collections.AbstractShard#isClaimed(byte[])
 	 */
 	@Override
-	public boolean isClaimed(byte[] key) throws KeyNotFoundException,
-			IOException {
+	public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
+		Lock l = this.hashlock.readLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
-				boolean cl = this.claims.get(pos);
-				if (cl)
+				Lock cl = claimlock.readLock();
+				cl.lock();
+				boolean zl = this.claims.get(pos);
+				cl.unlock();
+				if (zl)
 					return true;
 			} else {
 				throw new KeyNotFoundException(key);
 			}
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -467,8 +493,10 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public boolean update(byte[] key, long value) throws IOException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
+
 			int pos = this.index(key);
 			if (pos == -1) {
 				return false;
@@ -496,7 +524,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -507,11 +535,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public boolean remove(byte[] key) throws IOException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
 			if (!this.runningGC && !bf.mightContain(new KeyBlob(key)))
 				return false;
-			
+
 			int pos = this.index(key);
 
 			if (pos == -1) {
@@ -523,17 +552,24 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 					this.bf.put(new KeyBlob(key));
 				return false;
 			} else {
-				keys.position(pos);
-				keys.put(REMOVED);
-				keys.putLong(0);
-				long fp = keys.getLong();
+				ByteBuffer bf = ByteBuffer.allocate(EL);
+				kFC.read(bf, pos);
+				bf.put(REMOVED);
+				long fp = bf.getLong();
+				bf.position(bf.position() - 8);
+				bf.putLong(0);
+				bf.position(0);
+				kFC.write(bf);
 
 				ChunkData ck = new ChunkData(fp, key);
 				if (ck.setmDelete(true)) {
 
 					// this.kFC.write(rbuf, pos);
 					pos = (pos / EL);
+					Lock cl = this.claimlock.writeLock();
+					cl.lock();
 					this.claims.clear(pos);
+					cl.unlock();
 					this.mapped.clear(pos);
 					this.sz.decrementAndGet();
 					this.removed.set(pos);
@@ -547,7 +583,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -580,12 +616,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
 	 * @throws IOException
 	 */
-	byte[] current = new byte[FREE.length];
 
 	private int index(byte[] key) throws IOException {
 
 		// From here on we know obj to be non-null
 		ByteBuffer buf = ByteBuffer.wrap(key);
+		byte[] current = new byte[FREE.length];
+		ByteBuffer cb = ByteBuffer.wrap(current);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash);
@@ -594,8 +631,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		else
 			index = index * EL;
 
-		keys.position(index);
-		keys.get(current);
+		kFC.read(cb, index);
 
 		if (Arrays.equals(current, key)) {
 			return index;
@@ -615,8 +651,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * @return
 	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
-			throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -631,9 +666,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				index += length;
 			}
 			if (!this.isFree(index / EL)) {
-				
-				keys.position(index);
-				keys.get(cur);
+
+				kFC.read(ByteBuffer.wrap(cur), index);
 				if (Arrays.equals(cur, key))
 					return index;
 			} else {
@@ -644,10 +678,11 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		return -1;
 	}
 
-	protected int insertionIndex(byte[] key, boolean migthexist)
-			throws IOException, HashtableFullException {
+	protected int insertionIndex(byte[] key, boolean migthexist) throws IOException, HashtableFullException {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
+		byte[] current = new byte[FREE.length];
+		ByteBuffer cb = ByteBuffer.wrap(current);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash);
 		if (this.isFree(index))
@@ -655,8 +690,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		else
 			index = index * EL;
 		if (migthexist) {
-			keys.position(index);
-			keys.get(current);
+			kFC.read(cb, index);
 
 			if (Arrays.equals(current, key)) {
 				return -index - 1; // already stored
@@ -680,8 +714,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 * @throws IOException
 	 * @throws HashtableFullException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur,
-			boolean mightexist) throws IOException, HashtableFullException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur, boolean mightexist)
+			throws IOException, HashtableFullException {
 		final int length = size * EL;
 		final int probe = (1 + (hash % (size - 2))) * EL;
 		final int loopIndex = index;
@@ -712,8 +746,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				}
 			}
 			if (mightexist) {
-				keys.position(index);
-				keys.get(cur);
+				kFC.read(ByteBuffer.wrap(cur), index);
 				if (Arrays.equals(cur, key)) {
 					return -index - 1;
 				}
@@ -728,8 +761,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		}
 
 		// Can a resizing strategy be found that resizes the set?
-		throw new HashtableFullException(
-				"No free or removed slots available. Key set full?!!");
+		throw new HashtableFullException("No free or removed slots available. Key set full?!!");
 	}
 
 	// transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
@@ -741,9 +773,11 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			byte[] key = cm.getHash();
-			this.hashlock.lock();
+
 			if (this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				throw new HashtableFullException(
@@ -773,18 +807,22 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				if (!cm.recoverd) {
 					try {
 						cm.persistData(true);
-					}catch(
-							HashExistsException e) {
+					} catch (HashExistsException e) {
 						return false;
 					}
 				}
-				this.keys.position(pos);
-				this.keys.put(key);
-				this.keys.putLong(cm.getcPos());
+				ByteBuffer bf = ByteBuffer.allocate(EL);
+				bf.put(key);
+				bf.putLong(cm.getcPos());
+				bf.position(0);
+				this.kFC.write(bf, pos);
 				if (cm.getcPos() > bgst)
 					bgst = cm.getcPos();
 				pos = (pos / EL);
+				Lock cl = this.claimlock.writeLock();
+				cl.lock();
 				this.claims.set(pos);
+				cl.unlock();
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
@@ -794,14 +832,14 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			// this.store.put(storeID);
 			return pos > -1 ? true : false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
-	public boolean put(byte[] key, long value) throws HashtableFullException,
-			IOException {
+	public boolean put(byte[] key, long value) throws HashtableFullException, IOException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
 			if (this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				throw new HashtableFullException(
@@ -828,13 +866,18 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				this.bf.put(kb);
 				return false;
 			} else {
-				this.keys.position(pos);
-				this.keys.put(key);
-				this.keys.putLong(value);
+				ByteBuffer bf = ByteBuffer.allocate(EL);
+				bf.put(key);
+				bf.putLong(value);
+				bf.position(0);
+				this.kFC.write(bf, pos);
 				if (value > bgst)
 					bgst = value;
 				pos = (pos / EL);
+				Lock cl = this.claimlock.writeLock();
+				cl.lock();
 				this.claims.set(pos);
+				cl.unlock();
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
@@ -844,7 +887,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 				return pos > -1 ? true : false;
 			}
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -875,27 +918,39 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public long get(byte[] key, boolean claim) {
+		Lock l = this.hashlock.readLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
 			if (key == null)
 				return -1;
 			if (!this.runningGC && !this.bf.mightContain(new KeyBlob(key)))
 				return -1;
 			int pos = -1;
-			
+
 			pos = this.index(key);
 			if (pos == -1) {
 				return -1;
 			} else {
 				this.lastFound = System.currentTimeMillis();
-				this.keys.position(pos + VP);
-				long val = this.keys.getLong();
+				ByteBuffer bf = ByteBuffer.allocate(8);
+				this.kFC.read(bf, pos + VP);
+				bf.position(0);
+
+				long val = bf.getLong();
 				if (claim) {
 					pos = (pos / EL);
+					Lock cl = this.claimlock.writeLock();
+					cl.lock();
 					this.claims.set(pos);
+					cl.unlock();
 				}
-				if (this.runningGC)
+				if (this.runningGC) {
+					l.unlock();
+					l = this.hashlock.writeLock();
+					l.lock();
 					this.bf.put(new KeyBlob(key));
+
+				}
 				return val;
 
 			}
@@ -903,7 +958,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 
 	}
@@ -937,49 +992,21 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	 */
 	@Override
 	public void close() {
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-		this.closed = true;
-		try {
-			this.kFC.force(true);
-			this.kFC.close();
-		} catch (Exception e) {
-
-		}
-		try {
-			File f = new File(path + ".vmp");
-			FileOutputStream fout = new FileOutputStream(f);
-			ObjectOutputStream oon = new ObjectOutputStream(fout);
-			oon.writeObject(mapped);
-			oon.flush();
-			fout.getFD().sync();
-			oon.close();
-			fout.flush();
-
-			fout.close();
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing", e);
-		}
-		try {
-			File f = new File(path + ".vrp");
-			FileOutputStream fout = new FileOutputStream(f);
-			ObjectOutputStream oon = new ObjectOutputStream(fout);
-			oon.writeObject(this.removed);
-			oon.flush();
-			fout.getFD().sync();
-			oon.close();
-			fout.flush();
-
-			fout.close();
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing", e);
-		}
-		if (this.bf != null) {
+			this.closed = true;
 			try {
-				File f = new File(path + ".bf");
+				this.kFC.force(true);
+				this.kFC.close();
+			} catch (Exception e) {
+
+			}
+			try {
+				File f = new File(path + ".vmp");
 				FileOutputStream fout = new FileOutputStream(f);
 				ObjectOutputStream oon = new ObjectOutputStream(fout);
-				oon.writeObject(bf);
+				oon.writeObject(mapped);
 				oon.flush();
 				fout.getFD().sync();
 				oon.close();
@@ -989,20 +1016,49 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("error closing", e);
 			}
-		}
-		try {
-			RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
-			_bpos.seek(0);
-			_bpos.writeLong(bgst);
-			_bpos.writeBoolean(full);
-			_bpos.writeLong(lastFound);
-			_bpos.getFD().sync();
-			_bpos.close();
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error closing", e);
-		}
-		}finally {
-		this.hashlock.unlock();
+			try {
+				File f = new File(path + ".vrp");
+				FileOutputStream fout = new FileOutputStream(f);
+				ObjectOutputStream oon = new ObjectOutputStream(fout);
+				oon.writeObject(this.removed);
+				oon.flush();
+				fout.getFD().sync();
+				oon.close();
+				fout.flush();
+
+				fout.close();
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("error closing", e);
+			}
+			if (this.bf != null) {
+				try {
+					File f = new File(path + ".bf");
+					FileOutputStream fout = new FileOutputStream(f);
+					ObjectOutputStream oon = new ObjectOutputStream(fout);
+					oon.writeObject(bf);
+					oon.flush();
+					fout.getFD().sync();
+					oon.close();
+					fout.flush();
+
+					fout.close();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("error closing", e);
+				}
+			}
+			try {
+				RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
+				_bpos.seek(0);
+				_bpos.writeLong(bgst);
+				_bpos.writeBoolean(full);
+				_bpos.writeLong(lastFound);
+				_bpos.getFD().sync();
+				_bpos.close();
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("error closing", e);
+			}
+		} finally {
+			l.unlock();
 		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("closed " + this.path);
@@ -1022,20 +1078,23 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		try {
 			this.iterInit();
 			while (iterPos < size) {
-				this.hashlock.lock();
+				Lock l = this.hashlock.writeLock();
+				l.lock();
 				try {
+					Lock cl = this.claimlock.writeLock();
+					cl.lock();
 					boolean claimed = claims.get(iterPos);
 					claims.clear(iterPos);
 					if (claimed) {
 						this.mapped.set(iterPos);
 						this.removed.clear(iterPos);
 
-						
 						k++;
 					}
+					cl.unlock();
 				} finally {
 					iterPos++;
-					this.hashlock.unlock();
+					l.unlock();
 				}
 			}
 		} catch (NullPointerException e) {
@@ -1054,8 +1113,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	public void sync() throws SyncFailedException, IOException {
 		this.kFC.force(true);
 	}
-
-	
 
 	public static class KeyBlob implements Serializable {
 		/**
@@ -1108,30 +1165,38 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	public long claimRecords(LargeBloomFilter nbf) throws IOException {
 		this.iterInit();
 		long _sz = 0;
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			int asz = size;
-			if(!this.active)
+			if (!this.active)
 				asz = this.mapped.cardinality();
 			bf = BloomFilter.create(kbFunnel, asz, .01);
 			this.runningGC = true;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 		try {
+			ByteBuffer zbf = ByteBuffer.allocateDirect(EL);
 			while (iterPos < size) {
-				this.hashlock.lock();
+				l = this.hashlock.writeLock();
+				l.lock();
+				Lock cl = this.claimlock.writeLock();
+				cl.lock();
 				try {
 					byte[] key = new byte[FREE.length];
-					keys.position(iterPos * EL);
-					keys.get(key);
-					long val = keys.getLong();
-					if (!Arrays.equals(key, FREE)
-							&& !Arrays.equals(key, REMOVED)) {
+					zbf.position(0);
+					this.kFC.read(zbf, iterPos * EL);
+					zbf.position(0);
+					zbf.get(key);
+					long val = zbf.getLong();
+					if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 						if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-							keys.position(iterPos * EL);
-							keys.put(REMOVED);
-							keys.putLong(0);
+							zbf.position(0);
+							zbf.put(REMOVED);
+							zbf.putLong(0);
+							zbf.position(0);
+							kFC.write(zbf, iterPos * EL);
 							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
 							this.mapped.clear(iterPos);
@@ -1147,45 +1212,54 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 
 				} finally {
 					iterPos++;
-					this.hashlock.unlock();
+					l.unlock();
+					cl.unlock();
 				}
 			}
 			return _sz;
 		} finally {
-			this.hashlock.lock();
+			l = this.hashlock.writeLock();
+			l.lock();
 			this.runningGC = false;
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
-	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf)
-			throws IOException {
+	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
 		this.iterInit();
 		long _sz = 0;
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-			if(this.active)
-			bf = BloomFilter.create(kbFunnel, size, .01);
+			if (this.active)
+				bf = BloomFilter.create(kbFunnel, size, .01);
 			else
 				bf = BloomFilter.create(kbFunnel, sz.get(), .01);
 			this.runningGC = true;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 		try {
+			ByteBuffer zbf = ByteBuffer.allocateDirect(EL);
 			while (iterPos < size) {
-				this.hashlock.lock();
+				l = this.hashlock.writeLock();
+				l.lock();
+				Lock cl = this.claimlock.writeLock();
+				cl.lock();
 				try {
 					byte[] key = new byte[FREE.length];
-					keys.position(iterPos * EL);
-					keys.get(key);
-					long val = keys.getLong();
-					if (!Arrays.equals(key, FREE)
-							&& !Arrays.equals(key, REMOVED)) {
+					zbf.position(0);
+					this.kFC.read(zbf, iterPos * EL);
+					zbf.position(0);
+					zbf.get(key);
+					long val = zbf.getLong();
+					if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 						if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-							keys.position(iterPos * EL);
-							keys.put(REMOVED);
-							keys.putLong(0);
+							zbf.position(0);
+							zbf.put(REMOVED);
+							zbf.putLong(0);
+							zbf.position(0);
+							kFC.write(zbf, iterPos * EL);
 							ChunkData ck = new ChunkData(val, key);
 							ck.setmDelete(true);
 							this.mapped.clear(iterPos);
@@ -1202,14 +1276,16 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 
 				} finally {
 					iterPos++;
-					this.hashlock.unlock();
+					l.unlock();
+					cl.unlock();
 				}
 			}
 			return _sz;
 		} finally {
-			this.hashlock.lock();
+			l = this.hashlock.writeLock();
+			l.lock();
 			this.runningGC = false;
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -1220,7 +1296,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		if (object != null && object instanceof ProgressiveFileByteArrayLongMap) {
 			ProgressiveFileByteArrayLongMap m = (ProgressiveFileByteArrayLongMap) object;
 			sameSame = this.path.equalsIgnoreCase(m.path);
-		} 
+		}
 		return sameSame;
 	}
 
@@ -1238,51 +1314,38 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 		f.delete();
 	}
 
-	private boolean stopRun = false;
-	private boolean clRunning = false;
-
-	public void stopRun() {
-		this.stopRun = true;
-	}
-
-	
 	@Override
 	public void run() {
-		long tm = System.currentTimeMillis();
-		if((tm - this.lastloaded) > minTmBetweenLoads) {
 		try {
-			if (!clRunning && Main.readAheadMap) {
-				if(SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("caching " + this.path);
-				clRunning = true;
-				int _iterPos = 0;
+				SDFSLogger.getLog().info("caching " + this.path);
+			int _iterPos = 0;
+			ByteBuffer zbf = ByteBuffer.allocateDirect(EL);
+			while (_iterPos < size) {
+				Lock l = this.hashlock.readLock();
+				l.lock();
 
-				while (!stopRun && _iterPos < size) {
-					this.hashlock.lock();
-					try {
-						if (this.mapped.get(iterPos)) {
-							byte[] key = new byte[FREE.length];
-							keys.position(iterPos * EL);
-							keys.get(key);
-							keys.getLong();
-							_iterPos++;
+				try {
+					zbf.position(0);
+					if (this.mapped.get(iterPos)) {
+						try {
+							this.kFC.read(zbf, iterPos * EL);
 
-						} else {
-							_iterPos++;
+						} catch (IOException e) {
+							SDFSLogger.getLog().error("unable to precache", e);
 						}
-					} finally {
-						this.hashlock.unlock();
-					}
+						_iterPos++;
 
+					} else {
+						_iterPos++;
+					}
+				} finally {
+					l.unlock();
 				}
-				if(SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("done caching " + this.path);
+
 			}
-		} finally {
-			this.lastloaded = System.currentTimeMillis();
-			clRunning = false;
-			this.stopRun = false;
-		}
+				SDFSLogger.getLog().info("done caching " + this.path);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(e);
 		}
 
 	}
@@ -1290,12 +1353,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard, Serializa
 	@Override
 	public int compareTo(ProgressiveFileByteArrayLongMap m1) {
 		long dif = this.lastFound - m1.lastFound;
-		if(dif > 0)
+		if (dif > 0)
 			return 1;
-		if(dif < 0)
+		if (dif < 0)
 			return -1;
 		else
 			return 0;
 	}
-		   
+
 }

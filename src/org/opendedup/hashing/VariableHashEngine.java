@@ -1,6 +1,7 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,6 @@ import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.polynomial.Polynomial;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 
 public class VariableHashEngine implements AbstractHashEngine {
 
@@ -24,7 +23,6 @@ public class VariableHashEngine implements AbstractHashEngine {
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	static final long bytesPerWindow = 48;
 	private EnhancedFingerFactory ff = null;
-	HashFunction hf = Hashing.murmur3_128(seed);
 	
 	public VariableHashEngine() throws NoSuchAlgorithmException {
 		while(ff == null) {
@@ -36,7 +34,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 
 	@Override
 	public byte[] getHash(byte[] data) {
-		byte[] hash = hf.hashBytes(data).asBytes();
+		byte[] hash = MurMurHash3.murmurhash3_x64_128(data, 6442);
 		return hash;
 	}
 

@@ -8,39 +8,49 @@ import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.BitSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.StringUtils;
 
-
-public class SimpleByteArrayLongMap {
+public class SimpleByteArrayLongMap  implements Runnable {
 	// MappedByteBuffer keys = null;
 	private int size = 0;
 	private String path = null;
 	private FileChannel kFC = null;
 	RandomAccessFile rf = null;
-	private ReentrantLock hashlock = new ReentrantLock();
-	public static byte[] FREE = new byte[HashFunctionPool.hashLength];
+	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
+	public static final byte[] FREE = new byte[HashFunctionPool.hashLength];
 	transient protected static final int EL = HashFunctionPool.hashLength + 4;
 	transient private static final int VP = HashFunctionPool.hashLength;
+	BitSet mapped = null;
 	private int iterPos = 0;
 	private int currentSz = 0;
-	
+	private static transient BlockingQueue<Runnable> loadCacheQueue = new SynchronousQueue<Runnable>();
+	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS,
+			loadCacheQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
+	private boolean cached = false;
+
 	static {
-		FREE = new byte[HashFunctionPool.hashLength];
 		Arrays.fill(FREE, (byte) 0);
 	}
 
-	public SimpleByteArrayLongMap(String path, int sz)
-			throws IOException {
+	public SimpleByteArrayLongMap(String path, int sz) throws IOException {
 		this.size = NextPrime.getNextPrimeI(sz);
 		this.path = path;
 		this.setUp();
 	}
-	
+
 	public String getPath() {
 		return this.path;
 	}
@@ -52,51 +62,48 @@ public class SimpleByteArrayLongMap {
 		this.iterPos = 0;
 		this.iterlock.unlock();
 	}
-	
+
 	public int getCurrentSize() {
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			return this.currentSz;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
 
-	public KeyValuePair next() throws IOException {
+	public KeyValuePair next() throws IOException, MapClosedException {
 		while (iterPos < this.kFC.size()) {
-			this.hashlock.lock();
+			Lock l = this.hashlock.writeLock();
+			l.lock();
 			try {
-				if(iterPos < this.kFC.size()) {
+				if (this.closed)
+					throw new MapClosedException();
+				if (iterPos < this.kFC.size()) {
 					byte[] key = new byte[FREE.length];
 					this.vb.position(0);
 					kFC.read(vb, iterPos);
 					vb.position(0);
 					iterPos = iterPos + EL;
 					vb.get(key);
-					if (!Arrays.equals(key, FREE)
-							) {
-						return new KeyValuePair(key,vb.getInt());
+					if (!Arrays.equals(key, FREE)) {
+						return new KeyValuePair(key, vb.getInt());
 					}
 				} else {
 					iterPos = iterPos + EL;
 				}
 			} finally {
-				this.hashlock.unlock();
+				l.unlock();
 			}
 
 		}
 		return null;
 	}
-	
+
 	public int getMaxSz() {
 		return this.size;
 	}
-
-	
-
-	
-
-	
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -107,10 +114,14 @@ public class SimpleByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public void setUp() throws IOException {
-		if(new File(path).exists())
-			size =(int)new File(path).length()/EL;
-		rf = new RandomAccessFile(path,"rw");
-		rf.setLength(EL*size);
+		if (new File(path).exists()) {
+			size = (int) new File(path).length() / EL;
+		} else {
+			mapped = new BitSet(size);
+			this.cached = true;
+		}
+		rf = new RandomAccessFile(path, "rw");
+		rf.setLength(EL * size);
 		this.kFC = rf.getChannel();
 		this.closed = false;
 	}
@@ -123,26 +134,26 @@ public class SimpleByteArrayLongMap {
 	 * @return a <code>boolean</code> value
 	 */
 	public boolean containsKey(byte[] key) throws MapClosedException {
+		Lock l = this.hashlock.readLock();
+		l.lock();
 		try {
-			this.hashlock.lock();
-			if(this.closed)
+
+			if (this.closed)
 				throw new MapClosedException();
 			int index = index(key);
 			if (index >= 0) {
 				return true;
 			}
 			return false;
-		} catch(MapClosedException e) {
+		} catch (MapClosedException e) {
 			throw e;
-		}	catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
-
-	
 
 	private int hashFunc1(int hash) {
 		return hash % size;
@@ -167,17 +178,19 @@ public class SimpleByteArrayLongMap {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
-		int index = this.hashFunc1(hash) * EL;
+		int hi = this.hashFunc1(hash);
+		int index = hi * EL;
 		byte[] cur = new byte[FREE.length];
-		kFC.read(ByteBuffer.wrap(cur), index);
-		if (Arrays.equals(cur, key)) {
-			return index;
-		}
+		if (this.mapped == null || this.mapped.get(hi)) {
+			kFC.read(ByteBuffer.wrap(cur), index);
+			if (Arrays.equals(cur, key)) {
+				return index;
+			}
 
-		if (Arrays.equals(cur, FREE)) {
-			return -1;
+			if (Arrays.equals(cur, FREE)) {
+				return -1;
+			}
 		}
-
 		return indexRehashed(key, index, hash, cur);
 	}
 
@@ -193,8 +206,7 @@ public class SimpleByteArrayLongMap {
 	 * @return
 	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
-			throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -208,48 +220,95 @@ public class SimpleByteArrayLongMap {
 			if (index < 0) {
 				index += length;
 			}
-			kFC.read(ByteBuffer.wrap(cur), index);
-			//
-			if (Arrays.equals(cur, FREE)) {
-				return -1;
+			if (mapped == null || mapped.get(index / EL)) {
+				kFC.read(ByteBuffer.wrap(cur), index);
+				if (Arrays.equals(cur, key))
+					return index;
+				//
+				if (Arrays.equals(cur, FREE)) {
+					return -1;
+				}
 			}
 			//
-			if (Arrays.equals(cur, key))
-				return index;
+
 		} while (index != loopIndex);
 
 		return -1;
 	}
 	
-	boolean closed= false;
+	public void cache() {
+		if (!cached) {
+			this.hashlock.writeLock().lock();
+			try {
+				if(!this.cached) {
+					loadCacheExecutor.execute(this);
+					this.cached = true;
+				}
+			} catch (Exception e) {
+				if (SDFSLogger.isDebug())
+					SDFSLogger.getLog().debug("unable to cache " + this, e);
+			}finally {
+				this.hashlock.writeLock().unlock();
+			}
+		}
+	}
 	
+	public void run() {
+		ByteBuffer bf = ByteBuffer.allocateDirect(256*1024);
+		long iterPos = 0;
+		SDFSLogger.getLog().info("caching " + this.path);
+		try {
+		while (iterPos < this.kFC.size()) {
+				bf.position(0);
+				if(this.kFC.size()-iterPos < bf.capacity())
+					bf = ByteBuffer.allocate((int)(this.kFC.size()-iterPos));
+				this.kFC.read(bf,iterPos);
+				iterPos +=bf.capacity();
+			
+		}
+		}catch(Exception e) {
+			SDFSLogger.getLog().error(e);
+		}
+		SDFSLogger.getLog().info("done caching " + this.path);
+	}
+
+	boolean closed = false;
+
 	public void vanish() {
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
 			this.close();
-		}catch(Exception e) {
-			
+		} catch (Exception e) {
+
 		}
 		try {
 			File f = new File(this.path);
 			f.delete();
-		}catch(Exception e) {}
-		this.hashlock.unlock();
+		} catch (Exception e) {
+		}
+		l.unlock();
 	}
 
 	protected int insertionIndex(byte[] key) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
-		int index = this.hashFunc1(hash) * EL;
+		int hi = this.hashFunc1(hash);
+		int index = hi * EL;
 		byte[] cur = new byte[FREE.length];
-		kFC.read(ByteBuffer.wrap(cur), index);
+		if (this.mapped == null || this.mapped.get(hi)) {
 
-		if (Arrays.equals(cur, FREE)) {
-			return index; // empty, all done
-		} else if (Arrays.equals(cur, key)) {
-			return -index - 1; // already stored
+			kFC.read(ByteBuffer.wrap(cur), index);
+
+			if (Arrays.equals(cur, FREE)) {
+				return index; // empty, all done
+			} else if (Arrays.equals(cur, key)) {
+				return -index - 1; // already stored
+			}
 		}
+		else if(this.mapped != null && !this.mapped.get(hi))
+			return index;
 		return insertKeyRehash(key, index, hash, cur);
 	}
 
@@ -267,8 +326,7 @@ public class SimpleByteArrayLongMap {
 	 * @return
 	 * @throws IOException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur)
-			throws IOException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) throws IOException {
 		final int length = size * (EL);
 		final int probe = (1 + (hash % (size - 2))) * EL;
 
@@ -279,45 +337,47 @@ public class SimpleByteArrayLongMap {
 		 */
 		do {
 			// Identify first removed slot
-			
 
 			index -= probe;
 			if (index < 0) {
 				index += length;
 			}
-			kFC.read(ByteBuffer.wrap(cur), index);
+			if (mapped == null || mapped.get(index / EL)) {
+				kFC.read(ByteBuffer.wrap(cur), index);
 
-			// A FREE slot stops the search
-			if (Arrays.equals(cur, FREE)) {
-				
+				// A FREE slot stops the search
+				if (Arrays.equals(cur, FREE)) {
+
 					return index;
-			}
+				}
 
-			if (Arrays.equals(cur, key)) {
-				return -index - 1;
-			}
+				if (Arrays.equals(cur, key)) {
+					return -index - 1;
+				}
+			}else if(this.mapped != null && !this.mapped.get(index / EL))
+				return index;
 
 			// Detect loop
 		} while (index != loopIndex);
 
 		// We inspected all reachable slots and did not find a FREE one
 		// If we found a REMOVED slot we return the first one found
-		
 
 		// Can a resizing strategy be found that resizes the set?
-		throw new IllegalStateException(
-				"No free or removed slots available. Key set full?!!");
+		throw new IllegalStateException("No free or removed slots available. Key set full?!!");
 	}
-	
+
 	ByteBuffer vb = ByteBuffer.allocateDirect(EL);
-	public boolean put(byte[] key, int value) throws MapClosedException{
-		this.hashlock.lock();
+
+	public boolean put(byte[] key, int value) throws MapClosedException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		try {
-			if(this.closed)
+			if (this.closed)
 				throw new MapClosedException();
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
-				int npos = -pos -1;
+				int npos = -pos - 1;
 				npos = (npos / EL);
 				return false;
 			}
@@ -327,23 +387,28 @@ public class SimpleByteArrayLongMap {
 			vb.position(0);
 			this.kFC.write(vb, pos);
 			vb.position(0);
+			pos = (pos / EL);
+			this.mapped.set(pos);
 			this.currentSz++;
 			return pos > -1 ? true : false;
-		} catch(MapClosedException e){
+		} catch (MapClosedException e) {
 			throw e;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			e.printStackTrace();
 			return false;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 	}
-		
+
 	public int get(byte[] key) throws MapClosedException {
+		Lock l = this.hashlock.readLock();
+		l.lock();
+		ByteBuffer kb = ByteBuffer.allocate(EL);
 		try {
-			this.hashlock.lock();
-			if(this.closed)
+
+			if (this.closed)
 				throw new MapClosedException();
 			if (key == null)
 				return -1;
@@ -351,27 +416,27 @@ public class SimpleByteArrayLongMap {
 			if (pos == -1) {
 				return -1;
 			} else {
-				vb.position(0);
-				this.kFC.read(vb,pos);
-				vb.position(VP);
-				int val = vb.getInt();
-				vb.position(0);
+				kb.position(0);
+				this.kFC.read(kb, pos);
+				kb.position(VP);
+				int val = kb.getInt();
 				return val;
 
 			}
-		} catch(MapClosedException e){
+		} catch (MapClosedException e) {
 			throw e;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {
-			this.hashlock.unlock();
+			l.unlock();
 		}
 
 	}
 
 	public void close() {
-		this.hashlock.lock();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
 		this.closed = true;
 		try {
 			this.kFC.close();
@@ -383,109 +448,69 @@ public class SimpleByteArrayLongMap {
 		} catch (Exception e) {
 
 		}
-		this.hashlock.unlock();
+		this.mapped = null;
+		l.unlock();
 		SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
 	public static void main(String[] args) throws Exception {
-		SimpleByteArrayLongMap b = new SimpleByteArrayLongMap("/home/samsilverberg/staging/outgoing/-5355749298482906702.map",
-				10000000);
+		SimpleByteArrayLongMap b = new SimpleByteArrayLongMap(
+				"/home/samsilverberg/staging/outgoing/-5355749298482906702.map", 10000000);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;
-		while(p != null) {
+		while (p != null) {
 			i++;
-			System.out.println("key=" + StringUtils.getHexString(p.key) + " value=" +p.value);
+			System.out.println("key=" + StringUtils.getHexString(p.key) + " value=" + p.value);
 			p = b.next();
-			
-		}
-		System.out.println("sz="+i);
-		
-		/*
-		Random rnd = new Random();
-		byte[] hash = null;
-		int val = -33;
-		byte[] hash1 = null;
-		int val1 = -33;
-		for (int i = 0; i < 60000; i++) {
-			hash = new byte[16];
-			rnd.nextBytes(hash);
-			val = rnd.nextInt();
-			if (i == 5000) {
-				val1 = val;
-				hash1 = hash;
-			}
-			if (val < 0)
-				val = val * -1;
-			boolean k = b.put(hash, val);
-			if (k == false)
-				System.out.println("Unable to add this " + k);
-		}
-		long end = System.currentTimeMillis();
-		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
-		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000
-				+ " ms at pos " + b.get(hash1));
-		b.iterInit();
-		int vals = 0;
-		byte[] key = new byte[16];
-		start = System.currentTimeMillis();
-		while (key != null) {
-			KeyValuePair p =  b.next();
-			if(p == null)
-				key = null;
-			else {
-			key = p.key;
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			vals++;
-			}
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-		b.iterInit();
-		key = new byte[16];
-		start = System.currentTimeMillis();
-		vals = 0;
-		while (key != null) {
-			KeyValuePair p =  b.next();
-			if(p == null)
-				key = null;
-			else {
-			key = p.key;
-			int _val = p.value;
-			if (Arrays.equals(key, hash1))
-				System.out.println("found it! at " + vals);
-			int cval = b.get(key);
-			if(cval !=_val)
-				System.out.println("poop " + cval + " " +_val);
-			vals++;
-			}
-		}
-		b.vanish();
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms " + vals);
-				*/
-	}
 
-	
+		}
+		System.out.println("sz=" + i);
+
+		/*
+		 * Random rnd = new Random(); byte[] hash = null; int val = -33; byte[]
+		 * hash1 = null; int val1 = -33; for (int i = 0; i < 60000; i++) { hash
+		 * = new byte[16]; rnd.nextBytes(hash); val = rnd.nextInt(); if (i ==
+		 * 5000) { val1 = val; hash1 = hash; } if (val < 0) val = val * -1;
+		 * boolean k = b.put(hash, val); if (k == false) System.out.println(
+		 * "Unable to add this " + k); } long end = System.currentTimeMillis();
+		 * System.out.println("Took " + (end - start) / 1000 + " s " + val1);
+		 * System.out.println("Took " + (System.currentTimeMillis() - end) /
+		 * 1000 + " ms at pos " + b.get(hash1)); b.iterInit(); int vals = 0;
+		 * byte[] key = new byte[16]; start = System.currentTimeMillis(); while
+		 * (key != null) { KeyValuePair p = b.next(); if(p == null) key = null;
+		 * else { key = p.key; if (Arrays.equals(key, hash1))
+		 * System.out.println("found it! at " + vals); vals++; } }
+		 * System.out.println("Took " + (System.currentTimeMillis() - start) +
+		 * " ms " + vals); b.iterInit(); key = new byte[16]; start =
+		 * System.currentTimeMillis(); vals = 0; while (key != null) {
+		 * KeyValuePair p = b.next(); if(p == null) key = null; else { key =
+		 * p.key; int _val = p.value; if (Arrays.equals(key, hash1))
+		 * System.out.println("found it! at " + vals); int cval = b.get(key);
+		 * if(cval !=_val) System.out.println("poop " + cval + " " +_val);
+		 * vals++; } } b.vanish(); System.out.println("Took " +
+		 * (System.currentTimeMillis() - start) + " ms " + vals);
+		 */
+	}
 
 	public void sync() throws SyncFailedException, IOException {
 		this.kFC.force(false);
-		
+
 	}
-	
+
 	public static class KeyValuePair {
 		int value;
-		byte [] key;
-		protected KeyValuePair(byte [] key, int value) {
+		byte[] key;
+
+		protected KeyValuePair(byte[] key, int value) {
 			this.key = key;
 			this.value = value;
 		}
-		
-		public byte [] getKey() {
+
+		public byte[] getKey() {
 			return this.key;
 		}
-		
+
 		public int getValue() {
 			return this.value;
 		}

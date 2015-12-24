@@ -2,10 +2,12 @@ package org.opendedup.collections;
 
 import java.util.Collections;
 
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 
 
 
@@ -34,7 +36,6 @@ public class SortedReadMapList implements Runnable {
 	}
 
 	public void add(ProgressiveFileByteArrayLongMap m) {
-
 		try {
 			al.add(m);
 			Collections.reverse(al);

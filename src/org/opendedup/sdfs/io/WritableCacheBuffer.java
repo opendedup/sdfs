@@ -1,13 +1,14 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,6 +24,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
+import org.opendedup.util.StringUtils;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -63,7 +65,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static BlockingQueue<Runnable> worksQueue = null;
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor executor = null;
-	private static BlockingQueue<Runnable> lworksQueue = null;
+	private static SynchronousQueue<Runnable> lworksQueue = null;
 	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor lexecutor = null;
 	static {
@@ -73,14 +75,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			maxTasks = 10;
 		SDFSLogger.getLog().info(
 				"WriteCacheBuffer Pool List Size will be " + maxTasks);
-		worksQueue = new LinkedBlockingQueue<Runnable>(maxTasks);
-		executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
-				10, TimeUnit.SECONDS, worksQueue, executionHandler);
-		lworksQueue = new LinkedBlockingQueue<Runnable>(maxTasks);
-		lexecutor = new ThreadPoolExecutor(Main.writeThreads,
-				Main.writeThreads, 10, TimeUnit.SECONDS, lworksQueue,
+		worksQueue = new SynchronousQueue<Runnable>();
+		executor = new ThreadPoolExecutor(1, Main.writeThreads,
+				600, TimeUnit.SECONDS, worksQueue, executionHandler);
+		lworksQueue = new SynchronousQueue<Runnable>();
+		lexecutor = new ThreadPoolExecutor(1,
+				Main.writeThreads, 600, TimeUnit.SECONDS, lworksQueue,
 				lexecutionHandler);
-
+		lexecutor.allowCoreThreadTimeOut(true);
 		executor.allowCoreThreadTimeOut(true);
 	}
 
@@ -418,12 +420,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							buf.position(sh.pos);
 							buf.put(sh.ck, sh.offset, sh.nlen);
 						} catch (Exception e) {
+							String hp = StringUtils.getHexString(sh.hash);
 							SDFSLogger.getLog().error(
-									"pos = " + this.position + " ck nlen="
-											+ sh.nlen + " ck offset="
-											+ sh.offset + " ck len="
-											+ sh.ck.length + " hcb pos="
-											+ buf.position() + " ck slen="
+									"hash=" + hp + " pos = " + this.position + " ck nlen="
+											+ sh.nlen + " ckoffset="
+											+ sh.offset + " cklen="
+											+ sh.ck.length + " hcbpos="
+											+ buf.position() + " ckslen="
 											+ sh.len + " len="
 											+ (buf.capacity()));
 							throw new IOException(e);

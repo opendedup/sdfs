@@ -16,6 +16,7 @@ import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.BasicConfigurator;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
@@ -62,6 +63,7 @@ public class MountSDFS implements Daemon, Runnable{
 	}
 
 	public static void main(String[] args) throws ParseException {
+		BasicConfigurator.configure();
 		setup(args);
 		try {
 			
@@ -210,11 +212,11 @@ public class MountSDFS implements Daemon, Runnable{
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
-			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
+			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
 					+ ":" + Main.sdfsCliPort +","+cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
+			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
 					+ ":" + Main.sdfsCliPort);
 		}
 		sFal = new String[fal.size()];
