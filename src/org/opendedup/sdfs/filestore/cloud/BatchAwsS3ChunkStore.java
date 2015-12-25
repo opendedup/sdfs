@@ -81,6 +81,7 @@ import com.google.common.io.BaseEncoding;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.HashBlobArchiveNoMap;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
@@ -1903,6 +1904,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public boolean isLocalData() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void writeHashBlobArchive(HashBlobArchiveNoMap arc) throws IOException {
+		writeHashBlobArchive(arc, 0);
+	}
+
+	@Override
+	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
