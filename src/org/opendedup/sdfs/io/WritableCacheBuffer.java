@@ -76,7 +76,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		SDFSLogger.getLog().info(
 				"WriteCacheBuffer Pool List Size will be " + maxTasks);
 		worksQueue = new SynchronousQueue<Runnable>();
-		executor = new ThreadPoolExecutor(1, Main.writeThreads,
+		executor = new ThreadPoolExecutor(1, 2,
 				600, TimeUnit.SECONDS, worksQueue, executionHandler);
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(1,
@@ -202,7 +202,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
 						sh.hashloc = p.hashloc;
-						sh.cache = true;
 						sh.pos = p.pos;
 						sh.nlen = p.nlen;
 						sh.offset = p.offset;
@@ -248,10 +247,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					}
 
 				};
-				for (Shard sh : cks) {
-					sh.l = l;
-					executor.execute(sh);
-				}
+				ShardReader r = new ShardReader();
+				r.shards =cks;
+				r.l = l;
+				r.cache = true;
+				executor.execute(r);
+				
 				int wl = 0;
 				int al = 0;
 				while (l.getDN() < sz && l.getDNEX() == 0) {
@@ -355,10 +356,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					}
 
 				};
-				for (Shard sh : cks) {
-					sh.l = l;
-					executor.execute(sh);
-				}
+				ShardReader r = new ShardReader();
+				r.l = l;
+				r.shards = cks;
+				executor.execute(r);
 				int wl = 0;
 				int tm = 1000;
 				int al = 0;
@@ -697,11 +698,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			};
 			l.setMaxSize(fs.size());
-			for (Finger f : fs) {
-				f.l = l;
-				f.dedup = df.mf.isDedup();
-				SparseDedupFile.executor.execute(f);
-			}
+			Finger.FingerPersister fp = new Finger.FingerPersister();
+			fp.fingers = fs;
+			fp.dedup = df.mf.isDedup();
+			fp.l = l;
+			executor.execute(fp);
 			int wl = 0;
 			int tm = 1000;
 
@@ -1202,7 +1203,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
-	public static class Shard implements Runnable {
+	public static class Shard {
 		public byte[] hash;
 		public byte[] hashloc;
 		public int len;
@@ -1210,27 +1211,35 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public int apos;
 		public int offset;
 		public int nlen;
-		public boolean cache;
 
 		byte[] ck;
+		
+	}
+	
+	public static class ShardReader implements Runnable {
+		List<Shard> shards;
 		AsyncChunkReadActionListener l;
-
+		public boolean cache;
 		@Override
 		public void run() {
+			for(Shard s : shards) {
 			try {
 				if (cache) {
-					HCServiceProxy.cacheData(hash, hashloc);
+					HCServiceProxy.cacheData(s.hash, s.hashloc);
 				}else
-					ck = HCServiceProxy.fetchChunk(hash, hashloc);
-				l.commandResponse(this);
+					s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc);
+				l.commandResponse(s);
 			} catch (DataArchivedException e) {
 				l.commandArchiveException(e);
 			} catch (Exception e) {
 				l.commandException(e);
 			}
+			}
 
 		}
+		
 	}
+	
 
 	@Override
 	public void run() {

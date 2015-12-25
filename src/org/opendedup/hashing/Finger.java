@@ -1,9 +1,13 @@
 package org.opendedup.hashing;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-public class Finger implements Runnable {
+public class Finger  implements Runnable{
 	public byte[] chunk;
 	public byte[] hash;
 	public byte[] hl;
@@ -13,8 +17,8 @@ public class Finger implements Runnable {
 	public boolean dedup;
 	public AsyncChunkWriteActionListener l;
 
-	@Override
-	public void run() {
+
+	public void run()  {
 		try {
 			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
 					this.dedup);
@@ -23,5 +27,40 @@ public class Finger implements Runnable {
 		} catch (Throwable e) {
 			l.commandException(this, e);
 		}
+	}
+	
+	public static class FingerPersister implements Runnable{
+		public AsyncChunkWriteActionListener l;
+		public List<Finger> fingers;
+		public boolean dedup;
+		@Override
+		public void run() {
+			for(Finger f : fingers) {
+				try {
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
+							dedup);
+					l.commandResponse(f);
+
+				} catch (Throwable e) {
+					l.commandException(f, e);
+				}
+			}
+			
+		}
+		
+		public void persist() throws IOException, HashtableFullException {
+			for(Finger f : fingers) {
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
+							dedup);
+
+				
+			}
+		}
+		
+		
+	}
+	
+	public void persist() {
+		
 	}
 }

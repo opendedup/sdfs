@@ -446,7 +446,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 										metaData.put("deleted-objects", Integer.toString(delobj));
 										this.writeHashMap(metaData, k);
 										try {
-										long cl = HashBlobArchive.compactArchive(k);
+											long cl =0;
+										//long cl = HashBlobArchive.compactArchive(k);
 										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
 										SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
 										}catch(Exception e) {
@@ -474,7 +475,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
 								try {
-								long cl = HashBlobArchive.compactArchive(k);
+									long cl =0;
+								//long cl = HashBlobArchive.compactArchive(k);
 								
 								HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
 								SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");

@@ -68,7 +68,7 @@ public class SparseDedupFile implements DedupFile {
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private boolean deleted = false;
-	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads,
+	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1,
 			Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
 	private boolean dirty = false;
 	protected boolean toOccured = false;
@@ -384,88 +384,11 @@ public class SparseDedupFile implements DedupFile {
 						try {
 							List<Finger> fs = eng.getChunks(writeBuffer.getFlushedBuffer());
 							ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>(fs.size());
-							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
-
-								@Override
-								public void commandException(Finger result, Throwable e) {
-									int _dn = this.incrementandGetDN();
-									this.incrementAndGetDNEX();
-									SDFSLogger.getLog().error("Error while getting hash", e);
-									if (_dn >= this.getMaxSz()) {
-										synchronized (this) {
-											this.notifyAll();
-										}
-									}
-								}
-
-								@Override
-								public void commandResponse(Finger result) {
-									int _dn = this.incrementandGetDN();
-									if (_dn >= this.getMaxSz()) {
-										synchronized (this) {
-											this.notifyAll();
-										}
-									}
-								}
-
-								@Override
-								public void commandArchiveException(DataArchivedException e) {
-									this.incrementAndGetDNEX();
-									this.dar = e;
-									SDFSLogger.getLog().error("Data has been archived", e);
-									this.incrementandGetDN();
-
-									synchronized (this) {
-										this.notifyAll();
-									}
-
-								}
-
-							};
-							l.setMaxSize(fs.size());
-							for (Finger f : fs) {
-								f.l = l;
-								f.dedup = mf.isDedup();
-								executor.execute(f);
-							}
-							int wl = 0;
-							int tm = 1000;
-
-							int al = 0;
-							while (l.getDN() < fs.size() && l.getDNEX() == 0) {
-								if (al == 30) {
-									int nt = wl / 1000;
-									SDFSLogger.getLog()
-											.debug("Slow io, waited [" + nt + "] seconds for all writes to complete.");
-									al = 0;
-								}
-								if (Main.writeTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
-									int nt = wl / 1000;
-									this.toOccured = true;
-									throw new IOException("Write Timed Out after [" + nt + "] seconds. Expected ["
-											+ fs.size() + "] block writes but only [" + l.getDN() + "] were completed");
-								}
-								if (l.dar != null) {
-									throw l.dar;
-								}
-
-								synchronized (l) {
-									l.wait(tm);
-								}
-								al++;
-								wl += tm;
-							}
-							if (l.getDN() < fs.size()) {
-								this.toOccured = true;
-								throw new IOException(
-										"Write Timed Out expected [" + fs.size() + "] but got [" + l.getDN() + "]");
-							}
-							if (l.dar != null)
-								throw l.dar;
-							if (l.getDNEX() > 0) {
-								this.errOccured = true;
-								throw new IOException("Write Failed");
-							}
+							
+							Finger.FingerPersister fp = new Finger.FingerPersister();
+							fp.fingers = fs;
+							fp.dedup = mf.isDedup();
+							fp.persist();
 							// SDFSLogger.getLog().info("broke data up into " +
 							// fs.size() + " chunks");
 							int _pos = 0;
@@ -492,8 +415,6 @@ public class SparseDedupFile implements DedupFile {
 							}
 							writeBuffer.setDoop(dups);
 							writeBuffer.setAR(ar);
-						} catch (DataArchivedException e) {
-							throw e;
 						} catch (Exception e) {
 							this.errOccured = true;
 							throw e;
@@ -517,8 +438,6 @@ public class SparseDedupFile implements DedupFile {
 				}
 				mf.getIOMonitor().addDulicateData((dups - writeBuffer.getPrevDoop()), true);
 				this.updateMap(writeBuffer, dups);
-			} catch (DataArchivedException e) {
-				throw e;
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to add chunk at position " + writeBuffer.getFilePosition(), e);
 				this.errOccured = true;
@@ -661,6 +580,7 @@ public class SparseDedupFile implements DedupFile {
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
 			try {
+				
 				if (activeBuffer != null && activeBuffer.getFilePosition() == chunkPos)
 					return activeBuffer;
 				else {
