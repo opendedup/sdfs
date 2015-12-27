@@ -1,0 +1,22 @@
+ -agentpath:/usr/share/sdfs/linux-x86-128/libyjpagent.so=port=9000 \
+ 
+
+ for i in $(echo {a..n}); do cat /sys/block/sd$i/queue/scheduler; done
+ 
+ for i in $(echo {a..n}); do echo deadline > /sys/block/sd$i/queue/scheduler; done
+ 
+  for i in $(echo {a..n}); do cat /sys/block/sd$i/queue/scheduler; done
+
+  for i in $(echo {a..n}); do echo 1 > /sys/block/sd$i/queue/nr_requests; done
+  
+  for i in $(echo {a..n}); do cat /sys/block/sd$i/queue/nr_requests; done
+  
+  for i in $(echo {a..n}); do cat  /sys/block/sd$i/queue/add_random; done
+  
+  for i in $(echo {a..n}); do echo 0 >  /sys/block/sd$i/queue/add_random; done
+  
+  
+  for i in $(echo {a..n}); do cat /sys/block/sd$i/queue/rq_affinity; done
+  
+  for i in $(echo {a..n}); do echo 0 > /sys/block/sd$i/queue/rq_affinity; done
+  
