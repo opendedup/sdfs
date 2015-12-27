@@ -159,39 +159,43 @@ public class ReadTest implements Runnable {
 	}
 
 	public static void main(String[] args) throws IOException {
-		if (args.length != 4) {
+		if (args.length != 5) {
 			System.out
-					.println("ReadTest <Path to read from> <Number of Parallel Runs> <Test Name> <Output File>");
+					.println("ReadTest <Path to read from> <Number of Parallel Runs> <numer of tests> <Test Name> <Output File>");
 			System.exit(0);
 		}
-		System.out.println("Running Read Test ...");
-		float[] results = test(args[0], Integer.parseInt(args[1]));
-		String testName = args[2];
-		String logFileName = args[3];
-		Path p = Paths.get(logFileName);
-		boolean nf = !Files.exists(p);
-		FileChannel ch = (FileChannel) Files.newByteChannel(p,
-				StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-				StandardOpenOption.APPEND);
-		if (nf) {
-			String header = "test-name,date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),unique,runs\n";
-			ch.write(ByteBuffer.wrap(header.getBytes()));
+		int r = Integer.parseInt(args[2]);
+		for (int i = 0; i < r; i++) {
+			int start = (i * Integer.parseInt(args[1]))+1;
+			System.out.println("Running Read Test ...");
+			float[] results = test(args[0], start);
+			String testName = args[3];
+			String logFileName = args[4];
+			Path p = Paths.get(logFileName);
+			boolean nf = !Files.exists(p);
+			FileChannel ch = (FileChannel) Files.newByteChannel(p,
+					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+					StandardOpenOption.APPEND);
+			if (nf) {
+				String header = "test-name,date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),unique,runs\n";
+				ch.write(ByteBuffer.wrap(header.getBytes()));
+			}
+			String output = testName + "," + new Date() + ","
+					+ findMean(results) + "," + findMedian(results) + ","
+					+ findMode(results) + "," + findTotal(results) + ","
+					+ args[1] + "," + args[2] + "," + args[3] + "\n";
+			ch.write(ByteBuffer.wrap(output.getBytes()));
+			float mean = findMean(results);
+			System.out.println("Mean= " + mean);
+			float median = findMedian(results);
+			System.out.println("Median= " + median);
+			float mode = findMode(results);
+			System.out.println("Mode= " + mode);
+			float total = findTotal(results);
+			System.out.println("Total= " + total);
+			ch.close();
+			System.out.println("Results written to " + logFileName);
 		}
-		String output = testName + "," + new Date() + "," + findMean(results)
-				+ "," + findMedian(results) + "," + findMode(results) + ","
-				+ findTotal(results) + "," + args[1] + "," + args[2] + ","
-				+ args[3] + "\n";
-		ch.write(ByteBuffer.wrap(output.getBytes()));
-		float mean = findMean(results);
-		System.out.println("Mean= " + mean);
-		float median = findMedian(results);
-		System.out.println("Median= " + median);
-		float mode = findMode(results);
-		System.out.println("Mode= " + mode);
-		float total = findTotal(results);
-		System.out.println("Total= " + total);
-		ch.close();
-		System.out.println("Results written to " + logFileName);
 	}
 
 }

@@ -47,7 +47,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	private long size = 0;
 	private final ReentrantLock arlock = new ReentrantLock();
 	private final ReentrantLock iolock = new ReentrantLock();
-	private final ReentrantLock klock = new ReentrantLock();
+	//private final ReentrantLock klock = new ReentrantLock();
 	private String fileName;
 	private String origFileName;
 	long compactKsz = 0;
@@ -90,16 +90,17 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		this.closed = false;
 		// st = new SyncThread(this);
 	}
-
+/*
 	AtomicLong ct = new AtomicLong();
 	AtomicLong mt = new AtomicLong();
 	AtomicLong amt = new AtomicLong();
 	AtomicLong zmt = new AtomicLong();
 
+*/
 	private AbstractShard getReadMap(byte[] hash) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
-		long v = ct.incrementAndGet();
+		//long v = ct.incrementAndGet();
 		try {
 
 			if (!runningGC && !lbf.mightContain(hash)) {
@@ -116,17 +117,18 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		 * (_m.containsKey(hash)) return _m; }
 		 */
 		try {
-			zmt.incrementAndGet();
+			//zmt.incrementAndGet();
 			for (ProgressiveFileByteArrayLongMap _m : this.maps.getAL()) {
-				amt.incrementAndGet();
+				//amt.incrementAndGet();
 				if (_m.containsKey(hash)) {
 					return _m;
 				}
 			}
-			mt.incrementAndGet();
+			//mt.incrementAndGet();
 
 			return null;
 		} finally {
+			/*
 			klock.lock();
 			try {
 				if (ct.get() >= 500000 && !runningGC) {
@@ -144,6 +146,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			} finally {
 				klock.unlock();
 			}
+			*/
 		}
 	}
 
@@ -192,8 +195,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
-			if (!runningGC && !lbf.mightContain(hash))
+			if (!runningGC && !lbf.mightContain(hash)) {
 				return pos;
+			}
 		} finally {
 			l.unlock();
 		}
@@ -208,6 +212,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		for (ProgressiveFileByteArrayLongMap m : this.maps.getAL()) {
 			pos = m.get(hash);
 			if (pos != -1) {
+				
 				m.cache();
 				return pos;
 			}

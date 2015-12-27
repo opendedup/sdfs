@@ -526,8 +526,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (Exception e) {
 			archives.invalidate(hbid);
 			archive = archives.get(hbid);
+			z = archive.getChunk(hash);
 		}
-		z = archive.getChunk(hash);
 		return z;
 	}
 

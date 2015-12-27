@@ -1906,10 +1906,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		return false;
 	}
 
-	@Override
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc) throws IOException {
-		writeHashBlobArchive(arc, 0);
-	}
 
 	@Override
 	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {

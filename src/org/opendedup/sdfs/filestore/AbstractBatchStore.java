@@ -11,7 +11,6 @@ public interface AbstractBatchStore {
 	public boolean fileExists(long id) throws IOException;
 	public boolean checkAccess();
 	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException;
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc) throws IOException;
 	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException;
 	public byte [] getBytes(long id) throws IOException, DataArchivedException;
 	public Map<String,Integer> getHashMap(long id) throws IOException;

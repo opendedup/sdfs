@@ -19,6 +19,8 @@ public class PFullGC implements GCControllerImpl {
 	public PFullGC() {
 		this.prevPFull = calcPFull();
 		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
+		if(this.nextPFull== 0)
+			this.nextPFull = .1;
 		double pFull = (this.prevPFull * 100);
 		double nFull = (this.nextPFull * 100);
 		DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
@@ -32,7 +34,7 @@ public class PFullGC implements GCControllerImpl {
 
 	@Override
 	public void runGC() {
-		if (this.calcPFull() >= this.nextPFull) {
+		if (this.calcPFull() > this.nextPFull) {
 			SDFSEvent task = SDFSEvent
 					.gcInfoEvent("Percentage Full Exceeded : Running Orphaned Block Collection");
 			task.longMsg = "Running Garbage Collection because percentage full is "

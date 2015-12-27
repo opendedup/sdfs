@@ -1416,11 +1416,6 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc) throws IOException {
-		writeHashBlobArchive(arc, 0);
-	}
-
-	@Override
 	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {
 		// TODO Auto-generated method stub
 		

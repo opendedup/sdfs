@@ -61,7 +61,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean hlAdded = false;
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 	int sz;
-	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
+	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * 2;
 	private static BlockingQueue<Runnable> worksQueue = null;
 	private static RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor executor = null;
@@ -76,7 +76,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		SDFSLogger.getLog().info(
 				"WriteCacheBuffer Pool List Size will be " + maxTasks);
 		worksQueue = new SynchronousQueue<Runnable>();
-		executor = new ThreadPoolExecutor(1, 2,
+		executor = new ThreadPoolExecutor(1, maxTasks,
 				600, TimeUnit.SECONDS, worksQueue, executionHandler);
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(1,
@@ -357,9 +357,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				};
 				ShardReader r = new ShardReader();
+				r.shards =cks;
 				r.l = l;
-				r.shards = cks;
+				r.cache = false;
 				executor.execute(r);
+				
 				int wl = 0;
 				int tm = 1000;
 				int al = 0;
@@ -698,11 +700,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			};
 			l.setMaxSize(fs.size());
-			Finger.FingerPersister fp = new Finger.FingerPersister();
-			fp.fingers = fs;
-			fp.dedup = df.mf.isDedup();
-			fp.l = l;
-			executor.execute(fp);
+			for (Finger f : fs) {
+				f.l = l;
+				f.dedup = df.mf.isDedup();
+				SparseDedupFile.executor.execute(f);
+			}
 			int wl = 0;
 			int tm = 1000;
 
@@ -1203,7 +1205,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
-	public static class Shard {
+	public static class Shard implements Runnable{
 		public byte[] hash;
 		public byte[] hashloc;
 		public int len;
@@ -1212,7 +1214,27 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public int offset;
 		public int nlen;
 
+
+		public boolean cache;
+
 		byte[] ck;
+		AsyncChunkReadActionListener l;
+
+		@Override
+		public void run() {
+			try {
+				if (cache) {
+					HCServiceProxy.cacheData(hash, hashloc);
+				}else
+					ck = HCServiceProxy.fetchChunk(hash, hashloc);
+				l.commandResponse(this);
+			} catch (DataArchivedException e) {
+				l.commandArchiveException(e);
+			} catch (Exception e) {
+				l.commandException(e);
+			}
+
+		}
 		
 	}
 	

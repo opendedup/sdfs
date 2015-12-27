@@ -298,7 +298,9 @@ public class ProgressiveFileByteArrayLongMap
 		SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
 		@SuppressWarnings("resource")
 		RandomAccessFile _kRaf = new RandomAccessFile(path + ".keys", "rw");
-
+		if(newInstance)
+			_kRaf.setLength(this.size * EL);
+		SDFSLogger.getLog().info("set table to size " + posFile.length());
 		this.kFC = _kRaf.getChannel();
 		try {
 			/*
@@ -626,14 +628,18 @@ public class ProgressiveFileByteArrayLongMap
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash);
-		if (this.isFree(index))
+		
+		if (this.isFree(index)) {
+			//SDFSLogger.getLog().info("free=" + index + " hash=" +StringUtils.getHexString(key));
 			return -1;
+		}
 		else
 			index = index * EL;
 
 		kFC.read(cb, index);
 
 		if (Arrays.equals(current, key)) {
+			//SDFSLogger.getLog().info("found=" + index+ " hash=" +StringUtils.getHexString(key));
 			return index;
 		}
 		return indexRehashed(key, index, hash, current);
@@ -668,8 +674,9 @@ public class ProgressiveFileByteArrayLongMap
 			if (!this.isFree(index / EL)) {
 
 				kFC.read(ByteBuffer.wrap(cur), index);
-				if (Arrays.equals(cur, key))
+				if (Arrays.equals(cur, key)) {
 					return index;
+				}
 			} else {
 				return -1;
 			}
@@ -855,6 +862,7 @@ public class ProgressiveFileByteArrayLongMap
 				else {
 					pos = this.insertionIndex(key, bf.mightContain(kb));
 				}
+				//SDFSLogger.getLog().info("pos=" + pos/EL + " hash=" +StringUtils.getHexString(key));
 			} catch (HashtableFullException e) {
 				this.full = true;
 				throw e;
@@ -884,6 +892,7 @@ public class ProgressiveFileByteArrayLongMap
 				this.bf.put(kb);
 				// this.store.position(pos);
 				// this.store.put(storeID);
+				
 				return pos > -1 ? true : false;
 			}
 		} finally {
@@ -923,8 +932,9 @@ public class ProgressiveFileByteArrayLongMap
 		try {
 			if (key == null)
 				return -1;
-			if (!this.runningGC && !this.bf.mightContain(new KeyBlob(key)))
+			if (!this.runningGC && !this.bf.mightContain(new KeyBlob(key))) {
 				return -1;
+			}
 			int pos = -1;
 
 			pos = this.index(key);
