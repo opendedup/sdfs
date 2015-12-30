@@ -252,6 +252,7 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
+			
 			buf.position(pos);
 			this.writtenTo = true;
 			long _cp = offset;
@@ -462,7 +463,7 @@ public class DedupFileChannel {
 				byte[] _rb = null;
 				try {
 					while (readBuffer == null) {
-						readBuffer = df.getReadBuffer(currentLocation);
+						readBuffer = df.getWriteBuffer(currentLocation);
 						try {
 							startPos = (int) (currentLocation - readBuffer.getFilePosition());
 							int _len = readBuffer.getLength() - startPos;

@@ -39,7 +39,7 @@ public class ProcessWorker {
 	    }
 	    if ( isAlive( p ) )
 	    {
-	        throw new TimeoutException( "Process timeout out after " + timeout + " ms" );
+	        throw new TimeoutException( "Process [" + cmdStr +"] timeout out after [" + timeout + "] ms" );
 	    }
 	    return p.exitValue();
 	}
@@ -96,7 +96,7 @@ public class ProcessWorker {
 	                if(name.equalsIgnoreCase("stderr"))
 	                	SDFSLogger.getLog().error("[" + name + "] " + s);
 	                else
-	                	SDFSLogger.getLog().debug("[" + name + "] " + s);
+	                	SDFSLogger.getLog().info("[" + name + "] " + s);
 	            }
 	            is.close ();    
 	        } catch (Exception ex) {

@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.SyncFailedException;
@@ -9,21 +10,16 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.StringUtils;
 
-public class SimpleByteArrayLongMap  implements Runnable {
+public class SimpleByteArrayLongMap {
 	// MappedByteBuffer keys = null;
 	private int size = 0;
 	private String path = null;
@@ -36,10 +32,6 @@ public class SimpleByteArrayLongMap  implements Runnable {
 	BitSet mapped = null;
 	private int iterPos = 0;
 	private int currentSz = 0;
-	private static transient BlockingQueue<Runnable> loadCacheQueue = new SynchronousQueue<Runnable>();
-	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS,
-			loadCacheQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
-	private boolean cached = false;
 
 	static {
 		Arrays.fill(FREE, (byte) 0);
@@ -118,7 +110,6 @@ public class SimpleByteArrayLongMap  implements Runnable {
 			size = (int) new File(path).length() / EL;
 		} else {
 			mapped = new BitSet(size);
-			this.cached = true;
 		}
 		rf = new RandomAccessFile(path, "rw");
 		rf.setLength(EL * size);
@@ -234,42 +225,6 @@ public class SimpleByteArrayLongMap  implements Runnable {
 		} while (index != loopIndex);
 
 		return -1;
-	}
-	
-	public void cache() {
-		if (!cached) {
-			this.hashlock.writeLock().lock();
-			try {
-				if(!this.cached) {
-					loadCacheExecutor.execute(this);
-					this.cached = true;
-				}
-			} catch (Exception e) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("unable to cache " + this, e);
-			}finally {
-				this.hashlock.writeLock().unlock();
-			}
-		}
-	}
-	
-	public void run() {
-		ByteBuffer bf = ByteBuffer.allocateDirect(256*1024);
-		long iterPos = 0;
-		SDFSLogger.getLog().info("caching " + this.path);
-		try {
-		while (iterPos < this.kFC.size()) {
-				bf.position(0);
-				if(this.kFC.size()-iterPos < bf.capacity())
-					bf = ByteBuffer.allocate((int)(this.kFC.size()-iterPos));
-				this.kFC.read(bf,iterPos);
-				iterPos +=bf.capacity();
-			
-		}
-		}catch(Exception e) {
-			SDFSLogger.getLog().error(e);
-		}
-		SDFSLogger.getLog().info("done caching " + this.path);
 	}
 
 	boolean closed = false;

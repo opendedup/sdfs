@@ -1342,6 +1342,7 @@ public class ProgressiveFileByteArrayLongMap
 
 						} catch (IOException e) {
 							SDFSLogger.getLog().error("unable to precache", e);
+							return;
 						}
 						_iterPos++;
 

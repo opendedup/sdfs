@@ -81,7 +81,7 @@ public interface DedupChunkInterface {
 
 	public boolean isClosed();
 
-	public void flush() throws BufferClosedException;
+	public void flush() throws BufferClosedException,IOException;
 
 	public boolean isBatchProcessed();
 

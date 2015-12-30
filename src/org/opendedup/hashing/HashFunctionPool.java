@@ -2,17 +2,16 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
+
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 public class HashFunctionPool {
 
-	private int poolSize;
-	private ConcurrentLinkedQueue<AbstractHashEngine> passiveObjects = new ConcurrentLinkedQueue<AbstractHashEngine>();
+	private static ConcurrentLinkedQueue<AbstractHashEngine> passiveObjects = new ConcurrentLinkedQueue<AbstractHashEngine>();
 	public static final String TIGER_16 = "tiger16";
 	public static final String TIGER_24 = "tiger24";
 	public static final String MURMUR3_16 = "murmur3_128";
@@ -34,29 +33,9 @@ public class HashFunctionPool {
 		}
 	}
 
-	public HashFunctionPool(int size) {
-		this.poolSize = size;
-		this.populatePool();
-	}
-
-	public void populatePool() {
-		for (int i = 0; i < poolSize; i++) {
-			try {
-				this.passiveObjects.add(this.makeObject());
-			} catch (Exception e) {
-				e.printStackTrace();
-				SDFSLogger.getLog().fatal(
-						"unable to instancial Hash Function pool", e);
-
-			} finally {
-
-			}
-		}
-	}
-
-	public AbstractHashEngine borrowObject() throws IOException {
+	public static AbstractHashEngine borrowObject() throws IOException {
 		AbstractHashEngine hc = null;
-		hc = this.passiveObjects.poll();
+		hc = passiveObjects.poll();
 		if (hc == null) {
 			try {
 				hc = makeObject();
@@ -69,16 +48,16 @@ public class HashFunctionPool {
 		return hc;
 	}
 
-	public void returnObject(AbstractHashEngine hc) throws IOException {
-		this.passiveObjects.add(hc);
+	public static void returnObject(AbstractHashEngine hc) throws IOException {
+		passiveObjects.add(hc);
 	}
 
-	public AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
+	public static AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
 			NoSuchProviderException {
 		return getHashEngine();
 	}
 
-	public void destroyObject(AbstractHashEngine hc) {
+	public static void destroyObject(AbstractHashEngine hc) {
 		hc.destroy();
 	}
 

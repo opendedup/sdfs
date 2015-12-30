@@ -186,6 +186,8 @@ public class WriteTest implements Runnable {
 			System.exit(0);
 		}
 		int r = Integer.parseInt(args[4]);
+		File f = new File(args[0]);
+		f.mkdirs();
 		for (int i = 0; i < r; i++) {
 			int start = i * Integer.parseInt(args[3]);
 			float[] results = test(args[0], Integer.parseInt(args[1]),

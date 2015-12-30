@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -326,7 +327,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		fpos = this.getMapFilePosition(pos);
 
 		//
-		WriteLock l = this.hashlock.writeLock();
+		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try{
 		
@@ -341,6 +342,9 @@ public class LongByteArrayMap implements DataMapInterface {
 		;
 		if (fpos > flen)
 			flen = fpos;
+		l.unlock();
+		l = this.hashlock.readLock();
+		l.lock();
 		// rf.seek(fpos);
 		// rf.write(data);
 		pbdb.write(ByteBuffer.wrap(data), fpos);

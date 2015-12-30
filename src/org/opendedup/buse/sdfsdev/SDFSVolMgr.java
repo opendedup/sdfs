@@ -154,7 +154,9 @@ public class SDFSVolMgr implements Daemon{
 		
 		BUSEMkDev.init();
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
-		
+		VolumeShutdownHook.service = sdfsService;
+		VolumeShutdownHook shutdownHook = new VolumeShutdownHook();
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
@@ -206,6 +208,18 @@ public class SDFSVolMgr implements Daemon{
 		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
 		sdfsService.stop();
+		try {
+			try {
+			Main.volume.closeAllDevices();
+			}catch(Exception e) {}
+			Thread.sleep(1000);
+			try {
+			BUSEMkDev.release();
+			}catch(Exception e) {}
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
 		SDFSLogger.getLog().info("All Data Flushed");
 		
 	}

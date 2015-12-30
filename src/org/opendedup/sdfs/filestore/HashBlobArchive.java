@@ -251,7 +251,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 										m.put(BaseEncoding.base64().decode(key), _m.get(key));
 									}
 								}
-								m.cache();
 								return m;
 							} catch (Exception e) {
 								SDFSLogger.getLog().error("unable to fetch hashmap [" + hashid + "]", e);

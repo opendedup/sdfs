@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -50,12 +51,12 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.Weigher;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+import com.github.benmanes.caffeine.cache.Weigher;
 import com.google.common.io.BaseEncoding;
 import com.google.common.util.concurrent.RateLimiter;
 
@@ -189,16 +190,19 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
 					worksQueue, executionHandler);
 
-			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
+			openFiles = Caffeine.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Integer, FileChannel>() {
-						public void onRemoval(RemovalNotification<Integer, FileChannel> removal) {
+
+						@Override
+						public void onRemoval(Integer arg0, FileChannel arg1, RemovalCause arg2) {
 							try {
-								removal.getValue().close();
-							} catch (Exception e) {
-								SDFSLogger.getLog().warn("unable to close filechannel", e);
+								arg1.close();
+							} catch (IOException e) {
+								//SDFSLogger.getLog().error("unable to close file");
 							}
+							
 						}
-					}).concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
+					}).expireAfterAccess(60, TimeUnit.SECONDS)
 					.build(new CacheLoader<Integer, FileChannel>() {
 						public FileChannel load(Integer hashid) throws IOException {
 							try {
@@ -398,14 +402,18 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 	}
 
 	public static void buildCache() throws IOException {
-		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE).concurrencyLevel(64)
+		archives = Caffeine.newBuilder().maximumWeight(LOCAL_CACHE_SIZE)
 				.weigher(new Weigher<Integer, HashBlobArchiveNoMap>() {
 					public int weigh(Integer k, HashBlobArchiveNoMap g) {
 						return g.getLen();
 					}
 				}).removalListener(new RemovalListener<Integer, HashBlobArchiveNoMap>() {
-					public void onRemoval(RemovalNotification<Integer, HashBlobArchiveNoMap> removal) {
-						removal.getValue().removeCache();
+					
+
+					@Override
+					public void onRemoval(Integer arg0, HashBlobArchiveNoMap arg1, RemovalCause arg2) {
+						arg1.removeCache();
+						
 					}
 				}).build(new CacheLoader<Integer, HashBlobArchiveNoMap>() {
 					public HashBlobArchiveNoMap load(Integer hashid) throws IOException {

@@ -3,6 +3,7 @@ package org.opendedup.hashing;
 import java.util.ArrayList;
 
 
+
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,7 +13,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BufferClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
-import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -59,7 +59,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer runnable = tasks.get(i);
 								runnable.startClose();
-								AbstractHashEngine hc = SparseDedupFile.hashPool
+								AbstractHashEngine hc = HashFunctionPool
 										.borrowObject();
 								byte[] hash = null;
 
@@ -80,14 +80,14 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 								} catch (BufferClosedException e) {
 									
 								} finally {
-									SparseDedupFile.hashPool.returnObject(hc);
+									HashFunctionPool.returnObject(hc);
 								}
 							}
 						} else {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer writeBuffer = tasks.get(i);
 								writeBuffer.startClose();
-								VariableHashEngine hc = (VariableHashEngine) SparseDedupFile.hashPool
+								VariableHashEngine hc = (VariableHashEngine) HashFunctionPool
 										.borrowObject();
 								List<Finger> fs = hc.getChunks(writeBuffer
 										.getFlushedBuffer());

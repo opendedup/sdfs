@@ -2,6 +2,7 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
+
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
@@ -10,7 +11,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
-import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -50,12 +50,6 @@ public class SDFSService {
 		MgmtWebServer.start(useSSL);
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
-
-		System.out.println("Initializing HashFunction");
-		SDFSLogger.getLog().info("Initializing HashFunction");
-		SparseDedupFile.hashPool.hashCode();
-		System.out.println("HashFunction Initialized");
-		SDFSLogger.getLog().info("HashFunction Initialized");
 		if (HashFunctionPool.max_hash_cluster > 1)
 			SDFSLogger.getLog().info(
 					"HashFunction Min Block Size=" + VariableHashEngine.minLen
