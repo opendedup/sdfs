@@ -1,13 +1,13 @@
 package org.opendedup.hashing;
 
 import java.security.NoSuchAlgorithmException;
+
 import java.util.ArrayList;
 
 
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.QuickList;
