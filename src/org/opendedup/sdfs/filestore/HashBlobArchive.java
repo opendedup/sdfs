@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -127,6 +128,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	public static SimpleByteArrayLongMap getMap(long id) throws ExecutionException {
 		return maps.get(id);
+	}
+	
+	public static String getStrings(long id) throws IOException {
+		HashBlobArchive har = null;
+		File f = getPath(id);
+		if (f.exists()) {
+			har = new HashBlobArchive(f, id);
+			return har.getHashesString();
+		}else
+			return null;
+		
 	}
 
 	public static void deleteArchive(long id) {
@@ -422,7 +434,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static void buildCache() throws IOException {
-		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE).concurrencyLevel(64)
+		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE)
 				.weigher(new Weigher<Long, HashBlobArchive>() {
 					public int weigh(Long k, HashBlobArchive g) {
 						return g.getLen();
@@ -752,13 +764,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 			Lock ul = this.uploadlock.writeLock();
 			ul.lock();
 			try {
-				SDFSLogger.getLog().debug("removed " + f.getPath());
+				SDFSLogger.getLog().debug("removing " + f.getPath());
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
 				openFiles.invalidate(this.id);
 				f.delete();
 				File lf = new File(f.getPath() + ".map");
 				lf.delete();
+				SDFSLogger.getLog().debug("removed " + f.getPath());
 
 			} finally {
 				ul.unlock();
@@ -995,6 +1008,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 		l.lock();
 		try {
 			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
+			if(blockMap == null)
+				blockMap = maps.get(this.id);
 
 			blockMap.iterInit();
 			KeyValuePair p = blockMap.next();

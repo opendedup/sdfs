@@ -6,8 +6,10 @@ import java.io.File;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -69,22 +71,37 @@ public class SparseDedupFile implements DedupFile {
 			HashFunctionPool.max_hash_cluster);
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private boolean deleted = false;
-	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
-			worksQueue, executionHandler);
+	protected static transient ThreadPoolExecutor executor = null;
 	private boolean dirty = false;
 	protected boolean toOccured = false;
 	protected boolean errOccured = false;
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
+	public static VariableHashEngine eng = null;
 	
 	static {
 		maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 		SDFSLogger.getLog().info("Maximum Write Buffers are " + maxWriteBuffers);
-		if(!Main.chunkStoreLocal)
+		if(!Main.chunkStoreLocal) {
 			pool = new ThreadPool(
 					Main.writeThreads + 1,
 					((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
+			executor = new ThreadPoolExecutor(
+					120, 120, 10, TimeUnit.SECONDS,
+					worksQueue, executionHandler);
+		} else {
+			executor = new ThreadPoolExecutor(
+					Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+					worksQueue, executionHandler);
+		}
+		if (HashFunctionPool.max_hash_cluster > 1) {
+			try {
+				eng = new VariableHashEngine();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
 	}
 
 	public static void registerListener(Object obj) {
@@ -106,7 +123,7 @@ public class SparseDedupFile implements DedupFile {
 					try {
 						ck.flush();
 					} catch (BufferClosedException e) {
-						SDFSLogger.getLog().error(
+						SDFSLogger.getLog().debug(
 								"Error while closing buffer at "
 										+ removal.getKey());
 					} catch(IOException e) {
@@ -320,6 +337,18 @@ public class SparseDedupFile implements DedupFile {
 						"Flushing Cache of for " + mf.getPath() + " of size "
 								+ this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
+			Iterator<Long> iter = this.writeBuffers.asMap().keySet().iterator();
+			while(iter.hasNext()) {
+				Long key = iter.next();
+				WritableCacheBuffer bf = (WritableCacheBuffer)this.writeBuffers.getIfPresent(key);
+				if(bf != null) {
+					try {
+						bf.flush();
+					} catch (BufferClosedException e) {
+						
+					}
+				}
+			}
 			int z = 0;
 			synchronized(flushingBuffers) {
 				z = this.flushingBuffers.size();
@@ -389,7 +418,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 
 				int dups = 0;
-				if (writeBuffer.isBatchProcessed()) {
+				if (writeBuffer.isBatchProcessed() && HashFunctionPool.max_hash_cluster == 1) {
 					for (HashLocPair p : writeBuffer.getFingers()) {
 						if (!writeBuffer.isBatchwritten())
 							p.hashloc = HCServiceProxy.writeChunk(p.hash,
@@ -423,12 +452,26 @@ public class SparseDedupFile implements DedupFile {
 							writeBuffer.getFingers().set(0, p);
 
 					} else {
-						VariableHashEngine hc = (VariableHashEngine) HashFunctionPool
-								.borrowObject();
+						
 
 						try {
-							List<Finger> fs = hc.getChunks(writeBuffer
+							List<Finger> fs = null;
+							if(Main.chunkStoreLocal)
+								fs = eng.getChunks(writeBuffer
 									.getFlushedBuffer());
+							else {
+								fs = new ArrayList<Finger>();
+								for (HashLocPair p : writeBuffer.getFingers()) {
+									SDFSLogger.getLog().info(p.getNumberHL());
+									Finger f = new Finger();
+									f.hash = p.hash;
+									f.chunk = p.data;
+									f.dedup = true;
+									f.hl = p.hashloc;
+									fs.add(f);
+								}
+							}
+								
 							ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>(
 									fs.size());
 							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
@@ -562,7 +605,7 @@ public class SparseDedupFile implements DedupFile {
 							this.errOccured = true;
 							throw e;
 						} finally {
-							HashFunctionPool.returnObject(hc);
+							
 						}
 					}
 
@@ -701,11 +744,15 @@ public class SparseDedupFile implements DedupFile {
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);
 			try {
+				DedupChunkInterface wb = null;
 				if (Main.volume.isClustered()) {
-					return this.load(chunkPos);
+					wb =  this.load(chunkPos);
 				} else {
-					return this.writeBuffers.get(chunkPos);
+					wb = this.writeBuffers.get(chunkPos);
+					
 				}
+				wb.open();
+				return wb;
 			} 
 			catch (Exception e) {
 				throw new IOException(e);

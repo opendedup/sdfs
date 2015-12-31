@@ -63,6 +63,11 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public void resetHashLoc() {
 		this.hashloc = new byte[8];
 		this.hashloc[0] = -1;
+		currentPos = 1;
+	}
+	
+	public int getNumberHL() {
+		return this.currentPos - 1;
 	}
 
 	public HashLocPair(byte[] b) throws IOException {

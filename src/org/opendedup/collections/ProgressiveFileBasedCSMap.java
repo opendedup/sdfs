@@ -73,8 +73,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 
 	@Override
 	public void init(long maxSize, String fileName) throws IOException, HashtableFullException {
-		long msz = (((long) HashFunctionPool.hashLength + 8L) * maxSize) / 140L;
-		SDFSLogger.getLog().info("Size per table is " + msz);
 		maps = new SortedReadMapList();
 
 		this.size = (maxSize);

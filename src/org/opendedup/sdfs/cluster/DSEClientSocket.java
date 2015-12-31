@@ -209,10 +209,8 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 	public Object handle(Message msg) throws Exception {
 		byte[] buffer = msg.getBuffer();
 		ByteBuffer buf = ByteBuffer.wrap(buffer);
-		buf.position(msg.getOffset());
 		byte cmd = buf.get();
 		Object rtrn = null;
-
 		switch (cmd) {
 		case NetworkCMDS.UPDATE_DSE: {
 			try {
@@ -365,6 +363,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			SDFSLogger.getLog().info("setting gc schedule to " + schedule);
 			this._changeGCSchedule(schedule);
 			rtrn = schedule;
+			break;
+		}
+		default : {
+			rtrn = null;
 			break;
 		}
 		}

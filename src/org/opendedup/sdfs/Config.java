@@ -75,16 +75,18 @@ public class Config {
 			}
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
-			if (cbe.hasAttribute("average-chunk-size")) {
-				HashFunctionPool.avg_page_size = Integer.parseInt(cbe
-						.getAttribute("average-chunk-size"));
-			}
+			
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
 			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
 			if (cbe.hasAttribute("gc-class"))
 				Main.gcClass = cbe.getAttribute("gc-class");
 			Main.fDkiskSchedule = cbe.getAttribute("claim-hash-schedule");
+			if (cbe.hasAttribute("hash-type")) {
+				Main.hashType = cbe.getAttribute("hash-type");
+				SDFSLogger.getLog().info(
+						"Setting hash engine to " + Main.hashType);
+			}
 			if (cbe.hasAttribute("hash-size")) {
 				short hsz = Short.parseShort(cbe.getAttribute("hash-size"));
 				if (hsz == 16)
@@ -94,11 +96,11 @@ public class Config {
 				SDFSLogger.getLog().info(
 						"Setting hash engine to " + Main.hashType);
 			}
-			if (cbe.hasAttribute("hash-type")) {
-				Main.hashType = cbe.getAttribute("hash-type");
-				SDFSLogger.getLog().info(
-						"Setting hash engine to " + Main.hashType);
+			if (cbe.hasAttribute("average-chunk-size")) {
+				HashFunctionPool.avg_page_size = Integer.parseInt(cbe
+						.getAttribute("average-chunk-size"));
 			}
+			
 			if (cbe.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe
 						.getAttribute("encrypt"));
@@ -461,6 +463,7 @@ public class Config {
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 			}
+			
 
 		}
 		if (Main.chunkStoreEncryptionEnabled)

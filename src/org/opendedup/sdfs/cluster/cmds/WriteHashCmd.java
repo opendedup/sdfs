@@ -52,8 +52,8 @@ public class WriteHashCmd implements IOClientCmd {
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				false);
 		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		// opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.OOB);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.OOB);
 		// opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
 	}
@@ -127,11 +127,14 @@ public class WriteHashCmd implements IOClientCmd {
 										+ response.getException().getMessage());
 					} else if (response.wasSuspected()
 							|| response.wasUnreachable()) {
+						SDFSLogger.getLog().warn(
+								"unable to write to " + response.getSender());
 
 					} else if (response.wasReceived()) {
 						try {
+							
 							boolean done = (Boolean) response.getValue();
-							if (done)
+							if(done)
 								resp[0] = 1;
 							resp[pos] = svr.id;
 							pos++;

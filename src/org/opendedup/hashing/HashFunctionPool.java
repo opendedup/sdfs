@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 public class HashFunctionPool {
@@ -31,6 +32,7 @@ public class HashFunctionPool {
 			Main.MAPVERSION = 2;
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
+		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType);
 	}
 
 	public static AbstractHashEngine borrowObject() throws IOException {

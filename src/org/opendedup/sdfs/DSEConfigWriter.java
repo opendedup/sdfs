@@ -56,7 +56,7 @@ public class DSEConfigWriter {
 	int network_port = 2222;
 	String list_ip = "0.0.0.0";
 	long chunk_store_allocation_size = 0;
-	short chunk_size = 4;
+	short chunk_size = 512;
 	boolean awsEnabled = false;
 	boolean azureEnabled = false;
 	String cloudAccessKey = "";
@@ -67,11 +67,11 @@ public class DSEConfigWriter {
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 	boolean compress = Main.compress;
-	String hashType = HashFunctionPool.MURMUR3_16;
+	String hashType = HashFunctionPool.VARIABLE_MURMUR3;
+	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	private String clusterID = "sdfs-cluster";
 	private byte clusterMemberID = 1;
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	String chunk_store_class = "org.opendedup.sdfs.filestore.FileChunkStore";
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
@@ -230,9 +230,6 @@ public class DSEConfigWriter {
 					.parseBoolean(cmd.getOptionValue("compress"));
 			this.compress = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-compress"));
-			if (this.compress && !this.awsEnabled && this.azureEnabled) {
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.VariableFileChunkStore";
-			}
 		}
 		if (cmd.hasOption("listen-port")) {
 			this.network_port = Integer.parseInt(cmd
@@ -343,6 +340,16 @@ public class DSEConfigWriter {
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			cs.appendChild(aws);
 		}
+		Element extended  = xmldoc.createElement("extended-config");
+		extended.setAttribute("block-size", "30 MB");
+		extended.setAttribute("allow-sync", "false");
+		extended.setAttribute("upload-thread-sleep-time", "15000");
+		extended.setAttribute("sync-files", "false");
+		extended.setAttribute("local-cache-size","10 GB");
+		extended.setAttribute("map-cache-size", "100");
+		extended.setAttribute("io-threads", "16");
+		extended.setAttribute("delete-unclaimed", "true");
+		cs.appendChild(extended);
 		root.appendChild(cs);
 		try {
 			// Prepare the DOM document for writing

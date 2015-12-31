@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,15 +27,14 @@ public class FetchChunkCmd implements IOClientCmd {
 		this.hash = hash;
 		this.hashlocs = Arrays.copyOfRange(hashlocs, 1, hashlocs.length);
 		shuffleArray(this.hashlocs);
-		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
+		opts = new RequestOptions(ResponseMode.GET_FIRST, Main.ClusterRSPTimeout,
 				false);
-		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		// opts.setFlags(Message.Flag.DONT_BUNDLE);
-		opts.setFlags(Message.Flag.OOB);
-		// opts.setFlags(Message.Flag.NO_FC);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.OOB);
+		//opts.setFlags(Message.Flag.NO_FC);
 		opts.setAnycasting(true);
 	}
-
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
 		byte[] b = new byte[1 + 2 + hash.length];

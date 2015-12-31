@@ -153,11 +153,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	public Object handle(Message msg) throws Exception {
 		try {
 			byte[] buffer = msg.getBuffer();
+			SDFSLogger.getLog().info("recieved cmd sz= " + buffer.length);
+			SDFSLogger.getLog().info("recieved cmd offset= " + msg.getOffset());
 			ByteBuffer buf = ByteBuffer.wrap(buffer);
-			buf.position(msg.getOffset());
 			byte cmd = buf.get();
 			Object rtrn = null;
-			// SDFSLogger.getLog().debug("recieved cmd " +cmd);
+			SDFSLogger.getLog().info("recieved cmd " +cmd);
 			switch (cmd) {
 			case NetworkCMDS.UPDATE_DSE: {
 				try {
@@ -407,6 +408,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			}
 			case NetworkCMDS.STOP_GC_MASTER_CMD: {
 				rtrn = Boolean.valueOf(false);
+				break;
+			}
+			default : {
+				rtrn = null;
 				break;
 			}
 			}

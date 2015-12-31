@@ -10,6 +10,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
@@ -62,11 +63,21 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static SynchronousQueue<Runnable> lworksQueue = null;
 	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor lexecutor = null;
+	private static ThreadPoolExecutor executor = null;
+	private static SynchronousQueue<Runnable> worksQueue = null;
+	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 
 	static {
-		
+		if (maxTasks > 120)
+			maxTasks = 120;
+		if (!Main.chunkStoreLocal) {
+			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
+			worksQueue = new SynchronousQueue<Runnable>();
+			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
+		}
 		lworksQueue = new SynchronousQueue<Runnable>();
-		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue, lexecutionHandler);
+		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,
+				lexecutionHandler);
 	}
 
 	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, List<HashLocPair> ar,
@@ -186,75 +197,82 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						break;
 					i++;
 				}
-				sz = cks.size();
-				AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
+				if (Main.chunkStoreLocal) {
+					ShardReader r = new ShardReader();
+					r.shards = cks;
+					r.cache = false;
+					r.read();
+				} else {
+					sz = cks.size();
+					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
 
-					@Override
-					public void commandException(Exception e) {
-						this.incrementAndGetDNEX();
-						synchronized (this) {
-							this.notifyAll();
+						@Override
+						public void commandException(Exception e) {
+							this.incrementAndGetDNEX();
+							synchronized (this) {
+								this.notifyAll();
+							}
+
 						}
 
-					}
+						@Override
+						public void commandResponse(Shard result) {
+							cks.get(result.apos).ck = result.ck;
+							if (this.incrementandGetDN() >= sz) {
 
-					@Override
-					public void commandResponse(Shard result) {
-						cks.get(result.apos).ck = result.ck;
-						if (this.incrementandGetDN() >= sz) {
+								synchronized (this) {
+									this.notifyAll();
+								}
+							}
+						}
+
+						@Override
+						public void commandArchiveException(DataArchivedException e) {
+							this.incrementAndGetDNEX();
+							this.setDAR(e);
 
 							synchronized (this) {
 								this.notifyAll();
 							}
-						}
-					}
 
-					@Override
-					public void commandArchiveException(DataArchivedException e) {
-						this.incrementAndGetDNEX();
-						this.setDAR(e);
-
-						synchronized (this) {
-							this.notifyAll();
 						}
 
+					};
+					for (Shard sh : cks) {
+						sh.l = l;
+						executor.execute(sh);
 					}
+					int wl = 0;
+					int al = 0;
 
-				};
-				ShardReader r = new ShardReader();
-				r.shards = cks;
-				r.l = l;
-				r.cache = true;
-				lexecutor.execute(r);
+					while (l.getDN() < sz && l.getDNEX() == 0) {
+						if (al == 30) {
+							int nt = wl / 1000;
+							SDFSLogger.getLog()
+									.debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
+							al = 0;
+						}
 
-				int wl = 0;
-				int al = 0;
-				while (l.getDN() < sz && l.getDNEX() == 0) {
-					if (al == 30) {
-						int nt = wl / 1000;
-						SDFSLogger.getLog().debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
-						al = 0;
+						if (l.getDAR() != null) {
+							throw l.getDAR();
+						}
+						if (l.getDNEX() > 0)
+							throw new IOException("error while reading data");
+						synchronized (l) {
+							l.wait(1000);
+						}
+						wl += 1000;
+						al++;
 					}
-
 					if (l.getDAR() != null) {
 						throw l.getDAR();
 					}
-					if (l.getDNEX() > 0)
-						throw new IOException("error while reading data");
-					synchronized (l) {
-						l.wait(1000);
+					if (l.getDNEX() > 0) {
+						throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
 					}
-					wl += 1000;
-					al++;
-				}
-				if (l.getDAR() != null) {
-					throw l.getDAR();
-				}
-				if (l.getDNEX() > 0) {
-					throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
-				}
-				if (l.getDN() < sz) {
-					throw new IOException("thread timed out before read was complete ");
+					if (l.getDN() < sz) {
+						throw new IOException("thread timed out before read was complete ");
+					}
 				}
 
 			}
@@ -289,90 +307,98 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						break;
 					i++;
 				}
-				sz = cks.size();
-				AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
+				if (Main.chunkStoreLocal) {
+					ShardReader r = new ShardReader();
+					r.shards = cks;
+					r.cache = false;
+					r.read();
+				} else {
+					sz = cks.size();
+					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
 
-					@Override
-					public void commandException(Exception e) {
-						SDFSLogger.getLog().error("error getting block", e);
-						this.incrementAndGetDNEX();
-						synchronized (this) {
-							this.notifyAll();
+						@Override
+						public void commandException(Exception e) {
+							SDFSLogger.getLog().error("error getting block", e);
+							this.incrementAndGetDNEX();
+							synchronized (this) {
+								this.notifyAll();
+							}
+
 						}
 
-					}
+						@Override
+						public void commandResponse(Shard result) {
+							cks.get(result.apos).ck = result.ck;
+							if (this.incrementandGetDN() >= sz) {
 
-					@Override
-					public void commandResponse(Shard result) {
-						cks.get(result.apos).ck = result.ck;
-						if (this.incrementandGetDN() >= sz) {
+								synchronized (this) {
+									this.notifyAll();
+								}
+							}
+						}
+
+						@Override
+						public void commandArchiveException(DataArchivedException e) {
+							this.incrementAndGetDNEX();
+							this.setDAR(e);
 
 							synchronized (this) {
 								this.notifyAll();
 							}
-						}
-					}
 
-					@Override
-					public void commandArchiveException(DataArchivedException e) {
-						this.incrementAndGetDNEX();
-						this.setDAR(e);
-
-						synchronized (this) {
-							this.notifyAll();
 						}
 
+					};
+					for (Shard sh : cks) {
+						sh.l = l;
+						executor.execute(sh);
 					}
+					int wl = 0;
+					int tm = 1000;
+					int al = 0;
 
-				};
-				ShardReader r = new ShardReader();
-				r.shards = cks;
-				r.l = l;
-				r.cache = false;
-				lexecutor.execute(r);
-
-				int wl = 0;
-				int tm = 1000;
-				int al = 0;
-				while (l.getDN() < sz && l.getDNEX() == 0) {
-					if (al == 30) {
-						int nt = wl / 1000;
-						SDFSLogger.getLog().debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
-						al = 0;
-					}
-					if (Main.readTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
-						int nt = (tm * wl) / 1000;
-						throw new IOException("read Timed Out after [" + nt + "] seconds. Expected [" + sz
-								+ "] block read but only [" + l.getDN() + "] were completed");
+					while (l.getDN() < sz && l.getDNEX() == 0) {
+						if (al == 30) {
+							int nt = wl / 1000;
+							SDFSLogger.getLog()
+									.debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
+							al = 0;
+						}
+						if (Main.readTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
+							int nt = (tm * wl) / 1000;
+							throw new IOException("read Timed Out after [" + nt + "] seconds. Expected [" + sz
+									+ "] block read but only [" + l.getDN() + "] were completed");
+						}
+						if (l.getDAR() != null) {
+							throw l.getDAR();
+						}
+						if (l.getDNEX() > 0)
+							throw new IOException("error while reading data");
+						synchronized (l) {
+							l.wait(1000);
+						}
+						wl += 1000;
+						al++;
 					}
 					if (l.getDAR() != null) {
 						throw l.getDAR();
 					}
-					if (l.getDNEX() > 0)
-						throw new IOException("error while reading data");
-					synchronized (l) {
-						l.wait(1000);
+					if (l.getDNEX() > 0) {
+						if (this.tries < 3) {
+							Thread.sleep(100);
+							tries++;
+							this.buf = null;
+							initBuffer();
+							return;
+						} else {
+							throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
+						}
+
 					}
-					wl += 1000;
-					al++;
-				}
-				if (l.getDAR() != null) {
-					throw l.getDAR();
-				}
-				if (l.getDNEX() > 0) {
-					if (this.tries < 3) {
-						Thread.sleep(100);
-						tries++;
-						this.buf = null;
-						initBuffer();
-						return;
-					} else {
-						throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
+					if (l.getDN() < sz) {
+						throw new IOException("thread timed out before read was complete ");
 					}
 
-				}
-				if (l.getDN() < sz) {
-					throw new IOException("thread timed out before read was complete ");
 				}
 				buf.position(0);
 				for (Shard sh : cks) {
@@ -808,8 +834,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (Main.chunkStoreLocal) {
 					this.df.putBufferIntoFlush(this);
 					lexecutor.execute(this);
-				}
-				else {
+				} else {
 					SparseDedupFile.pool.execute(this);
 					this.df.putBufferIntoFlush(this);
 				}
@@ -1115,6 +1140,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
+	static AtomicInteger ai = new AtomicInteger();
 	public static class Shard implements Runnable {
 		public byte[] hash;
 		public byte[] hashloc;
@@ -1132,11 +1158,15 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
+				SDFSLogger.getLog().info("wou=" + ai.incrementAndGet());
 				if (cache) {
+					
 					HCServiceProxy.cacheData(hash, hashloc);
-				} else
+				} else {
 					ck = HCServiceProxy.fetchChunk(hash, hashloc);
-				l.commandResponse(this);
+					l.commandResponse(this);
+				}
+				ai.decrementAndGet();
 			} catch (DataArchivedException e) {
 				l.commandArchiveException(e);
 			} catch (Exception e) {
@@ -1147,13 +1177,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	}
 
-	public static class ShardReader implements Runnable {
+	public static class ShardReader {
 		List<Shard> shards;
 		AsyncChunkReadActionListener l;
 		public boolean cache;
 
-		@Override
-		public void run() {
+		public void read() {
 			for (Shard s : shards) {
 				try {
 					if (cache) {

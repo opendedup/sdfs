@@ -1,11 +1,13 @@
 package org.opendedup.hashing;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.QuickList;
@@ -25,17 +27,25 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
 			maxTasks);
 	Thread th = null;
+	public static VariableHashEngine eng = null;
 
 	static {
 		if (maxTasks > 120)
 			maxTasks = 120;
 		SDFSLogger.getLog().info("Pool List Size will be " + maxTasks);
+		if (HashFunctionPool.max_hash_cluster > 1) {
+			try {
+				eng = new VariableHashEngine();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
 	}
 
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
 	}
-
 	@Override
 	public void run() {
 		while (!isStopped()) {
@@ -59,12 +69,11 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer runnable = tasks.get(i);
 								runnable.startClose();
-								AbstractHashEngine hc = HashFunctionPool
-										.borrowObject();
+								
 								byte[] hash = null;
-
+								AbstractHashEngine hc = HashFunctionPool.borrowObject();
 								try {
-
+									
 									byte[] b = runnable.getFlushedBuffer();
 									hash = hc.getHash(b);
 									ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
@@ -87,22 +96,19 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer writeBuffer = tasks.get(i);
 								writeBuffer.startClose();
-								VariableHashEngine hc = (VariableHashEngine) HashFunctionPool
-										.borrowObject();
-								List<Finger> fs = hc.getChunks(writeBuffer
+								
+								List<Finger> fs = eng.getChunks(writeBuffer
 										.getFlushedBuffer());
-								int _pos = 0;
 								ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
 								for (Finger f : fs) {
 									HashLocPair p = new HashLocPair();
 									p.hash = f.hash;
-									p.hashloc = f.hl;
+									p.hashloc = new byte[8];
 									p.len = f.len;
 									p.offset = 0;
 									p.nlen = f.len;
 									p.data = f.chunk;
-									p.pos = _pos;
-									_pos += f.chunk.length;
+									p.pos = f.start;
 									ar.add(p);
 								}
 								writeBuffer.setAR(ar);
@@ -133,7 +139,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 						}
 					}
 				} else {
-					Thread.sleep(5);
+					Thread.sleep(1);
 				}
 
 			} catch (Exception e) {

@@ -579,7 +579,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw new IOException(e);
 			}
 			if (rs == null) {
-				SDFSLogger.getLog().info("no more " + k);
+				SDFSLogger.getLog().debug("no more " + k);
 				return null;
 			} else {
 				k++;

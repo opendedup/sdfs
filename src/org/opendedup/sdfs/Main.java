@@ -64,7 +64,7 @@ public class Main {
 	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	public static boolean DSEClusterEnabled = false;
 	public static String DSEClusterVolumeList = "/etc/sdfs/cluster-volumes.xml";
-	public static boolean DSEClusterDirectIO = false;
+	public static boolean DSEClusterDirectIO = true;
 	/**
 	 * DSE Host for front end file systems
 	 */
