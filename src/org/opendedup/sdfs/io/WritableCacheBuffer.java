@@ -1179,22 +1179,15 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	public static class ShardReader {
 		List<Shard> shards;
-		AsyncChunkReadActionListener l;
 		public boolean cache;
 
-		public void read() {
+		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
-				try {
 					if (cache) {
 						HCServiceProxy.cacheData(s.hash, s.hashloc);
 					} else
 						s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc);
-					l.commandResponse(s);
-				} catch (DataArchivedException e) {
-					l.commandArchiveException(e);
-				} catch (Exception e) {
-					l.commandException(e);
-				}
+				
 			}
 
 		}
