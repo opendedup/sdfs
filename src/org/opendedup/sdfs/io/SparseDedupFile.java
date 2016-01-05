@@ -462,7 +462,6 @@ public class SparseDedupFile implements DedupFile {
 							else {
 								fs = new ArrayList<Finger>();
 								for (HashLocPair p : writeBuffer.getFingers()) {
-									SDFSLogger.getLog().info(p.getNumberHL());
 									Finger f = new Finger();
 									f.hash = p.hash;
 									f.chunk = p.data;

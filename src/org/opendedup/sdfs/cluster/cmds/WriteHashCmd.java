@@ -50,12 +50,12 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
-				false);
-		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+				true);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		//opts.setFlags(Message.Flag.OOB);
-		// opts.setFlags(Message.Flag.NO_FC);
-		opts.setAnycasting(true);
+		//opts.setFlags(Message.Flag.NO_FC);
+		//opts.setAnycasting(true);
 	}
 
 	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress,
@@ -80,12 +80,12 @@ public class WriteHashCmd implements IOClientCmd {
 			this.len = this.aContents.length;
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
-				false);
-		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		// opts.setFlags(Message.Flag.DONT_BUNDLE);
-		// opts.setFlags(Message.Flag.NO_FC);
-		opts.setFlags(Message.Flag.OOB);
-		opts.setAnycasting(true);
+				true);
+		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		opts.setFlags(Message.Flag.DONT_BUNDLE);
+		//opts.setFlags(Message.Flag.NO_FC);
+		//opts.setFlags(Message.Flag.OOB);
+		//opts.setAnycasting(true);
 	}
 
 	@Override

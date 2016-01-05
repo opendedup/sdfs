@@ -28,18 +28,16 @@ public class FetchChunkCmd implements IOClientCmd {
 		this.hashlocs = Arrays.copyOfRange(hashlocs, 1, hashlocs.length);
 		shuffleArray(this.hashlocs);
 		opts = new RequestOptions(ResponseMode.GET_FIRST, Main.ClusterRSPTimeout,
-				false);
+				true);
 		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
-		//opts.setFlags(Message.Flag.DONT_BUNDLE);
+		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		//opts.setFlags(Message.Flag.OOB);
 		//opts.setFlags(Message.Flag.NO_FC);
-		opts.setAnycasting(true);
+		//opts.setAnycasting(true);
 	}
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
 		byte[] b = new byte[1 + 2 + hash.length];
-		// SDFSLogger.getLog().debug("Fetching " +
-		// StringUtils.getHexString(hash));
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.FETCH_CMD);
 		buf.putShort((short) hash.length);

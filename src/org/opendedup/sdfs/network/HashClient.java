@@ -113,6 +113,7 @@ public class HashClient implements Runnable {
 
 			clientSocket.connect(new InetSocketAddress(server.getHostName(),
 					server.getPort()));
+			
 			clientSocket.setSoTimeout(3000);
 			os = new DataOutputStream(new BufferedOutputStream(
 					clientSocket.getOutputStream(), 32768));

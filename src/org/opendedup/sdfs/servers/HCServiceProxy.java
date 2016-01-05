@@ -361,7 +361,7 @@ public class HCServiceProxy {
 			DirectWriteHashCmd cmd = new DirectWriteHashCmd(hash, aContents,
 					aContents.length, false, Main.volume.getClusterCopies());
 			cmd.executeCmd(socket);
-			// SDFSLogger.getLog().debug("wrote data when found none");
+			SDFSLogger.getLog().debug("wrote data when found none");
 			if (cmd.getExDn() > 0) {
 				SDFSLogger
 						.getLog()

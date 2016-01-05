@@ -30,7 +30,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.NO_FC);
+		opts.setFlags(Message.Flag.NO_FC);
 		//opts.setFlags(Message.Flag.OOB);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		try {

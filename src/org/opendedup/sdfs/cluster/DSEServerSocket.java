@@ -3,6 +3,7 @@ package org.opendedup.sdfs.cluster;
 import java.io.ByteArrayInputStream;
 
 
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -117,7 +118,11 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				.compressedSize();
 
 		channel.getState(null, 10000);
+		try {
 		lock_service = new LockService(channel);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		if (servers[this.id] != null) {
 			String err = "Duplicate ID found [" + this.id + "] with "
 					+ servers[this.id].address;

@@ -25,6 +25,7 @@ public class HashClientPool {
 		this.id = id;
 		this.poolSize = size;
 		passiveObjects = new LinkedBlockingQueue<HashClient>(this.poolSize);
+		SDFSLogger.getLog().info("Server id=" + id + " name=" + name + " hn=" + server.getHostName() + " port=" +server.getPort());
 		this.populatePool();
 
 	}
