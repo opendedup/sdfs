@@ -61,6 +61,7 @@ public class MountSDFS {
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
 		ArrayList<String> volumes = new ArrayList<String>();
+		
 		fal.add("-f");
 		if (cmd.hasOption("h")) {
 			printHelp(options);

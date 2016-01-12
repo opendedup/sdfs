@@ -5,6 +5,8 @@ import java.io.IOException;
 
 
 
+
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -22,6 +24,7 @@ public class SDFSLogger {
 	static {
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
+		
 		basicLog.setLevel(Level.INFO);
 		RollingFileAppender app = null;
 		try {
@@ -38,6 +41,8 @@ public class SDFSLogger {
 		log.setLevel(Level.INFO);
 		fsdebug = true;
 		fslog.setLevel(Level.DEBUG);
+		BasicConfigurator.configure(app);
+		
 	}
 
 	public static Logger getLog() {
