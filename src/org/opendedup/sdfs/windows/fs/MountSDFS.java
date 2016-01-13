@@ -61,6 +61,7 @@ public class MountSDFS {
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
 		ArrayList<String> volumes = new ArrayList<String>();
+		
 		fal.add("-f");
 		if (cmd.hasOption("h")) {
 			printHelp(options);
@@ -191,10 +192,10 @@ public class MountSDFS {
 		String sVersion = sProp.getProperty("java.version");
 		sVersion = sVersion.substring(0, 3);
 		Float f = Float.valueOf(sVersion);
-		if (f.floatValue() < (float) 1.7) {
-			System.out.println("Java version must be 1.7 or newer");
+		if (f.floatValue() < (float) 1.8) {
+			System.out.println("Java version must be 1.8 or newer");
 			System.out
-					.println("To get Java 7 go to https://jdk7.dev.java.net/");
+					.println("To get Java 8 go to https://jdk7.dev.java.net/");
 			System.exit(-1);
 		}
 	}

@@ -61,7 +61,6 @@ import net.decasdev.dokan.FileFlag.FileFlags;
 import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 import net.decasdev.dokan.WinError;
-
 import net.decasdev.dokan.FileFlag;
 
 import org.apache.log4j.Logger;
@@ -78,8 +77,11 @@ public class WinSDFS implements DokanOperations {
 	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
 	public static final int FILE_UNICODE_ON_DISK = 0x00000004;
 	public static final int FILE_DIRECTORY_FILE = 0x00000001;
-	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES
-			| FILE_UNICODE_ON_DISK | FILE_SUPPORTS_SPARSE_FILES;
+	public static final int FILE_PERSISTENT_ACLS =0x00000008;
+	public static final int FILE_SUPPORTS_REMOTE_STORAGE = 256;
+	public static final int SUPPORTED_FLAGS = FILE_CASE_PRESERVED_NAMES |
+            FILE_SUPPORTS_REMOTE_STORAGE | FILE_UNICODE_ON_DISK |
+            FILE_PERSISTENT_ACLS;
 	/** Next handle */
 	static long nextHandleNo = 1;
 	final long rootCreateTime = FileTimeUtils.toFileTime(new Date());
@@ -136,13 +138,12 @@ public class WinSDFS implements DokanOperations {
 		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
 		dokanOptions.metaFilePath = mountedVolume;
-
+		dokanOptions.optionsMode = 0;
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
 		System.out.println("volumemounted");
 		int result = Dokan.mount(dokanOptions, this);
 
-		// log("[MemoryFS] result = " + result);
 		if (result < 0) {
 			System.out.println("Unable to mount volume because result = "
 					+ result);
@@ -210,16 +211,17 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (sn.errRtn != null)
 					throw sn.errRtn;
+				log.debug("fn=" + fileName + " handle=" + sn.nextHandle );
 				return sn.nextHandle;
 			} catch (RejectedExecutionException e) {
 				log.warn("Threads exhausted");
 				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
 			}
 		} catch (DokanOperationException e) {
-			log.debug("dokan error", e);
+			log.debug("dokan error " + fileName, e);
 			throw e;
 		} catch (Exception e) {
-			log.error("unable to create file", e);
+			log.error("unable to create file ", e);
 			throw new DokanOperationException(WinError.ERROR_INVALID_FUNCTION);
 		}
 	}
@@ -903,7 +905,8 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName, info.handle);
-				read = ch.read(buf, 0, buf.capacity(), pos);
+				ch.read(buf, 0, buf.capacity(), pos);
+				read = buf.position();
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while reading data", e);
 				errRtn = e;
@@ -1265,13 +1268,13 @@ public class WinSDFS implements DokanOperations {
 						break;
 					case FILE_OPEN:
 						if (SDFSLogger.isFSDebug())
-							log.debug("[onCreateFile] directory_open " + fileName);
+							log.debug("[onCreateFile] directory_open " + fileName + " sm=" +flags.contains(FileFlags.FILE_FLAG_BACKUP_SEMANTICS));
 						if (fileName.equals("\\"))
 							nextHandle = getNextHandle();
 						fileName = Utils.trimTailBackSlash(fileName);
 						_f = new File(mountedVolume + fileName);
 						if (_f.exists() && _f.isDirectory()) {
-							nextHandle = getNextHandle();
+								nextHandle = getNextHandle();
 						}
 						else
 							throw new DokanOperationException(
@@ -1471,6 +1474,8 @@ public class WinSDFS implements DokanOperations {
 							nextHandle = getNextHandle();
 							break;
 						case FILE_OPEN:
+							if (SDFSLogger.isFSDebug())
+								log.debug("unable to open file " + path);
 							throw new DokanOperationException(
 									ERROR_FILE_NOT_FOUND);
 						case FILE_OVERWRITE:
@@ -1506,6 +1511,7 @@ public class WinSDFS implements DokanOperations {
 								WinError.ERROR_INVALID_FUNCTION);
 				}
 			} catch (Exception e) {
+				log.debug("error",e);
 				errRtn = e;
 			} finally {
 				done = true;

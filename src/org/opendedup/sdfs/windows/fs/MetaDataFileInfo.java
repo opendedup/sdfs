@@ -24,14 +24,16 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY;
 
-
-import static net.decasdev.dokan.FileAttribute.FileAttributeFlags.FILE_ATTRIBUTE_NORMAL;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.DosFileAttributes;
 import java.util.Date;
 
 import net.decasdev.dokan.ByHandleFileInformation;
+import net.decasdev.dokan.FileAttribute.FileAttributeFlags;
 import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 
@@ -45,7 +47,7 @@ public class MetaDataFileInfo {
 
 	String fileName;
 	final boolean isDirectory;
-	private int fileAttribute = FILE_ATTRIBUTE_NORMAL.getValue();
+	private int fileAttribute = 0;
 	long creationTime = 0;
 	long lastAccessTime = 0;
 	long lastWriteTime = 0;
@@ -58,8 +60,29 @@ public class MetaDataFileInfo {
 		this.mf = mf;
 		this.isDirectory = mf.isDirectory();
 		fileIndex = getNextFileIndex();
-		if (isDirectory)
-			fileAttribute = FILE_ATTRIBUTE_DIRECTORY.getValue();
+		Path file = Paths.get(mf.getPath());
+		try {
+		    DosFileAttributes attr =
+		        Files.readAttributes(file, DosFileAttributes.class);
+		    if(attr.isArchive())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_ARCHIVE.getValue();
+		    if(attr.isDirectory())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY.getValue();
+		    if(attr.isHidden())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_HIDDEN.getValue();
+		    if(attr.isReadOnly())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_READONLY.getValue();
+		    if(attr.isRegularFile())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_NORMAL.getValue();
+		    if(attr.isSymbolicLink())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_REPARSE_POINT.getValue();
+		    if(attr.isSystem())
+		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_SYSTEM.getValue();
+		} catch (IOException | UnsupportedOperationException x) {
+		    SDFSLogger.getLog().error("attributes could not be created for " + this.fileName,x);
+		}
+		
+		
 		creationTime = FileTimeUtils.toFileTime(new Date(0));
 		lastAccessTime = FileTimeUtils
 				.toFileTime(new Date(mf.getLastAccessed()));
