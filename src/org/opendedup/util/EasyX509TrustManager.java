@@ -1,4 +1,4 @@
-package org.apache.commons.httpclient.contrib.ssl;
+package org.opendedup.util;
 
 /*
  * ====================================================================

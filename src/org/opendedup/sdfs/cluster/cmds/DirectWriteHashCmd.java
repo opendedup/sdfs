@@ -1,7 +1,7 @@
 package org.opendedup.sdfs.cluster.cmds;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -93,6 +93,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 			sz = (byte) pools.size();
 
 			AsyncCmdListener l = new AsyncCmdListener() {
+				HashClientPool pool = null;
 
 				@Override
 				public void commandException(Exception e) {
@@ -132,18 +133,35 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					}
 				}
 
+				@Override
+				public HashClientPool getPool() {
+					return pool;
+				}
+
+				@Override
+				public void setPool(HashClientPool pool) {
+					this.pool = pool;
+					
+				}
+
 			};
+			ArrayList<PoolHC> ap = new ArrayList<PoolHC>();
 			for (HashClientPool pool : pools) {
 				if (pool != null) {
-					HashClient hc = pool.borrowObject();
+					HashClient hc = (HashClient)pool.borrowObject();
+					
 					hc.writeChunkAsync(this.hash, this.aContents, 0,
 							this.aContents.length, l);
 					executor.execute(hc);
+					PoolHC phc = new PoolHC();
+					phc.hc = hc;
+					phc.pool = pool;
+					ap.add(phc);
 				}
 			}
 			if (dn < sz) {
 				synchronized (l) {
-					l.wait(10000);
+					l.wait(60000);
 				}
 			}
 			if (dn < sz)
@@ -157,6 +175,13 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					}
 				}
 			}
+				for(PoolHC phc : ap) {
+					try {
+					phc.pool.returnObject(phc.hc);
+					}catch(Exception e) {
+						SDFSLogger.getLog().warn("unable to return hc to pool", e);
+					}
+				}
 			if (pos == 1)
 				throw new IOException("unable to write to any storage nodes");
 		} catch (Exception e) {
@@ -209,6 +234,11 @@ public class DirectWriteHashCmd implements IOClientCmd {
 								e1);
 			}
 		}
+	}
+	
+	private static class PoolHC {
+		HashClient hc;
+		HashClientPool pool;
 	}
 
 }

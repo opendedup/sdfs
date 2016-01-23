@@ -1,3 +1,16 @@
+Version 3.1.0
+	Fixes
+	* Fixed distributed DSE code for the 3.0 tree
+	* Optimized Replication now working in the 3.0 tree 
+	* Volume block device has been ported to the 3.0 tree
+	* Updated script files to point to appropriate sources
+	Enhancements
+	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
+	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.
+	* Default to TLSv1.2 for all communication
+	* Improved space savings on compaction. Removes individual orphaned blocks from chunks stored on disk. Not yet implemented for cloud storage
+	because of round trip cost.
+	* Ported Windows code to Dokany v 0.8
 Version 3.0.4
 	Fixes :
 	* Fixed xml commandline parsing in mount.sdfs script

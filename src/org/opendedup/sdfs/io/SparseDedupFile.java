@@ -81,7 +81,7 @@ public class SparseDedupFile implements DedupFile {
 	
 	static {
 		maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
-		SDFSLogger.getLog().info("Maximum Write Buffers are " + maxWriteBuffers);
+		SDFSLogger.getLog().debug("Maximum Write Buffers are " + maxWriteBuffers);
 		if(!Main.chunkStoreLocal) {
 			pool = new ThreadPool(
 					Main.writeThreads + 1,
@@ -466,7 +466,9 @@ public class SparseDedupFile implements DedupFile {
 									f.hash = p.hash;
 									f.chunk = p.data;
 									f.dedup = true;
+									f.len = p.data.length;
 									f.hl = p.hashloc;
+									f.start = p.pos;
 									fs.add(f);
 								}
 							}
@@ -573,7 +575,6 @@ public class SparseDedupFile implements DedupFile {
 							}
 							// SDFSLogger.getLog().info("broke data up into " +
 							// fs.size() + " chunks");
-							int _pos = 0;
 							for (Finger f : fs) {
 								HashLocPair p = new HashLocPair();
 								try {
@@ -582,8 +583,7 @@ public class SparseDedupFile implements DedupFile {
 									p.len = f.len;
 									p.offset = 0;
 									p.nlen = f.len;
-									p.pos = _pos;
-									_pos += f.chunk.length;
+									p.pos = f.start;
 									if (p.hashloc[0] == 1)
 										dups = dups + f.len;
 									ar.add(p);

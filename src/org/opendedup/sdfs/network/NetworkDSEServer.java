@@ -50,7 +50,7 @@ public class NetworkDSEServer implements Runnable {
 				// init KeyManager
 				KeyManager keyManagers[] = keyManagerFactory.getKeyManagers();
 				// init the SSL context
-				SSLContext sslContext = SSLContext.getInstance("TLS");
+				SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 				sslContext.init(keyManagers, null, new SecureRandom());
 				// get the socket factory
 				SSLServerSocketFactory socketFactory = sslContext

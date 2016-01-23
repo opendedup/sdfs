@@ -213,13 +213,12 @@ public class ClientThread extends Thread {
 								os.writeInt(dChunk.getData().length);
 								os.write(dChunk.getData());
 								os.flush();
-								writelock.unlock();
 							} catch (IOException e) {
-								if (writelock.isLocked())
-									writelock.unlock();
+								
+									
 								throw new IOException(e);
 							} finally {
-
+								writelock.unlock();
 							}
 						}
 

@@ -32,7 +32,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	static {
 		if (maxTasks > 120)
 			maxTasks = 120;
-		SDFSLogger.getLog().info("Pool List Size will be " + maxTasks);
+		SDFSLogger.getLog().debug("Pool List Size will be " + maxTasks);
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
 				eng = new VariableHashEngine();
@@ -81,6 +81,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.hash = hash;
 									p.pos = 0;
 									p.len = b.length;
+									p.nlen = b.length;
 									p.hashloc = new byte[8];
 									p.hash = hash;
 									p.data = b;

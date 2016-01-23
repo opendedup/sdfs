@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +11,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
@@ -71,7 +71,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		if (maxTasks > 120)
 			maxTasks = 120;
 		if (!Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
+			SDFSLogger.getLog().debug("Maximum Read Threads is " + maxTasks);
 			worksQueue = new SynchronousQueue<Runnable>();
 			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
 		}
@@ -351,6 +351,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					};
 					for (Shard sh : cks) {
 						sh.l = l;
+						sh.cache = false;
 						executor.execute(sh);
 					}
 					int wl = 0;
@@ -416,6 +417,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						try {
 							buf.position(sh.pos);
 							buf.put(sh.ck, sh.offset, sh.nlen);
+							
 						} catch (Exception e) {
 							String hp = StringUtils.getHexString(sh.hash);
 							SDFSLogger.getLog()
@@ -1140,7 +1142,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
-	static AtomicInteger ai = new AtomicInteger();
 	public static class Shard implements Runnable {
 		public byte[] hash;
 		public byte[] hashloc;
@@ -1152,26 +1153,27 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		public boolean cache;
 
-		byte[] ck;
+		public byte[] ck;
 		AsyncChunkReadActionListener l;
 
 		@Override
 		public void run() {
 			try {
-				SDFSLogger.getLog().info("wou=" + ai.incrementAndGet());
+				
 				if (cache) {
 					
 					HCServiceProxy.cacheData(hash, hashloc);
 				} else {
-					ck = HCServiceProxy.fetchChunk(hash, hashloc);
+					this.ck = HCServiceProxy.fetchChunk(hash, hashloc);
 					l.commandResponse(this);
+					
 				}
-				ai.decrementAndGet();
+				
 			} catch (DataArchivedException e) {
 				l.commandArchiveException(e);
 			} catch (Exception e) {
 				l.commandException(e);
-			}
+			} 
 
 		}
 

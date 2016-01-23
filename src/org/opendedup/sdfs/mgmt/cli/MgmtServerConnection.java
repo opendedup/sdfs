@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.URLEncoder;
 
@@ -8,11 +9,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.contrib.ssl.EasySSLProtocolSocketFactory;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.util.EasySSLProtocolSocketFactory;
 import org.w3c.dom.Document;
 
 public class MgmtServerConnection {

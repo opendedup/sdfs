@@ -843,7 +843,7 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-				sslContext = SSLContext.getInstance("SSLv3");
+				sslContext = SSLContext.getInstance("TLSv1.2");
 				// sslContext.init(keyManagerFactory.getKeyManagers(), new
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);

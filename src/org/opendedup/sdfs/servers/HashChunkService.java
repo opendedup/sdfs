@@ -114,7 +114,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 			HashtableFullException {
 		HCServer hserver = new HCServer(server, port, false, false, useSSL);
 		HashClient hc = new HashClient(hserver, "replication", password,
-				(byte) 0, null);
+				(byte) 0);
 		try {
 			ArrayList<HashChunk> hck = hc.fetchChunks(al);
 			for (int i = 0; i < hck.size(); i++) {

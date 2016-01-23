@@ -12,6 +12,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonInitException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
@@ -19,7 +22,7 @@ import org.opendedup.sdfs.cluster.DSEServerSocket;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
-public class ClusteredHCServer {
+public class ClusteredHCServer implements Daemon{
 
 	// Declaration section:
 	// declare a server socket and a client socket for the server
@@ -99,6 +102,48 @@ public class ClusteredHCServer {
 		}
 
 	}
+	ArrayList<String> volumes = new ArrayList<String>();
+	private void setup(String [] args) throws ParseException {
+		CommandLineParser parser = new PosixParser();
+		Options options = buildOptions();
+		CommandLine cmd = parser.parse(options, args);
+		
+		Main.standAloneDSE = true;
+		Main.chunkStoreLocal = true;
+		if (OSValidator.isUnix())
+			Main.logPath = "/var/log/sdfs/"
+					+ new File(cmd.getOptionValue("c")).getName()
+					+ ".log";
+		boolean debug = cmd.hasOption("d");
+		if (debug) {
+			SDFSLogger.setLevel(0);
+		}
+		if (cmd.hasOption("rv")) {
+			StringTokenizer st = new StringTokenizer(
+					cmd.getOptionValue("rv"), ",");
+			while (st.hasMoreTokens()) {
+				volumes.add(st.nextToken());
+			}
+		}
+		try {
+			Config.parseDSEConfigFile(cmd.getOptionValue("c"));
+		} catch (IOException e1) {
+			SDFSLogger.getLog().fatal(
+					"exiting because of an error with the config file",
+					e1);
+			e1.printStackTrace();
+			System.exit(-1);
+		}
+		try {
+			
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			SDFSLogger.getLog()
+					.fatal("unable to start cluster node", e);
+			System.exit(-1);
+		}
+	}
 
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
@@ -111,7 +156,7 @@ public class ClusteredHCServer {
 		String sVersion = sProp.getProperty("java.version");
 		sVersion = sVersion.substring(0, 3);
 		Float f = Float.valueOf(sVersion);
-		if (f.floatValue() < (float) 1.7) {
+		if (f.floatValue() < (float) 1.8) {
 			System.out.println("Java version must be 1.7 or newer");
 			System.out
 					.println("To get Java 7 go to https://jdk7.dev.java.net/");
@@ -139,6 +184,45 @@ public class ClusteredHCServer {
 		System.out.println("#### Shutting down HashStore ####");
 		HCServiceProxy.close();
 		System.out.println("#### Shut down completed ####");
+	}
+
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
+		checkJavaVersion();
+		setup(arg0.getArguments());
+		
+	}
+
+	@Override
+	public void start() throws Exception {
+		init(volumes);
+		
+	}
+
+	@Override
+	public void stop() throws Exception {
+		try {
+			System.out.println("#### Shutting Down Network Service ####");
+		} catch (Exception e) {
+		}
+		System.out.println("#### Shutting down HashStore ####");
+		HCServiceProxy.close();
+		System.out.println("#### Shut down completed ####");
+		try {
+			System.out.println("#### Shutting down StorageHub ####");
+
+			ClusteredHCServer.close();
+			System.out.println("#### Shut down StorageHub ####");
+		}catch(Exception e) {
+			
+		}
+		
 	}
 }
 

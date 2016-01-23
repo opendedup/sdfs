@@ -1,1 +1,1 @@
-java -Dfile.encoding=UTF-8 -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/*:/usr/share/sdfs/bin/* org.opendedup.sdfs.DSEConfigWriter "$@"
+/usr/share/sdfs/bin/jre/bin/java -Dfile.encoding=UTF-8 -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/*:/usr/share/sdfs/bin/* org.opendedup.sdfs.DSEConfigWriter "$@"

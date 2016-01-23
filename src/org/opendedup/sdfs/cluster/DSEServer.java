@@ -49,7 +49,7 @@ public class DSEServer implements Externalizable {
 	public HashClientPool createPool() throws IOException {
 		HCServer _server = new HCServer(this.hostName, this.dseport, false,
 				false, this.useSSL);
-		return new HashClientPool(_server, this.address.toString(), 5, this.id);
+		return new HashClientPool(_server, this.address.toString(), 20, this.id);
 	}
 
 	@Override
