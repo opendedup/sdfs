@@ -7,6 +7,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -38,6 +39,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static java.lang.Math.toIntExact;
 //import objectexplorer.MemoryMeasurer;
+
 
 
 
@@ -516,8 +518,15 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		//SDFSLogger.getLog().info("reading from id=" + hbid + " at " +pos + " id="+nd + " len=" +z.length + " hash=" +BaseEncoding.base64().encode(hash));
 		return z;
 	}
+	
+	public static String getStringMap(int id) throws ExecutionException, IOException {
+		HashBlobArchiveNoMap archive = rchunks.get(id);
+		if (archive == null)
+			archive = archives.get(id);
+		return archive.getHashesString();
+	}
 
-	public static void cacheArchive(byte[] hash, long nd)
+	public static void cacheArchive(byte[] hash, int nd)
 			throws ExecutionException, IOException, DataArchivedException {
 		ByteBuffer bf = ByteBuffer.allocate(8);
 		bf.putLong(nd);
@@ -571,7 +580,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		
 	}
 
-	protected static File getPath(long id) {
+	public static File getPath(long id) {
 		String st = Long.toString(id);
 
 		File nf = null;
@@ -891,6 +900,43 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 	public int getLen() {
 		return (int) f.length();
 	}
+	
+	private HashMap<String,Integer> getMap() throws IOException {
+		if (map == null) {
+			RandomAccessFile rf = null;
+			FileChannel ch = null;
+			Lock l = this.lock.readLock();
+			l.lock();
+			try {
+				map = new HashMap<String,Integer>();
+				rf = new RandomAccessFile(f, "rw");
+				ch = rf.getChannel();
+				ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
+				while (ch.position() < ch.size()) {
+					byte[] b = new byte[HashFunctionPool.hashLength];
+					buf.position(0);
+					ch.read(buf);
+					buf.position(0);
+					buf.getInt();
+					buf.get(b);
+					int pos = (int) ch.position() - 4;
+					ch.position(ch.position() + buf.getInt());
+					map.put(BaseEncoding.base64().encode(b), pos);
+				}
+			} finally {
+				try {
+					rf.close();
+				} catch (Exception e) {
+				}
+				try {
+					ch.close();
+				} catch (Exception e) {
+				}
+				l.unlock();
+			}
+		}
+		return map;
+	}
 
 	public int getSz() {
 		try {
@@ -963,6 +1009,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 
 			
 			StringBuffer sb = new StringBuffer();
+			getMap();
 			Iterator<String>keys= map.keySet().iterator();
 			while(keys.hasNext()) {
 				String key = keys.next();

@@ -29,7 +29,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.HashBlobArchiveNoMap;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
 import org.opendedup.util.XMLUtils;
@@ -44,7 +46,6 @@ import org.simpleframework.transport.connect.SocketConnection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import org.simpleframework.http.socket.service.Router;
 import org.simpleframework.http.socket.service.RouterContainer;
 import org.simpleframework.http.socket.service.DirectRouter;
@@ -52,8 +53,12 @@ import org.simpleframework.http.socket.service.DirectRouter;
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath()).getParent() + File.separator + "archives";
-	private static final String METADATA_PATH= "/metadata";
-	private static final String MAPDATA_PATH="/mapdata";
+	private static final String METADATA_PATH= "/metadata/";
+	private static final String MAPDATA_PATH="/mapdata/";
+	private static final String CHUNK_PATH="/chunkdata/";
+	private static final String CHUNK_MAP="/chunkmap/";
+	private static final String BLOCK_PATH="/blockdata/";
+	private static final String BATCH_BLOCK_PATH="/batchblockdata/";
 
 	@Override
 	public void handle(Request request, Response response) {
@@ -687,6 +692,46 @@ public class MgmtWebServer implements Container {
 					+ guid;
 					File f = new File(path);
 					this.downloadFile(f, request, response);
+				} else if(request.getTarget().startsWith(CHUNK_PATH)) {
+					if(!Main.chunkStoreLocal)
+						throw new IOException("chunkstore not local");
+					Integer id = Integer.parseInt(request.getTarget().substring(CHUNK_PATH.length()));
+					HashBlobArchiveNoMap.cacheArchive(null, id);
+					File f = HashBlobArchiveNoMap.getPath(id);
+					this.downloadFile(f, request, response);
+				} else if(request.getTarget().startsWith(BLOCK_PATH)) {
+					byte[] hash = com.google.common.io.BaseEncoding.base64Url().decode(request.getTarget().substring(BLOCK_PATH.length()));
+					byte[] data = HCServiceProxy.fetchHashChunk(hash).getData();
+					long time = System.currentTimeMillis();
+					response.setContentType("application/octet-stream");
+					response.setValue("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					response.getByteChannel().write(ByteBuffer.wrap(data));
+					response.getByteChannel().close();
+				}else if(request.getTarget().startsWith(BATCH_BLOCK_PATH)) {
+					byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+					byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
+					long time = System.currentTimeMillis();
+					response.setContentType("application/octet-stream");
+					response.setValue("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					response.getByteChannel().write(ByteBuffer.wrap(rslt));
+					response.getByteChannel().close();
+				} else if(request.getTarget().startsWith(CHUNK_MAP)) {
+					if(!Main.chunkStoreLocal)
+						throw new IOException("chunkstore not local");
+					int id = Integer.parseInt(request.getTarget().substring(CHUNK_PATH.length()));
+					String st = HashBlobArchiveNoMap.getStringMap(id);
+					long time = System.currentTimeMillis();
+					response.setContentType("text/string");
+					response.setValue("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					PrintStream body = response.getPrintStream();
+					body.println(st);
+					body.close();
 				}
 				else {
 

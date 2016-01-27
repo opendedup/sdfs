@@ -83,6 +83,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private BlockDev blkdev = null;
 	private boolean dirty = false;
 	private long attributes = 0;
+	
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);

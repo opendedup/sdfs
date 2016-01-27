@@ -168,7 +168,11 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 	public void cacheData(byte[] hash, long start, int len)
 			throws IOException, DataArchivedException {
 		try {
-			HashBlobArchiveNoMap.cacheArchive(hash, start);
+			ByteBuffer bf = ByteBuffer.allocate(8);
+			bf.putLong(start);
+			bf.position(0);
+			int hbid = bf.getInt();
+			HashBlobArchiveNoMap.cacheArchive(hash, hbid);
 		} catch (ExecutionException e) {
 			SDFSLogger.getLog().error("Unable to get block at " + start, e);
 			throw new IOException(e);

@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt.websocket;
 
 import org.simpleframework.http.socket.Session;
 
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -14,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.util.RandomGUID;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.socket.DataFrame;
@@ -29,16 +30,16 @@ import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
 
-public class MetaDataUpdate implements Service {
-	private final MetaDataUpdateListener listener;
+public class DDBUpdate implements Service {
+	private final DDBUpdateListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
 	
 	
 
-	public MetaDataUpdate() {
+	public DDBUpdate() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
-		listener = new MetaDataUpdateListener(this);
+		listener = new DDBUpdateListener(this);
 		this.users = new CopyOnWriteArraySet<String>();
 	}
 
@@ -123,15 +124,15 @@ public class MetaDataUpdate implements Service {
 	
 	@Subscribe
 	@AllowConcurrentEvents
-	public void metaFileWritten(MFileWritten evt) throws IOException {
-		Frame replay = new DataFrame(FrameType.TEXT, evt.mf.getPath());
+	public void ddbFileWritten(SFileWritten evt) throws IOException {
+		Frame replay = new DataFrame(FrameType.TEXT, evt.sf.getDatabasePath());
 		this.distribute(replay);
 	}
 
-	private static class MetaDataUpdateListener implements FrameListener {
+	private static class DDBUpdateListener implements FrameListener {
 		
 
-		private MetaDataUpdateListener(MetaDataUpdate service) {
+		private DDBUpdateListener(DDBUpdate service) {
 			
 		}
 

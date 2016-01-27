@@ -35,6 +35,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import fuse.SDFS.SDFSFileSystem;
@@ -51,6 +52,17 @@ public class FileReplicationService {
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private transient ThreadPoolExecutor executor = null;
+	
+	private static EventBus eventMetaDataBus = new EventBus();
+	private static EventBus eventDBBus = new EventBus();
+
+	public static void registerMetaDataListener(Object obj) {
+		eventMetaDataBus.register(obj);
+	}
+	
+	public static void registerDBListener(Object obj) {
+		eventDBBus.register(obj);
+	}
 
 	public FileReplicationService(AbstractCloudFileSync sync) {
 		this.sync = sync;
@@ -209,6 +221,7 @@ public class FileReplicationService {
 										"writem " + evt.mf.getPath());
 							this.sync.uploadFile(new File(evt.mf.getPath()),
 									evt.mf.getPath().substring(pl), "files");
+							eventMetaDataBus.post(evt);
 						} else {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
@@ -295,12 +308,15 @@ public class FileReplicationService {
 								.uploadFile(new File(evt.sf.getDatabasePath()),
 										evt.sf.getDatabasePath().substring(sl),
 										"ddb");
+						eventDBBus.post(evt);
+						
 					} else {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug(
 									"nowrited " + evt.sf.getDatabasePath());
 					}
 					done = true;
+					
 				} catch (Exception e) {
 					if (tries > maxTries)
 						throw e;
