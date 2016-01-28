@@ -8,6 +8,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -170,7 +171,6 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			if (!staged_chunk_location.exists()) {
 				staged_chunk_location.mkdirs();
 			}
-
 			SDFSLogger.getLog()
 					.info("############################ Initialied HashBlobArchiveNoMap ##############################");
 			SDFSLogger.getLog().info("Version : " + VERSION);
@@ -723,7 +723,8 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			SDFSLogger.getLog().debug("removed " + f.getPath());
 			f.delete();
 			File lf = new File(f.getPath() + ".smap");
-			lf.delete();
+			if(lf.exists())
+				lf.delete();
 			rchunks.remove(this.id);
 			
 		} catch (Exception e) {
@@ -1037,17 +1038,14 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		} finally {
 			l.unlock();
 		}
-		HashBlobArchiveNoMap _har = null;
 		long ofl = f.length();
-		int blks = 0;
-			_har = new HashBlobArchiveNoMap(true);
+		long kb = 0;
 
 			RandomAccessFile rf = null;
 			FileChannel ch = null;
 			l = this.lock.readLock();
 			l.lock();
 			try {
-				map = new HashMap<String,Integer>();
 				rf = new RandomAccessFile(f, "rw");
 				ch = rf.getChannel();
 				ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
@@ -1065,57 +1063,23 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 					bz.putLong(cid);
 					bz.position(0);
 					if (bz.getInt() == id) {
-						_har.putChunk(b, this.getChunk(b,pos));
-						blks++;
+						
+						byte [] chunk = this.getChunk(b,pos);
+						long np = HashBlobArchiveNoMap.writeBlock(b, chunk);
+						HCServiceProxy.getHashesMap().update(new ChunkData(np,b));
+						kb +=chunk.length + buf.capacity();
 					}
 					ch.position(ch.position() + buf.getInt());
-					
 				}
-			if (blks == 0) {
-				_har.delete();
-				
-				return 0;
-			} else {
-				l = this.lock.readLock();
-				try {
-					l.lock();
-					while (!_har.uploadFile(this.id)) {
-						Thread.sleep(100);
-					}
-				} finally {
-					l.unlock();
-				}
-				l = this.lock.writeLock();
-				try {
-					l.lock();
-					if (_har.f.exists() && _har.f.length() > 0) {
-						openFiles.invalidate(this.id);
-						rchunks.remove(this.id);
-						while (!_har.moveFile(this.id)) {
-							Thread.sleep(100);
-						}
-					} else {
-
-						_har.delete();
-						return 0;
-					}
-
-				} finally {
-					l.unlock();
-				}
-
-			}
+				rf.close();
+				this.delete();
+				HashBlobArchiveNoMap.compressedLength.addAndGet(-1 * ofl);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to compact " + id, e);
-			HashBlobArchiveNoMap.compressedLength.addAndGet(-1 * _har.f.length());
-			HashBlobArchiveNoMap.currentLength.addAndGet(-1 * _har.uncompressedLength.get());
-			_har.delete();
 			throw new IOException(e);
-		} finally {
-			rf.close();
-		}
-		HashBlobArchiveNoMap.compressedLength.addAndGet(-1 * ofl);
-		return f.length() - ofl;
+		} 
+		
+		return ofl-kb;
 	}
 
 	private boolean uploadFile(int nid) throws Exception {

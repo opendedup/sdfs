@@ -670,7 +670,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			// "symlink " + src.getPath() + " to " + dst.getPath());
 			try {
 				Files.createSymbolicLink(dstP, srcP);
-				SDFSLogger.getLog().info("zzzz=" + dst.getPath() + " " + MetaFileStore.getMF(dst.getPath()).isSymlink());
 				eventBus.post(new MFileWritten(MetaFileStore.getMF(dst.getPath())));
 			} catch (IOException e) {
 
@@ -719,11 +718,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
 					eventBus.post(new MFileDeleted(mf));
-					if (!Files.deleteIfExists(p)) {
-						eventBus.post(new MFileWritten(mf));
-						throw new FuseException().initErrno(Errno.EACCES);
-					}
-					
+					Files.delete(p);
 					return 0;
 				} catch (IOException e) {
 					SDFSLogger.getLog().warn("unable to delete symlink " + p);

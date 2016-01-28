@@ -311,10 +311,15 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 				k++;
 			}
 			ht = rs.st;
-			hid = rs.id;
+			hid = toIntExact(rs.id);
 		}
+		String [] tk = ht.nextToken().split(":");
+		iterBuf.position(0);
+		iterBuf.putInt(hid);
+		iterBuf.putInt(Integer.parseInt(tk[1]));
+		iterBuf.position(0);
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
-				ht.nextToken().split(":")[0]), hid);
+				tk[0]), iterBuf.getLong());
 		return chk;
 	}
 
@@ -465,10 +470,9 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 										metaData.put("deleted-objects", Integer.toString(delobj));
 										this.writeHashMap(metaData, k);
 										try {
-											long cl = HashBlobArchiveNoMap.compactArchive(k);
+											HashBlobArchiveNoMap.compactArchive(k);
 											HashBlobArchiveNoMap.currentLength
 													.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-											SDFSLogger.getLog().info("compacted archive [" + k + "] by [" + cl + "]");
 										} catch (Exception e) {
 
 										}
@@ -494,11 +498,10 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 								metaData.put("deleted-objects", Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
 								try {
-									long cl = HashBlobArchiveNoMap.compactArchive(k);
+									HashBlobArchiveNoMap.compactArchive(k);
 
 									HashBlobArchiveNoMap.currentLength
 											.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-									SDFSLogger.getLog().info("compacted archive [" + k + "] by [" + cl + "]");
 								} catch (Exception e) {
 
 								}
@@ -652,8 +655,9 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 
 	MultiDownload dl = null;
 	StringTokenizer ht = null;
-	long hid;
+	int hid;
 	Iterator<String> maps = null;
+	ByteBuffer iterBuf = ByteBuffer.allocate(8);
 
 	@Override
 	public void iterationInit(boolean deep) {
@@ -665,6 +669,7 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 			dl = new MultiDownload(this);
 			maps = this.traverseCache(new File(Main.chunkStore)).iterator();
 			dl.iterationInit(false, "");
+			iterBuf = ByteBuffer.allocate(8);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to initialize", e);
 		}
@@ -681,21 +686,21 @@ public class BatchFileChunkStoreNoMap implements AbstractChunkStore, AbstractBat
 
 	@Override
 	public StringResult getStringResult(String key) throws IOException, InterruptedException {
-		Integer hid = Integer.parseInt(key);
-		File mf = HashBlobArchiveNoMap.getPath(hid);
+		Integer shid = Integer.parseInt(key);
+		File mf = HashBlobArchiveNoMap.getPath(shid);
 		HashBlobArchiveNoMap.compressedLength.addAndGet(mf.length());
 		try {
-			HashMap<String, String> metaData = this.readHashMap(hid);
+			HashMap<String, String> metaData = this.readHashMap(shid);
 			HashBlobArchiveNoMap.currentLength.addAndGet(Integer.parseInt(metaData.get("bsize")));
 			if (metaData.containsKey("deleted-objects") || metaData.containsKey("deleted")) {
 				metaData.remove("deleted-objects");
 				metaData.remove("deleted");
-				this.writeHashMap(metaData, hid);
+				this.writeHashMap(metaData, shid);
 			}
-			StringTokenizer ht = new StringTokenizer(this.getStrings(hid), ",");
+			StringTokenizer sht = new StringTokenizer(this.getStrings(shid), ",");
 			StringResult st = new StringResult();
-			st.id = (long)hid;
-			st.st = ht;
+			st.id = (long)shid;
+			st.st = sht;
 			return st;
 			
 		} catch (ClassNotFoundException e) {

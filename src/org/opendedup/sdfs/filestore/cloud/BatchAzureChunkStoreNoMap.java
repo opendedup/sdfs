@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
+import static java.lang.Math.toIntExact;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -379,6 +381,7 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 		dl.iterationInit(false, "/keys");
 		this.ht = null;
 		this.hid = 0;
+		iterBuf = ByteBuffer.allocate(8);
 		
 	}
 
@@ -388,8 +391,8 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 	}
 
 	private StringTokenizer ht = null;
-	private long hid = 0;
-
+	private int hid = 0;
+	ByteBuffer iterBuf = ByteBuffer.allocate(8);
 	@Override
 	public ChunkData getNextChunck() throws IOException {
 		if (ht == null || !ht.hasMoreElements()) {
@@ -403,15 +406,18 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 				return null;
 			}
 			ht = rs.st;
-			hid = rs.id;
+			hid = toIntExact(rs.id);
 		}
 		if(!ht.hasMoreElements())
 			return getNextChunck();
 		else {
-		String token = ht.nextToken();
-		SDFSLogger.getLog().info("token="+token + " hid=" + hid);
+		String [] tk = ht.nextToken().split(":");
+		iterBuf.position(0);
+		iterBuf.putInt(hid);
+		iterBuf.putInt(Integer.parseInt(tk[1]));
+		iterBuf.position(0);
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
-				token.split(":")[0]), hid);
+				tk[0]), iterBuf.getLong());
 		return chk;
 		}
 	}
@@ -1326,7 +1332,7 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 		if (encrypt) {
 			nm = EncryptUtils.decryptCBC(nm);
 		}
-		this.hid = EncyptUtils.decHashArchiveName(bi.getName()
+		Long bid = EncyptUtils.decHashArchiveName(bi.getName()
 				.substring(5), encrypt);
 		boolean compress = Boolean.parseBoolean(md.get("lz4Compress"));
 		if (compress) {
@@ -1334,7 +1340,7 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 			nm = CompressionUtils.decompressLz4(nm, size);
 		}
 		String st = new String(nm);
-		ht = new StringTokenizer(st, ",");
+		StringTokenizer sht = new StringTokenizer(st, ",");
 		boolean changed = false;
 		if (md.containsKey("deleted")) {
 			md.remove("deleted");
@@ -1365,8 +1371,8 @@ public class BatchAzureChunkStoreNoMap implements AbstractChunkStore,
 			SDFSLogger.getLog().warn("unable to update size", e);
 		}
 		StringResult rslt = new StringResult();
-		rslt.id = hid;
-		rslt.st = ht;
+		rslt.id = bid;
+		rslt.st = sht;
 		SDFSLogger.getLog().info("st="+rslt.st);
 		return rslt;
 		}catch(Exception e) {

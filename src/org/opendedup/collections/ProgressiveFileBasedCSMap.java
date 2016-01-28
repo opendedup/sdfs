@@ -92,7 +92,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	 * AtomicLong amt = new AtomicLong(); AtomicLong zmt = new AtomicLong();
 	 * 
 	 */
-	private AbstractShard getReadMap(byte[] hash) throws IOException {
+	private ProgressiveFileByteArrayLongMap getReadMap(byte[] hash) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
 		// long v = ct.incrementAndGet();
@@ -650,19 +650,21 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	 */
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
-		try {
 			boolean added = false;
-			if (!this.isClaimed(cm)) {
-				cm.persistData(true);
-				added = this.getReadMap(cm.getHash()).update(cm.getHash(), cm.getcPos());
+			ProgressiveFileByteArrayLongMap bm = this.getReadMap(cm.getHash());
+			if(bm != null)
+				added = bm.update(cm.getHash(), cm.getcPos());
+			else {
+				try {
+				bm = this.getWriteMap();
+				added = bm.put(cm.getHash(), cm.getcPos());
+				this.lbf.put(cm.getHash());
+			} catch (HashtableFullException e) {
+				bm.setActive(false);
+				this.update(cm);
 			}
-			if (added) {
-				this.compactKsz++;
 			}
 			return added;
-		} catch (KeyNotFoundException e) {
-			return false;
-		}
 	}
 
 	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException, IOException {
