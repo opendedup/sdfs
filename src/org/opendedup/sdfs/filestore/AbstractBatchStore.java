@@ -18,5 +18,4 @@ public interface AbstractBatchStore {
 	public Iterator<String> getNextObjectList()throws IOException;
 	public StringResult getStringResult(String key) throws IOException, InterruptedException;
 	public boolean isLocalData();
-	
 }
