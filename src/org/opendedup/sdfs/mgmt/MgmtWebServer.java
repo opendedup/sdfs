@@ -59,7 +59,7 @@ public class MgmtWebServer implements Container {
 	private static final String CHUNK_MAP="/chunkmap/";
 	private static final String BLOCK_PATH="/blockdata/";
 	private static final String BATCH_BLOCK_PATH="/batchblockdata/";
-
+	private static final String BATCH_BLOCK_POINTER="/batchblockpointer/";
 	@Override
 	public void handle(Request request, Response response) {
 		try {
@@ -719,7 +719,17 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					response.getByteChannel().write(ByteBuffer.wrap(rslt));
 					response.getByteChannel().close();
-				} else if(request.getTarget().startsWith(CHUNK_MAP)) {
+				} else if(request.getTarget().startsWith(BATCH_BLOCK_POINTER)) {
+					byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+					byte[] rslt = new BatchGetPointerCmd().getResult(rb);
+					long time = System.currentTimeMillis();
+					response.setContentType("application/octet-stream");
+					response.setValue("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					response.getByteChannel().write(ByteBuffer.wrap(rslt));
+					response.getByteChannel().close();
+				}else if(request.getTarget().startsWith(CHUNK_MAP)) {
 					if(!Main.chunkStoreLocal)
 						throw new IOException("chunkstore not local");
 					int id = Integer.parseInt(request.getTarget().substring(CHUNK_PATH.length()));
