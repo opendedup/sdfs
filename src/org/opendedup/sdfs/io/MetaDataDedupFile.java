@@ -36,6 +36,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.eventbus.EventBus;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 /**
  * 
@@ -1425,6 +1429,58 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} finally {
 			this.writeLock.unlock();
 		}
+	}
+	
+	public String toJSON(boolean compact) throws IOException {
+		JsonObject dataset = new JsonObject();
+		dataset.addProperty("file-name", this.getName());
+		dataset.addProperty("mtime", Long.toString(this.lastModified()));
+		if(this.isFile())
+			dataset.addProperty("type", "file");
+		else if(this.isDirectory())
+			dataset.addProperty("type", "dir");
+		if(!compact && this.isFile()) {
+			dataset.addProperty("atime", Long.toString(this.getLastAccessed()));
+			dataset.addProperty("mtime", Long.toString(this.lastModified()));
+			dataset.addProperty("ctime", Long.toString(-1L));
+			dataset.addProperty("hidden", Boolean.toString(this.isHidden()));
+			dataset.addProperty("size", Long.toString(this.length()));
+			try {
+				dataset.addProperty("open",
+						Boolean.toString(DedupFileStore.fileOpen(this)));
+			} catch (NullPointerException e) {
+				dataset.addProperty("open", Boolean.toString(false));
+			}
+			dataset.addProperty("file-guid", this.getGUID());
+			dataset.addProperty("dedup-map-guid", this.getDfGuid());
+			dataset.addProperty("dedup", Boolean.toString(this.isDedup()));
+			dataset.addProperty("vmdk", Boolean.toString(this.isVmdk()));
+			if (symlink) {
+				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink-path", this.getSymlinkPath());
+			}
+		}
+		if(!compact && this.isDirectory()) {
+			Path p = Paths.get(this.getPath());
+			File f = new File(this.getPath());
+			dataset.addProperty("type", "directory");
+			BasicFileAttributes attrs = Files.readAttributes(p,
+					BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			dataset.addProperty("atime",
+					Long.toString(attrs.lastAccessTime().toMillis()));
+			dataset.addProperty("mtime",
+					Long.toString(attrs.lastModifiedTime().toMillis()));
+			dataset.addProperty("ctime",
+					Long.toString(attrs.creationTime().toMillis()));
+			dataset.addProperty("hidden", Boolean.toString(f.isHidden()));
+			dataset.addProperty("size", Long.toString(attrs.size()));
+			if (symlink) {
+				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink-path", this.getSymlinkPath());
+			}
+		}
+		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+		return gson.toJson(dataset);
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException,
