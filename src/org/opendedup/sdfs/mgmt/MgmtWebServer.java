@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,9 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -30,7 +33,9 @@ import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashBlobArchiveNoMap;
+import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
+import org.opendedup.sdfs.mgmt.websocket.PingService;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
@@ -48,12 +53,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.simpleframework.http.socket.service.Router;
 import org.simpleframework.http.socket.service.RouterContainer;
-import org.simpleframework.http.socket.service.DirectRouter;
+import org.simpleframework.http.socket.service.Service;
+import org.simpleframework.http.socket.service.PathRouter;
 
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath()).getParent() + File.separator + "archives";
 	private static final String METADATA_PATH= "/metadata/";
+	private static final String METADATA_INFO_PATH= "/metadatainfo/";
 	private static final String MAPDATA_PATH="/mapdata/";
 	private static final String CHUNK_PATH="/chunkdata/";
 	private static final String CHUNK_MAP="/chunkmap/";
@@ -685,7 +692,17 @@ public class MgmtWebServer implements Container {
 					File f = new File(path);
 					this.downloadFile(f, request, response);
 					
-				} else if(request.getTarget().startsWith(MAPDATA_PATH)) {
+				} else if(request.getTarget().startsWith(METADATA_INFO_PATH)) {
+					String path = Main.volume.getPath() + File.separator + request.getTarget().substring(METADATA_INFO_PATH.length());
+					long time = System.currentTimeMillis();
+					response.setContentType("application/json");
+					response.setValue("Server", "SDFS Management Server");
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					PrintStream body = response.getPrintStream();
+					body.println(GetJSONAttributes.getResult(path));
+					body.close();
+				}else if(request.getTarget().startsWith(MAPDATA_PATH)) {
 					String guid = request.getTarget().substring(MAPDATA_PATH.length());
 					String path = Main.dedupDBStore + File.separator
 					+ guid.substring(0, 2) + File.separator
@@ -825,6 +842,7 @@ public class MgmtWebServer implements Container {
 			KeyManagementException {
 		SSLContext sslContext = null;
 		if (Main.sdfsCliEnabled) {
+			useSSL = false;
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";
@@ -844,7 +862,11 @@ public class MgmtWebServer implements Container {
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 			}
-			Router negotiator = new DirectRouter(new MetaDataUpdate());
+			Map<String,Service> routes = new HashMap<String,Service>();
+			routes.put("/metadatasocket",new MetaDataUpdate());
+			routes.put("/ddbsocket",new DDBUpdate());
+			routes.put("/ping",new PingService());
+			Router negotiator = new PathRouter(routes,new PingService());
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
 			SocketProcessor server = new ContainerSocketProcessor(rn, 24,3);

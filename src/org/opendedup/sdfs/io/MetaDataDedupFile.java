@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,9 +37,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.eventbus.EventBus;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 /**
@@ -1431,7 +1429,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 	
-	public String toJSON(boolean compact) throws IOException {
+	public JsonObject toJSON(boolean compact) throws IOException {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("file-name", this.getName());
 		dataset.addProperty("mtime", Long.toString(this.lastModified()));
@@ -1479,8 +1477,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 		}
-		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
-		return gson.toJson(dataset);
+		return dataset;
 	}
 
 	public Element toXML(Document doc) throws ParserConfigurationException,

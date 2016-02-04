@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.io.events;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 import com.google.gson.FieldNamingPolicy;
@@ -11,6 +12,7 @@ public class MFileDeleted {
 	
 	public MetaDataDedupFile mf;
 	public boolean dir;
+	private static final int pl = Main.volume.getPath().length();
 	public MFileDeleted(MetaDataDedupFile f) {
 		this.mf = f;
 	}
@@ -23,7 +25,7 @@ public class MFileDeleted {
 	public String toJSON() {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("actionType", "mfileDelete");
-		dataset.addProperty("path", mf.getPath());
+		dataset.addProperty("path", mf.getPath().substring(pl));
 		if(mf.isSymlink())
 			dataset.addProperty("fileType", "symlink");
 		else if(this.dir)

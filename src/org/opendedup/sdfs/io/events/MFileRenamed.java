@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.io.events;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 import com.google.gson.FieldNamingPolicy;
@@ -12,6 +13,7 @@ public class MFileRenamed {
 	public MetaDataDedupFile mf;
 	public String from;
 	public String to;
+	private static final int pl = Main.volume.getPath().length();
 	public MFileRenamed(MetaDataDedupFile f,String from,String to) {
 		this.mf = f;
 		this.from = from;
@@ -21,7 +23,7 @@ public class MFileRenamed {
 	public String toJSON() {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("actionType", "mfileRename");
-		dataset.addProperty("path", mf.getPath());
+		dataset.addProperty("path",  mf.getPath().substring(pl));
 		dataset.addProperty("from", this.from);
 		dataset.addProperty("to", this.to);
 		if(mf.isSymlink())

@@ -25,6 +25,7 @@ while getopts ":v:" opt; do
 done
 else
 	CFG="/etc/sdfs/$1-volume-cfg.xml"
+	PF="$1.pid"
 fi
 
 if [ ! -n "$MEM" ]; then

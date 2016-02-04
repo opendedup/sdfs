@@ -10,18 +10,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.util.RandomGUID;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.socket.DataFrame;
 import org.simpleframework.http.socket.Frame;
-import org.simpleframework.http.socket.FrameType;
 import org.simpleframework.http.socket.FrameChannel;
 import org.simpleframework.http.socket.FrameListener;
+import org.simpleframework.http.socket.FrameType;
 import org.simpleframework.http.socket.Reason;
 import org.simpleframework.http.socket.service.Service;
 
@@ -33,13 +38,86 @@ public class MetaDataUpdate implements Service {
 	private final MetaDataUpdateListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
-	
+	private static ReentrantLock iLock = new ReentrantLock(true);
+	private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
 	
 
 	public MetaDataUpdate() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
 		listener = new MetaDataUpdateListener(this);
 		this.users = new CopyOnWriteArraySet<String>();
+		MetaDataDedupFile.registerListener(this);
+		MetaFileStore.registerListener(this);
+	}
+	
+	private ReentrantLock getLock(String st) {
+		iLock.lock();
+		try {
+			ReentrantLock l = activeTasks.get(st);
+			if (l == null) {
+				l = new ReentrantLock(true);
+				activeTasks.put(st, l);
+			}
+			return l;
+		} finally {
+			iLock.unlock();
+		}
+	}
+
+	private void removeLock(String st) {
+		iLock.lock();
+		try {
+			ReentrantLock l = activeTasks.get(st);
+			try {
+
+				if (l != null && !l.hasQueuedThreads()) {
+					this.activeTasks.remove(st);
+				}
+			} finally {
+				if (l != null)
+					l.unlock();
+			}
+		} finally {
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(
+						"hmpa size=" + this.activeTasks.size());
+			iLock.unlock();
+		}
+	}
+	
+	@Subscribe
+	@AllowConcurrentEvents
+	public void metaFileDeleted(MFileDeleted evt) throws IOException {
+		try {
+			ReentrantLock l = this.getLock(evt.mf.getPath());
+			l.lock();
+			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
+			this.distribute(replay);
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to delete " + evt.mf.getPath(),e);
+			throw new IOException(e);
+		}
+		finally {
+		removeLock(evt.mf.getPath());
+	}
+	}
+
+	@Subscribe
+	@AllowConcurrentEvents
+	public void metaFileRenamed(MFileRenamed evt) {
+
+		try {
+			ReentrantLock l = this.getLock(evt.mf.getPath());
+			l.lock();
+			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
+			this.distribute(replay);
+		} catch (Exception e) {
+			SDFSLogger.getLog()
+					.error("unable to rename " + evt.mf.getPath(), e);
+		} finally {
+			removeLock(evt.mf.getPath());
+		}
+
 	}
 
 	@Override
@@ -53,8 +131,6 @@ public class MetaDataUpdate implements Service {
 			vol = RandomGUID.getGuid();
 		}
 		if (Main.sdfsCliRequireAuth) {
-
-			
 			if (password != null) {
 				String hash;
 				try {
@@ -62,7 +138,6 @@ public class MetaDataUpdate implements Service {
 					if (hash.equals(Main.sdfsPassword)) {
 						auth = true;
 					}
-
 				} catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchProviderException e) {
 					SDFSLogger.getLog().error("unable to authenitcate user", e);
 				}
@@ -124,8 +199,19 @@ public class MetaDataUpdate implements Service {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileWritten(MFileWritten evt) throws IOException {
-		Frame replay = new DataFrame(FrameType.TEXT, evt.mf.getPath());
-		this.distribute(replay);
+		if(evt.mf.isDirty()) {
+			try {
+				ReentrantLock l = this.getLock(evt.mf.getPath());
+				l.lock();
+				Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
+				this.distribute(replay);
+			} catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"unable to write " + evt.mf.getPath(), e);
+			} finally {
+				removeLock(evt.mf.getPath());
+			}
+		}
 	}
 
 	private static class MetaDataUpdateListener implements FrameListener {
@@ -136,20 +222,19 @@ public class MetaDataUpdate implements Service {
 		}
 
 		@Override
-		public void onClose(Session arg0, Reason arg1) {
+		public void onClose(Session ses, Reason arg1) {
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void onError(Session arg0, Exception arg1) {
+		public void onError(Session ses, Exception arg1) {
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void onFrame(Session arg0, Frame arg1) {
-			// TODO Auto-generated method stub
+		public void onFrame(Session ses, Frame arg1) {
 
 		}
 

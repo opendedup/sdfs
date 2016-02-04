@@ -1,9 +1,5 @@
 package org.opendedup.sdfs.mgmt.websocket;
 
-import org.simpleframework.http.socket.Session;
-
-
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -20,28 +16,30 @@ import org.opendedup.util.RandomGUID;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.socket.DataFrame;
 import org.simpleframework.http.socket.Frame;
-import org.simpleframework.http.socket.FrameType;
 import org.simpleframework.http.socket.FrameChannel;
 import org.simpleframework.http.socket.FrameListener;
+import org.simpleframework.http.socket.FrameType;
 import org.simpleframework.http.socket.Reason;
+import org.simpleframework.http.socket.Session;
 import org.simpleframework.http.socket.service.Service;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.Subscribe;
 
-
-public class DDBUpdate implements Service {
-	private final DDBUpdateListener listener;
+public class PingService implements Service, Runnable {
+	private final PingListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
-	
+
 	
 
-	public DDBUpdate() {
+	public PingService() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
-		listener = new DDBUpdateListener(this);
+		listener = new PingListener(this);
 		this.users = new CopyOnWriteArraySet<String>();
+		Thread th = new Thread(this);
+		th.start();
 	}
+	
+	
 
 	@Override
 	public void connect(Session connection) {
@@ -54,8 +52,6 @@ public class DDBUpdate implements Service {
 			vol = RandomGUID.getGuid();
 		}
 		if (Main.sdfsCliRequireAuth) {
-
-			
 			if (password != null) {
 				String hash;
 				try {
@@ -63,7 +59,6 @@ public class DDBUpdate implements Service {
 					if (hash.equals(Main.sdfsPassword)) {
 						auth = true;
 					}
-
 				} catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchProviderException e) {
 					SDFSLogger.getLog().error("unable to authenitcate user", e);
 				}
@@ -104,7 +99,9 @@ public class DDBUpdate implements Service {
 		try {
 			for (String user : users) {
 				FrameChannel operation = sockets.get(user);
+
 				try {
+
 					operation.send(frame);
 					SDFSLogger.getLog().info("sent " + frame.getText());
 				} catch (Exception e) {
@@ -112,6 +109,7 @@ public class DDBUpdate implements Service {
 					sockets.remove(user);
 					users.remove(user);
 					operation.close();
+					
 				}
 			}
 		} catch (Exception e) {
@@ -119,38 +117,46 @@ public class DDBUpdate implements Service {
 		}
 	}
 	
-	@Subscribe
-	@AllowConcurrentEvents
-	public void ddbFileWritten(String data) throws IOException {
-		Frame replay = new DataFrame(FrameType.TEXT, data);
-		this.distribute(replay);
-	}
 
-	private static class DDBUpdateListener implements FrameListener {
+	private static class PingListener implements FrameListener {
 		
 
-		private DDBUpdateListener(DDBUpdate service) {
+		private PingListener(PingService service) {
 			
 		}
 
 		@Override
-		public void onClose(Session arg0, Reason arg1) {
+		public void onClose(Session ses, Reason arg1) {
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void onError(Session arg0, Exception arg1) {
+		public void onError(Session ses, Exception arg1) {
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void onFrame(Session arg0, Frame arg1) {
-			// TODO Auto-generated method stub
+		public void onFrame(Session ses, Frame arg1) {
 
 		}
 
+	}
+
+
+	@Override
+	public void run() {
+		for(;;) {
+			try {
+				Frame replay = new DataFrame(FrameType.TEXT, "ping");
+				this.distribute(replay);
+				Thread.sleep(5000);
+			}catch(Exception e) {
+				
+			}
+		}
+		
 	}
 
 }
