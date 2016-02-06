@@ -1,9 +1,5 @@
 package org.opendedup.sdfs.mgmt.websocket;
 
-import org.simpleframework.http.socket.Session;
-
-
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -16,14 +12,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.util.RandomGUID;
 import org.simpleframework.http.Request;
-import org.simpleframework.http.socket.DataFrame;
 import org.simpleframework.http.socket.Frame;
-import org.simpleframework.http.socket.FrameType;
 import org.simpleframework.http.socket.FrameChannel;
 import org.simpleframework.http.socket.FrameListener;
 import org.simpleframework.http.socket.Reason;
+import org.simpleframework.http.socket.Session;
 import org.simpleframework.http.socket.service.Service;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
@@ -121,9 +117,9 @@ public class DDBUpdate implements Service {
 	
 	@Subscribe
 	@AllowConcurrentEvents
-	public void ddbFileWritten(String data) throws IOException {
-		Frame replay = new DataFrame(FrameType.TEXT, data);
-		this.distribute(replay);
+	public void sFileWritten(SFileWritten evt) {
+		
+
 	}
 
 	private static class DDBUpdateListener implements FrameListener {

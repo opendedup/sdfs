@@ -73,6 +73,7 @@ public class MgmtWebServer implements Container {
 			Path reqPath = request.getPath();
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
+			SDFSLogger.getLog().info("poopssssssssssssssssssssssssssssss");
 
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
@@ -857,7 +858,7 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-				sslContext = SSLContext.getInstance("TLSv1.2");
+				sslContext = SSLContext.getInstance("SSLv3");
 				// sslContext.init(keyManagerFactory.getKeyManagers(), new
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
