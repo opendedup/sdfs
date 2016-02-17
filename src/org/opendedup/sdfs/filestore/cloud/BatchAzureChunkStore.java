@@ -360,7 +360,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	MultiDownload dl = null;
 
 	@Override
-	public void iterationInit(boolean deep) {
+	public void iterationInit(boolean deep) throws IOException {
 		this.hid = 0;
 		this.ht = null;
 		iter = container.listBlobs("keys/").iterator();

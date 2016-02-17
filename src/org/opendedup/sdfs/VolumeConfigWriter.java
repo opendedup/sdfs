@@ -86,7 +86,7 @@ public class VolumeConfigWriter {
 	boolean chunk_store_encrypt = false;
 
 	String hashType = HashFunctionPool.VARIABLE_MURMUR3;
-	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStoreNoMap";
+	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
@@ -191,7 +191,7 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 			if (ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStoreNoMap";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 				this.chunk_size = 256;
 				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
@@ -204,7 +204,7 @@ public class VolumeConfigWriter {
 			this.chunk_store_encrypt = Boolean.parseBoolean(cmd
 					.getOptionValue("chunk-store-encrypt"));
 			if (this.chunk_store_encrypt)
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStoreNoMap";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		}
 		if (cmd.hasOption("chunk-store-encryption-key")) {
 			String key = cmd.getOptionValue("chunk-store-encryption-key");
@@ -225,7 +225,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
-			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStoreNoMap";
+			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		} else if (cmd.hasOption("noext")) {
 			this.ext = false;
 			this.hash_db_class = "org.opendedup.collections.MaxFileBasedCSMap";
@@ -385,7 +385,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("chunk-store-compress"));
 			if (this.compress && !this.awsEnabled && !this.gsEnabled
 					&& this.azureEnabled) {
-				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStoreNoMap";
+				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 			}
 		}
 		if (cmd.hasOption("volume-maximum-full-percentage")) {

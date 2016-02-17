@@ -510,7 +510,8 @@ public class ProgressiveFileByteArrayLongMap
 				lb.put(key);
 				lb.putLong(value);
 				lb.position(0);
-				// this.kFC.write(lb, pos);
+				this.lastFound = System.currentTimeMillis();
+				this.kFC.write(lb, pos);
 				pos = (pos / EL);
 				this.claims.set(pos);
 				if (this.runningGC) {

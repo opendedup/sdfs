@@ -73,7 +73,6 @@ public class MgmtWebServer implements Container {
 			Path reqPath = request.getPath();
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
-			SDFSLogger.getLog().info("poopssssssssssssssssssssssssssssss");
 
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
@@ -843,7 +842,6 @@ public class MgmtWebServer implements Container {
 			KeyManagementException {
 		SSLContext sslContext = null;
 		if (Main.sdfsCliEnabled) {
-			useSSL = false;
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";

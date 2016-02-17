@@ -638,6 +638,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		 * this.misses.get() + " mtm=" + this.msTr.get() + " tpm=" + tpm);
 		 * this.trs.set(0); this.misses.set(0); this.msTr.set(0); }
 		 */
+		if(added)
+			this.kSz.incrementAndGet();
 		return added;
 	}
 
@@ -652,17 +654,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	public boolean update(ChunkData cm) throws IOException {
 			boolean added = false;
 			ProgressiveFileByteArrayLongMap bm = this.getReadMap(cm.getHash());
-			if(bm != null)
+			if(bm != null) {
 				added = bm.update(cm.getHash(), cm.getcPos());
-			else {
-				try {
-				bm = this.getWriteMap();
-				added = bm.put(cm.getHash(), cm.getcPos());
-				this.lbf.put(cm.getHash());
-			} catch (HashtableFullException e) {
-				bm.setActive(false);
-				this.update(cm);
-			}
 			}
 			return added;
 	}

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,12 +17,14 @@ public class MultiDownload implements Runnable {
 	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(Main.dseIOThreads * 2);
 	private boolean done = false;
 	private Exception ex;
+	Iterator<String> ck = null;
 
-	public MultiDownload(AbstractBatchStore cs) {
+	public MultiDownload(AbstractBatchStore cs) throws IOException {
 		this.cs = cs;
+		this.ck = cs.getNextObjectList();
 	}
 
-	Iterator<String> ck = null;
+	
 
 	public void iterationInit(boolean deep, String folder) {
 		try {
@@ -39,7 +42,7 @@ public class MultiDownload implements Runnable {
 			StringResult st = sbs.poll(1, TimeUnit.SECONDS);
 			if (st != null) {
 				return st;
-			} else if(this.done)
+			} else if (this.done)
 				break;
 		}
 		return null;
@@ -79,18 +82,20 @@ public class MultiDownload implements Runnable {
 
 	}
 
-	private synchronized String getNextKey() throws IOException {
-		try {
-			if (ck == null || !ck.hasNext()) {
-				ck = cs.getNextObjectList();
+	private String getNextKey() throws IOException {
+		synchronized (this) {
+			try {
+				if (ck == null || !ck.hasNext()) {
+					ck = cs.getNextObjectList();
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("while doing recovery ", e);
+				throw new IOException(e);
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("while doing recovery ", e);
-			throw new IOException(e);
-		}
 
-		if (ck.hasNext()) {
-			return ck.next();
+			if (ck != null && ck.hasNext()) {
+				return ck.next();
+			}
 		}
 		return null;
 	}
@@ -113,6 +118,7 @@ public class MultiDownload implements Runnable {
 					st = md.getNextKey();
 				}
 			} catch (Exception e) {
+				SDFSLogger.getLog().error("error  getting string result", e);
 				this.ex = e;
 			}
 			done = true;

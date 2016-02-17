@@ -43,7 +43,7 @@ public class ManualGC {
 			evt.maxCt = 100;
 			evt.curCt = 0;
 			try {
-				runGC();
+				rm = runGC();
 			} catch (IOException e) {
 				if (!Main.firstRun)
 					throw e;

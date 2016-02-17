@@ -2,13 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
-
-
-
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -22,9 +15,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,7 +103,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 	public static boolean REMOVE_FROM_CACHE = true;
 	private static LoadingCache<Integer, HashBlobArchiveNoMap> archives = null;
 	private static LoadingCache<Integer, FileChannel> openFiles = null;
-	private HashMap<String,Integer> map =new HashMap<String,Integer>(MAX_HM_SZ);
+	private Map<ByteArrayWrapper,Integer> map =  null;
 	private static ConcurrentHashMap<Integer, FileChannel> wOpenFiles = new ConcurrentHashMap<Integer, FileChannel>();
 	private static boolean closed = false;
 	private int blocksz = nextLen();
@@ -562,6 +557,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		if (!this.compactStaged)
 			executor.execute(this);
 		f = new File(staged_chunk_location, Long.toString(id));
+		map =new HashMap<ByteArrayWrapper,Integer>(MAX_HM_SZ);
 
 	}
 
@@ -577,7 +573,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
 		this.writeable = true;
 		f = new File(staged_chunk_location, Long.toString(id));
-		
+		map =new HashMap<ByteArrayWrapper,Integer>(MAX_HM_SZ);
 	}
 
 	public static File getPath(long id) {
@@ -615,7 +611,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		return this.id;
 	}
 
-	AtomicLong np = new AtomicLong();
+	AtomicInteger np = new AtomicInteger();
 
 	private int putChunk(byte[] hash, byte[] chunk)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
@@ -625,20 +621,23 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			try {
 				int nz = -1;
 				int al = chunk.length;
+				byte [] nchunk = null;
 				if (Main.compress) {
 					nz = chunk.length;
-					chunk = CompressionUtils.compressLz4(chunk);
+					nchunk = CompressionUtils.compressLz4(chunk);
 				}
-				ByteBuffer bf = ByteBuffer.wrap(new byte[4 + chunk.length]);
+				else
+					nchunk = chunk;
+				ByteBuffer bf = ByteBuffer.wrap(new byte[4 + nchunk.length]);
 				bf.putInt(nz);
-				bf.put(chunk);
+				bf.put(nchunk);
 				if (Main.chunkStoreEncryptionEnabled) {
-					chunk = EncryptUtils.encryptCBC(bf.array());
+					nchunk = EncryptUtils.encryptCBC(bf.array());
 				} else {
-					chunk = bf.array();
+					nchunk = bf.array();
 				}
 				FileChannel ch = null;
-				long cp = -1;
+				int cp = -1;
 				Lock l = this.lock.writeLock();
 				l.lock();
 				try {
@@ -656,16 +655,15 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 						ch = new RandomAccessFile(f, "rw").getChannel();
 						wOpenFiles.put(this.id, ch);
 					}
-
 					cp = np.get();
-					String st = BaseEncoding.base64().encode(hash);
+					
 					try {
-						if(!map.containsKey(st)){
-							map.put(st, (int) cp + 4 + hash.length);
-							np.set(cp + 4 + hash.length + 4 + chunk.length);
+						ByteArrayWrapper hw = new ByteArrayWrapper(hash);
+						if(!map.containsKey(hw)){
+							map.put(hw, cp + 4 + hash.length);
+							np.set(cp + 4 + hash.length + 4 + nchunk.length);
 							
 						}else {
-							np.set(cp);
 							throw new HashExistsException();
 						}
 					} catch(HashExistsException e) {
@@ -679,14 +677,14 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 					l.unlock();
 				}
 
-				ByteBuffer buf = ByteBuffer.wrap(new byte[4 + hash.length + 4 + chunk.length]);
+				ByteBuffer buf = ByteBuffer.wrap(new byte[4 + hash.length + 4 + nchunk.length]);
 				buf.putInt(hash.length);
 				buf.put(hash);
-				buf.putInt(chunk.length);
-				buf.put(chunk);
+				buf.putInt(nchunk.length);
+				buf.put(nchunk);
 				this.uncompressedLength.addAndGet(al);
 				HashBlobArchiveNoMap.currentLength.addAndGet(al);
-				HashBlobArchiveNoMap.compressedLength.addAndGet(chunk.length);
+				HashBlobArchiveNoMap.compressedLength.addAndGet(nchunk.length);
 				buf.position(0);
 
 				// SDFSLogger.getLog().info("writing at " +f.length() + " bl=" +
@@ -902,14 +900,14 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		return (int) f.length();
 	}
 	
-	private HashMap<String,Integer> getMap() throws IOException {
-		if (map == null) {
+	private synchronized Map<ByteArrayWrapper,Integer> getMap() throws IOException {
+		if (map == null || map.size() == 0) {
 			RandomAccessFile rf = null;
 			FileChannel ch = null;
 			Lock l = this.lock.readLock();
 			l.lock();
 			try {
-				map = new HashMap<String,Integer>();
+				map = new HashMap<ByteArrayWrapper,Integer>();
 				rf = new RandomAccessFile(f, "rw");
 				ch = rf.getChannel();
 				ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
@@ -922,7 +920,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 					buf.get(b);
 					int pos = (int) ch.position() - 4;
 					ch.position(ch.position() + buf.getInt());
-					map.put(BaseEncoding.base64().encode(b), pos);
+					map.put(new ByteArrayWrapper(b), pos);
 				}
 			} finally {
 				try {
@@ -948,7 +946,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 				Lock l = this.lock.readLock();
 				l.lock();
 				try {
-					map = new HashMap<String,Integer>();
+					map = new HashMap<ByteArrayWrapper,Integer>();
 					rf = new RandomAccessFile(f, "rw");
 					ch = rf.getChannel();
 					ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
@@ -961,7 +959,7 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 						buf.get(b);
 						int pos = (int) ch.position() - 4;
 						ch.position(ch.position() + buf.getInt());
-						map.put(BaseEncoding.base64().encode(b), pos);
+						map.put(new ByteArrayWrapper(b), pos);
 					}
 				} finally {
 					try {
@@ -1003,20 +1001,19 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		}
 	}
 
-	public String getHashesString() throws IOException {
+	public synchronized String getHashesString() throws IOException {
 		Lock l = this.lock.readLock();
 		l.lock();
 		try {
-
-			
 			StringBuffer sb = new StringBuffer();
 			getMap();
-			Iterator<String>keys= map.keySet().iterator();
+			Iterator<ByteArrayWrapper>keys= map.keySet().iterator();
 			while(keys.hasNext()) {
-				String key = keys.next();
+				ByteArrayWrapper kw = keys.next();
+				String key = BaseEncoding.base16().encode(kw.data);
 				sb.append(key);
 				sb.append(":");
-				sb.append(map.get(key));
+				sb.append(Integer.toString(map.get(kw)));
 				if (keys.hasNext())
 					sb.append(",");
 			}
@@ -1031,25 +1028,19 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		}
 	}
 
-	public long compact() throws IOException {
-		Lock l = this.lock.writeLock();
-		try {
-			l.lock();
-		} finally {
-			l.unlock();
-		}
+	public synchronized long compact() throws IOException {
 		long ofl = f.length();
 		long kb = 0;
 
 			RandomAccessFile rf = null;
 			FileChannel ch = null;
-			l = this.lock.readLock();
+			Lock l = this.lock.writeLock();
 			l.lock();
 			try {
 				rf = new RandomAccessFile(f, "rw");
 				ch = rf.getChannel();
 				ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
-				ByteBuffer bz = ByteBuffer.allocateDirect(8);
+				ByteBuffer bz = ByteBuffer.allocate(8);
 				while (ch.position() < ch.size()) {
 					byte[] b = new byte[HashFunctionPool.hashLength];
 					buf.position(0);
@@ -1063,10 +1054,10 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 					bz.putLong(cid);
 					bz.position(0);
 					if (bz.getInt() == id) {
-						
 						byte [] chunk = this.getChunk(b,pos);
 						long np = HashBlobArchiveNoMap.writeBlock(b, chunk);
-						HCServiceProxy.getHashesMap().update(new ChunkData(np,b));
+						if(!HCServiceProxy.getHashesMap().update(new ChunkData(np,b)))
+							throw new IOException("could not update");
 						kb +=chunk.length + buf.capacity();
 					}
 					ch.position(ch.position() + buf.getInt());
@@ -1077,7 +1068,12 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to compact " + id, e);
 			throw new IOException(e);
-		} 
+		} finally {
+			try {
+				rf.close();
+			}catch(Exception e) {}
+			l.unlock();
+		}
 		
 		return ofl-kb;
 	}
@@ -1114,14 +1110,8 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			File nf = getPath(nid);
 			Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			f = nf;
-			File omf = new File(f.toPath() + ".smap");
-			if(omf.exists()) {
-				File mf = new File(getPath(nid).getPath() + ".smap");
-				Files.move(omf.toPath(), mf.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			}
 			this.cached = true;
 			archives.put(nid, this);
-
 			rchunks.remove(this.id);
 			this.id = nid;
 			map = null;
@@ -1276,6 +1266,36 @@ public class HashBlobArchiveNoMap implements Runnable, Serializable {
 			}
 		}
 		wOpenFiles.clear();
+	}
+	
+	private final class ByteArrayWrapper
+	{
+	    private final byte[] data;
+
+	    public ByteArrayWrapper(byte[] data)
+	    {
+	        if (data == null)
+	        {
+	            throw new NullPointerException();
+	        }
+	        this.data = data;
+	    }
+
+	    @Override
+	    public boolean equals(Object other)
+	    {
+	        if (!(other instanceof ByteArrayWrapper))
+	        {
+	            return false;
+	        }
+	        return Arrays.equals(data, ((ByteArrayWrapper)other).data);
+	    }
+
+	    @Override
+	    public int hashCode()
+	    {
+	        return Arrays.hashCode(data);
+	    }
 	}
 
 }

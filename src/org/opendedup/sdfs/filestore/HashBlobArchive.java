@@ -665,7 +665,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						synchronized (this) {
 							this.notifyAll();
 						}
-						throw new ArchiveFullException();
+						throw new ArchiveFullException("archive full ");
 					}
 					ch = wOpenFiles.get(this.id);
 					if (ch == null) {
@@ -686,7 +686,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						synchronized (this) {
 							this.notifyAll();
 						}
-						throw new ArchiveFullException();
+						throw new ArchiveFullException("archive closed");
 					}catch(HashExistsException e) {
 						throw e;
 					} catch (Exception e) {
