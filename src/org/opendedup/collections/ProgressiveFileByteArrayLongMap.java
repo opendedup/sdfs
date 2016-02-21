@@ -53,7 +53,6 @@ public class ProgressiveFileByteArrayLongMap
 	transient protected static final int EL = HashFunctionPool.hashLength + 8;
 	transient private static final int VP = HashFunctionPool.hashLength;
 	transient private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
-	transient private ReentrantReadWriteLock claimlock = new ReentrantReadWriteLock();
 	transient public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	transient public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
 	transient private int iterPos = 0;
@@ -97,14 +96,14 @@ public class ProgressiveFileByteArrayLongMap
 		if (!cached) {
 			this.hashlock.writeLock().lock();
 			try {
-				if(!this.cached) {
+				if (!this.cached) {
 					loadCacheExecutor.execute(this);
 					this.cached = true;
 				}
 			} catch (Exception e) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("unable to cache " + this, e);
-			}finally {
+			} finally {
 				this.hashlock.writeLock().unlock();
 			}
 		}
@@ -298,7 +297,7 @@ public class ProgressiveFileByteArrayLongMap
 		SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
 		@SuppressWarnings("resource")
 		RandomAccessFile _kRaf = new RandomAccessFile(path + ".keys", "rw");
-		if(newInstance)
+		if (newInstance)
 			_kRaf.setLength(this.size * EL);
 		SDFSLogger.getLog().info("set table to size " + posFile.length());
 		this.kFC = _kRaf.getChannel();
@@ -442,10 +441,10 @@ public class ProgressiveFileByteArrayLongMap
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
-				Lock cl = claimlock.writeLock();
-				cl.lock();
-				this.claims.set(pos);
-				cl.unlock();
+
+				synchronized (this.claims) {
+					this.claims.set(pos);
+				}
 				if (this.runningGC)
 					this.bf.put(kb);
 				this.lastFound = System.currentTimeMillis();
@@ -473,12 +472,12 @@ public class ProgressiveFileByteArrayLongMap
 			int index = index(key);
 			if (index >= 0) {
 				int pos = (index / EL);
-				Lock cl = claimlock.readLock();
-				cl.lock();
-				boolean zl = this.claims.get(pos);
-				cl.unlock();
-				if (zl)
-					return true;
+				synchronized (this.claims) {
+					boolean zl = this.claims.get(pos);
+					if (zl)
+						return true;
+				}
+
 			} else {
 				throw new KeyNotFoundException(key);
 			}
@@ -513,12 +512,15 @@ public class ProgressiveFileByteArrayLongMap
 				this.lastFound = System.currentTimeMillis();
 				this.kFC.write(lb, pos);
 				pos = (pos / EL);
-				this.claims.set(pos);
+				synchronized (this.claims) {
+					this.claims.set(pos);
+				}
 				if (this.runningGC) {
 					this.bf.put(new KeyBlob(key));
 				}
 				this.mapped.set(pos);
 				this.removed.clear(pos);
+
 				// this.store.position(pos);
 				// this.store.put(storeID);
 				return true;
@@ -569,10 +571,10 @@ public class ProgressiveFileByteArrayLongMap
 
 					// this.kFC.write(rbuf, pos);
 					pos = (pos / EL);
-					Lock cl = this.claimlock.writeLock();
-					cl.lock();
-					this.claims.clear(pos);
-					cl.unlock();
+					synchronized (this.claims) {
+						this.claims.clear(pos);
+					}
+
 					this.mapped.clear(pos);
 					this.sz.decrementAndGet();
 					this.removed.set(pos);
@@ -629,18 +631,19 @@ public class ProgressiveFileByteArrayLongMap
 		buf.position(8);
 		int hash = buf.getInt() & 0x7fffffff;
 		int index = this.hashFunc1(hash);
-		
+
 		if (this.isFree(index)) {
-			//SDFSLogger.getLog().info("free=" + index + " hash=" +StringUtils.getHexString(key));
+			// SDFSLogger.getLog().info("free=" + index + " hash="
+			// +StringUtils.getHexString(key));
 			return -1;
-		}
-		else
+		} else
 			index = index * EL;
 
 		kFC.read(cb, index);
 
 		if (Arrays.equals(current, key)) {
-			//SDFSLogger.getLog().info("found=" + index+ " hash=" +StringUtils.getHexString(key));
+			// SDFSLogger.getLog().info("found=" + index+ " hash="
+			// +StringUtils.getHexString(key));
 			return index;
 		}
 		return indexRehashed(key, index, hash, current);
@@ -827,10 +830,9 @@ public class ProgressiveFileByteArrayLongMap
 				if (cm.getcPos() > bgst)
 					bgst = cm.getcPos();
 				pos = (pos / EL);
-				Lock cl = this.claimlock.writeLock();
-				cl.lock();
-				this.claims.set(pos);
-				cl.unlock();
+				synchronized (this.claims) {
+					this.claims.set(pos);
+				}
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
@@ -863,7 +865,8 @@ public class ProgressiveFileByteArrayLongMap
 				else {
 					pos = this.insertionIndex(key, bf.mightContain(kb));
 				}
-				//SDFSLogger.getLog().info("pos=" + pos/EL + " hash=" +StringUtils.getHexString(key));
+				// SDFSLogger.getLog().info("pos=" + pos/EL + " hash="
+				// +StringUtils.getHexString(key));
 			} catch (HashtableFullException e) {
 				this.full = true;
 				throw e;
@@ -871,7 +874,9 @@ public class ProgressiveFileByteArrayLongMap
 			if (pos < 0) {
 				int npos = -pos - 1;
 				npos = (npos / EL);
-				this.claims.set(npos);
+				synchronized (this.claims) {
+					this.claims.set(npos);
+				}
 				this.bf.put(kb);
 				return false;
 			} else {
@@ -883,17 +888,16 @@ public class ProgressiveFileByteArrayLongMap
 				if (value > bgst)
 					bgst = value;
 				pos = (pos / EL);
-				Lock cl = this.claimlock.writeLock();
-				cl.lock();
-				this.claims.set(pos);
-				cl.unlock();
+				synchronized (this.claims) {
+					this.claims.set(pos);
+				}
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
 				this.bf.put(kb);
 				// this.store.position(pos);
 				// this.store.put(storeID);
-				
+
 				return pos > -1 ? true : false;
 			}
 		} finally {
@@ -950,10 +954,9 @@ public class ProgressiveFileByteArrayLongMap
 				long val = bf.getLong();
 				if (claim) {
 					pos = (pos / EL);
-					Lock cl = this.claimlock.writeLock();
-					cl.lock();
-					this.claims.set(pos);
-					cl.unlock();
+					synchronized (this.claims) {
+						this.claims.set(pos);
+					}
 				}
 				if (this.runningGC) {
 					l.unlock();
@@ -1092,17 +1095,17 @@ public class ProgressiveFileByteArrayLongMap
 				Lock l = this.hashlock.writeLock();
 				l.lock();
 				try {
-					Lock cl = this.claimlock.writeLock();
-					cl.lock();
-					boolean claimed = claims.get(iterPos);
-					claims.clear(iterPos);
-					if (claimed) {
-						this.mapped.set(iterPos);
-						this.removed.clear(iterPos);
+					synchronized (this.claims) {
 
-						k++;
+						boolean claimed = claims.get(iterPos);
+						claims.clear(iterPos);
+						if (claimed) {
+							this.mapped.set(iterPos);
+							this.removed.clear(iterPos);
+
+							k++;
+						}
 					}
-					cl.unlock();
 				} finally {
 					iterPos++;
 					l.unlock();
@@ -1192,39 +1195,40 @@ public class ProgressiveFileByteArrayLongMap
 			while (iterPos < size) {
 				l = this.hashlock.writeLock();
 				l.lock();
-				Lock cl = this.claimlock.writeLock();
-				cl.lock();
-				try {
-					byte[] key = new byte[FREE.length];
-					zbf.position(0);
-					this.kFC.read(zbf, iterPos * EL);
-					zbf.position(0);
-					zbf.get(key);
-					long val = zbf.getLong();
-					if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-						if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-							zbf.position(0);
-							zbf.put(REMOVED);
-							zbf.putLong(0);
-							zbf.position(0);
-							kFC.write(zbf, iterPos * EL);
-							ChunkData ck = new ChunkData(val, key);
-							ck.setmDelete(true);
-							this.mapped.clear(iterPos);
-							this.sz.decrementAndGet();
-							this.removed.set(iterPos);
-							_sz++;
-						} else {
-							this.mapped.set(iterPos);
-							bf.put(new KeyBlob(key));
-						}
-						this.claims.clear(iterPos);
-					}
+				synchronized (this.claims) {
 
-				} finally {
-					iterPos++;
-					l.unlock();
-					cl.unlock();
+					try {
+						byte[] key = new byte[FREE.length];
+						zbf.position(0);
+						this.kFC.read(zbf, iterPos * EL);
+						zbf.position(0);
+						zbf.get(key);
+						long val = zbf.getLong();
+						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+								zbf.position(0);
+								zbf.put(REMOVED);
+								zbf.putLong(0);
+								zbf.position(0);
+								kFC.write(zbf, iterPos * EL);
+								ChunkData ck = new ChunkData(val, key);
+								ck.setmDelete(true);
+								this.mapped.clear(iterPos);
+								this.sz.decrementAndGet();
+								this.removed.set(iterPos);
+								_sz++;
+							} else {
+								this.mapped.set(iterPos);
+								bf.put(new KeyBlob(key));
+							}
+							this.claims.clear(iterPos);
+						}
+
+					} finally {
+						iterPos++;
+						l.unlock();
+
+					}
 				}
 			}
 			return _sz;
@@ -1255,40 +1259,40 @@ public class ProgressiveFileByteArrayLongMap
 			while (iterPos < size) {
 				l = this.hashlock.writeLock();
 				l.lock();
-				Lock cl = this.claimlock.writeLock();
-				cl.lock();
-				try {
-					byte[] key = new byte[FREE.length];
-					zbf.position(0);
-					this.kFC.read(zbf, iterPos * EL);
-					zbf.position(0);
-					zbf.get(key);
-					long val = zbf.getLong();
-					if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-						if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-							zbf.position(0);
-							zbf.put(REMOVED);
-							zbf.putLong(0);
-							zbf.position(0);
-							kFC.write(zbf, iterPos * EL);
-							ChunkData ck = new ChunkData(val, key);
-							ck.setmDelete(true);
-							this.mapped.clear(iterPos);
-							this.sz.decrementAndGet();
-							this.removed.set(iterPos);
-							_sz++;
-						} else {
-							this.mapped.set(iterPos);
-							bf.put(new KeyBlob(key));
-							lbf.put(key);
-						}
-						this.claims.clear(iterPos);
-					}
+				synchronized (this.claims) {
 
-				} finally {
-					iterPos++;
-					l.unlock();
-					cl.unlock();
+					try {
+						byte[] key = new byte[FREE.length];
+						zbf.position(0);
+						this.kFC.read(zbf, iterPos * EL);
+						zbf.position(0);
+						zbf.get(key);
+						long val = zbf.getLong();
+						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+								zbf.position(0);
+								zbf.put(REMOVED);
+								zbf.putLong(0);
+								zbf.position(0);
+								kFC.write(zbf, iterPos * EL);
+								ChunkData ck = new ChunkData(val, key);
+								ck.setmDelete(true);
+								this.mapped.clear(iterPos);
+								this.sz.decrementAndGet();
+								this.removed.set(iterPos);
+								_sz++;
+							} else {
+								this.mapped.set(iterPos);
+								bf.put(new KeyBlob(key));
+								lbf.put(key);
+							}
+							this.claims.clear(iterPos);
+						}
+
+					} finally {
+						iterPos++;
+						l.unlock();
+					}
 				}
 			}
 			return _sz;
@@ -1328,7 +1332,7 @@ public class ProgressiveFileByteArrayLongMap
 	@Override
 	public void run() {
 		try {
-				SDFSLogger.getLog().info("caching " + this.path);
+			SDFSLogger.getLog().info("caching " + this.path);
 			int _iterPos = 0;
 			ByteBuffer zbf = ByteBuffer.allocateDirect(EL);
 			while (_iterPos < size) {
@@ -1355,7 +1359,7 @@ public class ProgressiveFileByteArrayLongMap
 				}
 
 			}
-				SDFSLogger.getLog().info("done caching " + this.path);
+			SDFSLogger.getLog().info("done caching " + this.path);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(e);
 		}

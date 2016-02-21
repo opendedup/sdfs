@@ -3,7 +3,6 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -105,7 +104,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static ConcurrentHashMap<Long, SimpleByteArrayLongMap> wMaps = new ConcurrentHashMap<Long, SimpleByteArrayLongMap>();
 	private static ConcurrentHashMap<Long, FileChannel> wOpenFiles = new ConcurrentHashMap<Long, FileChannel>();
 	private static boolean closed = false;
-	private int blocksz = nextLen();
+	private int blocksz = MAX_LEN;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 
 	public static void setLocalCacheSize(long sz) {
@@ -129,16 +128,16 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static SimpleByteArrayLongMap getMap(long id) throws ExecutionException {
 		return maps.get(id);
 	}
-	
+
 	public static String getStrings(long id) throws IOException {
 		HashBlobArchive har = null;
 		File f = getPath(id);
 		if (f.exists()) {
 			har = new HashBlobArchive(f, id);
 			return har.getHashesString();
-		}else
+		} else
 			return null;
-		
+
 	}
 
 	public static void deleteArchive(long id) {
@@ -157,12 +156,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return nxt;
 	}
 
+	/*
 	private static int nextLen() {
 		int Low = MAX_LEN - (MAX_LEN / 3);
 		int High = MAX_LEN;
 		int nxt = r.nextInt(High - Low) + Low;
 		return nxt;
 	}
+	*/
 
 	// Each archive takes about 608 bytes of ram
 	// Each map takes about 260848 bytes of ram for 1854 entries
@@ -244,7 +245,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						public SimpleByteArrayLongMap load(Long hashid) throws IOException {
 							try {
 								SimpleByteArrayLongMap m = null;
-								
+
 								File lf = new File(getPath(hashid).getPath() + ".map");
 								try {
 									if (lf.exists()) {
@@ -437,10 +438,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE)
 				.weigher(new Weigher<Long, HashBlobArchive>() {
 					public int weigh(Long k, HashBlobArchive g) {
+						SDFSLogger.getLog().debug("getting size for " + k + " size=" + g.getLen());
 						return g.getLen();
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
+
 						removal.getValue().removeCache();
 					}
 				}).build(new CacheLoader<Long, HashBlobArchive>() {
@@ -526,17 +529,36 @@ public class HashBlobArchive implements Runnable, Serializable {
 		archives.invalidate(id);
 	}
 
-	public static byte[] getBlock(byte[] hash, long hbid)
-			throws ExecutionException, IOException, DataArchivedException {
+	public static byte[] getBlock(byte[] hash, long hbid) throws IOException, DataArchivedException {
 		HashBlobArchive archive = rchunks.get(hbid);
-		if (archive == null)
-			archive = archives.get(hbid);
+		if (archive == null) {
+			try {
+				archive = archives.get(hbid);
+			} catch (ExecutionException e1) {
+				if (e1.getCause() instanceof DataArchivedException)
+					throw (DataArchivedException) e1.getCause();
+				else if (e1.getCause() instanceof IOException)
+					throw (IOException) e1.getCause();
+				else
+					throw new IOException(e1.getCause());
+			}
+		}
 		byte[] z = null;
 		try {
 			z = archive.getChunk(hash);
 		} catch (Exception e) {
+			SDFSLogger.getLog().debug("exception while getting", e);
 			archives.invalidate(hbid);
-			archive = archives.get(hbid);
+			try {
+				archive = archives.get(hbid);
+			} catch (ExecutionException e1) {
+				if (e1.getCause() instanceof DataArchivedException)
+					throw (DataArchivedException) e1.getCause();
+				else if (e1.getCause() instanceof IOException)
+					throw (IOException) e1.getCause();
+				else
+					throw new IOException(e1.getCause());
+			}
 			z = archive.getChunk(hash);
 		}
 		return z;
@@ -547,7 +569,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		HashBlobArchive archive = rchunks.get(hbid);
 		if (archive == null) {
 			archive = archives.get(hbid);
-			archive.cacheChunk();
 		}
 	}
 
@@ -615,7 +636,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private HashBlobArchive(Long id) throws Exception {
 		this.id = id;
 		f = getPath(id);
-
+		this.loadData();
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
 	}
@@ -665,7 +686,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						synchronized (this) {
 							this.notifyAll();
 						}
-						throw new ArchiveFullException("archive full ");
+						throw new ArchiveFullException("archive full");
 					}
 					ch = wOpenFiles.get(this.id);
 					if (ch == null) {
@@ -687,7 +708,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							this.notifyAll();
 						}
 						throw new ArchiveFullException("archive closed");
-					}catch(HashExistsException e) {
+					} catch (HashExistsException e) {
 						throw e;
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("error while putting chunk " + this.id, e);
@@ -781,50 +802,32 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	private void cacheChunk() throws IOException, DataArchivedException {
+	private void loadData() throws Exception {
 		RandomAccessFile rf = null;
-		Lock l = this.lock.writeLock();
-
-		if (l.tryLock()) {
-			try {
-
-				if (!f.exists() || f.length() == 0) {
-					try {
-						byte[] b = store.getBytes(this.id);
-
-						if (rrl != null) {
-							int _sz = 1;
-							if (b.length > 1024)
-								_sz = b.length / 1024;
-							rrl.acquire(_sz);
-						}
-						rf = new RandomAccessFile(f, "rw");
-						rf.write(b);
-						maps.get(this.id);
-					} catch (DataArchivedException e) {
-						throw e;
-					} catch (IOException e) {
-						throw e;
-					} catch (Exception e) {
-						throw new IOException(e);
-					} finally {
-						try {
-							rf.close();
-						} catch (Exception e) {
-
-						}
-						try {
-							// ch.close();
-						} catch (Exception e) {
-
-						}
-
-					}
-				}
-
-			} finally {
-				l.unlock();
+		try {
+			byte[] b = store.getBytes(this.id);
+			if (rrl != null) {
+				int _sz = 1;
+				if (b.length > 1024)
+					_sz = b.length / 1024;
+				rrl.acquire(_sz);
 			}
+			rf = new RandomAccessFile(f, "rw");
+			rf.write(b);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+				rf.close();
+			} catch (Exception e) {
+
+			}
+			try {
+				// ch.close();
+			} catch (Exception e) {
+
+			}
+
 		}
 	}
 
@@ -835,46 +838,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		int pos = 0;
 		int nlen = 0;
 		try {
-			if (!f.exists() || f.length() == 0) {
-				l.unlock();
-				l = lock.writeLock();
-				l.lock();
-				try {
-					if (!f.exists() || f.length() == 0) {
-						RandomAccessFile rf = null;
-						try {
-							byte[] b = store.getBytes(this.id);
-							if (rrl != null) {
-								int _sz = 1;
-								if (b.length > 1024)
-									_sz = b.length / 1024;
-								rrl.acquire(_sz);
-							}
-							rf = new RandomAccessFile(f, "rw");
-							rf.write(b);
-						} catch (Exception e) {
-							throw e;
-						} finally {
-							try {
-								rf.close();
-							} catch (Exception e) {
-
-							}
-							try {
-								// ch.close();
-							} catch (Exception e) {
-
-							}
-
-						}
-					}
-				} finally {
-					l.unlock();
-					l = this.lock.readLock();
-					l.lock();
-				}
-			}
-
 			FileChannel ch = null;
 			if (!this.cached) {
 				ch = wOpenFiles.get(this.id);
@@ -889,22 +852,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
 			if (blockMap == null)
 				blockMap = maps.get(this.id);
-				pos = blockMap.get(hash);
-				if(pos == -1)
-					throw new IOException("requested block not found in " + f.getPath());
-				// rf.seek(pos - HashFunctionPool.hashLength);
-				byte[] h = new byte[4];
-				ByteBuffer hb = ByteBuffer.wrap(h);
-				try {
-					ch.read(hb, pos);
-				} catch (Exception e) {
-					ch = openFiles.get(id);
-					ch.read(hb, pos);
-				}
-				hb.position(0);
-				nlen = hb.getInt();
-				ub = new byte[nlen];
-				ch.read(ByteBuffer.wrap(ub), pos + 4);
+			pos = blockMap.get(hash);
+			if (pos == -1)
+				throw new IOException("requested block not found in " + f.getPath());
+			// rf.seek(pos - HashFunctionPool.hashLength);
+			byte[] h = new byte[4];
+			ByteBuffer hb = ByteBuffer.wrap(h);
+			try {
+				ch.read(hb, pos);
+			} catch (Exception e) {
+				ch = openFiles.get(id);
+				ch.read(hb, pos);
+			}
+			hb.position(0);
+			nlen = hb.getInt();
+			ub = new byte[nlen];
+			ch.read(ByteBuffer.wrap(ub), pos + 4);
 		} catch (ClosedChannelException e) {
 			return getChunk(hash);
 		} catch (MapClosedException e) {
@@ -1008,7 +971,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		l.lock();
 		try {
 			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
-			if(blockMap == null)
+			if (blockMap == null)
 				blockMap = maps.get(this.id);
 
 			blockMap.iterInit();

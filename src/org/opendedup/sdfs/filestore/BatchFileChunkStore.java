@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
@@ -120,14 +120,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException, DataArchivedException {
-		try {
 			byte[] b = HashBlobArchive.getBlock(hash, start);
 			return b;
-		} catch (ExecutionException e) {
-			SDFSLogger.getLog().error("Unable to get block at " + start, e);
-			throw new IOException(e);
-		}
-
 	}
 
 	@Override

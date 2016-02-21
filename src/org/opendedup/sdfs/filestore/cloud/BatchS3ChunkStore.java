@@ -172,12 +172,8 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public byte[] getChunk(byte[] hash, long start, int len) throws IOException, DataArchivedException {
-		try {
+		
 			return HashBlobArchive.getBlock(hash, start);
-		} catch (ExecutionException e) {
-			SDFSLogger.getLog().error("Unable to get block at " + start, e);
-			throw new IOException(e);
-		}
 
 	}
 
