@@ -73,7 +73,6 @@ public class MgmtWebServer implements Container {
 			Path reqPath = request.getPath();
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
-
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
 			String cmdOptions = request.getQuery().get("options");
