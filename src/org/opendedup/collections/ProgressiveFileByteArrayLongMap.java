@@ -551,7 +551,11 @@ public class ProgressiveFileByteArrayLongMap
 			if (pos == -1) {
 				return false;
 			}
-			boolean claimed = this.claims.get(pos);
+			boolean claimed =  false;
+			synchronized (this.claims) {
+				claimed = this.claims.get(pos);
+			}
+			
 			if (claimed) {
 				if (this.runningGC)
 					this.bf.put(new KeyBlob(key));
@@ -580,6 +584,7 @@ public class ProgressiveFileByteArrayLongMap
 					this.removed.set(pos);
 					// this.store.position(pos);
 					// this.store.put((byte)0);
+					this.full = false;
 					return true;
 				} else
 					return false;
@@ -809,9 +814,11 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			if (pos < 0) {
 
-				int npos = -pos - 1;
+				int npos = (-pos - 1)*-1;
 				npos = (npos / EL);
-				this.claims.set(npos);
+				synchronized (this.claims) {
+					this.claims.set(npos);
+				}
 				this.bf.put(kb);
 				return false;
 			} else {
@@ -1216,6 +1223,7 @@ public class ProgressiveFileByteArrayLongMap
 								this.mapped.clear(iterPos);
 								this.sz.decrementAndGet();
 								this.removed.set(iterPos);
+								this.full = false;
 								_sz++;
 							} else {
 								this.mapped.set(iterPos);
@@ -1231,12 +1239,13 @@ public class ProgressiveFileByteArrayLongMap
 					}
 				}
 			}
-			return _sz;
-		} finally {
 			l = this.hashlock.writeLock();
 			l.lock();
 			this.runningGC = false;
 			l.unlock();
+			return _sz;
+		} finally {
+			
 		}
 	}
 
@@ -1281,6 +1290,7 @@ public class ProgressiveFileByteArrayLongMap
 								this.sz.decrementAndGet();
 								this.removed.set(iterPos);
 								_sz++;
+								this.full = false;
 							} else {
 								this.mapped.set(iterPos);
 								bf.put(new KeyBlob(key));
@@ -1295,12 +1305,13 @@ public class ProgressiveFileByteArrayLongMap
 					}
 				}
 			}
-			return _sz;
-		} finally {
-			l = this.hashlock.writeLock();
 			l.lock();
 			this.runningGC = false;
 			l.unlock();
+			return _sz;
+		} finally {
+			l = this.hashlock.writeLock();
+			
 		}
 	}
 

@@ -5,6 +5,7 @@ Version 3.1.0
 	* Volume block device has been ported to the 3.0 tree
 	* Updated script files to point to appropriate sources
 	* Remove orphaned symlinks
+	* Fixed Cache Expiring for cloud storage data retrieval
 	Enhancements
 	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
 	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.

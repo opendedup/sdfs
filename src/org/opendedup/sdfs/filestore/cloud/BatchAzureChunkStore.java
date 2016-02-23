@@ -336,6 +336,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				if (cl < 0)
 					cl = 0;
 			}
+			if(cl==0 || sz==0) {
+			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("compressedlength",
+					Long.toString(HashBlobArchive.compressedLength.get()));
+			container.setMetadata(md);
+			container.uploadMetadata();
+			}
 			HashBlobArchive.currentLength.set(sz);
 			HashBlobArchive.compressedLength.set(cl);
 		} catch (Exception e) {

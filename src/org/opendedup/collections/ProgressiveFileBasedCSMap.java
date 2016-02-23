@@ -102,36 +102,28 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				// SDFSLogger.getLog().info("not in bloom filter");
 				return null;
 			}
-		} finally {
-			l.unlock();
-		}
-		/*
-		 * Iterator<ProgressiveFileByteArrayLongMap> iter =
-		 * activeReadMaps.iterator(); while (iter.hasNext()) {
-		 * ProgressiveFileByteArrayLongMap _m = iter.next(); if
-		 * (_m.containsKey(hash)) return _m; }
-		 */
-		try {
+
+			/*
+			 * Iterator<ProgressiveFileByteArrayLongMap> iter =
+			 * activeReadMaps.iterator(); while (iter.hasNext()) {
+			 * ProgressiveFileByteArrayLongMap _m = iter.next(); if
+			 * (_m.containsKey(hash)) return _m; }
+			 */
 			// zmt.incrementAndGet();
 			for (ProgressiveFileByteArrayLongMap _m : this.maps.getAL()) {
 				// amt.incrementAndGet();
 				if (_m.containsKey(hash)) {
+					if (runningGC)
+						this.lbf.put(hash);
 					return _m;
 				}
 			}
 			// mt.incrementAndGet();
 
 			return null;
+
 		} finally {
-			/*
-			 * klock.lock(); try { if (ct.get() >= 500000 && !runningGC) { long
-			 * mv = mt.get(); double pc = ((double) mv / (double) v) * 100;
-			 * double ac = ((double) amt.get()/(double)zmt.get());
-			 * SDFSLogger.getLog().info("pc=" + pc + " mv=" + mv + " ct=" + v +
-			 * " ap=" + ac); ct.set(0); mt.set(0); zmt.set(0); amt.set(0); } }
-			 * catch (Exception e) { SDFSLogger.getLog().error(e); } finally {
-			 * klock.unlock(); }
-			 */
+			l.unlock();
 		}
 	}
 
@@ -186,27 +178,20 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			if (!runningGC && !lbf.mightContain(hash)) {
 				return pos;
 			}
+			for (ProgressiveFileByteArrayLongMap m : this.maps.getAL()) {
+				pos = m.get(hash);
+				if (pos != -1) {
+					if (runningGC)
+						this.lbf.put(hash);
+					// m.cache();
+					return pos;
+				}
+			}
+
+			return pos;
 		} finally {
 			l.unlock();
 		}
-
-		/*
-		 * Iterator<ProgressiveFileByteArrayLongMap> iter =
-		 * activeReadMaps.iterator(); while (iter.hasNext()) {
-		 * ProgressiveFileByteArrayLongMap m = iter.next(); pos = m.get(hash);
-		 * if (pos != -1) { return pos; } } if (pos == -1) {
-		 */
-
-		for (ProgressiveFileByteArrayLongMap m : this.maps.getAL()) {
-			pos = m.get(hash);
-			if (pos != -1) {
-
-				m.cache();
-				return pos;
-			}
-		}
-
-		return pos;
 	}
 
 	@Override
@@ -244,24 +229,28 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		executor = new ThreadPoolExecutor(Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
 				worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 		csz = new AtomicLong(0);
-		Lock l = this.gcLock.writeLock();
-		l.lock();
-		this.runningGC = true;
-		lbf = null;
-		lbf = new LargeBloomFilter(maxSz, .01);
-		l.unlock();
+
 		try {
+			Lock l = this.gcLock.writeLock();
+			l.lock();
+			this.runningGC = true;
+			lbf = null;
+			lbf = new LargeBloomFilter(maxSz, .01);
+			l.unlock();
 			SDFSLogger.getLog().info("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
 			SDFSEvent tEvt = SDFSEvent
 					.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]", evt);
 			tEvt.maxCt = this.maps.size();
 			Iterator<ProgressiveFileByteArrayLongMap> iter = maps.iterator();
+			ArrayList<ClaimShard> excs = new ArrayList<ClaimShard>();
 			while (iter.hasNext()) {
 				tEvt.curCt++;
 				ProgressiveFileByteArrayLongMap m = null;
 				try {
 					m = iter.next();
-					executor.execute(new ClaimShard(m, bf, lbf, csz));
+					ClaimShard cms = new ClaimShard(m, bf, lbf, csz);
+					excs.add(cms);
+					executor.execute(cms);
 				} catch (Exception e) {
 					tEvt.endEvent("Unable to claim records for " + m + " because : [" + e.toString() + "]",
 							SDFSEvent.ERROR);
@@ -276,6 +265,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				}
 			} catch (InterruptedException e) {
 				throw new IOException(e);
+			}
+			for (ClaimShard cms : excs) {
+				if (cms.ex != null)
+					throw new IOException(cms.ex);
 			}
 			this.kSz.getAndAdd(-1 * csz.get());
 			tEvt.endEvent("removed [" + csz.get() + "] records");
@@ -300,6 +293,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 								_m = this.createWriteMap();
 								_m.put(p.key, p.value);
 							}
+							this.lbf.put(p.key);
 							p = m.nextKeyValue();
 						}
 						int mapsz = maps.size();
@@ -340,11 +334,11 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					throw new IOException(e);
 				}
 			}
-			return csz.get();
-		} finally {
 			l.lock();
 			this.runningGC = false;
 			l.unlock();
+			return csz.get();
+		} finally {
 			executor = null;
 		}
 	}
@@ -355,6 +349,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		LargeBloomFilter bf = null;
 		LargeBloomFilter nlbf = null;
 		AtomicLong claims = null;
+		Exception ex = null;
 
 		protected ClaimShard(ProgressiveFileByteArrayLongMap map, LargeBloomFilter bf, LargeBloomFilter nlbf,
 				AtomicLong claims) {
@@ -371,8 +366,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			try {
 				cl = map.claimRecords(bf, nlbf);
 				claims.addAndGet(cl);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to claim shard", e);
+				ex = e;
 			}
 
 		}
@@ -638,7 +634,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		 * this.misses.get() + " mtm=" + this.msTr.get() + " tpm=" + tpm);
 		 * this.trs.set(0); this.misses.set(0); this.msTr.set(0); }
 		 */
-		if(added)
+		if (added)
 			this.kSz.incrementAndGet();
 		return added;
 	}
@@ -652,12 +648,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	 */
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
-			boolean added = false;
-			ProgressiveFileByteArrayLongMap bm = this.getReadMap(cm.getHash());
-			if(bm != null) {
-				added = bm.update(cm.getHash(), cm.getcPos());
-			}
-			return added;
+		boolean added = false;
+		ProgressiveFileByteArrayLongMap bm = this.getReadMap(cm.getHash());
+		if (bm != null) {
+			added = bm.update(cm.getHash(), cm.getcPos());
+		}
+		return added;
 	}
 
 	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException, IOException {

@@ -89,8 +89,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		try {
 			// container = pool.borrowObject();
 			HashMap<String, String> md = new HashMap<String, String>();
-			md.put("currentlength", Long.toString(HashBlobArchiveNoMap.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchiveNoMap.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 			FileOutputStream fout = new FileOutputStream(new File(this.container_location, "BucketInfo"));
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
 			oon.writeObject(md);
@@ -595,7 +595,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 					maps.addAll(traverseCache(z));
 				} else {
 					try {
-						if (!z.getPath().endsWith(".smap") && !z.getPath().endsWith(".md")) {
+						if (!z.getPath().endsWith(".smap") && !z.getPath().endsWith(".md") && !z.getPath().endsWith(".map")) {
 							maps.add(z.getName());
 						}
 					} catch (Exception e) {
@@ -615,8 +615,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	@Override
 	public void iterationInit(boolean deep) {
 		try {
-			HashBlobArchiveNoMap.currentLength.set(0);
-			HashBlobArchiveNoMap.compressedLength.set(0);
+			HashBlobArchive.currentLength.set(0);
+			HashBlobArchive.compressedLength.set(0);
 			this.ht = null;
 			this.hid = 0;
 			dl = new MultiDownload(this);
@@ -639,11 +639,11 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	@Override
 	public StringResult getStringResult(String key) throws IOException, InterruptedException {
 		Long hid = Long.parseLong(key);
-		File mf = HashBlobArchiveNoMap.getPath(hid);
-		HashBlobArchiveNoMap.compressedLength.addAndGet(mf.length());
+		File mf = HashBlobArchive.getPath(hid);
+		HashBlobArchive.compressedLength.addAndGet(mf.length());
 		try {
 			HashMap<String, String> metaData = this.readHashMap(hid);
-			HashBlobArchiveNoMap.currentLength.addAndGet(Integer.parseInt(metaData.get("bsize")));
+			HashBlobArchive.currentLength.addAndGet(Integer.parseInt(metaData.get("bsize")));
 			if (metaData.containsKey("deleted-objects") || metaData.containsKey("deleted")) {
 				metaData.remove("deleted-objects");
 				metaData.remove("deleted");
