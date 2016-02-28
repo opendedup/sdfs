@@ -140,7 +140,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					activeWMap = new ProgressiveFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
 					activeWMap.setUp();
 					this.maps.add(activeWMap);
-					activeWMap.setActive(true);
+					activeWMap.activate();
 					written = true;
 				}
 			}
@@ -156,7 +156,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			this.iolock.lock();
 			try {
 				if (this.activeWriteMap.isFull()) {
-					this.activeWriteMap.setActive(false);
+					this.activeWriteMap.inActive();
 					this.activeWriteMap = this.createWriteMap();
 				}
 			} catch (Exception e) {
@@ -289,7 +289,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							try {
 								_m.put(p.key, p.value);
 							} catch (HashtableFullException e) {
-								_m.setActive(false);
+								_m.inActive();
 								_m = this.createWriteMap();
 								_m.put(p.key, p.value);
 							}
@@ -313,7 +313,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							try {
 								_m.put(p.key, p.value);
 							} catch (HashtableFullException e) {
-								_m.setActive(false);
+								_m.inActive();
 								_m = this.createWriteMap();
 								_m.put(p.key, p.value);
 							}
@@ -430,11 +430,11 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				rsz = rsz + m.size();
 				bar.update(i);
 				if (this.activeWriteMap == null && !m.isFull()) {
-					m.setActive(true);
+					m.activate();
 					this.activeWriteMap = m;
 					m.cache();
 				} else {
-					m.setActive(false);
+					m.inActive();
 				}
 			}
 			bar.finish();
@@ -498,7 +498,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					activeWMap.setUp();
 					this.maps.add(activeWMap);
 					written = true;
-					activeWMap.setActive(true);
+					activeWMap.activate();
 					this.activeWriteMap = activeWMap;
 				}
 			}
@@ -606,7 +606,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					added = bm.put(cm.getHash(), cm.getcPos());
 					this.lbf.put(cm.getHash());
 				} catch (HashtableFullException e) {
-					bm.setActive(false);
+					bm.inActive();
 					bm = this.createWriteMap();
 					added = bm.put(cm.getHash(), cm.getcPos());
 					this.lbf.put(cm.getHash());
@@ -619,7 +619,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		} finally {
 			try {
 				if (bm != null) {
-					bm.setActive(true);
+					bm.inActive();
 				}
 			} catch (Exception e) {
 

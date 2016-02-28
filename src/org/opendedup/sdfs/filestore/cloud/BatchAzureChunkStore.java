@@ -402,7 +402,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			return getNextChunck();
 		else {
 		String token = ht.nextToken();
-		SDFSLogger.getLog().info("token="+token + " hid=" + hid);
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
 				token.split(":")[0]), hid);
 		return chk;

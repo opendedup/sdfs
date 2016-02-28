@@ -365,7 +365,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 									.debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
 							al = 0;
 						}
-						if (Main.readTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
+						if (Main.readTimeoutSeconds > 0 && wl > (Main.readTimeoutSeconds * tm)) {
 							int nt = (tm * wl) / 1000;
 							throw new IOException("read Timed Out after [" + nt + "] seconds. Expected [" + sz
 									+ "] block read but only [" + l.getDN() + "] were completed");

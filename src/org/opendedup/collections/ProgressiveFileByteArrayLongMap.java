@@ -84,12 +84,28 @@ public class ProgressiveFileByteArrayLongMap
 		this.path = path;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void inActive() {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
+		this.active = false;
+		l.unlock();
+	}
+	
+	public void activate() {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
+		this.active = true;
+		l.unlock();
 	}
 
 	public boolean isActive() {
+		Lock l = this.hashlock.readLock();
+		l.lock();
+		try {
 		return this.active;
+		}finally {
+			l.unlock();
+		}
 	}
 
 	public void cache() {
@@ -794,8 +810,9 @@ public class ProgressiveFileByteArrayLongMap
 		try {
 			byte[] key = cm.getHash();
 
-			if (this.full || this.sz.get() >= maxSz) {
+			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
+				this.active = false;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
@@ -857,8 +874,9 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			if (this.full || this.sz.get() >= maxSz) {
+			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
+				this.active = false;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
