@@ -665,6 +665,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			l.setMaxSize(fs.size());
 			Finger.FingerPersister fp = new Finger.FingerPersister();
 			fp.l = l;
+			fp.fingers = fs;
 			fp.dedup = df.mf.isDedup();
 			lexecutor.execute(fp);
 			int wl = 0;

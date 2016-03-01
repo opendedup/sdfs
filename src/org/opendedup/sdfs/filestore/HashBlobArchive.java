@@ -447,7 +447,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						removal.getValue().removeCache();
 					}
 				}).build(new CacheLoader<Long, HashBlobArchive>() {
-					public HashBlobArchive load(Long hashid) throws IOException {
+					public HashBlobArchive load(Long hashid) throws Exception {
 						try {
 							HashBlobArchive har = null;
 							File f = getPath(hashid);
@@ -458,9 +458,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 								har = new HashBlobArchive(f, hashid);
 							har.cached = true;
 							return har;
-						} catch (Exception e) {
+						}catch (DataArchivedException e) {
+							throw e;
+						}
+						catch (Exception e) {
 							SDFSLogger.getLog().error("unable to fetch block [" + hashid + "]", e);
-							throw new IOException("unable to read " + hashid);
+							throw e;
 						}
 					}
 				});

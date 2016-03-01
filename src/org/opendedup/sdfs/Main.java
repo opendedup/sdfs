@@ -24,8 +24,8 @@ public class Main {
 	public static boolean checkArchiveOnOpen= false;
 	public static boolean checkArchiveOnRead = false;
 	
-	public static int writeTimeoutSeconds = 300;
-	public static int readTimeoutSeconds = 300;
+	public static int writeTimeoutSeconds = -1; //1 hour timeout
+	public static int readTimeoutSeconds = -1; //1 hour timeout
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
 

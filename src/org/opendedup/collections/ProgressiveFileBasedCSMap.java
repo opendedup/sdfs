@@ -138,9 +138,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
 					activeWMap = new ProgressiveFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
+					activeWMap.activate();
 					activeWMap.setUp();
 					this.maps.add(activeWMap);
-					activeWMap.activate();
+					
 					written = true;
 				}
 			}
@@ -297,7 +298,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							p = m.nextKeyValue();
 						}
 						int mapsz = maps.size();
+						l = this.gcLock.writeLock();
+						l.lock();
+						try{
 						maps.remove(m);
+						}finally {
+						l.unlock();
+						}
 						mapsz = mapsz - maps.size();
 						SDFSLogger.getLog()
 								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
@@ -320,7 +327,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							p = m.nextKeyValue();
 						}
 						int mapsz = maps.size();
+						l = this.gcLock.writeLock();
+						l.lock();
+						try{
 						maps.remove(m);
+						}finally {
+						l.unlock();
+						}
 						mapsz = mapsz - maps.size();
 						SDFSLogger.getLog()
 								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
@@ -495,10 +508,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				if (!f.exists()) {
 					ProgressiveFileByteArrayLongMap activeWMap = new ProgressiveFileByteArrayLongMap(
 							fileName + "-" + guid, this.hashTblSz);
+					activeWMap.activate();
 					activeWMap.setUp();
+					
 					this.maps.add(activeWMap);
 					written = true;
-					activeWMap.activate();
+					
 					this.activeWriteMap = activeWMap;
 				}
 			}
@@ -619,7 +634,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		} finally {
 			try {
 				if (bm != null) {
-					bm.inActive();
+					bm.activate();
 				}
 			} catch (Exception e) {
 

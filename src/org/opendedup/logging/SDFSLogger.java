@@ -6,6 +6,7 @@ import java.io.IOException;
 
 
 
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -17,6 +18,7 @@ import org.opendedup.sdfs.Main;
 public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
+	private static Logger awslog = Logger.getLogger("com.amazonaws");
 	private static Logger fslog = Logger.getLogger("fs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
@@ -25,7 +27,7 @@ public class SDFSLogger {
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
 		
-		basicLog.setLevel(Level.INFO);
+		basicLog.setLevel(Level.WARN);
 		RollingFileAppender app = null;
 		try {
 
@@ -36,6 +38,9 @@ public class SDFSLogger {
 		} catch (IOException e) {
 			log.debug("unable to change appender", e);
 		}
+		awslog.setLevel(Level.WARN);
+		awslog.removeAllAppenders();
+		awslog.addAppender(app);
 		log.setLevel(Level.INFO);
 		fsdebug = true;
 		fslog.setLevel(Level.DEBUG);

@@ -1169,7 +1169,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 		String hast = new String(data);
 		SDFSLogger.getLog()
-				.info("reading hashes " + (String) mp.get("objects")
+				.debug("reading hashes " + (String) mp.get("objects")
 						+ " from " + hid + " encn " + sobj.getKey().substring(5));
 		StringTokenizer ht = new StringTokenizer(hast, ",");
 		StringResult st = new StringResult();
