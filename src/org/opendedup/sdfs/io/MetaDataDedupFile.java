@@ -120,11 +120,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
+		this.writeLock.lock();
+		try {
 		this.mode = mode;
 		this.dirty = true;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),
 				LinkOption.NOFOLLOW_LINKS);
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -918,9 +923,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void setHidden(boolean hidden, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.hidden = hidden;
 		this.dirty = true;
 		this.unmarshal();
+	}finally {
+		this.writeLock.unlock();
+	}
 	}
 
 	/**
@@ -1094,54 +1104,91 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setExecutable(boolean executable, boolean ownerOnly,
 			boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.execute = executable;
 		this.ownerExecOnly = ownerOnly;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setExecutable(boolean executable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.execute = executable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setWritable(boolean writable, boolean ownerOnly,
 			boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.write = writable;
 		this.ownerWriteOnly = ownerOnly;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+	}finally {
+		this.writeLock.unlock();
+	}
 	}
 
 	public boolean setWritable(boolean writable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.write = writable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setReadable(boolean readable, boolean ownerOnly,
 			boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.read = readable;
 		this.ownerReadOnly = ownerOnly;
+		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setReadable(boolean readable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.read = readable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public void setReadOnly(boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.read = true;
 		this.dirty = true;
 		this.unmarshal();
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean isFile() {
@@ -1158,7 +1205,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setDirty(boolean dirty) {
+		this.writeLock.lock();
 		this.dirty = dirty;
+		this.writeLock.unlock();
 	}
 
 	/**
@@ -1178,10 +1227,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 
 	public boolean setLastModified(long lastModified, boolean propigateEvent) {
+		this.writeLock.lock();
+		try {
 		this.lastModified = lastModified;
 		this.dirty = true;
 		this.lastAccessed = lastModified;
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -1208,7 +1262,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the length to set
 	 */
 	public void setLength(long l, boolean serialize, boolean propigateEvent) {
-
+		this.writeLock.lock();
+		try{
 		long len = l - this.length;
 		if (len != 0) {
 			Main.volume.updateCurrentSize(len, true);
@@ -1216,6 +1271,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.dirty = true;
 			if (serialize)
 				this.unmarshal();
+		}
+		}finally {
+		this.writeLock.unlock();
 		}
 	}
 
@@ -1268,6 +1326,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param lastAccessed
 	 */
 	public void setLastAccessed(long lastAccessed) {
+		
 		setLastAccessed(lastAccessed, true);
 	}
 
@@ -1279,7 +1338,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 **/
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		// this.dirty = true;
+		this.writeLock.lock();
 		this.lastAccessed = lastAccessed;
+		this.writeLock.unlock();
 	}
 
 	public long getLastAccessed() {
@@ -1542,7 +1603,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlink(boolean symlink, boolean propigateEvent) {
+		this.writeLock.lock();
 		this.symlink = symlink;
+		
 	}
 
 	public String getSymlinkPath() {
@@ -1550,11 +1613,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlinkPath(String symlinkPath) {
+		
 		setSymlinkPath(symlinkPath, true);
 	}
 
 	public void setSymlinkPath(String symlinkPath, boolean propigateEvent) {
+		this.writeLock.lock();
 		this.symlinkPath = symlinkPath;
+		this.writeLock.unlock();
 	}
 
 	public long getAttributes() {
@@ -1562,6 +1628,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setAttributes(long attributes) {
+		this.writeLock.lock();
 		this.attributes = attributes;
+		this.writeLock.unlock();
 	}
 }

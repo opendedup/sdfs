@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -11,22 +12,20 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 public class Finger  implements Runnable{
 	public byte[] chunk;
 	public byte[] hash;
-	public byte[] hl;
+	public InsertRecord hl;
 	public int start;
 	public int len;
 	public int ap;
-	public boolean dedup;
 	public AsyncChunkWriteActionListener l;
 
 
 	public void run()  {
 		try {
 			if(Main.chunkStoreLocal)
-				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
-						dedup);
+				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk);
 				else
 					this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
-							this.hl);
+							this.hl.getHashLocs());
 			l.commandResponse(this);
 
 		} catch (Throwable e) {
@@ -43,11 +42,10 @@ public class Finger  implements Runnable{
 			for(Finger f : fingers) {
 				try {
 					if(Main.chunkStoreLocal)
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
-							dedup);
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 					else
 						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
-								f.hl);
+								f.hl.getHashLocs());
 					l.commandResponse(f);
 
 				} catch (Throwable e) {
@@ -59,8 +57,7 @@ public class Finger  implements Runnable{
 		
 		public void persist() throws IOException, HashtableFullException {
 			for(Finger f : fingers) {
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
-							dedup);
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 
 				
 			}

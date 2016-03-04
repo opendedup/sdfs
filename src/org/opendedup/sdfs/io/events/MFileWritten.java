@@ -7,15 +7,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class MFileWritten {
+public class MFileWritten extends GenericEvent{
 	private static final int pl = Main.volume.getPath().length();
 	public MetaDataDedupFile mf;
 	public MFileWritten(MetaDataDedupFile f) {
+		super();
 		this.mf = f;
 	}
 	
 	public String toJSON() {
-		JsonObject dataset = new JsonObject();
+		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileWritten");
 		dataset.addProperty("path",  mf.getPath().substring(pl));
 		if(mf.isSymlink())
@@ -27,5 +28,4 @@ public class MFileWritten {
 		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
 		return gson.toJson(dataset);
 	}
-
 }

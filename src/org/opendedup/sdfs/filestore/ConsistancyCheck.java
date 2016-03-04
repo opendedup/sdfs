@@ -93,7 +93,7 @@ public class ConsistancyCheck {
 					records.incrementAndGet();
 					long pos = map.get(data.getHash());
 					if (pos == -1) {
-						if (map.put(data))
+						if (map.put(data).getInserted())
 							recordsRecovered.incrementAndGet();
 					}
 

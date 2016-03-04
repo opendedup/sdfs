@@ -495,7 +495,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	
-	public boolean put(byte[] key, long value) throws HashtableFullException {
+	public InsertRecord put(byte[] key, long value) throws HashtableFullException {
 		try {
 			this.hashlock.lock();
 			if (this.sz.get() >= size)
@@ -507,7 +507,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 				int npos = -pos -1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return false;
+				return new InsertRecord(false,this.get(key));
 			}
 			this.keys.position(pos);
 			this.keys.put(key);
@@ -523,13 +523,13 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.sz.incrementAndGet();
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
+			return new InsertRecord(true,value);
 		} finally {
 			this.hashlock.unlock();
 		}
 	}
 	
-	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
 		try {
 			byte [] key = cm.getHash();
 			this.hashlock.lock();
@@ -542,7 +542,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 				int npos = -pos -1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return false;
+				return new InsertRecord(false,this.get(key));
 			}
 			this.keys.position(pos);
 			this.keys.put(key);
@@ -561,7 +561,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.sz.incrementAndGet();
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
+			return new InsertRecord(true,cm.getcPos());
 		} finally {
 			this.hashlock.unlock();
 		}

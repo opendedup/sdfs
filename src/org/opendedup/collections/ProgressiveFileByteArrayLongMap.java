@@ -804,7 +804,7 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -837,13 +837,13 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set(npos);
 				}
 				this.bf.put(kb);
-				return false;
+				return new InsertRecord(false,this.get(key));
 			} else {
 				if (!cm.recoverd) {
 					try {
 						cm.persistData(true);
 					} catch (HashExistsException e) {
-						return false;
+						return new InsertRecord(false,e.getPos());
 					}
 				}
 				ByteBuffer bf = ByteBuffer.allocate(EL);
@@ -861,16 +861,17 @@ public class ProgressiveFileByteArrayLongMap
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
 				this.bf.put(kb);
+				return new InsertRecord(true,cm.getcPos());
 			}
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
+			
 		} finally {
 			l.unlock();
 		}
 	}
 
-	public boolean put(byte[] key, long value) throws HashtableFullException, IOException {
+	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -903,7 +904,7 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set(npos);
 				}
 				this.bf.put(kb);
-				return false;
+				return new InsertRecord(false,this.get(key));
 			} else {
 				ByteBuffer bf = ByteBuffer.allocate(EL);
 				bf.put(key);
@@ -923,7 +924,7 @@ public class ProgressiveFileByteArrayLongMap
 				// this.store.position(pos);
 				// this.store.put(storeID);
 
-				return pos > -1 ? true : false;
+				return new InsertRecord(true,value);
 			}
 		} finally {
 			l.unlock();

@@ -665,10 +665,5 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 		return true;
 	}
-	@Override
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

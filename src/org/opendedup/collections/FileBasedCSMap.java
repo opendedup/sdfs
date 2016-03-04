@@ -229,7 +229,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	
 
 	@Override
-	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
+	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
 					+ " is close");
@@ -243,13 +243,11 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		// this.flushFullBuffer();
-		boolean added = false;
-		added = this.put(cm, true);
-		return added;
+		return this.put(cm, true);
 	}
 
 	@Override
-	public boolean put(ChunkData cm, boolean persist) throws IOException,
+	public InsertRecord put(ChunkData cm, boolean persist) throws IOException,
 			HashtableFullException {
 		// persist = false;
 		if (this.isClosed())
@@ -257,23 +255,23 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 					+ " is close");
 		if (kSz.get() >= this.maxSz)
 			throw new HashtableFullException("maximum sized reached");
-		boolean added = false;
+		InsertRecord rec = null;
 		// if (persist)
 		// this.flushFullBuffer();
 		if (persist) {
 			if (!cm.recoverd) {
 				cm.persistData(true);
 			}
-			added = this.getMap(cm.getHash()).put(cm);
-			if (added) {
+			rec = this.getMap(cm.getHash()).put(cm);
+			if (rec.getInserted()) {
 				this.kSz.incrementAndGet();
 			} else {
 				cm.setmDeleteDuplicate(true);
 			}
 		} else {
-			added = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
+			rec = this.getMap(cm.getHash()).put(cm.getHash(), cm.getcPos());
 		}
-		return added;
+		return rec;
 	}
 
 	/*
@@ -433,8 +431,8 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			if (val < 0)
 				val = val * -1;
 			ChunkData cm = new ChunkData(hash, val);
-			boolean k = b.put(cm);
-			if (k == false)
+			InsertRecord k = b.put(cm);
+			if (!k.getInserted())
 				System.out.println("Unable to add this " + k);
 
 		}

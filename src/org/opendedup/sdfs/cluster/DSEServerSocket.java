@@ -285,12 +285,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					try {
 						HashChunk ck = chunks.get(i);
 						if (ck != null) {
-							boolean dup = false;
-							byte[] b = HCServiceProxy.writeChunk(ck.getName(),
-									ck.getData(), true);
-							if (b[0] == 1)
-								dup = true;
-							rsults.add(i, Boolean.valueOf(dup));
+							rsults.add(i, HCServiceProxy.writeChunk(ck.getName(),
+									ck.getData()).getInserted());
 						} else
 							rsults.add(i, null);
 					} catch (Exception e) {
@@ -310,13 +306,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				int len = buf.getInt();
 				byte[] chunkBytes = new byte[len];
 				buf.get(chunkBytes);
-				boolean dup = false;
-				byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, true);
-				if (b[0] == 1)
-					dup = true;
 				// SDFSLogger.getLog().debug("Writing " +
 				// StringUtils.getHexString(hash) + " done=" +done);
-				rtrn = Boolean.valueOf(dup);
+				rtrn = Boolean.valueOf(HCServiceProxy.writeChunk(hash,
+						chunkBytes).getInserted());
 				break;
 			}
 			case NetworkCMDS.FETCH_CMD: {

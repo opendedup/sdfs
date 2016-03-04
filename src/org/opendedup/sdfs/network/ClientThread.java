@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.QuickList;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
@@ -122,15 +123,10 @@ public class ClientThread extends Thread {
 					int len = is.readInt();
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
-					boolean done = false;
-					byte[] b = HCServiceProxy.writeChunk(hash, chunkBytes, true);
-
-					if (b[0] == 1)
-						done = true;
-
+					InsertRecord rec = HCServiceProxy.writeChunk(hash, chunkBytes);
 					try {
 						writelock.lock();
-						os.writeBoolean(done);
+						os.writeBoolean(rec.getInserted());
 						os.flush();
 						writelock.unlock();
 					} catch (IOException e) {
@@ -161,12 +157,8 @@ public class ClientThread extends Thread {
 						try {
 							HashChunk ck = chunks.get(i);
 							if (ck != null) {
-								boolean dup = false;
-								byte[] b = HCServiceProxy.writeChunk(
-										ck.getName(), ck.getData(),  true);
-								if (b[0] == 1)
-									dup = true;
-								rsults.add(i, Boolean.valueOf(dup));
+								rsults.add(i, Boolean.valueOf(HCServiceProxy.writeChunk(
+										ck.getName(), ck.getData()).getInserted()));
 							} else
 								rsults.add(i, null);
 						} catch (Exception e) {

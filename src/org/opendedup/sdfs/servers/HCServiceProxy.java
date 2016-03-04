@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDiskException;
@@ -30,6 +31,7 @@ import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RedundancyNotMetException;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
@@ -41,6 +43,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.eventbus.EventBus;
+import com.google.common.primitives.Longs;
 
 public class HCServiceProxy {
 
@@ -272,10 +275,10 @@ public class HCServiceProxy {
 			hcService.sync();
 	}
 
-	private static byte[] _write(byte[] hash, byte[] aContents, byte[] hashloc)
+	private static InsertRecord _write(byte[] hash, byte[] aContents, byte[] hashloc)
 			throws IOException, RedundancyNotMetException {
 		if (Main.DSEClusterDirectIO)
-			return directWriteChunk(hash, aContents, hashloc);
+			return new InsertRecord(true,directWriteChunk(hash, aContents, hashloc));
 		else {
 			int ncopies = 0;
 			for (int i = 1; i < 8; i++) {
@@ -284,7 +287,7 @@ public class HCServiceProxy {
 				}
 			}
 			if (ncopies >= Main.volume.getClusterCopies()) {
-				return hashloc;
+				return new InsertRecord(true,hashloc);
 			} else if (ncopies > 0) {
 				byte[] ignoredHosts = new byte[ncopies];
 				for (int i = 0; i < ncopies; i++)
@@ -296,7 +299,7 @@ public class HCServiceProxy {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							"wrote data when found some but not all");
-				return cmd.reponse();
+				return new InsertRecord(true,cmd.reponse());
 			} else {
 				WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 						Main.volume.getClusterCopies());
@@ -304,12 +307,12 @@ public class HCServiceProxy {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("wrote data when found none");
 
-				return cmd.reponse();
+				return new InsertRecord(true,cmd.reponse());
 			}
 		}
 	}
 
-	public static byte[] writeChunk(byte[] hash, byte[] aContents,
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,
 			byte[] hashloc) throws IOException {
 
 		int tries = 0;
@@ -375,17 +378,11 @@ public class HCServiceProxy {
 
 	}
 
-	public static byte[] writeChunk(byte[] hash, byte[] aContents,
-			 boolean sendChunk) throws IOException,
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents) throws IOException,
 			HashtableFullException {
-		boolean doop = false;
-		byte[] b = new byte[8];
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			if (sendChunk) {
-				doop = HCServiceProxy.hcService.writeChunk(hash, aContents,  false);
-			}
-			b[1] = -2;
+				return HCServiceProxy.hcService.writeChunk(hash, aContents,  false);
 		} else {
 			try {
 				if (SDFSLogger.isDebug())
@@ -396,7 +393,7 @@ public class HCServiceProxy {
 				if (hcmd.meetsRedundancyRequirements()) {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("found all");
-					return hcmd.getResponse();
+					return new InsertRecord(false,hcmd.getResponse());
 				} else if (hcmd.exists()) {
 					byte[] ignoredHosts = new byte[hcmd.responses()];
 					for (int i = 0; i < hcmd.responses(); i++)
@@ -417,7 +414,7 @@ public class HCServiceProxy {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"wrote data when found some but not all");
-					return cmd.reponse();
+					return new InsertRecord(true,cmd.reponse());
 				} else {
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies());
@@ -443,7 +440,7 @@ public class HCServiceProxy {
 					 * cmd.reponse());
 					 */
 					// }
-					return cmd.reponse();
+					return new InsertRecord(false,cmd.reponse());
 				}
 			} catch (Exception e1) {
 				SDFSLogger.getLog().fatal("Unable to write chunk " + hash, e1);
@@ -452,23 +449,15 @@ public class HCServiceProxy {
 
 			}
 		}
-		if (doop)
-			b[0] = 1;
-
-		return b;
+		
 	}
 
-	public static byte[] writeChunk(byte[] hash, byte[] aContents,
-			 boolean sendChunk, byte[] ignoredHosts)
+	/*
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, byte[] ignoredHosts)
 			throws IOException, HashtableFullException {
-		boolean doop = false;
-		byte[] b = new byte[8];
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			if (!doop && sendChunk) {
-				doop = HCServiceProxy.hcService.writeChunk(hash, aContents, false);
-			}
-			b[1] = -2;
+				return HCServiceProxy.hcService.writeChunk(hash, aContents, false);
 		} else {
 
 			try {
@@ -476,12 +465,12 @@ public class HCServiceProxy {
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies(), ignoredHosts);
 					cmd.executeCmd(socket);
-					return cmd.reponse();
+					return new InsertRecord(true,cmd.reponse());
 				} else {
 					WriteHashCmd cmd = new WriteHashCmd(hash, aContents, false,
 							Main.volume.getClusterCopies());
 					cmd.executeCmd(socket);
-					return cmd.reponse();
+					return new InsertRecord(true,cmd.reponse());
 				}
 			} catch (Exception e1) {
 				// SDFSLogger.getLog().fatal("Unable to write chunk " + hash,
@@ -491,11 +480,8 @@ public class HCServiceProxy {
 
 			}
 		}
-		if (doop)
-			b[0] = 1;
-
-		return b;
 	}
+	*/
 
 	public static void runFDisk(FDiskEvent evt) throws FDiskException,
 			IOException {
@@ -579,12 +565,25 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static byte[] fetchChunk(byte[] hash, byte[] hashloc)
+	public static byte[] fetchChunk(byte[] hash, byte[] hashloc,boolean direct)
 			throws IOException, DataArchivedException {
 
 		if (Main.chunkStoreLocal) {
-			HashChunk hc = HCServiceProxy.hcService.fetchChunk(hash);
-			return hc.getData();
+			byte [] data = null;
+			if(direct) {
+				long pos = Longs.fromByteArray(hashloc);
+				try {
+				data =  HashBlobArchive.getBlock(hash, pos);
+				
+				}catch(DataArchivedException e) {
+					throw e;
+				} catch(Exception e) {
+					SDFSLogger.getLog().warn("data no found at " + pos, e);
+				}
+			}
+			if(data == null)
+				data =HCServiceProxy.hcService.fetchChunk(hash).getData();
+			return data;
 		} else {
 			ByteArrayWrapper wrapper = new ByteArrayWrapper(hash, hashloc);
 			try {

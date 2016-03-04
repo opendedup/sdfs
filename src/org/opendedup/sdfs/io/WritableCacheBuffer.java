@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
@@ -58,6 +59,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean batchwritten;
 	private boolean reconstructed;
 	private boolean hlAdded = false;
+	private boolean direct = false;
 	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
 	int sz;
 	private static SynchronousQueue<Runnable> lworksQueue = null;
@@ -70,11 +72,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	static {
 		if (maxTasks > 120)
 			maxTasks = 120;
-		if (!Main.chunkStoreLocal) {
-			SDFSLogger.getLog().debug("Maximum Read Threads is " + maxTasks);
+			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
 			worksQueue = new SynchronousQueue<Runnable>();
 			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
-		}
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,
 				lexecutionHandler);
@@ -89,7 +89,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		this.df = df;
 		this.reconstructed = reconstructed;
 		buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
-
+		if(this.df.bdb.getVersion() == 3) {
+			this.direct = true;
+		}
 		// this.currentLen = 0;
 		this.setLength(Main.CHUNK_LENGTH);
 		this.endPosition = this.getFilePosition() + this.getLength();
@@ -127,6 +129,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		this.setLength(Main.CHUNK_LENGTH);
 		this.endPosition = this.getFilePosition() + this.getLength();
 		this.setWritable(true);
+		
+		if(this.df.bdb.getVersion() == 3 ) {
+			this.direct = true;
+		}
 	}
 
 	/*
@@ -183,7 +189,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				for (HashLocPair p : ar) {
 
-					if (p.hashloc[1] != 0) {
+					if (p.hashloc[1] != 0 || this.direct) {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
 						sh.hashloc = p.hashloc;
@@ -191,6 +197,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						sh.nlen = p.nlen;
 						sh.offset = p.offset;
 						sh.len = p.len;
+						sh.direct = this.direct;
 						sh.apos = i;
 						cks.add(i, sh);
 					} else
@@ -200,6 +207,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (Main.chunkStoreLocal) {
 					ShardReader r = new ShardReader();
 					r.shards = cks;
+					r.direct = this.direct;
 					r.cache = false;
 					r.read();
 				} else {
@@ -240,6 +248,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					};
 					for (Shard sh : cks) {
 						sh.l = l;
+						sh.direct = direct;
 						executor.execute(sh);
 					}
 					int wl = 0;
@@ -297,6 +306,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
 						sh.hashloc = p.hashloc;
+						sh.direct = this.direct;
 						sh.pos = p.pos;
 						sh.nlen = p.nlen;
 						sh.offset = p.offset;
@@ -308,11 +318,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					i++;
 				}
 				if (Main.chunkStoreLocal) {
-					ShardReader r = new ShardReader();
-					r.shards = cks;
-					r.cache = false;
-					r.read();
-				} else {
+					
 					sz = cks.size();
 					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
 
@@ -352,6 +358,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					for (Shard sh : cks) {
 						sh.l = l;
 						sh.cache = false;
+						sh.direct = this.direct;
 						executor.execute(sh);
 					}
 					int wl = 0;
@@ -430,7 +437,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 			} else {
-				this.buf = ByteBuffer.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc));
+				this.buf = ByteBuffer.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc,direct));
 
 			}
 		}
@@ -530,13 +537,15 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						AbstractHashEngine eng = HashFunctionPool.borrowObject();
 						try {
 							p.hash = eng.getHash(b);
-							p.hashloc = HCServiceProxy.writeChunk(p.hash, b, true);
+							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b);
+							
+							p.hashloc = rec.getHashLocs();
 							p.len = b.length;
 							p.nlen = b.length;
 							p.offset = 0;
 							p.pos = pos;
 							int dups = 0;
-							if (p.hashloc[0] == 1)
+							if (!rec.getInserted())
 								dups = b.length;
 							df.mf.getIOMonitor().addVirtualBytesWritten(b.length, true);
 							df.mf.getIOMonitor().addActualBytesWritten(b.length - dups, true);
@@ -599,7 +608,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					SDFSLogger.getLog()
 							.debug("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
 									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
-				byte[] b = HCServiceProxy.fetchChunk(p.hash, p.hashloc);
+				byte[] b = HCServiceProxy.fetchChunk(p.hash, p.hashloc,direct);
 				ByteBuffer bf = ByteBuffer.wrap(b);
 				byte[] z = new byte[p.nlen];
 				bf.position(p.offset);
@@ -707,14 +716,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				HashLocPair p = new HashLocPair();
 				try {
 					p.hash = f.hash;
-					p.hashloc = f.hl;
+					p.hashloc = f.hl.getHashLocs();
 					p.len = f.len;
 					p.offset = 0;
 					p.nlen = f.len;
 					p.pos = pos;
 					pos += f.len;
 					int dups = 0;
-					if (p.hashloc[0] == 1)
+					if (!f.hl.getInserted())
 						dups = f.len;
 					df.mf.getIOMonitor().addVirtualBytesWritten(f.len, true);
 					df.mf.getIOMonitor().addActualBytesWritten(f.len - dups, true);
@@ -1151,7 +1160,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public int apos;
 		public int offset;
 		public int nlen;
-
+		public boolean direct;
 		public boolean cache;
 
 		public byte[] ck;
@@ -1162,10 +1171,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			try {
 				
 				if (cache) {
-					
 					HCServiceProxy.cacheData(hash, hashloc);
 				} else {
-					this.ck = HCServiceProxy.fetchChunk(hash, hashloc);
+					this.ck = HCServiceProxy.fetchChunk(hash, hashloc,direct);
 					l.commandResponse(this);
 					
 				}
@@ -1183,13 +1191,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public static class ShardReader {
 		List<Shard> shards;
 		public boolean cache;
+		public boolean direct;
 
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
 					if (cache) {
 						HCServiceProxy.cacheData(s.hash, s.hashloc);
 					} else
-						s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc);
+						s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc,direct);
 				
 			}
 

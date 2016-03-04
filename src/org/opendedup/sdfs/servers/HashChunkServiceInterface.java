@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -25,7 +26,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract AbstractChunkStore getChuckStore();
 
-	public abstract boolean writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
+	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
 			HashtableFullException;
 
 	public abstract void remoteFetchChunks(ArrayList<String> al, String server,

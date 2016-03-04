@@ -34,12 +34,15 @@ public class ReadTest implements Runnable {
 					StandardOpenOption.READ);
 			ByteBuffer buf = ByteBuffer.allocateDirect(bs);
 			long time = System.currentTimeMillis();
+			
 			while (sz < len) {
 				buf.position(0);
 				int read = fc.read(buf, sz);
 				sz = sz + read;
 			}
+			
 			duration = (System.currentTimeMillis() - time);
+			System.out.println("read=" + path + " len=" + len + " tm=" +duration);
 			fc.close();
 
 		} catch (Exception e) {
@@ -166,9 +169,9 @@ public class ReadTest implements Runnable {
 		}
 		int r = Integer.parseInt(args[2]);
 		for (int i = 0; i < r; i++) {
-			int start = (i * Integer.parseInt(args[1]))+1;
+			//int start = (i * Integer.parseInt(args[1]))+1;
 			System.out.println("Running Read Test ...");
-			float[] results = test(args[0], start);
+			float[] results = test(args[0], Integer.parseInt(args[1]));
 			String testName = args[3];
 			String logFileName = args[4];
 			Path p = Paths.get(logFileName);

@@ -248,6 +248,11 @@ public class LongByteArrayMap implements DataMapInterface {
 			this.offset = _v2offset;
 			this.arrayLength = _v2arrayLength;
 		}
+		if (version == 3) {
+			this.FREE = _V2FREE;
+			this.offset = _v2offset;
+			this.arrayLength = _v2arrayLength;
+		}
 	}
 
 	private void openFile() throws IOException {

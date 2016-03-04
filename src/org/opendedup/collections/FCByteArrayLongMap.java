@@ -503,7 +503,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 				"No free or removed slots available. Key set full?!!");
 	}
 	
-	public boolean put(ChunkData cm) {
+	public InsertRecord put(ChunkData cm) {
 		try {
 			byte [] key = cm.getHash();
 			this.hashlock.lock();
@@ -516,7 +516,8 @@ public class FCByteArrayLongMap implements AbstractShard {
 				int npos = -pos -1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return false;
+				return new InsertRecord(false,this.get(key));
+				
 			}
 			this.kFC.write(ByteBuffer.wrap(key), pos);
 			if (!cm.recoverd) {
@@ -532,16 +533,16 @@ public class FCByteArrayLongMap implements AbstractShard {
 			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
+			return new InsertRecord(true,cm.getcPos());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			return false;
+			return new InsertRecord(false,-1);
 		} finally {
 			this.hashlock.unlock();
 		}
 	}
 
-	public boolean put(byte[] key, long value) {
+	public InsertRecord put(byte[] key, long value) {
 		try {
 			this.hashlock.lock();
 			if (this.mapped.cardinality() >= size)
@@ -553,7 +554,7 @@ public class FCByteArrayLongMap implements AbstractShard {
 				int npos = -pos -1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return false;
+				return new InsertRecord(false,this.get(key));
 			}
 			this.kFC.write(ByteBuffer.wrap(key), pos);
 
@@ -567,10 +568,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
+			return new InsertRecord(true,value);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			return false;
+			return new InsertRecord(false,-1);
 		} finally {
 			this.hashlock.unlock();
 		}
@@ -683,8 +684,8 @@ public class FCByteArrayLongMap implements AbstractShard {
 			}
 			if (val < 0)
 				val = val * -1;
-			boolean k = b.put(hash, val);
-			if (k == false)
+			InsertRecord k = b.put(hash, val);
+			if (k.getInserted())
 				System.out.println("Unable to add this " + k);
 
 		}

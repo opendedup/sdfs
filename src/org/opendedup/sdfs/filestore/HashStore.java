@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -245,9 +246,9 @@ public class HashStore {
 	 * @throws IOException
 	 * @throws HashtableFullException
 	 */
-	public boolean addHashChunk(HashChunk chunk) throws IOException,
+	public InsertRecord addHashChunk(HashChunk chunk) throws IOException,
 			HashtableFullException {
-		boolean written = false;
+		InsertRecord written = null;
 		try {
 			//if (!bdb.containsKey(chunk.getName())) {
 				// long start = chunkStore.reserveWritePosition(chunk.getLen());

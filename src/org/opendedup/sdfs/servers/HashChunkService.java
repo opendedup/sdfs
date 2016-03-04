@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -74,27 +75,26 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hs.bdb;
 	}
 
-	public boolean writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
+	public InsertRecord writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
 			HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
 					+ "]");
 		chunksRead++;
-		boolean written = hs.addHashChunk(new HashChunk(hash, aContents,
+		InsertRecord written = hs.addHashChunk(new HashChunk(hash, aContents,
 				compressed));
-		if (written) {
+		if (written.getInserted()) {
 			unComittedChunks++;
 			chunksWritten++;
 			kBytesWrite = kBytesWrite + (aContents.length / KBYTE);
 			if (unComittedChunks > MAX_UNCOMITTEDCHUNKS) {
 				commitChunks();
 			}
-			return false;
 		} else {
 			dupsFound++;
-			return true;
 		}
+		return written;
 	}
 	
 	public void setReadSpeed(int speed) {

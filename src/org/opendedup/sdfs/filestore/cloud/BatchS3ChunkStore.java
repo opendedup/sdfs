@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.sdfs.filestore.HashBlobArchive;
-import org.opendedup.sdfs.filestore.HashBlobArchiveNoMap;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.AbstractBatchStore;
 
@@ -1409,12 +1409,6 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	public boolean isLocalData() {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

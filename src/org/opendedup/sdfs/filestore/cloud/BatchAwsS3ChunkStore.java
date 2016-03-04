@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore.cloud;
 import java.io.BufferedInputStream;
 
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -81,7 +82,6 @@ import com.google.common.io.BaseEncoding;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
-import org.opendedup.sdfs.filestore.HashBlobArchiveNoMap;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
@@ -1325,7 +1325,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				md.addUserMetadata("lastmodified",
 						Long.toString(f.lastModified()));
-
+				
 				md.setContentType("binary/octet-stream");
 				in = new BufferedInputStream(new FileInputStream(p), 32768);
 				try {
@@ -1342,6 +1342,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					PutObjectRequest req = new PutObjectRequest(this.name,
 							objName, in, md);
 					s3Service.putObject(req);
+					SDFSLogger.getLog().debug("uploaded=" + f.getPath() + " lm=" + md.getUserMetaDataOf("lastmodified") );
 				} catch (Exception e1) {
 					// SDFSLogger.getLog().error("error uploading", e1);
 					throw new IOException(e1);
@@ -1573,6 +1574,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				e = _e;
 				SDFSLogger.getLog().debug(
 						"unable to connect to bucket try " + i + " of 3", e);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+
+				}
 			}
 		}
 		if (e != null)
@@ -1899,13 +1905,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public boolean isLocalData() {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-
-	@Override
-	public void writeHashBlobArchive(HashBlobArchiveNoMap arc, int id) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

@@ -219,11 +219,11 @@ public class FileReplicationService {
 				while (!done) {
 					try {
 						if (evt.mf.isDirty()|| evt.mf.isSymlink()) {
-							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
-										"writem " + evt.mf.getPath());
+										"writem " + evt.mf.getPath() + " info=" + evt.mf.toJSON(false));
 							this.sync.uploadFile(new File(evt.mf.getPath()),
 									evt.mf.getPath().substring(pl), "files");
+							
 							eventMetaDataBus.post(evt);
 						} else {
 							if (SDFSLogger.isDebug())
@@ -348,6 +348,7 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
+					
 					this.sync.uploadFile(evt.sf,
 							evt.sf.getPath().substring(sl), "ddb");
 
@@ -380,6 +381,8 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
+					SDFSLogger.getLog().debug(
+							"synced " + evt.mf.getPath() + " info=" + evt.mf.toJSON(false));
 					this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf
 							.getPath().substring(pl), "files");
 					done = true;
@@ -563,7 +566,7 @@ public class FileReplicationService {
 							.getVirtualBytesWritten(), true);
 					SDFSLogger.getLog().info(
 							"downloaded " + to.getPath() + " sz="
-									+ to.length());
+									+ to.length() + " mf=" + mf.toJSON(false));
 					done = true;
 					fdl.incrementAndGet();
 				} catch (Exception e) {

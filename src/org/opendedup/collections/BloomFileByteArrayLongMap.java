@@ -642,7 +642,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public boolean put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
 		try {
 			byte[] key = cm.getHash();
 			this.hashlock.lock();
@@ -662,13 +662,14 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				npos = (npos / EL);
 				this.claims.set(npos);
 				this.bf.put(kb);
-				return false;
+				long p = this.get(key);
+				return new InsertRecord(false,p);
 			} else {
 				if (!cm.recoverd) {
 					try {
 					cm.persistData(true);
 					}catch(HashExistsException e) {
-						return false;
+						return new InsertRecord(false,e.getPos());
 					}
 				}
 				this.keys.position(pos);
@@ -682,16 +683,16 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
 				this.bf.put(kb);
+				return new InsertRecord(true,cm.getcPos());
 			}
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return pos > -1 ? true : false;
 		} finally {
 			this.hashlock.unlock();
 		}
 	}
 
-	public boolean put(byte[] key, long value) throws HashtableFullException,
+	public InsertRecord put(byte[] key, long value) throws HashtableFullException,
 			IOException {
 		try {
 			this.hashlock.lock();
@@ -710,7 +711,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				npos = (npos / EL);
 				this.claims.set(npos);
 				this.bf.put(kb);
-				return false;
+				long p = this.get(key);
+				return new InsertRecord(false,p);
 			} else {
 				this.keys.position(pos);
 				this.keys.put(key);
@@ -725,7 +727,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				this.bf.put(kb);
 				// this.store.position(pos);
 				// this.store.put(storeID);
-				return pos > -1 ? true : false;
+				return new InsertRecord(true,value);
 			}
 		} finally {
 			this.hashlock.unlock();

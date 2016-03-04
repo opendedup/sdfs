@@ -32,10 +32,10 @@ public interface AbstractHashesMap {
 	 */
 	public abstract boolean containsKey(byte[] key) throws IOException;
 
-	public abstract boolean put(ChunkData cm) throws IOException,
+	public abstract InsertRecord put(ChunkData cm) throws IOException,
 			HashtableFullException;
 
-	public abstract boolean put(ChunkData cm, boolean persist)
+	public abstract InsertRecord put(ChunkData cm, boolean persist)
 			throws IOException, HashtableFullException;
 
 	public abstract boolean update(ChunkData cm) throws IOException;

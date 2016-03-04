@@ -568,7 +568,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	@Override
-	public boolean put(ChunkData cm) throws IOException, HashtableFullException {
+	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
 		if (this.kSz.get() >= this.maxSz)
@@ -581,9 +581,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		// this.flushFullBuffer();
-		boolean added = false;
-		added = this.put(cm, true);
-		return added;
+		return this.put(cm, true);
 	}
 
 	// AtomicLong misses = new AtomicLong(0);
@@ -591,13 +589,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	// AtomicLong msTr = new AtomicLong(0);
 
 	@Override
-	public boolean put(ChunkData cm, boolean persist) throws IOException, HashtableFullException {
+	public InsertRecord put(ChunkData cm, boolean persist) throws IOException, HashtableFullException {
 		// persist = false;
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
 		if (kSz.get() >= this.maxSz)
 			throw new HashtableFullException("maximum sized reached");
-		boolean added = false;
+		InsertRecord rec = null;
 		// if (persist)
 		// this.flushFullBuffer();
 		Lock l = gcLock.readLock();
@@ -605,7 +603,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		ProgressiveFileByteArrayLongMap bm = null;
 		try {
 			// long tm = System.currentTimeMillis();
-			if (this.getReadMap(cm.getHash()) == null) {
+			ProgressiveFileByteArrayLongMap rm = this.getReadMap(cm.getHash());
+			if (rm == null) {
 				// this.misses.incrementAndGet();
 				// tm = System.currentTimeMillis() - tm;
 
@@ -614,20 +613,20 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						try {
 							cm.persistData(true);
 						} catch (HashExistsException e) {
-							return false;
+							return new InsertRecord(false,e.getPos());
 						}
 					}
 					bm = this.getWriteMap();
-					added = bm.put(cm.getHash(), cm.getcPos());
+					rec = bm.put(cm.getHash(), cm.getcPos());
 					this.lbf.put(cm.getHash());
 				} catch (HashtableFullException e) {
 					bm.inActive();
 					bm = this.createWriteMap();
-					added = bm.put(cm.getHash(), cm.getcPos());
+					rec = bm.put(cm.getHash(), cm.getcPos());
 					this.lbf.put(cm.getHash());
 				}
 			} else {
-				// tm = System.currentTimeMillis() - tm;
+				rec = new InsertRecord(false,rm.get(cm.getHash()));
 			}
 			// this.msTr.addAndGet(tm);
 
@@ -649,9 +648,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		 * this.misses.get() + " mtm=" + this.msTr.get() + " tpm=" + tpm);
 		 * this.trs.set(0); this.misses.set(0); this.msTr.set(0); }
 		 */
-		if (added)
+		if (rec.getInserted())
 			this.kSz.incrementAndGet();
-		return added;
+		return rec;
 	}
 
 	/*
@@ -820,8 +819,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			if (val < 0)
 				val = val * -1;
 			ChunkData cm = new ChunkData(hash, val);
-			boolean k = b.put(cm);
-			if (k == false)
+			InsertRecord k = b.put(cm);
+			if (k.getInserted())
 				System.out.println("Unable to add this " + k);
 
 		}

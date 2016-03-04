@@ -150,8 +150,8 @@ public class ClusterRedundancyCheck {
 					}
 					if (ncopies < Main.volume.getClusterCopies()) {
 						byte[] nb = HCServiceProxy.fetchChunk(p.hash,
-								exists);
-						exists = HCServiceProxy.writeChunk(p.hash, nb, true, exists);
+								exists,false);
+						exists = HCServiceProxy.writeChunk(p.hash, nb, exists).getHashLocs();
 						ncopies = 0;
 						for (int i = 1; i < 8; i++) {
 							if (exists[i] > (byte) 0) {
@@ -231,10 +231,10 @@ public class ClusterRedundancyCheck {
 											&& ncopies < HCServiceProxy.cs
 													.getStorageNodes().size()) {
 										byte[] nb = HCServiceProxy.fetchChunk(
-												p.hash, exists);
+												p.hash, exists,false);
 										exists = HCServiceProxy.writeChunk(
 												p.hash, nb, 
-												true, exists);
+												exists).getHashLocs();
 										ncopies = 0;
 										for (int i = 1; i < 8; i++) {
 											if (exists[i] > (byte) 0) {

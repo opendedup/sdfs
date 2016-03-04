@@ -1,6 +1,7 @@
 package org.opendedup.hashing;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,11 +13,9 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
-import java.util.Random;
 import java.util.zip.Adler32;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.ElapsedTime;
 import org.opendedup.util.StringUtils;
 
@@ -232,21 +231,6 @@ public class HashFunctions {
 			System.out.println(auth);
 		else
 			System.out.println("failed");
-	}
-
-	public static void insertRecorts(long number) throws Exception {
-		System.out.println("Inserting [" + number + "] Records....");
-		long start = System.currentTimeMillis();
-		Random rnd = new Random();
-		for (int i = 0; i < number; i++) {
-			byte[] b = new byte[64];
-			rnd.nextBytes(b);
-
-			byte[] hash = HashFunctions.getMD5ByteHash(b);
-			HCServiceProxy.writeChunk(hash, b, false);
-		}
-		System.out.println("Took " + (System.currentTimeMillis() - start)
-				+ " ms");
 	}
 
 	public static String getSHAHash(byte[] input)

@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -703,7 +704,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						boolean ins = wMaps.get(this.id).put(hash, (int) cp + 4 + hash.length);
 						if (!ins) {
 							np.set(cp);
-							throw new HashExistsException();
+							throw new HashExistsException(this.id,hash);
 						}
 					} catch (MapClosedException e1) {
 						this.writeable = false;

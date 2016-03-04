@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
@@ -421,7 +422,7 @@ public class SparseDedupFile implements DedupFile {
 					for (HashLocPair p : writeBuffer.getFingers()) {
 						if (!writeBuffer.isBatchwritten())
 							p.hashloc = HCServiceProxy.writeChunk(p.hash,
-									p.data, p.hashloc);
+									p.data, p.hashloc).getHashLocs();
 					}
 				} else {
 					if (HashFunctionPool.max_hash_cluster == 1) {
@@ -439,9 +440,9 @@ public class SparseDedupFile implements DedupFile {
 							HashFunctionPool.returnObject(hc);
 						}
 						byte[] b = writeBuffer.getFlushedBuffer();
-						p.hashloc = HCServiceProxy.writeChunk(p.hash, b,
-								mf.isDedup());
-						if (p.hashloc[0] == 1)
+						InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b);
+						p.hashloc = rec.getHashLocs();
+						if (!rec.getInserted())
 							dups = writeBuffer.capacity();
 						p.len = b.length;
 						p.pos = 0;
@@ -464,9 +465,8 @@ public class SparseDedupFile implements DedupFile {
 									Finger f = new Finger();
 									f.hash = p.hash;
 									f.chunk = p.data;
-									f.dedup = true;
 									f.len = p.data.length;
-									f.hl = p.hashloc;
+									f.hl = new InsertRecord(true,p.hashloc);
 									f.start = p.pos;
 									fs.add(f);
 								}
@@ -519,7 +519,6 @@ public class SparseDedupFile implements DedupFile {
 							l.setMaxSize(fs.size());
 							for (Finger f : fs) {
 								f.l = l;
-								f.dedup = mf.isDedup();
 								executor.execute(f);
 							}
 							int wl = 0;
@@ -578,12 +577,12 @@ public class SparseDedupFile implements DedupFile {
 								HashLocPair p = new HashLocPair();
 								try {
 									p.hash = f.hash;
-									p.hashloc = f.hl;
+									p.hashloc = f.hl.getHashLocs();
 									p.len = f.len;
 									p.offset = 0;
 									p.nlen = f.len;
 									p.pos = f.start;
-									if (p.hashloc[0] == 1)
+									if (!f.hl.getInserted())
 										dups = dups + f.len;
 									ar.add(p);
 								} catch (Exception e) {
