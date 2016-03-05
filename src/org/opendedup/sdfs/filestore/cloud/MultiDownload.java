@@ -94,13 +94,16 @@ public class MultiDownload implements Runnable {
 			}
 
 			if (ck != null && ck.hasNext()) {
-				return ck.next();
+				String kid = ck.next();
+				
+				return kid;
 			}
 		}
 		return null;
 	}
 
 	private void addStringResult(String key) throws IOException, InterruptedException {
+		SDFSLogger.getLog().debug("kid=" + key);
 		this.sbs.put(cs.getStringResult(key));
 	}
 

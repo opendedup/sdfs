@@ -1,3 +1,7 @@
+Version 3.1.1
+	Fixes
+	* Fixed cloud filesync
+	* Fixed dr restore from cloud to new local server
 Version 3.1.0
 	Fixes
 	* Fixed distributed DSE code for the 3.0 tree
@@ -6,6 +10,7 @@ Version 3.1.0
 	* Updated script files to point to appropriate sources
 	* Remove orphaned symlinks
 	* Fixed Cache Expiring for cloud storage data retrieval
+	* Fixed crash recovery of cloud storage
 	Enhancements
 	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
 	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.
@@ -13,6 +18,7 @@ Version 3.1.0
 	* Improved space savings on compaction. Removes individual orphaned blocks from chunks stored on disk. Not yet implemented for cloud storage
 	because of round trip cost.
 	* Ported Windows code to Dokany v 0.8
+	* added last accessed to delay Glacier archival for frequently accessed data
 Version 3.0.4
 	Fixes :
 	* Fixed xml commandline parsing in mount.sdfs script

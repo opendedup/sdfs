@@ -26,6 +26,7 @@ public class CloseFile {
 			File f = new File(Main.volume.getPath() + File.separator+file);
 			if(f.exists()) {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
+			mf.sync();
 			mf.getDedupFile(true).forceClose();
 			}
 			return (Element) root.cloneNode(true);

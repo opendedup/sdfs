@@ -19,11 +19,6 @@ public class ConsistancyCheck {
 	public static synchronized void runCheck(AbstractHashesMap map, AbstractChunkStore store) {
 		try {
 			store.iterationInit(false);
-			ChunkData data = store.getNextChunck();
-			if (data == null)
-				return;
-
-			data.recoverd = true;
 			System.out.println("Running Consistancy Check on DSE, this may take a while");
 			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
 			SDFSEvent evt = SDFSEvent.consistancyCheckEvent("Running Consistancy Check on DSE, this may take a while",
@@ -95,7 +90,7 @@ public class ConsistancyCheck {
 					if (pos == -1) {
 						if (map.put(data))
 							recordsRecovered.incrementAndGet();
-					}
+					} 
 
 					try {
 						synchronized (store) {

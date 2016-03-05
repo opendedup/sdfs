@@ -401,10 +401,9 @@ public class DedupFileChannel {
 				try {
 					if (this.writtenTo && Main.safeSync) {
 						df.writeCache();
-						df.getMetaFile().sync();
 						df.sync(false);
-
 					}
+					df.getMetaFile().sync();
 				} catch (Exception e) {
 
 				} finally {

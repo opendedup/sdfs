@@ -24,8 +24,8 @@ public class Main {
 	public static boolean checkArchiveOnOpen= false;
 	public static boolean checkArchiveOnRead = false;
 	
-	public static int writeTimeoutSeconds = -1; //1 hour timeout
-	public static int readTimeoutSeconds = -1; //1 hour timeout
+	public static int writeTimeoutSeconds = -1; //Disable timeout
+	public static int readTimeoutSeconds = -1; //Disable timeout
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
 
@@ -95,7 +95,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.1.0";
+	public static String version = "3.1.1";
 	
 	public static boolean readAhead = false;
 

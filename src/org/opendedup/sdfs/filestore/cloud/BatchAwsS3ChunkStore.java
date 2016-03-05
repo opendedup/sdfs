@@ -566,6 +566,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	int k = 0;
 	@Override
 	public ChunkData getNextChunck() throws IOException {
+		synchronized(this) {
 		if (ht == null || !ht.hasMoreElements()) {
 			StringResult rs;
 			try {
@@ -582,9 +583,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			ht = rs.st;
 			hid = rs.id;
 		}
+		String tk = ht.nextToken();
+		SDFSLogger.getLog().debug("hid=" + hid + " val=" + StringUtils.getHexString(BaseEncoding.base64().decode(
+				tk.split(":")[0])));
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
-				ht.nextToken().split(":")[0]), hid);
+				tk.split(":")[0]), hid);
 		return chk;
+		}
 
 	}
 
@@ -755,6 +760,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			}
 			md = new ObjectMetadata();
 			md.addUserMetadata("size", Integer.toString(sz));
+			md.addUserMetadata("lastaccessed", "0");
 			md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
 			md.addUserMetadata("encrypt",
 					Boolean.toString(Main.chunkStoreEncryptionEnabled));
@@ -876,6 +882,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			tm = System.currentTimeMillis();
 			if (compress)
 				data = CompressionUtils.decompressZLIB(data);
+			mp.put("lastaccessed",Long.toString(System.currentTimeMillis()));
+			omd.setUserMetadata(mp);
+			CopyObjectRequest req = new CopyObjectRequest(this.name,
+					"blocks/" + haName, this.name, "blocks/" + haName)
+					.withNewObjectMetadata(omd);
+			s3Service.copyObject(req);
 			if (mp.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean((String) mp.get("deleted"));
 				if (del) {
@@ -895,7 +907,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					mp.put("deleted-objects", Integer.toString(delobj));
 					mp.put("suspect", "true");
 					omd.setUserMetadata(mp);
-					CopyObjectRequest req = new CopyObjectRequest(this.name,
+					req = new CopyObjectRequest(this.name,
 							"keys/" + haName, this.name, "keys/" + haName)
 							.withNewObjectMetadata(omd);
 					s3Service.copyObject(req);
@@ -1202,32 +1214,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		HashBlobArchive.sync();
 	}
 
-	private long getLastModified(String st) {
-
-		try {
-			ObjectMetadata obj = s3Service.getObjectMetadata(this.name, st);
-			Map<String, String> metaData = obj.getUserMetadata();
-			if (metaData.containsKey("lastmodified")) {
-				return Long.parseLong((String) metaData.get("lastmodified"));
-			} else {
-				return 0;
-			}
-		} catch (Exception e) {
-			return -1;
-		} finally {
-
-		}
-	}
-
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
+		
 		BufferedInputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
 		String pth = pp + "/"
 				+ EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		if (f.lastModified() == this.getLastModified(pth))
-			return;
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -1290,6 +1284,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				e = new File(this.staged_sync_location, rnd + ".e");
 			}
 			try {
+				
 				BufferedInputStream is = new BufferedInputStream(
 						new FileInputStream(f));
 				BufferedOutputStream os = new BufferedOutputStream(
@@ -1342,6 +1337,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					PutObjectRequest req = new PutObjectRequest(this.name,
 							objName, in, md);
 					s3Service.putObject(req);
+					SDFSLogger.getLog().debug("uploaded=" + f.getPath() + " lm=" + md.getUserMetadata().get("lastmodified"));
 				} catch (Exception e1) {
 					// SDFSLogger.getLog().error("error uploading", e1);
 					throw new IOException(e1);

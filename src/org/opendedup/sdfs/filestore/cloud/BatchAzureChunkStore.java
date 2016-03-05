@@ -384,7 +384,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	private long hid = 0;
 
 	@Override
-	public ChunkData getNextChunck() throws IOException {
+	public synchronized ChunkData getNextChunck() throws IOException {
 		if (ht == null || !ht.hasMoreElements()) {
 			StringResult rs;
 			try {

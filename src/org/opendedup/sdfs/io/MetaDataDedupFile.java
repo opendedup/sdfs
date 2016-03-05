@@ -258,7 +258,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void setPermissions(int permissions, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
+		this.dirty =true;
 		this.permissions = permissions;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -918,9 +924,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void setHidden(boolean hidden, boolean propigateEvent) {
+		this.writeLock.lock();
+		try{
 		this.hidden = hidden;
 		this.dirty = true;
 		this.unmarshal();
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -1094,51 +1105,86 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setExecutable(boolean executable, boolean ownerOnly,
 			boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 		this.execute = executable;
 		this.ownerExecOnly = ownerOnly;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setExecutable(boolean executable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 		this.execute = executable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setWritable(boolean writable, boolean ownerOnly,
 			boolean propigateEvent) {
+		
+		this.writeLock.lock();
+		try  {
 		this.write = writable;
 		this.ownerWriteOnly = ownerOnly;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setWritable(boolean writable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 		this.write = writable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setReadable(boolean readable, boolean ownerOnly,
 			boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
+	
 		this.read = readable;
+		this.dirty = true;
 		this.ownerReadOnly = ownerOnly;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public boolean setReadable(boolean readable, boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 		this.read = readable;
 		this.dirty = true;
 		this.unmarshal();
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public void setReadOnly(boolean propigateEvent) {
+		
+	
 		this.read = true;
 		this.dirty = true;
 		this.unmarshal();
@@ -1178,10 +1224,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 
 	public boolean setLastModified(long lastModified, boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 		this.lastModified = lastModified;
 		this.dirty = true;
 		this.lastAccessed = lastModified;
 		return true;
+		}finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	/**
@@ -1208,6 +1259,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the length to set
 	 */
 	public void setLength(long l, boolean serialize, boolean propigateEvent) {
+		this.writeLock.lock();
+		try  {
 
 		long len = l - this.length;
 		if (len != 0) {
@@ -1216,6 +1269,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.dirty = true;
 			if (serialize)
 				this.unmarshal();
+		}
+		} finally {
+			this.writeLock.unlock();
 		}
 	}
 

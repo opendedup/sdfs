@@ -1,4 +1,4 @@
-VERSION=3.1.0
+VERSION=3.1.1
 DEBFILE="sdfs_${VERSION}_amd64.deb"
 echo $DEBFILE
 sudo rm *.rpm

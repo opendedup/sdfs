@@ -47,7 +47,7 @@ public class SDFSService {
 		}
 		SDFSLogger.getLog().debug(
 				"############# SDFSService Starting ##################");
-		MgmtWebServer.start(useSSL);
+		
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
@@ -57,6 +57,7 @@ public class SDFSService {
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
+		MgmtWebServer.start(useSSL);
 		if (Main.chunkStoreLocal) {
 			try {
 
