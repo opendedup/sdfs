@@ -123,6 +123,7 @@ int _tmain(int argc, TCHAR *argv[])
 	
 	TCHAR configFile[512];
 	__int64 mem = 256;
+	__int64 bsize = 60;
 	for (int i = 1; i < argc; i++) {
 		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
 			mem = _ttoi(argv[i + 1]);
@@ -174,11 +175,16 @@ int _tmain(int argc, TCHAR *argv[])
 				doc.Parse(contents.c_str());
 				if (doc.ErrorID() == 0) {
 					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
+					string bssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->FirstChildElement("extended-config")->Attribute("io-threads"));
 					std::stringstream sstr(ssz);
+					std::stringstream bstr(bssz);
 					__int64 sz;
+					__int64 bsz;
 					sstr >> sz;
+					bstr >> bsz;
 					long gb = sz / (1073741824);
 					mem += .4 * gb;
+					mem += bsize * bsz;
 					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
 				}
 				else {
