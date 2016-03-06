@@ -309,7 +309,7 @@ public class SparseDedupFile implements DedupFile {
 			String filePath = Main.dedupDBStore + File.separator
 					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
 			DedupFileStore.removeOpenDedupFile(this.GUID);
-			eventBus.post(new SFileDeleted(this.GUID));
+			eventBus.post(new SFileDeleted(filePath));
 			return DeleteDir.deleteDirectory(new File(filePath));
 		} catch (Exception e) {
 

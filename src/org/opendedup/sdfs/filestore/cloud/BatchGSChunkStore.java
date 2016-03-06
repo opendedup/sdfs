@@ -478,7 +478,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	private long hid = 0;
 
 	@Override
-	public ChunkData getNextChunck() throws IOException {
+	public synchronized ChunkData getNextChunck() throws IOException {
 
 		if (ht != null && ht.hasMoreElements()) {
 			return new ChunkData(BaseEncoding.base64().decode(
@@ -1041,27 +1041,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		HashBlobArchive.sync();
 	}
 
-	private long getLastModified(String st) {
-		StorageObject obj = null;
-		try {
-			obj = s3Service.getObjectDetails(this.name, st);
-			if (obj.containsMetadata("lastmodified")) {
-				return Long.parseLong((String) obj.getMetadata("lastmodified"));
-			} else {
-				return 0;
-			}
-		} catch (Exception e) {
-			return -1;
-		} finally {
-			if (obj != null) {
-				try {
-					obj.closeDataInputStream();
-				} catch (IOException e) {
-				}
-			}
-		}
-	}
-
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
 		BufferedInputStream in = null;
@@ -1069,9 +1048,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 			to = to.substring(1);
 		String pth = pp + "/"
 				+ this.encString(to, Main.chunkStoreEncryptionEnabled);
-		
-		if (f.lastModified() == this.getLastModified(pth))
-			return;
 		GSObject s3Object = new GSObject(pth);
 		boolean isDir = false;
 		boolean isSymlink = false;
