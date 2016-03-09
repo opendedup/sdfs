@@ -885,9 +885,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 			l.unlock();
 		}
+		try {
 		if (Main.chunkStoreEncryptionEnabled) {
 			ub = EncryptUtils.decryptCBC(ub);
 		}
+		
 		ByteBuffer bf = ByteBuffer.wrap(ub);
 		int cpz = bf.getInt();
 		byte[] cp = new byte[bf.remaining()];
@@ -896,6 +898,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 			cp = CompressionUtils.decompressLz4(cp, cpz);
 		}
 		return cp;
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("error getting data ul=" + ub.length + " file=" +this.id + " pos=" + pos, e);
+			throw e;
+		}
 	}
 
 	public int getLen() {
