@@ -7,7 +7,7 @@ MPTG=4
 MU="M"
 EXEC="/usr/share/sdfs/jsvc"
 PF="sdfs-ncfg.pid"
-if [[ $1:0:1} == '-' ]]; then
+if [[ ${1:0:1} == '-' ]]; then
 while getopts ":v:" opt; do
   case $opt in
     v)
@@ -37,7 +37,6 @@ fi
 else
         MEMORY=$MEM
 fi
-
 
 LD_PRELOAD="/usr/share/sdfs/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=/usr/share/sdfs/bin/ -home /usr/share/sdfs/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
  -Dfuse.logging.level=INFO -Xmx$MEMORY$MU -Xms$MEMORY$MU \
