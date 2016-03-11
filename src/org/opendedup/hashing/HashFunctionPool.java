@@ -29,7 +29,7 @@ public class HashFunctionPool {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
 			hashLength = VariableHashEngine.getHashLenth();
-			Main.MAPVERSION = 2;
+			Main.MAPVERSION = 3;
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
 		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType);
