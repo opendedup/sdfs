@@ -1,13 +1,13 @@
 #!/bin/bash
-modprobe fuse > /dev/null
+#modprobe fuse > /dev/null
 BASEMEMORY="1000"
-CHUNKSZ="80"
+CHUNKSZ="50"
 CFG=""
 MPTG=4
 MU="M"
 EXEC="/usr/share/sdfs/jsvc"
 PF="sdfs-ncfg.pid"
-if [[ $1:0:1} == '-' ]]; then
+if [[ {$1:0:1} == '-' ]]; then
 while getopts ":v:" opt; do
   case $opt in
     v)

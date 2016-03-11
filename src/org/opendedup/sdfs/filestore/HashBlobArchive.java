@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -158,13 +156,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	/*
-	private static int nextLen() {
-		int Low = MAX_LEN - (MAX_LEN / 3);
-		int High = MAX_LEN;
-		int nxt = r.nextInt(High - Low) + Low;
-		return nxt;
-	}
-	*/
+	 * private static int nextLen() { int Low = MAX_LEN - (MAX_LEN / 3); int
+	 * High = MAX_LEN; int nxt = r.nextInt(High - Low) + Low; return nxt; }
+	 */
 
 	// Each archive takes about 608 bytes of ram
 	// Each map takes about 260848 bytes of ram for 1854 entries
@@ -459,10 +453,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 								har = new HashBlobArchive(f, hashid);
 							har.cached = true;
 							return har;
-						}catch (DataArchivedException e) {
+						} catch (DataArchivedException e) {
 							throw e;
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							SDFSLogger.getLog().error("unable to fetch block [" + hashid + "]", e);
 							throw e;
 						}
@@ -704,7 +697,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						boolean ins = wMaps.get(this.id).put(hash, (int) cp + 4 + hash.length);
 						if (!ins) {
 							np.set(cp);
-							throw new HashExistsException(this.id,hash);
+							throw new HashExistsException(this.id, hash);
 						}
 					} catch (MapClosedException e1) {
 						this.writeable = false;
@@ -886,17 +879,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 			l.unlock();
 		}
-		if (Main.chunkStoreEncryptionEnabled) {
-			ub = EncryptUtils.decryptCBC(ub);
+		try {
+			if (Main.chunkStoreEncryptionEnabled) {
+				ub = EncryptUtils.decryptCBC(ub);
+			}
+			ByteBuffer bf = ByteBuffer.wrap(ub);
+			int cpz = bf.getInt();
+			byte[] cp = new byte[bf.remaining()];
+			bf.get(cp);
+			if (cpz > 0) {
+				cp = CompressionUtils.decompressLz4(cp, cpz);
+			}
+			return cp;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error getting data ul=" + ub.length + " file=" + this.id + " pos=" + pos, e);
+			throw e;
 		}
-		ByteBuffer bf = ByteBuffer.wrap(ub);
-		int cpz = bf.getInt();
-		byte[] cp = new byte[bf.remaining()];
-		bf.get(cp);
-		if (cpz > 0) {
-			cp = CompressionUtils.decompressLz4(cp, cpz);
-		}
-		return cp;
 	}
 
 	public int getLen() {

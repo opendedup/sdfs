@@ -45,8 +45,6 @@ public class MountSDFS implements Daemon, Runnable{
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
-		options.addOption("c", false,
-				"sdfs volume will be compacted and then exit");
 		options.addOption(
 				"forcecompact",
 				false,

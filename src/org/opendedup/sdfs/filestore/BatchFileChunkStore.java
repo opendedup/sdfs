@@ -286,7 +286,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 	int k = 0;
 	@Override
-	public synchronized ChunkData getNextChunck() throws IOException {
+	public ChunkData getNextChunck() throws IOException {
+		synchronized(this) {
 		if (ht == null || !ht.hasMoreElements()) {
 			StringResult rs;
 			try {
@@ -306,6 +307,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
 				ht.nextToken().split(":")[0]), hid);
 		return chk;
+		}
 	}
 	
 
