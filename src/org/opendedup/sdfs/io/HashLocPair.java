@@ -22,6 +22,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public int pos;
 	public int offset;
 	public int nlen;
+	private boolean dup = false;
 
 	public byte[] asArray() throws IOException {
 		ByteBuffer bf = ByteBuffer.wrap(new byte[BAL]);
@@ -140,6 +141,14 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 		out.writeInt(b.length);
 		out.write(b);
 		
+	}
+
+	public boolean isDup() {
+		return dup;
+	}
+
+	public void setDup(boolean dup) {
+		this.dup = dup;
 	}
 
 }

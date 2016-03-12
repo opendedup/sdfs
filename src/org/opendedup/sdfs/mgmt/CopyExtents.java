@@ -83,16 +83,13 @@ public class CopyExtents {
 					
 					HashLocPair p = sdc.getWL(_so);
 					
-					p.hashloc[7] = 1;
 					if (p.nlen > _rem) {
 						p.nlen = (int) _rem;
-						p.hashloc[7] = 2;
 					}
 					p.pos = _do;
 					int ep = p.pos + p.nlen;
 					if (ep > Main.CHUNK_LENGTH) {
 						p.nlen = Main.CHUNK_LENGTH - p.pos;
-						p.hashloc[7] = 3;
 					}
 					try {
 						ddc.copyExtent(p);
