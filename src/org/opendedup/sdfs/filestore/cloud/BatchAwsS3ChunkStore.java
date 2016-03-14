@@ -98,7 +98,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	private String name;
 	private com.amazonaws.regions.Region bucketLocation = null;
-
 	AmazonS3Client s3Service = null;
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
@@ -464,6 +463,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				md.addUserMetadata("currentcompressedsize", "0");
 				byte[] sz = "bucketinfodatanow".getBytes();
 				md.setContentLength(sz.length);
+				
 				s3Service.putObject(this.name, "bucketinfo",
 						new ByteArrayInputStream(sz), md);
 			} else {
