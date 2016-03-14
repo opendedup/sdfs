@@ -9,8 +9,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,7 +57,7 @@ public class SparseDedupFile implements DedupFile {
 	private String GUID = "";
 	private static EventBus eventBus = new EventBus();
 	public transient MetaDataDedupFile mf;
-	private transient final ArrayList<DedupFileChannel> channels = new ArrayList<DedupFileChannel>();
+	private transient final Set<DedupFileChannel> channels = new HashSet<DedupFileChannel>();
 	private transient String databasePath = null;
 	private transient String databaseDirPath = null;
 	private DedupFileChannel staticChannel = null;
@@ -300,7 +302,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	@Override
-	public boolean delete(boolean propigate) {
+	public boolean delete(boolean localOnly) {
 		this.channelLock.lock();
 		this.syncLock.lock();
 		try {
@@ -308,8 +310,10 @@ public class SparseDedupFile implements DedupFile {
 			this.forceClose();
 			String filePath = Main.dedupDBStore + File.separator
 					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
+			
 			DedupFileStore.removeOpenDedupFile(this.GUID);
-			eventBus.post(new SFileDeleted(filePath));
+			if(!localOnly)
+				eventBus.post(new SFileDeleted(this));
 			return DeleteDir.deleteDirectory(new File(filePath));
 		} catch (Exception e) {
 
@@ -1017,8 +1021,8 @@ public class SparseDedupFile implements DedupFile {
 				if (Main.safeClose) {
 					try {
 						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
-						for (int i = 0; i < this.channels.size(); i++) {
-							al.add(this.channels.get(i));
+						for (DedupFileChannel f : this.channels) {
+							al.add(f);
 						}
 						for (int i = 0; i < al.size(); i++) {
 							al.get(i).close(al.get(i).getFlags());

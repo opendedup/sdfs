@@ -28,11 +28,10 @@ public class Main {
 	public static int readTimeoutSeconds = -1; //1 hour timeout
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
-
 	public static boolean blockDev = false;
 
 	public static boolean firstRun = true;
-
+	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
 	
 	public static boolean syncDL = false;
@@ -95,7 +94,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.1.1";
+	public static String version = "3.2.0";
 	
 	public static boolean readAhead = false;
 

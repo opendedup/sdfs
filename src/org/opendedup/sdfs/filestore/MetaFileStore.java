@@ -262,10 +262,10 @@ private static EventBus eventBus = new EventBus();
 	 */
 
 	public static boolean removeMetaFile(String path) {
-		return removeMetaFile(path, true);
+		return removeMetaFile(path, false);
 	}
 
-	public static boolean removeMetaFile(String path, boolean propigateEvent) {
+	public static boolean removeMetaFile(String path, boolean localOnly) {
 		
 		if(SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
@@ -289,9 +289,10 @@ private static EventBus eventBus = new EventBus();
 				}
 				if (isSymlink) {
 					mf = getMF(new File(path));
+					if(!localOnly)
 					eventBus.post(new MFileDeleted(mf,true));
 					deleted = Files.deleteIfExists(p);
-					if (!deleted)
+					if (!localOnly && !deleted)
 						eventBus.post(new MFileWritten(mf));
 				}
 				else if (isDir) {
@@ -301,7 +302,7 @@ private static EventBus eventBus = new EventBus();
 
 					for (int i = 0; i < files.length; i++) {
 						boolean sd = removeMetaFile(files[i].getPath(),
-								propigateEvent);
+								localOnly);
 						if (!sd) {
 							SDFSLogger.getLog().warn(
 									"delete failed : unable to delete ["
@@ -309,31 +310,25 @@ private static EventBus eventBus = new EventBus();
 							return sd;
 						}
 					}
-					
 					mf = getMF(new File(path));
-					eventBus.post(new MFileDeleted(mf,true));
+					if(!localOnly)
+						eventBus.post(new MFileDeleted(mf,true));
 					deleted= Files.deleteIfExists(p);
-					if (!deleted)
+					if (!deleted && !localOnly)
 						eventBus.post(new MFileWritten(mf));
 				}
 				 else {
 					mf = getMF(new File(path));
 					pathMap.invalidate(mf.getPath());
 
-					Main.volume.updateCurrentSize(-1 * mf.length(), true);
-					try {
-						Main.volume.addActualWriteBytes(-1
-								* mf.getIOMonitor().getActualBytesWritten(),
-								true);
-						Main.volume.addDuplicateBytes(-1
-								* mf.getIOMonitor().getDuplicateBlocks(), true);
-						Main.volume.addVirtualBytesWritten(-1
-								* mf.getIOMonitor().getVirtualBytesWritten(),
-								true);
-					} catch (Exception e) {
-
+					
+					deleted = mf.deleteStub(localOnly);
+					if (!deleted) {
+						SDFSLogger.getLog().warn(
+								"could not delete " + mf.getPath());
+						return deleted;
 					}
-					if (mf.getDfGuid() != null) {
+					else if (mf.getDfGuid() != null) {
 						try {
 							deleted = mf.getDedupFile(false).delete(true);
 						} catch (Exception e) {
@@ -343,11 +338,20 @@ private static EventBus eventBus = new EventBus();
 												+ path, e);
 						}
 					}
-					deleted = mf.deleteStub();
-					if (!deleted) {
-						SDFSLogger.getLog().warn(
-								"could not delete " + mf.getPath());
-						return deleted;
+					if(deleted) {
+						Main.volume.updateCurrentSize(-1 * mf.length(), true);
+						try {
+							Main.volume.addActualWriteBytes(-1
+									* mf.getIOMonitor().getActualBytesWritten(),
+									true);
+							Main.volume.addDuplicateBytes(-1
+									* mf.getIOMonitor().getDuplicateBlocks(), true);
+							Main.volume.addVirtualBytesWritten(-1
+									* mf.getIOMonitor().getVirtualBytesWritten(),
+									true);
+						} catch (Exception e) {
+
+						}
 					}
 				}
 			} catch (Exception e) {

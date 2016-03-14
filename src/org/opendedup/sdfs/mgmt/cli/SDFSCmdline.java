@@ -239,7 +239,11 @@ public class SDFSCmdline {
 			ProcessCopyExtents.runCmd(sfile,dfile,Long.parseLong(vals[0]), Long.parseLong(vals[1]), Long.parseLong(vals[2]));
 			System.exit(0);
 		}
-		
+		if (cmd.hasOption("cloud-file")) {
+			String file = cmd.getOptionValue("cloud-file");
+			ProcessCloudFile.runCmd(file);
+			System.exit(0);
+		}
 
 		if (cmd.hasOption("partition-rm")) {
 			String val = cmd.getOptionValue("partition-rm");
@@ -453,6 +457,11 @@ public class SDFSCmdline {
 				.withLongOpt("set-write-speed")
 				.withDescription(
 						"Sets the Maximum Write Speed if supported by the DSE in KB/s")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("cloud-file")
+				.withDescription(
+						"retrieve a readonly copy of a cloud backed filesystem")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("flush-file-buffers")

@@ -668,4 +668,10 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		return true;
 	}
 
+	@Override
+	public void checkoutObject(long id, int claims) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

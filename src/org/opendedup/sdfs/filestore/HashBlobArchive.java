@@ -138,6 +138,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 			return null;
 
 	}
+	
+	public static void claimBlock(long id) throws IOException {
+		store.checkoutObject(id, 1);
+	}
 
 	public static void deleteArchive(long id) {
 		HashBlobArchive har = null;

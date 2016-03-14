@@ -2,12 +2,6 @@ package org.opendedup.logging;
 
 import java.io.IOException;
 
-
-
-
-
-
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -24,6 +18,7 @@ public class SDFSLogger {
 	private static boolean debug = false;
 	private static boolean fsdebug = false;
 	static {
+		
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
 		
@@ -40,12 +35,12 @@ public class SDFSLogger {
 		}
 		awslog.setLevel(Level.WARN);
 		awslog.removeAllAppenders();
-		awslog.addAppender(app);
 		log.setLevel(Level.INFO);
 		fsdebug = true;
-		fslog.setLevel(Level.DEBUG);
-		BasicConfigurator.configure(app);
-		
+		fslog.setLevel(Level.INFO);
+		Logger rootLogger = Logger.getRootLogger();
+		rootLogger.setLevel(Level.INFO);
+		rootLogger.addAppender(app);
 	}
 
 	public static Logger getLog() {

@@ -73,6 +73,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type CSZ = new Type("Set Cache Size");
 	public transient static final Type RSP = new Type("Set Read Speed");
 	public transient static final Type WSP = new Type("Set Write Speed");
+	public transient static final Type CF = new Type("Importing Cloud File");
 	public transient static final Type ARCHIVERESTORE = new Type("Restore from Glacier");
 	public transient static final Type WER = new Type("Write Error");
 	public transient static final Type DISCO = new Type("Storage Pool Disconnected");
@@ -81,6 +82,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
 	public transient static final Level ERROR = new Level("error");
+	
 	private transient static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
 			50, .075F, false);
 
@@ -220,6 +222,11 @@ public class SDFSEvent implements java.io.Serializable {
 	public static SDFSEvent wspEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(WSP, getTarget(), shortMsg, RUNNING);
 		
+		return event;
+	}
+	
+	public static SDFSEvent cfEvent(String fileName) {
+		SDFSEvent event = new SDFSEvent(CF, getTarget(), "Importing [" +fileName + "]", RUNNING);
 		return event;
 	}
 

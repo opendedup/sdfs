@@ -131,6 +131,17 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
+					} else if (cmd.equalsIgnoreCase("cloudfile")) {
+						try {
+							Element msg = new GetCloudFile().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
 					} else if (cmd.equalsIgnoreCase("setcachesz")) {
 						try {
 							Element msg = new SetCacheSize().getResult(request.getQuery().get("sz"));

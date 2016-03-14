@@ -1411,4 +1411,10 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 		return false;
 	}
 
+	@Override
+	public void checkoutObject(long id, int claims) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -15,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
@@ -27,9 +27,11 @@ import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileSync;
+import org.opendedup.sdfs.io.events.MFileUploaded;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileSync;
+import org.opendedup.sdfs.io.events.SFileUploaded;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.io.events.VolumeWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -52,17 +54,15 @@ public class FileReplicationService {
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
+	private static FileReplicationService service = null;
 
-	private static EventBus eventMetaDataBus = new EventBus();
-	private static EventBus eventDBBus = new EventBus();
-
-	public static void registerMetaDataListener(Object obj) {
-		eventMetaDataBus.register(obj);
+	private static EventBus eventUploadBus = new EventBus();
+	
+	public static void registerEvents(Object obj) {
+		eventUploadBus.register(obj);
 	}
 
-	public static void registerDBListener(Object obj) {
-		eventDBBus.register(obj);
-	}
+	
 
 	public FileReplicationService(AbstractCloudFileSync sync) {
 		this.sync = sync;
@@ -74,6 +74,60 @@ public class FileReplicationService {
 			SDFSFileSystem.registerListener(this);
 		SyncFS.registerListener(this);
 		HCServiceProxy.registerListener(this);
+		service = this;
+	}
+	
+	private MetaDataDedupFile downloadMetaFile(String fname,File to) throws Exception {
+		int tries = 0;
+		for (;;) {
+			to.delete();
+			try {
+				sync.downloadFile(fname, to, "files");
+				MetaDataDedupFile mf = MetaFileStore.getMF(to);
+				Main.volume.addDuplicateBytes(
+						mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
+				Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
+				SDFSLogger.getLog().info("downloaded " + to.getPath() + " sz=" + to.length());
+				return mf;
+			} catch (Exception e) {
+				if (tries > maxTries) {
+					SDFSLogger.getLog().error("unable to sync file " + fname + " to " + to.getPath(), e);
+					throw e;
+				} else
+					tries++;
+			}
+		}
+	}
+	
+	private File downloadDDBFile(String guid) throws Exception {
+		String sfp = Main.dedupDBStore + File.separator
+				+ guid.substring(0, 2) + File.separator + guid + File.separator + guid+ ".map";
+		File f = new File(sfp);
+		int tries = 0;
+		for(;;) {
+			f.delete();
+			try {
+				sync.downloadFile(sfp.substring(sl), f, "ddb");
+				SDFSLogger.getLog().info("downloaded " + f.getPath() + " sz=" + f.length());
+				return f;
+			} catch (Exception e) {
+				if (tries > maxTries) {
+					SDFSLogger.getLog().error("unable to sync ddb " + sfp + " to " + f.getPath(), e);
+					throw e;
+				} else
+					tries++;
+			}
+		}
+
+	}
+	
+	public static MetaDataDedupFile getMF(String fname) throws Exception {
+		File f = new File(Main.volume.getPath() + File.separator + fname);
+		return service.downloadMetaFile(fname, f);
+	}
+	
+	public static LongByteArrayMap getDDB(String fname) throws Exception {
+		return new LongByteArrayMap(service.downloadDDBFile(fname).getPath());
 	}
 
 	private ReentrantLock getLock(String st) {
@@ -115,6 +169,7 @@ public class FileReplicationService {
 	public void metaFileDeleted(MFileDeleted evt) throws IOException {
 		try {
 			// SDFSLogger.getLog().info("eeeks " + evt.mf.getPath());
+			if(evt.mf.isLocalOwner())
 			this.deleteFile(new File(evt.mf.getPath()));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to delete " + evt.mf.getPath(), e);
@@ -216,7 +271,7 @@ public class FileReplicationService {
 						if (evt.mf.isDirty() || evt.mf.isSymlink()) {
 							SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
 							this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files");
-							eventMetaDataBus.post(evt);
+							eventUploadBus.post(new MFileUploaded(evt.mf));
 						} else {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug("nowritem " + evt.mf.getPath());
@@ -293,15 +348,13 @@ public class FileReplicationService {
 			while (!done) {
 				try {
 					if (evt.sf.isDirty()) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("writed " + evt.sf.getDatabasePath());
+							SDFSLogger.getLog().info("writed " + evt.sf.getDatabasePath());
 						this.sync.uploadFile(new File(evt.sf.getDatabasePath()), evt.sf.getDatabasePath().substring(sl),
 								"ddb");
-						eventDBBus.post(evt);
+						eventUploadBus.post(new SFileUploaded(evt.sf));
 
 					} else {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("nowrited " + evt.sf.getDatabasePath());
+							SDFSLogger.getLog().info("nowrited " + evt.sf.getDatabasePath());
 					}
 					done = true;
 
@@ -384,15 +437,16 @@ public class FileReplicationService {
 	public void sFileDeleted(SFileDeleted evt) {
 
 		try {
-			ReentrantLock l = this.getLock(evt.sf);
+			ReentrantLock l = this.getLock(evt.sfp);
 			l.lock();
 			int tries = 0;
 			boolean done = false;
 			while (!done) {
 				try {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("dels " + evt.sf);
-					this.sync.deleteFile(evt.sf.substring(sl), "ddb");
+						SDFSLogger.getLog().debug("dels " + evt.sfp);
+					if(evt.sf.getMetaFile().isLocalOwner())
+						this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)
@@ -404,7 +458,7 @@ public class FileReplicationService {
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error("unable to dels " + evt.sf, e);
 		} finally {
-			removeLock(evt.sf);
+			removeLock(evt.sfp);
 		}
 	}
 
@@ -437,6 +491,7 @@ public class FileReplicationService {
 			removeLock(evt.vol.getConfigPath());
 		}
 	}
+	
 
 	@Subscribe
 	public void downloadAll(CloudSyncDLRequest req) {
@@ -494,6 +549,7 @@ public class FileReplicationService {
 		}
 
 	}
+	
 
 	private static class MetaFileDownloader implements Runnable {
 		private static Exception downloadSyncException;

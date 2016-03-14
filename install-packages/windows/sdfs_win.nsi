@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.1.0'
+!define VERSION '3.2.0'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -108,7 +108,7 @@ Section "SDFS Setup" SecMain
     "$INSTDIR" "(BU)" "GenericRead + GenericWrite"
 SectionEnd
 Section "Dokan Setup" SecDokan
-	ExecWait '"$INSTDIR\DokanInstall_0.8.0_redist.exe"'
+	ExecWait '"$INSTDIR\DokanSetup_redist.exe"'
 SectionEnd
 Section "-Quick Start Guide"
 	ExecShell "open" "http://www.opendedup.org/wqs"

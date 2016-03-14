@@ -689,7 +689,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			DedupFileChannel ch = this.getFileChannel(path, -1);
 			ch.truncateFile(size);
 			ch.getDedupFile().unRegisterChannel(ch, -1);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to truncate file " + path, e);
 			throw new FuseException().initErrno(Errno.EACCES);
 		} finally {

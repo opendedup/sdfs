@@ -101,10 +101,14 @@ public class DedupFileChannel {
 	 * @param siz
 	 *            the size of the file channel
 	 * @exception IOException
+	 * @throws ReadOnlyException 
 	 */
 
-	public synchronized void truncateFile(long siz) throws IOException {
-		Lock l = df.getReadLock();
+	public synchronized void truncateFile(long siz) throws IOException, ReadOnlyException {
+		if(!df.mf.canWrite())
+			throw new ReadOnlyException();
+		
+		Lock l = df.getWriteLock();
 		l.lock();
 		try {
 			if (SDFSLogger.isDebug())
@@ -196,8 +200,11 @@ public class DedupFileChannel {
 	 *            true will sync data
 	 * @throws IOException
 	 * @throws FileClosedException
+	 * @throws ReadOnlyException 
 	 */
-	public void force(boolean metaData) throws IOException, FileClosedException {
+	public void force(boolean metaData) throws IOException, FileClosedException, ReadOnlyException {
+		if(!df.mf.canWrite())
+			throw new ReadOnlyException();
 		Lock l = df.getWriteLock();
 		l.lock();
 		try {
@@ -234,10 +241,12 @@ public class DedupFileChannel {
 	 *            the offset within the bbuf to start the write from
 	 * @throws java.io.IOException
 	 * @throws DataArchivedException
+	 * @throws ReadOnlyException 
 	 */
 	public void writeFile(ByteBuffer buf, int len, int pos, long offset, boolean propigate)
-			throws java.io.IOException, DataArchivedException {
-
+			throws java.io.IOException, DataArchivedException, ReadOnlyException {
+		if(!df.mf.canWrite())
+			throw new ReadOnlyException();
 		if (SDFSLogger.isDebug()) {
 			SDFSLogger.getLog().debug("fc writing " + df.getMetaFile().getPath() + " spos=" + offset + " buffcap="
 					+ buf.capacity() + " len=" + len + " bcpos=" + pos);
@@ -365,10 +374,12 @@ public class DedupFileChannel {
 					try {
 						if (this.writtenTo && Main.safeSync) {
 							df.writeCache();
-							df.getMetaFile().sync();
+							
 							df.sync(false);
 
 						}
+						if(df.getMetaFile().canWrite())
+							df.getMetaFile().sync();
 					} catch (Exception e) {
 
 					} finally {
@@ -399,12 +410,13 @@ public class DedupFileChannel {
 			if (!this.isClosed()) {
 
 				try {
-					if (this.writtenTo && Main.safeSync) {
+					if (this.writtenTo && Main.safeSync && df.getMetaFile().canWrite()) {
 						df.writeCache();
 						df.sync(false);
 
 					}
-					df.getMetaFile().sync();
+					if(df.getMetaFile().canWrite())
+						df.getMetaFile().sync();
 				} catch (Exception e) {
 
 				} finally {

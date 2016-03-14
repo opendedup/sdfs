@@ -518,7 +518,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (fpos > flen)
 				return null;
 			byte [] buf = null;
-			if(version == 2) {
+			if(version > 1) {
 				ByteBuffer bf = ByteBuffer.allocate(5);
 				pbdb.read(bf, fpos);
 				bf.position(1);

@@ -326,6 +326,8 @@ void ReadFromPipe(void *param)
 		if (!cpt && strcmp(chBuf, "volumemounted") > 0) {
 			bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
 				dwRead, &dwWritten, NULL);
+			bSuccess = WriteFile(hParentStdOut, "\n",
+				dwRead, &dwWritten, NULL);
 			processCompleted = true;
 			break;
 		}

@@ -32,7 +32,21 @@ public class ManualGC {
 		try {
 
 			long rm = 0;
-			if (Main.chunkStoreLocal)
+			if(Main.disableGC) {
+				evt = SDFSEvent
+				.gcInfoEvent("SDFS Volume Cleanup not enabled for this volume "
+						+ Main.volume.getName());
+				evt.maxCt = 100;
+				evt.curCt = 0;
+				evt.endEvent("SDFS Volume Cleanup not enabled for this volume "
+						+ Main.volume.getName());
+				try {
+					Main.pFullSched.recalcScheduler();
+				} catch (Exception e) {
+				}
+				return 0;
+			}
+			else if (Main.chunkStoreLocal)
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
 								+ Main.volume.getName());
@@ -84,7 +98,8 @@ public class ManualGC {
 	private static long runGC() throws IOException {
 		long rm = 0;
 		try {
-
+			if(Main.disableGC)
+				return 0;
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				BloomFDisk fd = new BloomFDisk(evt);
 				evt.curCt = 33;

@@ -67,6 +67,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean ownerWriteOnly = false;
 	private boolean ownerExecOnly = false;
 	private boolean ownerReadOnly = false;
+	private boolean localowner = true;
 	private String dfGuid = null;
 
 	public boolean deleteOnClose = false;
@@ -938,7 +939,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if deleted
 	 */
-	public boolean deleteStub() {
+	public boolean deleteStub(boolean localOnly) {
+		if(!localOnly && !this.isLocalOwner())
+			return false;
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
@@ -1019,6 +1022,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean renameTo(String dest, boolean propigateEvent)
 			throws IOException {
+		if(!this.localowner)
+			return false;
 		writeLock.lock();
 		try {
 			File f = new File(this.path);
@@ -1100,23 +1105,22 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean canWrite() {
+		if(!this.localowner)
+			return false;
 		return this.write;
 	}
-
-	public boolean setExecutable(boolean executable, boolean ownerOnly,
-			boolean propigateEvent) {
-		this.writeLock.lock();
-		try  {
-		this.execute = executable;
-		this.ownerExecOnly = ownerOnly;
-		this.unmarshal();
-		return true;
-		}finally {
-			this.writeLock.unlock();
-		}
+	
+	public boolean isLocalOwner() {
+		return this.localowner;
+	}
+	
+	public void setLocalOwner(boolean local) {
+		this.localowner = local;
 	}
 
 	public boolean setExecutable(boolean executable, boolean propigateEvent) {
+		if(!this.localowner)
+			return false;
 		this.writeLock.lock();
 		try  {
 		this.execute = executable;
@@ -1130,7 +1134,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setWritable(boolean writable, boolean ownerOnly,
 			boolean propigateEvent) {
-		
+		if(!this.localowner)
+			return false;
 		this.writeLock.lock();
 		try  {
 		this.write = writable;
@@ -1144,6 +1149,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean setWritable(boolean writable, boolean propigateEvent) {
+		if(!this.localowner)
+			return false;
+		if(!this.localowner)
+			return false;
 		this.writeLock.lock();
 		try  {
 		this.write = writable;
@@ -1157,6 +1166,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public boolean setReadable(boolean readable, boolean ownerOnly,
 			boolean propigateEvent) {
+		if(!this.localowner)
+			return false;
 		this.writeLock.lock();
 		try  {
 	
@@ -1171,6 +1182,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public boolean setReadable(boolean readable, boolean propigateEvent) {
+		if(!this.localowner)
+			return false;
 		this.writeLock.lock();
 		try  {
 		this.read = readable;
@@ -1183,11 +1196,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setReadOnly(boolean propigateEvent) {
-		
+		if(this.localowner){
 	
 		this.read = true;
 		this.dirty = true;
 		this.unmarshal();
+		}
 	}
 
 	public boolean isFile() {
@@ -1224,6 +1238,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 
 	public boolean setLastModified(long lastModified, boolean propigateEvent) {
+		if(!this.isLocalOwner())
+			return false;
 		this.writeLock.lock();
 		try  {
 		this.lastModified = lastModified;
@@ -1259,6 +1275,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the length to set
 	 */
 	public void setLength(long l, boolean serialize, boolean propigateEvent) {
+		if(this.localowner) {
 		this.writeLock.lock();
 		try  {
 
@@ -1272,6 +1289,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 		} finally {
 			this.writeLock.unlock();
+		}
 		}
 	}
 
@@ -1335,6 +1353,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 **/
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		// this.dirty = true;
+		if(this.localowner)
 		this.lastAccessed = lastAccessed;
 	}
 
@@ -1410,6 +1429,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if(in.available() > 0) {
 					this.deleteOnClose = in.readBoolean();
 				}
+				if(in.available() > 0) {
+					this.localowner = in.readBoolean();
+				}
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1475,6 +1497,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeLong(attributes);
 			out.writeInt(this.mode);
 			out.writeBoolean(this.deleteOnClose);
+			out.writeBoolean(this.localowner);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);
@@ -1499,6 +1522,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("ctime", Long.toString(-1L));
 			dataset.addProperty("hidden", Boolean.toString(this.isHidden()));
 			dataset.addProperty("size", Long.toString(this.length()));
+			dataset.addProperty("read", Boolean.toString(this.read));
+			dataset.addProperty("write", Boolean.toString(this.write));
+			dataset.addProperty("localowner", Boolean.toString(this.localowner));
+			dataset.addProperty("execute", Boolean.toString(this.execute));
 			try {
 				dataset.addProperty("open",
 						Boolean.toString(DedupFileStore.fileOpen(this)));
@@ -1558,6 +1585,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("dedup-map-guid", this.getDfGuid());
 			root.setAttribute("dedup", Boolean.toString(this.isDedup()));
 			root.setAttribute("vmdk", Boolean.toString(this.isVmdk()));
+			root.setAttribute("localowner", Boolean.toString(this.isLocalOwner()));
+			root.setAttribute("execute", Boolean.toString(this.execute));
+			root.setAttribute("read", Boolean.toString(this.read));
+			root.setAttribute("write", Boolean.toString(this.write));
 			if (symlink) {
 				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
 				root.setAttribute("symlink-path", this.getSymlinkPath());
@@ -1598,6 +1629,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlink(boolean symlink, boolean propigateEvent) {
+		if(this.localowner)
 		this.symlink = symlink;
 	}
 
@@ -1606,6 +1638,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlinkPath(String symlinkPath) {
+		if(this.localowner)
 		setSymlinkPath(symlinkPath, true);
 	}
 
@@ -1617,7 +1650,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return attributes;
 	}
 
-	public void setAttributes(long attributes) {
+	public void setAttributes(long attributes) {		
+		if(this.localowner)
+		
 		this.attributes = attributes;
 	}
 }
