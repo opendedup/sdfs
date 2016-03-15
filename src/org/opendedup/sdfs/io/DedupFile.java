@@ -279,7 +279,7 @@ public interface DedupFile {
 	 * @return the DedupChunk of null if create is false and chunk is not found
 	 * @throws IOException
 	 */
-	public abstract DedupChunkInterface getHash(long location, boolean create)
+	public abstract DedupChunkInterface getHash(long location)
 			throws IOException, FileClosedException;
 
 	/**

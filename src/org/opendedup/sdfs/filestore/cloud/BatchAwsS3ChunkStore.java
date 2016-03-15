@@ -59,7 +59,7 @@ import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.S3ClientOptions;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
+import  com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -722,12 +722,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
-			S3Object sobj = null;
-			try {
-				sobj = s3Service.getObject(this.name, "blocks/" + haName);
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
+			S3Object sobj = s3Service.getObject(this.name, "blocks/" + haName);
 			int cl = (int) omd.getContentLength();
 			byte[] data = new byte[cl];
 			DataInputStream in = null;
@@ -799,8 +794,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			bps = (cl / 1024) / dtm;
 			return data;
 		} catch (AmazonS3Exception e) {
-			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 				throw new DataArchivedException(id, null);
+			}
 			else {
 				SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
 				throw e;
