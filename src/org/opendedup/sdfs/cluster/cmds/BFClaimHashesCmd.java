@@ -18,7 +18,6 @@ import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-
 public class BFClaimHashesCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;

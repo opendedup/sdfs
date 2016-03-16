@@ -9,8 +9,7 @@ import org.w3c.dom.Element;
 public class ProcessCloudFile {
 	public static void runCmd(String file) {
 		try {
-			System.out.printf("Checking out a read only copy of [%s] \n",
-					file);
+			System.out.printf("Checking out a read only copy of [%s] \n", file);
 			file = URLEncoder.encode(file, "UTF-8");
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
@@ -23,7 +22,9 @@ public class ProcessCloudFile {
 				System.out.println(root.getAttribute("msg"));
 			String status = root.getAttribute("status");
 			String msg = root.getAttribute("msg");
-			System.out.printf("Checking out a read only copy of [%s] returned [%s]\n", status, msg);
+			System.out.printf(
+					"Checking out a read only copy of [%s] returned [%s]\n",
+					status, msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -9,7 +9,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-public class Finger  implements Runnable{
+public class Finger implements Runnable {
 	public byte[] chunk;
 	public byte[] hash;
 	public InsertRecord hl;
@@ -18,31 +18,31 @@ public class Finger  implements Runnable{
 	public int ap;
 	public AsyncChunkWriteActionListener l;
 
-
-	public void run()  {
+	public void run() {
 		try {
-			if(Main.chunkStoreLocal)
+			if (Main.chunkStoreLocal)
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk);
-				else
-					this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
-							this.hl.getHashLocs());
+			else
+				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
+						this.hl.getHashLocs());
 			l.commandResponse(this);
 
 		} catch (Throwable e) {
 			l.commandException(this, e);
 		}
 	}
-	
-	public static class FingerPersister implements Runnable{
+
+	public static class FingerPersister implements Runnable {
 		public AsyncChunkWriteActionListener l;
 		public List<Finger> fingers;
 		public boolean dedup;
+
 		@Override
 		public void run() {
-			for(Finger f : fingers) {
+			for (Finger f : fingers) {
 				try {
-					if(Main.chunkStoreLocal)
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
+					if (Main.chunkStoreLocal)
+						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 					else
 						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
 								f.hl.getHashLocs());
@@ -52,21 +52,19 @@ public class Finger  implements Runnable{
 					l.commandException(f, e);
 				}
 			}
-			
-		}
-		
-		public void persist() throws IOException, HashtableFullException {
-			for(Finger f : fingers) {
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 
-				
+		}
+
+		public void persist() throws IOException, HashtableFullException {
+			for (Finger f : fingers) {
+				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
+
 			}
 		}
-		
-		
+
 	}
-	
+
 	public void persist() {
-		
+
 	}
 }

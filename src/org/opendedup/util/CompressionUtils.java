@@ -93,56 +93,57 @@ public class CompressionUtils {
 			throws IOException {
 		return lz4Decompressor.decompress(input, len);
 	}
-	
-	public static void compressFile(File src,File dst) throws IOException {
-		if(!dst.getParentFile().exists())
+
+	public static void compressFile(File src, File dst) throws IOException {
+		if (!dst.getParentFile().exists())
 			dst.getParentFile().mkdirs();
-		FileOutputStream fos =new FileOutputStream(dst);
-        FileInputStream fis =new FileInputStream(src);
-        LZ4BlockOutputStream os = new LZ4BlockOutputStream(fos,1 << 16,lz4Compressor);
-        IOUtils.copy(fis, os);
-        os.flush();
-        os.close();
-        fis.close();
-	}
-	
-	public static void decompressFile(File src,File dst) throws IOException {
-		if(!dst.getParentFile().exists())
-			dst.getParentFile().mkdirs();
-		FileOutputStream fos =new FileOutputStream(dst);
-        FileInputStream fis =new FileInputStream(src);
-        LZ4BlockInputStream is = new LZ4BlockInputStream(fis,lz4Decompressor);
-        IOUtils.copy(is, fos);
-        fos.flush();
-        fos.close();
-        fis.close();
-	}
-	
-	public static void compressFileSnappy(File src,File dst) throws IOException {
-		if(!dst.getParentFile().exists())
-			dst.getParentFile().mkdirs();
-		FileOutputStream fos =new FileOutputStream(dst);
-        FileInputStream fis =new FileInputStream(src);
-        SnappyOutputStream os = new SnappyOutputStream(fos);
-        IOUtils.copy(fis, os);
-        os.flush();
-        os.close();
-        fis.close();
-        
-	}
-	
-	public static void decompressFileSnappy(File src,File dst) throws IOException {
-		if(!dst.getParentFile().exists())
-			dst.getParentFile().mkdirs();
-		FileOutputStream fos =new FileOutputStream(dst);
-        FileInputStream fis =new FileInputStream(src);
-        SnappyInputStream is = new SnappyInputStream(fis);
-        IOUtils.copy(is, fos);
-        fos.flush();
-        fos.close();
-        fis.close();
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		LZ4BlockOutputStream os = new LZ4BlockOutputStream(fos, 1 << 16,
+				lz4Compressor);
+		IOUtils.copy(fis, os);
+		os.flush();
+		os.close();
+		fis.close();
 	}
 
-	
+	public static void decompressFile(File src, File dst) throws IOException {
+		if (!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		LZ4BlockInputStream is = new LZ4BlockInputStream(fis, lz4Decompressor);
+		IOUtils.copy(is, fos);
+		fos.flush();
+		fos.close();
+		fis.close();
+	}
+
+	public static void compressFileSnappy(File src, File dst)
+			throws IOException {
+		if (!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		SnappyOutputStream os = new SnappyOutputStream(fos);
+		IOUtils.copy(fis, os);
+		os.flush();
+		os.close();
+		fis.close();
+
+	}
+
+	public static void decompressFileSnappy(File src, File dst)
+			throws IOException {
+		if (!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		SnappyInputStream is = new SnappyInputStream(fis);
+		IOUtils.copy(is, fos);
+		fos.flush();
+		fos.close();
+		fis.close();
+	}
 
 }

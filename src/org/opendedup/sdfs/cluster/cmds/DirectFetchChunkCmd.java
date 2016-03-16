@@ -32,29 +32,32 @@ public class DirectFetchChunkCmd implements IOClientCmd {
 		buf.putShort((short) hash.length);
 		buf.put(hash);
 		int pos = 0;
-		
+
 		while (chunk == null) {
 			if (hashlocs[pos] > 0) {
 				HashClientPool pool = soc.getPool(hashlocs, pos);
 				if (pool != null) {
 					HashClient cl = null;
 					try {
-						cl = (HashClient)pool.borrowObject();
+						cl = (HashClient) pool.borrowObject();
 						this.chunk = cl.fetchChunk(hash);
-						SDFSLogger.getLog().debug("fetched " + this.chunk.length);
+						SDFSLogger.getLog().debug(
+								"fetched " + this.chunk.length);
 					} catch (Exception e) {
-						SDFSLogger.getLog().error("error while getting hash", e);
+						SDFSLogger.getLog()
+								.error("error while getting hash", e);
 						// throw new IOException(e);
 					} finally {
 						if (cl != null)
 							try {
 								pool.returnObject(cl);
 							} catch (Exception e) {
-								SDFSLogger.getLog().warn("unable to return object to pool", e);
+								SDFSLogger.getLog().warn(
+										"unable to return object to pool", e);
 							}
 					}
 				} else {
-					SDFSLogger.getLog().info(" pool is null at pos="+pos);
+					SDFSLogger.getLog().info(" pool is null at pos=" + pos);
 				}
 			}
 			pos++;
@@ -63,7 +66,9 @@ public class DirectFetchChunkCmd implements IOClientCmd {
 				for (byte k : hashlocs) {
 					st = st + " " + k;
 				}
-				throw new IOException("No Storage Servers available to fulfill request [" +st +"]");
+				throw new IOException(
+						"No Storage Servers available to fulfill request ["
+								+ st + "]");
 			}
 		}
 	}

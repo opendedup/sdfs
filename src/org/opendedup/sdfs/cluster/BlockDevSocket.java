@@ -184,8 +184,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 					prevm = this.pmAddr;
 				} else {
 					SDFSLogger.getLog().info(
-							prevm.toString() + " - "
-									+ this.pmAddr.toString());
+							prevm.toString() + " - " + this.pmAddr.toString());
 				}
 			}
 		} finally {
@@ -713,7 +712,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	@Override
 	public void put(long pos, byte[] data, int length) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

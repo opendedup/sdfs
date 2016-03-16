@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
@@ -21,7 +20,6 @@ import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.NextPrime;
 //import org.opendedup.util.OSValidator;
 import org.opendedup.util.StringUtils;
-
 
 public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
@@ -150,7 +148,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 				throw new IOException(e);
 			}
 		}
-		
+
 		tEvt.endEvent("reclaimed [" + claims + "] records");
 		SDFSLogger.getLog().info("reclaimed [" + claims + "] records");
 		return claims;
@@ -226,10 +224,9 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		return this.getMap(key).containsKey(key);
 	}
 
-	
-
 	@Override
-	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
+	public InsertRecord put(ChunkData cm) throws IOException,
+			HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
 					+ " is close");
@@ -311,7 +308,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		
+
 		return this.getMap(key).get(key);
 	}
 
@@ -391,7 +388,7 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			
+
 			for (int i = 0; i < this.maps.length; i++) {
 				this.maps[i].close();
 				this.maps[i] = null;
@@ -493,6 +490,6 @@ public class FileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void cache(byte[] key) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

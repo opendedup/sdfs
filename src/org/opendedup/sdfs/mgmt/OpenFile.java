@@ -6,10 +6,6 @@ import java.util.HashMap;
 
 import org.opendedup.sdfs.io.DedupFileChannel;
 
-
-
-
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -19,14 +15,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class OpenFile {
-	
-	public static HashMap<String,DedupFileChannel> OpenChannels = new HashMap<String,DedupFileChannel>();
-	
+
+	public static HashMap<String, DedupFileChannel> OpenChannels = new HashMap<String, DedupFileChannel>();
+
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
 			Document doc = XMLUtils.getXMLDoc("open-file");
 			Element root = doc.getDocumentElement();
-			File f = new File(Main.volume.getPath(),file);
+			File f = new File(Main.volume.getPath(), file);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			DedupFileChannel ch = mf.getDedupFile(true).getChannel(-33);
 			root.setAttribute("fd", ch.getID());
@@ -41,4 +37,3 @@ public class OpenFile {
 	}
 
 }
-

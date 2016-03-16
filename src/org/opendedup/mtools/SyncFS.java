@@ -40,7 +40,7 @@ public class SyncFS {
 	public SyncFS() throws IOException {
 		this.init();
 	}
-	
+
 	public SyncFS(String now) throws IOException {
 	}
 
@@ -57,7 +57,7 @@ public class SyncFS {
 					.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
 							+ Main.volume.getName() + " file size = " + sz);
 			fEvt.maxCt = sz;
-			if(fEvt.maxCt == 0)
+			if (fEvt.maxCt == 0)
 				fEvt.maxCt = 1;
 
 			SDFSLogger.getLog().info("entries = " + entries);
@@ -77,8 +77,8 @@ public class SyncFS {
 					"took [" + (System.currentTimeMillis() - start) / 1000
 							+ "] seconds to check ["
 							+ (files.get() + this.errorfiles.get())
-							+ "] files. errors when checking [" + errorfiles.get()
-							+ "] files");
+							+ "] files. errors when checking ["
+							+ errorfiles.get() + "] files");
 
 			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
 					/ 1000 + "] seconds to check ["
@@ -105,7 +105,7 @@ public class SyncFS {
 			executor.execute(new CheckDedupFile(this, dir));
 		}
 	}
-	
+
 	public SDFSEvent getEvt() {
 		return this.fEvt;
 	}
@@ -115,7 +115,7 @@ public class SyncFS {
 	private void checkDedupFile(MetaDataDedupFile mf) {
 		try {
 			eventBus.post(new MFileSync(mf));
-			if(mf.getDedupFile(false) != null) {
+			if (mf.getDedupFile(false) != null) {
 				File directory = new File(Main.dedupDBStore + File.separator
 						+ mf.getDfGuid().substring(0, 2) + File.separator
 						+ mf.getDfGuid());

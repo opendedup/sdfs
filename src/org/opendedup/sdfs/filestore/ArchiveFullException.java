@@ -9,7 +9,7 @@ public class ArchiveFullException extends Exception {
 	public ArchiveFullException() {
 		super();
 	}
-	
+
 	public ArchiveFullException(String msg) {
 		super(msg);
 	}

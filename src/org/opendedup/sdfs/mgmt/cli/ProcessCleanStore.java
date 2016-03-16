@@ -14,8 +14,7 @@ public class ProcessCleanStore {
 			String file = URLEncoder.encode("null", "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			System.out
-					.printf("Cleaning store\n");
+			System.out.printf("Cleaning store\n");
 			System.out.flush();
 			formatter.format("file=%s&cmd=%s&options=%s", file, "cleanstore",
 					"1");
@@ -33,8 +32,7 @@ public class ProcessCleanStore {
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
 				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
-						"event", "1",
-						URLEncoder.encode(uuid, "UTF-8"));
+						"event", "1", URLEncoder.encode(uuid, "UTF-8"));
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);

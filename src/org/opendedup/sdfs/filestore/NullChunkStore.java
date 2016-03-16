@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
  */
 
 public class NullChunkStore implements AbstractChunkStore {
-	//AtomicLong sz = new AtomicLong(0);
+	// AtomicLong sz = new AtomicLong(0);
 	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
@@ -56,7 +56,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		//return sz.get();
+		// return sz.get();
 		return 0;
 	}
 
@@ -94,7 +94,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long writeChunk(byte[] hash, byte[] chunk, int len)
 			throws IOException {
-		//this.sz.addAndGet(len);
+		// this.sz.addAndGet(len);
 		return 0;
 	}
 
@@ -107,7 +107,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public long compressedSize() {
 		// TODO Auto-generated method stub
-		//return this.sz.get();
+		// return this.sz.get();
 		return 0;
 	}
 
@@ -121,25 +121,25 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public void sync() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setReadSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setWriteSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setCacheSize(long bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public String restoreBlock(long id, byte[] hash) {
 		return null;
-		
+
 	}
 
 	@Override
@@ -181,20 +181,20 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

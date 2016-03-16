@@ -16,13 +16,14 @@ import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.LBF;
+
 public class SendBloomFilterCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
 	private LBF lbf;
 	private int id;
 
-	public SendBloomFilterCmd(int id,LBF lbf) {
+	public SendBloomFilterCmd(int id, LBF lbf) {
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
 		this.lbf = lbf;
 		this.id = id;
@@ -30,27 +31,26 @@ public class SendBloomFilterCmd implements IOPeerCmd {
 
 	@Override
 	public void executeCmd(final ClusterSocket soc) throws IOException {
-		byte [] lb = lbf.getBytes(); 
+		byte[] lb = lbf.getBytes();
 		int as = lb.length;
 		lb = CompressionUtils.compressLz4(lb);
-		byte[] b = new byte[1+4+4+4+lb.length];
+		byte[] b = new byte[1 + 4 + 4 + 4 + lb.length];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		buf.put(NetworkCMDS.SEND_BF);
 		buf.putInt(this.id);
 		buf.putInt(lb.length);
 		buf.putInt(as);
 		buf.put(lb);
-		
+
 		try {
 			List<Address> addrs = new ArrayList<Address>();
 			List<DSEServer> servers = soc.getStorageNodes();
 			for (DSEServer server : servers) {
 				addrs.add(server.address);
 			}
-			
+
 			if (servers.size() == 0)
-				throw new IOException(
-						"No Servers Found");
+				throw new IOException("No Servers Found");
 			RspList<Object> lst = soc.getDispatcher().castMessage(addrs,
 					new Message(null, null, buf.array()), opts);
 			for (Rsp<Object> rsp : lst) {
@@ -66,9 +66,9 @@ public class SendBloomFilterCmd implements IOPeerCmd {
 							"LBF Send unreachable Exception thrown for "
 									+ rsp.getSender());
 				} else {
-						SDFSLogger.getLog().debug(
-								"LBF completed for " + rsp.getSender()
-										+ " returned=" + rsp.getValue());
+					SDFSLogger.getLog().debug(
+							"LBF completed for " + rsp.getSender()
+									+ " returned=" + rsp.getValue());
 				}
 			}
 		} catch (Throwable e) {

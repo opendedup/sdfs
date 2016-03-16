@@ -4,8 +4,6 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 
-
-
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,6 +44,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	public PoolThread(BlockingQueue<WritableCacheBuffer> queue) {
 		taskQueue = queue;
 	}
+
 	@Override
 	public void run() {
 		while (!isStopped()) {
@@ -69,11 +68,12 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer runnable = tasks.get(i);
 								runnable.startClose();
-								
+
 								byte[] hash = null;
-								AbstractHashEngine hc = HashFunctionPool.borrowObject();
+								AbstractHashEngine hc = HashFunctionPool
+										.borrowObject();
 								try {
-									
+
 									byte[] b = runnable.getFlushedBuffer();
 									hash = hc.getHash(b);
 									ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
@@ -88,7 +88,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									ar.add(p);
 									runnable.setAR(ar);
 								} catch (BufferClosedException e) {
-									
+
 								} finally {
 									HashFunctionPool.returnObject(hc);
 								}
@@ -97,7 +97,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							for (int i = 0; i < ts; i++) {
 								WritableCacheBuffer writeBuffer = tasks.get(i);
 								writeBuffer.startClose();
-								
+
 								List<Finger> fs = eng.getChunks(writeBuffer
 										.getFlushedBuffer());
 								ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
@@ -116,26 +116,26 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							}
 						}
 						ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
-						
-						for(int i = 0; i < tasks.size();i++) {
+
+						for (int i = 0; i < tasks.size(); i++) {
 							WritableCacheBuffer ck = tasks.get(i);
-							if(ck == null)
+							if (ck == null)
 								break;
 							else
 								al.addAll(ck.getFingers());
 						}
-						
+
 						HCServiceProxy.batchHashExists(al);
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							if (runnable != null) {
 
-									try {
-										runnable.endClose();
-									} catch (Exception e) {
-										SDFSLogger.getLog().warn(
-												"unable to close block", e);
-									}
+								try {
+									runnable.endClose();
+								} catch (Exception e) {
+									SDFSLogger.getLog().warn(
+											"unable to close block", e);
+								}
 							}
 						}
 					}

@@ -2,7 +2,6 @@ package org.opendedup.hashing;
 
 import org.opendedup.sdfs.Main;
 
-
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
@@ -10,6 +9,7 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
 	HashFunction hf = Hashing.murmur3_128(seed);
+
 	public Murmur3HashEngine() {
 	}
 

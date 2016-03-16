@@ -24,10 +24,11 @@ public class ProcessDSEInfo {
 				Element dse = (Element) root.getElementsByTagName("dse")
 						.item(0);
 				long maxSz = Long.parseLong(dse.getAttribute("max-size"));
-				long maxCacheSz = Long.parseLong(dse.getAttribute("max-cache-size"));
+				long maxCacheSz = Long.parseLong(dse
+						.getAttribute("max-cache-size"));
 				long cacheSz = Long.parseLong(dse.getAttribute("cache-size"));
-				long rsp = Long.parseLong(dse.getAttribute("read-speed"))*1024;
-				long wsp = Long.parseLong(dse.getAttribute("write-speed"))*1024;
+				long rsp = Long.parseLong(dse.getAttribute("read-speed")) * 1024;
+				long wsp = Long.parseLong(dse.getAttribute("write-speed")) * 1024;
 				long currentSz = Long.parseLong(dse
 						.getAttribute("current-size"));
 				long compressedSz = Long.parseLong(dse
@@ -40,7 +41,8 @@ public class ProcessDSEInfo {
 				double pFull = 0.00;
 				if (currentSz > 0) {
 					pFull = (((double) currentSz / (double) maxSz) * 100);
-					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+							.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");
 					pFull = Double.valueOf(twoDForm.format(pFull));
 				}
@@ -58,18 +60,14 @@ public class ProcessDSEInfo {
 				System.out.printf("DSE Listen Host : %s\n", host);
 				System.out.printf("DSE Listen SSL : %s\n",
 						dse.getAttribute("listen-encrypted"));
-				System.out.printf("DSE Current Cache Size : %s\n",
-						StorageUnit.of(cacheSz)
-						.format(cacheSz));
+				System.out.printf("DSE Current Cache Size : %s\n", StorageUnit
+						.of(cacheSz).format(cacheSz));
 				System.out.printf("DSE Max Cache Size : %s\n",
-						StorageUnit.of(maxCacheSz)
-						.format(maxCacheSz));
-				System.out.printf("Trottled Read Speed : %s/s\n",
-						StorageUnit.of(rsp)
-						.format(rsp));
-				System.out.printf("Trottled Write Speed : %s/s\n",
-						StorageUnit.of(wsp)
-						.format(wsp));
+						StorageUnit.of(maxCacheSz).format(maxCacheSz));
+				System.out.printf("Trottled Read Speed : %s/s\n", StorageUnit
+						.of(rsp).format(rsp));
+				System.out.printf("Trottled Write Speed : %s/s\n", StorageUnit
+						.of(wsp).format(wsp));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

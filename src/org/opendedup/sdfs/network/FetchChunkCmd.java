@@ -2,7 +2,6 @@ package org.opendedup.sdfs.network;
 
 import java.io.DataInputStream;
 
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -34,7 +33,7 @@ public class FetchChunkCmd implements IOCmd {
 			throw new IOException("could not find chunk "
 					+ StringUtils.getHexString(hash));
 		}
-		
+
 		chunk = new byte[size];
 		is.readFully(chunk);
 		if (size == -1) {

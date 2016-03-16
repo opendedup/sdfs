@@ -51,11 +51,11 @@ public class WriteHashCmd implements IOClientCmd {
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				true);
-		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.OOB);
-		//opts.setFlags(Message.Flag.NO_FC);
-		//opts.setAnycasting(true);
+		// opts.setFlags(Message.Flag.OOB);
+		// opts.setFlags(Message.Flag.NO_FC);
+		// opts.setAnycasting(true);
 	}
 
 	public WriteHashCmd(byte[] hash, byte[] aContents, boolean compress,
@@ -81,11 +81,11 @@ public class WriteHashCmd implements IOClientCmd {
 		}
 		opts = new RequestOptions(ResponseMode.GET_ALL, Main.ClusterRSPTimeout,
 				true);
-		//opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
+		// opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
-		//opts.setFlags(Message.Flag.NO_FC);
-		//opts.setFlags(Message.Flag.OOB);
-		//opts.setAnycasting(true);
+		// opts.setFlags(Message.Flag.NO_FC);
+		// opts.setFlags(Message.Flag.OOB);
+		// opts.setAnycasting(true);
 	}
 
 	@Override
@@ -132,9 +132,9 @@ public class WriteHashCmd implements IOClientCmd {
 
 					} else if (response.wasReceived()) {
 						try {
-							
+
 							boolean done = (Boolean) response.getValue();
-							if(done)
+							if (done)
 								resp[0] = 1;
 							resp[pos] = svr.id;
 							pos++;

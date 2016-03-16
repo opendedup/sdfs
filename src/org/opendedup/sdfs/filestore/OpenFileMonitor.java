@@ -44,61 +44,61 @@ public class OpenFileMonitor implements Runnable {
 	@Override
 	public void run() {
 		try {
-		while (!closed) {
-			try {
-				Thread.sleep(this.interval);
-			} catch (InterruptedException e) {
-				if (this.closed)
-					break;
-			}
-			try {
-				DedupFile[] files = DedupFileStore.getArray();
-				for (int i = 0; i < files.length; i++) {
-					DedupFile df = null;
-					try {
-						df = files[i];
-						if (!Main.safeClose && this.isFileStale(df)
-								&& !df.hasOpenChannels()) {
-							try {
-								if (df != null) {
-									DedupFileStore.getDedupFile(
-											df.getMetaFile()).forceClose();
-									if (SDFSLogger.isDebug())
-										SDFSLogger
-												.getLog()
-												.debug("Closing ["
-														+ df.getMetaFile()
-																.getPath()
-														+ "] because its stale");
-								}
-							} catch (Exception e) {
-								SDFSLogger
-										.getLog()
-										.warn("Unable close file for "
-												+ df.getMetaFile().getPath(), e);
-							}
-						} else if(!Main.safeSync) {
-							df.sync(true);
-						}
-					} catch (NoSuchFileException e) {
+			while (!closed) {
+				try {
+					Thread.sleep(this.interval);
+				} catch (InterruptedException e) {
+					if (this.closed)
+						break;
+				}
+				try {
+					DedupFile[] files = DedupFileStore.getArray();
+					for (int i = 0; i < files.length; i++) {
+						DedupFile df = null;
 						try {
-							SDFSLogger.getLog().warn(
-									"OpenFile Monitor could not find file "
-											+ df.getMetaFile().getPath());
-							// df.forceClose();
-						} catch (Exception e1) {
+							df = files[i];
+							if (!Main.safeClose && this.isFileStale(df)
+									&& !df.hasOpenChannels()) {
+								try {
+									if (df != null) {
+										DedupFileStore.getDedupFile(
+												df.getMetaFile()).forceClose();
+										if (SDFSLogger.isDebug())
+											SDFSLogger
+													.getLog()
+													.debug("Closing ["
+															+ df.getMetaFile()
+																	.getPath()
+															+ "] because its stale");
+									}
+								} catch (Exception e) {
+									SDFSLogger.getLog().warn(
+											"Unable close file for "
+													+ df.getMetaFile()
+															.getPath(), e);
+								}
+							} else if (!Main.safeSync) {
+								df.sync(true);
+							}
+						} catch (NoSuchFileException e) {
+							try {
+								SDFSLogger.getLog().warn(
+										"OpenFile Monitor could not find file "
+												+ df.getMetaFile().getPath());
+								// df.forceClose();
+							} catch (Exception e1) {
 
+							}
 						}
 					}
-				}
-			} catch (NoSuchFileException e) {
+				} catch (NoSuchFileException e) {
 
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("Unable check files", e);
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("Unable check files", e);
+				}
 			}
-		}
-		}finally {
-		done = true;
+		} finally {
+			done = true;
 		}
 	}
 
@@ -117,9 +117,10 @@ public class OpenFileMonitor implements Runnable {
 			long currentTime = System.currentTimeMillis();
 			long staleTime = 0;
 			try {
-				staleTime = df.getMetaFile().getLastAccessed() + this.maxInactive;
+				staleTime = df.getMetaFile().getLastAccessed()
+						+ this.maxInactive;
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error checking last accessed",e);
+				SDFSLogger.getLog().error("error checking last accessed", e);
 			}
 			return currentTime > staleTime;
 		}
@@ -127,12 +128,13 @@ public class OpenFileMonitor implements Runnable {
 
 	/**
 	 * Closes the OpenFileMonitor thread.
-	 * @throws InterruptedException 
+	 * 
+	 * @throws InterruptedException
 	 */
 	public void close() {
 		this.closed = true;
 		th.interrupt();
-		while(!done) {
+		while (!done) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {

@@ -2,7 +2,6 @@ package org.opendedup.hashing;
 
 import java.io.IOException;
 
-
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,7 +18,7 @@ public class HashFunctionPool {
 	public static final String VARIABLE_MURMUR3 = "VARIABLE_MURMUR3";
 	public static int hashLength = 16;
 	public static int max_hash_cluster = 1;
-	//public static int min_page_size = Main.CHUNK_LENGTH;
+	// public static int min_page_size = Main.CHUNK_LENGTH;
 	public static int avg_page_size = 4096;
 
 	static {
@@ -54,8 +53,8 @@ public class HashFunctionPool {
 		passiveObjects.add(hc);
 	}
 
-	public static AbstractHashEngine makeObject() throws NoSuchAlgorithmException,
-			NoSuchProviderException {
+	public static AbstractHashEngine makeObject()
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		return getHashEngine();
 	}
 

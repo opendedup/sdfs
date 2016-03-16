@@ -59,9 +59,9 @@ public class PassPhrase {
 	protected static char[] goodChar = { 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 			'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
 			'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
-			'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','I','i','L',
-			'2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '_', '1', 'l','0',
-			'=' };
+			'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'I', 'i', 'L', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-',
+			'_', '1', 'l', '0', '=' };
 
 	/* Generate a Password object with a random password. */
 	public static String getNext() {
@@ -71,7 +71,7 @@ public class PassPhrase {
 		}
 		return sb.toString();
 	}
-	
+
 	public static String getPasswdNext() {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < PASSWD_MIN_LENGTH; i++) {
@@ -79,10 +79,10 @@ public class PassPhrase {
 		}
 		return sb.toString();
 	}
-	
+
 	public static String getIV() {
 		SecureRandom rnd = new SecureRandom();
-		byte [] b = new byte[16];
+		byte[] b = new byte[16];
 		rnd.nextBytes(b);
 		return StringUtils.getHexString(b);
 	}

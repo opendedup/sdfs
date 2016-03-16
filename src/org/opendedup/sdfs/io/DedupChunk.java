@@ -33,18 +33,16 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @param length
 	 *            The length of the chunk
 	 */
-	public DedupChunk(long position, int length, boolean newChunk,List<HashLocPair> ar,boolean reconstructed
-			) {
+	public DedupChunk(long position, int length, boolean newChunk,
+			List<HashLocPair> ar, boolean reconstructed) {
 		this.length = length;
 		this.position = position;
 		this.newChunk = newChunk;
 		this.ar = ar;
-		this.reconstructed = reconstructed;	
+		this.reconstructed = reconstructed;
 	}
 
-	
-
-	public byte[] getReadChunk(int start,int len) throws IOException {
+	public byte[] getReadChunk(int start, int len) throws IOException {
 		throw new IOException("not implemented");
 	}
 
@@ -155,8 +153,8 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#open()
 	 */
 	@Override
-	public void open() {
-
+	public boolean open() {
+		return true;
 	}
 
 	@Override
@@ -277,7 +275,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	@Override
 	public void setAR(List<HashLocPair> al) {
 		this.ar = al;
-		
+
 	}
 
 	@Override

@@ -14,7 +14,8 @@ import org.opendedup.sdfs.filestore.StringResult;
 
 public class MultiDownload implements Runnable {
 	AbstractBatchStore cs = null;
-	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(Main.dseIOThreads * 2);
+	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(
+			Main.dseIOThreads * 2);
 	private boolean done = false;
 	private Exception ex;
 	Iterator<String> ck = null;
@@ -23,8 +24,6 @@ public class MultiDownload implements Runnable {
 		this.cs = cs;
 		this.ck = cs.getNextObjectList();
 	}
-
-	
 
 	public void iterationInit(boolean deep, String folder) {
 		try {
@@ -100,7 +99,8 @@ public class MultiDownload implements Runnable {
 		return null;
 	}
 
-	private void addStringResult(String key) throws IOException, InterruptedException {
+	private void addStringResult(String key) throws IOException,
+			InterruptedException {
 		this.sbs.put(cs.getStringResult(key));
 	}
 

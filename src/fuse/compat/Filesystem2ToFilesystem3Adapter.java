@@ -60,7 +60,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	// called on every filehandle close, fh is filehandle passed from open
 	@Override
 	public int flush(String path, long fh) throws FuseException {
-		fs2.flush(path,fh);
+		fs2.flush(path, fh);
 
 		return 0;
 	}
@@ -71,7 +71,7 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	@Override
 	public int fsync(String path, long fh, boolean isDatasync)
 			throws FuseException {
-		fs2.fsync(path,fh, isDatasync);
+		fs2.fsync(path, fh, isDatasync);
 
 		return 0;
 	}
@@ -195,10 +195,9 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	// fh is filehandle passed from open,
 	// isWritepage indicates that write was caused by a writepage
 	@Override
-	public int write(String path, long fh, boolean isWritepage,
-			ByteBuffer buf, long offset) throws FuseException {
-		fs2.write(path,fh,
-				isWritepage, buf, offset);
+	public int write(String path, long fh, boolean isWritepage, ByteBuffer buf,
+			long offset) throws FuseException {
+		fs2.write(path, fh, isWritepage, buf, offset);
 
 		return 0;
 	}

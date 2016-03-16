@@ -92,8 +92,8 @@ public interface Filesystem3 extends FilesystemConstants {
 
 	// fh is filehandle passed from open,
 	// isWritepage indicates that write was caused by a writepage
-	public int write(String path, long fh, boolean isWritepage,
-			ByteBuffer buf, long offset) throws FuseException;
+	public int write(String path, long fh, boolean isWritepage, ByteBuffer buf,
+			long offset) throws FuseException;
 
 	// called on every filehandle close, fh is filehandle passed from open
 	public int flush(String path, long fh) throws FuseException;

@@ -2,14 +2,10 @@ package org.opendedup.collections;
 
 import java.util.Collections;
 
-
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-
-
 
 public class SortedReadMapList implements Runnable {
 	private CopyOnWriteArrayList<ProgressiveFileByteArrayLongMap> al = new CopyOnWriteArrayList<ProgressiveFileByteArrayLongMap>();
@@ -25,8 +21,8 @@ public class SortedReadMapList implements Runnable {
 
 			try {
 				Thread.sleep(10 * 1000);
-				Collections.sort(al,TIME_ORDER);
-				
+				Collections.sort(al, TIME_ORDER);
+
 			} catch (Exception e) {
 
 			} finally {

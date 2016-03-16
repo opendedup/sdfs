@@ -80,18 +80,18 @@ public class Volume implements java.io.Serializable {
 	public VolumeSocket getSoc() {
 		return this.soc;
 	}
-	
+
 	public static void setStorageConnected(boolean connected) {
-		if(connected && !storageConnected) {
+		if (connected && !storageConnected) {
 			SDFSEvent.recoEvent();
 		}
-		
-		if(!connected && storageConnected) {
+
+		if (!connected && storageConnected) {
 			SDFSEvent.discoEvent();
 		}
 		storageConnected = connected;
 	}
-	
+
 	public static boolean getStorageConnected() {
 		return storageConnected;
 	}
@@ -199,8 +199,9 @@ public class Volume implements java.io.Serializable {
 			Main.writeTimeoutSeconds = Integer.parseInt(vol
 					.getAttribute("write-timeout-seconds"));
 		if (vol.hasAttribute("sync-files")) {
-			boolean syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
-			if(syncDL)
+			boolean syncDL = Boolean.parseBoolean(vol
+					.getAttribute("sync-files"));
+			if (syncDL)
 				Main.syncDL = true;
 		}
 		if (vol.hasAttribute("use-dse-size"))

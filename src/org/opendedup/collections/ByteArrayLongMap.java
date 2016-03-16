@@ -125,9 +125,9 @@ public class ByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public int setUp() throws IOException {
-			keys = ByteBuffer.allocateDirect(size * FREE.length);
-			values = ByteBuffer.allocateDirect(size * 8);
-			claims = new BitSet(size);
+		keys = ByteBuffer.allocateDirect(size * FREE.length);
+		values = ByteBuffer.allocateDirect(size * 8);
+		claims = new BitSet(size);
 		for (int i = 0; i < size; i++) {
 			keys.put(FREE);
 			values.putLong(-1);
@@ -144,13 +144,11 @@ public class ByteArrayLongMap {
 	}
 
 	private void derefByteArray() {
-		
-			keys = null;
-			values = null;
-			claims = null;
+
+		keys = null;
+		values = null;
+		claims = null;
 	}
-
-
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -249,7 +247,7 @@ public class ByteArrayLongMap {
 					return true;
 				} catch (Exception e) {
 					throw e;
-				} 
+				}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
@@ -439,7 +437,7 @@ public class ByteArrayLongMap {
 				return pos > -1 ? true : false;
 			} catch (Exception e) {
 				throw e;
-			} 
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;

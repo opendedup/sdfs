@@ -29,8 +29,10 @@ public class BatchGetPointerCmd {
 			ArrayList<byte[]> hashes = (ArrayList<byte[]>) obj_in.readObject();
 			SDFSLogger.getLog().debug("will fetch " + hashes.size() + "blocks");
 
-			ByteBuffer bf = ByteBuffer.wrap(new byte[(HashFunctionPool.hashLength+8)*hashes.size()]);
-			for (byte[] b:hashes) {
+			ByteBuffer bf = ByteBuffer
+					.wrap(new byte[(HashFunctionPool.hashLength + 8)
+							* hashes.size()]);
+			for (byte[] b : hashes) {
 				long cid = HCServiceProxy.getHashesMap().get(b);
 				bf.put(b);
 				bf.putLong(cid);

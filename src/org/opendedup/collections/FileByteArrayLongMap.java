@@ -25,7 +25,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 
-
 public class FileByteArrayLongMap implements AbstractShard {
 	MappedByteBuffer keys = null;
 	MappedByteBuffer values = null;
@@ -98,7 +97,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		}
 		return null;
 	}
-	
 
 	private void recreateMap() {
 		mapped = new BitSet(size);
@@ -494,8 +492,9 @@ public class FileByteArrayLongMap implements AbstractShard {
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
-	
-	public InsertRecord put(byte[] key, long value) throws HashtableFullException {
+
+	public InsertRecord put(byte[] key, long value)
+			throws HashtableFullException {
 		try {
 			this.hashlock.lock();
 			if (this.sz.get() >= size)
@@ -504,10 +503,10 @@ public class FileByteArrayLongMap implements AbstractShard {
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
-				int npos = -pos -1;
+				int npos = -pos - 1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return new InsertRecord(false,this.get(key));
+				return new InsertRecord(false, this.get(key));
 			}
 			this.keys.position(pos);
 			this.keys.put(key);
@@ -523,15 +522,16 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.sz.incrementAndGet();
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return new InsertRecord(true,value);
+			return new InsertRecord(true, value);
 		} finally {
 			this.hashlock.unlock();
 		}
 	}
-	
-	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
+
+	public InsertRecord put(ChunkData cm) throws HashtableFullException,
+			IOException {
 		try {
-			byte [] key = cm.getHash();
+			byte[] key = cm.getHash();
 			this.hashlock.lock();
 			if (this.sz.get() >= size)
 				throw new HashtableFullException(
@@ -539,15 +539,15 @@ public class FileByteArrayLongMap implements AbstractShard {
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
-				int npos = -pos -1;
+				int npos = -pos - 1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return new InsertRecord(false,this.get(key));
+				return new InsertRecord(false, this.get(key));
 			}
 			this.keys.position(pos);
 			this.keys.put(key);
 			if (!cm.recoverd) {
-				
+
 				cm.persistData(true);
 			}
 			if (cm.getcPos() > bgst)
@@ -561,13 +561,11 @@ public class FileByteArrayLongMap implements AbstractShard {
 			this.sz.incrementAndGet();
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return new InsertRecord(true,cm.getcPos());
+			return new InsertRecord(true, cm.getcPos());
 		} finally {
 			this.hashlock.unlock();
 		}
 	}
-	
-	
 
 	/*
 	 * (non-Javadoc)
@@ -604,7 +602,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 			if (pos == -1) {
 				return -1;
 			} else {
-				
+
 				pos = (pos / FREE.length) * 8;
 				this.values.position(pos);
 				long val = this.values.getLong();
@@ -680,8 +678,6 @@ public class FileByteArrayLongMap implements AbstractShard {
 		SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
-	
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -725,8 +721,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 				keys.position(iterPos * FREE.length);
 				keys.get(key);
 				if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-					if (!nbf.mightContain(key)
-							&& !this.claims.get(iterPos)) {
+					if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
 						keys.position(iterPos * FREE.length);
 						keys.put(REMOVED);
 						this.values.position(iterPos * 8);
@@ -737,7 +732,7 @@ public class FileByteArrayLongMap implements AbstractShard {
 						this.values.putLong(0);
 						this.mapped.clear(iterPos);
 						this.sz.decrementAndGet();
-						
+
 						sz++;
 					} else {
 						this.mapped.set(iterPos);

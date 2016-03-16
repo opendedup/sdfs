@@ -33,30 +33,30 @@ public class RestoreArchive implements Runnable {
 
 	private void init() throws IOException {
 		SDFSLogger.getLog().info("Starting Archive Restore for " + f.getPath());
-		
+
 		File directory = new File(Main.dedupDBStore + File.separator
 				+ this.f.getDfGuid().substring(0, 2) + File.separator
 				+ this.f.getDfGuid());
 		File dbf = new File(directory.getPath() + File.separator
 				+ this.f.getDfGuid() + ".map");
 		this.initiateArchive(dbf);
-		
 
 	}
-	
+
 	public static void recoverArchives(MetaDataDedupFile f) throws IOException {
 		RestoreArchive ar = new RestoreArchive(f);
 		Thread th = new Thread(ar);
 		th.start();
-		while(!ar.fEvt.isDone()) {
+		while (!ar.fEvt.isDone()) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				throw new IOException(e);
 			}
 		}
-		if(ar.fEvt.level != SDFSEvent.INFO) {
-			throw new IOException("unable to restore all archived data for " + f.getPath());
+		if (ar.fEvt.level != SDFSEvent.INFO) {
+			throw new IOException("unable to restore all archived data for "
+					+ f.getPath());
 		}
 	}
 
@@ -101,35 +101,36 @@ public class RestoreArchive implements Runnable {
 			this.init();
 			while (this.restoreRequests.size() > 0) {
 				ArrayList<String> al = new ArrayList<String>();
-					for (String id : this.restoreRequests) {
-						try {
-							SDFSLogger.getLog().debug("will check " + id);
-							if (HCServiceProxy.blockRestored(id)) {
-								
-								al.add(id);
-								this.fEvt.curCt++;
-								this.importedArchives.incrementAndGet();
-								SDFSLogger.getLog().debug("restored " + id);
-							} else {
-								SDFSLogger.getLog().debug("not restored " + id);
-							}
-						} catch (Exception e) {
-							
-							SDFSLogger.getLog().error(
-									"unable to check restore for " + id, e);
-						}
+				for (String id : this.restoreRequests) {
+					try {
+						SDFSLogger.getLog().debug("will check " + id);
+						if (HCServiceProxy.blockRestored(id)) {
 
+							al.add(id);
+							this.fEvt.curCt++;
+							this.importedArchives.incrementAndGet();
+							SDFSLogger.getLog().debug("restored " + id);
+						} else {
+							SDFSLogger.getLog().debug("not restored " + id);
+						}
+					} catch (Exception e) {
+
+						SDFSLogger.getLog().error(
+								"unable to check restore for " + id, e);
 					}
-					for (String id : al) {
-						this.restoreRequests.remove(id);
-					}
-					al = null;
-					if(this.restoreRequests.size() > 0)
-						Thread.sleep(15 * 60 * 1000);
+
+				}
+				for (String id : al) {
+					this.restoreRequests.remove(id);
+				}
+				al = null;
+				if (this.restoreRequests.size() > 0)
+					Thread.sleep(15 * 60 * 1000);
 			}
 			SDFSLogger.getLog().info(
-					"took [" + (System.currentTimeMillis() - start) / (1000 * 60)
-							+ "] Minutes to import [" + totalArchives.get() + "]");
+					"took [" + (System.currentTimeMillis() - start)
+							/ (1000 * 60) + "] Minutes to import ["
+							+ totalArchives.get() + "]");
 			fEvt.endEvent("Archive Restore Succeeded for " + f.getPath());
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("archive restore failed", e);
@@ -137,7 +138,7 @@ public class RestoreArchive implements Runnable {
 					+ "]", SDFSEvent.ERROR);
 		}
 	}
-	
+
 	public SDFSEvent getEvent() {
 		return this.fEvt;
 	}

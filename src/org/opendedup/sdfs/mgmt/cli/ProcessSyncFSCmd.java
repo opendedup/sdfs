@@ -30,15 +30,16 @@ public class ProcessSyncFSCmd {
 			while (!closed) {
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
-				formatter.format("file=nun&cmd=%s&options=%s&uuid=%s", "event", Integer.toString(0),
-						URLEncoder.encode(uuid, "UTF-8"));
+				formatter.format("file=nun&cmd=%s&options=%s&uuid=%s", "event",
+						Integer.toString(0), URLEncoder.encode(uuid, "UTF-8"));
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);
-				if(Long.parseLong(evt.getAttribute("max-count")) == maxcount && bar==null) {
+				if (Long.parseLong(evt.getAttribute("max-count")) == maxcount
+						&& bar == null) {
 					bar = new CommandLineProgressBar(evt.getAttribute("type"),
 							maxcount, System.out);
-				}else {
+				} else {
 					maxcount = Long.parseLong(evt.getAttribute("max-count"));
 				}
 				if (le != evt.getElementsByTagName("event").getLength())
@@ -95,8 +96,7 @@ public class ProcessSyncFSCmd {
 								+ " Task Completed : "
 								+ evt.getAttribute("short-msg"));
 						System.exit(0);
-					}
-					else {
+					} else {
 						System.err.println(evt.getAttribute("type")
 								+ " Task Failed : "
 								+ evt.getAttribute("short-msg"));

@@ -69,7 +69,8 @@ public class ProcessClusterVolumesList {
 						double pf = ((double) Long.parseLong(dse
 								.getAttribute("current-size")) / (double) StringUtils
 								.parseSize(dse.getAttribute("capacity"))) * 100;
-						DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+						DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+								.getNumberInstance(Locale.US);
 						twoDForm.applyPattern("#.##");
 						String cpf = Double.toString(Double.valueOf(twoDForm
 								.format(pf)));

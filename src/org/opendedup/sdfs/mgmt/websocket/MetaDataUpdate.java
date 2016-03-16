@@ -33,14 +33,12 @@ import org.simpleframework.http.socket.service.Service;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
-
 public class MetaDataUpdate implements Service {
 	private final MetaDataUpdateListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
 	private static ReentrantLock iLock = new ReentrantLock(true);
 	private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
-	
 
 	public MetaDataUpdate() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
@@ -49,7 +47,7 @@ public class MetaDataUpdate implements Service {
 		MetaDataDedupFile.registerListener(this);
 		MetaFileStore.registerListener(this);
 	}
-	
+
 	private ReentrantLock getLock(String st) {
 		iLock.lock();
 		try {
@@ -84,7 +82,7 @@ public class MetaDataUpdate implements Service {
 			iLock.unlock();
 		}
 	}
-	
+
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileDeleted(MFileDeleted evt) throws IOException {
@@ -93,13 +91,13 @@ public class MetaDataUpdate implements Service {
 			l.lock();
 			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
 			this.distribute(replay);
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("unable to delete " + evt.mf.getPath(),e);
+		} catch (Exception e) {
+			SDFSLogger.getLog()
+					.error("unable to delete " + evt.mf.getPath(), e);
 			throw new IOException(e);
+		} finally {
+			removeLock(evt.mf.getPath());
 		}
-		finally {
-		removeLock(evt.mf.getPath());
-	}
 	}
 
 	@Subscribe
@@ -134,11 +132,14 @@ public class MetaDataUpdate implements Service {
 			if (password != null) {
 				String hash;
 				try {
-					hash = HashFunctions.getSHAHash(password.trim().getBytes(), Main.sdfsPasswordSalt.getBytes());
+					hash = HashFunctions.getSHAHash(password.trim().getBytes(),
+							Main.sdfsPasswordSalt.getBytes());
 					if (hash.equals(Main.sdfsPassword)) {
 						auth = true;
 					}
-				} catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchProviderException e) {
+				} catch (NoSuchAlgorithmException
+						| UnsupportedEncodingException
+						| NoSuchProviderException e) {
 					SDFSLogger.getLog().error("unable to authenitcate user", e);
 				}
 
@@ -188,18 +189,18 @@ public class MetaDataUpdate implements Service {
 					sockets.remove(user);
 					users.remove(user);
 					operation.close();
-					
+
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileWritten(MFileWritten evt) throws IOException {
-		if(evt.mf.isDirty()) {
+		if (evt.mf.isDirty()) {
 			try {
 				ReentrantLock l = this.getLock(evt.mf.getPath());
 				l.lock();
@@ -215,10 +216,9 @@ public class MetaDataUpdate implements Service {
 	}
 
 	private static class MetaDataUpdateListener implements FrameListener {
-		
 
 		private MetaDataUpdateListener(MetaDataUpdate service) {
-			
+
 		}
 
 		@Override

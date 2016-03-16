@@ -2,8 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,13 +56,15 @@ import org.simpleframework.http.socket.service.PathRouter;
 
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
-	private static String archivePath = new File(Main.volume.getPath()).getParent() + File.separator + "archives";
-	private static final String METADATA_PATH= "/metadata/";
-	private static final String METADATA_INFO_PATH= "/metadatainfo/";
-	private static final String MAPDATA_PATH="/mapdata/";
-	private static final String BLOCK_PATH="/blockdata/";
-	private static final String BATCH_BLOCK_PATH="/batchblockdata/";
-	private static final String BATCH_BLOCK_POINTER="/batchblockpointer/";
+	private static String archivePath = new File(Main.volume.getPath())
+			.getParent() + File.separator + "archives";
+	private static final String METADATA_PATH = "/metadata/";
+	private static final String METADATA_INFO_PATH = "/metadatainfo/";
+	private static final String MAPDATA_PATH = "/mapdata/";
+	private static final String BLOCK_PATH = "/blockdata/";
+	private static final String BATCH_BLOCK_PATH = "/batchblockdata/";
+	private static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
+
 	@Override
 	public void handle(Request request, Response response) {
 		try {
@@ -74,8 +74,10 @@ public class MgmtWebServer implements Container {
 			String file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd");
 			String cmdOptions = request.getQuery().get("options");
-			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			SDFSLogger.getLog().debug(
+					"cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
+			DocumentBuilderFactory factory = DocumentBuilderFactory
+					.newInstance();
 			DocumentBuilder builder;
 			builder = factory.newDocumentBuilder();
 			DOMImplementation impl = builder.getDOMImplementation();
@@ -89,12 +91,13 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = request.getQuery().get("password");
 				if (password != null) {
-					String hash = HashFunctions.getSHAHash(password.trim().getBytes(),
-							Main.sdfsPasswordSalt.getBytes());
+					String hash = HashFunctions.getSHAHash(password.trim()
+							.getBytes(), Main.sdfsPasswordSalt.getBytes());
 					if (hash.equals(Main.sdfsPassword))
 						auth = true;
 				} else {
-					SDFSLogger.getLog().warn("could not authenticate user to cli");
+					SDFSLogger.getLog().warn(
+							"could not authenticate user to cli");
 				}
 			} else {
 				auth = true;
@@ -107,12 +110,15 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("shutdown")) {
 						new Shutdown().getResult();
 						result.setAttribute("status", "success");
-						result.setAttribute("msg", "shutting down volume manager");
+						result.setAttribute("msg",
+								"shutting down volume manager");
 					} else if (cmd.equalsIgnoreCase("info")) {
 						try {
-							Element msg = new GetAttributes().getResult(cmdOptions, file);
+							Element msg = new GetAttributes().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -122,9 +128,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("deletefile")) {
 						try {
-							String msg = new DeleteFileCmd().getResult(cmdOptions, file);
+							String msg = new DeleteFileCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -133,9 +141,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cloudfile")) {
 						try {
-							Element msg = new GetCloudFile().getResult(cmdOptions, file);
+							Element msg = new GetCloudFile().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -144,9 +154,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("setcachesz")) {
 						try {
-							Element msg = new SetCacheSize().getResult(request.getQuery().get("sz"));
+							Element msg = new SetCacheSize().getResult(request
+									.getQuery().get("sz"));
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -155,9 +167,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("setreadspeed")) {
 						try {
-							Element msg = new SetReadSpeed().getResult(request.getQuery().get("sp"));
+							Element msg = new SetReadSpeed().getResult(request
+									.getQuery().get("sp"));
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -168,7 +182,8 @@ public class MgmtWebServer implements Container {
 						try {
 							Element msg = new SyncFSCmd().getResult();
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
@@ -177,9 +192,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("setwritespeed")) {
 						try {
-							Element msg = new SetWriteSpeed().getResult(request.getQuery().get("sp"));
+							Element msg = new SetWriteSpeed().getResult(request
+									.getQuery().get("sp"));
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -188,9 +205,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("deletearchive")) {
 						try {
-							String msg = new DeleteArchiveCmd().getResult(cmdOptions, file);
+							String msg = new DeleteArchiveCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -199,9 +218,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("makefolder")) {
 						try {
-							String msg = new MakeFolderCmd().getResult(cmdOptions, file);
+							String msg = new MakeFolderCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -212,13 +233,18 @@ public class MgmtWebServer implements Container {
 						try {
 							String srcfile = request.getQuery().get("srcfile");
 							String dstfile = request.getQuery().get("dstfile");
-							long sstart = Long.parseLong(request.getQuery().get("sstart"));
-							long len = Long.parseLong(request.getQuery().get("len"));
-							long dstart = Long.parseLong(request.getQuery().get("dstart"));
+							long sstart = Long.parseLong(request.getQuery()
+									.get("sstart"));
+							long len = Long.parseLong(request.getQuery().get(
+									"len"));
+							long dstart = Long.parseLong(request.getQuery()
+									.get("dstart"));
 
-							Element msg = new CopyExtents().getResult(srcfile, dstfile, sstart, len, dstart);
+							Element msg = new CopyExtents().getResult(srcfile,
+									dstfile, sstart, len, dstart);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -229,13 +255,19 @@ public class MgmtWebServer implements Container {
 
 					else if (cmd.equalsIgnoreCase("filteredinfo")) {
 						try {
-							boolean includeFiles = Boolean.parseBoolean(request.getQuery().get("includefiles"));
-							boolean includeFolders = Boolean.parseBoolean(request.getQuery().get("includefolders"));
-							int level = Integer.parseInt(request.getQuery().get("level"));
-							Element msg = new GetFilteredFileAttributes().getResult(cmdOptions, file, includeFiles,
-									includeFolders, level);
+							boolean includeFiles = Boolean.parseBoolean(request
+									.getQuery().get("includefiles"));
+							boolean includeFolders = Boolean
+									.parseBoolean(request.getQuery().get(
+											"includefolders"));
+							int level = Integer.parseInt(request.getQuery()
+									.get("level"));
+							Element msg = new GetFilteredFileAttributes()
+									.getResult(cmdOptions, file, includeFiles,
+											includeFolders, level);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -244,9 +276,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("dse-info")) {
 						try {
-							Element msg = new GetDSE().getResult(cmdOptions, file);
+							Element msg = new GetDSE().getResult(cmdOptions,
+									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -255,9 +289,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cluster-dse-info")) {
 						try {
-							Element msg = new GetClusterDSE().getResult(cmdOptions, file);
+							Element msg = new GetClusterDSE().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -266,9 +302,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cluster-volumes")) {
 						try {
-							Element msg = new GetRemoteVolumes().getResult(cmdOptions, file);
+							Element msg = new GetRemoteVolumes().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -277,9 +315,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cluster-volume-remove")) {
 						try {
-							new RemoveRemoteVolume().getResult(cmdOptions, file);
+							new RemoveRemoteVolume()
+									.getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -289,7 +329,8 @@ public class MgmtWebServer implements Container {
 						try {
 							new AddRemoteVolume().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -297,12 +338,16 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("blockdev-add")) {
 						try {
-							Element el = new BlockDeviceAdd().getResult(request.getQuery().get("devname"),
-									request.getQuery().get("size"), request.getQuery().get("start"));
+							Element el = new BlockDeviceAdd().getResult(request
+									.getQuery().get("devname"), request
+									.getQuery().get("size"), request.getQuery()
+									.get("start"));
 
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully added block device [" + request.getQuery().get("devname") + "]");
+									"successfully added block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -311,10 +356,13 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("blockdev-rm")) {
 						try {
-							Element el = new BlockDeviceRm().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceRm().getResult(request
+									.getQuery().get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully removed block device [" + request.getQuery().get("devname") + "]");
+									"successfully removed block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -323,10 +371,14 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("blockdev-start")) {
 						try {
-							Element el = new BlockDeviceStart().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStart()
+									.getResult(request.getQuery()
+											.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully started block device [" + request.getQuery().get("devname") + "]");
+									"successfully started block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -335,10 +387,14 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("blockdev-stop")) {
 						try {
-							Element el = new BlockDeviceStop().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStop()
+									.getResult(request.getQuery()
+											.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully stopped block device [" + request.getQuery().get("devname") + "]");
+									"successfully stopped block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -348,8 +404,10 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("blockdev-list")) {
 						try {
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-							List<Element> els = new BlockDeviceList().getResult();
+							result.setAttribute("msg",
+									"command completed successfully");
+							List<Element> els = new BlockDeviceList()
+									.getResult();
 							for (Element el : els) {
 								result.appendChild(doc.adoptNode(el));
 							}
@@ -360,11 +418,15 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("blockdev-update")) {
 						try {
-							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),
-									request.getQuery().get("param"), request.getQuery().get("value"));
+							Element el = new BlockDeviceUpdate().getResult(
+									request.getQuery().get("devname"), request
+											.getQuery().get("param"), request
+											.getQuery().get("value"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully updated block device [" + request.getQuery().get("devname") + "]");
+									"successfully updated block device ["
+											+ request.getQuery().get("devname")
+											+ "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -374,13 +436,15 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("close-file")) {
 						new CloseFile().getResult(cmdOptions, file);
 						result.setAttribute("status", "success");
-						result.setAttribute("msg", "command completed successfully");
+						result.setAttribute("msg",
+								"command completed successfully");
 
 					} else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -388,9 +452,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("get-gc-schedule")) {
 						try {
-							Element msg = new GetGCSchedule().getResult(cmdOptions, file);
+							Element msg = new GetGCSchedule().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 
 						} catch (IOException e) {
@@ -402,7 +468,8 @@ public class MgmtWebServer implements Container {
 						try {
 							Element msg = new GetGCMaster().getResult();
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -415,7 +482,8 @@ public class MgmtWebServer implements Container {
 						try {
 							new PromoteToGCMaster().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -423,9 +491,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("open-files")) {
 						try {
-							Element msg = new GetOpenFiles().getResult(cmdOptions, file);
+							Element msg = new GetOpenFiles().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -434,9 +504,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("debug-info")) {
 						try {
-							Element msg = new GetDebug().getResult(cmdOptions, file);
+							Element msg = new GetDebug().getResult(cmdOptions,
+									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -444,21 +516,22 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} /*
-						 * else if (cmd.equalsIgnoreCase("events")) { try {
-						 * String msg = new GetEvents().getResult(cmdOptions,
-						 * file); result =
-						 * "<result status=\"success\" msg=\"command completed successfully\">"
-						 * ; result = result + msg; result = result +
-						 * "</result>"; } catch (IOException e) {
-						 * result.setAttribute("status", "failed");
-						 * result.setAttribute("msg", e.toString());
-						 * SDFSLogger.getLog().warn(e); } }
-						 */
+					 * else if (cmd.equalsIgnoreCase("events")) { try { String
+					 * msg = new GetEvents().getResult(cmdOptions, file); result
+					 * =
+					 * "<result status=\"success\" msg=\"command completed successfully\">"
+					 * ; result = result + msg; result = result + "</result>"; }
+					 * catch (IOException e) { result.setAttribute("status",
+					 * "failed"); result.setAttribute("msg", e.toString());
+					 * SDFSLogger.getLog().warn(e); } }
+					 */
 					else if (cmd.equalsIgnoreCase("volume-info")) {
 						try {
-							Element msg = new GetVolume().getResult(cmdOptions, file);
+							Element msg = new GetVolume().getResult(cmdOptions,
+									file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
+							result.setAttribute("msg",
+									"command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -467,7 +540,8 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("changepassword")) {
 						try {
-							String msg = new SetPasswordCmd().getResult("", request.getQuery().get("newpassword"));
+							String msg = new SetPasswordCmd().getResult("",
+									request.getQuery().get("newpassword"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -477,9 +551,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("snapshot")) {
 						try {
-							Element msg = new SnapshotCmd().getResult(cmdOptions, file);
+							Element msg = new SnapshotCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "snapshot finished successfully");
+							result.setAttribute("msg",
+									"snapshot finished successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -489,9 +565,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("restorearchive")) {
 						try {
-							Element msg = new RestoreArchiveCmd().getResult(file);
+							Element msg = new RestoreArchiveCmd()
+									.getResult(file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "replication finished successfully");
+							result.setAttribute("msg",
+									"replication finished successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (Exception e) {
@@ -503,18 +581,23 @@ public class MgmtWebServer implements Container {
 						try {
 							String server = request.getQuery().get("server");
 							String password = request.getQuery().get("spasswd");
-							int port = Integer.parseInt(request.getQuery().get("port"));
+							int port = Integer.parseInt(request.getQuery().get(
+									"port"));
 							int maxSz = 30;
 							boolean useSSL = false;
 							if (request.getQuery().containsKey("maxsz"))
-								maxSz = Integer.parseInt(request.getQuery().get("maxsz"));
+								maxSz = Integer.parseInt(request.getQuery()
+										.get("maxsz"));
 							if (request.getQuery().containsKey("useSSL"))
-								useSSL = Boolean.parseBoolean(request.getQuery().get("useSSL"));
-							Element msg = new ImportArchiveCmd().getResult(file, cmdOptions, server, password, port,
+								useSSL = Boolean.parseBoolean(request
+										.getQuery().get("useSSL"));
+							Element msg = new ImportArchiveCmd().getResult(
+									file, cmdOptions, server, password, port,
 									maxSz, useSSL);
 
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "replication started successfully");
+							result.setAttribute("msg",
+									"replication started successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -523,7 +606,9 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
-						byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+						byte[] rb = com.google.common.io.BaseEncoding
+								.base64Url().decode(
+										request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.setContentType("application/octet-stream");
@@ -536,7 +621,9 @@ public class MgmtWebServer implements Container {
 						try {
 							String uuid = request.getQuery().get("uuid");
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", new CancelImportArchiveCmd().getResult(uuid));
+							result.setAttribute("msg",
+									new CancelImportArchiveCmd()
+											.getResult(uuid));
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -544,9 +631,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
-							Element msg = new ArchiveOutCmd().getResult(cmdOptions, file);
+							Element msg = new ArchiveOutCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", "archive out started successfully");
+							result.setAttribute("msg",
+									"archive out started successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
@@ -559,7 +648,8 @@ public class MgmtWebServer implements Container {
 					else if (cmd.equalsIgnoreCase("msnapshot")) {
 						try {
 							int snaps = request.getQuery().getInteger("snaps");
-							String msg = new MultiSnapshotCmd(snaps).getResult(cmdOptions, file);
+							String msg = new MultiSnapshotCmd(snaps).getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -569,7 +659,8 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("flush")) {
 						try {
-							String msg = new FlushBuffersCmd().getResult(cmdOptions, file);
+							String msg = new FlushBuffersCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -580,7 +671,8 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("expandvolume")) {
 						try {
 							String size = request.getQuery().get("size");
-							String msg = new ExpandVolumeCmd().getResult(cmdOptions, size);
+							String msg = new ExpandVolumeCmd().getResult(
+									cmdOptions, size);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -591,7 +683,8 @@ public class MgmtWebServer implements Container {
 					} else if (cmd.equalsIgnoreCase("volumeconfigpath")) {
 						try {
 							result.setAttribute("status", "success");
-							result.setAttribute("msg", Main.volume.getConfigPath());
+							result.setAttribute("msg",
+									Main.volume.getConfigPath());
 						} catch (java.lang.NullPointerException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -599,7 +692,8 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("dedup")) {
 						try {
-							String msg = new SetDedupAllCmd().getResult(cmdOptions, file);
+							String msg = new SetDedupAllCmd().getResult(
+									cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -608,7 +702,8 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("perfmon")) {
-						String msg = new SetEnablePerfMonCmd().getResult(cmdOptions, file);
+						String msg = new SetEnablePerfMonCmd().getResult(
+								cmdOptions, file);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", msg);
 					} else if (cmd.equalsIgnoreCase("cleanstore")) {
@@ -624,7 +719,8 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("fdisk")) {
 						try {
-							Element msg = new FDISKCmd().getResult(cmdOptions, file);
+							Element msg = new FDISKCmd().getResult(cmdOptions,
+									file);
 							result.setAttribute("status", "success");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
@@ -637,7 +733,8 @@ public class MgmtWebServer implements Container {
 
 					else if (cmd.equalsIgnoreCase("redundancyck")) {
 						try {
-							Element msg = new ClusterRedundancyCmd().getResult(cmdOptions, null);
+							Element msg = new ClusterRedundancyCmd().getResult(
+									cmdOptions, null);
 							result.setAttribute("status", "success");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
@@ -695,13 +792,19 @@ public class MgmtWebServer implements Container {
 					PrintStream body = response.getPrintStream();
 					body.println("could not find " + reqPath);
 					body.close();
-				} else if(request.getTarget().startsWith(METADATA_PATH)) {
-					String path = Main.volume.getPath() + File.separator + request.getTarget().substring(METADATA_PATH.length());
+				} else if (request.getTarget().startsWith(METADATA_PATH)) {
+					String path = Main.volume.getPath()
+							+ File.separator
+							+ request.getTarget().substring(
+									METADATA_PATH.length());
 					File f = new File(path);
 					this.downloadFile(f, request, response);
-					
-				} else if(request.getTarget().startsWith(METADATA_INFO_PATH)) {
-					String path = Main.volume.getPath() + File.separator + request.getTarget().substring(METADATA_INFO_PATH.length());
+
+				} else if (request.getTarget().startsWith(METADATA_INFO_PATH)) {
+					String path = Main.volume.getPath()
+							+ File.separator
+							+ request.getTarget().substring(
+									METADATA_INFO_PATH.length());
 					long time = System.currentTimeMillis();
 					response.setContentType("application/json");
 					response.setValue("Server", "SDFS Management Server");
@@ -710,15 +813,17 @@ public class MgmtWebServer implements Container {
 					PrintStream body = response.getPrintStream();
 					body.println(GetJSONAttributes.getResult(path));
 					body.close();
-				}else if(request.getTarget().startsWith(MAPDATA_PATH)) {
-					String guid = request.getTarget().substring(MAPDATA_PATH.length());
+				} else if (request.getTarget().startsWith(MAPDATA_PATH)) {
+					String guid = request.getTarget().substring(
+							MAPDATA_PATH.length());
 					String path = Main.dedupDBStore + File.separator
-					+ guid.substring(0, 2) + File.separator
-					+ guid;
+							+ guid.substring(0, 2) + File.separator + guid;
 					File f = new File(path);
 					this.downloadFile(f, request, response);
-				}  else if(request.getTarget().startsWith(BLOCK_PATH)) {
-					byte[] hash = com.google.common.io.BaseEncoding.base64Url().decode(request.getTarget().substring(BLOCK_PATH.length()));
+				} else if (request.getTarget().startsWith(BLOCK_PATH)) {
+					byte[] hash = com.google.common.io.BaseEncoding.base64Url()
+							.decode(request.getTarget().substring(
+									BLOCK_PATH.length()));
 					byte[] data = HCServiceProxy.fetchHashChunk(hash).getData();
 					long time = System.currentTimeMillis();
 					response.setContentType("application/octet-stream");
@@ -727,8 +832,9 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					response.getByteChannel().write(ByteBuffer.wrap(data));
 					response.getByteChannel().close();
-				}else if(request.getTarget().startsWith(BATCH_BLOCK_PATH)) {
-					byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+				} else if (request.getTarget().startsWith(BATCH_BLOCK_PATH)) {
+					byte[] rb = com.google.common.io.BaseEncoding.base64Url()
+							.decode(request.getParameter("data"));
 					byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 					long time = System.currentTimeMillis();
 					response.setContentType("application/octet-stream");
@@ -737,8 +843,9 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					response.getByteChannel().write(ByteBuffer.wrap(rslt));
 					response.getByteChannel().close();
-				} else if(request.getTarget().startsWith(BATCH_BLOCK_POINTER)) {
-					byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+				} else if (request.getTarget().startsWith(BATCH_BLOCK_POINTER)) {
+					byte[] rb = com.google.common.io.BaseEncoding.base64Url()
+							.decode(request.getParameter("data"));
 					byte[] rslt = new BatchGetPointerCmd().getResult(rb);
 					long time = System.currentTimeMillis();
 					response.setContentType("application/octet-stream");
@@ -747,15 +854,16 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					response.getByteChannel().write(ByteBuffer.wrap(rslt));
 					response.getByteChannel().close();
-				}
-				else {
+				} else {
 
-					File f = new File(archivePath + File.separator + reqPath.getPath());
+					File f = new File(archivePath + File.separator
+							+ reqPath.getPath());
 					try {
 						if (f.exists()) {
 							long time = System.currentTimeMillis();
 							response.setContentType("application/x-gtar");
-							response.addValue("Server", "SDFS Management Server");
+							response.addValue("Server",
+									"SDFS Management Server");
 							response.setDate("Date", time);
 							response.setDate("Last-Modified", time);
 							response.setContentLength(f.length());
@@ -798,8 +906,9 @@ public class MgmtWebServer implements Container {
 			}
 		}
 	}
-	
-	private void downloadFile(File f,Request request, Response response) throws IOException {
+
+	private void downloadFile(File f, Request request, Response response)
+			throws IOException {
 		if (f.exists()) {
 			long time = System.currentTimeMillis();
 			response.setContentType("application/octet-stream");
@@ -825,19 +934,22 @@ public class MgmtWebServer implements Container {
 		}
 	}
 
-	public static void start(boolean useSSL) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException,
-			CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException,
-			KeyManagementException {
+	public static void start(boolean useSSL) throws InvalidKeyException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			NoSuchProviderException, SignatureException, IOException,
+			UnrecoverableKeyException, KeyManagementException {
 		SSLContext sslContext = null;
 		if (Main.sdfsCliEnabled) {
 			if (useSSL) {
-				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+				String keydir = new File(Main.volume.getPath()).getParent()
+						+ File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";
 				if (!new File(key).exists()) {
 					KeyGenerator.generateKey(new File(key));
 				}
 				FileInputStream keyFile = new FileInputStream(key);
-				KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+				KeyStore keyStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
 				keyStore.load(keyFile, "sdfs".toCharArray());
 				// init KeyManagerFactory
 				KeyManagerFactory keyManagerFactory = KeyManagerFactory
@@ -849,24 +961,27 @@ public class MgmtWebServer implements Container {
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 			}
-			Map<String,Service> routes = new HashMap<String,Service>();
-			routes.put("/metadatasocket",new MetaDataUpdate());
-			routes.put("/ddbsocket",new DDBUpdate());
-			routes.put("/ping",new PingService());
-			Router negotiator = new PathRouter(routes,new PingService());
+			Map<String, Service> routes = new HashMap<String, Service>();
+			routes.put("/metadatasocket", new MetaDataUpdate());
+			routes.put("/ddbsocket", new DDBUpdate());
+			routes.put("/ping", new PingService());
+			Router negotiator = new PathRouter(routes, new PingService());
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
-			SocketProcessor server = new ContainerSocketProcessor(rn, 24,3);
+			SocketProcessor server = new ContainerSocketProcessor(rn, 24, 3);
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
-			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);
+			SocketAddress address = new InetSocketAddress(
+					Main.sdfsCliListenAddr, Main.sdfsCliPort);
 			connection = new SocketConnection(server);
 			if (sslContext != null)
 				connection.connect(address, sslContext);
 			else
 				connection.connect(address);
-			SDFSLogger.getLog().info("###################### SDFSCLI SSL Management WebServer Started at "
-					+ address.toString() + " #########################");
+			SDFSLogger
+					.getLog()
+					.info("###################### SDFSCLI SSL Management WebServer Started at "
+							+ address.toString() + " #########################");
 
 		}
 	}
@@ -875,7 +990,8 @@ public class MgmtWebServer implements Container {
 		try {
 			connection.close();
 		} catch (Throwable e) {
-			SDFSLogger.getLog().error("unable to stop Web Management Server", e);
+			SDFSLogger.getLog()
+					.error("unable to stop Web Management Server", e);
 		}
 	}
 

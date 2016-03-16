@@ -8,8 +8,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantLock;
 
-
-
 //import org.apache.lucene.store.NativePosixUtil;
 import org.apache.lucene.util.OpenBitSet;
 import org.bouncycastle.util.Arrays;
@@ -380,17 +378,17 @@ public class FileChunkStore implements AbstractChunkStore {
 			throw new IOException("ChunkStore is closed");
 		long pos = start / this.pageSize;
 		this.rlock.lock();
-		try{
-		if (this.freeSlots == null) {
-			this.freeSlots = new OpenBitSet();
-			this.smallestFree = 0;
-		}
-		if (this.smallestFree > pos)
-			this.smallestFree = pos;
-		this.freeSlots.ensureCapacity(pos);
-		this.freeSlots.set(pos);
-		}finally {
-		this.rlock.unlock();
+		try {
+			if (this.freeSlots == null) {
+				this.freeSlots = new OpenBitSet();
+				this.smallestFree = 0;
+			}
+			if (this.smallestFree > pos)
+				this.smallestFree = pos;
+			this.freeSlots.ensureCapacity(pos);
+			this.freeSlots.set(pos);
+		} finally {
+			this.rlock.unlock();
 		}
 		/*
 		 * RandomAccessFile raf = new RandomAccessFile(f, "rw");
@@ -468,7 +466,7 @@ public class FileChunkStore implements AbstractChunkStore {
 		FileChunkStore store = null;
 		int interval = 2 * 1000;
 		Thread th = null;
-		
+
 		SyncThread(FileChunkStore store) {
 			this.store = store;
 			th = new Thread(this);
@@ -521,19 +519,19 @@ public class FileChunkStore implements AbstractChunkStore {
 	@Override
 	public void setReadSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setWriteSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setCacheSize(long bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -560,11 +558,10 @@ public class FileChunkStore implements AbstractChunkStore {
 		return 0;
 	}
 
-
 	@Override
 	public String restoreBlock(long id, byte[] hash) {
 		return null;
-		
+
 	}
 
 	@Override
@@ -580,26 +577,26 @@ public class FileChunkStore implements AbstractChunkStore {
 			f.delete();
 
 		} catch (Exception e) {
-			
+
 		}
 		try {
-				bsf.delete();
+			bsf.delete();
 		} catch (Exception e) {
 		}
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

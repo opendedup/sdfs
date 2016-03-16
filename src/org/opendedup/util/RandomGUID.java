@@ -47,7 +47,7 @@ public class RandomGUID extends Object {
 	public RandomGUID() {
 		getRandomGUID(true);
 	}
-	
+
 	public static long getLong() {
 		return myRand.nextLong();
 	}

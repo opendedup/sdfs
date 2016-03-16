@@ -40,7 +40,8 @@ public class HashClient implements Runnable {
 
 	// private LRUMap existsBuffers = new LRUMap(10);
 
-	public HashClient(HCServer server, String name, String password, byte id) throws IOException {
+	public HashClient(HCServer server, String name, String password, byte id)
+			throws IOException {
 		this.server = server;
 		this.name = name;
 		this.id = id;
@@ -76,16 +77,21 @@ public class HashClient implements Runnable {
 			if (this.closed) {
 				try {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog()
-								.debug("Connecting to server " + server.getHostName() + " on port " + server.getPort());
+						SDFSLogger.getLog().debug(
+								"Connecting to server " + server.getHostName()
+										+ " on port " + server.getPort());
 					if (server.isSSL()) {
 						TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 							@Override
-							public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
+							public void checkClientTrusted(
+									final X509Certificate[] chain,
+									final String authType) {
 							}
 
 							@Override
-							public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
+							public void checkServerTrusted(
+									final X509Certificate[] chain,
+									final String authType) {
 							}
 
 							@Override
@@ -93,11 +99,14 @@ public class HashClient implements Runnable {
 								return null;
 							}
 						} };
-						SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-						sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+						SSLContext sslContext = SSLContext
+								.getInstance("TLSv1.2");
+						sslContext.init(null, trustAllCerts,
+								new java.security.SecureRandom());
 						// Create an ssl socket factory with our all-trusting
 						// manager
-						SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+						SSLSocketFactory sslSocketFactory = sslContext
+								.getSocketFactory();
 						clientSocket = sslSocketFactory.createSocket();
 					} else {
 						clientSocket = new Socket();
@@ -108,12 +117,16 @@ public class HashClient implements Runnable {
 					// clientSocket.setSendBufferSize(128 * 1024);
 					clientSocket.setPerformancePreferences(0, 1, 2);
 
-					clientSocket.connect(new InetSocketAddress(server.getHostName(), server.getPort()));
+					clientSocket.connect(new InetSocketAddress(server
+							.getHostName(), server.getPort()));
 
 					clientSocket.setSoTimeout(3000);
-					os = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream(), 32768));
-					is = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream(), 32768));
-					inReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+					os = new DataOutputStream(new BufferedOutputStream(
+							clientSocket.getOutputStream(), 32768));
+					is = new DataInputStream(new BufferedInputStream(
+							clientSocket.getInputStream(), 32768));
+					inReader = new BufferedReader(new InputStreamReader(
+							clientSocket.getInputStream()));
 					// Read the Header Line
 					inReader.readLine();
 					String passwdMessage = password + "\r\n";
@@ -121,19 +134,28 @@ public class HashClient implements Runnable {
 					os.flush();
 					int auth = is.readInt();
 					if (auth == 0)
-						throw new IOException("unable to authenticate chech upstream password");
+						throw new IOException(
+								"unable to authenticate chech upstream password");
 					this.closed = false;
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("hashclient connection established " + clientSocket.toString());
+						SDFSLogger.getLog().debug(
+								"hashclient connection established "
+										+ clientSocket.toString());
 				} catch (UnknownHostException e) {
-					SDFSLogger.getLog().fatal("Don't know about host " + server.getHostName() + server.getPort());
+					SDFSLogger.getLog().fatal(
+							"Don't know about host " + server.getHostName()
+									+ server.getPort());
 					this.closed = true;
 					throw e;
 				} catch (Exception e) {
-					SDFSLogger.getLog().fatal("Couldn't get I/O for the connection to the host", e);
+					SDFSLogger.getLog().fatal(
+							"Couldn't get I/O for the connection to the host",
+							e);
 					this.closed = true;
-					throw new IOException("Couldn't get I/O for the connection to the host " + server.getHostName()
-							+ ":" + server.getPort());
+					throw new IOException(
+							"Couldn't get I/O for the connection to the host "
+									+ server.getHostName() + ":"
+									+ server.getPort());
 				}
 			}
 		}
@@ -144,7 +166,9 @@ public class HashClient implements Runnable {
 			try {
 				this.openConnection();
 			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("unable to open connection to " + clientSocket.toString(), e);
+				SDFSLogger.getLog().fatal(
+						"unable to open connection to "
+								+ clientSocket.toString(), e);
 				throw new IOException(e);
 			}
 		}
@@ -157,7 +181,8 @@ public class HashClient implements Runnable {
 					this.close();
 				} catch (Exception e1) {
 				}
-				throw new IOException("unable to execute command because connection timed out");
+				throw new IOException(
+						"unable to execute command because connection timed out");
 			} else {
 				this.closed = true;
 				SDFSLogger.getLog().error("error executing command", e);
@@ -202,16 +227,18 @@ public class HashClient implements Runnable {
 		}
 	}
 
-	public boolean writeChunk(byte[] hash, byte[] aContents, int position, int len) throws IOException {
-		WriteHashCmd cmd = new WriteHashCmd(hash, aContents, len, server.isCompress());
+	public boolean writeChunk(byte[] hash, byte[] aContents, int position,
+			int len) throws IOException {
+		WriteHashCmd cmd = new WriteHashCmd(hash, aContents, len,
+				server.isCompress());
 
 		this.executeCmd(cmd);
 
 		return cmd.wasWritten();
 	}
 
-	public void writeChunkAsync(byte[] hash, byte[] aContents, int position, int len, AsyncCmdListener l)
-			throws IOException {
+	public void writeChunkAsync(byte[] hash, byte[] aContents, int position,
+			int len, AsyncCmdListener l) throws IOException {
 		this.listener = l;
 		this.ncmd = new WriteHashCmd(hash, aContents, len, server.isCompress());
 	}
@@ -224,7 +251,8 @@ public class HashClient implements Runnable {
 		}
 	}
 
-	public ArrayList<HashChunk> fetchChunks(ArrayList<String> al) throws IOException {
+	public ArrayList<HashChunk> fetchChunks(ArrayList<String> al)
+			throws IOException {
 		synchronized (this) {
 			BulkFetchChunkCmd cmd = new BulkFetchChunkCmd(al);
 			this.executeCmd(cmd);

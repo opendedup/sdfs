@@ -54,11 +54,10 @@ public class ArchiveImporter {
 		runningJobs.put(evt.uid, this);
 		String sdest = dest + "." + RandomGUID.getGuid();
 		File f = new File(srcArchive);
-		File fDstFiles = new File(Main.volume.getPath()
-				+ File.separator + sdest);
+		File fDstFiles = new File(Main.volume.getPath() + File.separator
+				+ sdest);
 		try {
 
-			
 			SDFSLogger.getLog().info("setting up staging at " + sdest);
 			try {
 				SDFSLogger.getLog().info(
@@ -67,7 +66,7 @@ public class ArchiveImporter {
 				if (!f.exists())
 					throw new IOException("File does not exist " + srcArchive);
 				if (OSValidator.isWindows()) {
-					
+
 					TFile srcRoot = new TFile(new File(srcArchive + "/"));
 					ievt.maxCt = FileCounts.getSize(srcRoot);
 
@@ -99,63 +98,67 @@ public class ArchiveImporter {
 					TVFS.umount(srcRoot.getInnerArchive());
 				} else {
 					ievt.maxCt = 3;
-					File stg =null;
+					File stg = null;
 					try {
-					stg = new File(new File(srcArchive).getParentFile()
-							.getPath() + File.separator + RandomGUID.getGuid());
-					stg.mkdirs();
-					String expFile = "tar -xzf " + srcArchive + " -C "
-							+ stg.getPath();
-					int xt = ProcessWorker.runProcess(expFile);
-					if(xt != 0)
-						throw new IOException("expand failed in " +expFile + " exit value was " + xt);
-					ievt.curCt++;
-					SDFSLogger.getLog().info(
-							"executed " + expFile + " exit code was "
-									+ xt);
-					File srcFilesRoot = new File(stg.getPath() + File.separator
-							+ "files");
-					File srcFiles = null;
-					try {
-						srcFiles = srcFilesRoot.listFiles()[0];
+						stg = new File(new File(srcArchive).getParentFile()
+								.getPath()
+								+ File.separator
+								+ RandomGUID.getGuid());
+						stg.mkdirs();
+						String expFile = "tar -xzf " + srcArchive + " -C "
+								+ stg.getPath();
+						int xt = ProcessWorker.runProcess(expFile);
+						if (xt != 0)
+							throw new IOException("expand failed in " + expFile
+									+ " exit value was " + xt);
+						ievt.curCt++;
+						SDFSLogger.getLog().info(
+								"executed " + expFile + " exit code was " + xt);
+						File srcFilesRoot = new File(stg.getPath()
+								+ File.separator + "files");
+						File srcFiles = null;
+						try {
+							srcFiles = srcFilesRoot.listFiles()[0];
+						} catch (Exception e) {
+							SDFSLogger.getLog().error(
+									"Replication archive is corrupt "
+											+ srcArchive + " size of "
+											+ new File(srcArchive).length(), e);
+							throw e;
+						}
+						SDFSLogger.getLog().info(
+								"setting up staging at " + fDstFiles.getPath());
+						fDstFiles.getParentFile().mkdirs();
+						String cpCmd = "cp -rfa " + srcFiles + " " + fDstFiles;
+
+						xt = ProcessWorker.runProcess(cpCmd);
+						if (xt != 0)
+							throw new IOException("copy failed in " + cpCmd
+									+ " exit value was " + xt);
+						SDFSLogger.getLog().info(
+								"executed " + cpCmd + " exit code was " + xt);
+						ievt.curCt++;
+						srcFiles = new File(stg.getPath() + File.separator
+								+ "ddb");
+						File ddb = new File(Main.dedupDBStore + File.separator);
+						if (!ddb.exists())
+							ddb.mkdirs();
+						if (srcFiles.exists()) {
+							cpCmd = "cp -rfa " + srcFiles + File.separator
+									+ " " + ddb.getParentFile().getPath();
+							xt = ProcessWorker.runProcess(cpCmd);
+							if (xt != 0)
+								throw new IOException("copy failed in " + cpCmd
+										+ " exit value was " + xt);
+						}
+						SDFSLogger.getLog().info(
+								"executed " + cpCmd + " exit code was " + xt);
+						ievt.endEvent("Staging completed successfully");
 					} catch (Exception e) {
-						SDFSLogger.getLog().error(
-								"Replication archive is corrupt " + srcArchive
-										+ " size of "
-										+ new File(srcArchive).length(), e);
-						throw e;
-					}
-					SDFSLogger.getLog().info("setting up staging at " + fDstFiles.getPath());
-					fDstFiles.getParentFile().mkdirs();
-					String cpCmd = "cp -rfa " + srcFiles + " " + fDstFiles;
-					
-					xt = ProcessWorker.runProcess(cpCmd);
-					if(xt != 0)
-						throw new IOException("copy failed in " +cpCmd + " exit value was " + xt);
-					SDFSLogger.getLog().info(
-							"executed " + cpCmd + " exit code was "
-									+ xt);
-					ievt.curCt++;
-					srcFiles = new File(stg.getPath() + File.separator
-							+ "ddb");
-					File ddb = new File(Main.dedupDBStore + File.separator);
-					if (!ddb.exists())
-						ddb.mkdirs();
-					if(srcFiles.exists()) {
-					cpCmd = "cp -rfa " + srcFiles + File.separator + " " + ddb.getParentFile().getPath();
-					xt = ProcessWorker.runProcess(cpCmd);
-					if(xt != 0)
-						throw new IOException("copy failed in " +cpCmd + " exit value was " + xt);
-					}
-					SDFSLogger.getLog().info(
-							"executed " + cpCmd + " exit code was "
-									+ xt);
-					ievt.endEvent("Staging completed successfully");
-					} catch(Exception e) {
 						ievt.endEvent(e.getMessage(), SDFSEvent.ERROR);
 						throw e;
-					}finally {
-						//FileUtils.deleteDirectory(stg);
+					} finally {
+						// FileUtils.deleteDirectory(stg);
 						Process p = Runtime.getRuntime().exec("rm -rf " + stg);
 						p.waitFor();
 						f.delete();
@@ -236,7 +239,7 @@ public class ArchiveImporter {
 			}
 		} finally {
 			try {
-				
+
 			} catch (Exception e) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("error", e);

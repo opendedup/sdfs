@@ -53,14 +53,14 @@ public class DedupFileStore {
 	 * @throws IOException
 	 */
 	private static ReentrantLock getDFLock = new ReentrantLock();
-	
+
 	public static void updateDedupFile(MetaDataDedupFile mf) {
 		getDFLock.lock();
-		try{
-		DedupFile df = openFile.get(mf.getDfGuid());
-		if(df != null)
-			df.setMetaDataDedupFile(mf);
-		}finally {
+		try {
+			DedupFile df = openFile.get(mf.getDfGuid());
+			if (df != null)
+				df.setMetaDataDedupFile(mf);
+		} finally {
 			getDFLock.unlock();
 		}
 	}
@@ -71,9 +71,9 @@ public class DedupFileStore {
 		DedupFile df = null;
 		try {
 			if (!closing) {
-					df = openFile.get(mf.getDfGuid());
-					if (df == null) {
-							df = new SparseDedupFile(mf);
+				df = openFile.get(mf.getDfGuid());
+				if (df == null) {
+					df = new SparseDedupFile(mf);
 				}
 				return df;
 			} else {
@@ -83,17 +83,17 @@ public class DedupFileStore {
 			getDFLock.unlock();
 		}
 	}
-	
+
 	public static DedupFile openDedupFile(MetaDataDedupFile mf)
 			throws IOException {
 		getDFLock.lock();
 		DedupFile df = null;
 		try {
 			if (!closing) {
-					df = openFile.get(mf.getDfGuid());
-					if (df == null) {
-							df = new SparseDedupFile(mf);
-							DedupFileStore.openFile.put(df.getGUID(), df);
+				df = openFile.get(mf.getDfGuid());
+				if (df == null) {
+					df = new SparseDedupFile(mf);
+					DedupFileStore.openFile.put(df.getGUID(), df);
 				}
 				return df;
 			} else {
@@ -114,7 +114,8 @@ public class DedupFileStore {
 	public static void addOpenDedupFiles(DedupFile df) throws IOException {
 		if (!closing) {
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
+				SDFSLogger.getLog().debug(
+						"adding dedupfile " + df.getMetaFile().getPath());
 			if (openFile.size() >= Main.maxOpenFiles)
 				throw new IOException("maximum number of files reached ["
 						+ Main.maxOpenFiles + "]. Too many open files");
@@ -211,8 +212,9 @@ public class DedupFileStore {
 					df.forceClose();
 				} catch (IOException e) {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug(
-								"unable to Close " + df.getMetaFile().getPath(),e);
+						SDFSLogger.getLog()
+								.debug("unable to Close "
+										+ df.getMetaFile().getPath(), e);
 				}
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(

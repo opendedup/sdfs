@@ -277,10 +277,10 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			SDFSEvent evt = SDFSEvent
 					.gcInfoEvent("Remote SDFS Volume Cleanup Initiated by "
 							+ msg.getSrc() + " for " + Main.volume.getName());
-			BloomFDisk fd = new BloomFDisk(evt,buf.getLong());
+			BloomFDisk fd = new BloomFDisk(evt, buf.getLong());
 			LBF[] lbfs = fd.getResults().getArray();
-			for(int i = 0; i < lbfs.length;i++) {
-				SendBloomFilterCmd sbf = new SendBloomFilterCmd(i,lbfs[i]);
+			for (int i = 0; i < lbfs.length; i++) {
+				SendBloomFilterCmd sbf = new SendBloomFilterCmd(i, lbfs[i]);
 				sbf.executeCmd(this);
 			}
 			rtrn = evt.getChildren().get(0);
@@ -365,7 +365,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 			rtrn = schedule;
 			break;
 		}
-		default : {
+		default: {
 			rtrn = null;
 			break;
 		}

@@ -25,27 +25,27 @@ import org.w3c.dom.Element;
 public interface AbstractChunkStore {
 
 	public String restoreBlock(long id, byte[] hash) throws IOException;
-	
+
 	public boolean blockRestored(String id);
 
 	public abstract long getFreeBlocks();
-	
+
 	public abstract int getReadSpeed();
-	
+
 	public abstract int getWriteSpeed();
-	
+
 	public abstract long getCacheSize();
-	
+
 	public abstract long getMaxCacheSize();
-	
+
 	public abstract void setReadSpeed(int kbps);
-	
+
 	public abstract void setWriteSpeed(int kbps);
-	
+
 	public abstract void deleteStore();
-	
+
 	public abstract void compact();
-	
+
 	public abstract void setCacheSize(long sz) throws IOException;
 
 	/**
@@ -86,7 +86,7 @@ public interface AbstractChunkStore {
 	public abstract long compressedSize();
 
 	public abstract long maxSize();
-	
+
 	public abstract void sync() throws IOException;
 
 	/**
@@ -144,7 +144,7 @@ public interface AbstractChunkStore {
 	 * @throws IOException
 	 */
 	public abstract byte[] getChunk(byte[] hash, long start, int len)
-			throws IOException,DataArchivedException;
+			throws IOException, DataArchivedException;
 
 	/**
 	 * tunes the chunk store to a specific size
@@ -164,8 +164,8 @@ public interface AbstractChunkStore {
 	public abstract ChunkData getNextChunck() throws IOException;
 
 	public abstract void iterationInit(boolean getchunks) throws IOException;
-	
+
 	public abstract void cacheData(byte[] hash, long start, int len)
-			throws IOException,DataArchivedException;
+			throws IOException, DataArchivedException;
 
 }

@@ -69,7 +69,8 @@ public class GetCloudFile {
 		}
 	}
 
-	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt) throws IOException {
+	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt)
+			throws IOException {
 		fevt.shortMsg = "Importing hashes for file";
 		Set<Long> blks = new HashSet<Long>();
 		if (ddb.getVersion() < 3)
@@ -79,29 +80,31 @@ public class GetCloudFile {
 			ddb.iterInit();
 			for (;;) {
 				LongKeyValue kv = ddb.nextKeyValue();
-				if(kv == null)
+				if (kv == null)
 					break;
-					SparseDataChunk ck = new SparseDataChunk(kv.getValue(),
-							ddb.getVersion());
-					boolean dirty = false;
-					List<HashLocPair> al = ck.getFingers();
-					for (HashLocPair p : al) {
-							
-							ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc),p.hash);
-							InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
-							if(ir.getInserted())
-								blks.add( Longs.fromByteArray(ir.getHashLocs()));
-							else {
-								p.hashloc = ir.getHashLocs();
-								dirty = true;
-							}
+				SparseDataChunk ck = new SparseDataChunk(kv.getValue(),
+						ddb.getVersion());
+				boolean dirty = false;
+				List<HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al) {
+
+					ChunkData cm = new ChunkData(
+							Longs.fromByteArray(p.hashloc), p.hash);
+					InsertRecord ir = HCServiceProxy.getHashesMap().put(cm,
+							false);
+					if (ir.getInserted())
+						blks.add(Longs.fromByteArray(ir.getHashLocs()));
+					else {
+						p.hashloc = ir.getHashLocs();
+						dirty = true;
 					}
-					if(dirty)
-						ddb.put(kv.getKey(), ck.getBytes());
 				}
+				if (dirty)
+					ddb.put(kv.getKey(), ck.getBytes());
+			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().info(
-					"error while checking file [" + ddb + "]", e);
+			SDFSLogger.getLog().info("error while checking file [" + ddb + "]",
+					e);
 		} finally {
 			ddb.close();
 			ddb = null;

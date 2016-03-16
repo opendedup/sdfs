@@ -25,13 +25,10 @@ import org.simpleframework.http.socket.service.Service;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
-
 public class DDBUpdate implements Service {
 	private final DDBUpdateListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
-	
-	
 
 	public DDBUpdate() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
@@ -51,16 +48,18 @@ public class DDBUpdate implements Service {
 		}
 		if (Main.sdfsCliRequireAuth) {
 
-			
 			if (password != null) {
 				String hash;
 				try {
-					hash = HashFunctions.getSHAHash(password.trim().getBytes(), Main.sdfsPasswordSalt.getBytes());
+					hash = HashFunctions.getSHAHash(password.trim().getBytes(),
+							Main.sdfsPasswordSalt.getBytes());
 					if (hash.equals(Main.sdfsPassword)) {
 						auth = true;
 					}
 
-				} catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchProviderException e) {
+				} catch (NoSuchAlgorithmException
+						| UnsupportedEncodingException
+						| NoSuchProviderException e) {
 					SDFSLogger.getLog().error("unable to authenitcate user", e);
 				}
 
@@ -114,19 +113,17 @@ public class DDBUpdate implements Service {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Subscribe
 	@AllowConcurrentEvents
 	public void sFileWritten(SFileWritten evt) {
-		
 
 	}
 
 	private static class DDBUpdateListener implements FrameListener {
-		
 
 		private DDBUpdateListener(DDBUpdate service) {
-			
+
 		}
 
 		@Override

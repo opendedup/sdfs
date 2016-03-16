@@ -37,8 +37,8 @@ public class ArchiveOutCmd implements Runnable {
 		SDFSLogger.getLog().debug("Relication base path = " + f.getPath());
 		vp = new File(Main.volume.getPath()).getParentFile();
 		SDFSLogger.getLog().debug("Volume parent folder = " + vp.getPath());
-		af = new File(Main.volume.getPath() + File.separator +"sdfsactiverepl"
-				+ File.separator + guid+File.separator + srcPath );
+		af = new File(Main.volume.getPath() + File.separator + "sdfsactiverepl"
+				+ File.separator + guid + File.separator + srcPath);
 		SDFSLogger.getLog().debug("Replication snapshot = " + af.getPath());
 		nf = new File(vp.getPath() + File.separator + "archives"
 				+ File.separator + guid);
@@ -80,7 +80,7 @@ public class ArchiveOutCmd implements Runnable {
 			eevt.curCt = 0;
 			mf.copyTo(nf.getPath(), true, true);
 			eevt.curCt = 1;
-			//MetaFileStore.removeMetaFile(af.getPath(), true);
+			// MetaFileStore.removeMetaFile(af.getPath(), true);
 			eevt.curCt = 2;
 			SDFSLogger.getLog().debug("Copied out replication snapshot");
 			if (OSValidator.isWindows()) {
@@ -102,7 +102,7 @@ public class ArchiveOutCmd implements Runnable {
 
 			if (nft.exists())
 				evt.endEvent("Archive Out of " + srcPath + " to "
-						+ nft.getPath() +" completed successfully");
+						+ nft.getPath() + " completed successfully");
 			else
 				throw new IOException(nft.getPath() + " does not exist");
 			eevt.endEvent("Archiving out " + srcPath + " successful");
@@ -113,8 +113,8 @@ public class ArchiveOutCmd implements Runnable {
 							+ e.toString(), e);
 			try {
 				MetaFileStore.removeMetaFile(af.getPath(), true);
-			} catch(Exception e1) {
-				
+			} catch (Exception e1) {
+
 			}
 			evt.endEvent("Archive Out failed", SDFSEvent.ERROR, e);
 

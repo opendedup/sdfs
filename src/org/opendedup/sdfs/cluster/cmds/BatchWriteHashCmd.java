@@ -44,8 +44,7 @@ public class BatchWriteHashCmd implements IOClientCmd {
 			}
 			if (ncopies == 0) {
 				buff.resetHashLoc();
-					hk.add(i,
-							new HashChunk(buff.hash, buff.data, false));
+				hk.add(i, new HashChunk(buff.hash, buff.data, false));
 			} else {
 				hk.add(i, null);
 			}
@@ -121,8 +120,8 @@ public class BatchWriteHashCmd implements IOClientCmd {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
 								HashLocPair buff = chunks.get(i);
-								if(doop)
-								buff.hashloc[0]=1;
+								if (doop)
+									buff.hashloc[0] = 1;
 								// TODO Fix this!!!!!!
 								buff.addHashLoc(id);
 								// proc++;

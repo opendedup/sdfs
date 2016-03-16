@@ -14,7 +14,7 @@ public abstract class AsyncChunkWriteActionListener {
 	public abstract void commandException(Finger result, Throwable e);
 
 	public abstract void commandResponse(Finger result);
-	
+
 	public abstract void commandArchiveException(DataArchivedException e);
 
 	public int incrementandGetDN() {

@@ -18,16 +18,16 @@ public class SDFSLogger {
 	private static boolean debug = false;
 	private static boolean fsdebug = false;
 	static {
-		
+
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
-		
+
 		basicLog.setLevel(Level.WARN);
 		RollingFileAppender app = null;
 		try {
 
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%c] [%t] %x - %m%n"), Main.logPath, true);
+					"%d [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
 			app.setMaxBackupIndex(2);
 			app.setMaxFileSize("10MB");
 		} catch (IOException e) {
@@ -45,9 +45,9 @@ public class SDFSLogger {
 
 	public static Logger getLog() {
 		return log;
-		
+
 	}
-	
+
 	public static Logger getFSLog() {
 		return fslog;
 	}
@@ -64,7 +64,7 @@ public class SDFSLogger {
 	public static boolean isDebug() {
 		return debug;
 	}
-	
+
 	public static boolean isFSDebug() {
 		return fsdebug;
 	}
@@ -78,7 +78,7 @@ public class SDFSLogger {
 			debug = false;
 		}
 	}
-	
+
 	public static void setFSLevel(int level) {
 		if (level == 0) {
 			fslog.setLevel(Level.DEBUG);

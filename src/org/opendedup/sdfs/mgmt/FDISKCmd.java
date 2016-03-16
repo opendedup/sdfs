@@ -11,13 +11,14 @@ public class FDISKCmd implements Runnable {
 	BloomFDisk fd = null;
 	String file = null;
 	SDFSEvent evt = SDFSEvent.gcInfoEvent("GC Started");
+
 	public Element getResult(String cmd, String file) throws IOException {
-		//minutes = Integer.parseInt(cmd);
+		// minutes = Integer.parseInt(cmd);
 		this.file = file;
-			fd = new BloomFDisk();
+		fd = new BloomFDisk();
 		Thread th = new Thread(this);
 		th.start();
-		
+
 		try {
 			Thread.sleep(1000);
 			return evt.toXML();
@@ -29,7 +30,7 @@ public class FDISKCmd implements Runnable {
 	@Override
 	public void run() {
 		try {
-			fd.init(evt,0);
+			fd.init(evt, 0);
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()

@@ -1,7 +1,5 @@
 package org.opendedup.sdfs.windows.fs;
 
-
-
 import net.decasdev.dokan.Dokan;
 
 import org.opendedup.sdfs.servers.SDFSService;
@@ -34,7 +32,7 @@ class ShutdownHook extends Thread {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 		}
 		System.out.println("SDFS Shut Down Cleanly");
 

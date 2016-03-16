@@ -14,7 +14,7 @@ public class Shutdown implements Runnable {
 
 	@Override
 	public void run() {
-			VolumeShutdownHook.shutdown();
+		VolumeShutdownHook.shutdown();
 		System.exit(0);
 	}
 

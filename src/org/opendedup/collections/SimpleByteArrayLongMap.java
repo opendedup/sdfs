@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.SyncFailedException;
@@ -197,7 +196,8 @@ public class SimpleByteArrayLongMap {
 	 * @return
 	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
+			throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -261,8 +261,7 @@ public class SimpleByteArrayLongMap {
 			} else if (Arrays.equals(cur, key)) {
 				return -index - 1; // already stored
 			}
-		}
-		else if(this.mapped != null && !this.mapped.get(hi))
+		} else if (this.mapped != null && !this.mapped.get(hi))
 			return index;
 		return insertKeyRehash(key, index, hash, cur);
 	}
@@ -281,7 +280,8 @@ public class SimpleByteArrayLongMap {
 	 * @return
 	 * @throws IOException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) throws IOException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur)
+			throws IOException {
 		final int length = size * (EL);
 		final int probe = (1 + (hash % (size - 2))) * EL;
 
@@ -309,7 +309,7 @@ public class SimpleByteArrayLongMap {
 				if (Arrays.equals(cur, key)) {
 					return -index - 1;
 				}
-			}else if(this.mapped != null && !this.mapped.get(index / EL))
+			} else if (this.mapped != null && !this.mapped.get(index / EL))
 				return index;
 
 			// Detect loop
@@ -319,7 +319,8 @@ public class SimpleByteArrayLongMap {
 		// If we found a REMOVED slot we return the first one found
 
 		// Can a resizing strategy be found that resizes the set?
-		throw new IllegalStateException("No free or removed slots available. Key set full?!!");
+		throw new IllegalStateException(
+				"No free or removed slots available. Key set full?!!");
 	}
 
 	ByteBuffer vb = ByteBuffer.allocateDirect(EL);
@@ -410,13 +411,15 @@ public class SimpleByteArrayLongMap {
 
 	public static void main(String[] args) throws Exception {
 		SimpleByteArrayLongMap b = new SimpleByteArrayLongMap(
-				"/home/samsilverberg/staging/outgoing/-5355749298482906702.map", 10000000);
+				"/home/samsilverberg/staging/outgoing/-5355749298482906702.map",
+				10000000);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;
 		while (p != null) {
 			i++;
-			System.out.println("key=" + StringUtils.getHexString(p.key) + " value=" + p.value);
+			System.out.println("key=" + StringUtils.getHexString(p.key)
+					+ " value=" + p.value);
 			p = b.next();
 
 		}

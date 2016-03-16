@@ -4,10 +4,6 @@ import java.io.File;
 
 import java.io.IOException;
 
-
-
-
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -17,14 +13,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class CloseFile {
-	
-	
+
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
 			Document doc = XMLUtils.getXMLDoc("close-file");
 			Element root = doc.getDocumentElement();
-			File f = new File(Main.volume.getPath() + File.separator+file);
-			if(f.exists()) {
+			File f = new File(Main.volume.getPath() + File.separator + file);
+			if (f.exists()) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.unmarshal();
 				mf.getDedupFile(true).forceClose();
@@ -39,4 +34,3 @@ public class CloseFile {
 	}
 
 }
-

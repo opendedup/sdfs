@@ -11,8 +11,9 @@ import org.w3c.dom.Element;
 public class ProcessRestoreArchiveCmd {
 	public static void runCmd(String file) {
 		try {
-			System.out.printf("restoring[%s] from archive. This can take 4 or more hours.\n",
-					file);
+			System.out
+					.printf("restoring[%s] from archive. This can take 4 or more hours.\n",
+							file);
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
@@ -38,10 +39,11 @@ public class ProcessRestoreArchiveCmd {
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);
-				if(Long.parseLong(evt.getAttribute("max-count")) == maxcount && bar==null) {
+				if (Long.parseLong(evt.getAttribute("max-count")) == maxcount
+						&& bar == null) {
 					bar = new CommandLineProgressBar(evt.getAttribute("type"),
 							maxcount, System.out);
-				}else {
+				} else {
 					maxcount = Long.parseLong(evt.getAttribute("max-count"));
 				}
 				if (le != evt.getElementsByTagName("event").getLength())
@@ -98,8 +100,7 @@ public class ProcessRestoreArchiveCmd {
 								+ " Task Completed : "
 								+ evt.getAttribute("short-msg"));
 						System.exit(0);
-					}
-					else {
+					} else {
 						System.err.println(evt.getAttribute("type")
 								+ " Task Failed : "
 								+ evt.getAttribute("short-msg"));

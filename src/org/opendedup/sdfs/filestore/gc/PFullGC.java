@@ -19,11 +19,12 @@ public class PFullGC implements GCControllerImpl {
 	public PFullGC() {
 		this.prevPFull = calcPFull();
 		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
-		if(this.nextPFull== 0)
+		if (this.nextPFull == 0)
 			this.nextPFull = .1;
 		double pFull = (this.prevPFull * 100);
 		double nFull = (this.nextPFull * 100);
-		DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+		DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+				.getNumberInstance(Locale.US);
 		twoDForm.applyPattern("#.##");
 		pFull = Double.valueOf(twoDForm.format(pFull));
 		nFull = Double.valueOf(twoDForm.format(nFull));
@@ -45,7 +46,8 @@ public class PFullGC implements GCControllerImpl {
 				this.nextPFull = this.calcNxtRun();
 				double pFull = (this.prevPFull * 100);
 				double nFull = (this.nextPFull * 100);
-				DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+				DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+						.getNumberInstance(Locale.US);
 				twoDForm.applyPattern("#.##");
 				pFull = Double.valueOf(twoDForm.format(pFull));
 				nFull = Double.valueOf(twoDForm.format(nFull));
@@ -77,7 +79,7 @@ public class PFullGC implements GCControllerImpl {
 				pFull = (double) HCServiceProxy.getSize()
 						/ (double) HCServiceProxy.getMaxSize();
 			}
-			
+
 			return pFull;
 		} finally {
 			if (l != null)

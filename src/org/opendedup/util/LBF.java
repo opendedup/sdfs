@@ -36,10 +36,10 @@ public class LBF implements Serializable {
 		}
 	};
 
-	public LBF(int sz,double fpp) {
-		this.bfs = BloomFilter.create(getFunnel(), sz,fpp);
+	public LBF(int sz, double fpp) {
+		this.bfs = BloomFilter.create(getFunnel(), sz, fpp);
 	}
-	
+
 	public LBF(BloomFilter<KeyBlob> bfs) {
 		this.bfs = bfs;
 	}
@@ -74,11 +74,11 @@ public class LBF implements Serializable {
 			l.unlock();
 		}
 	}
-	
+
 	public void putAll(LBF that) {
 		bfs.putAll(that.bfs);
 	}
-	
+
 	public void save(File f) throws IOException {
 		FileOutputStream fout = new FileOutputStream(f);
 		ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -88,16 +88,16 @@ public class LBF implements Serializable {
 		fout.flush();
 		fout.close();
 	}
-	
-	public byte [] getBytes() throws IOException {
+
+	public byte[] getBytes() throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		this.bfs.writeTo(baos);
 		return baos.toByteArray();
 	}
-	
+
 	public static Funnel<KeyBlob> getFunnel() {
-		
+
 		return kbFunnel;
 	}
- 
+
 }

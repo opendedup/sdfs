@@ -14,11 +14,9 @@ public class ProcessFdisk {
 			String file = URLEncoder.encode(path, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
-			System.out
-					.printf("running fdisk\n");
+			System.out.printf("running fdisk\n");
 			System.out.flush();
-			formatter.format("file=%s&cmd=%s&options=%s", file, "fdisk",
-					"1");
+			formatter.format("file=%s&cmd=%s&options=%s", file, "fdisk", "1");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
@@ -36,35 +34,33 @@ public class ProcessFdisk {
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				sevt = (Element) root.getElementsByTagName("event").item(0);
-				
-					if (bar == null) {
-						long maxct = Long.parseLong(sevt
-								.getAttribute("max-count"));
-						bar = new CommandLineProgressBar(
-								sevt.getAttribute("type"), maxct, System.out);
-					}
-					try {
 
-						long pc = Long.parseLong(sevt
-								.getAttribute("current-count"));
-						bar.update(pc);
-						if (!sevt.getAttribute("end-timestamp").equals("-1")) {
-							System.out.println(sevt.getAttribute("type")
-									+ " : " + sevt.getAttribute("short-msg"));
-							closed = true;
-						}
+				if (bar == null) {
+					long maxct = Long.parseLong(sevt.getAttribute("max-count"));
+					bar = new CommandLineProgressBar(sevt.getAttribute("type"),
+							maxct, System.out);
+				}
+				try {
 
-					} catch (Exception e) {
-						e.printStackTrace();
+					long pc = Long
+							.parseLong(sevt.getAttribute("current-count"));
+					bar.update(pc);
+					if (!sevt.getAttribute("end-timestamp").equals("-1")) {
+						System.out.println(sevt.getAttribute("type") + " : "
+								+ sevt.getAttribute("short-msg"));
 						closed = true;
 					}
-				}
-				
-				// System.out.println(evt.getAttribute("level"));
-				if (!closed)
-					Thread.sleep(1000);
 
-			
+				} catch (Exception e) {
+					e.printStackTrace();
+					closed = true;
+				}
+			}
+
+			// System.out.println(evt.getAttribute("level"));
+			if (!closed)
+				Thread.sleep(1000);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -2,9 +2,6 @@ package org.opendedup.fsync;
 
 import java.util.Properties;
 
-
-
-
 import org.opendedup.logging.SDFSLogger;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -40,8 +37,7 @@ public class SyncFSScheduler {
 					"Stand Alone Cloud SyncFS Scheduled will run first at "
 							+ cctrigger.getNextFireTime().toString());
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal(
-					"Unable to schedule Cloud SyncFS", e);
+			SDFSLogger.getLog().fatal("Unable to schedule Cloud SyncFS", e);
 		}
 	}
 

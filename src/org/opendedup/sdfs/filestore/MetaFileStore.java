@@ -36,47 +36,44 @@ import com.google.common.eventbus.EventBus;
  * 
  */
 public class MetaFileStore {
-	
-private static EventBus eventBus = new EventBus();
-	
+
+	private static EventBus eventBus = new EventBus();
+
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
-	
-	
 
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder
-			.newBuilder().concurrencyLevel(Main.writeThreads).maximumSize(1024).removalListener(
-					new RemovalListener<String, MetaDataDedupFile>() {
+			.newBuilder().concurrencyLevel(Main.writeThreads).maximumSize(1024)
+			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
 				@Override
 				public void onRemoval(
 						RemovalNotification<String, MetaDataDedupFile> removal) {
-					if(removal.getValue().exists())
+					if (removal.getValue().exists())
 						removal.getValue().sync();
 				}
-					}).build(new CacheLoader<String, MetaDataDedupFile>() {
+			}).build(new CacheLoader<String, MetaDataDedupFile>() {
 
-						@Override
-						public MetaDataDedupFile load(String path)
-								throws Exception {
-							return MetaDataDedupFile.getFile(path);
-						}
-						
-					});
+				@Override
+				public MetaDataDedupFile load(String path) throws Exception {
+					return MetaDataDedupFile.getFile(path);
+				}
+
+			});
 
 	static {
 		if (Main.version.startsWith("0.8")) {
 			SDFSLogger.getLog().fatal(
 					"Incompatible volume must be at least version 0.9.0 current volume vesion is ["
 							+ Main.version + "]");
-			System.err.println("Incompatible volume must be at least version 0.9.0 current volume vesion is ["
+			System.err
+					.println("Incompatible volume must be at least version 0.9.0 current volume vesion is ["
 							+ Main.version + "]");
 			System.exit(-1);
 		}
 	}
-
 
 	public static void rename(String src, String dst) throws IOException {
 		getMFLock.lock();
@@ -104,7 +101,7 @@ private static EventBus eventBus = new EventBus();
 	public static void removedCachedMF(String path) {
 		pathMap.invalidate(path);
 	}
-	
+
 	public static void addToCache(MetaDataDedupFile mf) {
 		pathMap.put(mf.getPath(), mf);
 	}
@@ -120,12 +117,12 @@ private static EventBus eventBus = new EventBus();
 	public static MetaDataDedupFile getMF(File f) {
 		try {
 			return pathMap.get(f.getPath());
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("unable to get " + f.getPath(),e);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to get " + f.getPath(), e);
 			return null;
 		}
 	}
-	
+
 	public static void mkDir(File f, int mode) throws IOException {
 		if (f.exists()) {
 			f = null;
@@ -134,12 +131,13 @@ private static EventBus eventBus = new EventBus();
 		f.mkdir();
 		Path p = Paths.get(f.getPath());
 		try {
-			if(!OSValidator.isWindows())
+			if (!OSValidator.isWindows())
 				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
 		} catch (IOException e) {
-			SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);
+			SDFSLogger.getLog().error("error while making dir " + f.getPath(),
+					e);
 			throw new IOException("access denied for " + f.getPath());
-		} 
+		}
 	}
 
 	public static MetaDataDedupFile getFolder(File f) {
@@ -207,7 +205,7 @@ private static EventBus eventBus = new EventBus();
 			Path p = Paths.get(origionalPath);
 			if (Files.isSymbolicLink(p)) {
 				File dst = new File(snapPath);
-				File src =Files.readSymbolicLink(p).toFile();
+				File src = Files.readSymbolicLink(p).toFile();
 				if (dst.exists() && !overwrite) {
 					throw new IOException(snapPath + " already exists");
 				}
@@ -266,110 +264,112 @@ private static EventBus eventBus = new EventBus();
 	}
 
 	public static boolean removeMetaFile(String path, boolean localOnly) {
-		
-		if(SDFSLogger.isDebug())
+
+		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
 		getMFLock.lock();
 		try {
-			if(new File(path).exists()) {
-			MetaDataDedupFile mf = null;
-			boolean deleted = false;
-			try {
-				Path p = Paths.get(path);
-				boolean isDir = false;
-				boolean isSymlink = false;
-				if (!OSValidator.isWindows()) {
-					isDir = Files.readAttributes(p, PosixFileAttributes.class,
-							LinkOption.NOFOLLOW_LINKS).isDirectory();
-					isSymlink = Files.readAttributes(p,
-							PosixFileAttributes.class,
-							LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
-				} else {
-					isDir = new File(path).isDirectory();
-				}
-				if (isSymlink) {
-					mf = getMF(new File(path));
-					if(!localOnly)
-					eventBus.post(new MFileDeleted(mf,true));
-					deleted = Files.deleteIfExists(p);
-					if (!localOnly && !deleted)
-						eventBus.post(new MFileWritten(mf));
-				}
-				else if (isDir) {
-					File ps = new File(path);
+			if (new File(path).exists()) {
+				MetaDataDedupFile mf = null;
+				boolean deleted = false;
+				try {
+					Path p = Paths.get(path);
+					boolean isDir = false;
+					boolean isSymlink = false;
+					if (!OSValidator.isWindows()) {
+						isDir = Files.readAttributes(p,
+								PosixFileAttributes.class,
+								LinkOption.NOFOLLOW_LINKS).isDirectory();
+						isSymlink = Files.readAttributes(p,
+								PosixFileAttributes.class,
+								LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+					} else {
+						isDir = new File(path).isDirectory();
+					}
+					if (isSymlink) {
+						mf = getMF(new File(path));
+						if (!localOnly)
+							eventBus.post(new MFileDeleted(mf, true));
+						deleted = Files.deleteIfExists(p);
+						if (!localOnly && !deleted)
+							eventBus.post(new MFileWritten(mf));
+					} else if (isDir) {
+						File ps = new File(path);
 
-					File[] files = ps.listFiles();
+						File[] files = ps.listFiles();
 
-					for (int i = 0; i < files.length; i++) {
-						boolean sd = removeMetaFile(files[i].getPath(),
-								localOnly);
-						if (!sd) {
+						for (int i = 0; i < files.length; i++) {
+							boolean sd = removeMetaFile(files[i].getPath(),
+									localOnly);
+							if (!sd) {
+								SDFSLogger.getLog().warn(
+										"delete failed : unable to delete ["
+												+ files[i] + "]");
+								return sd;
+							}
+						}
+						mf = getMF(new File(path));
+						if (!localOnly)
+							eventBus.post(new MFileDeleted(mf, true));
+						deleted = Files.deleteIfExists(p);
+						if (!deleted && !localOnly)
+							eventBus.post(new MFileWritten(mf));
+					} else {
+						mf = getMF(new File(path));
+						pathMap.invalidate(mf.getPath());
+
+						deleted = mf.deleteStub(localOnly);
+						if (!deleted) {
 							SDFSLogger.getLog().warn(
-									"delete failed : unable to delete ["
-											+ files[i] + "]");
-							return sd;
+									"could not delete " + mf.getPath());
+							return deleted;
+						} else if (mf.getDfGuid() != null) {
+							try {
+								deleted = mf.getDedupFile(false).delete(true);
+							} catch (Exception e) {
+								if (SDFSLogger.isDebug())
+									SDFSLogger.getLog().debug(
+											"unable to delete dedup file for "
+													+ path, e);
+							}
 						}
-					}
-					mf = getMF(new File(path));
-					if(!localOnly)
-						eventBus.post(new MFileDeleted(mf,true));
-					deleted= Files.deleteIfExists(p);
-					if (!deleted && !localOnly)
-						eventBus.post(new MFileWritten(mf));
-				}
-				 else {
-					mf = getMF(new File(path));
-					pathMap.invalidate(mf.getPath());
-
-					
-					deleted = mf.deleteStub(localOnly);
-					if (!deleted) {
-						SDFSLogger.getLog().warn(
-								"could not delete " + mf.getPath());
-						return deleted;
-					}
-					else if (mf.getDfGuid() != null) {
-						try {
-							deleted = mf.getDedupFile(false).delete(true);
-						} catch (Exception e) {
-							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug(
-										"unable to delete dedup file for "
-												+ path, e);
-						}
-					}
-					if(deleted) {
-						Main.volume.updateCurrentSize(-1 * mf.length(), true);
-						try {
-							Main.volume.addActualWriteBytes(-1
-									* mf.getIOMonitor().getActualBytesWritten(),
+						if (deleted) {
+							Main.volume.updateCurrentSize(-1 * mf.length(),
 									true);
-							Main.volume.addDuplicateBytes(-1
-									* mf.getIOMonitor().getDuplicateBlocks(), true);
-							Main.volume.addVirtualBytesWritten(-1
-									* mf.getIOMonitor().getVirtualBytesWritten(),
-									true);
-						} catch (Exception e) {
+							try {
+								Main.volume.addActualWriteBytes(-1
+										* mf.getIOMonitor()
+												.getActualBytesWritten(), true);
+								Main.volume.addDuplicateBytes(-1
+										* mf.getIOMonitor()
+												.getDuplicateBlocks(), true);
+								Main.volume
+										.addVirtualBytesWritten(
+												-1
+														* mf.getIOMonitor()
+																.getVirtualBytesWritten(),
+												true);
+							} catch (Exception e) {
 
+							}
 						}
 					}
+				} catch (Exception e) {
+					if (mf != null) {
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug(
+									"unable to remove " + path, e);
+					}
+					if (mf == null) {
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug(
+									"unable to remove  because [" + path
+											+ "] is null", e);
+					}
 				}
-			} catch (Exception e) {
-				if (mf != null) {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog()
-								.debug("unable to remove " + path, e);
-				}
-				if (mf == null) {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug(
-								"unable to remove  because [" + path
-										+ "] is null",e);
-				}
-			}
-			mf = null; 
-			return deleted;
-			}else 
+				mf = null;
+				return deleted;
+			} else
 				return true;
 		} finally {
 			pathMap.invalidate(path);

@@ -106,11 +106,12 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	static {
 		try {
-			if(Main.useAim) {
-				awsCredentials = AWSEC2IAMSessionCredentials.loadFromEC2InstanceData(true);
+			if (Main.useAim) {
+				awsCredentials = AWSEC2IAMSessionCredentials
+						.loadFromEC2InstanceData(true);
 			} else {
-			awsCredentials = new AWSCredentials(Main.cloudAccessKey,
-					Main.cloudSecretKey);
+				awsCredentials = new AWSCredentials(Main.cloudAccessKey,
+						Main.cloudSecretKey);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
@@ -141,7 +142,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 			S3Bucket s3Bucket = s3Service.getBucket(bucketName);
 			if (s3Bucket == null) {
 				return true;
-				//s3Bucket = s3Service.createBucket(bucketName);
+				// s3Bucket = s3Service.createBucket(bucketName);
 			}
 			return false;
 		} catch (Exception e) {
@@ -352,7 +353,8 @@ public class S3ChunkStore implements AbstractChunkStore {
 		this.name = Main.cloudBucket;
 		try {
 			String bucketLocation = null;
-			if (config != null && config.hasAttribute("default-bucket-location")) {
+			if (config != null
+					&& config.hasAttribute("default-bucket-location")) {
 				bucketLocation = config.getAttribute("default-bucket-location");
 			}
 			pool = new S3ServicePool(S3ChunkStore.awsCredentials,
@@ -362,10 +364,11 @@ public class S3ChunkStore implements AbstractChunkStore {
 			S3Bucket s3Bucket = s3Service.getBucket(this.name);
 
 			if (s3Bucket == null) {
-				if(bucketLocation == null)
-				s3Bucket = s3Service.createBucket(this.name);
+				if (bucketLocation == null)
+					s3Bucket = s3Service.createBucket(this.name);
 				else
-					s3Bucket = s3Service.createBucket(this.name,bucketLocation);
+					s3Bucket = s3Service
+							.createBucket(this.name, bucketLocation);
 				SDFSLogger.getLog().info("created new store " + name);
 				S3Object s3Object = new S3Object("bucketinfo");
 				s3Object.addMetadata("currentsize", "-1");
@@ -525,25 +528,25 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public void sync() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setReadSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setWriteSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setCacheSize(long bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -573,7 +576,7 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public String restoreBlock(long id, byte[] hash) {
 		return null;
-		
+
 	}
 
 	@Override
@@ -585,20 +588,20 @@ public class S3ChunkStore implements AbstractChunkStore {
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -13,21 +13,20 @@ import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.polynomial.Polynomial;
 
-
 public class VariableHashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
-	public static final int minLen = (4 * 1024)-1;
+	public static final int minLen = (4 * 1024) - 1;
 	public static int maxLen = Main.CHUNK_LENGTH;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	static final long bytesPerWindow = 48;
 	private EnhancedFingerFactory ff = null;
-	
+
 	public VariableHashEngine() throws NoSuchAlgorithmException {
-		while(ff == null) {
-			ff = new EnhancedFingerFactory(p, bytesPerWindow,
-					boundaryDetector, minLen, maxLen);
+		while (ff == null) {
+			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
+					minLen, maxLen);
 		}
 
 	}
@@ -55,14 +54,13 @@ public class VariableHashEngine implements AbstractHashEngine {
 		return al;
 	}
 
-	
 	public static int getHashLenth() {
 		// TODO Auto-generated method stub
 		return 16;
 	}
 
 	public static int getMaxCluster() {
-		return  Main.CHUNK_LENGTH / minLen;
+		return Main.CHUNK_LENGTH / minLen;
 	}
 
 	@Override
@@ -75,7 +73,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+
 	@Override
 	public int getMaxLen() {
 		// TODO Auto-generated method stub

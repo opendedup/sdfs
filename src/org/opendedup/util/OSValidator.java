@@ -52,11 +52,11 @@ public class OSValidator {
 			return "/opt/sdfs/";
 		else {
 			try {
-				return  WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS", "path") + 
-						File.separator;
-			}catch(Exception e) {
-			return System.getenv("programfiles") + File.separator + "sdfs"
-					+ File.separator;
+				return WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE,
+						"SOFTWARE\\Wow6432Node\\SDFS", "path") + File.separator;
+			} catch (Exception e) {
+				return System.getenv("programfiles") + File.separator + "sdfs"
+						+ File.separator;
 			}
 		}
 	}
@@ -66,11 +66,13 @@ public class OSValidator {
 			return "/etc/sdfs/";
 		else
 			try {
-				return  WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS", "path") + 
-					File.separator+ "etc" + File.separator;
-			}catch(Exception e) {
-			return System.getenv("programfiles") + File.separator + "sdfs"
-					+ File.separator + "etc" + File.separator;
+				return WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE,
+						"SOFTWARE\\Wow6432Node\\SDFS", "path")
+						+ File.separator
+						+ "etc" + File.separator;
+			} catch (Exception e) {
+				return System.getenv("programfiles") + File.separator + "sdfs"
+						+ File.separator + "etc" + File.separator;
 			}
 	}
 }

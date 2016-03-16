@@ -33,7 +33,11 @@ public class GetJSONAttributes {
 					datasets.add(mf.toJSON(true));
 				}
 				fo.add("files", datasets);
-				Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+				Gson gson = new GsonBuilder()
+						.setPrettyPrinting()
+						.serializeNulls()
+						.setFieldNamingPolicy(
+								FieldNamingPolicy.UPPER_CAMEL_CASE).create();
 				return gson.toJson(fo);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
@@ -43,14 +47,18 @@ public class GetJSONAttributes {
 								+ e.toString());
 			}
 		} else {
-			
+
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
 				JsonObject fo = new JsonObject();
 				JsonArray datasets = new JsonArray();
 				datasets.add(mf.toJSON(true));
 				fo.add("files", datasets);
-				Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+				Gson gson = new GsonBuilder()
+						.setPrettyPrinting()
+						.serializeNulls()
+						.setFieldNamingPolicy(
+								FieldNamingPolicy.UPPER_CAMEL_CASE).create();
 				return gson.toJson(fo);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(

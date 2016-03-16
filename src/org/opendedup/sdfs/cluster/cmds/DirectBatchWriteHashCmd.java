@@ -35,31 +35,18 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 		// long tm = System.currentTimeMillis();
 		for (int i = 0; i < sz; i++) {
 			// TODO Fix this!!!!!!
-						/*
-			WritableCacheBuffer buff = chunks.get(i);
-			
-			byte[] hashloc = buff.getHashLoc();
-			int ncopies = 0;
-			for (int z = 1; z < 8; z++) {
-				if (hashloc[z] > (byte) 0) {
-					ncopies++;
-				}
-			}
-			if (ncopies == 0) {
-				buff.resetHashLoc();
-				try {
-					hk.add(i,
-							new HashChunk(buff.getHash(), buff
-									.getFlushedBuffer(), false));
-				} catch (BufferClosedException e) {
-					hk.add(i, null);
-				}
-			} else {
-				hk.add(i, null);
-			}
-			*/
+			/*
+			 * WritableCacheBuffer buff = chunks.get(i);
+			 * 
+			 * byte[] hashloc = buff.getHashLoc(); int ncopies = 0; for (int z =
+			 * 1; z < 8; z++) { if (hashloc[z] > (byte) 0) { ncopies++; } } if
+			 * (ncopies == 0) { buff.resetHashLoc(); try { hk.add(i, new
+			 * HashChunk(buff.getHash(), buff .getFlushedBuffer(), false)); }
+			 * catch (BufferClosedException e) { hk.add(i, null); } } else {
+			 * hk.add(i, null); }
+			 */
 		}
-		
+
 		// tm = System.currentTimeMillis() - tm;
 		// SDFSLogger.getLog().info("ph 1 time was " + tm + " sz = " + sz);
 	}
@@ -126,7 +113,7 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 										+ rsp.getValue());
 						@SuppressWarnings("unchecked")
 						List<Boolean> rst = (List<Boolean>) rsp.getValue();
-						//byte id = soc.serverState.get(rsp.getSender()).id;
+						// byte id = soc.serverState.get(rsp.getSender()).id;
 						for (int i = 0; i < rst.size(); i++) {
 							if (rst.get(i) != null) {
 								boolean doop = rst.get(i);
@@ -134,7 +121,7 @@ public class DirectBatchWriteHashCmd implements IOClientCmd {
 								if (doop)
 									buff.setDoop(1);
 								// TODO Fix this!!!!!!
-								//buff.addHashLoc(id);
+								// buff.addHashLoc(id);
 								buff.setBatchwritten(true);
 								// proc++;
 							}

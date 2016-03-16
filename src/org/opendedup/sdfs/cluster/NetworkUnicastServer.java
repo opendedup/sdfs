@@ -19,7 +19,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.network.ClientThread;
 import org.opendedup.util.KeyGenerator;
 
-
 public class NetworkUnicastServer {
 
 	// Declaration section:

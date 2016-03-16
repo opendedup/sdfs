@@ -7,8 +7,8 @@ public interface AbstractHashEngine {
 	public byte[] getHash(byte[] data);
 
 	public void destroy();
-	
+
 	public int getMaxLen();
-	
+
 	public int getMinLen();
 }

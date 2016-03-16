@@ -10,10 +10,9 @@ public class DeleteDir {
 		if (path.exists()) {
 			File[] files = path.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				if(Files.isSymbolicLink(files[i].toPath())) {
+				if (Files.isSymbolicLink(files[i].toPath())) {
 					Files.deleteIfExists(files[i].toPath());
-				}
-				else if (files[i].isDirectory()) {
+				} else if (files[i].isDirectory()) {
 					deleteDirectory(files[i]);
 				} else {
 					Files.deleteIfExists(files[i].toPath());

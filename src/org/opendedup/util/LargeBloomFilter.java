@@ -6,8 +6,7 @@ import java.io.Serializable;
 
 import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
 
-
-public class LargeBloomFilter  implements Serializable {
+public class LargeBloomFilter implements Serializable {
 
 	/**
 	 * 
@@ -31,8 +30,7 @@ public class LargeBloomFilter  implements Serializable {
 		}
 	}
 
-	public LargeBloomFilter(File dir, long sz, boolean fb)
-			throws IOException {
+	public LargeBloomFilter(File dir, long sz, boolean fb) throws IOException {
 		bfs = new LBF[256];
 		CommandLineProgressBar bar = null;
 		if (fb)
@@ -62,8 +60,8 @@ public class LargeBloomFilter  implements Serializable {
 		LBF m = bfs[hashb];
 		return m;
 	}
-	
-	public void putAll(LBF that,int pos) {
+
+	public void putAll(LBF that, int pos) {
 		this.bfs[pos].putAll(that);
 	}
 
@@ -74,8 +72,6 @@ public class LargeBloomFilter  implements Serializable {
 	public void put(byte[] b) {
 		getMap(b).put(new KeyBlob(b));
 	}
-
-	
 
 	public void save(File dir) throws IOException {
 		CommandLineProgressBar bar = new CommandLineProgressBar(

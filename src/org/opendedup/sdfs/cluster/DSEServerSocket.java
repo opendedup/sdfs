@@ -2,8 +2,6 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.ByteArrayInputStream;
 
-
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -119,8 +117,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 
 		channel.getState(null, 10000);
 		try {
-		lock_service = new LockService(channel);
-		}catch(Exception e) {
+			lock_service = new LockService(channel);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		if (servers[this.id] != null) {
@@ -163,7 +161,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 			ByteBuffer buf = ByteBuffer.wrap(buffer);
 			byte cmd = buf.get();
 			Object rtrn = null;
-			SDFSLogger.getLog().info("recieved cmd " +cmd);
+			SDFSLogger.getLog().info("recieved cmd " + cmd);
 			switch (cmd) {
 			case NetworkCMDS.UPDATE_DSE: {
 				try {
@@ -285,8 +283,10 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					try {
 						HashChunk ck = chunks.get(i);
 						if (ck != null) {
-							rsults.add(i, HCServiceProxy.writeChunk(ck.getName(),
-									ck.getData()).getInserted());
+							rsults.add(
+									i,
+									HCServiceProxy.writeChunk(ck.getName(),
+											ck.getData()).getInserted());
 						} else
 							rsults.add(i, null);
 					} catch (Exception e) {
@@ -345,7 +345,8 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				int ucl = buf.getInt();
 				buf.get(ob);
 				ob = CompressionUtils.decompressLz4(ob, ucl);
-				BloomFilter<KeyBlob> bfs = BloomFilter.readFrom(new ByteArrayInputStream(ob), LBF.getFunnel());
+				BloomFilter<KeyBlob> bfs = BloomFilter.readFrom(
+						new ByteArrayInputStream(ob), LBF.getFunnel());
 				this.gcUpdateLock.lock();
 				try {
 					lbf[id].putAll(new LBF(bfs));
@@ -408,7 +409,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				rtrn = Boolean.valueOf(false);
 				break;
 			}
-			default : {
+			default: {
 				rtrn = null;
 				break;
 			}

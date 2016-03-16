@@ -17,8 +17,8 @@ public class WriteTest implements Runnable {
 	String path;
 	int size;
 	int uniqueP;
-	int bs = 16*1024;
-	int ss = bs *100;
+	int bs = 16 * 1024;
+	int ss = bs * 100;
 	public long duration = 0;
 	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;
@@ -51,7 +51,7 @@ public class WriteTest implements Runnable {
 					rnd.nextBytes(b);
 				}
 				bz.put(b);
-				if(!bz.hasRemaining()) {
+				if (!bz.hasRemaining()) {
 					bz.flip();
 					fc.write(bz);
 					bz.flip();
@@ -73,7 +73,7 @@ public class WriteTest implements Runnable {
 
 	public float results() {
 		float mb = size;
-		float mbps = (mb / duration)*1000;
+		float mbps = (mb / duration) * 1000;
 		return mbps;
 	}
 
@@ -96,8 +96,8 @@ public class WriteTest implements Runnable {
 		float results[] = new float[runs];
 		int t = 0;
 		for (int i = start; i < (start + tests.length); i++) {
-			WriteTest test = new WriteTest(path + File.separator + "test" + fn.getAndIncrement()
-					+ ".bin", size, unique);
+			WriteTest test = new WriteTest(path + File.separator + "test"
+					+ fn.getAndIncrement() + ".bin", size, unique);
 			tests[t] = test;
 			t++;
 		}

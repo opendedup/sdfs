@@ -75,7 +75,7 @@ public class Config {
 			}
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
-			
+
 			Main.chunkStorePageSize = Integer.parseInt(cbe
 					.getAttribute("page-size"));
 			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
@@ -100,7 +100,7 @@ public class Config {
 				HashFunctionPool.avg_page_size = Integer.parseInt(cbe
 						.getAttribute("average-chunk-size"));
 			}
-			
+
 			if (cbe.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe
 						.getAttribute("encrypt"));
@@ -258,7 +258,8 @@ public class Config {
 		doc.getDocumentElement().normalize();
 
 		String version = "0.8.12";
-		SDFSLogger.getLog().info("############ Running SDFS Version " + Main.version);
+		SDFSLogger.getLog().info(
+				"############ Running SDFS Version " + Main.version);
 		if (doc.getDocumentElement().hasAttribute("version")) {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
@@ -280,8 +281,9 @@ public class Config {
 		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
-		if(cache.hasAttribute("read-ahead")) {
-			Main.readAhead = Boolean.parseBoolean(cache.getAttribute("read-ahead"));
+		if (cache.hasAttribute("read-ahead")) {
+			Main.readAhead = Boolean.parseBoolean(cache
+					.getAttribute("read-ahead"));
 		}
 		Main.safeClose = Boolean.parseBoolean(cache.getAttribute("safe-close"));
 		// Makes sure writes are sync'd when set to true.
@@ -463,7 +465,6 @@ public class Config {
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
 			}
-			
 
 		}
 		if (Main.chunkStoreEncryptionEnabled)

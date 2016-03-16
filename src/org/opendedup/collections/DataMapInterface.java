@@ -16,15 +16,20 @@ public interface DataMapInterface {
 
 	public abstract boolean isClosed();
 
-	public abstract void put(long pos, byte[] data) throws IOException,FileClosedException;
-	
-	public abstract void put(long pos, byte[] data, int length) throws IOException,FileClosedException;
+	public abstract void put(long pos, byte[] data) throws IOException,
+			FileClosedException;
 
-	public abstract void putIfNull(long pos, byte[] data) throws IOException,FileClosedException;
+	public abstract void put(long pos, byte[] data, int length)
+			throws IOException, FileClosedException;
 
-	public abstract void trim(long pos, int len) throws IOException,FileClosedException;
+	public abstract void putIfNull(long pos, byte[] data) throws IOException,
+			FileClosedException;
 
-	public abstract void truncate(long length) throws IOException,FileClosedException;
+	public abstract void trim(long pos, int len) throws IOException,
+			FileClosedException;
+
+	public abstract void truncate(long length) throws IOException,
+			FileClosedException;
 
 	public abstract byte getVersion();
 
@@ -35,14 +40,16 @@ public interface DataMapInterface {
 	 * 
 	 * @see com.annesam.collections.AbstractMap#remove(long)
 	 */
-	public abstract void remove(long pos) throws IOException,FileClosedException;
+	public abstract void remove(long pos) throws IOException,
+			FileClosedException;
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.annesam.collections.AbstractMap#get(long)
 	 */
-	public abstract byte[] get(long pos) throws IOException, FileClosedException;
+	public abstract byte[] get(long pos) throws IOException,
+			FileClosedException;
 
 	public abstract void sync() throws IOException;
 

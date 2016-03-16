@@ -2,7 +2,6 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
-
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
@@ -35,9 +34,9 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(boolean useSSL,int port) throws Exception {
+	public void start(boolean useSSL, int port) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
-		if(port != -1)
+		if (port != -1)
 			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
 			System.err
@@ -47,7 +46,7 @@ public class SDFSService {
 		}
 		SDFSLogger.getLog().debug(
 				"############# SDFSService Starting ##################");
-		
+
 		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
 				+ "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
@@ -92,8 +91,6 @@ public class SDFSService {
 		SDFSLogger.getLog().debug(
 				"############### SDFSService Started ##################");
 	}
-	
-	
 
 	public void stop() {
 		stopped = true;
@@ -138,8 +135,9 @@ public class SDFSService {
 			}
 			if (Main.enableNetworkChunkStore && !Main.runCompact) {
 				try {
-				ndServer.close();
-				}catch(Exception e) {}
+					ndServer.close();
+				} catch (Exception e) {
+				}
 			}
 		}
 		try {

@@ -1,7 +1,5 @@
 package org.opendedup.fsync;
 
-
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.quartz.Job;

@@ -54,11 +54,11 @@ public enum StorageUnit {
 	}
 
 	public String format(double number) {
-		return nf.format(number / (double)divider) + " " + symbol;
+		return nf.format(number / (double) divider) + " " + symbol;
 	}
 
 	public String format(long number) {
-		return nf.format(number / (double)divider) + " " + symbol;
+		return nf.format(number / (double) divider) + " " + symbol;
 	}
 
 	private static java.text.NumberFormat nf = java.text.NumberFormat

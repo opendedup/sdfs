@@ -2,8 +2,6 @@ package org.opendedup.util;
 
 import java.io.File;
 
-
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,12 +30,12 @@ public class EncryptUtils {
 					.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
 			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			key = new SecretKeySpec(keyBytes, "AES");
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("uable to create key", e);
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
+
 	}
 
 	public static byte[] encrypt(byte[] chunk) throws IOException {
@@ -48,8 +46,6 @@ public class EncryptUtils {
 	public static byte[] decrypt(byte[] encryptedChunk) throws IOException {
 		return decryptCBC(encryptedChunk);
 	}
-
-	
 
 	public static byte[] encryptCBC(byte[] chunk) throws IOException {
 
@@ -85,8 +81,7 @@ public class EncryptUtils {
 		try {
 			byte[] _iv = StringUtils.getHexBytes(iv);
 			IvParameterSpec _spec = new IvParameterSpec(_iv);
-			byte[] _keyBytes = HashFunctions
-					.getSHAHashBytes(passwd.getBytes());
+			byte[] _keyBytes = HashFunctions.getSHAHashBytes(passwd.getBytes());
 			SecretKeySpec _key = new SecretKeySpec(_keyBytes, "AES");
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, _key, _spec);
@@ -105,8 +100,7 @@ public class EncryptUtils {
 		try {
 			byte[] _iv = StringUtils.getHexBytes(iv);
 			IvParameterSpec _spec = new IvParameterSpec(_iv);
-			byte[] _keyBytes = HashFunctions
-					.getSHAHashBytes(passwd.getBytes());
+			byte[] _keyBytes = HashFunctions.getSHAHashBytes(passwd.getBytes());
 			SecretKeySpec _key = new SecretKeySpec(_keyBytes, "AES");
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, _key, _spec);
@@ -157,8 +151,7 @@ public class EncryptUtils {
 			dst.getParentFile().mkdirs();
 		byte[] _iv = StringUtils.getHexBytes(iv);
 		IvParameterSpec _spec = new IvParameterSpec(_iv);
-		byte[] _keyBytes = HashFunctions
-				.getSHAHashBytes(passwd.getBytes());
+		byte[] _keyBytes = HashFunctions.getSHAHashBytes(passwd.getBytes());
 		SecretKeySpec _key = new SecretKeySpec(_keyBytes, "AES");
 		Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		encrypt.init(Cipher.DECRYPT_MODE, _key, _spec);
@@ -171,39 +164,40 @@ public class EncryptUtils {
 		fos.close();
 		cis.close();
 	}
-	
+
 	private static final ThreadLocal<Cipher> localDigest = new ThreadLocal<Cipher>() {
-	    @Override
-	    protected Cipher initialValue() {
-	        try {
-	            return Cipher.getInstance("AES/CBC/PKCS5Padding");
-	        } catch (Exception e) {
-	            // ugly but necessary
-	            throw new RuntimeException(e);
-	        }
-	    }
+		@Override
+		protected Cipher initialValue() {
+			try {
+				return Cipher.getInstance("AES/CBC/PKCS5Padding");
+			} catch (Exception e) {
+				// ugly but necessary
+				throw new RuntimeException(e);
+			}
+		}
 	};
 
 	public static void main(String[] args) {
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
-	    new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
+		new Thread(new MyRunnable()).start();
 	}
 
 	private static class MyRunnable implements Runnable {
-	    @Override
-	    public void run() {
-	    	try{
-	        Cipher cipher = localDigest.get();
-	        System.out.println("Got digest " + System.identityHashCode(cipher));
-	    	}catch(Exception e) {
-	    		e.printStackTrace();
-	    	}
-	    }
+		@Override
+		public void run() {
+			try {
+				Cipher cipher = localDigest.get();
+				System.out.println("Got digest "
+						+ System.identityHashCode(cipher));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

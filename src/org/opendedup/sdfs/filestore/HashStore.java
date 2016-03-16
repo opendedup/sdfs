@@ -135,17 +135,15 @@ public class HashStore {
 	public boolean hashExists(byte[] hash) throws IOException {
 		return this.bdb.containsKey(hash);
 	}
-	
-	
+
 	public String restoreBlock(byte[] hash) throws IOException {
 		long id = this.bdb.get(hash);
 		return HCServiceProxy.getChunkStore().restoreBlock(id, hash);
 	}
-	
+
 	public boolean blockRestored(String id) throws IOException {
 		return HCServiceProxy.getChunkStore().blockRestored(id);
 	}
-	
 
 	/**
 	 * The method used to open and connect to the TC database.
@@ -196,9 +194,10 @@ public class HashStore {
 	 * @param hash
 	 *            the md5 or sha hash to store
 	 * @return a hashchunk or null if the hash is not in the database.
-	 * @throws DataArchivedException 
+	 * @throws DataArchivedException
 	 */
-	public HashChunk getHashChunk(byte[] hash) throws IOException, DataArchivedException {
+	public HashChunk getHashChunk(byte[] hash) throws IOException,
+			DataArchivedException {
 		HashChunk hs = null;
 		// String hStr = StringUtils.getHexString(hash);
 		/*
@@ -213,17 +212,18 @@ public class HashStore {
 		 * } t++; } } else { if(this.readingBuffers.size() < mapSize)
 		 * this.readingBuffers.put(hStr, hs); }
 		 */
-			byte[] data = bdb.getData(hash);
-			if (data == null && Arrays.equals(hash, blankHash)) {
-				hs = new HashChunk(hash, new byte[blankData.length], false);
-			}
-			hs = new HashChunk(hash, data, false);
-			// this.cacheBuffers.put(hStr, hs);
+		byte[] data = bdb.getData(hash);
+		if (data == null && Arrays.equals(hash, blankHash)) {
+			hs = new HashChunk(hash, new byte[blankData.length], false);
+		}
+		hs = new HashChunk(hash, data, false);
+		// this.cacheBuffers.put(hStr, hs);
 
 		return hs;
 	}
-	
-	public void cacheChunk(byte [] hash) throws IOException, DataArchivedException {
+
+	public void cacheChunk(byte[] hash) throws IOException,
+			DataArchivedException {
 		bdb.cache(hash);
 	}
 
@@ -250,15 +250,15 @@ public class HashStore {
 			HashtableFullException {
 		InsertRecord written = null;
 		try {
-			//if (!bdb.containsKey(chunk.getName())) {
-				// long start = chunkStore.reserveWritePosition(chunk.getLen());
-				ChunkData cm = new ChunkData(chunk.getName(),
-						Main.chunkStorePageSize, chunk.getData());
-				written = bdb.put(cm);
-				// SDFSLogger.getLog().debug("wrote hash " +
-				// StringUtils.getHexString(chunk.getName()) + " = " +written);
+			// if (!bdb.containsKey(chunk.getName())) {
+			// long start = chunkStore.reserveWritePosition(chunk.getLen());
+			ChunkData cm = new ChunkData(chunk.getName(),
+					Main.chunkStorePageSize, chunk.getData());
+			written = bdb.put(cm);
+			// SDFSLogger.getLog().debug("wrote hash " +
+			// StringUtils.getHexString(chunk.getName()) + " = " +written);
 
-			//}
+			// }
 		} catch (IOException e) {
 			SDFSLogger.getLog().fatal(
 					"Unable to commit chunk "

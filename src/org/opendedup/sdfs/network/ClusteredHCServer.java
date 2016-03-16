@@ -22,7 +22,7 @@ import org.opendedup.sdfs.cluster.DSEServerSocket;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
-public class ClusteredHCServer implements Daemon{
+public class ClusteredHCServer implements Daemon {
 
 	// Declaration section:
 	// declare a server socket and a client socket for the server
@@ -102,25 +102,26 @@ public class ClusteredHCServer implements Daemon{
 		}
 
 	}
+
 	ArrayList<String> volumes = new ArrayList<String>();
-	private void setup(String [] args) throws ParseException {
+
+	private void setup(String[] args) throws ParseException {
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
 		CommandLine cmd = parser.parse(options, args);
-		
+
 		Main.standAloneDSE = true;
 		Main.chunkStoreLocal = true;
 		if (OSValidator.isUnix())
 			Main.logPath = "/var/log/sdfs/"
-					+ new File(cmd.getOptionValue("c")).getName()
-					+ ".log";
+					+ new File(cmd.getOptionValue("c")).getName() + ".log";
 		boolean debug = cmd.hasOption("d");
 		if (debug) {
 			SDFSLogger.setLevel(0);
 		}
 		if (cmd.hasOption("rv")) {
-			StringTokenizer st = new StringTokenizer(
-					cmd.getOptionValue("rv"), ",");
+			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
+					",");
 			while (st.hasMoreTokens()) {
 				volumes.add(st.nextToken());
 			}
@@ -129,18 +130,16 @@ public class ClusteredHCServer implements Daemon{
 			Config.parseDSEConfigFile(cmd.getOptionValue("c"));
 		} catch (IOException e1) {
 			SDFSLogger.getLog().fatal(
-					"exiting because of an error with the config file",
-					e1);
+					"exiting because of an error with the config file", e1);
 			e1.printStackTrace();
 			System.exit(-1);
 		}
 		try {
-			
+
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			SDFSLogger.getLog()
-					.fatal("unable to start cluster node", e);
+			SDFSLogger.getLog().fatal("unable to start cluster node", e);
 			System.exit(-1);
 		}
 	}
@@ -189,20 +188,20 @@ public class ClusteredHCServer implements Daemon{
 	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
 		checkJavaVersion();
 		setup(arg0.getArguments());
-		
+
 	}
 
 	@Override
 	public void start() throws Exception {
 		init(volumes);
-		
+
 	}
 
 	@Override
@@ -219,10 +218,10 @@ public class ClusteredHCServer implements Daemon{
 
 			ClusteredHCServer.close();
 			System.out.println("#### Shut down StorageHub ####");
-		}catch(Exception e) {
-			
+		} catch (Exception e) {
+
 		}
-		
+
 	}
 }
 

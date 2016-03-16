@@ -96,7 +96,7 @@ public class DSECompaction {
 		}
 		long osz = ostore.size();
 		long nsz = nstore.size();
-		//String ostorePath = ostore.f.getPath();
+		// String ostorePath = ostore.f.getPath();
 		ostore.close();
 		nstore.close();
 		File f = new File("changethis");

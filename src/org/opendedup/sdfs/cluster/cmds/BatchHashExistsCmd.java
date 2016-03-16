@@ -31,7 +31,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 				true);
 		opts.setFlags(Message.Flag.DONT_BUNDLE);
 		opts.setFlags(Message.Flag.NO_FC);
-		//opts.setFlags(Message.Flag.OOB);
+		// opts.setFlags(Message.Flag.OOB);
 		opts.setFlags(Message.Flag.NO_TOTAL_ORDER);
 		try {
 			byte[] ar = Util.objectToByteBuffer(hashes);
@@ -44,7 +44,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 			RspList<Object> lst = soc.disp.castMessage(null, new Message(null,
 					null, buf.array()), opts);
 			for (HashLocPair p : hashes) {
-				
+
 				if (p != null)
 					p.resetHashLoc();
 			}
@@ -70,7 +70,7 @@ public class BatchHashExistsCmd implements IOClientCmd {
 						for (int i = 0; i < rst.size(); i++) {
 							boolean exists = rst.get(i);
 							if (exists) {
-									if (hashes.get(i) != null)
+								if (hashes.get(i) != null)
 									this.hashes.get(i).addHashLoc(id);
 							}
 						}

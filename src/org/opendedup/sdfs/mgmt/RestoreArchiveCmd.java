@@ -16,7 +16,8 @@ public class RestoreArchiveCmd {
 
 	String srcPath;
 
-	public Element getResult(String file) throws IOException, ExecutionException {
+	public Element getResult(String file) throws IOException,
+			ExecutionException {
 		this.srcPath = file;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		if (!f.exists())

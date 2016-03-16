@@ -362,8 +362,10 @@ public class WinRegistry {
 		result[str.length()] = 0;
 		return result;
 	}
-	
-	public static void main(String [] args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		System.out.println(WinRegistry.readString(HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS", "path"));
+
+	public static void main(String[] args) throws IllegalArgumentException,
+			IllegalAccessException, InvocationTargetException {
+		System.out.println(WinRegistry.readString(HKEY_LOCAL_MACHINE,
+				"SOFTWARE\\Wow6432Node\\SDFS", "path"));
 	}
 }

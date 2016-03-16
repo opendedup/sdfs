@@ -9,7 +9,7 @@ public class ReadOnlyArchiveException extends Exception {
 	public ReadOnlyArchiveException() {
 		super();
 	}
-	
+
 	public ReadOnlyArchiveException(String msg) {
 		super(msg);
 	}

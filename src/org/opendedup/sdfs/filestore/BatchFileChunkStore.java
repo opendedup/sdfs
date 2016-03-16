@@ -1,11 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
-
-
-
-
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,6 +23,7 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.cloud.MultiDownload;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
+import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -36,7 +32,6 @@ import com.google.common.io.BaseEncoding;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.collections.HashExistsException;
-
 
 /**
  * 
@@ -47,15 +42,17 @@ import org.opendedup.collections.HashExistsException;
  *         this chunk store since S3 charges per http request.
  * 
  */
-public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable {
+public class BatchFileChunkStore implements AbstractChunkStore,
+		AbstractBatchStore, Runnable {
 	private String name;
 	boolean compress = false;
 	boolean encrypt = false;
-	
+
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
-	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
+	File staged_sync_location = new File(Main.chunkStore + File.separator
+			+ "syncstaged");
 	File container_location = new File(Main.chunkStore);
 
 	// private String bucketLocation = null;
@@ -67,7 +64,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		return false;
 	}
 
-	public static boolean checkBucketUnique(String awsAccessKey, String awsSecretKey, String bucketName) {
+	public static boolean checkBucketUnique(String awsAccessKey,
+			String awsSecretKey, String bucketName) {
 		return false;
 	}
 
@@ -89,9 +87,12 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		try {
 			// container = pool.borrowObject();
 			HashMap<String, String> md = new HashMap<String, String>();
-			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
-			FileOutputStream fout = new FileOutputStream(new File(this.container_location, "BucketInfo"));
+			md.put("currentlength",
+					Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("compressedlength",
+					Long.toString(HashBlobArchive.compressedLength.get()));
+			FileOutputStream fout = new FileOutputStream(new File(
+					this.container_location, "BucketInfo"));
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
 			oon.writeObject(md);
 			oon.flush();
@@ -100,7 +101,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			fout.close();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error closing container", e);
-		} 
+		}
 		try {
 			// this.serviceClient.
 		} catch (Exception e) {
@@ -119,9 +120,10 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public byte[] getChunk(byte[] hash, long start, int len) throws IOException, DataArchivedException {
-			byte[] b = HashBlobArchive.getBlock(hash, start);
-			return b;
+	public byte[] getChunk(byte[] hash, long start, int len)
+			throws IOException, DataArchivedException {
+		byte[] b = HashBlobArchive.getBlock(hash, start);
+		return b;
 	}
 
 	@Override
@@ -140,12 +142,14 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		return HashBlobArchive.currentLength.get();
 	}
 
-	public void cacheData(byte[] hash, long start, int len) throws IOException, DataArchivedException {
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len)
+			throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk);
 		} catch (HashExistsException e) {
@@ -160,7 +164,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	int del = 0;
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
+	public void deleteChunk(byte[] hash, long start, int len)
+			throws IOException {
 		delLock.lock();
 		try {
 			del++;
@@ -212,20 +217,24 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			// bucketLocation = config.getAttribute("default-bucket-location");
 		}
 		if (config.hasAttribute("block-size")) {
-			int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+			int sz = (int) StringUtils.parseSize(config
+					.getAttribute("block-size"));
 			HashBlobArchive.MAX_LEN = sz;
 		}
 		if (config.hasAttribute("delete-unclaimed")) {
-			this.deleteUnclaimed = Boolean.parseBoolean(config.getAttribute("delete-unclaimed"));
+			this.deleteUnclaimed = Boolean.parseBoolean(config
+					.getAttribute("delete-unclaimed"));
 		}
 		if (config.hasAttribute("upload-thread-sleep-time")) {
-			int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
+			int tm = Integer.parseInt(config
+					.getAttribute("upload-thread-sleep-time"));
 			HashBlobArchive.THREAD_SLEEP_TIME = tm;
 		} else {
 			HashBlobArchive.THREAD_SLEEP_TIME = 1000 * 60 * 5;
 		}
 		if (config.hasAttribute("local-cache-size")) {
-			long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
+			long sz = StringUtils.parseSize(config
+					.getAttribute("local-cache-size"));
 			HashBlobArchive.setLocalCacheSize(sz);
 		}
 		if (config.hasAttribute("map-cache-size")) {
@@ -236,8 +245,9 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			int sz = Integer.parseInt(config.getAttribute("io-threads"));
 			Main.dseIOThreads = sz;
 		}
-		if(config.hasAttribute("allow-sync")){
-			HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
+		if (config.hasAttribute("allow-sync")) {
+			HashBlobArchive.allowSync = Boolean.parseBoolean(config
+					.getAttribute("allow-sync"));
 		}
 
 		try {
@@ -246,7 +256,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 				FileInputStream fin = new FileInputStream(f);
 				ObjectInputStream oon = new ObjectInputStream(fin);
 				@SuppressWarnings("unchecked")
-				HashMap<String, String> md = (HashMap<String, String>) oon.readObject();
+				HashMap<String, String> md = (HashMap<String, String>) oon
+						.readObject();
 				oon.close();
 				long sz = 0;
 				long cl = 0;
@@ -285,33 +296,34 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	int k = 0;
+
 	@Override
 	public ChunkData getNextChunck() throws IOException {
-		synchronized(this) {
-		if (ht == null || !ht.hasMoreElements()) {
-			StringResult rs;
-			try {
-				rs = dl.getStringTokenizer();
-			} catch (Exception e) {
-				throw new IOException(e);
+		synchronized (this) {
+			if (ht == null || !ht.hasMoreElements()) {
+				StringResult rs;
+				try {
+					rs = dl.getStringTokenizer();
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
+				if (rs == null) {
+					SDFSLogger.getLog().debug("no more " + k);
+					return null;
+				} else {
+					k++;
+				}
+				ht = rs.st;
+				hid = rs.id;
 			}
-			if (rs == null) {
-				SDFSLogger.getLog().debug("no more " + k);
-				return null;
-			} else {
-				k++;
-			}
-			ht = rs.st;
-			hid = rs.id;
-		}
-		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
-				ht.nextToken().split(":")[0]), hid);
-		return chk;
+			ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
+					ht.nextToken().split(":")[0]), hid);
+			return chk;
 		}
 	}
-	
 
-	private HashMap<String, String> readHashMap(long id) throws IOException, ClassNotFoundException {
+	private HashMap<String, String> readHashMap(long id) throws IOException,
+			ClassNotFoundException {
 		File _f = new File(HashBlobArchive.getPath(id).getPath() + ".md");
 		FileInputStream fin = new FileInputStream(_f);
 		ObjectInputStream oon = new ObjectInputStream(fin);
@@ -321,7 +333,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		return md;
 	}
 
-	private void writeHashMap(HashMap<String, String> md, long id) throws IOException {
+	private void writeHashMap(HashMap<String, String> md, long id)
+			throws IOException {
 		File _f = new File(HashBlobArchive.getPath(id).getPath() + ".md");
 		FileOutputStream fout = new FileOutputStream(_f);
 		ObjectOutputStream out = new ObjectOutputStream(fout);
@@ -331,24 +344,25 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	private int verifyDelete(long id) throws IOException {
-		try {
 		SimpleByteArrayLongMap m = HashBlobArchive.getMap(id);
-		m.iterInit();
-		KeyValuePair p = m.next();
-		int claims = 0;
-		while (p != null) {
-			long cid = HCServiceProxy.getHashesMap().get(p.getKey());
-			if (cid == id)
-				claims++;
-			p = m.next();
-		}
-		return claims;
-		}catch(Exception e) {
+		try {
+			
+			m.iterInit();
+			KeyValuePair p = m.next();
+			int claims = 0;
+			while (p != null) {
+				HCServiceProxy.getHashesMap().get(p.getKey());
+				if (HCServiceProxy.getHashesMap().containsKey(p.getKey()))
+					claims++;
+				p = m.next();
+			}
+			return claims;
+		} catch (Exception e) {
 			throw new IOException(e);
+		} finally {
+			m.close();
 		}
 	}
-	
-	
 
 	@Override
 	public long maxSize() {
@@ -361,7 +375,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public void deleteDuplicate(byte[] hash, long start, int len) throws IOException {
+	public void deleteDuplicate(byte[] hash, long start, int len)
+			throws IOException {
 		// TODO Auto-generated method stub
 
 	}
@@ -379,14 +394,17 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
+	public void writeHashBlobArchive(HashBlobArchive arc, long id)
+			throws IOException {
 		try {
 			HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("objects", Integer.toString(arc.getSz()));
-			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
-			this.writeHashMap(metaData,id);
+			metaData.put("bsize",
+					Integer.toString(arc.uncompressedLength.get()));
+			this.writeHashMap(metaData, id);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to write archive " + arc.getID(), e);
+			SDFSLogger.getLog().error("unable to write archive " + arc.getID(),
+					e);
 			throw new IOException(e);
 		} finally {
 			// pool.returnObject(container);
@@ -416,6 +434,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 						this.delLock.unlock();
 					}
 					Set<Long> iter = odel.keySet();
+					long sz = 0;
 					for (Long k : iter) {
 
 						try {
@@ -424,72 +443,99 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 							int objs = 0;
 							try {
 								metaData = this.readHashMap(k);
-								objs = Integer.parseInt(metaData.get("objects"));
-							}catch(Exception e) {
-								metaData = new HashMap<String,String>();
+								objs = Integer
+										.parseInt(metaData.get("objects"));
+							} catch (Exception e) {
+								metaData = new HashMap<String, String>();
 							}
 							// SDFSLogger.getLog().info("remove requests for " +
 							// hashString + "=" + odel.get(k));
 							int delobj = 0;
 							if (metaData.containsKey("deleted-objects"))
-								delobj = Integer.parseInt((String) metaData.get("deleted-objects"));
-							
+								delobj = Integer.parseInt((String) metaData
+										.get("deleted-objects"));
+
 							delobj = delobj + odel.get(k);
-							SDFSLogger.getLog().debug("remove requests for " +
-									 k + "=" + odel.get(k) + " delob="+delobj + " bsz=" + metaData.get("bsize"));
+							SDFSLogger.getLog().debug(
+									"remove requests for " + k + "="
+											+ odel.get(k) + " delob=" + delobj
+											+ " bsz=" + metaData.get("bsize"));
 							if (objs <= delobj) {
 
 								if (this.deleteUnclaimed) {
 									int claims = this.verifyDelete(k);
 									if (claims > 0) {
-										SDFSLogger.getLog().warn("Not deleting " + k + " claims=" + claims);
-										metaData.put("objects", Integer.toString(claims));
+										SDFSLogger.getLog().debug(
+												"Not deleting " + k
+														+ " claims=" + claims);
+										metaData.put("objects",
+												Integer.toString(claims));
 										metaData.put("deleted-objects", "0");
-										metaData.put("deleted-objects", Integer.toString(delobj));
+										metaData.put("deleted-objects",
+												Integer.toString(delobj));
 										this.writeHashMap(metaData, k);
 										try {
-										long cl = HashBlobArchive.compactArchive(k);
-										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-										SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
-										}catch(Exception e) {
+											sz += HashBlobArchive
+													.compactArchive(k);
+											HashBlobArchive.currentLength
+													.addAndGet(-1
+															* Integer
+																	.parseInt(metaData
+																			.get("bsize")));
 											
+										} catch (Exception e) {
+
 										}
 									} else {
 										long fs = blob.length();
+										sz+=fs;
 										HashBlobArchive.deleteArchive(k);
-										HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-										HashBlobArchive.compressedLength.addAndGet(-1 *fs);
-										File _f = new File(HashBlobArchive.getPath(k).getPath() + ".md");
+										HashBlobArchive.currentLength
+												.addAndGet(-1
+														* Integer
+																.parseInt(metaData
+																		.get("bsize")));
+										HashBlobArchive.compressedLength
+												.addAndGet(-1 * fs);
+										File _f = new File(HashBlobArchive
+												.getPath(k).getPath() + ".md");
 										_f.delete();
 									}
 								} else {
 									// SDFSLogger.getLog().info("deleting " +
 									// hashString);
 									metaData.put("deleted", "true");
-									metaData.put("deleted-objects", Integer.toString(delobj));
+									metaData.put("deleted-objects",
+											Integer.toString(delobj));
 									this.writeHashMap(metaData, k);
 								}
 								HashBlobArchive.removeCache(k.longValue());
 							} else {
-								 SDFSLogger.getLog().debug("updating " +
-								 k + " sz=" +objs);
-								metaData.put("deleted-objects", Integer.toString(delobj));
+								SDFSLogger.getLog().debug(
+										"updating " + k + " sz=" + objs);
+								metaData.put("deleted-objects",
+										Integer.toString(delobj));
 								this.writeHashMap(metaData, k);
 								try {
-								long cl = HashBlobArchive.compactArchive(k);
-								
-								HashBlobArchive.currentLength.addAndGet(-1 * Integer.parseInt(metaData.get("bsize")));
-								SDFSLogger.getLog().info("compacted archive ["+k+"] by [" + cl+"]");
-								}catch(Exception e) {
+									sz += HashBlobArchive.compactArchive(k);
+
+									HashBlobArchive.currentLength.addAndGet(-1
+											* Integer.parseInt(metaData
+													.get("bsize")));
 									
+								} catch (Exception e) {
+
 								}
 							}
 						} catch (Exception e) {
-							SDFSLogger.getLog().warn("Unable to delete object " + k, e);
+							SDFSLogger.getLog().debug(
+									"Unable to delete object " + k, e);
 						} finally {
 							// pool.returnObject(container);
 						}
+						
 					}
+					SDFSLogger.getLog().info("Compacted [" + iter.size() + "] storaage objects by [" + StorageUnit.of(sz).format(sz)+ "]");
 
 				}
 			} catch (InterruptedException e) {
@@ -568,7 +614,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public boolean checkAccess(String username, String password, Properties props) throws Exception {
+	public boolean checkAccess(String username, String password,
+			Properties props) throws Exception {
 		return true;
 	}
 
@@ -583,13 +630,15 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 
 	}
-	
 
 	public ArrayList<String> traverseCache(File f) {
 		ArrayList<String> maps = new ArrayList<String>();
-		if (f.isDirectory() && !f.getName().equalsIgnoreCase("outgoing") && !f.getName().equalsIgnoreCase("syncstaged")
-				&& !f.getName().equalsIgnoreCase("metadata") && !f.getName().equalsIgnoreCase("blocks")
-				&& !f.getName().equalsIgnoreCase("keys") && !f.getName().equalsIgnoreCase("sync")) {
+		if (f.isDirectory() && !f.getName().equalsIgnoreCase("outgoing")
+				&& !f.getName().equalsIgnoreCase("syncstaged")
+				&& !f.getName().equalsIgnoreCase("metadata")
+				&& !f.getName().equalsIgnoreCase("blocks")
+				&& !f.getName().equalsIgnoreCase("keys")
+				&& !f.getName().equalsIgnoreCase("sync")) {
 			File[] fs = f.listFiles();
 
 			for (File z : fs) {
@@ -597,11 +646,14 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 					maps.addAll(traverseCache(z));
 				} else {
 					try {
-						if (!z.getPath().endsWith(".smap") && !z.getPath().endsWith(".md") && !z.getPath().endsWith(".map")) {
+						if (!z.getPath().endsWith(".smap")
+								&& !z.getPath().endsWith(".md")
+								&& !z.getPath().endsWith(".map")) {
 							maps.add(z.getName());
 						}
 					} catch (Exception e) {
-						SDFSLogger.getLog().error("unable to cache " + z.getPath(), e);
+						SDFSLogger.getLog().error(
+								"unable to cache " + z.getPath(), e);
 					}
 				}
 			}
@@ -628,35 +680,38 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			SDFSLogger.getLog().error("unable to initialize", e);
 		}
 	}
+
 	boolean fr = true;
+
 	@Override
-	public synchronized Iterator<String> getNextObjectList() throws IOException {
-		if(!fr)
-			maps = null;
-		
-			return maps;
-		
+	public Iterator<String> getNextObjectList() throws IOException {
+		return maps;
+
 	}
 
 	@Override
-	public StringResult getStringResult(String key) throws IOException, InterruptedException {
+	public StringResult getStringResult(String key) throws IOException,
+			InterruptedException {
 		Long hid = Long.parseLong(key);
 		File mf = HashBlobArchive.getPath(hid);
 		HashBlobArchive.compressedLength.addAndGet(mf.length());
 		try {
 			HashMap<String, String> metaData = this.readHashMap(hid);
-			HashBlobArchive.currentLength.addAndGet(Integer.parseInt(metaData.get("bsize")));
-			if (metaData.containsKey("deleted-objects") || metaData.containsKey("deleted")) {
+			HashBlobArchive.currentLength.addAndGet(Integer.parseInt(metaData
+					.get("bsize")));
+			if (metaData.containsKey("deleted-objects")
+					|| metaData.containsKey("deleted")) {
 				metaData.remove("deleted-objects");
 				metaData.remove("deleted");
 				this.writeHashMap(metaData, hid);
 			}
-			StringTokenizer ht = new StringTokenizer(HashBlobArchive.getStrings(hid), ",");
+			StringTokenizer ht = new StringTokenizer(
+					HashBlobArchive.getStrings(hid), ",");
 			StringResult st = new StringResult();
 			st.id = hid;
 			st.st = ht;
 			return st;
-			
+
 		} catch (ClassNotFoundException e) {
 			throw new IOException(e);
 		}
@@ -671,7 +726,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

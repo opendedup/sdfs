@@ -24,22 +24,24 @@ import org.opendedup.util.OSValidator;
 
 import fuse.FuseMount;
 
-public class MountSDFS implements Daemon, Runnable{
+public class MountSDFS implements Daemon, Runnable {
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
 	private static String[] sFal = null;
 	private static SDFSService sdfsService;
 	private static String mountOptions;
+
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
 				"o",
 				true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
-		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
+		options.addOption("cfr", false,
+				"Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption("d", false, "debug output");
 		options.addOption("s", false, "Run single threaded");
 		options.addOption("p", true, "port to use for sdfs cli");
-		options.addOption("cc",false,"Runs Consistency Check");
+		options.addOption("cc", false, "Runs Consistency Check");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -64,7 +66,7 @@ public class MountSDFS implements Daemon, Runnable{
 		BasicConfigurator.configure();
 		setup(args);
 		try {
-			
+
 			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
 					Main.volumeMountPoint), log);
 			System.exit(0);
@@ -94,8 +96,8 @@ public class MountSDFS implements Daemon, Runnable{
 			System.exit(-1);
 		}
 	}
-	
-	private static void setup(String [] args) throws ParseException {
+
+	private static void setup(String[] args) throws ParseException {
 		checkJavaVersion();
 		int port = -1;
 		String volumeConfigFile = null;
@@ -110,7 +112,7 @@ public class MountSDFS implements Daemon, Runnable{
 			printHelp(options);
 			System.exit(1);
 		}
-		if(cmd.hasOption("cc")) {
+		if (cmd.hasOption("cc")) {
 			Main.runConsistancyCheck = true;
 		}
 		if (cmd.hasOption("d")) {
@@ -119,7 +121,7 @@ public class MountSDFS implements Daemon, Runnable{
 		if (cmd.hasOption("s")) {
 			fal.add("-s");
 		}
-		if(cmd.hasOption("p")) {
+		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 		if (cmd.hasOption("rv")) {
@@ -143,11 +145,11 @@ public class MountSDFS implements Daemon, Runnable{
 			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
-		if(cmd.hasOption("cfr")) {
+		if (cmd.hasOption("cfr")) {
 			Main.syncDL = true;
 			Main.runConsistancyCheck = true;
 		}
-			
+
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
 					+ "-volume-cfg.xml");
@@ -197,7 +199,7 @@ public class MountSDFS implements Daemon, Runnable{
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start(useSSL,port);
+			sdfsService.start(useSSL, port);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -210,12 +212,16 @@ public class MountSDFS implements Daemon, Runnable{
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
-			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
-					+ ":" + Main.sdfsCliPort +","+cmd.getOptionValue("o"));
+			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+					+ volumeConfigFile
+					+ ":"
+					+ Main.sdfsCliPort
+					+ ","
+					+ cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:" + volumeConfigFile
-					+ ":" + Main.sdfsCliPort);
+			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+					+ volumeConfigFile + ":" + Main.sdfsCliPort);
 		}
 		sFal = new String[fal.size()];
 		fal.toArray(sFal);
@@ -233,7 +239,7 @@ public class MountSDFS implements Daemon, Runnable{
 	@Override
 	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
 		setup(arg0.getArguments());
-		
+
 	}
 
 	@Override
@@ -241,7 +247,7 @@ public class MountSDFS implements Daemon, Runnable{
 		MountSDFS sd = new MountSDFS();
 		Thread th = new Thread(sd);
 		th.start();
-		
+
 	}
 
 	@Override
@@ -256,7 +262,7 @@ public class MountSDFS implements Daemon, Runnable{
 		} catch (Exception e) {
 		}
 		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
-		
+
 	}
 
 	@Override
@@ -269,6 +275,6 @@ public class MountSDFS implements Daemon, Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 }

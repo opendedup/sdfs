@@ -7,15 +7,15 @@ import org.opendedup.sdfs.servers.HCServer;
 public class HashClientPoolFactory implements PoolableObjectFactory {
 	private HCServer server;
 	private byte id;
-	
-	public HashClientPoolFactory(HCServer server,byte id) {
-		this.server =server;
+
+	public HashClientPoolFactory(HCServer server, byte id) {
+		this.server = server;
 		this.id = id;
 	}
 
 	@Override
 	public void activateObject(Object arg0) throws Exception {
-		HashClient hc = (HashClient)arg0;
+		HashClient hc = (HashClient) arg0;
 		if (hc.isClosed()) {
 			hc.openConnection();
 		}
@@ -24,7 +24,7 @@ public class HashClientPoolFactory implements PoolableObjectFactory {
 
 	@Override
 	public void destroyObject(Object arg0) throws Exception {
-		HashClient hc = (HashClient)arg0;
+		HashClient hc = (HashClient) arg0;
 		hc.close();
 
 	}
@@ -39,13 +39,12 @@ public class HashClientPoolFactory implements PoolableObjectFactory {
 
 	@Override
 	public void passivateObject(Object arg0) throws Exception {
-		
 
 	}
 
 	@Override
 	public boolean validateObject(Object arg0) {
-		HashClient hc = (HashClient)arg0;
+		HashClient hc = (HashClient) arg0;
 		return !hc.isClosed();
 	}
 

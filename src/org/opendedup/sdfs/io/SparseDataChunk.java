@@ -173,7 +173,7 @@ public class SparseDataChunk implements Externalizable {
 					_h.offset += offset;
 					_h.nlen -= offset;
 					_h.pos = ep;
-					if(!Main.chunkStoreLocal)
+					if (!Main.chunkStoreLocal)
 						_h.hashloc[0] = 1;
 					else
 						_h.setDup(true);
@@ -204,7 +204,7 @@ public class SparseDataChunk implements Externalizable {
 				ar.add(z);
 			}
 		}
-		if(!Main.chunkStoreLocal)
+		if (!Main.chunkStoreLocal)
 			p.hashloc[0] = 1;
 		else
 			p.setDup(true);
@@ -279,7 +279,7 @@ public class SparseDataChunk implements Externalizable {
 					boolean dup = p.isDup();
 					if (!Main.chunkStoreLocal && p.hashloc[0] == 1)
 						dup = true;
-					if(dup)
+					if (dup)
 						this.doop += p.nlen;
 					buf.put(p.asArray());
 					this.len += p.nlen;

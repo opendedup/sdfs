@@ -51,9 +51,9 @@ public class MetaFileImport implements Serializable {
 	private Exception lastException;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor =  new ThreadPoolExecutor(Main.writeThreads,
-			Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
-			executionHandler);
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
+			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
+			worksQueue, executionHandler);
 
 	protected MetaFileImport(String path, String server, String password,
 			int port, int maxSz, SDFSEvent evt, boolean useSSL)
@@ -85,13 +85,14 @@ public class MetaFileImport implements Serializable {
 		this.closed = true;
 	}
 
-	public void runImport() throws IOException, ReplicationCanceledException, InterruptedException {
+	public void runImport() throws IOException, ReplicationCanceledException,
+			InterruptedException {
 		SDFSLogger.getLog().info("Running Import of " + path);
 		this.traverse(new File(this.path));
 		executor.shutdown();
 		// Wait for everything to finish.
 		while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-		  levt.shortMsg = "Awaiting finalization";
+			levt.shortMsg = "Awaiting finalization";
 		}
 		if (hashes.size() != 0) {
 			try {
@@ -144,8 +145,8 @@ public class MetaFileImport implements Serializable {
 					"requested " + chunks.size() + " but received "
 							+ pchunks.size());
 		}
-			corruption = false;
-			for(HashLocPair p : chunks) {
+		corruption = false;
+		for (HashLocPair p : chunks) {
 			byte[] eb = p.hashloc;
 			boolean exists = false;
 			if (eb[0] == 1)
@@ -182,7 +183,7 @@ public class MetaFileImport implements Serializable {
 					corruption = true;
 				}
 			}
-			}
+		}
 		return corruption;
 	}
 
@@ -211,13 +212,14 @@ public class MetaFileImport implements Serializable {
 					if (this.closed)
 						throw new ReplicationCanceledException(
 								"MetaFile Import Canceled");
-					if(this.lastException != null)
+					if (this.lastException != null)
 						throw this.lastException;
 					levt.curCt += (mp.getIterPos() - prevpos);
 					prevpos = mp.getIterPos();
 					val = mp.nextValue();
 					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val,mp.getVersion());
+						SparseDataChunk ck = new SparseDataChunk(val,
+								mp.getVersion());
 						List<HashLocPair> al = ck.getFingers();
 
 						if (Main.chunkStoreLocal) {
@@ -243,7 +245,8 @@ public class MetaFileImport implements Serializable {
 												Main.CHUNK_LENGTH, true);
 								}
 								if (hashes.size() >= MAX_SZ) {
-									executor.execute(new DataImporter(this,hashes));
+									executor.execute(new DataImporter(this,
+											hashes));
 								}
 							}
 						} else {
@@ -327,41 +330,34 @@ public class MetaFileImport implements Serializable {
 	public long getEndTime() {
 		return endTime;
 	}
-	
+
 	private static class DataImporter implements Runnable {
 		MetaFileImport mfi;
 		ArrayList<byte[]> hashes;
-		DataImporter(MetaFileImport mfi,ArrayList<byte[]> hashes) {
+
+		DataImporter(MetaFileImport mfi, ArrayList<byte[]> hashes) {
 			this.mfi = mfi;
-			this.hashes=hashes;
+			this.hashes = hashes;
 		}
+
 		@Override
 		public void run() {
 			try {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
-							"fetching " + hashes.size()
-									+ " blocks");
+							"fetching " + hashes.size() + " blocks");
 				int tries = 0;
 				for (;;) {
 					try {
 
-						long sz = ProcessBatchGetBlocks
-								.runCmd(hashes, mfi.server,
-										mfi.port, mfi.password,
-										mfi.useSSL);
+						long sz = ProcessBatchGetBlocks.runCmd(hashes,
+								mfi.server, mfi.port, mfi.password, mfi.useSSL);
 						if (SDFSLogger.isDebug())
-							SDFSLogger
-									.getLog()
-									.debug("fetched "
-											+ hashes.size()
-											+ " blocks");
-						Main.volume.addDuplicateBytes(
-								-1 * sz, true);
-						mfi.bytesTransmitted
-								.addAndGet(sz);
-						mfi.levt.bytesImported = mfi.bytesTransmitted
-								.get();
+							SDFSLogger.getLog().debug(
+									"fetched " + hashes.size() + " blocks");
+						Main.volume.addDuplicateBytes(-1 * sz, true);
+						mfi.bytesTransmitted.addAndGet(sz);
+						mfi.levt.bytesImported = mfi.bytesTransmitted.get();
 						hashes = null;
 						hashes = new ArrayList<byte[]>();
 						break;
@@ -373,12 +369,9 @@ public class MetaFileImport implements Serializable {
 
 				}
 			} catch (Throwable e) {
-				SDFSLogger
-						.getLog()
-						.error("Corruption Suspected on import",
-								e);
+				SDFSLogger.getLog().error("Corruption Suspected on import", e);
 			}
 		}
-		
+
 	}
 }

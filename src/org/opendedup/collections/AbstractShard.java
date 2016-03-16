@@ -6,7 +6,6 @@ import java.io.SyncFailedException;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 
-
 public interface AbstractShard {
 
 	public abstract void iterInit();
@@ -51,8 +50,8 @@ public interface AbstractShard {
 
 	public abstract InsertRecord put(ChunkData cm)
 			throws HashtableFullException, IOException;
-	
-	public abstract InsertRecord put(byte [] key,long val)
+
+	public abstract InsertRecord put(byte[] key, long val)
 			throws HashtableFullException, IOException;
 
 	public abstract int getEntries();
@@ -67,10 +66,8 @@ public interface AbstractShard {
 
 	public abstract long claimRecords() throws IOException;
 
-	public abstract long claimRecords(LargeBloomFilter bf)
-			throws IOException;
+	public abstract long claimRecords(LargeBloomFilter bf) throws IOException;
 
 	public abstract void sync() throws SyncFailedException, IOException;
-
 
 }

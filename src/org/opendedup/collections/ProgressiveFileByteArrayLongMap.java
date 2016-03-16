@@ -38,8 +38,8 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-public class ProgressiveFileByteArrayLongMap
-		implements AbstractShard, Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
+public class ProgressiveFileByteArrayLongMap implements AbstractShard,
+		Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
 	/**
 	 * 
 	 */
@@ -69,8 +69,9 @@ public class ProgressiveFileByteArrayLongMap
 	transient private boolean cached = false;
 	public transient long lastFound = 0;
 	private static transient BlockingQueue<Runnable> loadCacheQueue = new SynchronousQueue<Runnable>();
-	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS,
-			loadCacheQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
+	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(
+			1, 10, 10, TimeUnit.SECONDS, loadCacheQueue,
+			new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
 
 	static {
 		FREE = new byte[HashFunctionPool.hashLength];
@@ -79,7 +80,8 @@ public class ProgressiveFileByteArrayLongMap
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public ProgressiveFileByteArrayLongMap(String path, int size) throws IOException {
+	public ProgressiveFileByteArrayLongMap(String path, int size)
+			throws IOException {
 		this.size = size;
 		this.path = path;
 	}
@@ -90,7 +92,7 @@ public class ProgressiveFileByteArrayLongMap
 		this.active = false;
 		l.unlock();
 	}
-	
+
 	public void activate() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
@@ -102,8 +104,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
-		return this.active;
-		}finally {
+			return this.active;
+		} finally {
 			l.unlock();
 		}
 	}
@@ -259,7 +261,9 @@ public class ProgressiveFileByteArrayLongMap
 		byte[] key = this._nextKey();
 		while (key != null)
 			key = this._nextKey();
-		SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + mapped.cardinality());
+		SDFSLogger.getLog().warn(
+				"Recovered Hashmap " + this.path + " entries = "
+						+ mapped.cardinality());
 
 	}
 
@@ -305,7 +309,9 @@ public class ProgressiveFileByteArrayLongMap
 		if (posFile.exists()) {
 			int _sz = (int) (posFile.length()) / (EL);
 			if (_sz != size) {
-				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz + "] instead of [" + size + "]");
+				SDFSLogger.getLog().warn(
+						"Resetting size of hashtable to [" + _sz
+								+ "] instead of [" + size + "]");
 				this.size = _sz;
 			}
 		}
@@ -348,7 +354,8 @@ public class ProgressiveFileByteArrayLongMap
 				SDFSLogger.getLog().warn("bpos does not exist");
 			} else {
 				try {
-					RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
+					RandomAccessFile _bpos = new RandomAccessFile(path
+							+ ".bpos", "rw");
 					_bpos.seek(0);
 					bgst = _bpos.readLong();
 					this.full = _bpos.readBoolean();
@@ -417,7 +424,9 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			if (SDFSLogger.isDebug()) {
 				long mem = MemoryMeasurer.measureBytes(bf);
-				SDFSLogger.getLog().info("BF Archive Memory Size=" + StorageUnit.of(mem).format(mem));
+				SDFSLogger.getLog().info(
+						"BF Archive Memory Size="
+								+ StorageUnit.of(mem).format(mem));
 			}
 		}
 		if (this.lastFound == 0)
@@ -426,7 +435,9 @@ public class ProgressiveFileByteArrayLongMap
 			this.recreateMap();
 		}
 		if (bgst < 0) {
-			SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
+			SDFSLogger.getLog()
+					.info("Hashtable " + path
+							+ " did not close correctly. scanning ");
 			bgst = this.getBigestKey();
 
 		}
@@ -435,7 +446,8 @@ public class ProgressiveFileByteArrayLongMap
 		claims = new BitSet(size);
 		claims.clear();
 		double pfull = (double) this.sz.get() / (double) size;
-		SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" + this.full);
+		SDFSLogger.getLog().info(
+				"Percentage full=" + pfull + " full=" + this.full);
 		return bgst;
 	}
 
@@ -481,7 +493,8 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#isClaimed(byte[])
 	 */
 	@Override
-	public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
+	public boolean isClaimed(byte[] key) throws KeyNotFoundException,
+			IOException {
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
@@ -567,11 +580,11 @@ public class ProgressiveFileByteArrayLongMap
 			if (pos == -1) {
 				return false;
 			}
-			boolean claimed =  false;
+			boolean claimed = false;
 			synchronized (this.claims) {
 				claimed = this.claims.get(pos);
 			}
-			
+
 			if (claimed) {
 				if (this.runningGC)
 					this.bf.put(new KeyBlob(key));
@@ -682,7 +695,8 @@ public class ProgressiveFileByteArrayLongMap
 	 * @return
 	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
+			throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -710,7 +724,8 @@ public class ProgressiveFileByteArrayLongMap
 		return -1;
 	}
 
-	protected int insertionIndex(byte[] key, boolean migthexist) throws IOException, HashtableFullException {
+	protected int insertionIndex(byte[] key, boolean migthexist)
+			throws IOException, HashtableFullException {
 		ByteBuffer buf = ByteBuffer.wrap(key);
 		buf.position(8);
 		byte[] current = new byte[FREE.length];
@@ -746,8 +761,8 @@ public class ProgressiveFileByteArrayLongMap
 	 * @throws IOException
 	 * @throws HashtableFullException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur, boolean mightexist)
-			throws IOException, HashtableFullException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur,
+			boolean mightexist) throws IOException, HashtableFullException {
 		final int length = size * EL;
 		final int probe = (1 + (hash % (size - 2))) * EL;
 		final int loopIndex = index;
@@ -793,7 +808,8 @@ public class ProgressiveFileByteArrayLongMap
 		}
 
 		// Can a resizing strategy be found that resizes the set?
-		throw new HashtableFullException("No free or removed slots available. Key set full?!!");
+		throw new HashtableFullException(
+				"No free or removed slots available. Key set full?!!");
 	}
 
 	// transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
@@ -804,7 +820,8 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException,
+			IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -831,19 +848,19 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			if (pos < 0) {
 
-				int npos = (-pos - 1)*-1;
+				int npos = (-pos - 1) * -1;
 				npos = (npos / EL);
 				synchronized (this.claims) {
 					this.claims.set(npos);
 				}
 				this.bf.put(kb);
-				return new InsertRecord(false,this.get(key));
+				return new InsertRecord(false, this.get(key));
 			} else {
 				if (!cm.recoverd) {
 					try {
 						cm.persistData(true);
 					} catch (HashExistsException e) {
-						return new InsertRecord(false,e.getPos());
+						return new InsertRecord(false, e.getPos());
 					}
 				}
 				ByteBuffer bf = ByteBuffer.allocate(EL);
@@ -861,17 +878,18 @@ public class ProgressiveFileByteArrayLongMap
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
 				this.bf.put(kb);
-				return new InsertRecord(true,cm.getcPos());
+				return new InsertRecord(true, cm.getcPos());
 			}
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			
+
 		} finally {
 			l.unlock();
 		}
 	}
 
-	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException {
+	public InsertRecord put(byte[] key, long value)
+			throws HashtableFullException, IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -904,7 +922,7 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set(npos);
 				}
 				this.bf.put(kb);
-				return new InsertRecord(false,this.get(key));
+				return new InsertRecord(false, this.get(key));
 			} else {
 				ByteBuffer bf = ByteBuffer.allocate(EL);
 				bf.put(key);
@@ -924,7 +942,7 @@ public class ProgressiveFileByteArrayLongMap
 				// this.store.position(pos);
 				// this.store.put(storeID);
 
-				return new InsertRecord(true,value);
+				return new InsertRecord(true, value);
 			}
 		} finally {
 			l.unlock();
@@ -1087,7 +1105,8 @@ public class ProgressiveFileByteArrayLongMap
 				}
 			}
 			try {
-				RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
+				RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos",
+						"rw");
 				_bpos.seek(0);
 				_bpos.writeLong(bgst);
 				_bpos.writeBoolean(full);
@@ -1230,8 +1249,10 @@ public class ProgressiveFileByteArrayLongMap
 						zbf.position(0);
 						zbf.get(key);
 						long val = zbf.getLong();
-						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+						if (!Arrays.equals(key, FREE)
+								&& !Arrays.equals(key, REMOVED)) {
+							if (!nbf.mightContain(key)
+									&& !this.claims.get(iterPos)) {
 								zbf.position(0);
 								zbf.put(REMOVED);
 								zbf.putLong(0);
@@ -1264,11 +1285,12 @@ public class ProgressiveFileByteArrayLongMap
 			l.unlock();
 			return _sz;
 		} finally {
-			
+
 		}
 	}
 
-	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
+	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf)
+			throws IOException {
 		this.iterInit();
 		long _sz = 0;
 		Lock l = this.hashlock.writeLock();
@@ -1296,8 +1318,10 @@ public class ProgressiveFileByteArrayLongMap
 						zbf.position(0);
 						zbf.get(key);
 						long val = zbf.getLong();
-						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+						if (!Arrays.equals(key, FREE)
+								&& !Arrays.equals(key, REMOVED)) {
+							if (!nbf.mightContain(key)
+									&& !this.claims.get(iterPos)) {
 								zbf.position(0);
 								zbf.put(REMOVED);
 								zbf.putLong(0);
@@ -1330,7 +1354,7 @@ public class ProgressiveFileByteArrayLongMap
 			return _sz;
 		} finally {
 			l = this.hashlock.writeLock();
-			
+
 		}
 	}
 

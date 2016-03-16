@@ -28,7 +28,8 @@ public class ProcessDebugInfo {
 				System.out.printf("Active SDFS Threads : %s\n",
 						debug.getAttribute("active-threads"));
 				if (OSValidator.isUnix()) {
-					DecimalFormat zDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					DecimalFormat zDForm = (DecimalFormat) NumberFormat
+							.getNumberInstance(Locale.US);
 					zDForm.applyPattern("#");
 					double tcp = Double.parseDouble(debug
 							.getAttribute("total-cpu-load")) * 100;

@@ -20,7 +20,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 
-public class SDFSVolMgr implements Daemon{
+public class SDFSVolMgr implements Daemon {
 	private static SDFSService sdfsService = null;
 	private static int port;
 	private static boolean useSSL;
@@ -54,7 +54,7 @@ public class SDFSVolMgr implements Daemon{
 	public static void main(String[] args) throws ParseException {
 		setup(args);
 		try {
-			sdfsService.start(useSSL,port);
+			sdfsService.start(useSSL, port);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -70,11 +70,9 @@ public class SDFSVolMgr implements Daemon{
 			e.printStackTrace();
 		}
 
-		
 	}
-	
-	
-	private static void setup(String [] args) throws ParseException {
+
+	private static void setup(String[] args) throws ParseException {
 		checkJavaVersion();
 		port = -1;
 		String volumeConfigFile = null;
@@ -94,7 +92,7 @@ public class SDFSVolMgr implements Daemon{
 				volumes.add(st.nextToken());
 			}
 		}
-		if(cmd.hasOption("p")) {
+		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 		String volname = "SDFS";
@@ -151,7 +149,7 @@ public class SDFSVolMgr implements Daemon{
 			Main.logPath = Main.volume.getPath() + "\\log\\"
 					+ Main.volume.getName() + ".log";
 		Main.blockDev = true;
-		
+
 		BUSEMkDev.init();
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		VolumeShutdownHook.service = sdfsService;
@@ -160,7 +158,7 @@ public class SDFSVolMgr implements Daemon{
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
-		
+
 	}
 
 	private static void printHelp(Options options) {
@@ -188,19 +186,19 @@ public class SDFSVolMgr implements Daemon{
 	@Override
 	public void destroy() {
 		sdfsService = null;
-		
+
 	}
 
 	@Override
 	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
 		setup(arg0.getArguments());
-		
+
 	}
 
 	@Override
 	public void start() throws Exception {
-		sdfsService.start(useSSL,port);
-		
+		sdfsService.start(useSSL, port);
+
 	}
 
 	@Override
@@ -210,17 +208,19 @@ public class SDFSVolMgr implements Daemon{
 		sdfsService.stop();
 		try {
 			try {
-			Main.volume.closeAllDevices();
-			}catch(Exception e) {}
+				Main.volume.closeAllDevices();
+			} catch (Exception e) {
+			}
 			Thread.sleep(1000);
 			try {
-			BUSEMkDev.release();
-			}catch(Exception e) {}
+				BUSEMkDev.release();
+			} catch (Exception e) {
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
 		SDFSLogger.getLog().info("All Data Flushed");
-		
+
 	}
 }

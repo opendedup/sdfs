@@ -1,4 +1,3 @@
-
 package org.opendedup.sdfs;
 
 import java.io.File;
@@ -113,7 +112,7 @@ public class VolumeConfigWriter {
 	private String cloudUrl;
 	private boolean readAhead = false;
 	private String blockSize = "50 MB";
-	
+
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -219,10 +218,10 @@ public class VolumeConfigWriter {
 			}
 		}
 		if (cmd.hasOption("chunk-store-iv")) {
-			String iv =  cmd.getOptionValue("chunk-store-iv");
+			String iv = cmd.getOptionValue("chunk-store-iv");
 			this.chunk_store_iv = iv;
 		}
-		
+
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
 			this.hash_db_class = "org.opendedup.collections.ProgressiveFileBasedCSMap";
@@ -232,8 +231,8 @@ public class VolumeConfigWriter {
 			this.hash_db_class = "org.opendedup.collections.MaxFileBasedCSMap";
 			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
-		if(cmd.hasOption("aws-aim"))
-			this.awsAim=true;
+		if (cmd.hasOption("aws-aim"))
+			this.awsAim = true;
 
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd
@@ -242,18 +241,18 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-write-threads")) {
 			this.write_threads = Short.parseShort(cmd
 					.getOptionValue("io-write-threads"));
-		} else if(this.write_threads < 8) {
+		} else if (this.write_threads < 8) {
 			this.write_threads = 8;
 		}
 		if (cmd.hasOption("io-chunk-size")) {
 			this.chunk_size = Short.parseShort(cmd
 					.getOptionValue("io-chunk-size"));
 		}
-		if(cmd.hasOption("local-cache-size")) {
+		if (cmd.hasOption("local-cache-size")) {
 			this.cacheSize = cmd.getOptionValue("local-cache-size");
 			StringUtils.parseSize(this.cacheSize);
 		}
-		
+
 		if (cmd.hasOption("io-max-open-files")) {
 			this.max_open_files = Integer.parseInt(cmd
 					.getOptionValue("io-max-open-files"));
@@ -296,8 +295,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("google-enabled"));
 		}
 		if (cmd.hasOption("aws-bucket-location")) {
-			this.bucketLocation =cmd
-					.getOptionValue("aws-bucket-location");
+			this.bucketLocation = cmd.getOptionValue("aws-bucket-location");
 		}
 		if (cmd.hasOption("azure-enabled")) {
 			this.azureEnabled = Boolean.parseBoolean(cmd
@@ -307,29 +305,39 @@ public class VolumeConfigWriter {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
 		if (this.awsEnabled) {
-			if (awsAim || (cmd.hasOption("cloud-secret-key")
-					&& cmd.hasOption("cloud-access-key"))
+			if (awsAim
+					|| (cmd.hasOption("cloud-secret-key") && cmd
+							.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
-				if(!awsAim) {
-				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
-				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+				if (!awsAim) {
+					this.cloudAccessKey = cmd
+							.getOptionValue("cloud-access-key");
+					this.cloudSecretKey = cmd
+							.getOptionValue("cloud-secret-key");
 				}
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-				
-				if (!awsAim && !cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+
+				if (!awsAim
+						&& !cmd.hasOption("cloud-disable-test")
+						&& !S3ChunkStore.checkAuth(cloudAccessKey,
+								cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out
 							.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!awsAim && !cmd.hasOption("cloud-disable-test") && !S3ChunkStore.checkBucketUnique(cloudAccessKey,
-						cloudSecretKey, cloudBucketName)) {
-					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
-					System.out.println("Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
+				if (!awsAim
+						&& !cmd.hasOption("cloud-disable-test")
+						&& !S3ChunkStore.checkBucketUnique(cloudAccessKey,
+								cloudSecretKey, cloudBucketName)) {
+					System.out
+							.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
+					System.out
+							.println("Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
 				}
 			} else {
 				System.out.println("Error : Unable to create volume");
@@ -412,7 +420,7 @@ public class VolumeConfigWriter {
 					.getOptionValue("listen-port"));
 		}
 
-		if(cmd.hasOption("cloud-url")) {
+		if (cmd.hasOption("cloud-url")) {
 			this.cloudUrl = cmd.getOptionValue("cloud-url");
 			this.genericS3 = true;
 		}
@@ -527,9 +535,9 @@ public class VolumeConfigWriter {
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("log-level", "1");
 		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
-		
+
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
-		if(OSValidator.isWindows())
+		if (OSValidator.isWindows())
 			io.setAttribute("max-file-inactive", "0");
 		else
 			io.setAttribute("max-file-inactive", "900");
@@ -544,8 +552,8 @@ public class VolumeConfigWriter {
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("read-ahead", Boolean.toString(this.readAhead));
 		io.setAttribute("hash-type", this.hashType);
-		if(ext)
-			io.setAttribute("max-variable-segment-size","32");
+		if (ext)
+			io.setAttribute("max-variable-segment-size", "32");
 		root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");
@@ -573,11 +581,13 @@ public class VolumeConfigWriter {
 				Integer.toString(chunk_size * 1000));
 		vol.setAttribute("cluster-rack-aware",
 				Boolean.toString(clusterRackAware));
-		vol.setAttribute("read-timeout-seconds", Integer.toString(this.read_timeout));
-		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
+		vol.setAttribute("read-timeout-seconds",
+				Integer.toString(this.read_timeout));
+		vol.setAttribute("write-timeout-seconds",
+				Integer.toString(this.write_timeout));
 		int sn = new Random().nextInt();
-		if(sn < 0)
-			sn = sn *-1;
+		if (sn < 0)
+			sn = sn * -1;
 		vol.setAttribute("serial-number", Integer.toString(sn));
 		root.appendChild(vol);
 		Element cs = xmldoc.createElement("local-chunkstore");
@@ -629,39 +639,42 @@ public class VolumeConfigWriter {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
-			if(!awsAim) {
+			if (!awsAim) {
 				aws.setAttribute("aws-access-key", this.cloudAccessKey);
 				aws.setAttribute("aws-secret-key", this.cloudSecretKey);
 			}
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
-			if(ext) {
+			if (ext) {
 				this.chunk_size = 256;
-				
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
-				Element extended  = xmldoc.createElement("extended-config");
+
+				aws.setAttribute("chunkstore-class",
+						"org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
+				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("glacier-archive-days", "0");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
-				if(this.genericS3) {
-					Element cp  = xmldoc.createElement("connection-props");
+				if (this.genericS3) {
+					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
 					extended.setAttribute("disableDNSBucket", "true");
 					extended.appendChild(cp);
 				}
-					
-				if(this.bucketLocation!=null)
-				extended.setAttribute("default-bucket-location", this.bucketLocation);
+
+				if (this.bucketLocation != null)
+					extended.setAttribute("default-bucket-location",
+							this.bucketLocation);
 				cs.appendChild(extended);
-			} else if(bucketLocation != null) {
-				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("default-bucket-location", this.bucketLocation);
+			} else if (bucketLocation != null) {
+				Element extended = xmldoc.createElement("extended-config");
+				extended.setAttribute("default-bucket-location",
+						this.bucketLocation);
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -671,26 +684,29 @@ public class VolumeConfigWriter {
 			aws.setAttribute("gs-access-key", this.cloudAccessKey);
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
-			if(ext) {
+			if (ext) {
 				this.chunk_size = 1024;
-				
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
-				Element extended  = xmldoc.createElement("extended-config");
+
+				aws.setAttribute("chunkstore-class",
+						"org.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
+				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
-				if(this.bucketLocation!=null)
-				extended.setAttribute("default-bucket-location", this.bucketLocation);
+				if (this.bucketLocation != null)
+					extended.setAttribute("default-bucket-location",
+							this.bucketLocation);
 				cs.appendChild(extended);
-			} else if(bucketLocation != null) {
-				Element extended  = xmldoc.createElement("extended-config");
-				extended.setAttribute("default-bucket-location", this.bucketLocation);
+			} else if (bucketLocation != null) {
+				Element extended = xmldoc.createElement("extended-config");
+				extended.setAttribute("default-bucket-location",
+						this.bucketLocation);
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -700,15 +716,16 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-access-key", this.cloudAccessKey);
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
-			if(ext) {
+			if (ext) {
 				this.chunk_size = 1024;
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
-				Element extended  = xmldoc.createElement("extended-config");
+				aws.setAttribute("chunkstore-class",
+						"org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
+				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
-				extended.setAttribute("local-cache-size",this.cacheSize);
+				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
@@ -716,14 +733,14 @@ public class VolumeConfigWriter {
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
-		} else if(ext) {
+		} else if (ext) {
 			this.chunk_size = 1024;
-			Element extended  = xmldoc.createElement("extended-config");
+			Element extended = xmldoc.createElement("extended-config");
 			extended.setAttribute("block-size", "60 MB");
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "150000");
 			extended.setAttribute("sync-files", "false");
-			extended.setAttribute("local-cache-size",this.cacheSize);
+			extended.setAttribute("local-cache-size", this.cacheSize);
 			extended.setAttribute("map-cache-size", "100");
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
@@ -806,10 +823,8 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\".")
 				.hasArg(true).withArgName("password").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("aws-bucket-location")
-				.withDescription(
-						"The aws location for this bucket")
+		options.addOption(OptionBuilder.withLongOpt("aws-bucket-location")
+				.withDescription("The aws location for this bucket")
 				.hasArg(true).withArgName("aws location").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-require-auth")
@@ -836,8 +851,8 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("cloud-url")
 				.withDescription(
-						"The url of the blob server. e.g. http://s3server.localdomain/s3/").hasArg().withArgName("url")
-				.create());
+						"The url of the blob server. e.g. http://s3server.localdomain/s3/")
+				.hasArg().withArgName("url").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("base-path")
 				.withDescription(
@@ -863,8 +878,9 @@ public class VolumeConfigWriter {
 						"the file path to location for the io log.\n Defaults to: \n --base-path + "
 								+ File.separator + "sdfs.log").hasArg()
 				.withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("cloud-disable-test").withDescription("Disables testing authentication for s3").create()
-				);
+		options.addOption(OptionBuilder.withLongOpt("cloud-disable-test")
+				.withDescription("Disables testing authentication for s3")
+				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("io-safe-close")
 				.withDescription(
@@ -912,8 +928,8 @@ public class VolumeConfigWriter {
 				.withLongOpt("local-cache-size")
 				.withDescription(
 						"The local read cache size for data uploaded to the cloud. "
-								+ "\n Defaults to: \n 10 GB")
-				.hasArg().withArgName("Size + [MB,GB,TB]").create());
+								+ "\n Defaults to: \n 10 GB").hasArg()
+				.withArgName("Size + [MB,GB,TB]").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("io-meta-file-cache")
 				.withDescription(
@@ -1092,8 +1108,7 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Host name or IPv4 Address to listen on for incoming connections. Defaults to \"0.0.0.0\"")
 				.hasArg().withArgName("IPv4 Address").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("aws-aim")
+		options.addOption(OptionBuilder.withLongOpt("aws-aim")
 				.withDescription("Use aim authentication for access to AWS S3")
 				.create());
 		options.addOption(OptionBuilder
@@ -1158,10 +1173,8 @@ public class VolumeConfigWriter {
 								+ " any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node "
 								+ " for this cluster.").hasArg()
 				.withArgName("true|false").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("ext").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("noext").create());
+		options.addOption(OptionBuilder.withLongOpt("ext").create());
+		options.addOption(OptionBuilder.withLongOpt("noext").create());
 		return options;
 	}
 

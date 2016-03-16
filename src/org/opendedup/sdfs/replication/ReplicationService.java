@@ -156,11 +156,12 @@ public class ReplicationService implements Serializable {
 			this.persistResults();
 
 		} finally {
-			if(this.remoteSnapPath != null) {
+			if (this.remoteSnapPath != null) {
 				try {
 					ProcessDeleteFileCmd.execute(this.remoteSnapPath);
-				}catch(Exception e) {
-					SDFSLogger.getLog().error("unable to delete " + this.remoteSnapPath, e);
+				} catch (Exception e) {
+					SDFSLogger.getLog().error(
+							"unable to delete " + this.remoteSnapPath, e);
 				}
 			}
 			if (archive != null) {

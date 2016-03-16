@@ -8,32 +8,35 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class MFileRenamed extends GenericEvent{
-	
+public class MFileRenamed extends GenericEvent {
+
 	public MetaDataDedupFile mf;
 	public String from;
 	public String to;
 	private static final int pl = Main.volume.getPath().length();
-	public MFileRenamed(MetaDataDedupFile f,String from,String to) {
+
+	public MFileRenamed(MetaDataDedupFile f, String from, String to) {
 		super();
 		this.mf = f;
 		this.from = from;
 		this.to = to;
 	}
-	
+
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileRename");
-		dataset.addProperty("path",  mf.getPath().substring(pl));
+		dataset.addProperty("path", mf.getPath().substring(pl));
 		dataset.addProperty("from", this.from);
 		dataset.addProperty("to", this.to);
-		if(mf.isSymlink())
+		if (mf.isSymlink())
 			dataset.addProperty("fileType", "symlink");
-		else if(mf.isDirectory())
+		else if (mf.isDirectory())
 			dataset.addProperty("fileType", "dir");
 		else
 			dataset.addProperty("fileType", "file");
-		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).create();
+		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
+				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+				.create();
 		return gson.toJson(dataset);
 	}
 }

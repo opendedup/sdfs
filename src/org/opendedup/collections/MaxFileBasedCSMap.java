@@ -58,13 +58,14 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
-		long msz = (((long)HashFunctionPool.hashLength + 8L)*maxSize)/140L;
+		long msz = (((long) HashFunctionPool.hashLength + 8L) * maxSize) / 140L;
 		SDFSLogger.getLog().info("Size per table is " + msz);
-		if(msz > Integer.MAX_VALUE) {
-			SDFSLogger.getLog().info("######### Using larger hash bdb size ################");
+		if (msz > Integer.MAX_VALUE) {
+			SDFSLogger.getLog().info(
+					"######### Using larger hash bdb size ################");
 			maps = new BloomFileByteArrayLongMap[256];
 			ilg = true;
-		}else {
+		} else {
 			maps = new BloomFileByteArrayLongMap[128];
 		}
 		this.size = (maxSize);
@@ -83,8 +84,8 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 
 		int hashb = hash[2];
 		if (hashb < 0) {
-			if(ilg)
-				hashb = ((hashb * -1) +127);
+			if (ilg)
+				hashb = ((hashb * -1) + 127);
 			else
 				hashb = ((hashb * -1) - 1);
 		}
@@ -180,8 +181,9 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 			executor.shutdown();
 			try {
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-					  SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
-					}
+					SDFSLogger.getLog().debug(
+							"Awaiting fdisk completion of threads.");
+				}
 			} catch (InterruptedException e) {
 				throw new IOException(e);
 			}
@@ -198,6 +200,7 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		BloomFileByteArrayLongMap map = null;
 		LargeBloomFilter bf = null;
 		AtomicLong claims = null;
+
 		protected ClaimShard(BloomFileByteArrayLongMap map,
 				LargeBloomFilter bf, AtomicLong claims) {
 			this.map = map;
@@ -286,7 +289,8 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
+	public InsertRecord put(ChunkData cm) throws IOException,
+			HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName
 					+ " is close");
@@ -578,6 +582,6 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void cache(byte[] key) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

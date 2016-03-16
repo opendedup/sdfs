@@ -16,10 +16,10 @@ public class CreateFile {
 		try {
 			Document doc = XMLUtils.getXMLDoc("create-file");
 			Element root = doc.getDocumentElement();
-			File f = new File(Main.volume.getPath() + File.separator+file);
-			if(f.exists()) {
-			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			mf.unmarshal();
+			File f = new File(Main.volume.getPath() + File.separator + file);
+			if (f.exists()) {
+				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				mf.unmarshal();
 			}
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {

@@ -80,9 +80,9 @@ public class CopyExtents {
 					SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 					WritableCacheBuffer ddc = (WritableCacheBuffer) ddf
 							.getWriteBuffer(_dpos);
-					
+
 					HashLocPair p = sdc.getWL(_so);
-					
+
 					if (p.nlen > _rem) {
 						p.nlen = (int) _rem;
 					}
@@ -93,13 +93,20 @@ public class CopyExtents {
 					}
 					try {
 						ddc.copyExtent(p);
-					}catch(DataArchivedException e) {
-						if(Main.checkArchiveOnRead){
-							SDFSLogger.getLog().warn("Archived data found in "+ sdf.getMetaFile().getPath()+ " at " + _spos + ". Recovering data from archive. This may take up to 4 hours");
+					} catch (DataArchivedException e) {
+						if (Main.checkArchiveOnRead) {
+							SDFSLogger
+									.getLog()
+									.warn("Archived data found in "
+											+ sdf.getMetaFile().getPath()
+											+ " at "
+											+ _spos
+											+ ". Recovering data from archive. This may take up to 4 hours");
 							RestoreArchive.recoverArchives(smf);
-							return getResult(srcfile, dstfile, sstart,len, dstart);
-						}
-						else throw e;
+							return getResult(srcfile, dstfile, sstart, len,
+									dstart);
+						} else
+							throw e;
 					}
 					ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
 					ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
@@ -119,8 +126,10 @@ public class CopyExtents {
 			root.setAttribute("written", Long.toString(written));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"error in copy extent src=" + srcfile + " dst=" + dstfile + " sstart=" + sstart + " dstart=" +dstart + " len=" + len + " spos" + _spos + " dpos=" + _dpos,
-					e);
+					"error in copy extent src=" + srcfile + " dst=" + dstfile
+							+ " sstart=" + sstart + " dstart=" + dstart
+							+ " len=" + len + " spos" + _spos + " dpos="
+							+ _dpos, e);
 			throw e;
 		} finally {
 		}

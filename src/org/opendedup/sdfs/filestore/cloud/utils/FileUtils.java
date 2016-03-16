@@ -26,8 +26,8 @@ public class FileUtils {
 	private static final String IATTR = "DSHINT";
 	private static final String LATTR = "DSHLNG";
 
-	public static HashMap<String, String> getFileMetaData(File file, boolean encrypt)
-			throws IOException {
+	public static HashMap<String, String> getFileMetaData(File file,
+			boolean encrypt) throws IOException {
 		HashMap<String, String> md = new HashMap<String, String>();
 		if (OSValidator.isUnix()) {
 			boolean isSymbolicLink = Files.isSymbolicLink(file.toPath());
@@ -59,8 +59,8 @@ public class FileUtils {
 		}
 
 	}
-	
-	public static boolean fileValid(File f,byte [] hash) throws IOException {
+
+	public static boolean fileValid(File f, byte[] hash) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(f)) {
 			MessageDigest digest = MessageDigest.getInstance("MD5");
 
@@ -70,16 +70,15 @@ public class FileUtils {
 			while ((bytesRead = inputStream.read(bytesBuffer)) != -1) {
 				digest.update(bytesBuffer, 0, bytesRead);
 			}
-			byte [] b = digest
-					.digest();
+			byte[] b = digest.digest();
 			return Arrays.equals(b, hash);
-			
+
 			// initialize blob properties and assign md5 content
 			// generated.
-			
+
 		} catch (Exception ex) {
-			throw new IOException("Could not generate hash from file " + f.getPath(),
-					ex);
+			throw new IOException("Could not generate hash from file "
+					+ f.getPath(), ex);
 		}
 	}
 
@@ -123,10 +122,11 @@ public class FileUtils {
 											md.get(s), encrypt)),
 									LinkOption.NOFOLLOW_LINKS);
 
-					} else if(s.startsWith(LATTR)) {
+					} else if (s.startsWith(LATTR)) {
 						String nm = s.substring(LATTR.length());
-						if(nm.equalsIgnoreCase("mtime")) {
-							f.setLastModified(EncyptUtils.decLong(md.get(s), encrypt));
+						if (nm.equalsIgnoreCase("mtime")) {
+							f.setLastModified(EncyptUtils.decLong(md.get(s),
+									encrypt));
 						}
 					}
 				}

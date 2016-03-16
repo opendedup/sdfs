@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 package org.opendedup.sdfs.windows.fs;
 
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,27 +61,34 @@ public class MetaDataFileInfo {
 		fileIndex = getNextFileIndex();
 		Path file = Paths.get(mf.getPath());
 		try {
-		    DosFileAttributes attr =
-		        Files.readAttributes(file, DosFileAttributes.class);
-		    if(attr.isArchive())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_ARCHIVE.getValue();
-		    if(attr.isDirectory())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY.getValue();
-		    if(attr.isHidden())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_HIDDEN.getValue();
-		    if(attr.isReadOnly())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_READONLY.getValue();
-		    if(attr.isRegularFile())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_NORMAL.getValue();
-		    if(attr.isSymbolicLink())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_REPARSE_POINT.getValue();
-		    if(attr.isSystem())
-		    	fileAttribute |=FileAttributeFlags.FILE_ATTRIBUTE_SYSTEM.getValue();
+			DosFileAttributes attr = Files.readAttributes(file,
+					DosFileAttributes.class);
+			if (attr.isArchive())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_ARCHIVE
+						.getValue();
+			if (attr.isDirectory())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_DIRECTORY
+						.getValue();
+			if (attr.isHidden())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_HIDDEN
+						.getValue();
+			if (attr.isReadOnly())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_READONLY
+						.getValue();
+			if (attr.isRegularFile())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_NORMAL
+						.getValue();
+			if (attr.isSymbolicLink())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_REPARSE_POINT
+						.getValue();
+			if (attr.isSystem())
+				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_SYSTEM
+						.getValue();
 		} catch (IOException | UnsupportedOperationException x) {
-		    SDFSLogger.getLog().error("attributes could not be created for " + this.fileName,x);
+			SDFSLogger.getLog().error(
+					"attributes could not be created for " + this.fileName, x);
 		}
-		
-		
+
 		creationTime = FileTimeUtils.toFileTime(new Date(0));
 		lastAccessTime = FileTimeUtils
 				.toFileTime(new Date(mf.getLastAccessed()));
@@ -95,8 +101,7 @@ public class MetaDataFileInfo {
 		String lName = FilenameUtils.getName(fileName);
 		String sName = Utils.toShortName(fileName);
 		Win32FindData d = new Win32FindData(fileAttribute, creationTime,
-				lastAccessTime, lastWriteTime, fileSize, 0, 0, lName,
-				sName);
+				lastAccessTime, lastWriteTime, fileSize, 0, 0, lName, sName);
 		return d;
 	}
 

@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.LargeBloomFilter;
@@ -39,12 +38,13 @@ public interface AbstractHashesMap {
 			throws IOException, HashtableFullException;
 
 	public abstract boolean update(ChunkData cm) throws IOException;
-	
-	public abstract void cache(byte [] key) throws IOException;
+
+	public abstract void cache(byte[] key) throws IOException;
 
 	public abstract long get(byte[] key) throws IOException;
 
-	public abstract byte[] getData(byte[] key) throws IOException, DataArchivedException;
+	public abstract byte[] getData(byte[] key) throws IOException,
+			DataArchivedException;
 
 	public abstract boolean remove(ChunkData cm) throws IOException;
 

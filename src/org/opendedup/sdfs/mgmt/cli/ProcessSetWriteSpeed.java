@@ -11,7 +11,7 @@ public class ProcessSetWriteSpeed {
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			int sz = Integer.parseInt(ssz);
-			formatter.format("file=%s&cmd=setwritespeed&sp=%d", "null",sz);
+			formatter.format("file=%s&cmd=setwritespeed&sp=%d", "null", sz);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
@@ -24,7 +24,8 @@ public class ProcessSetWriteSpeed {
 				}
 				String status = root.getAttribute("status");
 				String msg = root.getAttribute("msg");
-				System.out.printf("Set Write Speed [%s] returned [%s]\n", status, msg);
+				System.out.printf("Set Write Speed [%s] returned [%s]\n",
+						status, msg);
 			}
 
 		} catch (Exception e) {

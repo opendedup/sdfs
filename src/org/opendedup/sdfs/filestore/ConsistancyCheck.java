@@ -16,14 +16,19 @@ public class ConsistancyCheck {
 	static AtomicLong currentCount = new AtomicLong();
 	static AtomicLong corruption = new AtomicLong();
 
-	public static synchronized void runCheck(AbstractHashesMap map, AbstractChunkStore store) {
+	public static synchronized void runCheck(AbstractHashesMap map,
+			AbstractChunkStore store) {
 		try {
 			store.iterationInit(false);
-			System.out.println("Running Consistancy Check on DSE, this may take a while");
-			SDFSLogger.getLog().warn("Running Consistancy Check on DSE, this may take a while");
-			SDFSEvent evt = SDFSEvent.consistancyCheckEvent("Running Consistancy Check on DSE, this may take a while",
+			System.out
+					.println("Running Consistancy Check on DSE, this may take a while");
+			SDFSLogger.getLog().warn(
+					"Running Consistancy Check on DSE, this may take a while");
+			SDFSEvent evt = SDFSEvent.consistancyCheckEvent(
+					"Running Consistancy Check on DSE, this may take a while",
 					Main.mountEvent);
-			CommandLineProgressBar bar = new CommandLineProgressBar("Scanning DSE", map.getSize(), System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar(
+					"Scanning DSE", map.getSize(), System.out);
 			evt.maxCt = map.getSize();
 			ArrayList<HashFetcher> al = new ArrayList<HashFetcher>();
 			for (int i = 0; i < Main.writeThreads; i++) {
@@ -53,19 +58,25 @@ public class ConsistancyCheck {
 			bar.finish();
 			System.out.println("Finished");
 			if (corruption.get() > 0) {
-				SDFSLogger.getLog().warn("Corruption found for [" + corruption + "] blocks");
-				System.out.println("Corruption found for [" + corruption + "] blocks");
+				SDFSLogger.getLog().warn(
+						"Corruption found for [" + corruption + "] blocks");
+				System.out.println("Corruption found for [" + corruption
+						+ "] blocks");
 			}
 
-			System.out.println("Succesfully Ran Consistance Check for [" + records + "] records, recovered ["
-					+ recordsRecovered + "]");
+			System.out.println("Succesfully Ran Consistance Check for ["
+					+ records + "] records, recovered [" + recordsRecovered
+					+ "]");
 
-			SDFSLogger.getLog().warn("Succesfully Ran Consistance Check for [" + records + "] records, recovered ["
-					+ recordsRecovered + "]");
-			evt.endEvent("Succesfully Ran Consistance Check for [" + records + "] records, recovered ["
-					+ recordsRecovered + "]");
+			SDFSLogger
+					.getLog()
+					.warn("Succesfully Ran Consistance Check for [" + records
+							+ "] records, recovered [" + recordsRecovered + "]");
+			evt.endEvent("Succesfully Ran Consistance Check for [" + records
+					+ "] records, recovered [" + recordsRecovered + "]");
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("Unable to recover records because " + e.toString(), e);
+			SDFSLogger.getLog().error(
+					"Unable to recover records because " + e.toString(), e);
 		}
 	}
 
@@ -102,11 +113,13 @@ public class ConsistancyCheck {
 						}
 					} catch (Exception e) {
 						corruption.incrementAndGet();
-						SDFSLogger.getLog().warn("Data Corruption found in datastore", e);
+						SDFSLogger.getLog().warn(
+								"Data Corruption found in datastore", e);
 					}
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to recover records because " + e.toString(), e);
+				SDFSLogger.getLog().error(
+						"Unable to recover records because " + e.toString(), e);
 			} finally {
 				running = false;
 			}

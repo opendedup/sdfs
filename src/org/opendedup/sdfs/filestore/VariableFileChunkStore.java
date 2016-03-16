@@ -56,11 +56,11 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	 * @param name
 	 *            the name of the chunk store.
 	 */
-	
+
 	public VariableFileChunkStore() {
 		createCS(Main.chunkStore);
 	}
-	
+
 	private void createCS(String location) {
 		if (Main.volume != null && HashFunctionPool.max_hash_cluster > 1) {
 			storeLengths = FactorTest.factorsOf(Main.chunkStorePageSize);
@@ -150,9 +150,9 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 			System.exit(-1);
 		}
 	}
-	
+
 	public VariableFileChunkStore(String location) {
-		
+
 	}
 
 	/*
@@ -168,8 +168,6 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 
 			} catch (Exception e) {
 			}
-			
-			
 
 		}
 		try {
@@ -197,32 +195,31 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		}
 
 	}
-	
+
 	public void deleteStore() {
-			SDFSLogger.getLog().debug("Closing chunkstore " + this.name);
+		SDFSLogger.getLog().debug("Closing chunkstore " + this.name);
+		try {
+			f.delete();
+
+		} catch (Exception e) {
+
+		}
+		try {
+			bsf.delete();
+		} catch (Exception e) {
+		}
+		try {
+			lsf.delete();
+		} catch (Exception e) {
+		}
+		for (FileChunkStore store : st) {
 			try {
-				f.delete();
+				store.deleteStore();
 
 			} catch (Exception e) {
-				
 			}
-			try {
-					bsf.delete();
-			} catch (Exception e) {
-			}
-			try {
-				lsf.delete();
-				}catch(Exception e) {}
-			for (FileChunkStore store : st) {
-				try {
-					store.deleteStore();
 
-				} catch (Exception e) {
-				}
-				
-				
-
-			}
+		}
 	}
 
 	public void sync() throws IOException {
@@ -558,7 +555,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 					chk = new ChunkData(_hash, pos);
 					chk.setChunk(chunk);
 					chk.cLen = chunk.length;
-				}else {
+				} else {
 					chk = new ChunkData(_hash, pos);
 				}
 				return chk;
@@ -686,6 +683,6 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

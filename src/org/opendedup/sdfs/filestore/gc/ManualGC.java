@@ -14,8 +14,7 @@ public class ManualGC {
 
 	public static SDFSEvent evt = null;
 
-	public static long clearChunks() throws InterruptedException,
-			IOException {
+	public static long clearChunks() throws InterruptedException, IOException {
 		return clearChunksMills();
 	}
 
@@ -32,10 +31,10 @@ public class ManualGC {
 		try {
 
 			long rm = 0;
-			if(Main.disableGC) {
+			if (Main.disableGC) {
 				evt = SDFSEvent
-				.gcInfoEvent("SDFS Volume Cleanup not enabled for this volume "
-						+ Main.volume.getName());
+						.gcInfoEvent("SDFS Volume Cleanup not enabled for this volume "
+								+ Main.volume.getName());
 				evt.maxCt = 100;
 				evt.curCt = 0;
 				evt.endEvent("SDFS Volume Cleanup not enabled for this volume "
@@ -45,8 +44,7 @@ public class ManualGC {
 				} catch (Exception e) {
 				}
 				return 0;
-			}
-			else if (Main.chunkStoreLocal)
+			} else if (Main.chunkStoreLocal)
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
 								+ Main.volume.getName());
@@ -98,18 +96,19 @@ public class ManualGC {
 	private static long runGC() throws IOException {
 		long rm = 0;
 		try {
-			if(Main.disableGC)
+			if (Main.disableGC)
 				return 0;
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				BloomFDisk fd = new BloomFDisk(evt);
 				evt.curCt = 33;
-				rm = HCServiceProxy.processHashClaims(evt,fd.getResults());
+				rm = HCServiceProxy.processHashClaims(evt, fd.getResults());
 				evt.curCt = 66;
 			} else {
-				FDiskEvent fevt = SDFSEvent.fdiskInfoEvent("running distributed fdisk", evt);
+				FDiskEvent fevt = SDFSEvent.fdiskInfoEvent(
+						"running distributed fdisk", evt);
 				HCServiceProxy.runFDisk(fevt);
 				evt.curCt = 33;
-				HCServiceProxy.processHashClaims(evt,null);
+				HCServiceProxy.processHashClaims(evt, null);
 				evt.curCt = 66;
 			}
 

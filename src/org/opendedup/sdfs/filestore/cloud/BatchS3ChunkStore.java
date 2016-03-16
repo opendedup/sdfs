@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -171,9 +170,10 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public byte[] getChunk(byte[] hash, long start, int len) throws IOException, DataArchivedException {
-		
-			return HashBlobArchive.getBlock(hash, start);
+	public byte[] getChunk(byte[] hash, long start, int len)
+			throws IOException, DataArchivedException {
+
+		return HashBlobArchive.getBlock(hash, start);
 
 	}
 
@@ -257,9 +257,9 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 			return Long.toString(id);
 		}
 	}
-	
-	public void cacheData(byte[] hash, long start, int len)
-			throws IOException, DataArchivedException {
+
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		try {
 			HashBlobArchive.cacheArchive(hash, start);
 		} catch (ExecutionException e) {
@@ -716,7 +716,8 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
+	public void writeHashBlobArchive(HashBlobArchive arc, long id)
+			throws IOException {
 		String haName = this.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
@@ -765,7 +766,8 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 			this.compressedLength.addAndGet(chunks.length);
 			this.currentLength.addAndGet(arc.getLen());
 		} catch (Throwable e) {
-			SDFSLogger.getLog().fatal("unable to upload " + arc.getID() + " with id " +id, e);
+			SDFSLogger.getLog().fatal(
+					"unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
 
@@ -786,11 +788,11 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 		DataInputStream in = new DataInputStream(obj.getDataInputStream());
 		in.readFully(data);
 		obj.closeDataInputStream();
-		
+
 		if (obj.containsMetadata("compress")) {
 			compress = Boolean.parseBoolean((String) obj
 					.getMetadata("compress"));
-		} 
+		}
 
 		if (compress)
 			data = CompressionUtils.decompressZLIB(data);
@@ -988,22 +990,20 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	public void sync() throws IOException {
 		HashBlobArchive.sync();
 	}
-	
+
 	private long getLastModified(String st) {
 		StorageObject obj = null;
 		try {
-			obj = s3Service.getObjectDetails(this.name,
-					st);
-			if(obj.containsMetadata("lastmodified")) {
-				return Long.parseLong((String) obj
-					.getMetadata("lastmodified"));
+			obj = s3Service.getObjectDetails(this.name, st);
+			if (obj.containsMetadata("lastmodified")) {
+				return Long.parseLong((String) obj.getMetadata("lastmodified"));
 			} else {
 				return 0;
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			return -1;
 		} finally {
-			if(obj != null) {
+			if (obj != null) {
 				try {
 					obj.closeDataInputStream();
 				} catch (IOException e) {
@@ -1017,7 +1017,7 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 		BufferedInputStream in = null;
 		String pth = pp + "/"
 				+ this.encString(to, Main.chunkStoreEncryptionEnabled);
-		if(f.lastModified() == this.getLastModified(pth))
+		if (f.lastModified() == this.getLastModified(pth))
 			return;
 		String rnd = RandomGUID.getGuid();
 		File p = new File(this.staged_sync_location, rnd);
@@ -1058,7 +1058,8 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 			s3Object.addMetadata("lz4compress", Boolean.toString(Main.compress));
 			s3Object.addMetadata("encrypt",
 					Boolean.toString(Main.chunkStoreEncryptionEnabled));
-			s3Object.addMetadata("lastmodified", Long.toString(f.lastModified()));
+			s3Object.addMetadata("lastmodified",
+					Long.toString(f.lastModified()));
 			s3Object.setContentType("binary/octet-stream");
 			in = new BufferedInputStream(new FileInputStream(p), 32768);
 			try {
@@ -1288,13 +1289,13 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 						"unable to connect to bucket try " + i + " of 3", e);
 			} finally {
 				try {
-					if(obj!= null)
-					obj.closeDataInputStream();
+					if (obj != null)
+						obj.closeDataInputStream();
 				} catch (IOException _e) {
 				}
 			}
 		}
-		if(e != null)
+		if (e != null)
 			SDFSLogger.getLog().warn(
 					"unable to connect to bucket try " + 3 + " of 3", e);
 		return false;
@@ -1302,28 +1303,28 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void setReadSpeed(int kbps) {
-		HashBlobArchive.setReadSpeed((double)kbps);
+		HashBlobArchive.setReadSpeed((double) kbps);
 	}
 
 	@Override
 	public void setWriteSpeed(int kbps) {
-		HashBlobArchive.setWriteSpeed((double)kbps);
+		HashBlobArchive.setWriteSpeed((double) kbps);
 	}
 
 	@Override
 	public void setCacheSize(long sz) throws IOException {
 		HashBlobArchive.setCacheSize(sz);
-		
+
 	}
 
 	@Override
 	public int getReadSpeed() {
-		return (int)HashBlobArchive.getReadSpeed();
+		return (int) HashBlobArchive.getReadSpeed();
 	}
 
 	@Override
 	public int getWriteSpeed() {
-		return (int)HashBlobArchive.getWriteSpeed();
+		return (int) HashBlobArchive.getWriteSpeed();
 	}
 
 	@Override
@@ -1339,7 +1340,7 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	@Override
 	public String restoreBlock(long id, byte[] hash) {
 		return Long.toString(id);
-		
+
 	}
 
 	@Override
@@ -1356,21 +1357,21 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void recoverVolumeConfig(String name, File to, String parentPath,
-			String accessKey, String secretKey,String bucket, Properties props) {
+			String accessKey, String secretKey, String bucket, Properties props) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -1389,7 +1390,7 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 		} catch (ServiceException e) {
 			SDFSLogger.getLog().error("unable to initialize", e);
 		}
-		
+
 	}
 
 	@Override
@@ -1414,7 +1415,7 @@ public class BatchS3ChunkStore implements AbstractChunkStore,
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

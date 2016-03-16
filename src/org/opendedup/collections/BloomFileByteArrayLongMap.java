@@ -471,6 +471,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	 * @throws IOException
 	 */
 	byte[] current = new byte[FREE.length];
+
 	private int index(byte[] key) throws IOException {
 
 		// From here on we know obj to be non-null
@@ -482,7 +483,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			return -1;
 		else
 			index = index * EL;
-		
+
 		keys.position(index);
 		keys.get(current);
 
@@ -634,7 +635,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				"No free or removed slots available. Key set full?!!");
 	}
 
-	//transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
+	// transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
 
 	/*
 	 * (non-Javadoc)
@@ -642,7 +643,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException,
+			IOException {
 		try {
 			byte[] key = cm.getHash();
 			this.hashlock.lock();
@@ -657,19 +659,19 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 			else
 				pos = this.insertionIndex(key, bf.mightContain(kb));
 			if (pos < 0) {
-				
+
 				int npos = -pos - 1;
 				npos = (npos / EL);
 				this.claims.set(npos);
 				this.bf.put(kb);
 				long p = this.get(key);
-				return new InsertRecord(false,p);
+				return new InsertRecord(false, p);
 			} else {
 				if (!cm.recoverd) {
 					try {
-					cm.persistData(true);
-					}catch(HashExistsException e) {
-						return new InsertRecord(false,e.getPos());
+						cm.persistData(true);
+					} catch (HashExistsException e) {
+						return new InsertRecord(false, e.getPos());
 					}
 				}
 				this.keys.position(pos);
@@ -683,7 +685,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
 				this.bf.put(kb);
-				return new InsertRecord(true,cm.getcPos());
+				return new InsertRecord(true, cm.getcPos());
 			}
 			// this.store.position(pos);
 			// this.store.put(storeID);
@@ -692,8 +694,8 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 		}
 	}
 
-	public InsertRecord put(byte[] key, long value) throws HashtableFullException,
-			IOException {
+	public InsertRecord put(byte[] key, long value)
+			throws HashtableFullException, IOException {
 		try {
 			this.hashlock.lock();
 			if (this.sz.get() >= size)
@@ -712,7 +714,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				this.claims.set(npos);
 				this.bf.put(kb);
 				long p = this.get(key);
-				return new InsertRecord(false,p);
+				return new InsertRecord(false, p);
 			} else {
 				this.keys.position(pos);
 				this.keys.put(key);
@@ -727,7 +729,7 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 				this.bf.put(kb);
 				// this.store.position(pos);
 				// this.store.put(storeID);
-				return new InsertRecord(true,value);
+				return new InsertRecord(true, value);
 			}
 		} finally {
 			this.hashlock.unlock();
@@ -911,8 +913,6 @@ public class BloomFileByteArrayLongMap implements AbstractShard, Serializable {
 	@Override
 	public void sync() throws SyncFailedException, IOException {
 	}
-
-
 
 	public static class KeyBlob implements Serializable {
 		/**

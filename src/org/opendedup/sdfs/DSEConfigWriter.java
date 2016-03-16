@@ -149,7 +149,7 @@ public class DSEConfigWriter {
 			}
 		}
 		if (cmd.hasOption("encryption-iv")) {
-			String iv =  cmd.getOptionValue("encryption-iv");
+			String iv = cmd.getOptionValue("encryption-iv");
 			this.chunk_store_iv = iv;
 		}
 
@@ -340,12 +340,12 @@ public class DSEConfigWriter {
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			cs.appendChild(aws);
 		}
-		Element extended  = xmldoc.createElement("extended-config");
+		Element extended = xmldoc.createElement("extended-config");
 		extended.setAttribute("block-size", "30 MB");
 		extended.setAttribute("allow-sync", "false");
 		extended.setAttribute("upload-thread-sleep-time", "15000");
 		extended.setAttribute("sync-files", "false");
-		extended.setAttribute("local-cache-size","10 GB");
+		extended.setAttribute("local-cache-size", "10 GB");
 		extended.setAttribute("map-cache-size", "100");
 		extended.setAttribute("io-threads", "16");
 		extended.setAttribute("delete-unclaimed", "true");

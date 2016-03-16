@@ -26,11 +26,10 @@ public class MountSDFS {
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("d", false, "turn on filesystem debugging");
-		options.addOption("cfr",false,"Restores files from cloud storage if the backend cloud store supports it");
-		options.addOption("cc",false,"Runs Consistency Check");
-		options.addOption(
-				"vc",
-				true,
+		options.addOption("cfr", false,
+				"Restores files from cloud storage if the backend cloud store supports it");
+		options.addOption("cc", false, "Runs Consistency Check");
+		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. "
 						+ "c:\\program files\\sdfs\\etc\\dedup-volume-cfg.xml");
 		options.addOption("nossl", false,
@@ -50,7 +49,9 @@ public class MountSDFS {
 		return options;
 	}
 
-	public static void main(String[] args) throws ParseException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+	public static void main(String[] args) throws ParseException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
 		checkJavaVersion();
 		int port = -1;
 		String volumeConfigFile = null;
@@ -61,7 +62,7 @@ public class MountSDFS {
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
 		ArrayList<String> volumes = new ArrayList<String>();
-		
+
 		fal.add("-f");
 		if (cmd.hasOption("h")) {
 			printHelp(options);
@@ -80,14 +81,14 @@ public class MountSDFS {
 			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
 		}
-		if(cmd.hasOption("cfr")) {
+		if (cmd.hasOption("cfr")) {
 			Main.syncDL = true;
 			Main.runConsistancyCheck = true;
 		}
-		if(cmd.hasOption("cc")) {
+		if (cmd.hasOption("cc")) {
 			Main.runConsistancyCheck = true;
 		}
-		if(cmd.hasOption("d")) {
+		if (cmd.hasOption("d")) {
 			debug = true;
 		}
 		if (cmd.hasOption("rv")) {
@@ -97,7 +98,7 @@ public class MountSDFS {
 				volumes.add(st.nextToken());
 			}
 		}
-		if(cmd.hasOption("p")) {
+		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
 
@@ -148,7 +149,7 @@ public class MountSDFS {
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 
 		try {
-			sdfsService.start(useSSL,port);
+			sdfsService.start(useSSL, port);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -162,17 +163,18 @@ public class MountSDFS {
 			String[] sFal = new String[fal.size()];
 			fal.toArray(sFal);
 			for (int i = 0; i < sFal.length; i++) {
-				//System.out.println(sFal[i]);
+				// System.out.println(sFal[i]);
 			}
 			try {
-			DriveIcon.addIcon(cmd.getOptionValue("m"));
-			}catch(Exception e) {
+				DriveIcon.addIcon(cmd.getOptionValue("m"));
+			} catch (Exception e) {
 				e.printStackTrace();
-				System.err.println("Unable to add icon for drive " + cmd.getOptionValue("m"));
+				System.err.println("Unable to add icon for drive "
+						+ cmd.getOptionValue("m"));
 			}
 			WinSDFS sdfs = new WinSDFS();
-			
-			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath(),debug);
+
+			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath(), debug);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

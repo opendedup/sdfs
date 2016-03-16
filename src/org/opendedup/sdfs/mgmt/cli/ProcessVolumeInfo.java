@@ -56,8 +56,9 @@ public class ProcessVolumeInfo {
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
 									0);
 				} else {
-					double dedupRate = (1-((double) dseSz / (double) capacitySz) * 100);
-					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					double dedupRate = (1 - ((double) dseSz / (double) capacitySz) * 100);
+					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+							.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");
 					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 					System.out
@@ -70,7 +71,8 @@ public class ProcessVolumeInfo {
 									0);
 				} else {
 					double dedupRate = (1 - ((double) compSz / (double) currentSz)) * 100;
-					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+							.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");
 					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 					System.out
@@ -81,7 +83,8 @@ public class ProcessVolumeInfo {
 					System.out.printf("Compression Rate: %d%%\n", 0);
 				} else {
 					double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
-					DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+							.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");
 					compRate = Double.valueOf(twoDForm.format(compRate));
 					System.out.printf("Compression Rate: %s%%\n",

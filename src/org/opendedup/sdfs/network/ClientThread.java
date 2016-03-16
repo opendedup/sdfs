@@ -123,7 +123,8 @@ public class ClientThread extends Thread {
 					int len = is.readInt();
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
-					InsertRecord rec = HCServiceProxy.writeChunk(hash, chunkBytes);
+					InsertRecord rec = HCServiceProxy.writeChunk(hash,
+							chunkBytes);
 					try {
 						writelock.lock();
 						os.writeBoolean(rec.getInserted());
@@ -157,8 +158,9 @@ public class ClientThread extends Thread {
 						try {
 							HashChunk ck = chunks.get(i);
 							if (ck != null) {
-								rsults.add(i, Boolean.valueOf(HCServiceProxy.writeChunk(
-										ck.getName(), ck.getData()).getInserted()));
+								rsults.add(i, Boolean.valueOf(HCServiceProxy
+										.writeChunk(ck.getName(), ck.getData())
+										.getInserted()));
 							} else
 								rsults.add(i, null);
 						} catch (Exception e) {
@@ -206,8 +208,7 @@ public class ClientThread extends Thread {
 								os.write(dChunk.getData());
 								os.flush();
 							} catch (IOException e) {
-								
-									
+
 								throw new IOException(e);
 							} finally {
 								writelock.unlock();

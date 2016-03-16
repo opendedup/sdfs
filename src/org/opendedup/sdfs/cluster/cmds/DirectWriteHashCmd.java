@@ -141,15 +141,15 @@ public class DirectWriteHashCmd implements IOClientCmd {
 				@Override
 				public void setPool(HashClientPool pool) {
 					this.pool = pool;
-					
+
 				}
 
 			};
 			ArrayList<PoolHC> ap = new ArrayList<PoolHC>();
 			for (HashClientPool pool : pools) {
 				if (pool != null) {
-					HashClient hc = (HashClient)pool.borrowObject();
-					
+					HashClient hc = (HashClient) pool.borrowObject();
+
 					hc.writeChunkAsync(this.hash, this.aContents, 0,
 							this.aContents.length, l);
 					executor.execute(hc);
@@ -175,13 +175,13 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					}
 				}
 			}
-				for(PoolHC phc : ap) {
-					try {
+			for (PoolHC phc : ap) {
+				try {
 					phc.pool.returnObject(phc.hc);
-					}catch(Exception e) {
-						SDFSLogger.getLog().warn("unable to return hc to pool", e);
-					}
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to return hc to pool", e);
 				}
+			}
 			if (pos == 1)
 				throw new IOException("unable to write to any storage nodes");
 		} catch (Exception e) {
@@ -235,7 +235,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 			}
 		}
 	}
-	
+
 	private static class PoolHC {
 		HashClient hc;
 		HashClientPool pool;

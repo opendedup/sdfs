@@ -2,7 +2,6 @@ package fuse.SDFS;
 
 import java.io.File;
 
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -104,7 +103,7 @@ public class SDFSCmds {
 		try {
 			mf = MetaFileStore.getMF(internalPath);
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error getting attrs",e);
+			SDFSLogger.getLog().error("error getting attrs", e);
 		}
 		File f = new File(internalPath);
 		if (!f.isDirectory()) {
@@ -178,7 +177,7 @@ public class SDFSCmds {
 					try {
 						mf = MetaFileStore.getMF(f.getPath());
 					} catch (Exception e) {
-						SDFSLogger.getLog().error("error getting attrs",e);
+						SDFSLogger.getLog().error("error getting attrs", e);
 					}
 					long val = Long.parseLong(valStr);
 					if (name.equalsIgnoreCase("user.sdfs.ActualBytesWritten")) {
@@ -257,7 +256,8 @@ public class SDFSCmds {
 					+ "] is a directory. This command cannot be executed on directories";
 		else {
 			try {
-				MetaFileStore.getMF(internalPath).getDedupFile(false).writeCache();
+				MetaFileStore.getMF(internalPath).getDedupFile(false)
+						.writeCache();
 				return "SUCCESS Flush File : Write Cache Flushed for "
 						+ externalPath;
 			} catch (Exception e) {

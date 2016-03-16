@@ -85,12 +85,15 @@ public class MAzureServicePool {
 		SDFSLogger.getLog().info("pool size is " + this.passiveObjects.size());
 		CloudBlobClient serviceClient = account.createCloudBlobClient();
 		serviceClient = account.createCloudBlobClient();
-		serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads*2);
-		serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs(10*1000);
-		serviceClient.getDefaultRequestOptions().setRetryPolicyFactory(new RetryExponentialRetry(500,5));
+		serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(
+				Main.dseIOThreads * 2);
+		serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs(
+				10 * 1000);
+		serviceClient.getDefaultRequestOptions().setRetryPolicyFactory(
+				new RetryExponentialRetry(500, 5));
 		CloudBlobContainer container = serviceClient
 				.getContainerReference(this.bucket);
-		
+
 		container.createIfNotExists();
 		return container;
 	}

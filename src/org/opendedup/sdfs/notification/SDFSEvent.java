@@ -74,15 +74,18 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type RSP = new Type("Set Read Speed");
 	public transient static final Type WSP = new Type("Set Write Speed");
 	public transient static final Type CF = new Type("Importing Cloud File");
-	public transient static final Type ARCHIVERESTORE = new Type("Restore from Glacier");
+	public transient static final Type ARCHIVERESTORE = new Type(
+			"Restore from Glacier");
 	public transient static final Type WER = new Type("Write Error");
-	public transient static final Type DISCO = new Type("Storage Pool Disconnected");
-	public transient static final Type RECO = new Type("Storage Pool Reconnected");
+	public transient static final Type DISCO = new Type(
+			"Storage Pool Disconnected");
+	public transient static final Type RECO = new Type(
+			"Storage Pool Reconnected");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
 	public transient static final Level ERROR = new Level("error");
-	
+
 	private transient static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
 			50, .075F, false);
 
@@ -159,6 +162,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
+
 	public void endErrorEvent() {
 		for (int i = 0; i < this.children.size(); i++) {
 			if (this.children.get(i).endTime == -1)
@@ -169,7 +173,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
-	
+
 	public void endWarnEvent() {
 		for (int i = 0; i < this.children.size(); i++) {
 			if (this.children.get(i).endTime == -1)
@@ -189,44 +193,49 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		return event;
 	}
-	
+
 	public static SDFSEvent archiveRestoreEvent(MetaDataDedupFile f) {
-		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(), "Restoring " +f.getPath(), RUNNING);
-		
+		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(),
+				"Restoring " + f.getPath(), RUNNING);
+
 		return event;
 	}
-	
+
 	public static SDFSEvent cszEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(CSZ, getTarget(), shortMsg, RUNNING);
-		
+
 		return event;
 	}
+
 	public static SDFSEvent rspEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(RSP, getTarget(), shortMsg, RUNNING);
-		
+
 		return event;
 	}
-	
+
 	public static void discoEvent() {
-		SDFSEvent event = new SDFSEvent(DISCO, getTarget(), "Storage Pool Disconnected", RUNNING);
-		event.maxCt =1;
+		SDFSEvent event = new SDFSEvent(DISCO, getTarget(),
+				"Storage Pool Disconnected", RUNNING);
+		event.maxCt = 1;
 		event.endWarnEvent();
 	}
-	
+
 	public static void recoEvent() {
-		SDFSEvent event = new SDFSEvent(RECO, getTarget(), "Storage Pool Reconnected", RUNNING);
-		event.maxCt =1;
+		SDFSEvent event = new SDFSEvent(RECO, getTarget(),
+				"Storage Pool Reconnected", RUNNING);
+		event.maxCt = 1;
 		event.endEvent();
 	}
-	
+
 	public static SDFSEvent wspEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(WSP, getTarget(), shortMsg, RUNNING);
-		
+
 		return event;
 	}
-	
+
 	public static SDFSEvent cfEvent(String fileName) {
-		SDFSEvent event = new SDFSEvent(CF, getTarget(), "Importing [" +fileName + "]", RUNNING);
+		SDFSEvent event = new SDFSEvent(CF, getTarget(), "Importing ["
+				+ fileName + "]", RUNNING);
 		return event;
 	}
 
@@ -386,10 +395,10 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static FDiskEvent fdiskInfoEvent(String shortMsg) {
 		FDiskEvent event = new FDiskEvent(shortMsg);
-		
+
 		return event;
 	}
-	
+
 	public static FDiskEvent fdiskInfoEvent(String shortMsg, SDFSEvent evt) {
 		FDiskEvent event = new FDiskEvent(shortMsg);
 		try {
@@ -448,9 +457,8 @@ public class SDFSEvent implements java.io.Serializable {
 	public Element toXML() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("event");
 		/*
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug(this.toString());
-		*/
+		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
+		 */
 		Element root = doc.getDocumentElement();
 		root.setAttribute("start-date", format.format(new Date(this.startTime)));
 		root.setAttribute("start-timestamp", Long.toString(this.startTime));

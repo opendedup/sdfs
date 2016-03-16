@@ -19,7 +19,6 @@ import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.LargeBloomFilter;
 
-
 public class HashChunkService implements HashChunkServiceInterface {
 
 	private double kBytesRead;
@@ -54,7 +53,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 			System.err.println("Unable to initiate ChunkStore");
 			e.printStackTrace();
 			System.exit(-1);
-		} 
+		}
 		try {
 			hs = new HashStore(this);
 		} catch (Exception e) {
@@ -70,13 +69,13 @@ public class HashChunkService implements HashChunkServiceInterface {
 	public AbstractChunkStore getChuckStore() {
 		return fileStore;
 	}
-	
+
 	public AbstractHashesMap getHashesMap() {
 		return hs.bdb;
 	}
 
-	public InsertRecord writeChunk(byte[] hash, byte[] aContents, boolean compressed) throws IOException,
-			HashtableFullException {
+	public InsertRecord writeChunk(byte[] hash, byte[] aContents,
+			boolean compressed) throws IOException, HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
@@ -96,19 +95,19 @@ public class HashChunkService implements HashChunkServiceInterface {
 		}
 		return written;
 	}
-	
+
 	public void setReadSpeed(int speed) {
-		fileStore.setReadSpeed((int)speed);
+		fileStore.setReadSpeed((int) speed);
 	}
-	
+
 	public void setWriteSpeed(int speed) {
-		fileStore.setWriteSpeed((int)speed);
+		fileStore.setWriteSpeed((int) speed);
 	}
-	
+
 	public void setCacheSize(long sz) throws IOException {
 		fileStore.setCacheSize(sz);
 	}
-	
+
 	public void remoteFetchChunks(ArrayList<String> al, String server,
 			String password, int port, boolean useSSL) throws IOException,
 			HashtableFullException {
@@ -119,7 +118,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 			ArrayList<HashChunk> hck = hc.fetchChunks(al);
 			for (int i = 0; i < hck.size(); i++) {
 				HashChunk _hc = hck.get(i);
-				writeChunk(_hc.getName(), _hc.getData(),  false);
+				writeChunk(_hc.getName(), _hc.getData(), false);
 			}
 		} finally {
 			hc.close();
@@ -132,7 +131,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return exists;
 	}
 
-	public HashChunk fetchChunk(byte[] hash) throws IOException, DataArchivedException {
+	public HashChunk fetchChunk(byte[] hash) throws IOException,
+			DataArchivedException {
 		HashChunk hashChunk = hs.getHashChunk(hash);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
@@ -141,8 +141,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 		this.chunksRead = this.chunksFetched;
 		return hashChunk;
 	}
-	
-	public void cacheChunk(byte [] hash) throws IOException, DataArchivedException {
+
+	public void cacheChunk(byte[] hash) throws IOException,
+			DataArchivedException {
 		hs.cacheChunk(hash);
 	}
 
@@ -228,14 +229,14 @@ public class HashChunkService implements HashChunkServiceInterface {
 	@Override
 	public void sync() throws IOException {
 		fileStore.sync();
-		
+
 	}
 
 	@Override
 	public long getCacheSize() {
 		return fileStore.getCacheSize();
 	}
-	
+
 	@Override
 	public long getMaxCacheSize() {
 		return fileStore.getMaxCacheSize();
@@ -257,7 +258,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public boolean blockRestored(String id) throws IOException{
+	public boolean blockRestored(String id) throws IOException {
 		return hs.blockRestored(id);
 	}
 

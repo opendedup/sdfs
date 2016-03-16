@@ -175,14 +175,15 @@ public class LargeLongByteArrayMap implements AbstractMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			try{
-			rf.close();
-			rf = null;
-			}catch(Exception e) {}
+			try {
+				rf.close();
+				rf = null;
+			} catch (Exception e) {
+			}
 			if (checkForLock) {
 				this.hashlock.writeLock().lock();
 			}
-			
+
 		}
 	}
 

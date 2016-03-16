@@ -66,7 +66,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 		this.hashloc[0] = -1;
 		currentPos = 1;
 	}
-	
+
 	public int getNumberHL() {
 		return this.currentPos - 1;
 	}
@@ -128,19 +128,20 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 		in.read(this.hash);
 		this.hashloc = new byte[8];
 		in.read(this.hashloc);
-		
+
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		ByteBuffer bf = ByteBuffer.wrap(new byte[4+this.hash.length+this.hashloc.length]);
+		ByteBuffer bf = ByteBuffer.wrap(new byte[4 + this.hash.length
+				+ this.hashloc.length]);
 		bf.putInt(this.hash.length);
 		bf.put(hash);
 		bf.put(hashloc);
 		byte[] b = bf.array();
 		out.writeInt(b.length);
 		out.write(b);
-		
+
 	}
 
 	public boolean isDup() {

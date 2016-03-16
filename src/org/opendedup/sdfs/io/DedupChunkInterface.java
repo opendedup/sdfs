@@ -7,25 +7,27 @@ import org.opendedup.collections.DataArchivedException;
 
 public interface DedupChunkInterface {
 
-
-
 	/**
 	 * 
 	 * @return gets the lenth of the DedupChunk
 	 */
 	public abstract int getLength();
-	
+
 	public boolean getReconstructed();
+
 	public void setReconstructed(boolean re);
+
 	/**
 	 * 
 	 * @return the file position within the DedupFile
 	 */
 	public abstract long getFilePosition();
 
-	public abstract byte[] getReadChunk(int start,int end) throws IOException,BufferClosedException,DataArchivedException;
+	public abstract byte[] getReadChunk(int start, int end) throws IOException,
+			BufferClosedException, DataArchivedException;
 
 	public List<HashLocPair> getFingers();
+
 	/**
 	 * 
 	 * @param length
@@ -46,7 +48,6 @@ public interface DedupChunkInterface {
 	 *            sets the chunk as new
 	 */
 	public abstract void setNewChunk(boolean newChunk);
-
 
 	/**
 	 * sets the chunk as writable
@@ -81,13 +82,13 @@ public interface DedupChunkInterface {
 
 	public boolean isClosed();
 
-	public void flush() throws BufferClosedException,IOException;
+	public void flush() throws BufferClosedException, IOException;
 
 	public boolean isBatchProcessed();
 
 	public boolean isBatchwritten();
-	
-	public void setAR(List <HashLocPair> al);
+
+	public void setAR(List<HashLocPair> al);
 
 	public void setBatchwritten(boolean written);
 
@@ -105,7 +106,7 @@ public interface DedupChunkInterface {
 	 */
 
 	public abstract void write(byte[] b, int pos) throws BufferClosedException,
-			IOException,DataArchivedException;
+			IOException, DataArchivedException;
 
 	public abstract void truncate(int len) throws BufferClosedException;
 
@@ -115,7 +116,7 @@ public interface DedupChunkInterface {
 
 	public abstract String toString();
 
-	public abstract void open();
+	public abstract boolean open();
 
 	public abstract void close() throws IOException;
 

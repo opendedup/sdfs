@@ -64,7 +64,8 @@ public class ProcessClusterDSEInfo {
 					double pFull = 0.00;
 					if (currentSz > 0) {
 						pFull = (((double) currentSz / (double) maxSz) * 100);
-						DecimalFormat twoDForm = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
+						DecimalFormat twoDForm = (DecimalFormat) NumberFormat
+								.getNumberInstance(Locale.US);
 						twoDForm.applyPattern("#.##");
 						pFull = Double.valueOf(twoDForm.format(pFull));
 					}

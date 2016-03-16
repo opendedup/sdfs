@@ -24,7 +24,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
 
-
 public class FCByteArrayLongMap implements AbstractShard {
 	// MappedByteBuffer keys = null;
 	private int size = 0;
@@ -502,10 +501,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 		throw new IllegalStateException(
 				"No free or removed slots available. Key set full?!!");
 	}
-	
+
 	public InsertRecord put(ChunkData cm) {
 		try {
-			byte [] key = cm.getHash();
+			byte[] key = cm.getHash();
 			this.hashlock.lock();
 			if (this.mapped.cardinality() >= size)
 				throw new IOException(
@@ -513,11 +512,11 @@ public class FCByteArrayLongMap implements AbstractShard {
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
-				int npos = -pos -1;
+				int npos = -pos - 1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return new InsertRecord(false,this.get(key));
-				
+				return new InsertRecord(false, this.get(key));
+
 			}
 			this.kFC.write(ByteBuffer.wrap(key), pos);
 			if (!cm.recoverd) {
@@ -533,10 +532,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return new InsertRecord(true,cm.getcPos());
+			return new InsertRecord(true, cm.getcPos());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			return new InsertRecord(false,-1);
+			return new InsertRecord(false, -1);
 		} finally {
 			this.hashlock.unlock();
 		}
@@ -551,10 +550,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 								+ "the volume or DSE allocation size");
 			int pos = this.insertionIndex(key);
 			if (pos < 0) {
-				int npos = -pos -1;
+				int npos = -pos - 1;
 				npos = (npos / FREE.length);
 				this.claims.set(npos);
-				return new InsertRecord(false,this.get(key));
+				return new InsertRecord(false, this.get(key));
 			}
 			this.kFC.write(ByteBuffer.wrap(key), pos);
 
@@ -568,10 +567,10 @@ public class FCByteArrayLongMap implements AbstractShard {
 			this.mapped.set(pos);
 			// this.store.position(pos);
 			// this.store.put(storeID);
-			return new InsertRecord(true,value);
+			return new InsertRecord(true, value);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			return new InsertRecord(false,-1);
+			return new InsertRecord(false, -1);
 		} finally {
 			this.hashlock.unlock();
 		}

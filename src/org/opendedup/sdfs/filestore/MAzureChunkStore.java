@@ -410,25 +410,25 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	@Override
 	public void sync() throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setReadSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setWriteSpeed(int bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setCacheSize(long bps) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -458,7 +458,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	@Override
 	public String restoreBlock(long id, byte[] hash) {
 		return null;
-		
+
 	}
 
 	@Override
@@ -470,20 +470,20 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -23,13 +23,10 @@ import org.simpleframework.http.socket.Reason;
 import org.simpleframework.http.socket.Session;
 import org.simpleframework.http.socket.service.Service;
 
-
 public class PingService implements Service, Runnable {
 	private final PingListener listener;
 	private final Map<String, FrameChannel> sockets;
 	private final Set<String> users;
-
-	
 
 	public PingService() {
 		sockets = new ConcurrentHashMap<String, FrameChannel>();
@@ -38,8 +35,6 @@ public class PingService implements Service, Runnable {
 		Thread th = new Thread(this);
 		th.start();
 	}
-	
-	
 
 	@Override
 	public void connect(Session connection) {
@@ -55,11 +50,14 @@ public class PingService implements Service, Runnable {
 			if (password != null) {
 				String hash;
 				try {
-					hash = HashFunctions.getSHAHash(password.trim().getBytes(), Main.sdfsPasswordSalt.getBytes());
+					hash = HashFunctions.getSHAHash(password.trim().getBytes(),
+							Main.sdfsPasswordSalt.getBytes());
 					if (hash.equals(Main.sdfsPassword)) {
 						auth = true;
 					}
-				} catch (NoSuchAlgorithmException | UnsupportedEncodingException | NoSuchProviderException e) {
+				} catch (NoSuchAlgorithmException
+						| UnsupportedEncodingException
+						| NoSuchProviderException e) {
 					SDFSLogger.getLog().error("unable to authenitcate user", e);
 				}
 
@@ -109,20 +107,18 @@ public class PingService implements Service, Runnable {
 					sockets.remove(user);
 					users.remove(user);
 					operation.close();
-					
+
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 
 	private static class PingListener implements FrameListener {
-		
 
 		private PingListener(PingService service) {
-			
+
 		}
 
 		@Override
@@ -144,19 +140,18 @@ public class PingService implements Service, Runnable {
 
 	}
 
-
 	@Override
 	public void run() {
-		for(;;) {
+		for (;;) {
 			try {
 				Frame replay = new DataFrame(FrameType.TEXT, "ping");
 				this.distribute(replay);
 				Thread.sleep(5000);
-			}catch(Exception e) {
-				
+			} catch (Exception e) {
+
 			}
 		}
-		
+
 	}
 
 }

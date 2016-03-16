@@ -12,7 +12,7 @@ public class ProcessSetCache {
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			long sz = StringUtils.parseSize(ssz);
-			formatter.format("file=%s&cmd=setcachesz&sz=%d", "null",sz);
+			formatter.format("file=%s&cmd=setcachesz&sz=%d", "null", sz);
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
@@ -25,7 +25,8 @@ public class ProcessSetCache {
 				}
 				String status = root.getAttribute("status");
 				String msg = root.getAttribute("msg");
-				System.out.printf("Set Cache [%s] returned [%s]\n", status, msg);
+				System.out
+						.printf("Set Cache [%s] returned [%s]\n", status, msg);
 			}
 
 		} catch (Exception e) {

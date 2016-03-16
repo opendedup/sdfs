@@ -18,7 +18,6 @@ import org.opendedup.collections.HashtableFullException;
  */
 public interface DedupFile {
 
-
 	public abstract void trim(long start, int len) throws IOException;
 
 	/**
@@ -43,16 +42,15 @@ public interface DedupFile {
 	public abstract DedupChunkInterface getWriteBuffer(long position)
 			throws FileClosedException, IOException, DataArchivedException;
 
-	public void updateMap(DedupChunkInterface writeBuffer,int doop)
+	public void updateMap(DedupChunkInterface writeBuffer, int doop)
 			throws FileClosedException, IOException;
 
 	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
-	
+
 	public void removeBufferFromFlush(DedupChunkInterface writeBuffer);
 
-	public void updateMap(DedupChunkInterface writeBuffer,
-			int doop, boolean propigateEvent) throws FileClosedException,
-			IOException;
+	public void updateMap(DedupChunkInterface writeBuffer, int doop,
+			boolean propigateEvent) throws FileClosedException, IOException;
 
 	/**
 	 * Clones the DedupFile
@@ -130,7 +128,8 @@ public interface DedupFile {
 	 * @throws IOException
 	 */
 	public abstract void writeCache(WritableCacheBuffer writeBuffer)
-			throws FileClosedException, IOException, HashtableFullException,DataArchivedException;
+			throws FileClosedException, IOException, HashtableFullException,
+			DataArchivedException;
 
 	/**
 	 * 
@@ -211,7 +210,7 @@ public interface DedupFile {
 	 *            to remove from the file
 	 */
 	public abstract void removeLock(DedupFileLock lock);
-	
+
 	public abstract void setMetaDataDedupFile(MetaDataDedupFile mf);
 
 	/**
@@ -279,7 +278,7 @@ public interface DedupFile {
 	 * @return the DedupChunk of null if create is false and chunk is not found
 	 * @throws IOException
 	 */
-	public abstract DedupChunkInterface getHash(long location, boolean create)
+	public abstract DedupChunkInterface getHash(long location)
 			throws IOException, FileClosedException;
 
 	/**

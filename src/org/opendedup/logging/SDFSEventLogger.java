@@ -79,7 +79,6 @@ public class SDFSEventLogger {
 		MDC.put("extendedInfo", evt.extendedInfo);
 		MDC.put("maxCt", Long.toString(evt.maxCt));
 		MDC.put("curCt", Long.toString(evt.curCt));
-		log.info("");
 		MDC.clear();
 	}
 

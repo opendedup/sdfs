@@ -14,18 +14,20 @@ public class IOMeter implements Runnable {
 	private long sleeptime = 15;
 	String fileName;
 	private boolean stopped = false;
-	
-	private static DecimalFormat df = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
-	private static DecimalFormat dfp = (DecimalFormat)NumberFormat.getNumberInstance(Locale.US);
-	
-	static  {
+
+	private static DecimalFormat df = (DecimalFormat) NumberFormat
+			.getNumberInstance(Locale.US);
+	private static DecimalFormat dfp = (DecimalFormat) NumberFormat
+			.getNumberInstance(Locale.US);
+
+	static {
 		df.applyPattern("###.##");
 		dfp.applyPattern("##.##%");
 	}
 
 	public IOMeter(String fileName) {
 		this.fileName = fileName;
-		
+
 	}
 
 	@Override

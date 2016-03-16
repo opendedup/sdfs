@@ -21,11 +21,11 @@ public class Main {
 					+ "sdfs" + File.separator;
 		}
 	}
-	public static boolean checkArchiveOnOpen= false;
+	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
-	
-	public static int writeTimeoutSeconds = -1; //1 hour timeout
-	public static int readTimeoutSeconds = -1; //1 hour timeout
+
+	public static int writeTimeoutSeconds = -1; // 1 hour timeout
+	public static int readTimeoutSeconds = -1; // 1 hour timeout
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
@@ -33,7 +33,7 @@ public class Main {
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
-	
+
 	public static boolean syncDL = false;
 
 	public static StandAloneGCScheduler pFullSched = null;
@@ -95,7 +95,7 @@ public class Main {
 	 * The Version of SDFS this is
 	 */
 	public static String version = "3.2.0";
-	
+
 	public static boolean readAhead = false;
 
 	/**
@@ -329,7 +329,7 @@ public class Main {
 	 * The awsSecretKey. This is used on the client.
 	 */
 	public static String cloudSecretKey = null;
-	
+
 	/**
 	 * use Aim for AWS S3 authentication
 	 */
@@ -378,14 +378,13 @@ public class Main {
 	public static String hashType = HashFunctionPool.MURMUR3_16;
 
 	public static int dseIOThreads = 24;
-	
+
 	/**
 	 * FDisk Schedule in cron format
 	 * 
 	 * @see org.opendedup.sdfs.FDISKJob
 	 */
 	public static String fDkiskSchedule = "0 59 23 * * ?";
-
 
 	public static boolean closedGracefully = true;
 

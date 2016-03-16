@@ -34,9 +34,6 @@ public class ChunkData {
 	public boolean recoverd = false;
 	public boolean blank;
 
-
-	
-
 	public ChunkData() {
 		this.blank = true;
 	}
@@ -195,28 +192,30 @@ public class ChunkData {
 		return hash;
 	}
 
-	public static byte[] getChunk(byte[] hash, long pos) throws IOException,DataArchivedException {
+	public static byte[] getChunk(byte[] hash, long pos) throws IOException,
+			DataArchivedException {
 		try {
 			return HCServiceProxy.getChunkStore().getChunk(hash, pos,
 					Main.chunkStorePageSize);
 		} catch (IOException e) {
-			
-				throw e;
+
+			throw e;
 		}
 
 	}
-	
-	public static void cacheChunk(byte[] hash, long pos) throws IOException,DataArchivedException {
+
+	public static void cacheChunk(byte[] hash, long pos) throws IOException,
+			DataArchivedException {
 		try {
 			HCServiceProxy.getChunkStore().cacheData(hash, pos,
 					Main.chunkStorePageSize);
 		} catch (IOException e) {
-				throw e;
+			throw e;
 		}
 
 	}
 
-	public byte[] getData() throws IOException,DataArchivedException {
+	public byte[] getData() throws IOException, DataArchivedException {
 		if (this.chunk == null) {
 			return HCServiceProxy.getChunkStore().getChunk(hash, this.cPos,
 					this.cLen);

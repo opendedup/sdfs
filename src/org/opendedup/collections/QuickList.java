@@ -217,7 +217,7 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 		for (int i = 0; i < z.size(); i++) {
 			System.out.println(z.get(i));
 		}
-		
+
 	}
 
 }

@@ -28,12 +28,12 @@ public abstract class AbstractDownloadListener {
 	public int getDNEX() {
 		return exdn.get();
 	}
-	
+
 	public synchronized void setDAR(DataArchivedException dar) {
-		if(this.dar == null)
+		if (this.dar == null)
 			this.dar = dar;
 	}
-	
+
 	public synchronized DataArchivedException getDAR() {
 		return this.dar;
 	}

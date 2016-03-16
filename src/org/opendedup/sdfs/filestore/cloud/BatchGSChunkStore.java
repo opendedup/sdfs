@@ -177,12 +177,12 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	@Override
 	public byte[] getChunk(byte[] hash, long start, int len)
 			throws IOException, DataArchivedException {
-			return HashBlobArchive.getBlock(hash, start);
+		return HashBlobArchive.getBlock(hash, start);
 
 	}
-	
-	public void cacheData(byte[] hash, long start, int len)
-			throws IOException, DataArchivedException {
+
+	public void cacheData(byte[] hash, long start, int len) throws IOException,
+			DataArchivedException {
 		try {
 			HashBlobArchive.cacheArchive(hash, start);
 		} catch (ExecutionException e) {
@@ -430,7 +430,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 									.getMetadata("currentsize"));
 							if (cl >= 0) {
 								HashBlobArchive.currentLength.set(cl);
-								
+
 							} else
 								SDFSLogger.getLog().warn(
 										"The S3 objectstore DSE did not close correctly len="
@@ -446,7 +446,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 									.getMetadata("currentcompressedsize"));
 							if (cl >= 0) {
 								HashBlobArchive.compressedLength.set(cl);
-								
+
 							} else
 								SDFSLogger.getLog().warn(
 										"The S3 objectstore DSE did not close correctly clen="
@@ -565,8 +565,8 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 						ht.nextToken().split(":")[0]), hid);
 
 				if (sobj.containsMetadata("bsize")) {
-					HashBlobArchive.currentLength.addAndGet(Integer.parseInt((String) sobj
-							.getMetadata("bsize")));
+					HashBlobArchive.currentLength.addAndGet(Integer
+							.parseInt((String) sobj.getMetadata("bsize")));
 				}
 				if (sobj.containsMetadata("bcompressedsize")) {
 					HashBlobArchive.compressedLength.addAndGet(Integer
@@ -733,7 +733,8 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc,long id) throws IOException {
+	public void writeHashBlobArchive(HashBlobArchive arc, long id)
+			throws IOException {
 		String haName = this.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
@@ -742,7 +743,8 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 			byte[] chunks = arc.getBytes();
 			int csz = chunks.length;
 			GSObject s3Object = new GSObject("blocks/" + haName);
-			s3Object.addMetadata("size", Integer.toString(arc.uncompressedLength.get()));
+			s3Object.addMetadata("size",
+					Integer.toString(arc.uncompressedLength.get()));
 			s3Object.addMetadata("lz4compress", Boolean.toString(Main.compress));
 			s3Object.addMetadata("encrypt",
 					Boolean.toString(Main.chunkStoreEncryptionEnabled));
@@ -796,7 +798,8 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 				s3Object.closeDataInputStream();
 			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().fatal("unable to upload " + arc.getID()+ " with id " +id, e);
+			SDFSLogger.getLog().fatal(
+					"unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
 
@@ -976,13 +979,16 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 								}
 								if (HashBlobArchive.compressedLength.get() > 0) {
 
-									HashBlobArchive.compressedLength.addAndGet(-1
-											* compressedSize);
-								} else if (HashBlobArchive.compressedLength.get() < 0)
+									HashBlobArchive.compressedLength
+											.addAndGet(-1 * compressedSize);
+								} else if (HashBlobArchive.compressedLength
+										.get() < 0)
 									HashBlobArchive.compressedLength.set(0);
-								HashBlobArchive.currentLength.addAndGet(-1 * size);
+								HashBlobArchive.currentLength.addAndGet(-1
+										* size);
 								if (HashBlobArchive.currentLength.get() > 0) {
-									HashBlobArchive.currentLength.addAndGet(-1 * size);
+									HashBlobArchive.currentLength.addAndGet(-1
+											* size);
 								} else if (HashBlobArchive.currentLength.get() < 0)
 									HashBlobArchive.currentLength.set(0);
 								HashBlobArchive.removeCache(k.longValue());
@@ -1064,116 +1070,119 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 			try {
 				s3Object.addMetadata("encrypt",
 						Boolean.toString(Main.chunkStoreEncryptionEnabled));
-				s3Object.addMetadata("lastmodified", Long.toString(f.lastModified()));
+				s3Object.addMetadata("lastmodified",
+						Long.toString(f.lastModified()));
 				String slp = EncyptUtils.encString(
 						Files.readSymbolicLink(f.toPath()).toFile().getPath(),
 						Main.chunkStoreEncryptionEnabled);
 				s3Object.addMetadata("symlink", slp);
 				s3Object.setContentType("binary/octet-stream");
 				s3Object.setContentLength(slp.getBytes().length);
-				s3Service.putObject(this.name,s3Object);
+				s3Service.putObject(this.name, s3Object);
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}
 		} else if (isDir) {
 			try {
-			HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
-					Main.chunkStoreEncryptionEnabled);
-			metaData.put("encrypt",
-					Boolean.toString(Main.chunkStoreEncryptionEnabled));
-			metaData.put("lastmodified", Long.toString(f.lastModified()));
-			metaData.put("directory", "true");
-			s3Object.setContentType("binary/octet-stream");
-			s3Object.setContentLength(pth.getBytes().length);
-			Set<String> st = metaData.keySet();
-			for(String s: st) {
-				s3Object.addMetadata(s, metaData.get(s));
-			}
-			s3Service.putObject(this.name,s3Object);
+				HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
+						Main.chunkStoreEncryptionEnabled);
+				metaData.put("encrypt",
+						Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				metaData.put("lastmodified", Long.toString(f.lastModified()));
+				metaData.put("directory", "true");
+				s3Object.setContentType("binary/octet-stream");
+				s3Object.setContentLength(pth.getBytes().length);
+				Set<String> st = metaData.keySet();
+				for (String s : st) {
+					s3Object.addMetadata(s, metaData.get(s));
+				}
+				s3Service.putObject(this.name, s3Object);
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}
 		} else {
-		String rnd = RandomGUID.getGuid();
-		File p = new File(this.staged_sync_location, rnd);
-		File z = new File(this.staged_sync_location, rnd + ".z");
-		File e = new File(this.staged_sync_location, rnd + ".e");
-		while (z.exists()) {
-			rnd = RandomGUID.getGuid();
-			p = new File(this.staged_sync_location, rnd);
-			z = new File(this.staged_sync_location, rnd + ".z");
-			e = new File(this.staged_sync_location, rnd + ".e");
-		}
-		try {
-			BufferedInputStream is = new BufferedInputStream(
-					new FileInputStream(f));
-			BufferedOutputStream os = new BufferedOutputStream(
-					new FileOutputStream(p));
-			IOUtils.copy(is, os);
-			os.flush();
-			os.close();
-			is.close();
-			if (Main.compress) {
-				CompressionUtils.compressFile(p, z);
-				p.delete();
-				p = z;
+			String rnd = RandomGUID.getGuid();
+			File p = new File(this.staged_sync_location, rnd);
+			File z = new File(this.staged_sync_location, rnd + ".z");
+			File e = new File(this.staged_sync_location, rnd + ".e");
+			while (z.exists()) {
+				rnd = RandomGUID.getGuid();
+				p = new File(this.staged_sync_location, rnd);
+				z = new File(this.staged_sync_location, rnd + ".z");
+				e = new File(this.staged_sync_location, rnd + ".e");
 			}
-			if (Main.chunkStoreEncryptionEnabled) {
+			try {
+				BufferedInputStream is = new BufferedInputStream(
+						new FileInputStream(f));
+				BufferedOutputStream os = new BufferedOutputStream(
+						new FileOutputStream(p));
+				IOUtils.copy(is, os);
+				os.flush();
+				os.close();
+				is.close();
+				if (Main.compress) {
+					CompressionUtils.compressFile(p, z);
+					p.delete();
+					p = z;
+				}
+				if (Main.chunkStoreEncryptionEnabled) {
+					try {
+						EncryptUtils.encryptFile(p, e);
+					} catch (Exception e1) {
+						throw new IOException(e1);
+					}
+					p.delete();
+					p = e;
+				}
+
+				s3Object.addMetadata("lz4compress",
+						Boolean.toString(Main.compress));
+				s3Object.addMetadata("encrypt",
+						Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				s3Object.addMetadata("lastmodified",
+						Long.toString(f.lastModified()));
+				s3Object.setContentType("binary/octet-stream");
+				Map<String, String> umd = FileUtils.getFileMetaData(f,
+						Main.chunkStoreEncryptionEnabled);
+				Set<String> st = umd.keySet();
+				for (String s : st) {
+					s3Object.addMetadata(s, umd.get(s));
+				}
+
+				in = new BufferedInputStream(new FileInputStream(p), 32768);
 				try {
-					EncryptUtils.encryptFile(p, e);
-				} catch (Exception e1) {
+					byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+					in.close();
+					s3Object.setMd5Hash(md5Hash);
+					in = new BufferedInputStream(new FileInputStream(p), 32768);
+				} catch (NoSuchAlgorithmException e2) {
+					SDFSLogger.getLog().error("while hashing", e2);
+					throw new IOException(e2);
+				}
+				s3Object.setDataInputStream(in);
+				s3Object.setContentType("binary/octet-stream");
+				s3Object.setContentLength(p.length());
+				try {
+					s3Service.putObject(this.name, s3Object);
+				} catch (ServiceException e1) {
+					SDFSLogger.getLog().error("error uploading", e1);
 					throw new IOException(e1);
 				}
-				p.delete();
-				p = e;
-			}
-			
-			s3Object.addMetadata("lz4compress", Boolean.toString(Main.compress));
-			s3Object.addMetadata("encrypt",
-					Boolean.toString(Main.chunkStoreEncryptionEnabled));
-			s3Object.addMetadata("lastmodified",
-					Long.toString(f.lastModified()));
-			s3Object.setContentType("binary/octet-stream");
-			Map<String, String> umd = FileUtils.getFileMetaData(f,
-					Main.chunkStoreEncryptionEnabled);
-			Set<String> st = umd.keySet();
-			for(String s: st) {
-				s3Object.addMetadata(s, umd.get(s));
-			}
-			
-			in = new BufferedInputStream(new FileInputStream(p), 32768);
-			try {
-				byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
-				in.close();
-				s3Object.setMd5Hash(md5Hash);
-				in = new BufferedInputStream(new FileInputStream(p), 32768);
-			} catch (NoSuchAlgorithmException e2) {
-				SDFSLogger.getLog().error("while hashing", e2);
-				throw new IOException(e2);
-			}
-			s3Object.setDataInputStream(in);
-			s3Object.setContentType("binary/octet-stream");
-			s3Object.setContentLength(p.length());
-			try {
-				s3Service.putObject(this.name, s3Object);
-			} catch (ServiceException e1) {
-				SDFSLogger.getLog().error("error uploading", e1);
-				throw new IOException(e1);
-			}
-			
-		} finally {
-			try {
-			s3Object.closeDataInputStream();
-			}catch(Exception ze) {}
-			try {
-				if (in != null)
-					in.close();
+
 			} finally {
-				p.delete();
-				z.delete();
-				e.delete();
+				try {
+					s3Object.closeDataInputStream();
+				} catch (Exception ze) {
+				}
+				try {
+					if (in != null)
+						in.close();
+				} finally {
+					p.delete();
+					z.delete();
+					e.delete();
+				}
 			}
-		}
 		}
 
 	}
@@ -1653,13 +1662,13 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void compact() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -1684,7 +1693,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
