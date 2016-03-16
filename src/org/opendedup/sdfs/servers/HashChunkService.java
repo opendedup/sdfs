@@ -131,9 +131,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return exists;
 	}
 
-	public HashChunk fetchChunk(byte[] hash) throws IOException,
+	public HashChunk fetchChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException {
-		HashChunk hashChunk = hs.getHashChunk(hash);
+		HashChunk hashChunk = hs.getHashChunk(hash,pos);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;

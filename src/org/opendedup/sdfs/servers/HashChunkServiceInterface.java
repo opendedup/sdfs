@@ -35,7 +35,7 @@ public interface HashChunkServiceInterface {
 	public abstract boolean hashExists(byte[] hash) throws IOException,
 			HashtableFullException;
 
-	public abstract HashChunk fetchChunk(byte[] hash) throws IOException,
+	public abstract HashChunk fetchChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException;
 
 	public abstract void cacheChunk(byte[] hash) throws IOException,

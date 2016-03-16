@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDiskException;
-import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEClientSocket;
@@ -32,7 +32,6 @@ import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RedundancyNotMetException;
 import org.opendedup.sdfs.cluster.cmds.WriteHashCmd;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
-import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
@@ -105,7 +104,7 @@ public class HCServiceProxy {
 
 	public static HashChunk fetchHashChunk(byte[] hash) throws IOException,
 			DataArchivedException {
-		return hcService.fetchChunk(hash);
+		return hcService.fetchChunk(hash,-1);
 	}
 
 	public static synchronized long getCacheSize() {
@@ -565,51 +564,14 @@ public class HCServiceProxy {
 
 		if (Main.chunkStoreLocal) {
 			byte[] data = null;
+			long pos = -1;
 			if (direct) {
-				long pos = Longs.fromByteArray(hashloc);
-				try {
-					data = HashBlobArchive.getBlock(hash, pos);
-					if (true) {
-						if (data != null) {
-							byte[] heb = he.getHash(data);
-							if (!Arrays.equals(heb, hash)) {
-								SDFSLogger.getLog().info(
-										"heb="
-												+ StringUtils.getHexString(heb)
-												+ " hash="
-												+ StringUtils
-														.getHexString(hash)
-												+ " pos=" + pos);
-							}
-						}
-					}
-				} catch (DataArchivedException e) {
-					throw e;
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("data no found at " + pos, e);
-				}
+				pos = Longs.fromByteArray(hashloc);
 			}
-			if (data == null) {
 
-				data = HCServiceProxy.hcService.fetchChunk(hash).getData();
-				if (true) {
-					long pos = Longs.fromByteArray(hashloc);
-					SDFSLogger.getLog().info(
-							"Retring ... data no found at " + pos);
-					if (data != null) {
-						byte[] heb = he.getHash(data);
-						if (!Arrays.equals(heb, hash))
-							SDFSLogger.getLog().info(
-									"z heb=" + StringUtils.getHexString(heb)
-											+ " hash="
-											+ StringUtils.getHexString(hash)
-											+ " pos=" + pos);
+			data = HCServiceProxy.hcService.fetchChunk(hash,pos).getData();
+				
 
-					} else
-						SDFSLogger.getLog().info("data is null");
-				}
-
-			}
 			return data;
 		} else {
 			ByteArrayWrapper wrapper = new ByteArrayWrapper(hash, hashloc);

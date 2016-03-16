@@ -464,7 +464,7 @@ public class SparseDedupFile implements DedupFile {
 									f.hash = p.hash;
 									f.chunk = p.data;
 									f.len = p.data.length;
-									f.hl = new InsertRecord(p.isDup(),
+									f.hl = new InsertRecord(false,
 											p.hashloc);
 									f.start = p.pos;
 									fs.add(f);
@@ -581,8 +581,9 @@ public class SparseDedupFile implements DedupFile {
 									p.offset = 0;
 									p.nlen = f.len;
 									p.pos = f.start;
+						
 									if (!f.hl.getInserted())
-										dups = dups + f.len;
+										dups += f.len;
 									ar.add(p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn(
@@ -592,6 +593,7 @@ public class SparseDedupFile implements DedupFile {
 									// + f.chunk.length);
 								}
 							}
+							writeBuffer.setPrevDoop(writeBuffer.getDoop());
 							writeBuffer.setDoop(dups);
 							writeBuffer.setAR(ar);
 						} catch (DataArchivedException e) {

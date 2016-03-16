@@ -584,4 +584,11 @@ public class MaxFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public byte[] getData(byte[] key, long pos) throws IOException,
+			DataArchivedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

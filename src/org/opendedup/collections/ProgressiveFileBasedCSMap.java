@@ -193,7 +193,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 					return pos;
 				}
 			}
-
 			return pos;
 		} finally {
 			l.unlock();
@@ -733,6 +732,32 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 	}
 
+	@Override
+	public byte[] getData(byte[] key,long pos) throws IOException, DataArchivedException {
+		if (this.isClosed())
+			throw new IOException("Hashtable " + this.fileName + " is close");
+		boolean direct = false;
+		if(pos == -1) {
+			pos = this.get(key);
+		} else {
+			direct = true;
+		}
+		if (pos != -1) {
+			byte [] data = ChunkData.getChunk(key, pos);
+			if(direct && (data == null || data.length == 0)) {
+				return this.getData(key);
+			}else {
+				return data;
+			}
+		} else {
+			SDFSLogger.getLog().error(
+					"found no data for key [" + StringUtils.getHexString(key)
+							+ "]");
+			return null;
+		}
+
+	}
+	
 	@Override
 	public boolean remove(ChunkData cm) throws IOException {
 		if (this.isClosed()) {

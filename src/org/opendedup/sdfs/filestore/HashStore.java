@@ -196,7 +196,7 @@ public class HashStore {
 	 * @return a hashchunk or null if the hash is not in the database.
 	 * @throws DataArchivedException
 	 */
-	public HashChunk getHashChunk(byte[] hash) throws IOException,
+	public HashChunk getHashChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException {
 		HashChunk hs = null;
 		// String hStr = StringUtils.getHexString(hash);
@@ -212,7 +212,7 @@ public class HashStore {
 		 * } t++; } } else { if(this.readingBuffers.size() < mapSize)
 		 * this.readingBuffers.put(hStr, hs); }
 		 */
-		byte[] data = bdb.getData(hash);
+		byte [] data = bdb.getData(hash,pos);
 		if (data == null && Arrays.equals(hash, blankHash)) {
 			hs = new HashChunk(hash, new byte[blankData.length], false);
 		}

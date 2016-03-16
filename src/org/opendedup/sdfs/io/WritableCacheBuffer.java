@@ -125,7 +125,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		this.position = dk.getFilePosition();
 		this.length = dk.getLength();
 		this.newChunk = dk.isNewChunk();
-		this.prevDoop = dk.getPrevDoop();
+		this.doop =dk.getDoop();
 		this.reconstructed = dk.getReconstructed();
 		this.ar = dk.getFingers();
 		this.df = (SparseDedupFile) df;
