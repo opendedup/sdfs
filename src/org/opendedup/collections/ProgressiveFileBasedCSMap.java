@@ -659,7 +659,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 					}
 				}
 			} else {
-				rec = new InsertRecord(false, rm.get(cm.getHash()));
+				rec = new InsertRecord(false, this.get(cm.getHash()));
 			}
 			// this.msTr.addAndGet(tm);
 
@@ -737,6 +737,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		boolean direct = false;
+		pos = -1;
 		if(pos == -1) {
 			pos = this.get(key);
 		} else {

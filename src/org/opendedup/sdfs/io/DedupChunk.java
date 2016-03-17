@@ -153,8 +153,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#open()
 	 */
 	@Override
-	public boolean open() {
-		return true;
+	public void open() {
 	}
 
 	@Override

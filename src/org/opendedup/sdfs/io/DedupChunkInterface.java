@@ -116,7 +116,7 @@ public interface DedupChunkInterface {
 
 	public abstract String toString();
 
-	public abstract boolean open();
+	public abstract void open();
 
 	public abstract void close() throws IOException;
 
