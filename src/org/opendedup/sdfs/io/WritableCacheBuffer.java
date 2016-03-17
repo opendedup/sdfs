@@ -28,6 +28,7 @@ import org.opendedup.util.StringUtils;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.primitives.Longs;
 
 /**
  * 
@@ -189,7 +190,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				for (HashLocPair p : ar) {
 
-					if (p.hashloc[1] != 0 || this.direct) {
+					if (Longs.fromByteArray(p.hashloc) !=0 ) {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
 						sh.hashloc = p.hashloc;
@@ -302,7 +303,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				for (HashLocPair p : ar) {
 
-					if (p.hashloc[1] != 0) {
+					if (Longs.fromByteArray(p.hashloc) !=0) {
 						Shard sh = new Shard();
 						sh.hash = p.hash;
 						sh.hashloc = p.hashloc;

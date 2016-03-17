@@ -586,8 +586,9 @@ public class SparseDedupFile implements DedupFile {
 									p.offset = 0;
 									p.nlen = f.len;
 									p.pos = f.start;
+									p.setDup(!f.hl.getInserted());
 									if (!f.hl.getInserted())
-										dups = dups + f.len;
+										dups += f.len;
 									ar.add(p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn(
