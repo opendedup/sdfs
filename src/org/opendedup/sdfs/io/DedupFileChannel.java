@@ -209,8 +209,6 @@ public class DedupFileChannel {
 	 */
 	public void force(boolean metaData) throws IOException,
 			FileClosedException, ReadOnlyException {
-		if (!df.mf.canWrite())
-			throw new ReadOnlyException();
 		Lock l = df.getWriteLock();
 		l.lock();
 		try {

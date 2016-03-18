@@ -840,7 +840,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	private byte[] getData(long id) throws Exception {
-		SDFSLogger.getLog().info("Downloading " + id);
+		//SDFSLogger.getLog().info("Downloading " + id);
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
@@ -1392,7 +1392,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				md.addUserMetadata("lastmodified",
 						Long.toString(f.lastModified()));
-				if (!md5sum || f.length() < 5242880) {
+				if (!md5sum || genericS3) {
 					md.setContentType("binary/octet-stream");
 					in = new BufferedInputStream(new FileInputStream(p), 32768);
 					try {
@@ -1507,7 +1507,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		Map<String, String> mp = null;
 		byte[] shash = null;
 		try {
-			if (!md5sum) {
+			if (!md5sum || genericS3) {
 				S3Object obj = null;
 
 				obj = s3Service.getObject(this.name, pp + "/" + haName);
@@ -1684,7 +1684,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public Map<String, Integer> getHashMap(long id) throws IOException {
-
+		//SDFSLogger.getLog().info("downloading map for " + id);
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		S3Object kobj = s3Service.getObject(this.name, "keys/" + haName);
