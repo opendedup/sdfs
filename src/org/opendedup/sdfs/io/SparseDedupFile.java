@@ -1421,5 +1421,9 @@ public class SparseDedupFile implements DedupFile {
 	public Lock getWriteLock() {
 		return globalLock.writeLock();
 	}
+	
+	public Lock getReadLock() {
+		return globalLock.readLock();
+	}
 
 }

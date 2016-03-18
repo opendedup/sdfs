@@ -104,6 +104,8 @@ public class DedupFileChannel {
 	 */
 
 	public synchronized void truncateFile(long siz) throws IOException {
+		Lock l = df.getReadLock();
+		l.lock();
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Truncating File");
@@ -126,6 +128,7 @@ public class DedupFileChannel {
 			df.getMetaFile().setLastModified(System.currentTimeMillis());
 			df.getMetaFile().setLength(siz, true);
 		} finally {
+			l.unlock();
 		}
 	}
 
@@ -195,6 +198,8 @@ public class DedupFileChannel {
 	 * @throws FileClosedException
 	 */
 	public void force(boolean metaData) throws IOException, FileClosedException {
+		Lock l = df.getWriteLock();
+		l.lock();
 		try {
 			df.sync(false);
 		} catch (FileClosedException e) {
@@ -209,7 +214,9 @@ public class DedupFileChannel {
 				this.closeLock.unlock();
 
 			}
-		} 
+		} finally {
+			l.unlock();
+		}
 		if (df.getMetaFile().getDev() != null)
 			df.getMetaFile().sync();
 	}
@@ -242,6 +249,8 @@ public class DedupFileChannel {
 						"###### In fc Text of VMX=" + df.getMetaFile().getPath() + "=" + new String(_zb, "UTF-8"));
 			}
 		}
+		Lock l = df.getReadLock();
+		l.lock();
 		try {
 			
 			buf.position(pos);
@@ -333,6 +342,7 @@ public class DedupFileChannel {
 				df.getMetaFile().setLastModified(System.currentTimeMillis());
 			} catch (Exception e) {
 			}
+			l.unlock();
 		}
 	}
 
@@ -345,6 +355,8 @@ public class DedupFileChannel {
 		Lock l = null;
 		this.closeLock.lock();
 		try {
+			l = df.getReadLock();
+			l.lock();
 			if (Main.safeClose) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("close " + df.getMetaFile().getPath() + " flag=" + flags);
@@ -379,8 +391,11 @@ public class DedupFileChannel {
 	protected void forceClose() throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("close " + df.getMetaFile().getPath() + " flag=" + flags);
+		Lock l = null;
 		this.closeLock.lock();
 		try {
+			l = df.getReadLock();
+			l.lock();
 			if (!this.isClosed()) {
 
 				try {
@@ -398,6 +413,8 @@ public class DedupFileChannel {
 			}
 
 		} finally {
+			if (l != null)
+				l.unlock();
 			this.closeLock.unlock();
 		}
 	}
@@ -423,6 +440,8 @@ public class DedupFileChannel {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("fc reading " + df.getMetaFile().getPath() + " spos=" + filePos + " buffcap="
 					+ buf.capacity() + " len=" + siz + " bcpos=" + bufPos);
+		Lock l = df.getReadLock();
+		l.lock();
 		try {
 			if (filePos >= df.getMetaFile().length() && !Main.blockDev) {
 				return -1;
@@ -443,7 +462,7 @@ public class DedupFileChannel {
 				byte[] _rb = null;
 				try {
 					while (readBuffer == null) {
-						readBuffer = df.getReadBuffer(currentLocation);
+						readBuffer = df.getWriteBuffer(currentLocation);
 						try {
 							startPos = (int) (currentLocation - readBuffer.getFilePosition());
 							int _len = readBuffer.getLength() - startPos;
@@ -509,6 +528,7 @@ public class DedupFileChannel {
 				df.getMetaFile().setLastAccessed(System.currentTimeMillis());
 			} catch (Exception e) {
 			}
+			l.unlock();
 			// this.removeAio();
 		}
 
@@ -529,7 +549,9 @@ public class DedupFileChannel {
 	 * @exception IOException
 	 */
 	public long seekFile(long pos, int typ) throws IOException {
-		
+		Lock l = df.getReadLock();
+		l.lock();
+		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("seek " + df.getMetaFile().getPath() + " at " + pos + " type=" + typ);
 			// Check if the current file position is the required file position
@@ -557,7 +579,9 @@ public class DedupFileChannel {
 			df.getMetaFile().setLastAccessed(System.currentTimeMillis());
 			// Return the new file position
 			return this.position();
-		
+		} finally {
+			l.unlock();
+		}
 	}
 
 	/**
@@ -625,9 +649,14 @@ public class DedupFileChannel {
 	}
 
 	public void trim(long start, int len) throws IOException {
-		
+		Lock l = df.getReadLock();
+		l.lock();
+		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("trim " + df.getMetaFile().getPath() + " start=" + start + " len=" + len);
 			df.trim(start, len);
+		} finally {
+			l.unlock();
+		}
 	}
 }
