@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
@@ -50,7 +51,6 @@ public class GetCloudFile {
 					&& MetaDataDedupFile.getFile(f.getPath()).isLocalOwner())
 				throw new IOException("File [" + file
 						+ "] already exists and is owned locally.");
-
 			fevt.maxCt = 4;
 			fevt.curCt = 1;
 			fevt.shortMsg = "Downloading [" + file + "]";
@@ -115,8 +115,10 @@ public class GetCloudFile {
 					if (ir.getInserted())
 						blks.add(Longs.fromByteArray(ir.getHashLocs()));
 					else {
-						p.hashloc = ir.getHashLocs();
-						dirty = true;
+						if(!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
+							p.hashloc = ir.getHashLocs();
+							dirty = true;
+						}
 					}
 				}
 				if (dirty)

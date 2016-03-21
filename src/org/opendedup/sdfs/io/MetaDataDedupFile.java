@@ -842,6 +842,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					out.writeObject(this);
 					out.flush();
 					out.close();
+					
 					eventBus.post(new MFileWritten(this));
 					this.dirty = false;
 				} catch (Exception e) {
