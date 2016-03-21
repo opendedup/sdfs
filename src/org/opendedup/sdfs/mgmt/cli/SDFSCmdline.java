@@ -246,12 +246,14 @@ public class SDFSCmdline {
 						Long.parseLong(vals[2]));
 				System.exit(0);
 			}
-			if (cmd.hasOption("cloud-file")) {
-				String file = cmd.getOptionValue("cloud-file");
-				ProcessCloudFile.runCmd(file);
+			if (cmd.hasOption("cloud-file-snap")) {
+				String file = cmd.getOptionValue("cloud-file-snap");
+				String dstfile = null;
+				if(cmd.hasOption("cloud-file-snap"))
+					dstfile = cmd.getOptionValue("snapshot-path");
+				ProcessCloudFile.runCmd(file,dstfile);
 				System.exit(0);
 			}
-
 			if (cmd.hasOption("partition-rm")) {
 				String val = cmd.getOptionValue("partition-rm");
 				ProcessBlockDeviceRm.runCmd(val);

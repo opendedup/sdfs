@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.opendedup.collections.LongKeyValue;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.HashLocPair;
@@ -27,10 +29,19 @@ import com.google.common.primitives.Longs;
 
 public class GetCloudFile {
 
-	public Element getResult(String cmd, String file) throws IOException {
+	public Element getResult(String file, String dstfile) throws IOException {
 		MetaDataDedupFile mf = null;
+		MetaDataDedupFile sdf = null;
 		LongByteArrayMap ddb = null;
 		SDFSEvent fevt = SDFSEvent.cfEvent(file);
+		if (dstfile != null && file.contentEquals(dstfile))
+			throw new IOException("local filename in the same as source name");
+
+		File df = null;
+		if (dstfile != null)
+			df = new File(Main.volume.getPath() + File.separator + dstfile);
+		if (df != null && df.exists())
+			throw new IOException(dstfile + " already exists");
 		try {
 			Document doc = XMLUtils.getXMLDoc("cloudfile");
 			Element root = doc.getDocumentElement();
@@ -44,7 +55,6 @@ public class GetCloudFile {
 			fevt.curCt = 1;
 			fevt.shortMsg = "Downloading [" + file + "]";
 			mf = FileReplicationService.getMF(file);
-
 			mf.setLocalOwner(false);
 			fevt.shortMsg = "Downloading Map Metadata for [" + file + "]";
 			ddb = FileReplicationService.getDDB(mf.getDfGuid());
@@ -52,12 +62,18 @@ public class GetCloudFile {
 				throw new IOException(
 						"only files version 3 or later can be imported");
 			checkDedupFile(ddb, fevt);
-			mf.toXML(doc);
+			if (df != null) {
+				sdf = mf.snapshot(df.getPath(), false, fevt);
+				sdf.toXML(doc);
+			} else {
+				mf.toXML(doc);
+			}
 			fevt.endEvent("imported [" + file + "]");
 			return (Element) root.cloneNode(true);
 		} catch (IOException e) {
-			if (mf != null) {
-				MetaFileStore.removeMetaFile(mf.getPath(), true);
+
+			if (sdf != null) {
+				MetaFileStore.removeMetaFile(sdf.getPath(), true);
 			}
 			throw e;
 		} catch (Exception e) {
@@ -66,6 +82,10 @@ public class GetCloudFile {
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 
+		} finally {
+			if (mf != null) {
+				MetaFileStore.removeMetaFile(mf.getPath(), true);
+			}
 		}
 	}
 
@@ -102,9 +122,13 @@ public class GetCloudFile {
 				if (dirty)
 					ddb.put(kv.getKey(), ck.getBytes());
 			}
+			for (Long l : blks) {
+				HashBlobArchive.claimBlock(l);
+			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().info("error while checking file [" + ddb + "]",
+			SDFSLogger.getLog().warn("error while checking file [" + ddb + "]",
 					e);
+			throw new IOException(e);
 		} finally {
 			ddb.close();
 			ddb = null;

@@ -141,8 +141,14 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("cloudfile")) {
 						try {
+							
+							String dstfile = null;
+							if(request.getQuery().containsKey("dstfile")) {
+								dstfile = request.getQuery().get("dstfile");
+							}
+								
 							Element msg = new GetCloudFile().getResult(
-									cmdOptions, file);
+								 file,dstfile);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");

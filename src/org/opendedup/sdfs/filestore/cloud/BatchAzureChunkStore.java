@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,6 +46,8 @@ import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.google.common.io.BaseEncoding;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -465,6 +466,33 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return st.split(",");
 
 	}
+	
+	private String getClaimName(long id) throws IOException {
+		String haName = EncyptUtils.encHashArchiveName(id,
+				Main.chunkStoreEncryptionEnabled);
+		return "claims/"
+				+ haName
+				+ "/"
+				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+						Main.chunkStoreEncryptionEnabled);
+	}
+	
+	private Map<String,String> getClaimMetaData(long id) throws IOException {
+			CloudBlockBlob blob;
+			try {
+				blob = container.getBlockBlobReference(this.getClaimName(id));
+				if(blob.exists())
+				return blob.getMetadata();
+				else
+					return null;
+			} catch (URISyntaxException e) {
+				throw new IOException(e);
+			} catch (StorageException e) {
+				throw new IOException(e);
+			}
+			
+		
+	}
 
 	private int getClaimedObjects(CloudBlockBlob blob) throws IOException {
 		try {
@@ -576,6 +604,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			blob.upload(s3IS, chunks.length);
 			s3IS.close();
 			s3IS = null;
+			
+			
 		} catch (Throwable e) {
 			SDFSLogger.getLog()
 					.error("unable to write archive " + arc.getID()
