@@ -343,7 +343,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				System.setProperty("com.amazonaws.services.s3.disablePutObjectMD5Validation", "true");
 			}
 			ClientConfiguration clientConfig = new ClientConfiguration();
-			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
+			clientConfig.setMaxConnections(Main.dseIOThreads * 3);
 			clientConfig.setConnectionTimeout(10000);
 			clientConfig.setSocketTimeout(10000);
 
@@ -1187,7 +1187,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				} else {
 					try {
-						multiPartUpload(f, objName, md);
+						md.setContentType("binary/octet-stream");
+						in = new BufferedInputStream(new FileInputStream(p), 32768);
+						byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+						in.close();
+						md.setContentMD5(BaseEncoding.base64().encode(md5Hash));
+						multiPartUpload(p, objName, md);
 					} catch (Exception e1) {
 						SDFSLogger.getLog().error("error uploading " + objName, e1);
 					}

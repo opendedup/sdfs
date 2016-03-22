@@ -102,8 +102,15 @@ public class CompressionUtils {
         LZ4BlockOutputStream os = new LZ4BlockOutputStream(fos,1 << 16,lz4Compressor);
         IOUtils.copy(fis, os);
         os.flush();
+        fos.flush();
         os.close();
         fis.close();
+        try {
+        	fos.close();
+        }catch(Exception e) {
+        	
+        }
+        
 	}
 	
 	public static void decompressFile(File src,File dst) throws IOException {

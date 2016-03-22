@@ -112,7 +112,7 @@ public class VolumeConfigWriter {
 	private boolean genericS3 = false;
 	private String cloudUrl;
 	private boolean readAhead = false;
-	private String blockSize = "50 MB";
+	private String blockSize = "20 MB";
 	
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();

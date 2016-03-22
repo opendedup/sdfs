@@ -726,42 +726,6 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public DedupChunkInterface getWriteBuffer(long position)
 			throws IOException, FileClosedException {
-		Lock l = this.globalLock.writeLock();
-		l.lock();
-		try {
-			if (this.closed) {
-				throw new FileClosedException("file already closed");
-			}
-			if (this.toOccured) {
-				throw new IOException("timeout occured");
-			}
-			if (this.errOccured) {
-				throw new IOException("write error occured");
-			}
-			if (!Volume.getStorageConnected())
-				throw new IOException("storage offline");
-			long chunkPos = this.getChuckPosition(position);
-			try {
-				DedupChunkInterface wb = null;
-				if (Main.volume.isClustered()) {
-					wb =  this.load(chunkPos);
-				} else {
-					wb = this.writeBuffers.get(chunkPos);
-					
-				}
-				wb.open();
-				return wb;
-			} 
-			catch (Exception e) {
-				throw new IOException(e);
-			}
-		} finally {
-			l.unlock();
-		}
-	}
-	
-	public DedupChunkInterface getReadBuffer(long position)
-			throws IOException, FileClosedException {
 		Lock l = this.globalLock.readLock();
 		l.lock();
 		try {
@@ -801,7 +765,7 @@ public class SparseDedupFile implements DedupFile {
 		DedupChunk ck = null;
 		try {
 			WritableCacheBuffer writeBuffer = null;
-			ck = this.getHash(chunkPos);
+			ck = this.getHash(chunkPos, true);
 
 			if (ck.isNewChunk()) {
 				writeBuffer = new WritableCacheBuffer(chunkPos, ck.getLength(),
@@ -1262,7 +1226,7 @@ public class SparseDedupFile implements DedupFile {
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
 	@Override
-	public DedupChunk getHash(long location)
+	public DedupChunk getHash(long location, boolean create)
 			throws IOException, FileClosedException {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
@@ -1287,9 +1251,13 @@ public class SparseDedupFile implements DedupFile {
 				// pck.getPos());
 				// }
 				ck.setDoop(pck.getDoop());
-				return ck;
-			} else {
+				pck = null;
+			}
+			b = null;
+			if (ck == null && create == true) {
 				return createNewChunk(place);
+			} else {
+				return ck;
 			}
 		}catch(FileClosedException e) {
 			throw e;
@@ -1297,7 +1265,8 @@ public class SparseDedupFile implements DedupFile {
 		catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to fetch chunk at position " + place, e);
-			throw new IOException("unable to fetch chunk at position " + place);
+
+			return null;
 		} finally {
 
 		}
@@ -1418,12 +1387,12 @@ public class SparseDedupFile implements DedupFile {
 
 	ReentrantReadWriteLock globalLock = new ReentrantReadWriteLock();
 
-	public Lock getWriteLock() {
-		return globalLock.writeLock();
-	}
-	
 	public Lock getReadLock() {
 		return globalLock.readLock();
+	}
+
+	public Lock getWriteLock() {
+		return globalLock.writeLock();
 	}
 
 }
