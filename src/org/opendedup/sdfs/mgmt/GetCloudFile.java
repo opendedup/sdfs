@@ -28,12 +28,15 @@ import org.w3c.dom.Element;
 
 import com.google.common.primitives.Longs;
 
-public class GetCloudFile {
+public class GetCloudFile implements Runnable {
 
+	MetaDataDedupFile mf = null;
+	MetaDataDedupFile sdf = null;
+	LongByteArrayMap ddb = null;
+	File df = null;
+	SDFSEvent fevt = null;
 	public Element getResult(String file, String dstfile) throws IOException {
-		MetaDataDedupFile mf = null;
-		MetaDataDedupFile sdf = null;
-		LongByteArrayMap ddb = null;
+		
 		SDFSEvent fevt = SDFSEvent.cfEvent(file);
 		if (dstfile != null && file.contentEquals(dstfile))
 			throw new IOException("local filename in the same as source name");
@@ -57,18 +60,23 @@ public class GetCloudFile {
 			mf = FileReplicationService.getMF(file);
 			mf.setLocalOwner(false);
 			fevt.shortMsg = "Downloading Map Metadata for [" + file + "]";
-			ddb = FileReplicationService.getDDB(mf.getDfGuid());
+			FileReplicationService.getDDB(mf.getDfGuid());
+			
+			
+			if (df != null) {
+				sdf = mf.snapshot(df.getPath(), false, fevt);
+				ddb = (LongByteArrayMap)sdf.getDedupFile(false).bdb;
+				sdf.toXML(doc);
+				
+			} else {
+				ddb = (LongByteArrayMap)mf.getDedupFile(false).bdb;
+				mf.toXML(doc);
+			}
 			if (ddb.getVersion() < 3)
 				throw new IOException(
 						"only files version 3 or later can be imported");
-			checkDedupFile(ddb, fevt);
-			if (df != null) {
-				sdf = mf.snapshot(df.getPath(), false, fevt);
-				sdf.toXML(doc);
-			} else {
-				mf.toXML(doc);
-			}
-			fevt.endEvent("imported [" + file + "]");
+			Thread th = new Thread(this);
+			th.start();
 			return (Element) root.cloneNode(true);
 		} catch (IOException e) {
 
@@ -82,11 +90,7 @@ public class GetCloudFile {
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 
-		} finally {
-			if (mf != null) {
-				MetaFileStore.removeMetaFile(mf.getPath(), true);
-			}
-		}
+		} 
 	}
 
 	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt)
@@ -135,6 +139,22 @@ public class GetCloudFile {
 			ddb.close();
 			ddb = null;
 		}
+	}
+
+	@Override
+	public void run() {
+		try {
+			this.checkDedupFile(ddb, fevt);
+			fevt.endEvent("imported [" + mf.getPath() + "]");
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to process file " + mf.getPath(), e);
+			fevt.endEvent("unable to process file " + mf.getPath(), SDFSEvent.ERROR);
+		} finally {
+			if (df != null && mf != null) {
+				MetaFileStore.removeMetaFile(mf.getPath(), true);
+			}
+		}
+		
 	}
 
 }

@@ -474,11 +474,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public MetaDataDedupFile() {
 	}
 
-	public DedupFile getDedupFile(boolean addtoopen) throws IOException {
+	public SparseDedupFile getDedupFile(boolean addtoopen) throws IOException {
 		this.writeLock.lock();
 		try {
 			if (this.dfGuid == null) {
-				DedupFile df = new SparseDedupFile(this);
+				SparseDedupFile df = new SparseDedupFile(this);
 				this.dfGuid = df.getGUID();
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
@@ -490,9 +490,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				return df;
 			} else {
 				if (addtoopen)
-					return DedupFileStore.openDedupFile(this);
+					return (SparseDedupFile)DedupFileStore.openDedupFile(this);
 				else
-					return DedupFileStore.getDedupFile(this);
+					return (SparseDedupFile)DedupFileStore.getDedupFile(this);
 			}
 		} finally {
 			writeLock.unlock();

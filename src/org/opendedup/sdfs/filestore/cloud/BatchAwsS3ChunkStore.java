@@ -1426,7 +1426,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					}
 				} else {
 					try {
-						multiPartUpload(f, objName, md);
+							md.setContentType("binary/octet-stream");
+							in = new BufferedInputStream(new FileInputStream(p), 32768);
+							byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+							in.close();
+							md.setContentMD5(BaseEncoding.base64().encode(md5Hash));
+							multiPartUpload(p, objName, md);
 					} catch (Exception e1) {
 						SDFSLogger.getLog().error("error uploading " + objName,
 								e1);
@@ -2085,7 +2090,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					this.getClaimName(id), new ByteArrayInputStream(msg), om);
 			s3Service.putObject(creq);
 		}
-
 	}
 
 }
