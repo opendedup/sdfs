@@ -23,6 +23,9 @@ public interface AbstractBatchStore {
 
 	public boolean checkAccess(String username, String password,
 			Properties props) throws Exception;
+	
+
+	public boolean objectClaimed(String key) throws IOException;
 
 	public Iterator<String> getNextObjectList() throws IOException;
 

@@ -101,7 +101,8 @@ public class MultiDownload implements Runnable {
 
 	private void addStringResult(String key) throws IOException,
 			InterruptedException {
-		this.sbs.put(cs.getStringResult(key));
+		if(cs.objectClaimed(key))
+			this.sbs.put(cs.getStringResult(key));
 	}
 
 	private static final class KeyGetter implements Runnable {

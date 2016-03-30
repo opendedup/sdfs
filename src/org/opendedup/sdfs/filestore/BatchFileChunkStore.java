@@ -729,4 +729,10 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 
 	}
 
+	@Override
+	public boolean objectClaimed(String key) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }

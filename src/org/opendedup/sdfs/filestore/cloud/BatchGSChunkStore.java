@@ -1516,147 +1516,13 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		return true;
 	}
 
-	@Override
-	public void recoverVolumeConfig(String name, File to, String parentPath,
-			String accessKey, String secretKey, String bucket, Properties props)
-			throws IOException {
-		GSCredentials creds = new GSCredentials(accessKey, secretKey);
-		if (props.containsKey("default-bucket-location")) {
-			bucketLocation = props.getProperty("default-bucket-location");
-		}
-		Jets3tProperties jProps = Jets3tProperties
-				.getInstance(Constants.JETS3T_PROPERTIES_FILENAME);
-		boolean encrypt = Boolean.parseBoolean(props.getProperty("encrypt",
-				"false"));
-		String keyStr = null;
-		String ivStr = null;
-		if (encrypt) {
-			keyStr = props.getProperty("key");
-			ivStr = props.getProperty("iv");
-		}
-		if (props.containsKey("proxy-host")) {
-			jProps.setProperty("httpclient.proxy-host",
-					props.getProperty("proxy-host"));
-		}
-		if (props.containsKey("proxy-domain")) {
-			jProps.setProperty("httpclient.proxy-domain",
-					props.getProperty("proxy-domain"));
-		}
-		if (props.containsKey("proxy-user")) {
-			jProps.setProperty("httpclient.proxy-user",
-					props.getProperty("proxy-user"));
-		}
-		if (props.containsKey("proxy-password")) {
-			jProps.setProperty("httpclient.proxy-password",
-					props.getProperty("proxy-password"));
-		}
-		if (props.containsKey("proxy-port")) {
-			jProps.setProperty("httpclient.proxy-port",
-					props.getProperty("proxy-port"));
-		}
-		try {
-			GoogleStorageService gs = new GoogleStorageService(creds);
-			GSObject[] objs = gs.listObjects(bucket, "volume/", null);
-			for (GSObject obj : objs) {
-				GSObject _o = gs.getObject(bucket, obj.getName());
-				int cl = (int) _o.getContentLength();
-				byte[] data = new byte[cl];
-				DataInputStream in = new DataInputStream(
-						_o.getDataInputStream());
-				in.readFully(data);
-				_o.closeDataInputStream();
-				String vn = _o.getName().substring("volume/".length());
-				Map<String, Object> mp = _o.getUserMetadataMap();
-				if (mp.containsKey("encrypt")
-						&& Boolean.parseBoolean((String) mp.get("encrypt"))) {
-					vn = new String(EncryptUtils.decryptCBC(BaseEncoding
-							.base64Url().decode(vn), keyStr, ivStr));
-				}
-				if (vn.equalsIgnoreCase(name + "-volume-cfg.xml")) {
-					String rnd = RandomGUID.getGuid();
-					File tmpdir = com.google.common.io.Files.createTempDir();
-					File p = new File(tmpdir, rnd);
-					File z = new File(tmpdir, rnd + ".uz");
-					File e = new File(tmpdir, rnd + ".de");
-					while (z.exists()) {
-						rnd = RandomGUID.getGuid();
-						p = new File(tmpdir, rnd);
-						z = new File(tmpdir, rnd + ".uz");
-						e = new File(tmpdir, rnd + ".de");
-					}
-					try {
-						ByteArrayInputStream zin = new ByteArrayInputStream(
-								data);
-						BufferedOutputStream out = new BufferedOutputStream(
-								new FileOutputStream(p));
-						IOUtils.copy(zin, out);
-						out.flush();
-						out.close();
-						zin.close();
-						boolean enc = false;
-						boolean lz4compress = false;
-						if (mp.containsKey("encrypt")
-								&& Boolean.parseBoolean((String) mp
-										.get("encrypt"))) {
-							enc = Boolean.parseBoolean((String) mp
-									.get("encrypt"));
-						}
-						if (mp.containsKey("lz4compress")
-								&& Boolean.parseBoolean((String) mp
-										.get("lz4compress"))) {
-							lz4compress = Boolean.parseBoolean((String) mp
-									.get("lz4compress"));
-						}
-						if (enc) {
-							EncryptUtils.decryptFile(p, e, keyStr, ivStr);
-							p.delete();
-							p = e;
-						}
-						if (lz4compress) {
-							CompressionUtils.decompressFile(p, z);
-							p.delete();
-							p = z;
-						}
-						File parent = to.getParentFile();
-						if (!parent.exists())
-							parent.mkdirs();
-						BufferedInputStream is = new BufferedInputStream(
-								new FileInputStream(p));
-						BufferedOutputStream os = new BufferedOutputStream(
-								new FileOutputStream(to));
-						IOUtils.copy(is, os);
-						os.flush();
-						os.close();
-						is.close();
-
-					} catch (Exception e1) {
-						throw new IOException(e1);
-					} finally {
-
-						p.delete();
-						z.delete();
-						e.delete();
-					}
-					break;
-				}
-
-			}
-
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
-
-	}
-
 	public static void main(String[] args) throws IOException {
 		Properties props = new Properties();
 		props.setProperty("encrypt", "true");
 		props.setProperty("key",
 				"EikuwdMNcqGgzetVa+JXAq8BHYzyStSntpRsHIEh+=uFxM015A5CSrz1mhiRz=Kw");
 		props.setProperty("iv", "5e9fc8188a743fd49e50913dbb332aeb");
-		new BatchGSChunkStore().recoverVolumeConfig("gs", new File(
-				"/tmp/test.xml"), "parentPath", "GOOGJPMZZN7SFEC2GQHV",
-				"2+xPK378GQyH9G1LJZJGzTfJJMjRLy63GeRKHy6W", "nbu0", props);
+		
 	}
 
 	@Override
@@ -1694,6 +1560,12 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	public void checkoutObject(long id, int claims) throws IOException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public boolean objectClaimed(String key) throws IOException {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }
