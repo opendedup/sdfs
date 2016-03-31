@@ -680,7 +680,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md.setContentMD5(BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(chunks)));
 			PutObjectRequest req = new PutObjectRequest(this.name, "blocks/" + haName, new ByteArrayInputStream(chunks),
 					md);
-			s3Service.putObject(req);
+			if(!md5sum || genericS3)
+				s3Service.putObject(req);
+			else
+				this.multiPartUpload(req);
 			byte[] hs = arc.getHashesString().getBytes();
 			int sz = hs.length;
 			if (Main.compress) {
@@ -1176,8 +1179,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 					in = new BufferedInputStream(new FileInputStream(p), 32768);
 					md.setContentLength(p.length());
+					PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
 					try {
-						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
+						
 						s3Service.putObject(req);
 						SDFSLogger.getLog()
 								.debug("uploaded=" + f.getPath() + " lm=" + md.getUserMetadata().get("lastmodified"));
@@ -1192,7 +1196,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
 						in.close();
 						md.setContentMD5(BaseEncoding.base64().encode(md5Hash));
-						multiPartUpload(p, objName, md);
+						in = new BufferedInputStream(new FileInputStream(p), 32768);
+						md.setContentLength(p.length());
+						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
+						multiPartUpload(req);
 					} catch (Exception e1) {
 						SDFSLogger.getLog().error("error uploading " + objName, e1);
 					}
@@ -1211,7 +1218,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	}
 
-	private void multiPartUpload(File file, String keyName, ObjectMetadata md)
+	private void multiPartUpload(PutObjectRequest req)
 			throws AmazonServiceException, AmazonClientException, InterruptedException {
 		TransferManager tx = null;
 		try {
@@ -1219,11 +1226,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				tx = new TransferManager(awsCredentials);
 			else
 				tx = new TransferManager(new InstanceProfileCredentialsProvider());
-			Upload myUpload = tx.upload(this.name, keyName, file);
+			Upload myUpload = tx.upload(req);
 			myUpload.waitForCompletion();
-			CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name, keyName, name, keyName)
-					.withNewObjectMetadata(md);
-			s3Service.copyObject(copyObjectRequest);
 		} finally {
 			if (tx != null)
 				tx.shutdownNow();
