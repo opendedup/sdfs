@@ -237,7 +237,6 @@ public class WinSDFS implements DokanOperations {
 				sn.fileName = fileName;
 				sn.info = arg1;
 				try {
-
 					int z = 0;
 					executor.execute(sn);
 					while (!sn.done) {

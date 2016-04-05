@@ -65,7 +65,6 @@ public class SparseDedupFile implements DedupFile {
 	public DataMapInterface bdb = null;
 	MessageDigest digest = null;
 	protected static transient ThreadPool pool = null;
-	private final ReentrantLock channelLock = new ReentrantLock();
 	private final ReentrantLock syncLock = new ReentrantLock();
 	private static int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final HashMap<Long, DedupChunkInterface> flushingBuffers = new HashMap<Long, DedupChunkInterface>(
@@ -296,14 +295,9 @@ public class SparseDedupFile implements DedupFile {
 		return false;
 	}
 
-	@Override
-	public boolean delete() {
-		return this.delete(true);
-	}
 
 	@Override
-	public boolean delete(boolean localOnly) {
-		this.channelLock.lock();
+	public boolean delete() {
 		this.syncLock.lock();
 		try {
 			this.deleted = true;
@@ -312,13 +306,12 @@ public class SparseDedupFile implements DedupFile {
 					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
 			
 			DedupFileStore.removeOpenDedupFile(this.GUID);
-			if(!localOnly)
+			
 				eventBus.post(new SFileDeleted(this));
 			return DeleteDir.deleteDirectory(new File(filePath));
 		} catch (Exception e) {
-
+			SDFSLogger.getLog().warn("error in delete " + this.GUID, e);
 		} finally {
-			this.channelLock.unlock();
 			this.syncLock.unlock();
 		}
 		return false;
@@ -878,7 +871,7 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public DedupFileChannel getChannel(int flags) throws IOException {
-		channelLock.lock();
+		syncLock.lock();
 		try {
 			if (!Volume.getStorageConnected())
 				throw new IOException("storage offline");
@@ -901,7 +894,7 @@ public class SparseDedupFile implements DedupFile {
 
 			}
 		} finally {
-			channelLock.unlock();
+			syncLock.unlock();
 		}
 	}
 
@@ -915,7 +908,7 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void unRegisterChannel(DedupFileChannel channel, int flags) {
 		if (Main.safeClose && !Main.blockDev) {
-			channelLock.lock();
+			syncLock.lock();
 			try {
 
 				if (channel.getFlags() == flags) {
@@ -933,7 +926,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 			} catch (Exception e) {
 			} finally {
-				channelLock.unlock();
+				syncLock.unlock();
 			}
 		}
 	}
@@ -952,7 +945,7 @@ public class SparseDedupFile implements DedupFile {
 		if (this.toOccured)
 			throw new IOException("timeout occured");
 		if (!Main.safeClose) {
-			channelLock.lock();
+			syncLock.lock();
 			try {
 				if (this.staticChannel == null) {
 					if (this.isClosed())
@@ -961,23 +954,23 @@ public class SparseDedupFile implements DedupFile {
 				}
 			} catch (Exception e) {
 			} finally {
-				channelLock.unlock();
+				syncLock.unlock();
 			}
 		} else {
-			channelLock.lock();
+			syncLock.lock();
 			try {
 				if (this.isClosed() || this.channels.size() == 0)
 					this.initDB();
 				this.channels.add(channel);
 			} finally {
-				channelLock.unlock();
+				syncLock.unlock();
 			}
 		}
 	}
 
 	@Override
 	public boolean hasOpenChannels() {
-		channelLock.lock();
+		syncLock.lock();
 		try {
 			if (this.channels.size() > 0)
 				return true;
@@ -986,18 +979,18 @@ public class SparseDedupFile implements DedupFile {
 		} catch (Exception e) {
 			return false;
 		} finally {
-			channelLock.unlock();
+			syncLock.unlock();
 		}
 	}
 
 	public int openChannelsSize() {
-		channelLock.lock();
+		syncLock.lock();
 		try {
 			return this.channels.size();
 		} catch (Exception e) {
 			return -1;
 		} finally {
-			channelLock.unlock();
+			syncLock.unlock();
 		}
 	}
 
@@ -1009,7 +1002,6 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void forceClose() throws IOException {
 		this.syncLock.lock();
-		this.channelLock.lock();
 		Lock l = this.globalLock.writeLock();
 		l.lock();
 		try {
@@ -1098,10 +1090,13 @@ public class SparseDedupFile implements DedupFile {
 				this.closed = true;
 				this.dirty = false;
 			} catch (Exception e) {
-			}	
-			this.channelLock.unlock();
-			this.syncLock.unlock();
+			}
+			try {
 			l.unlock();
+			}catch(Exception e) {}
+			try {
+			this.syncLock.unlock();
+			}catch(Exception e) {}
 		}
 	}
 	

@@ -107,16 +107,7 @@ public interface DedupFile {
 	 */
 	public abstract boolean delete();
 
-	/**
-	 * Deletes the DedupFile and all on disk references
-	 * 
-	 * @param propigateEvent
-	 *            TODO
-	 * 
-	 * @return true if deleted
-	 */
-	public abstract boolean delete(boolean propigateEvent);
-
+	
 	/**
 	 * Writes a specific cache buffer to the dedup chunk service
 	 * 

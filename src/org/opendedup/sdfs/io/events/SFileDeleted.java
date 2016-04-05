@@ -15,9 +15,10 @@ public class SFileDeleted {
 	public String sfp = null;
 
 	public SFileDeleted(SparseDedupFile sf) {
+		this.sf = sf;
 		sfp = Main.dedupDBStore + File.separator
 				+ this.sf.getGUID().substring(0, 2) + File.separator
-				+ this.sf.getGUID();
+				+ this.sf.getGUID()+ File.separator + this.sf.getGUID()+".map";
 	}
 
 	public String toJSON() {

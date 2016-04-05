@@ -113,7 +113,7 @@ public class FileReplicationService {
 			f.delete();
 			try {
 				sync.downloadFile(sfp.substring(sl), f, "ddb");
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"downloaded " + f.getPath() + " sz=" + f.length());
 				return f;
 			} catch (Exception e) {
@@ -135,6 +135,7 @@ public class FileReplicationService {
 	}
 
 	public static LongByteArrayMap getDDB(String fname) throws Exception {
+		
 		return new LongByteArrayMap(service.downloadDDBFile(fname).getPath());
 	}
 
@@ -177,9 +178,8 @@ public class FileReplicationService {
 	@AllowConcurrentEvents
 	public void metaFileDeleted(MFileDeleted evt) throws IOException {
 		try {
-			// SDFSLogger.getLog().info("eeeks " + evt.mf.getPath());
-			if (evt.mf.isLocalOwner())
-				this.deleteFile(new File(evt.mf.getPath()));
+			SDFSLogger.getLog().info("eeeks " + evt.mf.getPath());
+			this.deleteFile(new File(evt.mf.getPath()));
 		} catch (Exception e) {
 			SDFSLogger.getLog()
 					.error("unable to delete " + evt.mf.getPath(), e);
@@ -369,7 +369,7 @@ public class FileReplicationService {
 				try {
 					if (evt.sf.isDirty()) {
 						SDFSLogger.getLog().info(
-								"writed " + evt.sf.getDatabasePath());
+								"writed " + evt.sf.getDatabasePath().substring(sl));
 						this.sync
 								.uploadFile(new File(evt.sf.getDatabasePath()),
 										evt.sf.getDatabasePath().substring(sl),
@@ -462,7 +462,7 @@ public class FileReplicationService {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void sFileDeleted(SFileDeleted evt) {
-
+		SDFSLogger.getLog().info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzkkkkkkkkkkkkkkkk");
 		try {
 			ReentrantLock l = this.getLock(evt.sfp);
 			l.lock();
@@ -472,8 +472,8 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("dels " + evt.sfp);
-					if (evt.sf.getMetaFile().isLocalOwner())
-						this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
+					SDFSLogger.getLog().info("dels " + evt.sfp.substring(sl));
+					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)

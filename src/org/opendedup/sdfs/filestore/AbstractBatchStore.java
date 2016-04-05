@@ -1,11 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
 import org.opendedup.collections.DataArchivedException;
+
 
 public interface AbstractBatchStore {
 	public boolean fileExists(long id) throws IOException;
@@ -17,7 +19,7 @@ public interface AbstractBatchStore {
 
 	public void checkoutObject(long id, int claims) throws IOException;
 
-	public byte[] getBytes(long id) throws IOException, DataArchivedException;
+	public void getBytes(long id,File f) throws IOException, DataArchivedException;
 
 	public Map<String, Integer> getHashMap(long id) throws IOException;
 

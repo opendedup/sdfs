@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -30,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import static java.lang.Math.toIntExact;
 
 //import objectexplorer.MemoryMeasurer;
 
@@ -904,30 +906,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	private void loadData() throws Exception {
-		RandomAccessFile rf = null;
 		try {
-			byte[] b = store.getBytes(this.id);
+			store.getBytes(this.id,f);
 			if (rrl != null) {
 				int _sz = 1;
-				if (b.length > 1024)
-					_sz = b.length / 1024;
+				if (f.length() > 1024)
+					_sz = toIntExact(f.length() / 1024);
 				rrl.acquire(_sz);
 			}
-			rf = new RandomAccessFile(f, "rw");
-			rf.write(b);
+			
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-				rf.close();
-			} catch (Exception e) {
 
-			}
-			try {
-				// ch.close();
-			} catch (Exception e) {
-
-			}
 
 		}
 	}

@@ -317,15 +317,14 @@ public class MetaFileStore {
 					} else {
 						mf = getMF(new File(path));
 						pathMap.invalidate(mf.getPath());
-
-						deleted = mf.deleteStub(localOnly);
+						deleted = mf.deleteStub();
 						if (!deleted) {
 							SDFSLogger.getLog().warn(
 									"could not delete " + mf.getPath());
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
-								deleted = mf.getDedupFile(false).delete(true);
+								deleted = mf.getDedupFile(false).delete();
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger.getLog().debug(

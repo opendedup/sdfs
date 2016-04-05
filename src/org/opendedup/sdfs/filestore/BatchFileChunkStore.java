@@ -413,8 +413,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public byte[] getBytes(long id) throws IOException {
-		return null;
+	public void getBytes(long id,File f) throws IOException {
 	}
 
 	@Override

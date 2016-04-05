@@ -7,6 +7,10 @@ import java.io.IOException;
 public interface AbstractCloudFileSync {
 	public abstract void uploadFile(File f, String to, String parentPath)
 			throws IOException;
+	
+	public abstract void checkoutFile(String name) throws IOException;
+	
+	public abstract boolean isCheckedOut(String name) throws IOException;
 
 	public abstract void downloadFile(String name, File to, String parentPath)
 			throws IOException;

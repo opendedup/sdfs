@@ -1,10 +1,8 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -46,6 +44,8 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
+
 
 
 import com.google.common.io.BaseEncoding;
@@ -612,18 +612,14 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public byte[] getBytes(long id) throws IOException {
+	public void getBytes(long id,File f) throws IOException {
 		try {
 			String haName = EncyptUtils.encHashArchiveName(id,
 					Main.chunkStoreEncryptionEnabled);
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/"
 					+ haName);
-
-			ByteArrayOutputStream out = new ByteArrayOutputStream((int) blob
-					.getProperties().getLength());
-			blob.download(out);
+			blob.downloadToFile(f.getPath());
 			HashMap<String, String> metaData = blob.getMetadata();
-			byte[] data = out.toByteArray();
 			if (metaData.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean(metaData.get("deleted"));
 				if (del) {
@@ -659,7 +655,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				}
 
 			}
-			return data;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fetch block [" + id + "]", e);
 			throw new IOException(e);
@@ -1036,10 +1031,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		try {
-			CloudBlockBlob blob = container.getBlockBlobReference(pp
+			String fn = pp
 					+ "/"
 					+ EncyptUtils.encString(nm,
-							Main.chunkStoreEncryptionEnabled));
+							Main.chunkStoreEncryptionEnabled);
+			CloudBlockBlob blob = container.getBlockBlobReference(fn);
 			blob.downloadToFile(p.getPath());
 			byte[] md5 = Base64.decode(blob.getProperties().getContentMD5());
 			if (!FileUtils.fileValid(p, md5))
@@ -1102,6 +1098,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				is.close();
 				FileUtils.setFileMetaData(to, metaData, encrypt);
 			}
+			this.checkoutFile(fn);
 		} catch (Exception e1) {
 			throw new IOException(e1);
 		} finally {
@@ -1538,6 +1535,36 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		try {
 		CloudBlockBlob kblob = container
 				.getBlockBlobReference("claims/" + key+ "/"
+						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+								Main.chunkStoreEncryptionEnabled));
+		return kblob.exists();
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("error checking if blob is clamimed", e);
+			return false;
+		}
+	}
+
+	@Override
+	public void checkoutFile(String name) throws IOException {
+		try {
+		CloudBlockBlob kblob = container
+				.getBlockBlobReference("claims/" + name+ "/"
+						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+								Main.chunkStoreEncryptionEnabled));
+		kblob.uploadText(Long.toString(System.currentTimeMillis()));
+		}catch(Exception e) {
+			throw new IOException(e);
+		}	
+		
+	}
+
+	@Override
+	public boolean isCheckedOut(String name) throws IOException {
+		if(!this.clustered)
+			return true;
+		try {
+		CloudBlockBlob kblob = container
+				.getBlockBlobReference("claims/" + name+ "/"
 						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
 								Main.chunkStoreEncryptionEnabled));
 		return kblob.exists();

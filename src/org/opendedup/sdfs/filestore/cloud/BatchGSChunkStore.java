@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -807,48 +806,32 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 
 	}
 
-	private byte[] getData(long id) throws IOException, ServiceException {
+	private void getData(long id,File f) throws IOException, ServiceException {
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = this.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		StorageObject obj = s3Service.getObject(this.name, "blocks/" + haName);
-
-		boolean encrypt = false;
-		boolean compress = false;
-		boolean lz4compress = false;
-
-		int cl = (int) obj.getContentLength();
-		byte[] data = new byte[cl];
-		DataInputStream in = new DataInputStream(obj.getDataInputStream());
-		in.readFully(data);
-		obj.closeDataInputStream();
+		FileOutputStream out = new FileOutputStream(f);
 		try {
-			byte[] md5Hash = ServiceUtils.computeMD5Hash(data);
+			
+			IOUtils.copy(obj.getDataInputStream(), out);
+		} finally {
+			IOUtils.closeQuietly(out);
+			obj.closeDataInputStream();
+		}
+		FileInputStream in  = null;
+		try {
+			in  = new FileInputStream(f);
+			byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
 			byte[] lh = ServiceUtils.fromHex(obj.getMd5HashAsHex());
 			if (!Arrays.areEqual(md5Hash, lh))
 				throw new IOException("download corrupted in transit");
 		} catch (NoSuchAlgorithmException e) {
 
+		}finally {
+			IOUtils.closeQuietly(in);
 		}
-		int size = Integer.parseInt((String) obj.getMetadata("size"));
-		if (obj.containsMetadata("encrypt")) {
-			encrypt = Boolean.parseBoolean((String) obj.getMetadata("encrypt"));
-		}
-		if (obj.containsMetadata("compress")) {
-			compress = Boolean.parseBoolean((String) obj
-					.getMetadata("compress"));
-		} else if (obj.containsMetadata("lz4compress")) {
-			lz4compress = Boolean.parseBoolean((String) obj
-					.getMetadata("lz4compress"));
-		}
-
-		if (encrypt)
-			data = EncryptUtils.decryptCBC(data);
-		if (compress)
-			data = CompressionUtils.decompressZLIB(data);
-		else if (lz4compress) {
-			data = CompressionUtils.decompressLz4(data, size);
-		}
+		
 		if (obj.containsMetadata("deleted")) {
 			boolean del = Boolean.parseBoolean((String) obj
 					.getMetadata("deleted"));
@@ -888,17 +871,16 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 								+ "] blocks marked for deletion");
 			}
 		}
-		return data;
 	}
 
 	@Override
-	public byte[] getBytes(long id) throws IOException {
+	public void getBytes(long id,File f) throws IOException {
 
 		try {
-			return this.getData(id);
+			this.getData(id,f);
 		} catch (Exception e) {
 			try {
-				return this.getData(id);
+				this.getData(id,f);
 			} catch (Exception e1) {
 				SDFSLogger.getLog().error("unable to fetch id [" + id + "]", e);
 				throw new IOException("unable to read " + id);
@@ -1564,6 +1546,18 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 
 	@Override
 	public boolean objectClaimed(String key) throws IOException {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public void checkoutFile(String name) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isCheckedOut(String name) throws IOException {
 		// TODO Auto-generated method stub
 		return true;
 	}

@@ -939,9 +939,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if deleted
 	 */
-	public boolean deleteStub(boolean localOnly) {
-		if (!localOnly && !this.isLocalOwner())
-			return false;
+	public boolean deleteStub() {
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
