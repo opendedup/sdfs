@@ -29,6 +29,7 @@ import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static java.lang.Math.toIntExact;
 
@@ -108,6 +109,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	private int glacierDays = 0;
 	private int infrequentAccess = 0;
 	private boolean clustered = true;
+	private ReentrantReadWriteLock s3clientLock = new ReentrantReadWriteLock();
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
 	private boolean genericS3 = false;
@@ -636,6 +638,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	private String[] getStrings(S3Object sobj) throws IOException {
+		this.s3clientLock.readLock().lock();
+		try{
 		boolean encrypt = false;
 		boolean compress = false;
 		boolean lz4compress = false;
@@ -679,6 +683,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						+ sobj.getKey());
 		String[] st = hast.split(",");
 		return st;
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	private int getClaimedObjects(S3Object sobj, long id) throws Exception,
@@ -751,7 +758,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public boolean fileExists(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
-
+		this.s3clientLock.readLock().lock();
 		try {
 			s3Service.getObject(this.name, "blocks/" + haName);
 			return true;
@@ -764,6 +771,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw e;
 			} else
 				return false;
+		} finally {
+			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -778,6 +787,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	private ObjectMetadata getClaimMetaData(long id) throws IOException {
+		this.s3clientLock.readLock().lock();
 		try {
 			ObjectMetadata md = s3Service.getObjectMetadata(this.name,
 					this.getClaimName(id));
@@ -791,6 +801,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw e;
 			} else
 				return null;
+		} finally {
+			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -799,7 +811,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
-
+		this.s3clientLock.readLock().lock();
 		try {
 			int csz = toIntExact(arc.getFile().length());
 			ObjectMetadata md = new ObjectMetadata();
@@ -872,7 +884,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					"unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
-
+			this.s3clientLock.readLock().unlock();
 		}
 
 	}
@@ -882,6 +894,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
+		this.s3clientLock.readLock().lock();
 		try {
 
 			long tm = System.currentTimeMillis();
@@ -985,6 +998,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw e;
 
 			}
+		} finally {
+			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -1005,6 +1020,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	private Map<String, String> getUserMetaData(ObjectMetadata obj) {
+		this.s3clientLock.readLock().lock();
+		try{
 		if (!md5sum) {
 			HashMap<String, String> omd = new HashMap<String, String>();
 			Set<String> mdk = obj.getRawMetadata().keySet();
@@ -1021,17 +1038,24 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		} else {
 			return obj.getUserMetadata();
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 
 	}
 
 	private int verifyDelete(long id) throws IOException, Exception {
+		this.s3clientLock.readLock().lock();
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		ObjectMetadata om = null;
-		S3Object kobj = s3Service.getObject(this.name, "keys/" + haName);
-		int claims = this.getClaimedObjects(kobj, id);
+		S3Object kobj = null;
+		
+		int claims = 0;
+		this.s3clientLock.readLock().lock();
 		try {
-
+			kobj = s3Service.getObject(this.name, "keys/" + haName);
+			claims = this.getClaimedObjects(kobj, id);
 			if (claims > 0) {
 				if(this.clustered)
 					om = this.getClaimMetaData(id);
@@ -1095,6 +1119,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				kobj.close();
 			} catch (Exception e) {
 			}
+			this.s3clientLock.readLock().unlock();
 		}
 		return claims;
 	}
@@ -1221,6 +1246,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	public Iterator<String> getNextObjectList() {
+		this.s3clientLock.readLock().lock();
+		try{
 		List<String> keys = new ArrayList<String>();
 		if (ck == null)
 			ck = s3Service.listObjects(this.getName(), "keys/");
@@ -1234,10 +1261,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			keys.add(obj.getKey());
 		}
 		return keys.iterator();
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	public StringResult getStringResult(String key) throws IOException,
 			InterruptedException {
+		this.s3clientLock.readLock().lock();
+		try {
 		S3Object sobj = null;
 		ObjectMetadata md = null;
 		try {
@@ -1325,6 +1357,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			}
 		}
 		return st;
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	@Override
@@ -1334,7 +1369,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
-
+		this.s3clientLock.readLock().lock();
+		try{
 		BufferedInputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
@@ -1500,6 +1536,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				}
 			}
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 
 	}
 
@@ -1542,6 +1581,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void downloadFile(String nm, File to, String pp) throws IOException {
+		this.s3clientLock.readLock().lock();
+		try{
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		String rnd = RandomGUID.getGuid();
@@ -1650,10 +1691,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			z.delete();
 			e.delete();
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public void deleteFile(String nm, String pp) throws IOException {
+		this.s3clientLock.readLock().lock();
+		try{
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		String haName = EncyptUtils.encString(nm,
@@ -1663,12 +1709,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		} catch (Exception e1) {
 			throw new IOException(e1);
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 
 	}
 
 	@Override
 	public void renameFile(String from, String to, String pp)
 			throws IOException {
+		this.s3clientLock.readLock().lock();
+		try{
 		while (from.startsWith(File.separator))
 			from = from.substring(1);
 		while (to.startsWith(File.separator))
@@ -1684,6 +1735,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		} catch (Exception e1) {
 			throw new IOException(e1);
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	ObjectListing nck = null;
@@ -1697,6 +1751,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	public String getNextName(String pp) throws IOException {
+		this.s3clientLock.readLock().lock();
 		try {
 			String pfx = pp + "/";
 			if (nck == null) {
@@ -1733,16 +1788,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 		} catch (Exception e) {
 			throw new IOException(e);
+		} finally {
+			this.s3clientLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public Map<String, Integer> getHashMap(long id) throws IOException {
+		
+		
 		//SDFSLogger.getLog().info("downloading map for " + id);
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
-		S3Object kobj = s3Service.getObject(this.name, "keys/" + haName);
+		S3Object kobj = null;
+		this.s3clientLock.readLock().lock();
 		try {
+			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			String[] ks = this.getStrings(kobj);
 			HashMap<String, Integer> m = new HashMap<String, Integer>(ks.length);
 			for (String k : ks) {
@@ -1752,13 +1813,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 			return m;
 		} finally {
+			this.s3clientLock.readLock().unlock();
+			try {
 			kobj.close();
+			}catch(Exception e) {}
 		}
 
 	}
 
 	@Override
 	public boolean checkAccess() {
+		this.s3clientLock.readLock().lock();
+		try{
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
 			try {
@@ -1777,6 +1843,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			SDFSLogger.getLog().warn(
 					"unable to connect to bucket try " + 3 + " of 3", e);
 		return false;
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	@Override
@@ -1819,6 +1888,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	@Override
 	public synchronized String restoreBlock(long id, byte[] hash)
 			throws IOException {
+		this.s3clientLock.readLock().lock();
+		try{
 		if (id == -1) {
 			SDFSLogger.getLog().warn(
 					"Hash not found for " + StringUtils.getHexString(hash));
@@ -1860,17 +1931,25 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				throw e;
 			}
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 
 	}
 
 	@Override
 	public boolean blockRestored(String id) {
+		this.s3clientLock.readLock().lock();
+		try{
 		ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/"
 				+ id);
 		if (omd.getOngoingRestore())
 			return false;
 		else
 			return true;
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 
 	}
 
@@ -1950,6 +2029,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
+		this.s3clientLock.readLock().lock();
+		try {
 		if(!this.clustered)
 			throw new IOException("volume is not clustered");
 		ObjectMetadata om = this.getClaimMetaData(id);
@@ -1988,22 +2069,29 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					this.getClaimName(id), new ByteArrayInputStream(msg), om);
 			s3Service.putObject(creq);
 		}
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	
 
 	@Override
 	public boolean objectClaimed(String key) throws IOException {
+		
 		if(!this.clustered)
 			return true;
 		
 		String pth = "claims/" +key + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
 				Main.chunkStoreEncryptionEnabled);
+		this.s3clientLock.readLock().lock();
 		try {
 			s3Service.getObjectMetadata(this.name, pth);
 			return true;
 		}catch(Exception e) {
 			return false;
+		}finally {
+			this.s3clientLock.readLock().unlock();
 		}
 		
 		
@@ -2013,20 +2101,28 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public void checkoutFile(String name) throws IOException {
 		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
 				Main.chunkStoreEncryptionEnabled);
+		this.s3clientLock.readLock().lock();
+		try{
 		PutObjectRequest creq = new PutObjectRequest(this.name,
 				pth, Long.toString(System.currentTimeMillis()));
 		s3Service.putObject(creq);
+		}finally {
+			this.s3clientLock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public boolean isCheckedOut(String name) throws IOException {
 		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
 				Main.chunkStoreEncryptionEnabled);
+		this.s3clientLock.readLock().lock();
 		try {
 			s3Service.getObjectMetadata(this.name, pth);
 			return true;
 		}catch(Exception e) {
 			return false;
+		} finally {
+			this.s3clientLock.readLock().unlock();
 		}
 	}
 

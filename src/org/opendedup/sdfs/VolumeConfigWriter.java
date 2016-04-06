@@ -112,6 +112,13 @@ public class VolumeConfigWriter {
 	private String cloudUrl;
 	private boolean readAhead = false;
 	private String blockSize = "50 MB";
+	private long sn = new Random().nextLong();
+	
+	public VolumeConfigWriter() {
+		sn = new Random().nextLong();
+		if (sn < 0)
+			sn = sn * -1;
+	}
 
 	public void parseCmdLine(String[] args) throws Exception {
 		CommandLineParser parser = new PosixParser();
@@ -158,7 +165,7 @@ public class VolumeConfigWriter {
 		this.chunk_store_data_location = this.base_path + File.separator
 				+ "chunkstore" + File.separator + "chunks";
 		this.chunk_store_hashdb_location = this.base_path + File.separator
-				+ "chunkstore" + File.separator + "hdb";
+				+ "chunkstore" + File.separator + "hdb-" + this.sn;
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
@@ -585,10 +592,7 @@ public class VolumeConfigWriter {
 				Integer.toString(this.read_timeout));
 		vol.setAttribute("write-timeout-seconds",
 				Integer.toString(this.write_timeout));
-		int sn = new Random().nextInt();
-		if (sn < 0)
-			sn = sn * -1;
-		vol.setAttribute("serial-number", Integer.toString(sn));
+		vol.setAttribute("serial-number", Long.toString(sn));
 		root.appendChild(vol);
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));

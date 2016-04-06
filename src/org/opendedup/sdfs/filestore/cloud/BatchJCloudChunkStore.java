@@ -135,7 +135,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			Map<String, String> md = bmd.getUserMetadata();
 			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
-			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo",
+			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled),
 					CopyOptions.builder().contentMetadata(bmd.getContentMetadata()).userMetadata(md).build());
 			this.context.close();
 			SDFSLogger.getLog().info("Updated container on close");
@@ -704,6 +704,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					Map<String, String> md = dmd.getUserMetadata();
 					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("clustered", Boolean.toString(this.clustered));
 					blobStore.copyBlob(this.name, lbi, this.name, lbi,
 							CopyOptions.builder().contentMetadata(dmd.getContentMetadata()).userMetadata(md).build());
 					this.resetCurrentSize();

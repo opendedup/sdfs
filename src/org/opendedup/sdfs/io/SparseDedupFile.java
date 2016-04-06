@@ -908,7 +908,7 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void unRegisterChannel(DedupFileChannel channel, int flags) {
 		if (Main.safeClose && !Main.blockDev) {
-			syncLock.lock();
+			synchronized(channels) {
 			try {
 
 				if (channel.getFlags() == flags) {
@@ -928,6 +928,7 @@ public class SparseDedupFile implements DedupFile {
 			} finally {
 				syncLock.unlock();
 			}
+			}
 		}
 	}
 
@@ -945,7 +946,6 @@ public class SparseDedupFile implements DedupFile {
 		if (this.toOccured)
 			throw new IOException("timeout occured");
 		if (!Main.safeClose) {
-			syncLock.lock();
 			try {
 				if (this.staticChannel == null) {
 					if (this.isClosed())
@@ -953,24 +953,19 @@ public class SparseDedupFile implements DedupFile {
 					this.staticChannel = channel;
 				}
 			} catch (Exception e) {
-			} finally {
-				syncLock.unlock();
-			}
+			} 
 		} else {
-			syncLock.lock();
-			try {
+			synchronized(channels) {
 				if (this.isClosed() || this.channels.size() == 0)
 					this.initDB();
 				this.channels.add(channel);
-			} finally {
-				syncLock.unlock();
 			}
 		}
 	}
 
 	@Override
 	public boolean hasOpenChannels() {
-		syncLock.lock();
+		synchronized(channels) {
 		try {
 			if (this.channels.size() > 0)
 				return true;
@@ -978,19 +973,17 @@ public class SparseDedupFile implements DedupFile {
 				return false;
 		} catch (Exception e) {
 			return false;
-		} finally {
-			syncLock.unlock();
+		} 
 		}
 	}
 
 	public int openChannelsSize() {
-		syncLock.lock();
+		synchronized(channels) {
 		try {
 			return this.channels.size();
 		} catch (Exception e) {
 			return -1;
-		} finally {
-			syncLock.unlock();
+		}
 		}
 	}
 
@@ -1014,6 +1007,7 @@ public class SparseDedupFile implements DedupFile {
 				if (Main.safeClose) {
 					try {
 						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
+						
 						for (DedupFileChannel f : this.channels) {
 							al.add(f);
 						}
