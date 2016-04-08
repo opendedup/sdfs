@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -382,29 +383,31 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	private StringTokenizer ht = null;
 	private long hid = 0;
-
+	StringResult rrs;
 	@Override
 	public synchronized ChunkData getNextChunck() throws IOException {
 		if (ht == null || !ht.hasMoreElements()) {
-			StringResult rs;
+			
 			try {
-				rs = dl.getStringTokenizer();
+				
+				rrs = dl.getStringTokenizer();
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
-			if (rs == null) {
+			if (rrs == null) {
 				return null;
 			}
-			ht = rs.st;
-			hid = rs.id;
+			ht = rrs.st;
+			hid = rrs.id;
 		}
-		if(!ht.hasMoreElements())
-			return getNextChunck();
-		else {
+		try {
 		String token = ht.nextToken();
 		ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
 				token.split(":")[0]), hid);
 		return chk;
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("no more tokens for [" +rrs.sr+"]");
+			throw e;
 		}
 	}
 
@@ -1389,6 +1392,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return al.iterator();
 	}
 
+
 	@Override
 	public StringResult getStringResult(String key) throws IOException,
 			InterruptedException {
@@ -1402,7 +1406,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		if (encrypt) {
 			nm = EncryptUtils.decryptCBC(nm);
 		}
-		this.hid = EncyptUtils.decHashArchiveName(bi.getName()
+		Long sid = EncyptUtils.decHashArchiveName(bi.getName()
 				.substring(5), encrypt);
 		boolean compress = Boolean.parseBoolean(md.get("lz4Compress"));
 		if (compress) {
@@ -1410,7 +1414,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			nm = CompressionUtils.decompressLz4(nm, size);
 		}
 		String st = new String(nm);
-		ht = new StringTokenizer(st, ",");
+		
+		StringTokenizer str = new StringTokenizer(st, ",");
 		boolean changed = false;
 		if (md.containsKey("deleted")) {
 			md.remove("deleted");
@@ -1441,9 +1446,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			SDFSLogger.getLog().warn("unable to update size", e);
 		}
 		StringResult rslt = new StringResult();
-		rslt.id = hid;
-		rslt.st = ht;
-		SDFSLogger.getLog().info("st="+rslt.st);
+		rslt.id = sid;
+		rslt.st = str;
+		rslt.sr = st;
 		return rslt;
 		}catch(Exception e) {
 			throw new IOException(e);

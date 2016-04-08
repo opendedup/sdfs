@@ -1081,6 +1081,7 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
+				log.info("deleting " + fileName);
 				File f = resolvePath(fileName);
 
 				if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {

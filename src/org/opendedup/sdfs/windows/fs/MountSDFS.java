@@ -51,6 +51,8 @@ public class MountSDFS {
 	}
 
 	public static void main(String[] args) throws ParseException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		 System.setProperty("org.apache.commons.logging.Log",
+                 "org.apache.commons.logging.impl.NoOpLog");
 		checkJavaVersion();
 		int port = -1;
 		String volumeConfigFile = null;

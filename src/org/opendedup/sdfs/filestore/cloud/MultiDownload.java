@@ -1,11 +1,11 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -81,7 +81,7 @@ public class MultiDownload implements Runnable {
 		}
 
 	}
-
+	AtomicLong l = new AtomicLong();
 	private String getNextKey() throws IOException {
 		synchronized (this) {
 			try {
@@ -95,7 +95,7 @@ public class MultiDownload implements Runnable {
 
 			if (ck != null && ck.hasNext()) {
 				String kid = ck.next();
-				
+				l.incrementAndGet();
 				return kid;
 			}
 		}
@@ -103,7 +103,6 @@ public class MultiDownload implements Runnable {
 	}
 
 	private void addStringResult(String key) throws IOException, InterruptedException {
-		SDFSLogger.getLog().debug("kid=" + key);
 		this.sbs.put(cs.getStringResult(key));
 	}
 

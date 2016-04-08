@@ -61,6 +61,8 @@ public class MountSDFS implements Daemon, Runnable{
 	}
 
 	public static void main(String[] args) throws ParseException {
+		 System.setProperty("org.apache.commons.logging.Log",
+                 "org.apache.commons.logging.impl.NoOpLog");
 		BasicConfigurator.configure();
 		setup(args);
 		try {
