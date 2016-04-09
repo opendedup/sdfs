@@ -13,6 +13,8 @@ public interface AbstractBatchStore {
 	public boolean fileExists(long id) throws IOException;
 
 	public boolean checkAccess();
+	
+	public int getCheckInterval();
 
 	public void writeHashBlobArchive(HashBlobArchive arc, long id)
 			throws IOException;

@@ -76,6 +76,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	private String bucketLocation = null;
 	GoogleStorageService s3Service = null;
 	boolean closed = false;
+	private int checkInterval = 15000;
 	boolean deleteUnclaimed = true;
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
@@ -1560,6 +1561,12 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	public boolean isCheckedOut(String name) throws IOException {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public int getCheckInterval() {
+		// TODO Auto-generated method stub
+		return this.checkInterval;
 	}
 
 }

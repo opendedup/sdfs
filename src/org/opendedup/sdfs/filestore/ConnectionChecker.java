@@ -10,10 +10,14 @@ public class ConnectionChecker implements Runnable {
 	int interval = 5000;
 	private boolean stopped = false;
 
-	public ConnectionChecker(AbstractBatchStore store) {
-		this.store = store;
-		th = new Thread(this);
-		th.start();
+	public ConnectionChecker(AbstractBatchStore store, int interval) {
+
+		this.interval = interval;
+		if (interval > 0) {
+			this.store = store;
+			th = new Thread(this);
+			th.start();
+		}
 	}
 
 	@Override
@@ -38,7 +42,8 @@ public class ConnectionChecker implements Runnable {
 
 	public void stop() {
 		this.stopped = true;
-		th.interrupt();
+		if (th != null)
+			th.interrupt();
 
 	}
 

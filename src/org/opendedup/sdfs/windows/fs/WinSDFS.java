@@ -749,7 +749,7 @@ public class WinSDFS implements DokanOperations {
 			info.maximumComponentLength = 256;
 			info.volumeName = "Dedup Filesystem";
 			info.fileSystemName = "SDFS";
-			info.volumeSerialNumber = Main.volume.getSerialNumber();
+			info.volumeSerialNumber = (int)(Main.volume.getSerialNumber() >> 32);
 			return info;
 		} catch (Exception e) {
 			log.error("error getting volume info", e);

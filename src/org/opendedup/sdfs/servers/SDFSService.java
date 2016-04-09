@@ -83,6 +83,7 @@ public class SDFSService {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
 			Main.volume.setClosedGracefully(false);
+			Main.DSEID = Main.volume.getSerialNumber();
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);

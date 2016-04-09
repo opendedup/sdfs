@@ -97,6 +97,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
 	private AtomicLong rcurrentSize = new AtomicLong();
 	private AtomicLong rcurrentCompressedSize = new AtomicLong();
+	private int checkInterval = 15000;
 	// private String bucketLocation = null;
 	static {
 
@@ -131,11 +132,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			SDFSLogger.getLog().info("############ Closing Azure Container ##################");
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
-			BlobMetadata bmd = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled));
+			BlobMetadata bmd = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 			Map<String, String> md = bmd.getUserMetadata();
 			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
-			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled),
+			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled),
 					CopyOptions.builder().contentMetadata(bmd.getContentMetadata()).userMetadata(md).build());
 			this.context.close();
 			SDFSLogger.getLog().info("Updated container on close");
@@ -248,7 +249,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		PageSet<? extends StorageMetadata> bul = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("bucketinfo").withDetails());
 		long rcs = 0;
 		long rccs = 0;
-		String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+		String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		for(StorageMetadata st : bul) {
 			if(!st.getName().equalsIgnoreCase(lbi)) {
 			Map<String,String> md = st.getUserMetadata();
@@ -276,6 +277,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if (syncf) {
 				new FileReplicationService(this);
 			}
+		}
+		if(config.hasAttribute("connection-check-interval")) {
+			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 		}
 		if (config.hasAttribute("delete-unclaimed")) {
 			this.deleteUnclaimed = Boolean.parseBoolean(config.getAttribute("delete-unclaimed"));
@@ -337,7 +341,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			 * new RetryExponentialRetry(500, 5));
 			 */
 			Map<String, String> md = new HashMap<String,String>();
-			String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+			String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (blobStore.blobExists(this.name,lbi))
 				md = blobStore.blobMetadata(this.name, lbi).getUserMetadata();
 			if (md.size() == 0) 
@@ -363,7 +367,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 				md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 				md.put("clustered", Boolean.toString(this.clustered));
-				Blob b = blobStore.blobBuilder("bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled)).payload(Long.toString(System.currentTimeMillis()))
+				Blob b = blobStore.blobBuilder("bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)).payload(Long.toString(System.currentTimeMillis()))
 						.userMetadata(md).build();
 				blobStore.putBlob(this.name, b);
 			}
@@ -495,7 +499,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private String getClaimName(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		return "claims/keys/" + haName + "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 	}
 
 	private int getClaimedObjects(String pth) throws IOException {
@@ -699,7 +703,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			try {
 				Thread.sleep(60000);
 				try {
-					String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+					String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					BlobMetadata dmd = blobStore.blobMetadata(this.name, lbi);
 					Map<String, String> md = dmd.getUserMetadata();
 					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
@@ -1020,7 +1024,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		try {
 			if(this.clustered) {
 				String blb = "claims/" + haName +  "/"
-						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				blobStore.removeBlob(this.name, blb);
 				SDFSLogger.getLog().info("deleting " + blb );
 				if (!blobStore.list(this.name,ListContainerOptions.Builder.inDirectory("claims/"+haName)).iterator().hasNext()) {
@@ -1116,7 +1120,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
 			try {
-				Map<String, String> md = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled)).getUserMetadata();
+				Map<String, String> md = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)).getUserMetadata();
 				if (md.containsKey("currentlength")) {
 					Long.parseLong(md.get("currentlength"));
 					return true;
@@ -1321,7 +1325,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if(!this.clustered)
 			return true;
 		String blb = "claims/" + key +  "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		return blobStore.blobExists(this.name, blb);
 		
 	}
@@ -1329,7 +1333,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public void checkoutFile(String name) throws IOException {
 		String blb = "claims/" + name +  "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		Blob b =blobStore.blobBuilder(blb).payload(Long.toString(System.currentTimeMillis())).build();
 		blobStore.putBlob(this.name, b);
 	}
@@ -1339,8 +1343,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if(!this.clustered)
 			return true;
 		String blb = "claims/" + name +  "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(), Main.chunkStoreEncryptionEnabled);
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		return blobStore.blobExists(this.name, blb);
+	}
+
+	@Override
+	public int getCheckInterval() {
+		return this.checkInterval;
 	}
 
 }

@@ -107,7 +107,7 @@ public class MetaDataFileInfo {
 
 	ByHandleFileInformation toByHandleFileInformation() {
 		return new ByHandleFileInformation(fileAttribute, creationTime,
-				lastAccessTime, lastWriteTime, Main.volume.getSerialNumber(),
+				lastAccessTime, lastWriteTime, (int)(Main.volume.getSerialNumber() >> 32),
 				fileSize, 1, fileIndex);
 	}
 

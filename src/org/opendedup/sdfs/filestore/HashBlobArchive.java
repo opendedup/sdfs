@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -8,7 +9,6 @@ import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -107,7 +107,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static boolean closed = false;
 	private int blocksz = MAX_LEN;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
-	public FileLock fl = null;
+	//public FileLock fl = null;
 
 	public static void setLocalCacheSize(long sz) {
 		// slock.lock();
@@ -301,7 +301,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 									&& !ar.getName().endsWith(".vol")) {
 								Long id = Long.parseLong(ar.getName());
 								File cf = new File(staged_chunk_location,
-										Main.volume.getSerialNumber() + "-"
+										Main.DSEID + "-"
 												+ Long.toString(id) + ".vol");
 								if (cf.exists()) {
 									HashBlobArchive arc = new HashBlobArchive(
@@ -343,7 +343,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					f.mkdirs();
 			}
 
-			cc = new ConnectionChecker(store);
+			cc = new ConnectionChecker(store,store.getCheckInterval());
 			SDFSLogger
 					.getLog()
 					.info("################################# Done Uploading Archives #################");
@@ -489,7 +489,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l.unlock();
 				l = slock.writeLock();
 				l.lock();
-				if (archive.writeable)
+				if (archive != null && archive.writeable)
 					archive.putChunk(hash, chunk);
 				else
 					archive = new HashBlobArchive(hash, chunk);
@@ -710,16 +710,15 @@ public class HashBlobArchive implements Runnable, Serializable {
 				pid = rand.nextLong();
 			}
 			File cf = new File(getStagedPath(pid),
-					Main.volume.getSerialNumber() + "-" + Long.toString(pid)
+					Main.DSEID + "-" + Long.toString(pid)
 							+ ".vol");
+			this.id = pid;
 			f = new File(getStagedPath(pid), Long.toString(id));
 			@SuppressWarnings("resource")
 			FileChannel ch = new RandomAccessFile(f, "rw").getChannel();
-			fl = ch.tryLock();
-			if (fl != null) {
 				cf.setLastModified(System.currentTimeMillis());
 				wOpenFiles.put(id, ch);
-				this.id = pid;
+				
 				rchunks.put(this.id, this);
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
@@ -733,13 +732,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 				this.putChunk(hash, chunk);
 				executor.execute(this);
 				break;
-			} else {
-				try {
-					ch.close();
-				} catch (Exception e) {
-
-				}
-			}
 		}
 
 	}
@@ -1271,7 +1263,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			rchunks.remove(this.id);
 			this.id = nid;
 			File cf = new File(staged_chunk_location,
-					Main.volume.getSerialNumber() + "-" + Long.toString(nid)
+					Main.DSEID + "-" + Long.toString(nid)
 							+ ".vol");
 			cf.delete();
 		} catch (Exception e) {
@@ -1298,11 +1290,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					SDFSLogger.getLog().debug("writing " + id);
 				if (!this.uploadFile(nid))
 					return false;
-				try {
-					this.fl.release();
-				} catch (Exception e) {
-
-				}
+				
 				if (!this.moveFile(nid))
 					return false;
 				if (SDFSLogger.isDebug())

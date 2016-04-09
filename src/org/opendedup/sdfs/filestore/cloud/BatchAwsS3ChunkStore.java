@@ -114,6 +114,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			+ "syncstaged");
 	private boolean genericS3 = false;
 	private WeakHashMap<Long, String> restoreRequests = new WeakHashMap<Long, String>();
+	private int checkInterval = 15000;
 
 	static {
 		try {
@@ -305,7 +306,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				bucketLocation = RegionUtils.getRegion(config
 						.getAttribute("default-bucket-location"));
 			}
-
+			if(config.hasAttribute("connection-check-interval")) {
+				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
+			}
 			if (config.hasAttribute("block-size")) {
 				int sz = (int) StringUtils.parseSize(config
 						.getAttribute("block-size"));
@@ -782,7 +785,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		return "claims/keys/"
 				+ haName
 				+ "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+				+ EncyptUtils.encHashArchiveName(Main.DSEID,
 						Main.chunkStoreEncryptionEnabled);
 	}
 
@@ -2082,7 +2085,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		if(!this.clustered)
 			return true;
 		
-		String pth = "claims/" +key + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+		String pth = "claims/" +key + "/"+ EncyptUtils.encHashArchiveName(Main.DSEID,
 				Main.chunkStoreEncryptionEnabled);
 		this.s3clientLock.readLock().lock();
 		try {
@@ -2099,7 +2102,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
-		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.DSEID,
 				Main.chunkStoreEncryptionEnabled);
 		this.s3clientLock.readLock().lock();
 		try{
@@ -2113,7 +2116,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 	@Override
 	public boolean isCheckedOut(String name) throws IOException {
-		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+		String pth = "claims/" +name + "/"+ EncyptUtils.encHashArchiveName(Main.DSEID,
 				Main.chunkStoreEncryptionEnabled);
 		this.s3clientLock.readLock().lock();
 		try {
@@ -2124,6 +2127,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		} finally {
 			this.s3clientLock.readLock().unlock();
 		}
+	}
+
+	@Override
+	public int getCheckInterval() {
+		// TODO Auto-generated method stub
+		return this.checkInterval;
 	}
 
 }

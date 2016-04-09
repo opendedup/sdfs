@@ -156,12 +156,12 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	public Object handle(Message msg) throws Exception {
 		try {
 			byte[] buffer = msg.getBuffer();
-			SDFSLogger.getLog().info("recieved cmd sz= " + buffer.length);
-			SDFSLogger.getLog().info("recieved cmd offset= " + msg.getOffset());
+			SDFSLogger.getLog().debug("recieved cmd sz= " + buffer.length);
+			SDFSLogger.getLog().debug("recieved cmd offset= " + msg.getOffset());
 			ByteBuffer buf = ByteBuffer.wrap(buffer);
 			byte cmd = buf.get();
 			Object rtrn = null;
-			SDFSLogger.getLog().info("recieved cmd " + cmd);
+			SDFSLogger.getLog().debug("recieved cmd " + cmd);
 			switch (cmd) {
 			case NetworkCMDS.UPDATE_DSE: {
 				try {

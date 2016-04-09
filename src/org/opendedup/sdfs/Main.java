@@ -70,6 +70,7 @@ public class Main {
 	public static String DSERemoteHostName = null;
 
 	public static boolean standAloneDSE = false;
+	public static long DSEID = 0;
 
 	/**
 	 * DSE Host port for front end file systems

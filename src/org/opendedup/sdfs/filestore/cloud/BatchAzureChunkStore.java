@@ -81,6 +81,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	boolean clustered = false;
+	private int checkInterval =15000;
+	
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
 
@@ -252,6 +254,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					.getAttribute("block-size"));
 			HashBlobArchive.MAX_LEN = sz;
 
+		}
+		if(config.hasAttribute("connection-check-interval")) {
+			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 		}
 		if (config.hasAttribute("sync-files")) {
 			boolean syncf = Boolean.parseBoolean(config
@@ -482,7 +487,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return "claims/keys/"
 				+ haName
 				+ "/"
-				+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+				+ EncyptUtils.encHashArchiveName(Main.DSEID,
 						Main.chunkStoreEncryptionEnabled);
 	}
 
@@ -1428,7 +1433,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			if (encrypt) {
 				nm = EncryptUtils.decryptCBC(nm);
 			}
-			this.hid = EncyptUtils.decHashArchiveName(
+			long sid = EncyptUtils.decHashArchiveName(
 					bi.getName().substring(5), encrypt);
 			boolean compress = Boolean.parseBoolean(md.get("lz4Compress"));
 			if (compress) {
@@ -1436,7 +1441,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				nm = CompressionUtils.decompressLz4(nm, size);
 			}
 			String st = new String(nm);
-			ht = new StringTokenizer(st, ",");
+			StringTokenizer sht = new StringTokenizer(st, ",");
 			CloudBlob nbi = (CloudBlob) container.getBlockBlobReference(this.getClaimName(hid));
 			nbi.downloadAttributes();
 			md =nbi.getMetadata();
@@ -1470,8 +1475,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				SDFSLogger.getLog().warn("unable to update size", e);
 			}
 			StringResult rslt = new StringResult();
-			rslt.id = hid;
-			rslt.st = ht;
+			rslt.id = sid;
+			rslt.st = sht;
 			SDFSLogger.getLog().info("st=" + rslt.st);
 			return rslt;
 		} catch (Exception e) {
@@ -1515,7 +1520,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		try {
 		CloudBlockBlob kblob = container
 				.getBlockBlobReference("claims/" + key+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+						+ EncyptUtils.encHashArchiveName(Main.DSEID,
 								Main.chunkStoreEncryptionEnabled));
 		return kblob.exists();
 		}catch(Exception e) {
@@ -1529,7 +1534,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		try {
 		CloudBlockBlob kblob = container
 				.getBlockBlobReference("claims/" + name+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+						+ EncyptUtils.encHashArchiveName(Main.DSEID,
 								Main.chunkStoreEncryptionEnabled));
 		kblob.uploadText(Long.toString(System.currentTimeMillis()));
 		}catch(Exception e) {
@@ -1545,13 +1550,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		try {
 		CloudBlockBlob kblob = container
 				.getBlockBlobReference("claims/" + name+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.volume.getSerialNumber(),
+						+ EncyptUtils.encHashArchiveName(Main.DSEID,
 								Main.chunkStoreEncryptionEnabled));
 		return kblob.exists();
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("error checking if blob is clamimed", e);
 			return false;
 		}
+	}
+
+	@Override
+	public int getCheckInterval() {
+		return this.checkInterval;
 	}
 			
 

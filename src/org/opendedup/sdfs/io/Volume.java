@@ -65,7 +65,7 @@ public class Volume implements java.io.Serializable {
 	public Address host = null;
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
-	private int serialNumber = 0;
+	private long serialNumber = 0;
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
@@ -234,7 +234,7 @@ public class Volume implements java.io.Serializable {
 					.getAttribute("write-bytes")));
 
 		if (vol.hasAttribute("serial-number")) {
-			this.serialNumber = Integer.parseInt(vol
+			this.serialNumber = Long.parseLong(vol
 					.getAttribute("serial-number"));
 		} else {
 			int sn = new Random().nextInt();
@@ -567,7 +567,7 @@ public class Volume implements java.io.Serializable {
 				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
-		root.setAttribute("serial-number", Integer.toString(this.serialNumber));
+		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
@@ -620,7 +620,7 @@ public class Volume implements java.io.Serializable {
 				Long.toString(this.actualWriteBytes.get()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
-		root.setAttribute("serial-number", Integer.toString(this.serialNumber));
+		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("name", this.name);
 		root.setAttribute("dse-size",
 				Long.toString(HCServiceProxy.getDSESize()));
@@ -722,7 +722,7 @@ public class Volume implements java.io.Serializable {
 		this.clusterRackAware = clusterRackAware;
 	}
 
-	public int getSerialNumber() {
+	public Long getSerialNumber() {
 		return serialNumber;
 	}
 

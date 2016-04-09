@@ -54,6 +54,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
 	File container_location = new File(Main.chunkStore);
+	int checkInterval = 15000;
 
 	// private String bucketLocation = null;
 	static {
@@ -215,6 +216,9 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 
 		if (config.hasAttribute("default-bucket-location")) {
 			// bucketLocation = config.getAttribute("default-bucket-location");
+		}
+		if(config.hasAttribute("connection-check-interval")) {
+			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 		}
 		if (config.hasAttribute("block-size")) {
 			int sz = (int) StringUtils.parseSize(config
@@ -732,6 +736,12 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	public boolean objectClaimed(String key) {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public int getCheckInterval() {
+		// TODO Auto-generated method stub
+		return this.checkInterval;
 	}
 
 }

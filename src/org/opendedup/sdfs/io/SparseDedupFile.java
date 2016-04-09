@@ -871,8 +871,6 @@ public class SparseDedupFile implements DedupFile {
 	 */
 	@Override
 	public DedupFileChannel getChannel(int flags) throws IOException {
-		syncLock.lock();
-		try {
 			if (!Volume.getStorageConnected())
 				throw new IOException("storage offline");
 			if (this.toOccured)
@@ -885,17 +883,17 @@ public class SparseDedupFile implements DedupFile {
 				}
 				return this.staticChannel;
 			} else {
-
+				synchronized(channels) {
 				if (this.isClosed() || this.channels.size() == 0)
 					this.initDB();
 				DedupFileChannel channel = new DedupFileChannel(this, flags);
+				
 				this.channels.add(channel);
 				return channel;
+				}
 
 			}
-		} finally {
-			syncLock.unlock();
-		}
+		
 	}
 
 	/*
@@ -925,9 +923,7 @@ public class SparseDedupFile implements DedupFile {
 									+ flags + "!=" + channel.getFlags() + "]");
 				}
 			} catch (Exception e) {
-			} finally {
-				syncLock.unlock();
-			}
+			} 
 			}
 		}
 	}

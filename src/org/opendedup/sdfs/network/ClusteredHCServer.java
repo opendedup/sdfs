@@ -128,6 +128,7 @@ public class ClusteredHCServer implements Daemon {
 		}
 		try {
 			Config.parseDSEConfigFile(cmd.getOptionValue("c"));
+			Main.DSEID = Main.DSEClusterMemberID;
 		} catch (IOException e1) {
 			SDFSLogger.getLog().fatal(
 					"exiting because of an error with the config file", e1);

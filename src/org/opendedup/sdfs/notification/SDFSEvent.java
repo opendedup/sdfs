@@ -73,6 +73,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type CSZ = new Type("Set Cache Size");
 	public transient static final Type RSP = new Type("Set Read Speed");
 	public transient static final Type WSP = new Type("Set Write Speed");
+	public transient static final Type RAE = new Type("Cache File");
 	public transient static final Type CF = new Type("Importing Cloud File");
 	public transient static final Type ARCHIVERESTORE = new Type(
 			"Restore from Glacier");
@@ -162,6 +163,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
+	
 
 	public void endErrorEvent() {
 		for (int i = 0; i < this.children.size(); i++) {
@@ -193,6 +195,14 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		return event;
 	}
+	
+	public static SDFSEvent readAheadEvent(MetaDataDedupFile f) {
+		SDFSEvent event = new SDFSEvent(RAE, getTarget(),
+				"Caching " + f.getPath() + " Locally", RUNNING);
+
+		return event;
+	}
+	
 
 	public static SDFSEvent archiveRestoreEvent(MetaDataDedupFile f) {
 		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(),
