@@ -37,6 +37,7 @@ public class BlockDev implements Externalizable {
 	String uuid;
 	long size;
 	boolean startOnInit;
+	boolean mapDev = false;
 	byte status = 0;
 	String mappedDev;
 	String statusMsg = "Stopped";
@@ -143,6 +144,7 @@ public class BlockDev implements Externalizable {
 		this.statusMsg = "Stopping [" + this.devName + "] at ["
 				+ this.internalPath + "] on [" + this.devPath + "] with size ["
 				+ this.size + "]";
+		if(this.mapDev) {
 		String sh = "/bin/sh";
 		String cop = "-c";
 		String cmd = "umount /dev/mapper/" + this.devName + "";
@@ -171,6 +173,21 @@ public class BlockDev implements Externalizable {
 		} finally {
 			this.mappedDev = null;
 		}
+		} else {
+			String sh = "/bin/sh";
+			String cop = "-c";
+			String cmd = "umount " + this.devPath + "";
+			String[] exe = new String[] { sh, cop, cmd };
+			try {
+				ProcessWorker.runProcess(exe, 1000);
+				SDFSLogger.getLog().info(
+						"Removed mounts to /dev/mapper/" + this.devName);
+			} catch (Exception e) {
+				SDFSLogger.getLog()
+						.info("Failed to remove mounts to /dev/mapper/"
+								+ this.devName, e);
+			}
+		}
 		this.statusMsg = "Device Stopped";
 	}
 
@@ -178,6 +195,7 @@ public class BlockDev implements Externalizable {
 	public void startedEvent(BlockDeviceOpenEvent evt) {
 		this.statusMsg = "Backing Device Initiated";
 		try {
+			if(this.mapDev) {
 		File f = new File("/dev/mapper/" + this.devName);
 	
 		if (f.exists()) {
@@ -212,15 +230,19 @@ public class BlockDev implements Externalizable {
 		}
 		this.statusMsg = "Mapped device to parition /dev/mapper/"
 				+ this.devName;
+			}
 		}catch(Throwable e) {
 			this.statusMsg = e.getMessage();
 			SDFSLogger.getLog().warn(this.statusMsg,e);
 		}
 	
 		this.status = STARTED;
+		if(this.mapDev)
 		this.statusMsg = "Started [" + this.devName + "] at ["
 				+ this.internalPath + "] on [" + this.mappedDev
 				+ "] with size [" + this.size + "]";
+		else
+			this.statusMsg = "Started [" + this.devPath + "] ";
 		SDFSLogger.getLog().debug(this.statusMsg);
 	}
 
