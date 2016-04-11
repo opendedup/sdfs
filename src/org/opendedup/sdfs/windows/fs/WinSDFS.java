@@ -43,8 +43,8 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -92,8 +92,7 @@ public class WinSDFS implements DokanOperations {
 	static ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
 	// private static RejectedExecutionHandler executionHandler = new
 	// BlockPolicy();
-	private static BlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>(
-			1024);
+	private static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue);

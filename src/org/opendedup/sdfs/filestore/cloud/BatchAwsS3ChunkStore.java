@@ -115,6 +115,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	private boolean genericS3 = false;
 	private WeakHashMap<Long, String> restoreRequests = new WeakHashMap<Long, String>();
 	private int checkInterval = 15000;
+	private String binm = "bucketinfo";
 
 	static {
 		try {
@@ -179,8 +180,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			SDFSLogger.getLog().info(
 					"############ Closing Bucket##################");
 			HashBlobArchive.close();
+			
 			ObjectMetadata omd = s3Service
-					.getObjectMetadata(name, "bucketinfo");
+					.getObjectMetadata(name, binm);
 			HashMap<String, String> md = new HashMap<String, String>();
 			md.put("currentsize",
 					Long.toString(HashBlobArchive.currentLength.get()));
@@ -188,7 +190,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					Long.toString(HashBlobArchive.compressedLength.get()));
 			omd.setUserMetadata(md);
 			CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name,
-					"bucketinfo", name, "bucketinfo")
+					binm, name, binm)
 					.withNewObjectMetadata(omd);
 			s3Service.copyObject(copyObjectRequest);
 		} catch (Exception e) {
@@ -476,14 +478,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				this.clustered = true;
 				byte[] sz = "bucketinfodatanow".getBytes();
 				md.setContentLength(sz.length);
-
-				s3Service.putObject(this.name, "bucketinfo",
+				this.binm = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				s3Service.putObject(this.name,binm,
 						new ByteArrayInputStream(sz), md);
 			} else {
 				Map<String, String> obj = null;
 				ObjectMetadata omd = null;
 				try {
-					omd = s3Service.getObjectMetadata(this.name, "bucketinfo");
+					omd = s3Service.getObjectMetadata(this.name, binm);
 					obj = omd.getUserMetadata();
 					obj.get("currentsize");
 				} catch (Exception e) {
@@ -497,9 +499,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					md.addUserMetadata("currentcompressedsize", "0");
 					md.addUserMetadata("clustered", "true");
 					this.clustered = true;
+					this.binm = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					byte[] sz = "bucketinfodatanow".getBytes();
 					md.setContentLength(sz.length);
-					s3Service.putObject(this.name, "bucketinfo",
+					s3Service.putObject(this.name, binm,
 							new ByteArrayInputStream(sz), md);
 				} else {
 					if (obj.containsKey("currentsize")) {
@@ -537,12 +540,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						this.clustered = Boolean.parseBoolean(obj.get("clustered"));
 					} else
 						this.clustered = false;
+					if(this.clustered)
+						this.binm = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					obj.put("clustered", Boolean.toString(this.clustered));
 					omd.setUserMetadata(obj);
 					try {
 						CopyObjectRequest reg = new CopyObjectRequest(
-								this.name, "bucketinfo", this.name,
-								"bucketinfo").withNewObjectMetadata(omd);
+								this.name, binm, this.name,
+								binm).withNewObjectMetadata(omd);
 						s3Service.copyObject(reg);
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn(
@@ -554,7 +559,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						md.addUserMetadata("clustered", Boolean.toString(this.clustered));
 						byte[] sz = "bucketinfodatanow".getBytes();
 						md.setContentLength(sz.length);
-						s3Service.putObject(this.name, "bucketinfo",
+						s3Service.putObject(this.name, binm,
 								new ByteArrayInputStream(sz), md);
 						
 					}
@@ -1134,7 +1139,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				Thread.sleep(60000);
 				try {
 					ObjectMetadata omd = s3Service.getObjectMetadata(name,
-							"bucketinfo");
+							binm);
 					HashMap<String, String> md = new HashMap<String, String>();
 					md.put("currentsize",
 							Long.toString(HashBlobArchive.currentLength.get()));
@@ -1143,7 +1148,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					omd.setUserMetadata(md);
 
 					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(
-							name, "bucketinfo", name, "bucketinfo")
+							name, binm, name, binm)
 							.withNewObjectMetadata(omd);
 					s3Service.copyObject(copyObjectRequest);
 				} catch (Exception e) {
@@ -1832,7 +1837,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		for (int i = 0; i < 3; i++) {
 			try {
 				ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
-						"bucketinfo");
+						binm);
 				Map<String, String> obj = this.getUserMetaData(omd);
 				obj.get("currentsize");
 				return true;

@@ -1,6 +1,7 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -12,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
@@ -23,7 +25,6 @@ import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
-import org.opendedup.util.LargeBloomFilter;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
@@ -31,7 +32,7 @@ import com.google.common.hash.PrimitiveSink;
 public class BloomFDisk {
 	private AtomicLong files = new AtomicLong(0);
 	private FDiskEvent fEvt = null;
-	transient LargeBloomFilter bf = null;
+	transient LargeFileBloomFilter bf = null;
 	private boolean failed = false;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
@@ -41,6 +42,7 @@ public class BloomFDisk {
 			worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
 
+	
 	public BloomFDisk() {
 
 	}
@@ -78,7 +80,7 @@ public class BloomFDisk {
 			fEvt.maxCt = sz;
 
 			SDFSLogger.getLog().info("entries = " + entries);
-			this.bf = new LargeBloomFilter(entries, .10);
+			this.bf = new LargeFileBloomFilter(entries, .1);
 			SDFSLogger.getLog().info(
 					"Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
@@ -102,11 +104,12 @@ public class BloomFDisk {
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
 					SDFSEvent.ERROR);
 			this.failed = true;
+			this.vanish();
 			throw new FDiskException(e);
 		}
 	}
 
-	public LargeBloomFilter getResults() {
+	public LargeFileBloomFilter getResults() {
 		return this.bf;
 	}
 
@@ -211,5 +214,12 @@ public class BloomFDisk {
 		}
 
 	}
+	
+	public void vanish() {
+		if(bf != null)
+			this.bf.vanish();
+		}
+	
+	
 
 }

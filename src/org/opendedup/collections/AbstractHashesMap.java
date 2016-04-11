@@ -2,9 +2,9 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.LargeBloomFilter;
 
 public interface AbstractHashesMap {
 
@@ -18,7 +18,7 @@ public interface AbstractHashesMap {
 
 	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 
-	public abstract long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
+	public abstract long claimRecords(SDFSEvent evt, LargeFileBloomFilter bf)
 			throws IOException;
 
 	/**

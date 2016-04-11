@@ -27,9 +27,10 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.LargeBloomFilter;
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StorageUnit;
 
 import objectexplorer.MemoryMeasurer;
@@ -301,7 +302,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#setUp()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public long setUp() throws IOException {
 		File posFile = new File(path + ".keys");
@@ -412,10 +412,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				SDFSLogger.getLog().warn("bf does not exist");
 			} else {
 				try {
-					FileInputStream fin = new FileInputStream(f);
-					ObjectInputStream oon = new ObjectInputStream(fin);
-					bf = (BloomFilter<KeyBlob>) oon.readObject();
-					oon.close();
+					bf = BloomFilter.create(kbFunnel, size, .01);
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("bf load error", e);
 					closedCorrectly = false;
@@ -463,6 +460,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		try {
 
 			KeyBlob kb = new KeyBlob(key);
+			
 			if (!runningGC && !bf.mightContain(kb)) {
 				return false;
 			}
@@ -473,8 +471,13 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				synchronized (this.claims) {
 					this.claims.set(pos);
 				}
-				if (this.runningGC)
+				
+				if (this.runningGC){
+					l.unlock();
+					l = this.hashlock.writeLock();
+					l.lock();
 					this.bf.put(kb);
+				}
 				this.lastFound = System.currentTimeMillis();
 				return true;
 			}
@@ -1221,7 +1224,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	 */
 
 	@Override
-	public long claimRecords(LargeBloomFilter nbf) throws IOException {
+	public long claimRecords(LargeFileBloomFilter nbf) throws IOException {
 		this.iterInit();
 		long _sz = 0;
 		Lock l = this.hashlock.writeLock();
@@ -1289,7 +1292,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		}
 	}
 
-	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf)
+	public long claimRecords(LargeFileBloomFilter nbf, LargeBloomFilter lbf)
 			throws IOException {
 		this.iterInit();
 		long _sz = 0;

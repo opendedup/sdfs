@@ -2,6 +2,8 @@ package org.opendedup.sdfs.cluster;
 
 import java.io.ByteArrayInputStream;
 
+
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -31,7 +33,8 @@ import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.collections.QuickList;
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
+import org.opendedup.hashing.FLBF;
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.cmds.AddVolCmd;
@@ -43,11 +46,8 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.FindOpenPort;
-import org.opendedup.util.LBF;
-import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.StringUtils;
 
-import com.google.common.hash.BloomFilter;
 
 public class DSEServerSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -71,7 +71,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 	LockService lock_service = null;
 	private boolean peermaster = false;
 	private final ReentrantLock gcUpdateLock = new ReentrantLock();
-	LBF[] lbf = null;
+	FLBF[] lbf = null;
 
 	public DSEServerSocket(String config, String clusterID, byte id,
 			ArrayList<String> remoteVolumes) throws Exception {
@@ -253,7 +253,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 								+ " @ " + this.channel.getName());
 				this.gcUpdateLock.lock();
 				try {
-					this.lbf = new LargeBloomFilter(buf.getLong(), .10)
+					this.lbf = new LargeFileBloomFilter(buf.getLong(), .10)
 							.getArray();
 				} finally {
 					gcUpdateLock.unlock();
@@ -345,11 +345,9 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				int ucl = buf.getInt();
 				buf.get(ob);
 				ob = CompressionUtils.decompressLz4(ob, ucl);
-				BloomFilter<KeyBlob> bfs = BloomFilter.readFrom(
-						new ByteArrayInputStream(ob), LBF.getFunnel());
 				this.gcUpdateLock.lock();
 				try {
-					lbf[id].putAll(new LBF(bfs));
+					lbf[id].putAll(ob);
 				} finally {
 					this.gcUpdateLock.unlock();
 				}
@@ -360,14 +358,19 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				buf.get(ob);
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
 				this.gcUpdateLock.lock();
+				LargeFileBloomFilter bf = null;
 				try {
-					LargeBloomFilter bf = new LargeBloomFilter(lbf);
+					bf = new LargeFileBloomFilter(lbf);
 					HCServiceProxy.processHashClaims(evt, bf);
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"sending back bloom claim chunks cmd");
 				} finally {
-					lbf = null;
+					if(bf != null) {
+						try {
+						bf.vanish();
+						}catch(Exception e) {}
+					}
 					this.gcUpdateLock.unlock();
 				}
 				rtrn = evt;

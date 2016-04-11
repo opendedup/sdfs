@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.cluster;
 
 import java.io.DataInputStream;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +32,7 @@ import org.jgroups.blocks.ResponseMode;
 import org.jgroups.blocks.locking.LockService;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
+import org.opendedup.hashing.FLBF;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
@@ -47,7 +47,6 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.network.HashClientPool;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.LBF;
 
 public class DSEClientSocket implements RequestHandler, MembershipListener,
 		MessageListener, Runnable, ClusterSocket {
@@ -278,7 +277,7 @@ public class DSEClientSocket implements RequestHandler, MembershipListener,
 					.gcInfoEvent("Remote SDFS Volume Cleanup Initiated by "
 							+ msg.getSrc() + " for " + Main.volume.getName());
 			BloomFDisk fd = new BloomFDisk(evt, buf.getLong());
-			LBF[] lbfs = fd.getResults().getArray();
+			FLBF[] lbfs = fd.getResults().getArray();
 			for (int i = 0; i < lbfs.length; i++) {
 				SendBloomFilterCmd sbf = new SendBloomFilterCmd(i, lbfs[i]);
 				sbf.executeCmd(this);

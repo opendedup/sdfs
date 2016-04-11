@@ -1,6 +1,7 @@
-package org.opendedup.util;
+package org.opendedup.hashing;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -8,9 +9,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
@@ -18,8 +19,8 @@ import com.google.common.hash.PrimitiveSink;
 
 public class LBF implements Serializable {
 	private static final long serialVersionUID = 1L;
-	public transient BloomFilter<KeyBlob> bfs = null;
-	public transient ReentrantLock l = new ReentrantLock();
+	public transient BloomFilter<org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob> bfs = null;
+	public transient ReentrantReadWriteLock l = new ReentrantReadWriteLock();
 	private static Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
 		/**
 		 * 
@@ -36,7 +37,7 @@ public class LBF implements Serializable {
 		}
 	};
 
-	public LBF(int sz, double fpp) {
+	public LBF(long sz, double fpp) {
 		this.bfs = BloomFilter.create(getFunnel(), sz, fpp);
 	}
 
@@ -58,20 +59,20 @@ public class LBF implements Serializable {
 	}
 
 	public boolean mightContain(KeyBlob kb) {
-		l.lock();
+		l.readLock().lock();
 		try {
 			return bfs.mightContain(kb);
 		} finally {
-			l.unlock();
+			l.readLock().unlock();
 		}
 	}
 
 	public void put(KeyBlob kb) {
-		l.lock();
+		l.writeLock().lock();
 		try {
 			bfs.put(kb);
 		} finally {
-			l.unlock();
+			l.writeLock().unlock();
 		}
 	}
 

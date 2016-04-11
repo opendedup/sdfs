@@ -1,7 +1,7 @@
 package org.opendedup.collections;
 
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.util.LargeBloomFilter;
 
 public class LBFReconstructThread implements Runnable {
 

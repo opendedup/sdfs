@@ -1,11 +1,12 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,7 @@ public class ReadAhead implements Runnable {
 	ReadAheadEvent evt = null;
 	boolean closeWhenDone;
 	private DedupFileChannel ch = null;
-	private static transient BlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>(2);
+	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads * 4,
 			Main.writeThreads * 4, 10, TimeUnit.SECONDS, worksQueue, executionHandler);

@@ -27,6 +27,7 @@ public class GetDSE {
 								* HashFunctionPool.avg_page_size));
 			root.setAttribute("current-size",
 					Long.toString(HCServiceProxy.getChunkStore().size()));
+			root.setAttribute("entries", Long.toString(HCServiceProxy.getSize()));
 			root.setAttribute("compressed-size", Long.toString(HCServiceProxy
 					.getChunkStore().compressedSize()));
 			root.setAttribute("free-blocks",

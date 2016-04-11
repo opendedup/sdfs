@@ -11,19 +11,19 @@ import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
 import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
+import org.opendedup.hashing.FLBF;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.cluster.ClusterSocket;
 import org.opendedup.sdfs.cluster.DSEServer;
 import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.LBF;
 
 public class SendBloomFilterCmd implements IOPeerCmd {
 	boolean exists = false;
 	RequestOptions opts = null;
-	private LBF lbf;
+	private FLBF lbf;
 	private int id;
 
-	public SendBloomFilterCmd(int id, LBF lbf) {
+	public SendBloomFilterCmd(int id, FLBF lbf) {
 		opts = new RequestOptions(ResponseMode.GET_ALL, 0);
 		this.lbf = lbf;
 		this.id = id;

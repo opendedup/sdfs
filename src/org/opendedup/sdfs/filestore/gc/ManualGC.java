@@ -99,10 +99,16 @@ public class ManualGC {
 			if (Main.disableGC)
 				return 0;
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
+				
 				BloomFDisk fd = new BloomFDisk(evt);
+				try{
 				evt.curCt = 33;
 				rm = HCServiceProxy.processHashClaims(evt, fd.getResults());
 				evt.curCt = 66;
+				}finally {
+					fd.vanish();
+				}
+				
 			} else {
 				FDiskEvent fevt = SDFSEvent.fdiskInfoEvent(
 						"running distributed fdisk", evt);

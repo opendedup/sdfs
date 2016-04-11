@@ -1,10 +1,11 @@
-package org.opendedup.util;
+package org.opendedup.hashing;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.opendedup.collections.BloomFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.util.CommandLineProgressBar;
 
 public class LargeBloomFilter implements Serializable {
 

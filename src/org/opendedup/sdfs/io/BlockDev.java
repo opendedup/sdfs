@@ -2,6 +2,9 @@ package org.opendedup.sdfs.io;
 
 import java.io.Externalizable;
 
+
+
+
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,6 +37,7 @@ public class BlockDev implements Externalizable {
 	String uuid;
 	long size;
 	boolean startOnInit;
+	boolean mapDev = false;
 	byte status = 0;
 	String mappedDev;
 	String statusMsg = "Stopped";
@@ -50,7 +54,7 @@ public class BlockDev implements Externalizable {
 	public SDFSBlockDev getDevIO() {
 		return this.dev;
 	}
-
+	
 	public BlockDev(String devName, long size, boolean start, String uuid) {
 		if (uuid == null)
 			this.uuid = RandomGUID.getGuid();
@@ -140,6 +144,7 @@ public class BlockDev implements Externalizable {
 		this.statusMsg = "Stopping [" + this.devName + "] at ["
 				+ this.internalPath + "] on [" + this.devPath + "] with size ["
 				+ this.size + "]";
+		if(this.mapDev) {
 		String sh = "/bin/sh";
 		String cop = "-c";
 		String cmd = "umount /dev/mapper/" + this.devName + "";
@@ -168,6 +173,21 @@ public class BlockDev implements Externalizable {
 		} finally {
 			this.mappedDev = null;
 		}
+		} else {
+			String sh = "/bin/sh";
+			String cop = "-c";
+			String cmd = "umount " + this.devPath + "";
+			String[] exe = new String[] { sh, cop, cmd };
+			try {
+				ProcessWorker.runProcess(exe, 1000);
+				SDFSLogger.getLog().info(
+						"Removed mounts to /dev/mapper/" + this.devName);
+			} catch (Exception e) {
+				SDFSLogger.getLog()
+						.info("Failed to remove mounts to /dev/mapper/"
+								+ this.devName, e);
+			}
+		}
 		this.statusMsg = "Device Stopped";
 	}
 
@@ -175,50 +195,54 @@ public class BlockDev implements Externalizable {
 	public void startedEvent(BlockDeviceOpenEvent evt) {
 		this.statusMsg = "Backing Device Initiated";
 		try {
-			File f = new File("/dev/mapper/" + this.devName);
-
-			if (f.exists()) {
-				this.statusMsg = "partition already assigned at ["
-						+ f.getPath() + "] please remove.";
-				SDFSLogger.getLog().error(this.statusMsg);
-			}
-			long bsz = this.size / 512L;
-			String sh = "/bin/bash";
-			String cop = "-c";
-			String cmd = "echo 0 " + bsz + " linear " + this.devPath
-					+ " 0 | dmsetup create " + this.devName;
-			String[] exe = new String[] { sh, cop, cmd };
-			Thread.sleep(10000);
-			SDFSLogger.getLog().debug(
-					"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath
-							+ " 0 | dmsetup create " + this.devName + "\"");
-			try {
-				ProcessWorker.runProcess(exe, 1000);
-				SDFSLogger.getLog().info(
-						"Mapped device to partition /dev/mapper/"
-								+ this.devName);
-				this.mappedDev = "/dev/mapper/" + this.devName;
-			} catch (Exception e) {
-				this.statusMsg = "Failed to map device to partition /dev/mapper/"
-						+ this.devName;
-				SDFSLogger.getLog().warn(this.statusMsg, e);
-			}
-			if (!f.exists()) {
-				this.statusMsg = "Partition not assigned at [" + f.getPath()
-						+ "]. Please retry";
-				SDFSLogger.getLog().warn(this.statusMsg);
-			}
-			this.statusMsg = "Mapped device to parition /dev/mapper/"
-					+ this.devName;
-		} catch (Throwable e) {
-			this.statusMsg = e.getMessage();
-			SDFSLogger.getLog().warn(this.statusMsg, e);
+			if(this.mapDev) {
+		File f = new File("/dev/mapper/" + this.devName);
+	
+		if (f.exists()) {
+			this.statusMsg = "partition already assigned at [" + f.getPath()
+					+ "] please remove.";
+			SDFSLogger.getLog().error(this.statusMsg);
 		}
-
+		long bsz = this.size / 512L;
+		String sh = "/bin/bash";
+		String cop = "-c";
+		String cmd = "echo 0 " + bsz + " linear " + this.devPath
+				+ " 0 | dmsetup create " + this.devName;
+		String[] exe = new String[] { sh, cop, cmd };
+		Thread.sleep(10000);
+		SDFSLogger.getLog().debug(
+				"/bin/bash -c \"echo 0 " + bsz + " linear " + this.devPath
+						+ " 0 | dmsetup create " + this.devName + "\"");
+		try {
+			ProcessWorker.runProcess(exe, 1000);
+			SDFSLogger.getLog().info(
+					"Mapped device to partition /dev/mapper/" + this.devName);
+			this.mappedDev = "/dev/mapper/" + this.devName;
+		} catch (Exception e) {
+			this.statusMsg = "Failed to map device to partition /dev/mapper/"
+					+ this.devName;
+			SDFSLogger.getLog().warn(this.statusMsg,e);
+		}
+		if (!f.exists()) {
+			this.statusMsg = "Partition not assigned at [" + f.getPath()
+					+ "]. Please retry";
+			SDFSLogger.getLog().warn(this.statusMsg);
+		}
+		this.statusMsg = "Mapped device to parition /dev/mapper/"
+				+ this.devName;
+			}
+		}catch(Throwable e) {
+			this.statusMsg = e.getMessage();
+			SDFSLogger.getLog().warn(this.statusMsg,e);
+		}
+	
 		this.status = STARTED;
+		if(this.mapDev)
 		this.statusMsg = "Started [" + this.devName + "] at ["
 				+ this.internalPath + "] on [" + this.mappedDev
 				+ "] with size [" + this.size + "]";
+		else
+			this.statusMsg = "Started [" + this.devPath + "] ";
 		SDFSLogger.getLog().debug(this.statusMsg);
 	}
 

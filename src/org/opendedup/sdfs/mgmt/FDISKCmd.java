@@ -37,6 +37,9 @@ public class FDISKCmd implements Runnable {
 					.error("ERROR Clean Store: unable to cleand dedup storage engine of data not claimed in  ["
 							+ minutes + "] because :" + e.toString(), e);
 
+		} finally {
+			if(fd !=null)
+				fd.vanish();
 		}
 
 	}

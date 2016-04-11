@@ -9,9 +9,9 @@ import org.w3c.dom.Element;
 public class ProcessCloudFile {
 	public static void runCmd(String file, String dstfile) {
 		try {
-			System.out.printf("Checking out a read only copy of [%s] \n", file);
+			System.out.printf("Checking out [%s] from cloud\n", file);
 			file = URLEncoder.encode(file, "UTF-8");
-			file = URLEncoder.encode(file, "UTF-8");
+			dstfile = URLEncoder.encode(dstfile, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			if(dstfile != null)

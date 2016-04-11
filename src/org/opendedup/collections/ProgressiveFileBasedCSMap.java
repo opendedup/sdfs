@@ -29,6 +29,8 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.LargeBloomFilter;
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -36,7 +38,6 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
-import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StorageUnit;
@@ -73,7 +74,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 	private boolean runningGC = false;
-
 	@Override
 	public void init(long maxSize, String fileName) throws IOException,
 			HashtableFullException {
@@ -228,7 +228,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	AtomicLong csz = new AtomicLong(0);
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
+	public synchronized long claimRecords(SDFSEvent evt, LargeFileBloomFilter bf)
 			throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
@@ -378,13 +378,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	private static class ClaimShard implements Runnable {
 
 		ProgressiveFileByteArrayLongMap map = null;
-		LargeBloomFilter bf = null;
+		LargeFileBloomFilter bf = null;
 		LargeBloomFilter nlbf = null;
 		AtomicLong claims = null;
 		Exception ex = null;
 
 		protected ClaimShard(ProgressiveFileByteArrayLongMap map,
-				LargeBloomFilter bf, LargeBloomFilter nlbf, AtomicLong claims) {
+				LargeFileBloomFilter bf, LargeBloomFilter nlbf, AtomicLong claims) {
 			this.map = map;
 			this.bf = bf;
 			this.claims = claims;

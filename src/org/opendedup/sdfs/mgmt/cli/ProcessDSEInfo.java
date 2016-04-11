@@ -23,6 +23,9 @@ public class ProcessDSEInfo {
 			else {
 				Element dse = (Element) root.getElementsByTagName("dse")
 						.item(0);
+				long entries = -1;
+				if(dse.hasAttribute("entries"))
+					entries = Long.parseLong(dse.getAttribute("entries"));
 				long maxSz = Long.parseLong(dse.getAttribute("max-size"));
 				long maxCacheSz = Long.parseLong(dse
 						.getAttribute("max-cache-size"));
@@ -56,6 +59,13 @@ public class ProcessDSEInfo {
 				System.out.printf("DSE Page Size : %s\n", pageSize);
 				System.out.printf("DSE Blocks Available for Reuse : %s\n",
 						freeBlocks);
+				if(entries > 0) {
+					System.out.printf("Total DSE Blocks : %s\n",
+							entries);
+					long avgbs = currentSz/entries;
+					System.out.printf("Average DSE Block Size : %s\n",
+							avgbs);
+				}
 				System.out.printf("DSE Listen Port : %s\n", port);
 				System.out.printf("DSE Listen Host : %s\n", host);
 				System.out.printf("DSE Listen SSL : %s\n",

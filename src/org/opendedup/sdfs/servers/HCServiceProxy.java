@@ -13,6 +13,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
+import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
@@ -37,7 +38,6 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.LargeBloomFilter;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -88,7 +88,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized long processHashClaims(SDFSEvent evt,
-			LargeBloomFilter bf) throws IOException {
+			LargeFileBloomFilter bf) throws IOException {
 		if (Main.chunkStoreLocal)
 			return hcService.processHashClaims(evt, bf);
 		else {
@@ -211,7 +211,7 @@ public class HCServiceProxy {
 
 	public static long getSize() {
 		if (Main.chunkStoreLocal) {
-			return HCServiceProxy.hcService.getSize();
+			return hcService.getSize();
 		} else {
 			return socket.getCurrentSize();
 		}
@@ -477,8 +477,10 @@ public class HCServiceProxy {
 
 	public static void runFDisk(FDiskEvent evt) throws FDiskException,
 			IOException {
-		if (Main.chunkStoreLocal)
-			new BloomFDisk(evt);
+		if (Main.chunkStoreLocal) {
+			BloomFDisk fd = new BloomFDisk(evt);
+			fd.vanish();
+		}
 		else {
 			long sz = HCServiceProxy.getSize();
 			FDiskCmd cmd = new FDiskCmd(sz, evt);
