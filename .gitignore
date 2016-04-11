@@ -14,3 +14,5 @@ windows-exe/ipch/
 /test.sh
 install-packages/SDFS-3.0.3-Setup.exe
 install-packages/SDFS-3.0.4-Setup.exe
+install-packages/deb/usr/share/sdfs/lib/sdfs.isajar
+*.tmp
