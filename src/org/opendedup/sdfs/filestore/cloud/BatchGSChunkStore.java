@@ -1227,7 +1227,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		String haName = this.encString(nm, Main.chunkStoreEncryptionEnabled);
 		GSObject obj;
 		try {
-
 			obj = s3Service.getObject(this.name, pp + "/" + haName);
 			BufferedInputStream in = new BufferedInputStream(
 					obj.getDataInputStream());
@@ -1669,17 +1668,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 			throw new IOException(e);
 		}
 
-	}
-
-	public static void main(String[] args) throws IOException {
-		Properties props = new Properties();
-		props.setProperty("encrypt", "true");
-		props.setProperty("key",
-				"EikuwdMNcqGgzetVa+JXAq8BHYzyStSntpRsHIEh+=uFxM015A5CSrz1mhiRz=Kw");
-		props.setProperty("iv", "5e9fc8188a743fd49e50913dbb332aeb");
-		new BatchGSChunkStore().recoverVolumeConfig("gs", new File(
-				"/tmp/test.xml"), "parentPath", "GOOGJPMZZN7SFEC2GQHV",
-				"2+xPK378GQyH9G1LJZJGzTfJJMjRLy63GeRKHy6W", "nbu0", props);
 	}
 
 	@Override

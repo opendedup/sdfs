@@ -676,8 +676,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			md.addUserMetadata("objects", Integer.toString(arc.getSz()));
 			md.setContentType("binary/octet-stream");
 			md.setContentLength(chunks.length);
-			if (md5sum)
-				md.setContentMD5(BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(chunks)));
+			if (md5sum) {
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(chunks));
+				md.addUserMetadata("md5sum", st);
+				md.setContentMD5(st);
+			}
 			PutObjectRequest req = new PutObjectRequest(this.name, "blocks/" + haName, new ByteArrayInputStream(chunks),
 					md);
 			if(!md5sum || genericS3)
@@ -741,8 +744,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
 			double bps = (cl / 1024) / dtm;
 			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
-			if (md5sum) {
-				byte[] shash = BaseEncoding.base16().decode(omd.getETag().toUpperCase());
+			if (md5sum && omd.getUserMetadata().containsKey("md5sum")) {
+				byte[] shash = BaseEncoding.base64().decode(omd.getUserMetadata().get("md5sum"));
 				byte[] chash = ServiceUtils.computeMD5Hash(data);
 				if (!Arrays.equals(shash, chash))
 					throw new IOException("download corrupt at " + id);
@@ -1168,8 +1171,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					try {
 						if (md5sum) {
 							byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+							String st = BaseEncoding.base64().encode(md5Hash);
+							md.addUserMetadata("md5sum", st);
 							in.close();
-							md.setContentMD5(BaseEncoding.base64().encode(md5Hash));
+							md.setContentMD5(st);
 						}
 
 					} catch (NoSuchAlgorithmException e2) {
@@ -1194,8 +1199,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						md.setContentType("binary/octet-stream");
 						in = new BufferedInputStream(new FileInputStream(p), 32768);
 						byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+						String st = BaseEncoding.base64().encode(md5Hash);
+						md.addUserMetadata("md5sum", st);
+						
 						in.close();
-						md.setContentMD5(BaseEncoding.base64().encode(md5Hash));
+						md.setContentMD5(st);
 						in = new BufferedInputStream(new FileInputStream(p), 32768);
 						md.setContentLength(p.length());
 						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
@@ -1261,12 +1269,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			out.flush();
 			out.close();
 			in.close();
-			byte[] shash = BaseEncoding.base16().decode(obj.getObjectMetadata().getETag().toUpperCase());
-			if (!FileUtils.fileValid(p, shash))
-				throw new IOException("file " + p.getPath() + " is corrupt");
+			
+			
 			boolean encrypt = false;
 			boolean lz4compress = false;
 			Map<String, String> mp = obj.getObjectMetadata().getUserMetadata();
+			if(md5sum && mp.containsKey("m5sum")) {
+				byte[] shash = BaseEncoding.base64().decode(mp.get("m5sum"));
+			if (!FileUtils.fileValid(p, shash))
+				throw new IOException("file " + p.getPath() + " is corrupt");
+			}
 			if (mp.containsKey("encrypt")) {
 				encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
 			}

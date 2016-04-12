@@ -820,24 +820,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	}
 
-	private long getLastModified(String st) {
-
-		try {
-			CloudBlockBlob blob = container.getBlockBlobReference(st);
-			blob.downloadAttributes();
-			HashMap<String, String> metaData = blob.getMetadata();
-			if (metaData.containsKey("lastmodified")) {
-				return Long.parseLong((String) metaData.get("lastmodified"));
-			} else {
-				return 0;
-			}
-		} catch (Exception e) {
-			return -1;
-		} finally {
-
-		}
-	}
-
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
 		BufferedInputStream in = null;
@@ -886,8 +868,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				throw new IOException(e1);
 			}
 		} else {
-			if (f.lastModified() == this.getLastModified(pth))
-				return;
 			String rnd = RandomGUID.getGuid();
 			File p = new File(this.staged_sync_location, rnd);
 			File z = new File(this.staged_sync_location, rnd + ".z");
