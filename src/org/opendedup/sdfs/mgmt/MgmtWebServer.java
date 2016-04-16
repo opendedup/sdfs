@@ -515,6 +515,7 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
+						long st = System.currentTimeMillis();
 						byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
@@ -522,8 +523,15 @@ public class MgmtWebServer implements Container {
 						response.setValue("Server", "SDFS Management Server");
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
-						response.getByteChannel().write(ByteBuffer.wrap(rslt));
-						response.getByteChannel().close();
+						response.getOutputStream().write(rslt);
+						response.getOutputStream().flush();
+						try {
+							response.getOutputStream().close();
+						}catch(Exception e) {}
+						try {
+							response.close();
+						}catch(Exception e) {};
+						SDFSLogger.getLog().debug("sent reponse size " +rslt.length + " took " + (System.currentTimeMillis()-st));
 					} else if (cmd.equalsIgnoreCase("cancelimport")) {
 						try {
 							String uuid = request.getQuery().get("uuid");
@@ -806,7 +814,7 @@ public class MgmtWebServer implements Container {
 			try {
 				response.close();
 			} catch (IOException e) {
-				SDFSLogger.getLog().debug("error when closing response", e);
+				//SDFSLogger.getLog().debug("error when closing response", e);
 			}
 		}
 	}
@@ -868,7 +876,7 @@ public class MgmtWebServer implements Container {
 			Router negotiator = new PathRouter(routes,new PingService());
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
-			SocketProcessor server = new ContainerSocketProcessor(rn, 24,3);
+			SocketProcessor server = new ContainerSocketProcessor(rn, Main.writeThreads,3);
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);

@@ -80,7 +80,7 @@ public class ArchiveOutCmd implements Runnable {
 			eevt.curCt = 0;
 			mf.copyTo(nf.getPath(), true, true);
 			eevt.curCt = 1;
-			//MetaFileStore.removeMetaFile(af.getPath(), true);
+			MetaFileStore.removeMetaFile(af.getPath(), true);
 			eevt.curCt = 2;
 			SDFSLogger.getLog().debug("Copied out replication snapshot");
 			if (OSValidator.isWindows()) {

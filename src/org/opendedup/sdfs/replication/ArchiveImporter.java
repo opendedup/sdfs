@@ -104,7 +104,7 @@ public class ArchiveImporter {
 					stg = new File(new File(srcArchive).getParentFile()
 							.getPath() + File.separator + RandomGUID.getGuid());
 					stg.mkdirs();
-					String expFile = "tar -xzf " + srcArchive + " -C "
+					String expFile = "tar -xzpf " + srcArchive + " -C "
 							+ stg.getPath();
 					int xt = ProcessWorker.runProcess(expFile);
 					if(xt != 0)

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.cli;
 
 import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.util.Formatter;
 import java.util.List;
 
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.io.IOUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.HashChunk;
@@ -21,7 +23,8 @@ public class ProcessBatchGetBlocks {
 	public static long runCmd(ArrayList<byte[]> hashes, String server,
 			int port, String password, boolean useSSL) throws Exception,
 			ClassNotFoundException, HashtableFullException {
-
+		Exception he = null;
+		for(int t = 0; t <10;t++) {
 		InputStream in = null;
 		PostMethod method = null;
 		try {
@@ -35,24 +38,26 @@ public class ProcessBatchGetBlocks {
 			Formatter formatter = new Formatter(sb);
 			formatter.format("file=%s&cmd=batchgetblocks&options=ilovemg",
 					"ninja");
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			try{
 			method = MgmtServerConnection.connectAndPost(server, port,
 					password, sb.toString(), "", file, true);
 			in = method.getResponseBodyAsStream();
 			SDFSLogger.getLog().debug("reading imported blocks");
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			IOUtils.copy(in, out);
 			formatter.close();
-			byte[] buf = new byte[32768];
-			int len;
-			while ((len = in.read(buf)) > 0) {
-				out.write(buf, 0, len);
+			
+			}finally {
+				if(method != null)
+					try {
+				method.releaseConnection();
+					}catch(Exception e) {}
 			}
-
 			byte[] sh = CompressionUtils.decompressSnappy(out.toByteArray());
 			ObjectInputStream obj_in = new ObjectInputStream(
 					new ByteArrayInputStream(sh));
 			@SuppressWarnings("unchecked")
 			List<HashChunk> hck = (List<HashChunk>) obj_in.readObject();
-			out.close();
 			obj_in.close();
 			if (hck.size() != hashes.size())
 				throw new IOException("unable to import all blocks requested ["
@@ -66,7 +71,10 @@ public class ProcessBatchGetBlocks {
 			SDFSLogger.getLog().debug("imported " + hck.size());
 			return imsz;
 
-		} finally {
+		} catch(Exception e) {
+			he = e;
+			Thread.sleep(1000);
+		}finally {
 			if (in != null) {
 				try {
 					in.close();
@@ -79,6 +87,8 @@ public class ProcessBatchGetBlocks {
 				} catch (Exception e) {
 				}
 		}
+		}
+		throw new IOException(he);
 
 	}
 }

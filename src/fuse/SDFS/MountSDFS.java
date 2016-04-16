@@ -29,6 +29,7 @@ public class MountSDFS implements Daemon, Runnable{
 	private static String[] sFal = null;
 	private static SDFSService sdfsService;
 	private static String mountOptions;
+	private static ShutdownHook shutdownHook = null;
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption(
@@ -206,7 +207,7 @@ public class MountSDFS implements Daemon, Runnable{
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		ShutdownHook shutdownHook = new ShutdownHook(sdfsService,
+		shutdownHook = new ShutdownHook(sdfsService,
 				cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -243,7 +244,6 @@ public class MountSDFS implements Daemon, Runnable{
 		MountSDFS sd = new MountSDFS();
 		Thread th = new Thread(sd);
 		th.start();
-		
 	}
 
 	@Override
@@ -264,8 +264,10 @@ public class MountSDFS implements Daemon, Runnable{
 	@Override
 	public void run() {
 		try {
+			
 			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
 					Main.volumeMountPoint), log);
+			shutdownHook.shutdown();
 			System.exit(0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

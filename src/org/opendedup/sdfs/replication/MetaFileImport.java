@@ -33,7 +33,7 @@ public class MetaFileImport implements Serializable {
 	private static final long serialVersionUID = 2281680761909041919L;
 	private long filesProcessed = 0;
 	private transient ArrayList<byte[]> hashes = null;
-	private int MAX_SZ = ((30 * 1024 * 1024) / Main.CHUNK_LENGTH);
+	private int MAX_SZ = (500);
 	private static final int MAX_BATCHHASH_SIZE = 100;
 	boolean corruption = false;
 	private long entries = 0;
@@ -51,8 +51,8 @@ public class MetaFileImport implements Serializable {
 	private Exception lastException;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor =  new ThreadPoolExecutor(Main.writeThreads,
-			Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
+	private transient ThreadPoolExecutor executor =  new ThreadPoolExecutor(1,
+			4, 1, TimeUnit.MINUTES, worksQueue,
 			executionHandler);
 
 	protected MetaFileImport(String path, String server, String password,
@@ -244,6 +244,7 @@ public class MetaFileImport implements Serializable {
 								}
 								if (hashes.size() >= MAX_SZ) {
 									executor.execute(new DataImporter(this,hashes));
+									hashes = new ArrayList<byte[]>();
 								}
 							}
 						} else {
@@ -340,7 +341,7 @@ public class MetaFileImport implements Serializable {
 			try {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
-							"fetching " + hashes.size()
+							"thread fetching " + hashes.size()
 									+ " blocks");
 				int tries = 0;
 				for (;;) {
@@ -363,7 +364,7 @@ public class MetaFileImport implements Serializable {
 						mfi.levt.bytesImported = mfi.bytesTransmitted
 								.get();
 						hashes = null;
-						hashes = new ArrayList<byte[]>();
+						
 						break;
 					} catch (Exception e) {
 						tries++;

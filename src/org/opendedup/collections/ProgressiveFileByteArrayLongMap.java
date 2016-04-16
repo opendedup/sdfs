@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,9 +31,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.LargeBloomFilter;
-import org.opendedup.util.StorageUnit;
 
-import objectexplorer.MemoryMeasurer;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
@@ -415,10 +414,7 @@ public class ProgressiveFileByteArrayLongMap
 				}
 				f.delete();
 			}
-			if (SDFSLogger.isDebug()) {
-				long mem = MemoryMeasurer.measureBytes(bf);
-				SDFSLogger.getLog().info("BF Archive Memory Size=" + StorageUnit.of(mem).format(mem));
-			}
+			
 		}
 		if (this.lastFound == 0)
 			this.lastFound = new File(path + ".keys").lastModified();

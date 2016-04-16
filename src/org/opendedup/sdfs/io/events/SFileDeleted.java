@@ -16,7 +16,8 @@ public class SFileDeleted {
 	public SFileDeleted(String  GUID) {
 		this.GUID = GUID;
 		sf = Main.dedupDBStore + File.separator
-				+ this.GUID.substring(0, 2) + File.separator + this.GUID;
+				+ this.GUID.substring(0, 2) + File.separator + this.GUID+ File.separator
+				+ this.GUID + ".map";
 	}
 	
 	public String toJSON() {

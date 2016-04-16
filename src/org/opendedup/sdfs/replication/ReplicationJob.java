@@ -13,6 +13,8 @@ public class ReplicationJob implements Job {
 			ReplicationService service = (ReplicationService) context
 					.getJobDetail().getJobDataMap().get("service");
 			service.replicate();
+			SDFSLogger.getLog().info("will run again at " + context.getNextFireTime().toString());
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish executing replication",
 					e);
@@ -20,5 +22,4 @@ public class ReplicationJob implements Job {
 		}
 
 	}
-
 }

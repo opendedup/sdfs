@@ -95,7 +95,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.1.6";
+	public static String version = "3.1.7";
 	
 	public static boolean readAhead = false;
 
@@ -166,16 +166,8 @@ public class Main {
 	 * the client.
 	 */
 	public static int CHUNK_LENGTH = 16 * 1024;
-	/**
-	 * the default db user name. This is only used if the H2 database is being
-	 * used instead of TC. This is used on the client and chunk store.
-	 */
-	public static String dbuserName = "sa";
-	/**
-	 * the default db user password. This is only used if the H2 database is
-	 * being used instead of TC. This is used on the client and chunk store.
-	 */
-	public static String dbpassword = "sa";
+	
+
 	/**
 	 * The version of the communication protocol being used for client <-> chunk
 	 * store network communication.

@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.AbstractHashesMap;
@@ -39,7 +39,6 @@ import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.LargeBloomFilter;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 
 public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap {
@@ -518,12 +517,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				}
 			}
 		}
-		if (SDFSLogger.isDebug()) {
-			long mem = MemoryMeasurer.measureBytes(lbf);
-			long mmem = MemoryMeasurer.measureBytes(maps);
-			SDFSLogger.getLog().debug("Large BloomFilter Size=" + StorageUnit.of(mem).format(mem));
-			SDFSLogger.getLog().debug("Maps Size=" + StorageUnit.of(mmem).format(mmem));
-		}
+		
 		this.loadEvent.endEvent("Loaded entries " + rsz);
 		System.out.println("Loaded entries " + rsz);
 		SDFSLogger.getLog().info("Loaded entries " + rsz);

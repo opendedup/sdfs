@@ -146,6 +146,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 
 			};
 			ArrayList<PoolHC> ap = new ArrayList<PoolHC>();
+			synchronized (soc) {
 			for (HashClientPool pool : pools) {
 				if (pool != null) {
 					HashClient hc = (HashClient)pool.borrowObject();
@@ -158,6 +159,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 					phc.pool = pool;
 					ap.add(phc);
 				}
+			}
 			}
 			if (dn < sz) {
 				synchronized (l) {

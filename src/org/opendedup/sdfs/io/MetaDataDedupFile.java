@@ -657,12 +657,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			int trimlen = this.getPath().length();
 			MetaDataDedupFile[] files = this.listFiles();
 			for (int i = 0; i < files.length; i++) {
-
-				if (!files[i].getPath().equals(f.getPath())) {
-
+				File rf = new File(Main.volume.getPath() + File.separator + "sdfsactiverepl");
+				if (!files[i].getPath().equals(f.getPath()) && ! files[i].getPath().startsWith(rf.getPath())) {
+					
 					MetaDataDedupFile file = files[i];
 					String newPath = snaptoPath + File.separator
 							+ file.getPath().substring(trimlen);
+					SDFSLogger.getLog().debug("taking a snapshot of " + files[i] + " to " +newPath);
 					file.snapshot(newPath, overwrite, evt, propigateEvent);
 				}
 			}

@@ -1049,8 +1049,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void deleteFile(String nm, String pp) throws IOException {
-		while (nm.startsWith(File.separator))
+		while (nm.startsWith(File.separator)) {
 			nm = nm.substring(1);
+		}
 		String haName = EncyptUtils.encString(nm,
 				Main.chunkStoreEncryptionEnabled);
 		try {
