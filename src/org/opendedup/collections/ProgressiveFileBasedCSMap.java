@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.AbstractHashesMap;
@@ -40,14 +40,12 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.NextPrime;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
 
 public class ProgressiveFileBasedCSMap implements AbstractMap,
 		AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
 	private long size = 0;
-	private final ReentrantLock iolock = new ReentrantLock();
 	// private final ReentrantLock klock = new ReentrantLock();
 	private String fileName;
 	private String origFileName;
@@ -62,7 +60,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
 	private int hashTblSz = 100000;
-	private ProgressiveFileByteArrayLongMap activeWriteMap = null;
+	private ArrayList<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayList<ProgressiveFileByteArrayLongMap>();
+	private static final int AMS =8 ;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
@@ -156,22 +155,20 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		}
 	}
 
-	private ProgressiveFileByteArrayLongMap getWriteMap() throws IOException {
-
-		if (this.activeWriteMap.isFull()) {
-			this.iolock.lock();
-			try {
-				if (this.activeWriteMap.isFull()) {
-					this.activeWriteMap.inActive();
-					this.activeWriteMap = this.createWriteMap();
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to create new activemap", e);
-			} finally {
-				this.iolock.unlock();
-			}
+	int cp = 0;
+	private synchronized ProgressiveFileByteArrayLongMap getWriteMap() throws IOException {
+		if(cp >= this.activeWriteMaps.size())
+			cp =0;
+		ProgressiveFileByteArrayLongMap activeWMap;
+			activeWMap = this.activeWriteMaps.get(cp);
+		if (activeWMap.isFull()) {
+			activeWMap.inActive();
+			this.activeWriteMaps.remove(cp);
+			activeWMap = this.createWriteMap();
+			this.activeWriteMaps.add(cp, activeWMap);
 		}
-		return this.activeWriteMap;
+		cp++;
+		return activeWMap;
 	}
 
 	AtomicLong ict = new AtomicLong();
@@ -339,7 +336,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 								_m.inActive();
 								_m = this.createWriteMap();
 								_m.put(p.key, p.value);
-							}
+							} 
 							p = m.nextKeyValue();
 						}
 						int mapsz = maps.size();
@@ -463,12 +460,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				maps.add(m);
 				rsz = rsz + m.size();
 				bar.update(i);
-				if (this.activeWriteMap == null && !m.isFull()) {
+				if (!m.isFull() && this.activeWriteMaps.size() < AMS) {
 					m.activate();
-					this.activeWriteMap = m;
-					m.cache();
+					this.activeWriteMaps.add(m);
 				} else {
 					m.inActive();
+					m.full = true;
 				}
 			}
 			bar.finish();
@@ -524,11 +521,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 			}
 		}
-		if (this.activeWriteMap == null) {
-			String guid = null;
+		while (this.activeWriteMaps.size() < AMS) {
 			boolean written = false;
 			while (!written) {
-				guid = RandomGUID.getGuid();
+				String guid = RandomGUID.getGuid();
 
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
@@ -540,18 +536,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 					this.maps.add(activeWMap);
 					written = true;
 
-					this.activeWriteMap = activeWMap;
+					this.activeWriteMaps.add(activeWMap);
 				}
 			}
-		}
-		if (SDFSLogger.isDebug()) {
-			long mem = MemoryMeasurer.measureBytes(lbf);
-			long mmem = MemoryMeasurer.measureBytes(maps);
-			SDFSLogger.getLog()
-					.debug("Large BloomFilter Size="
-							+ StorageUnit.of(mem).format(mem));
-			SDFSLogger.getLog().debug(
-					"Maps Size=" + StorageUnit.of(mmem).format(mmem));
 		}
 		this.loadEvent.endEvent("Loaded entries " + rsz);
 		System.out.println("Loaded entries " + rsz);

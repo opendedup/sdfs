@@ -566,6 +566,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
 			SDFSEvent evt, boolean propigateEvent) throws IOException {
+		
+		SDFSLogger.getLog().debug("taking snapshot of " + this.getPath() +  " to " + snaptoPath);
 		if (this.isSymlink()) {
 
 			File dst = new File(snaptoPath);
@@ -652,17 +654,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("is snapshot dir");
+			
 			File f = new File(snaptoPath);
+			
 			f.mkdirs();
 			int trimlen = this.getPath().length();
 			MetaDataDedupFile[] files = this.listFiles();
 			for (int i = 0; i < files.length; i++) {
-
-				if (!files[i].getPath().equals(f.getPath())) {
+				if (!files[i].getPath().equals(f.getPath())&& !files[i].getPath().startsWith(Main.volume.getPath() + File.separator +"sdfsactiverepl")) {
 
 					MetaDataDedupFile file = files[i];
 					String newPath = snaptoPath + File.separator
 							+ file.getPath().substring(trimlen);
+					SDFSLogger.getLog().debug("newpath " + newPath +  " for " + file.getPath());
 					file.snapshot(newPath, overwrite, evt, propigateEvent);
 				}
 			}

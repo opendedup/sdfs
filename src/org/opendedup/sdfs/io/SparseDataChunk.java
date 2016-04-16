@@ -93,7 +93,6 @@ public class SparseDataChunk implements Externalizable {
 			}
 
 		} else {
-
 			this.flags = buf.get();
 			buf.getInt();
 			int zlen = buf.getInt();
