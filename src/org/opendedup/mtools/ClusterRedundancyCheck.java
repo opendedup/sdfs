@@ -19,6 +19,8 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.StringUtils;
 
+import com.google.common.primitives.Longs;
+
 public class ClusterRedundancyCheck {
 	private long files = 0;
 	private long corruptFiles = 0;
@@ -206,8 +208,8 @@ public class ClusterRedundancyCheck {
 							* Main.CHUNK_LENGTH);
 					HashLocPair p = ck.getFingers().get(0);
 					if (Main.chunkStoreLocal) {
-						byte[] exists = HCServiceProxy.hashExists(p.hash, true);
-
+						byte[] exists = Longs.toByteArray(HCServiceProxy.hashExists(p.hash, true));
+						
 						if (exists[0] == -1) {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(

@@ -133,8 +133,8 @@ public class HashStore {
 	 * @return returns true if the hash already exists.
 	 * @throws IOException
 	 */
-	public boolean hashExists(byte[] hash) throws IOException {
-		return this.bdb.containsKey(hash);
+	public long hashExists(byte[] hash) throws IOException {
+		return this.bdb.get(hash);
 	}
 
 	public String restoreBlock(byte[] hash) throws IOException {

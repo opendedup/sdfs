@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -29,14 +28,17 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
 
+import com.google.common.primitives.Longs;
+
 public class MetaFileImport implements Serializable {
 	private static final long serialVersionUID = 2281680761909041919L;
 	private long filesProcessed = 0;
 	private transient ArrayList<byte[]> hashes = null;
-	private int MAX_SZ = ((30 * 1024 * 1024) / Main.CHUNK_LENGTH);
+	private int MAX_SZ = (500);
 	private static final int MAX_BATCHHASH_SIZE = 100;
 	boolean corruption = false;
 	private long entries = 0;
+	private long passEntries = 0;
 	private AtomicLong bytesTransmitted = new AtomicLong(0);
 	private AtomicLong virtualBytesTransmitted = new AtomicLong(0);
 	private String server = null;
@@ -47,13 +49,13 @@ public class MetaFileImport implements Serializable {
 	long endTime = 0;
 	BlockImportEvent levt = null;
 	private boolean closed = false;
+	boolean firstrun = true;
 	private boolean useSSL;
 	private Exception lastException;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
-			worksQueue, executionHandler);
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1,
+			4, 1, TimeUnit.MINUTES, worksQueue, executionHandler);
 
 	protected MetaFileImport(String path, String server, String password,
 			int port, int maxSz, SDFSEvent evt, boolean useSSL)
@@ -87,12 +89,18 @@ public class MetaFileImport implements Serializable {
 
 	public void runImport() throws IOException, ReplicationCanceledException,
 			InterruptedException {
-		SDFSLogger.getLog().info("Running Import of " + path);
+		int i = 1;
+		SDFSLogger.getLog().info(
+				"Running Import of " + path + " total runs=" + i);
 		this.traverse(new File(this.path));
 		executor.shutdown();
-		// Wait for everything to finish.
-		while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-			levt.shortMsg = "Awaiting finalization";
+		try {
+			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+				SDFSLogger.getLog().debug(
+						"Awaiting fdisk completion of threads.");
+			}
+		} catch (InterruptedException e) {
+			throw new IOException(e);
 		}
 		if (hashes.size() != 0) {
 			try {
@@ -105,6 +113,41 @@ public class MetaFileImport implements Serializable {
 				corruption = true;
 			}
 		}
+		this.firstrun = false;
+		while (passEntries > 0) {
+			i++;
+			SDFSLogger.getLog().info(
+					"Running Import of " + path + " total runs=" + i + " entries imported=" +passEntries);
+			passEntries = 0;
+			this.traverse(new File(this.path));
+			
+			executor.shutdown();
+			try {
+				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+					SDFSLogger.getLog().debug(
+							"Awaiting fdisk completion of threads.");
+				}
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+			if (hashes.size() != 0) {
+				try {
+					long sz = ProcessBatchGetBlocks.runCmd(hashes, server, port,
+							password, useSSL);
+					this.bytesTransmitted.addAndGet(sz);
+					levt.bytesImported = this.bytesTransmitted.get();
+				} catch (Throwable e) {
+					SDFSLogger.getLog().error("Corruption Suspected on import", e);
+					corruption = true;
+				}
+			}
+
+		}
+		// Wait for everything to finish.
+		while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+			levt.shortMsg = "Awaiting finalization";
+		}
+		
 		endTime = System.currentTimeMillis();
 		levt.endEvent("took [" + (System.currentTimeMillis() - startTime)
 				/ 1000 + "] seconds to import [" + filesProcessed
@@ -220,6 +263,8 @@ public class MetaFileImport implements Serializable {
 					if (val != null) {
 						SparseDataChunk ck = new SparseDataChunk(val,
 								mp.getVersion());
+						ck.setFpos((prevpos / mp.getFree().length)
+								* Main.CHUNK_LENGTH);
 						List<HashLocPair> al = ck.getFingers();
 
 						if (Main.chunkStoreLocal) {
@@ -229,15 +274,20 @@ public class MetaFileImport implements Serializable {
 							if (HashFunctionPool.max_hash_cluster > 1)
 								mf.getIOMonitor().addDulicateData(
 										Main.CHUNK_LENGTH, true);
+							boolean hpc = false;
 							for (HashLocPair p : al) {
-								byte[] eb = HCServiceProxy.hashExists(p.hash,
+								long pos = HCServiceProxy.hashExists(p.hash,
 										false);
 								boolean exists = false;
-								if (eb[0] == 1)
+								if (pos != -1) {
+									p.hashloc = Longs.toByteArray(pos);
+									hpc = true;
 									exists = true;
+								}
 								if (!exists) {
 									hashes.add(p.hash);
 									entries++;
+									passEntries++;
 									levt.blocksImported = entries;
 								} else {
 									if (HashFunctionPool.max_hash_cluster == 1)
@@ -247,7 +297,11 @@ public class MetaFileImport implements Serializable {
 								if (hashes.size() >= MAX_SZ) {
 									executor.execute(new DataImporter(this,
 											hashes));
+									hashes = new ArrayList<byte[]>();
 								}
+							}
+							if (hpc) {
+								mp.put(ck.getFpos(), ck.getBytes());
 							}
 						} else {
 							bh.addAll(ck.getFingers());
@@ -273,6 +327,9 @@ public class MetaFileImport implements Serializable {
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
 				}
+				mf.setDirty(true);
+				mf.sync();
+				mf.getDedupFile(false).forceRemoteSync();
 			} catch (Throwable e) {
 				SDFSLogger.getLog()
 						.warn("error while checking file [" + mapFile.getPath()
@@ -281,13 +338,17 @@ public class MetaFileImport implements Serializable {
 						+ "]", SDFSEvent.WARN, e);
 				throw new IOException(e);
 			} finally {
+				
 				mp.close();
 				mp = null;
+				if(this.firstrun){
 				this.virtualBytesTransmitted.addAndGet(mf.length());
 				levt.virtualDataImported = this.virtualBytesTransmitted.get();
+				}
 			}
 		}
 		this.filesProcessed++;
+		if(this.firstrun)
 		levt.filesImported = this.filesProcessed;
 	}
 
@@ -345,7 +406,7 @@ public class MetaFileImport implements Serializable {
 			try {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
-							"fetching " + hashes.size() + " blocks");
+							"thread fetching " + hashes.size() + " blocks");
 				int tries = 0;
 				for (;;) {
 					try {
@@ -359,7 +420,7 @@ public class MetaFileImport implements Serializable {
 						mfi.bytesTransmitted.addAndGet(sz);
 						mfi.levt.bytesImported = mfi.bytesTransmitted.get();
 						hashes = null;
-						hashes = new ArrayList<byte[]>();
+
 						break;
 					} catch (Exception e) {
 						tries++;

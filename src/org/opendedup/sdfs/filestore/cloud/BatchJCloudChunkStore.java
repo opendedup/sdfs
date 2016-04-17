@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 
 
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,6 +29,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.ws.rs.core.MediaType;
+
+import org.jclouds.domain.Credentials;
+import org.jclouds.domain.Location;
+import org.jclouds.domain.LocationBuilder;
+import org.jclouds.domain.LocationScope;
+import org.jclouds.googlecloud.GoogleCredentialsFromJson;
+
+import com.google.common.base.Supplier;
 
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
@@ -67,6 +76,12 @@ import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+
+
+
+
+
+
 
 
 
@@ -320,9 +335,25 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 		try {
 			String service = config.getAttribute("service-type");
-			context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
-					.buildView(BlobStoreContext.class);
-			blobStore = context.getBlobStore();
+			Location region = null;
+			if(service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
+				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson( config.getAttribute("auth-file"));
+				context = ContextBuilder.newBuilder(service).credentialsSupplier(credentialSupplier)
+						.buildView(BlobStoreContext.class);
+				
+			} else if(service.equals("aws-s3")) {
+				Location provider = new LocationBuilder().scope(LocationScope.PROVIDER).id("aws-s3")
+			            .description("aws-s3").build();
+				region = new LocationBuilder().scope(LocationScope.REGION).id("us-east-1")
+			            .description("us-east-1").parent(provider).build();
+			}
+			else {
+				context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
+						.buildView(BlobStoreContext.class);
+			}
+			
+
+		   
 			
 			// Retry after 25 seconds of no response
 			overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
@@ -332,7 +363,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			// Do not wait between retries
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 			if (!blobStore.containerExists(this.name))
-				blobStore.createContainerInLocation(null, this.name);
+				blobStore.createContainerInLocation(region, this.name);
 			/*
 			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs(
 			 * 10 * 1000);
@@ -1350,6 +1381,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public int getCheckInterval() {
 		return this.checkInterval;
+	}
+
+	@Override
+	public boolean isClustered() {
+		// TODO Auto-generated method stub
+		return this.clustered;
 	}
 
 }

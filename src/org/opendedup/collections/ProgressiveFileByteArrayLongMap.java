@@ -40,7 +40,7 @@ import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
 public class ProgressiveFileByteArrayLongMap implements AbstractShard,
-		Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap2> {
+		Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
 	/**
 	 * 
 	 */
@@ -1410,7 +1410,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	}
 
 	@Override
-	public int compareTo(ProgressiveFileByteArrayLongMap2 m1) {
+	public int compareTo(ProgressiveFileByteArrayLongMap m1) {
 		long dif = this.lastFound - m1.lastFound;
 		if (dif > 0)
 			return 1;

@@ -16,6 +16,7 @@ public class ReadAheadEvent extends SDFSEvent {
 
 	public ReadAheadEvent(String target,MetaDataDedupFile mf) {
 		super(RAE, target, "Caching " +mf.getPath(), SDFSEvent.INFO);
+		this.mf = mf;
 		this.running = true;
 	}
 	

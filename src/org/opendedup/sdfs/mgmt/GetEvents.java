@@ -12,7 +12,7 @@ public class GetEvents {
 		try {
 			return SDFSEvent.getXMLEvents();
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to fulfill request ", e);
+			SDFSLogger.getLog().debug("unable to fulfill request ", e);
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 		}

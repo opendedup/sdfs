@@ -76,7 +76,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	private String bucketLocation = null;
 	GoogleStorageService s3Service = null;
 	boolean closed = false;
-	private int checkInterval = 15000;
 	boolean deleteUnclaimed = true;
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
@@ -812,25 +811,29 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		String haName = this.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		StorageObject obj = s3Service.getObject(this.name, "blocks/" + haName);
+
+
+		DataInputStream in = new DataInputStream(obj.getDataInputStream());
 		FileOutputStream out = new FileOutputStream(f);
+		IOUtils.copy(in, out);
+		IOUtils.closeQuietly(in);
+		IOUtils.closeQuietly(out);
 		try {
+		obj.closeDataInputStream();
+		}catch(Exception e) {
 			
-			IOUtils.copy(obj.getDataInputStream(), out);
-		} finally {
-			IOUtils.closeQuietly(out);
-			obj.closeDataInputStream();
 		}
-		FileInputStream in  = null;
 		try {
-			in  = new FileInputStream(f);
-			byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+			FileInputStream fin = new FileInputStream(f);
+			byte[] md5Hash = ServiceUtils.computeMD5Hash(fin);
 			byte[] lh = ServiceUtils.fromHex(obj.getMd5HashAsHex());
-			if (!Arrays.areEqual(md5Hash, lh))
+			IOUtils.closeQuietly(fin);
+			if (!Arrays.areEqual(md5Hash, lh)) {
+				f.delete();
 				throw new IOException("download corrupted in transit");
+			}
 		} catch (NoSuchAlgorithmException e) {
 
-		}finally {
-			IOUtils.closeQuietly(in);
 		}
 		
 		if (obj.containsMetadata("deleted")) {
@@ -938,10 +941,64 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 												.getMetadata("compressedsize"));
 
 								if (this.deleteUnclaimed) {
-									s3Service.deleteObject(this.name, "blocks/"
-											+ hashString);
-									s3Service.deleteObject(this.name, "keys/"
-											+ hashString);
+									StorageObject kobj = s3Service
+											.getObjectDetails(this.name,
+													"keys/" + hashString);
+									int claims = this.getClaimedObjects(kobj);
+									if (claims > 0) {
+										if (obj.containsMetadata("deleted-objects")) {
+											delobj = Integer
+													.parseInt((String) obj
+															.getMetadata("deleted-objects"))
+													- claims;
+											if (delobj < 0)
+												delobj = 0;
+										}
+										obj.removeMetadata("deleted");
+										obj.removeMetadata("deleted-objects");
+										obj.addMetadata("deleted-objects",
+												Integer.toString(delobj));
+										s3Service.updateObjectMetadata(
+												this.name, obj);
+										obj.closeDataInputStream();
+										int _size = Integer
+												.parseInt((String) obj
+														.getMetadata("size"));
+										int _compressedSize = Integer
+												.parseInt((String) obj
+														.getMetadata("compressedsize"));
+										HashBlobArchive.currentLength
+												.addAndGet(_size);
+										HashBlobArchive.compressedLength
+												.addAndGet(_compressedSize);
+										kobj.removeMetadata("deleted");
+										kobj.removeMetadata("deleted-objects");
+										kobj.addMetadata("deleted-objects",
+												Integer.toString(delobj));
+										s3Service.updateObjectMetadata(
+												this.name, kobj);
+										kobj.closeDataInputStream();
+									} else {
+										s3Service.deleteObject(this.name,
+												"blocks/" + hashString);
+										s3Service.deleteObject(this.name,
+												"keys/" + hashString);
+										if (HashBlobArchive.compressedLength.get() > 0) {
+
+											HashBlobArchive.compressedLength
+													.addAndGet(-1 * compressedSize);
+										} else if (HashBlobArchive.compressedLength
+												.get() < 0)
+											HashBlobArchive.compressedLength.set(0);
+										HashBlobArchive.currentLength.addAndGet(-1
+												* size);
+										if (HashBlobArchive.currentLength.get() > 0) {
+											HashBlobArchive.currentLength.addAndGet(-1
+													* size);
+										} else if (HashBlobArchive.currentLength.get() < 0)
+											HashBlobArchive.currentLength.set(0);
+										HashBlobArchive.removeCache(k.longValue());
+									}
 								} else {
 									obj.removeMetadata("deleted");
 									obj.addMetadata("deleted", "true");
@@ -960,21 +1017,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 									s3Service.updateObjectMetadata(this.name,
 											obj);
 								}
-								if (HashBlobArchive.compressedLength.get() > 0) {
-
-									HashBlobArchive.compressedLength
-											.addAndGet(-1 * compressedSize);
-								} else if (HashBlobArchive.compressedLength
-										.get() < 0)
-									HashBlobArchive.compressedLength.set(0);
-								HashBlobArchive.currentLength.addAndGet(-1
-										* size);
-								if (HashBlobArchive.currentLength.get() > 0) {
-									HashBlobArchive.currentLength.addAndGet(-1
-											* size);
-								} else if (HashBlobArchive.currentLength.get() < 0)
-									HashBlobArchive.currentLength.set(0);
-								HashBlobArchive.removeCache(k.longValue());
+								
 							} else {
 								// SDFSLogger.getLog().info("updating " +
 								// hashString + " sz=" +objects);
@@ -1187,7 +1230,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		String haName = this.encString(nm, Main.chunkStoreEncryptionEnabled);
 		GSObject obj;
 		try {
-
 			obj = s3Service.getObject(this.name, pp + "/" + haName);
 			BufferedInputStream in = new BufferedInputStream(
 					obj.getDataInputStream());
@@ -1499,15 +1541,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		return true;
 	}
 
-	public static void main(String[] args) throws IOException {
-		Properties props = new Properties();
-		props.setProperty("encrypt", "true");
-		props.setProperty("key",
-				"EikuwdMNcqGgzetVa+JXAq8BHYzyStSntpRsHIEh+=uFxM015A5CSrz1mhiRz=Kw");
-		props.setProperty("iv", "5e9fc8188a743fd49e50913dbb332aeb");
-		
-	}
-
 	@Override
 	public void deleteStore() {
 		// TODO Auto-generated method stub
@@ -1540,18 +1573,6 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void checkoutObject(long id, int claims) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean objectClaimed(String key) throws IOException {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
 	public void checkoutFile(String name) throws IOException {
 		// TODO Auto-generated method stub
 		
@@ -1566,7 +1587,25 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	@Override
 	public int getCheckInterval() {
 		// TODO Auto-generated method stub
-		return this.checkInterval;
+		return 20000;
+	}
+
+	@Override
+	public void checkoutObject(long id, int claims) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean objectClaimed(String key) throws IOException {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	@Override
+	public boolean isClustered() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

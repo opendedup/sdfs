@@ -1563,6 +1563,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	public int getCheckInterval() {
 		return this.checkInterval;
 	}
+
+	@Override
+	public boolean isClustered() {
+		// TODO Auto-generated method stub
+		return this.clustered;
+	}
 			
 
 }

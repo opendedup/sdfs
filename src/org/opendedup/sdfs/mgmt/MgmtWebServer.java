@@ -589,6 +589,7 @@ public class MgmtWebServer implements Container {
 							String password = request.getQuery().get("spasswd");
 							int port = Integer.parseInt(request.getQuery().get(
 									"port"));
+							boolean lz4 = false;
 							int maxSz = 30;
 							boolean useSSL = false;
 							if (request.getQuery().containsKey("maxsz"))
@@ -597,10 +598,11 @@ public class MgmtWebServer implements Container {
 							if (request.getQuery().containsKey("useSSL"))
 								useSSL = Boolean.parseBoolean(request
 										.getQuery().get("useSSL"));
+							if(request.getQuery().containsKey("uselz4"))
+								lz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
 							Element msg = new ImportArchiveCmd().getResult(
 									file, cmdOptions, server, password, port,
-									maxSz, useSSL);
-
+									maxSz, useSSL,lz4);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"replication started successfully");
@@ -612,17 +614,23 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
-						byte[] rb = com.google.common.io.BaseEncoding
-								.base64Url().decode(
-										request.getParameter("data"));
+						long st = System.currentTimeMillis();
+						byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.setContentType("application/octet-stream");
 						response.setValue("Server", "SDFS Management Server");
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
-						response.getByteChannel().write(ByteBuffer.wrap(rslt));
-						response.getByteChannel().close();
+						response.getOutputStream().write(rslt);
+						response.getOutputStream().flush();
+						try {
+							response.getOutputStream().close();
+						}catch(Exception e) {}
+						try {
+							response.close();
+						}catch(Exception e) {};
+						SDFSLogger.getLog().debug("sent reponse size " +rslt.length + " took " + (System.currentTimeMillis()-st));
 					} else if (cmd.equalsIgnoreCase("cancelimport")) {
 						try {
 							String uuid = request.getQuery().get("uuid");
@@ -637,8 +645,11 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("archiveout")) {
 						try {
+							boolean uselz4 = false;
+							if(request.getQuery().containsKey("uselz4"))
+								uselz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
 							Element msg = new ArchiveOutCmd().getResult(
-									cmdOptions, file);
+									cmdOptions, file,uselz4);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"archive out started successfully");

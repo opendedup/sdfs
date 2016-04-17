@@ -126,10 +126,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 		}
 	}
 
-	public boolean hashExists(byte[] hash) throws IOException,
+	public long hashExists(byte[] hash) throws IOException,
 			HashtableFullException {
-		boolean exists = hs.hashExists(hash);
-		return exists;
+		return hs.hashExists(hash);
 	}
 
 	public HashChunk fetchChunk(byte[] hash,long pos) throws IOException,

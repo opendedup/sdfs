@@ -99,7 +99,11 @@ public class HCServiceProxy {
 
 	public static synchronized boolean hashExists(byte[] hash)
 			throws IOException, HashtableFullException {
-		return hcService.hashExists(hash);
+		long pos = hcService.hashExists(hash);
+		if(pos != -1)
+			return true;
+		else 
+			return false;
 	}
 
 	public static HashChunk fetchHashChunk(byte[] hash) throws IOException,
@@ -497,23 +501,16 @@ public class HCServiceProxy {
 	 * "not implemented for remote chunkstores"); } }
 	 */
 
-	public static byte[] hashExists(byte[] hash, boolean findAll)
+	public static long hashExists(byte[] hash, boolean findAll)
 			throws IOException, HashtableFullException {
-		byte[] exists = new byte[8];
 		if (Main.chunkStoreLocal) {
-			if (HCServiceProxy.hcService.hashExists(hash)) {
-				exists[0] = 1;
-				return exists;
-			} else {
-				exists[0] = -1;
-				return exists;
-			}
+				return HCServiceProxy.hcService.hashExists(hash);
 
 		} else {
 			HashExistsCmd cmd = new HashExistsCmd(hash, findAll,
 					Main.volume.getClusterCopies());
 			cmd.executeCmd(socket);
-			return cmd.getResponse();
+			return Longs.fromByteArray(cmd.getResponse());
 		}
 	}
 
@@ -541,21 +538,14 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static byte[] hashExists(byte[] hash, boolean findAll,
+	public static long hashExists(byte[] hash, boolean findAll,
 			byte numtowaitfor) throws IOException, HashtableFullException {
-		byte[] exists = new byte[8];
 		if (Main.chunkStoreLocal) {
-			if (HCServiceProxy.hcService.hashExists(hash))
-				return exists;
-			else {
-				exists[0] = -1;
-				return exists;
-			}
-
+			return HCServiceProxy.hcService.hashExists(hash);
 		} else {
 			HashExistsCmd cmd = new HashExistsCmd(hash, findAll, numtowaitfor);
 			cmd.executeCmd(socket);
-			return cmd.getResponse();
+			return Longs.fromByteArray(cmd.getResponse());
 		}
 	}
 

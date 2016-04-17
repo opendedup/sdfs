@@ -55,6 +55,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			+ "syncstaged");
 	File container_location = new File(Main.chunkStore);
 	int checkInterval = 15000;
+	public boolean clustered;
 
 	// private String bucketLocation = null;
 	static {
@@ -742,6 +743,12 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	public int getCheckInterval() {
 		// TODO Auto-generated method stub
 		return this.checkInterval;
+	}
+
+	@Override
+	public boolean isClustered() {
+		// TODO Auto-generated method stub
+		return this.clustered;
 	}
 
 }

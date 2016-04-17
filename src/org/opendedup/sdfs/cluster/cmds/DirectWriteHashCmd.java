@@ -146,17 +146,18 @@ public class DirectWriteHashCmd implements IOClientCmd {
 
 			};
 			ArrayList<PoolHC> ap = new ArrayList<PoolHC>();
-			for (HashClientPool pool : pools) {
-				if (pool != null) {
-					HashClient hc = (HashClient) pool.borrowObject();
-
-					hc.writeChunkAsync(this.hash, this.aContents, 0,
-							this.aContents.length, l);
-					executor.execute(hc);
-					PoolHC phc = new PoolHC();
-					phc.hc = hc;
-					phc.pool = pool;
-					ap.add(phc);
+			synchronized (soc) {
+				for (HashClientPool pool : pools) {
+					if (pool != null) {
+						HashClient hc = (HashClient) pool.borrowObject();
+						hc.writeChunkAsync(this.hash, this.aContents, 0,
+								this.aContents.length, l);
+						executor.execute(hc);
+						PoolHC phc = new PoolHC();
+						phc.hc = hc;
+						phc.pool = pool;
+						ap.add(phc);
+					}
 				}
 			}
 			if (dn < sz) {

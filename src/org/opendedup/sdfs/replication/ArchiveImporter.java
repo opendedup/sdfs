@@ -45,7 +45,7 @@ public class ArchiveImporter {
 	}
 
 	public Element importArchive(String srcArchive, String dest, String server,
-			String password, int port, int maxSz, SDFSEvent evt, boolean useSSL)
+			String password, int port, int maxSz, SDFSEvent evt, boolean useSSL,boolean useLz4)
 			throws Exception {
 		ievt = SDFSEvent.archiveImportEvent("Importing " + srcArchive
 				+ " from " + server + ":" + port + " to " + dest, evt);
@@ -105,8 +105,11 @@ public class ArchiveImporter {
 								+ File.separator
 								+ RandomGUID.getGuid());
 						stg.mkdirs();
-						String expFile = "tar -xzf " + srcArchive + " -C "
+						
+						String expFile = "tar -xzpf " + srcArchive + " -C "
 								+ stg.getPath();
+						if(useLz4)
+							expFile = "lz4 -dc " + srcArchive + " | tar -xpf -";
 						int xt = ProcessWorker.runProcess(expFile);
 						if (xt != 0)
 							throw new IOException("expand failed in " + expFile
@@ -129,7 +132,7 @@ public class ArchiveImporter {
 						SDFSLogger.getLog().info(
 								"setting up staging at " + fDstFiles.getPath());
 						fDstFiles.getParentFile().mkdirs();
-						String cpCmd = "cp -rfa " + srcFiles + " " + fDstFiles;
+						String cpCmd = "cp -rfap " + srcFiles + " " + fDstFiles;
 
 						xt = ProcessWorker.runProcess(cpCmd);
 						if (xt != 0)
@@ -144,7 +147,7 @@ public class ArchiveImporter {
 						if (!ddb.exists())
 							ddb.mkdirs();
 						if (srcFiles.exists()) {
-							cpCmd = "cp -rfa " + srcFiles + File.separator
+							cpCmd = "cp -rfap " + srcFiles + File.separator
 									+ " " + ddb.getParentFile().getPath();
 							xt = ProcessWorker.runProcess(cpCmd);
 							if (xt != 0)

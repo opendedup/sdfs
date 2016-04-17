@@ -70,14 +70,15 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 
 	static {
-		
-		
 		if(!Main.chunkStoreLocal) {
 			if (maxTasks > 120)
 				maxTasks = 120;
 			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
 			worksQueue = new SynchronousQueue<Runnable>();
 			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
+		} else {
+			worksQueue = new SynchronousQueue<Runnable>();
+			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
 		}
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,

@@ -863,6 +863,13 @@ public class SparseDedupFile implements DedupFile {
 			this.syncLock.unlock();
 		}
 	}
+	
+	public void forceRemoteSync() throws IOException {
+		DedupFileChannel ch =this.getChannel(-1);
+		this.dirty = true;
+		eventBus.post(new SFileWritten(this));
+		this.unRegisterChannel(ch, -1);
+	}
 
 	/*
 	 * (non-Javadoc)

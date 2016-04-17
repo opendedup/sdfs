@@ -37,4 +37,6 @@ public interface AbstractBatchStore {
 			InterruptedException;
 
 	public boolean isLocalData();
+	
+	public boolean isClustered();
 }
