@@ -1,17 +1,89 @@
-Version 2.0.12
+VVersion 3.1.7
+	Fixes
+	* Fixed metadata upload issues to the cloud
+	* Changed default block size to 20MB from 50MB
+	* Rplication issues
+	Enhancements
+	* Multi-Threaded Metadata upload support to AWS
+	* Updated Dokan to version .8 this will require a complete uninstall and reinstall of Dokan to work correctly.
+Version 3.1.3
+	* Fixed glacier support that was broken in 3.1.2
+Version 3.1.2
+	* Added support for simple s3 devices. set simple-s3="true" in the extended attributes tag to fix
+Version 3.1.1
+	Fixes
+	* Fixed cloud filesync
+	* Fixed dr restore from cloud to new local server
+Version 3.1.0
+	Fixes
+	* Fixed distributed DSE code for the 3.0 tree
+	* Optimized Replication now working in the 3.0 tree 
+	* Volume block device has been ported to the 3.0 tree
+	* Updated script files to point to appropriate sources
+	* Remove orphaned symlinks
+	* Fixed Cache Expiring for cloud storage data retrieval
+	* Fixed crash recovery of cloud storage
+	Enhancements
+	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
+	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.
+	* Default to TLSv1.2 for all communication
+	* Improved space savings on compaction. Removes individual orphaned blocks from chunks stored on disk. Not yet implemented for cloud storage
+	because of round trip cost.
+	* Ported Windows code to Dokany v 0.8
+	* added last accessed to delay Glacier archival for frequently accessed data
+Version 3.0.4
 	Fixes :
-	* Windows - Jdokan filesystem api timeout
-	* Windows - Rename files not working
+	* Fixed xml commandline parsing in mount.sdfs script
+	* Replaced Oracle JRE with Zulu Openjdk jre
+Version 3.0.3
+	Fixes :
+	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table.
+	* Volume recovery now working properly. Was not grabbing hashmaps properly from cloud providers.
+Version 3.0.2
+	Fixes :
+	* Cloud storage libs overlap for Joda
+	* Included export encryption libs
+	* Compaction of hashmaps now working properly
+Version 3.0.1
+	This is a major new release of SDFS with a rewrite of the storage subsystem. This release includes enhancements to the following elements
+
+	Cloud Storage Enhancements :
+	* In-Line deduplication to a Cloud Storage Backend - SDFS can send all of its data to AWS, AZURE, or Google. 2.Performance Improvements - Compressed Multi-Threaded upload and download of data to the cloud
+	* Local Cache - SDFS will cache the most recently accessed data locally. This is configurable but set to 10 GB by Default
+	* Security - All data can be encrypted using AES-CBC 256 when sent to the cloud
+	* Throttling - Upload and download speeds can be throttled.
+	* Cloud Recovery/Replication - All local metadata is replicated to the cloud and can be recovered back to local volume.
+	* Glacier Support - Supports S3 Lifecycle policies and retrieving data from Glacier
+	* AWS Region Support - Supports all AWS Regions
+	* Amazon AIM Support
+	
+	Scalability Improvements:
+	* Tested to over 100TB of backend storage.
+	* Requires only 400MB of memory per TB of unique storage
+	* Unlimited Snapshots
+	* No compaction necessary sing orphaned data physically removed from underlying filesystem after garbage collection.
+	
+	General Enhancements :
+	* Mounts from fstab and using native linux mount commands (mount -t sdfs)
+	* Faster Volume Replication
+	* Local Encryption support - Uses AES-CBC 256
+	* Faster Garbage Collection - 300% improvement
 Version 2.0.11
 	Fixes :
 	* Fixed copy of files with non-english characters
 	* Fixed JNI hook to fuse referencing non-existent objects.
 	* Fixed replication service failures when replication occurs during garbage collection process
-	* Fixed org.opendedup.collections.ProgessiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
+	* Fixed org.opendedup.collections.ProgressiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
 	* Fixed volume state shown and unclean after unmount.
 	* Updated shared libs to latest compatible versions.
 	Enhancements :
-	* Added org.opendedup.collections.ProgessiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
+	* Added org.opendedup.collections.ProgressiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
+Version 2.0.9
+	Fixes :
+	* Fixed Block Chunk Store errors when writing with variable block deduplication
+	Enhancements :
+	* Garbage collection now done using new method that will increase performance
+	* Cloud Storage bucket location can now be defined using --aws-bucket-location
 Version 2.0.9
 	Fixes :
 	* Fixed Block Chunk Store errors when writing with variable block deduplication
