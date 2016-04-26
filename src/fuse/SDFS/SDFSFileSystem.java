@@ -737,7 +737,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 								"unable to delete folder " + f.getPath());
 						throw new FuseException().initErrno(Errno.ENOSYS);
 					}
-				} catch (Exception e) {
+				} 
+				catch(FuseException e) {
+					throw e;
+				}
+				catch (Exception e) {
 					SDFSLogger.getLog().error("unable to file file " + path, e);
 					throw new FuseException().initErrno(Errno.EACCES);
 				}

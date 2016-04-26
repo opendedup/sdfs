@@ -11,15 +11,15 @@ public class ProcessDeleteFileCmd {
 	public String status;
 	public String msg;
 
-	public static ProcessDeleteFileCmd execute(String file) {
+	public static ProcessDeleteFileCmd execute(String file,boolean rmlock) {
 		ProcessDeleteFileCmd store = new ProcessDeleteFileCmd();
 		try {
 			file = URLEncoder.encode(file, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			SDFSLogger.getLog().debug("Deleting File [" + file + "] ");
-			formatter.format("file=%s&cmd=%s&options=%s", file, "deletefile",
-					"");
+			formatter.format("file=%s&cmd=%s&options=%s&retentionlock=%s", file, "deletefile",
+					"",Boolean.toString(rmlock));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			formatter.close();
 			Element root = doc.getDocumentElement();

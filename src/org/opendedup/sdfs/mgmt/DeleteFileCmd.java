@@ -7,17 +7,20 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-public class DeleteFileCmd implements XtendedCmd {
+public class DeleteFileCmd {
 
-	@Override
-	public String getResult(String cmd, String file) throws IOException {
+	
+	public String getResult(String cmd, String file,boolean rmlock) throws IOException {
 		if (file.contains(".."))
 			throw new IOException("requeste file " + file + " does not exist");
+		
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist");
 		else {
+			if(rmlock)
+				MetaFileStore.getMF(f).clearRetentionLock();			
 			boolean removed = MetaFileStore.removeMetaFile(internalPath, true);
 			if (removed) {
 				SDFSEvent.deleteFileEvent(f);

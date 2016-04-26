@@ -68,7 +68,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean ownerExecOnly = false;
 	private boolean ownerReadOnly = false;
 	private String dfGuid = null;
-
+	private long retentionLock = -1;
 	public boolean deleteOnClose = false;
 	private String guid = "";
 	private IOMonitor monitor;
@@ -938,10 +938,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	/**
 	 * 
 	 * @return true if deleted
+	 * @throws IOException 
+	 * @throws RetentionLockException 
 	 */
 	public boolean deleteStub() {
 		this.writeLock.lock();
+		
 		try {
+			if(this.retentionLock > 0)
+				return false;
 			File f = new File(this.path);
 			eventBus.post(new MFileDeleted(this));
 			boolean del = f.delete();
@@ -1327,6 +1332,28 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setLastAccessed(long lastAccessed) {
 		setLastAccessed(lastAccessed, true);
 	}
+	
+	public synchronized void setRetentionLock() {
+		
+		if(this.retentionLock <=0)
+			this.retentionLock = System.currentTimeMillis();
+		SDFSLogger.getLog().info("retention lock set to " + this.retentionLock);
+	}
+	
+	public synchronized void clearRetentionLock() {
+		this.retentionLock = -1;
+	}
+	
+	public long getRetentionLock() {
+		return this.retentionLock;
+	}
+	
+	public boolean isRetentionLock() {
+		if(this.retentionLock > 0)
+			return true;
+		else
+			return false;
+	}
 
 	/**
 	 * 
@@ -1411,6 +1438,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if(in.available() > 0) {
 					this.deleteOnClose = in.readBoolean();
 				}
+				if(in.available() > 0) {
+					this.retentionLock = in.readLong();
+				}
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1476,6 +1506,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeLong(attributes);
 			out.writeInt(this.mode);
 			out.writeBoolean(this.deleteOnClose);
+			out.writeLong(this.retentionLock);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);

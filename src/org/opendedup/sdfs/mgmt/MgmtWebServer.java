@@ -125,7 +125,10 @@ public class MgmtWebServer implements Container {
 						}
 					} else if (cmd.equalsIgnoreCase("deletefile")) {
 						try {
-							String msg = new DeleteFileCmd().getResult(cmdOptions, file);
+							boolean rmlock = false;
+							if(request.getQuery().containsKey("retentionlock"))
+								rmlock = Boolean.parseBoolean(request.getQuery().get("retentionlock"));
+							String msg = new DeleteFileCmd().getResult(cmdOptions, file,rmlock );
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.createTextNode(msg));

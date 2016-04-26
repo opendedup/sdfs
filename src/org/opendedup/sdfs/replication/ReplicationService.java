@@ -68,10 +68,10 @@ public class ReplicationService implements Serializable {
 		System.out.println("Reading properties from " + args[0]);
 
 		try {
-			File f = new File(args[0]);
+			File f = new File(args[0].trim());
 			defjobPersistanceFolder = new File("replhistory" + File.separator
 					+ f.getName());
-			properties.load(new FileInputStream(args[0]));
+			properties.load(new FileInputStream(f));
 		} catch (IOException e) {
 			System.err.println("Unable to load properties");
 			e.printStackTrace();
@@ -158,7 +158,7 @@ public class ReplicationService implements Serializable {
 		} finally {
 			if(this.remoteSnapPath != null) {
 				try {
-					ProcessDeleteFileCmd.execute(this.remoteSnapPath);
+					ProcessDeleteFileCmd.execute(this.remoteSnapPath,true);
 				}catch(Exception e) {
 					SDFSLogger.getLog().error("unable to delete " + this.remoteSnapPath, e);
 				}
@@ -318,7 +318,7 @@ public class ReplicationService implements Serializable {
 					"ignoring deletion because file = "
 							+ this.mLocalServerFolder);
 		else {
-			ProcessDeleteFileCmd cmd = ProcessDeleteFileCmd.execute(file);
+			ProcessDeleteFileCmd cmd = ProcessDeleteFileCmd.execute(file,false);
 			String status = cmd.status;
 			String msg = cmd.msg;
 			if (status.equalsIgnoreCase("failed")

@@ -318,6 +318,8 @@ private static EventBus eventBus = new EventBus();
 				}
 				 else {
 					mf = getMF(new File(path));
+					if(mf.isRetentionLock())
+						return false;
 					pathMap.invalidate(mf.getPath());
 
 					Main.volume.updateCurrentSize(-1 * mf.length(), true);
