@@ -113,8 +113,10 @@ public class ConsistancyCheck {
 						}
 					} catch (Exception e) {
 						corruption.incrementAndGet();
+						/*
 						SDFSLogger.getLog().warn(
 								"Data Corruption found in datastore", e);
+								*/
 					}
 				}
 			} catch (Exception e) {

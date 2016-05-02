@@ -218,8 +218,9 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		if (config.hasAttribute("default-bucket-location")) {
 			// bucketLocation = config.getAttribute("default-bucket-location");
 		}
-		if(config.hasAttribute("connection-check-interval")) {
-			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
+		if (config.hasAttribute("connection-check-interval")) {
+			this.checkInterval = Integer.parseInt(config
+					.getAttribute("connection-check-interval"));
 		}
 		if (config.hasAttribute("block-size")) {
 			int sz = (int) StringUtils.parseSize(config
@@ -330,6 +331,15 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	private HashMap<String, String> readHashMap(long id) throws IOException,
 			ClassNotFoundException {
 		File _f = new File(HashBlobArchive.getPath(id).getPath() + ".md");
+		if (!_f.exists()) {
+			HashMap<String, String> hs = new HashMap<String, String>();
+			StringTokenizer ht = new StringTokenizer(
+					HashBlobArchive.getStrings(hid), ",");
+			hs.put("objects", Integer.toString(ht.countTokens()));
+			hs.put("bsize", Long.toString(new File(HashBlobArchive.getPath(id)
+					.getPath()).length()));
+			this.writeHashMap(hs, id);
+		}
 		FileInputStream fin = new FileInputStream(_f);
 		ObjectInputStream oon = new ObjectInputStream(fin);
 		@SuppressWarnings("unchecked")
@@ -351,7 +361,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	private int verifyDelete(long id) throws IOException {
 		SimpleByteArrayLongMap m = HashBlobArchive.getMap(id);
 		try {
-			
+
 			m.iterInit();
 			KeyValuePair p = m.next();
 			int claims = 0;
@@ -418,7 +428,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void getBytes(long id,File f) throws IOException {
+	public void getBytes(long id, File f) throws IOException {
 	}
 
 	@Override
@@ -486,13 +496,13 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 															* Integer
 																	.parseInt(metaData
 																			.get("bsize")));
-											
+
 										} catch (Exception e) {
 
 										}
 									} else {
 										long fs = blob.length();
-										sz+=fs;
+										sz += fs;
 										HashBlobArchive.deleteArchive(k);
 										HashBlobArchive.currentLength
 												.addAndGet(-1
@@ -526,7 +536,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 									HashBlobArchive.currentLength.addAndGet(-1
 											* Integer.parseInt(metaData
 													.get("bsize")));
-									
+
 								} catch (Exception e) {
 
 								}
@@ -537,9 +547,12 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 						} finally {
 							// pool.returnObject(container);
 						}
-						
+
 					}
-					SDFSLogger.getLog().info("Compacted [" + iter.size() + "] storaage objects by [" + StorageUnit.of(sz).format(sz)+ "]");
+					SDFSLogger.getLog().info(
+							"Compacted [" + iter.size()
+									+ "] storaage objects by ["
+									+ StorageUnit.of(sz).format(sz) + "]");
 
 				}
 			} catch (InterruptedException e) {
@@ -709,12 +722,18 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 				metaData.remove("deleted");
 				this.writeHashMap(metaData, hid);
 			}
-			StringTokenizer ht = new StringTokenizer(
-					HashBlobArchive.getStrings(hid), ",");
-			StringResult st = new StringResult();
-			st.id = hid;
-			st.st = ht;
-			return st;
+			try {
+				StringTokenizer dht = new StringTokenizer(
+						HashBlobArchive.getStrings(hid), ",");
+				StringResult st = new StringResult();
+				st.id = hid;
+				st.st = dht;
+				return st;
+			} catch (Exception e) {
+				SDFSLogger.getLog()
+						.error("unable to get strings for " + hid, e);
+				throw e;
+			}
 
 		} catch (ClassNotFoundException e) {
 			throw new IOException(e);

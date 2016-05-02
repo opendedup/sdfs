@@ -467,7 +467,7 @@ public class SDFSCmdline {
 						"Sets the Maximum Write Speed if supported by the DSE in KB/s")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
-				.withLongOpt("cloud-file")
+				.withLongOpt("cloud-file-snap")
 				.withDescription(
 						"retrieve a readonly copy of a cloud backed filesystem")
 				.hasArg(true).create());

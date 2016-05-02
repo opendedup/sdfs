@@ -11,7 +11,8 @@ public class ProcessCloudFile {
 		try {
 			System.out.printf("Checking out [%s] from cloud\n", file);
 			file = URLEncoder.encode(file, "UTF-8");
-			dstfile = URLEncoder.encode(dstfile, "UTF-8");
+			if(dstfile != null)
+				dstfile = URLEncoder.encode(dstfile, "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			if(dstfile != null)

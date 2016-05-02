@@ -680,7 +680,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					.getObjectMetadata());
 			if (mp.containsKey("md5sum")) {
 				try {
-					byte[] shash = BaseEncoding.base16().decode(
+					byte[] shash = BaseEncoding.base64().decode(
 							mp.get("md5sum"));
 					byte[] chash;
 					chash = ServiceUtils.computeMD5Hash(data);
@@ -971,7 +971,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
 			Map<String, String> mp = this.getUserMetaData(omd);
 			if (md5sum && mp.containsKey("md5sum")) {
-				byte[] shash = BaseEncoding.base16().decode(mp.get("md5sum"));
+				byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
 
 				InputStream in = new FileInputStream(f);
 				byte[] chash = ServiceUtils.computeMD5Hash(in);
@@ -1336,7 +1336,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			Map<String, String> mp = this.getUserMetaData(md);
 			if (mp.containsKey("md5sum")) {
 				try {
-					byte[] shash = BaseEncoding.base16().decode(
+					byte[] shash = BaseEncoding.base64().decode(
 							mp.get("md5sum"));
 					byte[] chash = ServiceUtils.computeMD5Hash(data);
 					if (!Arrays.equals(shash, chash))
@@ -1700,7 +1700,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					mp = this.getUserMetaData(s3Service.getObjectMetadata(name,
 							pp + "/" + haName));
 					if (omd.getUserMetadata().containsKey("md5sum")) {
-						shash = BaseEncoding.base16().decode(
+						shash = BaseEncoding.base64().decode(
 								omd.getUserMetaDataOf("md5sum"));
 					}
 				}

@@ -17,7 +17,6 @@ public class MultiDownload implements Runnable {
 	LinkedBlockingQueue<StringResult> sbs = new LinkedBlockingQueue<StringResult>(
 			Main.dseIOThreads * 2);
 	private boolean done = false;
-	private Exception ex;
 	Iterator<String> ck = null;
 
 	public MultiDownload(AbstractBatchStore cs) throws IOException {
@@ -36,8 +35,6 @@ public class MultiDownload implements Runnable {
 
 	public StringResult getStringTokenizer() throws Exception {
 		while (true) {
-			if (ex != null)
-				throw ex;
 			StringResult st = sbs.poll(1, TimeUnit.SECONDS);
 			if (st != null) {
 				return st;
@@ -62,9 +59,7 @@ public class MultiDownload implements Runnable {
 				Thread.sleep(100);
 				ArrayList<KeyGetter> _al = new ArrayList<KeyGetter>();
 				for (KeyGetter kd : al) {
-					if (kd.ex != null) {
-						ex = kd.ex;
-					}
+					
 					if (!kd.done) {
 						_al.add(kd);
 					}
@@ -107,20 +102,25 @@ public class MultiDownload implements Runnable {
 
 	private static final class KeyGetter implements Runnable {
 		MultiDownload md = null;
-		Exception ex = null;
 		boolean done = false;
 
 		@Override
 		public void run() {
+			String ost = "";
 			try {
 				String st = md.getNextKey();
 				while (st != null) {
-					md.addStringResult(st);
+					ost = st;
 					st = md.getNextKey();
+					SDFSLogger.getLog().info("Key = " + ost);
+					try {
+						md.addStringResult(ost);
+					}catch(Exception e) {
+						SDFSLogger.getLog().error("error getting string result for " + ost, e);
+					}
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error  getting string result", e);
-				this.ex = e;
+				SDFSLogger.getLog().error("error  getting string result for " + ost, e);
 			}
 			done = true;
 

@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -17,9 +16,11 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
+import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDataChunk;
+import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.XMLUtils;
@@ -33,6 +34,7 @@ public class GetCloudFile implements Runnable {
 	MetaDataDedupFile mf = null;
 	MetaDataDedupFile sdf = null;
 	LongByteArrayMap ddb = null;
+	
 	File df = null;
 	SDFSEvent fevt = null;
 	public Element getResult(String file, String dstfile) throws IOException {
@@ -61,20 +63,25 @@ public class GetCloudFile implements Runnable {
 			mf.setLocalOwner(false);
 			fevt.shortMsg = "Downloading Map Metadata for [" + file + "]";
 			FileReplicationService.getDDB(mf.getDfGuid());
-			
-			
 			if (df != null) {
 				sdf = mf.snapshot(df.getPath(), false, fevt);
-				ddb = (LongByteArrayMap)sdf.getDedupFile(false).bdb;
+				SparseDedupFile sdd = sdf.getDedupFile(false);
+				DedupFileChannel ch = sdd.getChannel(-1);
+				ddb = (LongByteArrayMap)sdd.bdb;
 				sdf.toXML(doc);
+				sdd.unRegisterChannel(ch, -1);
 				
 			} else {
-				ddb = (LongByteArrayMap)mf.getDedupFile(false).bdb;
+				SparseDedupFile sdd = mf.getDedupFile(false);
+				DedupFileChannel ch = sdd.getChannel(-1);
+				ddb = (LongByteArrayMap)sdd.bdb;
 				mf.toXML(doc);
+				sdd.unRegisterChannel(ch, -1);
 			}
 			if (ddb.getVersion() < 3)
 				throw new IOException(
 						"only files version 3 or later can be imported");
+			
 			Thread th = new Thread(this);
 			th.start();
 			return (Element) root.cloneNode(true);
