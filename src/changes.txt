@@ -1,3 +1,7 @@
+Version 3.1.9
+	Fixes
+	* Fixed MD5 sum verification for cloud storage from base16 to base64
+	* Fixed 256 Encryption libs in java binaries.
 Version 3.1.7
 	Fixes
 	* Fixed metadata upload issues to the cloud
