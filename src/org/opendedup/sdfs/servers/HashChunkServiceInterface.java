@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
@@ -11,6 +10,7 @@ import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
+import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public interface HashChunkServiceInterface {
@@ -39,7 +39,7 @@ public interface HashChunkServiceInterface {
 	public abstract HashChunk fetchChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException;
 
-	public abstract void cacheChunk(byte[] hash) throws IOException,
+	public abstract void cacheChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException;
 
 	public abstract byte getHashRoute(byte[] hash);
@@ -90,5 +90,7 @@ public interface HashChunkServiceInterface {
 	public abstract int getWriteSpeed();
 
 	public abstract void setCacheSize(long sz) throws IOException;
+	
+	public abstract RemoteVolumeInfo[] getConnectedVolumes() throws IOException;
 
 }

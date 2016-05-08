@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -1365,7 +1366,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		lk = null;
 	}
 
-	public String getNextName(String pp) throws IOException {
+	public String getNextName(String pp,long id) throws IOException {
 		try {
 			String pfx = pp + "/";
 			if (sobs == null) {
@@ -1579,7 +1580,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public boolean isCheckedOut(String name) throws IOException {
+	public boolean isCheckedOut(String name,long volumeID) throws IOException {
 		// TODO Auto-generated method stub
 		return true;
 	}
@@ -1606,6 +1607,18 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	public boolean isClustered() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		RemoteVolumeInfo info = new RemoteVolumeInfo();
+		info.id = Main.DSEID;
+		info.port = Main.sdfsCliPort;
+		info.hostname = InetAddress.getLocalHost().getHostName();
+		info.compressed = this.compressedSize();
+		info.data = this.size();
+		RemoteVolumeInfo[] ninfo = {info};
+		return ninfo;
 	}
 
 }

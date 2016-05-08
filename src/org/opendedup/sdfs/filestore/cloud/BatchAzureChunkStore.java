@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -44,6 +45,7 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
 
 
 
@@ -1148,7 +1150,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		di = null;
 	}
 
-	public String getNextName(String pp) throws IOException {
+	public String getNextName(String pp,long id) throws IOException {
 		String pfx = pp + "/";
 		if (di == null)
 			di = container.listBlobs(pp + "/").iterator();
@@ -1544,13 +1546,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public boolean isCheckedOut(String name) throws IOException {
+	public boolean isCheckedOut(String name,long volumeID) throws IOException {
 		if(!this.clustered)
 			return true;
 		try {
 		CloudBlockBlob kblob = container
 				.getBlockBlobReference("claims/" + name+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.DSEID,
+						+ EncyptUtils.encHashArchiveName(volumeID,
 								Main.chunkStoreEncryptionEnabled));
 		return kblob.exists();
 		}catch(Exception e) {
@@ -1568,6 +1570,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	public boolean isClustered() {
 		// TODO Auto-generated method stub
 		return this.clustered;
+	}
+
+	@Override
+	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		RemoteVolumeInfo info = new RemoteVolumeInfo();
+		info.id = Main.DSEID;
+		info.port = Main.sdfsCliPort;
+		info.hostname = InetAddress.getLocalHost().getHostName();
+		info.compressed = this.compressedSize();
+		info.data = this.size();
+		RemoteVolumeInfo[] ninfo = {info};
+		return ninfo;
 	}
 			
 

@@ -242,6 +242,7 @@ public class Volume implements java.io.Serializable {
 				sn = sn * -1;
 			this.serialNumber = sn;
 		}
+		Main.DSEID=this.serialNumber;
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));

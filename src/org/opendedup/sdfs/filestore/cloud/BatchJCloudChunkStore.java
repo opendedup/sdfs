@@ -5,12 +5,14 @@ import java.io.BufferedInputStream;
 
 
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -32,8 +34,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
-import org.jclouds.domain.LocationBuilder;
-import org.jclouds.domain.LocationScope;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 
 import com.google.common.base.Supplier;
@@ -76,6 +76,9 @@ import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+
+
+
 
 
 
@@ -144,18 +147,22 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public void close() {
 
 		try {
-			SDFSLogger.getLog().info("############ Closing Azure Container ##################");
+			SDFSLogger.getLog().info("############ Closing Container ##################");
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
 			BlobMetadata bmd = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 			Map<String, String> md = bmd.getUserMetadata();
 			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("hostname", InetAddress.getLocalHost().getHostName());
+			if(Main.volume != null) {
+				md.put("port", Integer.toString(Main.sdfsCliPort));
+			}
 			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled),
 					CopyOptions.builder().contentMetadata(bmd.getContentMetadata()).userMetadata(md).build());
 			this.context.close();
 			SDFSLogger.getLog().info("Updated container on close");
-			SDFSLogger.getLog().info("############ Azure Container Closed ##################");
+			SDFSLogger.getLog().info("############ Container Closed ##################");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error closing container", e);
 		} finally {
@@ -278,6 +285,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void init(Element config) throws IOException {
+		SDFSLogger.getLog().info("Accessing JCloud bucket " + Main.cloudBucket.toLowerCase());
 		this.name = Main.cloudBucket.toLowerCase();
 		this.staged_sync_location.mkdirs();
 		if (config.hasAttribute("default-bucket-location")) {
@@ -335,33 +343,38 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 		try {
 			String service = config.getAttribute("service-type");
+			// Retry after 25 seconds of no response
+						overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
+						overrides.setProperty(Constants.PROPERTY_USER_THREADS, Integer.toString(Main.dseIOThreads * 2));
+						// Keep retrying indefinitely
+						overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
+						// Do not wait between retries
+						overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 			Location region = null;
 			if(service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson( config.getAttribute("auth-file"));
-				context = ContextBuilder.newBuilder(service).credentialsSupplier(credentialSupplier)
+				context = ContextBuilder.newBuilder(service).overrides(overrides).credentialsSupplier(credentialSupplier)
 						.buildView(BlobStoreContext.class);
 				
-			} else if(service.equals("aws-s3")) {
-				Location provider = new LocationBuilder().scope(LocationScope.PROVIDER).id("aws-s3")
-			            .description("aws-s3").build();
-				region = new LocationBuilder().scope(LocationScope.REGION).id("us-east-1")
-			            .description("us-east-1").parent(provider).build();
+			} else if(service.equals("google-cloud-storage")) {
+				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
+				overrides.setProperty(
+						org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
+				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER,"true");
+				context = ContextBuilder.newBuilder("s3").overrides(overrides).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
+						.buildView(BlobStoreContext.class);
+				
 			}
 			else {
+				SDFSLogger.getLog().debug("ca=" + Main.cloudAccessKey + " cs=" + Main.cloudSecretKey);
 				context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
 						.buildView(BlobStoreContext.class);
 			}
-			
+			blobStore = context.getBlobStore();
 
 		   
 			
-			// Retry after 25 seconds of no response
-			overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
-			overrides.setProperty(Constants.PROPERTY_USER_THREADS, Integer.toString(Main.dseIOThreads * 2));
-			// Keep retrying indefinitely
-			overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
-			// Do not wait between retries
-			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
+			
 			if (!blobStore.containerExists(this.name))
 				blobStore.createContainerInLocation(region, this.name);
 			/*
@@ -398,6 +411,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 				md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 				md.put("clustered", Boolean.toString(this.clustered));
+				md.put("hostname", InetAddress.getLocalHost().getHostName());
+				if(Main.volume != null) {
+					md.put("port", Integer.toString(Main.sdfsCliPort));
+				}
 				Blob b = blobStore.blobBuilder("bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)).payload(Long.toString(System.currentTimeMillis()))
 						.userMetadata(md).build();
 				blobStore.putBlob(this.name, b);
@@ -517,12 +534,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if (encrypt) {
 			nm = EncryptUtils.decryptCBC(nm);
 		}
-		boolean compress = Boolean.parseBoolean(md.get("lz4Compress"));
+		boolean compress = Boolean.parseBoolean(md.get("lz4compress"));
 		if (compress) {
 			int size = Integer.parseInt(md.get("size"));
 			nm = CompressionUtils.decompressLz4(nm, size);
 		}
 		String st = new String(nm);
+		SDFSLogger.getLog().debug("string="+st);
 		return st.split(",");
 
 	}
@@ -585,12 +603,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData = new HashMap<String, String>();
 			// metaData = new HashMap<String, String>();
 			int ssz = chunks.length;
-			if (Main.compress) {
-				chunks = CompressionUtils.compressLz4(chunks);
-				metaData.put("lz4compress", "true");
-			} else {
-				metaData.put("lz4compress", "false");
-			}
 			if (Main.chunkStoreEncryptionEnabled) {
 				chunks = EncryptUtils.encryptCBC(chunks);
 				metaData.put("encrypt", "true");
@@ -740,6 +752,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 					md.put("clustered", Boolean.toString(this.clustered));
+					md.put("hostname", InetAddress.getLocalHost().getHostName());
+					if(Main.volume != null) {
+						md.put("port", Integer.toString(Main.sdfsCliPort));
+					}
 					blobStore.copyBlob(this.name, lbi, this.name, lbi,
 							CopyOptions.builder().contentMetadata(dmd.getContentMetadata()).userMetadata(md).build());
 					this.resetCurrentSize();
@@ -1057,10 +1073,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				String blb = "claims/" + haName +  "/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				blobStore.removeBlob(this.name, blb);
-				SDFSLogger.getLog().info("deleting " + blb );
+				SDFSLogger.getLog().debug("deleting " + blb );
 				if (!blobStore.list(this.name,ListContainerOptions.Builder.inDirectory("claims/"+haName)).iterator().hasNext()) {
 					blobStore.removeBlob(this.name, haName);
-					SDFSLogger.getLog().info("deleting " + haName );
+					SDFSLogger.getLog().debug("deleting " + haName );
 				}
 			}else {
 				blobStore.removeBlob(this.name, haName);
@@ -1095,7 +1111,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		ps = null;
 	}
 
-	public String getNextName(String pp) throws IOException {
+	public String getNextName(String pp,long id) throws IOException {
 		String pfx = pp + "/";
 		if (di == null) {
 			ps = blobStore.list(this.name,ListContainerOptions.Builder.withDetails().recursive().inDirectory(pp));
@@ -1133,15 +1149,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	public Map<String, Integer> getHashMap(long id) throws IOException {
+		String _k = "";
 		try {
 			String[] ks = this.getStrings(id);
 			HashMap<String, Integer> m = new HashMap<String, Integer>(ks.length);
 			for (String k : ks) {
+				_k = k;
 				String[] kv = k.split(":");
 				m.put(kv[0], Integer.parseInt(kv[1]));
 			}
 			return m;
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("error in string " + _k);
 			throw new IOException(e);
 		}
 	}
@@ -1151,7 +1170,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
 			try {
-				Map<String, String> md = blobStore.blobMetadata(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)).getUserMetadata();
+				String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				Map<String, String> md = blobStore.blobMetadata(this.name, lbi).getUserMetadata();
 				if (md.containsKey("currentlength")) {
 					Long.parseLong(md.get("currentlength"));
 					return true;
@@ -1370,11 +1390,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	@Override
-	public boolean isCheckedOut(String name) throws IOException {
+	public boolean isCheckedOut(String name,long volumeID) throws IOException {
 		if(!this.clustered)
 			return true;
 		String blb = "claims/" + name +  "/"
-				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				+ EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		return blobStore.blobExists(this.name, blb);
 	}
 
@@ -1387,6 +1407,41 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public boolean isClustered() {
 		// TODO Auto-generated method stub
 		return this.clustered;
+	}
+
+	@Override
+	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		if(this.clustered) {
+			ArrayList<RemoteVolumeInfo> ids = new ArrayList<RemoteVolumeInfo>();
+			PageSet<? extends StorageMetadata> bips = blobStore.list(this.name, ListContainerOptions.Builder.withDetails().inDirectory("bucketinfo"));
+			Iterator<? extends StorageMetadata> liter = bips.iterator();
+			while(liter.hasNext()) {
+				StorageMetadata md = liter.next();
+				String st = md.getName().substring("bucketinfo/".length());
+				long mids = EncyptUtils.decHashArchiveName(st, Main.chunkStoreEncryptionEnabled);
+				RemoteVolumeInfo info = new RemoteVolumeInfo();
+				info.id = mids;
+				info.hostname = md.getUserMetadata().get("hostname");
+				info.port = Integer.parseInt(md.getUserMetadata().get("port"));
+				info.compressed = Long.parseLong(md.getUserMetadata().get("compressedlength"));
+				info.data = Long.parseLong(md.getUserMetadata().get("currentlength"));
+				ids.add(info);
+			}
+			RemoteVolumeInfo [] lids = new RemoteVolumeInfo[ids.size()]; 
+			for(int i = 0 ;i<ids.size();i++) {
+				lids[i] = ids.get(i);
+			}
+			return lids;
+		} else {
+			RemoteVolumeInfo info = new RemoteVolumeInfo();
+			info.id = Main.DSEID;
+			info.port = Main.sdfsCliPort;
+			info.hostname = InetAddress.getLocalHost().getHostName();
+			info.compressed = this.compressedSize();
+			info.data = this.size();
+			RemoteVolumeInfo[] ninfo = {info};
+			return ninfo;
+		}
 	}
 
 }

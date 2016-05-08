@@ -53,6 +53,7 @@ public class SDFSService {
 			SDFSLogger.getLog().info(
 					"HashFunction Min Block Size=" + VariableHashEngine.minLen
 							+ " Max Block Size=" + VariableHashEngine.maxLen);
+		Main.DSEID = Main.volume.getSerialNumber();
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
@@ -83,7 +84,6 @@ public class SDFSService {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
 			Main.volume.setClosedGracefully(false);
-			Main.DSEID = Main.volume.getSerialNumber();
 			Config.writeSDFSConfigFile(configFile);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);

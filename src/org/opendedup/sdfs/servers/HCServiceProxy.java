@@ -174,7 +174,7 @@ public class HCServiceProxy {
 				}
 				touchRunFile();
 				if (Main.syncDL) {
-					eventBus.post(new CloudSyncDLRequest());
+					eventBus.post(new CloudSyncDLRequest(Main.DSEID));
 				}
 			}
 
@@ -194,6 +194,12 @@ public class HCServiceProxy {
 			System.err.println("Unable to initialize HashChunkService ");
 			e.printStackTrace();
 			System.exit(-1);
+		}
+	}
+	
+	public static void syncVolume(long volumeID) {
+		if(Main.chunkStoreLocal) {
+			eventBus.post(new CloudSyncDLRequest(volumeID));
 		}
 	}
 
@@ -577,11 +583,16 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static void cacheData(byte[] hash, byte[] hashloc)
+	public static void cacheData(byte[] hash, byte[] hashloc,boolean direct)
 			throws IOException, DataArchivedException {
 
-		if (Main.chunkStoreLocal)
-			HCServiceProxy.hcService.cacheChunk(hash);
+		if (Main.chunkStoreLocal) {
+			long pos = -1;
+			if (direct) {
+				pos = Longs.fromByteArray(hashloc);
+			}
+			HCServiceProxy.hcService.cacheChunk(hash,pos);
+		}
 	}
 
 	public static long getChunksRead() {

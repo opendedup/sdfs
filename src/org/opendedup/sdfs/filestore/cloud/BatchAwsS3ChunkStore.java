@@ -1823,7 +1823,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		nsummaries = null;
 	}
 
-	public String getNextName(String pp) throws IOException {
+	public String getNextName(String pp,long id) throws IOException {
 		this.s3clientLock.readLock().lock();
 		try {
 			String pfx = pp + "/";
@@ -2202,7 +2202,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public boolean isCheckedOut(String name) throws IOException {
+	public boolean isCheckedOut(String name,long volumeID) throws IOException {
 		String pth = "claims/"
 				+ name
 				+ "/"
@@ -2229,6 +2229,41 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public boolean isClustered() {
 		// TODO Auto-generated method stub
 		return this.clustered;
+	}
+
+	@Override
+	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		if(this.clustered) {
+			ObjectListing idol = this.s3Service.listObjects(this.getName(), "bucketinfo/");
+			Iterator<S3ObjectSummary> iter = idol.getObjectSummaries().iterator();
+			ArrayList<RemoteVolumeInfo> al = new ArrayList<RemoteVolumeInfo>();
+			while(iter.hasNext()) {
+				String key = iter.next().getKey();
+				String vid = key.substring("bucketinfo/".length());
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, key);
+				long id = EncyptUtils.decHashArchiveName(vid, Main.chunkStoreEncryptionEnabled);
+				RemoteVolumeInfo info = new RemoteVolumeInfo();
+				info.id = id;
+				info.hostname = om.getUserMetaDataOf("hostname");
+				info.port = Integer.parseInt(om.getUserMetaDataOf("port"));
+				info.compressed = Long.parseLong(om.getUserMetaDataOf("currentcompressedsize"));
+				info.data = Long.parseLong(om.getUserMetaDataOf("currentsize"));
+			}
+			RemoteVolumeInfo [] ids = new RemoteVolumeInfo[al.size()];
+			for(int i =0; i<al.size();i++){
+				ids[i] = al.get(i);
+			}
+			return ids;
+		}else {
+			RemoteVolumeInfo info = new RemoteVolumeInfo();
+			info.id = Main.DSEID;
+			info.port = Main.sdfsCliPort;
+			info.hostname = InetAddress.getLocalHost().getHostName();
+			info.compressed = this.compressedSize();
+			info.data = this.size();
+			RemoteVolumeInfo[] ninfo = {info};
+			return ninfo;
+		}
 	}
 
 }

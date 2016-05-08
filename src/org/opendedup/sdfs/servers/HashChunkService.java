@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
@@ -17,6 +16,8 @@ import org.opendedup.sdfs.filestore.DSECompaction;
 import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
+import org.opendedup.sdfs.filestore.cloud.AbstractCloudFileSync;
+import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
 import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
@@ -142,9 +143,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashChunk;
 	}
 
-	public void cacheChunk(byte[] hash) throws IOException,
+	public void cacheChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException {
-		hs.cacheChunk(hash);
+		hs.cacheChunk(hash,pos);
 	}
 
 	public byte getHashRoute(byte[] hash) {
@@ -260,6 +261,15 @@ public class HashChunkService implements HashChunkServiceInterface {
 	@Override
 	public boolean blockRestored(String id) throws IOException {
 		return hs.blockRestored(id);
+	}
+
+	@Override
+	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		if (fileStore instanceof AbstractCloudFileSync) {
+			AbstractCloudFileSync af = (AbstractCloudFileSync)fileStore;
+			return af.getConnectedVolumes();
+		} else
+			return null;
 	}
 
 }

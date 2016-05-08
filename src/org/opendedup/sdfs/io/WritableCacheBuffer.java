@@ -1174,7 +1174,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			try {
 
 				if (cache) {
-					HCServiceProxy.cacheData(hash, hashloc);
+					HCServiceProxy.cacheData(hash, hashloc,direct);
 				} else {
 					this.ck = HCServiceProxy.fetchChunk(hash, hashloc, direct);
 					l.commandResponse(this);
@@ -1199,7 +1199,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
 				if (cache) {
-					HCServiceProxy.cacheData(s.hash, s.hashloc);
+					HCServiceProxy.cacheData(s.hash, s.hashloc,direct);
 				} else
 					s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc, direct);
 

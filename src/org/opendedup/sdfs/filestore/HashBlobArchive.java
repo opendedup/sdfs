@@ -1250,13 +1250,15 @@ public class HashBlobArchive implements Runnable, Serializable {
 					StandardCopyOption.REPLACE_EXISTING);
 			f = nf;
 			SimpleByteArrayLongMap om = wMaps.remove(this.id);
-			if (om != null)
-				om.close();
-
-			File omf = new File(om.getPath());
+				
 			File mf = new File(getPath(nid).getPath() + ".map");
-			Files.move(omf.toPath(), mf.toPath(),
-					StandardCopyOption.REPLACE_EXISTING);
+			if(om != null) {
+				om.close();
+				File omf = new File(om.getPath());
+				Files.move(omf.toPath(), mf.toPath(),
+						StandardCopyOption.REPLACE_EXISTING);
+			}
+			
 			this.cached = true;
 			archives.put(nid, this);
 

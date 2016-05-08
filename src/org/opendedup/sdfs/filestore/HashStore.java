@@ -223,9 +223,9 @@ public class HashStore {
 		return hs;
 	}
 
-	public void cacheChunk(byte[] hash) throws IOException,
+	public void cacheChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException {
-		bdb.cache(hash);
+		bdb.cache(hash,pos);
 	}
 
 	public void processHashClaims(SDFSEvent evt) throws IOException {

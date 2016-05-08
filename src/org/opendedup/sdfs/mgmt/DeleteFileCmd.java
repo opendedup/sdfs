@@ -16,7 +16,7 @@ public class DeleteFileCmd implements XtendedCmd {
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
 		if (!f.exists())
-			throw new IOException("requeste file " + file + " does not exist");
+			throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 		else {
 			boolean removed = MetaFileStore.removeMetaFile(internalPath, true);
 			if (removed) {

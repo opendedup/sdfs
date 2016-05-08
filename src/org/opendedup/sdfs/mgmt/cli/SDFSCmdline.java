@@ -32,6 +32,7 @@ public class SDFSCmdline {
 				MgmtServerConnection.server = cmd.getOptionValue("server");
 			if (cmd.hasOption("password"))
 				MgmtServerConnection.password = cmd.getOptionValue("password");
+			
 			if (cmd.hasOption("port"))
 				MgmtServerConnection.port = Integer.parseInt(cmd
 						.getOptionValue("port"));
@@ -72,6 +73,8 @@ public class SDFSCmdline {
 				ProcessClusterVolumesList.runCmd();
 				System.exit(0);
 			}
+			if (cmd.hasOption("list-cloud-volumes"))
+				ProcessConnectedVolumes.runCmd();
 			if (cmd.hasOption("cluster-volume-remove")) {
 				ProcessClusterVolumeRemove.runCmd(cmd
 						.getOptionValue("cluster-volume-remove"));
@@ -199,6 +202,11 @@ public class SDFSCmdline {
 				ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
 				System.exit(0);
 			}
+			if (cmd.hasOption("sync-remote-cloud-volume")) {
+				ProcessSyncFromConnectedVolume.runCmd(Long.parseLong(cmd
+						.getOptionValue("sync-remote-cloud-volume")));
+				System.exit(0);
+			}
 			if (cmd.hasOption("change-password")) {
 				ProcessSetPasswordCmd.runCmd(cmd
 						.getOptionValue("change-password"));
@@ -311,6 +319,16 @@ public class SDFSCmdline {
 				.withLongOpt("password")
 				.withDescription(
 						"password to authenticate to SDFS CLI Interface for volume.")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("list-cloud-volumes")
+				.withDescription(
+						"list sdfs volumes that use this bucket.")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sync-remote-cloud-volume")
+				.withDescription(
+						"downloads metadata from specified volume id.")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("port")

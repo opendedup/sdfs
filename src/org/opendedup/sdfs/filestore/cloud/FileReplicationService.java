@@ -19,6 +19,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
@@ -89,7 +90,7 @@ public class FileReplicationService {
 						+ mf.getIOMonitor().getActualBytesWritten(), true);
 				Main.volume.addVirtualBytesWritten(mf.getIOMonitor()
 						.getVirtualBytesWritten(), true);
-				SDFSLogger.getLog().info(
+				SDFSLogger.getLog().debug(
 						"downloaded " + to.getPath() + " sz=" + to.length());
 				return mf;
 			} catch (Exception e) {
@@ -135,8 +136,12 @@ public class FileReplicationService {
 	}
 
 	public static LongByteArrayMap getDDB(String fname) throws Exception {
-		
+
 		return new LongByteArrayMap(service.downloadDDBFile(fname).getPath());
+	}
+	
+	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		return service.sync.getConnectedVolumes();
 	}
 
 	private ReentrantLock getLock(String st) {
@@ -178,7 +183,6 @@ public class FileReplicationService {
 	@AllowConcurrentEvents
 	public void metaFileDeleted(MFileDeleted evt) throws IOException {
 		try {
-			SDFSLogger.getLog().info("eeeks " + evt.mf.getPath());
 			this.deleteFile(new File(evt.mf.getPath()));
 		} catch (Exception e) {
 			SDFSLogger.getLog()
@@ -368,8 +372,10 @@ public class FileReplicationService {
 			while (!done) {
 				try {
 					if (evt.sf.isDirty()) {
-						SDFSLogger.getLog().info(
-								"writed " + evt.sf.getDatabasePath().substring(sl));
+						SDFSLogger.getLog().debug(
+								"writed "
+										+ evt.sf.getDatabasePath()
+												.substring(sl));
 						this.sync
 								.uploadFile(new File(evt.sf.getDatabasePath()),
 										evt.sf.getDatabasePath().substring(sl),
@@ -377,7 +383,7 @@ public class FileReplicationService {
 						eventUploadBus.post(new SFileUploaded(evt.sf));
 
 					} else {
-						SDFSLogger.getLog().info(
+						SDFSLogger.getLog().debug(
 								"nowrited " + evt.sf.getDatabasePath());
 					}
 					done = true;
@@ -462,7 +468,6 @@ public class FileReplicationService {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void sFileDeleted(SFileDeleted evt) {
-		SDFSLogger.getLog().info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzkkkkkkkkkkkkkkkk");
 		try {
 			ReentrantLock l = this.getLock(evt.sfp);
 			l.lock();
@@ -472,7 +477,6 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("dels " + evt.sfp);
-					SDFSLogger.getLog().info("dels " + evt.sfp.substring(sl));
 					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
 				} catch (Exception e) {
@@ -534,18 +538,22 @@ public class FileReplicationService {
 			this.sync.clearIter();
 			MetaFileDownloader.reset();
 			DDBDownloader.reset();
-			String fname = this.sync.getNextName("files");
+			String fname = this.sync.getNextName("files", req.getVolumeID());
 			while (fname != null) {
-				File f = new File(Main.volume.getPath() + File.separator
-						+ fname);
-				if (fname.endsWith(DM)) {
-					f = f.getParentFile();
-					f.mkdirs();
+				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
+				if (this.sync.isCheckedOut("files/" +efs, req.getVolumeID())) {
+					File f = new File(Main.volume.getPath() + File.separator
+							+ fname);
+					if (fname.endsWith(DM)) {
+						f = f.getParentFile();
+						f.mkdirs();
+					} else {
+						executor.execute(new MetaFileDownloader(fname, f, sync));
+					}
 				} else {
-					executor.execute(new MetaFileDownloader(fname, f, sync));
-
+					SDFSLogger.getLog().info("not checked out " +fname);
 				}
-				fname = this.sync.getNextName("files");
+				fname = this.sync.getNextName("files", req.getVolumeID());
 			}
 			executor.shutdown();
 			// Wait for everything to finish.
@@ -559,10 +567,13 @@ public class FileReplicationService {
 			executor = new ThreadPoolExecutor(Main.dseIOThreads,
 					Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
 					executionHandler);
-			fname = this.sync.getNextName("ddb");
+			fname = this.sync.getNextName("ddb", req.getVolumeID());
 			while (fname != null) {
-				executor.execute(new DDBDownloader(fname, sync));
-				fname = this.sync.getNextName("ddb");
+				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
+				if (this.sync.isCheckedOut("ddb/" +efs, req.getVolumeID())) {
+					executor.execute(new DDBDownloader(fname, sync));
+				}
+				fname = this.sync.getNextName("ddb", req.getVolumeID());
 			}
 			executor.shutdown();
 			// Wait for everything to finish.
@@ -621,6 +632,7 @@ public class FileReplicationService {
 				to.delete();
 				try {
 					sync.downloadFile(fname, to, "files");
+					sync.checkoutFile("files/" + fname);
 					MetaDataDedupFile mf = MetaFileStore.getMF(to);
 					Main.volume.addDuplicateBytes(mf.getIOMonitor()
 							.getDuplicateBlocks()
@@ -644,7 +656,6 @@ public class FileReplicationService {
 						tries++;
 				}
 			}
-
 		}
 
 	}
@@ -677,6 +688,7 @@ public class FileReplicationService {
 					f.delete();
 					try {
 						sync.downloadFile(fname, f, "ddb");
+						sync.checkoutFile("ddb/" + fname);
 						SDFSLogger.getLog().info(
 								"downloaded " + f.getPath() + " sz="
 										+ f.length());

@@ -126,7 +126,34 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("deletefile")) {
+					}else if (cmd.equalsIgnoreCase("connectedvolumes")) {
+						try {
+							Element msg = new GetConnectedVolumes().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					}
+					else if (cmd.equalsIgnoreCase("syncvolume")) {
+						try {
+							new SyncFromConnectedVolume().getResult(Long.parseLong(request
+									.getQuery().get("id")));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("deletefile")) {
 						try {
 							String msg = new DeleteFileCmd().getResult(
 									cmdOptions, file);
