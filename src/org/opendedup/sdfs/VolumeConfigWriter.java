@@ -692,8 +692,9 @@ public class VolumeConfigWriter {
 				this.chunk_size = 1024;
 
 				aws.setAttribute("chunkstore-class",
-						"org.opendedup.sdfs.filestore.cloud.BatchGSChunkStore");
+						"org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
+				extended.setAttribute("service-type", "google-cloud-storage");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
@@ -723,8 +724,9 @@ public class VolumeConfigWriter {
 			if (ext) {
 				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class",
-						"org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
+						"org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
+				extended.setAttribute("service-type", "azureblob");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
