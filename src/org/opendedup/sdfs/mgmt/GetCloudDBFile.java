@@ -17,6 +17,7 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.LRUCache;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,8 +29,23 @@ public class GetCloudDBFile implements Runnable {
 	LongByteArrayMap ddb = null;
 	String guid;
 	SDFSEvent fevt = null;
-	public Element getResult(String guid) throws IOException {
+	static LRUCache<String,String> ck = new LRUCache<String,String>(50);
+	public Element getResult(String guid,String changeid) throws IOException {
 		this.guid = guid;
+		synchronized(ck) {
+			if(ck.containsKey(changeid)) {
+				try {
+				SDFSLogger.getLog().info("ignoring " + changeid + " " + guid);
+				Document doc = XMLUtils.getXMLDoc("clouddbfile");
+				Element root = doc.getDocumentElement();
+				root.setAttribute("action", "ignored");
+				return (Element) root.cloneNode(true);
+				}catch(Exception e) {
+					throw new IOException(e);
+				}
+			}
+			ck.put(changeid, guid);
+			}
 		fevt = SDFSEvent.cfEvent(guid);
 		try {
 			Document doc = XMLUtils.getXMLDoc("clouddbfile");

@@ -11,6 +11,7 @@ import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.FileLock;
+import org.opendedup.util.LRUCache;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,10 +23,25 @@ public class GetCloudMetaFile {
 	private static FileLock fl = new FileLock();
 	File df = null;
 	SDFSEvent fevt = null;
+	static LRUCache<String,String> ck = new LRUCache<String,String>(50);
 
-	public Element getResult(String file, String dstfile) throws IOException {
+	public Element getResult(String file, String dstfile,String changeid) throws IOException {
 		ReentrantLock l = fl.getLock(file);
 		l.lock();
+		synchronized(ck) {
+		if(ck.containsKey(changeid)) {
+			try {
+			SDFSLogger.getLog().info("ignoring " + changeid + " " + file);
+			Document doc = XMLUtils.getXMLDoc("cloudmfile");
+			Element root = doc.getDocumentElement();
+			root.setAttribute("action", "ignored");
+			return (Element) root.cloneNode(true);
+			}catch(Exception e) {
+				throw new IOException(e);
+			}
+		}
+		ck.put(changeid, file);
+		}
 		try {
 			fevt = SDFSEvent.cfEvent(file);
 			if (dstfile != null && file.contentEquals(dstfile))

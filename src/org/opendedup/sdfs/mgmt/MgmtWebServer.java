@@ -155,8 +155,12 @@ public class MgmtWebServer implements Container {
 					} 
 					else if (cmd.equalsIgnoreCase("deletefile")) {
 						try {
+							String changeid = null;
+							if(request.getQuery().containsKey("changeid")) {
+								changeid = request.getQuery().get("changeid");
+							}
 							String msg = new DeleteFileCmd().getResult(
-									cmdOptions, file);
+									cmdOptions, file,changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -192,9 +196,9 @@ public class MgmtWebServer implements Container {
 							if(request.getQuery().containsKey("dstfile")) {
 								dstfile = request.getQuery().get("dstfile");
 							}
-								
+							String changeid = request.getQuery().get("changeid");	
 							Element msg = new GetCloudMetaFile().getResult(
-								 file,dstfile);
+								 file,dstfile,changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -207,9 +211,9 @@ public class MgmtWebServer implements Container {
 					} 
 					else if (cmd.equalsIgnoreCase("clouddbfile")) {
 						try {
-								
+							String changeid = request.getQuery().get("changeid");	
 							Element msg = new GetCloudDBFile().getResult(
-								 file);
+								 file,changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
