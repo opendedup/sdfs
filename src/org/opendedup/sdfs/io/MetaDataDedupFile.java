@@ -1338,6 +1338,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
+		if(!propigateEvent)
+			this.dirty= false;
 		this.unmarshal();
 	}
 

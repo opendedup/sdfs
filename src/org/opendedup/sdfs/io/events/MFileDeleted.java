@@ -28,7 +28,7 @@ public class MFileDeleted extends GenericEvent {
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileDelete");
-		dataset.addProperty("path", mf.getPath().substring(pl));
+		dataset.addProperty("object", mf.getPath().substring(pl));
 		if (mf.isSymlink())
 			dataset.addProperty("fileType", "symlink");
 		else if (this.dir)

@@ -6,12 +6,14 @@ import java.io.BufferedInputStream;
 
 
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -75,7 +77,10 @@ import com.google.common.hash.HashingInputStream;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
-import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+
+
+
+
 
 
 
@@ -116,6 +121,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private AtomicLong rcurrentSize = new AtomicLong();
 	private AtomicLong rcurrentCompressedSize = new AtomicLong();
 	private int checkInterval = 15000;
+	private static final int version  = 1;
 	// private String bucketLocation = null;
 	static {
 
@@ -158,6 +164,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if(Main.volume != null) {
 				md.put("port", Integer.toString(Main.sdfsCliPort));
 			}
+			md.put("bucketversion", Integer.toString(version));
+			md.put("sdfsversion", Main.version);
+			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 			blobStore.copyBlob(this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), this.name, "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled),
 					CopyOptions.builder().contentMetadata(bmd.getContentMetadata()).userMetadata(md).build());
 			this.context.close();
@@ -282,6 +291,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		this.rcurrentCompressedSize.set(rccs);
 		this.rcurrentSize.set(rcs);
 	}
+	
+	
 
 	@Override
 	public void init(Element config) throws IOException {
@@ -352,7 +363,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 			Location region = null;
 			if(service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
-				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson( config.getAttribute("auth-file"));
+				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
+				String creds = org.apache.commons.io.IOUtils.toString(is);
+				org.apache.commons.io.IOUtils.closeQuietly(is);
+				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
+				
 				context = ContextBuilder.newBuilder(service).overrides(overrides).credentialsSupplier(credentialSupplier)
 						.buildView(BlobStoreContext.class);
 				
@@ -371,8 +386,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						.buildView(BlobStoreContext.class);
 			}
 			blobStore = context.getBlobStore();
-
-		   
 			
 			
 			if (!blobStore.containerExists(this.name))
@@ -386,8 +399,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			 */
 			Map<String, String> md = new HashMap<String,String>();
 			String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			if (blobStore.blobExists(this.name,lbi))
-				md = blobStore.blobMetadata(this.name, lbi).getUserMetadata();
+			if (blobStore.blobExists(this.name,lbi)) {
+				blobStore.blobMetadata(this.name,lbi);
+				blobStore.blobMetadata(this.name,lbi).getUserMetadata();
+				md = blobStore.getBlob(this.name, lbi).getMetadata().getUserMetadata();
+			}
 			if (md.size() == 0) 
 				this.clustered = true;
 			else if (md.containsKey("clustered"))
@@ -415,6 +431,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				if(Main.volume != null) {
 					md.put("port", Integer.toString(Main.sdfsCliPort));
 				}
+				md.put("bucketversion", Integer.toString(version));
+				md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+				md.put("sdfsversion", Main.version);
 				Blob b = blobStore.blobBuilder("bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)).payload(Long.toString(System.currentTimeMillis()))
 						.userMetadata(md).build();
 				blobStore.putBlob(this.name, b);
@@ -593,10 +612,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("objects", Integer.toString(arc.getSz()));
 			HashCode hc = com.google.common.io.Files.hash(f, Hashing.md5());
-			Blob blob = blobStore.blobBuilder("blocks/" + haName).userMetadata(metaData).payload(f).contentLength(csz)
-					.contentMD5(hc).contentType(MediaType.APPLICATION_OCTET_STREAM)
+			metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
+			Blob blob = blobStore.blobBuilder("blocks/" + haName).userMetadata(metaData).payload(f).contentLength(csz).contentMD5(hc)
+					.contentType(MediaType.APPLICATION_OCTET_STREAM)
 					.build();
-			blobStore.putBlob(this.name, blob, multipart());
+			blobStore.putBlob(this.name, blob);
 			// upload the metadata
 			String st = arc.getHashesString();
 			byte [] chunks = st.getBytes();
@@ -753,6 +773,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 					md.put("clustered", Boolean.toString(this.clustered));
 					md.put("hostname", InetAddress.getLocalHost().getHostName());
+					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+					md.put("bucketversion", Integer.toString(version));
+					md.put("sdfsversion", Main.version);
 					if(Main.volume != null) {
 						md.put("port", Integer.toString(Main.sdfsCliPort));
 					}
@@ -941,7 +964,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				Blob b = blobStore.blobBuilder(pth).payload(fp).contentLength(p.length()).contentMD5(hc).userMetadata(metaData).build();
-				blobStore.putBlob(this.name, b, multipart());
+				blobStore.putBlob(this.name, b);
 				this.checkoutFile(pth);
 			} catch (Exception e1) {
 				throw new IOException(e1);
@@ -1350,11 +1373,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
+		String haName = "";
 		try {
 			if (blobStore.blobExists(this.name, this.getClaimName(id)))
 				return;
 			else {
-				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+				haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				BlobMetadata dmd = blobStore.blobMetadata(this.name,"keys/" + haName);
 				Map<String,String> md = dmd.getUserMetadata();
 				int objs = Integer.parseInt(md.get("objects"));
@@ -1425,6 +1449,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				info.port = Integer.parseInt(md.getUserMetadata().get("port"));
 				info.compressed = Long.parseLong(md.getUserMetadata().get("compressedlength"));
 				info.data = Long.parseLong(md.getUserMetadata().get("currentlength"));
+				info.lastupdated = Long.parseLong(md.getUserMetadata().get("lastupdated"));
+				info.sdfsversion = md.getUserMetadata().get("bucketversion");
+				info.version = Integer.parseInt(md.getUserMetadata().get("bucketversion"));
 				ids.add(info);
 			}
 			RemoteVolumeInfo [] lids = new RemoteVolumeInfo[ids.size()]; 
@@ -1439,6 +1466,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			info.hostname = InetAddress.getLocalHost().getHostName();
 			info.compressed = this.compressedSize();
 			info.data = this.size();
+			info.sdfsversion = Main.version;
+			info.version = version;
+			info.lastupdated = System.currentTimeMillis();
 			RemoteVolumeInfo[] ninfo = {info};
 			return ninfo;
 		}

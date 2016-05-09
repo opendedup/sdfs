@@ -25,7 +25,7 @@ public class MFileRenamed extends GenericEvent {
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileRename");
-		dataset.addProperty("path", mf.getPath().substring(pl));
+		dataset.addProperty("object", mf.getPath().substring(pl));
 		dataset.addProperty("from", this.from);
 		dataset.addProperty("to", this.to);
 		if (mf.isSymlink())

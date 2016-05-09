@@ -174,7 +174,7 @@ public class HCServiceProxy {
 				}
 				touchRunFile();
 				if (Main.syncDL) {
-					eventBus.post(new CloudSyncDLRequest(Main.DSEID));
+					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true));
 				}
 			}
 
@@ -197,9 +197,9 @@ public class HCServiceProxy {
 		}
 	}
 	
-	public static void syncVolume(long volumeID) {
+	public static void syncVolume(long volumeID,boolean syncMap) {
 		if(Main.chunkStoreLocal) {
-			eventBus.post(new CloudSyncDLRequest(volumeID));
+			eventBus.post(new CloudSyncDLRequest(volumeID,syncMap));
 		}
 	}
 

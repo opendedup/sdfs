@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +32,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
+import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
 import org.opendedup.sdfs.mgmt.websocket.PingService;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
@@ -185,7 +185,42 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("setcachesz")) {
+					}else if (cmd.equalsIgnoreCase("cloudmfile")) {
+						try {
+							
+							String dstfile = null;
+							if(request.getQuery().containsKey("dstfile")) {
+								dstfile = request.getQuery().get("dstfile");
+							}
+								
+							Element msg = new GetCloudMetaFile().getResult(
+								 file,dstfile);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("clouddbfile")) {
+						try {
+								
+							Element msg = new GetCloudDBFile().getResult(
+								 file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+					} 
+					else if (cmd.equalsIgnoreCase("setcachesz")) {
 						try {
 							Element msg = new SetCacheSize().getResult(request
 									.getQuery().get("sz"));
@@ -1008,6 +1043,7 @@ public class MgmtWebServer implements Container {
 			Map<String, Service> routes = new HashMap<String, Service>();
 			routes.put("/metadatasocket", new MetaDataUpdate());
 			routes.put("/ddbsocket", new DDBUpdate());
+			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());
 			Container container = new MgmtWebServer();

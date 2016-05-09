@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class SFileDeleted {
+public class SFileDeleted extends GenericEvent{
 	public SparseDedupFile sf = null;
 	public String sfp = null;
 
@@ -22,9 +22,9 @@ public class SFileDeleted {
 	}
 
 	public String toJSON() {
-		JsonObject dataset = new JsonObject();
+		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "sfileDeleted");
-		dataset.addProperty("GUID", this.sf.getGUID());
+		dataset.addProperty("object", this.sf.getGUID());
 		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
 				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
 				.create();

@@ -21,6 +21,7 @@ public class CloseFile {
 			File f = new File(Main.volume.getPath() + File.separator + file);
 			if (f.exists()) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				mf.setDirty(true);
 				mf.unmarshal();
 				mf.getDedupFile(true).forceClose();
 			}

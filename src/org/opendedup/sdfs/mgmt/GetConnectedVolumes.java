@@ -31,6 +31,9 @@ public class GetConnectedVolumes {
 					el.setAttribute("port", Integer.toString(vl.port));
 					el.setAttribute("size", Long.toString(vl.data));
 					el.setAttribute("compressed-size", Long.toString(vl.compressed));
+					el.setAttribute("sdfsversion", vl.sdfsversion);
+					el.setAttribute("version",Integer.toString(vl.version));
+					el.setAttribute("lastupdated", Long.toString(vl.lastupdated));
 					root.appendChild(el);
 				}
 			}

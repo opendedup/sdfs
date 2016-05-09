@@ -2,6 +2,8 @@ package org.opendedup.sdfs.io.events;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.opendedup.sdfs.Main;
+
 import com.google.gson.JsonObject;
 
 public class GenericEvent {
@@ -15,6 +17,8 @@ public class GenericEvent {
 	public JsonObject toJSONObject() {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("squence", sequence);
+		dataset.addProperty("volumeid", Long.toString(Main.DSEID));
+		dataset.addProperty("timestamp", Long.toString(System.currentTimeMillis()));
 		return dataset;
 	}
 

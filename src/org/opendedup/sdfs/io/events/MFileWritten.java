@@ -2,6 +2,7 @@ package org.opendedup.sdfs.io.events;
 
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,14 +20,17 @@ public class MFileWritten extends GenericEvent {
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileWritten");
-		dataset.addProperty("path", mf.getPath().substring(pl));
+		dataset.addProperty("object", mf.getPath().substring(pl));
+		
 		if (mf.isSymlink())
 			dataset.addProperty("fileType", "symlink");
 		else if (mf.isDirectory())
 			dataset.addProperty("fileType", "dir");
-		else
+		else {
 			dataset.addProperty("fileType", "file");
-		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
+			dataset.addProperty("size", mf.length());
+		}
+			Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
 				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
 				.create();
 		return gson.toJson(dataset);

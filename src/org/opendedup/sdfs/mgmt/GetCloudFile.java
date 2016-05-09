@@ -39,7 +39,7 @@ public class GetCloudFile implements Runnable {
 	SDFSEvent fevt = null;
 	public Element getResult(String file, String dstfile) throws IOException {
 		
-		SDFSEvent fevt = SDFSEvent.cfEvent(file);
+		fevt = SDFSEvent.cfEvent(file);
 		if (dstfile != null && file.contentEquals(dstfile))
 			throw new IOException("local filename in the same as source name");
 

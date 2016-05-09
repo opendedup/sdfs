@@ -47,7 +47,6 @@ public class DDBUpdate implements Service {
 			vol = RandomGUID.getGuid();
 		}
 		if (Main.sdfsCliRequireAuth) {
-
 			if (password != null) {
 				String hash;
 				try {

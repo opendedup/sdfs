@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -28,11 +29,9 @@ import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileSync;
-import org.opendedup.sdfs.io.events.MFileUploaded;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileSync;
-import org.opendedup.sdfs.io.events.SFileUploaded;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.io.events.VolumeWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -83,6 +82,7 @@ public class FileReplicationService {
 		for (;;) {
 			to.delete();
 			try {
+				MetaFileStore.removedCachedMF(to.getPath());
 				sync.downloadFile(fname, to, "files");
 				MetaDataDedupFile mf = MetaFileStore.getMF(to);
 				Main.volume.addDuplicateBytes(mf.getIOMonitor()
@@ -184,6 +184,8 @@ public class FileReplicationService {
 	public void metaFileDeleted(MFileDeleted evt) throws IOException {
 		try {
 			this.deleteFile(new File(evt.mf.getPath()));
+			SDFSLogger.getLog().debug("deleted " + evt.mf.getPath());
+			eventUploadBus.post(evt);
 		} catch (Exception e) {
 			SDFSLogger.getLog()
 					.error("unable to delete " + evt.mf.getPath(), e);
@@ -292,7 +294,7 @@ public class FileReplicationService {
 											+ evt.mf.length());
 							this.sync.uploadFile(new File(evt.mf.getPath()),
 									evt.mf.getPath().substring(pl), "files");
-							eventUploadBus.post(new MFileUploaded(evt.mf));
+							eventUploadBus.post(evt);
 						} else {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
@@ -380,8 +382,7 @@ public class FileReplicationService {
 								.uploadFile(new File(evt.sf.getDatabasePath()),
 										evt.sf.getDatabasePath().substring(sl),
 										"ddb");
-						eventUploadBus.post(new SFileUploaded(evt.sf));
-
+						eventUploadBus.post(evt);
 					} else {
 						SDFSLogger.getLog().debug(
 								"nowrited " + evt.sf.getDatabasePath());
@@ -477,8 +478,10 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("dels " + evt.sfp);
+					SDFSLogger.getLog().debug("dels " + evt.sfp);
 					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
+					eventUploadBus.post(evt);
 				} catch (Exception e) {
 					if (tries > maxTries)
 						throw e;

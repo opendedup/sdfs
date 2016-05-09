@@ -187,6 +187,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("currentcompressedsize",
 					Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+			md.put("hostname", InetAddress.getLocalHost().getHostName());
+			md.put("port", Integer.toString(Main.sdfsCliPort));
 			omd.setUserMetadata(md);
 			CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name,
 					binm, name, binm).withNewObjectMetadata(omd);
@@ -475,6 +478,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				md.addUserMetadata("currentsize", "0");
 				md.addUserMetadata("currentcompressedsize", "0");
 				md.addUserMetadata("clustered", "true");
+				md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
+				md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
+				md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
+				
 				this.clustered = true;
 				byte[] sz = "bucketinfodatanow".getBytes();
 				md.setContentLength(sz.length);
@@ -500,6 +507,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					md.addUserMetadata("currentsize", "0");
 					md.addUserMetadata("currentcompressedsize", "0");
 					md.addUserMetadata("clustered", "true");
+					md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
+					md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
+					md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
 					this.clustered = true;
 					this.binm = "bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID,
@@ -562,9 +572,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						SDFSLogger.getLog().info("created new store " + name);
 						ObjectMetadata md = new ObjectMetadata();
 						md.addUserMetadata("currentsize", "0");
+						md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
 						md.addUserMetadata("currentcompressedsize", "0");
 						md.addUserMetadata("clustered",
 								Boolean.toString(this.clustered));
+						md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
+						md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
 						byte[] sz = "bucketinfodatanow".getBytes();
 						md.setContentLength(sz.length);
 						s3Service.putObject(this.name, binm,
@@ -1178,6 +1191,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 							Long.toString(HashBlobArchive.currentLength.get()));
 					md.put("currentcompressedsize", Long
 							.toString(HashBlobArchive.compressedLength.get()));
+					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+					md.put("hostname", InetAddress.getLocalHost().getHostName());
+					md.put("port", Integer.toString(Main.sdfsCliPort));
 					omd.setUserMetadata(md);
 
 					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(

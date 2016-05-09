@@ -14,7 +14,7 @@ public class SyncFromConnectedVolume {
 			RemoteVolumeInfo[] l = FileReplicationService.getConnectedVolumes();
 			for (RemoteVolumeInfo lv : l) {
 				if (lv.id == id) {
-					HCServiceProxy.syncVolume(id);
+					HCServiceProxy.syncVolume(id,true);
 					return;
 				}
 			}
