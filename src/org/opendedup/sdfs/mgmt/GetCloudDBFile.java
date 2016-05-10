@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
@@ -17,6 +18,7 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.FileLock;
 import org.opendedup.util.LRUCache;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -29,24 +31,28 @@ public class GetCloudDBFile implements Runnable {
 	LongByteArrayMap ddb = null;
 	String guid;
 	SDFSEvent fevt = null;
-	static LRUCache<String,String> ck = new LRUCache<String,String>(50);
-	public Element getResult(String guid,String changeid) throws IOException {
+	static LRUCache<String, String> ck = new LRUCache<String, String>(50);
+	private static FileLock fl = new FileLock();
+	public Element getResult(String guid, String changeid) throws IOException {
 		this.guid = guid;
-		synchronized(ck) {
-			if(ck.containsKey(changeid)) {
+		synchronized (ck) {
+			if (ck.containsKey(changeid)) {
 				try {
-				SDFSLogger.getLog().info("ignoring " + changeid + " " + guid);
-				Document doc = XMLUtils.getXMLDoc("clouddbfile");
-				Element root = doc.getDocumentElement();
-				root.setAttribute("action", "ignored");
-				return (Element) root.cloneNode(true);
-				}catch(Exception e) {
+					SDFSLogger.getLog().info(
+							"ignoring " + changeid + " " + guid);
+					Document doc = XMLUtils.getXMLDoc("clouddbfile");
+					Element root = doc.getDocumentElement();
+					root.setAttribute("action", "ignored");
+					return (Element) root.cloneNode(true);
+				} catch (Exception e) {
 					throw new IOException(e);
 				}
 			}
 			ck.put(changeid, guid);
-			}
+		}
 		fevt = SDFSEvent.cfEvent(guid);
+		ReentrantLock l = fl.getLock(guid);
+		l.lock();
 		try {
 			Document doc = XMLUtils.getXMLDoc("clouddbfile");
 			Element root = doc.getDocumentElement();
@@ -57,7 +63,7 @@ public class GetCloudDBFile implements Runnable {
 			if (ddb.getVersion() < 3)
 				throw new IOException(
 						"only files version 3 or later can be imported");
-			
+
 			Thread th = new Thread(this);
 			th.start();
 			return (Element) root.cloneNode(true);
@@ -72,7 +78,9 @@ public class GetCloudDBFile implements Runnable {
 			throw new IOException("request to fetch attributes failed because "
 					+ e.toString());
 
-		} 
+		} finally {
+			fl.removeLock(guid);
+		}
 	}
 
 	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt)
@@ -101,7 +109,7 @@ public class GetCloudDBFile implements Runnable {
 					if (ir.getInserted())
 						blks.add(Longs.fromByteArray(ir.getHashLocs()));
 					else {
-						if(!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
+						if (!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
 							p.hashloc = ir.getHashLocs();
 							dirty = true;
 						}
@@ -113,15 +121,15 @@ public class GetCloudDBFile implements Runnable {
 			for (Long l : blks) {
 				boolean inserted = false;
 				int trs = 0;
-				while(!inserted) {
+				while (!inserted) {
 					try {
 						HashBlobArchive.claimBlock(l);
 						inserted = true;
-						
-					}catch(Exception e) {
+
+					} catch (Exception e) {
 						trs++;
-						
-						if(trs > 100)
+
+						if (trs > 100)
 							throw e;
 						else
 							Thread.sleep(5000);
@@ -143,11 +151,11 @@ public class GetCloudDBFile implements Runnable {
 		try {
 			this.checkDedupFile(ddb, fevt);
 			fevt.endEvent("imported [" + guid + "]");
-		}catch(Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to process " + guid, e);
 			fevt.endEvent("unable to process file " + guid, SDFSEvent.ERROR);
 		}
-		
+
 	}
 
 }

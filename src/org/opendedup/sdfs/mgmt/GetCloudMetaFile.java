@@ -26,8 +26,7 @@ public class GetCloudMetaFile {
 	static LRUCache<String,String> ck = new LRUCache<String,String>(50);
 
 	public Element getResult(String file, String dstfile,String changeid) throws IOException {
-		ReentrantLock l = fl.getLock(file);
-		l.lock();
+		
 		synchronized(ck) {
 		if(ck.containsKey(changeid)) {
 			try {
@@ -42,6 +41,8 @@ public class GetCloudMetaFile {
 		}
 		ck.put(changeid, file);
 		}
+		ReentrantLock l = fl.getLock(file);
+		l.lock();
 		try {
 			fevt = SDFSEvent.cfEvent(file);
 			if (dstfile != null && file.contentEquals(dstfile))
