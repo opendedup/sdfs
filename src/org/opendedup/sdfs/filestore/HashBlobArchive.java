@@ -1172,6 +1172,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 				return 0;
 			} else {
+				l = this.lock.writeLock();
+				try {
+					l.lock();
+					if (_har.f.exists() && _har.f.length() > 0) {
+						maps.invalidate(this.id);
+						openFiles.invalidate(this.id);
+						rchunks.remove(this.id);
+					}
+				}finally {
+					l.unlock();
+				}
 				l = this.lock.readLock();
 				try {
 					l.lock();
@@ -1250,7 +1261,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					StandardCopyOption.REPLACE_EXISTING);
 			f = nf;
 			SimpleByteArrayLongMap om = wMaps.remove(this.id);
-				
+			
 			File mf = new File(getPath(nid).getPath() + ".map");
 			if(om != null) {
 				om.close();

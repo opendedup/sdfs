@@ -116,4 +116,9 @@ public class MetaDataFileInfo {
 			nextFileIndex = 0;
 		return nextFileIndex++;
 	}
+	public String toString() {
+		return "lName = " + fileName + " fileAttribure = " + this.fileAttribute + " ctime = " + 
+		this.creationTime + " lastAccessTime = " + this.lastAccessTime +  " lastWriteTime =" + this.lastWriteTime +
+		" fileSize = " + this.fileSize + " fileInzed = " + this.fileIndex;
+	}
 }

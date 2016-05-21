@@ -62,7 +62,7 @@ public class GetCloudMetaFile {
 				fevt.curCt = 1;
 				fevt.shortMsg = "Downloading [" + file + "]";
 				mf = FileReplicationService.getMF(file);
-				mf.setLocalOwner(false);
+				mf.setLocalOwner(true);
 				mf.sync();
 				fevt.endEvent("retrieved file " + file);
 				return (Element) root.cloneNode(true);

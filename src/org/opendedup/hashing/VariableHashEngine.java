@@ -16,7 +16,7 @@ import org.rabinfingerprint.polynomial.Polynomial;
 public class VariableHashEngine implements AbstractHashEngine {
 
 	public static final int seed = 6442;
-	public static final int minLen = (4 * 1024) - 1;
+	public static int minLen = Main.MIN_CHUNK_LENGTH;
 	public static int maxLen = Main.CHUNK_LENGTH;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;

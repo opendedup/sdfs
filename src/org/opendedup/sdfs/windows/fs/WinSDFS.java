@@ -25,6 +25,7 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
+
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
@@ -134,15 +135,15 @@ public class WinSDFS implements DokanOperations {
 		driveLetter = _driveLetter;
 		DokanOptions dokanOptions = new DokanOptions();
 		dokanOptions.mountPoint = driveLetter;
-		
 		dokanOptions.threadCount = Main.writeThreads;
 		dokanOptions.metaFilePath = mountedVolume;
-		//dokanOptions.optionsMode = DokanOptionsMode.Mode.DOKAN_OPTION_MOUNT_MANAGER.getValue();
+		//dokanOptions.optionsMode = DokanOptionsMode.Mode.NETWORK_DRIVE.getValue();
 		//dokanOptions.uncPath = "\\opendedupe\\awesome";
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");
 		System.out.println("volumemounted");
-		int result = Dokan.mount(dokanOptions, this);
+		System.out.println("");
+		int result = Dokan.mount(dokanOptions, this,debug);
 
 		if (result < 0) {
 			System.out.println("Unable to mount volume because result = "
@@ -1027,6 +1028,7 @@ public class WinSDFS implements DokanOperations {
 					MetaDataDedupFile mf = MetaFileStore.getMF(_mf.getPath());
 					MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(),
 							mf);
+					log.debug(fi.toString());
 					filedata[i] = fi.toWin32FindData();
 					i++;
 				}
@@ -1168,6 +1170,7 @@ public class WinSDFS implements DokanOperations {
 						.getMF(resolvePath(fileName).getPath());
 				MetaDataFileInfo fi = new MetaDataFileInfo(fileName, mf);
 				info = fi.toByHandleFileInformation();
+				log.debug(fi.toString());
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while setting moving file", e);
 				errRtn = e;

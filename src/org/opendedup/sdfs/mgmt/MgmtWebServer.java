@@ -72,7 +72,7 @@ public class MgmtWebServer implements Container {
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
 			String file = request.getQuery().get("file");
-			String cmd = request.getQuery().get("cmd");
+			String cmd = request.getQuery().get("cmd").toLowerCase();
 			String cmdOptions = request.getQuery().get("options");
 			SDFSLogger.getLog().debug(
 					"cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
@@ -104,15 +104,14 @@ public class MgmtWebServer implements Container {
 			}
 			if (cmdReq) {
 				if (auth) {
-					if (cmd == null) {
-						result.setAttribute("status", "failed");
-						result.setAttribute("msg", "no command specified");
-					} else if (cmd.equalsIgnoreCase("shutdown")) {
+					switch (cmd) {
+					case "shutdown":
 						new Shutdown().getResult();
 						result.setAttribute("status", "success");
 						result.setAttribute("msg",
 								"shutting down volume manager");
-					} else if (cmd.equalsIgnoreCase("info")) {
+						break;
+					case "info":
 						try {
 							Element msg = new GetAttributes().getResult(
 									cmdOptions, file);
@@ -126,7 +125,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("connectedvolumes")) {
+						break;
+					case "connectedvolumes":
 						try {
 							Element msg = new GetConnectedVolumes().getResult();
 							result.setAttribute("status", "success");
@@ -139,11 +139,11 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-					else if (cmd.equalsIgnoreCase("syncvolume")) {
+						break;
+					case "syncvolume":
 						try {
-							new SyncFromConnectedVolume().getResult(Long.parseLong(request
-									.getQuery().get("id")));
+							new SyncFromConnectedVolume().getResult(Long
+									.parseLong(request.getQuery().get("id")));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -152,15 +152,15 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("deletefile")) {
+						break;
+					case "deletefile":
 						try {
 							String changeid = null;
-							if(request.getQuery().containsKey("changeid")) {
+							if (request.getQuery().containsKey("changeid")) {
 								changeid = request.getQuery().get("changeid");
 							}
 							String msg = new DeleteFileCmd().getResult(
-									cmdOptions, file,changeid);
+									cmdOptions, file, changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -170,16 +170,17 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cloudfile")) {
+						break;
+					case "cloudfile":
 						try {
-							
+
 							String dstfile = null;
-							if(request.getQuery().containsKey("dstfile")) {
+							if (request.getQuery().containsKey("dstfile")) {
 								dstfile = request.getQuery().get("dstfile");
 							}
-								
-							Element msg = new GetCloudFile().getResult(
-								 file,dstfile);
+
+							Element msg = new GetCloudFile().getResult(file,
+									dstfile);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -189,16 +190,18 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}else if (cmd.equalsIgnoreCase("cloudmfile")) {
+						break;
+					case "cloudmfile":
 						try {
-							
+
 							String dstfile = null;
-							if(request.getQuery().containsKey("dstfile")) {
+							if (request.getQuery().containsKey("dstfile")) {
 								dstfile = request.getQuery().get("dstfile");
 							}
-							String changeid = request.getQuery().get("changeid");	
+							String changeid = request.getQuery()
+									.get("changeid");
 							Element msg = new GetCloudMetaFile().getResult(
-								 file,dstfile,changeid);
+									file, dstfile, changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -208,12 +211,13 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("clouddbfile")) {
+						break;
+					case "clouddbfile":
 						try {
-							String changeid = request.getQuery().get("changeid");	
-							Element msg = new GetCloudDBFile().getResult(
-								 file,changeid);
+							String changeid = request.getQuery()
+									.get("changeid");
+							Element msg = new GetCloudDBFile().getResult(file,
+									changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -223,8 +227,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} 
-					else if (cmd.equalsIgnoreCase("setcachesz")) {
+						break;
+					case "setcachesz":
 						try {
 							Element msg = new SetCacheSize().getResult(request
 									.getQuery().get("sz"));
@@ -237,7 +241,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("setreadspeed")) {
+						break;
+					case "setreadspeed":
 						try {
 							Element msg = new SetReadSpeed().getResult(request
 									.getQuery().get("sp"));
@@ -250,7 +255,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("syncfiles")) {
+						break;
+					case "syncfiles":
+
 						try {
 							Element msg = new SyncFSCmd().getResult();
 							result.setAttribute("status", "success");
@@ -262,7 +269,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("setwritespeed")) {
+						break;
+					case "setwritespeed":
 						try {
 							Element msg = new SetWriteSpeed().getResult(request
 									.getQuery().get("sp"));
@@ -275,7 +283,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("deletearchive")) {
+						break;
+					case "deletearchive":
+
 						try {
 							String msg = new DeleteArchiveCmd().getResult(
 									cmdOptions, file);
@@ -288,8 +298,10 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("makefolder")) {
+						break;
+					case "makefolder":
 						try {
+
 							String msg = new MakeFolderCmd().getResult(
 									cmdOptions, file);
 							result.setAttribute("status", "success");
@@ -301,7 +313,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("copyextents")) {
+						break;
+					case "copyextents":
 						try {
 							String srcfile = request.getQuery().get("srcfile");
 							String dstfile = request.getQuery().get("dstfile");
@@ -323,9 +336,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
+						break;
 
-					else if (cmd.equalsIgnoreCase("filteredinfo")) {
+					case "filteredinfo":
 						try {
 							boolean includeFiles = Boolean.parseBoolean(request
 									.getQuery().get("includefiles"));
@@ -346,7 +359,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("dse-info")) {
+					case "dse-info":
 						try {
 							Element msg = new GetDSE().getResult(cmdOptions,
 									file);
@@ -359,7 +372,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cluster-dse-info")) {
+						break;
+					case "cluster-dse-info":
 						try {
 							Element msg = new GetClusterDSE().getResult(
 									cmdOptions, file);
@@ -372,7 +386,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cluster-volumes")) {
+						break;
+					case "cluster-volumes":
 						try {
 							Element msg = new GetRemoteVolumes().getResult(
 									cmdOptions, file);
@@ -385,7 +400,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cluster-volume-remove")) {
+						break;
+					case "cluster-volume-remove":
 						try {
 							new RemoveRemoteVolume()
 									.getResult(cmdOptions, file);
@@ -397,7 +413,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("cluster-volume-add")) {
+						break;
+					case "cluster-volume-add":
 						try {
 							new AddRemoteVolume().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
@@ -408,7 +425,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-add")) {
+						break;
+					case "blockdev-add":
 						try {
 							Element el = new BlockDeviceAdd().getResult(request
 									.getQuery().get("devname"), request
@@ -426,7 +444,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-rm")) {
+						break;
+					case "blockdev-rm":
 						try {
 							Element el = new BlockDeviceRm().getResult(request
 									.getQuery().get("devname"));
@@ -441,7 +460,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-start")) {
+						break;
+					case "blockdev-start":
 						try {
 							Element el = new BlockDeviceStart()
 									.getResult(request.getQuery()
@@ -457,7 +477,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-stop")) {
+						break;
+					case "blockdev-stop":
 						try {
 							Element el = new BlockDeviceStop()
 									.getResult(request.getQuery()
@@ -473,7 +494,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-list")) {
+						break;
+					case "blockdev-list":
 						try {
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
@@ -488,7 +510,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("blockdev-update")) {
+						break;
+					case "blockdev-update":
 						try {
 							Element el = new BlockDeviceUpdate().getResult(
 									request.getQuery().get("devname"), request
@@ -505,13 +528,15 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("close-file")) {
+						break;
+					case "close-file":
 						new CloseFile().getResult(cmdOptions, file);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg",
 								"command completed successfully");
+						break;
 
-					} else if (cmd.equalsIgnoreCase("set-gc-schedule")) {
+					case "set-gc-schedule":
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
@@ -522,7 +547,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("get-gc-schedule")) {
+						break;
+					case "get-gc-schedule":
 						try {
 							Element msg = new GetGCSchedule().getResult(
 									cmdOptions, file);
@@ -536,7 +562,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("get-gc-master")) {
+						break;
+					case "get-gc-master":
 						try {
 							Element msg = new GetGCMaster().getResult();
 							result.setAttribute("status", "success");
@@ -548,9 +575,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
+						break;
 
-					else if (cmd.equalsIgnoreCase("cluster-promote-gc")) {
+					case "cluster-promote-gc":
 						try {
 							new PromoteToGCMaster().getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
@@ -561,7 +588,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("open-files")) {
+						break;
+					case "open-files":
 						try {
 							Element msg = new GetOpenFiles().getResult(
 									cmdOptions, file);
@@ -574,7 +602,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("debug-info")) {
+						break;
+					case "debug-info":
 						try {
 							Element msg = new GetDebug().getResult(cmdOptions,
 									file);
@@ -587,17 +616,19 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} /*
-					 * else if (cmd.equalsIgnoreCase("events")) { try { String
-					 * msg = new GetEvents().getResult(cmdOptions, file); result
-					 * =
-					 * "<result status=\"success\" msg=\"command completed successfully\">"
-					 * ; result = result + msg; result = result + "</result>"; }
-					 * catch (IOException e) { result.setAttribute("status",
-					 * "failed"); result.setAttribute("msg", e.toString());
-					 * SDFSLogger.getLog().warn(e); } }
-					 */
-					else if (cmd.equalsIgnoreCase("volume-info")) {
+						break; /*
+								 * else if (cmd.equalsIgnoreCase("events")) {
+								 * try { String msg = new
+								 * GetEvents().getResult(cmdOptions, file);
+								 * result =
+								 * "<result status=\"success\" msg=\"command completed successfully\">"
+								 * ; result = result + msg; result = result +
+								 * "</result>"; } catch (IOException e) {
+								 * result.setAttribute("status", "failed");
+								 * result.setAttribute("msg", e.toString());
+								 * SDFSLogger.getLog().warn(e); } }
+								 */
+					case "volume-info":
 						try {
 							Element msg = new GetVolume().getResult(cmdOptions,
 									file);
@@ -610,7 +641,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("changepassword")) {
+						break;
+					case "changepassword":
 						try {
 							String msg = new SetPasswordCmd().getResult("",
 									request.getQuery().get("newpassword"));
@@ -621,7 +653,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("snapshot")) {
+						break;
+					case "snapshot":
 						try {
 							Element msg = new SnapshotCmd().getResult(
 									cmdOptions, file);
@@ -635,7 +668,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("restorearchive")) {
+						break;
+					case "restorearchive":
 						try {
 							Element msg = new RestoreArchiveCmd()
 									.getResult(file);
@@ -649,7 +683,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("error", e);
 						}
-					} else if (cmd.equalsIgnoreCase("importarchive")) {
+						break;
+					case "importarchive":
 						try {
 							String server = request.getQuery().get("server");
 							String password = request.getQuery().get("spasswd");
@@ -664,11 +699,12 @@ public class MgmtWebServer implements Container {
 							if (request.getQuery().containsKey("useSSL"))
 								useSSL = Boolean.parseBoolean(request
 										.getQuery().get("useSSL"));
-							if(request.getQuery().containsKey("uselz4"))
-								lz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
+							if (request.getQuery().containsKey("uselz4"))
+								lz4 = Boolean.parseBoolean(request.getQuery()
+										.get("uselz4"));
 							Element msg = new ImportArchiveCmd().getResult(
 									file, cmdOptions, server, password, port,
-									maxSz, useSSL,lz4);
+									maxSz, useSSL, lz4);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"replication started successfully");
@@ -679,9 +715,11 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("batchgetblocks")) {
-						long st = System.currentTimeMillis();
-						byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+						break;
+					case "batchgetblocks":
+						byte[] rb = com.google.common.io.BaseEncoding
+								.base64Url().decode(
+										request.getParameter("data"));
 						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
 						long time = System.currentTimeMillis();
 						response.setContentType("application/octet-stream");
@@ -692,12 +730,14 @@ public class MgmtWebServer implements Container {
 						response.getOutputStream().flush();
 						try {
 							response.getOutputStream().close();
-						}catch(Exception e) {}
+						} catch (Exception e) {
+						}
 						try {
 							response.close();
-						}catch(Exception e) {};
-						SDFSLogger.getLog().debug("sent reponse size " +rslt.length + " took " + (System.currentTimeMillis()-st));
-					} else if (cmd.equalsIgnoreCase("cancelimport")) {
+						} catch (Exception e) {
+						}
+						break;
+					case "cancelimport":
 						try {
 							String uuid = request.getQuery().get("uuid");
 							result.setAttribute("status", "success");
@@ -709,13 +749,15 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("archiveout")) {
+						break;
+					case "archiveout":
 						try {
 							boolean uselz4 = false;
-							if(request.getQuery().containsKey("uselz4"))
-								uselz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
+							if (request.getQuery().containsKey("uselz4"))
+								uselz4 = Boolean.parseBoolean(request
+										.getQuery().get("uselz4"));
 							Element msg = new ArchiveOutCmd().getResult(
-									cmdOptions, file,uselz4);
+									cmdOptions, file, uselz4);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"archive out started successfully");
@@ -726,9 +768,9 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
+						break;
 
-					else if (cmd.equalsIgnoreCase("msnapshot")) {
+					case "msnapshot":
 						try {
 							int snaps = request.getQuery().getInteger("snaps");
 							String msg = new MultiSnapshotCmd(snaps).getResult(
@@ -740,7 +782,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("flush")) {
+						break;
+					case "flush":
 						try {
 							String msg = new FlushBuffersCmd().getResult(
 									cmdOptions, file);
@@ -751,7 +794,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("expandvolume")) {
+						break;
+					case "expandvolume":
 						try {
 							String size = request.getQuery().get("size");
 							String msg = new ExpandVolumeCmd().getResult(
@@ -763,7 +807,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("volumeconfigpath")) {
+						break;
+					case "volumeconfigpath":
 						try {
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
@@ -773,7 +818,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("dedup")) {
+						break;
+					case "dedup":
 						try {
 							String msg = new SetDedupAllCmd().getResult(
 									cmdOptions, file);
@@ -784,85 +830,93 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("perfmon")) {
+						break;
+					case "perfmon":
 						String msg = new SetEnablePerfMonCmd().getResult(
 								cmdOptions, file);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", msg);
-					} else if (cmd.equalsIgnoreCase("cleanstore")) {
+						break;
+					case "cleanstore":
 						try {
-							Element msg = new CleanStoreCmd().getResult();
+							Element emsg = new CleanStoreCmd().getResult();
 							result.setAttribute("status", "success");
-							doc.adoptNode(msg);
-							result.appendChild(msg);
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("fdisk")) {
+						break;
+					case "fdisk":
 						try {
-							Element msg = new FDISKCmd().getResult(cmdOptions,
+							Element emsg = new FDISKCmd().getResult(cmdOptions,
 									file);
 							result.setAttribute("status", "success");
-							doc.adoptNode(msg);
-							result.appendChild(msg);
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					}
-
-					else if (cmd.equalsIgnoreCase("redundancyck")) {
+						break;
+					case "redundancyck":
 						try {
-							Element msg = new ClusterRedundancyCmd().getResult(
-									cmdOptions, null);
+							Element emsg = new ClusterRedundancyCmd()
+									.getResult(cmdOptions, null);
 							result.setAttribute("status", "success");
-							doc.adoptNode(msg);
-							result.appendChild(msg);
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("event")) {
+						break;
+					case "event":
 						try {
 							String uuid = request.getQuery().get("uuid");
-							Element msg = new GetEvent().getResult(uuid);
+							Element emsg = new GetEvent().getResult(uuid);
 							result.setAttribute("status", "success");
-							doc.adoptNode(msg);
-							result.appendChild(msg);
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
-					} else if (cmd.equalsIgnoreCase("events")) {
+						break;
+					case "events":
 						try {
-							Element msg = new GetEvents().getResult();
+							Element emsg = new GetEvents().getResult();
 							result.setAttribute("status", "success");
-							doc.adoptNode(msg);
-							result.appendChild(msg);
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn(e);
 						}
+						break;
+					default:
+						result.setAttribute("status", "failed");
+						result.setAttribute("msg", "no command specified");
 					}
-				}
-				if (!cmd.equalsIgnoreCase("batchgetblocks")) {
-					String rsString = XMLUtils.toXMLString(doc);
-					PrintStream body = response.getPrintStream();
-					long time = System.currentTimeMillis();
+					if (!cmd.equalsIgnoreCase("batchgetblocks")) {
+						String rsString = XMLUtils.toXMLString(doc);
+						PrintStream body = response.getPrintStream();
+						long time = System.currentTimeMillis();
 
-					// SDFSLogger.getLog().debug(rsString);
-					response.setContentType("text/xml");
-					response.addValue("Server", "SDFS Management Server");
-					response.setDate("Date", time);
-					response.setDate("Last-Modified", time);
-					body.println(rsString);
-					body.close();
+						// SDFSLogger.getLog().debug(rsString);
+						response.setContentType("text/xml");
+						response.addValue("Server", "SDFS Management Server");
+						response.setDate("Date", time);
+						response.setDate("Last-Modified", time);
+						body.println(rsString);
+						body.close();
+					}
 				}
 			} else {
 				if (!auth) {
