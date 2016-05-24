@@ -96,8 +96,8 @@ public class StringUtils {
 		return theCount;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		System.out.println("Volume = ");
-		System.out.println("Volume = " + getSpecialCharacterCount("zzzzzz!'"));
+		System.out.println("Volume = " + parseSize("750GB"));
 	}
 }

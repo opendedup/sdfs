@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -1598,6 +1598,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("execute", Boolean.toString(this.execute));
 			root.setAttribute("read", Boolean.toString(this.read));
 			root.setAttribute("write", Boolean.toString(this.write));
+			if(!this.extendedAttrs.isEmpty()) {
+				Element ear = doc.createElement("extended-attributes");
+				for(Entry<String,String> en : this.extendedAttrs.entrySet()) {
+					
+				}
+			}
 			if (symlink) {
 				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
 				root.setAttribute("symlink-path", this.getSymlinkPath());

@@ -368,7 +368,7 @@ public class MetaFileStore {
 				}
 				mf = null;
 				return deleted;
-			} else
+			} 
 				return true;
 		} finally {
 			pathMap.invalidate(path);

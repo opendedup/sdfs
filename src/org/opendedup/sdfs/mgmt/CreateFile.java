@@ -17,7 +17,7 @@ public class CreateFile {
 			Document doc = XMLUtils.getXMLDoc("create-file");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
-			if (f.exists()) {
+			if (!f.exists()) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.unmarshal();
 			}

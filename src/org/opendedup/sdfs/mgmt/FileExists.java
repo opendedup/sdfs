@@ -1,34 +1,22 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.io.DedupFileChannel;
-import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class CloseFile {
-
-	public Element getResult(String cmd, String file, long fd) throws IOException {
+public class FileExists {
+	public Element getResult(String cmd, String file) throws IOException {
 		try {
-			if(fd != -1) {
-				DedupFileChannel ch = OpenFile.OpenChannels.remove(fd);
-				ch.getDedupFile().unRegisterChannel(ch, -33);
-			}
-			Document doc = XMLUtils.getXMLDoc("close-file");
+			Document doc = XMLUtils.getXMLDoc("file-exists");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
-			if (f.exists()) {
-				MetaDataDedupFile mf = MetaFileStore.getMF(f);
-				mf.setDirty(true);
-				mf.unmarshal();
-				mf.getDedupFile(true).forceClose();
-			}
+			root.setAttribute("exists", Boolean.toString(f.exists()));
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
@@ -37,5 +25,4 @@ public class CloseFile {
 					+ e.toString());
 		}
 	}
-
 }

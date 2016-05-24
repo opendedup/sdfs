@@ -3,9 +3,9 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.sdfs.io.DedupFileChannel;
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -16,7 +16,8 @@ import org.w3c.dom.Element;
 
 public class OpenFile {
 
-	public static HashMap<String, DedupFileChannel> OpenChannels = new HashMap<String, DedupFileChannel>();
+	public static HashMap<Long, DedupFileChannel> OpenChannels = new HashMap<Long, DedupFileChannel>();
+	AtomicLong fds = new AtomicLong();
 
 	public Element getResult(String cmd, String file) throws IOException {
 		try {
@@ -25,8 +26,10 @@ public class OpenFile {
 			File f = new File(Main.volume.getPath(), file);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			DedupFileChannel ch = mf.getDedupFile(true).getChannel(-33);
-			root.setAttribute("fd", ch.getID());
-			OpenChannels.put(ch.getID(), ch);
+			long fd = fds.incrementAndGet();
+			root.setAttribute("fd", Long.toString(fd));
+			
+			OpenChannels.put(fd, ch);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

@@ -530,7 +530,10 @@ public class MgmtWebServer implements Container {
 						}
 						break;
 					case "close-file":
-						new CloseFile().getResult(cmdOptions, file);
+						long fd = -1;
+						if(request.getQuery().containsKey("fd"))
+							fd = Long.parseLong(request.getQuery().get("fd"));
+						new CloseFile().getResult(cmdOptions, file,fd);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg",
 								"command completed successfully");
