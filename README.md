@@ -3,6 +3,10 @@ What is this?
 
   A clustered deduplicated file system.
 
+License
+
+GPLv2
+
 Requirements
 
 System Requirements
