@@ -168,7 +168,7 @@ public class MgmtWebServer implements Container {
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("error in " +cmd,e);
 						}
 					} else if (cmd.equalsIgnoreCase("setwritespeed")) {
 						try {
