@@ -443,11 +443,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 							.getAttribute("proxy-username"));
 				}
 			}
-			if (awsCredentials != null)
-				s3Service = new AmazonS3Client(awsCredentials, clientConfig);
-			else
-				s3Service = new AmazonS3Client(
-						new InstanceProfileCredentialsProvider(), clientConfig);
+			
 			if (s3Target != null) {
 				TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
 					@Override
@@ -461,9 +457,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				clientConfig.getApacheHttpClientConfig().withSslSocketFactory(
 						sf);
-				s3Service.setEndpoint(s3Target);
 				this.genericS3 = true;
 			}
+			if (awsCredentials != null)
+				s3Service = new AmazonS3Client(awsCredentials, clientConfig);
+			else
+				s3Service = new AmazonS3Client(
+						new InstanceProfileCredentialsProvider(), clientConfig);
+			if(s3Target != null)
+				s3Service.setEndpoint(s3Target);
 			if (config.hasAttribute("disableDNSBucket")) {
 				s3Service.setS3ClientOptions(new S3ClientOptions()
 						.withPathStyleAccess(Boolean.parseBoolean(config
