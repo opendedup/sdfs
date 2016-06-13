@@ -13,6 +13,8 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 public class ManualGC {
 
 	public static SDFSEvent evt = null;
+	private static long lastGC = 0;
+	private static long MINGCTIME = 60*1000*60;
 
 	public static long clearChunks() throws InterruptedException, IOException {
 		return clearChunksMills();
@@ -29,8 +31,9 @@ public class ManualGC {
 		}
 		l.lock();
 		try {
-
+			
 			long rm = 0;
+			long dur = System.currentTimeMillis()- lastGC;
 			if (Main.disableGC) {
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup not enabled for this volume "
@@ -44,7 +47,21 @@ public class ManualGC {
 				} catch (Exception e) {
 				}
 				return 0;
-			} else if (Main.chunkStoreLocal)
+			} else if(dur < MINGCTIME) {
+				evt = SDFSEvent
+						.gcInfoEvent("SDFS Volume Cleanup already occured in the last 1 hour for "
+								+ Main.volume.getName());
+				evt.maxCt = 100;
+				evt.curCt = 0;
+				evt.endEvent("SDFS Volume Cleanup already occured in the last 1 hour for "
+						+ Main.volume.getName());
+				try {
+					Main.pFullSched.recalcScheduler();
+				} catch (Exception e) {
+				}
+				return 0;
+			}
+			else if (Main.chunkStoreLocal)
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
 								+ Main.volume.getName());
@@ -52,6 +69,7 @@ public class ManualGC {
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
 								+ Main.DSEClusterID);
+			lastGC = System.currentTimeMillis();
 			evt.maxCt = 100;
 			evt.curCt = 0;
 			try {
