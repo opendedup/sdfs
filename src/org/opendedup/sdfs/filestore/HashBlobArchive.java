@@ -846,18 +846,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 						boolean ins = wMaps.get(this.id).put(hash,
 								(int) cp + 4 + hash.length);
 						if (!ins) {
-							np.set(cp);
 							throw new HashExistsException(this.id, hash);
 						}
 					} catch (MapClosedException e1) {
+						np.set(cp);
 						this.writeable = false;
 						synchronized (this) {
 							this.notifyAll();
 						}
 						throw new ArchiveFullException("archive closed");
 					} catch (HashExistsException e) {
+						np.set(cp);
 						throw e;
 					} catch (Exception e) {
+						np.set(cp);
 						SDFSLogger.getLog().error(
 								"error while putting chunk " + this.id, e);
 						throw new IOException(e);
@@ -1154,10 +1156,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 		HashBlobArchive _har = null;
 		long ofl = f.length();
 		int blks = 0;
-		SimpleByteArrayLongMap _m = getRawMap(this.id);
+		
 		try {
 			_har = new HashBlobArchive(true);
-
+			SimpleByteArrayLongMap _m = getRawMap(this.id);
+			try {
 			_m.iterInit();
 			KeyValuePair p = _m.next();
 			while (p != null) {
@@ -1167,10 +1170,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 				p = _m.next();
 			}
+			}finally  {
+				_m.close();
+			}
 			if (blks == 0) {
 				_har.delete();
-
-				return 0;
+				this.delete();
+				HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
+				return -1*ofl;
 			} else {
 				l = this.lock.writeLock();
 				try {
@@ -1220,9 +1227,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					* _har.uncompressedLength.get());
 			_har.delete();
 			throw new IOException(e);
-		} finally {
-			_m.close();
-		}
+		} 
 		HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
 		return f.length() - ofl;
 	}
@@ -1280,7 +1285,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							+ ".vol");
 			cf.delete();
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error while writing " + this.id, e);
+			SDFSLogger.getLog().error("error while moving file " + this.id, e);
 			return false;
 		} finally {
 			ul.unlock();
