@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.utils.hashing.FileBasedBloomFilter;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;

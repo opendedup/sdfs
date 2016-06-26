@@ -623,6 +623,16 @@ public class Volume implements java.io.Serializable {
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("name", this.name);
+		if (HashFunctionPool.max_hash_cluster == 1)
+			root.setAttribute(
+					"max-size",
+					Long.toString(HCServiceProxy.getMaxSize()
+							* HCServiceProxy.getPageSize()));
+		else
+			root.setAttribute(
+					"max-size",
+					Long.toString(HCServiceProxy.getMaxSize()
+							* HashFunctionPool.avg_page_size));
 		root.setAttribute("dse-size",
 				Long.toString(HCServiceProxy.getDSESize()));
 		root.setAttribute("dse-comp-size",

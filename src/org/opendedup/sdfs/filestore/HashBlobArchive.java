@@ -297,13 +297,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 						ar.delete();
 					else {
 						try {
-							if (!ar.getName().endsWith(".map")
-									&& !ar.getName().endsWith(".vol")) {
+							if (!ar.getName().endsWith(".map")) {
 								Long id = Long.parseLong(ar.getName());
-								File cf = new File(staged_chunk_location,
-										Main.DSEID + "-"
-												+ Long.toString(id) + ".vol");
-								if (cf.exists()) {
 									HashBlobArchive arc = new HashBlobArchive(
 											ar, id);
 									File lf = new File(getPath(id).getPath()
@@ -315,7 +310,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 									}
 									arc.upload(id);
 									z++;
-								}
 							}
 						} catch (Exception e) {
 							c++;

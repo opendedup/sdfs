@@ -950,12 +950,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		this.s3clientLock.readLock().lock();
+		S3Object sobj = null;
 		try {
 
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
 					"blocks/" + haName);
-			S3Object sobj = null;
+			
 			try {
 				sobj = s3Service.getObject(this.name, "blocks/" + haName);
 			} catch (Exception e) {
@@ -977,6 +978,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				} finally {
 					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
+					
 				}
 			} else {
 				this.multiPartDownload("blocks/" + haName, f);
@@ -1053,6 +1055,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 			}
 		} finally {
+			try {
+				if(sobj != null) {
+					sobj.close();
+				}
+			}catch(Exception e) {
+				
+			}
 			this.s3clientLock.readLock().unlock();
 		}
 	}
@@ -1064,14 +1073,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		for (int i = 0; i < 5; i++) {
 			try {
 				this.getData(id, f);
+				return;
 			} catch (DataArchivedException e1) {
 				throw e1;
 			} catch (Exception e1) {
 				e = e1;
 			}
 		}
-		throw new IOException(e);
-
+		if(e != null) {
+			SDFSLogger.getLog().error(
+				"getnewblob unable to get block", e);
+			throw new IOException(e);
+		}
 	}
 
 	private Map<String, String> getUserMetaData(ObjectMetadata obj) {
@@ -1325,8 +1338,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	public StringResult getStringResult(String key) throws IOException,
 			InterruptedException {
 		this.s3clientLock.readLock().lock();
+		S3Object sobj = null;
 		try {
-			S3Object sobj = null;
+			
 			ObjectMetadata md = null;
 			try {
 				sobj = s3Service.getObject(getName(), key);
@@ -1426,6 +1440,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			}
 			return st;
 		} finally {
+			if(sobj != null)
+				sobj.close();
 			this.s3clientLock.readLock().unlock();
 		}
 	}
@@ -2209,6 +2225,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					ServiceUtils.computeMD5Hash(b));
 			om.setContentMD5(mds);
 			om.addUserMetadata("md5sum", mds);
+			om.setContentLength(b.length);
 			PutObjectRequest creq = new PutObjectRequest(this.name, pth,
 					new ByteArrayInputStream(b),om);
 			s3Service.putObject(creq);
