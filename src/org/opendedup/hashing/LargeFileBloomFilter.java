@@ -1,10 +1,10 @@
 package org.opendedup.hashing;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
 import org.opendedup.util.CommandLineProgressBar;
 
 import com.google.common.io.Files;
@@ -17,13 +17,13 @@ public class LargeFileBloomFilter implements Serializable {
 	private static final long serialVersionUID = 1L;
 	transient FLBF[] bfs = new FLBF[32];
 
-	public LargeFileBloomFilter(long sz, double fpp) {
+	public LargeFileBloomFilter(long sz, double fpp,boolean sync) {
 		File td = Files.createTempDir();
 		td.mkdirs();
 		bfs = new FLBF[32];
 		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
-			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs") );
+			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs"),sync );
 		}
 	}
 	
@@ -46,11 +46,11 @@ public class LargeFileBloomFilter implements Serializable {
 	}
 
 	public boolean mightContain(byte[] b) {
-		return getMap(b).mightContain(new KeyBlob(b));
+		return getMap(b).mightContain(b);
 	}
 
 	public void put(byte[] b) {
-		getMap(b).put(new KeyBlob(b));
+		getMap(b).put(b);
 	}
 
 	public void save() throws IOException {

@@ -89,15 +89,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		// st = new SyncThread(this);
 	}
 
-	/*
-	 * AtomicLong ct = new AtomicLong(); AtomicLong mt = new AtomicLong();
-	 * AtomicLong amt = new AtomicLong(); AtomicLong zmt = new AtomicLong();
-	 */
+	//AtomicLong ct = new AtomicLong();
+	//AtomicLong mt = new AtomicLong();
+	//AtomicLong amt = new AtomicLong();
+	//AtomicLong zmt = new AtomicLong();
+
 	private ProgressiveFileByteArrayLongMap getReadMap(byte[] hash)
 			throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
-		// long v = ct.incrementAndGet();
+		//ct.incrementAndGet();
 		try {
 
 			if (!runningGC && !lbf.mightContain(hash)) {
@@ -112,21 +113,34 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			 * (_m.containsKey(hash)) return _m; }
 			 */
 			// zmt.incrementAndGet();
+			/*
+			synchronized (ct) {
+				if (ct.get() > 10000) {
+					SDFSLogger.getLog().info(
+							"misses=" + mt.get() + " attempts=" + ct.get()
+									+ " lookups=" + amt.get());
+					ct.set(0);
+					amt.set(0);
+					mt.set(0);
+				}
+			}
+			*/
 			for (ProgressiveFileByteArrayLongMap _m : this.maps.getAL()) {
-				// amt.incrementAndGet();
+				//amt.incrementAndGet();
 				if (_m.containsKey(hash)) {
 					if (runningGC)
 						this.lbf.put(hash);
 					return _m;
 				}
 			}
-			// mt.incrementAndGet();
+			//mt.incrementAndGet();
 
 			return null;
 
 		} finally {
 			l.unlock();
 		}
+
 	}
 
 	private ProgressiveFileByteArrayLongMap createWriteMap() throws IOException {
@@ -242,8 +256,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			l.lock();
 			this.runningGC = true;
 			try {
-				lbf = null;
-				lbf = new LargeBloomFilter(maxSz, .01);
+				File _fs = new File(fileName);
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,
+						!Main.LOWMEM);
 			} finally {
 				l.unlock();
 			}
@@ -476,54 +491,50 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		}
 
 		this.loadEvent.shortMsg = "Loading BloomFilters";
-		if (maps.size() == 0)
-			lbf = new LargeBloomFilter(maxSz, .01);
-		else {
-			try {
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, true);
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("Recreating BloomFilters...");
-				this.loadEvent.shortMsg = "Recreating BloomFilters";
-				lbf = new LargeBloomFilter(maxSz, .01);
-				executor = new ThreadPoolExecutor(Main.writeThreads,
-						Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
-						new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
-						executionHandler);
-				CommandLineProgressBar bar = new CommandLineProgressBar(
-						"ReCreating BloomFilters", maps.size(), System.out);
-				Iterator<ProgressiveFileByteArrayLongMap> iter = maps
-						.iterator();
-				int i = 0;
-				ArrayList<LBFReconstructThread> al = new ArrayList<LBFReconstructThread>();
-				while (iter.hasNext()) {
-					ProgressiveFileByteArrayLongMap m = iter.next();
-					LBFReconstructThread th = new LBFReconstructThread(lbf, m);
-					executor.execute(th);
-					al.add(th);
-					i++;
-					bar.update(i);
-				}
-				executor.shutdown();
-				bar.finish();
-				try {
-					System.out
-							.print("Waiting for all BloomFilters creation threads to finish");
-					while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-						SDFSLogger.getLog().debug(
-								"Awaiting fdisk completion of threads.");
-						System.out.print(".");
 
-					}
-					for (LBFReconstructThread th : al) {
-						if (th.ex != null)
-							throw th.ex;
-					}
-					System.out.println(" done");
-				} catch (Exception e1) {
-					throw new IOException(e1);
-				}
+		if (maps.size() != 0 && !LargeBloomFilter.exists(_fs.getParentFile())) {
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01, !Main.LOWMEM);
+			SDFSLogger.getLog().warn("Recreating BloomFilters...");
+			this.loadEvent.shortMsg = "Recreating BloomFilters";
 
+			executor = new ThreadPoolExecutor(Main.writeThreads,
+					Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
+					new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
+					executionHandler);
+			CommandLineProgressBar bar = new CommandLineProgressBar(
+					"ReCreating BloomFilters", maps.size(), System.out);
+			Iterator<ProgressiveFileByteArrayLongMap> iter = maps.iterator();
+			int i = 0;
+			ArrayList<LBFReconstructThread> al = new ArrayList<LBFReconstructThread>();
+			while (iter.hasNext()) {
+				ProgressiveFileByteArrayLongMap m = iter.next();
+				LBFReconstructThread th = new LBFReconstructThread(lbf, m);
+				executor.execute(th);
+				al.add(th);
+				i++;
+				bar.update(i);
 			}
+			executor.shutdown();
+			bar.finish();
+			try {
+				System.out
+						.print("Waiting for all BloomFilters creation threads to finish");
+				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+					SDFSLogger.getLog().debug(
+							"Awaiting fdisk completion of threads.");
+					System.out.print(".");
+
+				}
+				for (LBFReconstructThread th : al) {
+					if (th.ex != null)
+						throw th.ex;
+				}
+				System.out.println(" done");
+			} catch (Exception e1) {
+				throw new IOException(e1);
+			}
+		} else {
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01, !Main.LOWMEM);
 		}
 		while (this.activeWriteMaps.size() < AMS) {
 			boolean written = false;
@@ -956,7 +967,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	}
 
 	@Override
-	public void cache(byte[] key,long pos) throws IOException {
+	public void cache(byte[] key, long pos) throws IOException {
 		if (pos == -1) {
 			pos = this.get(key);
 		}

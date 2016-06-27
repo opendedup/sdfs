@@ -32,23 +32,23 @@ public class FLBF implements Serializable {
 		}
 	};
 
-	public FLBF(long sz, double fpp,File path) {
-		this.bfs = FileBasedBloomFilter.create(getFunnel(), sz, fpp,path.getPath());
+	public FLBF(long sz, double fpp,File path,boolean memory) {
+		this.bfs = FileBasedBloomFilter.create(getFunnel(), sz, fpp,path.getPath(),memory);
 	}
 	
-	public boolean mightContain(KeyBlob kb) {
+	public boolean mightContain(byte [] bytes) {
 		l.readLock().lock();
 		try {
-			return bfs.mightContain(kb);
+			return bfs.mightContain(bytes);
 		} finally {
 			l.readLock().unlock();
 		}
 	}
 
-	public void put(KeyBlob kb) {
+	public void put(byte [] bytes) {
 		l.writeLock().lock();
 		try {
-			bfs.put(kb);
+			bfs.put(bytes);
 		} finally {
 			l.writeLock().unlock();
 		}

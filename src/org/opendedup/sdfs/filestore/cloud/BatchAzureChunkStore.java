@@ -50,6 +50,10 @@ import org.w3c.dom.NamedNodeMap;
 
 
 
+
+
+
+
 import com.google.common.io.BaseEncoding;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -82,8 +86,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
-	boolean clustered = false;
+	boolean clustered = true;
 	private int checkInterval =15000;
+	private static final int version  = 1;
 	
 	File staged_sync_location = new File(Main.chunkStore + File.separator
 			+ "syncstaged");
@@ -344,6 +349,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			md.put("clustered", Boolean.toString(clustered));
 			long sz = 0;
 			long cl = 0;
+			if(!this.clustered) {
 			if (md.containsKey("currentlength")) {
 				sz = Long.parseLong(md.get("currentlength"));
 				if (sz < 0)
@@ -354,12 +360,43 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				if (cl < 0)
 					cl = 0;
 			}
+			
 			if (cl == 0 || sz == 0) {
 				md.put("currentlength",
 						Long.toString(HashBlobArchive.currentLength.get()));
 				md.put("compressedlength",
 						Long.toString(HashBlobArchive.compressedLength.get()));
 				md.put("clustered", Boolean.toString(this.closed));
+				container.setMetadata(md);
+				container.uploadMetadata();
+			}
+			}else {
+				String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+				if(blob.exists()) {
+					blob.downloadAttributes();
+					HashMap<String,String> metaData = blob.getMetadata();
+					if (metaData.containsKey("currentlength")) {
+						sz = Long.parseLong(md.get("currentlength"));
+						if (sz < 0)
+							sz = 0;
+					}
+					if (metaData.containsKey("compressedlength")) {
+						cl = Long.parseLong(md.get("compressedlength"));
+						if (cl < 0)
+							cl = 0;
+					}
+				} 
+				HashMap<String,String> metaData = new HashMap<String,String>();
+				metaData.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+				metaData.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+				metaData.put("clustered", Boolean.toString(this.clustered));
+				metaData.put("hostname", InetAddress.getLocalHost().getHostName());
+				metaData.put("lastupdated", Long.toString(System.currentTimeMillis()));
+				metaData.put("bucketversion", Integer.toString(version));
+				metaData.put("sdfsversion", Main.version);
+				blob.setMetadata(md);
+				blob.uploadText(Long.toString(System.currentTimeMillis()));
 				container.setMetadata(md);
 				container.uploadMetadata();
 			}
@@ -719,7 +756,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			kblob.uploadMetadata();
 			}
 		} else {
-			
 			if(clustered) {
 				cblob.delete();
 				if(! container.listBlobs("claims/keys/"+haName).iterator().hasNext()) {
@@ -743,6 +779,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			try {
 				Thread.sleep(60000);
 				try {
+					if(!this.clustered) {
 					HashMap<String, String> md = container.getMetadata();
 					md.put("currentlength",
 							Long.toString(HashBlobArchive.currentLength.get()));
@@ -750,6 +787,23 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 							.toString(HashBlobArchive.compressedLength.get()));
 					container.setMetadata(md);
 					container.uploadMetadata();
+					}else {
+						String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+						CloudBlockBlob blob = container
+								.getBlockBlobReference(lbi);
+						blob.downloadAttributes();
+						HashMap<String, String> md = blob
+								.getMetadata();
+						md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("clustered", Boolean.toString(this.clustered));
+						md.put("hostname", InetAddress.getLocalHost().getHostName());
+						md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+						md.put("bucketversion", Integer.toString(version));
+						md.put("sdfsversion", Main.version);
+						blob.setMetadata(md);
+						blob.uploadMetadata();
+					}
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to update size", e);
 				}
@@ -899,6 +953,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				metaData.put("symlink", slp);
 				blob.setMetadata(metaData);
 				blob.uploadText(pth);
+				if(this.isClustered())
+					this.checkoutFile(pth);
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}
@@ -913,6 +969,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				metaData.put("directory", "true");
 				blob.setMetadata(metaData);
 				blob.uploadText(pth);
+				if(this.isClustered())
+					this.checkoutFile(pth);
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}
@@ -984,6 +1042,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 				in = new BufferedInputStream(new FileInputStream(p), 32768);
 				blob.upload(in, p.length());
+				if(this.isClustered())
+					this.checkoutFile(pth);
 
 			} catch (Exception e1) {
 				throw new IOException(e1);
@@ -1085,7 +1145,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				is.close();
 				FileUtils.setFileMetaData(to, metaData, encrypt);
 			}
-			this.checkoutFile(fn);
+			if(this.isClustered())
+				this.checkoutFile(fn);
 		} catch (Exception e1) {
 			throw new IOException(e1);
 		} finally {
@@ -1103,9 +1164,23 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		String haName = EncyptUtils.encString(nm,
 				Main.chunkStoreEncryptionEnabled);
 		try {
+		if(this.isClustered()) {
+				String blb = "claims/" + haName +  "/"
+						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				CloudBlockBlob blob = container.getBlockBlobReference(blb);
+				blob.delete();
+				if (!container.listBlobs("claims/"+haName).iterator().hasNext()) {
+					blob = container.getBlockBlobReference(pp + "/"
+							+ haName);
+					blob.delete();
+				}
+				
+		}else {
+		
 			CloudBlockBlob blob = container.getBlockBlobReference(pp + "/"
 					+ haName);
 			blob.delete();
+		}
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -1200,10 +1275,19 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
 			try {
+				if(!this.clustered) {
 				HashMap<String, String> md = container.getMetadata();
 				if (md.containsKey("currentlength")) {
 					Long.parseLong(md.get("currentlength"));
 					return true;
+				}
+				}else {
+					String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+						blob.downloadAttributes();
+						HashMap<String,String> md = blob.getMetadata();
+						Long.parseLong(md.get("currentlength"));
+						return true;
 				}
 			} catch (Exception _e) {
 				e = _e;

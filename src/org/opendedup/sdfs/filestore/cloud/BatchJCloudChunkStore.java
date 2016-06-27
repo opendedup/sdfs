@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 
 
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -77,6 +78,9 @@ import com.google.common.hash.HashingInputStream;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+
+
 
 
 
@@ -122,6 +126,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private AtomicLong rcurrentCompressedSize = new AtomicLong();
 	private int checkInterval = 15000;
 	private static final int version  = 1;
+	private boolean azureStore = false;
 	// private String bucketLocation = null;
 	static {
 
@@ -354,13 +359,17 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 		try {
 			String service = config.getAttribute("service-type");
+			if(service.equalsIgnoreCase("azureblob"))
+				this.azureStore = true;
 			// Retry after 25 seconds of no response
 						overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
-						overrides.setProperty(Constants.PROPERTY_USER_THREADS, Integer.toString(Main.dseIOThreads * 2));
+						overrides.setProperty(Constants.PROPERTY_USER_THREADS, "0");
+						overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_CONTEXT, Integer.toString(Main.dseIOThreads * 2));
+						overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_HOST, 0 + "");
 						// Keep retrying indefinitely
 						overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
 						// Do not wait between retries
-						overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
+						overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");		
 			Location region = null;
 			if(service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
@@ -613,10 +622,16 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData.put("objects", Integer.toString(arc.getSz()));
 			HashCode hc = com.google.common.io.Files.hash(f, Hashing.md5());
 			metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
-			Blob blob = blobStore.blobBuilder("blocks/" + haName).userMetadata(metaData).payload(f).contentLength(csz).contentMD5(hc)
+			Blob blob = blobStore.blobBuilder("blocks/" + haName).userMetadata(metaData).payload(f).contentLength(csz)
 					.contentType(MediaType.APPLICATION_OCTET_STREAM)
 					.build();
-			blobStore.putBlob(this.name, blob);
+			if(this.azureStore) {
+				blobStore.putBlob(this.name, blob,multipart());
+				
+				
+			}else {
+				blobStore.putBlob(this.name, blob);
+			}
 			// upload the metadata
 			String st = arc.getHashesString();
 			byte [] chunks = st.getBytes();
@@ -637,13 +652,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData.put("bcompressedsize", Long.toString(csz));
 			metaData.put("objects", Integer.toString(arc.getSz()));
 			blob = blobStore.blobBuilder("keys/" + haName).userMetadata(metaData).payload(chunks).contentLength(chunks.length)
-					.contentMD5(Hashing.md5().hashBytes(chunks)).contentType(MediaType.APPLICATION_OCTET_STREAM)
+					.contentType(MediaType.APPLICATION_OCTET_STREAM)
 					.build();
-			
+			if(this.azureStore)
+				blobStore.putBlob(this.name, blob,multipart());
+			else
 			blobStore.putBlob(this.name, blob);
 			blob = blobStore.blobBuilder(this.getClaimName(id)).userMetadata(metaData)
 					.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM)
 					.build();
+			if(this.azureStore)
+				blobStore.putBlob(this.name, blob,multipart());
+			else
 			blobStore.putBlob(this.name, blob);
 
 		} catch (Throwable e) {
@@ -906,6 +926,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						Main.chunkStoreEncryptionEnabled);
 				metaData.put("symlink", slp);
 				Blob b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).userMetadata(metaData).build();
+	
 				blobStore.putBlob(this.name, b);
 				this.checkoutFile(pth);
 			} catch (Exception e1) {
@@ -918,6 +939,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				metaData.put("directory", "true");
 				Blob b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).userMetadata(metaData).build();
+				
 				blobStore.putBlob(this.name, b);
 				this.checkoutFile(pth);
 			} catch (Exception e1) {
@@ -961,9 +983,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				HashCode hc = com.google.common.io.Files.hash(p,Hashing.md5());
 				HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
 				metaData.put("lz4compress", Boolean.toString(Main.compress));
+				metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
-				Blob b = blobStore.blobBuilder(pth).payload(fp).contentLength(p.length()).contentMD5(hc).userMetadata(metaData).build();
+				Blob b = blobStore.blobBuilder(pth).payload(fp).contentLength(p.length()).userMetadata(metaData).build();
+				if(this.azureStore)
+					blobStore.putBlob(this.name, b,multipart());
+				else
 				blobStore.putBlob(this.name, b);
 				this.checkoutFile(pth);
 			} catch (Exception e1) {
@@ -1005,7 +1031,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			
 			BlobMetadata md = blobStore.blobMetadata(this.name,
 					fn);
-			HashCode md5 = md.getContentMetadata().getContentMD5AsHashCode();
+			//HashCode md5 = md.getContentMetadata().getContentMD5AsHashCode();
+			
 			BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 			try (HashingInputStream his = new HashingInputStream(Hashing.md5(), blob.getPayload().openStream())) {
 				ByteStreams.copy(his, os);
@@ -1014,9 +1041,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				os.flush();
 				os.close();
 				}catch(Exception e1) {}
+				/*
 				if (!md5.equals(his.hash())) {
 					throw new IOException("file " + p.getPath() + " is corrupt");
 				}
+				*/
 				
 			}
 			
@@ -1309,7 +1338,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		try {
 			BlobMetadata dmd = blobStore.blobMetadata(this.name, key);
 			Map<String, String> md = dmd.getUserMetadata();
-			HashCode md5 = dmd.getContentMetadata().getContentMD5AsHashCode();
+			//HashCode md5 = dmd.getContentMetadata().getContentMD5AsHashCode();
 			Blob blob = blobStore.getBlob(this.name,key);
 			ByteArrayOutputStream os = new ByteArrayOutputStream(toIntExact(dmd.getContentMetadata().getContentLength()));
 			IOUtils.copy(blob.getPayload().openStream(), os);
@@ -1317,11 +1346,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			IOUtils.closeQuietly(os);
 			blob.getPayload().release();
 			byte [] nm = os.toByteArray();
-			HashCode nmd5 = Hashing.md5().hashBytes(nm);
-			
+			//HashCode nmd5 = Hashing.md5().hashBytes(nm);
+			/*
 			if (!md5.equals(nmd5)) {
 				throw new IOException("key " + key + " is corrupt");
 			}
+			*/
 			boolean encrypt = Boolean.parseBoolean(md.get("encrypt"));
 			if (encrypt) {
 				nm = EncryptUtils.decryptCBC(nm);
@@ -1385,6 +1415,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				int delobj = objs-claims;
 				md.put("deletedobjects", Integer.toString(delobj));
 				Blob b = blobStore.blobBuilder(this.getClaimName(id)).payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+				
 				blobStore.putBlob(this.name, b);
 			}
 		} catch (Exception e) {

@@ -1,10 +1,10 @@
 package org.opendedup.hashing;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
 import org.opendedup.util.CommandLineProgressBar;
 
 public class LargeBloomFilter implements Serializable {
@@ -13,80 +13,76 @@ public class LargeBloomFilter implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	transient LBF[] bfs = new LBF[256];
+	private static final int AR_SZ = 256;
+	transient FLBF[] bfs = new FLBF[AR_SZ];
 
 	public LargeBloomFilter() {
 
 	}
 
-	public LargeBloomFilter(LBF[] bfs) {
+	public LargeBloomFilter(FLBF[] bfs) {
 		this.bfs = bfs;
 	}
 
-	public LargeBloomFilter(long sz, double fpp) {
-		bfs = new LBF[256];
-		int isz = (int) (sz / bfs.length);
-		for (int i = 0; i < bfs.length; i++) {
-			bfs[i] = new LBF(isz, fpp);
+	public static boolean exists(File dir) {
+		for (int i = 0; i < AR_SZ; i++) {
+			File f = new File(dir.getPath() + File.separator + "lbf" + i
+					+ ".nbf");
+			if (!f.exists())
+				return false;
+
 		}
+		return true;
 	}
 
-	public LargeBloomFilter(File dir, long sz, boolean fb) throws IOException {
-		bfs = new LBF[256];
+	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb)
+			throws IOException {
+		bfs = new FLBF[AR_SZ];
 		CommandLineProgressBar bar = null;
 		if (fb)
 			bar = new CommandLineProgressBar("Loading BloomFilters",
 					bfs.length, System.out);
+		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
-			try {
-				bfs[i] = new LBF(new File(dir.getPath() + File.separator
-						+ "lbf" + i + ".bf"));
-				if (bar != null)
-					bar.update(i);
-			} catch (ClassNotFoundException e) {
-				throw new IOException(e);
-			} finally {
+			File f = new File(dir.getPath() + File.separator + "lbf" + i
+					+ ".nbf");
+			bfs[i] = new FLBF(isz, fpp, f, true);
+			if (bar != null)
+				bar.update(i);
 
-			}
 		}
 		bar.finish();
 	}
 
-	private LBF getMap(byte[] hash) {
+	private FLBF getMap(byte[] hash) {
 
 		int hashb = hash[1];
 		if (hashb < 0) {
 			hashb = ((hashb * -1) + 127);
 		}
-		LBF m = bfs[hashb];
+		FLBF m = bfs[hashb];
 		return m;
 	}
 
-	public void putAll(LBF that, int pos) {
-		this.bfs[pos].putAll(that);
-	}
-
 	public boolean mightContain(byte[] b) {
-		return getMap(b).mightContain(new KeyBlob(b));
+		return getMap(b).mightContain(b);
 	}
 
 	public void put(byte[] b) {
-		getMap(b).put(new KeyBlob(b));
+		getMap(b).put(b);
 	}
 
 	public void save(File dir) throws IOException {
 		CommandLineProgressBar bar = new CommandLineProgressBar(
 				"Saving BloomFilters", bfs.length, System.out);
 		for (int i = 0; i < bfs.length; i++) {
-			File f = new File(dir.getPath() + File.separator + "lbf" + i
-					+ ".bf");
-			bfs[i].save(f);
+			bfs[i].save();
 			bar.update(i);
 		}
 		bar.finish();
 	}
 
-	public LBF[] getArray() {
+	public FLBF[] getArray() {
 		return this.bfs;
 	}
 

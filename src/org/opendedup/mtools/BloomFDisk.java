@@ -80,7 +80,7 @@ public class BloomFDisk {
 			fEvt.maxCt = sz;
 
 			SDFSLogger.getLog().info("entries = " + entries);
-			this.bf = new LargeFileBloomFilter(entries, .1);
+			this.bf = new LargeFileBloomFilter(entries, .1,false);
 			SDFSLogger.getLog().info(
 					"Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();

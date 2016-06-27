@@ -1225,7 +1225,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
 		return f.length() - ofl;
 	}
-
+	//Random nd = new Random();
 	private boolean uploadFile(long nid) throws Exception {
 		Lock l = this.lock.readLock();
 		l.lock();
@@ -1288,6 +1288,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		return true;
 	}
+	
 
 	private boolean upload(long nid) {
 		Lock l = this.lock.writeLock();
@@ -1296,6 +1297,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		l.unlock();
 		Lock ul = this.uploadlock.writeLock();
 		ul.lock();
+		
 		try {
 			if (f.exists() && f.length() > 0) {
 				if (SDFSLogger.isDebug())

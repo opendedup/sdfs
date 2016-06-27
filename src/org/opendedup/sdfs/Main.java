@@ -33,6 +33,7 @@ public class Main {
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
+	public static boolean LOWMEM = true;
 
 	public static boolean syncDL = false;
 

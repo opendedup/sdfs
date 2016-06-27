@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,10 +33,12 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 
-import com.google.common.hash.BloomFilter;
+import org.opendedup.utils.hashing.FileBasedBloomFilter;
+
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
@@ -63,7 +66,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	transient private BitSet removed = null;
 	transient private BitSet mapped = null;
 	transient private AtomicInteger sz = new AtomicInteger(0);
-	transient private BloomFilter<KeyBlob> bf = null;
+	transient private FileBasedBloomFilter<KeyBlob> bf = null;
 	transient private boolean runningGC;
 	transient private long bgst = 0;
 	transient boolean full = false;
@@ -174,7 +177,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					} else if (!Arrays.equals(key, FREE)) {
 						this.mapped.set(iterPos - 1);
 						this.removed.clear(iterPos - 1);
-						this.bf.put(new KeyBlob(key));
+						this.bf.put(key);
 						return key;
 					} else {
 						this.mapped.clear(iterPos - 1);
@@ -206,7 +209,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					} else if (!Arrays.equals(key, FREE)) {
 						this.mapped.set(iterPos - 1);
 						this.removed.clear(iterPos - 1);
-						this.bf.put(new KeyBlob(key));
+						this.bf.put(key);
 						KVPair p = new KVPair();
 						p.key = key;
 						p.value = kFC.getLong();
@@ -240,7 +243,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				} else if (!Arrays.equals(key, FREE)) {
 					this.mapped.set(iterPos - 1);
 					this.removed.clear(iterPos - 1);
-					this.bf.put(new KeyBlob(key));
+					this.bf.put(key);
 					return key;
 				} else {
 					this.mapped.clear(iterPos - 1);
@@ -258,7 +261,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		mapped.clear();
 		removed = new BitSet(size);
 		removed.clear();
-		bf = BloomFilter.create(kbFunnel, mapped.cardinality(), .01);
+		bf = FileBasedBloomFilter.create(kbFunnel, size,.01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 		this.iterInit();
 		byte[] key = this._nextKey();
 		while (key != null)
@@ -344,7 +347,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		if (newInstance) {
 			mapped = new BitSet(size);
 			removed = new BitSet(size);
-			bf = BloomFilter.create(kbFunnel, size, .01);
+			bf = FileBasedBloomFilter.create(kbFunnel, size, .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 			this.full = false;
 		} else {
 			File f = new File(path + ".bpos");
@@ -405,18 +408,17 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				}
 				f.delete();
 			}
-			f = new File(path + ".bf");
+			f = new File(path + ".nbf");
 			if (!f.exists()) {
 				closedCorrectly = false;
 				SDFSLogger.getLog().warn("bf does not exist");
 			} else {
 				try {
-					bf = BloomFilter.create(kbFunnel, size, .01);
+					bf = FileBasedBloomFilter.create(kbFunnel, size, .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("bf load error", e);
 					closedCorrectly = false;
 				}
-				f.delete();
 			}
 		}
 		if (this.lastFound == 0)
@@ -452,9 +454,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		l.lock();
 		try {
 
-			KeyBlob kb = new KeyBlob(key);
 			
-			if (!runningGC && !bf.mightContain(kb)) {
+			if (!runningGC && !bf.mightContain(key)) {
 				return false;
 			}
 			int index = index(key);
@@ -469,7 +470,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					l.unlock();
 					l = this.hashlock.writeLock();
 					l.lock();
-					this.bf.put(kb);
+					this.bf.put(key);
 				}
 				this.lastFound = System.currentTimeMillis();
 				return true;
@@ -542,7 +543,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					this.claims.set(pos);
 				}
 				if (this.runningGC) {
-					this.bf.put(new KeyBlob(key));
+					this.bf.put(key);
 				}
 				this.mapped.set(pos);
 				this.removed.clear(pos);
@@ -569,7 +570,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			if (!this.runningGC && !bf.mightContain(new KeyBlob(key)))
+			if (!this.runningGC && !bf.mightContain(key))
 				return false;
 
 			int pos = this.index(key);
@@ -584,7 +585,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 
 			if (claimed) {
 				if (this.runningGC)
-					this.bf.put(new KeyBlob(key));
+					this.bf.put(key);
 				return false;
 			} else {
 				kFC.position(pos);
@@ -832,13 +833,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			}
-			KeyBlob kb = new KeyBlob(key);
 			int pos = -1;
 			try {
 				if (this.runningGC)
 					pos = this.insertionIndex(key, true);
 				else {
-					pos = this.insertionIndex(key, bf.mightContain(kb));
+					pos = this.insertionIndex(key, bf.mightContain(key));
 				}
 			} catch (HashtableFullException e) {
 				this.full = true;
@@ -851,7 +851,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				synchronized (this.claims) {
 					this.claims.set(npos);
 				}
-				this.bf.put(kb);
+				this.bf.put(key);
 				return new InsertRecord(false, this.get(key));
 			} else {
 				if (!cm.recoverd) {
@@ -873,7 +873,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
-				this.bf.put(kb);
+				this.bf.put(key);
 				return new InsertRecord(true, cm.getcPos());
 			}
 			// this.store.position(pos);
@@ -896,13 +896,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 								+ "the volume or DSE allocation size");
 
 			}
-			KeyBlob kb = new KeyBlob(key);
 			int pos = -1;
 			try {
 				if (this.runningGC)
 					pos = this.insertionIndex(key, true);
 				else {
-					pos = this.insertionIndex(key, bf.mightContain(kb));
+					pos = this.insertionIndex(key, bf.mightContain(key));
 				}
 				// SDFSLogger.getLog().info("pos=" + pos/EL + " hash="
 				// +StringUtils.getHexString(key));
@@ -916,7 +915,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				synchronized (this.claims) {
 					this.claims.set(npos);
 				}
-				this.bf.put(kb);
+				this.bf.put(key);
 				return new InsertRecord(false, this.get(key));
 			} else {
 				this.kFC.position(pos);
@@ -931,7 +930,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				this.mapped.set(pos);
 				this.sz.incrementAndGet();
 				this.removed.clear(pos);
-				this.bf.put(kb);
+				this.bf.put(key);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 
@@ -974,7 +973,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		try {
 			if (key == null)
 				return -1;
-			if (!this.runningGC && !this.bf.mightContain(new KeyBlob(key))) {
+			if (!this.runningGC && !this.bf.mightContain(key)) {
 				return -1;
 			}
 			int pos = -1;
@@ -999,7 +998,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					l.unlock();
 					l = this.hashlock.writeLock();
 					l.lock();
-					this.bf.put(new KeyBlob(key));
+					this.bf.put(key);
 
 				}
 				return val;
@@ -1087,16 +1086,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			}
 			if (this.bf != null) {
 				try {
-					File f = new File(path + ".bf");
-					FileOutputStream fout = new FileOutputStream(f);
-					ObjectOutputStream oon = new ObjectOutputStream(fout);
-					oon.writeObject(bf);
-					oon.flush();
-					fout.getFD().sync();
-					oon.close();
-					fout.flush();
-
-					fout.close();
+					bf.close();
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("error closing", e);
 				}
@@ -1227,7 +1217,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			int asz = size;
 			if (!this.active)
 				asz = this.mapped.cardinality();
-			bf = BloomFilter.create(kbFunnel, asz, .01);
+			bf = FileBasedBloomFilter.create(kbFunnel, asz, .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 			this.runningGC = true;
 		} finally {
 			l.unlock();
@@ -1259,7 +1249,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 								_sz++;
 							} else {
 								this.mapped.set(iterPos);
-								bf.put(new KeyBlob(key));
+								bf.put(key);
 							}
 							this.claims.clear(iterPos);
 						}
@@ -1289,9 +1279,9 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		l.lock();
 		try {
 			if (this.active)
-				bf = BloomFilter.create(kbFunnel, size, .01);
+				bf = FileBasedBloomFilter.create(kbFunnel, size, .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 			else
-				bf = BloomFilter.create(kbFunnel, sz.get(), .01);
+				bf = FileBasedBloomFilter.create(kbFunnel, sz.get(), .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 			this.runningGC = true;
 		} finally {
 			l.unlock();
@@ -1323,7 +1313,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 								this.full = false;
 							} else {
 								this.mapped.set(iterPos);
-								bf.put(new KeyBlob(key));
+								bf.put(key);
 								lbf.put(key);
 							}
 							this.claims.clear(iterPos);
@@ -1366,7 +1356,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		f.delete();
 		f = new File(path + ".vrp");
 		f.delete();
-		f = new File(path + ".bf");
+		f = new File(path + ".nbf");
 		f.delete();
 	}
 

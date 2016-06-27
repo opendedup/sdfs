@@ -253,7 +253,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 								+ " @ " + this.channel.getName());
 				this.gcUpdateLock.lock();
 				try {
-					this.lbf = new LargeFileBloomFilter(buf.getLong(), .10)
+					this.lbf = new LargeFileBloomFilter(buf.getLong(), .10,false)
 							.getArray();
 				} finally {
 					gcUpdateLock.unlock();
