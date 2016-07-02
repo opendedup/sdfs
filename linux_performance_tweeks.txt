@@ -1,6 +1,7 @@
  -agentpath:/usr/share/sdfs/linux-x86-128/libyjpagent.so=port=9000 \
  
-
+for i in $(echo {e..z}); do (echo n; echo p; echo 1; echo 2048; echo 2145386495; echo t;echo fd;echo w) | fdisk /dev/sd$i; done
+for i in $(echo {a..h}); do (echo n; echo p; echo 1; echo 2048; echo 2145386495; echo t;echo fd;echo w) | fdisk /dev/sda$i; done
  for i in $(echo {a..z}); do cat /sys/block/sd$i/queue/scheduler; done
  
  for i in $(echo {a..z}); do echo deadline > /sys/block/sd$i/queue/scheduler; done
@@ -8,7 +9,7 @@
   for i in $(echo {a..z}); do cat /sys/block/sd$i/queue/scheduler; done
 
   for i in $(echo {a..z}); do echo 24 > /sys/block/sd$i/queue/nr_requests; done
-  for i in $(echo {a..g}); do echo 24 > /sys/block/sda$i/queue/nr_requests; done
+  for i in $(echo {a..h}); do echo 24 > /sys/block/sda$i/queue/nr_requests; done
   
   for i in $(echo {a..z}); do cat /sys/block/sd$i/queue/nr_requests; done
   for i in $(echo {a..g}); do cat /sys/block/sda$i/queue/nr_requests; done

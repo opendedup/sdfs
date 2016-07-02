@@ -59,7 +59,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	private LargeBloomFilter lbf = null;
 	private int hashTblSz = 100000;
 	private ArrayList<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayList<ProgressiveFileByteArrayLongMap>();
-	private static final int AMS = 8;
+	private static final int AMS = 1;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
@@ -257,8 +257,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			this.runningGC = true;
 			try {
 				File _fs = new File(fileName);
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,
-						!Main.LOWMEM);
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true,
+						true);
 			} finally {
 				l.unlock();
 			}
@@ -493,7 +493,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		this.loadEvent.shortMsg = "Loading BloomFilters";
 
 		if (maps.size() != 0 && !LargeBloomFilter.exists(_fs.getParentFile())) {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01, !Main.LOWMEM);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true, true);
 			SDFSLogger.getLog().warn("Recreating BloomFilters...");
 			this.loadEvent.shortMsg = "Recreating BloomFilters";
 
@@ -534,7 +534,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				throw new IOException(e1);
 			}
 		} else {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01, !Main.LOWMEM);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true, true);
 		}
 		while (this.activeWriteMaps.size() < AMS) {
 			boolean written = false;

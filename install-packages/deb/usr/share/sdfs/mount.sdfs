@@ -3,6 +3,7 @@
 BASEMEMORY="1000"
 CFG=""
 MPTG=4
+LMPTG=2
 MU="M"
 EXEC="/usr/share/sdfs/jsvc"
 PF="sdfs-ncfg.pid"
@@ -23,21 +24,22 @@ while getopts ":v:" opt; do
   esac
 done
 else
-	CFG="/etc/sdfs/$1-volume-cfg.xml"
-	PF="$1.pid"
+        CFG="/etc/sdfs/$1-volume-cfg.xml"
+        PF="$1.pid"
 fi
 
 if [ ! -n "$MEM" ]; then
 if [ -n "$CFG" ] && [ -f "$CFG" ]; then
-        ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-        bac=$(echo 'cat //subsystem-config/local-chunkstore/extended-config/@io-threads' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-        MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY))
+                lm=$(echo 'cat //subsystem-config/local-chunkstore/@low-memory' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                if [ $lm == "true" ]; then
+                        MEMORY=$(((ac/10737418240*LMPTG)+BASEMEMORY))
+                else
+                        MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY))
+                fi
 fi
 else
         MEMORY=$MEM
-fi
-else
-	MEMORY=$MEM
 fi
 
 LD_PRELOAD="/usr/share/sdfs/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=/usr/share/sdfs/bin/ -home /usr/share/sdfs/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\

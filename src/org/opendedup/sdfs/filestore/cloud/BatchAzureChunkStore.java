@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jets3t.service.utils.ServiceUtils;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.apache.commons.compress.utils.IOUtils;
@@ -45,6 +46,9 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
+import static java.lang.Math.toIntExact;
+
 
 
 
@@ -563,7 +567,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 
-		byte[] chunks = arc.getBytes();
+		File f = arc.getFile();
 		try {
 			// container = pool.borrowObject();
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/"
@@ -575,34 +579,31 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			} else {
 				metaData.put("lz4Compress", "false");
 			}
-			int csz = chunks.length;
+			int csz = toIntExact(f.length());
 			if (Main.chunkStoreEncryptionEnabled) {
 				metaData.put("encrypt", "true");
 			} else {
 				metaData.put("encrypt", "false");
 			}
-			metaData.put("compressedsize", Integer.toString(chunks.length));
+			metaData.put("compressedsize", Integer.toString(csz));
 			metaData.put("bsize",
 					Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("objects", Integer.toString(arc.getSz()));
 
 			blob.setMetadata(metaData);
 
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			md.reset();
-			md.update(chunks);
-			// Encode the md5 content using Base64 encoding
-			String base64EncodedMD5content = Base64.encode(md.digest());
+			FileInputStream in = new FileInputStream(arc.getFile());
+			String mds = BaseEncoding.base64().encode(
+					ServiceUtils.computeMD5Hash(in));
+			IOUtils.closeQuietly(in);
 			// initialize blob properties and assign md5 content generated.
 			BlobProperties blobProperties = blob.getProperties();
-			blobProperties.setContentMD5(base64EncodedMD5content);
-			ByteArrayInputStream s3IS = new ByteArrayInputStream(chunks);
-			blob.upload(s3IS, chunks.length);
-			s3IS.close();
-			s3IS = null;
-
+			blobProperties.setContentMD5(mds);
+			BufferedInputStream bin = new BufferedInputStream(new FileInputStream(arc.getFile()));
+			blob.upload(bin, csz);
+			IOUtils.closeQuietly(bin);
 			// upload the metadata
-			chunks = arc.getHashesString().getBytes();
+			byte [] chunks = arc.getHashesString().getBytes();
 			blob = container.getBlockBlobReference("keys/" + haName);
 			// metaData = new HashMap<String, String>();
 			int ssz = chunks.length;
@@ -626,17 +627,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("bcompressedsize", Integer.toString(csz));
 			metaData.put("objects", Integer.toString(arc.getSz()));
-			md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.reset();
 			md.update(chunks);
 			// Encode the md5 content using Base64 encoding
-			base64EncodedMD5content = Base64.encode(md.digest());
+			String base64EncodedMD5content = Base64.encode(md.digest());
 			// initialize blob properties and assign md5 content generated.
 			blobProperties = blob.getProperties();
 			blobProperties.setContentMD5(base64EncodedMD5content);
 
 			blob.setMetadata(metaData);
-			s3IS = new ByteArrayInputStream(chunks);
+			ByteArrayInputStream s3IS = new ByteArrayInputStream(chunks);
 			blob.upload(s3IS, chunks.length);
 			s3IS.close();
 			s3IS = null;

@@ -76,6 +76,7 @@ public class VolumeConfigWriter {
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
+	boolean lowMemory = false;
 	int cloudThreads = 8;
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
@@ -267,6 +268,9 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-meta-file-cache")) {
 			this.meta_file_cache = Integer.parseInt(cmd
 					.getOptionValue("io-meta-file-cache"));
+		}
+		if(cmd.hasOption("low-memory")) {
+			this.lowMemory = true;
 		}
 		if (cmd.hasOption("io-claim-chunks-schedule")) {
 			this.fdisk_schedule = cmd
@@ -596,6 +600,7 @@ public class VolumeConfigWriter {
 		root.appendChild(vol);
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
+		cs.setAttribute("low-memory", Boolean.toString(this.lowMemory));
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size",
 				Long.toString(this.chunk_store_allocation_size));
@@ -1094,6 +1099,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
 				.hasArg().withArgName("Unique Cloud Bucket Name").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("low-memory")
+				.withDescription(
+						"Sets the volume to mimimize the amount of ram used at the expense of speed").hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("chunk-store-compress")
 				.withDescription(

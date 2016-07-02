@@ -73,6 +73,9 @@ public class Config {
 				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName(
 						"extended-config").item(0);
 			}
+			if(cbe.hasAttribute("low-memory")) {
+				Main.LOWMEM = Boolean.parseBoolean(cbe.getAttribute("low-memory"));
+			}
 			Main.chunkStoreAllocationSize = Long.parseLong(cbe
 					.getAttribute("allocation-size"));
 
@@ -347,6 +350,9 @@ public class Config {
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
 			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore
 					.getAttribute("average-chunk-size"));
+		}
+		if(localChunkStore.hasAttribute("low-memory")) {
+			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
 		}
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
