@@ -58,6 +58,7 @@ import static java.lang.Math.toIntExact;
 
 
 
+
 import com.google.common.io.BaseEncoding;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -1252,7 +1253,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return null;
 	}
 
-	public Map<String, Integer> getHashMap(long id) throws IOException {
+	public Map<String, Long> getHashMap(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		try {
@@ -1260,10 +1261,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					+ haName);
 			kblob.downloadAttributes();
 			String[] ks = this.getStrings(kblob);
-			HashMap<String, Integer> m = new HashMap<String, Integer>(ks.length);
+			HashMap<String, Long> m = new HashMap<String, Long>(ks.length);
 			for (String k : ks) {
 				String[] kv = k.split(":");
-				m.put(kv[0], Integer.parseInt(kv[1]));
+				m.put(kv[0], Long.parseLong(kv[1]));
 			}
 			return m;
 		} catch (Exception e) {
@@ -1667,6 +1668,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		info.data = this.size();
 		RemoteVolumeInfo[] ninfo = {info};
 		return ninfo;
+	}
+	
+	@Override
+	public byte[] getBytes(long id, int from, int to) throws IOException,
+			DataArchivedException {
+		throw new IOException("funtion not supported");
+	}
+
+	@Override
+	public int getMetaDataVersion() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 			
 

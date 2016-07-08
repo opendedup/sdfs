@@ -20,13 +20,16 @@ import org.opendedup.util.StringUtils;
 
 public class SimpleByteArrayLongMap {
 	// MappedByteBuffer keys = null;
+	private static int MAGIC_NUMBER = 6442;
+	private int version = -1;
 	private int size = 0;
+	private int offset = 16;
 	private String path = null;
 	private FileChannel kFC = null;
 	RandomAccessFile rf = null;
 	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 	public static final byte[] FREE = new byte[HashFunctionPool.hashLength];
-	transient protected static final int EL = HashFunctionPool.hashLength + 4;
+	transient protected int EL = HashFunctionPool.hashLength + 4;
 	transient private static final int VP = HashFunctionPool.hashLength;
 	BitSet mapped = null;
 	private int iterPos = 0;
@@ -36,10 +39,16 @@ public class SimpleByteArrayLongMap {
 		Arrays.fill(FREE, (byte) 0);
 	}
 
-	public SimpleByteArrayLongMap(String path, int sz) throws IOException {
+	public SimpleByteArrayLongMap(String path, int sz,int ver)
+			throws IOException {
 		this.size = NextPrime.getNextPrimeI(sz);
 		this.path = path;
+		this.version = ver;
 		this.setUp();
+	}
+
+	public int getVersion() {
+		return this.version;
 	}
 
 	public String getPath() {
@@ -74,12 +83,15 @@ public class SimpleByteArrayLongMap {
 				if (iterPos < this.kFC.size()) {
 					byte[] key = new byte[FREE.length];
 					this.vb.position(0);
-					kFC.read(vb, iterPos);
+					kFC.read(vb, iterPos + offset);
 					vb.position(0);
 					iterPos = iterPos + EL;
 					vb.get(key);
 					if (!Arrays.equals(key, FREE)) {
-						return new KeyValuePair(key, vb.getInt());
+						if (this.version == 0)
+							return new KeyValuePair(key, vb.getInt());
+						else
+							return new KeyValuePair(key, vb.getLong());
 					}
 				} else {
 					iterPos = iterPos + EL;
@@ -105,14 +117,52 @@ public class SimpleByteArrayLongMap {
 	 * @throws IOException
 	 */
 	public void setUp() throws IOException {
-		if (new File(path).exists()) {
-			size = (int) new File(path).length() / EL;
-		} else {
+		boolean nf = false;
+		if (!new File(path).exists()) {
+			nf = true;
 			mapped = new BitSet(size);
 		}
 		rf = new RandomAccessFile(path, "rw");
-		rf.setLength(EL * size);
 		this.kFC = rf.getChannel();
+		if (version != 0) {
+			if (nf) {
+				ByteBuffer nbf = ByteBuffer.allocate(16);
+				nbf.putInt(MAGIC_NUMBER);
+				nbf.putInt(this.version);
+				nbf.position(0);
+				this.kFC.write(nbf);
+				EL = HashFunctionPool.hashLength + 8;
+				this.offset = 16;
+				rf.setLength((EL * size)+offset);
+			} else {
+				ByteBuffer nbf = ByteBuffer.allocate(16);
+				this.kFC.read(nbf);
+				nbf.position(0);
+				int mn = nbf.getInt();
+				int vr = nbf.getInt();
+				if (mn == MAGIC_NUMBER) {
+					EL = HashFunctionPool.hashLength + 8;
+					this.version = vr;
+					this.offset = 16;
+
+				} else {
+					EL = HashFunctionPool.hashLength + 4;
+					this.version = 0;
+					this.offset = 0;
+				}
+				size = (int) (new File(path).length() - offset) / EL;
+			}
+		} else {
+			EL = HashFunctionPool.hashLength + 4;
+			this.version = 0;
+			this.offset = 0;
+			if (!nf) {
+				size = (int) (new File(path).length() - offset) / EL;
+			} else {
+				rf.setLength((EL * size)+offset);
+			}
+		}
+		vb = ByteBuffer.allocateDirect(EL);
 		this.closed = false;
 	}
 
@@ -172,7 +222,7 @@ public class SimpleByteArrayLongMap {
 		int index = hi * EL;
 		byte[] cur = new byte[FREE.length];
 		if (this.mapped == null || this.mapped.get(hi)) {
-			kFC.read(ByteBuffer.wrap(cur), index);
+			kFC.read(ByteBuffer.wrap(cur), index + offset);
 			if (Arrays.equals(cur, key)) {
 				return index;
 			}
@@ -212,7 +262,7 @@ public class SimpleByteArrayLongMap {
 				index += length;
 			}
 			if (mapped == null || mapped.get(index / EL)) {
-				kFC.read(ByteBuffer.wrap(cur), index);
+				kFC.read(ByteBuffer.wrap(cur), index + offset);
 				if (Arrays.equals(cur, key))
 					return index;
 				//
@@ -254,7 +304,7 @@ public class SimpleByteArrayLongMap {
 		byte[] cur = new byte[FREE.length];
 		if (this.mapped == null || this.mapped.get(hi)) {
 
-			kFC.read(ByteBuffer.wrap(cur), index);
+			kFC.read(ByteBuffer.wrap(cur), index + offset);
 
 			if (Arrays.equals(cur, FREE)) {
 				return index; // empty, all done
@@ -298,7 +348,7 @@ public class SimpleByteArrayLongMap {
 				index += length;
 			}
 			if (mapped == null || mapped.get(index / EL)) {
-				kFC.read(ByteBuffer.wrap(cur), index);
+				kFC.read(ByteBuffer.wrap(cur), index + offset);
 
 				// A FREE slot stops the search
 				if (Arrays.equals(cur, FREE)) {
@@ -323,9 +373,9 @@ public class SimpleByteArrayLongMap {
 				"No free or removed slots available. Key set full?!!");
 	}
 
-	ByteBuffer vb = ByteBuffer.allocateDirect(EL);
+	ByteBuffer vb = null;
 
-	public boolean put(byte[] key, int value) throws MapClosedException {
+	public boolean put(byte[] key, long value) throws MapClosedException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -337,11 +387,16 @@ public class SimpleByteArrayLongMap {
 				npos = (npos / EL);
 				return false;
 			}
+			SDFSLogger.getLog().info("wrote at " + pos + " fp " + (pos + offset) + " val " + value);
 			vb.position(0);
 			vb.put(key);
-			vb.putInt(value);
+			if (version == 0) {
+				vb.putInt((int) value);
+			} else {
+				vb.putLong(value);
+			}
 			vb.position(0);
-			this.kFC.write(vb, pos);
+			this.kFC.write(vb, pos + offset);
 			vb.position(0);
 			pos = (pos / EL);
 			this.mapped.set(pos);
@@ -358,7 +413,7 @@ public class SimpleByteArrayLongMap {
 		}
 	}
 
-	public int get(byte[] key) throws MapClosedException {
+	public long get(byte[] key) throws MapClosedException {
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		ByteBuffer kb = ByteBuffer.allocate(EL);
@@ -373,9 +428,15 @@ public class SimpleByteArrayLongMap {
 				return -1;
 			} else {
 				kb.position(0);
-				this.kFC.read(kb, pos);
+				
+				this.kFC.read(kb, pos + offset);
 				kb.position(VP);
-				int val = kb.getInt();
+				long val = -1;
+				if (this.version == 0)
+					val = kb.getInt();
+				else
+					val = kb.getLong();
+				SDFSLogger.getLog().info("read at " + pos + " fp " + (pos + offset) + " val " +val);
 				return val;
 
 			}
@@ -411,8 +472,7 @@ public class SimpleByteArrayLongMap {
 
 	public static void main(String[] args) throws Exception {
 		SimpleByteArrayLongMap b = new SimpleByteArrayLongMap(
-				"/home/samsilverberg/staging/outgoing/-5355749298482906702.map",
-				10000000);
+				"c:\\temp\\-5355749298482906702.map", 10000000,0);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;
@@ -457,10 +517,10 @@ public class SimpleByteArrayLongMap {
 	}
 
 	public static class KeyValuePair {
-		int value;
+		long value;
 		byte[] key;
 
-		protected KeyValuePair(byte[] key, int value) {
+		protected KeyValuePair(byte[] key, long value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -469,7 +529,7 @@ public class SimpleByteArrayLongMap {
 			return this.key;
 		}
 
-		public int getValue() {
+		public long getValue() {
 			return this.value;
 		}
 	}

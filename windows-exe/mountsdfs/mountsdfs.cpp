@@ -174,11 +174,27 @@ int _tmain(int argc, TCHAR *argv[])
 				doc.Parse(contents.c_str());
 				if (doc.ErrorID() == 0) {
 					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
-					std::stringstream sstr(ssz);
-					__int64 sz;
-					sstr >> sz;
-					long gb = sz / (1073741824);
-					mem += .4 * gb;
+					bool lowm = false;
+					if (doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory")) {
+						string lm = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory"));
+						if (lm.compare("true") == 0) {
+							lowm = true;
+						}
+					}
+					if (lowm == true) {
+						std::stringstream sstr(ssz);
+						__int64 sz;
+						sstr >> sz;
+						long gb = sz / (1073741824);
+						mem += .2 * gb;
+					}
+					else {
+						std::stringstream sstr(ssz);
+						__int64 sz;
+						sstr >> sz;
+						long gb = sz / (1073741824);
+						mem += .3 * gb;
+					}
 					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
 				}
 				else {

@@ -99,6 +99,7 @@ import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 
 
+
 import org.opendedup.collections.HashExistsException;
 
 import static java.lang.Math.toIntExact;
@@ -1200,15 +1201,15 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		return null;
 	}
 
-	public Map<String, Integer> getHashMap(long id) throws IOException {
+	public Map<String, Long> getHashMap(long id) throws IOException {
 		String _k = "";
 		try {
 			String[] ks = this.getStrings(id);
-			HashMap<String, Integer> m = new HashMap<String, Integer>(ks.length);
+			HashMap<String, Long> m = new HashMap<String, Long>(ks.length);
 			for (String k : ks) {
 				_k = k;
 				String[] kv = k.split(":");
-				m.put(kv[0], Integer.parseInt(kv[1]));
+				m.put(kv[0], Long.parseLong(kv[1]));
 			}
 			return m;
 		} catch (Exception e) {
@@ -1503,6 +1504,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			RemoteVolumeInfo[] ninfo = {info};
 			return ninfo;
 		}
+	}
+	
+	@Override
+	public byte[] getBytes(long id, int from, int to) throws IOException,
+			DataArchivedException {
+		throw new IOException("funtion not supported");
+	}
+
+	@Override
+	public int getMetaDataVersion() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

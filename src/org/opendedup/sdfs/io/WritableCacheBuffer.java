@@ -396,15 +396,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					throw l.getDAR();
 				}
 				if (l.getDNEX() > 0) {
-					if (this.tries < 3) {
-						Thread.sleep(100);
-						tries++;
-						this.buf = null;
-						initBuffer();
-						return;
-					} else {
+					
 						throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
-					}
 
 				}
 				if (l.getDN() < sz) {

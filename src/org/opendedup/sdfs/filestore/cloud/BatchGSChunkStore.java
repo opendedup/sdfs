@@ -1411,18 +1411,18 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public Map<String, Integer> getHashMap(long id) throws IOException {
+	public Map<String, Long> getHashMap(long id) throws IOException {
 		String haName = this.encHashArchiveName(id,
 				Main.chunkStoreEncryptionEnabled);
 		try {
 			StorageObject kobj = s3Service.getObject(this.name, "keys/"
 					+ haName);
 			String[] ks = this.getStrings(kobj);
-			HashMap<String, Integer> m = new HashMap<String, Integer>(ks.length);
+			HashMap<String, Long> m = new HashMap<String, Long>(ks.length);
 			for (String k : ks) {
 				String[] kv = k.split(":");
 				try {
-					m.put(kv[0], Integer.parseInt(kv[1]));
+					m.put(kv[0], Long.parseLong(kv[1]));
 				} catch (Exception e) {
 					SDFSLogger.getLog().info("corrupt key file [" + k + "]", e);
 					throw e;
@@ -1608,6 +1608,11 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		// TODO Auto-generated method stub
 		return false;
 	}
+	@Override
+	public byte[] getBytes(long id, int from, int to) throws IOException,
+			DataArchivedException {
+		throw new IOException("funtion not supported");
+	}
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
@@ -1619,6 +1624,12 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		info.data = this.size();
 		RemoteVolumeInfo[] ninfo = {info};
 		return ninfo;
+	}
+
+	@Override
+	public int getMetaDataVersion() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

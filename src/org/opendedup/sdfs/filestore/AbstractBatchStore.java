@@ -22,8 +22,10 @@ public interface AbstractBatchStore {
 	public void checkoutObject(long id, int claims) throws IOException;
 
 	public void getBytes(long id,File f) throws IOException, DataArchivedException;
+	
+	public byte [] getBytes(long id,int from,int to) throws IOException, DataArchivedException;
 
-	public Map<String, Integer> getHashMap(long id) throws IOException;
+	public Map<String, Long> getHashMap(long id) throws IOException;
 
 	public boolean checkAccess(String username, String password,
 			Properties props) throws Exception;
@@ -39,4 +41,6 @@ public interface AbstractBatchStore {
 	public boolean isLocalData();
 	
 	public boolean isClustered();
+	
+	public int getMetaDataVersion();
 }

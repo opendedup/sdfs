@@ -729,7 +729,7 @@ public class VolumeConfigWriter {
 			if (ext) {
 				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class",
-						"org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
+						"org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("service-type", "azureblob");
 				extended.setAttribute("block-size", this.blockSize);

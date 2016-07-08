@@ -56,6 +56,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	File container_location = new File(Main.chunkStore);
 	int checkInterval = 15000;
 	public boolean clustered;
+	private int mdVersion = 0;
 
 	// private String bucketLocation = null;
 	static {
@@ -576,8 +577,12 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public Map<String, Integer> getHashMap(long id) throws IOException {
+	public Map<String, Long> getHashMap(long id) throws IOException {
 		throw new IOException("not supported");
+	}
+	
+	public int getMetaDataVersion() {
+		return this.mdVersion;
 	}
 
 	@Override
@@ -768,6 +773,12 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	public boolean isClustered() {
 		// TODO Auto-generated method stub
 		return this.clustered;
+	}
+
+	@Override
+	public byte[] getBytes(long id, int from, int to) throws IOException,
+			DataArchivedException {
+		throw new IOException("funtion not supported");
 	}
 
 }
