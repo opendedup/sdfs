@@ -16,6 +16,7 @@ import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.lz4.LZ4Factory;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.opendedup.logging.SDFSLogger;
 import org.xerial.snappy.Snappy;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
@@ -25,10 +26,20 @@ import org.xerial.snappy.SnappyOutputStream;
 
 public class CompressionUtils {
 
-	static final LZ4Compressor lz4Compressor = LZ4Factory.nativeInstance()
-			.fastCompressor();
-	static final LZ4FastDecompressor lz4Decompressor = LZ4Factory
-			.nativeInstance().fastDecompressor();
+	static LZ4Compressor lz4Compressor;
+	static LZ4FastDecompressor lz4Decompressor;
+	static {
+		try {
+			lz4Compressor = LZ4Factory.nativeInstance()
+					.fastCompressor();
+			lz4Decompressor = LZ4Factory
+					.nativeInstance().fastDecompressor();
+		} catch(Throwable e) {
+			SDFSLogger.getLog().warn("Falling back to basic compressor");
+			lz4Compressor = LZ4Factory.safeInstance().fastCompressor();
+			lz4Decompressor = LZ4Factory.safeInstance().fastDecompressor();
+		}
+	}
 
 	public static byte[] compressZLIB(byte[] input) throws IOException {
 		// Create the compressor with highest level of compression

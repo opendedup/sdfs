@@ -169,13 +169,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
 			HashBlobArchive.close();
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, "bucketinfo");
-			HashMap<String, String> md = new HashMap<String, String>();
+			Map<String,String> md = omd.getUserMetadata();
+			ObjectMetadata nmd = new ObjectMetadata();
+			nmd.setUserMetadata(md);
 			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-			omd.setUserMetadata(md);
-			CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name, "bucketinfo", name, "bucketinfo")
-					.withNewObjectMetadata(omd);
-			s3Service.copyObject(copyObjectRequest);
+			byte[] sz = "bucketinfodatanow".getBytes();
+			String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+			md.put("md5sum", st);
+			nmd.setContentMD5(st);
+			nmd.setContentLength(sz.length);
+			nmd.setUserMetadata(md);
+			s3Service.putObject(this.name, "bucketinfo", new ByteArrayInputStream(sz), nmd);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
 		} finally {
@@ -343,6 +348,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				System.setProperty("com.amazonaws.services.s3.disablePutObjectMD5Validation", "true");
 			}
 			ClientConfiguration clientConfig = new ClientConfiguration();
+			clientConfig.setSignerOverride("S3SignerType");
 			clientConfig.setMaxConnections(Main.dseIOThreads * 3);
 			clientConfig.setConnectionTimeout(10000);
 			clientConfig.setSocketTimeout(10000);
@@ -417,6 +423,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md.addUserMetadata("currentsize", "0");
 				md.addUserMetadata("currentcompressedsize", "0");
 				byte[] sz = "bucketinfodatanow".getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.addUserMetadata("md5sum", st);
+				md.setContentMD5(st);
 				md.setContentLength(sz.length);
 				s3Service.putObject(this.name, "bucketinfo", new ByteArrayInputStream(sz), md);
 			} else {
@@ -434,7 +443,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					ObjectMetadata md = new ObjectMetadata();
 					md.addUserMetadata("currentsize", "0");
 					md.addUserMetadata("currentcompressedsize", "0");
+					
 					byte[] sz = "bucketinfodatanow".getBytes();
+					String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+					md.addUserMetadata("md5sum", st);
+					md.setContentMD5(st);
 					md.setContentLength(sz.length);
 					s3Service.putObject(this.name, "bucketinfo", new ByteArrayInputStream(sz), md);
 				} else {
@@ -460,21 +473,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					} else {
 						SDFSLogger.getLog().warn(
 								"The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
-					}
-					omd.setUserMetadata(obj);
-					try {
-						CopyObjectRequest reg = new CopyObjectRequest(this.name, "bucketinfo", this.name, "bucketinfo")
-								.withNewObjectMetadata(omd);
-						s3Service.copyObject(reg);
-					} catch (Exception e) {
-						SDFSLogger.getLog().warn("unable to update bucket info in init", e);
-						SDFSLogger.getLog().info("created new store " + name);
-						ObjectMetadata md = new ObjectMetadata();
-						md.addUserMetadata("currentsize", "0");
-						md.addUserMetadata("currentcompressedsize", "0");
-						byte[] sz = "bucketinfodatanow".getBytes();
-						md.setContentLength(sz.length);
-						s3Service.putObject(this.name, "bucketinfo", new ByteArrayInputStream(sz), md);
 					}
 				}
 			}
@@ -745,7 +743,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
 			double bps = (cl / 1024) / dtm;
-			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
+			SDFSLogger.getLog().info("read [" + id + "] at " + bps + " kbps");
 			if (md5sum && omd.getUserMetadata().containsKey("md5sum")) {
 				byte[] shash = BaseEncoding.base64().decode(omd.getUserMetadata().get("md5sum"));
 				byte[] chash = ServiceUtils.computeMD5Hash(data);
@@ -897,14 +895,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				Thread.sleep(60000);
 				try {
 					ObjectMetadata omd = s3Service.getObjectMetadata(name, "bucketinfo");
-					HashMap<String, String> md = new HashMap<String, String>();
+					Map<String,String> md = omd.getUserMetadata();
+					ObjectMetadata nmd = new ObjectMetadata();
+					nmd.setUserMetadata(md);
 					md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
 					md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-					omd.setUserMetadata(md);
-
-					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name, "bucketinfo", name, "bucketinfo")
-							.withNewObjectMetadata(omd);
-					s3Service.copyObject(copyObjectRequest);
+					byte[] sz = "bucketinfodatanow".getBytes();
+					String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+					md.put("md5sum", st);
+					nmd.setContentMD5(st);
+					nmd.setContentLength(sz.length);
+					nmd.setUserMetadata(md);
+					s3Service.putObject(this.name, "bucketinfo", new ByteArrayInputStream(sz), nmd);
+					
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to update metadata", e);
 				}
