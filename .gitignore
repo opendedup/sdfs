@@ -16,3 +16,4 @@ install-packages/SDFS-3.0.3-Setup.exe
 install-packages/SDFS-3.0.4-Setup.exe
 install-packages/deb/usr/share/sdfs/lib/sdfs.isajar
 *.tmp
+install-packages/SDFS-3.2.1-Setup.exe
