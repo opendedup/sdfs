@@ -856,12 +856,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 							hf.putInt((int) cp + 4 + hash.length);
 							hf.putInt(chunk.length);
 							hf.position(0);
-							int zd = (int) cp + 4 + hash.length;
+							//int zd = (int) cp + 4 + hash.length;
 							
 							ins = wMaps.get(this.id).put(hash,
 									hf.getLong());
-							if(ins)
-							SDFSLogger.getLog().info("put " + zd + " len " + chunk.length + " into " +this.id);
+							//if(ins)
+							//SDFSLogger.getLog().info("put " + zd + " len " + chunk.length + " into " +this.id);
 						}
 						if (!ins) {
 							throw new HashExistsException(this.id, hash);
@@ -1041,9 +1041,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 						ch = openFiles.get(id);
 					ch.read(ByteBuffer.wrap(ub), npos + 4);
 				} else {
-					SDFSLogger.getLog().info("getting " + npos + " nlen " + nlen + " from " + this.id + " pos " +pos);
+					//SDFSLogger.getLog().info("getting " + npos + " nlen " + nlen + " from " + this.id + " pos " +pos);
 					ub = store.getBytes(this.id, npos+4, npos+nlen+4);
-					SDFSLogger.getLog().info("got " + ub.length);
+					//SDFSLogger.getLog().info("got " + ub.length);
 				}
 			}
 			// rf.seek(pos - HashFunctionPool.hashLength);
@@ -1074,7 +1074,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			if (cpz > 0) {
 				cp = CompressionUtils.decompressLz4(cp, cpz);
 			}
-			SDFSLogger.getLog().info("got " + cp.length + " cpz " +cpz);
+			//SDFSLogger.getLog().info("got " + cp.length + " cpz " +cpz);
 			return cp;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

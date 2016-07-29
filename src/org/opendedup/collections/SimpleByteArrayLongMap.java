@@ -387,7 +387,7 @@ public class SimpleByteArrayLongMap {
 				npos = (npos / EL);
 				return false;
 			}
-			SDFSLogger.getLog().info("wrote at " + pos + " fp " + (pos + offset) + " val " + value);
+			//SDFSLogger.getLog().info("wrote at " + pos + " fp " + (pos + offset) + " val " + value);
 			vb.position(0);
 			vb.put(key);
 			if (version == 0) {
@@ -436,7 +436,7 @@ public class SimpleByteArrayLongMap {
 					val = kb.getInt();
 				else
 					val = kb.getLong();
-				SDFSLogger.getLog().info("read at " + pos + " fp " + (pos + offset) + " val " +val);
+				//SDFSLogger.getLog().info("read at " + pos + " fp " + (pos + offset) + " val " +val);
 				return val;
 
 			}

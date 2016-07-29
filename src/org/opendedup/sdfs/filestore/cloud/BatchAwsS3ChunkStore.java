@@ -1272,7 +1272,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 	private Map<String, String> getUserMetaData(ObjectMetadata obj) {
 		this.s3clientLock.readLock().lock();
 		try {
-			if (!md5sum) {
+			if (simpleS3) {
 				HashMap<String, String> omd = new HashMap<String, String>();
 				Set<String> mdk = obj.getRawMetadata().keySet();
 				for (String k : mdk) {
