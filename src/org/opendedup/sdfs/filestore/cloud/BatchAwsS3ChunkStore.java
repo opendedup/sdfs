@@ -185,7 +185,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
-			HashMap<String, String> md = new HashMap<String, String>();
+			Map<String, String> md = omd.getUserMetadata();
+			ObjectMetadata nmd = new ObjectMetadata();
+			nmd.setUserMetadata(md);
+			md.put("currentsize",
+					Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("currentcompressedsize",
+					Long.toString(HashBlobArchive.compressedLength.get()));
 			md.put("currentsize",
 					Long.toString(HashBlobArchive.currentLength.get()));
 			md.put("currentcompressedsize",
@@ -193,10 +199,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("port", Integer.toString(Main.sdfsCliPort));
-			omd.setUserMetadata(md);
-			CopyObjectRequest copyObjectRequest = new CopyObjectRequest(name,
-					binm, name, binm).withNewObjectMetadata(omd);
-			s3Service.copyObject(copyObjectRequest);
+			byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+			String st = BaseEncoding.base64().encode(
+					ServiceUtils.computeMD5Hash(sz));
+			md.put("md5sum", st);
+			nmd.setContentMD5(st);
+			nmd.setContentLength(sz.length);
+			nmd.setUserMetadata(md);
+			s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz),
+					nmd);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name,
 					e);
@@ -370,7 +381,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				HashBlobArchive.setLocalCacheSize(sz);
 			}
 			if (config.hasAttribute("metadata-version")) {
-				this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
+				this.mdVersion = Integer.parseInt(config
+						.getAttribute("metadata-version"));
 			}
 			if (config.hasAttribute("map-cache-size")) {
 				int sz = Integer
@@ -532,7 +544,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
 
 				this.clustered = true;
-				byte[] sz = "bucketinfodatanow".getBytes();
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
 				if (md5sum) {
 					String mds = BaseEncoding.base64().encode(
 							ServiceUtils.computeMD5Hash(sz));
@@ -586,7 +598,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					this.binm = "bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID,
 									Main.chunkStoreEncryptionEnabled);
-					byte[] sz = "bucketinfodatanow".getBytes();
+					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
 					if (md5sum) {
 						String mds = BaseEncoding.base64().encode(
 								ServiceUtils.computeMD5Hash(sz));
@@ -655,7 +667,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 								.getLocalHost().getHostName());
 						md.addUserMetadata("port",
 								Integer.toString(Main.sdfsCliPort));
-						byte[] sz = "bucketinfodatanow".getBytes();
+						byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
 						if (md5sum) {
 							String mds = BaseEncoding.base64().encode(
 									ServiceUtils.computeMD5Hash(sz));
@@ -1032,17 +1044,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		this.s3clientLock.readLock().lock();
 		S3Object sobj = null;
 		byte[] data = null;
-		int ol = 0;
+		//int ol = 0;
 		try {
 
 			long tm = System.currentTimeMillis();
-			ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
-					"blocks/" + haName);
-			ol = Integer.parseInt(omd.getUserMetadata().get("compressedsize"));
-			if(ol <= to) {
-				to = ol;
-				SDFSLogger.getLog().info("change to=" + to);
-			}
+			//ObjectMetadata omd = s3Service.getObjectMetadata(this.name,
+			//		"blocks/" + haName);
+			//Map<String, String> mp = this.getUserMetaData(omd);
+			//ol = Integer.parseInt(mp.get("compressedsize"));
+			//if (ol <= to) {
+			//	to = ol;
+			//	SDFSLogger.getLog().info("change to=" + to);
+			//}
 			int cl = (int) to - from;
 			GetObjectRequest gr = new GetObjectRequest(this.name, "blocks/"
 					+ haName);
@@ -1055,7 +1068,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
 			double bps = (cl / 1024) / dtm;
 			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
-			Map<String, String> mp = this.getUserMetaData(omd);
+			//mp = this.getUserMetaData(omd);
 			/*
 			 * try { mp.put("lastaccessed",
 			 * Long.toString(System.currentTimeMillis()));
@@ -1065,7 +1078,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			 * s3Service.copyObject(req); } catch (Exception e) {
 			 * SDFSLogger.getLog().debug("error setting last accessed", e); }
 			 */
-
+			/*
 			if (mp.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean((String) mp.get("deleted"));
 				if (del) {
@@ -1100,6 +1113,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					kobj.close();
 				}
 			}
+			*/
 			dtm = (System.currentTimeMillis() - tm) / 1000d;
 			bps = (cl / 1024) / dtm;
 		} catch (AmazonS3Exception e) {
@@ -1108,7 +1122,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			else {
 				SDFSLogger.getLog().error(
 						"unable to get block [" + id + "] at [blocks/" + haName
-								+ "] pos " +from + " to " + to, e);
+								+ "] pos " + from + " to " + to, e);
 				throw e;
 
 			}
@@ -1283,7 +1297,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 								.toLowerCase();
 						omd.put(key, (String) obj.getRawMetadataValue(k));
 					}
-					SDFSLogger.getLog().info("key=" + k + " value=" +  (String) obj.getRawMetadataValue(k));
+					SDFSLogger.getLog().info(
+							"key=" + k + " value="
+									+ obj.getRawMetadataValue(k));
 				}
 
 				return omd;
@@ -1384,20 +1400,29 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				try {
 					ObjectMetadata omd = s3Service
 							.getObjectMetadata(name, binm);
-					HashMap<String, String> md = new HashMap<String, String>();
+					Map<String, String> md = omd.getUserMetadata();
+					ObjectMetadata nmd = new ObjectMetadata();
+					nmd.setUserMetadata(md);
 					md.put("currentsize",
 							Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("currentcompressedsize", Long
-							.toString(HashBlobArchive.compressedLength.get()));
-					md.put("lastupdate",
-							Long.toString(System.currentTimeMillis()));
+					md.put("currentcompressedsize",
+							Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("currentsize",
+							Long.toString(HashBlobArchive.currentLength.get()));
+					md.put("currentcompressedsize",
+							Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 					md.put("hostname", InetAddress.getLocalHost().getHostName());
 					md.put("port", Integer.toString(Main.sdfsCliPort));
-					omd.setUserMetadata(md);
-
-					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(
-							name, binm, name, binm).withNewObjectMetadata(omd);
-					s3Service.copyObject(copyObjectRequest);
+					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+					String st = BaseEncoding.base64().encode(
+							ServiceUtils.computeMD5Hash(sz));
+					md.put("md5sum", st);
+					nmd.setContentMD5(st);
+					nmd.setContentLength(sz.length);
+					nmd.setUserMetadata(md);
+					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz),
+							nmd);
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
 							"unable to update metadata for " + binm, e);
@@ -2095,7 +2120,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 		try {
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			String[] ks = this.getStrings(kobj);
-			HashMap<String, Long> m = new HashMap<String, Long>(ks.length+1);
+			HashMap<String, Long> m = new HashMap<String, Long>(ks.length + 1);
 			for (String k : ks) {
 				String[] kv = k.split(":");
 				m.put(kv[0], Long.parseLong(kv[1]));
