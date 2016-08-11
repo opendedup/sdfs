@@ -23,23 +23,25 @@ public class GetCloudMetaFile {
 	private static FileLock fl = new FileLock();
 	File df = null;
 	SDFSEvent fevt = null;
-	static LRUCache<String,String> ck = new LRUCache<String,String>(50);
+	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 
-	public Element getResult(String file, String dstfile,String changeid) throws IOException {
-		
-		synchronized(ck) {
-		if(ck.containsKey(changeid)) {
-			try {
-			SDFSLogger.getLog().info("ignoring " + changeid + " " + file);
-			Document doc = XMLUtils.getXMLDoc("cloudmfile");
-			Element root = doc.getDocumentElement();
-			root.setAttribute("action", "ignored");
-			return (Element) root.cloneNode(true);
-			}catch(Exception e) {
-				throw new IOException(e);
+	public Element getResult(String file, String dstfile, String changeid)
+			throws IOException {
+
+		synchronized (ck) {
+			if (ck.containsKey(changeid)) {
+				try {
+					SDFSLogger.getLog().info(
+							"ignoring " + changeid + " " + file);
+					Document doc = XMLUtils.getXMLDoc("cloudmfile");
+					Element root = doc.getDocumentElement();
+					root.setAttribute("action", "ignored");
+					return (Element) root.cloneNode(true);
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 			}
-		}
-		ck.put(changeid, file);
+			ck.put(changeid, file);
 		}
 		ReentrantLock l = fl.getLock(file);
 		l.lock();

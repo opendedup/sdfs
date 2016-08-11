@@ -2,6 +2,8 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -158,30 +160,39 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * 
 	 * @see org.opendedup.collections.DataMap#nextValue()
 	 */
+	byte[][] nbufs = null;
+	final static int NP = 64;
+	ByteBuffer nbuf = null;
+
 	@Override
 	public byte[] nextValue() throws IOException {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		try {
-			long _cpos = getInternalIterFPos();
-			while (_cpos < flen) {
+
+			for (;;) {
 				try {
-					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-					pbdb.read(buf, _cpos);
-					byte[] val = buf.array();
+					if (nbuf == null || !nbuf.hasRemaining()) {
+						long _cpos = getInternalIterFPos();
+						int al = arrayLength * NP;
+						if(_cpos >= flen)
+							return null;
+						nbuf = ByteBuffer.allocate(al);
+						pbdb.read(nbuf, _cpos);
+						//SDFSLogger.getLog().info("al=" + al + " cpos=" +_cpos + " flen=" + flen + " fz=" +pbdb.size() + " nbfs=" + nbuf.position());
+						nbuf.position(0);
+					}
+					//SDFSLogger.getLog().info("arl=" + arrayLength + " nbufsz=" + nbuf.capacity() + " rem="+ nbuf.remaining());
+					byte[] val = new byte[arrayLength];
+					nbuf.get(val);
 					if (!Arrays.equals(val, FREE)) {
 						return val;
 					}
 				} finally {
 					iterPos++;
-					_cpos = (iterPos * arrayLength) + this.offset;
 				}
 			}
-			if (getInternalIterFPos() < pbdb.size()) {
-				flen = this.pbdb.size();
-				return this.nextValue();
-			}
-			return null;
+			
 		} finally {
 			l.unlock();
 		}
