@@ -86,6 +86,13 @@ public class PassPhrase {
 		rnd.nextBytes(b);
 		return StringUtils.getHexString(b);
 	}
+	
+	public static byte[] getByteIV() {
+		SecureRandom rnd = new SecureRandom();
+		byte[] b = new byte[16];
+		rnd.nextBytes(b);
+		return b;
+	}
 
 	public static void main(String[] argv) {
 		for (int i = 0; i < 20; i++) {

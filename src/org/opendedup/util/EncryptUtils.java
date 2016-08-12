@@ -21,7 +21,7 @@ import org.opendedup.sdfs.Main;
 public class EncryptUtils {
 	private static byte[] keyBytes = null;
 	private static SecretKeySpec key = null;
-	private static final byte[] iv = StringUtils
+	public static final byte[] iv = StringUtils
 			.getHexBytes(Main.chunkStoreEncryptionIV);
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
@@ -92,6 +92,30 @@ public class EncryptUtils {
 			throw new IOException(ce);
 		}
 
+	}
+	
+	public static byte [] decryptCBC(byte[] encChunk, IvParameterSpec cspec) throws IOException {
+		try {
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, key, cspec);
+			byte[] decrypted = cipher.doFinal(encChunk);
+			return decrypted;
+		} catch (Exception ce) {
+			SDFSLogger.getLog().error("uable to decrypt", ce);
+			throw new IOException(ce);
+		}
+	}
+	
+	public static byte [] encryptCBC(byte[] chunk, IvParameterSpec cspec) throws IOException {
+		try {
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, key, cspec);
+			byte[] encrypted = cipher.doFinal(chunk);
+			return encrypted;
+		} catch (Exception ce) {
+			SDFSLogger.getLog().error("uable to encrypt", ce);
+			throw new IOException(ce);
+		}
 	}
 
 	public static byte[] decryptCBC(byte[] encChunk, String passwd, String iv)
