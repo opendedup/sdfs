@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt.cli;
 
 import java.util.Formatter;
 
+import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -18,6 +19,7 @@ public class ProcessConnectedVolumes {
 			formatter.format("file=%s&cmd=connectedvolumes", "null");
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
+			System.out.println(XMLUtils.toXMLString(doc));
 			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
 				System.out.println(root.getAttribute("msg"));

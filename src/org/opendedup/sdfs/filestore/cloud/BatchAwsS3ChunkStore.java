@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.crypto.spec.IvParameterSpec;
+
 import static java.lang.Math.toIntExact;
 
 import org.apache.commons.compress.utils.IOUtils;
@@ -47,6 +49,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
+import org.opendedup.util.PassPhrase;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
@@ -809,8 +812,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				lz4compress = Boolean.parseBoolean((String) mp
 						.get("lz4compress"));
 			}
-			if (encrypt)
-				data = EncryptUtils.decryptCBC(data);
+			byte [] ivb = null;
+			if(mp.containsKey("ivpsec"))
+				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+			if (encrypt) {
+				if(ivb != null)
+					data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
+				else
+					data = EncryptUtils.decryptCBC(data);
+			}
 			if (compress)
 				data = CompressionUtils.decompressZLIB(data);
 			else if (lz4compress) {
@@ -999,11 +1009,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			if (Main.compress) {
 				hs = CompressionUtils.compressLz4(hs);
 			}
+			byte [] ivb = PassPhrase.getByteIV();
 			if (Main.chunkStoreEncryptionEnabled) {
-				hs = EncryptUtils.encryptCBC(hs);
+				hs = EncryptUtils.encryptCBC(hs,new IvParameterSpec(ivb));
 			}
 			md = new ObjectMetadata();
 			md.addUserMetadata("size", Integer.toString(sz));
+			md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
 			md.addUserMetadata("lastaccessed", "0");
 			md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
 			md.addUserMetadata("encrypt",
@@ -1615,9 +1627,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 				mp.remove("deleted-objects");
 				changed = true;
 			}
+			byte [] ivb = null;
+			if(mp.containsKey("ivspec")) {
+				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+			}
 
 			if (encrypt) {
-				data = EncryptUtils.decryptCBC(data);
+				if(ivb != null)
+					data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
+				else
+					data = EncryptUtils.decryptCBC(data);
 			}
 			if (compress)
 				data = CompressionUtils.decompressZLIB(data);
@@ -1766,9 +1785,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 						p.delete();
 						p = z;
 					}
+					byte [] ivb = null;
 					if (Main.chunkStoreEncryptionEnabled) {
 						try {
-							EncryptUtils.encryptFile(p, e);
+							ivb = PassPhrase.getByteIV();
+							EncryptUtils.encryptFile(p, e,new IvParameterSpec(ivb));
+							
 						} catch (Exception e1) {
 							throw new IOException(e1);
 						}
@@ -1784,6 +1806,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 							Boolean.toString(Main.compress));
 					md.addUserMetadata("encrypt",
 							Boolean.toString(Main.chunkStoreEncryptionEnabled));
+					if(ivb != null)
+						md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
 					md.addUserMetadata("lastmodified",
 							Long.toString(f.lastModified()));
 					if (simpleS3) {
@@ -1970,6 +1994,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					lz4compress = Boolean.parseBoolean(mp
 							.get("lz4compress"));
 				}
+				byte [] ivb = null;
+				if(mp.containsKey("ivspec")) {
+					ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+				}
 				SDFSLogger.getLog().debug("compress=" + lz4compress + " " + mp.get("lz4compress"));
 					
 				if (mp.containsKey("symlink")) {
@@ -1989,7 +2017,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					p.delete();
 				} else {
 					if (encrypt) {
-						EncryptUtils.decryptFile(p, e);
+						if(ivb != null) {
+							EncryptUtils.decryptFile(p, e, new IvParameterSpec(ivb));
+						} else {							
+							EncryptUtils.decryptFile(p, e);
+						}
 						p.delete();
 						p = e;
 					}
@@ -2499,18 +2531,28 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 					.iterator();
 			ArrayList<RemoteVolumeInfo> al = new ArrayList<RemoteVolumeInfo>();
 			while (iter.hasNext()) {
+				try {
 				String key = iter.next().getKey();
 				String vid = key.substring("bucketinfo/".length());
+				
 				ObjectMetadata om = s3Service.getObjectMetadata(this.name, key);
+				Map<String,String> md = this.getUserMetaData(om);
 				long id = EncyptUtils.decHashArchiveName(vid,
 						Main.chunkStoreEncryptionEnabled);
+				
 				RemoteVolumeInfo info = new RemoteVolumeInfo();
 				info.id = id;
-				info.hostname = om.getUserMetaDataOf("hostname");
-				info.port = Integer.parseInt(om.getUserMetaDataOf("port"));
-				info.compressed = Long.parseLong(om
-						.getUserMetaDataOf("currentcompressedsize"));
-				info.data = Long.parseLong(om.getUserMetaDataOf("currentsize"));
+				info.hostname = md.get("hostname");
+				info.port = Integer.parseInt(md.get("port"));
+				info.compressed = Long.parseLong(md.get("currentcompressedsize"));
+				info.data = Long.parseLong(md.get("currentsize"));
+				info.lastupdated = Long.parseLong(md.get("lastupdate"));
+				al.add(info);
+				}catch(Exception e) {
+					SDFSLogger.getLog().error("unable to get volume metadata", e);
+					throw new IOException(e);
+				}
+				
 			}
 			RemoteVolumeInfo[] ids = new RemoteVolumeInfo[al.size()];
 			for (int i = 0; i < al.size(); i++) {

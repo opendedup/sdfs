@@ -25,7 +25,6 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
-
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
@@ -56,6 +55,7 @@ import net.decasdev.dokan.DokanFileInfo;
 import net.decasdev.dokan.DokanOperationException;
 import net.decasdev.dokan.DokanOperations;
 import net.decasdev.dokan.DokanOptions;
+import net.decasdev.dokan.DokanOptionsMode;
 import net.decasdev.dokan.DokanVolumeInformation;
 import net.decasdev.dokan.FileFlag.FileFlags;
 import net.decasdev.dokan.FileTimeUtils;
@@ -137,7 +137,7 @@ public class WinSDFS implements DokanOperations {
 		dokanOptions.mountPoint = driveLetter;
 		dokanOptions.threadCount = Main.writeThreads;
 		dokanOptions.metaFilePath = mountedVolume;
-		//dokanOptions.optionsMode = DokanOptionsMode.Mode.NETWORK_DRIVE.getValue();
+		dokanOptions.optionsMode = DokanOptionsMode.Mode.REMOVABLE_DRIVE.getValue();
 		//dokanOptions.uncPath = "\\opendedupe\\awesome";
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter
 				+ " #############");

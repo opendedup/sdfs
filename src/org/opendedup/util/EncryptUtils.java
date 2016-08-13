@@ -152,6 +152,22 @@ public class EncryptUtils {
 		cout.close();
 		fis.close();
 	}
+	
+	public static void encryptFile(File src, File dst,IvParameterSpec ivspec) throws Exception {
+		if (!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+
+		Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		encrypt.init(Cipher.ENCRYPT_MODE, key, ivspec);
+		// opening streams
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		CipherOutputStream cout = new CipherOutputStream(fos, encrypt);
+		IOUtils.copy(fis, cout);
+		cout.flush();
+		cout.close();
+		fis.close();
+	}
 
 	public static void decryptFile(File src, File dst) throws Exception {
 		if (!dst.getParentFile().exists())
@@ -159,6 +175,22 @@ public class EncryptUtils {
 
 		Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		encrypt.init(Cipher.DECRYPT_MODE, key, spec);
+		// opening streams
+		FileOutputStream fos = new FileOutputStream(dst);
+		FileInputStream fis = new FileInputStream(src);
+		CipherInputStream cis = new CipherInputStream(fis, encrypt);
+		IOUtils.copy(cis, fos);
+		fos.flush();
+		fos.close();
+		cis.close();
+	}
+	
+	public static void decryptFile(File src, File dst,IvParameterSpec ivspec) throws Exception {
+		if (!dst.getParentFile().exists())
+			dst.getParentFile().mkdirs();
+
+		Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		encrypt.init(Cipher.DECRYPT_MODE, key, ivspec);
 		// opening streams
 		FileOutputStream fos = new FileOutputStream(dst);
 		FileInputStream fis = new FileInputStream(src);

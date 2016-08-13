@@ -1,10 +1,10 @@
 package org.opendedup.hashing;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +23,7 @@ public class LargeBloomFilter implements Serializable {
 	private static final int AR_SZ = 256;
 	transient FLBF[] bfs = new FLBF[AR_SZ];
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+	private transient SynchronousQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 
 	private transient ThreadPoolExecutor executor = null;
 
@@ -69,7 +68,7 @@ public class LargeBloomFilter implements Serializable {
 			th.fpp = fpp;
 			th.sz = isz;
 			executor.execute(th);
-			bfs[i] = new FLBF(isz, fpp, f, sync);
+			//bfs[i] = new FLBF(isz, fpp, f, sync);
 			if (bar != null)
 				bar.update(i);
 

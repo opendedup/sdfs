@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -257,6 +258,9 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	}
 
 	private void recreateMap() throws IOException {
+		Lock l = this.hashlock.writeLock();
+		l.lock();
+		try{
 		mapped = new BitSet(size);
 		mapped.clear();
 		removed = new BitSet(size);
@@ -269,6 +273,10 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		SDFSLogger.getLog().warn(
 				"Recovered Hashmap " + this.path + " entries = "
 						+ mapped.cardinality());
+		}finally {
+			l.unlock();
+		}
+		
 
 	}
 

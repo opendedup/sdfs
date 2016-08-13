@@ -57,6 +57,7 @@ public class VolumeConfigWriter {
 	String dirPermissions = "0755";
 	String owner = "0";
 	String group = "0";
+	boolean simpleS3 = false;
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
@@ -331,7 +332,8 @@ public class VolumeConfigWriter {
 				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-
+				if(cmd.hasOption("simple-s3"))
+					this.simpleS3 = true;
 				if (!awsAim
 						&& !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkAuth(cloudAccessKey,
@@ -673,9 +675,13 @@ public class VolumeConfigWriter {
 					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
 					extended.setAttribute("disableDNSBucket", "true");
+					
 					extended.appendChild(cp);
 				}
-
+				if(this.simpleS3)
+					extended.setAttribute("simple-s3", "true");
+				else
+					extended.setAttribute("simple-s3", "false");
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location",
 							this.bucketLocation);
@@ -1139,6 +1145,10 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder
 				.withLongOpt("enable-replication-master")
 				.withDescription("Enable this volume as a replication master")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("simple-s3")
+				.withDescription("Uses basic S3 api characteristics for cloud storage backend.")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("report-dse-size")

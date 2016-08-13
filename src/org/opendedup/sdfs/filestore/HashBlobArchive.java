@@ -899,7 +899,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				bf.putInt(nz);
 				bf.put(chunk);
 				if (Main.chunkStoreEncryptionEnabled) {
-					chunk = EncryptUtils.encryptCBC(bf.array());
+					chunk = EncryptUtils.encryptCBC(bf.array(),ivspec);
 				} else {
 					chunk = bf.array();
 				}
@@ -1147,7 +1147,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		try {
 			if (Main.chunkStoreEncryptionEnabled) {
-				ub = EncryptUtils.decryptCBC(ub);
+				ub = EncryptUtils.decryptCBC(ub,ivspec);
 			}
 			ByteBuffer bf = ByteBuffer.wrap(ub);
 			int cpz = bf.getInt();
