@@ -28,3 +28,5 @@ for i in $(echo {a..h}); do (echo n; echo p; echo 1; echo 2048; echo 2145386495;
   for i in $(echo {a..z}); do cat /sys/block/sd$i/queue/rq_affinity; done
   for i in $(echo {a..g}); do cat /sys/block/sda$i/queue/rq_affinity; done
   
+  
+  for i in $(echo {a..i}); do sdfscli --snapshot --snapshot-path bu$i --file-path bu; done
