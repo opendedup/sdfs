@@ -695,7 +695,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			HashBlobArchive.compressedLength.set(0);
 			this.ht = null;
 			this.hid = 0;
-			dl = new MultiDownload(this);
+			dl = new MultiDownload(this,"");
 			maps = this.traverseCache(new File(Main.chunkStore)).iterator();
 			dl.iterationInit(false, "");
 		} catch (Exception e) {
@@ -706,7 +706,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	boolean fr = true;
 
 	@Override
-	public Iterator<String> getNextObjectList() throws IOException {
+	public Iterator<String> getNextObjectList(String prefix) throws IOException {
 		return maps;
 
 	}

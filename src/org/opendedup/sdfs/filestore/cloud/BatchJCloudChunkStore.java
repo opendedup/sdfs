@@ -476,7 +476,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		iter = ips.iterator();
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
-		dl = new MultiDownload(this);
+		dl = new MultiDownload(this,"/keys");
 		dl.iterationInit(false, "/keys");
 		this.ht = null;
 		this.hid = 0;
@@ -1317,13 +1317,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	@Override
-	public Iterator<String> getNextObjectList() throws IOException {
+	public Iterator<String> getNextObjectList(String prefix) throws IOException {
 		List<String> al = new ArrayList<String>();
 		if(!iter.hasNext()) {
 			if(ips.getNextMarker() == null)
 				return al.iterator();
 			else {
-				ips = blobStore.list(this.name, ListContainerOptions.Builder.afterMarker(ips.getNextMarker()).inDirectory("keys"));
+				ips = blobStore.list(this.name, ListContainerOptions.Builder.afterMarker(ips.getNextMarker()).inDirectory(prefix));
 				iter = ips.iterator();
 			}
 		}

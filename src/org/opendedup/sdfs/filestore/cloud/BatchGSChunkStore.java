@@ -1555,7 +1555,7 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public Iterator<String> getNextObjectList() throws IOException {
+	public Iterator<String> getNextObjectList(String prefix) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

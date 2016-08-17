@@ -430,7 +430,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		iter = container.listBlobs("keys/").iterator();
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
-		dl = new MultiDownload(this);
+		dl = new MultiDownload(this,"keys/");
 		dl.iterationInit(false, "/keys");
 		this.ht = null;
 		this.hid = 0;
@@ -1492,7 +1492,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public Iterator<String> getNextObjectList() throws IOException {
+	public Iterator<String> getNextObjectList(String prefix) throws IOException {
 		List<String> al = new ArrayList<String>();
 		for (int i = 0; i < 1000; i++) {
 			if (iter.hasNext()) {

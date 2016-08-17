@@ -412,7 +412,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int mknod(String path, int mode, int rdev) throws FuseException {
-		// SDFSLogger.getLog().info("4=" + path);
+		SDFSLogger.getLog().info("4=" + path);
 		try {
 			File f = new File(this.mountedVolume + path);
 			if (Main.volume.isOffLine())
@@ -842,6 +842,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	private int getFtype(String path) throws FuseException {
+		SDFSLogger.getLog().info("Path=" + path);
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
 

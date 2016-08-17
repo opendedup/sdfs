@@ -436,6 +436,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("cloud-url")) {
 			this.cloudUrl = cmd.getOptionValue("cloud-url");
 			this.genericS3 = true;
+			this.simpleS3 = true;
 		}
 		if (cmd.hasOption("cluster-dse-password"))
 			this.clusterDSEPassword = cmd

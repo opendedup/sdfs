@@ -213,7 +213,7 @@ public class MountSDFS implements Daemon, Runnable {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (cmd.hasOption("o")) {
 			fal.add("-o");
-			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+			fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
 					+ volumeConfigFile
 					+ ":"
 					+ Main.sdfsCliPort
@@ -221,7 +221,7 @@ public class MountSDFS implements Daemon, Runnable {
 					+ cmd.getOptionValue("o"));
 		} else {
 			fal.add("-o");
-			fal.add("direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+			fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
 					+ volumeConfigFile + ":" + Main.sdfsCliPort);
 		}
 		sFal = new String[fal.size()];

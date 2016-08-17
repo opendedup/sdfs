@@ -18,10 +18,12 @@ public class MultiDownload implements Runnable {
 			Main.dseIOThreads * 2);
 	private boolean done = false;
 	Iterator<String> ck = null;
+	String prefix;
 
-	public MultiDownload(AbstractBatchStore cs) throws IOException {
+	public MultiDownload(AbstractBatchStore cs,String prefix) throws IOException {
 		this.cs = cs;
-		this.ck = cs.getNextObjectList();
+		this.prefix = prefix;
+		this.ck = cs.getNextObjectList(prefix);
 	}
 
 	public void iterationInit(boolean deep, String folder) {
@@ -80,7 +82,7 @@ public class MultiDownload implements Runnable {
 		synchronized (this) {
 			try {
 				if (ck == null || !ck.hasNext()) {
-					ck = cs.getNextObjectList();
+					ck = cs.getNextObjectList(prefix);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("while doing recovery ", e);

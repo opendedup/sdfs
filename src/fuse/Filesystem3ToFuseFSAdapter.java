@@ -33,7 +33,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	private Log log;
 
 	public Filesystem3ToFuseFSAdapter(Filesystem3 fs3, Log log) {
-		this(fs3, System.getProperty("file.encoding", "UTF-8"), log);
+		this(fs3, "UTF-8", log);
 	}
 
 	public Filesystem3ToFuseFSAdapter(Filesystem3 fs3, String encoding, Log log) {

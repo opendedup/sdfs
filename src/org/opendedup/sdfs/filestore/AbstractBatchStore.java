@@ -33,7 +33,7 @@ public interface AbstractBatchStore {
 
 	public boolean objectClaimed(String key) throws IOException;
 
-	public Iterator<String> getNextObjectList() throws IOException;
+	public Iterator<String> getNextObjectList(String prefix) throws IOException;
 
 	public StringResult getStringResult(String key) throws IOException,
 			InterruptedException;
