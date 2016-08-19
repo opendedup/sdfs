@@ -10,7 +10,7 @@ package org.opendedup.util;
  * Ross Anderson's original C sample code.
  */
 
-/* $Id: Tiger_Hash.java,v 1.5 2001/06/25 20:30:26 gelderen Exp $
+/* $Id: Tiger_Hash.java,v 1.5 2001, 2012/06/25 20:30:26 gelderen Exp $
  *
  * Copyright (C) 2000 The Cryptix Foundation Limited.
  * All rights reserved.

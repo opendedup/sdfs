@@ -842,7 +842,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	private int getFtype(String path) throws FuseException {
-		SDFSLogger.getLog().info("Path=" + path);
+		//SDFSLogger.getLog().info("Path=" + path);
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
 

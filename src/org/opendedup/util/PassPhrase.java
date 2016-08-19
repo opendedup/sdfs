@@ -3,7 +3,7 @@ package org.opendedup.util;
 import java.security.SecureRandom;
 
 /*
- * Copyright (c) Ian F. Darwin, http://www.darwinsys.com/, 1996-2002.
+ * Copyright (c) Ian F. Darwin, http://www.darwinsys.com/, 1996-2016.
 
  * All rights reserved. Software written by Ian F. Darwin and others.
  * $Id: LICENSE,v 1.8 2004/02/09 03:33:38 ian Exp $
