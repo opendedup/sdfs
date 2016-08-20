@@ -1,8 +1,16 @@
-
+Version 3.2.1
+	Fixes
+	* Fixed non english character file names
+	* Fixed support for minio
+	* Encryption correctly uses IV parameter for encryption on S3
+	Enhancements
+	* Multi node read write support with global deduplication
+	* Added Swift Support
+	* Better read performance
+	* Lower memory requirements
 Version 3.1.2
 	Fixes
 	* Upload of metadata to cloud slow
-	
 Version 3.1.1
 	Fixes
 	* Fixed cloud filesync

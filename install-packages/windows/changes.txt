@@ -1,7 +1,74 @@
-Version 2.0.12
+Version 3.2.1
+	Fixes
+	* Fixed non english character file names
+	* Fixed support for minio
+	* Encryption correctly uses IV parameter for encryption on S3
+	Enhancements
+	* Multi node read write support with global deduplication
+	* Added Swift Support
+	* Better read performance
+	* Lower memory requirements
+Version 3.1.2
+	Fixes
+	* Upload of metadata to cloud slow
+Version 3.1.1
+	Fixes
+	* Fixed cloud filesync
+	* Fixed dr restore from cloud to new local server
+Version 3.1.0
+	Fixes
+	* Fixed distributed DSE code for the 3.0 tree
+	* Optimized Replication now working in the 3.0 tree 
+	* Volume block device has been ported to the 3.0 tree
+	* Updated script files to point to appropriate sources
+	* Remove orphaned symlinks
+	* Fixed Cache Expiring for cloud storage data retrieval
+	Enhancements
+	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
+	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.
+	* Default to TLSv1.2 for all communication
+	* Improved space savings on compaction. Removes individual orphaned blocks from chunks stored on disk. Not yet implemented for cloud storage
+	because of round trip cost.
+	* Ported Windows code to Dokany v 0.8
+Version 3.0.4
 	Fixes :
-	* Windows - Jdokan filesystem api timeout
-	* Windows - Rename files not working
+	* Fixed xml commandline parsing in mount.sdfs script
+	* Replaced Oracle JRE with Zulu Openjdk jre
+Version 3.0.3
+	Fixes :
+	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table.
+	* Volume recovery now working properly. Was not grabbing hashmaps properly from cloud providers.
+Version 3.0.2
+	Fixes :
+	* Cloud storage libs overlap for Joda
+	* Included export encryption libs
+	* Compaction of hashmaps now working properly
+	
+Version 3.0.1
+	This is a major new release of SDFS with a rewrite of the storage subsystem. This release includes enhancements to the following elements
+
+	Cloud Storage Enhancements :
+	* In-Line deduplication to a Cloud Storage Backend - SDFS can send all of its data to AWS, AZURE, or Google. 2.Performance Improvements - Compressed Multi-Threaded upload and download of data to the cloud
+	* Local Cache - SDFS will cache the most recently accessed data locally. This is configurable but set to 10 GB by Default
+	* Security - All data can be encrypted using AES-CBC 256 when sent to the cloud
+	* Throttling - Upload and download speeds can be throttled.
+	* Cloud Recovery/Replication - All local metadata is replicated to the cloud and can be recovered back to local volume.
+	* Glacier Support - Supports S3 Lifecycle policies and retrieving data from Glacier
+	* AWS Region Support - Supports all AWS Regions
+	* Amazon AIM Support
+	
+	Scalability Improvements:
+	* Tested to over 100TB of backend storage.
+	* Requires only 400MB of memory per TB of unique storage
+	* Unlimited Snapshots
+	* No compaction necessary sing orphaned data physically removed from underlying filesystem after garbage collection.
+	
+	General Enhancements :
+	* Mounts from fstab and using native linux mount commands (mount -t sdfs)
+	* Faster Volume Replication
+	* Local Encryption support - Uses AES-CBC 256
+	* Faster Garbage Collection - 300% improvement
+	
 Version 2.0.11
 	Fixes :
 	* Fixed copy of files with non-english characters
@@ -19,21 +86,15 @@ Version 2.0.9
 	* Garbage collection now done using new method that will increase performance
 	* Cloud Storage bucket location can now be defined using --aws-bucket-location
 Version 2.0.8
-	Fixes :
+	This release include a lot of internal code refactoring for adding back windows support and other features. 	
+	Fixes :	
 	* Fixed More Replication Symlink issues.
 	* Fixed random deadlock under high load
 	* Nested Snapshots looping
 	* Fixed odvol mapping files and releasing them. This cause a hang during creation and subsequent restarts
 	Enhancements :
 	* Added more replication resilience
-Version 2.0.2
-	Fixes :
-	* Fixed More Symlink issues.
-	* Fixed random IO corruption under high load
-	* Fixed concurrent file read and delete issues
-	* Fixed libfuse.so issue where Native library was used over custom library.
-	Enhancements :
-	* Improved read/write performance by 20%-50%
+	* Support for faster garbage collection in distributed DSE mode
 Version 2.0.1
 	Fixes :
 	* Fixed Replication Reporting of progress by bytes transferred.
@@ -103,6 +164,17 @@ Version 2.0-beta1
 	* Refactored filesystem Sync action
 	* Refactored XML configuration
 	* Refactored Replication :Now all traffice is encrypted over a single SSL port (6442)
+Version 1.2.3
+	Fixes:
+	* Fixed Unique block deletion for filebasedchunkstore
+	* Fixed volume freezing due to thread deadlock. Presented during rsync
+	* Fixed Azure bucket name not being honored.
+	Enhancements:
+	* 40% Read performance improvement under NFS through better locking techniques and file caching
+	* Better file level locking under concurrent IO should allow for lower latency multi write to the same file
+	* Added block caching for the S3,Azure, and FileChunkStore and defaults to 10MB. This should improve performance
+	  for multiple writes. This option can be configured during volume creation using the --chunk-store-read-cache option.
+	* Replaced the version of java that ships with SDFS.
 Version 1.2.1
 	Fixes:
 	* Free space calculation was causing problems with new volumes in 1.2.0 not being able to be more than .95 full.

@@ -60,6 +60,9 @@ public class SyncFS {
 	}
 
 	public SyncFS(String now) throws IOException {
+		fEvt = SDFSEvent
+				.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
+						+ Main.volume.getName() );
 	}
 
 	public static void registerListener(Object obj) {
@@ -71,9 +74,6 @@ public class SyncFS {
 		long entries = FileCounts.getCount(f, false);
 		try {
 			long sz = FileCounts.getSize(f, false);
-			fEvt = SDFSEvent
-					.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
-							+ Main.volume.getName() + " file size = " + sz);
 			fEvt.maxCt = sz;
 			if (fEvt.maxCt == 0)
 				fEvt.maxCt = 1;

@@ -1,3 +1,43 @@
+Version 3.2.1
+	Fixes
+	* Fixed non english character file names
+	* Fixed support for minio
+	* Encryption correctly uses IV parameter for encryption on S3
+	Enhancements
+	* Multi node read write support with global deduplication
+	* Added Swift Support
+	* Better read performance
+	* Lower memory requirements
+Version 3.1.2
+	Fixes
+	* Upload of metadata to cloud slow
+Version 3.1.1
+	Fixes
+	* Fixed cloud filesync
+	* Fixed dr restore from cloud to new local server
+Version 3.1.0
+	Fixes
+	* Fixed distributed DSE code for the 3.0 tree
+	* Optimized Replication now working in the 3.0 tree 
+	* Volume block device has been ported to the 3.0 tree
+	* Updated script files to point to appropriate sources
+	* Remove orphaned symlinks
+	* Fixed Cache Expiring for cloud storage data retrieval
+	Enhancements
+	* Write Performance Improvements. These performance improvements should increase write speeds by 50%-100% if your system can handle it
+	* Read Performance Speed Improvements. Refactored read pipeline to simplify read access. Increases speed by 20%.
+	* Default to TLSv1.2 for all communication
+	* Improved space savings on compaction. Removes individual orphaned blocks from chunks stored on disk. Not yet implemented for cloud storage
+	because of round trip cost.
+	* Ported Windows code to Dokany v 0.8
+Version 3.0.4
+	Fixes :
+	* Fixed xml commandline parsing in mount.sdfs script
+	* Replaced Oracle JRE with Zulu Openjdk jre
+Version 3.0.3
+	Fixes :
+	* Hashtable inserts are now multi-threaded. Inserts were blocking to wait for previous chunk writes. New behavior is to write block and then insert into table.
+	* Volume recovery now working properly. Was not grabbing hashmaps properly from cloud providers.
 Version 3.0.2
 	Fixes :
 	* Cloud storage libs overlap for Joda
