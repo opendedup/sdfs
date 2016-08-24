@@ -103,6 +103,7 @@ public class VolumeConfigWriter {
 	private boolean useDSESize = true;
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
+	private boolean basicS3Signer = false;
 	private String clusterID = "sdfs-cluster";
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	private byte clusterCopies = 2;
@@ -332,8 +333,10 @@ public class VolumeConfigWriter {
 				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-				if(cmd.hasOption("simple-s3"))
+				if(cmd.hasOption("simple-s3")) {
 					this.simpleS3 = true;
+					this.basicS3Signer = true;
+				}
 				if (!awsAim
 						&& !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkAuth(cloudAccessKey,
@@ -683,6 +686,8 @@ public class VolumeConfigWriter {
 					extended.setAttribute("simple-s3", "true");
 				else
 					extended.setAttribute("simple-s3", "false");
+				if(this.basicS3Signer)
+					extended.setAttribute("use-basic-signer", "true");
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location",
 							this.bucketLocation);
