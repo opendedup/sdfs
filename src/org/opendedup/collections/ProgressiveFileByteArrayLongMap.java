@@ -189,7 +189,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
 					nkb.position(0);
-					kFC.read(nkb, iterPos * EL);
+					kFC.read(nkb, (long)iterPos * (long)EL);
 					nkb.position(0);
 					nkb.get(key);
 					iterPos++;
@@ -224,7 +224,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
 					nkvb.position(0);
-					kFC.read(nkb, iterPos * EL);
+					kFC.read(nkb, (long)iterPos * (long)EL);
 					nkvb.position(0);
 					nkvb.get(key);
 					iterPos++;
@@ -260,7 +260,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			try {
 				byte[] key = new byte[FREE.length];
 				nkb.position(0);
-				kFC.read(nkb, iterPos * EL);
+				kFC.read(nkb, (long)iterPos * (long)EL);
 				nkb.position(0);
 				nkb.get(key);
 				iterPos++;
@@ -322,7 +322,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			while (iterPos < size) {
 				bz.position(0);
 				long val = -1;
-				kFC.read(bz,(iterPos * EL) + VP);
+				kFC.read(bz,((long)iterPos * (long)EL) + VP);
 				bz.position(0);
 				val = bz.getLong();
 				iterPos++;
@@ -345,12 +345,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 		File posFile = new File(path + ".keys");
 		boolean newInstance = !posFile.exists();
 		if (posFile.exists()) {
-			int _sz = (int) (posFile.length()) / (EL);
+			long _sz = (posFile.length()) / (long)(EL);
 			if (_sz != size) {
 				SDFSLogger.getLog().warn(
 						"Resetting size of hashtable to [" + _sz
 								+ "] instead of [" + size + "]");
-				this.size = _sz;
+				this.size = (int)_sz;
 			}
 		}
 		this.maxSz = (int) (size * loadFactor);
@@ -1279,7 +1279,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					try {
 						byte[] key = new byte[FREE.length];
 						cbf.position(0);
-						this.kFC.read(cbf,iterPos * EL);
+						this.kFC.read(cbf,(long)iterPos * (long)EL);
 						cbf.position(0);
 						cbf.get(key);
 						long val = cbf.getLong();
@@ -1291,7 +1291,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 								cbf.put(REMOVED);
 								cbf.putLong(0);
 								cbf.position(0);
-								this.kFC.write(cbf,iterPos * EL);
+								this.kFC.write(cbf,(long)iterPos * (long)EL);
 								ChunkData ck = new ChunkData(val, key);
 								ck.setmDelete(true);
 								this.mapped.clear(iterPos);
@@ -1335,6 +1335,9 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			else
 				bf = FileBasedBloomFilter.create(kbFunnel, sz.get(), .01,new File(path + ".nbf").getPath(),!Main.LOWMEM);
 			this.runningGC = true;
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error during claim process",e);
+			throw new IOException(e);
 		} finally {
 			l.unlock();
 		}
@@ -1348,7 +1351,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 					try {
 						byte[] key = new byte[FREE.length];
 						cbf.position(0);
-						this.kFC.read(cbf,iterPos * EL);
+						this.kFC.read(cbf,(long)iterPos * (long)EL);
 						cbf.position(0);
 						cbf.get(key);
 						long val = cbf.getLong();
@@ -1360,7 +1363,7 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 								cbf.put(REMOVED);
 								cbf.putLong(0);
 								cbf.position(0);
-								this.kFC.write(cbf,iterPos * EL);
+								this.kFC.write(cbf,(long)iterPos * (long)EL);
 								ChunkData ck = new ChunkData(val, key);
 								ck.setmDelete(true);
 								this.mapped.clear(iterPos);
@@ -1386,7 +1389,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 			this.runningGC = false;
 			l.unlock();
 			return _sz;
-		} finally {
+		} catch(IOException e){
+			throw e;
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("error during claim process",e);
+			throw new IOException(e);
+		}finally {
 			l = this.hashlock.writeLock();
 
 		}
