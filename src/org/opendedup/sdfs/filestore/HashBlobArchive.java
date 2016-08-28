@@ -1330,7 +1330,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l = this.lock.writeLock();
 				try {
 					l.lock();
-					if (_har.f.exists() && _har.f.length() > 0) {
+					if (_har.f.exists() && (_har.f.length()-offset) > 0) {
 						maps.invalidate(this.id);
 						openFiles.invalidate(this.id);
 						rchunks.remove(this.id);
