@@ -33,12 +33,12 @@ public class LargeFileBloomFilter implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	transient FLBF[] bfs = new FLBF[32];
+	transient FLBF[] bfs = new FLBF[128];
 
 	public LargeFileBloomFilter(long sz, double fpp,boolean sync) {
 		File td = Files.createTempDir();
 		td.mkdirs();
-		bfs = new FLBF[32];
+		bfs = new FLBF[128];
 		int isz = (int) (sz / bfs.length);
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs"),sync );
@@ -55,7 +55,7 @@ public class LargeFileBloomFilter implements Serializable {
 		if (hashb < 0) {
 			hashb = ((hashb * -1) + 127);
 		}
-		FLBF m = bfs[hashb/8];
+		FLBF m = bfs[hashb/2];
 		return m;
 	}
 

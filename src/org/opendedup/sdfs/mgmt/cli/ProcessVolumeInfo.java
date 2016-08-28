@@ -28,6 +28,9 @@ public class ProcessVolumeInfo {
 						.getAttribute("maximum-percentage-full"));
 				long currentSz = Long.parseLong(dse
 						.getAttribute("current-size"));
+				if(dse.hasAttribute("files")) {
+					System.out.println("Files : " + dse.getAttribute("files"));
+				}
 				long dedupSz = Long.parseLong(dse
 						.getAttribute("duplicate-bytes"));
 				long compSz = Long.parseLong(dse.getAttribute("dse-comp-size"));
@@ -56,7 +59,7 @@ public class ProcessVolumeInfo {
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
 									0);
 				} else {
-					double dedupRate = (1 - ((double) dseSz / (double) capacitySz) * 100);
+					double dedupRate = ((1 - ((double) dseSz / (double) capacitySz)) * 100);
 					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
 							.getNumberInstance(Locale.US);
 					twoDForm.applyPattern("#.##");

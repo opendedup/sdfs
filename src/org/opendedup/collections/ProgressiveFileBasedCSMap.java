@@ -77,7 +77,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	private LargeBloomFilter lbf = null;
 	private int hashTblSz = 100000;
 	private ArrayList<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayList<ProgressiveFileByteArrayLongMap>();
-	private static final int AMS = 1;
+	private static final int AMS = Main.parallelDBCount;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
@@ -444,7 +444,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	public void setMaxSize(long maxSz) throws IOException {
 		this.maxSz = maxSz;
 		long _tbs = maxSz / (32);
-		int max = (Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL) - 100;
+		int max = 200*1000000;
 		if (_tbs > max) {
 			this.hashTblSz = max;
 		} else if (_tbs > this.hashTblSz) {
@@ -452,10 +452,11 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		}
 		long otb = this.hashTblSz;
 		this.hashTblSz = NextPrime.getNextPrimeI((int) (this.hashTblSz));
+		long fsz = (long)max *(long)ProgressiveFileByteArrayLongMap.EL;
 		SDFSLogger.getLog().info(
 				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs="
 						+ _tbs + " calculated hashtblesz=" + otb
-						+ " hashTblSz=" + this.hashTblSz);
+						+ " hashTblSz=" + this.hashTblSz + " filesize=" + fsz );
 	}
 
 	/**

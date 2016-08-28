@@ -390,6 +390,8 @@ public class Config {
 			if (localChunkStore.hasAttribute("chunkstore-class"))
 				Main.chunkStoreClass = localChunkStore
 						.getAttribute("chunkstore-class");
+			if(localChunkStore.hasAttribute("parallel-db-count"))
+				Main.parallelDBCount = Integer.parseInt(localChunkStore.getAttribute("parallel-db-count"));
 			if (localChunkStore.hasAttribute("hashdb-class"))
 				Main.hashesDBClass = localChunkStore
 						.getAttribute("hashdb-class");

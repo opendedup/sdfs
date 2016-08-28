@@ -109,6 +109,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static RateLimiter rrl = null;
 	public static RateLimiter wrl = null;
 	public static boolean REMOVE_FROM_CACHE = true;
+	public static final boolean DISABLE_WRITE=false;
 	private static LoadingCache<Long, HashBlobArchive> archives = null;
 	private static LoadingCache<Long, SimpleByteArrayLongMap> maps = null;
 	private static LoadingCache<Long, FileChannel> openFiles = null;
@@ -885,6 +886,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private void putChunk(byte[] hash, byte[] chunk) throws IOException,
 			ArchiveFullException, ReadOnlyArchiveException {
+		if(DISABLE_WRITE) {
+			this.uncompressedLength.addAndGet(chunk.length);
+			HashBlobArchive.currentLength.addAndGet(chunk.length);
+			HashBlobArchive.compressedLength.addAndGet(chunk.length);
+			return;
+		}
 		Lock ul = this.uploadlock.readLock();
 
 		if (ul.tryLock()) {
@@ -992,6 +999,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public void delete() {
+		if(DISABLE_WRITE)
+			return;
 		Lock l = this.lock.writeLock();
 		l.lock();
 		try {
@@ -1019,7 +1028,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			f.delete();
 			File lf = new File(f.getPath() + ".map");
 			lf.delete();
-
+			lf = new File(f.getPath() + ".md");
+			lf.delete();
 			rchunks.remove(this.id);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error deleting object", e);
@@ -1029,6 +1039,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	private void removeCache() {
+		if(DISABLE_WRITE)
+			return;
 		if (REMOVE_FROM_CACHE) {
 			Lock l = this.lock.writeLock();
 			l.lock();
@@ -1275,6 +1287,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public long compact() throws IOException {
+		if(DISABLE_WRITE)
+			return 0;
 		Lock l = this.lock.writeLock();
 		try {
 			l.lock();
@@ -1330,15 +1344,18 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l = this.lock.writeLock();
 				try {
 					l.lock();
-					if (_har.f.exists() && _har.f.length() > 0) {
+					if (_har.f.exists() && (_har.f.length()-offset) > 0) {
 						maps.invalidate(this.id);
 						openFiles.invalidate(this.id);
 						rchunks.remove(this.id);
+						int trys=0;
 						while (!_har.moveFile(this.id)) {
 							Thread.sleep(100);
+							trys++;
+							if(trys > 4)
+								throw new IOException();
 						}
 					} else {
-
 						_har.delete();
 						return 0;
 					}
@@ -1395,14 +1412,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 					StandardCopyOption.REPLACE_EXISTING);
 			f = nf;
 			SimpleByteArrayLongMap om = wMaps.remove(this.id);
-
+			
 			File mf = new File(getPath(nid).getPath() + ".map");
 			if (om != null) {
 				om.close();
-				File omf = new File(om.getPath());
-				Files.move(omf.toPath(), mf.toPath(),
-						StandardCopyOption.REPLACE_EXISTING);
 			}
+			File omf = new File(getPath(this.id).getPath()+ ".map");
+			Files.move(omf.toPath(), mf.toPath(),
+						StandardCopyOption.REPLACE_EXISTING);
 
 			this.cached = true;
 			archives.put(nid, this);

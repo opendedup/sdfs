@@ -36,6 +36,7 @@ import org.opendedup.sdfs.cluster.VolumeSocket;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.FileCounts;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
@@ -63,6 +64,7 @@ public class Volume implements java.io.Serializable {
 	long absoluteLength = -1;
 	private static boolean storageConnected = true;
 	private AtomicLong duplicateBytes = new AtomicLong(0);
+	private AtomicLong files = new AtomicLong(0);
 	private AtomicDouble virtualBytesWritten = new AtomicDouble(0);
 	private AtomicDouble readBytes = new AtomicDouble(0);
 	private AtomicLong actualWriteBytes = new AtomicLong(0);
@@ -123,6 +125,18 @@ public class Volume implements java.io.Serializable {
 		if (z == 0) {
 			SDFSEvent.wrErrEvent();
 		}
+	}
+	
+	public void addFile() {
+		this.files.incrementAndGet();
+	}
+	
+	public long getFiles() {
+		return this.files.get();
+	}
+	
+	public void removeFile() {
+		this.files.decrementAndGet();
 	}
 
 	public void addReadError() {
@@ -250,6 +264,14 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("write-bytes"))
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
+		if(vol.hasAttribute("files")) {
+			this.files.set(Long.parseLong(vol.getAttribute("files")));
+		} else {
+			File vf = new File(Main.dedupDBStore);
+			if (vf.exists()) {
+				this.files.set(FileCounts.getCounts(vf, false));
+			}
+		}
 
 		if (vol.hasAttribute("serial-number")) {
 			this.serialNumber = Long.parseLong(vol
@@ -588,6 +610,7 @@ public class Volume implements java.io.Serializable {
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("cluster-id", this.uuid);
+		root.setAttribute("files", Long.toString(this.files.get()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("allow-external-links",
@@ -660,6 +683,7 @@ public class Volume implements java.io.Serializable {
 				Double.toString(this.writeOperations.get()));
 		root.setAttribute("readerrors", Long.toString(this.readErrors.get()));
 		root.setAttribute("writeerrors", Long.toString(this.writeErrors.get()));
+		root.setAttribute("files", Long.toString(this.files.get()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links",

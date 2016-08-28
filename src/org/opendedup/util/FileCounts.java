@@ -64,6 +64,37 @@ public class FileCounts {
 		return size;
 	}
 
+	public static long getCounts(File file, boolean followSymlinks)
+			throws IOException {
+		// Store the total size of all files
+		long size = 0;
+		boolean symlink = false;
+		if (!OSValidator.isWindows() && !followSymlinks)
+			symlink = Files.readAttributes(file.toPath(),
+					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+					.isSymbolicLink();
+		if (!symlink) {
+			if (file.isDirectory()) {
+				// All files and subdirectories
+				File[] files = file.listFiles();
+				for (int i = 0; i < files.length; i++) {
+					// Recursive call
+					try {
+						size += getCounts(files[i], followSymlinks);
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"Unable to get " + files[i].getPath(), e);
+					}
+				}
+			}
+			// Base case
+			else if(!file.getPath().endsWith("mmf")){
+				size = 1;
+			}
+		}
+		return size;
+	}
+	
 	public static long getDBFileSize(File metaFile, boolean followSymlinks)
 			throws IOException {
 		long size = 0;

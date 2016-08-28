@@ -663,8 +663,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					+ this.getIOMonitor().getActualBytesWritten(), true);
 			Main.volume.addVirtualBytesWritten(this.getIOMonitor()
 					.getVirtualBytesWritten(), true);
+			Main.volume.addFile();
 			_mf.setVmdk(this.isVmdk(), true);
 			_mf.dirty = true;
+			
 			_mf.unmarshal();
 			_mf.sync();
 			evt.curCt = evt.curCt + 1;
@@ -820,6 +822,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
 						"Creating new MetaFile for " + this.path);
+			
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
 			this.owner_id = Main.defaultOwner;
@@ -829,6 +832,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.dedup = Main.dedupFiles;
 			this.setLength(0, false, true);
 			this.dirty = true;
+			Main.volume.addFile();
 			this.sync();
 		} else if (f.isDirectory()) {
 			this.permissions = Main.defaultDirPermissions;
@@ -967,9 +971,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
-			eventBus.post(new MFileDeleted(this));
+			
 			boolean del = f.delete();
-
+			if(del) {
+			Main.volume.removeFile();
+			eventBus.post(new MFileDeleted(this));
+			}
 			return del;
 		} finally {
 			this.writeLock.unlock();

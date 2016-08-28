@@ -436,7 +436,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	public void run() {
 		while (!closed) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 				if (this.deletes.size() > 0) {
 					this.delLock.lock();
 					HashMap<Long, Integer> odel = null;
@@ -533,7 +533,6 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 								this.writeHashMap(metaData, k);
 								try {
 									sz += HashBlobArchive.compactArchive(k);
-
 									HashBlobArchive.currentLength.addAndGet(-1
 											* Integer.parseInt(metaData
 													.get("bsize")));

@@ -20,18 +20,23 @@ package org.opendedup.mtools;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Set;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
@@ -42,8 +47,6 @@ import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.FileCounts;
-
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
@@ -53,10 +56,9 @@ public class BloomFDisk {
 	transient LargeFileBloomFilter bf = null;
 	private boolean failed = false;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
+			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
 
@@ -92,7 +94,7 @@ public class BloomFDisk {
 			return;
 		}
 		try {
-			long sz = FileCounts.getSize(f, false);
+			long sz = Main.volume.getFiles();
 			fEvt = SDFSEvent.fdiskInfoEvent("Starting BFDISK for "
 					+ Main.volume.getName() + " file size = " + sz, evt);
 			fEvt.maxCt = sz;
@@ -148,20 +150,56 @@ public class BloomFDisk {
 		}
 	}
 
-	ReentrantLock l = new ReentrantLock();
+	
 
+	
 	private void checkDedupFile(File mapFile) {
 		LongByteArrayMap mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
-			long prevpos = 0;
+			File dbf = new File(mapFile.getPath()+".mmf");
+			if(dbf.exists() && dbf.lastModified() >= mapFile.lastModified()) {
+				DB db = null;
+				try {
+					long tm = System.currentTimeMillis();
+					db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable()
+						    .fileMmapEnableIfSupported().readOnly().make();
+					Set<byte[]> map = db.treeSet("refmap", Serializer.BYTE_ARRAY).open();
+					map.forEach(new Consumer<byte []>(){
+
+						@Override
+						public void accept(byte[] b) {
+							bf.put(b);
+							
+						}});
+					
+					db.close();
+					long etm = System.currentTimeMillis() - tm;
+					SDFSLogger.getLog().info("tm = " + etm);
+					synchronized(fEvt) {
+					fEvt.curCt ++;
+					}
+					this.files.incrementAndGet();
+					return;
+				} catch(Exception e) {
+					SDFSLogger.getLog().error("unable to read db",e);
+					try {
+						db.close();
+					}catch(Exception e1) {
+						
+					}
+					dbf.delete();
+				}
+			}
+			//long msz = mapFile.length()/4;
+			DB db = null;
+			dbf.delete();
+			db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable()
+				    .fileMmapEnableIfSupported().allocateStartSize(1024).allocateIncrement(1024).make();
+			Set<byte[]> map = db.treeSet("refmap", Serializer.BYTE_ARRAY).create();
 			byte[] val = new byte[0];
 			mp.iterInit();
 			while (val != null) {
-				l.lock();
-				fEvt.curCt += (mp.getIterPos() - prevpos);
-				l.unlock();
-				prevpos = mp.getIterPos();
 				val = mp.nextValue();
 				if (val != null) {
 					SparseDataChunk ck = new SparseDataChunk(val,
@@ -169,9 +207,16 @@ public class BloomFDisk {
 					List<HashLocPair> al = ck.getFingers();
 					for (HashLocPair p : al) {
 						bf.put(p.hash);
+						map.add(p.hash);
 					}
 				}
 			}
+
+			synchronized(fEvt) {
+			fEvt.curCt++;
+			}
+			db.commit();
+			db.close();
 		} catch (Throwable e) {
 			SDFSLogger.getLog().info(
 					"error while checking file [" + mapFile.getPath() + "]", e);
