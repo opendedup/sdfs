@@ -2,10 +2,11 @@
 #modprobe fuse > /dev/null
 BASEMEMORY="1000"
 CFG=""
-MPTG=4
+MPTG=3
 LMPTG=2
 MU="M"
 EXEC="/usr/share/sdfs/jsvc"
+BASEPATH="/usr/share/sdfs"
 PF="sdfs-ncfg.pid"
 if [[ {$1:0:1} == '-' ]]; then
 while getopts ":v:" opt; do
@@ -42,7 +43,7 @@ else
         MEMORY=$MEM
 fi
 
-LD_PRELOAD="/usr/share/sdfs/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=/usr/share/sdfs/bin/ -home /usr/share/sdfs/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
- -Dfuse.logging.level=INFO -Xmx$MEMORY$MU -Xms$MEMORY$MU \
+LD_PRELOAD="${BASEPATH}/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=${BASEPATH}/bin/ -home ${BASEPATH}/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
+ -wait 99999999999 -Dfuse.logging.level=INFO -Dfile.encoding=UTF-8 -Xmx$MEMORY$MU -Xms$MEMORY$MU \
 -XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
- -cp /usr/share/sdfs/lib/commons-daemon-1.0.15.jar:/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* fuse.SDFS.MountSDFS "$@"
+ -cp ${BASEPATH}/lib/commons-daemon-1.0.15.jar:${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* fuse.SDFS.MountSDFS "$@"

@@ -1091,4 +1091,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		return 0;
 	}
 
+	@Override
+	public int destroy(ByteBuffer buf) throws FuseException {
+		try {
+			MountSDFS.shutdownHook.shutdown();
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error shutting down service ", e);
+			throw new FuseException().initErrno(Errno.ENODATA);
+		}
+		return 0;
+	}
+
 }

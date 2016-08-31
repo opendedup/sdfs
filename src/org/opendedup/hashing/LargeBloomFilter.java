@@ -74,7 +74,7 @@ public class LargeBloomFilter implements Serializable {
 		if (fb)
 			bar = new CommandLineProgressBar("Loading BloomFilters",
 					bfs.length, System.out);
-		int isz = (int) (sz / bfs.length);
+		long isz = sz / bfs.length;
 		for (int i = 0; i < bfs.length; i++) {
 			File f = new File(dir.getPath() + File.separator + "lbf" + i
 					+ ".nbf");
@@ -179,7 +179,11 @@ public class LargeBloomFilter implements Serializable {
 
 		@Override
 		public void run() {
+			try {
 			bfs[pos] = new FLBF(sz, fpp, f, sync);
+			}catch(Exception e) {
+				SDFSLogger.getLog().error("unable to create bloom filter",e);
+			}
 
 		}
 

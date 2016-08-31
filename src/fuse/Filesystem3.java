@@ -80,6 +80,8 @@ public interface Filesystem3 extends FilesystemConstants {
 	public int utime(String path, int atime, int mtime) throws FuseException;
 
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException;
+	
+	public int destroy(ByteBuffer buf) throws FuseException;
 
 	// if open returns a filehandle by calling FuseOpenSetter.setFh() method, it
 	// will be passed to every method that supports 'fh' argument

@@ -29,7 +29,7 @@ public class MountSDFS implements Daemon, Runnable {
 	private static String[] sFal = null;
 	private static SDFSService sdfsService;
 	private static String mountOptions;
-	private static ShutdownHook shutdownHook = null;
+	protected static ShutdownHook shutdownHook = null;
 
 	public static Options buildOptions() {
 		Options options = new Options();

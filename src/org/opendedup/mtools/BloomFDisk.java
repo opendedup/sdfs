@@ -61,7 +61,6 @@ public class BloomFDisk {
 			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
 			worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
 			executionHandler);
-
 	
 	public BloomFDisk() {
 
@@ -256,7 +255,11 @@ public class BloomFDisk {
 
 		@Override
 		public void run() {
+			try {
 			fd.checkDedupFile(f);
+			}catch(Exception e) {
+				SDFSLogger.getLog().error("error doing fdisk", e);
+			}
 		}
 	}
 

@@ -36,7 +36,7 @@ public class PFullGC implements GCControllerImpl {
 
 	public PFullGC() {
 		this.prevPFull = calcPFull();
-		this.nextPFull = Math.ceil(this.prevPFull * 10) / 10;
+		this.nextPFull = this.calcNxtRun();
 		if (this.nextPFull == 0)
 			this.nextPFull = .1;
 		double pFull = (this.prevPFull * 100);
@@ -109,11 +109,12 @@ public class PFullGC implements GCControllerImpl {
 		double next = this.calcPFull();
 		if (next >= .92)
 			return .90;
-		else {
-			next = Math.ceil(next * 10.0) / 10;
-		}
-		if (next == 0)
-			next = .1;
+		if (next >= 0)
+			next = .6;
+		if(next > .6)
+			next = next +.1;
+		if(next > .8)
+			next = next + .05;
 		return next;
 	}
 
@@ -127,8 +128,8 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	public static void main(String[] args) {
-		double num = 0.800338958916741818D;
-
+		double num = 0.400338958916741818D;
+		System.out.println(Math.ceil(num * 10.0));
 		System.out.println(Math.ceil(num * 10.0) / 10);
 	}
 

@@ -34,6 +34,8 @@ class ShutdownHook extends Thread {
 				} catch (Exception e) {
 				}
 				SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
+				sr=true;
+				
 			}
 		}
 	}

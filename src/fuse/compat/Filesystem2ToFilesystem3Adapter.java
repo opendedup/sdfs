@@ -160,7 +160,6 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 		statfsSetter.set(statfs.blockSize, statfs.blocks, statfs.blocksFree,
 				statfs.blocksAvail, statfs.files, statfs.filesFree,
 				statfs.namelen);
-
 		return 0;
 	}
 
@@ -199,6 +198,12 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 			long offset) throws FuseException {
 		fs2.write(path, fh, isWritepage, buf, offset);
 
+		return 0;
+	}
+
+	@Override
+	public int destroy(ByteBuffer buf) throws FuseException {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 }

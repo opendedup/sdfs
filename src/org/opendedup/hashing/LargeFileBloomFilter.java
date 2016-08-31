@@ -20,12 +20,13 @@ package org.opendedup.hashing;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.opendedup.sdfs.Main;
 import org.opendedup.util.CommandLineProgressBar;
 
-import com.google.common.io.Files;
 
 public class LargeFileBloomFilter implements Serializable {
 
@@ -36,10 +37,10 @@ public class LargeFileBloomFilter implements Serializable {
 	transient FLBF[] bfs = new FLBF[128];
 
 	public LargeFileBloomFilter(long sz, double fpp,boolean sync) {
-		File td = Files.createTempDir();
+		File td = new File(new File(Main.dedupDBStore).getParent()+ File.separator + "tmp");
 		td.mkdirs();
 		bfs = new FLBF[128];
-		int isz = (int) (sz / bfs.length);
+		long isz = sz / bfs.length;
 		for (int i = 0; i < bfs.length; i++) {
 			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs"),sync );
 		}

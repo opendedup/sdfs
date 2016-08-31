@@ -729,4 +729,19 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 
 		return errno;
 	}
+
+	@Override
+	public int destroy(ByteBuffer data) {
+		if (log != null && log.isDebugEnabled()) {
+			log.debug("stopping filesystem");
+		}
+
+		try {
+			return handleErrno(
+					fs3.destroy(data));
+		} catch (Exception e) {
+			return handleException(e);
+		}
+		
+	}
 }

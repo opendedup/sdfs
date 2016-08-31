@@ -1,2 +1,4 @@
-/usr/share/sdfs/bin/jre/bin/java  -Dfile.encoding=UTF-8 -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* org.opendedup.sdfs.VolumeConfigWriter "$@"
+#!/bin/bash
+BASEPATH="/usr/share/sdfs"
+${BASEPATH}/bin/jre/bin/java  -Dfile.encoding=UTF-8 -classpath ${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* org.opendedup.sdfs.VolumeConfigWriter "$@"
 
