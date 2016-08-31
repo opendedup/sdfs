@@ -421,6 +421,7 @@ typedef struct _jclass_fuse_FuseFS
       jmethodID mkdir__Ljava_nio_ByteBuffer_I;
       jmethodID rename__Ljava_nio_ByteBuffer_Ljava_nio_ByteBuffer_;
       jmethodID release__Ljava_nio_ByteBuffer_J_I;
+	  jmethodID destroy;
 
    } method;
 

@@ -981,6 +981,16 @@ static int javafs_fsync(const char *path, int datasync, struct fuse_file_info *f
    return -jerrno;
 }
 
+static void javafs_destroy(void *mt) {
+	while (1)
+   {
+	   (*env)->CallVoidMethod(env, fuseFS, FuseFS->method.destroy);
+	   break;
+   }
+	   
+	
+}
+
 
 //
 // extended attributes support contributed by Steven Pearson <steven_pearson@final-step.com>

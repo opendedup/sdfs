@@ -202,8 +202,8 @@ public class Filesystem2ToFilesystem3Adapter implements Filesystem3 {
 	}
 
 	@Override
-	public int destroy(ByteBuffer buf) throws FuseException {
+	public void destroy() throws FuseException {
 		// TODO Auto-generated method stub
-		return 0;
+		return;
 	}
 }

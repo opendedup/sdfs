@@ -1092,14 +1092,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	}
 
 	@Override
-	public int destroy(ByteBuffer buf) throws FuseException {
+	public void destroy() throws FuseException {
 		try {
+			SDFSLogger.getLog().info("unmount initiated");
 			MountSDFS.shutdownHook.shutdown();
 		} catch(Exception e) {
 			SDFSLogger.getLog().error("error shutting down service ", e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		}
-		return 0;
 	}
 
 }

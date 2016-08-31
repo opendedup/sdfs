@@ -50,8 +50,6 @@ public interface FuseFS extends FilesystemConstants {
 	public int truncate(ByteBuffer path, long size);
 
 	public int utime(ByteBuffer path, int atime, int mtime);
-	
-	public int destroy(ByteBuffer data);
 
 	public int statfs(FuseStatfsSetter statfsSetter);
 
@@ -94,5 +92,5 @@ public interface FuseFS extends FilesystemConstants {
 	// initialize.
 	public int init();
 
-	public int destroy();
+	public void destroy();
 }

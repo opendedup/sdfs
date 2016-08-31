@@ -666,23 +666,6 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 		}
 	}
 
-	@Override
-	public int destroy() {
-		if (lifecycleSupport == null) {
-			return handleErrno(Errno.ENOTSUPP);
-		}
-
-		if (log != null && log.isDebugEnabled()) {
-			log.debug("destroy: shutdown filesystem");
-		}
-
-		try {
-			return handleErrno(lifecycleSupport.destroy());
-		} catch (Exception e) {
-			return handleException(e);
-		}
-	}
-
 	//
 	// private
 	private int handleErrno(int errno) {
@@ -731,17 +714,18 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	}
 
 	@Override
-	public int destroy(ByteBuffer data) {
+	public void destroy() {
 		if (log != null && log.isDebugEnabled()) {
 			log.debug("stopping filesystem");
 		}
 
 		try {
-			return handleErrno(
-					fs3.destroy(data));
+			
+					fs3.destroy();
 		} catch (Exception e) {
-			return handleException(e);
+			log.error(e);
 		}
 		
 	}
+
 }

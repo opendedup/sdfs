@@ -81,7 +81,7 @@ public interface Filesystem3 extends FilesystemConstants {
 
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException;
 	
-	public int destroy(ByteBuffer buf) throws FuseException;
+	public void destroy() throws FuseException;
 
 	// if open returns a filehandle by calling FuseOpenSetter.setFh() method, it
 	// will be passed to every method that supports 'fh' argument

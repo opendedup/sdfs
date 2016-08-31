@@ -720,7 +720,7 @@ jclass_fuse_FuseFS *alloc_jclass_fuse_FuseFS(JNIEnv *env)
       if ((*env)->ExceptionCheck(env)) break;
       fuse_FuseFS->method.release__Ljava_nio_ByteBuffer_J_I = (*env)->GetMethodID(env, fuse_FuseFS->class, "release", "(Ljava/nio/ByteBuffer;JI)I");
       if ((*env)->ExceptionCheck(env)) break;
-	  fuse_FuseFS->method.destroy__Ljava_nio_ByteBuffer = (*env)->GetMethodID(env, fuse_FuseFS->class, "destroy", "(Ljava/nio/ByteBuffer)I");
+	  fuse_FuseFS->method.destroy = (*env)->GetMethodID(env, fuse_FuseFS->class, "destroy", "()V");
       if ((*env)->ExceptionCheck(env)) break;
 
       // we're done
