@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.opendedup.collections;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import java.util.Comparator;
@@ -39,7 +40,9 @@ public class SortedReadMapList implements Runnable {
 
 			try {
 				Thread.sleep(10 * 1000);
-				Collections.sort(al, TIME_ORDER);
+				synchronized(al) {
+					Collections.sort(al, TIME_ORDER);
+				}
 
 			} catch (Exception e) {
 
@@ -47,6 +50,23 @@ public class SortedReadMapList implements Runnable {
 
 			}
 		}
+	}
+	
+	public void sort() {
+		synchronized(al) {
+			Collections.sort(al, TIME_ORDER);
+		}
+	}
+	
+	public List<ProgressiveFileByteArrayLongMap> getLMMap() {
+		ArrayList<ProgressiveFileByteArrayLongMap> _al = new ArrayList<ProgressiveFileByteArrayLongMap>();
+		synchronized(al) {
+		for(ProgressiveFileByteArrayLongMap m : al) {
+			_al.add(m);
+		}
+		}
+		Collections.sort(_al, LM_ORDER);
+		return _al;
 	}
 
 	public void add(ProgressiveFileByteArrayLongMap m) {
@@ -80,6 +100,19 @@ public class SortedReadMapList implements Runnable {
 		public int compare(ProgressiveFileByteArrayLongMap m0,
 				ProgressiveFileByteArrayLongMap m1) {
 			long dif = m0.lastFound - m1.lastFound;
+			if (dif > 0)
+				return -1;
+			if (dif < 0)
+				return 1;
+			else
+				return 0;
+		}
+	};
+	
+	static final Comparator<ProgressiveFileByteArrayLongMap> LM_ORDER = new Comparator<ProgressiveFileByteArrayLongMap>() {
+		public int compare(ProgressiveFileByteArrayLongMap m0,
+				ProgressiveFileByteArrayLongMap m1) {
+			long dif = m0.getLastModified() - m1.getLastModified();
 			if (dif > 0)
 				return -1;
 			if (dif < 0)

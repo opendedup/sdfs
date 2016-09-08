@@ -36,6 +36,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -87,6 +88,7 @@ public class ProgressiveFileByteArrayLongMap
 	transient private boolean runningGC;
 	transient private long bgst = 0;
 	transient boolean full = false;
+	transient private boolean compacting = false;
 	transient private boolean active = false;
 	transient private boolean cached = false;
 	public transient long lastFound = 0;
@@ -106,6 +108,14 @@ public class ProgressiveFileByteArrayLongMap
 		this.path = path;
 	}
 
+	public void compactRunning(boolean running) {
+		this.compacting = running;
+	}
+
+	public boolean isCompactig() {
+		return this.compacting;
+	}
+
 	public void inActive() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
@@ -116,6 +126,7 @@ public class ProgressiveFileByteArrayLongMap
 	public void activate() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
+		this.lastFound = System.currentTimeMillis();
 		this.active = true;
 		l.unlock();
 	}
@@ -130,10 +141,12 @@ public class ProgressiveFileByteArrayLongMap
 		}
 	}
 
-	public void cache() {
+	public synchronized void cache() {
 		if (!cached) {
 			this.hashlock.writeLock().lock();
 			try {
+				if (this.isClosed())
+					throw new IOException("map closed");
 				if (!this.cached) {
 					loadCacheExecutor.execute(this);
 					this.cached = true;
@@ -181,6 +194,8 @@ public class ProgressiveFileByteArrayLongMap
 			Lock l = this.hashlock.writeLock();
 			l.lock();
 			try {
+				if (this.isClosed())
+					throw new IOException("map closed");
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
 					kFC.writeToArray((long) iterPos * (long) EL, key, 0, key.length);
@@ -214,6 +229,8 @@ public class ProgressiveFileByteArrayLongMap
 			Lock l = this.hashlock.writeLock();
 			l.lock();
 			try {
+				if (this.isClosed())
+					throw new IOException("map closed");
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
 					long pos = (long) iterPos * (long) EL;
@@ -246,7 +263,7 @@ public class ProgressiveFileByteArrayLongMap
 		return null;
 	}
 
-	public byte[] _nextKey() throws IOException {
+	private byte[] _nextKey() throws IOException {
 		while (iterPos < size) {
 			Lock l = this.hashlock.writeLock();
 			l.lock();
@@ -471,7 +488,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
-
+			if (this.isClosed())
+				throw new IOException("map closed");
 			if (!bf.mightContain(key)) {
 				return false;
 			}
@@ -512,6 +530,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			if (this.isClosed())
+				throw new IOException("map closed");
 			long index = index(key);
 			if (index >= 0) {
 				int pos = (int) (index / EL);
@@ -540,7 +560,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-
+			if (this.isClosed())
+				throw new IOException("map closed");
 			long pos = this.index(key);
 			if (pos == -1) {
 				return false;
@@ -585,6 +606,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
+			if (this.isClosed())
+				throw new IOException("map closed");
 			if (!bf.mightContain(key))
 				return false;
 
@@ -738,7 +761,7 @@ public class ProgressiveFileByteArrayLongMap
 		else
 			index = index * EL;
 		if (migthexist) {
-				kFC.writeToArray(index, current, 0, current.length);
+			kFC.writeToArray(index, current, 0, current.length);
 			if (Arrays.equals(current, key)) {
 				return -index - 1; // already stored
 			}
@@ -822,7 +845,10 @@ public class ProgressiveFileByteArrayLongMap
 	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
+
 		try {
+			if (this.isClosed())
+				throw new IOException("map closed");
 			byte[] key = cm.getHash();
 
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
@@ -887,6 +913,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
+			if (this.isClosed())
+				throw new IOException("map closed");
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
@@ -971,6 +999,8 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			if (this.isClosed())
+				throw new IOException("map closed");
 			if (key == null)
 				return -1;
 			if (!this.bf.mightContain(key)) {
@@ -984,9 +1014,7 @@ public class ProgressiveFileByteArrayLongMap
 			} else {
 				this.lastFound = System.currentTimeMillis();
 				long val = -1;
-				synchronized (kFC) {
-					val = this.kFC.getLong(pos + VP);
-				}
+				val = this.kFC.getLong(pos + VP);
 				if (claim) {
 					pos = (pos / EL);
 					synchronized (this.claims) {
@@ -1035,6 +1063,16 @@ public class ProgressiveFileByteArrayLongMap
 		return this.path;
 	}
 
+	public boolean isClosed() {
+		Lock l = this.hashlock.readLock();
+		l.lock();
+		try {
+			return this.closed;
+		} finally {
+			l.unlock();
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1053,11 +1091,19 @@ public class ProgressiveFileByteArrayLongMap
 
 			}
 			try {
+				this.kFC.close();
+
+			} catch (Exception e) {
+
+			}
+
+			try {
 				this.kFC.free();
 
 			} catch (Exception e) {
 
 			}
+
 			try {
 				File f = new File(path + ".vmp");
 				FileOutputStream fout = new FileOutputStream(f);
@@ -1230,6 +1276,8 @@ public class ProgressiveFileByteArrayLongMap
 				synchronized (this.claims) {
 
 					try {
+						if (this.isClosed())
+							throw new IOException("map closed");
 						byte[] key = new byte[FREE.length];
 						long pos = (long) iterPos * (long) EL;
 						kFC.writeToArray(pos, key, 0, key.length);
@@ -1296,6 +1344,8 @@ public class ProgressiveFileByteArrayLongMap
 				synchronized (this.claims) {
 
 					try {
+						if (this.isClosed())
+							throw new IOException("map closed");
 						byte[] key = new byte[FREE.length];
 						long pos = (long) iterPos * (long) EL;
 						kFC.writeToArray(pos, key, 0, key.length);
@@ -1351,17 +1401,44 @@ public class ProgressiveFileByteArrayLongMap
 	}
 
 	public void vanish() {
-		this.close();
-		File f = new File(path + ".keys");
-		f.delete();
-		f = new File(path + ".bpos");
-		f.delete();
-		f = new File(path + ".vmp");
-		f.delete();
-		f = new File(path + ".vrp");
-		f.delete();
-		f = new File(path + ".nbf");
-		f.delete();
+		Lock l = this.hashlock.writeLock();
+		l.lock();
+		try {
+			this.closed = true;
+			try {
+				this.kFC.flush();
+
+			} catch (Exception e) {
+
+			}
+			try {
+				this.kFC.close();
+
+			} catch (Exception e) {
+
+			}
+
+			try {
+				this.kFC.free();
+
+			} catch (Exception e) {
+
+			}
+			File f = new File(path + ".keys");
+			f.delete();
+			f = new File(path + ".bpos");
+			f.delete();
+			f = new File(path + ".vmp");
+			f.delete();
+			f = new File(path + ".vrp");
+			f.delete();
+			f = new File(path + ".nbf");
+			f.delete();
+			this.bf = null;
+			this._bf = null;
+		} finally {
+			l.unlock();
+		}
 	}
 
 	protected void initialize() {
@@ -1378,17 +1455,35 @@ public class ProgressiveFileByteArrayLongMap
 
 	}
 
+	AtomicLong lastRead = new AtomicLong(0);
+	private static long mtm = 60 * 1000 * 45;// 45 minutes
+
 	@Override
 	public void run() {
-		int ip = 0;
-		byte[] key = new byte[EL * 43690];
-		while ((ip + (2 * 43690)) < size && !this.closed) {
-			long pos = (long) ip * (long) EL;
-			kFC.writeToArray(pos, key, 0, key.length);
-			ip += 100;
-		}
-		SDFSLogger.getLog().info("done reading " + this.path);
+		synchronized (lastRead) {
 
+			long lr = System.currentTimeMillis() - lastRead.get();
+			if (lr > mtm) {
+				File posFile = new File(path + ".keys");
+				long cp = 0;
+				byte[] key = new byte[1024 * 1024 * 5];
+				while ((cp + key.length) < posFile.length() && !this.closed) {
+					kFC.writeToArray(cp, key, 0, key.length);
+					cp += key.length;
+				}
+				key = new byte[(int) (posFile.length() - cp)];
+				if (key.length > 0)
+					kFC.writeToArray(cp, key, 0, key.length);
+				//SDFSLogger.getLog().info("done reading " + this.path);
+				lastRead.set(System.currentTimeMillis());
+				this.cached = false;
+			}
+
+		}
+	}
+
+	public long getLastModified() {
+		return new File(path + ".keys").lastModified();
 	}
 
 	@Override

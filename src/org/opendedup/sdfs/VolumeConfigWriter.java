@@ -58,6 +58,7 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	boolean simpleS3 = false;
+	boolean v4Signer = false;
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
@@ -335,9 +336,12 @@ public class VolumeConfigWriter {
 				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-				if(cmd.hasOption("simple-s3")) {
+				if(cmd.hasOption("aws-simple-s3")) {
 					this.simpleS3 = true;
 					this.basicS3Signer = true;
+				}
+				if(cmd.hasOption("aws-use-v4-signer")) {
+					
 				}
 				if (!awsAim
 						&& !cmd.hasOption("cloud-disable-test")
@@ -1146,6 +1150,11 @@ public class VolumeConfigWriter {
 						"TCP Port to listen on for incoming connections. Defaults to 2222")
 				.hasArg().withArgName("TCP Port").create());
 		options.addOption(OptionBuilder
+				.withLongOpt("aws-use-v4-signer")
+				.withDescription(
+						"Use the AWS v4 signer for S3 connection.")
+				.create());
+		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-network")
 				.withDescription(
 						"Enable Network Services for Dedup Storage Enginge to serve remote hosts")
@@ -1155,7 +1164,7 @@ public class VolumeConfigWriter {
 				.withDescription("Enable this volume as a replication master")
 				.create());
 		options.addOption(OptionBuilder
-				.withLongOpt("simple-s3")
+				.withLongOpt("aws-simple-s3")
 				.withDescription("Uses basic S3 api characteristics for cloud storage backend.")
 				.create());
 		options.addOption(OptionBuilder

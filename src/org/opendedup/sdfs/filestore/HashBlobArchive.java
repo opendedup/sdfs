@@ -109,7 +109,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static RateLimiter rrl = null;
 	public static RateLimiter wrl = null;
 	public static boolean REMOVE_FROM_CACHE = true;
-	public static final boolean DISABLE_WRITE=true;
+	public static final boolean DISABLE_WRITE=false;
 	private static LoadingCache<Long, HashBlobArchive> archives = null;
 	private static LoadingCache<Long, SimpleByteArrayLongMap> maps = null;
 	private static LoadingCache<Long, FileChannel> openFiles = null;

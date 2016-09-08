@@ -26,9 +26,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Random;
+import ec.util.MersenneTwisterFast;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WriteTest implements Runnable {
@@ -40,11 +43,13 @@ public class WriteTest implements Runnable {
 	public long duration = 0;
 	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;
+	private MersenneTwisterFast rnd = null;
 
-	public WriteTest(String path, int size, int uniqueP) {
+	public WriteTest(String path, int size, int uniqueP,MersenneTwisterFast rnd) {
 		this.path = path;
 		this.size = size;
 		this.uniqueP = uniqueP;
+		this.rnd = rnd;
 		Thread th = new Thread(this);
 		th.start();
 	}
@@ -55,30 +60,33 @@ public class WriteTest implements Runnable {
 			long len = 1024L * 1024L * size;
 			long sz = 0;
 			Path ps = Paths.get(path);
+			int [] seeds = new int[600];
+			for(int i = 0;i<seeds.length;i++) {
+				seeds[i]=rnd.nextInt();
+			}
+			rnd.setSeed(seeds);
 			Files.deleteIfExists(ps);
 			FileChannel fc = (FileChannel) Files.newByteChannel(ps,
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.READ);
-			Random rnd = new Random();
-			byte[] b = new byte[bs];
+			
 			long time = System.currentTimeMillis();
 			int currPR = 0;
-			ByteBuffer bz = ByteBuffer.allocateDirect(ss);
 			while (sz < len) {
+				byte[] b = new byte[bs];
+				if((b.length +sz) > len)
+					b = new byte[(int)(len-sz)];
 				if (currPR < this.uniqueP) {
 					rnd.nextBytes(b);
 				}
-				bz.put(b);
-				if (!bz.hasRemaining()) {
-					bz.flip();
-					fc.write(bz);
-					bz.flip();
-				}
+				ByteBuffer bz = ByteBuffer.wrap(b);
+				fc.write(bz);
 				sz = sz + b.length;
 				if (currPR == 100)
 					currPR = 0;
 				else
 					currPR++;
+				
 			}
 			duration = (System.currentTimeMillis() - time);
 			fc.close();
@@ -109,13 +117,14 @@ public class WriteTest implements Runnable {
 	}
 
 	public static float[] test(String path, int size, int unique, int runs,
-			int start) {
+			int start,ArrayList<MersenneTwisterFast> rnd) {
 		WriteTest[] tests = new WriteTest[runs];
 		float results[] = new float[runs];
 		int t = 0;
 		for (int i = start; i < (start + tests.length); i++) {
+			int kk = fn.getAndIncrement();
 			WriteTest test = new WriteTest(path + File.separator + "test"
-					+ fn.getAndIncrement() + ".bin", size, unique);
+					+ kk + ".bin", size, unique,rnd.get(t));
 			tests[t] = test;
 			t++;
 		}
@@ -206,10 +215,16 @@ public class WriteTest implements Runnable {
 		int r = Integer.parseInt(args[4]);
 		File f = new File(args[0]);
 		f.mkdirs();
+		ArrayList<MersenneTwisterFast> rnds = new ArrayList<MersenneTwisterFast>(Integer.parseInt(args[3]));
+		SecureRandom rnd = new SecureRandom();
+		for(int i = 0;i < Integer.parseInt(args[3]);i++) {
+			MersenneTwisterFast zz = new MersenneTwisterFast(rnd.nextInt());
+			rnds.add(i, zz);
+		}
 		for (int i = 0; i < r; i++) {
 			int start = i * Integer.parseInt(args[3]);
 			float[] results = test(args[0], Integer.parseInt(args[1]),
-					Integer.parseInt(args[2]), Integer.parseInt(args[3]), start);
+					Integer.parseInt(args[2]), Integer.parseInt(args[3]), start,rnds);
 
 			String testName = args[5];
 			String logFileName = args[6];
@@ -237,7 +252,7 @@ public class WriteTest implements Runnable {
 			float total = findTotal(results);
 			System.out.println("Total= " + total);
 			ch.close();
-			System.out.println("Results written to " + logFileName);
+			System.out.println("Results written to " + logFileName + " time=" + LocalDateTime.now());
 		}
 	}
 
