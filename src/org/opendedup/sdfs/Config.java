@@ -345,6 +345,9 @@ public class Config {
 		SDFSLogger.getLog().debug("parsing local chunkstore parameters");
 		Element localChunkStore = (Element) doc.getElementsByTagName(
 				"local-chunkstore").item(0);
+		if(localChunkStore.hasAttribute("fpp")){
+			Main.fpp = Double.parseDouble(localChunkStore.getAttribute("fpp"));
+		}
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
@@ -400,6 +403,7 @@ public class Config {
 				Main.chunkStoreConfig = (Element) localChunkStore
 						.getElementsByTagName("extended-config").item(0);
 			}
+			
 			if (localChunkStore.hasAttribute("max-repl-batch-sz"))
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore
 						.getAttribute("max-repl-batch-sz"));

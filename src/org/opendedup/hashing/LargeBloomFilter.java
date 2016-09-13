@@ -188,6 +188,12 @@ public class LargeBloomFilter implements Serializable {
 		}
 
 	}
+	
+	public void vanish() {
+		for(FLBF k : bfs) {
+			k.vanish();
+		}
+	}
 
 	private static class FBSaver implements Runnable {
 		transient FLBF[] bfs = null;

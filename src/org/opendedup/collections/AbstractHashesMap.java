@@ -82,7 +82,7 @@ public interface AbstractHashesMap {
 
 	public abstract void rollbackCompact() throws IOException;
 
-	public abstract void init(long maxSize, String fileName)
+	public abstract void init(long maxSize, String fileName, double fpp)
 			throws IOException, HashtableFullException;
 
 }

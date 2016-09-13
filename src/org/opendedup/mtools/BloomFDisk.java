@@ -165,7 +165,6 @@ public class BloomFDisk {
 						    .fileMmapEnableIfSupported().readOnly().make();
 					Set<byte[]> map = db.treeSet("refmap", Serializer.BYTE_ARRAY).open();
 					map.forEach(new Consumer<byte []>(){
-
 						@Override
 						public void accept(byte[] b) {
 							bf.put(b);

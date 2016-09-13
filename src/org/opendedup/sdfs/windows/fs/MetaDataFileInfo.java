@@ -84,17 +84,34 @@ public class MetaDataFileInfo {
 			if (attr.isSystem())
 				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_SYSTEM
 						.getValue();
+			creationTime = millisToFiletime(attr.creationTime().toMillis());
+			lastAccessTime = millisToFiletime(mf.getLastAccessed());
+			SDFSLogger.getLog().info("fn="+this.fileName+" mtime=" +mf.lastModified() + " ft="+ attr.lastModifiedTime().toMillis() + " wt=" +millisToFiletime(mf.lastModified()));
+			lastWriteTime = millisToFiletime(mf.lastModified());
 		} catch (IOException | UnsupportedOperationException x) {
 			SDFSLogger.getLog().error(
 					"attributes could not be created for " + this.fileName, x);
 		}
 
-		creationTime = FileTimeUtils.toFileTime(new Date(0));
-		lastAccessTime = FileTimeUtils
-				.toFileTime(new Date(mf.getLastAccessed()));
-		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));
+		
 		fileSize = mf.length();
 		SDFSLogger.getLog().debug("created file info for " + fileName);
+	}
+	
+	/** Difference between Filetime epoch and Unix epoch (in ms). */
+	private static final long FILETIME_EPOCH_DIFF = 11644473600000L;
+
+	/** One millisecond expressed in units of 100s of nanoseconds. */
+	private static final long FILETIME_ONE_MILLISECOND = 10 * 1000;
+
+	public static long filetimeToMillis(final long filetime) {
+		if(filetime <= 0)
+			return 0;
+	    return (filetime / FILETIME_ONE_MILLISECOND) - FILETIME_EPOCH_DIFF;
+	}
+
+	public static long millisToFiletime(final long millis) {
+	    return (millis + FILETIME_EPOCH_DIFF) * FILETIME_ONE_MILLISECOND;
 	}
 
 	Win32FindData toWin32FindData() {

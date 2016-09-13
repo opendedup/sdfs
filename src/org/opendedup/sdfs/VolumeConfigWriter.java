@@ -618,6 +618,7 @@ public class VolumeConfigWriter {
 				Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("gc-class", this.gc_class);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
+		cs.setAttribute("fpp", ".001");
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
 		cs.setAttribute("encryption-iv", this.chunk_store_iv);

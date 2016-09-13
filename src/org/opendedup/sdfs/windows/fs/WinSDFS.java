@@ -1057,10 +1057,11 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
+				SDFSLogger.getLog().info("set "+fileName +" mtime=" + mtime + " atime=" + atime);
 				File f = resolvePath(fileName);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-				mf.setLastAccessed(atime * 1000L, true);
-				mf.setLastModified(mtime * 1000L, true);
+				mf.setLastAccessed(MetaDataFileInfo.filetimeToMillis(atime), true);
+				mf.setLastModified(MetaDataFileInfo.filetimeToMillis(mtime), true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while setting time", e);
 				errRtn = e;

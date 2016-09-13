@@ -168,7 +168,7 @@ public class HashStore {
 			SDFSLogger.getLog().info("Maximum Number of Entries is " + entries);
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
-			bdb.init(entries, dbf.getPath());
+			bdb.init(entries, dbf.getPath(),Main.fpp);
 		} catch (InstantiationException e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			e.printStackTrace();

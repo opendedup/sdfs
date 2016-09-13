@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -75,8 +76,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String path = "";
 	private String backingFile = null;
 	private boolean iterWeaveCP = false;
-	private long lastModified = 0;
-	private long lastAccessed = 0;
+	private AtomicLong lastModified = new AtomicLong(0);
+	private AtomicLong lastAccessed = new AtomicLong(0);
 	private boolean execute = true;
 	private boolean read = true;
 	private boolean write = true;
@@ -815,7 +816,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the path to the file
 	 */
 	private void init(String path) {
-		this.lastAccessed = System.currentTimeMillis();
+		this.lastAccessed.set(System.currentTimeMillis());
 		this.path = path;
 		File f = new File(path);
 		if (!f.exists()) {
@@ -828,7 +829,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.owner_id = Main.defaultOwner;
 			this.group_id = Main.defaultGroup;
 			this.permissions = Main.defaultFilePermissions;
-			this.lastModified = System.currentTimeMillis();
+			this.lastModified.set(System.currentTimeMillis());
 			this.dedup = Main.dedupFiles;
 			this.setLength(0, false, true);
 			this.dirty = true;
@@ -913,10 +914,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public long lastModified() {
 		if (this.dfGuid != null)
-			return lastModified;
+			return lastModified.get();
 		if (this.isDirectory())
 			return new File(this.path).lastModified();
-		return lastModified;
+		return lastModified.get();
 	}
 
 	/**
@@ -1271,9 +1272,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			return false;
 		this.writeLock.lock();
 		try {
-			this.lastModified = lastModified;
+			this.lastModified.set(lastModified);
 			this.dirty = true;
-			this.lastAccessed = lastModified;
+			this.lastAccessed.set(lastModified);
 			return true;
 		} finally {
 			this.writeLock.unlock();
@@ -1385,11 +1386,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
 		// this.dirty = true;
 		if (this.localowner)
-			this.lastAccessed = lastAccessed;
+			this.lastAccessed.get();
 	}
 
 	public long getLastAccessed() {
-		return lastAccessed;
+		return lastAccessed.get();
 	}
 
 	public boolean isDirty() {
@@ -1404,8 +1405,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 			in.readLong();
 			this.length = in.readLong();
-			this.lastModified = in.readLong();
-			this.lastAccessed = in.readLong();
+			this.lastModified.set(in.readLong());
+			this.lastAccessed.set(in.readLong());
 			this.execute = in.readBoolean();
 			this.read = in.readBoolean();
 			this.write = in.readBoolean();
@@ -1488,8 +1489,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						"writing out file=" + this.path + " df=" + this.dfGuid);
 			out.writeLong(-1);
 			out.writeLong(length);
-			out.writeLong(lastModified);
-			out.writeLong(lastAccessed);
+			out.writeLong(lastModified.get());
+			out.writeLong(lastAccessed.get());
 			out.writeBoolean(execute);
 			out.writeBoolean(read);
 			out.writeBoolean(write);

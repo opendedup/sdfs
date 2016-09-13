@@ -111,6 +111,18 @@ public class ProgressiveFileByteArrayLongMap
 	public void compactRunning(boolean running) {
 		this.compacting = running;
 	}
+	
+	public boolean equals(ProgressiveFileByteArrayLongMap m) {
+		if(m == null)
+			return false;
+		if(m.path == null)
+			return false;
+		if(m.path.equals(this.path))
+			return true;
+		else
+			return false;
+			
+	}
 
 	public boolean isCompactig() {
 		return this.compacting;
@@ -142,20 +154,24 @@ public class ProgressiveFileByteArrayLongMap
 	}
 
 	public synchronized void cache() {
-		if (!cached) {
+		long lr = System.currentTimeMillis() - lastRead.get();
+		if (lr > mtm) {
 			this.hashlock.writeLock().lock();
-			try {
-				if (this.isClosed())
-					throw new IOException("map closed");
-				if (!this.cached) {
-					loadCacheExecutor.execute(this);
-					this.cached = true;
+			lr = System.currentTimeMillis() - lastRead.get();
+			if (lr > mtm) {
+				try {
+					if (this.isClosed())
+						throw new IOException("map closed");
+					if (!this.cached) {
+						loadCacheExecutor.execute(this);
+						this.cached = true;
+					}
+				} catch (Exception e) {
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("unable to cache " + this, e);
+				} finally {
+					this.hashlock.writeLock().unlock();
 				}
-			} catch (Exception e) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("unable to cache " + this, e);
-			} finally {
-				this.hashlock.writeLock().unlock();
 			}
 		}
 	}
@@ -354,14 +370,14 @@ public class ProgressiveFileByteArrayLongMap
 			}
 		}
 		this.maxSz = (int) (size * loadFactor);
-		SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
+		// SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
 		long nsz = 0;
 		if (newInstance) {
 			nsz = (long) this.size * (long) EL;
 		} else {
 			nsz = posFile.length();
 		}
-		SDFSLogger.getLog().info("set table to size " + nsz);
+		// SDFSLogger.getLog().info("set table to size " + nsz);
 		this.kFC = LArrayJ.mmap(new File(path + ".keys"), 0, nsz, MMapMode.READ_WRITE);
 		try {
 			/*
@@ -414,7 +430,7 @@ public class ProgressiveFileByteArrayLongMap
 			f = new File(path + ".vmp");
 			if (!f.exists()) {
 				closedCorrectly = false;
-				SDFSLogger.getLog().warn("vmp does not exist");
+				SDFSLogger.getLog().warn("vmp does not exist for " + this.path);
 			} else {
 				try {
 					FileInputStream fin = new FileInputStream(f);
@@ -431,7 +447,7 @@ public class ProgressiveFileByteArrayLongMap
 			f = new File(path + ".vrp");
 			if (!f.exists()) {
 				closedCorrectly = false;
-				SDFSLogger.getLog().warn("vrp does not exist");
+				SDFSLogger.getLog().warn("vrp does not exist for " + this.path);
 			} else {
 				try {
 					FileInputStream fin = new FileInputStream(f);
@@ -448,7 +464,7 @@ public class ProgressiveFileByteArrayLongMap
 			f = new File(path + ".nbf");
 			if (!f.exists()) {
 				closedCorrectly = false;
-				SDFSLogger.getLog().warn("bf does not exist");
+				SDFSLogger.getLog().warn("bf does not exist for " + this.path);
 			} else {
 				try {
 					bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(),
@@ -473,8 +489,9 @@ public class ProgressiveFileByteArrayLongMap
 
 		claims = new BitSet(size);
 		claims.clear();
-		double pfull = (double) this.sz.get() / (double) size;
-		SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" + this.full);
+		// double pfull = (double) this.sz.get() / (double) size;
+		// SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" +
+		// this.full);
 		return bgst;
 	}
 
@@ -1434,7 +1451,11 @@ public class ProgressiveFileByteArrayLongMap
 			f.delete();
 			f = new File(path + ".nbf");
 			f.delete();
-			this.bf = null;
+			if (bf != null)
+				this.bf.vanish();
+			if (_bf != null)
+				this._bf.vanish();
+			bf = null;
 			this._bf = null;
 		} finally {
 			l.unlock();
@@ -1474,7 +1495,7 @@ public class ProgressiveFileByteArrayLongMap
 				key = new byte[(int) (posFile.length() - cp)];
 				if (key.length > 0)
 					kFC.writeToArray(cp, key, 0, key.length);
-				//SDFSLogger.getLog().info("done reading " + this.path);
+				// SDFSLogger.getLog().info("done reading " + this.path);
 				lastRead.set(System.currentTimeMillis());
 				this.cached = false;
 			}
