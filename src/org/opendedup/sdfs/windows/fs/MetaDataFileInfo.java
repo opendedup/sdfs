@@ -1,26 +1,4 @@
-/*
-The MIT License
 
-Copyright (C) 2008, 2016 Yu Kobayashi http://yukoba.accelart.jp/
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
- */
 
 package org.opendedup.sdfs.windows.fs;
 
@@ -29,11 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.DosFileAttributes;
-import java.util.Date;
 
 import net.decasdev.dokan.ByHandleFileInformation;
 import net.decasdev.dokan.FileAttribute.FileAttributeFlags;
-import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;
@@ -84,17 +60,34 @@ public class MetaDataFileInfo {
 			if (attr.isSystem())
 				fileAttribute |= FileAttributeFlags.FILE_ATTRIBUTE_SYSTEM
 						.getValue();
+			creationTime = millisToFiletime(attr.creationTime().toMillis());
+			lastAccessTime = millisToFiletime(mf.getLastAccessed());
+			//SDFSLogger.getLog().info("fn="+this.fileName+" mtime=" +mf.lastModified() + " ft="+ attr.lastModifiedTime().toMillis() + " wt=" +millisToFiletime(mf.lastModified()));
+			lastWriteTime = millisToFiletime(mf.lastModified());
 		} catch (IOException | UnsupportedOperationException x) {
 			SDFSLogger.getLog().error(
 					"attributes could not be created for " + this.fileName, x);
 		}
 
-		creationTime = FileTimeUtils.toFileTime(new Date(0));
-		lastAccessTime = FileTimeUtils
-				.toFileTime(new Date(mf.getLastAccessed()));
-		lastWriteTime = FileTimeUtils.toFileTime(new Date(mf.lastModified()));
+		
 		fileSize = mf.length();
 		SDFSLogger.getLog().debug("created file info for " + fileName);
+	}
+	
+	/** Difference between Filetime epoch and Unix epoch (in ms). */
+	private static final long FILETIME_EPOCH_DIFF = 11644473600000L;
+
+	/** One millisecond expressed in units of 100s of nanoseconds. */
+	private static final long FILETIME_ONE_MILLISECOND = 10 * 1000;
+
+	public static long filetimeToMillis(final long filetime) {
+		if(filetime <= 0)
+			return 0;
+	    return (filetime / FILETIME_ONE_MILLISECOND) - FILETIME_EPOCH_DIFF;
+	}
+
+	public static long millisToFiletime(final long millis) {
+	    return (millis + FILETIME_EPOCH_DIFF) * FILETIME_ONE_MILLISECOND;
 	}
 
 	Win32FindData toWin32FindData() {

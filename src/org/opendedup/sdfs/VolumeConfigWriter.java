@@ -466,6 +466,10 @@ public class VolumeConfigWriter {
 			this.sdfsCliRequireAuth = true;
 			this.sdfsCliListenAddr = "0.0.0.0";
 			this.networkEnable = true;
+			if (!cmd.hasOption("sdfscli-password")) {
+				System.err
+				.println("password is required");
+			}
 		}
 		if (cmd.hasOption("sdfscli-password")) {
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");

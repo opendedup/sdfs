@@ -1,3 +1,8 @@
+Version 3.2.3
+	Fixes
+	* Windows Thread Exhaustion
+	* Password is required for volumes that have a control port listening on an external interface
+	* Windows File timestamp shows correctly now
 Version 3.2.1
 	Fixes
 	* Fixed non english character file names
