@@ -25,6 +25,7 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
+
 import static net.decasdev.dokan.WinError.ERROR_DISK_FULL;
 import static net.decasdev.dokan.WinError.ERROR_FILE_EXISTS;
 import static net.decasdev.dokan.WinError.ERROR_FILE_NOT_FOUND;
@@ -32,7 +33,6 @@ import static net.decasdev.dokan.WinError.ERROR_PATH_NOT_FOUND;
 import static net.decasdev.dokan.WinError.ERROR_READ_FAULT;
 import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
 //import static net.decasdev.dokan.WinError.ERROR_IO_PENDING;
-import static net.decasdev.dokan.WinError.ERROR_MAX_THRDS_REACHED;
 
 import java.io.File;
 import java.io.IOException;
@@ -193,10 +193,15 @@ public class WinSDFS implements DokanOperations {
 			CreateFileThread sn = new CreateFileThread(fileName, desiredAccess,
 					shareMode, creationDisposition, createOptions,
 					flagsAndAttributes, fileInfo, this);
+			int z = 0;
 			try {
-
-				int z = 0;
+				
 				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 				while (!sn.done) {
 					synchronized (sn) {
 						sn.wait(CHANNEL_TIMEOUT);
@@ -213,10 +218,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 				log.debug("fn=" + fileName + " handle=" + sn.nextHandle);
 				return sn.nextHandle;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 		} catch (DokanOperationException e) {
 			log.debug("dokan error " + fileName, e);
 			throw e;
@@ -236,9 +238,15 @@ public class WinSDFS implements DokanOperations {
 				SyncThread sn = new SyncThread();
 				sn.fileName = fileName;
 				sn.info = arg1;
+				int z = 0;
 				try {
-					int z = 0;
+					
 					executor.execute(sn);
+				}catch (RejectedExecutionException e) {
+					log.warn("Threads exhausted");
+					Thread th = new Thread(sn);
+					th.start();
+				}
 					while (!sn.done) {
 						synchronized (sn) {
 							sn.wait(CHANNEL_TIMEOUT);
@@ -253,10 +261,7 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (sn.errRtn != null)
 						throw sn.errRtn;
-				} catch (RejectedExecutionException e) {
-					log.warn("Threads exhausted");
-					throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-				}
+				
 				// ch.force(true);
 			} catch (DokanOperationException e) {
 				throw e;
@@ -299,10 +304,15 @@ public class WinSDFS implements DokanOperations {
 			wr.info = arg3;
 			wr.fileName = fileName;
 			wr.pos = offset;
+			int z = 0;
 			try {
-
-				int z = 0;
+				
 				executor.execute(wr);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(wr);
+				th.start();
+			}
 				while (!wr.done) {
 					synchronized (wr) {
 						wr.wait(CHANNEL_TIMEOUT);
@@ -318,10 +328,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (wr.errRtn != null)
 					throw wr.errRtn;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 			// int read = ch.read(buf, 0, buf.capacity(), offset);
 			// if (read == -1)
 			// read = 0;
@@ -351,9 +358,15 @@ public class WinSDFS implements DokanOperations {
 			wr.fileName = fileName;
 			wr.info = arg3;
 			wr.pos = offset;
+			int z = 0;
 			try {
-				int z = 0;
+				
 				executor.execute(wr);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(wr);
+				th.start();
+			}
 				while (!wr.done) {
 					synchronized (wr) {
 						wr.wait(CHANNEL_TIMEOUT);
@@ -368,11 +381,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (wr.errRtn != null)
 					throw wr.errRtn;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-				// throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 			// ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			return buf.position();
 			// log("wrote " + new String(b));
@@ -410,9 +419,15 @@ public class WinSDFS implements DokanOperations {
 			SyncThread sn = new SyncThread();
 			sn.fileName = fileName;
 			sn.info = arg1;
+			int z = 0;
 			try {
+				
 				executor.execute(sn);
-				int z = 0;
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 				while (!sn.done) {
 					synchronized (sn) {
 						sn.wait(CHANNEL_TIMEOUT);
@@ -427,10 +442,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (sn.errRtn != null)
 					throw sn.errRtn;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 		} catch (Exception e) {
 
 			log.error("unable to sync file " + fileName, e);
@@ -447,9 +459,15 @@ public class WinSDFS implements DokanOperations {
 		try {
 			GetFileInfoThread sn = new GetFileInfoThread();
 			sn.fileName = fileName;
+			int z = 0;
 			try {
+				
 				executor.execute(sn);
-				int z = 0;
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 				while (!sn.done) {
 					synchronized (sn) {
 						sn.wait(CHANNEL_TIMEOUT);
@@ -466,10 +484,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 				else
 					return sn.info;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 		} catch (Exception e) {
 			log.error("unable to get file info " + fileName, e);
 			throw new DokanOperationException(ERROR_GEN_FAILURE);
@@ -485,7 +500,13 @@ public class WinSDFS implements DokanOperations {
 			ListFiles sn = new ListFiles();
 			sn.pathName = pathName;
 			try {
+				
 				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 				while (!sn.done) {
 					synchronized (sn) {
 						sn.wait(CHANNEL_TIMEOUT);
@@ -500,10 +521,7 @@ public class WinSDFS implements DokanOperations {
 					throw sn.errRtn;
 				else
 					return sn.filedata;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 		} catch (Exception e) {
 
 			log.error("unable to list file " + pathName, e);
@@ -543,7 +561,13 @@ public class WinSDFS implements DokanOperations {
 			sn.atime = atime;
 			sn.mtime = mtime;
 			try {
+				
 				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 				while (!sn.done) {
 					synchronized (sn) {
 						sn.wait(CHANNEL_TIMEOUT);
@@ -556,10 +580,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (sn.errRtn != null)
 					throw sn.errRtn;
-			} catch (RejectedExecutionException e) {
-				log.warn("Threads exhausted");
-				throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			}
+			
 
 		} catch (DokanOperationException e) {
 			throw e;
@@ -571,12 +592,19 @@ public class WinSDFS implements DokanOperations {
 
 	private void truncateFile(String fileName, long sz, DokanFileInfo nfo)
 			throws Exception {
+		try {
 		TruncateThread wr = new TruncateThread();
 		wr.fileName = fileName;
 		wr.info = nfo;
 		wr.sz = sz;
 		try {
+			
 			executor.execute(wr);
+		}catch (RejectedExecutionException e) {
+			log.warn("Threads exhausted");
+			Thread th = new Thread(wr);
+			th.start();
+		}
 			while (!wr.done) {
 				synchronized (wr) {
 					wr.wait(CHANNEL_TIMEOUT);
@@ -589,11 +617,12 @@ public class WinSDFS implements DokanOperations {
 			}
 			if (wr.errRtn != null)
 				throw wr.errRtn;
-		} catch (RejectedExecutionException e) {
-			log.warn("Threads exhausted");
-			throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-			// throw new DokanOperationException(ERROR_MAX_THRDS_REACHED);
-		}
+	} catch (DokanOperationException e) {
+		throw e;
+	} catch (Exception e) {
+		log.error("unable to truncate file " + fileName, e);
+		throw new DokanOperationException(ERROR_WRITE_FAULT);
+	}
 	}
 
 	@Override
@@ -612,7 +641,14 @@ public class WinSDFS implements DokanOperations {
 			}
 			DeleteFileThread sn = new DeleteFileThread();
 			sn.fileName = fileName;
-			executor.execute(sn);
+			try {
+				
+				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 			while (!sn.done) {
 				synchronized (sn) {
 					sn.wait(CHANNEL_TIMEOUT);
@@ -642,7 +678,14 @@ public class WinSDFS implements DokanOperations {
 
 			DeleteFolderThread sn = new DeleteFolderThread();
 			sn.path = path;
-			executor.execute(sn);
+			try {
+				
+				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 			while (!sn.done) {
 				synchronized (sn) {
 					sn.wait(CHANNEL_TIMEOUT);
@@ -676,7 +719,14 @@ public class WinSDFS implements DokanOperations {
 			MoveFileThread sn = new MoveFileThread();
 			sn.from = from;
 			sn.to = to;
-			executor.execute(sn);
+			try {
+				
+				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 			while (!sn.done) {
 				synchronized (sn) {
 					sn.wait(CHANNEL_TIMEOUT);
@@ -717,7 +767,14 @@ public class WinSDFS implements DokanOperations {
 			log.debug("[onGetDiskFreeSpace]");
 		try {
 			DokanDiskFreeSpaceThread sn = new DokanDiskFreeSpaceThread();
-			executor.execute(sn);
+			try {
+				
+				executor.execute(sn);
+			}catch (RejectedExecutionException e) {
+				log.warn("Threads exhausted");
+				Thread th = new Thread(sn);
+				th.start();
+			}
 			while (!sn.done) {
 				synchronized (sn) {
 					sn.wait(CHANNEL_TIMEOUT);
