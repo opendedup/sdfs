@@ -33,7 +33,7 @@ Ubuntu/Debian (Ubuntu 14.04+)
 		sudo dpkg -i sdfs-latest.deb
 		 
 	Step 3: Change the maximum number of open files allowed
-		echo "* hardnofile 65535" >> /etc/security/limits.conf
+		echo "* hard nofile 65535" >> /etc/security/limits.conf
 		echo "* soft nofile 65535" >> /etc/security/limits.conf
 		exit
 	Step 5: Log Out and Proceed to Initialization Instructions
