@@ -334,7 +334,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("copyextents",e);
 						}
 						break;
 
@@ -357,7 +357,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("filteredinfo",e);
 						}
 					case "dse-info":
 						try {
@@ -370,7 +370,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("dse-info",e);
 						}
 						break;
 					case "cluster-dse-info":
@@ -384,7 +384,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cluster-dse-info",e);
 						}
 						break;
 					case "cluster-volumes":
@@ -398,7 +398,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cluster-volumes",e);
 						}
 						break;
 					case "cluster-volume-remove":
@@ -411,7 +411,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cluster-volume-remove",e);
 						}
 						break;
 					case "cluster-volume-add":
@@ -423,7 +423,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cluster-volume-add",e);
 						}
 						break;
 					case "blockdev-add":
@@ -442,7 +442,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-add",e);
 						}
 						break;
 					case "blockdev-rm":
@@ -458,7 +458,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-rm",e);
 						}
 						break;
 					case "blockdev-start":
@@ -475,7 +475,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-start",e);
 						}
 						break;
 					case "blockdev-stop":
@@ -492,7 +492,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-stop",e);
 						}
 						break;
 					case "blockdev-list":
@@ -508,7 +508,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-list",e);
 						}
 						break;
 					case "blockdev-update":
@@ -526,7 +526,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("blockdev-update",e);
 						}
 						break;
 					case "close-file":
@@ -548,7 +548,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("set-gc-schedule",e);
 						}
 						break;
 					case "get-gc-schedule":
@@ -563,7 +563,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("get-gc-schedule",e);
 						}
 						break;
 					case "get-gc-master":
@@ -576,7 +576,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("get-gc-master",e);
 						}
 						break;
 
@@ -589,7 +589,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cluster-promote-gc",e);
 						}
 						break;
 					case "open-files":
@@ -603,7 +603,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("open-files",e);
 						}
 						break;
 					case "debug-info":
@@ -617,7 +617,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("debug-info",e);
 						}
 						break; /*
 								 * else if (cmd.equalsIgnoreCase("events")) {
@@ -642,7 +642,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("volume-info",e);
 						}
 						break;
 					case "changepassword":
@@ -654,7 +654,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("changepassword",e);
 						}
 						break;
 					case "snapshot":
@@ -669,7 +669,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("snapshot",e);
 						}
 						break;
 					case "restorearchive":
@@ -716,7 +716,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("importarchive",e);
 						}
 						break;
 					case "batchgetblocks":
@@ -750,7 +750,7 @@ public class MgmtWebServer implements Container {
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cancelimport",e);
 						}
 						break;
 					case "archiveout":
@@ -769,7 +769,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("archiveout",e);
 						}
 						break;
 
@@ -783,7 +783,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("msnapshot",e);
 						}
 						break;
 					case "flush":
@@ -808,7 +808,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("expandvolume",e);
 						}
 						break;
 					case "volumeconfigpath":
@@ -819,7 +819,7 @@ public class MgmtWebServer implements Container {
 						} catch (java.lang.NullPointerException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("volumeconfigpath",e);
 						}
 						break;
 					case "dedup":
@@ -849,7 +849,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cleanstore",e);
 						}
 						break;
 					case "fdisk":
@@ -862,7 +862,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("fdisk",e);
 						}
 						break;
 					case "redundancyck":
@@ -888,7 +888,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("event",e);
 						}
 						break;
 					case "events":
@@ -900,7 +900,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("events",e);
 						}
 						break;
 					default:

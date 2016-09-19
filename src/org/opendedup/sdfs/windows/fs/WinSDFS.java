@@ -220,7 +220,7 @@ public class WinSDFS implements DokanOperations {
 				return sn.nextHandle;
 			
 		} catch (DokanOperationException e) {
-			log.debug("dokan error " + fileName, e);
+			log.error("dokan error " + fileName, e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to create file ", e);
@@ -583,6 +583,7 @@ public class WinSDFS implements DokanOperations {
 			
 
 		} catch (DokanOperationException e) {
+			log.error("unable to set file " + fileName, e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to set file " + fileName, e);
@@ -618,6 +619,7 @@ public class WinSDFS implements DokanOperations {
 			if (wr.errRtn != null)
 				throw wr.errRtn;
 	} catch (DokanOperationException e) {
+		log.error("unable to truncate file " + fileName, e);
 		throw e;
 	} catch (Exception e) {
 		log.error("unable to truncate file " + fileName, e);
@@ -662,6 +664,7 @@ public class WinSDFS implements DokanOperations {
 			if (sn.errRtn != null)
 				throw sn.errRtn;
 		} catch (DokanOperationException e) {
+			log.error("unable to delete file " + fileName, e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to delete file " + fileName, e);
@@ -699,6 +702,7 @@ public class WinSDFS implements DokanOperations {
 			if (sn.errRtn != null)
 				throw sn.errRtn;
 		} catch (DokanOperationException e) {
+			log.error("unable to delete directory " + path, e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to delete file " + path, e);
