@@ -256,6 +256,10 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			HashBlobArchive.allowSync = Boolean.parseBoolean(config
 					.getAttribute("allow-sync"));
 		}
+		if (config.hasAttribute("null-test-only")) {
+			HashBlobArchive.DISABLE_WRITE = Boolean.parseBoolean(config
+					.getAttribute("null-test-only"));
+		}
 
 		try {
 			File f = new File(this.container_location, "BucketInfo");

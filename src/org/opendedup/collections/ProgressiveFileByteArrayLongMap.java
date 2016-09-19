@@ -111,17 +111,17 @@ public class ProgressiveFileByteArrayLongMap
 	public void compactRunning(boolean running) {
 		this.compacting = running;
 	}
-	
+
 	public boolean equals(ProgressiveFileByteArrayLongMap m) {
-		if(m == null)
+		if (m == null)
 			return false;
-		if(m.path == null)
+		if (m.path == null)
 			return false;
-		if(m.path.equals(this.path))
+		if (m.path.equals(this.path))
 			return true;
 		else
 			return false;
-			
+
 	}
 
 	public boolean isCompactig() {
@@ -358,141 +358,151 @@ public class ProgressiveFileByteArrayLongMap
 	 * 
 	 * @see org.opendedup.collections.AbstractShard#setUp()
 	 */
+
+	boolean setup = false;
+
 	@Override
-	public long setUp() throws IOException {
-		File posFile = new File(path + ".keys");
-		boolean newInstance = !posFile.exists();
-		if (posFile.exists()) {
-			long _sz = (posFile.length()) / (long) (EL);
-			if (_sz != size) {
-				SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz + "] instead of [" + size + "]");
-				this.size = (int) _sz;
+	public synchronized long setUp() throws IOException {
+		if (!setup) {
+			File posFile = new File(path + ".keys");
+			boolean newInstance = !posFile.exists();
+			if (posFile.exists()) {
+				long _sz = (posFile.length()) / (long) (EL);
+				if (_sz != size) {
+					SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz + "] instead of [" + size + "]");
+					this.size = (int) _sz;
+				}
 			}
-		}
-		this.maxSz = (int) (size * loadFactor);
-		// SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
-		long nsz = 0;
-		if (newInstance) {
-			nsz = (long) this.size * (long) EL;
-		} else {
-			nsz = posFile.length();
-		}
-		// SDFSLogger.getLog().info("set table to size " + nsz);
-		this.kFC = LArrayJ.mmap(new File(path + ".keys"), 0, nsz, MMapMode.READ_WRITE);
-		try {
-			/*
-			 * Field fd = tRaf.getClass().getDeclaredField("fd");
-			 * fd.setAccessible(true); NativePosixUtil.advise((FileDescriptor)
-			 * fd.get(tRaf), 0, 0, NativePosixUtil.DONTNEED);
-			 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
-			 * NativePosixUtil.RANDOM); fd =
-			 * kFC.getClass().getDeclaredField("fd"); fd.setAccessible(true);
-			 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
-			 * NativePosixUtil.DONTNEED);
-			 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
-			 * NativePosixUtil.RANDOM);
-			 */
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to set advisory", e);
-			throw new IOException(e);
-		}
-
-		boolean closedCorrectly = true;
-		if (newInstance) {
-			mapped = new BitSet(size);
-			removed = new BitSet(size);
-			bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
-			this.full = false;
-		} else {
-			File f = new File(path + ".bpos");
-			if (!f.exists()) {
-				closedCorrectly = false;
-				SDFSLogger.getLog().warn("bpos does not exist");
+			this.maxSz = (int) (size * loadFactor);
+			// SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
+			long nsz = 0;
+			if (newInstance) {
+				nsz = (long) this.size * (long) EL;
 			} else {
-				try {
-					RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
-					_bpos.seek(0);
-					bgst = _bpos.readLong();
-					this.full = _bpos.readBoolean();
+				nsz = posFile.length();
+			}
+			// SDFSLogger.getLog().info("set table to size " + nsz);
+			this.kFC = LArrayJ.mmap(new File(path + ".keys"), 0, nsz, MMapMode.READ_WRITE);
+			try {
+				/*
+				 * Field fd = tRaf.getClass().getDeclaredField("fd");
+				 * fd.setAccessible(true);
+				 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
+				 * NativePosixUtil.DONTNEED);
+				 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
+				 * NativePosixUtil.RANDOM); fd =
+				 * kFC.getClass().getDeclaredField("fd");
+				 * fd.setAccessible(true);
+				 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
+				 * NativePosixUtil.DONTNEED);
+				 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
+				 * NativePosixUtil.RANDOM);
+				 */
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("unable to set advisory", e);
+				throw new IOException(e);
+			}
+
+			boolean closedCorrectly = true;
+			if (newInstance) {
+				mapped = new BitSet(size);
+				removed = new BitSet(size);
+				bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
+				this.full = false;
+			} else {
+				File f = new File(path + ".bpos");
+				if (!f.exists()) {
+					closedCorrectly = false;
+					SDFSLogger.getLog().warn("bpos does not exist");
+				} else {
 					try {
-						this.lastFound = _bpos.readLong();
+						RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
+						_bpos.seek(0);
+						bgst = _bpos.readLong();
+						this.full = _bpos.readBoolean();
+						try {
+							this.lastFound = _bpos.readLong();
+						} catch (Exception e) {
+
+						}
+						this.lastFound = System.currentTimeMillis();
+						_bpos.close();
+						f.delete();
 					} catch (Exception e) {
-
+						SDFSLogger.getLog().warn("bpos load error", e);
+						closedCorrectly = false;
 					}
-					this.lastFound = System.currentTimeMillis();
-					_bpos.close();
+				}
+				f = new File(path + ".vmp");
+				if (!f.exists()) {
+					closedCorrectly = false;
+					SDFSLogger.getLog().warn("vmp does not exist for " + this.path);
+				} else {
+					try {
+						FileInputStream fin = new FileInputStream(f);
+						ObjectInputStream oon = new ObjectInputStream(fin);
+
+						mapped = (BitSet) oon.readObject();
+						oon.close();
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("vmp load error", e);
+						closedCorrectly = false;
+					}
 					f.delete();
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("bpos load error", e);
-					closedCorrectly = false;
 				}
-			}
-			f = new File(path + ".vmp");
-			if (!f.exists()) {
-				closedCorrectly = false;
-				SDFSLogger.getLog().warn("vmp does not exist for " + this.path);
-			} else {
-				try {
-					FileInputStream fin = new FileInputStream(f);
-					ObjectInputStream oon = new ObjectInputStream(fin);
+				f = new File(path + ".vrp");
+				if (!f.exists()) {
+					closedCorrectly = false;
+					SDFSLogger.getLog().warn("vrp does not exist for " + this.path);
+				} else {
+					try {
+						FileInputStream fin = new FileInputStream(f);
+						ObjectInputStream oon = new ObjectInputStream(fin);
 
-					mapped = (BitSet) oon.readObject();
-					oon.close();
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("vmp load error", e);
-					closedCorrectly = false;
+						removed = (BitSet) oon.readObject();
+						oon.close();
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("vrp load error", e);
+						closedCorrectly = false;
+					}
+					f.delete();
 				}
-				f.delete();
+				f = new File(path + ".nbf");
+				if (!f.exists()) {
+					closedCorrectly = false;
+					SDFSLogger.getLog().warn("bf does not exist for " + this.path);
+				} else {
+					try {
+						bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(),
+								!Main.LOWMEM);
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("bf load error", e);
+						closedCorrectly = false;
+					}
+				}
 			}
-			f = new File(path + ".vrp");
-			if (!f.exists()) {
-				closedCorrectly = false;
-				SDFSLogger.getLog().warn("vrp does not exist for " + this.path);
-			} else {
-				try {
-					FileInputStream fin = new FileInputStream(f);
-					ObjectInputStream oon = new ObjectInputStream(fin);
+			if (this.lastFound == 0)
+				this.lastFound = new File(path + ".keys").lastModified();
+			if (!closedCorrectly) {
+				this.recreateMap();
+			}
+			if (bgst < 0) {
+				SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
+				bgst = this.getBigestKey();
 
-					removed = (BitSet) oon.readObject();
-					oon.close();
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("vrp load error", e);
-					closedCorrectly = false;
-				}
-				f.delete();
 			}
-			f = new File(path + ".nbf");
-			if (!f.exists()) {
-				closedCorrectly = false;
-				SDFSLogger.getLog().warn("bf does not exist for " + this.path);
-			} else {
-				try {
-					bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(),
-							!Main.LOWMEM);
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("bf load error", e);
-					closedCorrectly = false;
-				}
-			}
+			sz.set(mapped.cardinality());
+
+			claims = new BitSet(size);
+			claims.clear();
+			// double pfull = (double) this.sz.get() / (double) size;
+			// SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" +
+			// this.full);
+			this.setup = true;
+			return bgst;
+		} else {
+			throw new IOException("already setup");
 		}
-		if (this.lastFound == 0)
-			this.lastFound = new File(path + ".keys").lastModified();
-		if (!closedCorrectly) {
-			this.recreateMap();
-		}
-		if (bgst < 0) {
-			SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
-			bgst = this.getBigestKey();
-
-		}
-		sz.set(mapped.cardinality());
-
-		claims = new BitSet(size);
-		claims.clear();
-		// double pfull = (double) this.sz.get() / (double) size;
-		// SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" +
-		// this.full);
-		return bgst;
 	}
 
 	/*
@@ -501,12 +511,12 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
 	@Override
-	public boolean containsKey(byte[] key) {
+	public boolean containsKey(byte[] key) throws MapClosedException {
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
 			if (this.isClosed())
-				throw new IOException("map closed");
+				throw new MapClosedException();
 			if (!bf.mightContain(key)) {
 				return false;
 			}
@@ -529,7 +539,9 @@ public class ProgressiveFileByteArrayLongMap
 				return true;
 			}
 			return false;
-		} catch (Exception e) {
+		} catch(MapClosedException e) {
+			throw e;
+		}catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
@@ -859,13 +871,13 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#put(byte[], long)
 	 */
 	@Override
-	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException {
+	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException, MapClosedException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 
 		try {
 			if (this.isClosed())
-				throw new IOException("map closed");
+				throw new MapClosedException();
 			byte[] key = cm.getHash();
 
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
@@ -926,7 +938,7 @@ public class ProgressiveFileByteArrayLongMap
 		}
 	}
 
-	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException {
+	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException, MapClosedException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -1001,7 +1013,7 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#get(byte[])
 	 */
 	@Override
-	public long get(byte[] key) {
+	public long get(byte[] key) throws MapClosedException {
 		return this.get(key, true);
 	}
 
@@ -1012,12 +1024,12 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 
 	@Override
-	public long get(byte[] key, boolean claim) {
+	public long get(byte[] key, boolean claim) throws MapClosedException{
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
 			if (this.isClosed())
-				throw new IOException("map closed");
+				throw new MapClosedException();
 			if (key == null)
 				return -1;
 			if (!this.bf.mightContain(key)) {
@@ -1049,7 +1061,10 @@ public class ProgressiveFileByteArrayLongMap
 				return val;
 
 			}
-		} catch (Exception e) {
+		}catch(MapClosedException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {

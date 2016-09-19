@@ -14,6 +14,10 @@ public final class ByteArrayWrapper
         }
         this.data = data;
     }
+    
+    public byte [] getData() {
+    	return this.data;
+    }
 
     @Override
     public boolean equals(Object other)

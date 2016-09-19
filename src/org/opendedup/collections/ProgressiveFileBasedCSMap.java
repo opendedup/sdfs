@@ -25,8 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -60,6 +58,10 @@ import org.opendedup.util.NextPrime;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.CacheLoader;
+
 public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
 	private long size = 0;
@@ -92,20 +94,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	protected ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 	private boolean runningGC = false;
 	// private long lastInsert = System.currentTimeMillis();
-	private LinkedHashMap<ByteArrayWrapper, ProgressiveFileByteArrayLongMap> keyLookup = new LinkedHashMap<ByteArrayWrapper, ProgressiveFileByteArrayLongMap>(
-			2000000, 0.75f, true) {
-		/**
-		* 
-		*/
-		private static final long serialVersionUID = 1L;
-
-		protected boolean removeEldestEntry(Map.Entry<ByteArrayWrapper, ProgressiveFileByteArrayLongMap> eldest) {
-			return size() > 2000000;
-		}
-	};
+	private LoadingCache<ByteArrayWrapper, ProgressiveFileByteArrayLongMap> keyLookup = CacheBuilder.newBuilder()
+			.maximumSize(1_000_000).concurrencyLevel(Main.writeThreads)
+			.build(new CacheLoader<ByteArrayWrapper, ProgressiveFileByteArrayLongMap>() {
+				public ProgressiveFileByteArrayLongMap load(ByteArrayWrapper key) throws KeyNotFoundException {
+					return _getReadMap(key.getData());
+				}
+			});
 
 	@Override
-	public void init(long maxSize, String fileName,double fpp) throws IOException, HashtableFullException {
+	public void init(long maxSize, String fileName, double fpp) throws IOException, HashtableFullException {
 		maps = new SortedReadMapList();
 
 		this.size = (maxSize);
@@ -124,7 +122,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	AtomicLong mttm = new AtomicLong(0);
 	AtomicLong ct = new AtomicLong(0);
 	AtomicLong fd = new AtomicLong(0);
-	// AtomicLong ch = new AtomicLong(0);
+	AtomicLong ch = new AtomicLong(0);
 	/*
 	 * private ProgressiveFileByteArrayLongMap getReadMap(byte[] hash) throws
 	 * IOException { try { return this.keyLookup.get(new
@@ -133,10 +131,27 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	 * new IOException(e1); } } }
 	 */
 
+	private ProgressiveFileByteArrayLongMap _getReadMap(byte[] hash) throws KeyNotFoundException {
+		for (ProgressiveFileByteArrayLongMap _m : this.maps.getAL()) {
+			// sns++;
+			try {
+				if (_m.containsKey(hash)) {
+					if (runningGC)
+						this.lbf.put(hash);
+					return _m;
+				}
+			} catch (Exception e) {
+
+			}
+		}
+		throw new KeyNotFoundException();
+
+	}
+
 	private ProgressiveFileByteArrayLongMap getReadMap(byte[] hash) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
-		long count = ct.incrementAndGet();
+		// long count = ct.incrementAndGet();
 		try {
 
 			if (!runningGC && !lbf.mightContain(hash)) {
@@ -144,12 +159,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				return null;
 			}
 			ProgressiveFileByteArrayLongMap _km;
-			_km = this.keyLookup.get(new ByteArrayWrapper(hash));
-			if (_km != null) {
-				// long chl = ch.incrementAndGet();
-				// SDFSLogger.getLog().info("found ch="+chl + " sz="
-				// +this.keyLookup.size());
-				return _km;
+			_km = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			if (_km != null && !_km.isClosed()) {
+				if (!_km.isClosed()) {
+					// long chl = ch.incrementAndGet();
+					// SDFSLogger.getLog().info("found ch=" + chl + " sz=" +
+					// this.keyLookup.size());
+					return _km;
+				} else {
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+				}
 			}
 
 			/*
@@ -166,30 +185,34 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			 * mt.set(0); } }
 			 */
 			long tm = System.currentTimeMillis();
-			int sns = 0;
+			// int sns = 0;
 			for (ProgressiveFileByteArrayLongMap _m : this.maps.getAL()) {
-				sns++;
-				if (_m.containsKey(hash)) {
-					if (runningGC)
-						this.lbf.put(hash);
-					long z = fd.incrementAndGet();
-					if (!_m.isActive()) {
-						synchronized (this.keyLookup) {
+				// sns++;
+				try {
+					if (_m.containsKey(hash)) {
+						if (runningGC)
+							this.lbf.put(hash);
+						// long z = fd.incrementAndGet();
+						if (!_m.isCompactig())
 							this.keyLookup.put(new ByteArrayWrapper(hash), _m);
-						}
-						SDFSLogger.getLog()
-								.info("ct=" + count + " found fd=" + z + " scans=" + sns + " time="
-										+ (System.currentTimeMillis() - tm) + " actve=" + _m.isActive() + " sz="
-										+ this.keyLookup.size());
+						/*
+						 * SDFSLogger.getLog() .info("ct=" + count +
+						 * " found fd=" + z + " scans=" + sns + " time=" +
+						 * (System.currentTimeMillis() - tm) + " actve=" +
+						 * _m.isActive() + " sz=" + this.keyLookup.size());
+						 */
+						return _m;
 					}
-					return _m;
+				} catch (Exception e) {
+
 				}
 			}
 			long k = mttm.addAndGet(System.currentTimeMillis() - tm);
 			long z = mt.incrementAndGet();
 			if (z > 100) {
 				long atime = k / z;
-				SDFSLogger.getLog().info("misses = " + z + " average seek time=" + atime + " total seektime=" + k);
+				SDFSLogger.getLog().info(
+						"misses = " + z + " average seek time=" + atime + " total seektime=" + k + " tot=" + ct.get());
 				mt.set(0);
 				mttm.set(0);
 			}
@@ -271,12 +294,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				return pos;
 			}
 			for (ProgressiveFileByteArrayLongMap m : this.maps.getAL()) {
-				pos = m.get(hash);
-				if (pos != -1) {
-					if (runningGC)
-						this.lbf.put(hash);
-					// m.cache();
-					return pos;
+				try {
+					pos = m.get(hash);
+					if (pos != -1) {
+						if (runningGC)
+							this.lbf.put(hash);
+						// m.cache();
+						return pos;
+					}
+				} catch (Exception e) {
+
 				}
 			}
 			return pos;
@@ -386,11 +413,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							try {
 								_m.put(p.key, p.value);
 								ByteArrayWrapper bw = new ByteArrayWrapper(p.key);
-								if (this.keyLookup.containsKey(bw)) {
-									synchronized (keyLookup) {
-										this.keyLookup.put(bw, _m);
-									}
-								}
+								this.keyLookup.invalidate(bw);
 								this.lbf.put(p.key);
 								p = m.nextKeyValue();
 							} catch (HashtableFullException e) {
@@ -420,12 +443,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 							try {
 								_m.put(p.key, p.value);
 								ByteArrayWrapper bw = new ByteArrayWrapper(p.key);
-
-								if (this.keyLookup.containsKey(bw)) {
-									synchronized (keyLookup) {
-										this.keyLookup.put(bw, _m);
-									}
-								}
+								this.keyLookup.invalidate(bw);
 								p = m.nextKeyValue();
 							} catch (HashtableFullException e) {
 
@@ -444,7 +462,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						SDFSLogger.getLog()
 								.info("removing maxed map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
 						m.vanish();
-						this.keyLookup.clear();
 						m = null;
 					}
 				} catch (Exception e) {
@@ -753,12 +770,19 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						// lastInsert = System.currentTimeMillis();
 					} catch (HashtableFullException e) {
 						rec = null;
+					} catch (MapClosedException e) {
+						rec = null;
 					} catch (Exception e) {
 						throw e;
 					}
 				}
 			} else {
-				rec = new InsertRecord(false, rm.get(cm.getHash()));
+				try {
+					rec = new InsertRecord(false, rm.get(cm.getHash()));
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
+					put(cm, persist);
+				}
 			}
 			// this.msTr.addAndGet(tm);
 
@@ -927,7 +951,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			int i = 0;
 			while (iter.hasNext()) {
 				try {
-
 					iter.next().close();
 					bar.update(i++);
 				} catch (Exception e) {
@@ -998,7 +1021,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		FileUtils.copyDirectory(new File(parent), new File(parent + ".compact"));
 
 		try {
-			this.init(maxSz, this.fileName,Main.fpp);
+			this.init(maxSz, this.fileName, Main.fpp);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -1112,8 +1135,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				int entries = 0;
 				Lock l = m.gcLock.readLock();
 				l.lock();
-				Lock gl =GCMain.gclock.readLock();
+				Lock gl = GCMain.gclock.readLock();
 				gl.lock();
+				map.compactRunning(true);
 				try {
 					KVPair p = map.nextKeyValue();
 					while (p != null && !m.closed && !map.isClosed()) {
@@ -1123,12 +1147,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 
 							_m.put(p.key, p.value);
 							ByteArrayWrapper bw = new ByteArrayWrapper(p.key);
-
-							if (m.keyLookup.containsKey(bw)) {
-								synchronized (m.keyLookup) {
-									m.keyLookup.put(bw, _m);
-								}
-							}
+							m.keyLookup.invalidate(bw);
 							m.lbf.put(p.key);
 							p = map.nextKeyValue();
 
