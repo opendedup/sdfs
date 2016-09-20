@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -118,8 +119,10 @@ public class SDFSService {
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
 
 		try {
+			BloomFDisk.closed = true;
 			Main.pFullSched.close();
 			Main.pFullSched = null;
+			
 		} catch (Exception e) {
 		}
 		SDFSLogger.getLog().info("Flushing and Closing Write Caches");

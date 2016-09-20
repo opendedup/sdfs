@@ -20,7 +20,6 @@ package org.opendedup.mtools;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -55,13 +54,12 @@ public class BloomFDisk {
 	private FDiskEvent fEvt = null;
 	transient LargeFileBloomFilter bf = null;
 	private boolean failed = false;
-	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS,
-			worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
-			executionHandler);
-	
+	private transient static RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private transient static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private transient static ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
+			10, TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+	public static boolean closed;
+
 	public BloomFDisk() {
 
 	}
@@ -84,44 +82,35 @@ public class BloomFDisk {
 			entries = HCServiceProxy.getSize();
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists()) {
-			SDFSEvent
-					.fdiskInfoEvent(
-							"FDisk Will not start because the volume has not been written too",
-							evt)
-					.endEvent(
-							"FDisk Will not start because the volume has not been written too");
+			SDFSEvent.fdiskInfoEvent("FDisk Will not start because the volume has not been written too", evt)
+					.endEvent("FDisk Will not start because the volume has not been written too");
 			return;
 		}
 		try {
 			long sz = Main.volume.getFiles();
-			fEvt = SDFSEvent.fdiskInfoEvent("Starting BFDISK for "
-					+ Main.volume.getName() + " file size = " + sz, evt);
+			fEvt = SDFSEvent.fdiskInfoEvent("Starting BFDISK for " + Main.volume.getName() + " file size = " + sz, evt);
 			fEvt.maxCt = sz;
 
 			SDFSLogger.getLog().info("entries = " + entries);
-			this.bf = new LargeFileBloomFilter(entries, .1,false);
-			SDFSLogger.getLog().info(
-					"Starting BloomFilter FDISK for " + Main.volume.getName());
+			this.bf = new LargeFileBloomFilter(entries, .1, false);
+			SDFSLogger.getLog().info("Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
 
 			this.traverse(f);
 			executor.shutdown();
 			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().debug(
-						"Awaiting fdisk completion of threads.");
+				SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
 			}
 			if (failed)
 				throw new IOException("BFDisk traverse failed");
 			SDFSLogger.getLog().info(
-					"took [" + (System.currentTimeMillis() - start) / 1000
-							+ "] seconds to check [" + files + "].");
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
 
-			fEvt.endEvent("took [" + (System.currentTimeMillis() - start)
-					/ 1000 + "] seconds to check [" + files + "].");
+			fEvt.endEvent(
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
-			fEvt.endEvent("fdisk failed because [" + e.toString() + "]",
-					SDFSEvent.ERROR);
+			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 			this.failed = true;
 			this.vanish();
 			throw new FDiskException(e);
@@ -133,6 +122,8 @@ public class BloomFDisk {
 	}
 
 	private void traverse(File dir) throws IOException {
+		if (closed)
+			throw new IOException("FDISK Closed");
 		if (dir.isDirectory()) {
 			if (failed)
 				throw new IOException("BFDisk traverse failed");
@@ -149,75 +140,109 @@ public class BloomFDisk {
 		}
 	}
 
-	
-
-	
-	private void checkDedupFile(File mapFile) {
+	private void checkDedupFile(File mapFile) throws IOException {
+		if (closed) {
+			this.failed = true;
+			return;
+		}
 		LongByteArrayMap mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
-			File dbf = new File(mapFile.getPath()+".mmf");
-			if(dbf.exists() && dbf.lastModified() >= mapFile.lastModified()) {
+			File dbf = new File(mapFile.getPath() + ".mmf");
+			if (dbf.exists() && dbf.lastModified() >= mapFile.lastModified()) {
 				DB db = null;
 				try {
 					long tm = System.currentTimeMillis();
-					db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable()
-						    .fileMmapEnableIfSupported().readOnly().make();
+					db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable().fileMmapEnableIfSupported()
+							.readOnly().make();
 					Set<byte[]> map = db.treeSet("refmap", Serializer.BYTE_ARRAY).open();
-					map.forEach(new Consumer<byte []>(){
+					map.forEach(new Consumer<byte[]>() {
 						@Override
 						public void accept(byte[] b) {
-							bf.put(b);
-							
-						}});
-					
+							if (BloomFDisk.closed)
+								throw new IllegalArgumentException("fdisk closed");
+							else
+								bf.put(b);
+
+						}
+					});
+
 					db.close();
 					long etm = System.currentTimeMillis() - tm;
 					SDFSLogger.getLog().info("tm = " + etm);
-					synchronized(fEvt) {
-					fEvt.curCt ++;
+					synchronized (fEvt) {
+						fEvt.curCt++;
 					}
 					this.files.incrementAndGet();
-					return;
-				} catch(Exception e) {
-					SDFSLogger.getLog().error("unable to read db",e);
+					if (closed) {
+						this.failed = true;
+						return;
+					} else
+						return;
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to read db", e);
 					try {
 						db.close();
-					}catch(Exception e1) {
-						
+					} catch (Exception e1) {
+
 					}
-					dbf.delete();
+					try {
+						dbf.delete();
+					} catch (Exception e1) {
+
+					}
+					if (closed) {
+						this.failed = true;
+						return;
+					}
 				}
 			}
-			//long msz = mapFile.length()/4;
+			if(closed) {
+				this.failed = true;
+				return;
+			}
+			boolean createdb = false;
+			if (mapFile.length() > (1024 * 1024*5))
+				createdb = true;
+			// long msz = mapFile.length()/4;
 			DB db = null;
-			dbf.delete();
-			db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable()
-				    .fileMmapEnableIfSupported().allocateStartSize(1024).allocateIncrement(1024).make();
-			Set<byte[]> map = db.treeSet("refmap", Serializer.BYTE_ARRAY).create();
+			Set<byte[]> map = null;
+			if (createdb) {
+
+				dbf.delete();
+				db = DBMaker.fileDB(dbf).concurrencyDisable().fileMmapEnable().fileMmapEnableIfSupported()
+						.allocateStartSize(1024).allocateIncrement(1024).make();
+
+				map = db.treeSet("refmap", Serializer.BYTE_ARRAY).create();
+			}
 			byte[] val = new byte[0];
 			mp.iterInit();
 			while (val != null) {
+				if (closed) {
+					this.failed = true;
+					return;
+				}
 				val = mp.nextValue();
 				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val,
-							mp.getVersion());
+					SparseDataChunk ck = new SparseDataChunk(val, mp.getVersion());
 					List<HashLocPair> al = ck.getFingers();
 					for (HashLocPair p : al) {
 						bf.put(p.hash);
-						map.add(p.hash);
+						if (createdb)
+							map.add(p.hash);
 					}
 				}
 			}
 
-			synchronized(fEvt) {
-			fEvt.curCt++;
+			synchronized (fEvt) {
+				fEvt.curCt++;
 			}
-			db.commit();
-			db.close();
+			if (createdb) {
+				db.commit();
+				db.close();
+			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().info(
-					"error while checking file [" + mapFile.getPath() + "]", e);
+			SDFSLogger.getLog().info("error while checking file [" + mapFile.getPath() + "]", e);
 			this.failed = true;
 		} finally {
 			mp.close();
@@ -255,15 +280,14 @@ public class BloomFDisk {
 		@Override
 		public void run() {
 			try {
-			fd.checkDedupFile(f);
-			}catch(Exception e) {
+				fd.checkDedupFile(f);
+			} catch (Exception e) {
 				SDFSLogger.getLog().error("error doing fdisk", e);
 			}
 		}
 	}
 
-	private final static class ProcessPriorityThreadFactory implements
-			ThreadFactory {
+	private final static class ProcessPriorityThreadFactory implements ThreadFactory {
 
 		private final int threadPriority;
 
@@ -279,12 +303,10 @@ public class BloomFDisk {
 		}
 
 	}
-	
+
 	public void vanish() {
-		if(bf != null)
+		if (bf != null)
 			this.bf.vanish();
-		}
-	
-	
+	}
 
 }

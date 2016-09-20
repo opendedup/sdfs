@@ -25,15 +25,14 @@ THE SOFTWARE.
 package org.opendedup.sdfs.windows.fs;
 
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.DosFileAttributes;
-import java.util.Date;
 
 import net.decasdev.dokan.ByHandleFileInformation;
 import net.decasdev.dokan.FileAttribute.FileAttributeFlags;
-import net.decasdev.dokan.FileTimeUtils;
 import net.decasdev.dokan.Win32FindData;
 
 import org.apache.commons.io.FilenameUtils;

@@ -571,11 +571,15 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				// + sz + " propsize was " + propsize);
 				ProgressiveFileByteArrayLongMap map = null;
 				String pth = files[i].getPath();
-				String pfx = pth.substring(0, pth.length() - 5);
-				map = new ProgressiveFileByteArrayLongMap(pfx, sz);
-				DBLoad l = new DBLoad(this, map, prg, rSz, ep, bar);
-				executor.execute(l);
-				al.add(l);
+				if (pth.endsWith(".keys")) {
+					
+					String pfx = pth.substring(0, pth.length() - 5);
+					SDFSLogger.getLog().info("pfx=" + pfx);
+					map = new ProgressiveFileByteArrayLongMap(pfx, sz);
+					DBLoad l = new DBLoad(this, map, prg, rSz, ep, bar);
+					executor.execute(l);
+					al.add(l);
+				}
 			}
 			executor.shutdown();
 			this.endPos = ep.get();
@@ -1128,7 +1132,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		@Override
 		public void run() {
 			try {
-				SDFSLogger.getLog().debug(
+				SDFSLogger.getLog().info(
 						"consolidating map " + map.toString() + " sz=" + map.maxSize() + " targetsz=" + m.lhashTblSz);
 				this.map.cache();
 				map.iterInit();
@@ -1136,12 +1140,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				Lock l = m.gcLock.readLock();
 				l.lock();
 				Lock gl = GCMain.gclock.readLock();
-				gl.lock();
+				
 				map.compactRunning(true);
 				try {
 					KVPair p = map.nextKeyValue();
 					while (p != null && !m.closed && !map.isClosed()) {
 						// long td = System.currentTimeMillis() - m.lastInsert;
+						gl.lock();
 						try {
 							ProgressiveFileByteArrayLongMap _m = m.getLargeWriteMap();
 
@@ -1153,14 +1158,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 
 							entries++;
 						} catch (HashtableFullException e) {
-
+							
+						} finally {
+							gl.unlock();
 						}
 						if (m.closed)
 							throw new IOException("map closed");
 
 					}
 				} finally {
-					gl.unlock();
+					
 					l.unlock();
 				}
 				int mapsz = m.maps.size();
@@ -1170,7 +1177,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 
 					m.maps.remove(map);
 					SDFSLogger.getLog()
-							.debug("consolidated map " + map.toString() + " sz=" + map.size() + " added " + entries);
+							.info("consolidated map " + map.toString() + " sz=" + map.size() + " added " + entries);
 				} finally {
 					l.unlock();
 				}
@@ -1211,7 +1218,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					// long td = System.currentTimeMillis() - m.lastInsert;
 
 					while (iter.hasNext() && !m.closed) {
+
 						ProgressiveFileByteArrayLongMap map = iter.next();
+						SDFSLogger.getLog().info("checking map " + map.toString());
 						boolean active = false;
 						synchronized (m) {
 							active = map.isActive();
@@ -1219,6 +1228,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						if (!map.isCompactig() && map != null && map.maxSize() < m.lhashTblSz && !active && !m.closed
 								&& !map.isClosed()) {
 							z++;
+							SDFSLogger.getLog().info("will consolidate map " + map.toString());
 							map.compactRunning(true);
 							DBCompact c = new DBCompact(m, map);
 							executor.execute(c);
