@@ -633,16 +633,11 @@ public class WinSDFS implements DokanOperations {
 		if (SDFSLogger.isFSDebug())
 			log.debug("[onDeleteFile] " + fileName);
 		try {
-			DedupFileChannel ch = getFileChannel(fileName, arg1.dokanContext);
-			if (ch != null) {
-				try {
-					this.closeFileChannel(arg1.dokanContext, arg1);
-				} catch (Exception e) {
-					log.error("unable to close " + fileName, e);
-				}
-			}
+			
 			DeleteFileThread sn = new DeleteFileThread();
 			sn.fileName = fileName;
+			sn.arg1 = arg1;
+			sn.sdfs = this;
 			try {
 				
 				executor.execute(sn);
@@ -836,7 +831,7 @@ public class WinSDFS implements DokanOperations {
 		System.exit(0);
 	}
 
-	private static DedupFileChannel getFileChannel(String path, long handleNo)
+	protected static DedupFileChannel getFileChannel(String path, long handleNo)
 			throws DokanOperationException {
 		DedupFileChannel ch = dedupChannels.get(handleNo);
 		if (ch == null) {
@@ -858,7 +853,7 @@ public class WinSDFS implements DokanOperations {
 		return ch;
 	}
 
-	private void closeFileChannel(long handleNo, DokanFileInfo info) {
+	protected void closeFileChannel(long handleNo, DokanFileInfo info) {
 
 		try {
 			CloseThread cl = new CloseThread();
@@ -884,6 +879,8 @@ public class WinSDFS implements DokanOperations {
 				if (cl.errRtn != null)
 					throw cl.errRtn;
 			} catch (RejectedExecutionException e) {
+				Thread th = new Thread(cl);
+				th.start();
 				log.warn("Threads exhausted in close");
 			}
 			// ch.getDedupFile().unRegisterChannel(ch, -1);
@@ -1141,10 +1138,19 @@ public class WinSDFS implements DokanOperations {
 		String fileName;
 		boolean done;
 		Exception errRtn;
-
+		WinSDFS sdfs;
+		DokanFileInfo arg1;
 		@Override
 		public void run() {
 			try {
+				DedupFileChannel ch = WinSDFS.getFileChannel(fileName, arg1.dokanContext);
+				if (ch != null) {
+					try {
+						sdfs.closeFileChannel(arg1.dokanContext, arg1);
+					} catch (Exception e) {
+						log.error("unable to close " + fileName, e);
+					}
+				}
 				File f = resolvePath(fileName);
 
 				if (!MetaFileStore.removeMetaFile(f.getPath(), true)) {
