@@ -44,5 +44,5 @@ fi
 
 LD_PRELOAD="/usr/share/sdfs/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=/usr/share/sdfs/bin/ -home /usr/share/sdfs/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
  -Dfuse.logging.level=INFO -Xmx$MEMORY$MU -Xms$MEMORY$MU \
--XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
+-XX:+DisableExplicitGC -Dfile.encoding=UTF-8 -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
  -cp /usr/share/sdfs/lib/commons-daemon-1.0.15.jar:/usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* fuse.SDFS.MountSDFS "$@"
