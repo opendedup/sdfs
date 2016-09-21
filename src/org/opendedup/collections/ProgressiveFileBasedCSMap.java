@@ -269,6 +269,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				this.activeWriteMaps.add(cp, activeWMap);
 			}
 			cp++;
+			//activeWMap.cache();
 			return activeWMap;
 		}
 	}
@@ -279,6 +280,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				lactiveWMap.inActive();
 				lactiveWMap = this.createWriteMap(this.lhashTblSz);
 			}
+			//lactiveWMap.cache();
 			return lactiveWMap;
 		}
 	}

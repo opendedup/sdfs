@@ -157,21 +157,27 @@ public class ProgressiveFileByteArrayLongMap
 		long lr = System.currentTimeMillis() - lastRead.get();
 		if (lr > mtm) {
 			this.hashlock.writeLock().lock();
-			lr = System.currentTimeMillis() - lastRead.get();
-			if (lr > mtm) {
-				try {
-					if (this.isClosed())
-						throw new IOException("map closed");
-					if (!this.cached) {
-						loadCacheExecutor.execute(this);
-						this.cached = true;
+			try {
+				if (!this.cacheRunning) {
+					this.cacheRunning = true;
+					lr = System.currentTimeMillis() - lastRead.get();
+					if (lr > mtm) {
+						try {
+							if (this.isClosed())
+								throw new IOException("map closed");
+							if (!this.cached) {
+								loadCacheExecutor.execute(this);
+								this.cached = true;
+							}
+						} catch (Exception e) {
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug("unable to cache " + this, e);
+
+						}
 					}
-				} catch (Exception e) {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("unable to cache " + this, e);
-				} finally {
-					this.hashlock.writeLock().unlock();
 				}
+			} finally {
+				this.hashlock.writeLock().unlock();
 			}
 		}
 	}
@@ -539,9 +545,9 @@ public class ProgressiveFileByteArrayLongMap
 				return true;
 			}
 			return false;
-		} catch(MapClosedException e) {
+		} catch (MapClosedException e) {
 			throw e;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
 		} finally {
@@ -1024,7 +1030,7 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 
 	@Override
-	public long get(byte[] key, boolean claim) throws MapClosedException{
+	public long get(byte[] key, boolean claim) throws MapClosedException {
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
@@ -1061,10 +1067,9 @@ public class ProgressiveFileByteArrayLongMap
 				return val;
 
 			}
-		}catch(MapClosedException e) {
+		} catch (MapClosedException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return -1;
 		} finally {
@@ -1493,28 +1498,34 @@ public class ProgressiveFileByteArrayLongMap
 
 	AtomicLong lastRead = new AtomicLong(0);
 	private static long mtm = 60 * 1000 * 45;// 45 minutes
+	private boolean cacheRunning = false;
 
 	@Override
 	public void run() {
+		this.cacheRunning = true;
+
 		synchronized (lastRead) {
+			try {
+				long lr = System.currentTimeMillis() - lastRead.get();
+				if (lr > mtm) {
+					File posFile = new File(path + ".keys");
+					long cp = 0;
+					byte[] key = new byte[1024 * 1024 * 5];
+					while ((cp + key.length) < posFile.length() && !this.closed) {
+						kFC.writeToArray(cp, key, 0, key.length);
+						cp += key.length;
+					}
+					key = new byte[(int) (posFile.length() - cp)];
+					if (key.length > 0)
+						kFC.writeToArray(cp, key, 0, key.length);
+					// SDFSLogger.getLog().info("done reading " + this.path);
+					lastRead.set(System.currentTimeMillis());
 
-			long lr = System.currentTimeMillis() - lastRead.get();
-			if (lr > mtm) {
-				File posFile = new File(path + ".keys");
-				long cp = 0;
-				byte[] key = new byte[1024 * 1024 * 5];
-				while ((cp + key.length) < posFile.length() && !this.closed) {
-					kFC.writeToArray(cp, key, 0, key.length);
-					cp += key.length;
 				}
-				key = new byte[(int) (posFile.length() - cp)];
-				if (key.length > 0)
-					kFC.writeToArray(cp, key, 0, key.length);
-				// SDFSLogger.getLog().info("done reading " + this.path);
-				lastRead.set(System.currentTimeMillis());
-				this.cached = false;
-			}
 
+			} finally {
+				this.cacheRunning = false;
+			}
 		}
 	}
 
