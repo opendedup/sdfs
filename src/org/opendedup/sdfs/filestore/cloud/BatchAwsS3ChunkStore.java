@@ -458,7 +458,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 
 				if (v4s) {
 					clientConfig.setSignerOverride("AWSS3V4SignerType");
-					System.out.println("poooop=" + v4s);
+				}
+			}
+			if(config.hasAttribute("use-basic-signer")) {
+				boolean v4s = Boolean.parseBoolean(config
+						.getAttribute("use-basic-signer"));
+
+				if (v4s) {
+					clientConfig.setSignerOverride("S3SignerType");
 				}
 			}
 
@@ -745,6 +752,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore,
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to start service",e);
 			throw new IOException(e);
 		}
 

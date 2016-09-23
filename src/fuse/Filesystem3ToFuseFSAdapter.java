@@ -9,6 +9,8 @@
 package fuse;
 
 import java.nio.BufferOverflowException;
+
+import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -33,7 +35,7 @@ public class Filesystem3ToFuseFSAdapter implements FuseFS {
 	private Log log;
 
 	public Filesystem3ToFuseFSAdapter(Filesystem3 fs3, Log log) {
-		this(fs3, "UTF-8", log);
+		this(fs3, StandardCharsets.UTF_8, log);
 	}
 
 	public Filesystem3ToFuseFSAdapter(Filesystem3 fs3, String encoding, Log log) {

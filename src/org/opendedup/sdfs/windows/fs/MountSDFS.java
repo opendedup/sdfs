@@ -192,7 +192,7 @@ public class MountSDFS {
 			}
 			WinSDFS sdfs = new WinSDFS();
 
-			sdfs.mount(cmd.getOptionValue("m"), null, debug);
+			sdfs.mount(cmd.getOptionValue("m"), Main.volume.getPath(), debug);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
