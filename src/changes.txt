@@ -1,8 +1,10 @@
-Version 3.2.3
+Version 3.2.5
 	Fixes
 	* Windows Thread Exhaustion
 	* Password is required for volumes that have a control port listening on an external interface
 	* Windows File timestamp shows correctly now
+	* Compatibility with Hitachi Content Platform
+	* Changed DSE restore from cloud to /keys to keys/ on aws iterator
 Version 3.2.1
 	Fixes
 	* Fixed non english character file names
