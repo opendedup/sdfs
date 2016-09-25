@@ -85,6 +85,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ProgressiveFileByteArrayLongMap lactiveWMap = null;
+	private long lastInsert = 0;
+	private static final long lastInsertTimeout = 1000;
 	Thread cdth = null;
 	private transient ThreadPoolExecutor executor = null;
 	boolean ilg = false;
@@ -269,7 +271,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				this.activeWriteMaps.add(cp, activeWMap);
 			}
 			cp++;
-			//activeWMap.cache();
+			activeWMap.cache();
 			return activeWMap;
 		}
 	}
@@ -280,7 +282,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				lactiveWMap.inActive();
 				lactiveWMap = this.createWriteMap(this.lhashTblSz);
 			}
-			//lactiveWMap.cache();
+			lactiveWMap.cache();
 			return lactiveWMap;
 		}
 	}
@@ -772,8 +774,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						// long k = System.currentTimeMillis() - tm;
 						// SDFSLogger.getLog().info("took " + k + " to put ");
 						this.lbf.put(cm.getHash());
-
-						// lastInsert = System.currentTimeMillis();
+						lastInsert = System.currentTimeMillis();
 					} catch (HashtableFullException e) {
 						rec = null;
 					} catch (MapClosedException e) {
@@ -1147,7 +1148,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				try {
 					KVPair p = map.nextKeyValue();
 					while (p != null && !m.closed && !map.isClosed()) {
-						// long td = System.currentTimeMillis() - m.lastInsert;
+						long td = System.currentTimeMillis() - m.lastInsert;
+						if(td < lastInsertTimeout)
+							Thread.sleep(1);
 						gl.lock();
 						try {
 							ProgressiveFileByteArrayLongMap _m = m.getLargeWriteMap();
@@ -1220,7 +1223,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					// long td = System.currentTimeMillis() - m.lastInsert;
 
 					while (iter.hasNext() && !m.closed) {
-
 						ProgressiveFileByteArrayLongMap map = iter.next();
 						SDFSLogger.getLog().info("checking map " + map.toString());
 						boolean active = false;
@@ -1237,7 +1239,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 						}
 					}
 				} catch (Exception e) {
-					SDFSLogger.getLog().error("unable to consolidate", e);
+					if(!m.closed)
+						SDFSLogger.getLog().warn("unable to consolidate", e);
 				} finally {
 					try {
 						if (!m.closed && z > 0)

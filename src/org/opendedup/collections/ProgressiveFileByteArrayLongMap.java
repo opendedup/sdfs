@@ -156,28 +156,23 @@ public class ProgressiveFileByteArrayLongMap
 	public synchronized void cache() {
 		long lr = System.currentTimeMillis() - lastRead.get();
 		if (lr > mtm) {
-			this.hashlock.writeLock().lock();
-			try {
-				if (!this.cacheRunning) {
-					this.cacheRunning = true;
-					lr = System.currentTimeMillis() - lastRead.get();
-					if (lr > mtm) {
-						try {
-							if (this.isClosed())
-								throw new IOException("map closed");
-							if (!this.cached) {
-								loadCacheExecutor.execute(this);
-								this.cached = true;
-							}
-						} catch (Exception e) {
-							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug("unable to cache " + this, e);
-
+			if (!this.cacheRunning) {
+				this.cacheRunning = true;
+				lr = System.currentTimeMillis() - lastRead.get();
+				if (lr > mtm) {
+					try {
+						if (this.isClosed())
+							throw new IOException("map closed");
+						if (!this.cached) {
+							loadCacheExecutor.execute(this);
+							this.cached = true;
 						}
+					} catch (Exception e) {
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug("unable to cache " + this, e);
+
 					}
 				}
-			} finally {
-				this.hashlock.writeLock().unlock();
 			}
 		}
 	}

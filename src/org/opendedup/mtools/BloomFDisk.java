@@ -163,7 +163,6 @@ public class BloomFDisk {
 								throw new IllegalArgumentException("fdisk closed");
 							else
 								bf.put(b);
-
 						}
 					});
 
