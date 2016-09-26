@@ -26,6 +26,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -1600,8 +1601,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public Element toXML(Document doc) throws ParserConfigurationException,
 			DOMException, IOException {
 		Element root = doc.createElement("file-info");
-		root.setAttribute("file-name", this.getName());
-		root.setAttribute("sdfs-path", this.getPath());
+		root.setAttribute("file-name", URLEncoder.encode(this.getName(),"UTF-8"));
+		root.setAttribute("sdfs-path", URLEncoder.encode(this.getPath(),"UTF-8"));
 		if (this.isFile()) {
 			root.setAttribute("type", "file");
 			root.setAttribute("atime", Long.toString(this.getLastAccessed()));

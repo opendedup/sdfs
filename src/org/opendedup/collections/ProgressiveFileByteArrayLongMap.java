@@ -1513,9 +1513,8 @@ public class ProgressiveFileByteArrayLongMap
 					key = new byte[(int) (posFile.length() - cp)];
 					if (key.length > 0)
 						kFC.writeToArray(cp, key, 0, key.length);
-					// SDFSLogger.getLog().info("done reading " + this.path);
+					SDFSLogger.getLog().info("done reading " + this.path);
 					lastRead.set(System.currentTimeMillis());
-
 				}
 
 			} finally {
