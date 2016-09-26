@@ -220,7 +220,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			nmd.setContentLength(sz.length);
 			nmd.setUserMetadata(md);
 			try {
-			s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
 			} catch (AmazonS3Exception e1) {
 				if (e1.getStatusCode() == 409) {
 					try {
@@ -724,7 +724,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 				}
 			}
-			Map<String, String> mp = this.getUserMetaData(sobj.getObjectMetadata());
+			ObjectMetadata omd = s3Service.getObjectMetadata(this.name,sobj.getKey());
+			Map<String, String> mp = this.getUserMetaData(omd);
 			if (mp.containsKey("md5sum")) {
 				try {
 					byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
@@ -1278,33 +1279,24 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				Thread.sleep(60000);
 				try {
-					ObjectMetadata omd = s3Service
-							.getObjectMetadata(name, binm);
+					ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
 					Map<String, String> md = omd.getUserMetadata();
 					ObjectMetadata nmd = new ObjectMetadata();
 					nmd.setUserMetadata(md);
-					md.put("currentsize",
-							Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("currentcompressedsize", Long
-							.toString(HashBlobArchive.compressedLength.get()));
-					md.put("currentsize",
-							Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("currentcompressedsize", Long
-							.toString(HashBlobArchive.compressedLength.get()));
-					md.put("lastupdate",
-							Long.toString(System.currentTimeMillis()));
+					md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+					md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+					md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 					md.put("hostname", InetAddress.getLocalHost().getHostName());
 					md.put("port", Integer.toString(Main.sdfsCliPort));
-					byte[] sz = Long.toString(System.currentTimeMillis())
-							.getBytes();
-					String st = BaseEncoding.base64().encode(
-							ServiceUtils.computeMD5Hash(sz));
+					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+					String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
 					md.put("md5sum", st);
 					nmd.setContentMD5(st);
 					nmd.setContentLength(sz.length);
 					nmd.setUserMetadata(md);
-					s3Service.putObject(this.name, binm,
-							new ByteArrayInputStream(sz), nmd);
+					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
 				} catch (Exception e) {
 					try {
 						ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
@@ -1331,7 +1323,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						SDFSLogger.getLog().error("unable to update metadata for " + binm, e);
 					}
 				}
-				
+
 				if (this.deletes.size() > 0) {
 					this.delLock.lock();
 					HashMap<Long, Integer> odel = null;
@@ -1420,15 +1412,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			List<String> keys = new ArrayList<String>();
 			if (ck == null) {
 				ck = s3Service.listObjects(this.getName(), prefix);
-			}
-			else if (ck.isTruncated()) {
+			} else if (ck.isTruncated()) {
 				ck = s3Service.listNextBatchOfObjects(ck);
 			} else {
 				return keys.iterator();
 			}
 			List<S3ObjectSummary> objs = ck.getObjectSummaries();
 			for (S3ObjectSummary obj : objs) {
-				
+
 				if (obj.getKey().length() > prefix.length())
 					keys.add(obj.getKey());
 			}
@@ -1468,6 +1459,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			boolean compress = false;
 			boolean lz4compress = false;
 			Map<String, String> mp = this.getUserMetaData(md);
+			byte[] ivb = null;
+			if (mp.containsKey("ivspec")) {
+				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+			}
 			if (mp.containsKey("md5sum")) {
 				try {
 					byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
@@ -1495,16 +1490,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				mp.remove("deleted-objects");
 				changed = true;
 			}
-			byte[] ivb = null;
-			if (mp.containsKey("ivspec")) {
-				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
-			}
+			
 
 			if (encrypt) {
-				if (ivb != null)
+				if (ivb != null) {
 					data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
-				else
+				} else {
 					data = EncryptUtils.decryptCBC(data);
+				}
 			}
 			if (compress)
 				data = CompressionUtils.decompressZLIB(data);
