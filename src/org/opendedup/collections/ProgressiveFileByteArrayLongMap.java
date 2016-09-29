@@ -84,7 +84,6 @@ public class ProgressiveFileByteArrayLongMap
 	transient private BitSet mapped = null;
 	transient private AtomicInteger sz = new AtomicInteger(0);
 	transient private FileBasedBloomFilter<KeyBlob> bf = null;
-	transient private FileBasedBloomFilter<KeyBlob> _bf = null;
 	transient private boolean runningGC;
 	transient private long bgst = 0;
 	transient boolean full = false;
@@ -223,8 +222,7 @@ public class ProgressiveFileByteArrayLongMap
 					} else if (!Arrays.equals(key, FREE)) {
 						this.mapped.set(iterPos - 1);
 						this.removed.clear(iterPos - 1);
-						if (this.runningGC)
-							this._bf.put(key);
+						
 						this.bf.put(key);
 						return key;
 					} else {
@@ -259,8 +257,6 @@ public class ProgressiveFileByteArrayLongMap
 					} else if (!Arrays.equals(key, FREE)) {
 						this.mapped.set(iterPos - 1);
 						this.removed.clear(iterPos - 1);
-						if (this.runningGC)
-							this._bf.put(key);
 						this.bf.put(key);
 						KVPair p = new KVPair();
 						p.key = key;
@@ -294,8 +290,6 @@ public class ProgressiveFileByteArrayLongMap
 				} else if (!Arrays.equals(key, FREE)) {
 					this.mapped.set(iterPos - 1);
 					this.removed.clear(iterPos - 1);
-					if (this.runningGC)
-						this._bf.put(key);
 					this.bf.put(key);
 					return key;
 				} else {
@@ -518,7 +512,7 @@ public class ProgressiveFileByteArrayLongMap
 		try {
 			if (this.isClosed())
 				throw new MapClosedException();
-			if (!bf.mightContain(key)) {
+			if (!this.runningGC && !bf.mightContain(key)) {
 				return false;
 			}
 			long index = index(key);
@@ -533,8 +527,7 @@ public class ProgressiveFileByteArrayLongMap
 					l.unlock();
 					l = this.hashlock.writeLock();
 					l.lock();
-					if (this._bf != null)
-						this._bf.put(key);
+						this.bf.put(key);
 				}
 				this.lastFound = System.currentTimeMillis();
 				return true;
@@ -607,8 +600,7 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set((int) pos);
 				}
 				if (this.runningGC) {
-					if (this._bf != null)
-						this._bf.put(key);
+						this.bf.put(key);
 				}
 				this.mapped.set((int) pos);
 				this.removed.clear((int) pos);
@@ -638,7 +630,7 @@ public class ProgressiveFileByteArrayLongMap
 		try {
 			if (this.isClosed())
 				throw new IOException("map closed");
-			if (!bf.mightContain(key))
+			if (!this.runningGC && !bf.mightContain(key))
 				return false;
 
 			long pos = this.index(key);
@@ -652,8 +644,8 @@ public class ProgressiveFileByteArrayLongMap
 			}
 
 			if (claimed) {
-				if (this.runningGC && this._bf != null)
-					this._bf.put(key);
+				if (this.runningGC)
+					this.bf.put(key);
 				return false;
 			} else {
 				this.kFC.readFromArray(REMOVED, 0, pos, REMOVED.length);
@@ -890,8 +882,10 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			long pos = -1;
 			try {
-
-				pos = this.insertionIndex(key, bf.mightContain(key));
+				if(this.runningGC)
+					pos = this.insertionIndex(key,true);
+				else
+					pos = this.insertionIndex(key, bf.mightContain(key));
 			} catch (HashtableFullException e) {
 				this.full = true;
 				throw e;
@@ -904,8 +898,6 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set((int) npos);
 				}
 				this.bf.put(key);
-				if (this.runningGC && this._bf != null)
-					this._bf.put(key);
 				return new InsertRecord(false, this.get(key));
 			} else {
 				if (!cm.recoverd) {
@@ -927,8 +919,6 @@ public class ProgressiveFileByteArrayLongMap
 				this.sz.incrementAndGet();
 				this.removed.clear((int) pos);
 				this.bf.put(key);
-				if (this.runningGC && this._bf != null)
-					this._bf.put(key);
 				return new InsertRecord(true, cm.getcPos());
 			}
 			// this.store.position(pos);
@@ -955,8 +945,10 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			long pos = -1;
 			try {
-
-				pos = this.insertionIndex(key, bf.mightContain(key));
+				if(this.runningGC)
+					pos = this.insertionIndex(key,true);
+				else
+					pos = this.insertionIndex(key, bf.mightContain(key));
 				// SDFSLogger.getLog().info("pos=" + pos/EL + " hash="
 				// +StringUtils.getHexString(key));
 			} catch (HashtableFullException e) {
@@ -970,8 +962,6 @@ public class ProgressiveFileByteArrayLongMap
 					this.claims.set((int) npos);
 				}
 				this.bf.put(key);
-				if (this.runningGC && this._bf != null)
-					this._bf.put(key);
 				return new InsertRecord(false, this.get(key));
 			} else {
 				this.kFC.readFromArray(key, 0, pos, key.length);
@@ -986,8 +976,6 @@ public class ProgressiveFileByteArrayLongMap
 				this.sz.incrementAndGet();
 				this.removed.clear((int) pos);
 				this.bf.put(key);
-				if (this.runningGC && this._bf != null)
-					this._bf.put(key);
 				// this.store.position(pos);
 				// this.store.put(storeID);
 
@@ -1033,7 +1021,7 @@ public class ProgressiveFileByteArrayLongMap
 				throw new MapClosedException();
 			if (key == null)
 				return -1;
-			if (!this.bf.mightContain(key)) {
+			if (!this.runningGC &&!this.bf.mightContain(key)) {
 				return -1;
 			}
 			long pos = -1;
@@ -1055,9 +1043,7 @@ public class ProgressiveFileByteArrayLongMap
 					l.unlock();
 					l = this.hashlock.writeLock();
 					l.lock();
-					if (this._bf != null)
-						this._bf.put(key);
-
+					this.bf.put(key);
 				}
 				return val;
 
@@ -1296,7 +1282,8 @@ public class ProgressiveFileByteArrayLongMap
 			int asz = size;
 			if (!this.active)
 				asz = this.mapped.cardinality();
-			_bf = FileBasedBloomFilter.create(kbFunnel, asz, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
+			bf = null;
+			bf = FileBasedBloomFilter.create(kbFunnel, asz, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
 			this.runningGC = true;
 		} finally {
 			l.unlock();
@@ -1327,7 +1314,7 @@ public class ProgressiveFileByteArrayLongMap
 								_sz++;
 							} else {
 								this.mapped.set(iterPos);
-								_bf.put(key);
+								bf.put(key);
 							}
 							this.claims.clear(iterPos);
 						}
@@ -1341,8 +1328,6 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			l = this.hashlock.writeLock();
 			l.lock();
-			bf = _bf;
-			_bf = null;
 			this.runningGC = false;
 			l.unlock();
 			return _sz;
@@ -1357,10 +1342,11 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
+			bf = null;
 			if (this.active)
-				_bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
+				bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
 			else
-				_bf = FileBasedBloomFilter.create(kbFunnel, sz.get(), .01, new File(path + ".nbf").getPath(),
+				bf = FileBasedBloomFilter.create(kbFunnel, sz.get(), .01, new File(path + ".nbf").getPath(),
 						!Main.LOWMEM);
 			this.runningGC = true;
 		} catch (Exception e) {
@@ -1395,7 +1381,7 @@ public class ProgressiveFileByteArrayLongMap
 								this.full = false;
 							} else {
 								this.mapped.set(iterPos);
-								_bf.put(key);
+								bf.put(key);
 								lbf.put(key);
 							}
 							this.claims.clear(iterPos);
@@ -1409,8 +1395,6 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			l.lock();
 			this.runningGC = false;
-			bf = _bf;
-			_bf = null;
 			l.unlock();
 			return _sz;
 		} catch (Exception e) {
@@ -1468,10 +1452,8 @@ public class ProgressiveFileByteArrayLongMap
 			f.delete();
 			if (bf != null)
 				this.bf.vanish();
-			if (_bf != null)
-				this._bf.vanish();
+			
 			bf = null;
-			this._bf = null;
 		} finally {
 			l.unlock();
 		}
