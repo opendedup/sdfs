@@ -207,6 +207,11 @@ public class SDFSCmdline {
 						.getOptionValue("sync-remote-cloud-volume")));
 				System.exit(0);
 			}
+			if (cmd.hasOption("delete-remote-cloud-volume")) {
+				ProcessDeleteConnectedVolume.runCmd(Long.parseLong(cmd
+						.getOptionValue("delete-remote-cloud-volume")));
+				System.exit(0);
+			}
 			if (cmd.hasOption("change-password")) {
 				ProcessSetPasswordCmd.runCmd(cmd
 						.getOptionValue("change-password"));
@@ -329,6 +334,11 @@ public class SDFSCmdline {
 				.withLongOpt("sync-remote-cloud-volume")
 				.withDescription(
 						"downloads metadata from specified volume id.")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("delete-remote-cloud-volume")
+				.withDescription(
+						"deletes metadata from specified volume id.")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("port")

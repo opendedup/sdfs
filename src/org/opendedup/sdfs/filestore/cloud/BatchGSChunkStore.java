@@ -1632,4 +1632,10 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		return 0;
 	}
 
+	@Override
+	public void removeVolume(long volumeID) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

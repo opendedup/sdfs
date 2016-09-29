@@ -49,16 +49,6 @@ import org.w3c.dom.NamedNodeMap;
 
 import static java.lang.Math.toIntExact;
 
-
-
-
-
-
-
-
-
-
-
 import com.google.common.io.BaseEncoding;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -82,8 +72,7 @@ import org.opendedup.collections.HashExistsException;
  *         this chunk store since S3 charges per http request.
  * 
  */
-public class BatchAzureChunkStore implements AbstractChunkStore,
-		AbstractBatchStore, Runnable, AbstractCloudFileSync {
+public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	CloudStorageAccount account;
 	CloudBlobClient serviceClient = null;
 	CloudBlobContainer container = null;
@@ -92,11 +81,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	boolean clustered = true;
-	private int checkInterval =15000;
-	private static final int version  = 1;
-	
-	File staged_sync_location = new File(Main.chunkStore + File.separator
-			+ "syncstaged");
+	private int checkInterval = 15000;
+	private static final int version = 1;
+
+	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
 
 	// private String bucketLocation = null;
 	static {
@@ -107,8 +95,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return false;
 	}
 
-	public static boolean checkBucketUnique(String awsAccessKey,
-			String awsSecretKey, String bucketName) {
+	public static boolean checkBucketUnique(String awsAccessKey, String awsSecretKey, String bucketName) {
 		return false;
 	}
 
@@ -130,20 +117,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	public void close() {
 
 		try {
-			SDFSLogger.getLog().info(
-					"############ Closing Azure Container ##################");
+			SDFSLogger.getLog().info("############ Closing Azure Container ##################");
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
 			HashMap<String, String> md = container.getMetadata();
-			md.put("currentlength",
-					Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength",
-					Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 			container.setMetadata(md);
 			container.uploadMetadata();
 			SDFSLogger.getLog().info("Updated container on close");
-			SDFSLogger.getLog().info(
-					"############ Azure Container Closed ##################");
+			SDFSLogger.getLog().info("############ Azure Container Closed ##################");
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error closing container", e);
 		} finally {
@@ -161,8 +144,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public byte[] getChunk(byte[] hash, long start, int len)
-			throws IOException, DataArchivedException {
+	public byte[] getChunk(byte[] hash, long start, int len) throws IOException, DataArchivedException {
 		return HashBlobArchive.getBlock(hash, start);
 
 	}
@@ -177,8 +159,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	}
 
-	public void cacheData(byte[] hash, long start, int len) throws IOException,
-			DataArchivedException {
+	public void cacheData(byte[] hash, long start, int len) throws IOException, DataArchivedException {
 		try {
 			HashBlobArchive.cacheArchive(hash, start);
 		} catch (ExecutionException e) {
@@ -195,8 +176,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
-			throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk);
 		} catch (HashExistsException e) {
@@ -210,8 +190,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	private ReentrantLock delLock = new ReentrantLock();
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len)
-			throws IOException {
+	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
 		delLock.lock();
 		try {
 			// SDFSLogger.getLog().info("deleting " + del);
@@ -243,8 +222,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		 */
 	}
 
-	public void deleteBucket() throws StorageException, IOException,
-			InterruptedException {
+	public void deleteBucket() throws StorageException, IOException, InterruptedException {
 		try {
 			container.deleteIfExists();
 		} finally {
@@ -262,33 +240,28 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			// bucketLocation = config.getAttribute("default-bucket-location");
 		}
 		if (config.hasAttribute("block-size")) {
-			int sz = (int) StringUtils.parseSize(config
-					.getAttribute("block-size"));
+			int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 			HashBlobArchive.MAX_LEN = sz;
 
 		}
-		if(config.hasAttribute("connection-check-interval")) {
+		if (config.hasAttribute("connection-check-interval")) {
 			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 		}
 		if (config.hasAttribute("sync-files")) {
-			boolean syncf = Boolean.parseBoolean(config
-					.getAttribute("sync-files"));
+			boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
 			if (syncf) {
 				new FileReplicationService(this);
 			}
 		}
 		if (config.hasAttribute("delete-unclaimed")) {
-			this.deleteUnclaimed = Boolean.parseBoolean(config
-					.getAttribute("delete-unclaimed"));
+			this.deleteUnclaimed = Boolean.parseBoolean(config.getAttribute("delete-unclaimed"));
 		}
 		if (config.hasAttribute("upload-thread-sleep-time")) {
-			int tm = Integer.parseInt(config
-					.getAttribute("upload-thread-sleep-time"));
+			int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
 			HashBlobArchive.THREAD_SLEEP_TIME = tm;
 		}
 		if (config.hasAttribute("local-cache-size")) {
-			long sz = StringUtils.parseSize(config
-					.getAttribute("local-cache-size"));
+			long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 			HashBlobArchive.setLocalCacheSize(sz);
 		}
 		if (config.hasAttribute("map-cache-size")) {
@@ -310,30 +283,23 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 		// System.setProperty("http.keepalive", "true");
 
-		System.setProperty("http.maxConnections",
-				Integer.toString(Main.dseIOThreads * 2));
+		System.setProperty("http.maxConnections", Integer.toString(Main.dseIOThreads * 2));
 
 		if (config.getElementsByTagName("connection-props").getLength() > 0) {
-			Element el = (Element) config.getElementsByTagName(
-					"connection-props").item(0);
+			Element el = (Element) config.getElementsByTagName("connection-props").item(0);
 			NamedNodeMap ls = el.getAttributes();
 			for (int i = 0; i < ls.getLength(); i++) {
-				System.setProperty(ls.item(i).getNodeName(), ls.item(i)
-						.getNodeValue());
-				SDFSLogger.getLog().debug(
-						"set connection value" + ls.item(i).getNodeName()
-								+ " to " + ls.item(i).getNodeValue());
+				System.setProperty(ls.item(i).getNodeName(), ls.item(i).getNodeValue());
+				SDFSLogger.getLog()
+						.debug("set connection value" + ls.item(i).getNodeName() + " to " + ls.item(i).getNodeValue());
 			}
 		}
 		try {
-			String storageConnectionString = "DefaultEndpointsProtocol="
-					+ connectionProtocol + ";" + "AccountName="
-					+ Main.cloudAccessKey + ";" + "AccountKey="
-					+ Main.cloudSecretKey;
+			String storageConnectionString = "DefaultEndpointsProtocol=" + connectionProtocol + ";" + "AccountName="
+					+ Main.cloudAccessKey + ";" + "AccountKey=" + Main.cloudSecretKey;
 			account = CloudStorageAccount.parse(storageConnectionString);
 			serviceClient = account.createCloudBlobClient();
-			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(
-					Main.dseIOThreads * 2);
+			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
 			/*
 			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs(
 			 * 10 * 1000);
@@ -345,42 +311,41 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			container.createIfNotExists();
 			container.downloadAttributes();
 			HashMap<String, String> md = container.getMetadata();
-			if(md.size() == 0)
+			if (md.size() == 0)
 				this.clustered = true;
-			else if(md.containsKey("clustered"))
+			else if (md.containsKey("clustered"))
 				this.clustered = Boolean.parseBoolean(md.get("clustered"));
 			else
 				this.clustered = false;
 			md.put("clustered", Boolean.toString(clustered));
 			long sz = 0;
 			long cl = 0;
-			if(!this.clustered) {
-			if (md.containsKey("currentlength")) {
-				sz = Long.parseLong(md.get("currentlength"));
-				if (sz < 0)
-					sz = 0;
-			}
-			if (md.containsKey("compressedlength")) {
-				cl = Long.parseLong(md.get("compressedlength"));
-				if (cl < 0)
-					cl = 0;
-			}
-			
-			if (cl == 0 || sz == 0) {
-				md.put("currentlength",
-						Long.toString(HashBlobArchive.currentLength.get()));
-				md.put("compressedlength",
-						Long.toString(HashBlobArchive.compressedLength.get()));
-				md.put("clustered", Boolean.toString(this.closed));
-				container.setMetadata(md);
-				container.uploadMetadata();
-			}
-			}else {
-				String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			if (!this.clustered) {
+				if (md.containsKey("currentlength")) {
+					sz = Long.parseLong(md.get("currentlength"));
+					if (sz < 0)
+						sz = 0;
+				}
+				if (md.containsKey("compressedlength")) {
+					cl = Long.parseLong(md.get("compressedlength"));
+					if (cl < 0)
+						cl = 0;
+				}
+
+				if (cl == 0 || sz == 0) {
+					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("clustered", Boolean.toString(this.closed));
+					container.setMetadata(md);
+					container.uploadMetadata();
+				}
+			} else {
+				String lbi = "bucketinfo/"
+						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference(lbi);
-				if(blob.exists()) {
+				if (blob.exists()) {
 					blob.downloadAttributes();
-					HashMap<String,String> metaData = blob.getMetadata();
+					HashMap<String, String> metaData = blob.getMetadata();
 					if (metaData.containsKey("currentlength")) {
 						sz = Long.parseLong(md.get("currentlength"));
 						if (sz < 0)
@@ -391,8 +356,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 						if (cl < 0)
 							cl = 0;
 					}
-				} 
-				HashMap<String,String> metaData = new HashMap<String,String>();
+				}
+				HashMap<String, String> metaData = new HashMap<String, String>();
 				metaData.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 				metaData.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 				metaData.put("clustered", Boolean.toString(this.clustered));
@@ -430,7 +395,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		iter = container.listBlobs("keys/").iterator();
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
-		dl = new MultiDownload(this,"keys/");
+		dl = new MultiDownload(this, "keys/");
 		dl.iterationInit(false, "/keys");
 		this.ht = null;
 		this.hid = 0;
@@ -464,8 +429,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			return getNextChunck();
 		else {
 			String token = ht.nextToken();
-			ChunkData chk = new ChunkData(BaseEncoding.base64().decode(
-					token.split(":")[0]), hid);
+			ChunkData chk = new ChunkData(BaseEncoding.base64().decode(token.split(":")[0]), hid);
 			return chk;
 		}
 	}
@@ -481,8 +445,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void deleteDuplicate(byte[] hash, long start, int len)
-			throws IOException {
+	public void deleteDuplicate(byte[] hash, long start, int len) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
@@ -490,10 +453,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	@Override
 	public boolean fileExists(long id) throws IOException {
 		try {
-			String haName = EncyptUtils.encHashArchiveName(id,
-					Main.chunkStoreEncryptionEnabled);
-			CloudBlockBlob blob = container.getBlockBlobReference("blocks/"
-					+ haName);
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			return blob.exists();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to get id", e);
@@ -502,8 +463,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	}
 
-	private String[] getStrings(CloudBlockBlob blob) throws StorageException,
-			IOException {
+	private String[] getStrings(CloudBlockBlob blob) throws StorageException, IOException {
 		HashMap<String, String> md = blob.getMetadata();
 		byte[] nm = new byte[(int) blob.getProperties().getLength()];
 		blob.downloadToByteArray(nm, 0);
@@ -524,15 +484,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		return st.split(",");
 
 	}
-	
+
 	private String getClaimName(long id) throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(id,
-				Main.chunkStoreEncryptionEnabled);
-		return "claims/keys/"
-				+ haName
-				+ "/"
-				+ EncyptUtils.encHashArchiveName(Main.DSEID,
-						Main.chunkStoreEncryptionEnabled);
+		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+		return "claims/keys/" + haName + "/"
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 	}
 
 	private int getClaimedObjects(CloudBlockBlob blob) throws IOException {
@@ -546,8 +502,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			}
 
 			encrypt = Boolean.parseBoolean(md.get("encrypt"));
-			long id = EncyptUtils.decHashArchiveName(blob.getName()
-					.substring(5), encrypt);
+			long id = EncyptUtils.decHashArchiveName(blob.getName().substring(5), encrypt);
 			int claims = 0;
 			for (String ha : hs) {
 				byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
@@ -563,16 +518,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void writeHashBlobArchive(HashBlobArchive arc, long id)
-			throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(id,
-				Main.chunkStoreEncryptionEnabled);
+	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
+		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 
 		File f = arc.getFile();
 		try {
 			// container = pool.borrowObject();
-			CloudBlockBlob blob = container.getBlockBlobReference("blocks/"
-					+ haName);
+			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("size", Integer.toString(arc.uncompressedLength.get()));
 			if (Main.compress) {
@@ -587,15 +539,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				metaData.put("encrypt", "false");
 			}
 			metaData.put("compressedsize", Integer.toString(csz));
-			metaData.put("bsize",
-					Integer.toString(arc.uncompressedLength.get()));
+			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("objects", Integer.toString(arc.getSz()));
 
 			blob.setMetadata(metaData);
 
 			FileInputStream in = new FileInputStream(arc.getFile());
-			String mds = BaseEncoding.base64().encode(
-					ServiceUtils.computeMD5Hash(in));
+			String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(in));
 			IOUtils.closeQuietly(in);
 			// initialize blob properties and assign md5 content generated.
 			BlobProperties blobProperties = blob.getProperties();
@@ -604,7 +554,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			blob.upload(bin, csz);
 			IOUtils.closeQuietly(bin);
 			// upload the metadata
-			byte [] chunks = arc.getHashesString().getBytes();
+			byte[] chunks = arc.getHashesString().getBytes();
 			blob = container.getBlockBlobReference("keys/" + haName);
 			// metaData = new HashMap<String, String>();
 			int ssz = chunks.length;
@@ -624,8 +574,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			// metaData.put("bsize", Integer.toString(arc.getLen()));
 			// metaData.put("objects", Integer.toString(arc.getSz()));
 			metaData.put("size", Integer.toString(ssz));
-			metaData.put("bsize",
-					Integer.toString(arc.uncompressedLength.get()));
+			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("bcompressedsize", Integer.toString(csz));
 			metaData.put("objects", Integer.toString(arc.getSz()));
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -645,12 +594,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			blob = container.getBlockBlobReference(this.getClaimName(id));
 			blob.setMetadata(metaData);
 			blob.uploadText(Long.toString(System.currentTimeMillis()));
-			
-			
+
 		} catch (Throwable e) {
-			SDFSLogger.getLog()
-					.error("unable to write archive " + arc.getID()
-							+ " with id " + id, e);
+			SDFSLogger.getLog().error("unable to write archive " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
 		} finally {
 			// pool.returnObject(container);
@@ -658,26 +604,22 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public void getBytes(long id,File f) throws IOException {
+	public void getBytes(long id, File f) throws IOException {
 		try {
-			String haName = EncyptUtils.encHashArchiveName(id,
-					Main.chunkStoreEncryptionEnabled);
-			CloudBlockBlob blob = container.getBlockBlobReference("blocks/"
-					+ haName);
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			blob.downloadToFile(f.getPath());
 			HashMap<String, String> metaData = blob.getMetadata();
 			if (metaData.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean(metaData.get("deleted"));
 				if (del) {
-					CloudBlockBlob kblob = container
-							.getBlockBlobReference("keys/" + haName);
+					CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
 					kblob.downloadAttributes();
 					metaData = kblob.getMetadata();
 					int claims = this.getClaimedObjects(kblob);
 					int delobj = 0;
 					if (metaData.containsKey("deletedobjects")) {
-						delobj = Integer.parseInt(metaData
-								.get("deletedobjects")) - claims;
+						delobj = Integer.parseInt(metaData.get("deletedobjects")) - claims;
 						if (delobj < 0)
 							delobj = 0;
 					}
@@ -685,8 +627,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					metaData.put("deletedobjects", Integer.toString(delobj));
 					metaData.put("suspect", "true");
 					int _size = Integer.parseInt((String) metaData.get("size"));
-					int _compressedSize = Integer.parseInt((String) metaData
-							.get("compressedsize"));
+					int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
 					HashBlobArchive.currentLength.addAndGet(_size);
 					HashBlobArchive.compressedLength.addAndGet(_compressedSize);
 					blob.setMetadata(metaData);
@@ -709,32 +650,26 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		}
 	}
 
-	private int verifyDelete(long id) throws StorageException,
-			URISyntaxException, IOException {
-		String haName = EncyptUtils.encHashArchiveName(id,
-				Main.chunkStoreEncryptionEnabled);
-		
-		CloudBlockBlob kblob = container
-				.getBlockBlobReference("keys/" + haName);
-		CloudBlockBlob cblob  = null;
-		if(this.clustered)
-			cblob = container
-				.getBlockBlobReference(this.getClaimName(id));
+	private int verifyDelete(long id) throws StorageException, URISyntaxException, IOException {
+		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+
+		CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
+		CloudBlockBlob cblob = null;
+		if (this.clustered)
+			cblob = container.getBlockBlobReference(this.getClaimName(id));
 		kblob.downloadAttributes();
 		cblob.downloadAttributes();
 		HashMap<String, String> metaData = null;
-		if(clustered)
+		if (clustered)
 			metaData = cblob.getMetadata();
 		else
 			metaData = kblob.getMetadata();
 		int claims = this.getClaimedObjects(kblob);
 		if (claims > 0) {
-			SDFSLogger.getLog().warn(
-					"Reclaimed object " + id + " claims=" + claims);
+			SDFSLogger.getLog().warn("Reclaimed object " + id + " claims=" + claims);
 			int delobj = 0;
 			if (metaData.containsKey("deletedobjects")) {
-				delobj = Integer.parseInt(metaData.get("deletedobjects"))
-						- claims;
+				delobj = Integer.parseInt(metaData.get("deletedobjects")) - claims;
 				if (delobj < 0)
 					delobj = 0;
 			}
@@ -742,25 +677,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			metaData.put("deletedobjects", Integer.toString(delobj));
 			metaData.put("suspect", "true");
 			int _size = Integer.parseInt((String) metaData.get("size"));
-			int _compressedSize = Integer.parseInt((String) metaData
-					.get("compressedsize"));
+			int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
 			HashBlobArchive.currentLength.addAndGet(_size);
 			HashBlobArchive.compressedLength.addAndGet(_compressedSize);
 			metaData = kblob.getMetadata();
 			metaData.remove("deleted");
 			metaData.put("deletedobjects", Integer.toString(delobj));
 			metaData.put("suspect", "true");
-			if(clustered) {
+			if (clustered) {
 				cblob.setMetadata(metaData);
 				cblob.uploadMetadata();
-			}else {
-			kblob.setMetadata(metaData);
-			kblob.uploadMetadata();
+			} else {
+				kblob.setMetadata(metaData);
+				kblob.uploadMetadata();
 			}
 		} else {
-			if(clustered) {
+			if (clustered) {
 				cblob.delete();
-				if(! container.listBlobs("claims/keys/"+haName).iterator().hasNext()) {
+				if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
 					kblob.delete();
 					kblob = container.getBlockBlobReference("blocks/" + haName);
 					kblob.delete();
@@ -781,21 +715,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			try {
 				Thread.sleep(60000);
 				try {
-					if(!this.clustered) {
-					HashMap<String, String> md = container.getMetadata();
-					md.put("currentlength",
-							Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("compressedlength", Long
-							.toString(HashBlobArchive.compressedLength.get()));
-					container.setMetadata(md);
-					container.uploadMetadata();
-					}else {
-						String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-						CloudBlockBlob blob = container
-								.getBlockBlobReference(lbi);
+					if (!this.clustered) {
+						HashMap<String, String> md = container.getMetadata();
+						md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+						container.setMetadata(md);
+						container.uploadMetadata();
+					} else {
+						String lbi = "bucketinfo/"
+								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+						CloudBlockBlob blob = container.getBlockBlobReference(lbi);
 						blob.downloadAttributes();
-						HashMap<String, String> md = blob
-								.getMetadata();
+						HashMap<String, String> md = blob.getMetadata();
 						md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 						md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 						md.put("clustered", Boolean.toString(this.clustered));
@@ -822,49 +753,36 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					}
 					Set<Long> iter = odel.keySet();
 					for (Long k : iter) {
-						String hashString = EncyptUtils
-								.encHashArchiveName(k.longValue(),
-										Main.chunkStoreEncryptionEnabled);
+						String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
+								Main.chunkStoreEncryptionEnabled);
 						try {
 							CloudBlockBlob blob = null;
-							if(this.clustered)
-								blob = container
-									.getBlockBlobReference(this.getClaimName(k));
+							if (this.clustered)
+								blob = container.getBlockBlobReference(this.getClaimName(k));
 							else
-								blob = container
-										.getBlockBlobReference("keys/" + hashString);
+								blob = container.getBlockBlobReference("keys/" + hashString);
 							blob.downloadAttributes();
-							HashMap<String, String> metaData = blob
-									.getMetadata();
-							int objs = Integer
-									.parseInt(metaData.get("objects"));
+							HashMap<String, String> metaData = blob.getMetadata();
+							int objs = Integer.parseInt(metaData.get("objects"));
 							// SDFSLogger.getLog().info("remove requests for " +
 							// hashString + "=" + odel.get(k));
 							int delobj = 0;
 							if (metaData.containsKey("deletedobjects"))
-								delobj = Integer.parseInt((String) metaData
-										.get("deletedobjects"));
+								delobj = Integer.parseInt((String) metaData.get("deletedobjects"));
 							// SDFSLogger.getLog().info("remove requests for " +
 							// hashString + "=" + odel.get(k));
 							delobj = delobj + odel.get(k);
 							if (objs <= delobj) {
-								int size = Integer.parseInt((String) metaData
-										.get("size"));
-								int compressedSize = Integer
-										.parseInt((String) metaData
-												.get("compressedsize"));
+								int size = Integer.parseInt((String) metaData.get("size"));
+								int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
 								if (HashBlobArchive.compressedLength.get() > 0) {
 
-									HashBlobArchive.compressedLength
-											.addAndGet(-1 * compressedSize);
-								} else if (HashBlobArchive.compressedLength
-										.get() < 0)
+									HashBlobArchive.compressedLength.addAndGet(-1 * compressedSize);
+								} else if (HashBlobArchive.compressedLength.get() < 0)
 									HashBlobArchive.compressedLength.set(0);
-								HashBlobArchive.currentLength.addAndGet(-1
-										* size);
+								HashBlobArchive.currentLength.addAndGet(-1 * size);
 								if (HashBlobArchive.currentLength.get() > 0) {
-									HashBlobArchive.currentLength.addAndGet(-1
-											* size);
+									HashBlobArchive.currentLength.addAndGet(-1 * size);
 								} else if (HashBlobArchive.currentLength.get() < 0)
 									HashBlobArchive.currentLength.set(0);
 								HashBlobArchive.removeCache(k.longValue());
@@ -874,8 +792,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 									// SDFSLogger.getLog().info("deleting " +
 									// hashString);
 									metaData.put("deleted", "true");
-									metaData.put("deletedobjects",
-											Integer.toString(delobj));
+									metaData.put("deletedobjects", Integer.toString(delobj));
 									blob.setMetadata(metaData);
 									blob.uploadMetadata();
 								}
@@ -883,8 +800,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 							} else {
 								// SDFSLogger.getLog().info("updating " +
 								// hashString + " sz=" +objs);
-								metaData.put("deletedobjects",
-										Integer.toString(delobj));
+								metaData.put("deletedobjects", Integer.toString(delobj));
 								blob.setMetadata(metaData);
 								blob.uploadMetadata();
 							}
@@ -901,8 +817,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 							} finally {
 								delLock.unlock();
 							}
-							SDFSLogger.getLog().warn(
-									"Unable to delete object " + hashString, e);
+							SDFSLogger.getLog().warn("Unable to delete object " + hashString, e);
 						} finally {
 							// pool.returnObject(container);
 						}
@@ -929,15 +844,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		BufferedInputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
-		String pth = pp + "/"
-				+ EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
+		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
-			isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class,
-					LinkOption.NOFOLLOW_LINKS).isDirectory();
-			isSymlink = Files.readAttributes(f.toPath(),
-					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+			isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+					.isDirectory();
+			isSymlink = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 					.isSymbolicLink();
 		} else {
 			isDir = f.isDirectory();
@@ -946,16 +859,14 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			try {
 				CloudBlockBlob blob = container.getBlockBlobReference(pth);
 				HashMap<String, String> metaData = new HashMap<String, String>();
-				metaData.put("encrypt",
-						Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
-				String slp = EncyptUtils.encString(
-						Files.readSymbolicLink(f.toPath()).toFile().getPath(),
+				String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
 						Main.chunkStoreEncryptionEnabled);
 				metaData.put("symlink", slp);
 				blob.setMetadata(metaData);
 				blob.uploadText(pth);
-				if(this.isClustered())
+				if (this.isClustered())
 					this.checkoutFile(pth);
 			} catch (Exception e1) {
 				throw new IOException(e1);
@@ -963,15 +874,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		} else if (isDir) {
 			try {
 				CloudBlockBlob blob = container.getBlockBlobReference(pth);
-				HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
-						Main.chunkStoreEncryptionEnabled);
-				metaData.put("encrypt",
-						Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				metaData.put("directory", "true");
 				blob.setMetadata(metaData);
 				blob.uploadText(pth);
-				if(this.isClustered())
+				if (this.isClustered())
 					this.checkoutFile(pth);
 			} catch (Exception e1) {
 				throw new IOException(e1);
@@ -988,10 +897,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				e = new File(this.staged_sync_location, rnd + ".e");
 			}
 			try {
-				BufferedInputStream is = new BufferedInputStream(
-						new FileInputStream(f));
-				BufferedOutputStream os = new BufferedOutputStream(
-						new FileOutputStream(p));
+				BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
+				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 				IOUtils.copy(is, os);
 				os.flush();
 				os.close();
@@ -1013,11 +920,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				while (to.startsWith(File.separator))
 					to = to.substring(1);
 				CloudBlockBlob blob = container.getBlockBlobReference(pth);
-				HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
-						Main.chunkStoreEncryptionEnabled);
+				HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
 				metaData.put("lz4compress", Boolean.toString(Main.compress));
-				metaData.put("encrypt",
-						Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				blob.setMetadata(metaData);
 				try (FileInputStream inputStream = new FileInputStream(p)) {
@@ -1037,14 +942,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 					BlobProperties blobProperties = blob.getProperties();
 					blobProperties.setContentMD5(base64EncodedMD5content);
 				} catch (Exception ex) {
-					throw new IOException("Could not generate hash from file",
-							ex);
+					throw new IOException("Could not generate hash from file", ex);
 				}
 				// Encode the md5 content using Base64 encoding
 
 				in = new BufferedInputStream(new FileInputStream(p), 32768);
 				blob.upload(in, p.length());
-				if(this.isClustered())
+				if (this.isClustered())
 					this.checkoutFile(pth);
 
 			} catch (Exception e1) {
@@ -1080,10 +984,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		try {
-			String fn = pp
-					+ "/"
-					+ EncyptUtils.encString(nm,
-							Main.chunkStoreEncryptionEnabled);
+			String fn = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
 			CloudBlockBlob blob = container.getBlockBlobReference(fn);
 			blob.downloadToFile(p.getPath());
 			byte[] md5 = Base64.decode(blob.getProperties().getContentMD5());
@@ -1101,11 +1002,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			}
 			if (metaData.containsKey("symlink")) {
 				if (OSValidator.isWindows())
-					throw new IOException(
-							"unable to restore symlinks to windows");
+					throw new IOException("unable to restore symlinks to windows");
 				else {
-					String spth = EncyptUtils.decString(
-							metaData.get("symlink"), encrypt);
+					String spth = EncyptUtils.decString(metaData.get("symlink"), encrypt);
 					Path srcP = Paths.get(spth);
 					Path dstP = Paths.get(to.getPath());
 					Files.createSymbolicLink(dstP, srcP);
@@ -1137,17 +1036,15 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				if (to.exists())
 					throw new IOException("file " + to.getPath() + " exists");
 
-				BufferedInputStream is = new BufferedInputStream(
-						new FileInputStream(p));
-				BufferedOutputStream os = new BufferedOutputStream(
-						new FileOutputStream(to));
+				BufferedInputStream is = new BufferedInputStream(new FileInputStream(p));
+				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(to));
 				IOUtils.copy(is, os);
 				os.flush();
 				os.close();
 				is.close();
 				FileUtils.setFileMetaData(to, metaData, encrypt);
 			}
-			if(this.isClustered())
+			if (this.isClustered())
 				this.checkoutFile(fn);
 		} catch (Exception e1) {
 			throw new IOException(e1);
@@ -1163,46 +1060,39 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	public void deleteFile(String nm, String pp) throws IOException {
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
-		String haName = EncyptUtils.encString(nm,
-				Main.chunkStoreEncryptionEnabled);
+		String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
 		try {
-		if(this.isClustered()) {
-				String blb = "claims/" + haName +  "/"
+			if (this.isClustered()) {
+				String blb = "claims/" + haName + "/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference(blb);
 				blob.delete();
-				if (!container.listBlobs("claims/"+haName).iterator().hasNext()) {
-					blob = container.getBlockBlobReference(pp + "/"
-							+ haName);
+				if (!container.listBlobs("claims/" + haName).iterator().hasNext()) {
+					blob = container.getBlockBlobReference(pp + "/" + haName);
 					blob.delete();
 				}
-				
-		}else {
-		
-			CloudBlockBlob blob = container.getBlockBlobReference(pp + "/"
-					+ haName);
-			blob.delete();
-		}
+
+			} else {
+
+				CloudBlockBlob blob = container.getBlockBlobReference(pp + "/" + haName);
+				blob.delete();
+			}
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
 
 	@Override
-	public void renameFile(String from, String to, String pp)
-			throws IOException {
+	public void renameFile(String from, String to, String pp) throws IOException {
 		while (from.startsWith(File.separator))
 			from = from.substring(1);
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
-		String fn = EncyptUtils.encString(from,
-				Main.chunkStoreEncryptionEnabled);
+		String fn = EncyptUtils.encString(from, Main.chunkStoreEncryptionEnabled);
 		String tn = EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		try {
-			CloudBlockBlob sblob = container.getBlockBlobReference(pp + "/"
-					+ fn);
-			CloudBlockBlob tblob = container.getBlockBlobReference(pp + "/"
-					+ tn);
+			CloudBlockBlob sblob = container.getBlockBlobReference(pp + "/" + fn);
+			CloudBlockBlob tblob = container.getBlockBlobReference(pp + "/" + tn);
 			tblob.startCopy(sblob);
 			while (tblob.getCopyState().getStatus() == CopyStatus.PENDING) {
 				Thread.sleep(10);
@@ -1210,9 +1100,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			if (tblob.getCopyState().getStatus() == CopyStatus.SUCCESS) {
 				sblob.delete();
 			} else {
-				throw new IOException("unable to rename file " + fn
-						+ " because " + tblob.getCopyState().getStatus().name()
-						+ " : " + tblob.getCopyState().getStatusDescription());
+				throw new IOException(
+						"unable to rename file " + fn + " because " + tblob.getCopyState().getStatus().name() + " : "
+								+ tblob.getCopyState().getStatusDescription());
 			}
 
 		} catch (Exception e) {
@@ -1227,7 +1117,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		di = null;
 	}
 
-	public String getNextName(String pp,long id) throws IOException {
+	public String getNextName(String pp, long id) throws IOException {
 		String pfx = pp + "/";
 		if (di == null)
 			di = container.listBlobs(pp + "/").iterator();
@@ -1238,8 +1128,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 				HashMap<String, String> md = bi.getMetadata();
 				boolean encrypt = Boolean.parseBoolean(md.get("encrypt"));
-				String fname = EncyptUtils.decString(
-						bi.getName().substring(pfx.length()), encrypt);
+				String fname = EncyptUtils.decString(bi.getName().substring(pfx.length()), encrypt);
 				return fname;
 				/*
 				 * this.downloadFile(fname, new File(to.getPath() +
@@ -1254,11 +1143,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	public Map<String, Long> getHashMap(long id) throws IOException {
-		String haName = EncyptUtils.encHashArchiveName(id,
-				Main.chunkStoreEncryptionEnabled);
+		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		try {
-			CloudBlockBlob kblob = container.getBlockBlobReference("keys/"
-					+ haName);
+			CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
 			kblob.downloadAttributes();
 			String[] ks = this.getStrings(kblob);
 			HashMap<String, Long> m = new HashMap<String, Long>(ks.length);
@@ -1277,29 +1164,28 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		Exception e = null;
 		for (int i = 0; i < 3; i++) {
 			try {
-				if(!this.clustered) {
-				HashMap<String, String> md = container.getMetadata();
-				if (md.containsKey("currentlength")) {
+				if (!this.clustered) {
+					HashMap<String, String> md = container.getMetadata();
+					if (md.containsKey("currentlength")) {
+						Long.parseLong(md.get("currentlength"));
+						return true;
+					}
+				} else {
+					String lbi = "bucketinfo/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+					blob.downloadAttributes();
+					HashMap<String, String> md = blob.getMetadata();
 					Long.parseLong(md.get("currentlength"));
 					return true;
 				}
-				}else {
-					String lbi = "bucketinfo/" +EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-					CloudBlockBlob blob = container.getBlockBlobReference(lbi);
-						blob.downloadAttributes();
-						HashMap<String,String> md = blob.getMetadata();
-						Long.parseLong(md.get("currentlength"));
-						return true;
-				}
 			} catch (Exception _e) {
 				e = _e;
-				SDFSLogger.getLog().debug(
-						"unable to connect to bucket try " + i + " of 3", e);
+				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
 		}
 		if (e != null)
-			SDFSLogger.getLog().warn(
-					"unable to connect to bucket try " + 3 + " of 3", e);
+			SDFSLogger.getLog().warn("unable to connect to bucket try " + 3 + " of 3", e);
 		return false;
 	}
 
@@ -1354,26 +1240,21 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public boolean checkAccess(String username, String password,
-			Properties props) throws Exception {
-		String storageConnectionString = "DefaultEndpointsProtocol="
-				+ props.getProperty("protocol") + ";" + "AccountName="
-				+ Main.cloudAccessKey + ";" + "AccountKey="
-				+ Main.cloudSecretKey;
+	public boolean checkAccess(String username, String password, Properties props) throws Exception {
+		String storageConnectionString = "DefaultEndpointsProtocol=" + props.getProperty("protocol") + ";"
+				+ "AccountName=" + Main.cloudAccessKey + ";" + "AccountKey=" + Main.cloudSecretKey;
 		account = CloudStorageAccount.parse(storageConnectionString);
 		serviceClient = account.createCloudBlobClient();
 		serviceClient.listContainers();
 		return true;
 	}
 
-	public void recoverVolumeConfig(String na, File to, String parentPath,
-			String accessKey, String secretKey, String bucket, Properties props)
-			throws IOException {
+	public void recoverVolumeConfig(String na, File to, String parentPath, String accessKey, String secretKey,
+			String bucket, Properties props) throws IOException {
 		try {
 			if (to.exists())
 				throw new IOException("file exists " + to.getPath());
-			String storageConnectionString = "DefaultEndpointsProtocol="
-					+ "https;" + "AccountName=" + accessKey + ";"
+			String storageConnectionString = "DefaultEndpointsProtocol=" + "https;" + "AccountName=" + accessKey + ";"
 					+ "AccountKey=" + secretKey;
 			CloudStorageAccount _account;
 			CloudBlobClient _serviceClient = null;
@@ -1381,16 +1262,14 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			_account = CloudStorageAccount.parse(storageConnectionString);
 			_serviceClient = _account.createCloudBlobClient();
 			_container = _serviceClient.getContainerReference(bucket);
-			boolean encrypt = Boolean.parseBoolean(props.getProperty("encrypt",
-					"false"));
+			boolean encrypt = Boolean.parseBoolean(props.getProperty("encrypt", "false"));
 			String keyStr = null;
 			String ivStr = null;
 			if (encrypt) {
 				keyStr = props.getProperty("key");
 				ivStr = props.getProperty("iv");
 			}
-			Iterator<ListBlobItem> _iter = _container.listBlobs("volume/")
-					.iterator();
+			Iterator<ListBlobItem> _iter = _container.listBlobs("volume/").iterator();
 			while (_iter.hasNext()) {
 				CloudBlob bi = (CloudBlob) _iter.next();
 				bi.downloadAttributes();
@@ -1398,8 +1277,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 				String vn = bi.getName().substring("volume/".length());
 				System.out.println(vn);
 				if (md.containsKey("encrypt")) {
-					vn = new String(EncryptUtils.decryptCBC(BaseEncoding
-							.base64Url().decode(vn), keyStr, ivStr));
+					vn = new String(EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(vn), keyStr, ivStr));
 				}
 
 				if (vn.equalsIgnoreCase(na + "-volume-cfg.xml")) {
@@ -1415,11 +1293,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 						e = new File(tmpdir, rnd + ".de");
 					}
 					try {
-						CloudBlockBlob blob = _container
-								.getBlockBlobReference(bi.getName());
+						CloudBlockBlob blob = _container.getBlockBlobReference(bi.getName());
 
-						BufferedOutputStream out = new BufferedOutputStream(
-								new FileOutputStream(p));
+						BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
 						blob.download(out);
 						HashMap<String, String> metaData = blob.getMetadata();
 						out.flush();
@@ -1430,8 +1306,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 							enc = Boolean.parseBoolean(metaData.get("encrypt"));
 						}
 						if (metaData.containsKey("lz4compress")) {
-							lz4compress = Boolean.parseBoolean(metaData
-									.get("lz4compress"));
+							lz4compress = Boolean.parseBoolean(metaData.get("lz4compress"));
 						}
 						if (enc) {
 							EncryptUtils.decryptFile(p, e, keyStr, ivStr);
@@ -1447,13 +1322,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 							to.getParentFile().mkdirs();
 						}
 						if (to.exists())
-							throw new IOException("file " + to.getPath()
-									+ " exists");
+							throw new IOException("file " + to.getPath() + " exists");
 
-						BufferedInputStream is = new BufferedInputStream(
-								new FileInputStream(p));
-						BufferedOutputStream os = new BufferedOutputStream(
-								new FileOutputStream(to));
+						BufferedInputStream is = new BufferedInputStream(new FileInputStream(p));
+						BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(to));
 						IOUtils.copy(is, os);
 						os.flush();
 						os.close();
@@ -1509,8 +1381,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	}
 
 	@Override
-	public StringResult getStringResult(String key) throws IOException,
-			InterruptedException {
+	public StringResult getStringResult(String key) throws IOException, InterruptedException {
 		try {
 			CloudBlob bi = (CloudBlob) container.getBlockBlobReference(key);
 			bi.downloadAttributes();
@@ -1521,8 +1392,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			if (encrypt) {
 				nm = EncryptUtils.decryptCBC(nm);
 			}
-			long sid = EncyptUtils.decHashArchiveName(
-					bi.getName().substring(5), encrypt);
+			long sid = EncyptUtils.decHashArchiveName(bi.getName().substring(5), encrypt);
 			boolean compress = Boolean.parseBoolean(md.get("lz4Compress"));
 			if (compress) {
 				int size = Integer.parseInt(md.get("size"));
@@ -1532,7 +1402,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 			StringTokenizer sht = new StringTokenizer(st, ",");
 			CloudBlob nbi = (CloudBlob) container.getBlockBlobReference(this.getClaimName(hid));
 			nbi.downloadAttributes();
-			md =nbi.getMetadata();
+			md = nbi.getMetadata();
 			boolean changed = false;
 			if (md.containsKey("deleted")) {
 				md.remove("deleted");
@@ -1581,21 +1451,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
 		try {
-		CloudBlockBlob cblob = container
-				.getBlockBlobReference(this.getClaimName(id));
-		if(cblob.exists())
-			return;
-		else {
-			String haName = EncyptUtils.encHashArchiveName(id,
-					Main.chunkStoreEncryptionEnabled);
-			CloudBlockBlob kblob = container
-					.getBlockBlobReference("keys/" + haName);
-			kblob.downloadAttributes();
-			HashMap<String,String> metaData = kblob.getMetadata();
-			cblob.setMetadata(metaData);
-			cblob.uploadText(Long.toString(System.currentTimeMillis()));
-		}
-		}catch(Exception e) {
+			CloudBlockBlob cblob = container.getBlockBlobReference(this.getClaimName(id));
+			if (cblob.exists())
+				return;
+			else {
+				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+				CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
+				kblob.downloadAttributes();
+				HashMap<String, String> metaData = kblob.getMetadata();
+				cblob.setMetadata(metaData);
+				cblob.uploadText(Long.toString(System.currentTimeMillis()));
+			}
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 
@@ -1603,15 +1470,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 
 	@Override
 	public boolean objectClaimed(String key) throws IOException {
-		if(!this.clustered)
+		if (!this.clustered)
 			return true;
 		try {
-		CloudBlockBlob kblob = container
-				.getBlockBlobReference("claims/" + key+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.DSEID,
-								Main.chunkStoreEncryptionEnabled));
-		return kblob.exists();
-		}catch(Exception e) {
+			CloudBlockBlob kblob = container.getBlockBlobReference("claims/" + key + "/"
+					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+			return kblob.exists();
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error checking if blob is clamimed", e);
 			return false;
 		}
@@ -1620,28 +1485,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 	@Override
 	public void checkoutFile(String name) throws IOException {
 		try {
-		CloudBlockBlob kblob = container
-				.getBlockBlobReference("claims/" + name+ "/"
-						+ EncyptUtils.encHashArchiveName(Main.DSEID,
-								Main.chunkStoreEncryptionEnabled));
-		kblob.uploadText(Long.toString(System.currentTimeMillis()));
-		}catch(Exception e) {
+			CloudBlockBlob kblob = container.getBlockBlobReference("claims/" + name + "/"
+					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+			kblob.uploadText(Long.toString(System.currentTimeMillis()));
+		} catch (Exception e) {
 			throw new IOException(e);
-		}	
-		
+		}
+
 	}
 
 	@Override
-	public boolean isCheckedOut(String name,long volumeID) throws IOException {
-		if(!this.clustered)
+	public boolean isCheckedOut(String name, long volumeID) throws IOException {
+		if (!this.clustered)
 			return true;
 		try {
-		CloudBlockBlob kblob = container
-				.getBlockBlobReference("claims/" + name+ "/"
-						+ EncyptUtils.encHashArchiveName(volumeID,
-								Main.chunkStoreEncryptionEnabled));
-		return kblob.exists();
-		}catch(Exception e) {
+			CloudBlockBlob kblob = container.getBlockBlobReference("claims/" + name + "/"
+					+ EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled));
+			return kblob.exists();
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error checking if blob is clamimed", e);
 			return false;
 		}
@@ -1666,13 +1527,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		info.hostname = InetAddress.getLocalHost().getHostName();
 		info.compressed = this.compressedSize();
 		info.data = this.size();
-		RemoteVolumeInfo[] ninfo = {info};
+		RemoteVolumeInfo[] ninfo = { info };
 		return ninfo;
 	}
-	
+
 	@Override
-	public byte[] getBytes(long id, int from, int to) throws IOException,
-			DataArchivedException {
+	public byte[] getBytes(long id, int from, int to) throws IOException, DataArchivedException {
 		throw new IOException("funtion not supported");
 	}
 
@@ -1681,6 +1541,55 @@ public class BatchAzureChunkStore implements AbstractChunkStore,
 		// TODO Auto-generated method stub
 		return 0;
 	}
-			
+
+	@Override
+	public void removeVolume(long volumeID) throws IOException {
+		if (volumeID == Main.DSEID)
+			throw new IOException("volume can not remove its self");
+		String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
+		try {
+			CloudBlockBlob cblob = container.getBlockBlobReference(lbi);
+			cblob.downloadAttributes();
+			HashMap<String, String> md = cblob.getMetadata();
+			long dur = System.currentTimeMillis() - Long.parseLong(md.get("lastupdated"));
+			if (dur < (60000 * 2)) {
+				throw new IOException("Volume [" + volumeID + "] is currently mounted");
+			}
+		} catch (IOException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+
+		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
+		iter = container.listBlobs("claims/", true).iterator();
+		String suffix = "/" + vid;
+		String prefix = "claims/";
+		while (iter.hasNext()) {
+			try {
+				CloudBlob bi = (CloudBlob) iter.next();
+				String nm = bi.getName();
+				if (nm.endsWith(suffix)) {
+					bi.delete();
+					String fldr = nm.substring(0, nm.length() - suffix.length());
+					Iterator<ListBlobItem> _it = container.listBlobs(fldr).iterator();
+					if (!_it.hasNext()) {
+						String fl = fldr.substring(prefix.length());
+						CloudBlockBlob blob = container.getBlockBlobReference(fl);
+						blob.delete();
+
+					}
+				}
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+		}
+		try {
+			CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+			blob.delete();
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
 
 }

@@ -1323,7 +1323,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if(ips.getNextMarker() == null)
 				return al.iterator();
 			else {
-				ips = blobStore.list(this.name, ListContainerOptions.Builder.afterMarker(ips.getNextMarker()).inDirectory(prefix));
+				ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().afterMarker(ips.getNextMarker()).inDirectory(prefix));
 				iter = ips.iterator();
 			}
 		}
@@ -1516,6 +1516,44 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public int getMetaDataVersion() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public void removeVolume(long volumeID) throws IOException {
+		if (volumeID == Main.DSEID)
+			throw new IOException("volume can not remove its self");
+		String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
+		BlobMetadata dmd = blobStore.blobMetadata(this.name, lbi);
+		Map<String, String> md = dmd.getUserMetadata();
+		long dur = System.currentTimeMillis() - Long.parseLong(md.get("lastupdated"));
+		if (dur < (60000 * 2)) {
+			throw new IOException("Volume [" + volumeID + "] is currently mounted");
+		}
+		ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().inDirectory("claims"));
+		iter = ips.iterator();
+		Iterator<String> objs = this.getNextObjectList("claims");
+		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
+		String suffix = "/" + vid;
+		String prefix = "claims/";
+		while(objs !=null) {
+			while(objs.hasNext()) {
+				String nm = objs.next();
+				if(nm.endsWith(vid)) {
+					blobStore.removeBlob(this.name, nm);
+					String fldr = nm.substring(0, nm.length() - suffix.length());
+					PageSet<? extends StorageMetadata> bips = blobStore.list(this.name, ListContainerOptions.Builder.withDetails().inDirectory(fldr));
+					if(bips.isEmpty()) {
+						String fl = fldr.substring(prefix.length());
+						blobStore.removeBlob(this.name, fl);
+					}
+					
+				}
+			}
+			objs = this.getNextObjectList("claims");
+			if(!objs.hasNext())
+				objs = null;
+		}
+		blobStore.removeBlob(this.name, lbi);
 	}
 
 }

@@ -153,6 +153,19 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn(e);
 						}
 						break;
+					case "deletevolume":
+						try {
+							new DeleteConnectedVolume().getResult(Long
+									.parseLong(request.getQuery().get("id")));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+						break;
 					case "deletefile":
 						try {
 							String changeid = null;
