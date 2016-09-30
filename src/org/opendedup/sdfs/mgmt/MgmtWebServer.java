@@ -123,7 +123,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("info",e);
 						}
 						break;
 					case "connectedvolumes":
@@ -137,7 +137,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("connectedvolumes",e);
 						}
 						break;
 					case "syncvolume":
@@ -150,7 +150,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("syncvolume",e);
 						}
 						break;
 					case "deletevolume":
@@ -163,7 +163,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("deletevolume",e);
 						}
 						break;
 					case "deletefile":
@@ -181,7 +181,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("deletefile",e);
 						}
 						break;
 					case "cloudfile":
@@ -191,9 +191,12 @@ public class MgmtWebServer implements Container {
 							if (request.getQuery().containsKey("dstfile")) {
 								dstfile = request.getQuery().get("dstfile");
 							}
-
+							boolean overwrite = false;
+							if (request.getQuery().containsKey("overwrite")) {
+								overwrite = Boolean.parseBoolean(request.getQuery().get("overwrite"));
+							}
 							Element msg = new GetCloudFile().getResult(file,
-									dstfile);
+									dstfile,overwrite);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -201,7 +204,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cloudfile",e);
 						}
 						break;
 					case "cloudmfile":
@@ -222,7 +225,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("cloudmfile",e);
 						}
 						break;
 					case "clouddbfile":
@@ -238,7 +241,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("clouddbfile",e);
 						}
 						break;
 					case "setcachesz":
@@ -266,7 +269,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("setcachesz",e);
 						}
 						break;
 					case "syncfiles":
@@ -280,7 +283,7 @@ public class MgmtWebServer implements Container {
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("syncfiles",e);
 						}
 						break;
 					case "setwritespeed":
@@ -294,7 +297,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("setwritespeed",e);
 						}
 						break;
 					case "deletearchive":
@@ -309,7 +312,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("deletearchive",e);
 						}
 						break;
 					case "makefolder":
@@ -324,7 +327,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
+							SDFSLogger.getLog().warn("makefolder",e);
 						}
 						break;
 					case "copyextents":

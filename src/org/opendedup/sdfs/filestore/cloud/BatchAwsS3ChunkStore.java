@@ -2325,7 +2325,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			om.setContentLength(b.length);
 			PutObjectRequest creq = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(b), om);
 			s3Service.putObject(creq);
-			s3Service.putObject(creq);
 		} catch (AmazonS3Exception e1) {
 			if (e1.getStatusCode() == 409) {
 				try {

@@ -33,11 +33,11 @@ public class GetCloudFile implements Runnable {
 
 	MetaDataDedupFile mf = null;
 	MetaDataDedupFile sdf = null;
-	LongByteArrayMap ddb = null;
+	SparseDedupFile sdd = null;
 	
 	File df = null;
 	SDFSEvent fevt = null;
-	public Element getResult(String file, String dstfile) throws IOException {
+	public Element getResult(String file, String dstfile, boolean overwrite) throws IOException {
 		
 		fevt = SDFSEvent.cfEvent(file);
 		if (dstfile != null && file.contentEquals(dstfile))
@@ -46,25 +46,27 @@ public class GetCloudFile implements Runnable {
 		File df = null;
 		if (dstfile != null)
 			df = new File(Main.volume.getPath() + File.separator + dstfile);
-		if (df != null && df.exists())
+		if (!overwrite && df != null && df.exists())
 			throw new IOException(dstfile + " already exists");
 		try {
 			Document doc = XMLUtils.getXMLDoc("cloudfile");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
-			if (f.exists()
+			if (!overwrite &&f.exists()
 					&& MetaDataDedupFile.getFile(f.getPath()).isLocalOwner())
 				throw new IOException("File [" + file
 						+ "] already exists and is owned locally.");
+			else
 			fevt.maxCt = 4;
 			fevt.curCt = 1;
 			fevt.shortMsg = "Downloading [" + file + "]";
 			mf = FileReplicationService.getMF(file);
 			mf.setLocalOwner(false);
 			fevt.shortMsg = "Downloading Map Metadata for [" + file + "]";
+			LongByteArrayMap ddb = null;
 			FileReplicationService.getDDB(mf.getDfGuid());
 			if (df != null) {
-				sdf = mf.snapshot(df.getPath(), false, fevt);
+				sdf = mf.snapshot(df.getPath(), overwrite, fevt);
 				SparseDedupFile sdd = sdf.getDedupFile(false);
 				DedupFileChannel ch = sdd.getChannel(-1);
 				ddb = (LongByteArrayMap)sdd.bdb;
@@ -100,10 +102,12 @@ public class GetCloudFile implements Runnable {
 		} 
 	}
 
-	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt)
+	private void checkDedupFile(SparseDedupFile sdb, SDFSEvent fevt)
 			throws IOException {
 		fevt.shortMsg = "Importing hashes for file";
 		Set<Long> blks = new HashSet<Long>();
+		DedupFileChannel ch = sdd.getChannel(-1);
+		LongByteArrayMap ddb = (LongByteArrayMap)sdd.bdb;
 		if (ddb.getVersion() < 3)
 			throw new IOException(
 					"only files version 3 or later can be imported");
@@ -143,15 +147,14 @@ public class GetCloudFile implements Runnable {
 					e);
 			throw new IOException(e);
 		} finally {
-			ddb.close();
-			ddb = null;
+			sdd.unRegisterChannel(ch, -1);
 		}
 	}
 
 	@Override
 	public void run() {
 		try {
-			this.checkDedupFile(ddb, fevt);
+			this.checkDedupFile(sdd, fevt);
 			fevt.endEvent("imported [" + mf.getPath() + "]");
 		}catch(Exception e) {
 			SDFSLogger.getLog().error("unable to process file " + mf.getPath(), e);
