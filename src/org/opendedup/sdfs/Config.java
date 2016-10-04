@@ -502,6 +502,8 @@ public class Config {
 	 */
 	public synchronized static void writeSDFSConfigFile(String fileName)
 			throws Exception {
+		SDFSLogger.getLog().info("zzzzzzzzzzzzzzzbooooooooooo " +StorageUnit.of(HCServiceProxy.getMaxCacheSize())
+		.format(HCServiceProxy.getMaxCacheSize()));
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -535,6 +537,8 @@ public class Config {
 						Integer.toString(HCServiceProxy.getReadSpeed()));
 				chunkStoreConfig.setAttribute("write-speed",
 						Integer.toString(HCServiceProxy.getWriteSpeed()));
+				SDFSLogger.getLog().info("booooooooooo " +StorageUnit.of(HCServiceProxy.getMaxCacheSize())
+								.format(HCServiceProxy.getMaxCacheSize()));
 			}
 		}
 

@@ -748,7 +748,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				lz4compress = Boolean.parseBoolean((String) mp.get("lz4compress"));
 			}
 			byte[] ivb = null;
-			if (mp.containsKey("ivpsec"))
+			if (mp.containsKey("ivspec"))
 				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
 			if (encrypt) {
 				if (ivb != null)

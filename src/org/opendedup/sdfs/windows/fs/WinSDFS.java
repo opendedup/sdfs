@@ -1240,7 +1240,7 @@ public class WinSDFS implements DokanOperations {
 				info = fi.toByHandleFileInformation();
 				log.debug(fi.toString());
 			} catch (Exception e) {
-				SDFSLogger.getLog().debug("error while setting moving file", e);
+				SDFSLogger.getLog().debug("error while setting fileing file", e);
 				errRtn = e;
 			}
 			done = true;
@@ -1309,7 +1309,8 @@ public class WinSDFS implements DokanOperations {
 
 		@Override
 		public void run() {
-			try {
+			try {if (SDFSLogger.isFSDebug())
+				log.debug("[onCreateFile] ");
 				CreationDisposition disposition = CreationDisposition
 						.build(creationDisposition);
 				if (SDFSLogger.isFSDebug())
@@ -1318,7 +1319,7 @@ public class WinSDFS implements DokanOperations {
 							+ " shareMode=" + shareMode + " desiredAccess="
 							+ desiredAccess + " flagsAndAttributes="
 							+ flagsAndAttributes + " createOptions="
-							+ createOptions);
+							+ createOptions + " filePath=" +new File(mountedVolume + fileName).getPath() + " exists=" +new File(mountedVolume + fileName).exists());
 				EnumSet<FileFlags> flags = FileFlag
 						.getFlags(flagsAndAttributes);
 				if ((createOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE
@@ -1399,6 +1400,7 @@ public class WinSDFS implements DokanOperations {
 						}
 					}
 					if (fileName.equals("\\")) {
+						log.debug("\\FILE_CREATE");
 						switch (disposition) {
 						case FILE_CREATE:
 							throw new DokanOperationException(
@@ -1425,6 +1427,7 @@ public class WinSDFS implements DokanOperations {
 					} else if (new File(mountedVolume + fileName).exists()) {
 						switch (disposition) {
 						case FILE_CREATE:
+							log.debug("\\FILE_CREATE");
 							throw new DokanOperationException(
 									WinError.ERROR_ALREADY_EXISTS);
 						case FILE_OPEN_IF:
@@ -1437,6 +1440,7 @@ public class WinSDFS implements DokanOperations {
 							}
 							break;
 						case FILE_OPEN:
+							log.debug("\\FILE_OPEN");
 							nextHandle = getNextHandle();
 							arg5.dokanContext = nextHandle;
 							if (deleteOnClose) {
@@ -1448,6 +1452,7 @@ public class WinSDFS implements DokanOperations {
 							break;
 						case FILE_SUPERSEDE:
 							try {
+								log.debug("\\FILE_SUPERSEDE");
 								nextHandle = getNextHandle();
 								arg5.dokanContext = nextHandle;
 								fs.truncateFile(fileName, 0, arg5);
@@ -1465,12 +1470,15 @@ public class WinSDFS implements DokanOperations {
 							}
 							break;
 						case FILE_OVERWRITE:
+							log.debug("\\FILE_OVERWRITE");
 							throw new DokanOperationException(
 									WinError.ERROR_ALREADY_EXISTS);
 						case UNDEFINED:
+							log.debug("\\UNDEFINED");
 							assert (false);
 						case FILE_OVERWRITE_IF:
 							try {
+								log.debug("\\FILE_OVERWRITE_IF");
 								nextHandle = getNextHandle();
 								arg5.dokanContext = nextHandle;
 								fs.truncateFile(fileName, 0, arg5);
@@ -1488,6 +1496,7 @@ public class WinSDFS implements DokanOperations {
 							}
 							break;
 						default:
+							log.debug("hit default");
 							break;
 						}
 					} else {
@@ -1495,6 +1504,7 @@ public class WinSDFS implements DokanOperations {
 						switch (disposition) {
 
 						case FILE_CREATE:
+							log.debug("FILE_CREATE");
 							if (Main.volume.isFull())
 								throw new DokanOperationException(
 										ERROR_DISK_FULL);
@@ -1516,6 +1526,7 @@ public class WinSDFS implements DokanOperations {
 							arg5.dokanContext = nextHandle;
 							break;
 						case FILE_OVERWRITE_IF:
+							log.debug("FILE_OVERWRITE_IF");
 							if (Main.volume.isFull())
 								throw new DokanOperationException(
 										ERROR_DISK_FULL);
@@ -1536,6 +1547,7 @@ public class WinSDFS implements DokanOperations {
 							arg5.dokanContext = nextHandle;
 							break;
 						case FILE_OPEN_IF:
+							log.debug("FILE_OPEN_IF");
 							if (Main.volume.isFull())
 								throw new DokanOperationException(
 										ERROR_DISK_FULL);
@@ -1555,6 +1567,7 @@ public class WinSDFS implements DokanOperations {
 							arg5.dokanContext = nextHandle;
 							break;
 						case FILE_OPEN:
+							log.debug("FILE_OPEN");
 							if (SDFSLogger.isFSDebug())
 								log.debug("unable to open file " + path);
 							throw new DokanOperationException(
@@ -1563,8 +1576,10 @@ public class WinSDFS implements DokanOperations {
 							throw new DokanOperationException(
 									ERROR_FILE_NOT_FOUND);
 						case UNDEFINED:
+							log.debug("UNDEFINED");
 							assert (false);
 						case FILE_SUPERSEDE:
+							log.debug("FILE_SUPERSEDE");
 							if (Main.volume.isFull())
 								throw new DokanOperationException(
 										ERROR_DISK_FULL);
@@ -1584,6 +1599,7 @@ public class WinSDFS implements DokanOperations {
 							arg5.dokanContext = nextHandle;
 							break;
 						default:
+							log.debug("hit default");
 							break;
 						}
 					}
