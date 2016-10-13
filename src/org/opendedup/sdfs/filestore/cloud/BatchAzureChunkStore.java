@@ -320,6 +320,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			md.put("clustered", Boolean.toString(clustered));
 			long sz = 0;
 			long cl = 0;
+			SDFSLogger.getLog().info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 			if (!this.clustered) {
 				if (md.containsKey("currentlength")) {
 					sz = Long.parseLong(md.get("currentlength"));
@@ -335,11 +336,14 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (cl == 0 || sz == 0) {
 					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
 					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
-					md.put("clustered", Boolean.toString(this.closed));
+					md.put("clustered", Boolean.toString(this.clustered));
+					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+					md.put("port", Integer.toString(Main.sdfsCliPort));
 					container.setMetadata(md);
 					container.uploadMetadata();
 				}
 			} else {
+				SDFSLogger.getLog().info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				String lbi = "bucketinfo/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference(lbi);
@@ -362,13 +366,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
 				metaData.put("clustered", Boolean.toString(this.clustered));
 				metaData.put("hostname", InetAddress.getLocalHost().getHostName());
+				metaData.put("port", Integer.toString(Main.sdfsCliPort));
 				metaData.put("lastupdated", Long.toString(System.currentTimeMillis()));
 				metaData.put("bucketversion", Integer.toString(version));
 				metaData.put("sdfsversion", Main.version);
-				blob.setMetadata(md);
+				blob.setMetadata(metaData);
 				blob.uploadText(Long.toString(System.currentTimeMillis()));
+				blob.uploadMetadata();
 				container.setMetadata(md);
 				container.uploadMetadata();
+				SDFSLogger.getLog().info("set user metadata " + metaData.size());
 			}
 			HashBlobArchive.currentLength.set(sz);
 			HashBlobArchive.compressedLength.set(cl);
@@ -734,6 +741,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 						md.put("bucketversion", Integer.toString(version));
 						md.put("sdfsversion", Main.version);
+						md.put("port", Integer.toString(Main.sdfsCliPort));
 						blob.setMetadata(md);
 						blob.uploadMetadata();
 					}
@@ -1521,14 +1529,48 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
-		RemoteVolumeInfo info = new RemoteVolumeInfo();
-		info.id = Main.DSEID;
-		info.port = Main.sdfsCliPort;
-		info.hostname = InetAddress.getLocalHost().getHostName();
-		info.compressed = this.compressedSize();
-		info.data = this.size();
-		RemoteVolumeInfo[] ninfo = { info };
-		return ninfo;
+		if(this.isClustered()) {
+		try {
+		Iterator<ListBlobItem> it = container.listBlobs("bucketinfo/").iterator();
+		ArrayList<RemoteVolumeInfo> al = new ArrayList<RemoteVolumeInfo>();
+		while(it.hasNext()) {
+			CloudBlob bi = (CloudBlob) it.next();
+			bi.downloadAttributes();
+			HashMap<String, String> md = bi.getMetadata();
+			SDFSLogger.getLog().info("keysize=" + md.size());
+			for(String st : md.keySet()) {
+				SDFSLogger.getLog().info("key=" + st + " val=" + md.get(st));
+			}
+			RemoteVolumeInfo info = new RemoteVolumeInfo();
+			info.id = EncyptUtils.decHashArchiveName(bi.getName().substring("bucketinfo/".length()), Main.chunkStoreEncryptionEnabled);
+			info.hostname = md.get("hostname");
+			try {
+			info.port = Integer.parseInt(md.get("port"));
+			}catch(Exception e) {}
+			info.compressed = Long.parseLong(md.get("compressedlength"));
+			info.data = Long.parseLong(md.get("currentlength"));
+			info.lastupdated = Long.parseLong(md.get("lastupdated"));
+			al.add(info);
+		}
+		RemoteVolumeInfo[] ids = new RemoteVolumeInfo[al.size()];
+		for (int i = 0; i < al.size(); i++) {
+			ids[i] = al.get(i);
+		}
+		return ids;
+		
+		}catch(Exception e) {
+			throw new IOException(e);
+		}
+		}else {
+			RemoteVolumeInfo info = new RemoteVolumeInfo();
+			info.id = Main.DSEID;
+			info.port = Main.sdfsCliPort;
+			info.hostname = InetAddress.getLocalHost().getHostName();
+			info.compressed = this.compressedSize();
+			info.data = this.size();
+			RemoteVolumeInfo[] ninfo = { info };
+			return ninfo;
+		}
 	}
 
 	@Override
