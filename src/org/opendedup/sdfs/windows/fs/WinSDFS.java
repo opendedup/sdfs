@@ -220,7 +220,7 @@ public class WinSDFS implements DokanOperations {
 				return sn.nextHandle;
 			
 		} catch (DokanOperationException e) {
-			log.error("dokan error " + fileName, e);
+			log.debug("dokan error " + fileName, e);
 			throw e;
 		} catch (Exception e) {
 			log.error("unable to create file ", e);
@@ -1496,7 +1496,6 @@ public class WinSDFS implements DokanOperations {
 							}
 							break;
 						default:
-							log.debug("hit default");
 							break;
 						}
 					} else {
