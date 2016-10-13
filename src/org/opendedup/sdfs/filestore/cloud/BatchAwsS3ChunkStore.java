@@ -2461,17 +2461,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if(nm.endsWith(suffix)) {
 					s3Service.deleteObject(this.name, nm);
 					String fldr = nm.substring(0, nm.length() - suffix.length());
-					SDFSLogger.getLog().info("deleted " + fldr);
+					SDFSLogger.getLog().debug("deleted " + fldr);
 					ObjectListing ol = s3Service.listObjects(this.getName(), fldr + "/");
 					if (ol.getObjectSummaries().size() == 0) {
 						String fl = fldr.substring(prefix.length());
 						s3Service.deleteObject(this.name, fl);
-						SDFSLogger.getLog().info("deleted " + fl);
+						SDFSLogger.getLog().debug("deleted " + fl);
 					}
 				}
 			}
+			iter=null;
+			iter = this.getNextObjectList("claims/");
+			if(!iter.hasNext())
+				iter = null;
 		}
 		s3Service.deleteObject(this.name, "bucketinfo/" + vid);
+		SDFSLogger.getLog().info("Deleted " + volumeID);
 	}
 	
 	
