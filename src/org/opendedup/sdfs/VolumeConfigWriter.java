@@ -49,7 +49,7 @@ public class VolumeConfigWriter {
 	boolean dedup_files = true;
 	short chunk_size = 256;
 	int max_file_write_buffers = 24;
-	int max_open_files = 1024;
+	int max_open_files = 4096;
 	int meta_file_cache = 1024;
 	int write_timeout = Main.writeTimeoutSeconds;
 	int read_timeout = Main.readTimeoutSeconds;

@@ -724,7 +724,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 				}
 			}
-			ObjectMetadata omd = s3Service.getObjectMetadata(this.name,sobj.getKey());
+			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, sobj.getKey());
 			Map<String, String> mp = this.getUserMetaData(omd);
 			if (mp.containsKey("md5sum")) {
 				try {
@@ -1490,7 +1490,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				mp.remove("deleted-objects");
 				changed = true;
 			}
-			
 
 			if (encrypt) {
 				if (ivb != null) {
@@ -1905,16 +1904,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				if (this.isClustered()) {
 					String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-					String blb = "claims/" + haName + "/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-					s3Service.deleteObject(this.name, blb);
-					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
-					String vid = "claims/volumes/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
-							+ haName;
-					s3Service.deleteObject(this.name, vid);
-					if (ol.getObjectSummaries().size() == 0) {
-						s3Service.deleteObject(this.name, haName);
+					if (s3Service.doesObjectExist(this.name, haName)) {
+						String blb = "claims/" + haName + "/"
+								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+						s3Service.deleteObject(this.name, blb);
+						ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
+						String vid = "claims/volumes/"
+								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
+								+ haName;
+						s3Service.deleteObject(this.name, vid);
+						if (ol.getObjectSummaries().size() == 0) {
+							s3Service.deleteObject(this.name, haName);
+						}
 					}
 				} else {
 					String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
@@ -2431,7 +2432,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void removeVolume(long volumeID) throws IOException {
-		if(volumeID == Main.DSEID)
+		if (volumeID == Main.DSEID)
 			throw new IOException("volume can not remove its self");
 		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		Map<String, String> obj = null;
@@ -2439,26 +2440,25 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			omd = s3Service.getObjectMetadata(this.name, "bucketinfo/" + vid);
 			obj = this.getUserMetaData(omd);
-			
+
 			long tm = Long.parseLong(obj.get("lastupdate"));
 			long dur = System.currentTimeMillis() - tm;
-			if(dur < (60000*2)) {
-				throw new IOException("Volume [" + volumeID+ "] is currently mounted");
+			if (dur < (60000 * 2)) {
+				throw new IOException("Volume [" + volumeID + "] is currently mounted");
 			}
-			
-			
+
 		} catch (Exception e) {
 			omd = null;
 			SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 		}
 		ck = null;
-		String suffix= "/" +vid;
+		String suffix = "/" + vid;
 		String prefix = "claims/";
 		Iterator<String> iter = this.getNextObjectList("claims/");
-		while(iter != null) {
-			while(iter.hasNext()) {
+		while (iter != null) {
+			while (iter.hasNext()) {
 				String nm = iter.next();
-				if(nm.endsWith(suffix)) {
+				if (nm.endsWith(suffix)) {
 					s3Service.deleteObject(this.name, nm);
 					String fldr = nm.substring(0, nm.length() - suffix.length());
 					SDFSLogger.getLog().debug("deleted " + fldr);
@@ -2470,17 +2470,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				}
 			}
-			iter=null;
+			iter = null;
 			iter = this.getNextObjectList("claims/");
-			if(!iter.hasNext())
+			if (!iter.hasNext())
 				iter = null;
 		}
 		s3Service.deleteObject(this.name, "bucketinfo/" + vid);
 		SDFSLogger.getLog().info("Deleted " + volumeID);
 	}
-	
-	
-	
-	
 
 }

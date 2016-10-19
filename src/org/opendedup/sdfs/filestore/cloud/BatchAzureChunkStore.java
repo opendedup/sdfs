@@ -1069,21 +1069,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+
 		try {
-			if (this.isClustered()) {
-				String blb = "claims/" + haName + "/"
-						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-				CloudBlockBlob blob = container.getBlockBlobReference(blb);
-				blob.delete();
-				if (!container.listBlobs("claims/" + haName).iterator().hasNext()) {
-					blob = container.getBlockBlobReference(pp + "/" + haName);
+			CloudBlockBlob blob = container.getBlockBlobReference(pp + "/" + haName);
+			if (blob.exists()) {
+				if (this.isClustered()) {
+					String blb = "claims/" + haName + "/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					blob = container.getBlockBlobReference(blb);
+					blob.delete();
+					if (!container.listBlobs("claims/" + haName).iterator().hasNext()) {
+						blob = container.getBlockBlobReference(pp + "/" + haName);
+						blob.delete();
+					}
+
+				} else {
+
 					blob.delete();
 				}
-
-			} else {
-
-				CloudBlockBlob blob = container.getBlockBlobReference(pp + "/" + haName);
-				blob.delete();
 			}
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -1529,39 +1532,41 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
-		if(this.isClustered()) {
-		try {
-		Iterator<ListBlobItem> it = container.listBlobs("bucketinfo/").iterator();
-		ArrayList<RemoteVolumeInfo> al = new ArrayList<RemoteVolumeInfo>();
-		while(it.hasNext()) {
-			CloudBlob bi = (CloudBlob) it.next();
-			bi.downloadAttributes();
-			HashMap<String, String> md = bi.getMetadata();
-			SDFSLogger.getLog().info("keysize=" + md.size());
-			for(String st : md.keySet()) {
-				SDFSLogger.getLog().info("key=" + st + " val=" + md.get(st));
-			}
-			RemoteVolumeInfo info = new RemoteVolumeInfo();
-			info.id = EncyptUtils.decHashArchiveName(bi.getName().substring("bucketinfo/".length()), Main.chunkStoreEncryptionEnabled);
-			info.hostname = md.get("hostname");
+		if (this.isClustered()) {
 			try {
-			info.port = Integer.parseInt(md.get("port"));
-			}catch(Exception e) {}
-			info.compressed = Long.parseLong(md.get("compressedlength"));
-			info.data = Long.parseLong(md.get("currentlength"));
-			info.lastupdated = Long.parseLong(md.get("lastupdated"));
-			al.add(info);
-		}
-		RemoteVolumeInfo[] ids = new RemoteVolumeInfo[al.size()];
-		for (int i = 0; i < al.size(); i++) {
-			ids[i] = al.get(i);
-		}
-		return ids;
-		
-		}catch(Exception e) {
-			throw new IOException(e);
-		}
-		}else {
+				Iterator<ListBlobItem> it = container.listBlobs("bucketinfo/").iterator();
+				ArrayList<RemoteVolumeInfo> al = new ArrayList<RemoteVolumeInfo>();
+				while (it.hasNext()) {
+					CloudBlob bi = (CloudBlob) it.next();
+					bi.downloadAttributes();
+					HashMap<String, String> md = bi.getMetadata();
+					SDFSLogger.getLog().info("keysize=" + md.size());
+					for (String st : md.keySet()) {
+						SDFSLogger.getLog().info("key=" + st + " val=" + md.get(st));
+					}
+					RemoteVolumeInfo info = new RemoteVolumeInfo();
+					info.id = EncyptUtils.decHashArchiveName(bi.getName().substring("bucketinfo/".length()),
+							Main.chunkStoreEncryptionEnabled);
+					info.hostname = md.get("hostname");
+					try {
+						info.port = Integer.parseInt(md.get("port"));
+					} catch (Exception e) {
+					}
+					info.compressed = Long.parseLong(md.get("compressedlength"));
+					info.data = Long.parseLong(md.get("currentlength"));
+					info.lastupdated = Long.parseLong(md.get("lastupdated"));
+					al.add(info);
+				}
+				RemoteVolumeInfo[] ids = new RemoteVolumeInfo[al.size()];
+				for (int i = 0; i < al.size(); i++) {
+					ids[i] = al.get(i);
+				}
+				return ids;
+
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+		} else {
 			RemoteVolumeInfo info = new RemoteVolumeInfo();
 			info.id = Main.DSEID;
 			info.port = Main.sdfsCliPort;

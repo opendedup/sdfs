@@ -274,7 +274,7 @@ public class FileReplicationService {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to delete " + f.getPath(), e);
+			SDFSLogger.getLog().debug("unable to delete " + f.getPath(), e);
 
 		} finally {
 			removeLock(f.getPath());
