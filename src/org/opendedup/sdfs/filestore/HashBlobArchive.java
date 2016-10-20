@@ -383,6 +383,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 				rrl = null;
 			else
 				rrl = RateLimiter.create(kbps);
+			if(Main.volume != null) {
+				try {
+					Main.volume.writeUpdate();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to update volume",e);
+				}
+			}
 		} finally {
 			l.unlock();
 		}
@@ -434,6 +441,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 				wrl = null;
 			else
 				wrl = RateLimiter.create(kbps);
+			if(Main.volume != null) {
+				try {
+					Main.volume.writeUpdate();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to update volume",e);
+				}
+			}
 		} finally {
 			l.unlock();
 		}
@@ -481,6 +495,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 			LOCAL_CACHE_SIZE = sz;
 			buildCache();
+			if(Main.volume != null) {
+				try {
+					Main.volume.writeUpdate();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to update volume",e);
+				}
+			}
 		} finally {
 			l.unlock();
 		}

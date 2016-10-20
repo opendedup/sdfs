@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.mgmt.cli;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -31,9 +32,9 @@ public class ProcessFileInfo {
 							"file-info").item(i);
 					System.out.println("#");
 					System.out.printf("file name : %s\n",
-							fileEl.getAttribute("file-name"));
+							URLDecoder.decode(fileEl.getAttribute("file-name"),"UTF-8"));
 					System.out.printf("sdfs path : %s\n",
-							fileEl.getAttribute("sdfs-path"));
+							URLDecoder.decode(fileEl.getAttribute("sdfs-path"),"UTF-8"));
 					if (fileEl.hasAttribute("symlink")) {
 						System.out.printf("symlink : %s\n",
 								fileEl.getAttribute("symlink"));

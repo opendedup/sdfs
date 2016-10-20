@@ -49,7 +49,7 @@ public class VolumeConfigWriter {
 	boolean dedup_files = true;
 	short chunk_size = 256;
 	int max_file_write_buffers = 24;
-	int max_open_files = 1024;
+	int max_open_files = 4096;
 	int meta_file_cache = 1024;
 	int write_timeout = Main.writeTimeoutSeconds;
 	int read_timeout = Main.readTimeoutSeconds;
@@ -58,7 +58,6 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	boolean simpleS3 = false;
-	boolean v4Signer = false;
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
@@ -70,7 +69,6 @@ public class VolumeConfigWriter {
 	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	//String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
-	
 	String syncfs_schedule = "4 59 23 * * ?";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
@@ -117,6 +115,8 @@ public class VolumeConfigWriter {
 	private boolean genericS3 = false;
 	private String cloudUrl;
 	private boolean readAhead = false;
+	private boolean usebasicsigner=false;
+	private boolean disableDNSBucket = false;
 	private String blockSize = "50 MB";
 	private long sn = new Random().nextLong();
 	
@@ -336,12 +336,9 @@ public class VolumeConfigWriter {
 				this.readAhead = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 256;
-				if(cmd.hasOption("aws-simple-s3")) {
+				if(cmd.hasOption("simple-s3")) {
 					this.simpleS3 = true;
-					this.basicS3Signer = true;
-				}
-				if(cmd.hasOption("aws-use-v4-signer")) {
-					
+					this.usebasicsigner = true;
 				}
 				if (!awsAim
 						&& !cmd.hasOption("cloud-disable-test")
@@ -446,6 +443,14 @@ public class VolumeConfigWriter {
 			this.cloudUrl = cmd.getOptionValue("cloud-url");
 			this.genericS3 = true;
 			this.simpleS3 = true;
+			this.disableDNSBucket=true;
+			this.usebasicsigner = true;
+		}
+		if(cmd.hasOption("aws-basic-signer")) {
+			this.usebasicsigner = Boolean.parseBoolean(cmd.getOptionValue("aws-basic-signer"));
+		}
+		if(cmd.hasOption("aws-disable-dns-bucket")) {
+			this.disableDNSBucket = Boolean.parseBoolean(cmd.getOptionValue("aws-disable-dns-bucket"));
 		}
 		if (cmd.hasOption("cluster-dse-password"))
 			this.clusterDSEPassword = cmd
@@ -682,10 +687,11 @@ public class VolumeConfigWriter {
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("glacier-archive-days", "0");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
 				if (this.genericS3) {
 					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
-					extended.setAttribute("disableDNSBucket", "true");
+					extended.setAttribute("disableDNSBucket", Boolean.toString(this.disableDNSBucket));
 					
 					extended.appendChild(cp);
 				}
@@ -883,6 +889,16 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The url of the blob server. e.g. http://s3server.localdomain/s3/")
 				.hasArg().withArgName("url").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-basic-signer")
+				.withDescription(
+						"use basic s3 signer for the cloud connection. This is set to true by default for all cloud url buckets")
+				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("aws-disable-dns-bucket")
+				.withDescription(
+						"disable the use of dns bucket names to prepent the cloud url. This is set to true by default when cloud-url is set")
+				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("base-path")
 				.withDescription(
@@ -1151,11 +1167,6 @@ public class VolumeConfigWriter {
 						"TCP Port to listen on for incoming connections. Defaults to 2222")
 				.hasArg().withArgName("TCP Port").create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-use-v4-signer")
-				.withDescription(
-						"Use the AWS v4 signer for S3 connection.")
-				.create());
-		options.addOption(OptionBuilder
 				.withLongOpt("dse-enable-network")
 				.withDescription(
 						"Enable Network Services for Dedup Storage Enginge to serve remote hosts")
@@ -1165,7 +1176,7 @@ public class VolumeConfigWriter {
 				.withDescription("Enable this volume as a replication master")
 				.create());
 		options.addOption(OptionBuilder
-				.withLongOpt("aws-simple-s3")
+				.withLongOpt("simple-s3")
 				.withDescription("Uses basic S3 api characteristics for cloud storage backend.")
 				.create());
 		options.addOption(OptionBuilder

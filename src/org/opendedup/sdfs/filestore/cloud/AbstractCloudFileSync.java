@@ -16,6 +16,8 @@ public interface AbstractCloudFileSync {
 			throws IOException;
 
 	public abstract String getNextName(String prefix,long id) throws IOException;
+	
+	public abstract void removeVolume(long volumeID) throws IOException;
 
 	public abstract void clearIter();
 

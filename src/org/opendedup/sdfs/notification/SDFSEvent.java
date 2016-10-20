@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -60,24 +61,19 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type GC = new Type("Garbage Collection");
 	public transient static final Type FLUSHALL = new Type("Flush All Buffers");
 	public transient static final Type FDISK = new Type("File Check");
-	public transient static final Type CRCK = new Type(
-			"Cluster Redundancy Check");
+	public transient static final Type CRCK = new Type("Cluster Redundancy Check");
 	public transient static final Type WAIT = new Type("Waiting to Run Again");
 	public transient static final Type CLAIMR = new Type("Claim Records");
 	public transient static final Type REMOVER = new Type("Remove Records");
-	public transient static final Type AIMPORT = new Type(
-			"Replication Meta-Data File Import");
+	public transient static final Type AIMPORT = new Type("Replication Meta-Data File Import");
 	public transient static final Type IMPORT = new Type("Replication Import");
-	public transient static final Type AOUT = new Type(
-			"Replication Archive Out");
+	public transient static final Type AOUT = new Type("Replication Archive Out");
 	public transient static final Type MOUNT = new Type("Mount Volume");
 	public transient static final Type COMPACT = new Type("Compaction");
 	public transient static final Type UMOUNT = new Type("Unmount Volume");
-	public transient static final Type LHASHDB = new Type(
-			"Loading Hash Database Task");
+	public transient static final Type LHASHDB = new Type("Loading Hash Database Task");
 	public transient static final Type FSCK = new Type("Consistancy Check");
-	public transient static final Type MIMPORT = new Type(
-			"Replication Block Data" + " Import");
+	public transient static final Type MIMPORT = new Type("Replication Block Data" + " Import");
 	public transient static final Type FIXDSE = new Type("Volume Recovery Task");
 	public transient static final Type SNAP = new Type("Take Snapshot");
 	public transient static final Type EXPANDVOL = new Type("Expand Volume");
@@ -93,23 +89,27 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type WSP = new Type("Set Write Speed");
 	public transient static final Type RAE = new Type("Cache File");
 	public transient static final Type CF = new Type("Importing Cloud File");
-	public transient static final Type ARCHIVERESTORE = new Type(
-			"Restore from Glacier");
+	public transient static final Type ARCHIVERESTORE = new Type("Restore from Glacier");
 	public transient static final Type WER = new Type("Write Error");
-	public transient static final Type DISCO = new Type(
-			"Storage Pool Disconnected");
-	public transient static final Type RECO = new Type(
-			"Storage Pool Reconnected");
+	public transient static final Type DISCO = new Type("Storage Pool Disconnected");
+	public transient static final Type RECO = new Type("Storage Pool Reconnected");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
 	public transient static final Level ERROR = new Level("error");
 
-	private transient static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(
-			50, .075F, false);
+	private transient static LinkedHashMap<String, SDFSEvent> tasks = new LinkedHashMap<String, SDFSEvent>(50, .075F,
+			false) {
+		private static final long serialVersionUID = -1L;
 
-	SimpleDateFormat format = new SimpleDateFormat(
-			"EEE MMM dd HH:mm:ss zzz yyyy");
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, SDFSEvent> entry) {
+			return size() > 50;
+		}
+
+	};
+
+	SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
 
 	protected SDFSEvent(Type type, String target, String shortMsg, Level level) {
 		this.type = type;
@@ -117,7 +117,9 @@ public class SDFSEvent implements java.io.Serializable {
 		this.startTime = System.currentTimeMillis();
 		this.shortMsg = shortMsg;
 		this.uid = RandomGUID.getGuid();
-		tasks.put(uid, this);
+		synchronized (tasks) {
+			tasks.put(uid, this);
+		}
 		this.level = level;
 		SDFSEventLogger.log(this);
 
@@ -181,7 +183,6 @@ public class SDFSEvent implements java.io.Serializable {
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
-	
 
 	public void endErrorEvent() {
 		for (int i = 0; i < this.children.size(); i++) {
@@ -213,18 +214,15 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		return event;
 	}
-	
+
 	public static SDFSEvent readAheadEvent(MetaDataDedupFile f) {
-		SDFSEvent event = new SDFSEvent(RAE, getTarget(),
-				"Caching " + f.getPath() + " Locally", RUNNING);
+		SDFSEvent event = new SDFSEvent(RAE, getTarget(), "Caching " + f.getPath() + " Locally", RUNNING);
 
 		return event;
 	}
-	
 
 	public static SDFSEvent archiveRestoreEvent(MetaDataDedupFile f) {
-		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(),
-				"Restoring " + f.getPath(), RUNNING);
+		SDFSEvent event = new SDFSEvent(ARCHIVERESTORE, getTarget(), "Restoring " + f.getPath(), RUNNING);
 
 		return event;
 	}
@@ -242,15 +240,13 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static void discoEvent() {
-		SDFSEvent event = new SDFSEvent(DISCO, getTarget(),
-				"Storage Pool Disconnected", RUNNING);
+		SDFSEvent event = new SDFSEvent(DISCO, getTarget(), "Storage Pool Disconnected", RUNNING);
 		event.maxCt = 1;
 		event.endWarnEvent();
 	}
 
 	public static void recoEvent() {
-		SDFSEvent event = new SDFSEvent(RECO, getTarget(),
-				"Storage Pool Reconnected", RUNNING);
+		SDFSEvent event = new SDFSEvent(RECO, getTarget(), "Storage Pool Reconnected", RUNNING);
 		event.maxCt = 1;
 		event.endEvent();
 	}
@@ -262,8 +258,7 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent cfEvent(String fileName) {
-		SDFSEvent event = new SDFSEvent(CF, getTarget(), "Importing ["
-				+ fileName + "]", RUNNING);
+		SDFSEvent event = new SDFSEvent(CF, getTarget(), "Importing [" + fileName + "]", RUNNING);
 		return event;
 	}
 
@@ -273,8 +268,7 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent passwdEvent(String shortMsg) {
-		SDFSEvent event = new SDFSEvent(PSWD, "Administrative User", shortMsg,
-				RUNNING);
+		SDFSEvent event = new SDFSEvent(PSWD, "Administrative User", shortMsg, RUNNING);
 		return event;
 	}
 
@@ -284,15 +278,13 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static void rdErrEvent() {
-		SDFSEvent event = new SDFSEvent(RDER, getTarget(),
-				"Read Error Detected", ERROR);
+		SDFSEvent event = new SDFSEvent(RDER, getTarget(), "Read Error Detected", ERROR);
 		event.maxCt = 1;
 		event.endErrorEvent();
 	}
 
 	public static void wrErrEvent() {
-		SDFSEvent event = new SDFSEvent(WER, getTarget(),
-				"Write Error Detected", ERROR);
+		SDFSEvent event = new SDFSEvent(WER, getTarget(), "Write Error Detected", ERROR);
 		event.maxCt = 1;
 		event.endErrorEvent();
 	}
@@ -318,8 +310,8 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent compactEvent() {
-		SDFSEvent event = new SDFSEvent(COMPACT, getTarget(),
-				"Running Compaction on DSE, this may take a while", RUNNING);
+		SDFSEvent event = new SDFSEvent(COMPACT, getTarget(), "Running Compaction on DSE, this may take a while",
+				RUNNING);
 		return event;
 	}
 
@@ -347,13 +339,11 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent flushAllBuffers() {
-		SDFSEvent event = new SDFSEvent(FLUSHALL, getTarget(),
-				"Flushing all buffers", RUNNING);
+		SDFSEvent event = new SDFSEvent(FLUSHALL, getTarget(), "Flushing all buffers", RUNNING);
 		return event;
 	}
 
-	public static SDFSEvent snapEvent(String shortMsg, File src)
-			throws IOException {
+	public static SDFSEvent snapEvent(String shortMsg, File src) throws IOException {
 
 		SDFSEvent event = new SDFSEvent(SNAP, getTarget(), shortMsg, RUNNING);
 		if (src.isDirectory())
@@ -363,10 +353,8 @@ public class SDFSEvent implements java.io.Serializable {
 		return event;
 	}
 
-	public static BlockImportEvent metaImportEvent(String shortMsg,
-			SDFSEvent evt) {
-		BlockImportEvent event = new BlockImportEvent(getTarget(), shortMsg,
-				RUNNING);
+	public static BlockImportEvent metaImportEvent(String shortMsg, SDFSEvent evt) {
+		BlockImportEvent event = new BlockImportEvent(getTarget(), shortMsg, RUNNING);
 		try {
 			evt.addChild(event);
 		} catch (Exception e) {
@@ -375,15 +363,13 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent deleteFileEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File "
-				+ f.getPath() + " deleted", RUNNING);
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File " + f.getPath() + " deleted", RUNNING);
 		event.endEvent("File " + f.getPath() + " deleted", INFO);
 		return event;
 	}
 
 	public static SDFSEvent deleteFileFailedEvent(File f) {
-		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File "
-				+ f.getPath() + " delete failed", WARN);
+		SDFSEvent event = new SDFSEvent(SDFSEvent.DELFILE, getTarget(), "File " + f.getPath() + " delete failed", WARN);
 		event.endEvent("File " + f.getPath() + " delete failed", WARN);
 		return event;
 	}
@@ -500,8 +486,7 @@ public class SDFSEvent implements java.io.Serializable {
 		root.setAttribute("short-msg", this.shortMsg);
 		root.setAttribute("long-msg", this.longMsg);
 		try {
-			root.setAttribute("percent-complete",
-					Double.toString((this.curCt / this.maxCt)));
+			root.setAttribute("percent-complete", Double.toString((this.curCt / this.maxCt)));
 		} catch (Exception e) {
 			root.setAttribute("percent-complete", "0");
 		}
@@ -522,22 +507,16 @@ public class SDFSEvent implements java.io.Serializable {
 	public static SDFSEvent fromXML(Element el) {
 		SDFSEvent evt = null;
 		if (el.getAttribute("type").equalsIgnoreCase(MIMPORT.type)) {
-			BlockImportEvent _evt = new BlockImportEvent(
-					el.getAttribute("target"), el.getAttribute("short-msg"),
+			BlockImportEvent _evt = new BlockImportEvent(el.getAttribute("target"), el.getAttribute("short-msg"),
 					new Level(el.getAttribute("level")));
-			_evt.blocksImported = Long.parseLong(el
-					.getAttribute("blocks-imported"));
-			_evt.bytesImported = Long.parseLong(el
-					.getAttribute("bytes-imported"));
-			_evt.filesImported = Long.parseLong(el
-					.getAttribute("files-imported"));
-			_evt.virtualDataImported = Long.parseLong(el
-					.getAttribute("virtual-data-imported"));
+			_evt.blocksImported = Long.parseLong(el.getAttribute("blocks-imported"));
+			_evt.bytesImported = Long.parseLong(el.getAttribute("bytes-imported"));
+			_evt.filesImported = Long.parseLong(el.getAttribute("files-imported"));
+			_evt.virtualDataImported = Long.parseLong(el.getAttribute("virtual-data-imported"));
 			evt = _evt;
 		} else {
-			evt = new SDFSEvent(new Type(el.getAttribute("type")),
-					el.getAttribute("target"), el.getAttribute("short-msg"),
-					new Level(el.getAttribute("level")));
+			evt = new SDFSEvent(new Type(el.getAttribute("type")), el.getAttribute("target"),
+					el.getAttribute("short-msg"), new Level(el.getAttribute("level")));
 		}
 		evt.maxCt = Long.parseLong(el.getAttribute("max-count"));
 		evt.curCt = Long.parseLong(el.getAttribute("current-count"));
@@ -550,8 +529,7 @@ public class SDFSEvent implements java.io.Serializable {
 		int le = el.getElementsByTagName("event").getLength();
 		if (le > 0) {
 			for (int i = 0; i < le; i++) {
-				Element _el = (Element) el.getElementsByTagName("event")
-						.item(i);
+				Element _el = (Element) el.getElementsByTagName("event").item(i);
 				evt.children.add(fromXML(_el));
 			}
 		}
@@ -560,32 +538,36 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static String getEvents() {
-		Iterator<SDFSEvent> iter = SDFSEvent.tasks.values().iterator();
-		StringBuffer sb = new StringBuffer();
-		while (iter.hasNext()) {
-			sb.append(iter.next());
-			sb.append("/n");
+		synchronized (tasks) {
+			Iterator<SDFSEvent> iter = SDFSEvent.tasks.values().iterator();
+			StringBuffer sb = new StringBuffer();
+			while (iter.hasNext()) {
+				sb.append(iter.next());
+				sb.append("/n");
+			}
+			return sb.toString();
 		}
-		return sb.toString();
 	}
 
-	public static Element getXMLEvent(String uuid)
-			throws ParserConfigurationException {
-		if (tasks.containsKey(uuid))
-			return tasks.get(uuid).toXML();
-		else
-			throw new NullPointerException(uuid + " could not be found");
-
+	public static Element getXMLEvent(String uuid) throws ParserConfigurationException {
+		synchronized (tasks) {
+			if (tasks.containsKey(uuid))
+				return tasks.get(uuid).toXML();
+			else
+				throw new NullPointerException(uuid + " could not be found");
+		}
 	}
 
 	public static Element getXMLEvents() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("events");
 		Element root = doc.getDocumentElement();
-		Iterator<SDFSEvent> iter = tasks.values().iterator();
-		while (iter.hasNext()) {
-			Element el = iter.next().toXML();
-			doc.adoptNode(el);
-			root.appendChild(el);
+		synchronized (tasks) {
+			Iterator<SDFSEvent> iter = tasks.values().iterator();
+			while (iter.hasNext()) {
+				Element el = iter.next().toXML();
+				doc.adoptNode(el);
+				root.appendChild(el);
+			}
 		}
 		return (Element) root.cloneNode(true);
 	}

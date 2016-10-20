@@ -975,10 +975,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			File f = new File(this.path);
 			
 			boolean del = f.delete();
-			if(del) {
 			Main.volume.removeFile();
 			eventBus.post(new MFileDeleted(this));
-			}
 			return del;
 		} finally {
 			this.writeLock.unlock();
@@ -1601,6 +1599,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public Element toXML(Document doc) throws ParserConfigurationException,
 			DOMException, IOException {
 		Element root = doc.createElement("file-info");
+		
 		root.setAttribute("file-name", URLEncoder.encode(this.getName(),"UTF-8"));
 		root.setAttribute("sdfs-path", URLEncoder.encode(this.getPath(),"UTF-8"));
 		if (this.isFile()) {

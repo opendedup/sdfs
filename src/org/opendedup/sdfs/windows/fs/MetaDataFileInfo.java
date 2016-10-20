@@ -85,7 +85,7 @@ public class MetaDataFileInfo {
 						.getValue();
 			creationTime = millisToFiletime(attr.creationTime().toMillis());
 			lastAccessTime = millisToFiletime(mf.getLastAccessed());
-			SDFSLogger.getLog().info("fn="+this.fileName+" mtime=" +mf.lastModified() + " ft="+ attr.lastModifiedTime().toMillis() + " wt=" +millisToFiletime(mf.lastModified()));
+			//SDFSLogger.getLog().info("fn="+this.fileName+" mtime=" +mf.lastModified() + " ft="+ attr.lastModifiedTime().toMillis() + " wt=" +millisToFiletime(mf.lastModified()));
 			lastWriteTime = millisToFiletime(mf.lastModified());
 		} catch (IOException | UnsupportedOperationException x) {
 			SDFSLogger.getLog().error(

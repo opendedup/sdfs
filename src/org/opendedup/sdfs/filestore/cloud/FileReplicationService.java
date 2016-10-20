@@ -55,7 +55,7 @@ public class FileReplicationService {
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private transient ThreadPoolExecutor executor = null;
-	private static FileReplicationService service = null;
+	public static FileReplicationService service = null;
 
 	private static EventBus eventUploadBus = new EventBus();
 
@@ -142,6 +142,10 @@ public class FileReplicationService {
 	
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
 		return service.sync.getConnectedVolumes();
+	}
+	
+	public static void removeVolume(long id) throws IOException {
+		service.sync.removeVolume(id);
 	}
 
 	private ReentrantLock getLock(String st) {
@@ -270,7 +274,7 @@ public class FileReplicationService {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to delete " + f.getPath(), e);
+			SDFSLogger.getLog().debug("unable to delete " + f.getPath(), e);
 
 		} finally {
 			removeLock(f.getPath());
