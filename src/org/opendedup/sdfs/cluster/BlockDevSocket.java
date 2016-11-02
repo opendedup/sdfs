@@ -50,6 +50,7 @@ import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.BlockDev;
@@ -125,7 +126,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 					SDFSLogger
 							.getLog()
 							.info("Not first node in cluster, clearing and resyncing");
-					this.map.vanish();
+					this.map.vanish(true);
 					this.map = new LongByteArrayMap(path);
 					this.resync();
 					SDFSLogger.getLog().info("Done Resync'ing");
@@ -191,7 +192,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 						done = true;
 					else {
 						try {
-							map.putIfNull(kv.getKey(), kv.getValue());
+							map.putIfNull(kv.getKey(),kv.getValue());
 						} catch (FileClosedException e) {
 							throw new IOException(e);
 						}
@@ -322,7 +323,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 			case NXTVAL:
 				ArrayList<LongKeyValue> al = new ArrayList<LongKeyValue>();
 				for (int i = 0; i < mxSz; i++) {
-					LongKeyValue v = map.nextKeyValue();
+					LongKeyValue v = map.nextKeyValue(Main.refCount);
 					al.add(v);
 					if (v == null)
 						break;
@@ -433,8 +434,8 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public byte[] nextValue() throws IOException {
-		return map.nextValue();
+	public SparseDataChunk nextValue(boolean index) throws IOException {
+		return map.nextValue(index);
 	}
 
 	@Override
@@ -510,7 +511,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public void put(long pos, byte[] data) throws IOException {
+	public void put(long pos, SparseDataChunk data) throws IOException {
 		try {
 			map.put(pos, data);
 			if (channel != null) {
@@ -534,7 +535,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public void putIfNull(long pos, byte[] data) throws IOException {
+	public void putIfNull(long pos, SparseDataChunk data) throws IOException {
 		this.putIfNull(pos, data);
 
 	}
@@ -628,7 +629,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public byte[] get(long pos) throws IOException {
+	public SparseDataChunk get(long pos) throws IOException {
 		try {
 			return map.get(pos);
 		} catch (FileClosedException e) {
@@ -662,14 +663,14 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public void vanish() throws IOException {
-		map.vanish();
+	public void vanish(boolean index) throws IOException {
+		map.vanish(index);
 
 	}
 
 	@Override
-	public void copy(String destFilePath) throws IOException {
-		map.copy(destFilePath);
+	public void copy(String destFilePath,boolean index) throws IOException {
+		map.copy(destFilePath,index);
 	}
 
 	@Override
@@ -728,7 +729,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public void put(long pos, byte[] data, int length) throws IOException {
+	public void put(long pos, SparseDataChunk data, int length) throws IOException {
 		// TODO Auto-generated method stub
 
 	}

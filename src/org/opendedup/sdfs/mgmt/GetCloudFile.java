@@ -10,6 +10,7 @@ import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -19,7 +20,6 @@ import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -114,11 +114,10 @@ public class GetCloudFile implements Runnable {
 		try {
 			ddb.iterInit();
 			for (;;) {
-				LongKeyValue kv = ddb.nextKeyValue();
+				LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
 				if (kv == null)
 					break;
-				SparseDataChunk ck = new SparseDataChunk(kv.getValue(),
-						ddb.getVersion());
+				SparseDataChunk ck = kv.getValue();
 				boolean dirty = false;
 				List<HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al) {
@@ -137,7 +136,7 @@ public class GetCloudFile implements Runnable {
 					}
 				}
 				if (dirty)
-					ddb.put(kv.getKey(), ck.getBytes());
+					ddb.put(kv.getKey(), ck);
 			}
 			for (Long l : blks) {
 				HashBlobArchive.claimBlock(l);

@@ -24,6 +24,7 @@ public class Main {
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
 	public static double fpp = .01;
+	public static boolean refCount = true;
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
 	public static int readTimeoutSeconds = -1; // 1 hour timeout

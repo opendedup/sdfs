@@ -19,13 +19,14 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.hashing.LargeFileBloomFilter;
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
@@ -64,7 +65,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract void processHashClaims(SDFSEvent evt) throws IOException;
 
-	public abstract long processHashClaims(SDFSEvent evt, LargeFileBloomFilter bf)
+	public abstract long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;
 
 	public abstract void commitChunks();

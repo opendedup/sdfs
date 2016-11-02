@@ -52,6 +52,14 @@ public class LargeBloomFilter implements Serializable {
 	public LargeBloomFilter(FLBF[] bfs) {
 		this.bfs = bfs;
 	}
+	
+	public long getSize() {
+		long sz = 0;
+		for(FLBF fp : bfs ) {
+			sz+=fp.getSize();
+		}
+		return sz;
+	}
 
 	public static boolean exists(File dir) {
 		for (int i = 0; i < AR_SZ; i++) {
@@ -65,10 +73,11 @@ public class LargeBloomFilter implements Serializable {
 	}
 
 	public LargeBloomFilter(File dir, long sz, double fpp, boolean fb,
-			boolean sync) throws IOException {
+			boolean sync,boolean counting) throws IOException {
 		executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
 				10, TimeUnit.SECONDS, worksQueue, executionHandler);
-
+		if(!dir.exists())
+			dir.mkdirs();
 		bfs = new FLBF[AR_SZ];
 		CommandLineProgressBar bar = null;
 		if (fb)
@@ -85,6 +94,7 @@ public class LargeBloomFilter implements Serializable {
 			th.sync = sync;
 			th.fpp = fpp;
 			th.sz = isz;
+			th.counting = counting;
 			executor.execute(th);
 			//bfs[i] = new FLBF(isz, fpp, f, sync);
 			if (bar != null)
@@ -119,6 +129,10 @@ public class LargeBloomFilter implements Serializable {
 		FLBF m = bfs[hashb];
 		return m;
 	}
+	
+	public void remove(byte [] b) throws IOException {
+		 getMap(b).remove(b);
+	}
 
 	public boolean mightContain(byte[] b) {
 		return getMap(b).mightContain(b);
@@ -131,6 +145,8 @@ public class LargeBloomFilter implements Serializable {
 	public void save(File dir) throws IOException {
 		CommandLineProgressBar bar = new CommandLineProgressBar(
 				"Saving BloomFilters", bfs.length, System.out);
+		if(!dir.exists())
+			dir.mkdirs();
 		executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
 				100, TimeUnit.SECONDS, worksQueue, executionHandler);
 		for (int i = 0; i < bfs.length; i++) {
@@ -176,11 +192,11 @@ public class LargeBloomFilter implements Serializable {
 		long sz;
 		double fpp;
 		boolean sync;
-
+		boolean counting;
 		@Override
 		public void run() {
 			try {
-			bfs[pos] = new FLBF(sz, fpp, f, sync);
+			bfs[pos] = new FLBF(sz, fpp, f, sync,counting);
 			}catch(Exception e) {
 				SDFSLogger.getLog().error("unable to create bloom filter",e);
 			}

@@ -24,10 +24,10 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class LongKeyValue implements Externalizable {
-	private byte[] value;
+	private SparseDataChunk value;
 	private long key;
 
-	public LongKeyValue(long key, byte[] value) {
+	public LongKeyValue(long key, SparseDataChunk value) {
 		this.key = key;
 		this.value = value;
 	}
@@ -40,18 +40,21 @@ public class LongKeyValue implements Externalizable {
 	public void readExternal(ObjectInput out) throws IOException,
 			ClassNotFoundException {
 		this.key = out.readLong();
-		this.value = new byte[out.readInt()];
-		out.readFully(value);
+		byte [] b =  new byte[out.readInt()];
+		
+		out.readFully(b);
+		this.value = new SparseDataChunk(b,(byte)3);
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput in) throws IOException {
 		in.writeLong(this.key);
-		in.writeInt(value.length);
-		in.write(value);
+		byte [] b = value.getBytes();
+		in.writeInt(b.length);
+		in.write(b);
 	}
 
-	public byte[] getValue() {
+	public SparseDataChunk getValue() {
 		return value;
 	}
 

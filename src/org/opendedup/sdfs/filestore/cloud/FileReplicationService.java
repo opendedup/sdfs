@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,12 +18,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.bouncycastle.util.Arrays;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.LongKeyValue;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
@@ -40,6 +50,7 @@ import org.opendedup.util.OSValidator;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.primitives.Longs;
 
 import fuse.SDFS.SDFSFileSystem;
 
@@ -646,6 +657,7 @@ public class FileReplicationService {
 							+ mf.getIOMonitor().getActualBytesWritten(), true);
 					Main.volume.addVirtualBytesWritten(mf.getIOMonitor()
 							.getVirtualBytesWritten(), true);
+					Main.volume.addFile();
 					SDFSLogger.getLog()
 							.info("downloaded " + to.getPath() + " sz="
 									+ to.length());
@@ -699,6 +711,66 @@ public class FileReplicationService {
 						SDFSLogger.getLog().info(
 								"downloaded " + f.getPath() + " sz="
 										+ f.length());
+						LongByteArrayMap ddb = new LongByteArrayMap(f.getPath());
+						Set<Long> blks = new HashSet<Long>();
+						if (ddb.getVersion() < 3)
+							throw new IOException(
+									"only files version 3 or later can be imported");
+						try {
+							ddb.iterInit();
+							for (;;) {
+								LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+								if (kv == null)
+									break;
+								SparseDataChunk ck = kv.getValue();
+								boolean dirty = false;
+								List<HashLocPair> al = ck.getFingers();
+								for (HashLocPair p : al) {
+
+									ChunkData cm = new ChunkData(
+											Longs.fromByteArray(p.hashloc), p.hash);
+									InsertRecord ir = HCServiceProxy.getHashesMap().put(cm,
+											false);
+									Main.volume.addVirtualBytesWritten(p.len, false);
+									Main.volume.addDuplicateBytes(p.len, false);
+									if (ir.getInserted())
+										blks.add(Longs.fromByteArray(ir.getHashLocs()));
+									else {
+										if (!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
+											p.hashloc = ir.getHashLocs();
+											dirty = true;
+										}
+									}
+								}
+								if (dirty)
+									ddb.put(kv.getKey(), ck);
+							}
+							for (Long l : blks) {
+								boolean inserted = false;
+								int trs = 0;
+								while (!inserted) {
+									try {
+										HashBlobArchive.claimBlock(l);
+										inserted = true;
+
+									} catch (Exception e) {
+										trs++;
+
+										if (trs > 100)
+											throw e;
+										else
+											Thread.sleep(5000);
+									}
+								}
+							}
+						} catch (Throwable e) {
+							SDFSLogger.getLog().warn("error while checking file [" + ddb + "]",
+									e);
+							throw new IOException(e);
+						} finally {
+							ddb.close();
+							ddb = null;
+						}
 						done = true;
 						ddl.incrementAndGet();
 					} catch (Exception e) {

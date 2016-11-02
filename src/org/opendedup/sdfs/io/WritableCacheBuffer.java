@@ -34,6 +34,7 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;

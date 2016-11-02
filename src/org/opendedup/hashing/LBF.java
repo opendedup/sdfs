@@ -35,10 +35,17 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
+import orestes.bloomfilter.FilterBuilder;
+import orestes.bloomfilter.memory.CountingBloomFilterMemory;
+import static java.lang.Math.toIntExact;
+
 public class LBF implements Serializable {
 	private static final long serialVersionUID = 1L;
+	CountingBloomFilterMemory<Object> filter = null;
 	public transient BloomFilter<org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob> bfs = null;
 	public transient ReentrantReadWriteLock l = new ReentrantReadWriteLock();
+	
+	boolean counting = false;
 	private static Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
 		/**
 		 * 
@@ -55,8 +62,14 @@ public class LBF implements Serializable {
 		}
 	};
 
-	public LBF(long sz, double fpp) {
+	public LBF(long sz, double fpp,boolean counting) {
+		this.counting = counting;
+		if(counting) {
+			FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(32);
+			filter = new CountingBloomFilterMemory<>(fb);
+		}else {
 		this.bfs = BloomFilter.create(getFunnel(), sz, fpp);
+		}
 	}
 
 	public LBF(BloomFilter<KeyBlob> bfs) {
@@ -64,19 +77,32 @@ public class LBF implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	LBF(File f) throws IOException, ClassNotFoundException {
+	LBF(File f,boolean counting) throws IOException, ClassNotFoundException {
 		if (!f.exists()) {
 			throw new IOException("bf does not exist " + f.getPath());
 		}
 		FileInputStream fin = new FileInputStream(f);
 		ObjectInputStream oon = new ObjectInputStream(fin);
-		BloomFilter<KeyBlob> kb = (BloomFilter<KeyBlob>) oon.readObject();
+		if(counting) {
+			filter = (CountingBloomFilterMemory<Object>) oon.readObject();
+		}else {
+			BloomFilter<KeyBlob> kb = (BloomFilter<KeyBlob>) oon.readObject();
 		bfs = kb;
+		}
 		oon.close();
 		f.delete();
 	}
+	
+	public void remove(KeyBlob kb) {
+		if(counting) {
+			filter.removeRaw(kb.key);
+		}
+	}
 
 	public boolean mightContain(KeyBlob kb) {
+		if(counting) {
+			return filter.contains(kb.key);
+		}
 		l.readLock().lock();
 		try {
 			return bfs.mightContain(kb);
@@ -86,11 +112,15 @@ public class LBF implements Serializable {
 	}
 
 	public void put(KeyBlob kb) {
+		if(counting) {
+			filter.addRaw(kb.key);
+		}else {
 		l.writeLock().lock();
 		try {
 			bfs.put(kb);
 		} finally {
 			l.writeLock().unlock();
+		}
 		}
 	}
 
@@ -101,7 +131,10 @@ public class LBF implements Serializable {
 	public void save(File f) throws IOException {
 		FileOutputStream fout = new FileOutputStream(f);
 		ObjectOutputStream oon = new ObjectOutputStream(fout);
-		oon.writeObject(this.bfs);
+		if(counting)
+			oon.writeObject(this.filter);
+		else
+			oon.writeObject(this.bfs);
 		oon.flush();
 		oon.close();
 		fout.flush();
@@ -109,6 +142,8 @@ public class LBF implements Serializable {
 	}
 
 	public byte[] getBytes() throws IOException {
+		if(counting)
+			throw new IOException("not implemented");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		this.bfs.writeTo(baos);
 		return baos.toByteArray();

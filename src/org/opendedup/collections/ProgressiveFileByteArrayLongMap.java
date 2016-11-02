@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +47,6 @@ import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
-import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -1273,7 +1273,7 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 
 	@Override
-	public long claimRecords(LargeFileBloomFilter nbf) throws IOException {
+	public long claimRecords(LargeBloomFilter nbf) throws IOException {
 		this.iterInit();
 		long _sz = 0;
 		Lock l = this.hashlock.writeLock();
@@ -1336,7 +1336,7 @@ public class ProgressiveFileByteArrayLongMap
 		}
 	}
 
-	public long claimRecords(LargeFileBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
+	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
 		this.iterInit();
 		long _sz = 0;
 		Lock l = this.hashlock.writeLock();

@@ -1,10 +1,13 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
@@ -30,6 +33,8 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
+	public static LargeBloomFilter cp = null;
+	
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -41,6 +46,15 @@ public class DedupFileStore {
 		} else if (Main.blockDev) {
 			// openFileMonitor = new OpenFileMonitor(1000,
 			// Main.maxInactiveFileTime);
+		}
+		if(Main.refCount) {
+			long entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
+			try {
+				cp = new LargeBloomFilter(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"),entries, .1, false,true,Main.refCount);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 	}
 
@@ -221,6 +235,12 @@ public class DedupFileStore {
 							"Closed " + df.getMetaFile().getPath());
 			}
 		}
+		if(cp != null)
+			try {
+				cp.save(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"));
+			} catch (IOException e) {
+				SDFSLogger.getLog().error("unable to serialize cp",e);
+			}
 	}
 
 	/**

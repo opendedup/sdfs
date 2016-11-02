@@ -35,14 +35,15 @@ public class LargeFileBloomFilter implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	transient FLBF[] bfs = new FLBF[256];
+	boolean counting = false;
 
-	public LargeFileBloomFilter(long sz, double fpp,boolean sync) {
+	public LargeFileBloomFilter(long sz, double fpp,boolean sync,boolean counting) throws IOException {
 		File td = new File(new File(Main.dedupDBStore).getParent()+ File.separator + "tmp");
 		td.mkdirs();
 		bfs = new FLBF[256];
 		long isz = sz / bfs.length;
 		for (int i = 0; i < bfs.length; i++) {
-			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs"),sync );
+			bfs[i] = new FLBF(isz, fpp,new File(td,i+".bfs"),sync, counting);
 		}
 	}
 	

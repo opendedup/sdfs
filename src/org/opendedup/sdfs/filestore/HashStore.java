@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -10,7 +11,7 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.LargeFileBloomFilter;
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -232,7 +233,7 @@ public class HashStore {
 		this.bdb.claimRecords(evt);
 	}
 
-	public long processHashClaims(SDFSEvent evt, LargeFileBloomFilter bf)
+	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException {
 		return this.bdb.claimRecords(evt, bf);
 	}

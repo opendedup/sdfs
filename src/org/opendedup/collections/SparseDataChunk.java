@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package org.opendedup.sdfs.io;
+package org.opendedup.collections;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -28,10 +28,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.HashLocPair;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantLock l = new ReentrantLock();

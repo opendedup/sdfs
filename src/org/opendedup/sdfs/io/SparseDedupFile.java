@@ -47,6 +47,7 @@ import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
@@ -254,7 +255,7 @@ public class SparseDedupFile implements DedupFile {
 				SDFSLogger.getLog().debug("Snap map is " + _dbf);
 				SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
 			}
-			bdb.copy(_dbf.getPath());
+			bdb.copy(_dbf.getPath(),true);
 
 			snapmf.setDedupFile(_df);
 			return _df;
@@ -291,7 +292,7 @@ public class SparseDedupFile implements DedupFile {
 			ch = this.getChannel(-1);
 			this.writeCache();
 			this.sync(true);
-			bdb.copy(dest.getPath() + File.separator + this.GUID + ".map");
+			bdb.copy(dest.getPath() + File.separator + this.GUID + ".map",true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to copy to" + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
@@ -319,14 +320,40 @@ public class SparseDedupFile implements DedupFile {
 		this.syncLock.lock();
 		try {
 			this.deleted = true;
+			if(Main.refCount) {
+				if (this.isClosed()) {
+					File directory = new File(Main.dedupDBStore + File.separator
+							+ this.GUID.substring(0, 2) + File.separator
+							+ this.GUID);
+					File dbf = new File(directory.getPath() + File.separator
+							+ this.GUID + ".map");
+
+					this.databaseDirPath = directory.getPath();
+					this.databasePath = dbf.getPath();
+					if (!directory.exists()) {
+						directory.mkdirs();
+					}
+					if (mf.getDev() != null) {
+						this.bdb = new BlockDevSocket(mf.getDev(),
+								this.databasePath);
+					} else
+						this.bdb = new LongByteArrayMap(this.databasePath);
+
+					this.closed = false;
+				}
+				this.bdb.vanish(true);
+			}
 			this.forceClose();
+			
 			String filePath = Main.dedupDBStore + File.separator
 					+ this.GUID.substring(0, 2) + File.separator + this.GUID;
 			
 			DedupFileStore.removeOpenDedupFile(this.GUID);
 			
 				eventBus.post(new SFileDeleted(this));
+				
 			return DeleteDir.deleteDirectory(new File(filePath));
+				
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error in delete " + this.GUID, e);
 		} finally {
@@ -694,7 +721,7 @@ public class SparseDedupFile implements DedupFile {
 							true, this.bdb.getVersion());
 				}
 			}
-			bdb.put(filePosition, chunk.getBytes());
+			bdb.put(filePosition, chunk);
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
 					"unable to write " + writeBuffer.getFilePosition()
@@ -725,12 +752,10 @@ public class SparseDedupFile implements DedupFile {
 		if (this.errOccured) {
 			throw new IOException("write error occured");
 		}
-		SparseDataChunk pck = null;
-		byte[] b = bdb.get(pos);
-		if (b == null)
+		SparseDataChunk pck =  bdb.get(pos);
+		
+		if (pck == null)
 			pck = new SparseDataChunk();
-		else
-			pck = new SparseDataChunk(b, this.bdb.getVersion());
 		if (pos + Main.CHUNK_LENGTH > mf.length())
 			pck.len = (int) (mf.length() - pos);
 		else
@@ -1249,10 +1274,8 @@ public class SparseDedupFile implements DedupFile {
 		DedupChunk ck = null;
 		try {
 			// this.addReadAhead(place);
-			byte[] b = this.bdb.get(place);
-			if (b != null) {
-				SparseDataChunk pck = new SparseDataChunk(b,
-						this.bdb.getVersion());
+			SparseDataChunk pck = this.bdb.get(place);
+			if (pck != null) {
 				// ByteString data = pck.getData();
 				// boolean dataEmpty = !pck.isLocalData();
 				// if (dataEmpty) {
@@ -1267,7 +1290,6 @@ public class SparseDedupFile implements DedupFile {
 				ck.setDoop(pck.getDoop());
 				pck = null;
 			}
-			b = null;
 			if (ck == null && create == true) {
 				return createNewChunk(place);
 			} else {

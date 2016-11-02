@@ -52,6 +52,7 @@ import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
 import org.opendedup.collections.QuickList;
 import org.opendedup.hashing.FLBF;
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -271,7 +272,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 								+ " @ " + this.channel.getName());
 				this.gcUpdateLock.lock();
 				try {
-					this.lbf = new LargeFileBloomFilter(buf.getLong(), .10,false)
+					this.lbf = new LargeFileBloomFilter(buf.getLong(), .10,false,false)
 							.getArray();
 				} finally {
 					gcUpdateLock.unlock();
@@ -376,13 +377,15 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				buf.get(ob);
 				SDFSEvent evt = (SDFSEvent) Util.objectFromByteBuffer(ob);
 				this.gcUpdateLock.lock();
-				LargeFileBloomFilter bf = null;
+				LargeBloomFilter bf = null;
 				try {
-					bf = new LargeFileBloomFilter(lbf);
+					/*todo fixme
+					bf = new LargeFileBloomFilter();
 					HCServiceProxy.processHashClaims(evt, bf);
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(
 								"sending back bloom claim chunks cmd");
+								*/
 				} finally {
 					if(bf != null) {
 						try {

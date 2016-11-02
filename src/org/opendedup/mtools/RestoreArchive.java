@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
@@ -82,13 +82,10 @@ public class RestoreArchive implements Runnable {
 		DataMapInterface mp = null;
 		try {
 			mp = new LongByteArrayMap(mapFile.getPath());
-			byte[] val = new byte[0];
 			mp.iterInit();
-			while (val != null) {
-				val = mp.nextValue();
-				if (val != null) {
-					SparseDataChunk ck = new SparseDataChunk(val,
-							mp.getVersion());
+			SparseDataChunk ck= mp.nextValue(false);
+			while (ck != null) {
+				
 					List<HashLocPair> al = ck.getFingers();
 					for (HashLocPair p : al) {
 						String req = HCServiceProxy.restoreBlock(p.hash);
@@ -99,8 +96,7 @@ public class RestoreArchive implements Runnable {
 							this.totalArchives.incrementAndGet();
 						}
 					}
-
-				}
+					ck = mp.nextValue(false);
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error(

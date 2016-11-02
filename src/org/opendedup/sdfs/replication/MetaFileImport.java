@@ -32,13 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
@@ -266,10 +266,10 @@ public class MetaFileImport implements Serializable {
 			}
 			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
 			try {
-				byte[] val = new byte[0];
+				SparseDataChunk ck = new SparseDataChunk();
 				long prevpos = 0;
 				mp.iterInit();
-				while (val != null) {
+				while (ck != null) {
 					if (this.closed)
 						throw new ReplicationCanceledException(
 								"MetaFile Import Canceled");
@@ -277,10 +277,8 @@ public class MetaFileImport implements Serializable {
 						throw this.lastException;
 					levt.curCt += (mp.getIterPos() - prevpos);
 					prevpos = mp.getIterPos();
-					val = mp.nextValue();
-					if (val != null) {
-						SparseDataChunk ck = new SparseDataChunk(val,
-								mp.getVersion());
+					ck  = mp.nextValue(Main.refCount);
+					if (ck != null) {
 						ck.setFpos((prevpos / mp.getFree().length)
 								* Main.CHUNK_LENGTH);
 						List<HashLocPair> al = ck.getFingers();
@@ -319,7 +317,7 @@ public class MetaFileImport implements Serializable {
 								}
 							}
 							if (hpc) {
-								mp.put(ck.getFpos(), ck.getBytes());
+								mp.put(ck.getFpos(), ck);
 							}
 						} else {
 							bh.addAll(ck.getFingers());
@@ -348,6 +346,7 @@ public class MetaFileImport implements Serializable {
 				mf.setDirty(true);
 				mf.sync();
 				mf.getDedupFile(false).forceRemoteSync();
+				Main.volume.addFile();
 			} catch (Throwable e) {
 				SDFSLogger.getLog()
 						.warn("error while checking file [" + mapFile.getPath()

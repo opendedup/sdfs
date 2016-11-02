@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
@@ -15,7 +16,6 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
-import org.opendedup.sdfs.io.SparseDataChunk;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.notification.SDFSEvent;

@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -46,7 +47,6 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
-import org.opendedup.hashing.LargeFileBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -345,7 +345,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	AtomicLong csz = new AtomicLong(0);
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt, LargeFileBloomFilter bf) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt, LargeBloomFilter bf) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
@@ -359,7 +359,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				File _fs = new File(fileName);
 				lbf.vanish();
 				lbf = null;
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, false, true);
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, false, true,false);
 			} finally {
 				l.unlock();
 			}
@@ -486,12 +486,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	private static class ClaimShard implements Runnable {
 
 		ProgressiveFileByteArrayLongMap map = null;
-		LargeFileBloomFilter bf = null;
+		LargeBloomFilter bf = null;
 		LargeBloomFilter nlbf = null;
 		AtomicLong claims = null;
 		Exception ex = null;
 
-		protected ClaimShard(ProgressiveFileByteArrayLongMap map, LargeFileBloomFilter bf, LargeBloomFilter nlbf,
+		protected ClaimShard(ProgressiveFileByteArrayLongMap map, LargeBloomFilter bf, LargeBloomFilter nlbf,
 				AtomicLong claims) {
 			this.map = map;
 			this.bf = bf;
@@ -610,7 +610,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 		this.loadEvent.shortMsg = "Loading BloomFilters";
 
 		if (maps.size() != 0 && !LargeBloomFilter.exists(_fs.getParentFile())) {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, true, true);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, true, true,false);
 			SDFSLogger.getLog().warn("Recreating BloomFilters...");
 			this.loadEvent.shortMsg = "Recreating BloomFilters";
 
@@ -646,7 +646,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 				throw new IOException(e1);
 			}
 		} else {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, true, true);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, Main.fpp, true, true,false);
 		}
 		while (this.activeWriteMaps.size() < AMS) {
 			boolean written = false;

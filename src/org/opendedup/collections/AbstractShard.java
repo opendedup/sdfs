@@ -19,9 +19,10 @@
 package org.opendedup.collections;
 
 import java.io.IOException;
+
 import java.io.SyncFailedException;
 
-import org.opendedup.hashing.LargeFileBloomFilter;
+import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 public interface AbstractShard {
@@ -84,7 +85,7 @@ public interface AbstractShard {
 
 	public abstract long claimRecords() throws IOException;
 
-	public abstract long claimRecords(LargeFileBloomFilter bf) throws IOException;
+	public abstract long claimRecords(LargeBloomFilter bf) throws IOException;
 
 	public abstract void sync() throws SyncFailedException, IOException;
 
