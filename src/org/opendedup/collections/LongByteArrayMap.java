@@ -495,6 +495,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					for(HashLocPair p : ck.getFingers()) {
 						DedupFileStore.cp.remove(p.hash);
 					}
+					kv = this.nextKeyValue(false);
 				}
 			}
 			_bdb = (FileChannel) Files.newByteChannel(bdbf, StandardOpenOption.CREATE, StandardOpenOption.WRITE,

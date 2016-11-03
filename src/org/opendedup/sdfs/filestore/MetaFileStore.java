@@ -324,6 +324,7 @@ public class MetaFileStore {
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
+								SDFSLogger.getLog().info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
 								deleted = mf.getDedupFile(false).delete();
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())

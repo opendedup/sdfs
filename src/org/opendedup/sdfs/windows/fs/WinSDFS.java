@@ -1,27 +1,3 @@
-/*
-The MIT License
-
-Copyright (C) 2008, 2016 Yu Kobayashi http://yukoba.accelart.jp/
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
- */
-
 package org.opendedup.sdfs.windows.fs;
 
 import static net.decasdev.dokan.WinError.ERROR_GEN_FAILURE;
@@ -211,7 +187,7 @@ public class WinSDFS implements DokanOperations {
 						Dokan.resetTimeout(RESET_DURATION, fileInfo);
 						log.debug("onCreateFile did not finish in "
 								+ (z * CHANNEL_TIMEOUT) / 1000
-								+ " seconds. slow io." + fileInfo.dokanContext);
+								+ " seconds. slow io." + fileInfo.handle);
 					}
 				}
 				if (sn.errRtn != null)
@@ -256,7 +232,7 @@ public class WinSDFS implements DokanOperations {
 							Dokan.resetTimeout(RESET_DURATION, arg1);
 							log.debug("sync did not finish in "
 									+ (z * CHANNEL_TIMEOUT) / 1000
-									+ " seconds. slow io." + arg1.dokanContext);
+									+ " seconds. slow io." + arg1.handle);
 						}
 					}
 					if (sn.errRtn != null)
@@ -279,7 +255,7 @@ public class WinSDFS implements DokanOperations {
 			try {
 				if (SDFSLogger.isFSDebug())
 					log.debug("[onClose] " + path);
-				this.closeFileChannel(arg1.dokanContext, arg1);
+				this.closeFileChannel(arg1.handle, arg1);
 				if (arg1.deleteOnClose) {
 					this.onDeleteFile(path, arg1);
 				}
@@ -322,7 +298,7 @@ public class WinSDFS implements DokanOperations {
 						z++;
 						log.debug("write did not finish in "
 								+ (z * CHANNEL_TIMEOUT) / 1000
-								+ "seconds. slow io." + arg3.dokanContext);
+								+ "seconds. slow io." + arg3.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg3);
 					}
 				}
@@ -375,7 +351,7 @@ public class WinSDFS implements DokanOperations {
 						z++;
 						log.debug("write did not finish in "
 								+ (z * CHANNEL_TIMEOUT) / 1000
-								+ " seconds. slow io. ct=" + arg3.dokanContext);
+								+ " seconds. slow io. ct=" + arg3.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg3);
 					}
 				}
@@ -436,7 +412,7 @@ public class WinSDFS implements DokanOperations {
 						z++;
 						log.debug("fsync did not finish in "
 								+ (z * CHANNEL_TIMEOUT) / 1000
-								+ " seconds. slow io." + arg1.dokanContext);
+								+ " seconds. slow io." + arg1.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -476,7 +452,7 @@ public class WinSDFS implements DokanOperations {
 						z++;
 						log.debug("ByHandleFileInformation did not finish in "
 								+ (z * CHANNEL_TIMEOUT) / 1000
-								+ " seconds. slow io." + arg1.dokanContext);
+								+ " seconds. slow io." + arg1.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -513,7 +489,7 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!sn.done) {
 						log.debug("find files did not finish in 5 seconds. slow io."
-								+ arg1.dokanContext);
+								+ arg1.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg1);
 					}
 				}
@@ -574,7 +550,7 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!sn.done) {
 						log.debug("onSetFileTime did not finish in 5 seconds. slow io."
-								+ arg4.dokanContext);
+								+ arg4.handle);
 						Dokan.resetTimeout(RESET_DURATION, arg4);
 					}
 				}
@@ -612,8 +588,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (!wr.done) {
 					log.debug("truncate did not finish in 5 seconds. slow io."
-							+ nfo.dokanContext);
-					Dokan.resetTimeout(RESET_DURATION, nfo);
+							+ nfo.handle);
 				}
 			}
 			if (wr.errRtn != null)
@@ -652,7 +627,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (!sn.done) {
 					log.debug("onDeleteFile did not finish in 5 seconds. slow io."
-							+ arg1.dokanContext);
+							+ arg1.handle);
 					Dokan.resetTimeout(RESET_DURATION, arg1);
 				}
 			}
@@ -690,7 +665,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (!sn.done) {
 					log.debug("onDeleteDirectory did not finish in 5 seconds. slow io."
-							+ arg1.dokanContext);
+							+ arg1.handle);
 					Dokan.resetTimeout(RESET_DURATION, arg1);
 				}
 			}
@@ -712,7 +687,7 @@ public class WinSDFS implements DokanOperations {
 			log.debug("==> [onMoveFile] " + from + " -> " + to
 					+ ", replaceExisiting = " + replaceExisiting);
 		if (arg3 != null) {
-			log.debug("dokanfileinfo " + arg3.dokanContext);
+			log.debug("dokanfileinfo " + arg3.handle);
 		}
 		try {
 			MoveFileThread sn = new MoveFileThread();
@@ -732,7 +707,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (!sn.done) {
 					log.debug("sync did not finish in 5 seconds. slow io."
-							+ arg3.dokanContext);
+							+ arg3.handle);
 					Dokan.resetTimeout(RESET_DURATION, arg3);
 				}
 			}
@@ -780,7 +755,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (!sn.done) {
 					log.debug("onGetDiskFreeSpace did not finish in 5 seconds. slow io."
-							+ arg0.dokanContext);
+							+ arg0.handle);
 					Dokan.resetTimeout(RESET_DURATION, arg0);
 				}
 			}
@@ -857,7 +832,7 @@ public class WinSDFS implements DokanOperations {
 
 		try {
 			CloseThread cl = new CloseThread();
-			cl.handleNo = info.dokanContext;
+			cl.handleNo = info.handle;
 			try {
 
 				executor.execute(cl);
@@ -870,7 +845,7 @@ public class WinSDFS implements DokanOperations {
 						z++;
 						log.debug("waiting for close for "
 								+ (z * CHANNEL_TIMEOUT) / 1000 + " "
-								+ info.dokanContext);
+								+ info.handle);
 						Dokan.resetTimeout(RESET_DURATION, info);
 					} else {
 						return;
@@ -922,7 +897,7 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName,
-						info.dokanContext);
+						info.handle);
 				if (info.writeToEndOfFile) {
 					log.debug("writing to end of file" + ch.getFile().length());
 					pos = ch.getFile().length();
@@ -963,7 +938,7 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName,
-						info.dokanContext);
+						info.handle);
 				ch.read(buf, 0, buf.capacity(), pos);
 				read = buf.position();
 			} catch (Exception e) {
@@ -990,7 +965,7 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				DedupFileChannel ch = getFileChannel(fileName,
-						info.dokanContext);
+						info.handle);
 				ch.truncateFile(sz);
 
 			} catch (Exception e) {
@@ -1017,7 +992,7 @@ public class WinSDFS implements DokanOperations {
 
 			try {
 				DedupFileChannel ch = getFileChannel(fileName,
-						info.dokanContext);
+						info.handle);
 				ch.force(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while sync data", e);
@@ -1047,7 +1022,7 @@ public class WinSDFS implements DokanOperations {
 					if (ch != null) {
 						ch.getDedupFile().unRegisterChannel(ch, -1);
 					}
-					if (ch.getFile().deleteOnClose) {
+					if (ch.getFile() != null && ch.getFile().deleteOnClose) {
 						MetaFileStore.removeMetaFile(ch.getFile().getPath(),
 								true);
 						log.debug("Deleted file on close");
@@ -1115,7 +1090,7 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-				SDFSLogger.getLog().info("set "+fileName +" mtime=" + mtime + " atime=" + atime);
+				//SDFSLogger.getLog().info("set "+fileName +" mtime=" + mtime + " atime=" + atime);
 				File f = resolvePath(fileName);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 				mf.setLastAccessed(MetaDataFileInfo.filetimeToMillis(atime), true);
@@ -1143,10 +1118,10 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-				DedupFileChannel ch = WinSDFS.getFileChannel(fileName, arg1.dokanContext);
+				DedupFileChannel ch = WinSDFS.getFileChannel(fileName, arg1.handle);
 				if (ch != null) {
 					try {
-						sdfs.closeFileChannel(arg1.dokanContext, arg1);
+						sdfs.closeFileChannel(arg1.handle, arg1);
 					} catch (Exception e) {
 						log.error("unable to close " + fileName, e);
 					}
@@ -1432,7 +1407,7 @@ public class WinSDFS implements DokanOperations {
 									WinError.ERROR_ALREADY_EXISTS);
 						case FILE_OPEN_IF:
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							if (deleteOnClose) {
 								MetaDataDedupFile mf = MetaFileStore
 										.getMF(mountedVolume + fileName);
@@ -1442,7 +1417,7 @@ public class WinSDFS implements DokanOperations {
 						case FILE_OPEN:
 							log.debug("\\FILE_OPEN");
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							if (deleteOnClose) {
 								MetaDataDedupFile mf = MetaFileStore
 										.getMF(mountedVolume + fileName);
@@ -1454,7 +1429,7 @@ public class WinSDFS implements DokanOperations {
 							try {
 								log.debug("\\FILE_SUPERSEDE");
 								nextHandle = getNextHandle();
-								arg5.dokanContext = nextHandle;
+								arg5.handle = nextHandle;
 								fs.truncateFile(fileName, 0, arg5);
 								fs.closeFileChannel(nextHandle, arg5);
 								if (deleteOnClose) {
@@ -1480,7 +1455,7 @@ public class WinSDFS implements DokanOperations {
 							try {
 								log.debug("\\FILE_OVERWRITE_IF");
 								nextHandle = getNextHandle();
-								arg5.dokanContext = nextHandle;
+								arg5.handle = nextHandle;
 								fs.truncateFile(fileName, 0, arg5);
 								fs.closeFileChannel(nextHandle, arg5);
 								if (deleteOnClose) {
@@ -1522,7 +1497,7 @@ public class WinSDFS implements DokanOperations {
 										ERROR_FILE_NOT_FOUND);
 							}
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OVERWRITE_IF:
 							log.debug("FILE_OVERWRITE_IF");
@@ -1543,7 +1518,7 @@ public class WinSDFS implements DokanOperations {
 										ERROR_FILE_NOT_FOUND);
 							}
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OPEN_IF:
 							log.debug("FILE_OPEN_IF");
@@ -1563,7 +1538,7 @@ public class WinSDFS implements DokanOperations {
 										ERROR_FILE_NOT_FOUND);
 							}
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OPEN:
 							log.debug("FILE_OPEN");
@@ -1595,7 +1570,7 @@ public class WinSDFS implements DokanOperations {
 										ERROR_FILE_NOT_FOUND);
 							}
 							nextHandle = getNextHandle();
-							arg5.dokanContext = nextHandle;
+							arg5.handle = nextHandle;
 							break;
 						default:
 							log.debug("hit default");

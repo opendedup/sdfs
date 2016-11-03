@@ -81,7 +81,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	protected int lhashTblSz = 100000;
 	private boolean hugeTables = false;
 	private ArrayList<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayList<ProgressiveFileByteArrayLongMap>();
-	private static final int AMS = Main.parallelDBCount;
+	private static int AMS = Main.parallelDBCount;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ProgressiveFileByteArrayLongMap lactiveWMap = null;
@@ -277,6 +277,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	protected ProgressiveFileByteArrayLongMap getLargeWriteMap() throws IOException {
+		if(this.hugeTables) {
 		synchronized (lactiveWMap) {
 			if (lactiveWMap.isFull()) {
 				lactiveWMap.inActive();
@@ -284,6 +285,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			}
 			lactiveWMap.cache();
 			return lactiveWMap;
+		}
+		}else {
+			return this.getWriteMap();
 		}
 	}
 
@@ -526,6 +530,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			this.hugeTables = true;
 		} else if (_tbs > this.hashTblSz) {
 			this.hashTblSz = (int) _tbs;
+			AMS = 1;
 		}
 		if (_tbs < lmax)
 			this.lhashTblSz = (int) _tbs;
@@ -600,7 +605,6 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 					if (th.e != null)
 						throw th.e;
 				}
-				System.out.println("done");
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			}

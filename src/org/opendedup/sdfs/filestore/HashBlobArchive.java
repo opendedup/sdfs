@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -407,10 +408,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 			} catch (Exception e) {
 				m = null;
-				lf.delete();
+				if(HashBlobArchive.REMOVE_FROM_CACHE)
+					lf.delete();
 				SDFSLogger.getLog().error("unable to read " + lf.getPath(), e);
 			}
-			if (m == null) {
+			if (m == null && HashBlobArchive.REMOVE_FROM_CACHE) {
 				Map<String, Long> _m = store.getHashMap(hashid);
 				Set<String> keys = _m.keySet();
 				m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ,VERSION);
@@ -1308,6 +1310,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public long compact() throws IOException {
+		SDFSLogger.getLog().info("compacting " + this.id + " at " + f.getPath());
 		if(DISABLE_WRITE)
 			return 0;
 		Lock l = this.lock.writeLock();
@@ -1336,32 +1339,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 			} finally {
 				_m.close();
 			}
+			SDFSLogger.getLog().info("compacting " + this.id + " at " + f.getPath() + " by " + blks);
 			if (blks == 0) {
 				_har.delete();
 				this.delete();
 				HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
 				return -1 * ofl;
 			} else {
-				l = this.lock.writeLock();
-				try {
-					l.lock();
-					if (_har.f.exists() && _har.f.length() > 0) {
-						maps.invalidate(this.id);
-						openFiles.invalidate(this.id);
-						rchunks.remove(this.id);
-					}
-				} finally {
-					l.unlock();
-				}
-				l = this.lock.readLock();
-				try {
-					l.lock();
-					while (!_har.uploadFile(this.id)) {
-						Thread.sleep(100);
-					}
-				} finally {
-					l.unlock();
-				}
+				
 				l = this.lock.writeLock();
 				try {
 					l.lock();
@@ -1391,7 +1376,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			HashBlobArchive.compressedLength.addAndGet(-1 * _har.f.length());
 			HashBlobArchive.currentLength.addAndGet(-1
 					* _har.uncompressedLength.get());
-			_har.delete();
+			//_har.delete();
 			throw new IOException(e);
 		}
 		HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
@@ -1456,7 +1441,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} finally {
 			ul.unlock();
 			l.unlock();
-
 		}
 		return true;
 	}

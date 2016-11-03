@@ -260,6 +260,9 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			HashBlobArchive.DISABLE_WRITE = Boolean.parseBoolean(config
 					.getAttribute("null-test-only"));
 		}
+		if (config.hasAttribute("map-version")) {
+			this.mdVersion = Integer.parseInt(config.getAttribute("map-version"));
+		}
 
 		try {
 			File f = new File(this.container_location, "BucketInfo");
