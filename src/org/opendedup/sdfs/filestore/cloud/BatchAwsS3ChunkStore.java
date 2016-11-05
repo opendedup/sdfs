@@ -1526,7 +1526,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						kn = this.getClaimName(hid);
 					else
 						kn = sobj.getKey();
-					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(getName(), kn, getName(), kn);
+					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(getName(), kn, getName(), kn).withNewObjectMetadata(md);
 					s3Service.copyObject(copyObjectRequest);
 				} catch (Exception e) {
 					throw new IOException(e);

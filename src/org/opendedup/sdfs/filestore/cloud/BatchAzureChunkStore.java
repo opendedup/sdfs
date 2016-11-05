@@ -1628,7 +1628,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				}
 			} catch (Exception e) {
-				throw new IOException(e);
+				SDFSLogger.getLog().warn("error removing object",e);
 			}
 		}
 		try {
