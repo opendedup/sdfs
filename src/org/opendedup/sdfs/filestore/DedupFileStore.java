@@ -9,10 +9,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.BloomFDisk;
+import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
+import org.opendedup.sdfs.notification.FDiskEvent;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 /**
  * 
@@ -51,9 +55,26 @@ public class DedupFileStore {
 			long entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
 			try {
 				cp = new LargeBloomFilter(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"),entries, .1, false,true,Main.refCount);
+				
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
+			}
+		}
+	}
+	public static void init() {
+		if(cp.getSize() == 0) {
+			SDFSEvent evt = new FDiskEvent("Checking References");
+			SDFSLogger.getLog().info("Recreating Reference Map");
+			try {
+				new BloomFDisk(evt);
+			} catch (FDiskException e) {
+				SDFSLogger.getLog().error("unable to check fdisk",e);
+				e.printStackTrace();
+				System.exit(4);
+			}finally {
+				evt.endEvent();
 			}
 		}
 	}
@@ -217,6 +238,7 @@ public class DedupFileStore {
 			SDFSLogger.getLog().debug("Open Files = " + openFile.size());
 		if (openFileMonitor != null)
 			openFileMonitor.close();
+		if(openFile.size() > 0) {
 		Object[] dfs = getArray();
 		SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
 		for (int i = 0; i < dfs.length; i++) {
@@ -235,12 +257,15 @@ public class DedupFileStore {
 							"Closed " + df.getMetaFile().getPath());
 			}
 		}
-		if(cp != null)
+		}
+		if(cp != null && Main.refCount) {
+			SDFSLogger.getLog().info("closing reference map");
 			try {
 				cp.save(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"));
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("unable to serialize cp",e);
 			}
+		}
 	}
 
 	/**

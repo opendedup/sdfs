@@ -230,6 +230,10 @@ public class HCServiceProxy {
 			return (byte) socket.serverState.size();
 		}
 	}
+	
+	public static boolean mightContainKey(byte [] key) {
+		return hcService.mightContainKey(key);
+	}
 
 	public static AbstractHashesMap getHashesMap() {
 		if (Main.chunkStoreLocal)

@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +22,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.cloud.MultiDownload;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
@@ -29,8 +29,6 @@ import org.w3c.dom.Element;
 
 import com.google.common.io.BaseEncoding;
 
-import org.opendedup.collections.SimpleByteArrayLongMap;
-import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.collections.HashExistsException;
 
 /**
@@ -215,7 +213,8 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		this.name = "filestore";
 		this.staged_sync_location.mkdirs();
 		HashBlobArchive.REMOVE_FROM_CACHE = false;
-
+		HashBlobArchive.cacheWrites = false;
+		HashBlobArchive.cacheReads = false;
 		if (config.hasAttribute("default-bucket-location")) {
 			// bucketLocation = config.getAttribute("default-bucket-location");
 		}
@@ -366,27 +365,6 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		out.close();
 	}
 
-	private int verifyDelete(long id) throws IOException {
-		SimpleByteArrayLongMap m = HashBlobArchive.getMap(id);
-		try {
-
-			m.iterInit();
-			KeyValuePair p = m.next();
-			int claims = 0;
-			while (p != null) {
-				HCServiceProxy.getHashesMap().get(p.getKey());
-				if (HCServiceProxy.getHashesMap().containsKey(p.getKey()))
-					claims++;
-				p = m.next();
-			}
-			return claims;
-		} catch (Exception e) {
-			throw new IOException(e);
-		} finally {
-			m.close();
-		}
-	}
-
 	@Override
 	public long maxSize() {
 		return Main.chunkStoreAllocationSize;
@@ -478,68 +456,20 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 										.get("deleted-objects"));
 
 							delobj = delobj + odel.get(k);
-							SDFSLogger.getLog().debug(
+							SDFSLogger.getLog().info(
 									"remove requests for " + k + "="
 											+ odel.get(k) + " delob=" + delobj
 											+ " bsz=" + metaData.get("bsize"));
-							if (objs <= delobj) {
-
-								if (this.deleteUnclaimed) {
-									int claims = this.verifyDelete(k);
-									if (claims > 0) {
-										SDFSLogger.getLog().debug(
-												"Not deleting " + k
-														+ " claims=" + claims);
-										metaData.put("objects",
-												Integer.toString(claims));
-										metaData.put("deleted-objects", "0");
-										metaData.put("deleted-objects",
-												Integer.toString(delobj));
-										this.writeHashMap(metaData, k);
-										try {
-											sz += HashBlobArchive
-													.compactArchive(k);
-											HashBlobArchive.currentLength
-													.addAndGet(-1
-															* Integer
-																	.parseInt(metaData
-																			.get("bsize")));
-
-										} catch (Exception e) {
-
-										}
-									} else {
-										long fs = blob.length();
-										sz += fs;
-										HashBlobArchive.deleteArchive(k);
-										HashBlobArchive.currentLength
-												.addAndGet(-1
-														* Integer
-																.parseInt(metaData
-																		.get("bsize")));
-										HashBlobArchive.compressedLength
-												.addAndGet(-1 * fs);
-										File _f = new File(HashBlobArchive
-												.getPath(k).getPath() + ".md");
-										_f.delete();
-									}
-								} else {
-									// SDFSLogger.getLog().info("deleting " +
-									// hashString);
-									metaData.put("deleted", "true");
-									metaData.put("deleted-objects",
-											Integer.toString(delobj));
-									this.writeHashMap(metaData, k);
-								}
-								HashBlobArchive.removeCache(k.longValue());
-							} else {
+							
 								SDFSLogger.getLog().debug(
 										"updating " + k + " sz=" + objs);
 								metaData.put("deleted-objects",
 										Integer.toString(delobj));
-								this.writeHashMap(metaData, k);
+								
 								try {
 									sz += HashBlobArchive.compactArchive(k);
+									if(blob.exists())
+										this.writeHashMap(metaData, k);
 									HashBlobArchive.currentLength.addAndGet(-1
 											* Integer.parseInt(metaData
 													.get("bsize")));
@@ -547,7 +477,6 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 								} catch (Exception e) {
 
 								}
-							}
 						} catch (Exception e) {
 							SDFSLogger.getLog().debug(
 									"Unable to delete object " + k, e);

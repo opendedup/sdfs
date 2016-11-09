@@ -33,6 +33,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.VolumeSocket;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -347,6 +348,8 @@ public class Volume implements java.io.Serializable {
 		}
 		if (Main.blockDev)
 			this.startAllOnStartupDevices();
+		
+		DedupFileStore.init();
 	}
 
 	public synchronized void addBlockDev(BlockDev dev) throws Exception {

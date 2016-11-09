@@ -648,23 +648,13 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 
 	private int getClaimedObjects(StorageObject sobj) throws ServiceException,
 			IOException {
-		boolean encrypt = false;
 
-		if (sobj.containsMetadata("encrypt")) {
-			encrypt = Boolean
-					.parseBoolean((String) sobj.getMetadata("encrypt"));
-		} else {
-			sobj = s3Service.getObjectDetails(this.name, sobj.getName());
-			encrypt = Boolean
-					.parseBoolean((String) sobj.getMetadata("encrypt"));
-		}
-		long id = this.decHashArchiveName(sobj.getKey().substring(5), encrypt);
+		
 		String[] st = this.getStrings(sobj);
 		int claims = 0;
 		for (String ha : st) {
 			byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-			long cid = HCServiceProxy.getHashesMap().get(b);
-			if (cid == id)
+			if (HCServiceProxy.getHashesMap().mightContainKey(b))
 				claims++;
 		}
 		return claims;

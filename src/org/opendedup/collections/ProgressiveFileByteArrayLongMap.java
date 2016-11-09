@@ -20,7 +20,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +29,7 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.concurrent.BlockingQueue;
@@ -56,10 +56,6 @@ import org.opendedup.utils.hashing.FileBasedBloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-import xerial.larray.MappedLByteArray;
-import xerial.larray.japi.LArrayJ;
-import xerial.larray.mmap.MMapMode;
-
 public class ProgressiveFileByteArrayLongMap
 		implements AbstractShard, Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
 	/**
@@ -71,7 +67,7 @@ public class ProgressiveFileByteArrayLongMap
 	transient private int maxSz = 0;
 	transient private double loadFactor = .75;
 	transient private String path = null;
-	transient private MappedLByteArray kFC = null;
+	transient private FileChannel kFC = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8;
 	transient private static final int VP = HashFunctionPool.hashLength;
 	transient private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
@@ -214,7 +210,7 @@ public class ProgressiveFileByteArrayLongMap
 					throw new IOException("map closed");
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
-					kFC.writeToArray((long) iterPos * (long) EL, key, 0, key.length);
+					kFC.read(ByteBuffer.wrap(key), (long) iterPos * (long) EL);
 					iterPos++;
 					if (Arrays.equals(key, REMOVED)) {
 						this.removed.set(iterPos - 1);
@@ -222,7 +218,7 @@ public class ProgressiveFileByteArrayLongMap
 					} else if (!Arrays.equals(key, FREE)) {
 						this.mapped.set(iterPos - 1);
 						this.removed.clear(iterPos - 1);
-						
+
 						this.bf.put(key);
 						return key;
 					} else {
@@ -249,7 +245,8 @@ public class ProgressiveFileByteArrayLongMap
 				if (this.mapped.get(iterPos)) {
 					byte[] key = new byte[FREE.length];
 					long pos = (long) iterPos * (long) EL;
-					kFC.writeToArray(pos, key, 0, key.length);
+					kFC.read(ByteBuffer.wrap(key), pos);
+					// kFC.writeToArray(pos, key, 0, key.length);
 					iterPos++;
 					if (Arrays.equals(key, REMOVED)) {
 						this.removed.set(iterPos - 1);
@@ -260,7 +257,11 @@ public class ProgressiveFileByteArrayLongMap
 						this.bf.put(key);
 						KVPair p = new KVPair();
 						p.key = key;
-						p.value = kFC.getLong(pos + key.length);
+						ByteBuffer bk = ByteBuffer.allocate(8);
+
+						kFC.read(bk, pos + key.length);
+						bk.flip();
+						p.value = bk.getLong();
 						return p;
 					} else {
 						this.mapped.clear(iterPos - 1);
@@ -282,7 +283,8 @@ public class ProgressiveFileByteArrayLongMap
 			l.lock();
 			try {
 				byte[] key = new byte[FREE.length];
-				kFC.writeToArray((long) iterPos * (long) EL, key, 0, key.length);
+				kFC.read(ByteBuffer.wrap(key),(long) iterPos * (long) EL);
+				//kFC.writeToArray((long) iterPos * (long) EL, key, 0, key.length);
 				iterPos++;
 				if (Arrays.equals(key, REMOVED)) {
 					this.removed.set(iterPos - 1);
@@ -320,7 +322,6 @@ public class ProgressiveFileByteArrayLongMap
 		} finally {
 			l.unlock();
 		}
-
 	}
 
 	/*
@@ -335,8 +336,12 @@ public class ProgressiveFileByteArrayLongMap
 		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			ByteBuffer bk = ByteBuffer.allocateDirect(8);
 			while (iterPos < size) {
-				long val = kFC.getLong(((long) iterPos * (long) EL) + VP);
+				bk.position(0);
+				kFC.read(bk,((long) iterPos * (long) EL) + VP);
+				bk.position(0);
+				long val = bk.getLong();
 
 				iterPos++;
 				if (val > _bgst)
@@ -377,7 +382,13 @@ public class ProgressiveFileByteArrayLongMap
 				nsz = posFile.length();
 			}
 			// SDFSLogger.getLog().info("set table to size " + nsz);
-			this.kFC = LArrayJ.mmap(new File(path + ".keys"), 0, nsz, MMapMode.READ_WRITE);
+			@SuppressWarnings("resource")
+			RandomAccessFile kRaf = new RandomAccessFile(path + ".keys", "rw");
+			if (newInstance) {
+				kRaf.setLength(nsz);
+			}
+			SDFSLogger.getLog().info("set table to size " + posFile.length());
+			this.kFC = kRaf.getChannel();
 			try {
 				/*
 				 * Field fd = tRaf.getClass().getDeclaredField("fd");
@@ -527,7 +538,7 @@ public class ProgressiveFileByteArrayLongMap
 					l.unlock();
 					l = this.hashlock.writeLock();
 					l.lock();
-						this.bf.put(key);
+					this.bf.put(key);
 				}
 				this.lastFound = System.currentTimeMillis();
 				return true;
@@ -593,14 +604,17 @@ public class ProgressiveFileByteArrayLongMap
 				if (value > bgst)
 					bgst = value;
 				this.lastFound = System.currentTimeMillis();
-				this.kFC.readFromArray(key, 0, pos, key.length);
-				this.kFC.putLong(pos + key.length, value);
+				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
+				bk.put(key);
+				bk.putLong(value);
+				bk.position(0);
+				this.kFC.write(bk,pos);
 				pos = (pos / EL);
 				synchronized (this.claims) {
 					this.claims.set((int) pos);
 				}
 				if (this.runningGC) {
-						this.bf.put(key);
+					this.bf.put(key);
 				}
 				this.mapped.set((int) pos);
 				this.removed.clear((int) pos);
@@ -648,9 +662,16 @@ public class ProgressiveFileByteArrayLongMap
 					this.bf.put(key);
 				return false;
 			} else {
-				this.kFC.readFromArray(REMOVED, 0, pos, REMOVED.length);
-				long fp = this.kFC.getLong(pos + REMOVED.length);
-				this.kFC.putLong(pos + REMOVED.length, 0);
+				this.kFC.write(ByteBuffer.wrap(REMOVED),pos);
+				ByteBuffer bk = ByteBuffer.allocate(8);
+				this.kFC.read(bk,pos + REMOVED.length);
+				bk.position(0);
+				long fp = bk.getLong();
+				bk.position(0);
+				bk.putLong(0);
+				bk.position(0);
+				this.kFC.read(bk,pos + REMOVED.length);
+				
 
 				ChunkData ck = new ChunkData(fp, key);
 				if (ck.setmDelete(true)) {
@@ -723,8 +744,7 @@ public class ProgressiveFileByteArrayLongMap
 			return -1;
 		} else
 			index = index * EL;
-		kFC.writeToArray(index, current, 0, current.length);
-
+		kFC.read(ByteBuffer.wrap(current),index);
 		if (Arrays.equals(current, key)) {
 			// SDFSLogger.getLog().info("found=" + index+ " hash="
 			// +StringUtils.getHexString(key));
@@ -760,7 +780,7 @@ public class ProgressiveFileByteArrayLongMap
 				index += length;
 			}
 			if (!this.isFree((int) (index / EL))) {
-				kFC.writeToArray(index, cur, 0, cur.length);
+				this.kFC.read(ByteBuffer.wrap(cur),index);
 				if (Arrays.equals(cur, key)) {
 					return index;
 				}
@@ -783,7 +803,7 @@ public class ProgressiveFileByteArrayLongMap
 		else
 			index = index * EL;
 		if (migthexist) {
-			kFC.writeToArray(index, current, 0, current.length);
+			kFC.read(ByteBuffer.wrap(current),index);
 			if (Arrays.equals(current, key)) {
 				return -index - 1; // already stored
 			}
@@ -838,7 +858,7 @@ public class ProgressiveFileByteArrayLongMap
 				}
 			}
 			if (mightexist) {
-				kFC.writeToArray(index, cur, 0, cur.length);
+				kFC.read(ByteBuffer.wrap(cur),index);
 				if (Arrays.equals(cur, key)) {
 					return -index - 1;
 				}
@@ -882,8 +902,8 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			long pos = -1;
 			try {
-				if(this.runningGC)
-					pos = this.insertionIndex(key,true);
+				if (this.runningGC)
+					pos = this.insertionIndex(key, true);
 				else
 					pos = this.insertionIndex(key, bf.mightContain(key));
 			} catch (HashtableFullException e) {
@@ -907,8 +927,12 @@ public class ProgressiveFileByteArrayLongMap
 						return new InsertRecord(false, e.getPos());
 					}
 				}
-				this.kFC.readFromArray(key, 0, pos, key.length);
-				this.kFC.putLong(pos + key.length, cm.getcPos());
+				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
+				bk.put(key);
+				bk.putLong(cm.getcPos());
+				bk.position(0);
+				this.kFC.write(bk,pos);
+				
 				if (cm.getcPos() > bgst)
 					bgst = cm.getcPos();
 				pos = (pos / EL);
@@ -945,8 +969,8 @@ public class ProgressiveFileByteArrayLongMap
 			}
 			long pos = -1;
 			try {
-				if(this.runningGC)
-					pos = this.insertionIndex(key,true);
+				if (this.runningGC)
+					pos = this.insertionIndex(key, true);
 				else
 					pos = this.insertionIndex(key, bf.mightContain(key));
 				// SDFSLogger.getLog().info("pos=" + pos/EL + " hash="
@@ -964,8 +988,11 @@ public class ProgressiveFileByteArrayLongMap
 				this.bf.put(key);
 				return new InsertRecord(false, this.get(key));
 			} else {
-				this.kFC.readFromArray(key, 0, pos, key.length);
-				this.kFC.putLong(pos + key.length, value);
+				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
+				bk.put(key);
+				bk.putLong(value);
+				bk.position(0);
+				this.kFC.write(bk,pos);
 				if (value > bgst)
 					bgst = value;
 				pos = (pos / EL);
@@ -1021,7 +1048,7 @@ public class ProgressiveFileByteArrayLongMap
 				throw new MapClosedException();
 			if (key == null)
 				return -1;
-			if (!this.runningGC &&!this.bf.mightContain(key)) {
+			if (!this.runningGC && !this.bf.mightContain(key)) {
 				return -1;
 			}
 			long pos = -1;
@@ -1032,7 +1059,10 @@ public class ProgressiveFileByteArrayLongMap
 			} else {
 				this.lastFound = System.currentTimeMillis();
 				long val = -1;
-				val = this.kFC.getLong(pos + VP);
+				ByteBuffer bk = ByteBuffer.allocate(8);
+				this.kFC.read(bk,pos + VP);
+				bk.position(0);
+				val = bk.getLong();
 				if (claim) {
 					pos = (pos / EL);
 					synchronized (this.claims) {
@@ -1103,7 +1133,7 @@ public class ProgressiveFileByteArrayLongMap
 		try {
 			this.closed = true;
 			try {
-				this.kFC.flush();
+				this.kFC.force(true);
 
 			} catch (Exception e) {
 
@@ -1115,12 +1145,7 @@ public class ProgressiveFileByteArrayLongMap
 
 			}
 
-			try {
-				this.kFC.free();
-
-			} catch (Exception e) {
-
-			}
+			
 
 			try {
 				File f = new File(path + ".vmp");
@@ -1222,7 +1247,7 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public void sync() throws SyncFailedException, IOException {
-		this.kFC.flush();
+		this.kFC.force(true);
 	}
 
 	public static class KeyBlob implements Serializable {
@@ -1289,22 +1314,29 @@ public class ProgressiveFileByteArrayLongMap
 			l.unlock();
 		}
 		try {
+			ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
 			while (iterPos < size) {
 				l = this.hashlock.writeLock();
 				l.lock();
 				synchronized (this.claims) {
-
+					bk.position(0);
 					try {
 						if (this.isClosed())
 							throw new IOException("map closed");
 						byte[] key = new byte[FREE.length];
 						long pos = (long) iterPos * (long) EL;
-						kFC.writeToArray(pos, key, 0, key.length);
-						long val = kFC.getLong(pos + key.length);
+						kFC.read(bk,pos);
+						bk.position(0);
+						bk.get(key);
+						long val = bk.getLong();
+						
 						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-								this.kFC.readFromArray(REMOVED, 0, pos, REMOVED.length);
-								this.kFC.putLong(pos + REMOVED.length, 0);
+								bk.position(0);
+								bk.put(REMOVED);
+								bk.putLong(0);
+								bk.position(0);
+								this.kFC.write(bk,pos);
 								ChunkData ck = new ChunkData(val, key);
 								ck.setmDelete(true);
 								this.mapped.clear(iterPos);
@@ -1356,22 +1388,29 @@ public class ProgressiveFileByteArrayLongMap
 			l.unlock();
 		}
 		try {
+			ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
 			while (iterPos < size) {
 				l = this.hashlock.writeLock();
 				l.lock();
 				synchronized (this.claims) {
-
+					bk.position(0);
 					try {
 						if (this.isClosed())
 							throw new IOException("map closed");
 						byte[] key = new byte[FREE.length];
 						long pos = (long) iterPos * (long) EL;
-						kFC.writeToArray(pos, key, 0, key.length);
-						long val = kFC.getLong(pos + key.length);
+						kFC.read(bk,pos);
+						bk.position(0);
+						bk.get(key);
+						long val = bk.getLong();
 						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
 							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-								this.kFC.readFromArray(REMOVED, 0, pos, REMOVED.length);
-								this.kFC.putLong(pos + REMOVED.length, 0);
+								bk.position(0);
+								bk.put(REMOVED);
+								bk.putLong(0);
+								bk.position(0);
+								this.kFC.write(bk,pos);
+								
 								ChunkData ck = new ChunkData(val, key);
 								ck.setmDelete(true);
 								this.mapped.clear(iterPos);
@@ -1421,27 +1460,41 @@ public class ProgressiveFileByteArrayLongMap
 		l.lock();
 		try {
 			this.closed = true;
+			
 			try {
-				this.kFC.flush();
+				int trs = 0;
+				while(this.kFC.isOpen()) {
+					this.kFC.close();
+					trs++;
+					if (trs > 10) {
+						SDFSLogger.getLog().warn("unable to close " + this.toString()+ " " + this.cacheRunning + " " + this.kFC.isOpen());
+						break;
+					}
+				}
 
 			} catch (Exception e) {
-
-			}
-			try {
-				this.kFC.close();
-
-			} catch (Exception e) {
-
+				SDFSLogger.getLog().error("error closing",e);
 			}
 
-			try {
-				this.kFC.free();
+			
+			
+			boolean del = false;
+			int trs = 0;
+			File f = new File(path + ".keys".trim());
+			while (!del) {
 
-			} catch (Exception e) {
-
+				del = f.delete();
+				if (!del)
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+				trs++;
+				if (trs > 10) {
+					SDFSLogger.getLog().warn("unable to delete " + f.getPath() + " " + f.exists() + " " + this.cacheRunning + " " + this.kFC.isOpen());
+					break;
+				}
 			}
-			File f = new File(path + ".keys");
-			f.delete();
 			f = new File(path + ".bpos");
 			f.delete();
 			f = new File(path + ".vmp");
@@ -1452,21 +1505,23 @@ public class ProgressiveFileByteArrayLongMap
 			f.delete();
 			if (bf != null)
 				this.bf.vanish();
-			
+
 			bf = null;
 		} finally {
 			l.unlock();
 		}
 	}
 
-	protected void initialize() {
+	protected void initialize() throws IOException {
 		int ip = 0;
 		byte[] key = new byte[EL * 43690];
 		Arrays.fill(key, (byte) 0);
 		SDFSLogger.getLog().info("initialize " + this.path);
+		ByteBuffer bk = ByteBuffer.allocateDirect(key.length);
 		while ((ip + (53690)) < size && !this.closed) {
+			bk.position(0);
 			long pos = (long) ip * (long) EL;
-			kFC.readFromArray(key, 0, pos, key.length);
+			kFC.write(bk,pos);
 			ip += 43690;
 		}
 		SDFSLogger.getLog().info("done initialize " + this.path);
@@ -1479,6 +1534,7 @@ public class ProgressiveFileByteArrayLongMap
 
 	@Override
 	public void run() {
+		try {
 		this.cacheRunning = true;
 
 		synchronized (lastRead) {
@@ -1487,14 +1543,15 @@ public class ProgressiveFileByteArrayLongMap
 				if (lr > mtm) {
 					File posFile = new File(path + ".keys");
 					long cp = 0;
-					byte[] key = new byte[1024 * 1024 * 5];
-					while ((cp + key.length) < posFile.length() && !this.closed) {
-						kFC.writeToArray(cp, key, 0, key.length);
-						cp += key.length;
+					ByteBuffer bk = ByteBuffer.allocateDirect(1024 * 1024 * 5);
+					while ((cp + bk.capacity()) < posFile.length() && !this.closed) {
+						
+						kFC.read(bk);
+						cp += bk.capacity();
 					}
-					key = new byte[(int) (posFile.length() - cp)];
+					byte [] key = new byte[(int) (posFile.length() - cp)];
 					if (key.length > 0)
-						kFC.writeToArray(cp, key, 0, key.length);
+						kFC.read(ByteBuffer.wrap(key));
 					SDFSLogger.getLog().info("done reading " + this.path);
 					lastRead.set(System.currentTimeMillis());
 				}
@@ -1502,6 +1559,9 @@ public class ProgressiveFileByteArrayLongMap
 			} finally {
 				this.cacheRunning = false;
 			}
+		}
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("error caching", e);
 		}
 	}
 

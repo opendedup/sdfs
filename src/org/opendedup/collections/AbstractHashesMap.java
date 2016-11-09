@@ -33,6 +33,8 @@ public interface AbstractHashesMap {
 	public abstract long getUsedSize();
 
 	public abstract long getMaxSize();
+	
+	public abstract boolean mightContainKey(byte [] key);
 
 	public abstract void claimRecords(SDFSEvent evt) throws IOException;
 

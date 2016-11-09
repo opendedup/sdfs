@@ -94,6 +94,7 @@ public class Main {
 
 	public static String DSEClusterNodeRack = "rack1";
 	public static String DSEClusterNodeLocation = "pdx";
+	public static int MAX_TABLES_SCAN=100;
 
 	/**
 	 * The Version of SDFS this is

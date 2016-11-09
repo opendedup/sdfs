@@ -20,6 +20,7 @@ package org.opendedup.hashing;
 
 import java.io.ByteArrayOutputStream;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.utils.hashing.FileBasedBloomFilter;
 
 import static java.lang.Math.toIntExact;
@@ -63,67 +65,68 @@ public class FLBF implements Serializable {
 	};
 
 	@SuppressWarnings("unchecked")
-	public FLBF(long sz, double fpp,File path,boolean memory,boolean counting) throws IOException {
+	public FLBF(long sz, double fpp, File path, boolean memory, boolean counting) throws IOException {
 		this.counting = counting;
-		if(counting) {
+		if (counting) {
 			this.path = path;
 			if (path.exists()) {
-				
-			FileInputStream fin = new FileInputStream(path);
-			ObjectInputStream oon = new ObjectInputStream(fin);
-			try{
-				filter = (CountingBloomFilterMemory<Object>) oon.readObject();
-			}catch(Exception e) {
-				try {
-					oon.close();
-					path.delete();
-				}catch(Exception e1) {
-					
-				}
-				throw new IOException(e);
-			}
 
-			oon.close();
-			path.delete();
-			}else {
-				FilterBuilder fb = new FilterBuilder(toIntExact(sz),fpp).countingBits(32);
-			 filter = new CountingBloomFilterMemory<>(fb);
+				FileInputStream fin = new FileInputStream(path);
+				ObjectInputStream oon = new ObjectInputStream(fin);
+				try {
+					filter = (CountingBloomFilterMemory<Object>) oon.readObject();
+				} catch (Exception e) {
+					try {
+						oon.close();
+						path.delete();
+					} catch (Exception e1) {
+
+					}
+					throw new IOException(e);
+				}
+
+				oon.close();
+				path.delete();
+			} else {
+				FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(32);
+				filter = new CountingBloomFilterMemory<>(fb);
 			}
-		}else {
-		this.bfs = FileBasedBloomFilter.create(getFunnel(), sz, fpp,path.getPath(),memory);
+		} else {
+			this.bfs = FileBasedBloomFilter.create(getFunnel(), sz, fpp, path.getPath(), memory);
 		}
 	}
-	
+
 	public long getSize() {
-		if(this.counting)
+		if (this.counting)
 			return Math.round(this.filter.getEstimatedPopulation());
-		else 
+		else
 			return 0;
 	}
-	
-	public boolean mightContain(byte [] bytes) {
-		if(this.counting)
-			return this.filter.contains(bytes);
+
+	public boolean mightContain(byte[] bytes) {
 		l.readLock().lock();
 		try {
-			return bfs.mightContain(bytes);
+			if (this.counting)
+				return this.filter.contains(bytes);
+			else
+				return bfs.mightContain(bytes);
 		} finally {
 			l.readLock().unlock();
 		}
 	}
 
-	public void put(byte [] bytes) {
-		if(this.counting) {
-			this.filter.addRaw(bytes);
-			return;
-		}else{
-			
+	public void put(byte[] bytes) {
 		l.writeLock().lock();
 		try {
-			bfs.put(bytes);
+			if (this.counting) {
+				this.filter.addRaw(bytes);
+				return;
+			} else {
+
+				bfs.put(bytes);
+			}
 		} finally {
 			l.writeLock().unlock();
-		}
 		}
 	}
 
@@ -132,36 +135,44 @@ public class FLBF implements Serializable {
 	}
 
 	public void save() throws IOException {
-		if(this.counting) {
+		if (this.counting) {
+			SDFSLogger.getLog().info("writing to " + path);
 			FileOutputStream fout = new FileOutputStream(path);
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
-				oon.writeObject(this.filter);
+			oon.writeObject(this.filter);
 			oon.flush();
 			oon.close();
 			fout.flush();
 			fout.close();
+			SDFSLogger.getLog().info("wrote to " + path);
 		} else {
-		bfs.close();
+			bfs.close();
 		}
 	}
-	
+
 	public void vanish() {
-		if(counting)
+		if (counting)
 			path.delete();
 		else
-		bfs.vanish();
-		
+			bfs.vanish();
+
 	}
-	public void remove(byte [] data) throws IOException {
-		if(counting) {
-			this.filter.removeRaw(data);
-		}else {
-			throw new IOException("not implemented");
+
+	public void remove(byte[] data) throws IOException {
+		l.writeLock().lock();
+		try {
+			if (counting) {
+				this.filter.removeRaw(data);
+			} else {
+				throw new IOException("not implemented");
+			}
+		} finally {
+			l.writeLock().unlock();
 		}
 	}
 
 	public byte[] getBytes() throws IOException {
-		if(counting)
+		if (counting)
 			throw new IOException("not implemented");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		this.bfs.writeTo(baos);

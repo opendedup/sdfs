@@ -2,13 +2,16 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -76,7 +79,8 @@ public class MetaFileStore {
 	}
 
 	public static void rename(String src, String dst) throws IOException {
-		getMFLock.lock();
+		WriteLock l =getMFLock.writeLock();
+		l.lock();
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
@@ -88,7 +92,7 @@ public class MetaFileStore {
 			pathMap.invalidate(dst);
 			pathMap.put(dst, mf);
 		} finally {
-			getMFLock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -112,14 +116,18 @@ public class MetaFileStore {
 	 *            the path to the MetaDataDedupFile
 	 * @return the MetaDataDedupFile
 	 */
-	private static ReentrantLock getMFLock = new ReentrantLock();
+	private static ReentrantReadWriteLock getMFLock = new ReentrantReadWriteLock();
 
 	public static MetaDataDedupFile getMF(File f) {
+		ReadLock l = getMFLock.readLock();
+		l.lock();
 		try {
 			return pathMap.get(f.getPath());
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to get " + f.getPath(), e);
+			SDFSLogger.getLog().debug("unable to get " + f.getPath(), e);
 			return null;
+		}finally {
+			l.unlock();
 		}
 	}
 
@@ -141,11 +149,12 @@ public class MetaFileStore {
 	}
 
 	public static MetaDataDedupFile getFolder(File f) {
-		getMFLock.lock();
+		WriteLock l =getMFLock.writeLock();
+		l.lock();
 		try {
 			return MetaDataDedupFile.getFile(f.getPath());
 		} finally {
-			getMFLock.unlock();
+			l.unlock();
 		}
 	}
 
@@ -267,7 +276,8 @@ public class MetaFileStore {
 
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
-		getMFLock.lock();
+		WriteLock l =getMFLock.writeLock();
+		l.lock();
 		try {
 			if (new File(path).exists()) {
 				MetaDataDedupFile mf = null;
@@ -316,7 +326,7 @@ public class MetaFileStore {
 							eventBus.post(new MFileWritten(mf));
 					} else {
 						mf = getMF(new File(path));
-						pathMap.invalidate(mf.getPath());
+						
 						deleted = mf.deleteStub();
 						if (!deleted) {
 							SDFSLogger.getLog().warn(
@@ -326,6 +336,7 @@ public class MetaFileStore {
 							try {
 								SDFSLogger.getLog().info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
 								deleted = mf.getDedupFile(false).delete();
+								pathMap.invalidate(mf.getPath());
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger.getLog().debug(
@@ -372,8 +383,7 @@ public class MetaFileStore {
 			} 
 				return true;
 		} finally {
-			pathMap.invalidate(path);
-			getMFLock.unlock();
+			l.unlock();
 		}
 	}
 

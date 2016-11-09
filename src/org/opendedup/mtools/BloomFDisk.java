@@ -90,7 +90,7 @@ public class BloomFDisk {
 			if (!Main.refCount || DedupFileStore.cp.getSize() == 0) {
 				DedupFileStore.cp = null;
 				DedupFileStore.cp = new LargeBloomFilter(
-						new File(new File(Main.dedupDBStore).getParent() + File.separator + "tmp"), entries, .1, false,
+						new File(new File(Main.dedupDBStore).getParent() + File.separator + "gc"), entries, .1, false,
 						false,Main.refCount);
 				SDFSLogger.getLog().info("Starting BloomFilter FDISK for " + Main.volume.getName());
 				long start = System.currentTimeMillis();
@@ -157,7 +157,7 @@ public class BloomFDisk {
 			// long msz = mapFile.length()/4;
 
 			mp.iterInit();
-			SparseDataChunk ck = mp.nextValue(Main.refCount);
+			SparseDataChunk ck = mp.nextValue(true);
 			while (ck != null) {
 				if (closed) {
 					this.failed = true;
@@ -167,7 +167,7 @@ public class BloomFDisk {
 				for (HashLocPair p : al) {
 					DedupFileStore.cp.put(p.hash);
 				}
-				ck = mp.nextValue(Main.refCount);
+				ck = mp.nextValue(true);
 			}
 
 			synchronized (fEvt) {
@@ -177,7 +177,8 @@ public class BloomFDisk {
 			SDFSLogger.getLog().info("error while checking file [" + mapFile.getPath() + "]", e);
 			this.failed = true;
 		} finally {
-			mp.close();
+			if(mp != null)
+				mp.close();
 			mp = null;
 		}
 		this.files.incrementAndGet();
@@ -211,6 +212,7 @@ public class BloomFDisk {
 
 		@Override
 		public void run() {
+			SDFSLogger.getLog().info("Running " + f.getPath());
 			try {
 				fd.checkDedupFile(f);
 			} catch (Exception e) {

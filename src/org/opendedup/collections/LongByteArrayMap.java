@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -59,7 +60,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	public static byte[] _FREE = new byte[_arrayLength];
 	public static byte[] _V1FREE = new byte[_v1arrayLength];
 	public static byte[] _V2FREE = new byte[_v2arrayLength];
-	public long iterPos = 0;
+	public AtomicLong iterPos = new AtomicLong();
 	FileChannel bdbc = null;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
 	// private int eI = 1024 * 1024;
@@ -73,7 +74,6 @@ public class LongByteArrayMap implements DataMapInterface {
 	private int arrayLength = _v1arrayLength;
 	private byte version = Main.MAPVERSION;
 	private byte[] FREE;
-	long flen = 0;
 
 	static {
 		SDFSLogger.getLog().info("File Map Version is = " + Main.MAPVERSION);
@@ -109,7 +109,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		WriteLock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			this.iterPos = 0;
+			this.iterPos.set(0);
 
 		} finally {
 			l.unlock();
@@ -117,7 +117,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	}
 
 	private long getInternalIterFPos() {
-		return (this.iterPos * arrayLength) + this.offset;
+		return (this.iterPos.get() * arrayLength) + this.offset;
 	}
 
 	/*
@@ -127,7 +127,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	 */
 	@Override
 	public long getIterPos() {
-		return (this.iterPos * arrayLength);
+		return (this.iterPos.get() * arrayLength);
 	}
 
 	/*
@@ -141,27 +141,27 @@ public class LongByteArrayMap implements DataMapInterface {
 		l.lock();
 		try {
 			long _cpos = getInternalIterFPos();
-			while (_cpos < flen) {
+			while (_cpos < pbdb.size()) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
-					long pos = iterPos * Main.CHUNK_LENGTH;
+					long pos = iterPos.get() * Main.CHUNK_LENGTH;
 					pbdb.read(buf, _cpos);
 					byte[] val = buf.array();
-					iterPos++;
+					iterPos.incrementAndGet();
 					if (!Arrays.equals(val, FREE)) {
 						return pos;
 					}
 				} catch (Exception e1) {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("unable to iterate through key at " + iterPos * arrayLength, e1);
+						SDFSLogger.getLog().debug("unable to iterate through key at " + iterPos.get() * arrayLength, e1);
 				} finally {
-					iterPos++;
+					iterPos.incrementAndGet();
 					_cpos = getInternalIterFPos();
 				}
 			}
-			if ((iterPos * arrayLength) + this.offset != flen)
+			if ((iterPos.get() * arrayLength) + this.offset !=  pbdb.size())
 				throw new IOException("did not reach end of file for [" + this.filePath + "] len="
-						+ iterPos * arrayLength + " file len =" + flen);
+						+ iterPos.get() * arrayLength + " file len =" +  pbdb.size());
 
 			return -1;
 		} finally {
@@ -183,21 +183,18 @@ public class LongByteArrayMap implements DataMapInterface {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		try {
-
-			for (;;) {
+			long _cpos = getInternalIterFPos();
+			while (_cpos <  pbdb.size()) {
 				try {
-					if (nbuf == null || !nbuf.hasRemaining()) {
-						long _cpos = getInternalIterFPos();
-						int al = arrayLength * NP;
-						if (_cpos >= flen)
-							return null;
-						nbuf = ByteBuffer.allocate(al);
-						pbdb.read(nbuf, _cpos);
-						// SDFSLogger.getLog().info("al=" + al + " cpos=" +_cpos
-						// + " flen=" + flen + " fz=" +pbdb.size() + " nbfs=" +
-						// nbuf.position());
-						nbuf.position(0);
+					if (nbuf == null) {
+						nbuf = ByteBuffer.allocate(arrayLength);
 					}
+					nbuf.position(0);
+					pbdb.read(nbuf, _cpos);
+					// SDFSLogger.getLog().info("al=" + al + " cpos=" +_cpos
+					// + " flen=" + flen + " fz=" +pbdb.size() + " nbfs=" +
+					// nbuf.position());
+					nbuf.position(0);
 					// SDFSLogger.getLog().info("arl=" + arrayLength + "
 					// nbufsz=" + nbuf.capacity() + " rem="+ nbuf.remaining());
 					byte[] val = new byte[arrayLength];
@@ -212,9 +209,11 @@ public class LongByteArrayMap implements DataMapInterface {
 						return ck;
 					}
 				} finally {
-					iterPos++;
+					iterPos.incrementAndGet();
+					_cpos = (iterPos.get() * arrayLength) + this.offset;
 				}
 			}
+			return null;
 
 		} finally {
 			l.unlock();
@@ -227,7 +226,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		l.lock();
 		try {
 			long _cpos = getInternalIterFPos();
-			while (_cpos < flen) {
+			while (_cpos <  pbdb.size()) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					pbdb.read(buf, _cpos);
@@ -239,18 +238,12 @@ public class LongByteArrayMap implements DataMapInterface {
 								DedupFileStore.cp.put(p.hash);
 							}
 						}
-						return new LongKeyValue(iterPos * Main.CHUNK_LENGTH, ck);
+						return new LongKeyValue(iterPos.get() * Main.CHUNK_LENGTH, ck);
 					}
 				} finally {
-					iterPos++;
-					_cpos = (iterPos * arrayLength) + this.offset;
+					iterPos.incrementAndGet();
+					_cpos = (iterPos.get() * arrayLength) + this.offset;
 				}
-			}
-			if (getInternalIterFPos() < pbdb.size()) {
-
-				flen = this.pbdb.size();
-
-				return this.nextKeyValue(index);
 			}
 			return null;
 		} finally {
@@ -321,11 +314,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					}
 					bdb.position(1024);
 					bdb.close();
-					flen = 0;
-				} else {
-
-					flen = dbFile.length();
-				}
+				} 
 				rf = new RandomAccessFile(filePath, "rw");
 
 				pbdb = rf.getChannel();
@@ -378,9 +367,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			 * IOException("data length " + data.length + " does not equal " +
 			 * arrayLength);
 			 */
-			;
-			if (fpos > flen)
-				flen = fpos;
+			
 			l.unlock();
 			l = this.hashlock.readLock();
 			l.lock();
@@ -392,7 +379,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					}
 				}
 				for (HashLocPair p : data.getFingers()) {
-					DedupFileStore.cp.remove(p.hash);
+					DedupFileStore.cp.put(p.hash);
 				}
 			}
 			// rf.seek(fpos);
@@ -440,12 +427,12 @@ public class LongByteArrayMap implements DataMapInterface {
 					long _pos = ls;
 					while (_bdb.position() < es) {
 						_pos = _bdb.position();
-						if(Main.refCount) {
-						byte[] val = new byte[arrayLength];
-						ByteBuffer _bz = ByteBuffer.wrap(val);
-						_bdb.read(_bz);
-						if (!Arrays.equals(val, FREE)) {
-							SparseDataChunk ck = new SparseDataChunk(val, this.version);
+						if (Main.refCount) {
+							byte[] val = new byte[arrayLength];
+							ByteBuffer _bz = ByteBuffer.wrap(val);
+							_bdb.read(_bz);
+							if (!Arrays.equals(val, FREE)) {
+								SparseDataChunk ck = new SparseDataChunk(val, this.version);
 								for (HashLocPair p : ck.getFingers()) {
 									DedupFileStore.cp.remove(p.hash);
 								}
@@ -487,12 +474,12 @@ public class LongByteArrayMap implements DataMapInterface {
 		FileChannel _bdb = null;
 		try {
 			fpos = this.getMapFilePosition(length);
-			if(Main.refCount) {
+			if (Main.refCount) {
 				this.iterInit();
 				LongKeyValue kv = this.nextKeyValue(false);
-				while(kv != null && kv.getKey() < fpos) {
+				while (kv != null && kv.getKey() < fpos) {
 					SparseDataChunk ck = kv.getValue();
-					for(HashLocPair p : ck.getFingers()) {
+					for (HashLocPair p : ck.getFingers()) {
 						DedupFileStore.cp.remove(p.hash);
 					}
 					kv = this.nextKeyValue(false);
@@ -509,7 +496,6 @@ public class LongByteArrayMap implements DataMapInterface {
 				_bdb.close();
 			} catch (Exception e) {
 			}
-			this.flen = fpos;
 			l.unlock();
 		}
 
@@ -577,7 +563,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 			fpos = this.getMapFilePosition(pos);
 
-			if (fpos > flen)
+			if (fpos >  pbdb.size())
 				return null;
 			byte[] buf = null;
 			if (version > 1) {
@@ -661,6 +647,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				this.close();
 			File f = new File(this.filePath);
 			f.delete();
+
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {

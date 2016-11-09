@@ -103,6 +103,10 @@ public class HashStore {
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
+	
+	public boolean mightContainKey(byte [] key) {
+		return this.bdb.mightContainKey(key);
+	}
 
 	/**
 	 * Initiates the chunkstore. It will create a S3 chunk store per HashStore

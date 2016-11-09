@@ -778,7 +778,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		int claims = 0;
 		for (String ha : st) {
 			byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-			if (HCServiceProxy.getHashesMap().containsKey(b))
+			if (HCServiceProxy.getHashesMap().mightContainKey(b))
 				claims++;
 		}
 		return claims;

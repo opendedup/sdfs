@@ -32,6 +32,7 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.OSValidator;
 
 public class SDFSService {
 	String configFile;
@@ -58,20 +59,17 @@ public class SDFSService {
 		if (port != -1)
 			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
-			System.err
-					.println("This version is not backwards compatible with previous versions of SDFS");
+			System.err.println("This version is not backwards compatible with previous versions of SDFS");
 			System.err.println("Exiting");
 			System.exit(-1);
 		}
-		SDFSLogger.getLog().debug(
-				"############# SDFSService Starting ##################");
+		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
 
-		Main.mountEvent = SDFSEvent.mountEvent("SDFS Version [" + Main.version
-				+ "] Mounting Volume from " + this.configFile);
+		Main.mountEvent = SDFSEvent
+				.mountEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
-			SDFSLogger.getLog().info(
-					"HashFunction Min Block Size=" + VariableHashEngine.minLen
-							+ " Max Block Size=" + VariableHashEngine.maxLen);
+			SDFSLogger.getLog().info("HashFunction Min Block Size=" + VariableHashEngine.minLen + " Max Block Size="
+					+ VariableHashEngine.maxLen);
 		Main.DSEID = Main.volume.getSerialNumber();
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
@@ -108,8 +106,7 @@ public class SDFSService {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		Main.volume.init();
-		SDFSLogger.getLog().debug(
-				"############### SDFSService Started ##################");
+		SDFSLogger.getLog().debug("############### SDFSService Started ##################");
 	}
 
 	public void stop() {
@@ -122,33 +119,53 @@ public class SDFSService {
 			BloomFDisk.closed = true;
 			Main.pFullSched.close();
 			Main.pFullSched = null;
-			
+
 		} catch (Exception e) {
 		}
 		SDFSLogger.getLog().info("Flushing and Closing Write Caches");
-		DedupFileStore.close();
+		try {
+			DedupFileStore.close();
+		} catch (Exception e) {
+			System.out.println("Dedupe File store did not close correctly");
+			SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+		}
 		SDFSLogger.getLog().info("Write Caches Flushed and Closed");
 		SDFSLogger.getLog().info("Committing open Files");
-		MetaFileStore.close();
+		try {
+			MetaFileStore.close();
+		} catch (Exception e) {
+			System.out.println("Meta File store did not close correctly");
+			SDFSLogger.getLog().error("Meta File store did not close correctly", e);
+		}
 		SDFSLogger.getLog().info("Open File Committed");
 		SDFSLogger.getLog().info("Writing Config File");
 
 		/*
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
-		MgmtWebServer.stop();
 		try {
-			Process p = Runtime.getRuntime().exec(
-					"umount " + Main.volumeMountPoint);
-			p.waitFor();
+		MgmtWebServer.stop();
+		}catch(Exception e) {
+			System.out.println("Web Server did not close correctly");
+			SDFSLogger.getLog().error("Web server did not close correctly", e);
+		}
+		try {
+			if (OSValidator.isUnix()) {
+				Process p = Runtime.getRuntime().exec("umount " + Main.volumeMountPoint);
+				p.waitFor();
+			}
 		} catch (Exception e) {
+			
 		}
 		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info(
-					"######### Shutting down HashStore ###################");
+			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+			try {
 			HCServiceProxy.close();
-			SDFSLogger.getLog().info(
-					"######### HashStore Closed ###################");
+			}catch(Exception e) {
+				System.out.println("HashStore did not close correctly");
+				SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+			}
+			SDFSLogger.getLog().info("######### HashStore Closed ###################");
 			Main.volume.setClosedGracefully(true);
 			try {
 				Config.writeSDFSConfigFile(configFile);

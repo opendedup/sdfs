@@ -973,11 +973,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			File f = new File(this.path);
-			
+			if(f.exists()) {
 			boolean del = f.delete();
 			Main.volume.removeFile();
 			eventBus.post(new MFileDeleted(this));
 			return del;
+			}
+			else
+				return true;
 		} finally {
 			this.writeLock.unlock();
 		}

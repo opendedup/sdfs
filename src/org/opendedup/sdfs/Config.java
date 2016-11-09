@@ -350,6 +350,9 @@ public class Config {
 		}
 		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore
 				.getAttribute("enabled"));
+		if(localChunkStore.hasAttribute("max-scan-depth")) {
+			Main.MAX_TABLES_SCAN= Integer.parseInt(localChunkStore.getAttribute("max-scan-depth"));
+		}
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
 			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore
 					.getAttribute("average-chunk-size"));
@@ -508,8 +511,6 @@ public class Config {
 	 */
 	public synchronized static void writeSDFSConfigFile(String fileName)
 			throws Exception {
-		SDFSLogger.getLog().info("zzzzzzzzzzzzzzzbooooooooooo " +StorageUnit.of(HCServiceProxy.getMaxCacheSize())
-		.format(HCServiceProxy.getMaxCacheSize()));
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -543,8 +544,6 @@ public class Config {
 						Integer.toString(HCServiceProxy.getReadSpeed()));
 				chunkStoreConfig.setAttribute("write-speed",
 						Integer.toString(HCServiceProxy.getWriteSpeed()));
-				SDFSLogger.getLog().info("booooooooooo " +StorageUnit.of(HCServiceProxy.getMaxCacheSize())
-								.format(HCServiceProxy.getMaxCacheSize()));
 			}
 		}
 

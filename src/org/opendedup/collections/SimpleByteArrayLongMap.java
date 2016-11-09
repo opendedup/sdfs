@@ -298,6 +298,7 @@ public class SimpleByteArrayLongMap {
 	boolean closed = false;
 
 	public void vanish() {
+		SDFSLogger.getLog().info("removed" + this.path);
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {

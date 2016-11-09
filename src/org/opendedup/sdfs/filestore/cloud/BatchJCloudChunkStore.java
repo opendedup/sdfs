@@ -588,8 +588,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			int claims = 0;
 			for (String ha : hs) {
 				byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-				long cid = HCServiceProxy.getHashesMap().get(b);
-				if (cid == id)
+				if (HCServiceProxy.getHashesMap().mightContainKey(b))
 					claims++;
 			}
 			return claims;

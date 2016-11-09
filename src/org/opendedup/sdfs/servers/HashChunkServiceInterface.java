@@ -40,6 +40,8 @@ public interface HashChunkServiceInterface {
 	public abstract String restoreBlock(byte[] hash) throws IOException;
 
 	public abstract boolean blockRestored(String id) throws IOException;
+	
+	public abstract boolean mightContainKey(byte [] key);
 
 	public abstract long getChunksFetched();
 

@@ -291,4 +291,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 			return null;
 	}
 
+	@Override
+	public boolean mightContainKey(byte[] key) {
+		return hs.mightContainKey(key);
+	}
+
 }
