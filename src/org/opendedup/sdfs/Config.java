@@ -67,6 +67,9 @@ public class Config {
 			if (cbe.hasAttribute("chunkstore-class")) {
 				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
 			}
+			if (cbe.hasAttribute("max-table-scan")) {
+				Main.MAX_TBLS = Integer.parseInt(cbe.getAttribute("max-table-scan"));
+			}
 			if (cbe.hasAttribute("hashdb-class"))
 				Main.hashesDBClass = cbe.getAttribute("hashdb-class");
 			if (cbe.getElementsByTagName("extended-config").getLength() > 0) {

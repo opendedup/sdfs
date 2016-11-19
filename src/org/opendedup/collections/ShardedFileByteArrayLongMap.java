@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,7 +38,7 @@ import com.google.common.hash.PrimitiveSink;
 import sun.nio.ch.DirectBuffer;
 
 public class ShardedFileByteArrayLongMap
-		implements AbstractShard, Serializable, Comparable<ShardedFileByteArrayLongMap> {
+		implements Runnable, AbstractShard, Serializable, Comparable<ShardedFileByteArrayLongMap> {
 	/**
 	 * 
 	 */
@@ -73,6 +72,9 @@ public class ShardedFileByteArrayLongMap
 	transient private boolean compacting = false;
 	transient private boolean active = false;
 	private transient AtomicLong lastFound = new AtomicLong();
+	private AtomicLong nextCached = new AtomicLong();
+	private static final long mixCacheTM = 60 * 60 * 1000;
+	private boolean cacheRunning = false;
 	int minSz = 10000;
 
 	private ArrayList<Shard> shards = new ArrayList<Shard>(numshards);
@@ -162,6 +164,15 @@ public class ShardedFileByteArrayLongMap
 
 	@Override
 	public synchronized void cache() {
+		if (this.nextCached.get() < System.currentTimeMillis() && !this.cacheRunning) {
+			synchronized (this.nextCached) {
+				if (!this.cacheRunning) {
+					this.cacheRunning = true;
+					Thread th = new Thread(this);
+					th.start();
+				}
+			}
+		}
 
 	}
 
@@ -221,6 +232,7 @@ public class ShardedFileByteArrayLongMap
 
 		}
 	}
+
 	@Override
 	public KVPair nextKeyValue() throws IOException {
 		for (;;) {
@@ -243,6 +255,7 @@ public class ShardedFileByteArrayLongMap
 		}
 
 	}
+
 	@Override
 	public void clearRefMap() throws IOException {
 		Lock l = this.hashlock.writeLock();
@@ -417,7 +430,7 @@ public class ShardedFileByteArrayLongMap
 						}
 						oon.close();
 					} catch (Exception e) {
-						
+
 						SDFSLogger.getLog().warn("vmp load error", e);
 						closedCorrectly = false;
 					}
@@ -446,9 +459,9 @@ public class ShardedFileByteArrayLongMap
 					BitSet cl = new BitSet(partSize);
 					this.claims.add(i, cl);
 				}
-				
+
 				int cp = 0;
-				if(!closedCorrectly) {
+				if (!closedCorrectly) {
 					for (int i = 0; i < (numshards); i++) {
 						BitSet mp = new BitSet(partSize);
 						BitSet rm = new BitSet(partSize);
@@ -463,7 +476,7 @@ public class ShardedFileByteArrayLongMap
 					shards.add(i, sh);
 					cp += partSize;
 				}
-				
+
 				if (!closedCorrectly) {
 					this.recreateMap(partSize);
 				}
@@ -660,6 +673,7 @@ public class ShardedFileByteArrayLongMap
 			this.hashlock.readLock().unlock();
 		}
 	}
+
 	@Override
 	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		try {
@@ -1111,9 +1125,6 @@ public class ShardedFileByteArrayLongMap
 		}
 	}
 
-	AtomicLong lastRead = new AtomicLong(0);
-	private boolean cacheRunning = false;
-
 	@Override
 	public long getLastModified() {
 		return new File(path + ".keys").lastModified();
@@ -1143,8 +1154,8 @@ public class ShardedFileByteArrayLongMap
 		int iterPos = 0;
 		int start;
 
-		public Shard(ShardedFileByteArrayLongMap m, int start, int size, BitSet mapped, BitSet claims,
-				BitSet removed) throws IOException {
+		public Shard(ShardedFileByteArrayLongMap m, int start, int size, BitSet mapped, BitSet claims, BitSet removed)
+				throws IOException {
 			this.m = m;
 			this.size = size;
 			this.start = start;
@@ -1382,10 +1393,13 @@ public class ShardedFileByteArrayLongMap
 						pos = (pos / EL) * 8;
 						ct = this.rFC.getLong(pos);
 						ct++;
+						if(ct<0)
+							ct=1;
 						this.rFC.putLong(pos, ct);
 						this.claims.set(pos / 8);
-						//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
-						
+						// SDFSLogger.getLog().info("added " + ct + " " +
+						// StringUtils.getHexString(key));
+
 						return true;
 					} else
 						return false;
@@ -1402,7 +1416,7 @@ public class ShardedFileByteArrayLongMap
 
 				pos = this.index(key);
 				if (pos == -1) {
-					SDFSLogger.getLog().warn("miss");
+					// SDFSLogger.getLog().warn("miss");
 					return false;
 				} else {
 					long ct = -1;
@@ -1689,6 +1703,8 @@ public class ShardedFileByteArrayLongMap
 								this.removed.clear(iterPos);
 							} else if (mapped.get(iterPos)) {
 								byte[] key = new byte[FREE.length];
+								kFC.position(iterPos * EL);
+								kFC.get(key);
 								int pos = iterPos * 8;
 								long val = rFC.getLong(pos);
 								if (val <= 0) {
@@ -1718,52 +1734,60 @@ public class ShardedFileByteArrayLongMap
 		}
 
 		public long claimRecords(LargeBloomFilter nbf) throws IOException {
-			this.iterInit();
-			long _sz = 0;
-			try {
-				while (iterPos < size) {
-					synchronized (this) {
-						try {
-							if (m.isClosed())
-								throw new IOException("map closed");
-							byte[] key = new byte[FREE.length];
-							int pos = iterPos * EL;
-							// kFC.getBytes(pos, key);
-							kFC.position(pos);
-							kFC.get(key);
-							long val = kFC.getLong();
+			long k = 0;
 
-							if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-								if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+			try {
+				this.iterInit();
+				synchronized (this) {
+					this.claims.clear();
+				}
+				while (iterPos < size) {
+
+					try {
+						synchronized (this) {
+
+							boolean claimed = claims.get(iterPos);
+							claims.clear(iterPos);
+							if (claimed) {
+								this.mapped.set(iterPos);
+								this.removed.clear(iterPos);
+								byte[] key = new byte[FREE.length];
+								kFC.position(iterPos * EL);
+								kFC.get(key);
+								nbf.put(key);
+
+							} else if (mapped.get(iterPos)) {
+								byte[] key = new byte[FREE.length];
+								kFC.position(iterPos * EL);
+								kFC.get(key);
+								int pos = iterPos * 8;
+								long val = rFC.getLong(pos);
+								if (val <= 0) {
+									pos = iterPos * EL;
+									long ov = kFC.getLong(pos + VP);
 									kFC.position(pos);
+
 									this.kFC.put(REMOVED);
 									this.kFC.putLong(0);
-									this.rFC.putLong(iterPos * 8, 0);
-									ChunkData ck = new ChunkData(val, key);
+									ChunkData ck = new ChunkData(ov, key);
 									ck.setmDelete(true);
-
 									this.mapped.clear(iterPos);
 									this.removed.set(iterPos);
 									m.full = false;
-									_sz++;
+									k++;
 								} else {
-									this.mapped.set(iterPos);
-
+									nbf.put(key);
 								}
-								this.claims.clear(iterPos);
 							}
-
-						} finally {
-							iterPos++;
-
 						}
+					} finally {
+						iterPos++;
 					}
 				}
-
-				return _sz;
-			} finally {
+			} catch (NullPointerException e) {
 
 			}
+			return k;
 		}
 
 		public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
@@ -1828,6 +1852,53 @@ public class ShardedFileByteArrayLongMap
 		zbf.position(0);
 		kbf.position(0);
 		System.out.println(kbf.compareTo(zbf));
+	}
+
+	@Override
+	public void run() {
+		try {
+			byte[] key = new byte[EL * 43690];
+			Arrays.fill(key, (byte) 0);
+			SDFSLogger.getLog().info("caching " + this.path);
+			ByteBuffer bk = ByteBuffer.allocateDirect(key.length);
+			bk.put(key);
+
+			this.hashlock.readLock().lock();
+			try {
+				kFC.position(0);
+				while (!this.isClosed() && (kFC.position() + key.length) < kFC.size() && !this.closed) {
+					this.hashlock.readLock().unlock();
+					bk.position(0);
+					this.hashlock.readLock().lock();
+					kFC.read(bk);
+				}
+			} finally {
+				try {
+					this.hashlock.readLock().unlock();
+				} catch (Exception e) {
+				}
+			}
+
+			int lft = (int) (kFC.size() - kFC.position());
+			key = new byte[lft];
+			Arrays.fill(key, (byte) 0);
+			bk = ByteBuffer.allocateDirect(key.length);
+			bk.put(key);
+			bk.position(0);
+			this.hashlock.readLock().lock();
+			try {
+				if (!this.isClosed())
+					kFC.read(bk);
+			} finally {
+				this.hashlock.readLock().unlock();
+			}
+			this.nextCached.set(System.currentTimeMillis() + mixCacheTM);
+			SDFSLogger.getLog().info("done caching " + this.path);
+
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to cache", e);
+		}
+
 	}
 
 }

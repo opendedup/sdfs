@@ -30,6 +30,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -83,6 +84,8 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	private transient ThreadPoolExecutor executor = null;
 	boolean ilg = false;
 	boolean runningGC = false;
+	private ThreadLocalRandom tblrnd = ThreadLocalRandom.current();
+	protected int maxTbls =100;
 	int currentAWPos = 0;
 	// private BloomFileByteArrayLongMap activeWMap = null;
 	ReentrantLock al = new ReentrantLock();
@@ -117,7 +120,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	AtomicLong amt = new AtomicLong();
 	AtomicLong zmt = new AtomicLong();
 
-	private AbstractShard getReadMap(byte[] hash) throws IOException {
+	private AbstractShard getReadMap(byte[] hash,boolean deep) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
 		ct.incrementAndGet();
@@ -142,12 +145,14 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 					// long chl = ch.incrementAndGet();
 					// SDFSLogger.getLog().info("found ch=" + chl + " sz=" +
 					// this.keyLookup.size());
+					_km.cache();
 					return _km;
 				} else {
 					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
 				}
 			}
 
+			/*
 			synchronized (ct) {
 				if (ct.get() > 10000) {
 					SDFSLogger.getLog().info("misses=" + mt.get() + " inserts=" + ct.get() + " lookups=" + amt.get()
@@ -157,11 +162,24 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 					mt.set(0);
 				}
 			}
-
+			*/
+			
+			int sns = this.maxTbls;
+			int trs = 0;
+			if(this.maxTbls <=0)
+				deep=true;
 			for (AbstractShard _m : this.maps.getAL()) {
+				trs++;
+				if(!deep && trs == this.maxTbls) {
+					sns = this.tblrnd.nextInt(0,this.maps.size());
+				}
+				if(!deep && trs > sns) {
+					break;
+				}
 				amt.incrementAndGet();
 				if (_m.containsKey(hash)) {
 					this.keyLookup.put(new ByteArrayWrapper(hash), _m);
+					_m.cache();
 					return _m;
 				}
 			}
@@ -302,6 +320,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				} catch (MapClosedException e) {
 				}
 			}
+			SDFSLogger.getLog().info("miss2");
 			return false;
 		} finally {
 			l.unlock();
@@ -398,7 +417,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				AbstractShard m = null;
 				try {
 					m = iter.next();
-					ClaimShard cms = new ClaimShard(m, csz);
+					ClaimShard cms = new ClaimShard(m, csz,lbf);
 					excs.add(cms);
 					executor.execute(cms);
 				} catch (Exception e) {
@@ -670,9 +689,9 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 			this.nlbf = nlbf;
 		}
 
-		protected ClaimShard(AbstractShard map, AtomicLong claims) {
+		protected ClaimShard(AbstractShard map, AtomicLong claims,LargeBloomFilter nlbf) {
 			this.map = map;
-
+			this.nlbf = nlbf;
 			this.claims = claims;
 		}
 
@@ -682,7 +701,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 			long cl;
 			try {
 				if (bf == null)
-					cl = map.claimRecords();
+					cl = map.claimRecords(nlbf);
 				else
 					cl = map.claimRecords(bf, nlbf);
 				claims.addAndGet(cl);
@@ -854,7 +873,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		AbstractShard m = this.getReadMap(key);
+		AbstractShard m = this.getReadMap(key,true);
 		if (m == null)
 			return false;
 		return true;
@@ -896,7 +915,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		ShardedFileByteArrayLongMap bm = null;
 		try {
 			// long tm = System.currentTimeMillis();
-			AbstractShard rm = this.getReadMap(cm.getHash());
+			AbstractShard rm = this.getReadMap(cm.getHash(),false);
 			if (rm == null) {
 				// this.misses.incrementAndGet();
 				// tm = System.currentTimeMillis() - tm;
@@ -956,7 +975,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
 		boolean added = false;
-		AbstractShard bm = this.getReadMap(cm.getHash());
+		AbstractShard bm = this.getReadMap(cm.getHash(),true);
 		if (bm != null) {
 			added = bm.update(cm.getHash(), cm.getcPos());
 		}
@@ -1026,7 +1045,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 			try {
 				if (cm.getHash().length == 0)
 					return true;
-				AbstractShard m = this.getReadMap(cm.getHash());
+				AbstractShard m = this.getReadMap(cm.getHash(),true);
 				if (m == null)
 					return false;
 				if (!m.remove(cm.getHash())) {
@@ -1226,7 +1245,22 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
+			if(!this.runningGC)
 			return this.lbf.mightContain(key);
+			else {
+				long ps = -1;
+				try {
+					ps = this.get(key);
+				} catch (IOException e) {
+					SDFSLogger.getLog().warn("unable to check",e);
+					return true;
+				}
+				if (ps != -1) {
+					return true;
+				}else
+					return false;
+			}
+				
 		} finally {
 			l.unlock();
 		}

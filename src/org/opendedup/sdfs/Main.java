@@ -36,6 +36,7 @@ public class Main {
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
 	public static boolean LOWMEM = false;
+	public static int MAX_TBLS=0;
 
 	public static boolean syncDL = false;
 

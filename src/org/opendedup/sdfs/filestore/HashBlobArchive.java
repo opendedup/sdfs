@@ -1241,6 +1241,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 						} catch (HashExistsException e) {
 							SDFSLogger.getLog().debug("hash already inserted");
 						}
+					} else {
+						SDFSLogger.getLog().debug("nk [" + StringUtils.getHexString(p.getKey()) + "] ");
 					}
 					p = _m.next();
 				}
