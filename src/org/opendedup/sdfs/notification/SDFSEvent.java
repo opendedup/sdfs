@@ -609,8 +609,9 @@ public class SDFSEvent implements java.io.Serializable {
 	public static String getTarget() {
 		if (Main.standAloneDSE)
 			return "Storage node " + Main.DSEClusterMemberID;
-		else
+		else if(Main.volume != null)
 			return Main.volume.getName();
+		else return "test";
 	}
 
 }

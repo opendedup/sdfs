@@ -2,6 +2,9 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -44,6 +47,7 @@ public class VolumeConfigWriter {
 	String dedup_db_store = base_path + File.separator + "ddb";
 	String io_log = base_path + File.separator + "io.log";
 	boolean safe_close = true;
+	boolean vrts_appliance = false;
 	boolean safe_sync = true;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
@@ -117,7 +121,7 @@ public class VolumeConfigWriter {
 	private boolean readAhead = false;
 	private boolean usebasicsigner=false;
 	private boolean disableDNSBucket = false;
-	private String blockSize = "50 MB";
+	private String blockSize = "5 MB";
 	private long sn = new Random().nextLong();
 	
 	public VolumeConfigWriter() {
@@ -163,6 +167,10 @@ public class VolumeConfigWriter {
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
 		base_path = OSValidator.getProgramBasePath() + "volumes"
 				+ File.separator + volume_name;
+		if(cmd.hasOption("vrts-appliance")) {
+			this.vrts_appliance = true;
+			this.base_path = "/config/sdfs/" +volume_name;
+		}
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
 		}
@@ -543,6 +551,22 @@ public class VolumeConfigWriter {
 		}
 		File file = new File(OSValidator.getConfigPath()
 				+ this.volume_name.trim() + "-volume-cfg.xml");
+		
+		if(vrts_appliance) {
+			dir = new File("/config/sdfs/etc/");
+			if (!dir.exists()) {
+				System.out.println("making" + dir.getAbsolutePath());
+				dir.mkdirs();
+			}
+			File vdir = new File("/opendedupe/volumes/"+this.volume_name.trim());
+			if(!vdir.exists()) {
+				System.out.println("making mountpoint" + vdir.getAbsolutePath());
+				vdir.mkdirs();
+			}
+			file = new File(dir.getPath()
+					+ this.volume_name.trim() + "-volume-cfg.xml");
+			
+		}
 		// Create XML DOM document (Memory consuming).
 		Document xmldoc = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -774,7 +798,7 @@ public class VolumeConfigWriter {
 			Element extended = xmldoc.createElement("extended-config");
 			extended.setAttribute("block-size", "60 MB");
 			extended.setAttribute("allow-sync", "false");
-			extended.setAttribute("upload-thread-sleep-time", "150000");
+			extended.setAttribute("upload-thread-sleep-time", "1500");
 			extended.setAttribute("sync-files", "false");
 			extended.setAttribute("local-cache-size", this.cacheSize);
 			extended.setAttribute("map-cache-size", "100");
@@ -794,6 +818,12 @@ public class VolumeConfigWriter {
 					.newTransformer();
 			xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			xformer.transform(source, result);
+			File lf = new File(OSValidator.getConfigPath()
+					+ this.volume_name.trim() + "-volume-cfg.xml");
+			Path srcP = Paths.get(file.getPath());
+			Path dstP = Paths.get(lf.getPath());
+			Files.createSymbolicLink(dstP, srcP);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -854,6 +884,11 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("help")
 				.withDescription("Display these options.").hasArg(false)
 				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("vrts-appliance")
+				.withDescription(
+						"Volume is running on a NetBackup Appliance.")
+				.hasArg(true).withArgName("password").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sdfscli-password")
 				.withDescription(

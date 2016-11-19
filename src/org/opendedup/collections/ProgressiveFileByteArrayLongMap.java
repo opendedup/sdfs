@@ -1,21 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
- *
- * This file is part of OpenDedupe SDFS.
- *
- * OpenDedupe SDFS is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * OpenDedupe SDFS is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package org.opendedup.collections;
 
 import java.io.File;
@@ -29,13 +11,12 @@ import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -44,20 +25,20 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.collections.AbstractShard;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
-import org.opendedup.collections.ProgressiveFileBasedCSMap.ProcessPriorityThreadFactory;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
-
-import org.opendedup.utils.hashing.FileBasedBloomFilter;
+import org.opendedup.util.NextPrime;
+import org.opendedup.util.StringUtils;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
+import sun.nio.ch.DirectBuffer;
+
 public class ProgressiveFileByteArrayLongMap
-		implements AbstractShard, Serializable, Runnable, Comparable<ProgressiveFileByteArrayLongMap> {
+		implements AbstractShard, Serializable, Comparable<ProgressiveFileByteArrayLongMap> {
 	/**
 	 * 
 	 */
@@ -68,28 +49,32 @@ public class ProgressiveFileByteArrayLongMap
 	transient private double loadFactor = .75;
 	transient private String path = null;
 	transient private FileChannel kFC = null;
+	transient private FileChannel rFC = null;
+	transient private RandomAccessFile rRaf = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8;
+	transient protected static final int RL = 8;
 	transient private static final int VP = HashFunctionPool.hashLength;
 	transient private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 	transient public static byte[] FREE = new byte[HashFunctionPool.hashLength];
 	transient public static byte[] REMOVED = new byte[HashFunctionPool.hashLength];
-	transient private int iterPos = 0;
+	transient private Iterator<Shard> iter = null;
+	transient private Shard currentIter = null;
 	transient private boolean closed = false;
-	transient private BitSet claims = null;
-	transient private BitSet removed = null;
-	transient private BitSet mapped = null;
+	private int numshards = 32;
+	private int numdiv = 256 / numshards;
+	transient private ArrayList<BitSet> claims = new ArrayList<BitSet>(16);
+	transient private ArrayList<BitSet> removed = new ArrayList<BitSet>(16);
+	transient private ArrayList<BitSet> mapped = new ArrayList<BitSet>(16);
+	// transient private FileBasedBloomFilter<KeyBlob> bf = null;
 	transient private AtomicInteger sz = new AtomicInteger(0);
-	transient private FileBasedBloomFilter<KeyBlob> bf = null;
-	transient private boolean runningGC;
-	transient private long bgst = 0;
+	transient RandomAccessFile kRaf = null;
 	transient boolean full = false;
 	transient private boolean compacting = false;
 	transient private boolean active = false;
-	transient private boolean cached = false;
-	public transient long lastFound = 0;
-	private static transient BlockingQueue<Runnable> loadCacheQueue = new SynchronousQueue<Runnable>();
-	private static transient ThreadPoolExecutor loadCacheExecutor = new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS,
-			loadCacheQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY));
+	private transient AtomicLong lastFound = new AtomicLong();
+	int minSz = 10000;
+
+	private ArrayList<Shard> shards = new ArrayList<Shard>(numshards);
 
 	static {
 		FREE = new byte[HashFunctionPool.hashLength];
@@ -98,13 +83,33 @@ public class ProgressiveFileByteArrayLongMap
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	public ProgressiveFileByteArrayLongMap(String path, int size) throws IOException {
+	protected ProgressiveFileByteArrayLongMap(String path, int size) throws IOException {
 		this.size = size;
 		this.path = path;
+		if (this.size < 1_000_000) {
+			this.numshards = 4;
+
+		} else if (this.size < 10_000_000) {
+			this.numshards = 8;
+
+		} else if (this.size < 40_000_000) {
+			this.numshards = 8;
+
+		} else if (this.size < 100_000_000) {
+			this.numshards = 16;
+
+		}
+		this.numshards = 32;
+
+		numdiv = 256 / numshards;
 	}
 
 	public void compactRunning(boolean running) {
 		this.compacting = running;
+	}
+
+	public long getLastAccess() {
+		return this.lastFound.get();
 	}
 
 	public boolean equals(ProgressiveFileByteArrayLongMap m) {
@@ -133,7 +138,7 @@ public class ProgressiveFileByteArrayLongMap
 	public void activate() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
-		this.lastFound = System.currentTimeMillis();
+		this.lastFound.set(System.currentTimeMillis());
 		this.active = true;
 		l.unlock();
 	}
@@ -149,27 +154,7 @@ public class ProgressiveFileByteArrayLongMap
 	}
 
 	public synchronized void cache() {
-		long lr = System.currentTimeMillis() - lastRead.get();
-		if (lr > mtm) {
-			if (!this.cacheRunning) {
-				this.cacheRunning = true;
-				lr = System.currentTimeMillis() - lastRead.get();
-				if (lr > mtm) {
-					try {
-						if (this.isClosed())
-							throw new IOException("map closed");
-						if (!this.cached) {
-							loadCacheExecutor.execute(this);
-							this.cached = true;
-						}
-					} catch (Exception e) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("unable to cache " + this, e);
 
-					}
-				}
-			}
-		}
 	}
 
 	/*
@@ -179,7 +164,9 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public synchronized void iterInit() {
-		this.iterPos = 0;
+		// this.iterPos = 0;
+		this.iter = this.shards.iterator();
+		this.currentIter = null;
 	}
 
 	public boolean isFull() {
@@ -202,155 +189,110 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public byte[] nextKey() throws IOException {
-		while (iterPos < size) {
-			Lock l = this.hashlock.writeLock();
-			l.lock();
-			try {
-				if (this.isClosed())
-					throw new IOException("map closed");
-				if (this.mapped.get(iterPos)) {
-					byte[] key = new byte[FREE.length];
-					kFC.read(ByteBuffer.wrap(key), (long) iterPos * (long) EL);
-					iterPos++;
-					if (Arrays.equals(key, REMOVED)) {
-						this.removed.set(iterPos - 1);
-						this.mapped.clear(iterPos - 1);
-					} else if (!Arrays.equals(key, FREE)) {
-						this.mapped.set(iterPos - 1);
-						this.removed.clear(iterPos - 1);
+		return this._nextKey(false);
+	}
 
-						this.bf.put(key);
-						return key;
-					} else {
-						this.mapped.clear(iterPos - 1);
-					}
+	private byte[] _nextKey(boolean recreate) throws IOException {
+		for (;;) {
+
+			if (this.currentIter == null) {
+				if (iter.hasNext()) {
+					this.currentIter = iter.next();
+					this.currentIter.iterInit();
 				} else {
-					iterPos++;
+					return null;
 				}
-			} finally {
-				l.unlock();
 			}
+			byte[] key = this.currentIter.nextKey(recreate);
+			if (key != null) {
+				return key;
+			} else
+				currentIter = null;
 
 		}
-		return null;
 	}
 
 	public KVPair nextKeyValue() throws IOException {
-		while (iterPos < size) {
-			Lock l = this.hashlock.writeLock();
-			l.lock();
-			try {
-				if (this.isClosed())
-					throw new IOException("map closed");
-				if (this.mapped.get(iterPos)) {
-					byte[] key = new byte[FREE.length];
-					long pos = (long) iterPos * (long) EL;
-					kFC.read(ByteBuffer.wrap(key), pos);
-					// kFC.writeToArray(pos, key, 0, key.length);
-					iterPos++;
-					if (Arrays.equals(key, REMOVED)) {
-						this.removed.set(iterPos - 1);
-						this.mapped.clear(iterPos - 1);
-					} else if (!Arrays.equals(key, FREE)) {
-						this.mapped.set(iterPos - 1);
-						this.removed.clear(iterPos - 1);
-						this.bf.put(key);
-						KVPair p = new KVPair();
-						p.key = key;
-						ByteBuffer bk = ByteBuffer.allocate(8);
+		for (;;) {
 
-						kFC.read(bk, pos + key.length);
-						bk.flip();
-						p.value = bk.getLong();
-						return p;
-					} else {
-						this.mapped.clear(iterPos - 1);
-					}
+			if (this.currentIter == null) {
+				if (iter.hasNext()) {
+					this.currentIter = iter.next();
+					this.currentIter.iterInit();
 				} else {
-					iterPos++;
+					return null;
 				}
-			} finally {
-				l.unlock();
 			}
+			KVPair key = this.currentIter.nextKeyValue();
 
+			if (key != null) {
+				return key;
+			} else {
+				currentIter = null;
+			}
 		}
-		return null;
+
 	}
 
-	private byte[] _nextKey() throws IOException {
-		while (iterPos < size) {
-			Lock l = this.hashlock.writeLock();
-			l.lock();
-			try {
-				byte[] key = new byte[FREE.length];
-				kFC.read(ByteBuffer.wrap(key),(long) iterPos * (long) EL);
-				//kFC.writeToArray((long) iterPos * (long) EL, key, 0, key.length);
-				iterPos++;
-				if (Arrays.equals(key, REMOVED)) {
-					this.removed.set(iterPos - 1);
-					this.mapped.clear(iterPos - 1);
-				} else if (!Arrays.equals(key, FREE)) {
-					this.mapped.set(iterPos - 1);
-					this.removed.clear(iterPos - 1);
-					this.bf.put(key);
-					return key;
-				} else {
-					this.mapped.clear(iterPos - 1);
-				}
-			} finally {
-				l.unlock();
-			}
-
-		}
-		return null;
-	}
-
-	private void recreateMap() throws IOException {
+	public void clearRefMap() throws IOException {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			mapped = new BitSet(size);
-			mapped.clear();
-			removed = new BitSet(size);
-			removed.clear();
-			bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
-			this.iterInit();
-			byte[] key = this._nextKey();
-			while (key != null)
-				key = this._nextKey();
-			SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + mapped.cardinality());
+			for (Shard sh : shards) {
+				synchronized (sh) {
+					sh.closeRef();
+				}
+			}
+			try {
+				this.rFC.close();
+			} catch (Exception e) {
+			}
+			try {
+				this.rRaf.close();
+			} catch (Exception e) {
+			}
+			File f = new File(path + ".refs");
+			if (!f.delete()) {
+				throw new IOException("could not delete refs");
+			} else {
+				rRaf = new RandomAccessFile(path + ".refs", "rw");
+				this.rFC = rRaf.getChannel();
+				for (Shard sh : shards) {
+					synchronized (sh) {
+						sh.recreateRefMap();
+					}
+				}
+			}
 		} finally {
 			l.unlock();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.collections.AbstractShard#getBigestKey()
-	 */
-	@Override
-	public long getBigestKey() throws IOException {
-		this.iterInit();
-		long _bgst = 0;
-		Lock l = this.hashlock.readLock();
+	private void recreateMap(int sz) throws IOException {
+		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			ByteBuffer bk = ByteBuffer.allocateDirect(8);
-			while (iterPos < size) {
-				bk.position(0);
-				kFC.read(bk,((long) iterPos * (long) EL) + VP);
-				bk.position(0);
-				long val = bk.getLong();
-
-				iterPos++;
-				if (val > _bgst)
-					_bgst = val;
+			for (int i = 0; i < numshards; i++) {
+				this.mapped.add(i, new BitSet(sz));
+				this.claims.add(i, new BitSet(sz));
+				this.removed.add(i, new BitSet(sz));
 			}
+			// bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new
+			// File(path + ".nbf").getPath(), true);
+			this.iterInit();
+			byte[] key = this._nextKey(true);
+			while (key != null) {
+				key = this._nextKey(true);
+				// this.bf.put(key);
+			}
+			long rsz = 0;
+			for (BitSet s : this.mapped) {
+				rsz += s.cardinality();
+			}
+			SDFSLogger.getLog().warn("Recovered Hashmap " + this.path + " entries = " + rsz);
 		} finally {
 			l.unlock();
 		}
-		return _bgst;
 	}
 
 	/*
@@ -360,61 +302,74 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 
 	boolean setup = false;
+	boolean newInstance = false;
 
 	@Override
 	public synchronized long setUp() throws IOException {
 		if (!setup) {
 			File posFile = new File(path + ".keys");
-			boolean newInstance = !posFile.exists();
+			newInstance = !posFile.exists();
 			if (posFile.exists()) {
 				long _sz = (posFile.length()) / (long) (EL);
 				if (_sz != size) {
+
 					SDFSLogger.getLog().warn("Resetting size of hashtable to [" + _sz + "] instead of [" + size + "]");
 					this.size = (int) _sz;
+					// System.out.println("nsz="+this.size +" nfs=" +
+					// posFile.length());
 				}
 			}
-			this.maxSz = (int) (size * loadFactor);
+
 			// SDFSLogger.getLog().info("sz=" + size + " maxSz=" + this.maxSz);
+
+			SDFSLogger.getLog().info("set table file size to size " + posFile.length());
+
+			boolean closedCorrectly = true;
+
+			int partSize = size / numshards;
+			// System.out.println("size="+size);
+			// int lastPacket = shardSize - ((numshards-1) * partSize);
+
 			long nsz = 0;
 			if (newInstance) {
-				nsz = (long) this.size * (long) EL;
+				partSize = NextPrime.getNextPrimeI(partSize);
+				if (partSize < this.minSz) {
+					partSize = NextPrime.getNextPrimeI(minSz);
+				}
+				// lastPacket = NextPrime.getNextPrimeI((int)lastPacket);
+				size = (partSize * numshards);
+
+				nsz = (long) size * (long) EL;
+				// System.out.println("nsize="+size + "nsz=" + nsz);
 			} else {
 				nsz = posFile.length();
 			}
+			// SDFSLogger.getLog().info("partsize=" + partSize);
+			this.maxSz = (int) (size * loadFactor);
 			// SDFSLogger.getLog().info("set table to size " + nsz);
-			@SuppressWarnings("resource")
-			RandomAccessFile kRaf = new RandomAccessFile(path + ".keys", "rw");
+			kRaf = new RandomAccessFile(path + ".keys", "rw");
+			rRaf = new RandomAccessFile(path + ".refs", "rw");
+			this.kFC = kRaf.getChannel();
+			this.rFC = rRaf.getChannel();
 			if (newInstance) {
 				kRaf.setLength(nsz);
-			}
-			SDFSLogger.getLog().info("set table to size " + posFile.length());
-			this.kFC = kRaf.getChannel();
-			try {
-				/*
-				 * Field fd = tRaf.getClass().getDeclaredField("fd");
-				 * fd.setAccessible(true);
-				 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
-				 * NativePosixUtil.DONTNEED);
-				 * NativePosixUtil.advise((FileDescriptor) fd.get(tRaf), 0, 0,
-				 * NativePosixUtil.RANDOM); fd =
-				 * kFC.getClass().getDeclaredField("fd");
-				 * fd.setAccessible(true);
-				 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
-				 * NativePosixUtil.DONTNEED);
-				 * NativePosixUtil.advise((FileDescriptor) fd.get(kFC), 0, 0,
-				 * NativePosixUtil.RANDOM);
-				 */
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("unable to set advisory", e);
-				throw new IOException(e);
-			}
-
-			boolean closedCorrectly = true;
-			if (newInstance) {
-				mapped = new BitSet(size);
-				removed = new BitSet(size);
-				bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
+				long rsz = (long) size * (long) RL;
+				rRaf.setLength(rsz);
+				for (int i = 0; i < (numshards); i++) {
+					BitSet mp = new BitSet(partSize);
+					BitSet rm = new BitSet(partSize);
+					BitSet cl = new BitSet(partSize);
+					this.mapped.add(i, mp);
+					this.removed.add(i, rm);
+					this.claims.add(i, cl);
+					// long pos = (long) i * (long) partSize * (long) EL;
+					Shard sh = new Shard(this, i * partSize, partSize, mp, cl, rm);
+					this.shards.add(i, sh);
+				}
+				// bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new
+				// File(path + ".nbf").getPath(), true);
 				this.full = false;
+				this.initialize();
 			} else {
 				File f = new File(path + ".bpos");
 				if (!f.exists()) {
@@ -424,14 +379,13 @@ public class ProgressiveFileByteArrayLongMap
 					try {
 						RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 						_bpos.seek(0);
-						bgst = _bpos.readLong();
 						this.full = _bpos.readBoolean();
 						try {
-							this.lastFound = _bpos.readLong();
+							this.lastFound.set(_bpos.readLong());
 						} catch (Exception e) {
 
 						}
-						this.lastFound = System.currentTimeMillis();
+						this.lastFound.set(System.currentTimeMillis());
 						_bpos.close();
 						f.delete();
 					} catch (Exception e) {
@@ -447,10 +401,13 @@ public class ProgressiveFileByteArrayLongMap
 					try {
 						FileInputStream fin = new FileInputStream(f);
 						ObjectInputStream oon = new ObjectInputStream(fin);
-
-						mapped = (BitSet) oon.readObject();
+						for (int i = 0; i < numshards; i++) {
+							BitSet mp = (BitSet) oon.readObject();
+							this.mapped.add(i, mp);
+						}
 						oon.close();
 					} catch (Exception e) {
+						
 						SDFSLogger.getLog().warn("vmp load error", e);
 						closedCorrectly = false;
 					}
@@ -464,8 +421,10 @@ public class ProgressiveFileByteArrayLongMap
 					try {
 						FileInputStream fin = new FileInputStream(f);
 						ObjectInputStream oon = new ObjectInputStream(fin);
-
-						removed = (BitSet) oon.readObject();
+						for (int i = 0; i < numshards; i++) {
+							BitSet mp = (BitSet) oon.readObject();
+							this.removed.add(i, mp);
+						}
 						oon.close();
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("vrp load error", e);
@@ -473,42 +432,56 @@ public class ProgressiveFileByteArrayLongMap
 					}
 					f.delete();
 				}
-				f = new File(path + ".nbf");
-				if (!f.exists()) {
-					closedCorrectly = false;
-					SDFSLogger.getLog().warn("bf does not exist for " + this.path);
-				} else {
-					try {
-						bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(),
-								!Main.LOWMEM);
-					} catch (Exception e) {
-						SDFSLogger.getLog().warn("bf load error", e);
-						closedCorrectly = false;
+				for (int i = 0; i < (numshards); i++) {
+					BitSet cl = new BitSet(partSize);
+					this.claims.add(i, cl);
+				}
+				
+				int cp = 0;
+				if(!closedCorrectly) {
+					for (int i = 0; i < (numshards); i++) {
+						BitSet mp = new BitSet(partSize);
+						BitSet rm = new BitSet(partSize);
+						BitSet cl = new BitSet(partSize);
+						this.mapped.add(i, mp);
+						this.removed.add(i, rm);
+						this.claims.add(i, cl);
 					}
 				}
+				for (int i = 0; i < numshards; i++) {
+					Shard sh = new Shard(this, cp, partSize, mapped.get(i), claims.get(i), removed.get(i));
+					shards.add(i, sh);
+					cp += partSize;
+				}
+				
+				if (!closedCorrectly) {
+					this.recreateMap(partSize);
+				}
 			}
-			if (this.lastFound == 0)
-				this.lastFound = new File(path + ".keys").lastModified();
-			if (!closedCorrectly) {
-				this.recreateMap();
-			}
-			if (bgst < 0) {
-				SDFSLogger.getLog().info("Hashtable " + path + " did not close correctly. scanning ");
-				bgst = this.getBigestKey();
+			if (this.lastFound.get() == 0)
+				this.lastFound.set(new File(path + ".keys").lastModified());
 
+			for (BitSet s : this.mapped) {
+				sz.addAndGet(s.cardinality());
 			}
-			sz.set(mapped.cardinality());
-
-			claims = new BitSet(size);
-			claims.clear();
 			// double pfull = (double) this.sz.get() / (double) size;
 			// SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" +
 			// this.full);
 			this.setup = true;
-			return bgst;
+			return this.sz.get();
 		} else {
 			throw new IOException("already setup");
 		}
+	}
+
+	private Shard getMap(byte[] hash) {
+
+		int hashb = hash[1];
+		if (hashb < 0) {
+			hashb = ((hashb * -1) + 127);
+		}
+		Shard m = this.shards.get(hashb / numdiv);
+		return m;
 	}
 
 	/*
@@ -517,40 +490,19 @@ public class ProgressiveFileByteArrayLongMap
 	 * @see org.opendedup.collections.AbstractShard#containsKey(byte[])
 	 */
 	@Override
-	public boolean containsKey(byte[] key) throws MapClosedException {
-		Lock l = this.hashlock.readLock();
-		l.lock();
+	public boolean containsKey(byte[] key) {
+
 		try {
-			if (this.isClosed())
-				throw new MapClosedException();
-			if (!this.runningGC && !bf.mightContain(key)) {
-				return false;
+			/*
+			 * if (bf.mightContain(key)) { return false; }
+			 */
+			Shard sh = this.getMap(key);
+			synchronized (sh) {
+				return sh.containsKey(key);
 			}
-			long index = index(key);
-			if (index >= 0) {
-				int pos = (int) (index / EL);
-
-				synchronized (this.claims) {
-					this.claims.set(pos);
-				}
-
-				if (this.runningGC) {
-					l.unlock();
-					l = this.hashlock.writeLock();
-					l.lock();
-					this.bf.put(key);
-				}
-				this.lastFound = System.currentTimeMillis();
-				return true;
-			}
-			return false;
-		} catch (MapClosedException e) {
-			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error getting record", e);
 			return false;
-		} finally {
-			l.unlock();
 		}
 	}
 
@@ -561,27 +513,20 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
-		Lock l = this.hashlock.readLock();
-		l.lock();
-		try {
-			if (this.isClosed())
-				throw new IOException("map closed");
-			long index = index(key);
-			if (index >= 0) {
-				int pos = (int) (index / EL);
-				synchronized (this.claims) {
-					boolean zl = this.claims.get(pos);
-					if (zl)
-						return true;
-				}
-
+		/*
+		 * if (!bf.mightContain(key)) throw new KeyNotFoundException();
+		 */
+		Shard sh = this.getMap(key);
+		synchronized (sh) {
+			if (sh.isClaimed(key)) {
+				this.lastFound.set(System.currentTimeMillis());
+				return true;
 			} else {
-				throw new KeyNotFoundException(key);
+				return false;
 			}
-			return false;
-		} finally {
-			l.unlock();
+
 		}
+
 	}
 
 	/*
@@ -591,43 +536,18 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public boolean update(byte[] key, long value) throws IOException {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
-		try {
-			if (this.isClosed())
-				throw new IOException("map closed");
-			long pos = this.index(key);
-			if (pos == -1) {
-				return false;
-			} else {
-				// keys.position(pos);
-				if (value > bgst)
-					bgst = value;
-				this.lastFound = System.currentTimeMillis();
-				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
-				bk.put(key);
-				bk.putLong(value);
-				bk.position(0);
-				this.kFC.write(bk,pos);
-				pos = (pos / EL);
-				synchronized (this.claims) {
-					this.claims.set((int) pos);
-				}
-				if (this.runningGC) {
-					this.bf.put(key);
-				}
-				this.mapped.set((int) pos);
-				this.removed.clear((int) pos);
-
-				// this.store.position(pos);
-				// this.store.put(storeID);
+		/*
+		 * if (!bf.mightContain(key)) return false;
+		 */
+		Shard sh = this.getMap(key);
+		synchronized (sh) {
+			if (sh.update(key, value)) {
+				this.lastFound.set(System.currentTimeMillis());
 				return true;
+			} else {
+				return false;
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
-			return false;
-		} finally {
-			l.unlock();
+
 		}
 	}
 
@@ -639,241 +559,22 @@ public class ProgressiveFileByteArrayLongMap
 
 	@Override
 	public boolean remove(byte[] key) throws IOException {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
-		try {
-			if (this.isClosed())
-				throw new IOException("map closed");
-			if (!this.runningGC && !bf.mightContain(key))
-				return false;
-
-			long pos = this.index(key);
-
-			if (pos == -1) {
-				return false;
-			}
-			boolean claimed = false;
-			synchronized (this.claims) {
-				claimed = this.claims.get((int) (pos / EL));
-			}
-
-			if (claimed) {
-				if (this.runningGC)
-					this.bf.put(key);
-				return false;
-			} else {
-				this.kFC.write(ByteBuffer.wrap(REMOVED),pos);
-				ByteBuffer bk = ByteBuffer.allocate(8);
-				this.kFC.read(bk,pos + REMOVED.length);
-				bk.position(0);
-				long fp = bk.getLong();
-				bk.position(0);
-				bk.putLong(0);
-				bk.position(0);
-				this.kFC.read(bk,pos + REMOVED.length);
-				
-
-				ChunkData ck = new ChunkData(fp, key);
-				if (ck.setmDelete(true)) {
-
-					// this.kFC.write(rbuf, pos);
-					pos = (pos / EL);
-					synchronized (this.claims) {
-						this.claims.clear((int) pos);
-					}
-
-					this.mapped.clear((int) pos);
-					this.sz.decrementAndGet();
-					this.removed.set((int) pos);
-					// this.store.position(pos);
-					// this.store.put((byte)0);
-					this.full = false;
-					return true;
-				} else
-					return false;
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
-			return false;
-		} finally {
-			l.unlock();
-		}
-	}
-
-	private int hashFunc1(int hash) {
-		return hash % size;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opendedup.collections.AbstractShard#hashFunc3(int)
-	 */
-	public int hashFunc3(int hash) {
-		int result = hash + 1;
-		return result;
-	}
-
-	private boolean isFree(int pos) {
-		if (this.mapped.get(pos) || this.removed.get(pos))
-			return false;
-		else
-			return true;
-	}
-
-	/**
-	 * Locates the index of <tt>obj</tt>.
-	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
-	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
-	 * @throws IOException
-	 */
-	private long index(byte[] key) throws IOException {
-
-		// From here on we know obj to be non-null
-		ByteBuffer buf = ByteBuffer.wrap(key);
-		byte[] current = new byte[FREE.length];
-		buf.position(8);
-		int hash = buf.getInt() & 0x7fffffff;
-		long index = this.hashFunc1(hash);
-
-		if (this.isFree((int) index)) {
-			// SDFSLogger.getLog().info("free=" + index + " hash="
-			// +StringUtils.getHexString(key));
-			return -1;
-		} else
-			index = index * EL;
-		kFC.read(ByteBuffer.wrap(current),index);
-		if (Arrays.equals(current, key)) {
-			// SDFSLogger.getLog().info("found=" + index+ " hash="
-			// +StringUtils.getHexString(key));
-			return index;
-		}
-		return indexRehashed(key, index, hash, current);
-	}
-
-	/**
-	 * Locates the index of non-null <tt>obj</tt>.
-	 * 
-	 * @param obj
-	 *            target key, know to be non-null
-	 * @param index
-	 *            we start from
-	 * @param hash
-	 * @param cur
-	 * @return
-	 * @throws IOException
-	 */
-
-	private long indexRehashed(byte[] key, long index, int hash, byte[] cur) throws IOException {
-
-		// NOTE: here it has to be REMOVED or FULL (some user-given value)
-		// see Knuth, p. 529
-		long length = (long) size * (long) EL;
-		long probe = (long) (1 + (hash % (size - 2))) * (long) EL;
-		final long loopIndex = index;
-
-		do {
-			index -= probe;
-			if (index < 0) {
-				index += length;
-			}
-			if (!this.isFree((int) (index / EL))) {
-				this.kFC.read(ByteBuffer.wrap(cur),index);
-				if (Arrays.equals(cur, key)) {
-					return index;
-				}
-			} else {
-				return -1;
-			}
-		} while (index != loopIndex);
-		SDFSLogger.getLog().info("looped through everything");
-		return -1;
-	}
-
-	private long insertionIndex(byte[] key, boolean migthexist) throws IOException, HashtableFullException {
-		ByteBuffer buf = ByteBuffer.wrap(key);
-		buf.position(8);
-		int hash = buf.getInt() & 0x7fffffff;
-		long index = this.hashFunc1(hash);
-		byte[] current = new byte[FREE.length];
-		if (this.isFree((int) index))
-			return index * EL;
-		else
-			index = index * EL;
-		if (migthexist) {
-			kFC.read(ByteBuffer.wrap(current),index);
-			if (Arrays.equals(current, key)) {
-				return -index - 1; // already stored
-			}
-		}
-		return insertKeyRehash(key, index, hash, current, migthexist);
-	}
-
-	/**
-	 * Looks for a slot using double hashing for a non-null key values and
-	 * inserts the value in the slot
-	 * 
-	 * @param key
-	 *            non-null key value
-	 * @param index
-	 *            natural index
-	 * @param hash
-	 * @param cur
-	 *            value of first matched slot
-	 * @return
-	 * @throws IOException
-	 * @throws HashtableFullException
-	 */
-	private long insertKeyRehash(byte[] key, long index, int hash, byte[] cur, boolean mightexist)
-			throws IOException, HashtableFullException {
-		final long length = (long) size * (long) EL;
-		final long probe = (long) (1 + (hash % (size - 2))) * (long) EL;
-		final long loopIndex = index;
-		long firstRemoved = -1;
-
-		/**
-		 * Look until FREE slot or we start to loop
+		/*
+		 * if (!bf.mightContain(key)) return false;
 		 */
-		do {
-			// Identify first removed slot
+		Shard sh = this.getMap(key);
+		synchronized (sh) {
+			if (sh.remove(key)) {
+				this.lastFound.set(System.currentTimeMillis());
+				this.sz.decrementAndGet();
 
-			if (this.removed.get((int) (index / EL)) && firstRemoved == -1) {
-				firstRemoved = index;
-				if (!mightexist)
-					return index;
-			}
-			index -= probe;
-			if (index < 0) {
-				index += length;
+				this.full = false;
+				return true;
+			} else {
+				return false;
 			}
 
-			// A FREE slot stops the search
-			if (this.isFree((int) (index / EL))) {
-				if (firstRemoved != -1) {
-					return firstRemoved;
-				} else {
-					return index;
-				}
-			}
-			if (mightexist) {
-				kFC.read(ByteBuffer.wrap(cur),index);
-				if (Arrays.equals(cur, key)) {
-					return -index - 1;
-				}
-			}
-			// Detect loop
-		} while (index != loopIndex);
-
-		// We inspected all reachable slots and did not find a FREE one
-		// If we found a REMOVED slot we return the first one found
-		if (firstRemoved != -1) {
-			return firstRemoved;
 		}
-
-		// Can a resizing strategy be found that resizes the set?
-		throw new HashtableFullException("No free or removed slots available. Key set full?!!");
 	}
 
 	// transient ByteBuffer zlb = ByteBuffer.wrap(new byte[EL]);
@@ -885,8 +586,6 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public InsertRecord put(ChunkData cm) throws HashtableFullException, IOException, MapClosedException {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
 
 		try {
 			if (this.isClosed())
@@ -900,116 +599,82 @@ public class ProgressiveFileByteArrayLongMap
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
 			}
-			long pos = -1;
-			try {
-				if (this.runningGC)
-					pos = this.insertionIndex(key, true);
-				else
-					pos = this.insertionIndex(key, bf.mightContain(key));
-			} catch (HashtableFullException e) {
-				this.full = true;
-				throw e;
+			Shard sh = this.getMap(key);
+			InsertRecord r = null;
+			synchronized (sh) {
+				r = sh.put(cm.getHash(), cm.getcPos(), -1, true);
 			}
-			if (pos < 0) {
-
-				long npos = (-pos - 1) * -1;
-				npos = (npos / EL);
-				synchronized (this.claims) {
-					this.claims.set((int) npos);
-				}
-				this.bf.put(key);
-				return new InsertRecord(false, this.get(key));
-			} else {
-				if (!cm.recoverd) {
-					try {
-						cm.persistData(true);
-					} catch (HashExistsException e) {
-						return new InsertRecord(false, e.getPos());
-					}
-				}
-				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
-				bk.put(key);
-				bk.putLong(cm.getcPos());
-				bk.position(0);
-				this.kFC.write(bk,pos);
-				
-				if (cm.getcPos() > bgst)
-					bgst = cm.getcPos();
-				pos = (pos / EL);
-				synchronized (this.claims) {
-					this.claims.set((int) pos);
-				}
-				this.mapped.set((int) pos);
+			if (r.getInserted()) {
 				this.sz.incrementAndGet();
-				this.removed.clear((int) pos);
-				this.bf.put(key);
-				return new InsertRecord(true, cm.getcPos());
+				/*
+				 * synchronized(bf) { this.bf.put(key); }
+				 */
 			}
-			// this.store.position(pos);
-			// this.store.put(storeID);
-
-		} finally {
-			l.unlock();
+			return r;
+		} catch (HashtableFullException e) {
+			this.full = true;
+			throw e;
 		}
+
 	}
 
-	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException, MapClosedException {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
+	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException {
+		this.hashlock.readLock().lock();
 		try {
-			if (this.isClosed())
-				throw new IOException("map closed");
+
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
-
 			}
-			long pos = -1;
-			try {
-				if (this.runningGC)
-					pos = this.insertionIndex(key, true);
-				else
-					pos = this.insertionIndex(key, bf.mightContain(key));
-				// SDFSLogger.getLog().info("pos=" + pos/EL + " hash="
-				// +StringUtils.getHexString(key));
-			} catch (HashtableFullException e) {
-				this.full = true;
-				throw e;
+			Shard sh = this.getMap(key);
+			InsertRecord r = null;
+			synchronized (sh) {
+				r = sh.put(key, value, -1, true);
 			}
-			if (pos < 0) {
-				long npos = -pos - 1;
-				npos = (npos / EL);
-				synchronized (this.claims) {
-					this.claims.set((int) npos);
-				}
-				this.bf.put(key);
-				return new InsertRecord(false, this.get(key));
-			} else {
-				ByteBuffer bk = ByteBuffer.allocate(key.length + 8);
-				bk.put(key);
-				bk.putLong(value);
-				bk.position(0);
-				this.kFC.write(bk,pos);
-				if (value > bgst)
-					bgst = value;
-				pos = (pos / EL);
-				synchronized (this.claims) {
-					this.claims.set((int) pos);
-				}
-				this.mapped.set((int) pos);
+			if (r.getInserted()) {
 				this.sz.incrementAndGet();
-				this.removed.clear((int) pos);
-				this.bf.put(key);
-				// this.store.position(pos);
-				// this.store.put(storeID);
-
-				return new InsertRecord(true, value);
+				/*
+				 * synchronized(bf) { this.bf.put(key); }
+				 */
 			}
+			return r;
+
+		} catch (HashtableFullException e) {
+			this.full = true;
+			throw e;
 		} finally {
-			l.unlock();
+			this.hashlock.readLock().unlock();
+		}
+	}
+
+	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
+		try {
+
+			if (!this.active || this.full || this.sz.get() >= maxSz) {
+				this.full = true;
+				this.active = false;
+				throw new HashtableFullException(
+						"entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
+			}
+			Shard sh = this.getMap(key);
+			InsertRecord r = null;
+			synchronized (sh) {
+				r = sh.put(key, value, claims, true);
+			}
+			if (r.getInserted()) {
+				this.sz.incrementAndGet();
+				/*
+				 * synchronized(bf) { this.bf.put(key); }
+				 */
+			}
+
+		} catch (HashtableFullException e) {
+			this.full = true;
+			throw e;
 		}
 	}
 
@@ -1041,52 +706,47 @@ public class ProgressiveFileByteArrayLongMap
 
 	@Override
 	public long get(byte[] key, boolean claim) throws MapClosedException {
-		Lock l = this.hashlock.readLock();
-		l.lock();
+		this.hashlock.readLock().lock();
 		try {
 			if (this.isClosed())
 				throw new MapClosedException();
-			if (key == null)
-				return -1;
-			if (!this.runningGC && !this.bf.mightContain(key)) {
-				return -1;
+			Shard sh = this.getMap(key);
+			synchronized (sh) {
+				return sh.get(key, claim);
 			}
-			long pos = -1;
-
-			pos = this.index(key);
-			if (pos == -1) {
-				return -1;
-			} else {
-				this.lastFound = System.currentTimeMillis();
-				long val = -1;
-				ByteBuffer bk = ByteBuffer.allocate(8);
-				this.kFC.read(bk,pos + VP);
-				bk.position(0);
-				val = bk.getLong();
-				if (claim) {
-					pos = (pos / EL);
-					synchronized (this.claims) {
-						this.claims.set((int) pos);
-					}
-				}
-				if (this.runningGC) {
-					l.unlock();
-					l = this.hashlock.writeLock();
-					l.lock();
-					this.bf.put(key);
-				}
-				return val;
-
-			}
-		} catch (MapClosedException e) {
-			throw e;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("error getting record", e);
-			return -1;
 		} finally {
-			l.unlock();
+			this.hashlock.readLock().unlock();
 		}
 
+	}
+
+	public boolean claim(byte[] key, long val) throws MapClosedException {
+		this.hashlock.readLock().lock();
+		try {
+			if (this.isClosed())
+				throw new MapClosedException();
+			Shard sh = this.getMap(key);
+			synchronized (sh) {
+				return sh.claimKey(key, val);
+			}
+		} finally {
+			this.hashlock.readLock().unlock();
+		}
+
+	}
+
+	public boolean removeClaim(byte[] key, long val) throws MapClosedException {
+		this.hashlock.readLock().lock();
+		try {
+			if (this.isClosed())
+				throw new MapClosedException();
+			Shard sh = this.getMap(key);
+			synchronized (sh) {
+				return sh.removeClaimKey(key, val);
+			}
+		} finally {
+			this.hashlock.readLock().unlock();
+		}
 	}
 
 	/*
@@ -1132,26 +792,46 @@ public class ProgressiveFileByteArrayLongMap
 		l.lock();
 		try {
 			this.closed = true;
-			try {
-				this.kFC.force(true);
-
-			} catch (Exception e) {
-
+			for (Shard s : shards) {
+				synchronized (s) {
+					s.close();
+				}
 			}
+
 			try {
 				this.kFC.close();
 
 			} catch (Exception e) {
-
+				SDFSLogger.getLog().error("error closing", e);
 			}
 
-			
+			try {
+				this.rFC.close();
+
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error closing", e);
+			}
+
+			try {
+				this.kRaf.close();
+			} catch (Exception e) {
+				// SDFSLogger.getLog().error("error closing", e);
+			}
+
+			try {
+				this.rRaf.close();
+			} catch (Exception e) {
+				// SDFSLogger.getLog().error("error closing", e);
+			}
 
 			try {
 				File f = new File(path + ".vmp");
 				FileOutputStream fout = new FileOutputStream(f);
 				ObjectOutputStream oon = new ObjectOutputStream(fout);
-				oon.writeObject(mapped);
+				for (int i = 0; i < numshards; i++) {
+					oon.writeObject(mapped.get(i));
+				}
+
 				oon.flush();
 				fout.getFD().sync();
 				oon.close();
@@ -1165,7 +845,9 @@ public class ProgressiveFileByteArrayLongMap
 				File f = new File(path + ".vrp");
 				FileOutputStream fout = new FileOutputStream(f);
 				ObjectOutputStream oon = new ObjectOutputStream(fout);
-				oon.writeObject(this.removed);
+				for (int i = 0; i < numshards; i++) {
+					oon.writeObject(removed.get(i));
+				}
 				oon.flush();
 				fout.getFD().sync();
 				oon.close();
@@ -1174,20 +856,19 @@ public class ProgressiveFileByteArrayLongMap
 				fout.close();
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("error closing", e);
-			}
-			if (this.bf != null) {
-				try {
-					bf.close();
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("error closing", e);
-				}
-			}
+			} /*
+				 * if (this.bf != null) { try { FileOutputStream fout = new
+				 * FileOutputStream(path + ".bf"); ObjectOutputStream oon = new
+				 * ObjectOutputStream(fout); oon.writeObject(this.bf);
+				 * oon.flush(); oon.close(); fout.flush(); fout.close(); } catch
+				 * (Exception e) { SDFSLogger.getLog().warn("error closing", e);
+				 * } }
+				 */
 			try {
 				RandomAccessFile _bpos = new RandomAccessFile(path + ".bpos", "rw");
 				_bpos.seek(0);
-				_bpos.writeLong(bgst);
 				_bpos.writeBoolean(full);
-				_bpos.writeLong(lastFound);
+				_bpos.writeLong(lastFound.get());
 				_bpos.getFD().sync();
 				_bpos.close();
 			} catch (Exception e) {
@@ -1207,37 +888,44 @@ public class ProgressiveFileByteArrayLongMap
 	 */
 	@Override
 	public synchronized long claimRecords() throws IOException {
-		if (this.closed)
-			throw new IOException("Hashtable " + this.path + " is close");
-		long k = 0;
-
+		this.hashlock.readLock().lock();
 		try {
-			this.iterInit();
-			while (iterPos < size) {
-				Lock l = this.hashlock.writeLock();
-				l.lock();
-				try {
-					synchronized (this.claims) {
-
-						boolean claimed = claims.get(iterPos);
-						claims.clear(iterPos);
-						if (claimed) {
-							this.mapped.set(iterPos);
-							this.removed.clear(iterPos);
-
-							k++;
-						}
-					}
-				} finally {
-					iterPos++;
-					l.unlock();
-				}
+			if (this.closed)
+				throw new IOException("Hashtable " + this.path + " is close");
+			long k = 0;
+			for (Shard sh : this.shards) {
+				k += sh.claimRecords();
 			}
-		} catch (NullPointerException e) {
 
+			return k;
+		} finally {
+			this.hashlock.readLock().unlock();
 		}
+	}
 
-		return k;
+	protected void initialize() throws IOException {
+		if (this.newInstance) {
+			byte[] key = new byte[EL * 43690];
+			Arrays.fill(key, (byte) 0);
+			SDFSLogger.getLog().info("initialize " + this.path);
+			ByteBuffer bk = ByteBuffer.allocateDirect(key.length);
+			bk.put(key);
+			kFC.position(0);
+			while ((kFC.position() + key.length) < kFC.size() && !this.closed) {
+				bk.position(0);
+
+				kFC.write(bk);
+			}
+			int lft = (int) (kFC.size() - kFC.position());
+			key = new byte[lft];
+			Arrays.fill(key, (byte) 0);
+			bk = ByteBuffer.allocateDirect(key.length);
+			bk.put(key);
+			bk.position(0);
+			kFC.write(bk);
+			this.kFC.force(true);
+			SDFSLogger.getLog().info("done initialize " + this.path);
+		}
 	}
 
 	/*
@@ -1299,150 +987,34 @@ public class ProgressiveFileByteArrayLongMap
 
 	@Override
 	public long claimRecords(LargeBloomFilter nbf) throws IOException {
-		this.iterInit();
-		long _sz = 0;
-		Lock l = this.hashlock.writeLock();
-		l.lock();
-		try {
-			int asz = size;
-			if (!this.active)
-				asz = this.mapped.cardinality();
-			bf = null;
-			bf = FileBasedBloomFilter.create(kbFunnel, asz, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
-			this.runningGC = true;
-		} finally {
-			l.unlock();
+		if (this.closed)
+			throw new IOException("Hashtable " + this.path + " is close");
+		long k = 0;
+		for (Shard sh : this.shards) {
+			k += sh.claimRecords(nbf);
 		}
-		try {
-			ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
-			while (iterPos < size) {
-				l = this.hashlock.writeLock();
-				l.lock();
-				synchronized (this.claims) {
-					bk.position(0);
-					try {
-						if (this.isClosed())
-							throw new IOException("map closed");
-						byte[] key = new byte[FREE.length];
-						long pos = (long) iterPos * (long) EL;
-						kFC.read(bk,pos);
-						bk.position(0);
-						bk.get(key);
-						long val = bk.getLong();
-						
-						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-								bk.position(0);
-								bk.put(REMOVED);
-								bk.putLong(0);
-								bk.position(0);
-								this.kFC.write(bk,pos);
-								ChunkData ck = new ChunkData(val, key);
-								ck.setmDelete(true);
-								this.mapped.clear(iterPos);
-								this.sz.decrementAndGet();
-								this.removed.set(iterPos);
-								this.full = false;
-								_sz++;
-							} else {
-								this.mapped.set(iterPos);
-								bf.put(key);
-							}
-							this.claims.clear(iterPos);
-						}
-
-					} finally {
-						iterPos++;
-						l.unlock();
-
-					}
-				}
-			}
-			l = this.hashlock.writeLock();
-			l.lock();
-			this.runningGC = false;
-			l.unlock();
-			return _sz;
-		} finally {
-
+		if (k > 0) {
+			this.full = false;
+			this.sz.addAndGet((int) -1 * (int) k);
 		}
+
+		return k;
+
 	}
 
 	public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
-		this.iterInit();
-		long _sz = 0;
-		Lock l = this.hashlock.writeLock();
-		l.lock();
-		try {
-			bf = null;
-			if (this.active)
-				bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new File(path + ".nbf").getPath(), !Main.LOWMEM);
-			else
-				bf = FileBasedBloomFilter.create(kbFunnel, sz.get(), .01, new File(path + ".nbf").getPath(),
-						!Main.LOWMEM);
-			this.runningGC = true;
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("error during claim process", e);
-			throw new IOException(e);
-		} finally {
-			l.unlock();
+		if (this.closed)
+			throw new IOException("Hashtable " + this.path + " is close");
+		long k = 0;
+		for (Shard sh : this.shards) {
+			k += sh.claimRecords(nbf, lbf);
 		}
-		try {
-			ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
-			while (iterPos < size) {
-				l = this.hashlock.writeLock();
-				l.lock();
-				synchronized (this.claims) {
-					bk.position(0);
-					try {
-						if (this.isClosed())
-							throw new IOException("map closed");
-						byte[] key = new byte[FREE.length];
-						long pos = (long) iterPos * (long) EL;
-						kFC.read(bk,pos);
-						bk.position(0);
-						bk.get(key);
-						long val = bk.getLong();
-						if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
-							if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
-								bk.position(0);
-								bk.put(REMOVED);
-								bk.putLong(0);
-								bk.position(0);
-								this.kFC.write(bk,pos);
-								
-								ChunkData ck = new ChunkData(val, key);
-								ck.setmDelete(true);
-								this.mapped.clear(iterPos);
-								this.sz.decrementAndGet();
-								this.removed.set(iterPos);
-								_sz++;
-								this.full = false;
-							} else {
-								this.mapped.set(iterPos);
-								bf.put(key);
-								lbf.put(key);
-							}
-							this.claims.clear(iterPos);
-						}
-
-					} finally {
-						iterPos++;
-						l.unlock();
-					}
-				}
-			}
-			l.lock();
-			this.runningGC = false;
-			l.unlock();
-			return _sz;
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("error during claim process", e);
-			throw new IOException(e);
-		} finally {
-			l = this.hashlock.writeLock();
-
+		if (k > 0) {
+			this.full = false;
+			this.sz.addAndGet((int) -1 * (int) k);
 		}
+
+		return k;
 	}
 
 	@Override
@@ -1460,24 +1032,35 @@ public class ProgressiveFileByteArrayLongMap
 		l.lock();
 		try {
 			this.closed = true;
-			
-			try {
-				int trs = 0;
-				while(this.kFC.isOpen()) {
-					this.kFC.close();
-					trs++;
-					if (trs > 10) {
-						SDFSLogger.getLog().warn("unable to close " + this.toString()+ " " + this.cacheRunning + " " + this.kFC.isOpen());
-						break;
-					}
+			for (Shard s : shards) {
+				synchronized (s) {
+					s.close();
 				}
-
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("error closing",e);
 			}
 
-			
-			
+			try {
+				this.kFC.close();
+
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error closing", e);
+			}
+
+			try {
+				this.kRaf.close();
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error closing", e);
+			}
+
+			try {
+				this.rFC.close();
+
+			} catch (Exception e) {
+			}
+
+			try {
+				this.rRaf.close();
+			} catch (Exception e) {
+			}
 			boolean del = false;
 			int trs = 0;
 			File f = new File(path + ".keys".trim());
@@ -1491,7 +1074,8 @@ public class ProgressiveFileByteArrayLongMap
 					}
 				trs++;
 				if (trs > 10) {
-					SDFSLogger.getLog().warn("unable to delete " + f.getPath() + " " + f.exists() + " " + this.cacheRunning + " " + this.kFC.isOpen());
+					SDFSLogger.getLog()
+							.warn("unable to delete " + f.getPath() + " " + f.exists() + " " + this.cacheRunning + " ");
 					break;
 				}
 			}
@@ -1501,69 +1085,16 @@ public class ProgressiveFileByteArrayLongMap
 			f.delete();
 			f = new File(path + ".vrp");
 			f.delete();
-			f = new File(path + ".nbf");
+			f = new File(path + ".bf");
 			f.delete();
-			if (bf != null)
-				this.bf.vanish();
-
-			bf = null;
+			// bf = null;
 		} finally {
 			l.unlock();
 		}
 	}
 
-	protected void initialize() throws IOException {
-		int ip = 0;
-		byte[] key = new byte[EL * 43690];
-		Arrays.fill(key, (byte) 0);
-		SDFSLogger.getLog().info("initialize " + this.path);
-		ByteBuffer bk = ByteBuffer.allocateDirect(key.length);
-		while ((ip + (53690)) < size && !this.closed) {
-			bk.position(0);
-			long pos = (long) ip * (long) EL;
-			kFC.write(bk,pos);
-			ip += 43690;
-		}
-		SDFSLogger.getLog().info("done initialize " + this.path);
-
-	}
-
 	AtomicLong lastRead = new AtomicLong(0);
-	private static long mtm = 60 * 1000 * 45;// 45 minutes
 	private boolean cacheRunning = false;
-
-	@Override
-	public void run() {
-		try {
-		this.cacheRunning = true;
-
-		synchronized (lastRead) {
-			try {
-				long lr = System.currentTimeMillis() - lastRead.get();
-				if (lr > mtm) {
-					File posFile = new File(path + ".keys");
-					long cp = 0;
-					ByteBuffer bk = ByteBuffer.allocateDirect(1024 * 1024 * 5);
-					while ((cp + bk.capacity()) < posFile.length() && !this.closed) {
-						
-						kFC.read(bk);
-						cp += bk.capacity();
-					}
-					byte [] key = new byte[(int) (posFile.length() - cp)];
-					if (key.length > 0)
-						kFC.read(ByteBuffer.wrap(key));
-					SDFSLogger.getLog().info("done reading " + this.path);
-					lastRead.set(System.currentTimeMillis());
-				}
-
-			} finally {
-				this.cacheRunning = false;
-			}
-		}
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("error caching", e);
-		}
-	}
 
 	public long getLastModified() {
 		return new File(path + ".keys").lastModified();
@@ -1571,13 +1102,701 @@ public class ProgressiveFileByteArrayLongMap
 
 	@Override
 	public int compareTo(ProgressiveFileByteArrayLongMap m1) {
-		long dif = this.lastFound - m1.lastFound;
+		long dif = this.lastFound.get() - m1.lastFound.get();
 		if (dif > 0)
 			return 1;
 		if (dif < 0)
 			return -1;
 		else
 			return 0;
+	}
+
+	public static class Shard implements Runnable {
+		MappedByteBuffer kFC = null;
+		MappedByteBuffer rFC = null;
+		ProgressiveFileByteArrayLongMap m;
+		private int size;
+		BitSet mapped;
+		BitSet claims;
+		BitSet removed;
+		int currentSz = 0;
+		int maxSz = 0;
+		int iterPos = 0;
+		int start;
+
+		public Shard(ProgressiveFileByteArrayLongMap m, int start, int size, BitSet mapped, BitSet claims,
+				BitSet removed) throws IOException {
+			this.m = m;
+			this.size = size;
+			this.start = start;
+			this.maxSz = (int) (size * m.loadFactor);
+			long ep = (long) ((long) size * (long) ProgressiveFileByteArrayLongMap.EL);
+			long sp = (long) ((long) start * (long) ProgressiveFileByteArrayLongMap.EL);
+			kFC = m.kFC.map(FileChannel.MapMode.READ_WRITE, sp, ep);
+			ep = (long) ((long) size * (long) ProgressiveFileByteArrayLongMap.RL);
+			sp = (long) ((long) start * (long) ProgressiveFileByteArrayLongMap.RL);
+			rFC = m.rFC.map(FileChannel.MapMode.READ_WRITE, sp, ep);
+			// System.out.println("start=" + start + " ep=" + ep + " fl=" +
+			// m.kFC.size());
+			this.mapped = mapped;
+			this.removed = removed;
+			this.claims = claims;
+		}
+
+		public synchronized void iterInit() {
+			this.iterPos = 0;
+		}
+
+		public void recreateRefMap() throws IOException {
+			long ep = (long) ((long) size * (long) ProgressiveFileByteArrayLongMap.RL);
+			long sp = (long) ((long) start * (long) ProgressiveFileByteArrayLongMap.RL);
+			rFC = m.rFC.map(FileChannel.MapMode.READ_WRITE, sp, ep);
+		}
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+
+		}
+
+		private int hashFunc1(int hash) {
+			return hash % size;
+		}
+
+		private boolean isFree(int pos) {
+			if (mapped.get(pos) || removed.get(pos))
+				return false;
+			else
+				return true;
+		}
+
+		/**
+		 * Locates the index of <tt>obj</tt>.
+		 * 
+		 * @param obj
+		 *            an <code>Object</code> value
+		 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
+		 * @throws IOException
+		 */
+		private int index(byte[] key) throws IOException {
+
+			// From here on we know obj to be non-null
+			ByteBuffer buf = ByteBuffer.wrap(key);
+			byte[] current = new byte[FREE.length];
+			buf.position(8);
+			int hash = buf.getInt() & 0x7fffffff;
+			int index = this.hashFunc1(hash);
+			if (this.isFree(index)) {
+				// SDFSLogger.getLog().info("free=" + index + " hash="
+				// +StringUtils.getHexString(key));
+				return -1;
+			} else
+				index = index * EL;
+			kFC.position(index);
+			kFC.get(current);
+			if (Arrays.equals(current, key)) {
+				// SDFSLogger.getLog().info("found=" + index+ " hash="
+				// +StringUtils.getHexString(key));
+				return index;
+			}
+			return indexRehashed(key, index, hash, current);
+		}
+
+		/**
+		 * Locates the index of non-null <tt>obj</tt>.
+		 * 
+		 * @param obj
+		 *            target key, know to be non-null
+		 * @param index
+		 *            we start from
+		 * @param hash
+		 * @param cur
+		 * @return
+		 * @throws IOException
+		 */
+
+		private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
+
+			// NOTE: here it has to be REMOVED or FULL (some user-given value)
+			// see Knuth, p. 529
+			int length = size * EL;
+			int probe = (1 + (hash % (size - 2))) * EL;
+			final long loopIndex = index;
+
+			do {
+				index -= probe;
+				if (index < 0) {
+					index += length;
+				}
+				if (!this.isFree((index / EL))) {
+					kFC.position(index);
+					kFC.get(cur);
+					if (Arrays.equals(cur, key)) {
+						return index;
+					}
+				} else {
+					return -1;
+				}
+			} while (index != loopIndex);
+			SDFSLogger.getLog().warn("looped through everything");
+			return -1;
+		}
+
+		private int insertionIndex(byte[] key, boolean migthexist) throws IOException, HashtableFullException {
+			ByteBuffer buf = ByteBuffer.wrap(key);
+			buf.position(8);
+			int hash = buf.getInt() & 0x7fffffff;
+			int index = this.hashFunc1(hash);
+			byte[] current = new byte[FREE.length];
+			if (this.isFree(index)) {
+				return index * EL;
+			} else
+				index = index * EL;
+			if (migthexist) {
+				kFC.position(index);
+				kFC.get(current);
+				if (Arrays.equals(current, key)) {
+					return -index - 1; // already stored
+				}
+			}
+			return insertKeyRehash(key, index, hash, current, migthexist);
+		}
+
+		/**
+		 * Looks for a slot using double hashing for a non-null key values and
+		 * inserts the value in the slot
+		 * 
+		 * @param key
+		 *            non-null key value
+		 * @param index
+		 *            natural index
+		 * @param hash
+		 * @param cur
+		 *            value of first matched slot
+		 * @return
+		 * @throws IOException
+		 * @throws HashtableFullException
+		 */
+		private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur, boolean mightexist)
+				throws IOException, HashtableFullException {
+			final int length = size * EL;
+			final int probe = (1 + (hash % (size - 2))) * EL;
+			final int loopIndex = index;
+			int firstRemoved = -1;
+
+			/**
+			 * Look until FREE slot or we start to loop
+			 */
+			// int k = 0;
+
+			do {
+				// Identify first removed slot
+
+				if (removed.get(index / EL) && firstRemoved == -1) {
+					firstRemoved = index;
+					if (!mightexist)
+						return index;
+				}
+				index -= probe;
+				if (index < 0) {
+					index += length;
+				}
+
+				// A FREE slot stops the search
+				if (this.isFree(index / EL)) {
+					if (firstRemoved != -1) {
+						return firstRemoved;
+					} else {
+						return index;
+					}
+				}
+				if (mightexist) {
+					kFC.position(index);
+					kFC.get(cur);
+					if (Arrays.equals(cur, key)) {
+						return -index - 1;
+					}
+				}
+
+				// Detect loop
+			} while (index != loopIndex);
+
+			// We inspected all reachable slots and did not find a FREE one
+			// If we found a REMOVED slot we return the first one found
+			if (firstRemoved != -1) {
+				return firstRemoved;
+			}
+
+			// Can a resizing strategy be found that resizes the set?
+			throw new HashtableFullException("No free or removed slots available. Key set full?!!");
+		}
+
+		public boolean containsKey(byte[] key) throws MapClosedException {
+			try {
+				int index = index(key);
+				if (index >= 0) {
+					int pos = (index / EL);
+
+					synchronized (this.claims) {
+						this.claims.set(pos);
+					}
+					return true;
+				}
+				return false;
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error getting record", e);
+				return false;
+			}
+		}
+
+		public boolean claimKey(byte[] key, long val) {
+			try {
+				int pos = -1;
+
+				pos = this.index(key);
+				if (pos == -1) {
+					return false;
+				} else {
+					long ct = 0;
+					long _val = this.kFC.getLong(pos + VP);
+					if (_val == val) {
+						pos = (pos / EL) * 8;
+						ct = this.rFC.getLong(pos);
+						ct++;
+						this.rFC.putLong(pos, ct);
+						this.claims.set(pos / 8);
+						//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
+						
+						return true;
+					} else
+						return false;
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error setting claim", e);
+				return false;
+			}
+		}
+
+		public boolean removeClaimKey(byte[] key, long val) {
+			try {
+				int pos = -1;
+
+				pos = this.index(key);
+				if (pos == -1) {
+					SDFSLogger.getLog().warn("miss");
+					return false;
+				} else {
+					long ct = -1;
+					long _val = this.kFC.getLong(pos + VP);
+					if (_val == val) {
+						pos = (pos / EL) * 8;
+						ct = this.rFC.getLong(pos);
+						ct--;
+						if (ct < 0) {
+
+							SDFSLogger.getLog()
+									.warn("negative reference for " + StringUtils.getHexString(key) + " val=" + ct);
+							ct = 0;
+						}
+						this.rFC.putLong(pos, ct);
+
+						return true;
+					} else {
+						return false;
+					}
+
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error removeing claim", e);
+				return false;
+			}
+		}
+
+		public long get(byte[] key, boolean claim) {
+			try {
+				int pos = -1;
+
+				pos = this.index(key);
+				if (pos == -1) {
+					return -1;
+				} else {
+					long val = -1;
+					val = this.kFC.getLong(pos + VP);
+
+					if (claim) {
+						pos = (pos / EL);
+						this.claims.set(pos);
+					}
+
+					return val;
+
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error getting record", e);
+				return -1;
+			}
+
+		}
+
+		ByteBuffer pbuf = ByteBuffer.allocateDirect(EL);
+
+		public InsertRecord put(byte[] key, long value, long cl, boolean mightContain)
+				throws HashtableFullException, IOException {
+
+			if (!m.active || m.full || this.currentSz >= maxSz) {
+				m.full = true;
+				m.active = false;
+				throw new HashtableFullException(
+						"entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
+
+			}
+			int pos = -1;
+			try {
+				pos = this.insertionIndex(key, mightContain);
+			} catch (HashtableFullException e) {
+				m.full = true;
+				throw e;
+			}
+			if (pos < 0) {
+				int npos = -pos - 1;
+				npos = (npos / EL);
+				this.claims.set(npos);
+				return new InsertRecord(false, this.get(key, true));
+			} else {
+				this.kFC.position(pos);
+				pbuf.position(0);
+				this.pbuf.put(key);
+				this.pbuf.putLong(value);
+				this.pbuf.position(0);
+				this.kFC.put(pbuf);
+				// this.kFC.put(key);
+				// this.kFC.putLong(value);
+				pos = (pos / EL);
+				this.claims.set(pos);
+				this.mapped.set(pos);
+				this.currentSz++;
+				this.removed.clear(pos);
+				if (cl >= 0)
+					this.rFC.putLong(pos * 8, cl);
+				return new InsertRecord(true, value);
+			}
+		}
+
+		public void closeRef() {
+			sun.misc.Cleaner cleaner = ((DirectBuffer) rFC).cleaner();
+			cleaner.clean();
+			rFC = null;
+		}
+
+		public void close() {
+			sun.misc.Cleaner cleaner = ((DirectBuffer) kFC).cleaner();
+			cleaner.clean();
+			cleaner = ((DirectBuffer) rFC).cleaner();
+			cleaner.clean();
+		}
+
+		public byte[] nextKey(boolean recreate) throws IOException {
+			this.mapped.cardinality();
+			while (iterPos < size) {
+				synchronized (this) {
+					if (m.isClosed())
+						throw new IOException("map closed");
+					if (recreate || this.mapped.get(iterPos)) {
+						byte[] key = new byte[FREE.length];
+						kFC.position(iterPos * EL);
+						kFC.get(key);
+						iterPos++;
+						if (Arrays.equals(key, REMOVED)) {
+							this.removed.set(iterPos - 1);
+							this.mapped.clear(iterPos - 1);
+						} else if (!Arrays.equals(key, FREE)) {
+							// System.out.println("m");
+							this.mapped.set(iterPos - 1);
+							this.removed.clear(iterPos - 1);
+							// System.out.println("ip="+iterPos);
+							return key;
+						} else {
+							this.mapped.clear(iterPos - 1);
+						}
+					} else {
+
+						iterPos++;
+					}
+				}
+			}
+			return null;
+		}
+
+		public KVPair nextKeyValue() throws IOException {
+			while (iterPos < size) {
+				synchronized (this) {
+
+					if (this.mapped.get(iterPos)) {
+						byte[] key = new byte[FREE.length];
+						int pos = iterPos * EL;
+						kFC.position(pos);
+						kFC.get(key);
+						iterPos++;
+						if (Arrays.equals(key, REMOVED)) {
+							this.removed.set(iterPos - 1);
+							this.mapped.clear(iterPos - 1);
+						} else if (!Arrays.equals(key, FREE)) {
+
+							this.mapped.set(iterPos - 1);
+							this.removed.clear(iterPos - 1);
+							KVPair p = new KVPair();
+							p.key = key;
+							p.value = kFC.getLong();
+							pos = (iterPos - 1) * 8;
+							p.loc = rFC.getLong(pos);
+							return p;
+						} else {
+							this.mapped.clear(iterPos - 1);
+						}
+					} else {
+						iterPos++;
+					}
+				}
+			}
+			return null;
+		}
+
+		public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
+
+			int index = index(key);
+			if (index >= 0) {
+				int pos = (index / EL);
+				synchronized (this.claims) {
+					boolean zl = this.claims.get(pos);
+					if (zl)
+						return true;
+					else {
+						long cl = this.rFC.getLong(pos * 8);
+						if (cl > 0)
+							return true;
+					}
+				}
+
+			} else {
+				throw new KeyNotFoundException(key);
+			}
+			return false;
+
+		}
+
+		public boolean update(byte[] key, long value) throws IOException {
+			try {
+				int pos = this.index(key);
+				if (pos == -1) {
+					return false;
+				} else {
+					this.kFC.position(pos);
+					this.kFC.put(key);
+					this.kFC.putLong(value);
+					this.claims.set(pos);
+					this.mapped.set(pos);
+					this.removed.clear(pos);
+					// this.store.position(pos);
+					// this.store.put(storeID);
+					return true;
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error getting record", e);
+				return false;
+			}
+		}
+
+		public boolean remove(byte[] key) throws IOException {
+
+			try {
+
+				int pos = this.index(key);
+
+				if (pos == -1) {
+					return false;
+				}
+				boolean claimed = false;
+				claimed = this.claims.get(pos / EL);
+
+				if (claimed) {
+					return false;
+				} else {
+					this.kFC.position(pos);
+					this.kFC.put(REMOVED);
+					long fp = this.kFC.getLong();
+
+					this.kFC.putLong(pos + REMOVED.length, 0);
+					pos = (pos / EL) * RL;
+					this.rFC.putLong(pos, 0);
+					ChunkData ck = new ChunkData(fp, key);
+					if (ck.setmDelete(true)) {
+
+						// this.kFC.write(rbuf, pos);
+						pos = (pos / RL);
+						this.claims.clear(pos);
+						this.mapped.clear(pos);
+						this.removed.set(pos);
+						// this.store.position(pos);
+						// this.store.put((byte)0);
+						return true;
+					} else
+						return false;
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("error getting record", e);
+				return false;
+			}
+		}
+
+		public synchronized long claimRecords() throws IOException {
+
+			long k = 0;
+
+			try {
+				this.iterInit();
+				synchronized (this) {
+					this.claims.clear();
+				}
+				while (iterPos < size) {
+
+					try {
+						synchronized (this) {
+
+							boolean claimed = claims.get(iterPos);
+							claims.clear(iterPos);
+							if (claimed) {
+								this.mapped.set(iterPos);
+								this.removed.clear(iterPos);
+							} else if (mapped.get(iterPos)) {
+								byte[] key = new byte[FREE.length];
+								int pos = iterPos * 8;
+								long val = rFC.getLong(pos);
+								if (val <= 0) {
+									pos = iterPos * EL;
+									long ov = kFC.getLong(pos + VP);
+									kFC.position(pos);
+
+									this.kFC.put(REMOVED);
+									this.kFC.putLong(0);
+									ChunkData ck = new ChunkData(ov, key);
+									ck.setmDelete(true);
+									this.mapped.clear(iterPos);
+									this.removed.set(iterPos);
+									m.full = false;
+									k++;
+								}
+							}
+						}
+					} finally {
+						iterPos++;
+					}
+				}
+			} catch (NullPointerException e) {
+
+			}
+			return k;
+		}
+
+		public long claimRecords(LargeBloomFilter nbf) throws IOException {
+			this.iterInit();
+			long _sz = 0;
+			try {
+				while (iterPos < size) {
+					synchronized (this) {
+						try {
+							if (m.isClosed())
+								throw new IOException("map closed");
+							byte[] key = new byte[FREE.length];
+							int pos = iterPos * EL;
+							// kFC.getBytes(pos, key);
+							kFC.position(pos);
+							kFC.get(key);
+							long val = kFC.getLong();
+
+							if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+								if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+									kFC.position(pos);
+									this.kFC.put(REMOVED);
+									this.kFC.putLong(0);
+									this.rFC.putLong(iterPos * 8, 0);
+									ChunkData ck = new ChunkData(val, key);
+									ck.setmDelete(true);
+
+									this.mapped.clear(iterPos);
+									this.removed.set(iterPos);
+									m.full = false;
+									_sz++;
+								} else {
+									this.mapped.set(iterPos);
+
+								}
+								this.claims.clear(iterPos);
+							}
+
+						} finally {
+							iterPos++;
+
+						}
+					}
+				}
+
+				return _sz;
+			} finally {
+
+			}
+		}
+
+		public long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException {
+			this.iterInit();
+			long _sz = 0;
+
+			try {
+				// ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
+				while (iterPos < size) {
+
+					synchronized (this) {
+
+						try {
+							if (m.isClosed())
+								throw new IOException("map closed");
+							byte[] key = new byte[FREE.length];
+							int pos = iterPos * EL;
+							kFC.position(pos);
+							kFC.get(key);
+							long val = kFC.get();
+							if (!Arrays.equals(key, FREE) && !Arrays.equals(key, REMOVED)) {
+								if (!nbf.mightContain(key) && !this.claims.get(iterPos)) {
+									kFC.position(pos);
+									this.kFC.put(REMOVED);
+									this.kFC.putLong(0);
+									this.rFC.putLong(iterPos * 8, 0);
+									ChunkData ck = new ChunkData(val, key);
+									ck.setmDelete(true);
+									this.mapped.clear(iterPos);
+									this.removed.set(iterPos);
+									_sz++;
+								} else {
+									this.mapped.set(iterPos);
+
+								}
+								this.claims.clear(iterPos);
+							}
+
+						} finally {
+							iterPos++;
+						}
+					}
+				}
+
+				return _sz;
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("error during claim process", e);
+				throw new IOException(e);
+			} finally {
+
+			}
+		}
 	}
 
 	public static void main(String[] args) {

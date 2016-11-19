@@ -88,7 +88,7 @@ public class FLBF implements Serializable {
 				oon.close();
 				path.delete();
 			} else {
-				FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(32);
+				FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(1);
 				filter = new CountingBloomFilterMemory<>(fb);
 			}
 		} else {

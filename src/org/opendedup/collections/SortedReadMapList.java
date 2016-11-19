@@ -99,7 +99,7 @@ public class SortedReadMapList implements Runnable {
 	static final Comparator<ProgressiveFileByteArrayLongMap> TIME_ORDER = new Comparator<ProgressiveFileByteArrayLongMap>() {
 		public int compare(ProgressiveFileByteArrayLongMap m0,
 				ProgressiveFileByteArrayLongMap m1) {
-			long dif = m0.lastFound - m1.lastFound;
+			long dif = m0.getLastAccess() - m1.getLastAccess();
 			if (dif > 0)
 				return -1;
 			if (dif < 0)

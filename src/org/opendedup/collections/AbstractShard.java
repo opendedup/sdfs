@@ -31,7 +31,6 @@ public interface AbstractShard {
 
 	public abstract byte[] nextKey() throws IOException;
 
-	public abstract long getBigestKey() throws IOException;
 
 	/**
 	 * initializes the Object set of this hash table.
@@ -50,7 +49,7 @@ public interface AbstractShard {
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
 	 */
-	public abstract boolean containsKey(byte[] key) throws MapClosedException;
+	public abstract boolean containsKey(byte[] key) ;
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -68,16 +67,16 @@ public interface AbstractShard {
 	public abstract boolean remove(byte[] key) throws IOException;
 
 	public abstract InsertRecord put(ChunkData cm)
-			throws HashtableFullException, IOException,MapClosedException;
+			throws HashtableFullException, IOException, MapClosedException;
 
 	public abstract InsertRecord put(byte[] key, long val)
-			throws HashtableFullException, IOException, MapClosedException;
+			throws HashtableFullException, IOException;
 
 	public abstract int getEntries();
 
 	public abstract long get(byte[] key) throws MapClosedException;
 
-	public abstract long get(byte[] key, boolean claim) throws MapClosedException;
+	public abstract long get(byte[] key, boolean claim) throws MapClosedException ;
 
 	public abstract int size();
 

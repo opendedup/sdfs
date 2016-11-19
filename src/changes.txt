@@ -1,3 +1,9 @@
+Version 3.3.0
+	Enhancements
+	* New Hashtable format to support better performance at scale
+	* New incremental garbage collection using reference checking
+	* Reduced memory footprint
+	* New switch --vrts-appliance in mkfs.sdfs to support placement of metadata on the appliance
 Version 3.2.5
 	Fixes
 	* Windows Thread Exhaustion

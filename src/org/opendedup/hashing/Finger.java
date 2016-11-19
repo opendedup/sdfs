@@ -25,7 +25,10 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import jonelo.jacksum.adapt.org.bouncycastle.util.Arrays;
 
 public class Finger implements Runnable {
 	public byte[] chunk;
@@ -38,7 +41,9 @@ public class Finger implements Runnable {
 
 	public void run() {
 		try {
-			if (Main.chunkStoreLocal)
+			if(Arrays.areEqual(this.hash, WritableCacheBuffer.bk))
+				this.hl = new InsertRecord(false,0);
+			else if (Main.chunkStoreLocal)
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk);
 			else
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
@@ -59,7 +64,9 @@ public class Finger implements Runnable {
 		public void run() {
 			for (Finger f : fingers) {
 				try {
-					if (Main.chunkStoreLocal)
+					if(Arrays.areEqual(f.hash, WritableCacheBuffer.bk))
+						f.hl = new InsertRecord(false,0);
+					else if (Main.chunkStoreLocal)
 						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 					else
 						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
@@ -75,7 +82,10 @@ public class Finger implements Runnable {
 
 		public void persist() throws IOException, HashtableFullException {
 			for (Finger f : fingers) {
-				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
+				if(Arrays.areEqual(f.hash, WritableCacheBuffer.bk))
+					f.hl = new InsertRecord(false,0);
+				else
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
 
 			}
 		}

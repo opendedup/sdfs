@@ -33,7 +33,7 @@ public class ManualGC {
 	
 	public static SDFSEvent evt = null;
 	private static long lastGC = 0;
-	private static long MINGCTIME = 60*1000*60;
+	private static long MINGCTIME = 1;
 
 	public static long clearChunks() throws InterruptedException, IOException {
 		return clearChunksMills();
@@ -102,7 +102,7 @@ public class ManualGC {
 				} catch (Exception e) {
 				}
 			}
-			if (Main.firstRun) {
+			if (Main.firstRun && !Main.refCount) {
 				SDFSLogger.getLog().info("Waiting 10 Seconds to run again");
 				SDFSEvent wevt = SDFSEvent.waitEvent(
 						"Waiting 10 Seconds to run again", evt);
@@ -136,7 +136,7 @@ public class ManualGC {
 			if (Main.disableGC)
 				return 0;
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
-				
+				if(!Main.refCount) {
 				BloomFDisk fd = new BloomFDisk(evt);
 				try{
 				evt.curCt = 33;
@@ -144,6 +144,11 @@ public class ManualGC {
 				evt.curCt = 66;
 				}finally {
 					fd.vanish();
+				}
+				}else {
+					evt.curCt = 33;
+					rm = HCServiceProxy.processHashClaims(evt);
+					evt.curCt = 66;
 				}
 				
 			} else {

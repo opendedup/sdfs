@@ -46,6 +46,10 @@ public interface HashChunkServiceInterface {
 	public abstract long getChunksFetched();
 
 	public abstract AbstractChunkStore getChuckStore();
+	
+	public abstract boolean claimKey(byte [] key,long val) throws IOException;
+	
+	public abstract boolean removeClaimKey(byte [] key,long val) throws IOException;
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
 			boolean compressed) throws IOException, HashtableFullException;
@@ -65,7 +69,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract byte getHashRoute(byte[] hash);
 
-	public abstract void processHashClaims(SDFSEvent evt) throws IOException;
+	public abstract long processHashClaims(SDFSEvent evt) throws IOException;
 
 	public abstract long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;
@@ -113,5 +117,7 @@ public interface HashChunkServiceInterface {
 	public abstract void setCacheSize(long sz) throws IOException;
 	
 	public abstract RemoteVolumeInfo[] getConnectedVolumes() throws IOException;
+
+	void clearRefMap() throws IOException;
 
 }

@@ -364,7 +364,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			try {
 				if (lf.exists()) {
 					m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, VERSION);
-				}
+				} else 
+					SDFSLogger.getLog().info("could not find " + lf.getPath());
+				
 			} catch (Exception e) {
 				m = null;
 				if (HashBlobArchive.REMOVE_FROM_CACHE)

@@ -39,6 +39,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
@@ -47,6 +48,8 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
 
 import com.google.common.primitives.Longs;
+
+import jonelo.jacksum.adapt.org.bouncycastle.util.Arrays;
 
 public class MetaFileImport implements Serializable {
 	private static final long serialVersionUID = 2281680761909041919L;
@@ -292,7 +295,10 @@ public class MetaFileImport implements Serializable {
 										Main.CHUNK_LENGTH, true);
 							boolean hpc = false;
 							for (HashLocPair p : al) {
-								long pos = HCServiceProxy.hashExists(p.hash,
+								long pos = 0 ;
+								if(Arrays.areEqual(WritableCacheBuffer.bk,p.hash))
+										pos= 0;
+								pos = HCServiceProxy.hashExists(p.hash,
 										false);
 								boolean exists = false;
 								if (pos != -1) {

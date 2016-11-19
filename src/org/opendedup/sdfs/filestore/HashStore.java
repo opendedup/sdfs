@@ -227,14 +227,26 @@ public class HashStore {
 
 		return hs;
 	}
+	
+	public boolean claimKey(byte [] key,long val) throws IOException {
+		return bdb.claimKey(key,val);
+	}
+	
+	public boolean removeClaimKey(byte [] key,long val) throws IOException {
+		return bdb.removeClaimKey(key,val);
+	}
 
 	public void cacheChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException {
 		bdb.cache(hash,pos);
 	}
 
-	public void processHashClaims(SDFSEvent evt) throws IOException {
-		this.bdb.claimRecords(evt);
+	public long processHashClaims(SDFSEvent evt) throws IOException {
+		return this.bdb.claimRecords(evt);
+	}
+	
+	public void clearRefMap() throws IOException {
+		this.bdb.clearRefMap();
 	}
 
 	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)

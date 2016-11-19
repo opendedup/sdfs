@@ -310,7 +310,6 @@ public class SparseDedupFile implements DedupFile {
 					}
 					
 					this.bdb.vanish(Main.refCount);
-					SDFSLogger.getLog().info("vanshished " + dbf.getPath());
 				}
 
 			}

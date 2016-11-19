@@ -982,6 +982,7 @@ static int javafs_fsync(const char *path, int datasync, struct fuse_file_info *f
 }
 
 static void javafs_destroy(void *mt) {
+	JNIEnv *env = get_env();
 	while (1)
    {
 	   (*env)->CallVoidMethod(env, fuseFS, FuseFS->method.destroy);
@@ -1198,7 +1199,8 @@ static struct fuse_operations javafs_oper = {
    setxattr:    javafs_setxattr,
    getxattr:    javafs_getxattr,
    listxattr:   javafs_listxattr,
-   removexattr: javafs_removexattr
+   removexattr: javafs_removexattr,
+   destroy:	javafs_destroy
 };
 
 
@@ -1341,6 +1343,7 @@ JNIEXPORT void JNICALL Java_fuse_FuseMount_mount(JNIEnv *env, jclass class, jobj
       {
          free(fuseArgv[i]);
       }
+
 
       vm = NULL;
       mainEnv = NULL;

@@ -20,6 +20,7 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
+
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
@@ -116,6 +117,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 		}
 		return written;
 	}
+	@Override
+	public void clearRefMap() throws IOException {
+		hs.clearRefMap();
+	}
 
 	public void setReadSpeed(int speed) {
 		fileStore.setReadSpeed((int) speed);
@@ -176,8 +181,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashRoute;
 	}
 
-	public void processHashClaims(SDFSEvent evt) throws IOException {
-		hs.processHashClaims(evt);
+	public long processHashClaims(SDFSEvent evt) throws IOException {
+		return hs.processHashClaims(evt);
 	}
 
 	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
@@ -294,6 +299,16 @@ public class HashChunkService implements HashChunkServiceInterface {
 	@Override
 	public boolean mightContainKey(byte[] key) {
 		return hs.mightContainKey(key);
+	}
+
+	@Override
+	public boolean claimKey(byte[] key,long val) throws IOException {
+		return hs.claimKey(key,val);
+	}
+
+	@Override
+	public boolean removeClaimKey(byte[] key,long val) throws IOException {
+		return hs.removeClaimKey(key,val);
 	}
 
 }

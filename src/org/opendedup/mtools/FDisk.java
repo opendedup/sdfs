@@ -21,6 +21,7 @@ package org.opendedup.mtools;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
@@ -35,9 +36,9 @@ import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.FDiskEvent;
@@ -45,11 +46,11 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
+import com.google.common.primitives.Longs;
 
-public class BloomFDisk {
+public class FDisk {
 	private AtomicLong files = new AtomicLong(0);
 	private FDiskEvent fEvt = null;
-	transient LargeBloomFilter bf = null;
 	private boolean failed = false;
 	private transient static RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
@@ -57,16 +58,16 @@ public class BloomFDisk {
 			10, TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 	public static boolean closed;
 
-	public BloomFDisk() {
+	public FDisk() {
 
 	}
 
-	public BloomFDisk(SDFSEvent evt) throws FDiskException {
+	public FDisk(SDFSEvent evt) throws FDiskException {
 		long entries = HCServiceProxy.getSize();
 		init(evt, entries);
 	}
 
-	public BloomFDisk(SDFSEvent evt, long entries) throws FDiskException {
+	public FDisk(SDFSEvent evt, long entries) throws FDiskException {
 		init(evt, entries);
 	}
 
@@ -75,6 +76,7 @@ public class BloomFDisk {
 	}
 
 	public void init(SDFSEvent evt, long entries) throws FDiskException {
+		
 		if (entries == 0)
 			entries = HCServiceProxy.getSize();
 		File f = new File(Main.dedupDBStore);
@@ -84,13 +86,13 @@ public class BloomFDisk {
 			return;
 		}
 		try {
+			HCServiceProxy.clearRefMap();
 			long sz = Main.volume.getFiles();
-			fEvt = SDFSEvent.fdiskInfoEvent("Starting BFDISK for " + Main.volume.getName() + " file size = " + sz, evt);
+			fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file size = " + sz, evt);
 			fEvt.maxCt = sz;
 
 			SDFSLogger.getLog().info("entries = " + entries);
-			this.bf = new LargeBloomFilter(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "tmp"),entries, .1, false,false,false);
-			SDFSLogger.getLog().info("Starting BloomFilter FDISK for " + Main.volume.getName());
+			SDFSLogger.getLog().info("Starting FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
 			this.traverse(f);
 			executor.shutdown();
@@ -98,7 +100,7 @@ public class BloomFDisk {
 				SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
 			}
 			if (failed)
-				throw new IOException("BFDisk traverse failed");
+				throw new IOException("FDisk traverse failed");
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
 
@@ -108,35 +110,32 @@ public class BloomFDisk {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 			this.failed = true;
-			this.vanish();
 			throw new FDiskException(e);
 		}
 	}
 
-	public LargeBloomFilter getResults() {
-		return this.bf;
-	}
+	
 
 	private void traverse(File dir) throws IOException {
 		if (closed)
 			throw new IOException("FDISK Closed");
 		if (dir.isDirectory()) {
 			if (failed)
-				throw new IOException("BFDisk traverse failed");
+				throw new IOException("FDisk traverse failed");
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
 				traverse(new File(dir, children[i]));
 			}
 		} else {
 			if (failed)
-				throw new IOException("BFDisk traverse failed");
+				throw new IOException("FDisk traverse failed");
 			if (dir.getPath().endsWith(".map")) {
 				executor.execute(new CheckDedupFile(this, dir));
 			}
 		}
 	}
 
-	private void checkDedupFile(File mapFile) throws IOException {
+	private void checkDedupFile(File mapFile) throws IOException {  
 		if (closed) {
 			this.failed = true;
 			return;
@@ -150,7 +149,7 @@ public class BloomFDisk {
 				return;
 			}
 			mp.iterInit();
-			SparseDataChunk ck = mp.nextValue(Main.refCount);
+			SparseDataChunk ck = mp.nextValue(false);
 			while (ck != null) {
 				if (closed) {
 					this.failed = true;
@@ -158,10 +157,12 @@ public class BloomFDisk {
 				}
 				List<HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al) {
-					bf.put(p.hash);
+					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
+					if(!added)
+						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos());
 					
 				}
-				ck = mp.nextValue(Main.refCount);
+				ck = mp.nextValue(false);
 			}
 
 			synchronized (fEvt) {
@@ -195,10 +196,10 @@ public class BloomFDisk {
 
 	private static class CheckDedupFile implements Runnable {
 
-		BloomFDisk fd = null;
+		FDisk fd = null;
 		File f = null;
 
-		protected CheckDedupFile(BloomFDisk fd, File f) {
+		protected CheckDedupFile(FDisk fd, File f) {
 			this.fd = fd;
 			this.f = f;
 		}
@@ -228,11 +229,6 @@ public class BloomFDisk {
 			return thread;
 		}
 
-	}
-
-	public void vanish() {
-		if (bf != null)
-			this.bf.vanish();
 	}
 
 }

@@ -20,8 +20,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -38,6 +40,7 @@ import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -87,8 +90,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static ThreadPoolExecutor executor = null;
 	private static SynchronousQueue<Runnable> worksQueue = null;
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
-
+	public static final byte [] blankBlock = new byte[4096];
+	public static final byte [] bk = new Murmur3HashEngine().getHash(blankBlock);
 	static {
+		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
 		if(!Main.chunkStoreLocal) {
 			if (maxTasks > 120)
 				maxTasks = 120;
@@ -451,6 +456,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 			} else {
+				if(Arrays.equals(this.ar.get(0).hash, bk))
+					this.buf = ByteBuffer
+							.wrap(new byte[Main.MIN_CHUNK_LENGTH]);
+				else
 				this.buf = ByteBuffer
 						.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc, direct));
 
@@ -623,7 +632,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					SDFSLogger.getLog()
 							.debug("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
 									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
-				byte[] b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
+				byte[] b = null;
+				if(Arrays.equals(p.hash, bk))
+					b = new byte[Main.MIN_CHUNK_LENGTH];
+				else
+					b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
 				ByteBuffer bf = ByteBuffer.wrap(b);
 				byte[] z = new byte[p.nlen];
 				bf.position(p.offset);
@@ -1184,8 +1197,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
-
-				if (cache) {
+				if(Arrays.equals(hash, bk))
+					ck = new byte[Main.MIN_CHUNK_LENGTH];
+				else if (cache) {
 					HCServiceProxy.cacheData(hash, hashloc,direct);
 				} else {
 					this.ck = HCServiceProxy.fetchChunk(hash, hashloc, direct);
@@ -1210,7 +1224,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
-				if (cache) {
+				if(Arrays.equals(s.hash, bk))
+					s.ck = new byte[Main.MIN_CHUNK_LENGTH];
+				else if (cache) {
 					HCServiceProxy.cacheData(s.hash, s.hashloc,direct);
 				} else
 					s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc, direct);

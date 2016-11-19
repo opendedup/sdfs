@@ -36,7 +36,7 @@ public interface AbstractHashesMap {
 	
 	public abstract boolean mightContainKey(byte [] key);
 
-	public abstract void claimRecords(SDFSEvent evt) throws IOException;
+	public abstract long claimRecords(SDFSEvent evt) throws IOException;
 
 	public abstract long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;
@@ -60,6 +60,10 @@ public interface AbstractHashesMap {
 	public abstract boolean update(ChunkData cm) throws IOException;
 
 	public abstract void cache(byte[] key,long pos) throws IOException;
+	
+	public abstract boolean claimKey(byte[] key,long val) throws IOException;
+	
+	public abstract boolean removeClaimKey(byte[] key,long val) throws IOException;
 
 	public abstract long get(byte[] key) throws IOException;
 
@@ -86,5 +90,7 @@ public interface AbstractHashesMap {
 
 	public abstract void init(long maxSize, String fileName, double fpp)
 			throws IOException, HashtableFullException;
+
+	void clearRefMap() throws IOException;
 
 }

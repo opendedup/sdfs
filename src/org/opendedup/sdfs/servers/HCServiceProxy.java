@@ -36,6 +36,7 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
+import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
@@ -96,12 +97,13 @@ public class HCServiceProxy {
 		eventBus.register(obj);
 	}
 
-	public static synchronized void processHashClaims(SDFSEvent evt)
+	public static synchronized long processHashClaims(SDFSEvent evt)
 			throws IOException {
 		if (Main.chunkStoreLocal)
-			hcService.processHashClaims(evt);
+			return hcService.processHashClaims(evt);
 		else {
 			new ClaimHashesCmd(evt).executeCmd(cs);
+			return 0;
 
 		}
 	}
@@ -114,6 +116,10 @@ public class HCServiceProxy {
 			new BFClaimHashesCmd(evt).executeCmd(cs);
 		}
 		return 0;
+	}
+	
+	public static void  clearRefMap() throws IOException {
+		hcService.clearRefMap();
 	}
 
 	public static synchronized boolean hashExists(byte[] hash)
@@ -175,6 +181,22 @@ public class HCServiceProxy {
 			hcService.setCacheSize(sz);
 		}
 	}
+	
+	public static boolean claimKey(byte [] key,long val) throws IOException {
+		if (Main.chunkStoreLocal) {
+			return hcService.claimKey(key,val);
+		}
+		else 
+			return false;
+	}
+	
+	public static boolean removeClaimKey(byte [] key,long val) throws IOException {
+		if (Main.chunkStoreLocal) {
+			return hcService.removeClaimKey(key,val);
+		}
+		else 
+			return false;
+	}
 
 	public static long getChunksFetched() {
 		return -1;
@@ -190,6 +212,11 @@ public class HCServiceProxy {
 						+ ".lock");
 				if (Main.runConsistancyCheck || file.exists()) {
 					hcService.runConsistancyCheck();
+					SDFSEvent evt = SDFSEvent
+					.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
+							+ Main.volume.getName());
+					new FDisk(evt);
+					
 				}
 				touchRunFile();
 				if (Main.syncDL) {

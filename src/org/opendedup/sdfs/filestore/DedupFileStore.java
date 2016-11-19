@@ -1,22 +1,16 @@
 package org.opendedup.sdfs.filestore;
 
-import java.io.File;
 import java.io.IOException;
-
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.BloomFDisk;
-import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
-import org.opendedup.sdfs.notification.FDiskEvent;
-import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 
 /**
  * 
@@ -37,46 +31,24 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
-	public static LargeBloomFilter cp = null;
-	
+	private static HashMap<Byte, ReentrantLock> lockMap = new HashMap<Byte, ReentrantLock>();
+
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
 	 */
 	static {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
-			openFileMonitor = new OpenFileMonitor(10000,
-					Main.maxInactiveFileTime);
+			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
 		} else if (Main.blockDev) {
 			// openFileMonitor = new OpenFileMonitor(1000,
 			// Main.maxInactiveFileTime);
 		}
-		if(Main.refCount) {
-			long entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
-			try {
-				cp = new LargeBloomFilter(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"),entries, .1, false,true,Main.refCount);
-				
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
+		
 	}
+
 	public static void init() {
-		if(cp.getSize() == 0) {
-			SDFSEvent evt = new FDiskEvent("Checking References");
-			SDFSLogger.getLog().info("Recreating Reference Map");
-			try {
-				new BloomFDisk(evt);
-			} catch (FDiskException e) {
-				SDFSLogger.getLog().error("unable to check fdisk",e);
-				e.printStackTrace();
-				System.exit(4);
-			}finally {
-				evt.endEvent();
-			}
-		}
+		
 	}
 
 	/**
@@ -100,8 +72,68 @@ public class DedupFileStore {
 		}
 	}
 
-	public static DedupFile getDedupFile(MetaDataDedupFile mf)
-			throws IOException {
+	public static boolean addRef(byte [] entry,long val) throws IOException {
+		if(val == 0)
+			return true;
+		ReentrantLock l = getLock(entry[0]);
+		l.lock();
+		try {
+			return HCServiceProxy.claimKey(entry,val);
+			
+		} finally {
+			removeLock(entry[0]);
+		}
+	}
+
+	public static boolean removeRef(byte [] entry,long val) throws IOException {
+		if(val == 0)
+			return true;
+		ReentrantLock l = getLock(entry[0]);
+		l.lock();
+		try {
+			return HCServiceProxy.removeClaimKey(entry,val);
+			
+		} finally {
+			removeLock(entry[0]);
+		}
+	}
+
+	private static ReentrantLock iLock = new ReentrantLock();
+
+	private static ReentrantLock getLock(byte st) {
+		iLock.lock();
+		try {
+			ReentrantLock l = lockMap.get(st);
+			if (l == null) {
+				l = new ReentrantLock(false);
+				lockMap.put(st, l);
+			}
+			return l;
+		} finally {
+			iLock.unlock();
+		}
+	}
+
+	private static void removeLock(byte st) {
+		iLock.lock();
+		try {
+			ReentrantLock l = lockMap.get(st);
+			try {
+
+				if (l != null && !l.hasQueuedThreads()) {
+					lockMap.remove(st);
+				}
+			} finally {
+				if (l != null && l.isLocked())
+					l.unlock();
+			}
+		} finally {
+
+			iLock.unlock();
+		}
+	}
+
+	public static DedupFile getDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
 		DedupFile df = null;
 		try {
@@ -119,8 +151,7 @@ public class DedupFileStore {
 		}
 	}
 
-	public static DedupFile openDedupFile(MetaDataDedupFile mf)
-			throws IOException {
+	public static DedupFile openDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
 		DedupFile df = null;
 		try {
@@ -149,15 +180,13 @@ public class DedupFileStore {
 	public static void addOpenDedupFiles(DedupFile df) throws IOException {
 		if (!closing) {
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"adding dedupfile " + df.getMetaFile().getPath());
+				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
 			if (openFile.size() >= Main.maxOpenFiles)
-				throw new IOException("maximum number of files reached ["
-						+ Main.maxOpenFiles + "]. Too many open files");
+				throw new IOException(
+						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
 			openFile.put(df.getGUID(), df);
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"dedupfile cache size is " + openFile.size());
+				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
 		} else {
 			throw new IOException("DedupFileStore is closed");
 		}
@@ -173,8 +202,7 @@ public class DedupFileStore {
 	 * @return the new cloned Dedup file map
 	 * @throws IOException
 	 */
-	public static DedupFile cloneDedupFile(MetaDataDedupFile oldmf,
-			MetaDataDedupFile newmf) throws IOException {
+	public static DedupFile cloneDedupFile(MetaDataDedupFile oldmf, MetaDataDedupFile newmf) throws IOException {
 		if (!closing) {
 			if (oldmf.getDfGuid() == null)
 				return null;
@@ -238,34 +266,24 @@ public class DedupFileStore {
 			SDFSLogger.getLog().debug("Open Files = " + openFile.size());
 		if (openFileMonitor != null)
 			openFileMonitor.close();
-		if(openFile.size() > 0) {
-		Object[] dfs = getArray();
-		SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
-		for (int i = 0; i < dfs.length; i++) {
-			DedupFile df = (DedupFile) dfs[i];
-			if (df != null) {
-				try {
-					df.forceClose();
-				} catch (IOException e) {
+		if (openFile.size() > 0) {
+			Object[] dfs = getArray();
+			SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
+			for (int i = 0; i < dfs.length; i++) {
+				DedupFile df = (DedupFile) dfs[i];
+				if (df != null) {
+					try {
+						df.forceClose();
+					} catch (IOException e) {
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug("unable to Close " + df.getMetaFile().getPath(), e);
+					}
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog()
-								.debug("unable to Close "
-										+ df.getMetaFile().getPath(), e);
+						SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
 				}
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"Closed " + df.getMetaFile().getPath());
 			}
 		}
-		}
-		if(cp != null && Main.refCount) {
-			SDFSLogger.getLog().info("closing reference map");
-			try {
-				cp.save(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "gc"));
-			} catch (IOException e) {
-				SDFSLogger.getLog().error("unable to serialize cp",e);
-			}
-		}
+		
 	}
 
 	/**
@@ -273,8 +291,7 @@ public class DedupFileStore {
 	 */
 	public static void flushAllFiles() {
 		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug(
-					"flushing write caches of size " + openFile.size());
+			SDFSLogger.getLog().debug("flushing write caches of size " + openFile.size());
 		Object[] dfs = getArray();
 		for (int i = 0; i < dfs.length; i++) {
 			DedupFile df = (DedupFile) dfs[i];
