@@ -92,7 +92,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	public void init(long maxSize, String fileName,double fpp) throws IOException,
 			HashtableFullException {
 		maps = new SortedReadMapList();
-
+		Main.refCount = false;
 		this.size = (maxSize);
 		this.maxSz = maxSize;
 		this.fileName = fileName;

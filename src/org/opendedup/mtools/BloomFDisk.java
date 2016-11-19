@@ -51,9 +51,9 @@ public class BloomFDisk {
 	private FDiskEvent fEvt = null;
 	transient LargeBloomFilter bf = null;
 	private boolean failed = false;
-	private transient static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient static ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
+	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
 			10, TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 	public static boolean closed;
 
@@ -118,6 +118,7 @@ public class BloomFDisk {
 	}
 
 	private void traverse(File dir) throws IOException {
+		SDFSLogger.getLog().info("traversing " + dir.getPath());
 		if (closed)
 			throw new IOException("FDISK Closed");
 		if (dir.isDirectory()) {
@@ -137,6 +138,7 @@ public class BloomFDisk {
 	}
 
 	private void checkDedupFile(File mapFile) throws IOException {
+		SDFSLogger.getLog().info("checking " + mapFile);
 		if (closed) {
 			this.failed = true;
 			return;
@@ -199,6 +201,7 @@ public class BloomFDisk {
 		File f = null;
 
 		protected CheckDedupFile(BloomFDisk fd, File f) {
+			SDFSLogger.getLog().info("init " + f.getPath());
 			this.fd = fd;
 			this.f = f;
 		}
@@ -206,6 +209,7 @@ public class BloomFDisk {
 		@Override
 		public void run() {
 			try {
+				SDFSLogger.getLog().info("running " + f.getPath());
 				fd.checkDedupFile(f);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("error doing fdisk", e);

@@ -52,9 +52,9 @@ public class FDisk {
 	private AtomicLong files = new AtomicLong(0);
 	private FDiskEvent fEvt = null;
 	private boolean failed = false;
-	private transient static RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient static ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
+	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
 			10, TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 	public static boolean closed;
 
