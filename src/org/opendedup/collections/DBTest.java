@@ -19,7 +19,7 @@ public class DBTest implements Runnable {
 	private static AtomicInteger k = new AtomicInteger();
 	private static AtomicLong ct = new AtomicLong();
 	private long rns = 0;
-	private static ProgressiveFileBasedCSMap m;
+	private static ShardedProgressiveFileBasedCSMap m;
 	private Murmur3HashEngine hc = new Murmur3HashEngine();
 
 	public DBTest(long ins) {

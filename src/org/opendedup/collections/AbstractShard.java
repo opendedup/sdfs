@@ -88,4 +88,44 @@ public interface AbstractShard {
 
 	public abstract void sync() throws SyncFailedException, IOException;
 
+	void clearRefMap() throws IOException;
+
+	KVPair nextKeyValue() throws IOException;
+
+	long getLastModified();
+
+	void vanish();
+
+	long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException;
+
+	boolean isClosed();
+
+	int maxSize();
+
+	int avail();
+
+	boolean removeClaim(byte[] key, long val) throws MapClosedException;
+
+	boolean claim(byte[] key, long val) throws MapClosedException;
+
+	void put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
+
+	boolean isMaxed();
+
+	boolean isFull();
+
+	void cache();
+
+	void activate();
+
+	boolean isActive();
+
+	void inActive();
+
+	boolean isCompactig();
+
+	void compactRunning(boolean running);
+
+	long getLastAccess();
+
 }

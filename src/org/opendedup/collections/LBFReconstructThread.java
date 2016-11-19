@@ -24,10 +24,10 @@ import org.opendedup.logging.SDFSLogger;
 public class LBFReconstructThread implements Runnable {
 
 	LargeBloomFilter bf;
-	ProgressiveFileByteArrayLongMap m;
+	AbstractShard m;
 	Exception ex = null;
 
-	LBFReconstructThread(LargeBloomFilter bf, ProgressiveFileByteArrayLongMap m) {
+	LBFReconstructThread(LargeBloomFilter bf, AbstractShard m) {
 		this.bf = bf;
 		this.m = m;
 	}

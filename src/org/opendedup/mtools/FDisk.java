@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;

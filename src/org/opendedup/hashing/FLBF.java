@@ -30,7 +30,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.utils.hashing.FileBasedBloomFilter;
 

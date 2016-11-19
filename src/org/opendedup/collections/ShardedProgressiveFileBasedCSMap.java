@@ -1,5 +1,3 @@
-package org.opendedup.collections;
-
 /*******************************************************************************
  * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
  *
@@ -18,6 +16,7 @@ package org.opendedup.collections;
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
+package org.opendedup.collections;
 
 import java.io.File;
 
@@ -26,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -46,6 +46,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
+import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
@@ -56,8 +57,11 @@ import org.opendedup.util.NextPrime;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 
-public class ProgressiveFileBasedCSMap implements AbstractMap,
-		AbstractHashesMap {
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
 	private long size = 0;
 	// private final ReentrantLock klock = new ReentrantLock();
@@ -69,28 +73,31 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	private AtomicLong kSz = new AtomicLong(0);
 	private long maxSz = 0;
 	private byte[] FREE = new byte[HashFunctionPool.hashLength];
-	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent(
-			"Loading Hash Database", Main.mountEvent);
+	private SDFSEvent loadEvent = SDFSEvent.loadHashDBEvent("Loading Hash Database", Main.mountEvent);
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
-	private int hashTblSz = 100000;
-	private ArrayList<ProgressiveFileByteArrayLongMap> activeWriteMaps = new ArrayList<ProgressiveFileByteArrayLongMap>();
-	private static final int AMS = 1;
+	private int hashTblSz = 10_000_000;
+	private ShardedFileByteArrayLongMap activeWMap = null;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
-	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
-
+	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
 	boolean ilg = false;
+	boolean runningGC = false;
 	int currentAWPos = 0;
 	// private BloomFileByteArrayLongMap activeWMap = null;
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
-	private boolean runningGC = false;
+
+	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder()
+			.maximumSize(1_000_000).concurrencyLevel(Main.writeThreads)
+			.build(new CacheLoader<ByteArrayWrapper, AbstractShard>() {
+				public AbstractShard load(ByteArrayWrapper key) throws KeyNotFoundException {
+					return _getReadMap(key.getData());
+				}
+			});
 
 	@Override
-	public void init(long maxSize, String fileName,double fpp) throws IOException,
-			HashtableFullException {
+	public void init(long maxSize, String fileName, double fpp) throws IOException, HashtableFullException {
 		maps = new SortedReadMapList();
 
 		this.size = (maxSize);
@@ -105,16 +112,15 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		// st = new SyncThread(this);
 	}
 
-	//AtomicLong ct = new AtomicLong();
-	//AtomicLong mt = new AtomicLong();
-	//AtomicLong amt = new AtomicLong();
-	//AtomicLong zmt = new AtomicLong();
+	AtomicLong ct = new AtomicLong();
+	AtomicLong mt = new AtomicLong();
+	AtomicLong amt = new AtomicLong();
+	AtomicLong zmt = new AtomicLong();
 
-	private AbstractShard getReadMap(byte[] hash)
-			throws IOException {
+	private AbstractShard getReadMap(byte[] hash) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
-		//ct.incrementAndGet();
+		ct.incrementAndGet();
 		try {
 
 			if (!runningGC && !lbf.mightContain(hash)) {
@@ -128,28 +134,38 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			 * ProgressiveFileByteArrayLongMap _m = iter.next(); if
 			 * (_m.containsKey(hash)) return _m; }
 			 */
-			// zmt.incrementAndGet();
-			/*
+			zmt.incrementAndGet();
+			AbstractShard _km;
+			_km = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			if (_km != null && !_km.isClosed()) {
+				if (!_km.isClosed()) {
+					// long chl = ch.incrementAndGet();
+					// SDFSLogger.getLog().info("found ch=" + chl + " sz=" +
+					// this.keyLookup.size());
+					return _km;
+				} else {
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+				}
+			}
+
 			synchronized (ct) {
 				if (ct.get() > 10000) {
-					SDFSLogger.getLog().info(
-							"misses=" + mt.get() + " attempts=" + ct.get()
-									+ " lookups=" + amt.get());
+					SDFSLogger.getLog().info("misses=" + mt.get() + " inserts=" + ct.get() + " lookups=" + amt.get()
+							+ " attempts=" + zmt.incrementAndGet());
 					ct.set(0);
 					amt.set(0);
 					mt.set(0);
 				}
 			}
-			*/
+
 			for (AbstractShard _m : this.maps.getAL()) {
-				//amt.incrementAndGet();
+				amt.incrementAndGet();
 				if (_m.containsKey(hash)) {
-					if (runningGC)
-						this.lbf.put(hash);
+					this.keyLookup.put(new ByteArrayWrapper(hash), _m);
 					return _m;
 				}
 			}
-			//mt.incrementAndGet();
+			mt.incrementAndGet();
 
 			return null;
 
@@ -159,8 +175,25 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 	}
 
-	private ProgressiveFileByteArrayLongMap createWriteMap() throws IOException {
-		ProgressiveFileByteArrayLongMap activeWMap = null;
+	private AbstractShard _getReadMap(byte[] hash) throws KeyNotFoundException {
+		for (AbstractShard _m : this.maps.getAL()) {
+			// sns++;
+			try {
+				if (_m.containsKey(hash)) {
+					if (runningGC)
+						this.lbf.put(hash);
+					return _m;
+				}
+			} catch (Exception e) {
+
+			}
+		}
+		throw new KeyNotFoundException();
+
+	}
+
+	private ShardedFileByteArrayLongMap createWriteMap() throws IOException {
+		ShardedFileByteArrayLongMap activeWMap = null;
 		try {
 			String guid = null;
 			boolean written = false;
@@ -169,8 +202,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
-					activeWMap = new ProgressiveFileByteArrayLongMap(fileName
-							+ "-" + guid, this.hashTblSz);
+					activeWMap = new ShardedFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
 					activeWMap.activate();
 					activeWMap.setUp();
 					this.maps.add(activeWMap);
@@ -184,23 +216,16 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		}
 	}
 
-	int cp = 0;
-
-	private ProgressiveFileByteArrayLongMap getWriteMap() throws IOException {
-		synchronized (activeWriteMaps) {
-			if (cp >= this.activeWriteMaps.size())
-				cp = 0;
-			ProgressiveFileByteArrayLongMap activeWMap;
-			activeWMap = this.activeWriteMaps.get(cp);
-			if (activeWMap.isFull() || !activeWMap.isActive()) {
-				activeWMap.inActive();
-				this.activeWriteMaps.remove(cp);
-				activeWMap = this.createWriteMap();
-				this.activeWriteMaps.add(cp, activeWMap);
+	private ShardedFileByteArrayLongMap getWriteMap() throws IOException {
+		if (activeWMap.isFull() || !activeWMap.isActive()) {
+			synchronized (this) {
+				if (activeWMap.isFull() || !activeWMap.isActive()) {
+					activeWMap.inActive();
+					activeWMap = this.createWriteMap();
+				}
 			}
-			cp++;
-			return activeWMap;
 		}
+		return activeWMap;
 	}
 
 	AtomicLong ict = new AtomicLong();
@@ -213,20 +238,109 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			if (!runningGC && !lbf.mightContain(hash)) {
 				return pos;
 			}
+			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			if (k != null) {
+				try {
+					pos = k.get(hash);
+					if (pos != -1) {
+
+						// m.cache();
+						return pos;
+					}
+					else {
+						this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+					}
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+				}
+			}
+
 			for (AbstractShard m : this.maps.getAL()) {
 				try {
 					pos = m.get(hash);
+					if (pos != -1) {
+
+						// m.cache();
+						return pos;
+					}
 				} catch (MapClosedException e) {
-					SDFSLogger.getLog().warn("", e);
-				}
-				if (pos != -1) {
-					if (runningGC)
-						this.lbf.put(hash);
-					// m.cache();
-					return pos;
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
 				}
 			}
 			return pos;
+		} finally {
+			l.unlock();
+		}
+	}
+
+	public boolean claimKey(byte[] hash, long val) throws IOException {
+		Lock l = gcLock.readLock();
+		l.lock();
+		try {
+			if (!runningGC && !lbf.mightContain(hash)) {
+				return false;
+			}
+			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			if (k != null) {
+				try {
+					boolean pos = k.claim(hash, val);
+					if (pos) {
+						// m.cache();
+						return pos;
+					}
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+				}
+			}
+			for (AbstractShard m : this.maps.getAL()) {
+				try {
+					boolean pos = m.claim(hash, val);
+					if (pos) {
+						// m.cache();
+						return pos;
+					}
+				} catch (MapClosedException e) {
+				}
+			}
+			return false;
+		} finally {
+			l.unlock();
+		}
+	}
+
+	public boolean removeClaimKey(byte[] hash, long val) throws IOException {
+		Lock l = gcLock.readLock();
+		l.lock();
+		try {
+			if (!runningGC && !lbf.mightContain(hash)) {
+				SDFSLogger.getLog().info("misss " + StringUtils.getHexString(hash));
+				return false;
+			}
+			
+			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			if (k != null) {
+				try {
+					boolean pos = k.removeClaim(hash, val);
+					if (pos) {
+						// m.cache();
+						return pos;
+					}
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
+				}
+			}
+			for (AbstractShard m : this.maps.getAL()) {
+				try {
+				boolean pos = m.removeClaim(hash, val);
+				if (pos) {
+					// m.cache();
+					return pos;
+				}
+				} catch (MapClosedException e) {
+					
+				}
+			}
+			return false;
 		} finally {
 			l.unlock();
 		}
@@ -255,20 +369,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 	@Override
 	public synchronized long claimRecords(SDFSEvent evt) throws IOException {
-		throw new IOException("nor implemented");
-	}
-
-	AtomicLong csz = new AtomicLong(0);
-
-	@Override
-	public synchronized long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
-		executor = new ThreadPoolExecutor(Main.writeThreads + 1,
-				Main.writeThreads + 1, 10, TimeUnit.SECONDS, worksQueue,
-				new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
-				executionHandler);
+		executor = new ThreadPoolExecutor(Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
+				worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 		csz = new AtomicLong(0);
 
 		try {
@@ -277,16 +381,15 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			this.runningGC = true;
 			try {
 				File _fs = new File(fileName);
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true,
-						true,false);
+				lbf = null;
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, false);
 			} finally {
 				l.unlock();
 			}
-			SDFSLogger.getLog().info(
-					"Claiming Records [" + this.getSize() + "] from ["
-							+ this.fileName + "]");
-			SDFSEvent tEvt = SDFSEvent.claimInfoEvent("Claiming Records ["
-					+ this.getSize() + "] from [" + this.fileName + "]", evt);
+
+			SDFSLogger.getLog().info("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
+			SDFSEvent tEvt = SDFSEvent
+					.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]", evt);
 			tEvt.maxCt = this.maps.size();
 			Iterator<AbstractShard> iter = maps.iterator();
 			ArrayList<ClaimShard> excs = new ArrayList<ClaimShard>();
@@ -295,23 +398,20 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				AbstractShard m = null;
 				try {
 					m = iter.next();
-					ClaimShard cms = new ClaimShard(m, bf, lbf, csz);
+					ClaimShard cms = new ClaimShard(m, csz);
 					excs.add(cms);
 					executor.execute(cms);
 				} catch (Exception e) {
-					tEvt.endEvent("Unable to claim records for " + m
-							+ " because : [" + e.toString() + "]",
+					tEvt.endEvent("Unable to claim records for " + m + " because : [" + e.toString() + "]",
 							SDFSEvent.ERROR);
-					SDFSLogger.getLog().error(
-							"Unable to claim records for " + m, e);
+					SDFSLogger.getLog().error("Unable to claim records for " + m, e);
 					throw new IOException(e);
 				}
 			}
 			executor.shutdown();
 			try {
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-					SDFSLogger.getLog().debug(
-							"Awaiting fdisk completion of threads.");
+					SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
 				}
 			} catch (InterruptedException e) {
 				throw new IOException(e);
@@ -335,10 +435,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 						m.iterInit();
 						KVPair p = m.nextKeyValue();
 						while (p != null) {
-							ProgressiveFileByteArrayLongMap _m = this
-									.getWriteMap();
+							AbstractShard _m = this.getWriteMap();
 							try {
-								_m.put(p.key, p.value);
+								_m.put(p.key, p.value, p.loc);
+								this.keyLookup.invalidate(new ByteArrayWrapper(p.key));
 								this.lbf.put(p.key);
 								p = m.nextKeyValue();
 							} catch (HashtableFullException e) {
@@ -355,20 +455,167 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 							l.unlock();
 						}
 						mapsz = mapsz - maps.size();
-						SDFSLogger.getLog().info(
-								"removing map " + m.toString() + " sz="
-										+ maps.size() + " rm=" + mapsz);
+						SDFSLogger.getLog()
+								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
 						m.vanish();
 
 						m = null;
 					} else if (m.isMaxed()) {
-						SDFSLogger.getLog().info(
-								"deleting maxed " + m.toString());
+						SDFSLogger.getLog().info("deleting maxed " + m.toString());
 						m.iterInit();
 						KVPair p = m.nextKeyValue();
 						while (p != null) {
-							ProgressiveFileByteArrayLongMap _m = this
-									.getWriteMap();
+							ShardedFileByteArrayLongMap _m = this.getWriteMap();
+							try {
+								_m.put(p.key, p.value, p.loc);
+								p = m.nextKeyValue();
+							} catch (HashtableFullException e) {
+
+							}
+
+						}
+						int mapsz = maps.size();
+						l = this.gcLock.writeLock();
+						l.lock();
+						try {
+							maps.remove(m);
+						} finally {
+							l.unlock();
+						}
+						mapsz = mapsz - maps.size();
+						SDFSLogger.getLog()
+								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
+						m.vanish();
+
+						m = null;
+					}
+				} catch (Exception e) {
+					tEvt.endEvent("Unable to compact " + m + " because : [" + e.toString() + "]", SDFSEvent.ERROR);
+					SDFSLogger.getLog().error("to compact " + m, e);
+					throw new IOException(e);
+				}
+			}
+			l.lock();
+			this.runningGC = false;
+			l.unlock();
+			return csz.get();
+		} finally {
+			executor = null;
+		}
+	}
+
+	@Override
+	public synchronized void clearRefMap() throws IOException {
+		//SDFSLogger.getLog().info("############################ refmap");
+		Iterator<AbstractShard> iter = maps.iterator();
+		while (iter.hasNext()) {
+			//SDFSLogger.getLog().info("clearing refmap");
+			iter.next().clearRefMap();
+			//SDFSLogger.getLog().info("cleared refmap");
+		}
+	}
+
+	AtomicLong csz = new AtomicLong(0);
+
+	@Override
+	public synchronized long claimRecords(SDFSEvent evt, LargeBloomFilter bf) throws IOException {
+		if (this.isClosed())
+			throw new IOException("Hashtable " + this.fileName + " is close");
+		executor = new ThreadPoolExecutor(Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
+				worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+		csz = new AtomicLong(0);
+
+		try {
+			Lock l = this.gcLock.writeLock();
+			l.lock();
+			this.runningGC = true;
+			try {
+				File _fs = new File(fileName);
+				lbf = null;
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, false);
+			} finally {
+				l.unlock();
+			}
+
+			SDFSLogger.getLog().info("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]");
+			SDFSEvent tEvt = SDFSEvent
+					.claimInfoEvent("Claiming Records [" + this.getSize() + "] from [" + this.fileName + "]", evt);
+			tEvt.maxCt = this.maps.size();
+			Iterator<AbstractShard> iter = maps.iterator();
+			ArrayList<ClaimShard> excs = new ArrayList<ClaimShard>();
+			while (iter.hasNext()) {
+				tEvt.curCt++;
+				AbstractShard m = null;
+				try {
+					m = iter.next();
+					ClaimShard cms = new ClaimShard(m, bf, lbf, csz);
+					excs.add(cms);
+					executor.execute(cms);
+				} catch (Exception e) {
+					tEvt.endEvent("Unable to claim records for " + m + " because : [" + e.toString() + "]",
+							SDFSEvent.ERROR);
+					SDFSLogger.getLog().error("Unable to claim records for " + m, e);
+					throw new IOException(e);
+				}
+			}
+			executor.shutdown();
+			try {
+				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+					SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
+				}
+			} catch (InterruptedException e) {
+				throw new IOException(e);
+			}
+			for (ClaimShard cms : excs) {
+				if (cms.ex != null)
+					throw new IOException(cms.ex);
+			}
+			this.kSz.getAndAdd(-1 * csz.get());
+			tEvt.endEvent("removed [" + csz.get() + "] records");
+			SDFSLogger.getLog().info("removed [" + csz.get() + "] records");
+			iter = maps.iterator();
+			while (iter.hasNext()) {
+				AbstractShard m = null;
+				try {
+					m = iter.next();
+					if (!m.isFull() && !m.isActive()) {
+
+						// SDFSLogger.getLog().info("deleting " +
+						// m.toString());
+						m.iterInit();
+						KVPair p = m.nextKeyValue();
+						while (p != null) {
+							AbstractShard _m = this.getWriteMap();
+							try {
+								_m.put(p.key, p.value, p.loc);
+								this.keyLookup.invalidate(new ByteArrayWrapper(p.key));
+								this.lbf.put(p.key);
+								p = m.nextKeyValue();
+							} catch (HashtableFullException e) {
+
+							}
+
+						}
+						int mapsz = maps.size();
+						l = this.gcLock.writeLock();
+						l.lock();
+						try {
+							maps.remove(m);
+						} finally {
+							l.unlock();
+						}
+						mapsz = mapsz - maps.size();
+						SDFSLogger.getLog()
+								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
+						m.vanish();
+
+						m = null;
+					} else if (m.isMaxed()) {
+						SDFSLogger.getLog().info("deleting maxed " + m.toString());
+						m.iterInit();
+						KVPair p = m.nextKeyValue();
+						while (p != null) {
+							ShardedFileByteArrayLongMap _m = this.getWriteMap();
 							try {
 								_m.put(p.key, p.value);
 								p = m.nextKeyValue();
@@ -386,17 +633,14 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 							l.unlock();
 						}
 						mapsz = mapsz - maps.size();
-						SDFSLogger.getLog().info(
-								"removing map " + m.toString() + " sz="
-										+ maps.size() + " rm=" + mapsz);
+						SDFSLogger.getLog()
+								.info("removing map " + m.toString() + " sz=" + maps.size() + " rm=" + mapsz);
 						m.vanish();
 
 						m = null;
 					}
 				} catch (Exception e) {
-					tEvt.endEvent(
-							"Unable to compact " + m + " because : ["
-									+ e.toString() + "]", SDFSEvent.ERROR);
+					tEvt.endEvent("Unable to compact " + m + " because : [" + e.toString() + "]", SDFSEvent.ERROR);
 					SDFSLogger.getLog().error("to compact " + m, e);
 					throw new IOException(e);
 				}
@@ -418,8 +662,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		AtomicLong claims = null;
 		Exception ex = null;
 
-		protected ClaimShard(AbstractShard map,
-				LargeBloomFilter bf, LargeBloomFilter nlbf,
+		protected ClaimShard(AbstractShard map, LargeBloomFilter bf, LargeBloomFilter nlbf,
 				AtomicLong claims) {
 			this.map = map;
 			this.bf = bf;
@@ -427,12 +670,21 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			this.nlbf = nlbf;
 		}
 
+		protected ClaimShard(AbstractShard map, AtomicLong claims) {
+			this.map = map;
+
+			this.claims = claims;
+		}
+
 		@Override
 		public void run() {
 			map.iterInit();
 			long cl;
 			try {
-				cl = map.claimRecords(bf, nlbf);
+				if (bf == null)
+					cl = map.claimRecords();
+				else
+					cl = map.claimRecords(bf, nlbf);
 				claims.addAndGet(cl);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to claim shard", e);
@@ -446,7 +698,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	public void setMaxSize(long maxSz) throws IOException {
 		this.maxSz = maxSz;
 		long _tbs = maxSz / (32);
-		int max = (Integer.MAX_VALUE / ProgressiveFileByteArrayLongMap.EL) - 100;
+		int max = 600_000_000;
 		if (_tbs > max) {
 			this.hashTblSz = max;
 		} else if (_tbs > this.hashTblSz) {
@@ -454,10 +706,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		}
 		long otb = this.hashTblSz;
 		this.hashTblSz = NextPrime.getNextPrimeI((int) (this.hashTblSz));
-		SDFSLogger.getLog().info(
-				"table setup max=" + max + " maxsz=" + this.maxSz + " _tbs="
-						+ _tbs + " calculated hashtblesz=" + otb
-						+ " hashTblSz=" + this.hashTblSz);
+		SDFSLogger.getLog().info("table setup max=" + max + " maxsz=" + this.maxSz + " _tbs=" + _tbs
+				+ " calculated hashtblesz=" + otb + " hashTblSz=" + this.hashTblSz);
 	}
 
 	/**
@@ -480,28 +730,27 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		this.setMaxSize(maxSz);
 		File[] files = _fs.getParentFile().listFiles(new DBFileFilter());
 		if (files.length > 0) {
-			CommandLineProgressBar bar = new CommandLineProgressBar(
-					"Loading Existing Hash Tables", files.length, System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Existing Hash Tables", files.length,
+					System.out);
 			this.loadEvent.maxCt = files.length + 128;
-
 			for (int i = 0; i < files.length; i++) {
 				this.loadEvent.curCt = this.loadEvent.curCt + 1;
 				int sz = NextPrime.getNextPrimeI((int) (this.hashTblSz));
 				// SDFSLogger.getLog().debug("will create byte array of size "
 				// + sz + " propsize was " + propsize);
-				ProgressiveFileByteArrayLongMap m = null;
+				ShardedFileByteArrayLongMap m = null;
 				String pth = files[i].getPath();
 				String pfx = pth.substring(0, pth.length() - 5);
-				m = new ProgressiveFileByteArrayLongMap(pfx, sz);
+				m = new ShardedFileByteArrayLongMap(pfx, sz);
 				long mep = m.setUp();
 				if (mep > endPos)
 					endPos = mep;
 				maps.add(m);
 				rsz = rsz + m.size();
 				bar.update(i);
-				if (!m.isFull() && this.activeWriteMaps.size() < AMS) {
+				if (!m.isFull() && this.activeWMap == null) {
 					m.activate();
-					this.activeWriteMaps.add(m);
+					this.activeWMap = m;
 				} else {
 					m.inActive();
 					m.full = true;
@@ -513,16 +762,13 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		this.loadEvent.shortMsg = "Loading BloomFilters";
 
 		if (maps.size() != 0 && !LargeBloomFilter.exists(_fs.getParentFile())) {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true, true,false);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, false);
 			SDFSLogger.getLog().warn("Recreating BloomFilters...");
 			this.loadEvent.shortMsg = "Recreating BloomFilters";
 
-			executor = new ThreadPoolExecutor(Main.writeThreads,
-					Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
-					new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY),
-					executionHandler);
-			CommandLineProgressBar bar = new CommandLineProgressBar(
-					"ReCreating BloomFilters", maps.size(), System.out);
+			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
+					new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+			CommandLineProgressBar bar = new CommandLineProgressBar("ReCreating BloomFilters", maps.size(), System.out);
 			Iterator<AbstractShard> iter = maps.iterator();
 			int i = 0;
 			ArrayList<LBFReconstructThread> al = new ArrayList<LBFReconstructThread>();
@@ -537,11 +783,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			executor.shutdown();
 			bar.finish();
 			try {
-				System.out
-						.print("Waiting for all BloomFilters creation threads to finish");
+				System.out.print("Waiting for all BloomFilters creation threads to finish");
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-					SDFSLogger.getLog().debug(
-							"Awaiting fdisk completion of threads.");
+					SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
 					System.out.print(".");
 
 				}
@@ -554,24 +798,22 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				throw new IOException(e1);
 			}
 		} else {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .01,true, true,false);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, false);
 		}
-		while (this.activeWriteMaps.size() < AMS) {
+		if (this.activeWMap == null) {
 			boolean written = false;
 			while (!written) {
 				String guid = RandomGUID.getGuid();
 
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
-					ProgressiveFileByteArrayLongMap activeWMap = new ProgressiveFileByteArrayLongMap(
-							fileName + "-" + guid, this.hashTblSz);
+					activeWMap = new ShardedFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
 					activeWMap.activate();
 					activeWMap.setUp();
 
 					this.maps.add(activeWMap);
 					written = true;
 
-					this.activeWriteMaps.add(activeWMap);
 				}
 			}
 		}
@@ -619,11 +861,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	}
 
 	@Override
-	public InsertRecord put(ChunkData cm) throws IOException,
-			HashtableFullException {
+	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
-			throw new HashtableFullException("Hashtable " + this.fileName
-					+ " is close");
+			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
 		if (this.kSz.get() >= this.maxSz)
 			throw new HashtableFullException(
 					"entries is greater than or equal to the maximum number of entries. You need to expand"
@@ -642,12 +882,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	// AtomicLong msTr = new AtomicLong(0);
 
 	@Override
-	public InsertRecord put(ChunkData cm, boolean persist) throws IOException,
-			HashtableFullException {
+	public InsertRecord put(ChunkData cm, boolean persist) throws IOException, HashtableFullException {
 		// persist = false;
 		if (this.isClosed())
-			throw new HashtableFullException("Hashtable " + this.fileName
-					+ " is close");
+			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
 		if (kSz.get() >= this.maxSz)
 			throw new HashtableFullException("maximum sized reached");
 		InsertRecord rec = null;
@@ -655,7 +893,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		// this.flushFullBuffer();
 		Lock l = gcLock.readLock();
 		l.lock();
-		ProgressiveFileByteArrayLongMap bm = null;
+		ShardedFileByteArrayLongMap bm = null;
 		try {
 			// long tm = System.currentTimeMillis();
 			AbstractShard rm = this.getReadMap(cm.getHash());
@@ -677,6 +915,8 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 					} catch (HashtableFullException e) {
 						rec = null;
 					} catch (Exception e) {
+						// this.keyLookup.invalidate(new
+						// ByteArrayWrapper(cm.getHash()));
 						throw e;
 					}
 				}
@@ -684,21 +924,15 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				try {
 					rec = new InsertRecord(false, rm.get(cm.getHash()));
 				} catch (MapClosedException e) {
-					SDFSLogger.getLog().error("unable to remove",e);
+					this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
+					put(cm, persist);
 				}
 			}
 			// this.msTr.addAndGet(tm);
 
 		} finally {
-			try {
-				if (bm != null) {
-					bm.activate();
-				}
-			} catch (Exception e) {
 
-			} finally {
-				l.unlock();
-			}
+			l.unlock();
 		}
 		/*
 		 * this.trs.incrementAndGet(); if(this.trs.get() == 10000) { long tpm =
@@ -729,8 +963,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		return added;
 	}
 
-	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException,
-			IOException {
+	public boolean isClaimed(ChunkData cm) throws KeyNotFoundException, IOException {
 		throw new IOException("not implemented");
 	}
 
@@ -750,17 +983,14 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		if (ps != -1) {
 			return ChunkData.getChunk(key, ps);
 		} else {
-			SDFSLogger.getLog().error(
-					"found no data for key [" + StringUtils.getHexString(key)
-							+ "]");
+			SDFSLogger.getLog().error("found no data for key [" + StringUtils.getHexString(key) + "]");
 			return null;
 		}
 
 	}
 
 	@Override
-	public byte[] getData(byte[] key, long pos) throws IOException,
-			DataArchivedException {
+	public byte[] getData(byte[] key, long pos) throws IOException, DataArchivedException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		boolean direct = false;
@@ -777,9 +1007,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				return data;
 			}
 		} else {
-			SDFSLogger.getLog().error(
-					"found no data for key [" + StringUtils.getHexString(key)
-							+ "]");
+			SDFSLogger.getLog().error("found no data for key [" + StringUtils.getHexString(key) + "]");
 			return null;
 		}
 
@@ -793,7 +1021,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
-			if (!this.runningGC && !lbf.mightContain(cm.getHash()))
+			if (!runningGC && !lbf.mightContain(cm.getHash()))
 				return false;
 			try {
 				if (cm.getHash().length == 0)
@@ -806,8 +1034,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 				} else {
 					cm.setmDelete(true);
 					if (this.isClosed()) {
-						throw new IOException("hashtable [" + this.fileName
-								+ "] is close");
+						throw new IOException("hashtable [" + this.fileName + "] is close");
 					}
 					try {
 						this.kSz.decrementAndGet();
@@ -832,11 +1059,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		syncLock.lock();
 		try {
 			if (this.isClosed()) {
-				throw new IOException("hashtable [" + this.fileName
-						+ "] is close");
+				throw new IOException("hashtable [" + this.fileName + "] is close");
 			}
-			Iterator<AbstractShard> iter = this.maps
-					.iterator();
+			Iterator<AbstractShard> iter = this.maps.iterator();
 			while (iter.hasNext()) {
 				try {
 					iter.next().sync();
@@ -857,10 +1082,9 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		try {
 			this.closed = true;
 
-			CommandLineProgressBar bar = new CommandLineProgressBar(
-					"Closing Hash Tables", this.maps.size(), System.out);
-			Iterator<AbstractShard> iter = this.maps
-					.iterator();
+			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", this.maps.size(),
+					System.out);
+			Iterator<AbstractShard> iter = this.maps.iterator();
 			int i = 0;
 			while (iter.hasNext()) {
 				try {
@@ -880,8 +1104,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 			}
 		} finally {
 			this.syncLock.unlock();
-			SDFSLogger.getLog()
-					.info("Hashtable [" + this.fileName + "] closed");
+			SDFSLogger.getLog().info("Hashtable [" + this.fileName + "] closed");
 		}
 	}
 
@@ -891,7 +1114,40 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 	}
 
-	
+	public static void main(String[] args) throws Exception {
+		ShardedProgressiveFileBasedCSMap b = new ShardedProgressiveFileBasedCSMap();
+		b.init(1000000, "/opt/sdfs/hash", .001);
+		long start = System.currentTimeMillis();
+		Random rnd = new Random();
+		byte[] hash = null;
+		long val = -33;
+		byte[] hash1 = null;
+		long val1 = -33;
+		Tiger16HashEngine eng = new Tiger16HashEngine();
+		for (int i = 0; i < 60000; i++) {
+			byte[] z = new byte[64];
+			rnd.nextBytes(z);
+			hash = eng.getHash(z);
+			val = rnd.nextLong();
+			if (i == 1) {
+				val1 = val;
+				hash1 = hash;
+			}
+			if (val < 0)
+				val = val * -1;
+			ChunkData cm = new ChunkData(hash, val);
+			InsertRecord k = b.put(cm);
+			if (k.getInserted())
+				System.out.println("Unable to add this " + k);
+
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
+		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000 + " ms at pos " + b.get(hash1));
+		b.claimRecords(SDFSEvent.gcInfoEvent("testing 123"));
+		b.close();
+
+	}
 
 	@Override
 	public void initCompact() throws IOException {
@@ -904,11 +1160,10 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 		if (f.exists()) {
 			FileUtils.deleteDirectory(f);
 		}
-		FileUtils
-				.copyDirectory(new File(parent), new File(parent + ".compact"));
+		FileUtils.copyDirectory(new File(parent), new File(parent + ".compact"));
 
 		try {
-			this.init(maxSz, this.fileName,.001);
+			this.init(maxSz, this.fileName, .001);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -919,16 +1174,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 	public void commitCompact(boolean force) throws IOException {
 		this.close();
 		FileUtils.deleteDirectory(new File(this.origFileName).getParentFile());
+		SDFSLogger.getLog().info("Deleted " + new File(this.origFileName).getParent());
+		new File(this.fileName).getParentFile().renameTo(new File(this.origFileName).getParentFile());
 		SDFSLogger.getLog().info(
-				"Deleted " + new File(this.origFileName).getParent());
-		new File(this.fileName).getParentFile().renameTo(
-				new File(this.origFileName).getParentFile());
-		SDFSLogger.getLog().info(
-				"moved " + new File(this.fileName).getParent() + " to "
-						+ new File(this.origFileName).getParent());
+				"moved " + new File(this.fileName).getParent() + " to " + new File(this.origFileName).getParent());
 		FileUtils.deleteDirectory(new File(this.fileName).getParentFile());
-		SDFSLogger.getLog().info(
-				"deleted " + new File(this.fileName).getParent());
+		SDFSLogger.getLog().info("deleted " + new File(this.fileName).getParent());
 
 	}
 
@@ -938,8 +1189,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 	}
 
-	protected final static class ProcessPriorityThreadFactory implements
-			ThreadFactory {
+	protected final static class ProcessPriorityThreadFactory implements ThreadFactory {
 
 		private final int threadPriority;
 
@@ -966,34 +1216,20 @@ public class ProgressiveFileBasedCSMap implements AbstractMap,
 
 				ChunkData.cacheChunk(key, pos);
 			} catch (Exception e) {
-				SDFSLogger.getLog()
-						.debug("error getting ["
-								+ StringUtils.getHexString(key) + "]", e);
+				SDFSLogger.getLog().debug("error getting [" + StringUtils.getHexString(key) + "]", e);
 			}
 
 	}
 
 	@Override
 	public boolean mightContainKey(byte[] key) {
-		// TODO Auto-generated method stub
-		return lbf.mightContain(key);
+		Lock l = gcLock.readLock();
+		l.lock();
+		try {
+			return this.lbf.mightContain(key);
+		} finally {
+			l.unlock();
+		}
 	}
 
-	@Override
-	public boolean claimKey(byte[] key, long val) throws IOException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeClaimKey(byte[] key, long val) throws IOException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void clearRefMap() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
 }

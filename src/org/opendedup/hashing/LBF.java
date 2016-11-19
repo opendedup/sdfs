@@ -29,7 +29,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob;
+import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnel;
@@ -42,7 +42,7 @@ import static java.lang.Math.toIntExact;
 public class LBF implements Serializable {
 	private static final long serialVersionUID = 1L;
 	CountingBloomFilterMemory<Object> filter = null;
-	public transient BloomFilter<org.opendedup.collections.ProgressiveFileByteArrayLongMap.KeyBlob> bfs = null;
+	public transient BloomFilter<org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob> bfs = null;
 	public transient ReentrantReadWriteLock l = new ReentrantReadWriteLock();
 	
 	boolean counting = false;

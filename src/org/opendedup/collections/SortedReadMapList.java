@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SortedReadMapList implements Runnable {
-	private CopyOnWriteArrayList<ProgressiveFileByteArrayLongMap> al = new CopyOnWriteArrayList<ProgressiveFileByteArrayLongMap>();
+	private CopyOnWriteArrayList<AbstractShard> al = new CopyOnWriteArrayList<AbstractShard>();
 
 	public SortedReadMapList() {
 		Thread th = new Thread(this);
@@ -58,10 +58,10 @@ public class SortedReadMapList implements Runnable {
 		}
 	}
 	
-	public List<ProgressiveFileByteArrayLongMap> getLMMap() {
-		ArrayList<ProgressiveFileByteArrayLongMap> _al = new ArrayList<ProgressiveFileByteArrayLongMap>();
+	public List<AbstractShard> getLMMap() {
+		ArrayList<AbstractShard> _al = new ArrayList<AbstractShard>();
 		synchronized(al) {
-		for(ProgressiveFileByteArrayLongMap m : al) {
+		for(AbstractShard m : al) {
 			_al.add(m);
 		}
 		}
@@ -69,7 +69,7 @@ public class SortedReadMapList implements Runnable {
 		return _al;
 	}
 
-	public void add(ProgressiveFileByteArrayLongMap m) {
+	public void add(AbstractShard m) {
 		try {
 			al.add(m);
 			Collections.reverse(al);
@@ -84,21 +84,21 @@ public class SortedReadMapList implements Runnable {
 		return this.al.size();
 	}
 
-	public void remove(ProgressiveFileByteArrayLongMap m) {
+	public void remove(AbstractShard m) {
 		al.remove(m);
 	}
 
-	public List<ProgressiveFileByteArrayLongMap> getAL() {
+	public List<AbstractShard> getAL() {
 		return this.al;
 	}
 
-	public Iterator<ProgressiveFileByteArrayLongMap> iterator() {
+	public Iterator<AbstractShard> iterator() {
 		return al.iterator();
 	}
 
-	static final Comparator<ProgressiveFileByteArrayLongMap> TIME_ORDER = new Comparator<ProgressiveFileByteArrayLongMap>() {
-		public int compare(ProgressiveFileByteArrayLongMap m0,
-				ProgressiveFileByteArrayLongMap m1) {
+	static final Comparator<AbstractShard> TIME_ORDER = new Comparator<AbstractShard>() {
+		public int compare(AbstractShard m0,
+				AbstractShard m1) {
 			long dif = m0.getLastAccess() - m1.getLastAccess();
 			if (dif > 0)
 				return -1;
@@ -109,9 +109,9 @@ public class SortedReadMapList implements Runnable {
 		}
 	};
 	
-	static final Comparator<ProgressiveFileByteArrayLongMap> LM_ORDER = new Comparator<ProgressiveFileByteArrayLongMap>() {
-		public int compare(ProgressiveFileByteArrayLongMap m0,
-				ProgressiveFileByteArrayLongMap m1) {
+	static final Comparator<AbstractShard> LM_ORDER = new Comparator<AbstractShard>() {
+		public int compare(AbstractShard m0,
+				AbstractShard m1) {
 			long dif = m0.getLastModified() - m1.getLastModified();
 			if (dif > 0)
 				return -1;
