@@ -44,11 +44,11 @@ public class DedupFileStore {
 			// openFileMonitor = new OpenFileMonitor(1000,
 			// Main.maxInactiveFileTime);
 		}
-		
+
 	}
 
 	public static void init() {
-		
+
 	}
 
 	/**
@@ -72,27 +72,27 @@ public class DedupFileStore {
 		}
 	}
 
-	public static boolean addRef(byte [] entry,long val) throws IOException {
-		if(val == 0)
+	public static boolean addRef(byte[] entry, long val) throws IOException {
+		if (val == 0)
 			return true;
 		ReentrantLock l = getLock(entry[0]);
 		l.lock();
 		try {
-			return HCServiceProxy.claimKey(entry,val);
-			
+			return HCServiceProxy.claimKey(entry, val);
+
 		} finally {
 			removeLock(entry[0]);
 		}
 	}
 
-	public static boolean removeRef(byte [] entry,long val) throws IOException {
-		if(val == 0)
+	public static boolean removeRef(byte[] entry, long val) throws IOException {
+		if (val == 0)
 			return true;
 		ReentrantLock l = getLock(entry[0]);
 		l.lock();
 		try {
-			return HCServiceProxy.removeClaimKey(entry,val);
-			
+			return HCServiceProxy.removeClaimKey(entry, val);
+
 		} finally {
 			removeLock(entry[0]);
 		}
@@ -124,8 +124,13 @@ public class DedupFileStore {
 					lockMap.remove(st);
 				}
 			} finally {
-				if (l != null && l.isLocked())
-					l.unlock();
+				if (l != null && l.isLocked()) {
+					try {
+						l.unlock();
+					} catch (Exception e) {
+
+					}
+				}
 			}
 		} finally {
 
@@ -283,7 +288,7 @@ public class DedupFileStore {
 				}
 			}
 		}
-		
+
 	}
 
 	/**

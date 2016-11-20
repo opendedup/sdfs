@@ -163,6 +163,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("vrts-appliance")) {
 			this.vrts_appliance = true;
 			this.base_path = "/config/sdfs/" + volume_name;
+			this.safe_sync = false;
 		}
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");

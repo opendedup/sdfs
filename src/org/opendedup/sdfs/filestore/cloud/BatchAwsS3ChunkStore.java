@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -46,7 +47,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -106,6 +112,7 @@ import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -1323,6 +1330,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 				
 				if (this.deletes.size() > 0) {
+					SDFSLogger.getLog().info("running garbage collection");
+					RejectedExecutionHandler executionHandler = new BlockPolicy();
+					BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+					ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.dseIOThreads,
+							10, TimeUnit.SECONDS, worksQueue, executionHandler);
 					this.delLock.lock();
 					HashMap<Long, Integer> odel = null;
 					try {
@@ -1335,65 +1347,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					Set<Long> iter = odel.keySet();
 					for (Long k : iter) {
-						String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
-								Main.chunkStoreEncryptionEnabled);
-						try {
-							ObjectMetadata om = null;
-							if (clustered) {
-								om = s3Service.getObjectMetadata(this.name, "keys/" + hashString);
-
-							} else {
-								om = s3Service.getObjectMetadata(this.name, this.getClaimName(k.longValue()));
-							}
-							Map<String, String> mp = this.getUserMetaData(om);
-							int objects = Integer.parseInt((String) mp.get("objects"));
-							int delobj = 0;
-							if (mp.containsKey("deleted-objects"))
-								delobj = Integer.parseInt((String) mp.get("deleted-objects"));
-							// SDFSLogger.getLog().info("remove requests for " +
-							// hashString + "=" + odel.get(k));
-							delobj = delobj + odel.get(k);
-							if (objects <= delobj) {
-								// SDFSLogger.getLog().info("deleting " +
-								// hashString);
-								int size = Integer.parseInt((String) mp.get("bsize"));
-								int compressedSize = Integer.parseInt((String) mp.get("bcompressedsize"));
-								HashBlobArchive.currentLength.addAndGet(-1 * size);
-								HashBlobArchive.compressedLength.addAndGet(-1 * compressedSize);
-								if (this.deleteUnclaimed) {
-									this.verifyDelete(k.longValue());
-								} else {
-									mp.put("deleted", "true");
-									mp.put("deleted-objects", Integer.toString(delobj));
-									om.setUserMetadata(mp);
-									String km = null;
-									if (clustered)
-										km = this.getClaimName(k.longValue());
-									else
-										km = "keys/" + hashString;
-									CopyObjectRequest req = new CopyObjectRequest(this.name, km, this.name, km)
-											.withNewObjectMetadata(om);
-									s3Service.copyObject(req);
-								}
-								HashBlobArchive.removeCache(k.longValue());
-							} else {
-								mp.put("deleted-objects", Integer.toString(delobj));
-								om.setUserMetadata(mp);
-								String km = null;
-								if (clustered)
-									km = this.getClaimName(k.longValue());
-								else
-									km = "keys/" + hashString;
-								CopyObjectRequest req = new CopyObjectRequest(this.name, km, this.name, km)
-										.withNewObjectMetadata(om);
-								s3Service.copyObject(req);
-							}
-						} catch (Exception e) {
-							SDFSLogger.getLog().warn("Unable to delete object " + hashString, e);
-						} finally {
-						}
+						DeleteObject obj = new DeleteObject();
+						obj.k = k;
+						obj.odel=odel;
+						obj.st = this;
+						executor.execute(obj);
 					}
-
+					executor.shutdown();
+					while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
+					}
+					SDFSLogger.getLog().info("done running garbage collection");
 				}
 			} catch (InterruptedException e) {
 				break;
@@ -2477,6 +2441,77 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		s3Service.deleteObject(this.name, "bucketinfo/" + vid);
 		SDFSLogger.getLog().info("Deleted " + volumeID);
+	}
+	
+	private static class DeleteObject implements Runnable {
+		BatchAwsS3ChunkStore st = null;
+		Long k;
+		HashMap<Long, Integer> odel = null;
+
+		@Override
+		public void run() {
+			try {
+			String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
+					Main.chunkStoreEncryptionEnabled);
+			
+				ObjectMetadata om = null;
+				if (st.clustered) {
+					om = st.s3Service.getObjectMetadata(st.name, "keys/" + hashString);
+
+				} else {
+					om = st.s3Service.getObjectMetadata(st.name, st.getClaimName(k.longValue()));
+				}
+				Map<String, String> mp = st.getUserMetaData(om);
+				int objects = Integer.parseInt((String) mp.get("objects"));
+				int delobj = 0;
+				if (mp.containsKey("deleted-objects"))
+					delobj = Integer.parseInt((String) mp.get("deleted-objects"));
+				// SDFSLogger.getLog().info("remove requests for " +
+				// hashString + "=" + odel.get(k));
+				delobj = delobj + odel.get(k);
+				if (objects <= delobj) {
+					// SDFSLogger.getLog().info("deleting " +
+					// hashString);
+					int size = Integer.parseInt((String) mp.get("bsize"));
+					int compressedSize = Integer.parseInt((String) mp.get("bcompressedsize"));
+					HashBlobArchive.currentLength.addAndGet(-1 * size);
+					HashBlobArchive.compressedLength.addAndGet(-1 * compressedSize);
+					if (st.deleteUnclaimed) {
+						st.verifyDelete(k.longValue());
+						SDFSLogger.getLog().info("deleted " + k.longValue());
+					} else {
+						mp.put("deleted", "true");
+						mp.put("deleted-objects", Integer.toString(delobj));
+						om.setUserMetadata(mp);
+						String km = null;
+						if (st.clustered)
+							km = st.getClaimName(k.longValue());
+						else
+							km = "keys/" + hashString;
+						CopyObjectRequest req = new CopyObjectRequest(st.name, km, st.name, km)
+								.withNewObjectMetadata(om);
+						st.s3Service.copyObject(req);
+					}
+					HashBlobArchive.removeCache(k.longValue());
+				} else {
+					mp.put("deleted-objects", Integer.toString(delobj));
+					om.setUserMetadata(mp);
+					String km = null;
+					if (st.clustered)
+						km = st.getClaimName(k.longValue());
+					else
+						km = "keys/" + hashString;
+					CopyObjectRequest req = new CopyObjectRequest(st.name, km, st.name, km)
+							.withNewObjectMetadata(om);
+					st.s3Service.copyObject(req);
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("Unable to delete object " + k, e);
+			} finally {
+			}
+			
+		}
+		
 	}
 
 }

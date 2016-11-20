@@ -1191,7 +1191,8 @@ static struct fuse_operations javafs_oper = {
    open:       javafs_open,
    read:       javafs_read,
    write:      javafs_write,
-   statfs:     javafs_statfs,
+		   statfs:     javafs_statfs,
+				   destroy : javafs_destroy,
    flush:      javafs_flush,
    release:    javafs_release,
    fsync:      javafs_fsync,
@@ -1199,8 +1200,8 @@ static struct fuse_operations javafs_oper = {
    setxattr:    javafs_setxattr,
    getxattr:    javafs_getxattr,
    listxattr:   javafs_listxattr,
-   removexattr: javafs_removexattr,
-   destroy:	javafs_destroy
+   removexattr: javafs_removexattr
+   
 };
 
 
