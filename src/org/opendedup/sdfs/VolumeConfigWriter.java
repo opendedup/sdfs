@@ -499,7 +499,7 @@ public class VolumeConfigWriter {
 				System.out.println("making mountpoint" + vdir.getAbsolutePath());
 				vdir.mkdirs();
 			}
-			file = new File(dir.getPath() + this.volume_name.trim() + "-volume-cfg.xml");
+			file = new File(dir.getPath() + File.separator + this.volume_name.trim() + "-volume-cfg.xml");
 
 		}
 		// Create XML DOM document (Memory consuming).
@@ -796,7 +796,7 @@ public class VolumeConfigWriter {
 		options.addOption(
 				OptionBuilder.withLongOpt("help").withDescription("Display these options.").hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("vrts-appliance")
-				.withDescription("Volume is running on a NetBackup Appliance.").hasArg(true).withArgName("password")
+				.withDescription("Volume is running on a NetBackup Appliance.").hasArg(true).hasArg(false)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-password")
 				.withDescription(
