@@ -120,7 +120,7 @@ public class VolumeConfigWriter {
 	private boolean readAhead = false;
 	private boolean usebasicsigner = false;
 	private boolean disableDNSBucket = false;
-	private String blockSize = "5 MB";
+	private String blockSize = "30 MB";
 	private long sn = new Random().nextLong();
 
 	public VolumeConfigWriter() {
