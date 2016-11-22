@@ -2455,7 +2455,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					Main.chunkStoreEncryptionEnabled);
 			
 				ObjectMetadata om = null;
-				if (st.clustered) {
+				if (!st.clustered) {
 					om = st.s3Service.getObjectMetadata(st.name, "keys/" + hashString);
 
 				} else {
