@@ -60,10 +60,6 @@ public interface AbstractHashesMap {
 	public abstract boolean update(ChunkData cm) throws IOException;
 
 	public abstract void cache(byte[] key,long pos) throws IOException;
-	
-	public abstract boolean claimKey(byte[] key,long val) throws IOException;
-	
-	public abstract boolean removeClaimKey(byte[] key,long val) throws IOException;
 
 	public abstract long get(byte[] key) throws IOException;
 
@@ -92,5 +88,7 @@ public interface AbstractHashesMap {
 			throws IOException, HashtableFullException;
 
 	void clearRefMap() throws IOException;
+
+	boolean claimKey(byte[] hash, long val, long ct) throws IOException;
 
 }

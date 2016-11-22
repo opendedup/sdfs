@@ -47,9 +47,8 @@ public class DBTest implements Runnable {
 					System.exit(0);
 				}
 				*/
-				m.claimKey(key, z);
-				m.claimKey(key, z);
-				m.removeClaimKey(key, z);
+				m.claimKey(key, z,1);
+				m.claimKey(key, z,1);
 			}
 			
 			

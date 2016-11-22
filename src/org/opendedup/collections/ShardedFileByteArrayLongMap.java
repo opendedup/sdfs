@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,8 +31,6 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.NextPrime;
-import org.opendedup.util.StringUtils;
-
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
@@ -164,6 +163,7 @@ public class ShardedFileByteArrayLongMap
 
 	@Override
 	public synchronized void cache() {
+		/*
 		if (this.nextCached.get() < System.currentTimeMillis() && !this.cacheRunning) {
 			synchronized (this.nextCached) {
 				if (!this.cacheRunning) {
@@ -173,6 +173,7 @@ public class ShardedFileByteArrayLongMap
 				}
 			}
 		}
+		*/
 
 	}
 
@@ -746,34 +747,19 @@ public class ShardedFileByteArrayLongMap
 	}
 
 	@Override
-	public boolean claim(byte[] key, long val) throws MapClosedException {
+	public boolean claim(byte[] key, long val,long ct) throws MapClosedException {
 		this.hashlock.readLock().lock();
 		try {
 			if (this.isClosed())
 				throw new MapClosedException();
 			Shard sh = this.getMap(key);
 			synchronized (sh) {
-				return sh.claimKey(key, val);
+				return sh.claimKey(key, val,ct);
 			}
 		} finally {
 			this.hashlock.readLock().unlock();
 		}
 
-	}
-
-	@Override
-	public boolean removeClaim(byte[] key, long val) throws MapClosedException {
-		this.hashlock.readLock().lock();
-		try {
-			if (this.isClosed())
-				throw new MapClosedException();
-			Shard sh = this.getMap(key);
-			synchronized (sh) {
-				return sh.removeClaimKey(key, val);
-			}
-		} finally {
-			this.hashlock.readLock().unlock();
-		}
 	}
 
 	/*
@@ -1379,7 +1365,7 @@ public class ShardedFileByteArrayLongMap
 			}
 		}
 
-		public boolean claimKey(byte[] key, long val) {
+		public boolean claimKey(byte[] key, long val,long ct) {
 			try {
 				int pos = -1;
 
@@ -1387,14 +1373,10 @@ public class ShardedFileByteArrayLongMap
 				if (pos == -1) {
 					return false;
 				} else {
-					long ct = 0;
 					long _val = this.kFC.getLong(pos + VP);
 					if (_val == val) {
 						pos = (pos / EL) * 8;
-						ct = this.rFC.getLong(pos);
-						ct++;
-						if(ct<0)
-							ct=1;
+						ct += this.rFC.getLong(pos);
 						this.rFC.putLong(pos, ct);
 						this.claims.set(pos / 8);
 						// SDFSLogger.getLog().info("added " + ct + " " +
@@ -1406,41 +1388,6 @@ public class ShardedFileByteArrayLongMap
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("error setting claim", e);
-				return false;
-			}
-		}
-
-		public boolean removeClaimKey(byte[] key, long val) {
-			try {
-				int pos = -1;
-
-				pos = this.index(key);
-				if (pos == -1) {
-					// SDFSLogger.getLog().warn("miss");
-					return false;
-				} else {
-					long ct = -1;
-					long _val = this.kFC.getLong(pos + VP);
-					if (_val == val) {
-						pos = (pos / EL) * 8;
-						ct = this.rFC.getLong(pos);
-						ct--;
-						if (ct < 0) {
-
-							SDFSLogger.getLog()
-									.warn("negative reference for " + StringUtils.getHexString(key) + " val=" + ct);
-							ct = 0;
-						}
-						this.rFC.putLong(pos, ct);
-
-						return true;
-					} else {
-						return false;
-					}
-
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("error removeing claim", e);
 				return false;
 			}
 		}

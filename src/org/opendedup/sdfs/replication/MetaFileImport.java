@@ -296,7 +296,7 @@ public class MetaFileImport implements Serializable {
 							boolean hpc = false;
 							for (HashLocPair p : al) {
 								long pos = 0 ;
-								if(Arrays.areEqual(WritableCacheBuffer.bk,p.hash))
+								if(Main.refCount && Arrays.areEqual(WritableCacheBuffer.bk,p.hash))
 										pos= 0;
 								pos = HCServiceProxy.hashExists(p.hash,
 										false);

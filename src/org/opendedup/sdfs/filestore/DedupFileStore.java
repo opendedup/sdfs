@@ -1,16 +1,28 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
-import java.util.HashMap;
+
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.opendedup.collections.ByteArrayWrapper;
+import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 
 /**
  * 
@@ -31,7 +43,26 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
-	private static HashMap<Byte, ReentrantLock> lockMap = new HashMap<Byte, ReentrantLock>();
+	
+	private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup = CacheBuilder.newBuilder()
+			.maximumSize(1_000_000).concurrencyLevel(Main.writeThreads)
+			.removalListener(new RemovalListener<ByteLongArrayWrapper, AtomicLong>() {
+				public void onRemoval(RemovalNotification<ByteLongArrayWrapper, AtomicLong> removal) {
+					ByteLongArrayWrapper bk = removal.getKey();
+					try {
+						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
+							SDFSLogger.getLog().warn("Unable to insert");
+						}
+					} catch (IOException e) {
+						SDFSLogger.getLog().error("unable to add reference",e);
+					}
+					
+				}
+			}).build(new CacheLoader<ByteLongArrayWrapper, AtomicLong>() {
+				public AtomicLong load(ByteLongArrayWrapper key) throws KeyNotFoundException {
+					return new AtomicLong(0);
+				}
+			});
 
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
@@ -75,68 +106,48 @@ public class DedupFileStore {
 	public static boolean addRef(byte[] entry, long val) throws IOException {
 		if (val == 0)
 			return true;
-		ReentrantLock l = getLock(entry[0]);
-		l.lock();
+		
 		try {
-			return HCServiceProxy.claimKey(entry, val);
+			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
+				return true;
+			else {
+				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
+				try {
+					keyLookup.get(bl).incrementAndGet();
+					return true;
+				} catch (ExecutionException e) {
+					SDFSLogger.getLog().error("unable to increment", e);;
+					return false;
+				}
+			}
 
 		} finally {
-			removeLock(entry[0]);
 		}
 	}
-
+	
 	public static boolean removeRef(byte[] entry, long val) throws IOException {
 		if (val == 0)
 			return true;
-		ReentrantLock l = getLock(entry[0]);
-		l.lock();
+		
 		try {
-			return HCServiceProxy.removeClaimKey(entry, val);
-
-		} finally {
-			removeLock(entry[0]);
-		}
-	}
-
-	private static ReentrantLock iLock = new ReentrantLock();
-
-	private static ReentrantLock getLock(byte st) {
-		iLock.lock();
-		try {
-			ReentrantLock l = lockMap.get(st);
-			if (l == null) {
-				l = new ReentrantLock(false);
-				lockMap.put(st, l);
-			}
-			return l;
-		} finally {
-			iLock.unlock();
-		}
-	}
-
-	private static void removeLock(byte st) {
-		iLock.lock();
-		try {
-			ReentrantLock l = lockMap.get(st);
-			try {
-
-				if (l != null && !l.hasQueuedThreads()) {
-					lockMap.remove(st);
-				}
-			} finally {
-				if (l != null && l.isLocked()) {
-					try {
-						l.unlock();
-					} catch (Exception e) {
-
-					}
+			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
+				return true;
+			else {
+				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
+				try {
+					keyLookup.get(bl).decrementAndGet();
+					return true;
+				} catch (ExecutionException e) {
+					SDFSLogger.getLog().error("unable to increment", e);;
+					return false;
 				}
 			}
-		} finally {
 
-			iLock.unlock();
+		} finally {
 		}
 	}
+
+	
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
@@ -287,6 +298,9 @@ public class DedupFileStore {
 						SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
 				}
 			}
+		} 
+		if(Main.refCount) {
+			keyLookup.invalidateAll();
 		}
 
 	}
@@ -308,5 +322,51 @@ public class DedupFileStore {
 		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("write caches flushed");
+		if(Main.refCount) {
+			keyLookup.invalidateAll();
+		}
+	}
+	
+	private static class ByteLongArrayWrapper
+	{
+	    private final byte[] data;
+	    private final long val;
+
+	    public ByteLongArrayWrapper(byte[] data,long val)
+	    {
+	        if (data == null)
+	        {
+	            throw new NullPointerException();
+	        }
+	        this.val = val;
+	        this.data = data;
+	    }
+	    
+	    public byte [] getData() {
+	    	return this.data;
+	    }
+	    
+	    public long getVal() {
+	    	return this.val;
+	    }
+
+	    @Override
+	    public boolean equals(Object other)
+	    {
+	        if (!(other instanceof ByteArrayWrapper))
+	        {
+	            return false;
+	        }
+	        if(Arrays.equals(data, ((ByteLongArrayWrapper)other).data) && val ==((ByteLongArrayWrapper)other).val )
+	        	return true;
+	        else
+	        	return false;
+	    }
+
+	    @Override
+	    public int hashCode()
+	    {
+	        return Arrays.hashCode(data);
+	    }
 	}
 }

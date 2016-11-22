@@ -102,11 +102,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
 		} else {
 			worksQueue = new SynchronousQueue<Runnable>();
-			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
+			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 		}
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,
-				lexecutionHandler);
+				new ThreadPoolExecutor.CallerRunsPolicy());
 	}
 
 	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, List<HashLocPair> ar,
@@ -458,7 +458,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} else {
 				if(Arrays.equals(this.ar.get(0).hash, bk))
 					this.buf = ByteBuffer
-							.wrap(new byte[Main.MIN_CHUNK_LENGTH]);
+							.wrap(new byte[blankBlock.length]);
 				else
 				this.buf = ByteBuffer
 						.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc, direct));
@@ -634,7 +634,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
 				byte[] b = null;
 				if(Arrays.equals(p.hash, bk))
-					b = new byte[Main.MIN_CHUNK_LENGTH];
+					b = new byte[blankBlock.length];
 				else
 					b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
 				ByteBuffer bf = ByteBuffer.wrap(b);
@@ -1197,8 +1197,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
-				if(Arrays.equals(hash, bk))
-					ck = new byte[Main.MIN_CHUNK_LENGTH];
+				if(Arrays.equals(hash, bk)) {
+					ck = new byte[blankBlock.length];
+					l.commandResponse(this);
+				}
 				else if (cache) {
 					HCServiceProxy.cacheData(hash, hashloc,direct);
 				} else {
@@ -1209,8 +1211,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			} catch (DataArchivedException e) {
 				l.commandArchiveException(e);
-			} catch (Exception e) {
-				l.commandException(e);
+			} catch (Throwable e) {
+				l.commandException(new Exception(e));
 			}
 
 		}
@@ -1225,7 +1227,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
 				if(Arrays.equals(s.hash, bk))
-					s.ck = new byte[Main.MIN_CHUNK_LENGTH];
+					s.ck = new byte[blankBlock.length];
 				else if (cache) {
 					HCServiceProxy.cacheData(s.hash, s.hashloc,direct);
 				} else

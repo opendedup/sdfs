@@ -182,17 +182,9 @@ public class HCServiceProxy {
 		}
 	}
 	
-	public static boolean claimKey(byte [] key,long val) throws IOException {
+	public static boolean claimKey(byte [] key,long val,long ct) throws IOException {
 		if (Main.chunkStoreLocal) {
-			return hcService.claimKey(key,val);
-		}
-		else 
-			return false;
-	}
-	
-	public static boolean removeClaimKey(byte [] key,long val) throws IOException {
-		if (Main.chunkStoreLocal) {
-			return hcService.removeClaimKey(key,val);
+			return hcService.claimKey(key,val,ct);
 		}
 		else 
 			return false;

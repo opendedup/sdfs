@@ -868,7 +868,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					cp = np.get();
 					np.set(cp + 4 + hash.length + 4 + chunk.length);
 					try {
-						boolean ins = false;
+						boolean ins = true;
 						if (VERSION == 0) {
 							ins = wMaps.get(this.id).put(hash, (int) cp + 4 + hash.length);
 							SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
@@ -907,7 +907,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					l.unlock();
 				}
 
-				ByteBuffer buf = ByteBuffer.wrap(new byte[4 + hash.length + 4 + chunk.length]);
+				ByteBuffer buf = ByteBuffer.allocateDirect(4 + hash.length + 4 + chunk.length);
 				buf.putInt(hash.length);
 				buf.put(hash);
 				buf.putInt(chunk.length);

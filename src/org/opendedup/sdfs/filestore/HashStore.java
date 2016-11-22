@@ -228,12 +228,8 @@ public class HashStore {
 		return hs;
 	}
 	
-	public boolean claimKey(byte [] key,long val) throws IOException {
-		return bdb.claimKey(key,val);
-	}
-	
-	public boolean removeClaimKey(byte [] key,long val) throws IOException {
-		return bdb.removeClaimKey(key,val);
+	public boolean claimKey(byte [] key,long val,long ct) throws IOException {
+		return bdb.claimKey(key,val,ct);
 	}
 
 	public void cacheChunk(byte[] hash,long pos) throws IOException,

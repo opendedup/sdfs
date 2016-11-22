@@ -360,7 +360,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		fpos = this.getMapFilePosition(pos);
 
 		//
-		Lock l = this.hashlock.writeLock();
+		Lock l = this.hashlock.readLock();
 		l.lock();
 		try {
 
@@ -372,10 +372,6 @@ public class LongByteArrayMap implements DataMapInterface {
 			 * IOException("data length " + data.length + " does not equal " +
 			 * arrayLength);
 			 */
-			
-			l.unlock();
-			l = this.hashlock.readLock();
-			l.lock();
 			if (Main.refCount) {
 				SparseDataChunk ck = this.get(pos);
 				if (ck != null) {

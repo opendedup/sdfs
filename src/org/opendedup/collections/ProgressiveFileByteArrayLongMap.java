@@ -1465,18 +1465,6 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	}
 
 	@Override
-	public boolean removeClaim(byte[] key, long val) throws MapClosedException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean claim(byte[] key, long val) throws MapClosedException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		// TODO Auto-generated method stub
 		
@@ -1498,6 +1486,12 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	public long getLastAccess() {
 		// TODO Auto-generated method stub
 		return this.lastFound;
+	}
+
+	@Override
+	public boolean claim(byte[] key, long val, long ct) throws MapClosedException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

@@ -48,8 +48,9 @@ public interface AbstractShard {
 	 * @param obj
 	 *            an <code>Object</code> value
 	 * @return a <code>boolean</code> value
+	 * @throws MapClosedException 
 	 */
-	public abstract boolean containsKey(byte[] key) ;
+	public abstract boolean containsKey(byte[] key) throws MapClosedException ;
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -70,7 +71,7 @@ public interface AbstractShard {
 			throws HashtableFullException, IOException, MapClosedException;
 
 	public abstract InsertRecord put(byte[] key, long val)
-			throws HashtableFullException, IOException;
+			throws HashtableFullException, IOException, MapClosedException;
 
 	public abstract int getEntries();
 
@@ -104,10 +105,6 @@ public interface AbstractShard {
 
 	int avail();
 
-	boolean removeClaim(byte[] key, long val) throws MapClosedException;
-
-	boolean claim(byte[] key, long val) throws MapClosedException;
-
 	void put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
 
 	boolean isMaxed();
@@ -127,5 +124,7 @@ public interface AbstractShard {
 	void compactRunning(boolean running);
 
 	long getLastAccess();
+
+	boolean claim(byte[] key, long val, long ct) throws MapClosedException;
 
 }

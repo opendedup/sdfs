@@ -47,9 +47,8 @@ public interface HashChunkServiceInterface {
 
 	public abstract AbstractChunkStore getChuckStore();
 	
-	public abstract boolean claimKey(byte [] key,long val) throws IOException;
+	public abstract boolean claimKey(byte [] key,long val,long ct) throws IOException;
 	
-	public abstract boolean removeClaimKey(byte [] key,long val) throws IOException;
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
 			boolean compressed) throws IOException, HashtableFullException;

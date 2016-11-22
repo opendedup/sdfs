@@ -177,10 +177,14 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 					break;
 				}
 				amt.incrementAndGet();
-				if (_m.containsKey(hash)) {
-					this.keyLookup.put(new ByteArrayWrapper(hash), _m);
-					_m.cache();
-					return _m;
+				try {
+					if (_m.containsKey(hash)) {
+						this.keyLookup.put(new ByteArrayWrapper(hash), _m);
+						_m.cache();
+						return _m;
+					}
+				} catch (MapClosedException e) {
+					getReadMap(hash,deep);
 				}
 			}
 			mt.incrementAndGet();
@@ -291,7 +295,8 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		}
 	}
 
-	public boolean claimKey(byte[] hash, long val) throws IOException {
+	@Override
+	public boolean claimKey(byte[] hash, long val,long ct) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
@@ -301,7 +306,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
 			if (k != null) {
 				try {
-					boolean pos = k.claim(hash, val);
+					boolean pos = k.claim(hash, val,ct);
 					if (pos) {
 						// m.cache();
 						return pos;
@@ -312,7 +317,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 			}
 			for (AbstractShard m : this.maps.getAL()) {
 				try {
-					boolean pos = m.claim(hash, val);
+					boolean pos = m.claim(hash, val,ct);
 					if (pos) {
 						// m.cache();
 						return pos;
@@ -321,44 +326,6 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				}
 			}
 			SDFSLogger.getLog().info("miss2");
-			return false;
-		} finally {
-			l.unlock();
-		}
-	}
-
-	public boolean removeClaimKey(byte[] hash, long val) throws IOException {
-		Lock l = gcLock.readLock();
-		l.lock();
-		try {
-			if (!runningGC && !lbf.mightContain(hash)) {
-				SDFSLogger.getLog().info("misss " + StringUtils.getHexString(hash));
-				return false;
-			}
-			
-			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
-			if (k != null) {
-				try {
-					boolean pos = k.removeClaim(hash, val);
-					if (pos) {
-						// m.cache();
-						return pos;
-					}
-				} catch (MapClosedException e) {
-					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
-				}
-			}
-			for (AbstractShard m : this.maps.getAL()) {
-				try {
-				boolean pos = m.removeClaim(hash, val);
-				if (pos) {
-					// m.cache();
-					return pos;
-				}
-				} catch (MapClosedException e) {
-					
-				}
-			}
 			return false;
 		} finally {
 			l.unlock();
@@ -924,7 +891,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 						if (persist && !cm.recoverd) {
 							try {
 								cm.persistData(true);
-							} catch (HashExistsException e) {
+							} catch (org.opendedup.collections.HashExistsException e) {
 								return new InsertRecord(false, e.getPos());
 							}
 						}

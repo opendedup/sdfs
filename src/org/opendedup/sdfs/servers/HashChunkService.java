@@ -302,13 +302,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public boolean claimKey(byte[] key,long val) throws IOException {
-		return hs.claimKey(key,val);
-	}
-
-	@Override
-	public boolean removeClaimKey(byte[] key,long val) throws IOException {
-		return hs.removeClaimKey(key,val);
+	public boolean claimKey(byte[] key,long val,long ct) throws IOException {
+		return hs.claimKey(key,val,ct);
 	}
 
 }

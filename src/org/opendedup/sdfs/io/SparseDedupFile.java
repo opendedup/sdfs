@@ -105,8 +105,8 @@ public class SparseDedupFile implements DedupFile {
 					((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
 			executor = new ThreadPoolExecutor(120, 120, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
 		} else {
-			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
-					executionHandler);
+			executor = new ThreadPoolExecutor(1, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
+					new ThreadPoolExecutor.CallerRunsPolicy());
 		}
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
@@ -525,6 +525,7 @@ public class SparseDedupFile implements DedupFile {
 
 							int al = 0;
 							while (l.getDN() < fs.size() && l.getDNEX() == 0) {
+								
 								if (al == 30) {
 									int nt = wl / 1000;
 									SDFSLogger.getLog()
@@ -543,6 +544,7 @@ public class SparseDedupFile implements DedupFile {
 
 								synchronized (l) {
 									l.wait(tm);
+									
 								}
 								al++;
 								wl += tm;

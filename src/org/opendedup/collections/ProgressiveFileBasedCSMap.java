@@ -132,10 +132,14 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 			 */
 			for (AbstractShard _m : this.maps.getAL()) {
 				// amt.incrementAndGet();
-				if (_m.containsKey(hash)) {
-					if (runningGC)
-						this.lbf.put(hash);
-					return _m;
+				try {
+					if (_m.containsKey(hash)) {
+						if (runningGC)
+							this.lbf.put(hash);
+						return _m;
+					}
+				} catch (MapClosedException e) {
+					this.getReadMap(hash);
 				}
 			}
 			// mt.incrementAndGet();
@@ -931,13 +935,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	@Override
-	public boolean claimKey(byte[] key, long val) throws IOException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeClaimKey(byte[] key, long val) throws IOException {
+	public boolean claimKey(byte[] key, long val,long claims) throws IOException {
 		// TODO Auto-generated method stub
 		return false;
 	}
