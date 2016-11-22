@@ -24,6 +24,7 @@ import java.util.concurrent.locks.Lock;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -146,9 +147,14 @@ public class ManualGC {
 					fd.vanish();
 				}
 				}else {
+					DedupFileStore.gcRunning(true);
+					try {
 					evt.curCt = 33;
 					rm = HCServiceProxy.processHashClaims(evt);
 					evt.curCt = 66;
+					}finally {
+						DedupFileStore.gcRunning(false);
+					}
 				}
 				
 			} else {

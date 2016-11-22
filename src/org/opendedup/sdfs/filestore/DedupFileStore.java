@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.ByteArrayWrapper;
 import org.opendedup.collections.KeyNotFoundException;
@@ -81,6 +82,23 @@ public class DedupFileStore {
 	public static void init() {
 
 	}
+	
+	public static boolean gcRunning;
+	static ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
+	public static void gcRunning(boolean running) {
+		gcLock.writeLock().lock();
+		try{
+		if(running) {
+			gcRunning = true;
+			keyLookup.invalidateAll();
+		}
+		else
+			gcRunning = false;
+		}finally {
+			gcLock.writeLock().unlock();
+		}
+		
+	}
 
 	/**
 	 * 
@@ -111,6 +129,10 @@ public class DedupFileStore {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
 				return true;
 			else {
+				gcLock.readLock().lock();
+				try {
+				if(gcRunning)
+					return HCServiceProxy.claimKey(entry, val,1);
 				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
 				try {
 					keyLookup.get(bl).incrementAndGet();
@@ -118,6 +140,9 @@ public class DedupFileStore {
 				} catch (ExecutionException e) {
 					SDFSLogger.getLog().error("unable to increment", e);;
 					return false;
+				}
+				}finally {
+					gcLock.readLock().unlock();
 				}
 			}
 
@@ -133,6 +158,10 @@ public class DedupFileStore {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
 				return true;
 			else {
+				gcLock.readLock().lock();
+				try {
+				if(gcRunning)
+					return HCServiceProxy.claimKey(entry, val,1);
 				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
 				try {
 					keyLookup.get(bl).decrementAndGet();
@@ -140,6 +169,9 @@ public class DedupFileStore {
 				} catch (ExecutionException e) {
 					SDFSLogger.getLog().error("unable to increment", e);;
 					return false;
+				}
+				}finally {
+					gcLock.readLock().unlock();
 				}
 			}
 

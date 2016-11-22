@@ -121,6 +121,7 @@ public class VolumeConfigWriter {
 	private boolean usebasicsigner = false;
 	private boolean disableDNSBucket = false;
 	private String blockSize = "30 MB";
+	private boolean minIOEnabled;
 	private long sn = new Random().nextLong();
 
 	public VolumeConfigWriter() {
@@ -290,6 +291,11 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("aws-enabled")) {
 			this.awsEnabled = Boolean.parseBoolean(cmd.getOptionValue("aws-enabled"));
 		}
+		if (cmd.hasOption("minio-enabled")) {
+
+			this.safe_sync = false;
+			this.minIOEnabled = true;
+		}
 		if (cmd.hasOption("google-enabled")) {
 			this.gsEnabled = Boolean.parseBoolean(cmd.getOptionValue("google-enabled"));
 		}
@@ -302,9 +308,13 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("gc-class")) {
 			this.gc_class = cmd.getOptionValue("gc-class");
 		}
-		if (this.awsEnabled) {
+		if (this.awsEnabled || minIOEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
+				if(this.minIOEnabled && !cmd.hasOption("cloud-url")) {
+					System.out.println("Error : Unable to create volume");
+					System.out.println("cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+				}
 				if (!awsAim) {
 					this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 					this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
@@ -318,13 +328,13 @@ public class VolumeConfigWriter {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
 				}
-				if (!awsAim && !cmd.hasOption("cloud-disable-test")
+				if (!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!awsAim && !cmd.hasOption("cloud-disable-test")
+				if (!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
 					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
 					System.out.println(
@@ -404,7 +414,9 @@ public class VolumeConfigWriter {
 			this.genericS3 = true;
 			this.simpleS3 = true;
 			this.disableDNSBucket = true;
-			this.usebasicsigner = true;
+			if(!this.minIOEnabled) {
+				this.usebasicsigner = true;
+			}
 		}
 		if (cmd.hasOption("aws-basic-signer")) {
 			this.usebasicsigner = Boolean.parseBoolean(cmd.getOptionValue("aws-basic-signer"));
@@ -609,7 +621,7 @@ public class VolumeConfigWriter {
 
 		root.appendChild(sdfscli);
 
-		if (this.awsEnabled) {
+		if (this.awsEnabled || this.minIOEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
@@ -647,6 +659,9 @@ public class VolumeConfigWriter {
 					extended.setAttribute("simple-s3", "false");
 				if (this.basicS3Signer)
 					extended.setAttribute("use-basic-signer", "true");
+				if(this.minIOEnabled) {
+					extended.setAttribute("use-v4-signer", "true");
+				}
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location", this.bucketLocation);
 				cs.appendChild(extended);
@@ -977,6 +992,9 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("minio-enabled")
+				.withDescription(
+						"Set to true to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ").hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-secret-key")
 				.withDescription("Set to the value of Cloud Storage secret key.").hasArg()
 				.withArgName("Cloud Secret Key").create());
