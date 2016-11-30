@@ -64,6 +64,7 @@ public class VolumeConfigWriter {
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
+	boolean mdCompresstion = false;
 	double max_percent_full = .95;
 	boolean chunk_store_local = true;
 	String chunk_store_data_location = null;
@@ -116,6 +117,8 @@ public class VolumeConfigWriter {
 	private boolean ext = true;
 	private boolean awsAim = false;
 	private boolean genericS3 = false;
+	private boolean accessEnabled = false;
+	private String accessPath = null;
 	private String cloudUrl;
 	private boolean readAhead = false;
 	private boolean usebasicsigner = false;
@@ -278,6 +281,9 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("permissions-owner")) {
 			this.owner = cmd.getOptionValue("permissions-owner");
 		}
+		if(cmd.hasOption("compress-metadata")) {
+			this.mdCompresstion = true;
+		}
 		if (cmd.hasOption("chunk-store-data-location")) {
 			this.chunk_store_data_location = cmd.getOptionValue("chunk-store-data-location");
 		}
@@ -296,6 +302,22 @@ public class VolumeConfigWriter {
 			this.safe_sync = false;
 			this.minIOEnabled = true;
 		}
+		if (cmd.hasOption("access-enabled")) {
+
+			this.safe_sync = false;
+			this.accessEnabled = true;
+			if(!cmd.hasOption("access-path") || !cmd.hasOption("cloud-bucket-name")) {
+				System.out.println("Error : Unable to create volume");
+				System.out.println(
+						"access-path, and cloud-bucket-name are required.");
+			}
+			this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+			this.accessPath = cmd.getOptionValue("access-path");
+			this.compress = true;
+			this.readAhead = true;
+			if (!cmd.hasOption("io-chunk-size"))
+				this.chunk_size = 256;
+		}
 		if (cmd.hasOption("google-enabled")) {
 			this.gsEnabled = Boolean.parseBoolean(cmd.getOptionValue("google-enabled"));
 		}
@@ -311,9 +333,10 @@ public class VolumeConfigWriter {
 		if (this.awsEnabled || minIOEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
-				if(this.minIOEnabled && !cmd.hasOption("cloud-url")) {
+				if (this.minIOEnabled && !cmd.hasOption("cloud-url")) {
 					System.out.println("Error : Unable to create volume");
-					System.out.println("cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+					System.out.println(
+							"cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				}
 				if (!awsAim) {
 					this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
@@ -414,7 +437,7 @@ public class VolumeConfigWriter {
 			this.genericS3 = true;
 			this.simpleS3 = true;
 			this.disableDNSBucket = true;
-			if(!this.minIOEnabled) {
+			if (!this.minIOEnabled) {
 				this.usebasicsigner = true;
 			}
 		}
@@ -577,6 +600,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("read-timeout-seconds", Integer.toString(this.read_timeout));
 		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
 		vol.setAttribute("serial-number", Long.toString(sn));
+		vol.setAttribute("compress-metadata", Boolean.toString(this.mdCompresstion));
 		root.appendChild(vol);
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("enabled", Boolean.toString(this.chunk_store_local));
@@ -620,8 +644,31 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
 
 		root.appendChild(sdfscli);
+		if (this.accessEnabled) {
+			Element aws = xmldoc.createElement("file-store");
+			aws.setAttribute("enabled", "true");
+			aws.setAttribute("bucket-name", this.cloudBucketName);
+			this.chunk_size = 256;
+			aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
+			Element extended = xmldoc.createElement("extended-config");
+			extended.setAttribute("service-type", "filesystem");
+			extended.setAttribute("block-size", this.blockSize);
+			extended.setAttribute("share-path", this.accessPath);
+			extended.setAttribute("allow-sync", "false");
+			extended.setAttribute("upload-thread-sleep-time", "10000");
+			extended.setAttribute("sync-files", "true");
+			extended.setAttribute("local-cache-size", this.cacheSize);
+			extended.setAttribute("share-path", this.accessPath);
+			extended.setAttribute("map-cache-size", "100");
+			extended.setAttribute("io-threads", "16");
+			extended.setAttribute("delete-unclaimed", "true");
+			extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			cs.appendChild(extended);
 
-		if (this.awsEnabled || this.minIOEnabled) {
+			cs.appendChild(aws);
+		}
+
+		else if (this.awsEnabled || this.minIOEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
@@ -659,7 +706,7 @@ public class VolumeConfigWriter {
 					extended.setAttribute("simple-s3", "false");
 				if (this.basicS3Signer)
 					extended.setAttribute("use-basic-signer", "true");
-				if(this.minIOEnabled) {
+				if (this.minIOEnabled) {
 					extended.setAttribute("use-v4-signer", "true");
 				}
 				if (this.bucketLocation != null)
@@ -678,7 +725,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
 			if (ext) {
-				this.chunk_size = 1024;
+				this.chunk_size = 256;
 
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
@@ -811,8 +858,7 @@ public class VolumeConfigWriter {
 		options.addOption(
 				OptionBuilder.withLongOpt("help").withDescription("Display these options.").hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("vrts-appliance")
-				.withDescription("Volume is running on a NetBackup Appliance.").hasArg(true).hasArg(false)
-				.create());
+				.withDescription("Volume is running on a NetBackup Appliance.").hasArg(true).hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-password")
 				.withDescription(
 						"The password used to authenticate to the sdfscli management interface. Thee default password is \"admin\".")
@@ -854,6 +900,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The class used for intelligent block garbage collection.\n Defaults to: \n " + Main.gcClass)
 				.hasArg().withArgName("CLASS NAME").create());
+		options.addOption(OptionBuilder.withLongOpt("compress-metadata")
+				.withDescription(
+						"Enable compression of metadata at the expense of speed to open and close files. This option should be enabled for backup")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("dedup-db-store")
 				.withDescription(
 						"the folder path to location for the dedup file database.\n Defaults to: \n --base-path + "
@@ -992,9 +1042,17 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("access-enabled")
+				.withDescription(
+						"Set enable this volume to store Veritas Access Storage. access-path and cloud-bucket-name will also need to be set. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("access-path")
+				.withDescription("Set the path that the Veritas Access nfs path is mounted to. ").hasArg(true)
+				.create());
 		options.addOption(OptionBuilder.withLongOpt("minio-enabled")
 				.withDescription(
-						"Set to true to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ").hasArg(false).create());
+						"Set to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-secret-key")
 				.withDescription("Set to the value of Cloud Storage secret key.").hasArg()
 				.withArgName("Cloud Secret Key").create());

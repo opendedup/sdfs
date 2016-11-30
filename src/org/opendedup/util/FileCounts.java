@@ -126,6 +126,10 @@ public class FileCounts {
 					File mapFile = new File(Main.dedupDBStore + File.separator
 							+ dfGuid.substring(0, 2) + File.separator + dfGuid
 							+ File.separator + dfGuid + ".map");
+					if(!mapFile.exists())
+						mapFile = new File(Main.dedupDBStore + File.separator
+								+ dfGuid.substring(0, 2) + File.separator + dfGuid
+								+ File.separator + dfGuid + ".map.lz4");
 					size += mapFile.length();
 				}
 			}

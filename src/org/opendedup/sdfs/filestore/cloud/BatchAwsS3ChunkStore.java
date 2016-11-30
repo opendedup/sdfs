@@ -614,9 +614,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					obj.put("clustered", Boolean.toString(this.clustered));
 					omd.setUserMetadata(obj);
 					try {
-						CopyObjectRequest reg = new CopyObjectRequest(this.name, binm, this.name, binm)
-								.withNewObjectMetadata(omd);
-						s3Service.copyObject(reg);
+						
+						updateObject(binm, omd);
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to update bucket info in init", e);
 						SDFSLogger.getLog().info("created new store " + name);
@@ -890,12 +889,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int csz = toIntExact(arc.getFile().length());
 			ObjectMetadata md = new ObjectMetadata();
 			md.addUserMetadata("size", Integer.toString(arc.uncompressedLength.get()));
-
 			md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
 			md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 			md.addUserMetadata("compressedsize", Integer.toString(csz));
 			md.addUserMetadata("bsize", Integer.toString(arc.getLen()));
 			md.addUserMetadata("objects", Integer.toString(arc.getSz()));
+			md.addUserMetadata("bcompressedsize", Integer.toString(csz));
 			md.setContentType("binary/octet-stream");
 			md.setContentLength(csz);
 			if (md5sum) {
@@ -1104,9 +1103,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				mp.put("lastaccessed", Long.toString(System.currentTimeMillis()));
 				omd.setUserMetadata(mp);
-				CopyObjectRequest req = new CopyObjectRequest(this.name, "blocks/" + haName, this.name,
-						"blocks/" + haName).withNewObjectMetadata(omd);
-				s3Service.copyObject(req);
+				
+				updateObject("blocks/" + haName, omd);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error setting last accessed", e);
 			}
@@ -1127,9 +1125,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					mp.put("deleted-objects", Integer.toString(delobj));
 					mp.put("suspect", "true");
 					omd.setUserMetadata(mp);
-					CopyObjectRequest req = new CopyObjectRequest(this.name, "keys/" + haName, this.name,
-							"keys/" + haName).withNewObjectMetadata(omd);
-					s3Service.copyObject(req);
+					
+					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
 					HashBlobArchive.currentLength.addAndGet(_size);
@@ -1191,7 +1188,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						String key = k.substring(Headers.S3_USER_METADATA_PREFIX.length()).toLowerCase();
 						omd.put(key, (String) obj.getRawMetadataValue(k));
 					}
-					SDFSLogger.getLog().debug("key=" + k + " value=" + obj.getRawMetadataValue(k));
+					SDFSLogger.getLog().info("key=" + k + " value=" + obj.getRawMetadataValue(k));
 				}
 				Map<String, String> zd = obj.getUserMetadata();
 				mdk = zd.keySet();
@@ -1243,8 +1240,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					kn = this.getClaimName(id);
 				else
 					kn = "keys/" + haName;
-				CopyObjectRequest req = new CopyObjectRequest(this.name, kn, this.name, kn).withNewObjectMetadata(om);
-				s3Service.copyObject(req);
+				
+				this.updateObject(kn, om);
 				int _size = Integer.parseInt((String) mp.get("size"));
 				int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
 				HashBlobArchive.currentLength.addAndGet(_size);
@@ -1321,9 +1318,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						nmd.setContentMD5(st);
 						nmd.setContentLength(sz.length);
 						nmd.setUserMetadata(md);
-						CopyObjectRequest req = new CopyObjectRequest(this.name, binm, this.name, binm)
-								.withNewObjectMetadata(nmd);
-						s3Service.copyObject(req);
+						
+						this.updateObject(binm, nmd);
 					} catch (Exception e1) {
 						SDFSLogger.getLog().error("unable to update metadata for " + binm, e);
 					}
@@ -1489,8 +1485,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						kn = this.getClaimName(hid);
 					else
 						kn = sobj.getKey();
-					CopyObjectRequest copyObjectRequest = new CopyObjectRequest(getName(), kn, getName(), kn).withNewObjectMetadata(md);
-					s3Service.copyObject(copyObjectRequest);
+					
+					this.updateObject(kn, md);
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
@@ -1831,6 +1827,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						p.delete();
 						p = z;
 					}
+					
 					File parent = to.getParentFile();
 					if (!parent.exists())
 						parent.mkdirs();
@@ -2443,6 +2440,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		SDFSLogger.getLog().info("Deleted " + volumeID);
 	}
 	
+	private void updateObject(String km,ObjectMetadata om) {
+		try {
+			CopyObjectRequest req = new CopyObjectRequest(name, km, name, km)
+					.withNewObjectMetadata(om);
+			s3Service.copyObject(req);
+		}catch(AmazonS3Exception e) {
+			CopyObjectRequest req = new CopyObjectRequest(name, km, name, km + ".cpy")
+					.withNewObjectMetadata(om);
+			s3Service.copyObject(req);
+			s3Service.deleteObject(name,km);
+			req = new CopyObjectRequest(name, km+".cpy", name, km).withNewObjectMetadata(om);
+			s3Service.copyObject(req);
+			s3Service.deleteObject(name,km+".cpy");
+		}
+	}
+	
 	private static class DeleteObject implements Runnable {
 		BatchAwsS3ChunkStore st = null;
 		Long k;
@@ -2462,6 +2475,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					om = st.s3Service.getObjectMetadata(st.name, st.getClaimName(k.longValue()));
 				}
 				Map<String, String> mp = st.getUserMetaData(om);
+				for(String s : mp.keySet()) {
+					SDFSLogger.getLog().info(s + " = " + mp.get(s));
+				}
 				int objects = Integer.parseInt((String) mp.get("objects"));
 				int delobj = 0;
 				if (mp.containsKey("deleted-objects"))
@@ -2488,9 +2504,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							km = st.getClaimName(k.longValue());
 						else
 							km = "keys/" + hashString;
-						CopyObjectRequest req = new CopyObjectRequest(st.name, km, st.name, km)
-								.withNewObjectMetadata(om);
-						st.s3Service.copyObject(req);
+						st.updateObject(km, om);
 					}
 					HashBlobArchive.removeCache(k.longValue());
 				} else {
@@ -2501,9 +2515,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						km = st.getClaimName(k.longValue());
 					else
 						km = "keys/" + hashString;
-					CopyObjectRequest req = new CopyObjectRequest(st.name, km, st.name, km)
-							.withNewObjectMetadata(om);
-					st.s3Service.copyObject(req);
+					st.updateObject(km, om);
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("Unable to delete object " + k, e);

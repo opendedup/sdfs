@@ -187,7 +187,7 @@ public class ClusterRedundancyCheck {
 	private void checkDedupFile(File mapFile) throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Cluster check " + mapFile.getPath());
-		LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
+		LongByteArrayMap mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
 		long prevpos = 0;
 		try {
 			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(MAX_BATCH_SIZE);

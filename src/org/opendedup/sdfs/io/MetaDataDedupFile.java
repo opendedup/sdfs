@@ -789,6 +789,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 								Path sdbf = new File(sdbdirectory.getPath()
 										+ File.separator + file.dfGuid + ".map")
 										.toPath();
+								boolean lz4 = false;
+								if(!sdbf.toFile().exists()) {
+									sdbf = new File(sdbdirectory.getPath()
+											+ File.separator + file.dfGuid + ".map.lz4")
+											.toPath();
+									lz4 = true;
+								}
 
 								File ddbdir = new File(npath + File.separator
 										+ "ddb" + File.separator
@@ -798,6 +805,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 								Path ddbf = new File(ddbdir.getPath()
 										+ File.separator + file.dfGuid + ".map")
 										.toPath();
+								if(lz4) {
+									ddbf = new File(ddbdir.getPath()
+											+ File.separator + file.dfGuid + ".map.lz4")
+											.toPath();
+								}
 
 								Files.copy(sdbf, ddbf,
 										StandardCopyOption.REPLACE_EXISTING,

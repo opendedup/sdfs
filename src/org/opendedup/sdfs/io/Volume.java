@@ -284,6 +284,8 @@ public class Volume implements java.io.Serializable {
 			this.serialNumber = sn;
 		}
 		Main.DSEID=this.serialNumber;
+		if(vol.hasAttribute("compress-metadata"))
+			Main.COMPRESS_METADATA = Boolean.parseBoolean(vol.getAttribute("compress-metadata"));
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));
@@ -632,6 +634,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("write-timeout-seconds",
 				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
+		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
 		try {
 			root.setAttribute("dse-comp-size",
 					Long.toString(HCServiceProxy.getDSECompressedSize()));
@@ -702,6 +705,7 @@ public class Volume implements java.io.Serializable {
 				Integer.toString(Main.readTimeoutSeconds));
 		root.setAttribute("write-timeout-seconds",
 				Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		for (BlockDev blk : this.devices) {
 			Element el = blk.getElement();

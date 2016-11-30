@@ -129,7 +129,7 @@ public class FDisk {
 		} else {
 			if (failed)
 				throw new IOException("FDisk traverse failed");
-			if (dir.getPath().endsWith(".map")) {
+			if (dir.getPath().endsWith(".map") || dir.getPath().endsWith(".map.lz4")) {
 				executor.execute(new CheckDedupFile(this, dir));
 			}
 		}
@@ -142,7 +142,10 @@ public class FDisk {
 		}
 		LongByteArrayMap mp = null;
 		try {
-			mp = new LongByteArrayMap(mapFile.getPath());
+			if(mapFile.getName().endsWith(".lz4"))
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8));
+			else
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
 			
 			if (closed) {
 				this.failed = true;

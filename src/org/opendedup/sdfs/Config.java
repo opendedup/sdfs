@@ -123,6 +123,7 @@ public class Config {
 				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe
 						.getAttribute("max-repl-batch-sz"));
 			int awsSz = doc.getElementsByTagName("aws").getLength();
+			int fileSz = doc.getElementsByTagName("file-store").getLength();
 			int googleSz = doc.getElementsByTagName("google-store").getLength();
 			if (cbe.hasAttribute("cluster-id"))
 				Main.DSEClusterID = cbe.getAttribute("cluster-id");
@@ -156,6 +157,15 @@ public class Config {
 				Main.cloudAccessKey = aws.getAttribute("gs-access-key");
 				Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
 				Main.cloudBucket = aws.getAttribute("gs-bucket-name");
+			}
+			if (fileSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
+				Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
+				if (aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
+				Main.cloudBucket = aws.getAttribute("bucket-name");
 			}
 			if (googleSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
@@ -444,6 +454,16 @@ public class Config {
 							+ " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 			int googleSz = doc.getElementsByTagName("google-store").getLength();
+			int fileSz = doc.getElementsByTagName("file-store").getLength();
+			if (fileSz > 0) {
+				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
+				Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
+				if (aws.hasAttribute("chunkstore-class"))
+					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+				Main.cloudChunkStore = Boolean.parseBoolean(aws
+						.getAttribute("enabled"));
+				Main.cloudBucket = aws.getAttribute("bucket-name");
+			}
 			if (googleSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
 				Element aws = (Element) doc

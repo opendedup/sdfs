@@ -90,10 +90,10 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	Lock smWriteLock = null;
 	private Thread ft = null;
 
-	public BlockDevSocket(BlockDev dev, String path) throws IOException {
+	public BlockDevSocket(BlockDev dev, String guid) throws IOException {
 		SDFSLogger.getLog().info(
 				"Starting block device map for " + dev.getDevName());
-		map = new LongByteArrayMap(path);
+		map = LongByteArrayMap.getMap(guid);
 		if (Main.volume.isClustered()) {
 			this.vs = Main.volume.getSoc();
 			this.dev = dev;
@@ -127,7 +127,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 							.getLog()
 							.info("Not first node in cluster, clearing and resyncing");
 					this.map.vanish(true);
-					this.map = new LongByteArrayMap(path);
+					this.map = LongByteArrayMap.getMap(guid);
 					this.resync();
 					SDFSLogger.getLog().info("Done Resync'ing");
 				}
@@ -679,7 +679,7 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		this.flushlock.lock();
 
 		try {

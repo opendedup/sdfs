@@ -77,6 +77,6 @@ public interface DataMapInterface {
 
 	public abstract long size();
 
-	public abstract void close();
+	public abstract void close() throws IOException;
 
 }

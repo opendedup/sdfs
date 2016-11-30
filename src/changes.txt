@@ -1,3 +1,12 @@
+Version 3.3.2
+	Enhancements
+	* Added support for veritas access backend --access-enabled --access-path
+	* Added support for metadata compression. This can be enabled by setting compress-metadata="true" in the volume xml tag or --compress-metadata during volume creation.
+Version 3.3.1
+	Fixes
+	* Fixed Garbage collection with reference checking
+	* Fixed performance issue with reference checking
+	* Fixed Minio compatibility with metadata
 Version 3.3.0
 	Enhancements
 	* New Hashtable format to support better performance at scale

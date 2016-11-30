@@ -127,6 +127,7 @@ public class FileReplicationService {
 				sync.downloadFile(sfp.substring(sl), f, "ddb");
 				SDFSLogger.getLog().debug(
 						"downloaded " + f.getPath() + " sz=" + f.length());
+				
 				return f;
 			} catch (Exception e) {
 				if (tries > maxTries) {
@@ -148,7 +149,7 @@ public class FileReplicationService {
 
 	public static LongByteArrayMap getDDB(String fname) throws Exception {
 
-		return new LongByteArrayMap(service.downloadDDBFile(fname).getPath());
+		return LongByteArrayMap.getMap(service.downloadDDBFile(fname).getPath());
 	}
 	
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
@@ -711,7 +712,7 @@ public class FileReplicationService {
 						SDFSLogger.getLog().info(
 								"downloaded " + f.getPath() + " sz="
 										+ f.length());
-						LongByteArrayMap ddb = new LongByteArrayMap(f.getPath());
+						LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getName().substring(0, f.getName().length() - 4));
 						Set<Long> blks = new HashSet<Long>();
 						if (ddb.getVersion() < 3)
 							throw new IOException(

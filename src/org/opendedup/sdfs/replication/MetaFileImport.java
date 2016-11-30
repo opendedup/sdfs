@@ -261,13 +261,7 @@ public class MetaFileImport implements Serializable {
 		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
 		if (dfGuid != null) {
-			File mapFile = new File(Main.dedupDBStore + File.separator
-					+ dfGuid.substring(0, 2) + File.separator + dfGuid
-					+ File.separator + dfGuid + ".map");
-			if (!mapFile.exists()) {
-				return;
-			}
-			LongByteArrayMap mp = new LongByteArrayMap(mapFile.getPath());
+			LongByteArrayMap mp = LongByteArrayMap.getMap(dfGuid);
 			try {
 				SparseDataChunk ck = new SparseDataChunk();
 				long prevpos = 0;
@@ -355,9 +349,9 @@ public class MetaFileImport implements Serializable {
 				Main.volume.addFile();
 			} catch (Throwable e) {
 				SDFSLogger.getLog()
-						.warn("error while checking file [" + mapFile.getPath()
+						.warn("error while checking file [" + dfGuid
 								+ "]", e);
-				levt.endEvent("error while checking file [" + mapFile.getPath()
+				levt.endEvent("error while checking file [" + dfGuid
 						+ "]", SDFSEvent.WARN, e);
 				throw new IOException(e);
 			} finally {

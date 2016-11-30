@@ -57,8 +57,10 @@ public class RestoreArchive implements Runnable {
 				+ this.f.getDfGuid());
 		File dbf = new File(directory.getPath() + File.separator
 				+ this.f.getDfGuid() + ".map");
+		if(!dbf.exists())
+			 dbf = new File(directory.getPath() + File.separator
+						+ this.f.getDfGuid() + ".map.lz4");
 		this.initiateArchive(dbf);
-
 	}
 
 	public static void recoverArchives(MetaDataDedupFile f) throws IOException {
@@ -81,7 +83,10 @@ public class RestoreArchive implements Runnable {
 	private void initiateArchive(File mapFile) throws IOException {
 		DataMapInterface mp = null;
 		try {
-			mp = new LongByteArrayMap(mapFile.getPath());
+			if(mapFile.getName().endsWith(".lz4"))
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8));
+			else
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
 			mp.iterInit();
 			SparseDataChunk ck= mp.nextValue(false);
 			while (ck != null) {

@@ -300,13 +300,13 @@ public class SparseDedupFile implements DedupFile {
 				File directory = new File(
 						Main.dedupDBStore + File.separator + this.GUID.substring(0, 2) + File.separator + this.GUID);
 				File dbf = new File(directory.getPath() + File.separator + this.GUID + ".map");
-
-				if (dbf.exists()) {
+				File zdbf = new File(directory.getPath() + File.separator + this.GUID + ".map.lz4");
+				if (dbf.exists() || zdbf.exists()) {
 					if (bdb == null || bdb.isClosed()) {
 						if (mf.getDev() != null) {
 							this.bdb = new BlockDevSocket(mf.getDev(), dbf.getPath());
 						} else
-							this.bdb = new LongByteArrayMap(dbf.getPath());
+							this.bdb = LongByteArrayMap.getMap(this.GUID);
 					}
 					
 					this.bdb.vanish(Main.refCount);
@@ -1009,6 +1009,15 @@ public class SparseDedupFile implements DedupFile {
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to flush " + this.databasePath, e);
 				}
+				if (!this.deleted) {
+					try {
+						MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
+						MetaFileStore.getMF(mf.getPath()).sync();
+						eventBus.post(new SFileWritten(this));
+					} catch (Exception e) {
+						SDFSLogger.getLog().error("error while syncing file in close", e);
+					}
+				}
 				try {
 					this.bdb.sync();
 				} catch (Exception e) {
@@ -1020,15 +1029,7 @@ public class SparseDedupFile implements DedupFile {
 				this.bdb = null;
 				this.closed = true;
 
-				if (!this.deleted) {
-					try {
-						MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
-						MetaFileStore.getMF(mf.getPath()).sync();
-						eventBus.post(new SFileWritten(this));
-					} catch (Exception e) {
-						SDFSLogger.getLog().error("error while syncing file in close", e);
-					}
-				}
+				
 			}
 			if (this.toOccured) {
 				this.toOccured = false;
@@ -1137,16 +1138,15 @@ public class SparseDedupFile implements DedupFile {
 				File directory = new File(
 						Main.dedupDBStore + File.separator + this.GUID.substring(0, 2) + File.separator + this.GUID);
 				File dbf = new File(directory.getPath() + File.separator + this.GUID + ".map");
-
 				this.databaseDirPath = directory.getPath();
 				this.databasePath = dbf.getPath();
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
 				if (mf.getDev() != null) {
-					this.bdb = new BlockDevSocket(mf.getDev(), this.databasePath);
+					this.bdb = new BlockDevSocket(mf.getDev(), this.GUID);
 				} else
-					this.bdb = new LongByteArrayMap(this.databasePath);
+					this.bdb = LongByteArrayMap.getMap(GUID);
 
 				this.closed = false;
 			}
