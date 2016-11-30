@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -725,8 +726,14 @@ public class SparseDedupFile implements DedupFile {
 				}
 				wb.open();
 				return wb;
-			} catch (Exception e) {
-				throw new IOException(e);
+			} catch (IOException e) {
+				throw e;
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				if (e.getCause() instanceof FileClosedException)
+					throw (FileClosedException)e.getCause();
+				else
+					throw new IOException(e);
 			}
 		} finally {
 			l.unlock();

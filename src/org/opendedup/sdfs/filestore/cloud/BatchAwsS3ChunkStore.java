@@ -1188,7 +1188,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						String key = k.substring(Headers.S3_USER_METADATA_PREFIX.length()).toLowerCase();
 						omd.put(key, (String) obj.getRawMetadataValue(k));
 					}
-					SDFSLogger.getLog().info("key=" + k + " value=" + obj.getRawMetadataValue(k));
+					SDFSLogger.getLog().debug("key=" + k + " value=" + obj.getRawMetadataValue(k));
 				}
 				Map<String, String> zd = obj.getUserMetadata();
 				mdk = zd.keySet();
@@ -1865,10 +1865,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (this.isClustered()) {
 					
 					String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+					SDFSLogger.getLog().debug("deleting " + haName);
 					if (s3Service.doesObjectExist(this.name, haName)) {
 						String blb = "claims/" + haName + "/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 						s3Service.deleteObject(this.name, blb);
+						SDFSLogger.getLog().debug("deleted " +  "claims/" + haName + "/"
+								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 						ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
 						String vid = "claims/volumes/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
@@ -1876,6 +1879,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, vid);
 						if (ol.getObjectSummaries().size() == 0) {
 							s3Service.deleteObject(this.name, haName);
+							SDFSLogger.getLog().debug("deleted " +  haName);
 						}
 					}
 				} else {
