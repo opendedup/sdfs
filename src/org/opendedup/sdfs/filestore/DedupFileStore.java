@@ -208,6 +208,7 @@ public class DedupFileStore {
 				if (df == null) {
 					df = new SparseDedupFile(mf);
 					DedupFileStore.openFile.put(df.getGUID(), df);
+					
 				}
 				return df;
 			} else {
@@ -233,6 +234,7 @@ public class DedupFileStore {
 				throw new IOException(
 						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
 			openFile.put(df.getGUID(), df);
+			
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
 		} else {

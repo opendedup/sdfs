@@ -317,7 +317,7 @@ public class MetaFileImport implements Serializable {
 				}
 				mf.setDirty(true);
 				mf.sync();
-				mf.getDedupFile(false).forceRemoteSync();
+				//mf.getDedupFile(false).forceRemoteSync();
 				Main.volume.addFile();
 			} catch (Throwable e) {
 				SDFSLogger.getLog().warn("error while checking file [" + dfGuid + "]", e);

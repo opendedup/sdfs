@@ -1092,7 +1092,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				eventBus.post(new MFileWritten(this));
 				return rn;
 			} else {
-				MetaFileStore.removeMetaFile(dest, true);
+				//MetaFileStore.removeMetaFile(dest, true);
 				if (this.dfGuid != null)
 					DedupFileStore.updateDedupFile(this);
 				boolean rename = f.renameTo(new File(dest));

@@ -26,6 +26,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.ClusterRedundancyCheck;
 import org.opendedup.sdfs.Main;
@@ -295,25 +296,9 @@ public class ArchiveImporter {
 	}
 
 	public void commitImport(String dest, String sdest) throws IOException {
-		File f = new File(dest);
-		if (f.exists()) {
-			try {
-				MetaDataDedupFile mf = MetaFileStore.getMF(dest);
-				MetaFileStore.removeMetaFile(mf.getPath(), true);
-				
-			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to commit replication while removing old data in ["
-								+ dest + "]", e);
-				throw new IOException(
-						"unable to commit replication while removing old data in ["
-								+ dest + "]");
-			}
-		}
 		try {
-			boolean rn = MetaFileStore.rename(sdest, dest);
-			SDFSLogger.getLog().info("moved "+ dest + " to " + sdest + " "+ rn);
-
+			boolean rn = MetaFileStore.rename(new File(sdest).getPath(), new File(dest).getPath());
+			SDFSLogger.getLog().info("moved "+ sdest + " to " + dest + " "+ rn);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to commit replication while moving from staing ["
@@ -322,7 +307,18 @@ public class ArchiveImporter {
 					"unable to commit replication while moving from staing ["
 							+ sdest + "] to [" + dest + "]");
 
+		} finally {
+			File f = new File(sdest);
+			if(f.exists() && f.isDirectory()) {
+				FileUtils.deleteDirectory(f);
+				SDFSLogger.getLog().info("deleted "+ f.getPath());
+			}
+			else if(f.exists()) {
+				f.delete();
+				SDFSLogger.getLog().info("deleted "+ f.getPath());
+			}
 		}
+		
 	}
 
 	private void export(File file, File dst)
