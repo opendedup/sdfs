@@ -296,23 +296,10 @@ public class ArchiveImporter {
 
 	public void commitImport(String dest, String sdest) throws IOException {
 		File f = new File(dest);
-		if (f.exists()) {
-			try {
-				MetaDataDedupFile mf = MetaFileStore.getMF(dest);
-				MetaFileStore.removeMetaFile(mf.getPath(), true);
-			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to commit replication while removing old data in ["
-								+ dest + "]", e);
-				throw new IOException(
-						"unable to commit replication while removing old data in ["
-								+ dest + "]");
-			}
-		}
+		
 		try {
-			MetaFileStore.rename(sdest, dest);
-			SDFSLogger.getLog().info("moved " + sdest + " to " + dest);
-
+			boolean rn = MetaFileStore.rename(sdest, dest);
+			SDFSLogger.getLog().info("moved "+ dest + " to " + sdest + " "+ rn);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to commit replication while moving from staing ["
@@ -321,6 +308,20 @@ public class ArchiveImporter {
 					"unable to commit replication while moving from staing ["
 							+ sdest + "] to [" + dest + "]");
 
+		}
+		if (f.exists()) {
+			try {
+				MetaDataDedupFile mf = MetaFileStore.getMF(dest);
+				MetaFileStore.removeMetaFile(mf.getPath(), true);
+				
+			} catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"unable to commit replication while removing old data in ["
+								+ dest + "]", e);
+				throw new IOException(
+						"unable to commit replication while removing old data in ["
+								+ dest + "]");
+			}
 		}
 	}
 

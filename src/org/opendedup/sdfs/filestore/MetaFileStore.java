@@ -78,7 +78,7 @@ public class MetaFileStore {
 		}
 	}
 
-	public static void rename(String src, String dst) throws IOException {
+	public static boolean rename(String src, String dst) throws IOException {
 		WriteLock l =getMFLock.writeLock();
 		l.lock();
 		try {
@@ -87,10 +87,11 @@ public class MetaFileStore {
 						"removing [" + dst + "] and replacing with [" + src
 								+ "]");
 			MetaDataDedupFile mf = getMF(src);
-			mf.renameTo(dst);
+			boolean rn = mf.renameTo(dst);
 			pathMap.invalidate(src);
 			pathMap.invalidate(dst);
 			pathMap.put(dst, mf);
+			return rn;
 		} finally {
 			l.unlock();
 		}

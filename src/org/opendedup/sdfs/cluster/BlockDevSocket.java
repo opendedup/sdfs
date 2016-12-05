@@ -429,12 +429,12 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	}
 
 	@Override
-	public long nextKey() throws IOException {
+	public long nextKey() throws IOException, FileClosedException {
 		return map.nextKey();
 	}
 
 	@Override
-	public SparseDataChunk nextValue(boolean index) throws IOException {
+	public SparseDataChunk nextValue(boolean index) throws IOException, FileClosedException {
 		return map.nextValue(index);
 	}
 

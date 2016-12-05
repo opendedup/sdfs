@@ -28,9 +28,9 @@ public interface DataMapInterface {
 
 	public abstract long getIterPos();
 
-	public abstract long nextKey() throws IOException;
+	public abstract long nextKey() throws IOException, FileClosedException;
 
-	public abstract SparseDataChunk nextValue(boolean refcount) throws IOException;
+	public abstract SparseDataChunk nextValue(boolean refcount) throws IOException, FileClosedException;
 
 	public abstract boolean isClosed();
 

@@ -133,7 +133,6 @@ public class LongByteArrayMap implements DataMapInterface {
 	private LongByteArrayMap(String filePath) throws IOException {
 		this.filePath = filePath;
 		this.openFile();
-
 	}
 
 	public static LongByteArrayMap getMap(String GUID) throws IOException {
@@ -144,7 +143,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		try {
 			LongByteArrayMap map = mp.get(mapFile.getPath());
 			if (map != null) {
-				map.addOpen();
+				map.openFile();
 				return map;
 			} else {
 				File zmapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator
@@ -154,7 +153,6 @@ public class LongByteArrayMap implements DataMapInterface {
 				else
 					map = new LongByteArrayMap(mapFile.getPath());
 				mp.put(mapFile.getPath(), map);
-				map.addOpen();
 				return map;
 			}
 		} finally {
@@ -211,16 +209,23 @@ public class LongByteArrayMap implements DataMapInterface {
 		return (this.iterPos.get() * arrayLength);
 	}
 
+	public void setIterPos(long pos) {
+		this.iterPos.set(pos / arrayLength);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.opendedup.collections.DataMap#nextKey()
 	 */
 	@Override
-	public long nextKey() throws IOException {
+	public long nextKey() throws IOException, FileClosedException {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			if (this.isClosed()) {
+				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
+			}
 			long _cpos = getInternalIterFPos();
 			while (_cpos < pbdb.size()) {
 				try {
@@ -261,10 +266,13 @@ public class LongByteArrayMap implements DataMapInterface {
 	ByteBuffer nbuf = null;
 
 	@Override
-	public SparseDataChunk nextValue(boolean index) throws IOException {
+	public SparseDataChunk nextValue(boolean index) throws IOException, FileClosedException {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			if (this.isClosed()) {
+				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
+			}
 			long _cpos = getInternalIterFPos();
 			while (_cpos < pbdb.size()) {
 				try {
@@ -303,10 +311,13 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	}
 
-	public LongKeyValue nextKeyValue(boolean index) throws IOException {
+	public LongKeyValue nextKeyValue(boolean index) throws IOException, FileClosedException {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		try {
+			if (this.isClosed()) {
+				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
+			}
 			long _cpos = getInternalIterFPos();
 			while (_cpos < pbdb.size()) {
 				try {
@@ -368,66 +379,72 @@ public class LongByteArrayMap implements DataMapInterface {
 	}
 
 	private void openFile() throws IOException {
-		if (this.closed) {
-			WriteLock l = this.hashlock.writeLock();
-			l.lock();
-			File fp = new File(filePath);
-			if (fp.exists() && filePath.endsWith(".lz4")) {
-				String nfp = filePath.substring(0, filePath.length() - 4);
-				CompressionUtils.decompressFile(new File(filePath), new File(nfp));
-				if (!new File(nfp).exists())
-					throw new IOException("File could not be decompressed " + nfp);
-				if (!new File(filePath).delete())
-					throw new IOException("unable to delete" + filePath);
-				filePath = nfp;
-			}
-			try {
-				bdbf = Paths.get(filePath);
-
-				dbFile = new File(filePath);
-				boolean fileExists = dbFile.exists();
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
-				if (!fileExists) {
-					if (!dbFile.getParentFile().exists()) {
-						dbFile.getParentFile().mkdirs();
-					}
-					FileChannel bdb = (FileChannel) Files.newByteChannel(bdbf, StandardOpenOption.CREATE,
-							StandardOpenOption.WRITE, StandardOpenOption.READ, StandardOpenOption.SPARSE);
-					if (version > 0) {
-						// SDFSLogger.getLog().info("Writing version " +
-						// this.version);
-						ByteBuffer buf = ByteBuffer.allocate(3);
-						buf.putShort(magicnumber);
-						buf.put(this.version);
-						buf.position(0);
-						bdb.position(0);
-						bdb.write(buf);
-					}
-					bdb.position(1024);
-					bdb.close();
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
+		try {
+			
+			if (this.closed) {
+				
+				File fp = new File(filePath);
+				if (fp.exists() && filePath.endsWith(".lz4")) {
+					String nfp = filePath.substring(0, filePath.length() - 4);
+					CompressionUtils.decompressFile(new File(filePath), new File(nfp));
+					if (!new File(nfp).exists())
+						throw new IOException("File could not be decompressed " + nfp);
+					if (!new File(filePath).delete())
+						throw new IOException("unable to delete" + filePath);
+					filePath = nfp;
 				}
-				rf = new RandomAccessFile(filePath, "rw");
+				try {
+					bdbf = Paths.get(filePath);
 
-				pbdb = rf.getChannel();
-				ByteBuffer buf = ByteBuffer.allocate(3);
-				pbdb.position(0);
-				pbdb.read(buf);
-				buf.position(0);
-				if (buf.getShort() == magicnumber) {
-					this.version = buf.get();
-				} else {
-					this.version = 0;
+					dbFile = new File(filePath);
+					boolean fileExists = dbFile.exists();
+					if (SDFSLogger.isDebug())
+						SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
+					if (!fileExists) {
+						if (!dbFile.getParentFile().exists()) {
+							dbFile.getParentFile().mkdirs();
+						}
+						FileChannel bdb = (FileChannel) Files.newByteChannel(bdbf, StandardOpenOption.CREATE,
+								StandardOpenOption.WRITE, StandardOpenOption.READ, StandardOpenOption.SPARSE);
+						if (version > 0) {
+							// SDFSLogger.getLog().info("Writing version " +
+							// this.version);
+							ByteBuffer buf = ByteBuffer.allocate(3);
+							buf.putShort(magicnumber);
+							buf.put(this.version);
+							buf.position(0);
+							bdb.position(0);
+							bdb.write(buf);
+						}
+						bdb.position(1024);
+						bdb.close();
+					}
+					rf = new RandomAccessFile(filePath, "rw");
+
+					pbdb = rf.getChannel();
+					ByteBuffer buf = ByteBuffer.allocate(3);
+					pbdb.position(0);
+					pbdb.read(buf);
+					buf.position(0);
+					if (buf.getShort() == magicnumber) {
+						this.version = buf.get();
+					} else {
+						this.version = 0;
+					}
+					this.intVersion();
+					// initiall allocate 32k
+					this.closed = false;
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to open file " + filePath, e);
+					throw new IOException(e);
 				}
-				this.intVersion();
-				// initiall allocate 32k
-				this.closed = false;
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to open file " + filePath, e);
-				throw new IOException(e);
-			} finally {
-				l.unlock();
 			}
+			this.addOpen();
+			mp.put(this.filePath, this);
+		} finally {
+			l.unlock();
 		}
 	}
 
@@ -746,7 +763,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 	}
 
-	public void index() throws IOException {
+	public void index() throws IOException, FileClosedException {
 		this.iterInit();
 		SparseDataChunk ck = this.nextValue(true);
 		while (ck != null) {
@@ -846,14 +863,14 @@ public class LongByteArrayMap implements DataMapInterface {
 		WriteLock l = this.hashlock.writeLock();
 		l.lock();
 		try {
+			
 			int op = this.opens.decrementAndGet();
 			if (op <= 0) {
-				//SDFSLogger.getLog().info("closing " + this.filePath);
+				// SDFSLogger.getLog().info("closing " + this.filePath);
 				this.opens.set(0);
+				
 				dbFile = null;
-				if (!this.isClosed()) {
-					this.closed = true;
-				}
+				this.closed = true;
 				try {
 					pbdb.force(true);
 					pbdb.close();
@@ -875,6 +892,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						df.delete();
 					}
 				}
+				mp.remove(this.filePath);
 			}
 		} finally {
 			l.unlock();

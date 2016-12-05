@@ -1865,12 +1865,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (this.isClustered()) {
 					
 					String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-					SDFSLogger.getLog().debug("deleting " + haName);
+					SDFSLogger.getLog().info("deleting " + haName);
 					if (s3Service.doesObjectExist(this.name, haName)) {
 						String blb = "claims/" + haName + "/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 						s3Service.deleteObject(this.name, blb);
-						SDFSLogger.getLog().debug("deleted " +  "claims/" + haName + "/"
+						SDFSLogger.getLog().info("deleted " +  "claims/" + haName + "/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 						ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
 						String vid = "claims/volumes/"
@@ -1879,8 +1879,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, vid);
 						if (ol.getObjectSummaries().size() == 0) {
 							s3Service.deleteObject(this.name, haName);
-							SDFSLogger.getLog().debug("deleted " +  haName);
+							SDFSLogger.getLog().info("deleted " +  haName);
+						}else {
+							SDFSLogger.getLog().info("not deleting " +  haName);
 						}
+						
 					}
 				} else {
 					String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
