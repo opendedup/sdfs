@@ -494,7 +494,7 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("dels " + evt.sfp);
-					SDFSLogger.getLog().debug("dels " + evt.sfp);
+					SDFSLogger.getLog().info("dels " + evt.sfp);
 					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
 					eventUploadBus.post(evt);

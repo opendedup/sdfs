@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
-
+import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.LargeBloomFilter;
@@ -89,6 +89,7 @@ public class BloomFDisk {
 			fEvt.maxCt = sz;
 
 			SDFSLogger.getLog().info("entries = " + entries);
+			FileUtils.deleteDirectory(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "tmp"));
 			this.bf = new LargeBloomFilter(new File(new File(Main.dedupDBStore).getParent()+ File.separator + "tmp"),entries, .1, false,false,false);
 			SDFSLogger.getLog().info("Starting BloomFilter FDISK for " + Main.volume.getName());
 			long start = System.currentTimeMillis();
