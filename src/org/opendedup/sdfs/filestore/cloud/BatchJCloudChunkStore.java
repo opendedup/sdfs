@@ -405,7 +405,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				this.accessStore = true;
 			} else {
 				SDFSLogger.getLog().debug("ca=" + Main.cloudAccessKey + " cs=" + Main.cloudSecretKey);
-				context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
+				context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey).overrides(overrides)
 						.buildView(BlobStoreContext.class);
 			}
 			blobStore = context.getBlobStore();
