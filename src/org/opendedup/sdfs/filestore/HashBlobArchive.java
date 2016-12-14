@@ -375,8 +375,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 			if (m == null && HashBlobArchive.REMOVE_FROM_CACHE) {
 				Map<String, Long> _m = store.getHashMap(hashid);
+				double z = _m.size() * 1.25;
+				int sz = new Long(Math.round(z)).intValue();
 				Set<String> keys = _m.keySet();
-				m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, VERSION);
+				m = new SimpleByteArrayLongMap(lf.getPath(), sz, VERSION);
 				for (String key : keys) {
 					m.put(BaseEncoding.base64().decode(key), _m.get(key));
 				}
@@ -913,8 +915,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 				buf.putInt(chunk.length);
 				buf.put(chunk);
 				this.uncompressedLength.addAndGet(al);
-				HashBlobArchive.currentLength.addAndGet(al);
-				HashBlobArchive.compressedLength.addAndGet(chunk.length);
 				buf.position(0);
 
 				// SDFSLogger.getLog().info("writing at " +f.length() + " bl=" +
@@ -1419,6 +1419,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 			return false;
 		} finally {
 			ul.unlock();
+		}
+		if(f.exists()) {
+			HashBlobArchive.compressedLength.addAndGet(f.length());
+			HashBlobArchive.currentLength.addAndGet(uncompressedLength.get());
+			
 		}
 		return true;
 	}

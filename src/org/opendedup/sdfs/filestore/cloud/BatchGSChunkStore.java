@@ -92,6 +92,11 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 			System.exit(-1);
 		}
 	}
+	@Override
+	public void clearCounters() {
+		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.currentLength.set(0);
+	}
 
 	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
 		GSCredentials creds = null;

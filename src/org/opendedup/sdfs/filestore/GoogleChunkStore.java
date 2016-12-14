@@ -364,4 +364,10 @@ public class GoogleChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void clearCounters() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

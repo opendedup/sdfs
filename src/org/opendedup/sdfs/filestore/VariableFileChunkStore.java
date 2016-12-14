@@ -685,4 +685,10 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void clearCounters() {
+		// TODO Auto-generated method stub
+		
+	}
 }

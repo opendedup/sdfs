@@ -486,4 +486,10 @@ public class MAzureChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void clearCounters() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

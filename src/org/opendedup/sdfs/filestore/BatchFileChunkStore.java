@@ -716,4 +716,10 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		throw new IOException("funtion not supported");
 	}
 
+	@Override
+	public void clearCounters() {
+		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.currentLength.set(0);
+	}
+
 }

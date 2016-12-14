@@ -118,6 +118,8 @@ public class VolumeConfigWriter {
 	private boolean awsAim = false;
 	private boolean genericS3 = false;
 	private boolean accessEnabled = false;
+	private boolean atmosEnabled = false;
+	private boolean backblazeEnabled = false;
 	private String accessPath = null;
 	private String cloudUrl;
 	private boolean readAhead = false;
@@ -281,7 +283,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("permissions-owner")) {
 			this.owner = cmd.getOptionValue("permissions-owner");
 		}
-		if(cmd.hasOption("compress-metadata")) {
+		if (cmd.hasOption("compress-metadata")) {
 			this.mdCompresstion = true;
 		}
 		if (cmd.hasOption("chunk-store-data-location")) {
@@ -302,14 +304,30 @@ public class VolumeConfigWriter {
 			this.safe_sync = false;
 			this.minIOEnabled = true;
 		}
+		if (cmd.hasOption("atmos-enabled")) {
+
+			this.safe_sync = false;
+			this.atmosEnabled = true;
+			if (!cmd.hasOption("cloud-url")) {
+				System.out.println("Error : Unable to create volume");
+				System.out
+						.println("cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
+			} else {
+
+			}
+		}
+		if (cmd.hasOption("backblaze-enabled")) {
+
+			this.safe_sync = false;
+			this.backblazeEnabled = true;
+		}
 		if (cmd.hasOption("access-enabled")) {
 
 			this.safe_sync = false;
 			this.accessEnabled = true;
-			if(!cmd.hasOption("access-path") || !cmd.hasOption("cloud-bucket-name")) {
+			if (!cmd.hasOption("access-path") || !cmd.hasOption("cloud-bucket-name")) {
 				System.out.println("Error : Unable to create volume");
-				System.out.println(
-						"access-path, and cloud-bucket-name are required.");
+				System.out.println("access-path, and cloud-bucket-name are required.");
 			}
 			this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 			this.accessPath = cmd.getOptionValue("access-path");
@@ -371,7 +389,7 @@ public class VolumeConfigWriter {
 				System.out.println(cmd.getOptionValue("cloud-bucket-name"));
 				System.exit(-1);
 			}
-		} else if (this.gsEnabled) {
+		} else if (this.gsEnabled || this.atmosEnabled || this.backblazeEnabled) {
 			if (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key")
 					&& cmd.hasOption("cloud-bucket-name")) {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
@@ -644,14 +662,26 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
 
 		root.appendChild(sdfscli);
-		if (this.accessEnabled) {
+		if (this.accessEnabled || this.atmosEnabled || this.backblazeEnabled) {
+
 			Element aws = xmldoc.createElement("file-store");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("bucket-name", this.cloudBucketName);
+			aws.setAttribute("access-key", this.cloudAccessKey);
+			aws.setAttribute("secret-key", this.cloudSecretKey);
 			this.chunk_size = 256;
 			aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 			Element extended = xmldoc.createElement("extended-config");
-			extended.setAttribute("service-type", "filesystem");
+			if (this.accessEnabled)
+				extended.setAttribute("service-type", "filesystem");
+			if (this.atmosEnabled) {
+				extended.setAttribute("service-type", "atmos");
+				Element cp = xmldoc.createElement("connection-props");
+				cp.setAttribute("jclouds.endpoint", this.cloudUrl);
+				extended.appendChild(cp);
+			}
+			if (this.backblazeEnabled)
+				extended.setAttribute("service-type", "b2");
 			extended.setAttribute("block-size", this.blockSize);
 			extended.setAttribute("share-path", this.accessPath);
 			extended.setAttribute("allow-sync", "false");
@@ -1052,6 +1082,14 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("minio-enabled")
 				.withDescription(
 						"Set to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("atmos-enabled")
+				.withDescription(
+						"Set to enable this volume to store to Atmo Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("backblaze-enabled")
+				.withDescription(
+						"Set to enable this volume to store to Backblaze Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-secret-key")
 				.withDescription("Set to the value of Cloud Storage secret key.").hasArg()

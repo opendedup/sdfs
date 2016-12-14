@@ -102,6 +102,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public BatchAzureChunkStore() {
 
 	}
+	
+	@Override
+	public void clearCounters() {
+		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.currentLength.set(0);
+	}
 
 	@Override
 	public long bytesRead() {

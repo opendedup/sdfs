@@ -463,6 +463,8 @@ public class Config {
 				Main.cloudChunkStore = Boolean.parseBoolean(aws
 						.getAttribute("enabled"));
 				Main.cloudBucket = aws.getAttribute("bucket-name");
+				Main.cloudAccessKey = aws.getAttribute("access-key");
+				Main.cloudSecretKey = aws.getAttribute("secret-key");
 			}
 			if (googleSz > 0) {
 				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";

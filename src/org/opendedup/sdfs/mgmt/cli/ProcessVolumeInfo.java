@@ -54,11 +54,12 @@ public class ProcessVolumeInfo {
 						StorageUnit.of(compSz).format(compSz));
 				System.out.printf("Cluster Block Copies : %s\n",
 						dse.getAttribute("cluster-block-copies"));
-				if (dseSz == 0 || capacitySz == 0) {
+				if (dseSz <= 0 || capacitySz <= 0) {
 					System.out
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
 									0);
 				} else {
+					try {
 					double dedupRate = ((1 - ((double) dseSz / (double) currentSz)) * 100);
 					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
 							.getNumberInstance(Locale.US);
@@ -67,10 +68,15 @@ public class ProcessVolumeInfo {
 					System.out
 							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %s%%\n",
 									Double.toString(dedupRate));
+					}catch(Exception e) {
+						System.out
+						.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
+								0);
+					}
 				}
-				if (compSz == 0 || currentSz == 0) {
+				if (compSz <= 0 || currentSz <= 0) {
 					System.out
-							.printf("Actual Storage Savings (Compressed Unique Blocks Stored/Current Size): %d%%\n",
+							.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size): %d%%\n",
 									0);
 				} else {
 					double dedupRate = (1 - ((double) compSz / (double) currentSz)) * 100;
@@ -82,9 +88,10 @@ public class ProcessVolumeInfo {
 							.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size) : %s%%\n",
 									Double.toString(dedupRate));
 				}
-				if (compSz == 0 || dseSz == 0) {
+				if (compSz <= 0 || dseSz <= 0) {
 					System.out.printf("Compression Rate: %d%%\n", 0);
 				} else {
+					try {
 					double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
 					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
 							.getNumberInstance(Locale.US);
@@ -92,6 +99,11 @@ public class ProcessVolumeInfo {
 					compRate = Double.valueOf(twoDForm.format(compRate));
 					System.out.printf("Compression Rate: %s%%\n",
 							Double.toString(compRate));
+					}catch(Exception e) {
+						System.out
+						.printf("Compression Rate : %d%%\n",
+								0);
+					}
 				}
 				formatter.close();
 			}

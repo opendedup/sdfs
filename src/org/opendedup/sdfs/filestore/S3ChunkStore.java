@@ -604,4 +604,10 @@ public class S3ChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public void clearCounters() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

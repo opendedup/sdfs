@@ -2463,6 +2463,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 	}
 	
+	@Override
+	public void clearCounters() {
+		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.currentLength.set(0);
+	}
+	
+	
 	private static class DeleteObject implements Runnable {
 		BatchAwsS3ChunkStore st = null;
 		Long k;
