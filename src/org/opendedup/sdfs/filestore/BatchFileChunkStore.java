@@ -89,9 +89,9 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			// container = pool.borrowObject();
 			HashMap<String, String> md = new HashMap<String, String>();
 			md.put("currentlength",
-					Long.toString(HashBlobArchive.currentLength.get()));
+					Long.toString(HashBlobArchive.getLength()));
 			md.put("compressedlength",
-					Long.toString(HashBlobArchive.compressedLength.get()));
+					Long.toString(HashBlobArchive.getCompressedLength()));
 			FileOutputStream fout = new FileOutputStream(new File(
 					this.container_location, "BucketInfo"));
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
@@ -140,7 +140,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return HashBlobArchive.currentLength.get();
+		return HashBlobArchive.getLength();
 	}
 
 	public void cacheData(byte[] hash, long start, int len) throws IOException,
@@ -284,8 +284,8 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 					if (cl < 0)
 						cl = 0;
 				}
-				HashBlobArchive.currentLength.set(sz);
-				HashBlobArchive.compressedLength.set(cl);
+				HashBlobArchive.setLength(sz);
+				HashBlobArchive.setCompressedLength(cl);
 				f.delete();
 			}
 			this.compress = Main.compress;
@@ -372,7 +372,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 
 	@Override
 	public long compressedSize() {
-		return HashBlobArchive.compressedLength.get();
+		return HashBlobArchive.getCompressedLength();
 	}
 
 	@Override
@@ -470,7 +470,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 									sz += HashBlobArchive.compactArchive(k);
 									if(blob.exists())
 										this.writeHashMap(metaData, k);
-									HashBlobArchive.currentLength.addAndGet(-1
+									HashBlobArchive.addToLength(-1
 											* Integer.parseInt(metaData
 													.get("bsize")));
 
@@ -626,8 +626,8 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	@Override
 	public void iterationInit(boolean deep) {
 		try {
-			HashBlobArchive.currentLength.set(0);
-			HashBlobArchive.compressedLength.set(0);
+			HashBlobArchive.setLength(0);
+			HashBlobArchive.setCompressedLength(0);
 			this.ht = null;
 			this.hid = 0;
 			dl = new MultiDownload(this,"");
@@ -651,10 +651,10 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 			InterruptedException {
 		Long hid = Long.parseLong(key);
 		File mf = HashBlobArchive.getPath(hid);
-		HashBlobArchive.compressedLength.addAndGet(mf.length());
+		HashBlobArchive.addToCompressedLength(mf.length());
 		try {
 			HashMap<String, String> metaData = this.readHashMap(hid);
-			HashBlobArchive.currentLength.addAndGet(Integer.parseInt(metaData
+			HashBlobArchive.addToCompressedLength(Integer.parseInt(metaData
 					.get("bsize")));
 			if (metaData.containsKey("deleted-objects")
 					|| metaData.containsKey("deleted")) {
@@ -718,8 +718,8 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void clearCounters() {
-		HashBlobArchive.compressedLength.set(0);
-		HashBlobArchive.currentLength.set(0);
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 	}
 
 }

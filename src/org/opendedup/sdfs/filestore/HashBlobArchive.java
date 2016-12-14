@@ -136,6 +136,30 @@ public class HashBlobArchive implements Runnable, Serializable {
 			// slock.unlock();
 		}
 	}
+	
+	public static long getCompressedLength() {
+		return compressedLength.get();
+	}
+	
+	public static void setCompressedLength(long val) {
+		compressedLength.set(val);
+	}
+	
+	public static void addToCompressedLength(long val) {
+		compressedLength.addAndGet(val);
+	}
+	
+	public static long getLength() {
+		return currentLength.get();
+	}
+	
+	public static void setLength(long val) {
+		currentLength.set(val);
+	}
+	
+	public static void addToLength(long val) {
+		currentLength.addAndGet(val);
+	}
 
 	public static SimpleByteArrayLongMap getMap(long id) throws IOException {
 		return getRawMap(id);
@@ -1421,9 +1445,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			ul.unlock();
 		}
 		if(f.exists()) {
-			HashBlobArchive.compressedLength.addAndGet(f.length());
-			HashBlobArchive.currentLength.addAndGet(uncompressedLength.get());
-			
+			 HashBlobArchive.compressedLength.addAndGet(f.length());
+			 HashBlobArchive.currentLength.addAndGet(uncompressedLength.get());
+			//SDFSLogger.getLog().info("size=" + k + " uc=" + z + " fs=" + f.length() + " ufs=" + uncompressedLength.get());
 		}
 		return true;
 	}

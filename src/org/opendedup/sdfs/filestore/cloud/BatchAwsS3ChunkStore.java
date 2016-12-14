@@ -1218,13 +1218,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			claims = this.getClaimedObjects(kobj, id);
+			Map<String, String> mp = this.getUserMetaData(om);
 			if (claims > 0) {
 				if (this.clustered)
 					om = this.getClaimMetaData(id);
 				else {
 					om = s3Service.getObjectMetadata(this.name, "keys/" + haName);
 				}
-				Map<String, String> mp = this.getUserMetaData(om);
+				
 				int delobj = 0;
 				if (mp.containsKey("deleted-objects")) {
 					delobj = Integer.parseInt((String) mp.get("deleted-objects")) - claims;
@@ -1242,10 +1243,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					kn = "keys/" + haName;
 				
 				this.updateObject(kn, om);
-				int _size = Integer.parseInt((String) mp.get("size"));
-				int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-				HashBlobArchive.currentLength.addAndGet(_size);
-				HashBlobArchive.compressedLength.addAndGet(_compressedSize);
+				
 				SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 
 			}
@@ -1257,6 +1255,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
 				} else {
 					s3Service.deleteObject(this.name, this.getClaimName(id));
+					int _size = Integer.parseInt((String) mp.get("size"));
+					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
+					HashBlobArchive.currentLength.addAndGet(-1* _size);
+					HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
 					if (ol.getObjectSummaries().size() == 0) {
 						s3Service.deleteObject(this.name, "blocks/" + haName);
@@ -2502,10 +2504,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (objects <= delobj) {
 					// SDFSLogger.getLog().info("deleting " +
 					// hashString);
-					int size = Integer.parseInt((String) mp.get("bsize"));
-					int compressedSize = Integer.parseInt((String) mp.get("bcompressedsize"));
-					HashBlobArchive.currentLength.addAndGet(-1 * size);
-					HashBlobArchive.compressedLength.addAndGet(-1 * compressedSize);
+					
 					if (st.deleteUnclaimed) {
 						st.verifyDelete(k.longValue());
 						SDFSLogger.getLog().info("deleted " + k.longValue());

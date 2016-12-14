@@ -83,7 +83,7 @@ public class DedupFileStore {
 
 	}
 	
-	public static boolean gcRunning;
+	private static boolean gcRunning;
 	static ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 	public static void gcRunning(boolean running) {
 		gcLock.writeLock().lock();
