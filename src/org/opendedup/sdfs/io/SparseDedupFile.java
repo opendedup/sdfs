@@ -707,12 +707,6 @@ public class SparseDedupFile implements DedupFile {
 			if (this.closed) {
 				throw new FileClosedException("file already closed");
 			}
-			if (this.toOccured) {
-				throw new IOException("timeout occured");
-			}
-			if (this.errOccured) {
-				throw new IOException("write error occured");
-			}
 			if (!Volume.getStorageConnected())
 				throw new IOException("storage offline");
 			long chunkPos = this.getChuckPosition(position);

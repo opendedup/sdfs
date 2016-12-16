@@ -130,7 +130,7 @@ public interface AbstractChunkStore {
 	 * @throws IOException
 	 */
 	public abstract long writeChunk(byte[] hash, byte[] chunk, int len)
-			throws IOException;
+			throws IOException ;
 
 	/**
 	 * gets a chunk of data from the chunk store

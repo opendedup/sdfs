@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -893,14 +894,14 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 								cm.persistData(true);
 							} catch (org.opendedup.collections.HashExistsException e) {
 								return new InsertRecord(false, e.getPos());
-							}
+							} 
 						}
 						bm = this.getWriteMap();
 						rec = bm.put(cm.getHash(), cm.getcPos());
 						this.lbf.put(cm.getHash());
 					} catch (HashtableFullException e) {
 						rec = null;
-					} catch (Exception e) {
+					}  catch (Exception e) {
 						// this.keyLookup.invalidate(new
 						// ByteArrayWrapper(cm.getHash()));
 						throw e;

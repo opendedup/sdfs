@@ -791,10 +791,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					kmetaData.remove("deleted");
 					kmetaData.put("deletedobjects", Integer.toString(delobj));
 					kmetaData.put("suspect", "true");
-					int _size = Integer.parseInt((String) metaData.get("size"));
-					int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-					HashBlobArchive.currentLength.addAndGet(_size);
-					HashBlobArchive.compressedLength.addAndGet(_compressedSize);
+					//int _size = Integer.parseInt((String) metaData.get("size"));
+					//int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
+					//HashBlobArchive.currentLength.addAndGet(_size);
+					//HashBlobArchive.compressedLength.addAndGet(_compressedSize);
 
 					this.updateObject("keys/" + haName, null, kmetaData);
 					metaData.remove("deleted");
@@ -924,7 +924,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						blobStore.putBlob(this.name, b);
 
 					}
-					this.resetCurrentSize();
+					//this.resetCurrentSize();
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to update size", e);
 				}

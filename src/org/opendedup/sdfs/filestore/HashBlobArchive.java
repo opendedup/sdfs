@@ -498,6 +498,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		Lock l = slock.readLock();
 		l.lock();
 		try {
+			for(;;) {
 			try {
 				archive.putChunk(hash, chunk);
 				return archive.id;
@@ -507,11 +508,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l.unlock();
 				l = slock.writeLock();
 				l.lock();
+				try {
 				if (archive != null && archive.writeable)
 					archive.putChunk(hash, chunk);
 				else
 					archive = new HashBlobArchive(hash, chunk);
+				
 				return archive.id;
+				}catch(Exception e1) {
+					l.unlock();
+					l = slock.readLock();
+					l.lock();
+				}
+			}
 			}
 		} finally {
 			l.unlock();
@@ -846,12 +855,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private void putChunk(byte[] hash, byte[] chunk)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
-		if (DISABLE_WRITE) {
-			this.uncompressedLength.addAndGet(chunk.length);
-			HashBlobArchive.currentLength.addAndGet(chunk.length);
-			HashBlobArchive.compressedLength.addAndGet(chunk.length);
-			return;
-		}
+		
 		Lock ul = this.uploadlock.readLock();
 
 		if (ul.tryLock()) {
@@ -1447,7 +1451,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		if(f.exists()) {
 			 HashBlobArchive.compressedLength.addAndGet(f.length());
 			 HashBlobArchive.currentLength.addAndGet(uncompressedLength.get());
-			//SDFSLogger.getLog().info("size=" + k + " uc=" + z + " fs=" + f.length() + " ufs=" + uncompressedLength.get());
+			 //SDFSLogger.getLog().info("size=" + k + " uc=" + z + " fs=" + f.length() + " ufs=" + uncompressedLength.get());
 		}
 		return true;
 	}
