@@ -654,7 +654,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		HashBlobArchive.addToCompressedLength(mf.length());
 		try {
 			HashMap<String, String> metaData = this.readHashMap(hid);
-			HashBlobArchive.addToCompressedLength(Integer.parseInt(metaData
+			HashBlobArchive.addToLength(Integer.parseInt(metaData
 					.get("bsize")));
 			if (metaData.containsKey("deleted-objects")
 					|| metaData.containsKey("deleted")) {

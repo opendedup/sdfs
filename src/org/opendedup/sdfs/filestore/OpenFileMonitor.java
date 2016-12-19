@@ -117,7 +117,10 @@ public class OpenFileMonitor implements Runnable {
 			long currentTime = System.currentTimeMillis();
 			long staleTime = 0;
 			try {
-				staleTime = df.getMetaFile().getLastAccessed()
+				if(df.getMetaFile() == null)
+					return true;
+				else
+					staleTime = df.getMetaFile().getLastAccessed()
 						+ this.maxInactive;
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("error checking last accessed", e);

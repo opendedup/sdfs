@@ -327,7 +327,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						}
 					}
 				}
-				archive = new HashBlobArchive(false);
+				archive = new HashBlobArchive(false,MAX_HM_SZ);
 
 				if (z > 0 || c > 0) {
 					SDFSLogger.getLog().info("Uploaded " + z + " archives. Failed to upload " + c + " archives");
@@ -681,7 +681,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	private HashBlobArchive(boolean compact) throws IOException {
+	private HashBlobArchive(boolean compact,int sz) throws IOException {
 		long pid = rand.nextLong();
 		while (pid < 100 && store.fileExists(pid))
 			pid = rand.nextLong();
@@ -692,7 +692,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		this.writeable = true;
 		this.compactStaged = compact;
 		wMaps.put(id, new SimpleByteArrayLongMap(new File(staged_chunk_location, Long.toString(id) + ".map").getPath(),
-				MAX_HM_SZ, VERSION));
+				sz, VERSION));
 		if (!this.compactStaged)
 			executor.execute(this);
 		f = new File(staged_chunk_location, Long.toString(id));
@@ -1108,7 +1108,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog()
-					.error("unable to read at " + pos + " " + nlen + " flen " + f.length() + " file=" + f.getPath(), e);
+					.error("unable to read at " + pos + " " + nlen + " flen " + f.length() + " file=" + f.getPath() + " openFiles " + openFiles.size(), e);
 			throw new IOException(e);
 		} finally {
 
@@ -1254,8 +1254,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 		int blks = 0;
 
 		try {
-			_har = new HashBlobArchive(true);
 			SimpleByteArrayLongMap _m = getRawMap(this.id);
+			_har = new HashBlobArchive(true,_m.getMaxSz());
+			
 			try {
 				_m.iterInit();
 				KeyValuePair p = _m.next();
@@ -1303,6 +1304,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 							if (trys > 4)
 								throw new IOException();
 						}
+						HashBlobArchive.compressedLength.addAndGet(_har.f.length());
+						HashBlobArchive.currentLength.addAndGet(_har.uncompressedLength.get());
 					} else {
 						_har.delete();
 						return 0;
@@ -1315,12 +1318,16 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to compact " + id, e);
-			HashBlobArchive.compressedLength.addAndGet(-1 * _har.f.length());
-			HashBlobArchive.currentLength.addAndGet(-1 * _har.uncompressedLength.get());
+			if(_har !=null) {
+				HashBlobArchive.compressedLength.addAndGet(-1 * _har.f.length());
+				HashBlobArchive.currentLength.addAndGet(-1 * _har.uncompressedLength.get());
+			}
+			
 			// _har.delete();
 			throw new IOException(e);
 		}
-		HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
+		HashBlobArchive.compressedLength.addAndGet(-1* ofl);
+		
 		return f.length() - ofl;
 	}
 

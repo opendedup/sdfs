@@ -223,7 +223,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				return new HashMap<String, String>();
 			}
 		} else {
-
 			BlobMetadata omd = blobStore.blobMetadata(this.name, obj);
 			Map<String, String> md = new HashMap<String, String>();
 			Map<String, String> zk = omd.getUserMetadata();
@@ -856,11 +855,22 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				else
 					_ps = blobStore.list(this.name, ListContainerOptions.Builder.prefix("/claims/keys/" + haName));
 				if (_ps.size() == 0 || this.atmosStore) {
+					metaData = this.getMetaData("blocks/" + haName);
 					blobStore.removeBlob(this.name, "keys/" + haName);
 					SDFSLogger.getLog().info("Deleting " + "keys/" + haName);
 					blobStore.removeBlob(this.name, "blocks/" + haName);
-					SDFSLogger.getLog().info("Deleting " + "blocks/" + haName);
+					SDFSLogger.getLog().info("Deleting " + "blocks/" + haName + " size="+metaData.get("size") + " compressed size="+metaData.get("compressedsize"));
 					
+					int _size = Integer.parseInt((String) metaData.get("bsize"));
+					int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
+					HashBlobArchive.currentLength.addAndGet(-1* _size);
+					HashBlobArchive.compressedLength.addAndGet(-1* _compressedSize);
+					if(HashBlobArchive.currentLength.get() < 0)
+						HashBlobArchive.currentLength.set(0);
+					if(HashBlobArchive.compressedLength.get() < 0) {
+						HashBlobArchive.compressedLength.set(0);
+					}
+					SDFSLogger.getLog().info("Current DSE Size  size="+HashBlobArchive.currentLength.get() + " compressed size="+HashBlobArchive.compressedLength.get());
 				} else {
 					SDFSLogger.getLog().info("Not deleting becuase still claimed by " +_ps.size());
 					Iterator<? extends StorageMetadata> _di = _ps.iterator();
@@ -869,15 +879,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					}
 					
 				}
-				int _size = Integer.parseInt((String) metaData.get("size"));
-				int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-				HashBlobArchive.currentLength.addAndGet(-1* _size);
-				HashBlobArchive.compressedLength.addAndGet(-1* _compressedSize);
-				if(HashBlobArchive.currentLength.get() < 0)
-					HashBlobArchive.currentLength.set(0);
-				if(HashBlobArchive.compressedLength.get() < 0) {
-					HashBlobArchive.compressedLength.set(0);
-				}
+				
 			} else {
 				blobStore.removeBlob(this.name, "keys/" + haName);
 				blobStore.removeBlob(this.name, "blocks/" + haName);
@@ -1416,7 +1418,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
 		}
-		if (e != null)
+		if (e != null && !this.atmosStore )
 			SDFSLogger.getLog().warn("unable to connect to bucket try " + 3 + " of 3", e);
 		return true;
 	}

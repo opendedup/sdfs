@@ -296,11 +296,6 @@ public class ShardedFileByteArrayLongMap
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			for (int i = 0; i < numshards; i++) {
-				this.mapped.add(i, new BitSet(sz));
-				this.claims.add(i, new BitSet(sz));
-				this.removed.add(i, new BitSet(sz));
-			}
 			// bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new
 			// File(path + ".nbf").getPath(), true);
 			this.iterInit();
@@ -463,6 +458,9 @@ public class ShardedFileByteArrayLongMap
 
 				int cp = 0;
 				if (!closedCorrectly) {
+					this.mapped = new ArrayList<BitSet>();
+					this.removed = new ArrayList<BitSet>();
+					this.claims = new ArrayList<BitSet>();
 					for (int i = 0; i < (numshards); i++) {
 						BitSet mp = new BitSet(partSize);
 						BitSet rm = new BitSet(partSize);
@@ -491,6 +489,7 @@ public class ShardedFileByteArrayLongMap
 			// double pfull = (double) this.sz.get() / (double) size;
 			// SDFSLogger.getLog().info("Percentage full=" + pfull + " full=" +
 			// this.full);
+			SDFSLogger.getLog().info("opened hashtable " + path + " size = " + this.sz.get());
 			this.setup = true;
 			return this.sz.get();
 		} else {
@@ -806,6 +805,7 @@ public class ShardedFileByteArrayLongMap
 	public void close() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
+		long _sz = 0;
 		try {
 			this.closed = true;
 			for (Shard s : shards) {
@@ -839,13 +839,14 @@ public class ShardedFileByteArrayLongMap
 			} catch (Exception e) {
 				// SDFSLogger.getLog().error("error closing", e);
 			}
-
+			
 			try {
 				File f = new File(path + ".vmp");
 				FileOutputStream fout = new FileOutputStream(f);
 				ObjectOutputStream oon = new ObjectOutputStream(fout);
 				for (int i = 0; i < numshards; i++) {
 					oon.writeObject(mapped.get(i));
+					_sz += mapped.get(i).cardinality();
 				}
 
 				oon.flush();
@@ -895,6 +896,7 @@ public class ShardedFileByteArrayLongMap
 		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("closed " + this.path);
+		SDFSLogger.getLog().info("close hashtable " + path + " size = " + this.sz.get() + " map size= " +_sz);
 	}
 
 	/*

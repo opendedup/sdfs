@@ -113,7 +113,7 @@ public class MultiDownload implements Runnable {
 				while (st != null) {
 					ost = st;
 					st = md.getNextKey();
-					SDFSLogger.getLog().info("Key = " + ost);
+					//SDFSLogger.getLog().info("Key = " + ost);
 					try {
 						md.addStringResult(ost);
 					}catch(Exception e) {
