@@ -20,13 +20,13 @@ package org.opendedup.sdfs.replication;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +41,6 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.cli.ProcessBatchGetBlocks;
 import org.opendedup.sdfs.notification.BlockImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -74,10 +73,9 @@ public class MetaFileImport implements Serializable {
 	boolean firstrun = true;
 	private boolean useSSL;
 	private Exception lastException;
-	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, worksQueue,
-			executionHandler);
+			new ThreadPoolExecutor.CallerRunsPolicy());
 
 	protected MetaFileImport(String path, String server, String password, int port, int maxSz, SDFSEvent evt,
 			boolean useSSL) throws IOException {
@@ -134,7 +132,7 @@ public class MetaFileImport implements Serializable {
 			passEntries = 0;
 			worksQueue = new SynchronousQueue<Runnable>();
 			executor = new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, worksQueue,
-					executionHandler);
+					new ThreadPoolExecutor.CallerRunsPolicy());
 			this.traverse(new File(this.path));
 			
 			executor.shutdown();
@@ -265,7 +263,7 @@ public class MetaFileImport implements Serializable {
 							for (HashLocPair p : al) {
 								long pos = 0;
 								if (Main.refCount && Arrays.areEqual(WritableCacheBuffer.bk, p.hash))
-									pos = 0;
+									pos = 1;
 								else
 									pos = HCServiceProxy.hashExists(p.hash, false);
 								boolean exists = false;
@@ -311,7 +309,7 @@ public class MetaFileImport implements Serializable {
 				}
 				Main.volume.updateCurrentSize(mf.length(), true);
 				if (corruption) {
-					MetaFileStore.removeMetaFile(mf.getPath(), true);
+					MetaFileStore.removeMetaFile(mf.getPath(), true,true);
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
 				}

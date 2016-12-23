@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -12,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,7 +34,6 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
@@ -62,7 +61,6 @@ public class FileReplicationService {
 	private static final int sl = Main.dedupDBStore.length();
 	private static final int maxTries = 3;
 	private static final String DM = "/ThisIsADirectoryMarkerDoNotDelete";
-	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
 			2);
 	private transient ThreadPoolExecutor executor = null;
@@ -551,7 +549,7 @@ public class FileReplicationService {
 				.getLog()
 				.info("##################### Syncing Files from cloud now ########################");
 		executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads,
-				10, TimeUnit.SECONDS, worksQueue, executionHandler);
+				10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 
 		try {
 			this.sync.clearIter();
@@ -585,7 +583,7 @@ public class FileReplicationService {
 			this.sync.clearIter();
 			executor = new ThreadPoolExecutor(Main.dseIOThreads,
 					Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
-					executionHandler);
+					new ThreadPoolExecutor.CallerRunsPolicy());
 			fname = this.sync.getNextName("ddb", req.getVolumeID());
 			while (fname != null) {
 				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);

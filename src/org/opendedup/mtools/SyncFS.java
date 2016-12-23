@@ -56,6 +56,9 @@ public class SyncFS {
 	private static EventBus eventBus = new EventBus();
 
 	public SyncFS() throws IOException {
+		fEvt = SDFSEvent
+				.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
+						+ Main.volume.getName() );
 		this.init();
 	}
 

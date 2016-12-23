@@ -90,7 +90,7 @@ public class GetCloudFile implements Runnable {
 		} catch (IOException e) {
 
 			if (sdf != null) {
-				MetaFileStore.removeMetaFile(sdf.getPath(), true);
+				MetaFileStore.removeMetaFile(sdf.getPath(), true,true);
 			}
 			throw e;
 		} catch (Exception e) {
@@ -160,7 +160,7 @@ public class GetCloudFile implements Runnable {
 			fevt.endEvent("unable to process file " + mf.getPath(), SDFSEvent.ERROR);
 		} finally {
 			if (df != null && mf != null) {
-				MetaFileStore.removeMetaFile(mf.getPath(), true);
+				MetaFileStore.removeMetaFile(mf.getPath(), true,true);
 			}
 		}
 		

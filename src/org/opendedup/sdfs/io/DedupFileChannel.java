@@ -539,6 +539,7 @@ public class DedupFileChannel {
 								buf.put(_rb, 0, nl);
 							else
 								buf.put(_rb);
+							//SDFSLogger.getLog().info(new String(_rb));
 							df.getMetaFile().getIOMonitor()
 									.addBytesRead(_len, true);
 							currentLocation = currentLocation + _len;

@@ -43,7 +43,7 @@ public class DedupFileStore {
 	 * stores open files in an LRU map. Files will be evicted based on the
 	 * maxOpenFiles parameter
 	 */
-	private static ConcurrentHashMap<String, DedupFile> openFile = new ConcurrentHashMap<String, DedupFile>();
+	private static ConcurrentHashMap<String, SparseDedupFile> openFile = new ConcurrentHashMap<String, SparseDedupFile>();
 	
 	private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup = CacheBuilder.newBuilder()
 			.maximumSize(1_000_000).concurrencyLevel(Main.writeThreads)
@@ -122,7 +122,7 @@ public class DedupFileStore {
 	}
 
 	public static boolean addRef(byte[] entry, long val) throws IOException {
-		if (val == 0)
+		if (val == 1 || val == 0)
 			return true;
 		
 		try {
@@ -151,7 +151,7 @@ public class DedupFileStore {
 	}
 	
 	public static boolean removeRef(byte[] entry, long val) throws IOException {
-		if (val == 0)
+		if (val == 1|| val == 0)
 			return true;
 		
 		try {
@@ -183,7 +183,7 @@ public class DedupFileStore {
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
-		DedupFile df = null;
+		SparseDedupFile df = null;
 		try {
 			if (!closing) {
 				df = openFile.get(mf.getDfGuid());
@@ -201,7 +201,7 @@ public class DedupFileStore {
 
 	public static DedupFile openDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
-		DedupFile df = null;
+		SparseDedupFile df = null;
 		try {
 			if (!closing) {
 				df = openFile.get(mf.getDfGuid());
@@ -226,10 +226,11 @@ public class DedupFileStore {
 	 *            the dedup file to add to the openfile hashmap
 	 * @throws IOException
 	 */
-	public static void addOpenDedupFiles(DedupFile df) throws IOException {
+	public static void addOpenDedupFiles(SparseDedupFile df) throws IOException {
 		if (!closing) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
+			//SDFSLogger.getLog().info("adding " + df.getGUID() + "pth=" + df.getMetaFile().getPath());
 			if (openFile.size() >= Main.maxOpenFiles)
 				throw new IOException(
 						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
@@ -279,7 +280,10 @@ public class DedupFileStore {
 	 * @param mf
 	 */
 	public static void removeOpenDedupFile(String guid) {
-		openFile.remove(guid);
+		//SDFSLogger.getLog().info("removing " + guid);
+		if(guid != null)
+			openFile.remove(guid);
+		
 	}
 
 	/**

@@ -20,10 +20,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +32,6 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
 
 
@@ -42,9 +41,8 @@ public class ReadAhead implements Runnable {
 	boolean closeWhenDone;
 	private DedupFileChannel ch = null;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads * 4,
-			Main.writeThreads * 4, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
+			Main.writeThreads * 4, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 	public HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {

@@ -614,7 +614,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				throw new IOException("path exists [" + snaptoPath
 						+ "]Cannot overwrite existing data ");
 			else if (f.exists()) {
-				MetaFileStore.removeMetaFile(snaptoPath, true);
+				MetaFileStore.removeMetaFile(snaptoPath, true,true);
 			}
 
 			if (!f.getParentFile().exists())
@@ -887,6 +887,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					
 					eventBus.post(new MFileWritten(this));
 					this.dirty = false;
+					
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn(
 							"unable to write file metadata for [" + this.path

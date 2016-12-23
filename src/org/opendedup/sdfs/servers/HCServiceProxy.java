@@ -204,16 +204,21 @@ public class HCServiceProxy {
 						+ ".lock");
 				if (Main.runConsistancyCheck || file.exists()) {
 					hcService.runConsistancyCheck();
-					SDFSEvent evt = SDFSEvent
-					.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
-							+ Main.volume.getName());
-					new FDisk(evt);
+					
 					
 				}
-				touchRunFile();
+				
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true));
 				}
+				if (Main.runConsistancyCheck|| file.exists()) {
+					SDFSLogger.getLog().info("running consistency check");
+					SDFSEvent evt = SDFSEvent
+							.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
+									+ Main.volume.getName());
+							new FDisk(evt);
+				}
+				touchRunFile();
 			}
 
 			else {

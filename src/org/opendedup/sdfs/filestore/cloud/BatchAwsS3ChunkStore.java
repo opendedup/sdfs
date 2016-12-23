@@ -20,15 +20,17 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -49,14 +51,11 @@ import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.crypto.spec.IvParameterSpec;
 
 import static java.lang.Math.toIntExact;
@@ -112,7 +111,6 @@ import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -141,12 +139,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private int glacierDays = 0;
 	private int infrequentAccess = 0;
 	private boolean clustered = true;
-	private ReentrantReadWriteLock s3clientLock = new ReentrantReadWriteLock();
+	// private ReentrantReadWriteLock s3clientLock = new
+	// ReentrantReadWriteLock();
 	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
 	private WeakHashMap<Long, String> restoreRequests = new WeakHashMap<Long, String>();
 	private int checkInterval = 15000;
 	private String binm = "bucketinfo";
 	private int mdVersion = 0;
+	private boolean simpleMD;
+	private final static String mdExt = ".6442";
 
 	static {
 		try {
@@ -227,11 +228,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			nmd.setContentLength(sz.length);
 			nmd.setUserMetadata(md);
 			try {
-			s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+
+				if (this.simpleMD)
+					this.updateObject(binm, nmd);
+				else
+					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
 			} catch (AmazonS3Exception e1) {
 				if (e1.getStatusCode() == 409) {
 					try {
-						s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+						if (this.simpleMD)
+							this.updateObject(binm, nmd);
+						else
+							s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
 					} catch (Exception e2) {
 						throw new IOException(e2);
 					}
@@ -382,6 +390,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (syncf) {
 					new FileReplicationService(this);
 				}
+			}
+			if (config.hasAttribute("simple-metadata")) {
+				this.simpleMD = Boolean.parseBoolean(config.getAttribute("simple-metadata"));
 			}
 			int rsp = 0;
 			int wsp = 0;
@@ -540,30 +551,29 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				this.binm = "bucketinfo/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
+				if (this.simpleMD)
+					this.updateObject(binm, md);
+
 			} else {
 				Map<String, String> obj = null;
-				ObjectMetadata omd = null;
 				try {
-					omd = s3Service.getObjectMetadata(this.name, binm);
-					obj = omd.getUserMetadata();
-					obj.get("currentsize");
+					obj = this.getUserMetaData(binm);
 				} catch (Exception e) {
-					omd = null;
 					SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 				}
-				if (omd == null) {
+				if (!obj.containsKey("currentsize")) {
 					try {
 						this.binm = "bucketinfo/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-						omd = s3Service.getObjectMetadata(this.name, binm);
-						obj = omd.getUserMetadata();
+
+						obj = this.getUserMetaData(binm);
 						obj.get("currentsize");
 					} catch (Exception e) {
-						omd = null;
+						obj.get("currentsize");
 						SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 					}
 				}
-				if (omd == null) {
+				if (!obj.containsKey("currentsize")) {
 					ObjectMetadata md = new ObjectMetadata();
 					md.addUserMetadata("currentsize", "0");
 					md.addUserMetadata("currentcompressedsize", "0");
@@ -582,6 +592,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					md.setContentLength(sz.length);
 					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
+					if (this.simpleMD)
+						this.updateObject(binm, md);
 				} else {
 					if (obj.containsKey("currentsize")) {
 						long cl = Long.parseLong((String) obj.get("currentsize"));
@@ -612,9 +624,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.clustered = false;
 
 					obj.put("clustered", Boolean.toString(this.clustered));
-					omd.setUserMetadata(obj);
+
 					try {
-						
+						ObjectMetadata omd = new ObjectMetadata();
+						omd.setUserMetadata(obj);
 						updateObject(binm, omd);
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to update bucket info in init", e);
@@ -633,6 +646,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						}
 						md.setContentLength(sz.length);
 						s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
+						if (this.simpleMD)
+							this.updateObject(binm, md);
 
 					}
 				}
@@ -707,79 +722,72 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	private String[] getStrings(S3Object sobj) throws IOException {
-		this.s3clientLock.readLock().lock();
+
+		boolean encrypt = false;
+		boolean compress = false;
+		boolean lz4compress = false;
+
+		int cl = (int) sobj.getObjectMetadata().getContentLength();
+
+		byte[] data = new byte[cl];
+		DataInputStream in = null;
 		try {
-			boolean encrypt = false;
-			boolean compress = false;
-			boolean lz4compress = false;
+			in = new DataInputStream(sobj.getObjectContent());
+			in.readFully(data);
 
-			int cl = (int) sobj.getObjectMetadata().getContentLength();
-
-			byte[] data = new byte[cl];
-			DataInputStream in = null;
-			try {
-				in = new DataInputStream(sobj.getObjectContent());
-				in.readFully(data);
-
-			} catch (Exception e) {
-				throw new IOException(e);
-			} finally {
-				try {
-					in.close();
-				} catch (Exception e) {
-				}
-			}
-			Map<String, String> mp = this.getUserMetaData(sobj.getObjectMetadata());
-			if (mp.containsKey("md5sum")) {
-				try {
-					byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
-					byte[] chash;
-					chash = ServiceUtils.computeMD5Hash(data);
-					if (!Arrays.equals(shash, chash))
-						throw new IOException("download corrupt at " + sobj.getKey());
-				} catch (NoSuchAlgorithmException e) {
-					throw new IOException(e);
-				}
-			}
-			int size = Integer.parseInt((String) mp.get("size"));
-			if (mp.containsKey("encrypt")) {
-				encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
-			}
-			if (mp.containsKey("compress")) {
-				compress = Boolean.parseBoolean((String) mp.get("compress"));
-			} else if (mp.containsKey("lz4compress")) {
-
-				lz4compress = Boolean.parseBoolean((String) mp.get("lz4compress"));
-			}
-			byte[] ivb = null;
-			if (mp.containsKey("ivspec"))
-				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
-			if (encrypt) {
-				if (ivb != null)
-					data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
-				else
-					data = EncryptUtils.decryptCBC(data);
-			}
-			if (compress)
-				data = CompressionUtils.decompressZLIB(data);
-			else if (lz4compress) {
-				data = CompressionUtils.decompressLz4(data, size);
-			}
-			String hast = new String(data);
-			SDFSLogger.getLog().debug("reading hashes " + (String) mp.get("hashes") + " from " + sobj.getKey());
-			String[] st = hast.split(",");
-			return st;
+		} catch (Exception e) {
+			throw new IOException(e);
 		} finally {
-			this.s3clientLock.readLock().unlock();
+			try {
+				in.close();
+			} catch (Exception e) {
+			}
 		}
+		Map<String, String> mp = this.getUserMetaData(sobj.getKey());
+		if (mp.containsKey("md5sum")) {
+			try {
+				byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
+				byte[] chash;
+				chash = ServiceUtils.computeMD5Hash(data);
+				if (!Arrays.equals(shash, chash))
+					throw new IOException("download corrupt at " + sobj.getKey());
+			} catch (NoSuchAlgorithmException e) {
+				throw new IOException(e);
+			}
+		}
+		int size = Integer.parseInt((String) mp.get("size"));
+		if (mp.containsKey("encrypt")) {
+			encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
+		}
+		if (mp.containsKey("compress")) {
+			compress = Boolean.parseBoolean((String) mp.get("compress"));
+		} else if (mp.containsKey("lz4compress")) {
+
+			lz4compress = Boolean.parseBoolean((String) mp.get("lz4compress"));
+		}
+		byte[] ivb = null;
+		if (mp.containsKey("ivspec"))
+			ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+		if (encrypt) {
+			if (ivb != null)
+				data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
+			else
+				data = EncryptUtils.decryptCBC(data);
+		}
+		if (compress)
+			data = CompressionUtils.decompressZLIB(data);
+		else if (lz4compress) {
+			data = CompressionUtils.decompressLz4(data, size);
+		}
+		String hast = new String(data);
+		SDFSLogger.getLog().debug("reading hashes " + (String) mp.get("hashes") + " from " + sobj.getKey());
+		String[] st = hast.split(",");
+		return st;
+
 	}
 
 	private int getClaimedObjects(S3Object sobj, long id) throws Exception, IOException {
 
-		Map<String, String> mp = this.getUserMetaData(sobj.getObjectMetadata());
-		if (!mp.containsKey("encrypt")) {
-			mp = this.getUserMetaData(s3Service.getObjectMetadata(this.name, sobj.getKey()));
-		}
 		String[] st = this.getStrings(sobj);
 		int claims = 0;
 		for (String ha : st) {
@@ -840,7 +848,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public boolean fileExists(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			s3Service.getObject(this.name, "blocks/" + haName);
 			return true;
@@ -852,8 +860,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw e;
 			} else
 				return false;
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -864,7 +870,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	private ObjectMetadata getClaimMetaData(long id) throws IOException {
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			ObjectMetadata md = s3Service.getObjectMetadata(this.name, this.getClaimName(id));
 			return md;
@@ -876,15 +882,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw e;
 			} else
 				return null;
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			int csz = toIntExact(arc.getFile().length());
 			ObjectMetadata md = new ObjectMetadata();
@@ -911,6 +915,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				s3Service.putObject(req);
 			else
 				this.multiPartUpload(req);
+			if (this.simpleMD)
+				this.updateObject("blocks/" + haName, md);
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(msg));
 			md.setContentMD5(mds);
@@ -922,6 +928,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						new ByteArrayInputStream(msg), md);
 
 				s3Service.putObject(creq);
+				if (this.simpleMD)
+					this.updateObject(this.getClaimName(id), md);
 			}
 			byte[] hs = arc.getHashesString().getBytes();
 			int sz = hs.length;
@@ -952,11 +960,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			req = new PutObjectRequest(this.name, "keys/" + haName, new ByteArrayInputStream(hs), md);
 			s3Service.putObject(req);
+			if (this.simpleMD)
+				this.updateObject("keys/" + haName, md);
 		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("unable to upload " + arc.getID() + " with id " + id, e);
 			throw new IOException(e);
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 
 	}
@@ -965,7 +973,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// SDFSLogger.getLog().info("Downloading " + id);
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		S3Object sobj = null;
 		byte[] data = null;
 		// int ol = 0;
@@ -1044,7 +1052,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception e) {
 
 			}
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 		}
 		return data;
 	}
@@ -1053,7 +1061,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// SDFSLogger.getLog().info("Downloading " + id);
 		// SDFSLogger.getLog().info("Current readers :" + rr.incrementAndGet());
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		S3Object sobj = null;
 		try {
 
@@ -1089,7 +1097,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
 			double bps = (cl / 1024) / dtm;
 			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
-			Map<String, String> mp = this.getUserMetaData(omd);
+			Map<String, String> mp = this.getUserMetaData("blocks/" + haName);
 			if (md5sum && mp.containsKey("md5sum")) {
 				byte[] shash = BaseEncoding.base64().decode(mp.get("md5sum"));
 
@@ -1103,7 +1111,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				mp.put("lastaccessed", Long.toString(System.currentTimeMillis()));
 				omd.setUserMetadata(mp);
-				
+
 				updateObject("blocks/" + haName, omd);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error setting last accessed", e);
@@ -1125,7 +1133,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					mp.put("deleted-objects", Integer.toString(delobj));
 					mp.put("suspect", "true");
 					omd.setUserMetadata(mp);
-					
+
 					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
@@ -1153,7 +1161,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception e) {
 
 			}
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -1176,8 +1184,27 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 	}
 
-	private Map<String, String> getUserMetaData(ObjectMetadata obj) {
-		this.s3clientLock.readLock().lock();
+	private Map<String, String> getUserMetaData(String name) throws IOException {
+		// this.s3clientLock.readLock().lock();
+		if (this.simpleMD) {
+			if (s3Service.doesObjectExist(this.name, name + mdExt)) {
+				S3Object sobj = s3Service.getObject(this.name, name + mdExt);
+				ObjectInputStream in = new ObjectInputStream(sobj.getObjectContent());
+				try {
+					@SuppressWarnings("unchecked")
+					Map<String, String> md = (Map<String, String>) in.readObject();
+					return md;
+				} catch (ClassNotFoundException e) {
+					throw new IOException(e);
+				} finally {
+					if (in != null)
+						IOUtils.closeQuietly(in);
+				}
+			} else {
+				return new HashMap<String, String>();
+			}
+		}
+		ObjectMetadata obj = s3Service.getObjectMetadata(this.name, name);
 		try {
 			if (simpleS3) {
 				HashMap<String, String> omd = new HashMap<String, String>();
@@ -1202,31 +1229,32 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				return obj.getUserMetadata();
 			}
 		} finally {
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 		}
 
 	}
 
 	private int verifyDelete(long id) throws IOException, Exception {
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		ObjectMetadata om = null;
+		// ObjectMetadata om = null;
 		S3Object kobj = null;
 
 		int claims = 0;
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
+
 		try {
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			claims = this.getClaimedObjects(kobj, id);
+			String name = null;
 			if (this.clustered)
-				om = this.getClaimMetaData(id);
+				name = this.getClaimName(id);
 			else {
-				om = s3Service.getObjectMetadata(this.name, "keys/" + haName);
+				name = "keys/" + haName;
 			}
-			Map<String, String> mp = this.getUserMetaData(om);
+			Map<String, String> mp = this.getUserMetaData(name);
 			if (claims > 0) {
-				
-				
+
 				int delobj = 0;
 				if (mp.containsKey("deleted-objects")) {
 					delobj = Integer.parseInt((String) mp.get("deleted-objects")) - claims;
@@ -1236,15 +1264,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				mp.remove("deleted");
 				mp.put("deleted-objects", Integer.toString(delobj));
 				mp.put("suspect", "true");
-				om.setUserMetadata(mp);
+
 				String kn = null;
 				if (this.clustered)
 					kn = this.getClaimName(id);
 				else
 					kn = "keys/" + haName;
-				
+
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, kn);
+				om.setUserMetadata(mp);
 				this.updateObject(kn, om);
-				
 				SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 
 			}
@@ -1254,16 +1283,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					s3Service.deleteObject(this.name, "blocks/" + haName);
 					s3Service.deleteObject(this.name, "keys/" + haName);
 					SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
+					if (this.simpleMD) {
+						s3Service.deleteObject(this.name, "blocks/" + haName + mdExt);
+						s3Service.deleteObject(this.name, "keys/" + haName+ mdExt);
+					}
 				} else {
 					s3Service.deleteObject(this.name, this.getClaimName(id));
+					if (this.simpleMD)
+						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-					HashBlobArchive.currentLength.addAndGet(-1* _size);
+					HashBlobArchive.currentLength.addAndGet(-1 * _size);
 					HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
-					if(HashBlobArchive.currentLength.get() < 0) {
+					if (HashBlobArchive.currentLength.get() < 0) {
 						HashBlobArchive.currentLength.set(0);
 					}
-					if(HashBlobArchive.compressedLength.get() < 0) {
+					if (HashBlobArchive.compressedLength.get() < 0) {
 						HashBlobArchive.compressedLength.set(0);
 					}
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
@@ -1271,7 +1306,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, "blocks/" + haName);
 						s3Service.deleteObject(this.name, "keys/" + haName);
 						SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
+						if (this.simpleMD) {
+							s3Service.deleteObject(this.name, "blocks/" + haName + mdExt);
+							s3Service.deleteObject(this.name, "keys/" + haName+ mdExt);
+						}
 					}
+
 				}
 			}
 		} finally {
@@ -1279,7 +1319,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				kobj.close();
 			} catch (Exception e) {
 			}
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 		}
 		return claims;
 	}
@@ -1290,24 +1330,38 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				Thread.sleep(60000);
 				try {
-					ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
-					Map<String, String> md = omd.getUserMetadata();
-					ObjectMetadata nmd = new ObjectMetadata();
-					nmd.setUserMetadata(md);
-					md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-					md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
-					md.put("hostname", InetAddress.getLocalHost().getHostName());
-					md.put("port", Integer.toString(Main.sdfsCliPort));
-					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
-					String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
-					md.put("md5sum", st);
-					nmd.setContentMD5(st);
-					nmd.setContentLength(sz.length);
-					nmd.setUserMetadata(md);
-					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+					if (this.simpleMD) {
+						Map<String, String> md = this.getUserMetaData(binm);
+						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+						md.put("hostname", InetAddress.getLocalHost().getHostName());
+						md.put("port", Integer.toString(Main.sdfsCliPort));
+						ObjectMetadata omd = new ObjectMetadata();
+						omd.setUserMetadata(md);
+						this.updateObject(binm, omd);
+					} else {
+						ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
+						Map<String, String> md = omd.getUserMetadata();
+						ObjectMetadata nmd = new ObjectMetadata();
+						nmd.setUserMetadata(md);
+						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+						md.put("hostname", InetAddress.getLocalHost().getHostName());
+						md.put("port", Integer.toString(Main.sdfsCliPort));
+						byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+						String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+						md.put("md5sum", st);
+						nmd.setContentMD5(st);
+						nmd.setContentLength(sz.length);
+						nmd.setUserMetadata(md);
+						s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+					}
 				} catch (Exception e) {
 					try {
 						ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
@@ -1327,19 +1381,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						nmd.setContentMD5(st);
 						nmd.setContentLength(sz.length);
 						nmd.setUserMetadata(md);
-						
+
 						this.updateObject(binm, nmd);
 					} catch (Exception e1) {
 						SDFSLogger.getLog().error("unable to update metadata for " + binm, e);
 					}
 				}
-				
+
 				if (this.deletes.size() > 0) {
 					SDFSLogger.getLog().info("running garbage collection");
-					RejectedExecutionHandler executionHandler = new BlockPolicy();
 					BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-					ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.dseIOThreads,
-							10, TimeUnit.SECONDS, worksQueue, executionHandler);
+					ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.dseIOThreads, 10, TimeUnit.SECONDS,
+							worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 					this.delLock.lock();
 					HashMap<Long, Integer> odel = null;
 					try {
@@ -1354,7 +1407,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					for (Long k : iter) {
 						DeleteObject obj = new DeleteObject();
 						obj.k = k;
-						obj.odel=odel;
+						obj.odel = odel;
 						obj.st = this;
 						executor.execute(obj);
 					}
@@ -1374,7 +1427,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	public Iterator<String> getNextObjectList(String prefix) {
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			List<String> keys = new ArrayList<String>();
 			if (ck == null) {
@@ -1386,18 +1439,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			List<S3ObjectSummary> objs = ck.getObjectSummaries();
 			for (S3ObjectSummary obj : objs) {
-				
-				if (obj.getKey().length() > prefix.length())
+
+				if (obj.getKey().length() > prefix.length() && !obj.getKey().endsWith(mdExt))
 					keys.add(obj.getKey());
 			}
 			return keys.iterator();
 		} finally {
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 		}
 	}
 
 	public StringResult getStringResult(String key) throws IOException, InterruptedException {
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		S3Object sobj = null;
 		try {
 
@@ -1425,7 +1478,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			boolean encrypt = false;
 			boolean compress = false;
 			boolean lz4compress = false;
-			Map<String, String> mp = this.getUserMetaData(md);
+			Map<String, String> mp = this.getUserMetaData(key);
 			byte[] ivb = null;
 			if (mp.containsKey("ivspec")) {
 				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
@@ -1459,7 +1512,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			if (encrypt) {
-				
+
 				if (ivb != null) {
 					data = EncryptUtils.decryptCBC(data, new IvParameterSpec(ivb));
 				} else {
@@ -1494,7 +1547,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						kn = this.getClaimName(hid);
 					else
 						kn = sobj.getKey();
-					
+
 					this.updateObject(kn, md);
 				} catch (Exception e) {
 					throw new IOException(e);
@@ -1503,8 +1556,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			return st;
 		} finally {
 			if (sobj != null)
-				sobj.close();
-			this.s3clientLock.readLock().unlock();
+				try {
+					sobj.close();
+				} catch (Exception e) {
+				}
+			// this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -1515,197 +1571,203 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
-		this.s3clientLock.readLock().lock();
-		try {
-			InputStream in = null;
-			while (to.startsWith(File.separator))
-				to = to.substring(1);
+		// this.s3clientLock.readLock().lock();
+		InputStream in = null;
+		while (to.startsWith(File.separator))
+			to = to.substring(1);
 
-			String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-			SDFSLogger.getLog().info("uploading " + f.getPath() + " to " + to + " pth " + pth);
-			boolean isDir = false;
-			boolean isSymlink = false;
-			if (!OSValidator.isWindows()) {
-				isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-						.isDirectory();
-				isSymlink = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-						.isSymbolicLink();
-			} else {
-				isDir = f.isDirectory();
-			}
-			if (isSymlink) {
-				try {
-					HashMap<String, String> metaData = new HashMap<String, String>();
-					metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
-					metaData.put("lastmodified", Long.toString(f.lastModified()));
-					String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
-							Main.chunkStoreEncryptionEnabled);
-					metaData.put("symlink", slp);
-					ObjectMetadata md = new ObjectMetadata();
-					md.setContentType("binary/octet-stream");
-					md.setContentLength(pth.getBytes().length);
-					md.setUserMetadata(metaData);
-					PutObjectRequest req = new PutObjectRequest(this.name, pth,
-							new ByteArrayInputStream(pth.getBytes()), md);
-					s3Service.putObject(req);
-					if (this.isClustered())
-						this.checkoutFile(pth);
-				} catch (Exception e1) {
-					throw new IOException(e1);
-				}
-			} else if (isDir) {
-				HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
+		SDFSLogger.getLog().info("uploading " + f.getPath() + " to " + to + " pth " + pth);
+		boolean isDir = false;
+		boolean isSymlink = false;
+		if (!OSValidator.isWindows()) {
+			isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+					.isDirectory();
+			isSymlink = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+					.isSymbolicLink();
+		} else {
+			isDir = f.isDirectory();
+		}
+		if (isSymlink) {
+			try {
+				HashMap<String, String> metaData = new HashMap<String, String>();
 				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
-				metaData.put("directory", "true");
+				String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
+						Main.chunkStoreEncryptionEnabled);
+				metaData.put("symlink", slp);
 				ObjectMetadata md = new ObjectMetadata();
 				md.setContentType("binary/octet-stream");
 				md.setContentLength(pth.getBytes().length);
 				md.setUserMetadata(metaData);
-				try {
-					PutObjectRequest req = new PutObjectRequest(this.name, pth,
-							new ByteArrayInputStream(pth.getBytes()), md);
-					s3Service.putObject(req);
-					if (this.isClustered())
-						this.checkoutFile(pth);
-				} catch (Exception e1) {
-					SDFSLogger.getLog().error("error uploading", e1);
-					throw new IOException(e1);
+				PutObjectRequest req = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(pth.getBytes()),
+						md);
+				s3Service.putObject(req);
+				if (this.simpleMD)
+					this.updateObject(pth, md);
+				if (this.isClustered())
+					this.checkoutFile(pth);
+			} catch (Exception e1) {
+				throw new IOException(e1);
+			}
+		} else if (isDir) {
+			HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+			metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
+			metaData.put("lastmodified", Long.toString(f.lastModified()));
+			metaData.put("directory", "true");
+			ObjectMetadata md = new ObjectMetadata();
+			md.setContentType("binary/octet-stream");
+			md.setContentLength(pth.getBytes().length);
+			md.setUserMetadata(metaData);
+			try {
+				PutObjectRequest req = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(pth.getBytes()),
+						md);
+				s3Service.putObject(req);
+				if (this.isClustered())
+					this.checkoutFile(pth);
+				if (this.simpleMD)
+					this.updateObject(pth, md);
+			} catch (Exception e1) {
+				SDFSLogger.getLog().error("error uploading", e1);
+				throw new IOException(e1);
+			}
+		} else {
+			String rnd = RandomGUID.getGuid();
+			File p = new File(this.staged_sync_location, rnd);
+			File z = new File(this.staged_sync_location, rnd + ".z");
+			File e = new File(this.staged_sync_location, rnd + ".e");
+			while (z.exists()) {
+				rnd = RandomGUID.getGuid();
+				p = new File(this.staged_sync_location, rnd);
+				z = new File(this.staged_sync_location, rnd + ".z");
+				e = new File(this.staged_sync_location, rnd + ".e");
+			}
+			try {
+				BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
+				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
+				IOUtils.copy(is, os);
+				os.flush();
+				os.close();
+				is.close();
+				if (Main.compress) {
+					CompressionUtils.compressFile(p, z);
+					p.delete();
+					p = z;
 				}
-			} else {
-				String rnd = RandomGUID.getGuid();
-				File p = new File(this.staged_sync_location, rnd);
-				File z = new File(this.staged_sync_location, rnd + ".z");
-				File e = new File(this.staged_sync_location, rnd + ".e");
-				while (z.exists()) {
-					rnd = RandomGUID.getGuid();
-					p = new File(this.staged_sync_location, rnd);
-					z = new File(this.staged_sync_location, rnd + ".z");
-					e = new File(this.staged_sync_location, rnd + ".e");
+				byte[] ivb = null;
+				if (Main.chunkStoreEncryptionEnabled) {
+					try {
+						ivb = PassPhrase.getByteIV();
+						EncryptUtils.encryptFile(p, e, new IvParameterSpec(ivb));
+
+					} catch (Exception e1) {
+						throw new IOException(e1);
+					}
+					p.delete();
+					p = e;
 				}
-				try {
-					BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
-					BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
-					IOUtils.copy(is, os);
-					os.flush();
-					os.close();
-					is.close();
-					if (Main.compress) {
-						CompressionUtils.compressFile(p, z);
-						p.delete();
-						p = z;
-					}
-					byte[] ivb = null;
-					if (Main.chunkStoreEncryptionEnabled) {
-						try {
-							ivb = PassPhrase.getByteIV();
-							EncryptUtils.encryptFile(p, e, new IvParameterSpec(ivb));
-
-						} catch (Exception e1) {
-							throw new IOException(e1);
-						}
-						p.delete();
-						p = e;
-					}
-					String objName = pth;
-					ObjectMetadata md = new ObjectMetadata();
-					Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
-					md.setUserMetadata(umd);
-					md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
-					md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
-					if (ivb != null)
-						md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
-					md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
-					if (simpleS3) {
-						md.setContentType("binary/octet-stream");
-						in = new BufferedInputStream(new FileInputStream(p), 32768);
-						try {
-							if (md5sum) {
-								byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
-								in.close();
-								String mds = BaseEncoding.base64().encode(md5Hash);
-								md.setContentMD5(mds);
-								md.addUserMetadata("md5sum", mds);
-							}
-
-						} catch (NoSuchAlgorithmException e2) {
-							SDFSLogger.getLog().error("while hashing", e2);
-							throw new IOException(e2);
-						}
-
-						in = new FileInputStream(p);
-						md.setContentLength(p.length());
-						try {
-							PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
-							s3Service.putObject(req);
-							if (this.isClustered())
-								this.checkoutFile(pth);
-							SDFSLogger.getLog().debug(
-									"uploaded=" + f.getPath() + " lm=" + md.getUserMetadata().get("lastmodified"));
-						} catch (AmazonS3Exception e1) {
-							if (e1.getStatusCode() == 409) {
-								try {
-									s3Service.deleteObject(this.name, objName);
-									this.uploadFile(f, to, pp);
-									return;
-								} catch (Exception e2) {
-									throw new IOException(e2);
-								}
-							} else {
-
-								throw new IOException(e1);
-							}
-						} catch (Exception e1) {
-							// SDFSLogger.getLog().error("error uploading", e1);
-							throw new IOException(e1);
-						}
-					} else {
-						try {
-							md.setContentType("binary/octet-stream");
-							in = new BufferedInputStream(new FileInputStream(p), 32768);
+				String objName = pth;
+				ObjectMetadata md = new ObjectMetadata();
+				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+				md.setUserMetadata(umd);
+				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
+				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				if (ivb != null)
+					md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
+				md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
+				if (simpleS3) {
+					md.setContentType("binary/octet-stream");
+					in = new BufferedInputStream(new FileInputStream(p), 32768);
+					try {
+						if (md5sum) {
 							byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
 							in.close();
 							String mds = BaseEncoding.base64().encode(md5Hash);
 							md.setContentMD5(mds);
 							md.addUserMetadata("md5sum", mds);
-							in = new BufferedInputStream(new FileInputStream(p), 32768);
+						}
 
-							md.setContentLength(p.length());
-							PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
-							multiPartUpload(req);
-							if (this.isClustered())
-								this.checkoutFile(pth);
-						} catch (AmazonS3Exception e1) {
-							if (e1.getStatusCode() == 409) {
-								try {
-									s3Service.deleteObject(this.name, objName);
-									this.uploadFile(f, to, pp);
-									return;
-								} catch (Exception e2) {
-									throw new IOException(e2);
-								}
-							} else {
+					} catch (NoSuchAlgorithmException e2) {
+						SDFSLogger.getLog().error("while hashing", e2);
+						throw new IOException(e2);
+					}
 
-								throw new IOException(e1);
+					in = new FileInputStream(p);
+					md.setContentLength(p.length());
+					try {
+						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
+						s3Service.putObject(req);
+						if (this.isClustered())
+							this.checkoutFile(pth);
+						if (this.simpleMD)
+							this.updateObject(pth, md);
+						SDFSLogger.getLog()
+								.debug("uploaded=" + f.getPath() + " lm=" + md.getUserMetadata().get("lastmodified"));
+					} catch (AmazonS3Exception e1) {
+						if (e1.getStatusCode() == 409) {
+							try {
+								s3Service.deleteObject(this.name, objName);
+								if (this.simpleMD)
+									s3Service.deleteObject(this.name, objName + mdExt);
+								this.uploadFile(f, to, pp);
+								return;
+							} catch (Exception e2) {
+								throw new IOException(e2);
 							}
-						} catch (Exception e1) {
-							// SDFSLogger.getLog().error("error uploading", e1);
+						} else {
+
 							throw new IOException(e1);
 						}
+					} catch (Exception e1) {
+						// SDFSLogger.getLog().error("error uploading", e1);
+						throw new IOException(e1);
 					}
-				} finally {
+				} else {
 					try {
-						if (in != null)
-							in.close();
-					} finally {
-						p.delete();
-						z.delete();
-						e.delete();
+						md.setContentType("binary/octet-stream");
+						in = new BufferedInputStream(new FileInputStream(p), 32768);
+						byte[] md5Hash = ServiceUtils.computeMD5Hash(in);
+						in.close();
+						String mds = BaseEncoding.base64().encode(md5Hash);
+						md.setContentMD5(mds);
+						md.addUserMetadata("md5sum", mds);
+						in = new BufferedInputStream(new FileInputStream(p), 32768);
+
+						md.setContentLength(p.length());
+						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
+						multiPartUpload(req);
+						if (this.isClustered())
+							this.checkoutFile(pth);
+					} catch (AmazonS3Exception e1) {
+						if (e1.getStatusCode() == 409) {
+							try {
+								s3Service.deleteObject(this.name, objName);
+								if (this.simpleMD)
+									s3Service.deleteObject(this.name, objName + mdExt);
+								this.uploadFile(f, to, pp);
+								return;
+							} catch (Exception e2) {
+								throw new IOException(e2);
+							}
+						} else {
+
+							throw new IOException(e1);
+						}
+					} catch (Exception e1) {
+						// SDFSLogger.getLog().error("error uploading", e1);
+						throw new IOException(e1);
 					}
 				}
+			} finally {
+				try {
+					if (in != null)
+						in.close();
+				} finally {
+					p.delete();
+					z.delete();
+					e.delete();
+				}
 			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 
 	}
@@ -1745,189 +1807,189 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void downloadFile(String nm, File to, String pp) throws IOException {
-		this.s3clientLock.readLock().lock();
-		try {
-			while (nm.startsWith(File.separator))
-				nm = nm.substring(1);
-			String rnd = RandomGUID.getGuid();
-			File p = new File(this.staged_sync_location, rnd);
-			File z = new File(this.staged_sync_location, rnd + ".uz");
-			File e = new File(this.staged_sync_location, rnd + ".de");
-			while (z.exists()) {
-				rnd = RandomGUID.getGuid();
-				p = new File(this.staged_sync_location, rnd);
-				z = new File(this.staged_sync_location, rnd + ".uz");
-				e = new File(this.staged_sync_location, rnd + ".de");
-			}
-			if (nm.startsWith(File.separator))
-				nm = nm.substring(1);
-			String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-			Map<String, String> mp = null;
-			byte[] shash = null;
-			try {
-				if (this.simpleS3) {
-					S3Object obj = null;
-					SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
-					obj = s3Service.getObject(this.name, pp + "/" + haName);
-					BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
-					BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
-					IOUtils.copy(in, out);
-					out.flush();
-					out.close();
-					in.close();
-					ObjectMetadata omd = s3Service.getObjectMetadata(name, pp + "/" + haName);
-					mp = this.getUserMetaData(omd);
-					SDFSLogger.getLog().debug("mp sz=" + mp.size());
-					try {
-						if (obj != null)
-							obj.close();
-					} catch (Exception e1) {
-					}
-				} else {
-					SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
-					this.multiPartDownload(pp + "/" + haName, p);
-					ObjectMetadata omd = s3Service.getObjectMetadata(name, pp + "/" + haName);
-					mp = this.getUserMetaData(omd);
-					if (md5sum && mp.containsKey("md5sum")) {
-						shash = BaseEncoding.base64().decode(omd.getUserMetaDataOf("md5sum"));
-					}
-				}
-				if (shash != null && !FileUtils.fileValid(p, shash))
-					throw new IOException("file " + p.getPath() + " is corrupt");
-				boolean encrypt = false;
-				boolean lz4compress = false;
-				if (mp.containsKey("encrypt")) {
-					encrypt = Boolean.parseBoolean(mp.get("encrypt"));
-				}
-				if (mp.containsKey("lz4compress")) {
-					lz4compress = Boolean.parseBoolean(mp.get("lz4compress"));
-				}
-				byte[] ivb = null;
-				if (mp.containsKey("ivspec")) {
-					ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
-				}
-				SDFSLogger.getLog().debug("compress=" + lz4compress + " " + mp.get("lz4compress"));
-
-				if (mp.containsKey("symlink")) {
-					if (OSValidator.isWindows())
-						throw new IOException("unable to restore symlinks to windows");
-					else {
-						String spth = EncyptUtils.decString(mp.get("symlink"), encrypt);
-						Path srcP = Paths.get(spth);
-						Path dstP = Paths.get(to.getPath());
-						Files.createSymbolicLink(dstP, srcP);
-					}
-				} else if (mp.containsKey("directory")) {
-					to.mkdirs();
-					FileUtils.setFileMetaData(to, mp, encrypt);
-					p.delete();
-				} else {
-					if (encrypt) {
-						if (ivb != null) {
-							EncryptUtils.decryptFile(p, e, new IvParameterSpec(ivb));
-						} else {
-							EncryptUtils.decryptFile(p, e);
-						}
-						p.delete();
-						p = e;
-					}
-					if (lz4compress) {
-						CompressionUtils.decompressFile(p, z);
-						p.delete();
-						p = z;
-					}
-					
-					File parent = to.getParentFile();
-					if (!parent.exists())
-						parent.mkdirs();
-					BufferedInputStream is = new BufferedInputStream(new FileInputStream(p));
-					BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(to));
-					IOUtils.copy(is, os);
-					os.flush();
-					os.close();
-					is.close();
-					FileUtils.setFileMetaData(to, mp, encrypt);
-					SDFSLogger.getLog().debug("updated " + to + " sz=" + to.length());
-				}
-
-			} catch (Exception e1) {
-				throw new IOException(e1);
-			} finally {
-
-				p.delete();
-				z.delete();
-				e.delete();
-			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
+		// this.s3clientLock.readLock().lock();
+		while (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+		String rnd = RandomGUID.getGuid();
+		File p = new File(this.staged_sync_location, rnd);
+		File z = new File(this.staged_sync_location, rnd + ".uz");
+		File e = new File(this.staged_sync_location, rnd + ".de");
+		while (z.exists()) {
+			rnd = RandomGUID.getGuid();
+			p = new File(this.staged_sync_location, rnd);
+			z = new File(this.staged_sync_location, rnd + ".uz");
+			e = new File(this.staged_sync_location, rnd + ".de");
 		}
+		if (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+		String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+		Map<String, String> mp = null;
+		byte[] shash = null;
+		try {
+			if (this.simpleS3) {
+				S3Object obj = null;
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
+				obj = s3Service.getObject(this.name, pp + "/" + haName);
+				BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
+				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
+				IOUtils.copy(in, out);
+				out.flush();
+				out.close();
+				in.close();
+				mp = this.getUserMetaData(pp + "/" + haName);
+				SDFSLogger.getLog().debug("mp sz=" + mp.size());
+				try {
+					if (obj != null)
+						obj.close();
+				} catch (Exception e1) {
+				}
+			} else {
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
+				this.multiPartDownload(pp + "/" + haName, p);
+				mp = this.getUserMetaData(pp + "/" + haName);
+				if (md5sum && mp.containsKey("md5sum")) {
+					shash = BaseEncoding.base64().decode(mp.get("md5sum"));
+				}
+			}
+			if (shash != null && !FileUtils.fileValid(p, shash))
+				throw new IOException("file " + p.getPath() + " is corrupt");
+			boolean encrypt = false;
+			boolean lz4compress = false;
+			if (mp.containsKey("encrypt")) {
+				encrypt = Boolean.parseBoolean(mp.get("encrypt"));
+			}
+			if (mp.containsKey("lz4compress")) {
+				lz4compress = Boolean.parseBoolean(mp.get("lz4compress"));
+			}
+			byte[] ivb = null;
+			if (mp.containsKey("ivspec")) {
+				ivb = BaseEncoding.base64().decode(mp.get("ivspec"));
+			}
+			SDFSLogger.getLog().debug("compress=" + lz4compress + " " + mp.get("lz4compress"));
+
+			if (mp.containsKey("symlink")) {
+				if (OSValidator.isWindows())
+					throw new IOException("unable to restore symlinks to windows");
+				else {
+					String spth = EncyptUtils.decString(mp.get("symlink"), encrypt);
+					Path srcP = Paths.get(spth);
+					Path dstP = Paths.get(to.getPath());
+					Files.createSymbolicLink(dstP, srcP);
+				}
+			} else if (mp.containsKey("directory")) {
+				to.mkdirs();
+				FileUtils.setFileMetaData(to, mp, encrypt);
+				p.delete();
+			} else {
+				if (encrypt) {
+					if (ivb != null) {
+						EncryptUtils.decryptFile(p, e, new IvParameterSpec(ivb));
+					} else {
+						EncryptUtils.decryptFile(p, e);
+					}
+					p.delete();
+					p = e;
+				}
+				if (lz4compress) {
+					CompressionUtils.decompressFile(p, z);
+					p.delete();
+					p = z;
+				}
+
+				File parent = to.getParentFile();
+				if (!parent.exists())
+					parent.mkdirs();
+				BufferedInputStream is = new BufferedInputStream(new FileInputStream(p));
+				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(to));
+				IOUtils.copy(is, os);
+				os.flush();
+				os.close();
+				is.close();
+				FileUtils.setFileMetaData(to, mp, encrypt);
+				SDFSLogger.getLog().debug("updated " + to + " sz=" + to.length());
+			}
+
+		} catch (Exception e1) {
+			throw new IOException(e1);
+		} finally {
+
+			p.delete();
+			z.delete();
+			e.delete();
+		}
+
 	}
 
 	@Override
 	public void deleteFile(String nm, String pp) throws IOException {
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
+		while (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+
 		try {
-			while (nm.startsWith(File.separator))
-				nm = nm.substring(1);
+			if (this.isClustered()) {
 
-			try {
-				if (this.isClustered()) {
-					
-					String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-					SDFSLogger.getLog().info("deleting " + haName);
-					if (s3Service.doesObjectExist(this.name, haName)) {
-						String blb = "claims/" + haName + "/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-						s3Service.deleteObject(this.name, blb);
-						SDFSLogger.getLog().info("deleted " +  "claims/" + haName + "/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
-						ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
-						String vid = "claims/volumes/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
-								+ haName;
-						s3Service.deleteObject(this.name, vid);
-						if (ol.getObjectSummaries().size() == 0) {
-							s3Service.deleteObject(this.name, haName);
-							SDFSLogger.getLog().info("deleted " +  haName);
-						}else {
-							SDFSLogger.getLog().info("not deleting " +  haName);
-						}
-						
+				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+				SDFSLogger.getLog().info("deleting " + haName);
+				if (s3Service.doesObjectExist(this.name, haName)) {
+					String blb = "claims/" + haName + "/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					s3Service.deleteObject(this.name, blb);
+					if (this.simpleMD)
+						s3Service.deleteObject(this.name, blb + mdExt);
+					SDFSLogger.getLog().info("deleted " + "claims/" + haName + "/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
+					String vid = "claims/volumes/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
+							+ haName;
+					s3Service.deleteObject(this.name, vid);
+					if (this.simpleMD)
+						s3Service.deleteObject(this.name, vid + mdExt);
+					if (ol.getObjectSummaries().size() == 0) {
+						s3Service.deleteObject(this.name, haName);
+						if (this.simpleMD)
+							s3Service.deleteObject(this.name, haName + mdExt);
+						SDFSLogger.getLog().info("deleted " + haName);
+					} else {
+						SDFSLogger.getLog().info("not deleting " + haName);
 					}
-				} else {
-					String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
 
-					s3Service.deleteObject(this.name, pp + "/" + haName);
 				}
-			} catch (Exception e1) {
-				throw new IOException(e1);
+			} else {
+				String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+
+				s3Service.deleteObject(this.name, pp + "/" + haName);
+				if (this.simpleMD)
+					s3Service.deleteObject(this.name, pp + "/" + haName + mdExt);
 			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
+		} catch (Exception e1) {
+			throw new IOException(e1);
 		}
 
 	}
 
 	@Override
 	public void renameFile(String from, String to, String pp) throws IOException {
-		this.s3clientLock.readLock().lock();
+
+		while (from.startsWith(File.separator))
+			from = from.substring(1);
+		while (to.startsWith(File.separator))
+			to = to.substring(1);
+		String fn = EncyptUtils.encString(from, Main.chunkStoreEncryptionEnabled);
+		String tn = EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		try {
-			while (from.startsWith(File.separator))
-				from = from.substring(1);
-			while (to.startsWith(File.separator))
-				to = to.substring(1);
-			String fn = EncyptUtils.encString(from, Main.chunkStoreEncryptionEnabled);
-			String tn = EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-			try {
-				CopyObjectRequest req = new CopyObjectRequest(this.name, pp + "/" + fn, this.name, pp + "/" + tn);
-				s3Service.copyObject(req);
-				s3Service.deleteObject(this.name, pp + "/" + fn);
-			} catch (Exception e1) {
-				throw new IOException(e1);
-			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
+			CopyObjectRequest req = new CopyObjectRequest(this.name, pp + "/" + fn, this.name, pp + "/" + tn);
+			s3Service.copyObject(req);
+			req = new CopyObjectRequest(this.name, pp + "/" + fn + mdExt, this.name, pp + "/" + tn + mdExt);
+			s3Service.copyObject(req);
+			s3Service.deleteObject(this.name, pp + "/" + fn);
+			if (this.simpleMD)
+				s3Service.deleteObject(this.name, pp + "/" + fn + mdExt);
+		} catch (Exception e1) {
+			throw new IOException(e1);
 		}
+
 	}
 
 	ObjectListing nck = null;
@@ -1941,7 +2003,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	public String getNextName(String pp, long id) throws IOException {
-		this.s3clientLock.readLock().lock();
 		try {
 			String pfx = pp + "/";
 			if (nck == null) {
@@ -1957,32 +2018,33 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			if (nsummaries.size() == 0)
 				return null;
-			ObjectMetadata sobj = null;
 			String ky = nsummaries.get(nobjPos.get()).getKey();
-			if (ky.length() == pfx.length()) {
+			if (!ky.endsWith(mdExt)) {
+				if (ky.length() == pfx.length()) {
+					nobjPos.incrementAndGet();
+					return getNextName(pp, id);
+				} else {
+					Map<String, String> mp = this.getUserMetaData(nsummaries.get(nobjPos.get()).getKey());
+					boolean encrypt = false;
+					if (mp.containsKey("encrypt")) {
+						encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
+					}
+					String pt = nsummaries.get(nobjPos.get()).getKey().substring(pfx.length());
+					String fname = EncyptUtils.decString(pt, encrypt);
+					nobjPos.incrementAndGet();
+					return fname;
+					/*
+					 * this.downloadFile(fname, new File(to.getPath() +
+					 * File.separator + fname), pp);
+					 */
+				}
+			} else {
 				nobjPos.incrementAndGet();
 				return getNextName(pp, id);
-			} else {
-				sobj = s3Service.getObjectMetadata(this.name, nsummaries.get(nobjPos.get()).getKey());
-				Map<String, String> mp = this.getUserMetaData(sobj);
-				boolean encrypt = false;
-				if (mp.containsKey("encrypt")) {
-					encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
-				}
-				String pt = nsummaries.get(nobjPos.get()).getKey().substring(pfx.length());
-				String fname = EncyptUtils.decString(pt, encrypt);
-				nobjPos.incrementAndGet();
-				return fname;
-				/*
-				 * this.downloadFile(fname, new File(to.getPath() +
-				 * File.separator + fname), pp);
-				 */
 			}
 
 		} catch (Exception e) {
 			throw new IOException(e);
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -1992,7 +2054,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// SDFSLogger.getLog().info("downloading map for " + id);
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		S3Object kobj = null;
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			String[] ks = this.getStrings(kobj);
@@ -2004,7 +2066,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			return m;
 		} finally {
-			this.s3clientLock.readLock().unlock();
+			// this.s3clientLock.readLock().unlock();
 			try {
 				kobj.close();
 			} catch (Exception e) {
@@ -2015,26 +2077,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean checkAccess() {
-		this.s3clientLock.readLock().lock();
-		try {
-			Exception e = null;
-			for (int i = 0; i < 3; i++) {
-				try {
-					ObjectMetadata omd = s3Service.getObjectMetadata(this.name, binm);
-					Map<String, String> obj = this.getUserMetaData(omd);
-					obj.get("currentsize");
-					return true;
-				} catch (Exception _e) {
-					e = _e;
-					SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
-				}
+
+		Exception e = null;
+		for (int i = 0; i < 3; i++) {
+			try {
+				Map<String, String> obj = this.getUserMetaData(binm);
+				obj.get("currentsize");
+				return true;
+			} catch (Exception _e) {
+				e = _e;
+				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
-			if (e != null)
-				SDFSLogger.getLog().warn("unable to connect to bucket try " + 3 + " of 3", e);
-			return false;
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
+		if (e != null)
+			SDFSLogger.getLog().warn("unable to connect to bucket try " + 3 + " of 3", e);
+		return false;
+
 	}
 
 	@Override
@@ -2076,63 +2134,55 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public synchronized String restoreBlock(long id, byte[] hash) throws IOException {
-		this.s3clientLock.readLock().lock();
+
+		if (id == -1) {
+			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
+			return null;
+		}
+		String haName = this.restoreRequests.get(new Long(id));
+		if (haName == null)
+			haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+		else if (haName.equalsIgnoreCase("InvalidObjectState"))
+			return null;
+		else {
+			return haName;
+		}
 		try {
-			if (id == -1) {
-				SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
+			RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
+			s3Service.restoreObject(request);
+			if (blockRestored(haName)) {
+				restoreRequests.put(new Long(id), "InvalidObjectState");
 				return null;
 			}
-			String haName = this.restoreRequests.get(new Long(id));
-			if (haName == null)
-				haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-			else if (haName.equalsIgnoreCase("InvalidObjectState"))
+			restoreRequests.put(new Long(id), haName);
+			return haName;
+		} catch (AmazonS3Exception e) {
+			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+
+				restoreRequests.put(new Long(id), "InvalidObjectState");
 				return null;
-			else {
-				return haName;
 			}
-			try {
-				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
-				s3Service.restoreObject(request);
-				if (blockRestored(haName)) {
-					restoreRequests.put(new Long(id), "InvalidObjectState");
-					return null;
-				}
+			if (e.getErrorCode().equalsIgnoreCase("RestoreAlreadyInProgress")) {
+
 				restoreRequests.put(new Long(id), haName);
 				return haName;
-			} catch (AmazonS3Exception e) {
-				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
-
-					restoreRequests.put(new Long(id), "InvalidObjectState");
-					return null;
-				}
-				if (e.getErrorCode().equalsIgnoreCase("RestoreAlreadyInProgress")) {
-
-					restoreRequests.put(new Long(id), haName);
-					return haName;
-				} else {
-					SDFSLogger.getLog().error(
-							"Error while restoring block " + e.getErrorCode() + " id=" + id + " name=blocks/" + haName);
-					throw e;
-				}
+			} else {
+				SDFSLogger.getLog().error(
+						"Error while restoring block " + e.getErrorCode() + " id=" + id + " name=blocks/" + haName);
+				throw e;
 			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 
 	}
 
 	@Override
 	public boolean blockRestored(String id) {
-		this.s3clientLock.readLock().lock();
-		try {
-			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
-			if (omd.getOngoingRestore())
-				return false;
-			else
-				return true;
-		} finally {
-			this.s3clientLock.readLock().unlock();
-		}
+
+		ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
+		if (omd.getOngoingRestore())
+			return false;
+		else
+			return true;
 
 	}
 
@@ -2208,65 +2258,66 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
-		this.s3clientLock.readLock().lock();
-		try {
-			if (!this.clustered)
-				throw new IOException("volume is not clustered");
-			ObjectMetadata om = this.getClaimMetaData(id);
-			if (om != null)
-				return;
-			else {
-				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-				om = s3Service.getObjectMetadata(this.name, "keys/" + haName);
-				Map<String, String> md = om.getUserMetadata();
-				md.put("objects", Integer.toString(claims));
-				if (md.containsKey("deleted")) {
-					md.remove("deleted");
-				}
-				if (md.containsKey("deleted-objects")) {
-					md.remove("deleted-objects");
-				}
-				if (md.containsKey("bsize")) {
-					HashBlobArchive.currentLength.addAndGet(Integer.parseInt(md.get("bsize")));
-				}
-				if (md.containsKey("bcompressedsize")) {
-					HashBlobArchive.compressedLength.addAndGet(Integer.parseInt(md.get("bcompressedsize")));
-				}
-				byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 
-				om.setContentLength(msg.length);
-				try {
-					String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(msg));
-					om.setContentMD5(mds);
-					om.addUserMetadata("md5sum", mds);
-				} catch (Exception e) {
-					throw new IOException(e);
-				}
-				try {
-					PutObjectRequest creq = new PutObjectRequest(this.name, this.getClaimName(id),
-							new ByteArrayInputStream(msg), om);
-					s3Service.putObject(creq);
-				} catch (AmazonS3Exception e1) {
-					if (e1.getStatusCode() == 409) {
-						try {
-							s3Service.deleteObject(this.name, this.getClaimName(id));
-							this.checkoutObject(id, claims);
-							return;
-						} catch (Exception e2) {
-							throw new IOException(e2);
-						}
-					} else {
+		if (!this.clustered)
+			throw new IOException("volume is not clustered");
+		ObjectMetadata om = this.getClaimMetaData(id);
+		if (om != null)
+			return;
+		else {
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+			om = s3Service.getObjectMetadata(this.name, "keys/" + haName);
+			Map<String, String> md = om.getUserMetadata();
+			md.put("objects", Integer.toString(claims));
+			if (md.containsKey("deleted")) {
+				md.remove("deleted");
+			}
+			if (md.containsKey("deleted-objects")) {
+				md.remove("deleted-objects");
+			}
+			if (md.containsKey("bsize")) {
+				HashBlobArchive.currentLength.addAndGet(Integer.parseInt(md.get("bsize")));
+			}
+			if (md.containsKey("bcompressedsize")) {
+				HashBlobArchive.compressedLength.addAndGet(Integer.parseInt(md.get("bcompressedsize")));
+			}
+			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 
-						throw new IOException(e1);
+			om.setContentLength(msg.length);
+			try {
+				String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(msg));
+				om.setContentMD5(mds);
+				om.addUserMetadata("md5sum", mds);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+			try {
+				PutObjectRequest creq = new PutObjectRequest(this.name, this.getClaimName(id),
+						new ByteArrayInputStream(msg), om);
+				s3Service.putObject(creq);
+				if (this.simpleMD)
+					this.updateObject(this.getClaimName(id), om);
+			} catch (AmazonS3Exception e1) {
+				if (e1.getStatusCode() == 409) {
+					try {
+						s3Service.deleteObject(this.name, this.getClaimName(id));
+						if (this.simpleMD)
+							s3Service.deleteObject(name, this.getClaimName(id) + mdExt);
+						this.checkoutObject(id, claims);
+						return;
+					} catch (Exception e2) {
+						throw new IOException(e2);
 					}
-				} catch (Exception e1) {
-					// SDFSLogger.getLog().error("error uploading", e1);
+				} else {
+
 					throw new IOException(e1);
 				}
+			} catch (Exception e1) {
+				// SDFSLogger.getLog().error("error uploading", e1);
+				throw new IOException(e1);
 			}
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
+
 	}
 
 	@Override
@@ -2277,14 +2328,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 		String pth = "claims/" + key + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			s3Service.getObjectMetadata(this.name, pth);
 			return true;
 		} catch (Exception e) {
 			return false;
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 
 	}
@@ -2293,7 +2342,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void checkoutFile(String name) throws IOException {
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// this.s3clientLock.readLock().lock();
 		try {
 			byte[] b = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -2303,10 +2352,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			om.setContentLength(b.length);
 			PutObjectRequest creq = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(b), om);
 			s3Service.putObject(creq);
+			if (this.simpleMD)
+				this.updateObject(pth, om);
 		} catch (AmazonS3Exception e1) {
 			if (e1.getStatusCode() == 409) {
 				try {
 					s3Service.deleteObject(this.name, pth);
+					if (this.simpleMD)
+						s3Service.deleteObject(this.name, pth + mdExt);
 					this.checkoutFile(name);
 					return;
 				} catch (Exception e2) {
@@ -2319,8 +2372,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} catch (Exception e1) {
 			// SDFSLogger.getLog().error("error uploading", e1);
 			throw new IOException(e1);
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -2328,15 +2379,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean isCheckedOut(String name, long volumeID) throws IOException {
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
-		this.s3clientLock.readLock().lock();
+		// .name.this.s3clientLock.readLock().lock();
 		try {
 
 			s3Service.getObjectMetadata(this.name, pth);
 			return true;
 		} catch (Exception e) {
 			return false;
-		} finally {
-			this.s3clientLock.readLock().unlock();
 		}
 	}
 
@@ -2361,22 +2410,23 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			while (iter.hasNext()) {
 				try {
 					String key = iter.next().getKey();
-					SDFSLogger.getLog().info("key=" + key);
-					String vid = key.substring("bucketinfo/".length());
-					if (vid.length() > 0) {
+					if (!key.endsWith(mdExt)) {
+						SDFSLogger.getLog().info("key=" + key);
+						String vid = key.substring("bucketinfo/".length());
+						if (vid.length() > 0) {
 
-						ObjectMetadata om = s3Service.getObjectMetadata(this.name, key);
-						Map<String, String> md = this.getUserMetaData(om);
-						long id = EncyptUtils.decHashArchiveName(vid, Main.chunkStoreEncryptionEnabled);
+							Map<String, String> md = this.getUserMetaData(key);
+							long id = EncyptUtils.decHashArchiveName(vid, Main.chunkStoreEncryptionEnabled);
 
-						RemoteVolumeInfo info = new RemoteVolumeInfo();
-						info.id = id;
-						info.hostname = md.get("hostname");
-						info.port = Integer.parseInt(md.get("port"));
-						info.compressed = Long.parseLong(md.get("currentcompressedsize"));
-						info.data = Long.parseLong(md.get("currentsize"));
-						info.lastupdated = Long.parseLong(md.get("lastupdate"));
-						al.add(info);
+							RemoteVolumeInfo info = new RemoteVolumeInfo();
+							info.id = id;
+							info.hostname = md.get("hostname");
+							info.port = Integer.parseInt(md.get("port"));
+							info.compressed = Long.parseLong(md.get("currentcompressedsize"));
+							info.data = Long.parseLong(md.get("currentsize"));
+							info.lastupdated = Long.parseLong(md.get("lastupdate"));
+							al.add(info);
+						}
 					}
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to get volume metadata", e);
@@ -2413,10 +2463,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throw new IOException("volume can not remove its self");
 		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		Map<String, String> obj = null;
-		ObjectMetadata omd = null;
 		try {
-			omd = s3Service.getObjectMetadata(this.name, "bucketinfo/" + vid);
-			obj = this.getUserMetaData(omd);
+			obj = this.getUserMetaData("bucketinfo/" + vid);
 
 			long tm = Long.parseLong(obj.get("lastupdate"));
 			long dur = System.currentTimeMillis() - tm;
@@ -2425,7 +2473,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 		} catch (Exception e) {
-			omd = null;
 			SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 		}
 		ck = null;
@@ -2437,12 +2484,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				String nm = iter.next();
 				if (nm.endsWith(suffix)) {
 					s3Service.deleteObject(this.name, nm);
+					if (this.simpleMD)
+						s3Service.deleteObject(this.name, nm + mdExt);
 					String fldr = nm.substring(0, nm.length() - suffix.length());
 					SDFSLogger.getLog().debug("deleted " + fldr);
 					ObjectListing ol = s3Service.listObjects(this.getName(), fldr + "/");
 					if (ol.getObjectSummaries().size() == 0) {
 						String fl = fldr.substring(prefix.length());
 						s3Service.deleteObject(this.name, fl);
+						if (this.simpleMD)
+							s3Service.deleteObject(this.name, fl + mdExt);
 						SDFSLogger.getLog().debug("deleted " + fl);
 					}
 				}
@@ -2453,33 +2504,60 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				iter = null;
 		}
 		s3Service.deleteObject(this.name, "bucketinfo/" + vid);
+		if (this.simpleMD)
+			s3Service.deleteObject(this.name, "bucketinfo/" + vid + mdExt);
 		SDFSLogger.getLog().info("Deleted " + volumeID);
 	}
-	
-	private void updateObject(String km,ObjectMetadata om) {
-		try {
-			CopyObjectRequest req = new CopyObjectRequest(name, km, name, km)
-					.withNewObjectMetadata(om);
-			s3Service.copyObject(req);
-		}catch(AmazonS3Exception e) {
-			
-			CopyObjectRequest req = new CopyObjectRequest(name, km, name, km + ".cpy")
-					.withNewObjectMetadata(om);
-			s3Service.copyObject(req);
-			s3Service.deleteObject(name,km);
-			req = new CopyObjectRequest(name, km+".cpy", name, km).withNewObjectMetadata(om);
-			s3Service.copyObject(req);
-			s3Service.deleteObject(name,km+".cpy");
+
+	private void updateObject(String km, ObjectMetadata om) throws IOException {
+		if (this.simpleMD) {
+			Map<String, String> md = om.getUserMetadata();
+			ByteArrayOutputStream bo = new ByteArrayOutputStream();
+			ObjectOutputStream o = new ObjectOutputStream(bo);
+			o.writeObject(md);
+			byte[] b = bo.toByteArray();
+			om = new ObjectMetadata();
+			om.setContentType("binary/octet-stream");
+			om.setContentLength(b.length);
+			if (md5sum) {
+				String mds;
+				try {
+					mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(b));
+				} catch (NoSuchAlgorithmException e) {
+					throw new IOException(e);
+				}
+				om.setContentMD5(mds);
+			}
+			if(s3Service.doesObjectExist(this.name, km + mdExt)){
+				s3Service.deleteObject(this.name,km + mdExt);
+			}
+				
+			PutObjectRequest req = new PutObjectRequest(this.name, km + mdExt, new ByteArrayInputStream(b), om);
+
+			s3Service.putObject(req);
+
+		} else {
+			try {
+				CopyObjectRequest req = new CopyObjectRequest(name, km, name, km).withNewObjectMetadata(om);
+				s3Service.copyObject(req);
+			} catch (AmazonS3Exception e) {
+
+				CopyObjectRequest req = new CopyObjectRequest(name, km, name, km + ".cpy").withNewObjectMetadata(om);
+				s3Service.copyObject(req);
+				s3Service.deleteObject(name, km);
+				req = new CopyObjectRequest(name, km + ".cpy", name, km).withNewObjectMetadata(om);
+				s3Service.copyObject(req);
+				s3Service.deleteObject(name, km + ".cpy");
+			}
 		}
 	}
-	
+
 	@Override
 	public void clearCounters() {
 		HashBlobArchive.compressedLength.set(0);
 		HashBlobArchive.currentLength.set(0);
 	}
-	
-	
+
 	private static class DeleteObject implements Runnable {
 		BatchAwsS3ChunkStore st = null;
 		Long k;
@@ -2488,39 +2566,40 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		@Override
 		public void run() {
 			try {
-			String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
-					Main.chunkStoreEncryptionEnabled);
-			
-				ObjectMetadata om = null;
+				String hashString = EncyptUtils.encHashArchiveName(k.longValue(), Main.chunkStoreEncryptionEnabled);
+
+				String name = null;
 				if (!st.clustered) {
-					om = st.s3Service.getObjectMetadata(st.name, "keys/" + hashString);
+					name = "keys/" + hashString;
 
 				} else {
-					om = st.s3Service.getObjectMetadata(st.name, st.getClaimName(k.longValue()));
+					name = st.getClaimName(k.longValue());
 				}
-				Map<String, String> mp = st.getUserMetaData(om);
-				for(String s : mp.keySet()) {
-					SDFSLogger.getLog().info(s + " = " + mp.get(s));
-				}
-				//int objects = Integer.parseInt((String) mp.get("objects"));
-				int delobj = 0;
-				if (mp.containsKey("deleted-objects"))
-					delobj = Integer.parseInt((String) mp.get("deleted-objects"));
-				// SDFSLogger.getLog().info("remove requests for " +
-				// hashString + "=" + odel.get(k));
-				delobj = delobj + odel.get(k);
-					// SDFSLogger.getLog().info("deleting " +
-					// hashString);
-					
+				if (st.s3Service.doesObjectExist(st.name, name)) {
 					if (st.deleteUnclaimed) {
 						int cl = st.verifyDelete(k.longValue());
-						if(cl == 0) {
+						if (cl == 0) {
 							SDFSLogger.getLog().info("deleted " + k.longValue());
 							HashBlobArchive.removeCache(k.longValue());
 						}
 					} else {
+						Map<String, String> mp = st.getUserMetaData(name);
+						for (String s : mp.keySet()) {
+							SDFSLogger.getLog().info(s + " = " + mp.get(s));
+						}
+						// int objects = Integer.parseInt((String)
+						// mp.get("objects"));
+						int delobj = 0;
+						if (mp.containsKey("deleted-objects"))
+							delobj = Integer.parseInt((String) mp.get("deleted-objects"));
+						// SDFSLogger.getLog().info("remove requests for " +
+						// hashString + "=" + odel.get(k));
+						delobj = delobj + odel.get(k);
+						// SDFSLogger.getLog().info("deleting " +
+						// hashString);
 						mp.put("deleted", "true");
 						mp.put("deleted-objects", Integer.toString(delobj));
+						ObjectMetadata om = st.s3Service.getObjectMetadata(st.name, name);
 						om.setUserMetadata(mp);
 						String km = null;
 						if (st.clustered)
@@ -2530,34 +2609,27 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						st.updateObject(km, om);
 					}
 					/*
-					
-				} else {
-					try {
-					mp.put("deleted-objects", Integer.toString(delobj));
-					om.setUserMetadata(mp);
-					String km = null;
-					if (st.clustered)
-						km = st.getClaimName(k.longValue());
-					else
-						km = "keys/" + hashString;
-					st.updateObject(km, om);
-					}catch(Exception e) {
-						if (st.deleteUnclaimed) {
-							st.verifyDelete(k.longValue());
-							SDFSLogger.getLog().info("deleted " + k.longValue());
-						}else 
-							throw e;
-					}
-					
+					 * 
+					 * } else { try { mp.put("deleted-objects",
+					 * Integer.toString(delobj)); om.setUserMetadata(mp); String
+					 * km = null; if (st.clustered) km =
+					 * st.getClaimName(k.longValue()); else km = "keys/" +
+					 * hashString; st.updateObject(km, om); }catch(Exception e)
+					 * { if (st.deleteUnclaimed) {
+					 * st.verifyDelete(k.longValue());
+					 * SDFSLogger.getLog().info("deleted " + k.longValue());
+					 * }else throw e; }
+					 * 
+					 * }
+					 */
 				}
-				*/
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("Unable to delete object " + k, e);
 			} finally {
 			}
-			
+
 		}
-		
+
 	}
 
 }

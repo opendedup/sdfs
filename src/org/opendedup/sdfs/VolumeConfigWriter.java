@@ -423,7 +423,7 @@ public class VolumeConfigWriter {
 			}
 		}
 		if (cmd.hasOption("chunk-store-io-threads")) {
-			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("cloud-io-threads"));
+			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("chunk-store-io-threads"));
 		}
 		if (cmd.hasOption("chunk-store-compress")) {
 			this.compress = Boolean.parseBoolean(cmd.getOptionValue("chunk-store-compress"));

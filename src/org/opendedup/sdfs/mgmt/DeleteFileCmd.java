@@ -37,7 +37,7 @@ public class DeleteFileCmd {
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 		else {
-			boolean removed = MetaFileStore.removeMetaFile(internalPath, true);
+			boolean removed = MetaFileStore.removeMetaFile(internalPath, true,true);
 			if (removed) {
 				SDFSEvent.deleteFileEvent(f);
 				return "removed [" + file + "]";

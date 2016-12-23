@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +43,6 @@ import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
@@ -96,7 +94,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static boolean cacheReads = true;
 	public static int offset = 0;
 	private File f = null;
-	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+	//private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private static transient ThreadPoolExecutor executor = null;
 	public static AtomicLong currentLength = new AtomicLong(0);
@@ -249,7 +247,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
-					worksQueue, executionHandler);
+					worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
@@ -389,7 +387,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				if (lf.exists()) {
 					m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, VERSION);
 				} else 
-					SDFSLogger.getLog().info("could not find " + lf.getPath());
+					SDFSLogger.getLog().debug("could not find " + lf.getPath());
 				
 			} catch (Exception e) {
 				m = null;
@@ -1505,6 +1503,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 			Lock l = slock.writeLock();
 			l.lock();
 			try {
+				Collection<HashBlobArchive> st = rchunks.values();
+				for (HashBlobArchive ar : st) {
+					synchronized(ar) {
+						ar.notifyAll();
+					}
+				}
 				while (rchunks.size() > 0) {
 					try {
 						Thread.sleep(1);

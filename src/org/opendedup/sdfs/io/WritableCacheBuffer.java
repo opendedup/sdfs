@@ -1198,7 +1198,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public void run() {
 			try {
 				if(Arrays.equals(hash, bk)) {
-					ck = new byte[blankBlock.length];
+					ck = blankBlock;
 					l.commandResponse(this);
 				}
 				else if (cache) {
@@ -1227,7 +1227,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
 				if(Arrays.equals(s.hash, bk))
-					s.ck = new byte[blankBlock.length];
+					s.ck =blankBlock;
 				else if (cache) {
 					HCServiceProxy.cacheData(s.hash, s.hashloc,direct);
 				} else

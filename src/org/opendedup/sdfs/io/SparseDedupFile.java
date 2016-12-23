@@ -20,6 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +33,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +56,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.BlockDevSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -88,7 +87,6 @@ public class SparseDedupFile implements DedupFile {
 	private transient final HashMap<Long, DedupChunkInterface> flushingBuffers = new HashMap<Long, DedupChunkInterface>(
 			256, .75f);
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private static transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private boolean deleted = false;
 	protected static transient ThreadPoolExecutor executor = null;
 	private boolean dirty = false;
@@ -104,7 +102,7 @@ public class SparseDedupFile implements DedupFile {
 		if (!Main.chunkStoreLocal) {
 			pool = new ThreadPool(Main.writeThreads + 1,
 					((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
-			executor = new ThreadPoolExecutor(120, 120, 10, TimeUnit.SECONDS, worksQueue, executionHandler);
+			executor = new ThreadPoolExecutor(120, 120, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 		} else {
 			executor = new ThreadPoolExecutor(1, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());

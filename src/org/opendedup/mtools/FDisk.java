@@ -153,6 +153,7 @@ public class FDisk {
 			}
 			mp.iterInit();
 			SparseDataChunk ck = mp.nextValue(false);
+			long k = 0;
 			while (ck != null) {
 				if (closed) {
 					this.failed = true;
@@ -161,18 +162,20 @@ public class FDisk {
 				List<HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al) {
 					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
+					k++;
 					if(!added)
 						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos());
 					
 				}
 				ck = mp.nextValue(false);
 			}
+			SDFSLogger.getLog().info("ref added for " + mapFile + " k= " +k);
 
 			synchronized (fEvt) {
 				fEvt.curCt++;
 			}
 		} catch (Throwable e) {
-			SDFSLogger.getLog().info("error while checking file [" + mapFile.getPath() + "]", e);
+			SDFSLogger.getLog().error("error while checking file [" + mapFile.getPath() + "]", e);
 			this.failed = true;
 		} finally {
 			mp.close();
