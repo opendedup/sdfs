@@ -125,6 +125,7 @@ public class VolumeConfigWriter {
 	private boolean readAhead = false;
 	private boolean usebasicsigner = false;
 	private boolean disableDNSBucket = false;
+	private boolean simpleMD = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
 	private long sn = new Random().nextLong();
@@ -249,6 +250,9 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd.getOptionValue("io-safe-sync"));
 		}
+		if(cmd.hasOption("simple-metadata")) {
+			this.simpleMD = true;
+		}
 		if (cmd.hasOption("io-write-threads")) {
 			this.write_threads = Short.parseShort(cmd.getOptionValue("io-write-threads"));
 		} else if (this.write_threads < 8) {
@@ -303,6 +307,7 @@ public class VolumeConfigWriter {
 
 			this.safe_sync = false;
 			this.minIOEnabled = true;
+			this.simpleMD = true;
 		}
 		if (cmd.hasOption("atmos-enabled")) {
 
@@ -721,6 +726,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("glacier-archive-days", "0");
+				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
 				if (this.genericS3) {
@@ -933,6 +939,10 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("compress-metadata")
 				.withDescription(
 						"Enable compression of metadata at the expense of speed to open and close files. This option should be enabled for backup")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("simple-metadata")
+				.withDescription(
+						"If set, will create a separate object for metadata used for objects sent to the cloud. Otherwise, metadata will be stored as attributes to the object.")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("dedup-db-store")
 				.withDescription(

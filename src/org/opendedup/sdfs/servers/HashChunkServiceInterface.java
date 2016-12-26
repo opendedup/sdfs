@@ -63,7 +63,7 @@ public interface HashChunkServiceInterface {
 	public abstract HashChunk fetchChunk(byte[] hash,long pos) throws IOException,
 			DataArchivedException;
 
-	public abstract void cacheChunk(byte[] hash,long pos) throws IOException,
+	public abstract void cacheChunk(long pos) throws IOException,
 			DataArchivedException;
 
 	public abstract byte getHashRoute(byte[] hash);

@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 
+
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +19,7 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.StringUtils;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -52,7 +54,7 @@ public class DedupFileStore {
 					ByteLongArrayWrapper bk = removal.getKey();
 					try {
 						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
-							SDFSLogger.getLog().warn("Unable to insert");
+							SDFSLogger.getLog().warn("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
 						}
 					} catch (IOException e) {
 						SDFSLogger.getLog().error("unable to add reference",e);

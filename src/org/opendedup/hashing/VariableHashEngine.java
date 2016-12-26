@@ -38,7 +38,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 	public static int maxLen = Main.CHUNK_LENGTH;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
-	static final long bytesPerWindow = 48;
+	public static long bytesPerWindow = 48;
 	private EnhancedFingerFactory ff = null;
 
 	public VariableHashEngine() throws NoSuchAlgorithmException {

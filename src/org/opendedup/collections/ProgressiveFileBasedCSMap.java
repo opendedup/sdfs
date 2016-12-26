@@ -901,16 +901,12 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	@Override
-	public void cache(byte[] key, long pos) throws IOException {
-		if (pos == -1) {
-			pos = this.get(key);
-		}
-		if (pos != -1)
+	public void cache(long pos) throws IOException {
 			try {
 
-				ChunkData.cacheChunk(key, pos);
+				ChunkData.cacheChunk(pos);
 			} catch (Exception e) {
-				SDFSLogger.getLog().debug("error getting [" + StringUtils.getHexString(key) + "]", e);
+				SDFSLogger.getLog().debug("error getting [" + pos + "]", e);
 			}
 
 	}

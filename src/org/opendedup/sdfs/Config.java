@@ -327,6 +327,8 @@ public class Config {
 		} else {
 			VariableHashEngine.minLen = Main.MIN_CHUNK_LENGTH;
 		}
+		if(cache.hasAttribute("variable-window-size"))
+			VariableHashEngine.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
 			VariableHashEngine.maxLen = Integer.parseInt(cache
 					.getAttribute("max-variable-segment-size")) * 1024;

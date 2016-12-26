@@ -21,10 +21,12 @@ package org.opendedup.sdfs.io.events;
 public class CloudSyncDLRequest {
 	long volumeID;
 	boolean updateHashMap;
+	boolean updateRef;
 
-	public CloudSyncDLRequest(long volumeID,boolean updateHashMap) {
+	public CloudSyncDLRequest(long volumeID,boolean updateHashMap,boolean updateRef) {
 		this.volumeID = volumeID;
 		this.updateHashMap = updateHashMap;
+		this.updateRef = updateRef;
 	}
 	
 	public long getVolumeID() {
@@ -33,6 +35,10 @@ public class CloudSyncDLRequest {
 	
 	public boolean isUpdateHashMap() {
 		return this.updateHashMap;
+	}
+	
+	public boolean isUpdateRef() {
+		return this.updateRef;
 	}
 	
 }

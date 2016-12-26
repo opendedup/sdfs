@@ -167,9 +167,9 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashChunk;
 	}
 
-	public void cacheChunk(byte[] hash,long pos) throws IOException,
+	public void cacheChunk(long pos) throws IOException,
 			DataArchivedException {
-		hs.cacheChunk(hash,pos);
+		hs.cacheChunk(pos);
 	}
 
 	public byte getHashRoute(byte[] hash) {

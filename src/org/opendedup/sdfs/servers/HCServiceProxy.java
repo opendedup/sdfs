@@ -209,9 +209,9 @@ public class HCServiceProxy {
 				}
 				
 				if (Main.syncDL) {
-					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true));
+					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true,false));
 				}
-				if (Main.runConsistancyCheck|| file.exists()) {
+				if (Main.runConsistancyCheck|| file.exists() || Main.syncDL) {
 					SDFSLogger.getLog().info("running consistency check");
 					SDFSEvent evt = SDFSEvent
 							.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
@@ -242,7 +242,7 @@ public class HCServiceProxy {
 	
 	public static void syncVolume(long volumeID,boolean syncMap) {
 		if(Main.chunkStoreLocal) {
-			eventBus.post(new CloudSyncDLRequest(volumeID,syncMap));
+			eventBus.post(new CloudSyncDLRequest(volumeID,syncMap,true));
 		}
 	}
 
@@ -630,15 +630,11 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static void cacheData(byte[] hash, byte[] hashloc,boolean direct)
+	public static void cacheData(long pos)
 			throws IOException, DataArchivedException {
 
 		if (Main.chunkStoreLocal) {
-			long pos = -1;
-			if (direct) {
-				pos = Longs.fromByteArray(hashloc);
-			}
-			HCServiceProxy.hcService.cacheChunk(hash,pos);
+			HCServiceProxy.hcService.cacheChunk(pos);
 		}
 	}
 

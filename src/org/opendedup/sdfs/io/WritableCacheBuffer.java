@@ -207,116 +207,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	}
 
-	public void cacheChunk() throws IOException, InterruptedException, DataArchivedException {
-		if (this.buf == null) {
-			this.hlAdded = false;
-			if (HashFunctionPool.max_hash_cluster > 1) {
-
-				final ArrayList<Shard> cks = new ArrayList<Shard>();
-				int i = 0;
-				// long fp = this.position;
-
-				for (HashLocPair p : ar) {
-
-					if (Longs.fromByteArray(p.hashloc) != 0) {
-						Shard sh = new Shard();
-						sh.hash = p.hash;
-						sh.hashloc = p.hashloc;
-						sh.pos = p.pos;
-						sh.nlen = p.nlen;
-						sh.offset = p.offset;
-						sh.len = p.len;
-						sh.direct = this.direct;
-						sh.apos = i;
-						cks.add(i, sh);
-					} else
-						break;
-					i++;
-				}
-				if (Main.chunkStoreLocal) {
-					ShardReader r = new ShardReader();
-					r.shards = cks;
-					r.direct = this.direct;
-					r.cache = true;
-					r.read();
-				} else {
-					sz = cks.size();
-					AsyncChunkReadActionListener l = new AsyncChunkReadActionListener() {
-
-						@Override
-						public void commandException(Exception e) {
-							this.incrementAndGetDNEX();
-							synchronized (this) {
-								this.notifyAll();
-							}
-
-						}
-
-						@Override
-						public void commandResponse(Shard result) {
-							cks.get(result.apos).ck = result.ck;
-							if (this.incrementandGetDN() >= sz) {
-
-								synchronized (this) {
-									this.notifyAll();
-								}
-							}
-						}
-
-						@Override
-						public void commandArchiveException(DataArchivedException e) {
-							this.incrementAndGetDNEX();
-							this.setDAR(e);
-
-							synchronized (this) {
-								this.notifyAll();
-							}
-
-						}
-
-					};
-					for (Shard sh : cks) {
-						sh.l = l;
-						sh.cache = true;
-						sh.direct = direct;
-						executor.execute(sh);
-					}
-					int wl = 0;
-					int al = 0;
-
-					while (l.getDN() < sz && l.getDNEX() == 0) {
-						if (al == 30) {
-							int nt = wl / 1000;
-							SDFSLogger.getLog()
-									.debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
-							al = 0;
-						}
-
-						if (l.getDAR() != null) {
-							throw l.getDAR();
-						}
-						if (l.getDNEX() > 0)
-							throw new IOException("error while reading data");
-						synchronized (l) {
-							l.wait(1000);
-						}
-						wl += 1000;
-						al++;
-					}
-					if (l.getDAR() != null) {
-						throw l.getDAR();
-					}
-					if (l.getDNEX() > 0) {
-						throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
-					}
-					if (l.getDN() < sz) {
-						throw new IOException("thread timed out before read was complete ");
-					}
-				}
-
-			}
-		}
-	}
+	
 
 	int tries = 0;
 
@@ -386,7 +277,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				};
 				for (Shard sh : cks) {
 					sh.l = l;
-					sh.cache = false;
 					sh.direct = this.direct;
 					executor.execute(sh);
 				}
@@ -505,15 +395,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	}
 
-	public HashLocPair getPair(int pos) {
-		for (HashLocPair h : ar) {
-			int ep = h.pos + h.nlen;
-			if (pos >= h.pos && pos < ep) {
-				return h;
-			}
-		}
-		return null;
-	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -1189,7 +1071,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		public int offset;
 		public int nlen;
 		public boolean direct;
-		public boolean cache;
 
 		public byte[] ck;
 		AsyncChunkReadActionListener l;
@@ -1200,15 +1081,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if(Arrays.equals(hash, bk)) {
 					ck = blankBlock;
 					l.commandResponse(this);
-				}
-				else if (cache) {
-					HCServiceProxy.cacheData(hash, hashloc,direct);
-				} else {
+				}else {				
 					this.ck = HCServiceProxy.fetchChunk(hash, hashloc, direct);
 					l.commandResponse(this);
-
 				}
-
 			} catch (DataArchivedException e) {
 				l.commandArchiveException(e);
 			} catch (Throwable e) {
@@ -1221,16 +1097,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 	public static class ShardReader {
 		List<Shard> shards;
-		public boolean cache;
 		public boolean direct;
 
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
 				if(Arrays.equals(s.hash, bk))
 					s.ck =blankBlock;
-				else if (cache) {
-					HCServiceProxy.cacheData(s.hash, s.hashloc,direct);
-				} else
+				else
 					s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc, direct);
 
 			}

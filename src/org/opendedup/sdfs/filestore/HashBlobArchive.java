@@ -351,7 +351,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	public static void setReadSpeed(double kbps) {
+	public static void setReadSpeed(double kbps,boolean update) {
 		Lock l = slock.writeLock();
 		l.lock();
 		try {
@@ -366,7 +366,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				rrl = null;
 			else
 				rrl = RateLimiter.create(kbps);
-			if (Main.volume != null) {
+			if (Main.volume != null && update) {
 				try {
 					Main.volume.writeUpdate();
 				} catch (Exception e) {
@@ -412,7 +412,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	public static void setWriteSpeed(double kbps) {
+	public static void setWriteSpeed(double kbps,boolean update) {
 		Lock l = slock.writeLock();
 		l.lock();
 		try {
@@ -427,7 +427,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				wrl = null;
 			else
 				wrl = RateLimiter.create(kbps);
-			if (Main.volume != null) {
+			if (Main.volume != null && update) {
 				try {
 					Main.volume.writeUpdate();
 				} catch (Exception e) {
@@ -458,7 +458,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return FileUtils.sizeOfDirectory(chunk_location);
 	}
 
-	public static void setCacheSize(long sz) throws IOException {
+	public static void setCacheSize(long sz,boolean update) throws IOException {
 		Lock l = slock.writeLock();
 		l.lock();
 		try {
@@ -477,7 +477,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 			LOCAL_CACHE_SIZE = sz;
 			buildCache();
-			if (Main.volume != null) {
+			if (Main.volume != null && update) {
 				try {
 					Main.volume.writeUpdate();
 				} catch (Exception e) {
@@ -661,7 +661,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return z;
 	}
 
-	public static void cacheArchive(byte[] hash, long hbid)
+	public static void cacheArchive(long hbid)
 			throws ExecutionException, IOException, DataArchivedException {
 		HashBlobArchive archive = rchunks.get(hbid);
 		if (archive == null) {
@@ -1574,4 +1574,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 		wOpenFiles.clear();
 	}
 
+	public static void main(String [] args) {
+		byte [] b= StringUtils.getHexBytes(args[0]);
+		String hb = BaseEncoding.base64().encode(b);
+		System.out.println(hb);
+		
+	}
 }

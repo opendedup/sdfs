@@ -79,6 +79,7 @@ public class MultiDownload implements Runnable {
 
 	private String getNextKey() throws IOException {
 		synchronized (this) {
+		
 			try {
 				if (ck == null || !ck.hasNext()) {
 					ck = cs.getNextObjectList(prefix);
@@ -97,8 +98,12 @@ public class MultiDownload implements Runnable {
 
 	private void addStringResult(String key) throws IOException,
 			InterruptedException {
-		if(cs.objectClaimed(key))
-			this.sbs.put(cs.getStringResult(key));
+		if(cs.objectClaimed(key)) {
+
+			StringResult sr = cs.getStringResult(key);
+			//SDFSLogger.getLog().info("adding " + key +  "sr=" + sr.id + "ln=" + sr.st.countTokens());
+			this.sbs.put(sr);
+		}
 	}
 
 	private static final class KeyGetter implements Runnable {
@@ -107,21 +112,21 @@ public class MultiDownload implements Runnable {
 
 		@Override
 		public void run() {
-			String ost = "";
+			String st = null;
 			try {
-				String st = md.getNextKey();
+				st = md.getNextKey();
 				while (st != null) {
-					ost = st;
-					st = md.getNextKey();
+					
 					//SDFSLogger.getLog().info("Key = " + ost);
 					try {
-						md.addStringResult(ost);
+						md.addStringResult(st);
+						st = md.getNextKey();
 					}catch(Exception e) {
-						SDFSLogger.getLog().error("error getting string result for " + ost, e);
+						SDFSLogger.getLog().error("error getting string result for " + st, e);
 					}
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("error  getting string result for " + ost, e);
+				SDFSLogger.getLog().error("error  getting string result for " + st, e);
 			}
 			done = true;
 

@@ -211,7 +211,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
-			Map<String, String> md = omd.getUserMetadata();
+			Map<String, String> md = null;
+			if(this.simpleMD)
+				md = this.getUserMetaData(binm);
+			else
+				md = omd.getUserMetadata();
 			ObjectMetadata nmd = new ObjectMetadata();
 			nmd.setUserMetadata(md);
 			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
@@ -274,9 +278,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	}
 
-	public void cacheData(byte[] hash, long start, int len) throws IOException, DataArchivedException {
+	public void cacheData(long start) throws IOException, DataArchivedException {
 		try {
-			HashBlobArchive.cacheArchive(hash, start);
+			HashBlobArchive.cacheArchive(start);
 		} catch (ExecutionException e) {
 			SDFSLogger.getLog().error("Unable to get block at " + start, e);
 			throw new IOException(e);
@@ -525,10 +529,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				System.out.println("target=" + s3Target);
 			}
 			if (config.hasAttribute("disableDNSBucket")) {
-				s3Service.setS3ClientOptions(new S3ClientOptions()
-						.withPathStyleAccess(Boolean.parseBoolean(config.getAttribute("disableDNSBucket")))
-						.disableChunkedEncoding());
+				s3Service.setS3ClientOptions(S3ClientOptions.builder().disableChunkedEncoding()
+						.setPathStyleAccess(Boolean.parseBoolean(config.getAttribute("disableDNSBucket"))).build());
 				System.out.println("disableDNSBucket=" + Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
+			}
+			if (config.hasAttribute("use-accelerated-mode")) {
+				s3Service.setS3ClientOptions(S3ClientOptions.builder()
+						.setAccelerateModeEnabled(Boolean.parseBoolean(config.getAttribute("use-accelerated-mode")))
+						.build());
 			}
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
@@ -680,8 +688,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				s3Service.deleteBucketLifecycleConfiguration(this.name);
 			}
 			HashBlobArchive.init(this);
-			HashBlobArchive.setReadSpeed(rsp);
-			HashBlobArchive.setWriteSpeed(wsp);
+			HashBlobArchive.setReadSpeed(rsp, false);
+			HashBlobArchive.setWriteSpeed(wsp, false);
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
@@ -869,11 +877,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 	}
 
-	private ObjectMetadata getClaimMetaData(long id) throws IOException {
+	private Map<String,String> getClaimMetaData(long id) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		try {
-			ObjectMetadata md = s3Service.getObjectMetadata(this.name, this.getClaimName(id));
-			return md;
+			Map<String,String> md = this.getUserMetaData(this.getClaimName(id));
+			if(md.size() == 0)
+				return null;
+			else
+				return md;
 		} catch (AmazonServiceException e) {
 			String errorCode = e.getErrorCode().trim();
 
@@ -1253,30 +1264,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				name = "keys/" + haName;
 			}
 			Map<String, String> mp = this.getUserMetaData(name);
-			if (claims > 0) {
-
-				int delobj = 0;
-				if (mp.containsKey("deleted-objects")) {
-					delobj = Integer.parseInt((String) mp.get("deleted-objects")) - claims;
-					if (delobj < 0)
-						delobj = 0;
-				}
-				mp.remove("deleted");
-				mp.put("deleted-objects", Integer.toString(delobj));
-				mp.put("suspect", "true");
-
-				String kn = null;
-				if (this.clustered)
-					kn = this.getClaimName(id);
-				else
-					kn = "keys/" + haName;
-
-				ObjectMetadata om = s3Service.getObjectMetadata(this.name, kn);
-				om.setUserMetadata(mp);
-				this.updateObject(kn, om);
-				SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
-
-			}
 
 			if (claims == 0) {
 				if (!clustered) {
@@ -1285,7 +1272,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
 					if (this.simpleMD) {
 						s3Service.deleteObject(this.name, "blocks/" + haName + mdExt);
-						s3Service.deleteObject(this.name, "keys/" + haName+ mdExt);
+						s3Service.deleteObject(this.name, "keys/" + haName + mdExt);
 					}
 				} else {
 					s3Service.deleteObject(this.name, this.getClaimName(id));
@@ -1308,7 +1295,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
 						if (this.simpleMD) {
 							s3Service.deleteObject(this.name, "blocks/" + haName + mdExt);
-							s3Service.deleteObject(this.name, "keys/" + haName+ mdExt);
+							s3Service.deleteObject(this.name, "keys/" + haName + mdExt);
 						}
 					}
 
@@ -1499,9 +1486,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			lz4compress = Boolean.parseBoolean(mp.get("lz4compress"));
 			boolean changed = false;
 
-			Long hid = EncyptUtils.decHashArchiveName(sobj.getKey().substring(5), encrypt);
+			Long _hid = EncyptUtils.decHashArchiveName(sobj.getKey().substring(5), encrypt);
 			if (this.clustered)
-				mp = s3Service.getObjectMetadata(this.name, this.getClaimName(hid)).getUserMetadata();
+				mp = s3Service.getObjectMetadata(this.name, this.getClaimName(_hid)).getUserMetadata();
 			if (mp.containsKey("deleted")) {
 				mp.remove("deleted");
 				changed = true;
@@ -1526,12 +1513,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			String hast = new String(data);
-			SDFSLogger.getLog().debug("reading hashes " + (String) mp.get("objects") + " from " + hid + " encn "
+			SDFSLogger.getLog().debug("reading hashes " + (String) mp.get("objects") + " from " + _hid + " encn "
 					+ sobj.getKey().substring(5));
-			StringTokenizer ht = new StringTokenizer(hast, ",");
+			StringTokenizer _ht = new StringTokenizer(hast, ",");
 			StringResult st = new StringResult();
-			st.id = hid;
-			st.st = ht;
+			st.id = _hid;
+			st.st = _ht;
 			if (mp.containsKey("bsize")) {
 				HashBlobArchive.currentLength.addAndGet(Integer.parseInt(mp.get("bsize")));
 			}
@@ -2097,19 +2084,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setReadSpeed(int kbps) {
-		HashBlobArchive.setReadSpeed((double) kbps);
+		HashBlobArchive.setReadSpeed((double) kbps, true);
 
 	}
 
 	@Override
 	public void setWriteSpeed(int kbps) {
-		HashBlobArchive.setWriteSpeed((double) kbps);
+		HashBlobArchive.setWriteSpeed((double) kbps, true);
 
 	}
 
 	@Override
 	public void setCacheSize(long sz) throws IOException {
-		HashBlobArchive.setCacheSize(sz);
+		HashBlobArchive.setCacheSize(sz, true);
 	}
 
 	@Override
@@ -2188,50 +2175,90 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean checkAccess(String username, String password, Properties props) throws Exception {
-		BasicAWSCredentials _cred = new BasicAWSCredentials(username, password);
-		if (props.containsKey("default-bucket-location")) {
-			bucketLocation = RegionUtils.getRegion(props.getProperty("default-bucket-location"));
-		}
+		try {
+			BasicAWSCredentials _cred = new BasicAWSCredentials(username, password);
+			if (props.containsKey("default-bucket-location")) {
+				bucketLocation = RegionUtils.getRegion(props.getProperty("default-bucket-location"));
+			}
 
-		ClientConfiguration clientConfig = new ClientConfiguration();
-		clientConfig.setMaxConnections(Main.dseIOThreads * 2);
-		clientConfig.setConnectionTimeout(10000);
-		clientConfig.setSocketTimeout(10000);
-		String s3Target = null;
-
-		if (props.containsKey("s3-target")) {
-			s3Target = props.getProperty("s3-target");
-		}
-		if (props.containsKey("proxy-host")) {
-			clientConfig.setProxyHost(props.getProperty("proxy-host"));
-		}
-		if (props.containsKey("proxy-domain")) {
-			clientConfig.setProxyDomain(props.getProperty("proxy-domain"));
-		}
-		if (props.containsKey("proxy-password")) {
-			clientConfig.setProxyPassword(props.getProperty("proxy-password"));
-		}
-		if (props.containsKey("proxy-port")) {
-			clientConfig.setProxyPort(Integer.parseInt(props.getProperty("proxy-port")));
-		}
-		if (props.containsKey("proxy-username")) {
-			clientConfig.setProxyUsername(props.getProperty("proxy-username"));
-		}
-		s3Service = new AmazonS3Client(_cred, clientConfig);
-		if (s3Target != null) {
-			TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-				@Override
-				public boolean isTrusted(X509Certificate[] certificate, String authType) {
-					return true;
+			ClientConfiguration clientConfig = new ClientConfiguration();
+			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
+			clientConfig.setConnectionTimeout(10000);
+			clientConfig.setSocketTimeout(10000);
+			String s3Target = null;
+			if (props.containsKey("s3-target")) {
+				s3Target = props.getProperty("s3-target");
+			}
+			if (props.containsKey("proxy-host")) {
+				clientConfig.setProxyHost(props.getProperty("proxy-host"));
+			}
+			if (props.containsKey("proxy-domain")) {
+				clientConfig.setProxyDomain(props.getProperty("proxy-domain"));
+			}
+			if (props.containsKey("proxy-password")) {
+				clientConfig.setProxyPassword(props.getProperty("proxy-password"));
+			}
+			if (props.containsKey("proxy-port")) {
+				clientConfig.setProxyPort(Integer.parseInt(props.getProperty("proxy-port")));
+			}
+			if (props.containsKey("proxy-username")) {
+				clientConfig.setProxyUsername(props.getProperty("proxy-username"));
+			}
+			if (props.containsKey("use-v4-signer")) {
+				boolean v4s = Boolean.parseBoolean(props.getProperty("use-v4-signer"));
+				if (v4s) {
+					clientConfig.setSignerOverride("AWSS3V4SignerType");
 				}
-			};
-			SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
-					SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-			clientConfig.getApacheHttpClientConfig().withSslSocketFactory(sf);
-			s3Service.setEndpoint(s3Target);
+			}
+			if (props.containsKey("use-basic-signer")) {
+				boolean v4s = Boolean.parseBoolean(props.getProperty("use-basic-signer"));
+				if (v4s) {
+					clientConfig.setSignerOverride("S3SignerType");
+				}
+			}
+			if (props.containsKey("protocol")) {
+				String pr = props.getProperty("protocol");
+				if (pr.equalsIgnoreCase("http"))
+					clientConfig.setProtocol(Protocol.HTTP);
+				else
+					clientConfig.setProtocol(Protocol.HTTPS);
+			}
+			if(props.containsKey("default-bucket-location"))
+			bucketLocation = RegionUtils.getRegion(props.getProperty("default-bucket-location"));
+			s3Service = new AmazonS3Client(_cred, clientConfig);
+			if (s3Target != null) {
+				TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+					@Override
+					public boolean isTrusted(X509Certificate[] certificate, String authType) {
+						return true;
+					}
+				};
+				SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
+						SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+				clientConfig.getApacheHttpClientConfig().withSslSocketFactory(sf);
+				s3Service.setEndpoint(s3Target);
+			}
+			
+			if (props.containsKey("disableDNSBucket")) {
+				s3Service.setS3ClientOptions(S3ClientOptions.builder().disableChunkedEncoding()
+						.setPathStyleAccess(Boolean.parseBoolean(props.getProperty("disableDNSBucket"))).build());
+			}
+			if (props.containsKey("use-accelerated-mode")) {
+				s3Service.setS3ClientOptions(S3ClientOptions.builder()
+						.setAccelerateModeEnabled(Boolean.parseBoolean(props.getProperty("use-accelerated-mode")))
+						.build());
+			}
+			if (bucketLocation != null) {
+				s3Service.setRegion(bucketLocation);
+				System.out.println("bucketLocation=" + bucketLocation.toString());
+			}
+			s3Service.doesBucketExist("aaa");
+			return true;
+		} catch (Exception e) {
+			System.err.println("Cannot authenticate to provider");
+			e.printStackTrace();
+			return false;
 		}
-		s3Service.listBuckets();
-		return true;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -2261,13 +2288,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 		if (!this.clustered)
 			throw new IOException("volume is not clustered");
-		ObjectMetadata om = this.getClaimMetaData(id);
-		if (om != null)
+		Map<String, String> md= this.getClaimMetaData(id);
+		if (md != null)
 			return;
 		else {
-			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-			om = s3Service.getObjectMetadata(this.name, "keys/" + haName);
-			Map<String, String> md = om.getUserMetadata();
+			md = new HashMap<String,String>();
 			md.put("objects", Integer.toString(claims));
 			if (md.containsKey("deleted")) {
 				md.remove("deleted");
@@ -2282,7 +2307,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				HashBlobArchive.compressedLength.addAndGet(Integer.parseInt(md.get("bcompressedsize")));
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
-
+			ObjectMetadata om = new ObjectMetadata();
+			om.setUserMetadata(md);
 			om.setContentLength(msg.length);
 			try {
 				String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(msg));
@@ -2528,13 +2554,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 				om.setContentMD5(mds);
 			}
-			if(s3Service.doesObjectExist(this.name, km + mdExt)){
-				s3Service.deleteObject(this.name,km + mdExt);
+			if (s3Service.doesObjectExist(this.name, km + mdExt+ ".cpy")) {
+				s3Service.deleteObject(this.name, km + mdExt + ".cpy");
+				CopyObjectRequest creq = new CopyObjectRequest(name, km + mdExt, name, km + mdExt + ".cpy")
+						.withNewObjectMetadata(om);
+				s3Service.copyObject(creq);
+				s3Service.deleteObject(this.name, km + mdExt);
+				PutObjectRequest req = new PutObjectRequest(this.name, km + mdExt, new ByteArrayInputStream(b), om);
+				s3Service.putObject(req);
+				s3Service.deleteObject(this.name, km + mdExt + ".cpy");
+			} else {
+				PutObjectRequest req = new PutObjectRequest(this.name, km + mdExt, new ByteArrayInputStream(b), om);
+				s3Service.putObject(req);
 			}
-				
-			PutObjectRequest req = new PutObjectRequest(this.name, km + mdExt, new ByteArrayInputStream(b), om);
-
-			s3Service.putObject(req);
 
 		} else {
 			try {

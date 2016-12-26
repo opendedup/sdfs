@@ -204,11 +204,10 @@ public class ChunkData {
 
 	}
 
-	public static void cacheChunk(byte[] hash, long pos) throws IOException,
+	public static void cacheChunk(long pos) throws IOException,
 			DataArchivedException {
 		try {
-			HCServiceProxy.getChunkStore().cacheData(hash, pos,
-					Main.chunkStorePageSize);
+			HCServiceProxy.getChunkStore().cacheData(pos);
 		} catch (IOException e) {
 			throw e;
 		}

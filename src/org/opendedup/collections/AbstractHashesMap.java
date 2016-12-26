@@ -59,7 +59,7 @@ public interface AbstractHashesMap {
 
 	public abstract boolean update(ChunkData cm) throws IOException;
 
-	public abstract void cache(byte[] key,long pos) throws IOException;
+	public abstract void cache(long pos) throws IOException, DataArchivedException;
 
 	public abstract long get(byte[] key) throws IOException;
 

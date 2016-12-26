@@ -167,7 +167,7 @@ public interface AbstractChunkStore {
 
 	public abstract void iterationInit(boolean getchunks) throws IOException;
 
-	public abstract void cacheData(byte[] hash, long start, int len)
+	public abstract void cacheData(long start)
 			throws IOException, DataArchivedException;
 
 }

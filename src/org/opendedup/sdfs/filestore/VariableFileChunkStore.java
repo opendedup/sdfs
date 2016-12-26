@@ -680,7 +680,7 @@ public class VariableFileChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void cacheData(byte[] hash, long start, int len) throws IOException,
+	public void cacheData(long len) throws IOException,
 			DataArchivedException {
 		// TODO Auto-generated method stub
 

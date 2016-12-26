@@ -165,9 +165,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	}
 
-	public void cacheData(byte[] hash, long start, int len) throws IOException, DataArchivedException {
+	public void cacheData(long start) throws IOException, DataArchivedException {
 		try {
-			HashBlobArchive.cacheArchive(hash, start);
+			HashBlobArchive.cacheArchive(start);
 		} catch (ExecutionException e) {
 			SDFSLogger.getLog().error("Unable to get block at " + start, e);
 			throw new IOException(e);
@@ -394,8 +394,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Thread thread = new Thread(this);
 		thread.start();
 		HashBlobArchive.init(this);
-		HashBlobArchive.setReadSpeed(rsp);
-		HashBlobArchive.setWriteSpeed(wsp);
+		HashBlobArchive.setReadSpeed(rsp,false);
+		HashBlobArchive.setWriteSpeed(wsp,false);
 	}
 
 	Iterator<ListBlobItem> iter = null;
@@ -1204,19 +1204,19 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setReadSpeed(int kbps) {
-		HashBlobArchive.setReadSpeed((double) kbps);
+		HashBlobArchive.setReadSpeed((double) kbps,true);
 
 	}
 
 	@Override
 	public void setWriteSpeed(int kbps) {
-		HashBlobArchive.setWriteSpeed((double) kbps);
+		HashBlobArchive.setWriteSpeed((double) kbps,true);
 
 	}
 
 	@Override
 	public void setCacheSize(long sz) throws IOException {
-		HashBlobArchive.setCacheSize(sz);
+		HashBlobArchive.setCacheSize(sz,true);
 
 	}
 

@@ -143,7 +143,7 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		return HashBlobArchive.getLength();
 	}
 
-	public void cacheData(byte[] hash, long start, int len) throws IOException,
+	public void cacheData(long len) throws IOException,
 			DataArchivedException {
 
 	}
@@ -522,19 +522,19 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 
 	@Override
 	public void setReadSpeed(int kbps) {
-		HashBlobArchive.setReadSpeed((double) kbps);
+		HashBlobArchive.setReadSpeed((double) kbps,true);
 
 	}
 
 	@Override
 	public void setWriteSpeed(int kbps) {
-		HashBlobArchive.setWriteSpeed((double) kbps);
+		HashBlobArchive.setWriteSpeed((double) kbps,true);
 
 	}
 
 	@Override
 	public void setCacheSize(long sz) throws IOException {
-		HashBlobArchive.setCacheSize(sz);
+		HashBlobArchive.setCacheSize(sz,true);
 
 	}
 
@@ -649,29 +649,29 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 	@Override
 	public StringResult getStringResult(String key) throws IOException,
 			InterruptedException {
-		Long hid = Long.parseLong(key);
-		File mf = HashBlobArchive.getPath(hid);
+		Long _hid = Long.parseLong(key);
+		File mf = HashBlobArchive.getPath(_hid);
 		HashBlobArchive.addToCompressedLength(mf.length());
 		try {
-			HashMap<String, String> metaData = this.readHashMap(hid);
+			HashMap<String, String> metaData = this.readHashMap(_hid);
 			HashBlobArchive.addToLength(Integer.parseInt(metaData
 					.get("bsize")));
 			if (metaData.containsKey("deleted-objects")
 					|| metaData.containsKey("deleted")) {
 				metaData.remove("deleted-objects");
 				metaData.remove("deleted");
-				this.writeHashMap(metaData, hid);
+				this.writeHashMap(metaData, _hid);
 			}
 			try {
 				StringTokenizer dht = new StringTokenizer(
-						HashBlobArchive.getStrings(hid), ",");
+						HashBlobArchive.getStrings(_hid), ",");
 				StringResult st = new StringResult();
-				st.id = hid;
+				st.id = _hid;
 				st.st = dht;
 				return st;
 			} catch (Exception e) {
 				SDFSLogger.getLog()
-						.error("unable to get strings for " + hid, e);
+						.error("unable to get strings for " + _hid, e);
 				throw e;
 			}
 

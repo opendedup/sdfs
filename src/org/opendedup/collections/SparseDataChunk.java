@@ -19,6 +19,7 @@
 package org.opendedup.collections;
 
 import java.io.Externalizable;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -26,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -34,7 +35,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 
 public class SparseDataChunk implements Externalizable {
-	private ReentrantLock l = new ReentrantLock();
+	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
 	private int doop;
 	private int prevdoop;
 	// private int RAWDL;
@@ -55,8 +56,7 @@ public class SparseDataChunk implements Externalizable {
 		this.marshall(rawData);
 	}
 
-	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData,
-			byte version) {
+	public SparseDataChunk(int doop, List<HashLocPair> ar, boolean localData, byte version) {
 
 		this.version = version;
 		this.doop = doop;
@@ -87,8 +87,7 @@ public class SparseDataChunk implements Externalizable {
 		} else if (version == 1) {
 			this.doop = buf.getInt();
 			ar = new ArrayList<HashLocPair>();
-			byte[] hash = new byte[HashFunctionPool.hashLength
-					* HashFunctionPool.max_hash_cluster];
+			byte[] hash = new byte[HashFunctionPool.hashLength * HashFunctionPool.max_hash_cluster];
 			buf.get(hash);
 			byte[] hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
 			buf.get(hashlocs);
@@ -133,7 +132,7 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	public HashLocPair getWL(int _pos) throws IOException {
-		l.lock();
+		l.readLock().lock();
 		try {
 			for (HashLocPair h : ar) {
 				int ep = h.pos + h.nlen;
@@ -151,92 +150,90 @@ public class SparseDataChunk implements Externalizable {
 			}
 			throw new IOException("Position not found " + _pos);
 		} finally {
-			l.unlock();
+			l.readLock().unlock();
 		}
 
 	}
 
-	public static void insertHashLocPair(List<HashLocPair> ar, HashLocPair p)
-			throws IOException {
+	public static void insertHashLocPair(List<HashLocPair> ar, HashLocPair p) throws IOException {
 		int ep = p.pos + p.nlen;
 		if (ep > Main.CHUNK_LENGTH)
 			throw new IOException("Overflow ep=" + ep);
 		ArrayList<HashLocPair> rm = null;
 		ArrayList<HashLocPair> am = null;
 		// SDFSLogger.getLog().info("p = " + p);
-
-		for (HashLocPair h : ar) {
-			int hep = h.pos + h.nlen;
-			if (h.pos >= ep)
-				break;
-			else if (h.pos >= p.pos && hep <= ep) {
-				// SDFSLogger.getLog().info("0 removing h = " + h);
-				if (rm == null)
-					rm = new ArrayList<HashLocPair>();
-				rm.add(h);
-			} else if (h.pos >= p.pos && h.pos < ep && hep > ep) {
-				int no = ep - h.pos;
-				// int oh = h.pos;
-				h.pos = ep;
-				h.offset += no;
-				h.nlen -= no;
-
-				// SDFSLogger.getLog().info("2 changing pos  from " +oh
-				// +" to " + h.pos + " offset = " + h.offset);
-			} else if (h.pos <= p.pos && hep > p.pos) {
-				if (hep > ep) {
-					int offset = ep - h.pos;
-					HashLocPair _h = h.clone();
-					_h.offset += offset;
-					_h.nlen -= offset;
-					_h.pos = ep;
-					if (!Main.chunkStoreLocal)
-						_h.hashloc[0] = 1;
-					else
-						_h.setDup(true);
-					if (am == null)
-						am = new ArrayList<HashLocPair>();
-
-					am.add(_h);
-				}
-				if (h.pos < p.pos) {
-					h.nlen = (p.pos - h.pos);
-				} else {
+			for (HashLocPair h : ar) {
+				int hep = h.pos + h.nlen;
+				if (h.pos >= ep)
+					break;
+				else if (h.pos >= p.pos && hep <= ep) {
+					// SDFSLogger.getLog().info("0 removing h = " + h);
 					if (rm == null)
 						rm = new ArrayList<HashLocPair>();
 					rm.add(h);
+				} else if (h.pos >= p.pos && h.pos < ep && hep > ep) {
+					int no = ep - h.pos;
+					// int oh = h.pos;
+					h.pos = ep;
+					h.offset += no;
+					h.nlen -= no;
+
+					// SDFSLogger.getLog().info("2 changing pos from " +oh
+					// +" to " + h.pos + " offset = " + h.offset);
+				} else if (h.pos <= p.pos && hep > p.pos) {
+					if (hep > ep) {
+						int offset = ep - h.pos;
+						HashLocPair _h = h.clone();
+						_h.offset += offset;
+						_h.nlen -= offset;
+						_h.pos = ep;
+						if (!Main.chunkStoreLocal)
+							_h.hashloc[0] = 1;
+						else
+							_h.setDup(true);
+						if (am == null)
+							am = new ArrayList<HashLocPair>();
+
+						am.add(_h);
+					}
+					if (h.pos < p.pos) {
+						h.nlen = (p.pos - h.pos);
+					} else {
+						if (rm == null)
+							rm = new ArrayList<HashLocPair>();
+						rm.add(h);
+					}
+				}
+				if (h.isInvalid()) {
+					SDFSLogger.getLog().error("h = " + h.toString());
 				}
 			}
-			if (h.isInvalid()) {
-				SDFSLogger.getLog().error("h = " + h.toString());
+			if (rm != null) {
+				for (HashLocPair z : rm) {
+					ar.remove(z);
+				}
 			}
-		}
-		if (rm != null) {
-			for (HashLocPair z : rm) {
-				ar.remove(z);
+			if (am != null) {
+				for (HashLocPair z : am) {
+					ar.add(z);
+				}
 			}
-		}
-		if (am != null) {
-			for (HashLocPair z : am) {
-				ar.add(z);
-			}
-		}
-		if (!Main.chunkStoreLocal)
-			p.hashloc[0] = 1;
-		else
-			p.setDup(true);
-		ar.add(p);
+			if (!Main.chunkStoreLocal)
+				p.hashloc[0] = 1;
+			else
+				p.setDup(true);
+			ar.add(p);
 
-		Collections.sort(ar);
+			Collections.sort(ar);
 	}
 
 	public void putHash(HashLocPair p) throws IOException {
-		l.lock();
+		l.writeLock().lock();
 		try {
 			insertHashLocPair(ar, p);
 			this.flags = RECONSTRUCTED;
 		} finally {
-			l.unlock();
+			l.writeLock().unlock();
 		}
 	}
 
@@ -247,11 +244,10 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	public byte[] getBytes() throws IOException {
-		l.lock();
+		l.readLock().lock();
 		try {
 			if (this.version == 0) {
-				ByteBuffer buf = ByteBuffer
-						.wrap(new byte[LongByteArrayMap._FREE.length]);
+				ByteBuffer buf = ByteBuffer.wrap(new byte[LongByteArrayMap._FREE.length]);
 				if (doop > 0)
 					buf.put((byte) 1);
 				else
@@ -261,8 +257,7 @@ public class SparseDataChunk implements Externalizable {
 				buf.put(ar.get(0).hashloc);
 				return buf.array();
 			} else if (this.version == 1) {
-				ByteBuffer buf = ByteBuffer
-						.wrap(new byte[LongByteArrayMap._v1arrayLength]);
+				ByteBuffer buf = ByteBuffer.wrap(new byte[LongByteArrayMap._v1arrayLength]);
 				buf.putInt(doop);
 				for (HashLocPair p : ar) {
 					buf.put(p.hash);
@@ -274,8 +269,7 @@ public class SparseDataChunk implements Externalizable {
 
 			} else {
 				ByteBuffer buf = null;
-				buf = ByteBuffer.wrap(new byte[1 + 4 + 4 + 4
-						+ (ar.size() * HashLocPair.BAL)]);
+				buf = ByteBuffer.wrap(new byte[1 + 4 + 4 + 4 + (ar.size() * HashLocPair.BAL)]);
 				this.prevdoop = this.doop;
 				this.doop = 0;
 				buf.put(this.flags);
@@ -283,12 +277,9 @@ public class SparseDataChunk implements Externalizable {
 				buf.putInt(this.ar.size());
 				Collections.sort(this.ar);
 				if (ar.size() > (LongByteArrayMap.MAX_ELEMENTS_PER_AR)) {
-					SDFSLogger.getLog().error(
-							"Buffer overflow ar size = " + ar.size()
-									+ " max size = "
-									+ (LongByteArrayMap.MAX_ELEMENTS_PER_AR));
-					throw new IOException("Buffer overflow ar size = "
-							+ ar.size() + " max size = "
+					SDFSLogger.getLog().error("Buffer overflow ar size = " + ar.size() + " max size = "
+							+ (LongByteArrayMap.MAX_ELEMENTS_PER_AR));
+					throw new IOException("Buffer overflow ar size = " + ar.size() + " max size = "
 							+ (LongByteArrayMap.MAX_ELEMENTS_PER_AR));
 				}
 				this.len = 0;
@@ -305,7 +296,7 @@ public class SparseDataChunk implements Externalizable {
 				return buf.array();
 			}
 		} finally {
-			l.unlock();
+			l.readLock().unlock();
 		}
 	}
 
@@ -326,8 +317,7 @@ public class SparseDataChunk implements Externalizable {
 	}
 
 	@Override
-	public void readExternal(ObjectInput in) throws IOException,
-			ClassNotFoundException {
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		byte[] b = new byte[in.readInt()];
 		this.marshall(b);
 

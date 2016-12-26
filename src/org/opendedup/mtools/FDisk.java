@@ -44,6 +44,8 @@ import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.StringUtils;
+
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 import com.google.common.primitives.Longs;
@@ -153,7 +155,7 @@ public class FDisk {
 			}
 			mp.iterInit();
 			SparseDataChunk ck = mp.nextValue(false);
-			long k = 0;
+			//long k = 0;
 			while (ck != null) {
 				if (closed) {
 					this.failed = true;
@@ -162,14 +164,14 @@ public class FDisk {
 				List<HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al) {
 					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
-					k++;
+					//k++;
 					if(!added)
-						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos());
+						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash=" + StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));
 					
 				}
 				ck = mp.nextValue(false);
 			}
-			SDFSLogger.getLog().info("ref added for " + mapFile + " k= " +k);
+			//SDFSLogger.getLog().info("ref added for " + mapFile + " k= " +k);
 
 			synchronized (fEvt) {
 				fEvt.curCt++;

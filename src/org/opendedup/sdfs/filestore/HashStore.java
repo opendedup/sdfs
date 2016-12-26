@@ -232,9 +232,9 @@ public class HashStore {
 		return bdb.claimKey(key,val,ct);
 	}
 
-	public void cacheChunk(byte[] hash,long pos) throws IOException,
+	public void cacheChunk(long pos) throws IOException,
 			DataArchivedException {
-		bdb.cache(hash,pos);
+		bdb.cache(pos);
 	}
 
 	public long processHashClaims(SDFSEvent evt) throws IOException {

@@ -22,6 +22,9 @@ import java.io.IOException;
 
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -29,10 +32,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.LongKeyValue;
+import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import com.google.common.primitives.Longs;
 
 
 public class ReadAhead implements Runnable {
@@ -74,49 +83,51 @@ public class ReadAhead implements Runnable {
 	}
 
 	private static class CacheChunk implements Runnable {
-		WritableCacheBuffer buf = null;
-		SparseDedupFile df = null;
+		long pos;
 
 		public void run() {
 			try {
-				if (!df.isClosed()) {
-					buf.cacheChunk();
-				}
+				HCServiceProxy.cacheData(pos);
 			} catch (IOException e) {
 				SDFSLogger.getLog()
-						.debug("error caching chunk [" + buf.getFilePosition() + "] in " + df.getDatabasePath(), e);
-			} catch (InterruptedException e) {
+						.debug("error caching chunk [" + pos + "] ", e);
+			}  catch (DataArchivedException e) {
 				SDFSLogger.getLog()
-						.debug("error caching chunk [" + buf.getFilePosition() + "] in " + df.getDatabasePath(), e);
-			} catch (DataArchivedException e) {
-				SDFSLogger.getLog()
-						.debug("error caching chunk [" + buf.getFilePosition() + "] in " + df.getDatabasePath(), e);
+						.debug("error caching chunk [" + pos + "] ", e);
 			}
 		}
 	}
 
 	@Override
 	public void run() {
-		long i = 0;
 		try {
-			while (i < df.mf.length()) {
-				try {
-					WritableCacheBuffer buf = (WritableCacheBuffer) df.getWriteBuffer(i);
-					CacheChunk ck = new CacheChunk();
-					ck.buf = buf;
-					ck.df = df;
-					executor.execute(ck);
-					i = buf.getEndPosition();
-					evt.curCt = i;
-				} catch (IOException e) {
-					SDFSLogger.getLog().debug("error caching chunk [" + i + "] in " + df.getDatabasePath(), e);
+			LongByteArrayMap mp =(LongByteArrayMap) df.bdb;
+			mp.iterInit();
+			Set<Long> blks = new HashSet<Long>();
+			for (;;) {
+				LongKeyValue kv = mp.nextKeyValue(false);
+				if (kv == null)
 					break;
-				} catch (FileClosedException e) {
-					SDFSLogger.getLog().debug("error caching chunk [" + i + "] in " + df.getDatabasePath(), e);
-					break;
+				SparseDataChunk ck = kv.getValue();
+				List<HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al) {
+					long pos = Longs.fromByteArray(p.hashloc);
+					if(pos >100) {
+						blks.add(pos);
+					}
 				}
 			}
+			for(Long l : blks) {
+				CacheChunk ck = new CacheChunk();
+				ck.pos = l;
+				executor.execute(ck);
+			}
+			
 			evt.endEvent(df.getMetaFile().getPath() + " Cached");
+		} catch (IOException e) {
+			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);
+		} catch (FileClosedException e) {
+			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);
 		} finally {
 			try {
 			if (ch != null)

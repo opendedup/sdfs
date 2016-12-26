@@ -588,7 +588,7 @@ public class FileReplicationService {
 			while (fname != null) {
 				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
 				if (this.sync.isCheckedOut("ddb/" +efs, req.getVolumeID())) {
-					executor.execute(new DDBDownloader(fname, sync));
+					executor.execute(new DDBDownloader(fname, sync,req.isUpdateRef()));
 				}
 				fname = this.sync.getNextName("ddb", req.getVolumeID());
 			}
@@ -682,6 +682,7 @@ public class FileReplicationService {
 		private static Exception downloadSyncException;
 		AbstractCloudFileSync sync;
 		String fname;
+		boolean updateRef =true;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
 
@@ -691,9 +692,10 @@ public class FileReplicationService {
 			downloadSyncException = null;
 		}
 
-		DDBDownloader(String fname, AbstractCloudFileSync sync) {
+		DDBDownloader(String fname, AbstractCloudFileSync sync,boolean updateRef) {
 			this.sync = sync;
 			this.fname = fname;
+			this.updateRef = updateRef;
 		}
 
 		@Override
@@ -712,13 +714,16 @@ public class FileReplicationService {
 										+ f.length());
 						LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getName().substring(0, f.getName().length() - 4));
 						Set<Long> blks = new HashSet<Long>();
+						boolean ref= false;
+						if(this.updateRef && Main.refCount)
+							ref = true;
 						if (ddb.getVersion() < 3)
 							throw new IOException(
 									"only files version 3 or later can be imported");
 						try {
 							ddb.iterInit();
 							for (;;) {
-								LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+								LongKeyValue kv = ddb.nextKeyValue(ref);
 								if (kv == null)
 									break;
 								SparseDataChunk ck = kv.getValue();
