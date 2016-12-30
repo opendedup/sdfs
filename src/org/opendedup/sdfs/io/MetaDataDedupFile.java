@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+import static java.nio.file.StandardCopyOption.*;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -743,19 +744,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					+ "]Cannot overwrite existing data ");
 		if (!f.exists())
 			f.mkdirs();
-
-		String cpCmd = "cp -rf --preserve=all " + this.path + " " + snaptoPath;
-		Process p = Runtime.getRuntime().exec(cpCmd);
-
-		try {
-			int ecode = p.waitFor();
-			if (ecode != 0)
-				throw new IOException("unable to copy " + this.path
-						+ " cp exit code is " + ecode);
-
-		} catch (Exception e) {
-			throw new IOException(e);
-		}
+		Files.copy(new File(this.path).toPath(), new File(snaptoPath).toPath(), REPLACE_EXISTING , COPY_ATTRIBUTES );
 		MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
 		dmf.copyDir(npath);
 	}

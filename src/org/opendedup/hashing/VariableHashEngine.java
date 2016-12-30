@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
@@ -43,6 +44,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 
 	public VariableHashEngine() throws NoSuchAlgorithmException {
 		while (ff == null) {
+			SDFSLogger.getLog().info("Variable minLen=" +minLen + " maxlen=" + maxLen + " windowSize=" + bytesPerWindow);
 			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
 					minLen, maxLen);
 		}

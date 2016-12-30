@@ -322,6 +322,7 @@ public class Config {
 				.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
 		if(cache.hasAttribute("min-variable-segment-size")) {
+			
 			VariableHashEngine.minLen = (Integer.parseInt(cache
 					.getAttribute("min-variable-segment-size")) * 1024)-1;
 		} else {

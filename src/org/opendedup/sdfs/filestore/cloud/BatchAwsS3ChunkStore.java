@@ -569,7 +569,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 					SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 				}
-				if (!obj.containsKey("currentsize")) {
+				if (obj == null || !obj.containsKey("currentsize")) {
 					try {
 						this.binm = "bucketinfo/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -1237,7 +1237,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 				return omd;
 			} else {
-				return obj.getUserMetadata();
+
+				Map<String,String> md = obj.getUserMetadata();
+				return md;
 			}
 		} finally {
 			// this.s3clientLock.readLock().unlock();

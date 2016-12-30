@@ -50,7 +50,7 @@ public class VolumeConfigWriter {
 	boolean safe_sync = true;
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
-	short chunk_size = 256;
+	int chunk_size = 256;
 	int max_file_write_buffers = 24;
 	int max_open_files = 4096;
 	int meta_file_cache = 1024;
@@ -83,6 +83,8 @@ public class VolumeConfigWriter {
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
 	boolean lowMemory = false;
+	int maxSegSize = 32;
+	int windowSize = 48;
 	int cloudThreads = 8;
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
@@ -128,6 +130,7 @@ public class VolumeConfigWriter {
 	private boolean simpleMD = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
+	private String volumeType = "standard";
 	private long sn = new Random().nextLong();
 
 	public VolumeConfigWriter() {
@@ -174,6 +177,14 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("base-path")) {
 			this.base_path = cmd.getOptionValue("base-path");
+		}
+		if(cmd.hasOption("backup-volume")) {
+			this.mdCompresstion = true;
+			this.maxSegSize = 12;
+			this.max_open_files = 32*3;
+			this.max_file_write_buffers=80;
+			this.chunk_size = 40960;
+			this.volumeType ="backup";
 		}
 		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
@@ -287,6 +298,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("permissions-owner")) {
 			this.owner = cmd.getOptionValue("permissions-owner");
 		}
+		
 		if (cmd.hasOption("compress-metadata")) {
 			this.mdCompresstion = true;
 		}
@@ -304,7 +316,6 @@ public class VolumeConfigWriter {
 			this.awsEnabled = Boolean.parseBoolean(cmd.getOptionValue("aws-enabled"));
 		}
 		if (cmd.hasOption("minio-enabled")) {
-
 			this.safe_sync = false;
 			this.minIOEnabled = true;
 			this.simpleMD = true;
@@ -579,7 +590,7 @@ public class VolumeConfigWriter {
 
 		Element io = xmldoc.createElement("io");
 		io.setAttribute("log-level", "1");
-		io.setAttribute("chunk-size", Short.toString(this.chunk_size));
+		io.setAttribute("chunk-size", Integer.toString(this.chunk_size));
 
 		io.setAttribute("dedup-files", Boolean.toString(this.dedup_files));
 		if (OSValidator.isWindows())
@@ -595,9 +606,10 @@ public class VolumeConfigWriter {
 		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
 		io.setAttribute("read-ahead", Boolean.toString(this.readAhead));
 		io.setAttribute("hash-type", this.hashType);
-		if (ext)
-			io.setAttribute("max-variable-segment-size", "32");
-		root.appendChild(io);
+		io.setAttribute("max-variable-segment-size", Integer.toString(this.maxSegSize));
+		io.setAttribute("variable-window-size", Integer.toString(this.windowSize));
+		io.setAttribute("volume-type", this.volumeType);
+			root.appendChild(io);
 
 		Element perm = xmldoc.createElement("permissions");
 		perm.setAttribute("default-file", this.filePermissions);
@@ -1126,6 +1138,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("backup-volume")
+				.withDescription(
+						"When set, changed the volume attributes for better deduplication but slower randnom IO.")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("azure-enabled")
 				.withDescription(
 						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")

@@ -74,7 +74,7 @@ public class MetaFileImport implements Serializable {
 	private boolean useSSL;
 	private Exception lastException;
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, worksQueue,
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
 			new ThreadPoolExecutor.CallerRunsPolicy());
 
 	protected MetaFileImport(String path, String server, String password, int port, int maxSz, SDFSEvent evt,
@@ -131,7 +131,7 @@ public class MetaFileImport implements Serializable {
 					.info("Running Import of " + path + " total runs=" + i + " entries imported=" + passEntries);
 			passEntries = 0;
 			worksQueue = new SynchronousQueue<Runnable>();
-			executor = new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, worksQueue,
+			executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
 			this.traverse(new File(this.path));
 			
