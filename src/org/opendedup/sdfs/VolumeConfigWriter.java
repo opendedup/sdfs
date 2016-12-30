@@ -51,7 +51,7 @@ public class VolumeConfigWriter {
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
-	int max_file_write_buffers = 24;
+	int max_file_write_buffers = 1;
 	int max_open_files = 4096;
 	int meta_file_cache = 1024;
 	int write_timeout = Main.writeTimeoutSeconds;
@@ -202,9 +202,7 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("io-max-file-write-buffers")) {
 			this.max_file_write_buffers = Integer.parseInt(cmd.getOptionValue("io-max-file-write-buffers"));
-		} else {
-			this.max_file_write_buffers = 1;
-		}
+		} 
 		if (cmd.hasOption("hash-type")) {
 			String ht = cmd.getOptionValue("hash-type");
 			if (ht.equalsIgnoreCase(HashFunctionPool.TIGER_16) || ht.equalsIgnoreCase(HashFunctionPool.TIGER_24)
@@ -219,7 +217,6 @@ public class VolumeConfigWriter {
 			}
 			if (ht.equalsIgnoreCase(HashFunctionPool.VARIABLE_MURMUR3)) {
 				this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
-				this.chunk_size = 256;
 				this.compress = true;
 			} else if (cmd.hasOption("chunkstore-class")) {
 				this.chunk_store_class = cmd.getOptionValue("chunkstore-class");
@@ -270,7 +267,7 @@ public class VolumeConfigWriter {
 			this.write_threads = 8;
 		}
 		if (cmd.hasOption("io-chunk-size")) {
-			this.chunk_size = Short.parseShort(cmd.getOptionValue("io-chunk-size"));
+			this.chunk_size = Integer.parseInt(cmd.getOptionValue("io-chunk-size"));
 		}
 		if (cmd.hasOption("local-cache-size")) {
 			this.cacheSize = cmd.getOptionValue("local-cache-size");
@@ -379,8 +376,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				this.readAhead = true;
-				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 256;
+				
 				if (cmd.hasOption("simple-s3")) {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
@@ -413,8 +409,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				this.readAhead = true;
-				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 256;
+				
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
@@ -430,8 +425,7 @@ public class VolumeConfigWriter {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.readAhead = true;
 				this.compress = true;
-				if (!cmd.hasOption("io-chunk-size"))
-					this.chunk_size = 256;
+				
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
@@ -686,7 +680,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("bucket-name", this.cloudBucketName);
 			aws.setAttribute("access-key", this.cloudAccessKey);
 			aws.setAttribute("secret-key", this.cloudSecretKey);
-			this.chunk_size = 256;
 			aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 			Element extended = xmldoc.createElement("extended-config");
 			if (this.accessEnabled)
@@ -725,7 +718,7 @@ public class VolumeConfigWriter {
 			}
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if (ext) {
-				this.chunk_size = 256;
+				
 
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
@@ -773,7 +766,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
 			if (ext) {
-				this.chunk_size = 256;
+				
 
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
@@ -803,7 +796,6 @@ public class VolumeConfigWriter {
 			aws.setAttribute("azure-secret-key", this.cloudSecretKey);
 			aws.setAttribute("azure-bucket-name", this.cloudBucketName);
 			if (ext) {
-				this.chunk_size = 1024;
 				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAzureChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("service-type", "azureblob");
@@ -820,7 +812,6 @@ public class VolumeConfigWriter {
 			}
 			cs.appendChild(aws);
 		} else if (ext) {
-			this.chunk_size = 1024;
 			Element extended = xmldoc.createElement("extended-config");
 			extended.setAttribute("block-size", "60 MB");
 			extended.setAttribute("allow-sync", "false");
