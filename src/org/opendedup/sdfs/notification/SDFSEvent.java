@@ -128,6 +128,8 @@ public class SDFSEvent implements java.io.Serializable {
 	public void endEvent(String msg, Level level) {
 		this.shortMsg = msg;
 		this.level = level;
+		if(this.maxCt ==0)
+			this.maxCt=1;
 		this.curCt = this.maxCt;
 		this.endTime = System.currentTimeMillis();
 		SDFSEventLogger.log(this);
@@ -156,6 +158,8 @@ public class SDFSEvent implements java.io.Serializable {
 		this.shortMsg = msg + " Exception : " + e.toString();
 		this.level = level;
 		this.endTime = System.currentTimeMillis();
+		if(this.maxCt ==0)
+			this.maxCt=1;
 		this.curCt = this.maxCt;
 		this.success = false;
 		SDFSEventLogger.log(this);
@@ -180,6 +184,8 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		this.endTime = System.currentTimeMillis();
 		this.level = SDFSEvent.INFO;
+		if(this.maxCt ==0)
+			this.maxCt=1;
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
@@ -191,6 +197,8 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		this.endTime = System.currentTimeMillis();
 		this.level = SDFSEvent.ERROR;
+		if(this.maxCt ==0)
+			this.maxCt=1;
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}
@@ -202,6 +210,8 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 		this.endTime = System.currentTimeMillis();
 		this.level = SDFSEvent.WARN;
+		if(this.maxCt ==0)
+			this.maxCt=1;
 		this.curCt = this.maxCt;
 		SDFSEventLogger.log(this);
 	}

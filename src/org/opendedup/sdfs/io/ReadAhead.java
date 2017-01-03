@@ -123,7 +123,8 @@ public class ReadAhead implements Runnable {
 				ck.pos = l;
 				executor.execute(ck);
 			}
-			
+			if(evt.maxCt==0)
+				evt.maxCt=1;
 			evt.endEvent(df.getMetaFile().getPath() + " Cached");
 		} catch (IOException e) {
 			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);

@@ -19,7 +19,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-import static java.nio.file.StandardCopyOption.*;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,6 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -744,7 +745,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					+ "]Cannot overwrite existing data ");
 		if (!f.exists())
 			f.mkdirs();
-		Files.copy(new File(this.path).toPath(), new File(snaptoPath).toPath(), REPLACE_EXISTING , COPY_ATTRIBUTES );
+		FileUtils.copyDirectory(new File(this.path),  new File(snaptoPath), true);
+		//SDFSLogger.getLog().info("copied files to " + npath);
 		MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
 		dmf.copyDir(npath);
 	}

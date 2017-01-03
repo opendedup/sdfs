@@ -124,7 +124,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder.newBuilder()
-			.maximumSize(maxWriteBuffers + 1).concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
+			.maximumSize(maxWriteBuffers + 1).concurrencyLevel(64).expireAfterAccess(15, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(RemovalNotification<Long, DedupChunkInterface> removal) {
 					DedupChunkInterface ck = removal.getValue();
@@ -830,9 +830,9 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().debug(
 							"Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" + st + "]");
 				HCServiceProxy.sync();
-			} else {
+			} /*else {
 				this.writeCache();
-			}
+			}*/
 
 			if (this.toOccured)
 				throw new IOException("timeout occured");

@@ -346,8 +346,7 @@ public class VolumeConfigWriter {
 			this.accessPath = cmd.getOptionValue("access-path");
 			this.compress = true;
 			this.readAhead = true;
-			if (!cmd.hasOption("io-chunk-size"))
-				this.chunk_size = 256;
+			
 		}
 		if (cmd.hasOption("google-enabled")) {
 			this.gsEnabled = Boolean.parseBoolean(cmd.getOptionValue("google-enabled"));
