@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -94,7 +95,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 
 									byte[] b = runnable.getFlushedBuffer();
 									hash = hc.getHash(b);
-									ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
+									TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 									HashLocPair p = new HashLocPair();
 									p.hash = hash;
 									p.pos = 0;
@@ -103,7 +104,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.hashloc = new byte[8];
 									p.hash = hash;
 									p.data = b;
-									ar.add(p);
+									ar.put(p.pos,p);
 									runnable.setAR(ar);
 								} catch (BufferClosedException e) {
 
@@ -118,7 +119,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 
 								List<Finger> fs = eng.getChunks(writeBuffer
 										.getFlushedBuffer());
-								ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>();
+								TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 								for (Finger f : fs) {
 									HashLocPair p = new HashLocPair();
 									p.hash = f.hash;
@@ -128,7 +129,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.nlen = f.len;
 									p.data = f.chunk;
 									p.pos = f.start;
-									ar.add(p);
+									ar.put(p.pos,p);
 								}
 								writeBuffer.setAR(ar);
 							}
@@ -140,7 +141,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 							if (ck == null)
 								break;
 							else
-								al.addAll(ck.getFingers());
+								al.addAll(ck.getFingers().values());
 						}
 
 						HCServiceProxy.batchHashExists(al);

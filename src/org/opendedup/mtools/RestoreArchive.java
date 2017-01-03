@@ -19,10 +19,11 @@
 package org.opendedup.mtools;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.DataMapInterface;
@@ -91,8 +92,8 @@ public class RestoreArchive implements Runnable {
 			SparseDataChunk ck= mp.nextValue(false);
 			while (ck != null) {
 				
-					List<HashLocPair> al = ck.getFingers();
-					for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 						String req = HCServiceProxy.restoreBlock(p.hash);
 						if (req != null && !this.restoreRequests.contains(req)) {
 							this.restoreRequests.add(req);

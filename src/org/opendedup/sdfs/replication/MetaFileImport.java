@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -252,7 +253,7 @@ public class MetaFileImport implements Serializable {
 					ck = mp.nextValue(this.firstrun);
 					if (ck != null) {
 						ck.setFpos((prevpos / mp.getFree().length) * Main.CHUNK_LENGTH);
-						List<HashLocPair> al = ck.getFingers();
+						TreeMap<Integer,HashLocPair> al = ck.getFingers();
 
 						if (Main.chunkStoreLocal) {
 							mf.getIOMonitor().addVirtualBytesWritten(Main.CHUNK_LENGTH, true);
@@ -260,7 +261,7 @@ public class MetaFileImport implements Serializable {
 							if (HashFunctionPool.max_hash_cluster > 1)
 								mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH, true);
 							boolean hpc = false;
-							for (HashLocPair p : al) {
+							for (HashLocPair p : al.values()) {
 								long pos = 0;
 								if (Main.refCount && Arrays.areEqual(WritableCacheBuffer.bk, p.hash))
 									pos = 1;
@@ -290,7 +291,7 @@ public class MetaFileImport implements Serializable {
 								mp.put(ck.getFpos(), ck);
 							}
 						} else {
-							bh.addAll(ck.getFingers());
+							bh.addAll(ck.getFingers().values());
 							if (bh.size() >= MAX_BATCHHASH_SIZE) {
 								boolean cp = batchCheck(bh, mf);
 								if (cp)

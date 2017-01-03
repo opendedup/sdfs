@@ -22,8 +22,9 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
-import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -108,9 +109,12 @@ public class FDisk {
 
 			fEvt.endEvent(
 					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
+			evt.endEvent(
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
+			evt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 			this.failed = true;
 			throw new FDiskException(e);
 		}
@@ -161,8 +165,8 @@ public class FDisk {
 					this.failed = true;
 					return;
 				}
-				List<HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
 					//k++;
 					if(!added)

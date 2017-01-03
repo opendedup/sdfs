@@ -19,7 +19,8 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
-import java.util.List;
+
+import java.util.TreeMap;
 
 import org.opendedup.collections.DataArchivedException;
 
@@ -44,7 +45,7 @@ public interface DedupChunkInterface {
 	public abstract byte[] getReadChunk(int start, int end) throws IOException,
 			BufferClosedException, DataArchivedException;
 
-	public List<HashLocPair> getFingers();
+	public TreeMap<Integer,HashLocPair> getFingers();
 
 	/**
 	 * 
@@ -106,7 +107,7 @@ public interface DedupChunkInterface {
 
 	public boolean isBatchwritten();
 
-	public void setAR(List<HashLocPair> al);
+	public void setAR(TreeMap<Integer,HashLocPair> al);
 
 	public void setBatchwritten(boolean written);
 

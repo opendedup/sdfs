@@ -35,7 +35,7 @@ if [ -n "$CFG" ] && [ -f "$CFG" ]; then
                 bm=$(echo 'cat //subsystem-config/io/@chunk-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 th=$(echo 'cat //subsystem-config/io/@write-threads' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-                cm=$(((bm*th)/1024);
+                cm=$(((bm*th)/1024));
                 if [ $lm == "true" ]; then
                         MEMORY=$(((ac/10737418240*LMPTG)+BASEMEMORY+cm))
                 else

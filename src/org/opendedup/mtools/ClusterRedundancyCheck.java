@@ -131,7 +131,7 @@ public class ClusterRedundancyCheck {
 			throws IOException, HashtableFullException, FileClosedException {
 		ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
 		for (SparseDataChunk ck : chunks) {
-			al.addAll(ck.getFingers());
+			al.addAll(ck.getFingers().values());
 		}
 		List<HashLocPair> pchunks = HCServiceProxy.batchHashExists(al);
 		int corruptBlocks = 0;

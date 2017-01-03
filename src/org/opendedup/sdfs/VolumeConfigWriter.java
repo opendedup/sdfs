@@ -180,7 +180,7 @@ public class VolumeConfigWriter {
 		}
 		if(cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
-			this.maxSegSize = 12;
+			this.maxSegSize = 128;
 			this.max_open_files = 32*3;
 			this.max_file_write_buffers=80;
 			this.chunk_size = 40960;

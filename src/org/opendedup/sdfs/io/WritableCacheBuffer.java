@@ -21,11 +21,12 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -82,7 +83,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean reconstructed;
 	private boolean hlAdded = false;
 	private boolean direct = false;
-	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
+	private TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 	int sz;
 	private static SynchronousQueue<Runnable> lworksQueue = null;
 	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
@@ -90,7 +91,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static ThreadPoolExecutor executor = null;
 	private static SynchronousQueue<Runnable> worksQueue = null;
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
-	public static final byte [] blankBlock = new byte[4096];
+	public static final byte [] blankBlock = new byte[VariableHashEngine.minLen+1];
 	public static final byte [] bk = new Murmur3HashEngine().getHash(blankBlock);
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
@@ -109,7 +110,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				new ThreadPoolExecutor.CallerRunsPolicy());
 	}
 
-	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, List<HashLocPair> ar,
+	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, TreeMap<Integer,HashLocPair> ar,
 			boolean reconstructed) throws IOException {
 		this.length = length;
 		this.position = startPos;
@@ -221,7 +222,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				int i = 0;
 				// long fp = this.position;
 
-				for (HashLocPair p : ar) {
+				for (HashLocPair p : ar.values()) {
 
 					if (Longs.fromByteArray(p.hashloc) != 0) {
 						Shard sh = new Shard();
@@ -368,7 +369,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return Main.CHUNK_LENGTH;
 	}
 
-	public void setAR(List<HashLocPair> al) {
+	public void setAR(TreeMap<Integer,HashLocPair> al) {
 		this.ar = al;
 	}
 
@@ -434,7 +435,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
 
 					this.writeBlock(b, pos);
-					this.ar = new ArrayList<HashLocPair>();
+					this.ar = new TreeMap<Integer,HashLocPair>();
 				} else if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
 					// SDFSLogger.getLog().info("poop " + b.length + " pos=" +
 					// pos + "_spos=" + _spos + " bpos=" +bpos );
@@ -1124,9 +1125,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	@Override
-	public List<HashLocPair> getFingers() {
+	public TreeMap<Integer,HashLocPair> getFingers() {
 		// TODO Auto-generated method stub
-		Collections.sort(ar);
 		return ar;
 	}
 

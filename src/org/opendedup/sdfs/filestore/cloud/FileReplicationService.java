@@ -3,13 +3,14 @@ package org.opendedup.sdfs.filestore.cloud;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -728,8 +729,8 @@ public class FileReplicationService {
 									break;
 								SparseDataChunk ck = kv.getValue();
 								boolean dirty = false;
-								List<HashLocPair> al = ck.getFingers();
-								for (HashLocPair p : al) {
+								TreeMap<Integer,HashLocPair> al = ck.getFingers();
+								for (HashLocPair p : al.values()) {
 
 									ChunkData cm = new ChunkData(
 											Longs.fromByteArray(p.hashloc), p.hash);

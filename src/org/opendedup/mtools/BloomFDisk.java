@@ -21,8 +21,9 @@ package org.opendedup.mtools;
 import java.io.File;
 
 
+
 import java.io.IOException;
-import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -161,8 +162,8 @@ public class BloomFDisk {
 					this.failed = true;
 					return;
 				}
-				List<HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 					bf.put(p.hash);
 					
 				}

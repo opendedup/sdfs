@@ -21,10 +21,11 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 
 
+
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -109,8 +110,8 @@ public class ReadAhead implements Runnable {
 				if (kv == null)
 					break;
 				SparseDataChunk ck = kv.getValue();
-				List<HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 					long pos = Longs.fromByteArray(p.hashloc);
 					if(pos >100) {
 						blks.add(pos);

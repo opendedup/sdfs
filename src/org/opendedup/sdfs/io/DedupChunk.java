@@ -20,8 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeMap;
 
 /**
  * 
@@ -36,7 +35,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	private boolean writable = false;
 	private int doop = 0;
 	private boolean reconstructed = false;
-	private List<HashLocPair> ar = new ArrayList<HashLocPair>();
+	private TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 
 	public DedupChunk(long position) {
 		this.position = position;
@@ -52,7 +51,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 *            The length of the chunk
 	 */
 	public DedupChunk(long position, int length, boolean newChunk,
-			List<HashLocPair> ar, boolean reconstructed) {
+			TreeMap<Integer,HashLocPair> ar, boolean reconstructed) {
 		this.length = length;
 		this.position = position;
 		this.newChunk = newChunk;
@@ -272,7 +271,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public List<HashLocPair> getFingers() {
+	public TreeMap<Integer,HashLocPair> getFingers() {
 		// TODO Auto-generated method stub
 		return this.ar;
 	}
@@ -290,7 +289,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void setAR(List<HashLocPair> al) {
+	public void setAR(TreeMap<Integer,HashLocPair> al) {
 		this.ar = al;
 
 	}

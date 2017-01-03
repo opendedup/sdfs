@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -425,7 +426,7 @@ public class SparseDedupFile implements DedupFile {
 
 				int dups = 0;
 				if (writeBuffer.isBatchProcessed() && HashFunctionPool.max_hash_cluster == 1) {
-					for (HashLocPair p : writeBuffer.getFingers()) {
+					for (HashLocPair p : writeBuffer.getFingers().values()) {
 						if (!writeBuffer.isBatchwritten())
 							p.hashloc = HCServiceProxy.writeChunk(p.hash, p.data, p.hashloc).getHashLocs();
 					}
@@ -452,9 +453,9 @@ public class SparseDedupFile implements DedupFile {
 						p.len = b.length;
 						p.pos = 0;
 						if (writeBuffer.getFingers().size() == 0)
-							writeBuffer.getFingers().add(p);
+							writeBuffer.getFingers().put(p.pos, p);
 						else
-							writeBuffer.getFingers().set(0, p);
+							writeBuffer.getFingers().put(0, p);
 
 					} else {
 
@@ -464,7 +465,7 @@ public class SparseDedupFile implements DedupFile {
 								fs = eng.getChunks(writeBuffer.getFlushedBuffer());
 							else {
 								fs = new ArrayList<Finger>();
-								for (HashLocPair p : writeBuffer.getFingers()) {
+								for (HashLocPair p : writeBuffer.getFingers().values()) {
 									Finger f = new Finger();
 									f.hash = p.hash;
 									f.chunk = p.data;
@@ -475,7 +476,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 							}
 
-							ArrayList<HashLocPair> ar = new ArrayList<HashLocPair>(fs.size());
+							TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
 
 								@Override
@@ -573,7 +574,7 @@ public class SparseDedupFile implements DedupFile {
 									p.setDup(!f.hl.getInserted());
 									if (!f.hl.getInserted())
 										dups += f.len;
-									ar.add(p);
+									ar.put(p.pos,p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to write object finger", e);
 									throw e;
@@ -686,16 +687,24 @@ public class SparseDedupFile implements DedupFile {
 		if (this.errOccured) {
 			throw new IOException("write error occured");
 		}
-		SparseDataChunk pck = bdb.get(pos);
-
-		if (pck == null)
+		if(pck != null && pck.getFpos() == pos)
+			return pck;
+		else 
+			pck = bdb.get(pos);
+		if (pck == null) {
 			pck = new SparseDataChunk();
+			
+		}
+		pck.setFpos(pos);
 		if (pos + Main.CHUNK_LENGTH > mf.length())
 			pck.len = (int) (mf.length() - pos);
 		else
 			pck.len = Main.CHUNK_LENGTH;
 		return pck;
 	}
+	
+	private SparseDataChunk pck = null;
+	
 
 	@Override
 	public DedupChunkInterface getWriteBuffer(long position) throws IOException, FileClosedException {
@@ -1271,7 +1280,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private DedupChunk createNewChunk(long location) {
-		DedupChunk ck = new DedupChunk(location, Main.CHUNK_LENGTH, true, new ArrayList<HashLocPair>(), false);
+		DedupChunk ck = new DedupChunk(location, Main.CHUNK_LENGTH, true, new TreeMap<Integer,HashLocPair>(), false);
 		return ck;
 	}
 

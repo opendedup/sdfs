@@ -1,10 +1,11 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
@@ -119,8 +120,8 @@ public class GetCloudFile implements Runnable {
 					break;
 				SparseDataChunk ck = kv.getValue();
 				boolean dirty = false;
-				List<HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 
 					ChunkData cm = new ChunkData(
 							Longs.fromByteArray(p.hashloc), p.hash);

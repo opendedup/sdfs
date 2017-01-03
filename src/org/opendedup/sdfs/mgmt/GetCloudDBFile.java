@@ -1,9 +1,10 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bouncycastle.util.Arrays;
@@ -99,8 +100,8 @@ public class GetCloudDBFile implements Runnable {
 					break;
 				SparseDataChunk ck = kv.getValue();
 				boolean dirty = false;
-				List<HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al) {
+				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				for (HashLocPair p : al.values()) {
 
 					ChunkData cm = new ChunkData(
 							Longs.fromByteArray(p.hashloc), p.hash);
