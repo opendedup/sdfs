@@ -14,6 +14,22 @@ import org.w3c.dom.Element;
 public class GetAttributes {
 
 	public Element getResult(String cmd, String file) throws IOException {
+		if(file.equals("lastClosedFile")) {
+			try {
+				MetaDataDedupFile mf = CloseFile.lastClosedFile;
+				Document doc = XMLUtils.getXMLDoc("files");
+				Element fe = mf.toXML(doc);
+				Element root = doc.getDocumentElement();
+				root.appendChild(fe);
+				return (Element) root.cloneNode(true);
+			} catch (Exception e) {
+				SDFSLogger.getLog().error(
+						"unable to fulfill request on file " + file, e);
+				throw new IOException(
+						"request to fetch attributes failed because "
+								+ e.toString());
+			}
+		}
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
 		if (!f.exists())

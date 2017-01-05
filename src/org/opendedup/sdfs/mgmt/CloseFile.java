@@ -13,6 +13,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class CloseFile {
+	
+	public static MetaDataDedupFile lastClosedFile =null;
 
 	public Element getResult(String cmd, String file, long fd) throws IOException {
 		try {
@@ -28,6 +30,7 @@ public class CloseFile {
 				mf.setDirty(true);
 				mf.unmarshal();
 				mf.getDedupFile(true).forceClose();
+				lastClosedFile=mf;
 			}
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
