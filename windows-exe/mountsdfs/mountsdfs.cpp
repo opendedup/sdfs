@@ -174,6 +174,8 @@ int _tmain(int argc, TCHAR *argv[])
 				doc.Parse(contents.c_str());
 				if (doc.ErrorID() == 0) {
 					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
+					string bsz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("io")->Attribute("chunk-size"));
+					string tsz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("io")->Attribute("write-threads"));
 					bool lowm = false;
 					if (doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory")) {
 						string lm = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory"));
@@ -190,8 +192,16 @@ int _tmain(int argc, TCHAR *argv[])
 					}
 					else {
 						std::stringstream sstr(ssz);
+						std::stringstream bstr(bsz);
+						std::stringstream tstr(tsz);
 						__int64 sz;
+						__int64 bz;
+						__int64 tz;
+						bstr >> bz;
+						tstr >> tz;
 						sstr >> sz;
+						long tt = (bz* tz)/1024;
+						mem += tt;
 						long gb = sz / (1073741824);
 						mem += .3 * gb;
 					}

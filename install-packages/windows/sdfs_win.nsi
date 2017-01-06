@@ -111,7 +111,7 @@ Section "Dokan Setup" SecDokan
 	ExecWait '"$INSTDIR\DokanSetup_redist.exe'
 SectionEnd
 Section "-Quick Start Guide"
-	ExecShell "open" "http://www.opendedup.org/wqs"
+	ExecShell "open" "http://opendedup.org/odd/windows-quickstart/"
 SectionEnd
 
 

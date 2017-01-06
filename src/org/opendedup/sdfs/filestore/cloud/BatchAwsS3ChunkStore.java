@@ -577,7 +577,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						obj = this.getUserMetaData(binm);
 						obj.get("currentsize");
 					} catch (Exception e) {
+						if(obj != null) {
 						obj.get("currentsize");
+						}else
+							obj = new HashMap<String, String>();
 						SDFSLogger.getLog().debug("unable to find bucketinfo object", e);
 					}
 				}
