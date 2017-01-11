@@ -71,9 +71,14 @@ public class MgmtWebServer implements Container {
 			Path reqPath = request.getPath();
 
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
-			String file = request.getQuery().get("file");
+			String file = null;
+			if(request.getQuery().containsKey("file"))
+				file = request.getQuery().get("file");
 			String cmd = request.getQuery().get("cmd").toLowerCase();
-			String cmdOptions = request.getQuery().get("options");
+			
+			String cmdOptions = null;
+			if(request.getQuery().containsKey("options"))
+				cmdOptions = request.getQuery().get("options");
 			SDFSLogger.getLog().debug(
 					"cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
 			DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -121,6 +126,110 @@ public class MgmtWebServer implements Container {
 							doc.adoptNode(msg);
 							result.appendChild(msg);
 						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtgetseqnum" :
+						try {
+							Element msg = OSTEventStore.getCurrentSeqNum();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtresseqnum" :
+						try {
+							Element msg = OSTEventStore.reserverSeqNum();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtset" :
+						try {
+							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							String data = request.getQuery().get("event");
+							String payload = null;
+							if(request.getQuery().containsKey("payload"))
+								payload = request.getQuery().get("payload");
+							OSTEventStore.AddOSTEvent(seqnum, data,payload);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtsetpayload" :
+						try {
+							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							String payload = request.getQuery().get("payload");
+							OSTEventStore.SetOSTEventPayload(seqnum,payload);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtget" :
+						try {
+							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							Element msg = OSTEventStore.getOSTEvent(seqnum);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtdelete" :
+						try {
+							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							OSTEventStore.DeleteOSTEvent(seqnum);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info",e);
+						}
+						break;
+					case "ostevtgetall" :
+						try {
+							Element msg = OSTEventStore.getOSTEvents();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("info",e);
@@ -925,16 +1034,14 @@ public class MgmtWebServer implements Container {
 					}
 					if (!cmd.equalsIgnoreCase("batchgetblocks")) {
 						String rsString = XMLUtils.toXMLString(doc);
-						PrintStream body = response.getPrintStream();
-						long time = System.currentTimeMillis();
 
 						// SDFSLogger.getLog().debug(rsString);
 						response.setContentType("text/xml");
-						response.addValue("Server", "SDFS Management Server");
-						response.setDate("Date", time);
-						response.setDate("Last-Modified", time);
-						body.println(rsString);
-						body.close();
+						byte [] rb= rsString.getBytes();
+						response.setContentLength(rb.length);
+						response.getOutputStream().write(rb);
+						response.getOutputStream().flush();
+						response.close();
 					}
 				}
 			} else {
@@ -986,6 +1093,7 @@ public class MgmtWebServer implements Container {
 					response.setValue("Server", "SDFS Management Server");
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
+					response.setContentLength(data.length);
 					response.getByteChannel().write(ByteBuffer.wrap(data));
 					response.getByteChannel().close();
 				} else if (request.getTarget().startsWith(BATCH_BLOCK_PATH)) {
@@ -997,6 +1105,7 @@ public class MgmtWebServer implements Container {
 					response.setValue("Server", "SDFS Management Server");
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
+					response.setContentLength(rslt.length);
 					response.getByteChannel().write(ByteBuffer.wrap(rslt));
 					response.getByteChannel().close();
 				} else if (request.getTarget().startsWith(BATCH_BLOCK_POINTER)) {
@@ -1008,6 +1117,7 @@ public class MgmtWebServer implements Container {
 					response.setValue("Server", "SDFS Management Server");
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
+					response.setContentLength(rslt.length);
 					response.getByteChannel().write(ByteBuffer.wrap(rslt));
 					response.getByteChannel().close();
 				} else {
@@ -1066,11 +1176,8 @@ public class MgmtWebServer implements Container {
 	private void downloadFile(File f, Request request, Response response)
 			throws IOException {
 		if (f.exists()) {
-			long time = System.currentTimeMillis();
 			response.setContentType("application/octet-stream");
 			response.addValue("Server", "SDFS Management Server");
-			response.setDate("Date", time);
-			response.setDate("Last-Modified", time);
 			response.setContentLength(f.length());
 			InputStream in = new FileInputStream(f);
 			OutputStream out = response.getOutputStream();
@@ -1079,6 +1186,7 @@ public class MgmtWebServer implements Container {
 			while ((len = in.read(buf)) > 0) {
 				out.write(buf, 0, len);
 			}
+			out.flush();
 			in.close();
 			out.close();
 

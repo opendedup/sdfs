@@ -31,6 +31,9 @@ public class ProcessVolumeInfo {
 				if(dse.hasAttribute("files")) {
 					System.out.println("Files : " + dse.getAttribute("files"));
 				}
+				if(dse.hasAttribute("offline")) {
+					System.out.println("Volume Offline : " + dse.getAttribute("offline"));
+				}
 				long dedupSz = Long.parseLong(dse
 						.getAttribute("duplicate-bytes"));
 				long compSz = Long.parseLong(dse.getAttribute("dse-comp-size"));

@@ -628,6 +628,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		root.setAttribute("offline", Boolean.toString(this.volumeOffLine));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
 		root.setAttribute("read-timeout-seconds",
 				Integer.toString(Main.readTimeoutSeconds));

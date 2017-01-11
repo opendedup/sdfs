@@ -1,13 +1,12 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
-
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
@@ -15,6 +14,7 @@ import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.HashLocPair;
@@ -110,11 +110,13 @@ public class GetCloudDBFile implements Runnable {
 					if (ir.getInserted())
 						blks.add(Longs.fromByteArray(ir.getHashLocs()));
 					else {
-						if (!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
+						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
 							p.hashloc = ir.getHashLocs();
+							blks.add(Longs.fromByteArray(ir.getHashLocs()));
 							dirty = true;
 						}
 					}
+					DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
 				}
 				if (dirty)
 					ddb.put(kv.getKey(), ck);

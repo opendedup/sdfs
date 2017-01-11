@@ -56,9 +56,9 @@ public class ReadAhead implements Runnable {
 	public HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
-		if (Main.readAhead)
-			return new  ReadAhead(df,false);
-		else
+		//if (Main.readAhead)
+		//	return new  ReadAhead(df,false);
+		//else
 			throw new IOException("ReadAhead disabled");
 	}
 

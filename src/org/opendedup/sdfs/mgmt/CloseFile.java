@@ -25,7 +25,7 @@ public class CloseFile {
 			Document doc = XMLUtils.getXMLDoc("close-file");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
-			if (f.exists()) {
+			if (f.exists() && f.getName().endsWith("F1.img")) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.setDirty(true);
 				mf.unmarshal();

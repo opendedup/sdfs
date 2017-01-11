@@ -743,6 +743,7 @@ public class FileReplicationService {
 									else {
 										if (!Arrays.areEqual(p.hashloc, ir.getHashLocs())) {
 											p.hashloc = ir.getHashLocs();
+											blks.add(Longs.fromByteArray(ir.getHashLocs()));
 											dirty = true;
 										}
 									}
