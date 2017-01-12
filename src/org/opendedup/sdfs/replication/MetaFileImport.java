@@ -57,7 +57,7 @@ public class MetaFileImport implements Serializable {
 	private long filesProcessed = 0;
 	private transient ArrayList<byte[]> hashes = null;
 	private int MAX_SZ = (500);
-	private static final int MAX_BATCHHASH_SIZE = 100;
+	private static final int MAX_BATCHHASH_SIZE = 1024;
 	boolean corruption = false;
 	private long entries = 0;
 	private long passEntries = 0;
@@ -78,13 +78,14 @@ public class MetaFileImport implements Serializable {
 	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
 			new ThreadPoolExecutor.CallerRunsPolicy());
 
-	protected MetaFileImport(String path, String server, String password, int port, int maxSz, SDFSEvent evt,
+	public MetaFileImport(String path, String server, String password, int port, int maxSz, SDFSEvent evt,
 			boolean useSSL) throws IOException {
-		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ + " use ssl " + useSSL);
-		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ, evt);
+		
 		// this.useSSL = useSSL;
 		if (maxSz > 0)
 			MAX_SZ = (maxSz * 1024 * 1024) / Main.CHUNK_LENGTH;
+		SDFSLogger.getLog().info("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ + " use ssl " + useSSL);
+		levt = SDFSEvent.metaImportEvent("Starting MetaFile FDISK. Max entries per batch are " + MAX_SZ, evt);
 		hashes = new ArrayList<byte[]>();
 		startTime = System.currentTimeMillis();
 		File f = new File(path);
@@ -96,7 +97,6 @@ public class MetaFileImport implements Serializable {
 		this.port = port;
 		this.path = path;
 		this.useSSL = useSSL;
-
 	}
 
 	public void close() {
@@ -316,7 +316,7 @@ public class MetaFileImport implements Serializable {
 				}
 				mf.setDirty(true);
 				mf.sync();
-				//mf.getDedupFile(false).forceRemoteSync();
+				mf.getDedupFile(false).forceRemoteSync();
 				Main.volume.addFile();
 			} catch (Throwable e) {
 				SDFSLogger.getLog().warn("error while checking file [" + dfGuid + "]", e);

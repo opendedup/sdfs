@@ -17,11 +17,11 @@ import org.w3c.dom.Element;
 public class OSTEventStore {
 
 	private static TreeMap<Long, OSTEvent> map = new TreeMap<Long, OSTEvent>();
-	private static AtomicLong seqnum = new AtomicLong(-1);
+	private static AtomicLong seqnum = new AtomicLong(0);
 
 	public static Element reserverSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.incrementAndGet();
-		SDFSLogger.getLog().info("reserve sequence number " + sqnum);
+		SDFSLogger.getLog().debug("reserve sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -33,7 +33,7 @@ public class OSTEventStore {
 
 	public static Element getCurrentSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.get();
-		SDFSLogger.getLog().info("getting sequence number " + sqnum);
+		SDFSLogger.getLog().debug("getting sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -44,7 +44,7 @@ public class OSTEventStore {
 	}
 
 	public static void AddOSTEvent(long id, String data) {
-		SDFSLogger.getLog().info("adding event " + id + " evt=" + data);
+		SDFSLogger.getLog().debug("adding event " + id + " evt=" + data);
 		synchronized (map) {
 			OSTEvent evt = new OSTEvent();
 			evt.ev_seqno = id;
@@ -54,7 +54,7 @@ public class OSTEventStore {
 	}
 	
 	public static void AddOSTEvent(long id, String data,String payload) {
-		SDFSLogger.getLog().info("adding event " + id +  "event=" +data+ " payload=" + payload);
+		SDFSLogger.getLog().debug("adding event " + id +  "event=" +data+ " payload=" + payload);
 		synchronized (map) {
 			OSTEvent evt = new OSTEvent();
 			evt.ev_seqno = id;
@@ -65,14 +65,14 @@ public class OSTEventStore {
 	}
 	
 	public static void SetOSTEventPayload(long id, String payload) {
-		SDFSLogger.getLog().info("setting event " + id + " payload=" + payload);
+		SDFSLogger.getLog().debug("setting event " + id + " payload=" + payload);
 		synchronized (map) {
 			map.get(id).payload = payload;
 		}
 	}
 	
 	public static void DeleteOSTEvent(long id) {
-		SDFSLogger.getLog().info("deleting event " + id);
+		SDFSLogger.getLog().debug("deleting event " + id);
 		synchronized (map) {
 			map.remove(id);
 		}
@@ -82,9 +82,11 @@ public class OSTEventStore {
 		SDFSLogger.getLog().info("getting event " + id);
 		try {
 			synchronized (map) {
-				OSTEvent evt = map.get(id);
+				//OSTEvent evt = map.get(id);
+				/*
 				if(evt != null)
-					SDFSLogger.getLog().info("getting event id " + id + " data=" + evt.event + " payload=" + evt.payload);
+					SDFSLogger.getLog().debug("getting event id " + id + " data=" + evt.event + " payload=" + evt.payload);
+				*/
 				return map.get(id).toXML();
 			}
 		} catch (Exception e) {

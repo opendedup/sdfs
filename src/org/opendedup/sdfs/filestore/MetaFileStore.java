@@ -323,6 +323,8 @@ public class MetaFileStore {
 						
 					} else {
 						mf = getMF(new File(path));
+						if(mf.isRetentionLock())
+							return false;
 						pathMap.invalidate(mf.getPath());
 						DedupFileStore.removeOpenDedupFile(mf.getDfGuid());
 						deleted = mf.deleteStub();

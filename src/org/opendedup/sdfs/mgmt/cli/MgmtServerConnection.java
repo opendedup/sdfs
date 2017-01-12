@@ -96,7 +96,7 @@ public class MgmtServerConnection {
 		return connectAndGet(url, file, useSSL);
 	}
 
-	private static GetMethod connectAndGet(String url, String file,
+	public static GetMethod connectAndGet(String url, String file,
 			boolean useSSL) throws IOException {
 		if (userName != null && password != null)
 			if (url.trim().length() == 0)
@@ -143,7 +143,7 @@ public class MgmtServerConnection {
 		}
 	}
 
-	private static GetMethod connectAndGet(String server, int port,
+	public static GetMethod connectAndGet(String server, int port,
 			String password, String url, String file, boolean useSSL)
 			throws Exception {
 		String req = null;
@@ -158,7 +158,12 @@ public class MgmtServerConnection {
 				prot = "https";
 
 			}
+			
 			req = prot + "://" + server + ":" + port + "/" + file + "?" + url;
+			if(useSSL) {
+				req = req.replaceAll("(?<!https:)//", "/");
+			}else
+				req = req.replaceAll("(?<!http:)//", "/");
 			GetMethod method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)

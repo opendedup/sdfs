@@ -152,6 +152,16 @@ public class SDFSCmdline {
 						cmd.getOptionValue("file-path"), server, password,
 						port, quiet, maxSz);
 			}
+			if (cmd.hasOption("import-file")) {
+				String server = cmd.getOptionValue("replication-master");
+				int maxSz = 0;
+				if (cmd.hasOption("replication-batch-size"))
+					maxSz = Integer.parseInt(cmd
+							.getOptionValue("replication-batch-size"));
+				ProcessImportFileCmd.runCmd(
+						cmd.getOptionValue("import-file"),
+						cmd.getOptionValue("file-path"), server, quiet, maxSz);
+			}
 			if (cmd.hasOption("archive-out")) {
 				ProcessArchiveOutCmd.runCmd(cmd.getOptionValue("archive-out"),
 						".");
@@ -453,6 +463,12 @@ public class SDFSCmdline {
 				.withDescription(
 						"Imports an archive created using archive out.\n e.g. --import-archive <archive created with archive-out> "
 								+ "--file-path=<relative-folder-destination> --replication-master=<server-ip> --replication-master-password=<server-password>")
+				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("import-file")
+				.withDescription(
+						"Imports an file from another sdfs volume.\n e.g. --import-file <remote file to import> "
+								+ "--file-path=<relative-file-destination> --replication-master=<server url>")
 				.hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("replication-master")

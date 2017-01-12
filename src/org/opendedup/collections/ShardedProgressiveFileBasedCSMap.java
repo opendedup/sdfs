@@ -326,7 +326,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				} catch (MapClosedException e) {
 				}
 			}
-			SDFSLogger.getLog().info("miss2");
+			SDFSLogger.getLog().debug("miss2");
 			return false;
 		} finally {
 			l.unlock();
@@ -777,8 +777,46 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 
 				}
 				for (LBFReconstructThread th : al) {
-					if (th.ex != null)
-						throw th.ex;
+					if (th.ex != null) {
+						lbf.vanish();
+						lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, false);
+						SDFSLogger.getLog().warn("Recreating BloomFilters...");
+						this.loadEvent.shortMsg = "Recreating BloomFilters";
+
+						executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
+								new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+						bar = new CommandLineProgressBar("ReCreating BloomFilters", maps.size(), System.out);
+						iter = maps.iterator();
+						i = 0;
+						al = new ArrayList<LBFReconstructThread>();
+						while (iter.hasNext()) {
+							AbstractShard m = iter.next();
+							th = new LBFReconstructThread(lbf, m);
+							executor.execute(th);
+							al.add(th);
+							i++;
+							bar.update(i);
+						}
+						executor.shutdown();
+						bar.finish();
+						try {
+							System.out.print("Waiting for all BloomFilters creation threads to finish");
+							while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+								SDFSLogger.getLog().debug("Awaiting fdisk completion of threads.");
+								System.out.print(".");
+
+							}
+							for (LBFReconstructThread _th : al) {
+								if (_th.ex != null) {
+									throw _th.ex;
+								}
+							}
+						} catch (Exception e1) {
+							throw new IOException(e1);
+						}
+						break;
+					}
+						
 				}
 				System.out.println(" done");
 			} catch (Exception e1) {

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
@@ -30,6 +31,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
@@ -58,12 +60,12 @@ public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath())
 			.getParent() + File.separator + "archives";
-	private static final String METADATA_PATH = "/metadata/";
-	private static final String METADATA_INFO_PATH = "/metadatainfo/";
-	private static final String MAPDATA_PATH = "/mapdata/";
-	private static final String BLOCK_PATH = "/blockdata/";
-	private static final String BATCH_BLOCK_PATH = "/batchblockdata/";
-	private static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
+	public static final String METADATA_PATH = "/metadata/";
+	public static final String METADATA_INFO_PATH = "/metadatainfo/";
+	public static final String MAPDATA_PATH = "/mapdata/";
+	public static final String BLOCK_PATH = "/blockdata/";
+	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
+	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
 
 	@Override
 	public void handle(Request request, Response response) {
@@ -74,7 +76,9 @@ public class MgmtWebServer implements Container {
 			String file = null;
 			if(request.getQuery().containsKey("file"))
 				file = request.getQuery().get("file");
-			String cmd = request.getQuery().get("cmd").toLowerCase();
+			String cmd = request.getQuery().get("cmd");
+			if(cmd != null)
+				cmd = cmd.toLowerCase();
 			
 			String cmdOptions = null;
 			if(request.getQuery().containsKey("options"))
@@ -281,8 +285,11 @@ public class MgmtWebServer implements Container {
 							if (request.getQuery().containsKey("changeid")) {
 								changeid = request.getQuery().get("changeid");
 							}
+							boolean rmlock = false;
+							if(request.getQuery().containsKey("retentionlock"))
+								rmlock = Boolean.parseBoolean(request.getQuery().get("retentionlock"));
 							String msg = new DeleteFileCmd().getResult(
-									cmdOptions, file, changeid);
+									cmdOptions, file, changeid,rmlock);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
 									"command completed successfully");
@@ -844,6 +851,25 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("importarchive",e);
 						}
 						break;
+					case "importfile":
+						try {
+							String srcFile= request.getQuery().get("srcfile");
+							String destFile= request.getQuery().get("dstfile");
+							String server= request.getQuery().get("server");
+							int maxsz = Integer.parseInt(request.getQuery().get("maxsz"));
+							Element msg = new ImportFileCmd().getResult(
+									srcFile,destFile,server,maxsz);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg",
+									"replication started successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("importarchive",e);
+						}
+						break;
 					case "batchgetblocks":
 						byte[] rb = com.google.common.io.BaseEncoding
 								.base64Url().decode(
@@ -1050,17 +1076,24 @@ public class MgmtWebServer implements Container {
 					response.setCode(403);
 					body.println("authentication required");
 
-				} else if (reqPath.getPath().contains("..")) {
+				} else if (reqPath.getPath().contains("..") || URLDecoder.decode(reqPath.getPath(), "UTF-8").contains("..")) {
 					response.setCode(404);
 					PrintStream body = response.getPrintStream();
 					body.println("could not find " + reqPath);
 					body.close();
 				} else if (request.getTarget().startsWith(METADATA_PATH)) {
+					long time = System.currentTimeMillis();
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
 					String path = Main.volume.getPath()
 							+ File.separator
 							+ request.getTarget().substring(
 									METADATA_PATH.length());
+					MetaFileStore.getMF(path).sync();
+					path = path.split("\\?")[0];
+					path = URLDecoder.decode(path, "UTF-8");
 					File f = new File(path);
+					response.setContentLength(f.length());
 					this.downloadFile(f, request, response);
 
 				} else if (request.getTarget().startsWith(METADATA_INFO_PATH)) {
@@ -1068,6 +1101,9 @@ public class MgmtWebServer implements Container {
 							+ File.separator
 							+ request.getTarget().substring(
 									METADATA_INFO_PATH.length());
+					
+					path = path.split("\\?")[0];
+					path = URLDecoder.decode(path, "UTF-8");
 					long time = System.currentTimeMillis();
 					response.setContentType("application/json");
 					response.setValue("Server", "SDFS Management Server");
@@ -1077,11 +1113,29 @@ public class MgmtWebServer implements Container {
 					body.println(GetJSONAttributes.getResult(path));
 					body.close();
 				} else if (request.getTarget().startsWith(MAPDATA_PATH)) {
+					long time = System.currentTimeMillis();
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					
 					String guid = request.getTarget().substring(
 							MAPDATA_PATH.length());
+					SDFSLogger.getLog().info("path=" +request.getTarget());
+					SDFSLogger.getLog().info("guid=" +guid);
+					guid = guid.split("\\?")[0];
+					guid = URLDecoder.decode(guid, "UTF-8");
 					String path = Main.dedupDBStore + File.separator
-							+ guid.substring(0, 2) + File.separator + guid;
+							+ guid.substring(0, 2) + File.separator + guid + File.separator + guid + ".map";
 					File f = new File(path);
+					if(!f.exists()) {
+						path = Main.dedupDBStore + File.separator
+						+ guid.substring(0, 2) + File.separator + guid + File.separator + guid + ".map.lz4";
+						
+						response.setValue("metadatacomp", "true");
+					}else {
+						response.setValue("metadatacomp", "false");
+					}
+					f = new File(path);
+					response.setContentLength(f.length());
 					this.downloadFile(f, request, response);
 				} else if (request.getTarget().startsWith(BLOCK_PATH)) {
 					byte[] hash = com.google.common.io.BaseEncoding.base64Url()
@@ -1195,6 +1249,7 @@ public class MgmtWebServer implements Container {
 			PrintStream body = response.getPrintStream();
 			body.println("could not find " + f.getPath());
 			body.close();
+			SDFSLogger.getLog().warn("unable to find " + f.getPath());
 		}
 	}
 

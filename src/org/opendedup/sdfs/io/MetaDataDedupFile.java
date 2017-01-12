@@ -108,6 +108,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private BlockDev blkdev = null;
 	private boolean dirty = false;
 	private long attributes = 0;
+	private long retentionLock = -1;
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -145,8 +146,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.mode = mode;
 		this.dirty = true;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode),
-				LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -156,8 +156,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            deduped opportunistically.
 	 * @throws IOException
 	 */
-	public void setDedup(boolean dedupNow) throws IOException,
-			HashtableFullException {
+	public void setDedup(boolean dedupNow) throws IOException, HashtableFullException {
 		setDedup(dedupNow, true);
 	}
 
@@ -170,16 +169,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            deduped opportunistically.
 	 * @throws IOException
 	 */
-	public void setDedup(boolean dedupNow, boolean propigateEvent)
-			throws IOException, HashtableFullException {
+	public void setDedup(boolean dedupNow, boolean propigateEvent) throws IOException, HashtableFullException {
 		if (!this.dedup && dedupNow) {
 			try {
 				this.dedup = dedupNow;
 				this.getDedupFile(true).optimize();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				SDFSLogger.getLog().error(
-						"unable to set dedup on " + this.getPath(), e);
+				SDFSLogger.getLog().error("unable to set dedup on " + this.getPath(), e);
 			}
 		}
 		this.dedup = dedupNow;
@@ -320,12 +317,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 * @throws IOException
 	 */
-	public void setOwner_id(int owner_id, boolean propigateEvent)
-			throws IOException {
+	public void setOwner_id(int owner_id, boolean propigateEvent) throws IOException {
 		this.owner_id = owner_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id),
-				LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id), LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -359,12 +354,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 * @throws IOException
 	 */
-	public void setGroup_id(int group_id, boolean propigateEvent)
-			throws IOException {
+	public void setGroup_id(int group_id, boolean propigateEvent) throws IOException {
 		this.group_id = group_id;
 		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id),
-				LinkOption.NOFOLLOW_LINKS);
+		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id), LinkOption.NOFOLLOW_LINKS);
 	}
 
 	/**
@@ -421,8 +414,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				mf = (MetaDataDedupFile) in.readObject();
 				mf.path = path;
 				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"reading in file " + mf.path + " df=" + mf.dfGuid);
+					SDFSLogger.getLog().debug("reading in file " + mf.path + " df=" + mf.dfGuid);
 				MetaFileStore.addToCache(mf);
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("unable to de-serialize " + path, e);
@@ -503,18 +495,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				SparseDedupFile df = new SparseDedupFile(this);
 				this.dfGuid = df.getGUID();
 				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"No DF EXISTS .... Set dedup file for "
-									+ this.getPath() + " to " + this.dfGuid);
+					SDFSLogger.getLog()
+							.debug("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
 				if (addtoopen)
 					DedupFileStore.addOpenDedupFiles(df);
 				this.sync();
 				return df;
 			} else {
 				if (addtoopen)
-					return (SparseDedupFile)DedupFileStore.openDedupFile(this);
+					return (SparseDedupFile) DedupFileStore.openDedupFile(this);
 				else
-					return (SparseDedupFile)DedupFileStore.getDedupFile(this);
+					return (SparseDedupFile) DedupFileStore.getDedupFile(this);
 			}
 		} finally {
 			writeLock.unlock();
@@ -528,9 +519,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				DedupFile df = new SparseDedupFile(this);
 				this.dfGuid = df.getGUID();
 				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"No DF EXISTS .... Set dedup file for "
-									+ this.getPath() + " to " + this.dfGuid);
+					SDFSLogger.getLog()
+							.debug("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
 				this.sync();
 				return df;
 			} else {
@@ -568,8 +558,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
-			SDFSEvent evt) throws IOException {
+	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite, SDFSEvent evt) throws IOException {
 		return snapshot(snaptoPath, overwrite, evt, true);
 	}
 
@@ -586,10 +575,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite,
-			SDFSEvent evt, boolean propigateEvent) throws IOException {
-		
-		SDFSLogger.getLog().debug("taking snapshot of " + this.getPath() +  " to " + snaptoPath);
+	public MetaDataDedupFile snapshot(String snaptoPath, boolean overwrite, SDFSEvent evt, boolean propigateEvent)
+			throws IOException {
+
+		SDFSLogger.getLog().debug("taking snapshot of " + this.getPath() + " to " + snaptoPath);
 		if (this.isSymlink()) {
 
 			File dst = new File(snaptoPath);
@@ -600,12 +589,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			Path srcP = Paths.get(src.getPath());
 			Path dstP = Paths.get(dst.getPath());
 			try {
-				Files.createSymbolicLink(dstP, Files.readSymbolicLink(srcP)
-						.toFile().toPath());
+				Files.createSymbolicLink(dstP, Files.readSymbolicLink(srcP).toFile().toPath());
 			} catch (IOException e) {
-				SDFSLogger.getLog().error(
-						"error symlinking " + this.getPath() + " to "
-								+ snaptoPath, e);
+				SDFSLogger.getLog().error("error symlinking " + this.getPath() + " to " + snaptoPath, e);
 			}
 			return getFile(snaptoPath);
 		} else if (!this.isDirectory()) {
@@ -613,10 +599,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
 			if (f.exists() && !overwrite)
-				throw new IOException("path exists [" + snaptoPath
-						+ "]Cannot overwrite existing data ");
+				throw new IOException("path exists [" + snaptoPath + "]Cannot overwrite existing data ");
 			else if (f.exists()) {
-				MetaFileStore.removeMetaFile(snaptoPath, true,true);
+				MetaFileStore.removeMetaFile(snaptoPath, true, true);
 			}
 
 			if (!f.getParentFile().exists())
@@ -627,12 +612,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				try {
 					this.setDedup(true, true);
 					try {
-						_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf)
-								.getGUID();
+						_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
 					} catch (java.lang.NullPointerException e) {
 						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug(
-									"no dedupfile for " + this.path, e);
+							SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
 					}
 				} catch (HashtableFullException e) {
 					throw new IOException(e);
@@ -640,10 +623,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					try {
 						this.setDedup(false, true);
 					} catch (HashtableFullException e) {
-						SDFSLogger
-								.getLog()
-								.error("error while setting dedup option back to false",
-										e);
+						SDFSLogger.getLog().error("error while setting dedup option back to false", e);
 					}
 				}
 			} else {
@@ -651,26 +631,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					DedupFileStore.cloneDedupFile(this, _mf);
 				} catch (java.lang.NullPointerException e) {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug(
-								"no dedupfile for " + this.path, e);
+						SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
 				}
 			}
-			_mf.getIOMonitor().setVirtualBytesWritten(
-					this.getIOMonitor().getVirtualBytesWritten(), true);
-			_mf.getIOMonitor()
-					.setDuplicateBlocks(
-							this.getIOMonitor().getDuplicateBlocks()
-									+ this.getIOMonitor()
-											.getActualBytesWritten(), true);
-			Main.volume.addDuplicateBytes(this.getIOMonitor()
-					.getDuplicateBlocks()
-					+ this.getIOMonitor().getActualBytesWritten(), true);
-			Main.volume.addVirtualBytesWritten(this.getIOMonitor()
-					.getVirtualBytesWritten(), true);
+			_mf.getIOMonitor().setVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten(), true);
+			_mf.getIOMonitor().setDuplicateBlocks(
+					this.getIOMonitor().getDuplicateBlocks() + this.getIOMonitor().getActualBytesWritten(), true);
+			Main.volume.addDuplicateBytes(
+					this.getIOMonitor().getDuplicateBlocks() + this.getIOMonitor().getActualBytesWritten(), true);
+			Main.volume.addVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten(), true);
 			Main.volume.addFile();
 			_mf.setVmdk(this.isVmdk(), true);
 			_mf.dirty = true;
-			
+
 			_mf.unmarshal();
 			_mf.sync();
 			evt.curCt = evt.curCt + 1;
@@ -678,9 +651,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("is snapshot dir");
-			
+
 			File f = new File(snaptoPath);
-			
+
 			f.mkdirs();
 			int trimlen = this.getPath().length();
 			MetaDataDedupFile[] files = this.listFiles();
@@ -688,19 +661,17 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (!files[i].getPath().equals(f.getPath())) {
 
 					File rf = new File(Main.volume.getPath() + File.separator + "sdfsactiverepl");
-					if (!files[i].getPath().equals(f.getPath()) && ! files[i].getPath().startsWith(rf.getPath())) {
-					MetaDataDedupFile file = files[i];
-					String newPath = snaptoPath + File.separator
-							+ file.getPath().substring(trimlen);
-					file.snapshot(newPath, overwrite, evt, propigateEvent);
+					if (!files[i].getPath().equals(f.getPath()) && !files[i].getPath().startsWith(rf.getPath())) {
+						MetaDataDedupFile file = files[i];
+						String newPath = snaptoPath + File.separator + file.getPath().substring(trimlen);
+						file.snapshot(newPath, overwrite, evt, propigateEvent);
 					}
 				}
 			}
 			try {
 				return MetaFileStore.getMF(snaptoPath);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to traverse " + this.getPath());
+				SDFSLogger.getLog().error("unable to traverse " + this.getPath());
 				throw new IOException(e);
 			}
 		}
@@ -735,18 +706,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the new clone
 	 * @throws IOException
 	 */
-	public void copyTo(String npath, boolean overwrite, boolean propigateEvent)
-			throws IOException {
-		String snaptoPath = new File(npath + File.separator + "files")
-				.getPath() + File.separator;
+	public void copyTo(String npath, boolean overwrite, boolean propigateEvent) throws IOException {
+		String snaptoPath = new File(npath + File.separator + "files").getPath() + File.separator;
 		File f = new File(snaptoPath);
 		if (f.exists() && !overwrite)
-			throw new IOException("while copying path exists [" + snaptoPath
-					+ "]Cannot overwrite existing data ");
+			throw new IOException("while copying path exists [" + snaptoPath + "]Cannot overwrite existing data ");
 		if (!f.exists())
 			f.mkdirs();
-		FileUtils.copyDirectory(new File(this.path),  new File(snaptoPath), true);
-		//SDFSLogger.getLog().info("copied files to " + npath);
+		FileUtils.copyDirectory(new File(this.path), new File(snaptoPath), true);
+		// SDFSLogger.getLog().info("copied files to " + npath);
 		MetaDataDedupFile dmf = MetaDataDedupFile.getFile(snaptoPath);
 		dmf.copyDir(npath);
 	}
@@ -759,51 +727,39 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (Files.isSymbolicLink(p)) {
 
 			} else {
-				MetaDataDedupFile file = MetaDataDedupFile.getFile(this
-						.getPath() + File.separator + files[i]);
+				MetaDataDedupFile file = MetaDataDedupFile.getFile(this.getPath() + File.separator + files[i]);
 				if (file.isDirectory())
 					file.copyDir(npath);
 				else {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug(
-								"copy dedup file for : " + file.getPath()
-										+ " guid :" + file.getDfGuid());
+						SDFSLogger.getLog()
+								.debug("copy dedup file for : " + file.getPath() + " guid :" + file.getDfGuid());
 					if (file.dfGuid != null) {
 						if (DedupFileStore.fileOpen(file))
 							file.getDedupFile(false).copyTo(npath, true);
 						else {
-							File sdbdirectory = new File(Main.dedupDBStore
-									+ File.separator
-									+ file.dfGuid.substring(0, 2)
-									+ File.separator + file.dfGuid);
+							File sdbdirectory = new File(Main.dedupDBStore + File.separator
+									+ file.dfGuid.substring(0, 2) + File.separator + file.dfGuid);
 							if (sdbdirectory.exists()) {
-								Path sdbf = new File(sdbdirectory.getPath()
-										+ File.separator + file.dfGuid + ".map")
+								Path sdbf = new File(sdbdirectory.getPath() + File.separator + file.dfGuid + ".map")
 										.toPath();
 								boolean lz4 = false;
-								if(!sdbf.toFile().exists()) {
-									sdbf = new File(sdbdirectory.getPath()
-											+ File.separator + file.dfGuid + ".map.lz4")
+								if (!sdbf.toFile().exists()) {
+									sdbf = new File(sdbdirectory.getPath() + File.separator + file.dfGuid + ".map.lz4")
 											.toPath();
 									lz4 = true;
 								}
 
-								File ddbdir = new File(npath + File.separator
-										+ "ddb" + File.separator
-										+ file.dfGuid.substring(0, 2)
-										+ File.separator + file.dfGuid);
+								File ddbdir = new File(npath + File.separator + "ddb" + File.separator
+										+ file.dfGuid.substring(0, 2) + File.separator + file.dfGuid);
 								ddbdir.mkdirs();
-								Path ddbf = new File(ddbdir.getPath()
-										+ File.separator + file.dfGuid + ".map")
-										.toPath();
-								if(lz4) {
-									ddbf = new File(ddbdir.getPath()
-											+ File.separator + file.dfGuid + ".map.lz4")
+								Path ddbf = new File(ddbdir.getPath() + File.separator + file.dfGuid + ".map").toPath();
+								if (lz4) {
+									ddbf = new File(ddbdir.getPath() + File.separator + file.dfGuid + ".map.lz4")
 											.toPath();
 								}
 
-								Files.copy(sdbf, ddbf,
-										StandardCopyOption.REPLACE_EXISTING,
+								Files.copy(sdbf, ddbf, StandardCopyOption.REPLACE_EXISTING,
 										StandardCopyOption.COPY_ATTRIBUTES);
 							}
 						}
@@ -825,9 +781,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		File f = new File(path);
 		if (!f.exists()) {
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"Creating new MetaFile for " + this.path);
-			
+				SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
+
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
 			this.owner_id = Main.defaultOwner;
@@ -867,22 +822,18 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 				try {
 
-					if (f.getParentFile() == null
-							|| !f.getParentFile().exists())
+					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
-					out = new ObjectOutputStream(
-							new FileOutputStream(this.path));
+					out = new ObjectOutputStream(new FileOutputStream(this.path));
 					out.writeObject(this);
 					out.flush();
 					out.close();
-					
+
 					eventBus.post(new MFileWritten(this));
 					this.dirty = false;
-					
+
 				} catch (Exception e) {
-					SDFSLogger.getLog().warn(
-							"unable to write file metadata for [" + this.path
-									+ "]", e);
+					SDFSLogger.getLog().warn("unable to write file metadata for [" + this.path + "]", e);
 					return false;
 				}
 			}
@@ -976,14 +927,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public boolean deleteStub() {
 		this.writeLock.lock();
 		try {
+			if (this.retentionLock > 0)
+				return false;
 			File f = new File(this.path);
-			if(f.exists()) {
-			boolean del = f.delete();
-			Main.volume.removeFile();
-			eventBus.post(new MFileDeleted(this));
-			return del;
-			}
-			else
+			if (f.exists()) {
+				boolean del = f.delete();
+				Main.volume.removeFile();
+				eventBus.post(new MFileDeleted(this));
+				return del;
+			} else
 				return true;
 		} finally {
 			this.writeLock.unlock();
@@ -1039,11 +991,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			for (int i = 0; i < df.length; i++) {
 
 				try {
-					df[i] = MetaFileStore.getMF(this.getPath() + File.separator
-							+ files[i]);
+					df[i] = MetaFileStore.getMF(this.getPath() + File.separator + files[i]);
 				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"unable to traverse " + this.getPath());
+					SDFSLogger.getLog().error("unable to traverse " + this.getPath());
 				}
 			}
 			return df;
@@ -1056,8 +1006,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return renameTo(dest, true);
 	}
 
-	public boolean renameTo(String dest, boolean propigateEvent)
-			throws IOException {
+	public boolean renameTo(String dest, boolean propigateEvent) throws IOException {
 		if (!this.localowner)
 			return false;
 		writeLock.lock();
@@ -1071,8 +1020,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					Files.createSymbolicLink(dstP, srcP);
 					return true;
 				} catch (IOException e) {
-					SDFSLogger.getLog().warn(
-							"unable to rename file to " + dest, e);
+					SDFSLogger.getLog().warn("unable to rename file to " + dest, e);
 					return false;
 				}
 			} else if (f.isDirectory()) {
@@ -1084,7 +1032,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				eventBus.post(new MFileWritten(this));
 				return rn;
 			} else {
-				//MetaFileStore.removeMetaFile(dest, true);
+				// MetaFileStore.removeMetaFile(dest, true);
 				if (this.dfGuid != null)
 					DedupFileStore.updateDedupFile(this);
 				boolean rename = f.renameTo(new File(dest));
@@ -1093,8 +1041,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					this.dirty = true;
 					eventBus.post(new MFileDeleted(this));
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog()
-								.debug("FileSystem rename succesful");
+						SDFSLogger.getLog().debug("FileSystem rename succesful");
 
 					this.path = dest;
 					this.unmarshal();
@@ -1168,8 +1115,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
-	public boolean setWritable(boolean writable, boolean ownerOnly,
-			boolean propigateEvent) {
+	public boolean setWritable(boolean writable, boolean ownerOnly, boolean propigateEvent) {
 		if (!this.localowner)
 			return false;
 		this.writeLock.lock();
@@ -1200,8 +1146,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
-	public boolean setReadable(boolean readable, boolean ownerOnly,
-			boolean propigateEvent) {
+	public boolean setReadable(boolean readable, boolean ownerOnly, boolean propigateEvent) {
 		if (!this.localowner)
 			return false;
 		this.writeLock.lock();
@@ -1370,8 +1315,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
-		if(!propigateEvent)
-			this.dirty= false;
+		if (!propigateEvent)
+			this.dirty = false;
 		this.unmarshal();
 	}
 
@@ -1381,6 +1326,28 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setLastAccessed(long lastAccessed) {
 		setLastAccessed(lastAccessed, true);
+	}
+
+	public synchronized void setRetentionLock() {
+
+		if (this.retentionLock <= 0)
+			this.retentionLock = System.currentTimeMillis();
+		SDFSLogger.getLog().info("retention lock set to " + this.retentionLock);
+	}
+
+	public synchronized void clearRetentionLock() {
+		this.retentionLock = -1;
+	}
+
+	public long getRetentionLock() {
+		return this.retentionLock;
+	}
+
+	public boolean isRetentionLock() {
+		if (this.retentionLock > 0)
+			return true;
+		else
+			return false;
 	}
 
 	/**
@@ -1404,8 +1371,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	@Override
-	public void readExternal(ObjectInput in) throws IOException,
-			ClassNotFoundException {
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		this.writeLock.lock();
 		try {
 
@@ -1470,6 +1436,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.localowner = in.readBoolean();
 				}
+				if(in.available() > 0) {
+					this.retentionLock = in.readLong();
+				}
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1491,8 +1460,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.isSymlink())
 				return;
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"writing out file=" + this.path + " df=" + this.dfGuid);
+				SDFSLogger.getLog().debug("writing out file=" + this.path + " df=" + this.dfGuid);
 			out.writeLong(-1);
 			out.writeLong(length);
 			out.writeLong(lastModified.get());
@@ -1536,6 +1504,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeInt(this.mode);
 			out.writeBoolean(this.deleteOnClose);
 			out.writeBoolean(this.localowner);
+			out.writeLong(this.retentionLock);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);
@@ -1565,8 +1534,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("localowner", Boolean.toString(this.localowner));
 			dataset.addProperty("execute", Boolean.toString(this.execute));
 			try {
-				dataset.addProperty("open",
-						Boolean.toString(DedupFileStore.fileOpen(this)));
+				dataset.addProperty("open", Boolean.toString(DedupFileStore.fileOpen(this)));
 			} catch (NullPointerException e) {
 				dataset.addProperty("open", Boolean.toString(false));
 			}
@@ -1575,8 +1543,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("dedup", Boolean.toString(this.isDedup()));
 			dataset.addProperty("vmdk", Boolean.toString(this.isVmdk()));
 			if (symlink) {
-				dataset.addProperty("symlink",
-						Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 		}
@@ -1584,31 +1551,25 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			Path p = Paths.get(this.getPath());
 			File f = new File(this.getPath());
 			dataset.addProperty("type", "directory");
-			BasicFileAttributes attrs = Files.readAttributes(p,
-					BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-			dataset.addProperty("atime",
-					Long.toString(attrs.lastAccessTime().toMillis()));
-			dataset.addProperty("mtime",
-					Long.toString(attrs.lastModifiedTime().toMillis()));
-			dataset.addProperty("ctime",
-					Long.toString(attrs.creationTime().toMillis()));
+			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			dataset.addProperty("atime", Long.toString(attrs.lastAccessTime().toMillis()));
+			dataset.addProperty("mtime", Long.toString(attrs.lastModifiedTime().toMillis()));
+			dataset.addProperty("ctime", Long.toString(attrs.creationTime().toMillis()));
 			dataset.addProperty("hidden", Boolean.toString(f.isHidden()));
 			dataset.addProperty("size", Long.toString(attrs.size()));
 			if (symlink) {
-				dataset.addProperty("symlink",
-						Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 		}
 		return dataset;
 	}
 
-	public Element toXML(Document doc) throws ParserConfigurationException,
-			DOMException, IOException {
+	public Element toXML(Document doc) throws ParserConfigurationException, DOMException, IOException {
 		Element root = doc.createElement("file-info");
-		
-		root.setAttribute("file-name", URLEncoder.encode(this.getName(),"UTF-8"));
-		root.setAttribute("sdfs-path", URLEncoder.encode(this.getPath(),"UTF-8"));
+
+		root.setAttribute("file-name", URLEncoder.encode(this.getName(), "UTF-8"));
+		root.setAttribute("sdfs-path", URLEncoder.encode(this.getPath(), "UTF-8"));
 		if (this.isFile()) {
 			root.setAttribute("type", "file");
 			root.setAttribute("atime", Long.toString(this.getLastAccessed()));
@@ -1617,8 +1578,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("hidden", Boolean.toString(this.isHidden()));
 			root.setAttribute("size", Long.toString(this.length()));
 			try {
-				root.setAttribute("open",
-						Boolean.toString(DedupFileStore.fileOpen(this)));
+				root.setAttribute("open", Boolean.toString(DedupFileStore.fileOpen(this)));
 			} catch (NullPointerException e) {
 				root.setAttribute("open", Boolean.toString(false));
 			}
@@ -1626,15 +1586,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("dedup-map-guid", this.getDfGuid());
 			root.setAttribute("dedup", Boolean.toString(this.isDedup()));
 			root.setAttribute("vmdk", Boolean.toString(this.isVmdk()));
-			root.setAttribute("localowner",
-					Boolean.toString(this.isLocalOwner()));
+			root.setAttribute("localowner", Boolean.toString(this.isLocalOwner()));
 			root.setAttribute("execute", Boolean.toString(this.execute));
 			root.setAttribute("read", Boolean.toString(this.read));
 			root.setAttribute("write", Boolean.toString(this.write));
-			if(!this.extendedAttrs.isEmpty()) {
+			if (!this.extendedAttrs.isEmpty()) {
 				Element ear = doc.createElement("extended-attributes");
-				for(Entry<String,String> en : this.extendedAttrs.entrySet()) {
-					
+				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
+
 					Element ar = doc.createElement("extended-attribute");
 					ar.setAttribute("name", en.getKey());
 					ar.setAttribute("value", en.getValue());
@@ -1654,14 +1613,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			Path p = Paths.get(this.getPath());
 			File f = new File(this.getPath());
 			root.setAttribute("type", "directory");
-			BasicFileAttributes attrs = Files.readAttributes(p,
-					BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-			root.setAttribute("atime",
-					Long.toString(attrs.lastAccessTime().toMillis()));
-			root.setAttribute("mtime",
-					Long.toString(attrs.lastModifiedTime().toMillis()));
-			root.setAttribute("ctime",
-					Long.toString(attrs.creationTime().toMillis()));
+			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			root.setAttribute("atime", Long.toString(attrs.lastAccessTime().toMillis()));
+			root.setAttribute("mtime", Long.toString(attrs.lastModifiedTime().toMillis()));
+			root.setAttribute("ctime", Long.toString(attrs.creationTime().toMillis()));
 			root.setAttribute("hidden", Boolean.toString(f.isHidden()));
 			root.setAttribute("size", Long.toString(attrs.size()));
 			if (symlink) {

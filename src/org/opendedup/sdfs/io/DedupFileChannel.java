@@ -74,8 +74,8 @@ public class DedupFileChannel {
 			this.recoverArchives();
 		}
 		try {
-			if (Main.readAhead)
-				ReadAhead.getReadAhead(file);
+			//if (Main.readAhead)
+			//	ReadAhead.getReadAhead(file);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to load readahead for " + df.mf.getPath(), e);

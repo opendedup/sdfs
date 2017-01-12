@@ -176,7 +176,7 @@ public class ReplicationService implements Serializable {
 		} finally {
 			if (this.remoteSnapPath != null) {
 				try {
-					ProcessDeleteFileCmd.execute(this.remoteSnapPath);
+					ProcessDeleteFileCmd.execute(this.remoteSnapPath,true);
 				} catch (Exception e) {
 					SDFSLogger.getLog().error(
 							"unable to delete " + this.remoteSnapPath, e);
@@ -337,7 +337,7 @@ public class ReplicationService implements Serializable {
 					"ignoring deletion because file = "
 							+ this.mLocalServerFolder);
 		else {
-			ProcessDeleteFileCmd cmd = ProcessDeleteFileCmd.execute(file);
+			ProcessDeleteFileCmd cmd = ProcessDeleteFileCmd.execute(file,true);
 			String status = cmd.status;
 			String msg = cmd.msg;
 			if (status.equalsIgnoreCase("failed")

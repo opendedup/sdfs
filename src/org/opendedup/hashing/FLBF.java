@@ -153,9 +153,15 @@ public class FLBF implements Serializable {
 	public void vanish() {
 		if (counting)
 			path.delete();
-		else
+		else {
+			try {
+				bfs.close();
+			} catch (IOException e) {
+				
+			}
 			bfs.vanish();
-
+			path.delete();
+		}
 	}
 
 	public void remove(byte[] data) throws IOException {

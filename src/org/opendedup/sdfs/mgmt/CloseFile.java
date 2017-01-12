@@ -27,6 +27,7 @@ public class CloseFile {
 			File f = new File(Main.volume.getPath() + File.separator + file);
 			if (f.exists() && f.getName().endsWith("F1.img")) {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
+				mf.setRetentionLock();
 				mf.setDirty(true);
 				mf.unmarshal();
 				mf.getDedupFile(true).forceClose();

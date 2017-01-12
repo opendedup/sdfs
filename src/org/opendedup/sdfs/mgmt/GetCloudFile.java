@@ -124,7 +124,6 @@ public class GetCloudFile implements Runnable {
 					InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
 					mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
 					if (ir.getInserted()) {
-						SDFSLogger.getLog().info("k " + Longs.fromByteArray(p.hashloc));
 						mf.getIOMonitor().addActualBytesWritten(p.nlen, false);
 						blks.add(Longs.fromByteArray(ir.getHashLocs()));
 					} else {

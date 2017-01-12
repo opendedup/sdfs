@@ -54,7 +54,7 @@ public class DedupFileStore {
 					ByteLongArrayWrapper bk = removal.getKey();
 					try {
 						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
-							SDFSLogger.getLog().warn("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
+							SDFSLogger.getLog().debug("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
 						}
 					} catch (IOException e) {
 						SDFSLogger.getLog().error("unable to add reference",e);

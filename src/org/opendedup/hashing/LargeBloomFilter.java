@@ -208,8 +208,13 @@ public class LargeBloomFilter implements Serializable {
 	
 	public void vanish() {
 		for(FLBF k : bfs) {
+			try{
 			k.vanish();
+			}catch(NullPointerException e) {
+				
+			}
 		}
+		bfs = null;
 	}
 
 	private static class FBSaver implements Runnable {
