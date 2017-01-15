@@ -11,7 +11,7 @@ public class OSTEvent {
 	public String event;
 	public String payload;
 	
-	public Element toXML() throws ParserConfigurationException {
+	public Document toXML() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("event");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -21,6 +21,6 @@ public class OSTEvent {
 		root.setAttribute("event", event);
 		if(payload != null)
 			root.setAttribute("payload", payload);
-		return (Element) root.cloneNode(true);
+		return doc;
 	}
 }

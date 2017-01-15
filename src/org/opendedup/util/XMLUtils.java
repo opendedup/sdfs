@@ -19,7 +19,9 @@
 package org.opendedup.util;
 
 import java.io.File;
+
 import java.io.StringWriter;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,6 +35,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class XMLUtils {
 
@@ -69,5 +72,38 @@ public class XMLUtils {
 		doc.getDocumentElement().normalize();
 		return toXMLString(doc);
 
+	}
+	
+	public static Element toXMLElement(String fileName) throws Exception {
+		File file = new File(fileName);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(file);
+		doc.getDocumentElement().normalize();
+		Element root = doc.getDocumentElement();
+		return (Element) root.cloneNode(true);
+
+	}
+	
+	public static Document toXMLDocument(String fileName) throws Exception {
+		File file = new File(fileName);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(file);
+		doc.getDocumentElement().normalize();
+		return doc;
+
+	}
+	
+	public static void toXMLFile(Document doc,String file) throws TransformerException, IOException {
+		TransformerFactory transfac = TransformerFactory.newInstance();
+		Transformer trans = transfac.newTransformer();
+		trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		trans.setOutputProperty(OutputKeys.INDENT, "yes");
+		// create string from xml tree
+		StreamResult result = new StreamResult(new File(file));
+		DOMSource source = new DOMSource(doc);
+		trans.transform(source, result);
+		
 	}
 }

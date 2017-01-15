@@ -1,13 +1,15 @@
 package org.opendedup.sdfs.mgmt;
 
+import java.io.File;
+
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.OSTEvent;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -16,8 +18,16 @@ import org.w3c.dom.Element;
 
 public class OSTEventStore {
 
-	private static TreeMap<Long, OSTEvent> map = new TreeMap<Long, OSTEvent>();
 	private static AtomicLong seqnum = new AtomicLong(0);
+	private static File dir = new File(new File(Main.volume.getPath()).getParentFile().getPath() + File.separator + "ostevents" + File.separator);
+	static  {
+		File[] fls = dir.listFiles();
+		for(File f : fls) {
+			long id = Long.parseLong(f.getName().substring(0,f.getName().length()-4));
+			if(id > seqnum.get())
+				seqnum.set(id);
+		}
+	}
 
 	public static Element reserverSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.incrementAndGet();
@@ -43,51 +53,55 @@ public class OSTEventStore {
 		return (Element) root.cloneNode(true);
 	}
 
-	public static void AddOSTEvent(long id, String data) {
+	public static void AddOSTEvent(long id, String data) throws TransformerException, IOException, ParserConfigurationException {
 		SDFSLogger.getLog().debug("adding event " + id + " evt=" + data);
-		synchronized (map) {
+		synchronized (seqnum) {
 			OSTEvent evt = new OSTEvent();
 			evt.ev_seqno = id;
 			evt.event = data;
-			map.put(id, evt);
+			XMLUtils.toXMLFile(evt.toXML(), new File(dir.getPath() + id + ".xml").getPath());
 		}
 	}
 	
-	public static void AddOSTEvent(long id, String data,String payload) {
+	public static void AddOSTEvent(long id, String data,String payload) throws TransformerException, IOException, ParserConfigurationException {
 		SDFSLogger.getLog().debug("adding event " + id +  "event=" +data+ " payload=" + payload);
-		synchronized (map) {
+		synchronized (seqnum) {
 			OSTEvent evt = new OSTEvent();
 			evt.ev_seqno = id;
 			evt.event = data;
 			evt.payload = payload;
-			map.put(id, evt);
+			XMLUtils.toXMLFile(evt.toXML(), new File(dir.getPath() + id + ".xml").getPath());
 		}
 	}
 	
-	public static void SetOSTEventPayload(long id, String payload) {
+	public static void SetOSTEventPayload(long id, String payload) throws Exception {
 		SDFSLogger.getLog().debug("setting event " + id + " payload=" + payload);
-		synchronized (map) {
-			map.get(id).payload = payload;
+		synchronized (seqnum) {
+			Document doc = XMLUtils.toXMLDocument(dir.getPath() + id + ".xml");
+			Element root = doc.getDocumentElement();
+			root.setAttribute("payload", payload);
+			XMLUtils.toXMLFile(doc, new File(dir.getPath() + id + ".xml").getPath());
 		}
 	}
 	
 	public static void DeleteOSTEvent(long id) {
 		SDFSLogger.getLog().debug("deleting event " + id);
-		synchronized (map) {
-			map.remove(id);
+		synchronized (seqnum) {
+			File f = new File(dir.getPath() + id + ".xml");
+			f.delete();
 		}
 	}
 
 	public static Element getOSTEvent(long id) throws IOException {
 		SDFSLogger.getLog().info("getting event " + id);
 		try {
-			synchronized (map) {
+			synchronized (seqnum) {
 				//OSTEvent evt = map.get(id);
 				/*
 				if(evt != null)
 					SDFSLogger.getLog().debug("getting event id " + id + " data=" + evt.event + " payload=" + evt.payload);
 				*/
-				return map.get(id).toXML();
+				return XMLUtils.toXMLElement(dir.getPath() + id + ".xml");
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fulfill request on id " + id, e);
@@ -100,10 +114,10 @@ public class OSTEventStore {
 		try {
 			Document doc = XMLUtils.getXMLDoc("events");
 			Element root = doc.getDocumentElement();
-			synchronized (map) {
-				Iterator<OSTEvent> iter = map.values().iterator();
-				while (iter.hasNext()) {
-					Element el = iter.next().toXML();
+			synchronized (seqnum) {
+				File[] fls = dir.listFiles();
+				for(File f : fls) {
+					Element el = XMLUtils.toXMLElement(f.getPath());
 					doc.adoptNode(el);
 					root.appendChild(el);
 				}

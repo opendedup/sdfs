@@ -1089,8 +1089,8 @@ public class MgmtWebServer implements Container {
 							+ File.separator
 							+ request.getTarget().substring(
 									METADATA_PATH.length());
-					MetaFileStore.getMF(path).sync();
 					path = path.split("\\?")[0];
+					MetaFileStore.getMF(path).sync();
 					path = URLDecoder.decode(path, "UTF-8");
 					File f = new File(path);
 					response.setContentLength(f.length());
