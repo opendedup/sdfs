@@ -21,6 +21,7 @@ public class OSTEventStore {
 	private static AtomicLong seqnum = new AtomicLong(0);
 	private static File dir = new File(new File(Main.volume.getPath()).getParentFile().getPath() + File.separator + "ostevents" + File.separator);
 	static  {
+		dir.mkdirs();
 		File[] fls = dir.listFiles();
 		for(File f : fls) {
 			long id = Long.parseLong(f.getName().substring(0,f.getName().length()-4));
@@ -31,7 +32,7 @@ public class OSTEventStore {
 
 	public static Element reserverSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.incrementAndGet();
-		SDFSLogger.getLog().debug("reserve sequence number " + sqnum);
+		SDFSLogger.getLog().info("reserve sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -43,7 +44,7 @@ public class OSTEventStore {
 
 	public static Element getCurrentSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.get();
-		SDFSLogger.getLog().debug("getting sequence number " + sqnum);
+		SDFSLogger.getLog().info("getting sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());

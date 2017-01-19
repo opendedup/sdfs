@@ -483,9 +483,11 @@ public class LongByteArrayMap implements DataMapInterface {
 						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc));
 					}
 				}
+				/*
 				for (HashLocPair p : data.getFingers().values()) {
 					DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
 				}
+				*/
 			}
 			// rf.seek(fpos);
 			// rf.write(data);

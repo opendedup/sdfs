@@ -126,13 +126,15 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public void endEvent(String msg, Level level) {
+		synchronized (this) {
 		this.shortMsg = msg;
 		this.level = level;
-		if(this.maxCt ==0)
-			this.maxCt=1;
+		if (this.maxCt == 0)
+			this.maxCt = 1;
 		this.curCt = this.maxCt;
 		this.endTime = System.currentTimeMillis();
 		SDFSEventLogger.log(this);
+		}
 	}
 
 	public void addChild(SDFSEvent evt) throws IOException {
@@ -151,69 +153,79 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public void endEvent(String msg, Level level, Throwable e) {
-		for (int i = 0; i < this.children.size(); i++) {
-			if (this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent(msg, level, e);
+		synchronized (this) {
+			for (int i = 0; i < this.children.size(); i++) {
+				if (this.children.get(i).level.type.equalsIgnoreCase(RUNNING.type))
+					this.children.get(i).endEvent(msg, level, e);
+			}
+			this.shortMsg = msg + " Exception : " + e.toString();
+			this.level = level;
+			this.endTime = System.currentTimeMillis();
+			if (this.maxCt == 0)
+				this.maxCt = 1;
+			this.curCt = this.maxCt;
+			this.success = false;
+			SDFSEventLogger.log(this);
 		}
-		this.shortMsg = msg + " Exception : " + e.toString();
-		this.level = level;
-		this.endTime = System.currentTimeMillis();
-		if(this.maxCt ==0)
-			this.maxCt=1;
-		this.curCt = this.maxCt;
-		this.success = false;
-		SDFSEventLogger.log(this);
 	}
 
 	public void endEvent(String msg) {
-		for (int i = 0; i < this.children.size(); i++) {
-			if (this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent(msg);
+		synchronized (this) {
+			for (int i = 0; i < this.children.size(); i++) {
+				if (this.children.get(i).level.type.equalsIgnoreCase(RUNNING.type))
+					this.children.get(i).endEvent(msg);
+			}
+			this.shortMsg = msg;
+			this.endTime = System.currentTimeMillis();
+			this.level = SDFSEvent.INFO;
+			this.curCt = this.maxCt;
+			SDFSEventLogger.log(this);
 		}
-		this.shortMsg = msg;
-		this.endTime = System.currentTimeMillis();
-		this.level = SDFSEvent.INFO;
-		this.curCt = this.maxCt;
-		SDFSEventLogger.log(this);
 	}
 
 	public void endEvent() {
-		for (int i = 0; i < this.children.size(); i++) {
-			if (this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent();
+		synchronized (this) {
+			for (int i = 0; i < this.children.size(); i++) {
+				if (this.children.get(i).level.type.equalsIgnoreCase(RUNNING.type))
+					this.children.get(i).endEvent();
+			}
+			this.endTime = System.currentTimeMillis();
+			this.level = SDFSEvent.INFO;
+			if (this.maxCt == 0)
+				this.maxCt = 1;
+			this.curCt = this.maxCt;
+			SDFSEventLogger.log(this);
 		}
-		this.endTime = System.currentTimeMillis();
-		this.level = SDFSEvent.INFO;
-		if(this.maxCt ==0)
-			this.maxCt=1;
-		this.curCt = this.maxCt;
-		SDFSEventLogger.log(this);
 	}
 
 	public void endErrorEvent() {
-		for (int i = 0; i < this.children.size(); i++) {
-			if (this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent();
+		synchronized (this) {
+			for (int i = 0; i < this.children.size(); i++) {
+				if (this.children.get(i).level.type.equalsIgnoreCase(RUNNING.type))
+					this.children.get(i).endEvent();
+			}
+			this.endTime = System.currentTimeMillis();
+			this.level = SDFSEvent.ERROR;
+			if (this.maxCt == 0)
+				this.maxCt = 1;
+			this.curCt = this.maxCt;
+			SDFSEventLogger.log(this);
 		}
-		this.endTime = System.currentTimeMillis();
-		this.level = SDFSEvent.ERROR;
-		if(this.maxCt ==0)
-			this.maxCt=1;
-		this.curCt = this.maxCt;
-		SDFSEventLogger.log(this);
 	}
 
 	public void endWarnEvent() {
-		for (int i = 0; i < this.children.size(); i++) {
-			if (this.children.get(i).endTime == -1)
-				this.children.get(i).endEvent();
+		synchronized (this) {
+			for (int i = 0; i < this.children.size(); i++) {
+				if (this.children.get(i).level.type.equalsIgnoreCase(RUNNING.type))
+					this.children.get(i).endEvent();
+			}
+			this.endTime = System.currentTimeMillis();
+			this.level = SDFSEvent.WARN;
+			if (this.maxCt == 0)
+				this.maxCt = 1;
+			this.curCt = this.maxCt;
+			SDFSEventLogger.log(this);
 		}
-		this.endTime = System.currentTimeMillis();
-		this.level = SDFSEvent.WARN;
-		if(this.maxCt ==0)
-			this.maxCt=1;
-		this.curCt = this.maxCt;
-		SDFSEventLogger.log(this);
 	}
 
 	public static SDFSEvent archiveImportEvent(String shortMsg, SDFSEvent evt) {
@@ -439,79 +451,84 @@ public class SDFSEvent implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(this.uid);
-		sb.append(format.format(new Date(this.startTime)));
-		sb.append(",");
-		sb.append(this.startTime);
-		sb.append(",");
-		if (this.endTime > 0)
-			sb.append(format.format(new Date(this.endTime)));
-		else
-			sb.append("");
-		sb.append(",");
-		sb.append(this.endTime);
-		sb.append(",");
-		sb.append(this.level);
-		sb.append(",");
-		sb.append(this.type);
-		sb.append(",");
-		sb.append(this.target);
-		sb.append(",");
-		sb.append(this.shortMsg);
-		sb.append(",");
-		sb.append(this.longMsg);
-		sb.append(",");
-		if (this.maxCt == 0 || this.curCt == 0)
-			sb.append("0");
-		else
-			sb.append(Double.toString(this.curCt / this.maxCt));
-		sb.append(",");
-		sb.append(this.curCt);
-		sb.append(",");
-		sb.append(this.maxCt);
-		sb.append(",");
-		sb.append(this.extendedInfo);
-		sb.append(",");
-		sb.append(this.success);
-		return sb.toString();
+		synchronized (this) {
+			StringBuffer sb = new StringBuffer();
+			sb.append(this.uid);
+			sb.append(format.format(new Date(this.startTime)));
+			sb.append(",");
+			sb.append(this.startTime);
+			sb.append(",");
+			if (this.endTime > 0)
+				sb.append(format.format(new Date(this.endTime)));
+			else
+				sb.append("");
+			sb.append(",");
+			sb.append(this.endTime);
+			sb.append(",");
+			sb.append(this.level);
+			sb.append(",");
+			sb.append(this.type);
+			sb.append(",");
+			sb.append(this.target);
+			sb.append(",");
+			sb.append(this.shortMsg);
+			sb.append(",");
+			sb.append(this.longMsg);
+			sb.append(",");
+			if (this.maxCt == 0 || this.curCt == 0)
+				sb.append("0");
+			else
+				sb.append(Double.toString(this.curCt / this.maxCt));
+			sb.append(",");
+			sb.append(this.curCt);
+			sb.append(",");
+			sb.append(this.maxCt);
+			sb.append(",");
+			sb.append(this.extendedInfo);
+			sb.append(",");
+			sb.append(this.success);
+			return sb.toString();
+		}
 
 	}
 
 	public Element toXML() throws ParserConfigurationException {
-		Document doc = XMLUtils.getXMLDoc("event");
-		/*
-		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
-		 */
-		Element root = doc.getDocumentElement();
-		root.setAttribute("start-date", format.format(new Date(this.startTime)));
-		root.setAttribute("start-timestamp", Long.toString(this.startTime));
-		if (this.endTime > 0) {
-			root.setAttribute("end-date", format.format(new Date(this.endTime)));
+		synchronized (this) {
+			Document doc = XMLUtils.getXMLDoc("event");
+			/*
+			 * if (SDFSLogger.isDebug())
+			 * SDFSLogger.getLog().debug(this.toString());
+			 */
+			Element root = doc.getDocumentElement();
+			root.setAttribute("start-date", format.format(new Date(this.startTime)));
+			root.setAttribute("start-timestamp", Long.toString(this.startTime));
+			if (this.endTime > 0) {
+				root.setAttribute("end-date", format.format(new Date(this.endTime)));
+			}
+			root.setAttribute("end-timestamp", Long.toString(this.endTime));
+			root.setAttribute("level", this.level.toString());
+			root.setAttribute("type", this.type.toString());
+			root.setAttribute("target", this.target);
+			root.setAttribute("short-msg", this.shortMsg);
+			root.setAttribute("long-msg", this.longMsg);
+			try {
+				root.setAttribute("percent-complete", Double.toString((this.curCt / this.maxCt)));
+			} catch (Exception e) {
+				root.setAttribute("percent-complete", "0");
+			}
+			root.setAttribute("max-count", Long.toString(this.maxCt));
+			root.setAttribute("current-count", Long.toString(this.curCt));
+			root.setAttribute("uuid", this.uid);
+			root.setAttribute("parent-uid", this.puid);
+			root.setAttribute("extended-info", this.extendedInfo);
+			root.setAttribute("success", Boolean.toString(this.success));
+			for (int i = 0; i < this.children.size(); i++) {
+				Element el = this.children.get(i).toXML();
+				doc.adoptNode(el);
+				root.appendChild(el);
+			}
+			return (Element) root.cloneNode(true);
 		}
-		root.setAttribute("end-timestamp", Long.toString(this.endTime));
-		root.setAttribute("level", this.level.toString());
-		root.setAttribute("type", this.type.toString());
-		root.setAttribute("target", this.target);
-		root.setAttribute("short-msg", this.shortMsg);
-		root.setAttribute("long-msg", this.longMsg);
-		try {
-			root.setAttribute("percent-complete", Double.toString((this.curCt / this.maxCt)));
-		} catch (Exception e) {
-			root.setAttribute("percent-complete", "0");
-		}
-		root.setAttribute("max-count", Long.toString(this.maxCt));
-		root.setAttribute("current-count", Long.toString(this.curCt));
-		root.setAttribute("uuid", this.uid);
-		root.setAttribute("parent-uid", this.puid);
-		root.setAttribute("extended-info", this.extendedInfo);
-		root.setAttribute("success", Boolean.toString(this.success));
-		for (int i = 0; i < this.children.size(); i++) {
-			Element el = this.children.get(i).toXML();
-			doc.adoptNode(el);
-			root.appendChild(el);
-		}
-		return (Element) root.cloneNode(true);
 	}
 
 	public static SDFSEvent fromXML(Element el) {
@@ -619,9 +636,10 @@ public class SDFSEvent implements java.io.Serializable {
 	public static String getTarget() {
 		if (Main.standAloneDSE)
 			return "Storage node " + Main.DSEClusterMemberID;
-		else if(Main.volume != null)
+		else if (Main.volume != null)
 			return Main.volume.getName();
-		else return "test";
+		else
+			return "test";
 	}
 
 }

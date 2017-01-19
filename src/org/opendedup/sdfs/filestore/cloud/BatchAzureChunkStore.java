@@ -530,7 +530,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 
-		File f = arc.getFile();
+		byte [] f = arc.getBytes();
 		try {
 			// container = pool.borrowObject();
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
@@ -541,7 +541,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} else {
 				metaData.put("lz4Compress", "false");
 			}
-			int csz = toIntExact(f.length());
+			int csz = toIntExact(f.length);
 			if (Main.chunkStoreEncryptionEnabled) {
 				metaData.put("encrypt", "true");
 			} else {
@@ -553,13 +553,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			blob.setMetadata(metaData);
 
-			FileInputStream in = new FileInputStream(arc.getFile());
+			ByteArrayInputStream in = new ByteArrayInputStream(f);
 			String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(in));
 			IOUtils.closeQuietly(in);
 			// initialize blob properties and assign md5 content generated.
 			BlobProperties blobProperties = blob.getProperties();
 			blobProperties.setContentMD5(mds);
-			BufferedInputStream bin = new BufferedInputStream(new FileInputStream(arc.getFile()));
+			ByteArrayInputStream bin = new ByteArrayInputStream(f);
 			blob.upload(bin, csz);
 			IOUtils.closeQuietly(bin);
 			// upload the metadata

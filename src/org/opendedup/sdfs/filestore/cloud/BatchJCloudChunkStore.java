@@ -703,7 +703,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		try {
 			// container = pool.borrowObject();
-			File f = arc.getFile();
+			byte[] f = arc.getBytes();
 			HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("size", Integer.toString(arc.uncompressedLength.get()));
 			if (Main.compress) {
@@ -711,7 +711,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			} else {
 				metaData.put("lz4compress", "false");
 			}
-			long csz = f.length();
+			long csz = f.length;
 			if (Main.chunkStoreEncryptionEnabled) {
 				metaData.put("encrypt", "true");
 			} else {
@@ -720,7 +720,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData.put("compressedsize", Long.toString(csz));
 			metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 			metaData.put("objects", Integer.toString(arc.getSz()));
-			HashCode hc = com.google.common.io.Files.hash(f, Hashing.md5());
+			HashCode hc = Hashing.md5().hashBytes(f);
 			metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 			Blob blob = null;
 			if (this.accessStore || this.atmosStore || b2Store)

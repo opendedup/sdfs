@@ -904,7 +904,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();
 		try {
-			int csz = toIntExact(arc.getFile().length());
+			byte [] k = arc.getBytes();
+			int csz = toIntExact(k.length);
 			ObjectMetadata md = new ObjectMetadata();
 			md.addUserMetadata("size", Integer.toString(arc.uncompressedLength.get()));
 			md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
@@ -916,14 +917,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			md.setContentType("binary/octet-stream");
 			md.setContentLength(csz);
 			if (md5sum) {
-				FileInputStream in = new FileInputStream(arc.getFile());
+				ByteArrayInputStream in = new ByteArrayInputStream(k);
 				String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(in));
 				md.setContentMD5(mds);
 				md.addUserMetadata("md5sum", mds);
 				IOUtils.closeQuietly(in);
 			}
 			PutObjectRequest req = new PutObjectRequest(this.name, "blocks/" + haName,
-					new FileInputStream(arc.getFile()), md);
+					new ByteArrayInputStream(k), md);
 
 			if (this.simpleS3)
 				s3Service.putObject(req);

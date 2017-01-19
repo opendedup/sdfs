@@ -48,15 +48,17 @@ public class DedupFileStore {
 	private static ConcurrentHashMap<String, SparseDedupFile> openFile = new ConcurrentHashMap<String, SparseDedupFile>();
 	
 	private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup = CacheBuilder.newBuilder()
-			.maximumSize(1_000_000).concurrencyLevel(Main.writeThreads)
+			.maximumSize(100).concurrencyLevel(64)
 			.removalListener(new RemovalListener<ByteLongArrayWrapper, AtomicLong>() {
 				public void onRemoval(RemovalNotification<ByteLongArrayWrapper, AtomicLong> removal) {
 					ByteLongArrayWrapper bk = removal.getKey();
 					try {
+						//SDFSLogger.getLog().info("flushing");
+						
 						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
 							SDFSLogger.getLog().debug("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
 						}
-					} catch (IOException e) {
+					} catch (Exception e) {
 						SDFSLogger.getLog().error("unable to add reference",e);
 					}
 					
@@ -133,8 +135,9 @@ public class DedupFileStore {
 			else {
 				gcLock.readLock().lock();
 				try {
-				if(gcRunning)
+				//if(gcRunning)
 					return HCServiceProxy.claimKey(entry, val,1);
+				/*
 				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
 				try {
 					keyLookup.get(bl).incrementAndGet();
@@ -142,7 +145,7 @@ public class DedupFileStore {
 				} catch (ExecutionException e) {
 					SDFSLogger.getLog().error("unable to increment", e);;
 					return false;
-				}
+				}*/
 				}finally {
 					gcLock.readLock().unlock();
 				}

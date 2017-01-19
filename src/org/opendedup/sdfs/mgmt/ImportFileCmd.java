@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,7 +110,7 @@ public class ImportFileCmd implements Runnable {
 	}
 	
 	private MetaDataDedupFile downloadMetaFile() throws Exception {
-		String fp = MgmtWebServer.METADATA_PATH + this.srcFile;
+		String fp = MgmtWebServer.METADATA_PATH + URLEncoder.encode(this.srcFile,"UTF-8");
 		GetMethod mtd = null;
 		try{
 			mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
