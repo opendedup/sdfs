@@ -45,16 +45,16 @@ import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
 import org.simpleframework.http.core.ContainerSocketProcessor;
+import org.simpleframework.http.socket.service.PathRouter;
+import org.simpleframework.http.socket.service.Router;
+import org.simpleframework.http.socket.service.RouterContainer;
+import org.simpleframework.http.socket.service.Service;
 import org.simpleframework.transport.SocketProcessor;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.simpleframework.http.socket.service.Router;
-import org.simpleframework.http.socket.service.RouterContainer;
-import org.simpleframework.http.socket.service.Service;
-import org.simpleframework.http.socket.service.PathRouter;
 
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
@@ -122,6 +122,21 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", "command completed successfully");
 							doc.adoptNode(msg);
 							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "setattribute":
+						try {
+							String name = request.getQuery().get("name");
+							String value = null;
+							if(request.getQuery().containsKey("value"))
+								value = request.getQuery().get("value");
+							SetFileAttribute.getResult(file,name,value);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
@@ -962,6 +977,20 @@ public class MgmtWebServer implements Container {
 					body.println("invalid path " + reqPath.getPath());
 					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
 					body.close();
+				} else if (Main.matcher !=null && request.getTarget().startsWith(Main.matcher.getWPath())) {
+					long time = System.currentTimeMillis();
+					response.setDate("Date", time);
+					response.setDate("Last-Modified", time);
+					String guid = request.getTarget().substring(Main.matcher.getWPath().length());
+					SDFSLogger.getLog().info("path=" + request.getTarget());
+					SDFSLogger.getLog().info("guid=" + guid);
+					guid = guid.split("\\?")[0];
+					SDFSLogger.getLog().info("guid=" + guid);
+					String pth = guid.split("/")[0];
+					SDFSLogger.getLog().info("pth=" + pth);
+					long start = Long.parseLong(guid.split("/")[1]);
+					pth = URLDecoder.decode(pth, "UTF-8");
+					Main.matcher.getResult(pth,start,response);
 				} else if (request.getTarget().startsWith(METADATA_PATH)) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
@@ -1158,6 +1187,10 @@ public class MgmtWebServer implements Container {
 			Map<String, Service> routes = new HashMap<String, Service>();
 			routes.put("/metadatasocket", new MetaDataUpdate());
 			routes.put("/ddbsocket", new DDBUpdate());
+			if(Main.matcher != null) {
+				Main.matcher.start();
+				routes.put(Main.matcher.getWSPath(),Main.matcher);
+			}
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());

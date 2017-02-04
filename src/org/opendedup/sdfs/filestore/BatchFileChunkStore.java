@@ -652,16 +652,6 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		Long _hid = Long.parseLong(key);
 		File mf = HashBlobArchive.getPath(_hid);
 		HashBlobArchive.addToCompressedLength(mf.length());
-		try {
-			HashMap<String, String> metaData = this.readHashMap(_hid);
-			HashBlobArchive.addToLength(Integer.parseInt(metaData
-					.get("bsize")));
-			if (metaData.containsKey("deleted-objects")
-					|| metaData.containsKey("deleted")) {
-				metaData.remove("deleted-objects");
-				metaData.remove("deleted");
-				this.writeHashMap(metaData, _hid);
-			}
 			try {
 				StringTokenizer dht = new StringTokenizer(
 						HashBlobArchive.getStrings(_hid), ",");
@@ -674,10 +664,6 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 						.error("unable to get strings for " + _hid, e);
 				throw e;
 			}
-
-		} catch (ClassNotFoundException e) {
-			throw new IOException(e);
-		}
 	}
 
 	@Override

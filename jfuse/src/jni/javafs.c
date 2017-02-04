@@ -1326,7 +1326,11 @@ JNIEXPORT void JNICALL Java_fuse_FuseMount_mount(JNIEnv *env, jclass class, jobj
             {
                // main loop
                fuse_main(fuseArgc, fuseArgv, &javafs_oper);
-
+			   while (1)
+			   {
+				   (*env)->CallVoidMethod(env, fuseFS, FuseFS->method.destroy);
+				   break;
+			   }
                // cleanup
                free_threadGroup(env);
             }

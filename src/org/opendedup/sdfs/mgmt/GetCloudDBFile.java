@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,6 @@ import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.HashLocPair;
@@ -116,7 +116,6 @@ public class GetCloudDBFile implements Runnable {
 							dirty = true;
 						}
 					}
-					DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
 				}
 				if (dirty)
 					ddb.put(kv.getKey(), ck);

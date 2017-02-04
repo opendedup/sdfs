@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
 
 import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.InsertRecord;
@@ -143,12 +144,18 @@ public class FileReplicationService {
 
 	public static MetaDataDedupFile getMF(String fname) throws Exception {
 		File f = new File(Main.volume.getPath() + File.separator + fname);
-		return service.downloadMetaFile(fname, f);
+		fname = fname.replaceAll( Matcher.quoteReplacement("\\"),"/");
+		MetaDataDedupFile mf = service.downloadMetaFile(fname, f);
+		while (fname.startsWith(File.separator))
+			fname = fname.substring(1);
+		service.sync.checkoutFile("files/" + fname);
+		return mf;
 	}
 
 	public static LongByteArrayMap getDDB(String fname) throws Exception {
-
-		return LongByteArrayMap.getMap(service.downloadDDBFile(fname).getPath());
+		LongByteArrayMap m = LongByteArrayMap.getMap(service.downloadDDBFile(fname).getPath());
+		service.sync.checkoutFile("ddb/" + fname);
+		return m;
 	}
 	
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {

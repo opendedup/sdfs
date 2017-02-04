@@ -245,11 +245,11 @@ public class VolumeConfigWriter {
 
 		if (cmd.hasOption("ext")) {
 			this.ext = true;
-			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap";
+			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 			this.chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 		} else if (cmd.hasOption("noext")) {
 			this.ext = false;
-			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap";
+			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
 		if (cmd.hasOption("aws-aim"))

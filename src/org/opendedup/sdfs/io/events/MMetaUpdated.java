@@ -16,29 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package org.opendedup.util;
+package org.opendedup.sdfs.io.events;
 
-import java.io.IOException;
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class TestFile {
-	public static void main(String[] args) throws IOException {
-		JsonObject obj = new JsonObject();
-		obj.addProperty("poop", "wow");
-		JsonObject ar = new JsonObject();
-		ar.addProperty("ar1", 1);
-		ar.addProperty("ar2", 2);
-		obj.add("ars", ar);
-		Gson gson = new GsonBuilder()
-				.setPrettyPrinting()
-				.serializeNulls()
-				.setFieldNamingPolicy(
-						FieldNamingPolicy.UPPER_CAMEL_CASE).create();
-		System.out.println(gson.toJson(obj));
+public class MMetaUpdated extends GenericEvent {
+	private static final int pl = Main.volume.getPath().length();
+	public MetaDataDedupFile mf;
+	public String name,value;
+
+	public MMetaUpdated(MetaDataDedupFile f,String name,String value) {
+		super();
+		this.mf = f;
+		this.name = name;
+		this.value = value;
 	}
 
+	public String toJSON() {
+		JsonObject dataset = this.toJSONObject();
+		dataset.addProperty("actionType", "mmetaUpdated");
+		dataset.addProperty("name", name);
+		if(this.value != null)
+			dataset.addProperty("value", value);
+		dataset.addProperty("object", mf.getPath().substring(pl));
+			Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
+				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+				.create();
+		return gson.toJson(dataset);
+	}
 }

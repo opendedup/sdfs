@@ -36,6 +36,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.util.RandomGUID;
@@ -63,6 +64,9 @@ public class MetaDataUpload implements Service {
 		listener = new MetaDataUpdateListener(this);
 		this.users = new CopyOnWriteArraySet<String>();
 		FileReplicationService.registerEvents(this);
+		if(Main.matcher != null) {
+			Main.matcher.registerEvents(this);
+		}
 	}
 
 	private ReentrantLock getLock(String st) {
@@ -201,6 +205,21 @@ public class MetaDataUpload implements Service {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileWritten(MFileWritten evt) throws IOException {
+		try {
+			ReentrantLock l = this.getLock(evt.mf.getPath());
+			l.lock();
+			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
+			this.distribute(replay);
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to write " + evt.mf.getPath(), e);
+		} finally {
+			removeLock(evt.mf.getPath());
+		}
+	}
+	
+	@Subscribe
+	@AllowConcurrentEvents
+	public void mmetaUpdate(MMetaUpdated evt) throws IOException {
 		try {
 			ReentrantLock l = this.getLock(evt.mf.getPath());
 			l.lock();

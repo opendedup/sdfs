@@ -39,7 +39,6 @@ public class WriteTest implements Runnable {
 	int size;
 	int uniqueP;
 	int bs = 16 * 1024;
-	int ss = bs * 100;
 	public long duration = 0;
 	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;

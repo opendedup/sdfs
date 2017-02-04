@@ -21,6 +21,7 @@ package org.opendedup.sdfs.io;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -68,7 +69,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
-
 public class SparseDedupFile implements DedupFile {
 
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
@@ -572,8 +572,10 @@ public class SparseDedupFile implements DedupFile {
 									p.nlen = f.len;
 									p.pos = f.start;
 									p.setDup(!f.hl.getInserted());
-									if (!f.hl.getInserted())
+									if (!f.hl.getInserted()) {
 										dups += f.len;
+									}
+									
 									ar.put(p.pos,p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to write object finger", e);
@@ -659,6 +661,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 			}
 			bdb.put(filePosition, chunk);
+			eventBus.post(new SFileWritten(this,filePosition));
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to write " + writeBuffer.getFilePosition() + " closing " + mf.getPath(),
 					e);

@@ -87,7 +87,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 	public void destroy() {
 
 	}
-
+	
 	@Override
 	public boolean isVariableLength() {
 		// TODO Auto-generated method stub

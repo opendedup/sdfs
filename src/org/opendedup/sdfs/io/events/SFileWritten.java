@@ -28,17 +28,32 @@ import com.google.gson.JsonObject;
 
 public class SFileWritten  extends GenericEvent{
 	public SparseDedupFile sf = null;
+	long location = -1;
 
 	public SFileWritten(SparseDedupFile f) {
 		this.sf = f;
 	}
+	
+	public SFileWritten(SparseDedupFile f,long location) {
+		this.sf = f;
+		this.location = location;
+	}
+	
+	public long getLocation() {
+		return this.location;
+	}
 
 	public String toJSON() {
+		String fl = sf.mf.getPath().substring(Main.volume.getPath().length());
+		while(fl.startsWith("/") || fl.startsWith("\\"))
+			fl =fl.substring(1, fl.length());
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "sfileWritten");
 		dataset.addProperty("volumeid", Long.toString(Main.DSEID));
 		dataset.addProperty("timestamp", Long.toString(System.currentTimeMillis()));
-		dataset.addProperty("object", sf.getGUID());
+		dataset.addProperty("location", this.location);
+		dataset.addProperty("file", fl);
+		dataset.addProperty("object", sf.getGUID() + "-" + this.location);
 		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
 				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
 				.create();

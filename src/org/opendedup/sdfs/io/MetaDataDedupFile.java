@@ -20,6 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -51,6 +52,7 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
@@ -78,7 +80,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private long length = 0;
 	private String path = "";
 	private String backingFile = null;
-	private boolean iterWeaveCP = false;
 	private AtomicLong lastModified = new AtomicLong(0);
 	private AtomicLong lastAccessed = new AtomicLong(0);
 	private boolean execute = true;
@@ -192,6 +193,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void addXAttribute(String name, String value) {
 		addXAttribute(name, value, true);
+		
 	}
 
 	/**
@@ -206,7 +208,18 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void addXAttribute(String name, String value, boolean propigateEvent) {
 		extendedAttrs.put(name, value);
+		this.dirty = true;
+		eventBus.post(new MMetaUpdated(this,name,value));
+		this.unmarshal();
 	}
+	
+	public void removeXAttribute(String name) {
+		extendedAttrs.remove(name);
+		this.dirty = true;
+		eventBus.post(new MMetaUpdated(this,name,null));
+		this.unmarshal();
+	}
+
 
 	public void setBackingFile(String file) {
 		this.backingFile = file;
@@ -214,14 +227,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public String getBackingFile() {
 		return this.backingFile;
-	}
-
-	public void setInterWeaveCP(boolean interweave) {
-		this.iterWeaveCP = interweave;
-	}
-
-	public boolean isInterWeaveCP() {
-		return this.iterWeaveCP;
 	}
 
 	/**
@@ -1517,33 +1522,45 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public JsonObject toJSON(boolean compact) throws IOException {
 		JsonObject dataset = new JsonObject();
-		dataset.addProperty("file-name", this.getName());
-		dataset.addProperty("mtime", Long.toString(this.lastModified()));
+		dataset.addProperty("file", this.getName());
+		dataset.addProperty("mtime", this.lastModified());
+		dataset.addProperty("volumeid", Long.toString(Main.volume.getSerialNumber()));
 		if (this.isFile())
 			dataset.addProperty("type", "file");
 		else if (this.isDirectory())
 			dataset.addProperty("type", "dir");
 		if (!compact && this.isFile()) {
-			dataset.addProperty("atime", Long.toString(this.getLastAccessed()));
-			dataset.addProperty("mtime", Long.toString(this.lastModified()));
-			dataset.addProperty("ctime", Long.toString(-1L));
-			dataset.addProperty("hidden", Boolean.toString(this.isHidden()));
-			dataset.addProperty("size", Long.toString(this.length()));
-			dataset.addProperty("read", Boolean.toString(this.read));
-			dataset.addProperty("write", Boolean.toString(this.write));
-			dataset.addProperty("localowner", Boolean.toString(this.localowner));
-			dataset.addProperty("execute", Boolean.toString(this.execute));
+			dataset.addProperty("atime", this.getLastAccessed());
+			dataset.addProperty("mtime", this.lastModified());
+			dataset.addProperty("ctime", -1L);
+			dataset.addProperty("hidden", this.isHidden());
+			dataset.addProperty("size", this.length());
+			dataset.addProperty("read", this.read);
+			dataset.addProperty("write", this.write);
+			dataset.addProperty("localowner", this.localowner);
+			dataset.addProperty("execute", this.execute);
+			JsonObject io = this.getIOMonitor().toJson();
+			dataset.add("io", io);
 			try {
-				dataset.addProperty("open", Boolean.toString(DedupFileStore.fileOpen(this)));
+				dataset.addProperty("open", DedupFileStore.fileOpen(this));
 			} catch (NullPointerException e) {
 				dataset.addProperty("open", Boolean.toString(false));
 			}
+			if (this.extendedAttrs.size() > 0) {
+				JsonObject jo = new JsonObject();
+				for (String key : this.extendedAttrs.keySet()) {
+					if(key.trim().length() > 0) {
+						jo.addProperty(key, this.extendedAttrs.get(key));
+					}
+				}
+				dataset.add("extendedattrs", jo);
+			}
 			dataset.addProperty("file-guid", this.getGUID());
 			dataset.addProperty("dedup-map-guid", this.getDfGuid());
-			dataset.addProperty("dedup", Boolean.toString(this.isDedup()));
-			dataset.addProperty("vmdk", Boolean.toString(this.isVmdk()));
+			dataset.addProperty("dedup", this.isDedup());
+			dataset.addProperty("vmdk", this.isVmdk());
 			if (symlink) {
-				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink", this.isSymlink());
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 		}
@@ -1552,13 +1569,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			File f = new File(this.getPath());
 			dataset.addProperty("type", "directory");
 			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-			dataset.addProperty("atime", Long.toString(attrs.lastAccessTime().toMillis()));
-			dataset.addProperty("mtime", Long.toString(attrs.lastModifiedTime().toMillis()));
-			dataset.addProperty("ctime", Long.toString(attrs.creationTime().toMillis()));
-			dataset.addProperty("hidden", Boolean.toString(f.isHidden()));
-			dataset.addProperty("size", Long.toString(attrs.size()));
+			dataset.addProperty("atime", attrs.lastAccessTime().toMillis());
+			dataset.addProperty("mtime", attrs.lastModifiedTime().toMillis());
+			dataset.addProperty("ctime", attrs.creationTime().toMillis());
+			dataset.addProperty("hidden", f.isHidden());
+			dataset.addProperty("size", attrs.size());
 			if (symlink) {
-				dataset.addProperty("symlink", Boolean.toString(this.isSymlink()));
+				dataset.addProperty("symlink", this.isSymlink());
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 		}

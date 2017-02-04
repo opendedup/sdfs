@@ -272,6 +272,7 @@ public class MetaFileImport implements Serializable {
 									p.hashloc = Longs.toByteArray(pos);
 									hpc = true;
 									exists = true;
+																	
 								}
 								if (!exists) {
 									hashes.add(p.hash);
@@ -279,6 +280,7 @@ public class MetaFileImport implements Serializable {
 									passEntries++;
 									levt.blocksImported = entries;
 								} else {
+									HCServiceProxy.claimKey(p.hash, pos, 1);
 									if (HashFunctionPool.max_hash_cluster == 1)
 										mf.getIOMonitor().addDulicateData(Main.CHUNK_LENGTH, true);
 								}

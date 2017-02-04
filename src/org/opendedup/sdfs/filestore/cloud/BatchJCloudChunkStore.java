@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-
-
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -100,7 +98,7 @@ import org.opendedup.collections.HashExistsException;
  * 
  */
 public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
-	
+
 	BlobStoreContext context = null;
 	BlobStore blobStore = null;
 	String bucketLocation = null;
@@ -255,10 +253,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			}
 		} else {
 			BlobMetadata omd = blobStore.blobMetadata(this.name, obj);
+
 			Map<String, String> md = new HashMap<String, String>();
-			Map<String, String> zk = omd.getUserMetadata();
-			for (String key : zk.keySet()) {
-				md.put(key.toLowerCase(), zk.get(key));
+			if (omd != null) {
+				Map<String, String> zk = omd.getUserMetadata();
+				for (String key : zk.keySet()) {
+					md.put(key.toLowerCase(), zk.get(key));
+				}
 			}
 			return md;
 
@@ -328,33 +329,25 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	/*
-	@SuppressWarnings("deprecation")
-	private void resetCurrentSize() throws IOException {
-		PageSet<? extends StorageMetadata> bul = null;
-		if (this.atmosStore)
-			bul = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("bucketinfo/"));
-		else if(this.b2Store)
-			bul = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/").maxResults(100));
-		else
-			bul = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/"));
-		long rcs = 0;
-		long rccs = 0;
-		String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-		for (StorageMetadata st : bul) {
-			if (!st.getName().equalsIgnoreCase(lbi)) {
-				Map<String, String> md = this.getMetaData(lbi);
-				try {
-					rcs += Long.parseLong(md.get("currentlength"));
-					rccs += Long.parseLong(md.get("compressedlength"));
-				} catch (Exception e) {
-
-				}
-			}
-		}
-		this.rcurrentCompressedSize.set(rccs);
-		this.rcurrentSize.set(rcs);
-	}
-	*/
+	 * @SuppressWarnings("deprecation") private void resetCurrentSize() throws
+	 * IOException { PageSet<? extends StorageMetadata> bul = null; if
+	 * (this.atmosStore) bul = blobStore.list(this.name,
+	 * ListContainerOptions.Builder.inDirectory("bucketinfo/")); else
+	 * if(this.b2Store) bul = blobStore.list(this.name,
+	 * ListContainerOptions.Builder.prefix("bucketinfo/").maxResults(100)); else
+	 * bul = blobStore.list(this.name,
+	 * ListContainerOptions.Builder.prefix("bucketinfo/")); long rcs = 0; long
+	 * rccs = 0; String lbi = "bucketinfo/" +
+	 * EncyptUtils.encHashArchiveName(Main.DSEID,
+	 * Main.chunkStoreEncryptionEnabled); for (StorageMetadata st : bul) { if
+	 * (!st.getName().equalsIgnoreCase(lbi)) { Map<String, String> md =
+	 * this.getMetaData(lbi); try { rcs +=
+	 * Long.parseLong(md.get("currentlength")); rccs +=
+	 * Long.parseLong(md.get("compressedlength")); } catch (Exception e) {
+	 * 
+	 * } } } this.rcurrentCompressedSize.set(rccs); this.rcurrentSize.set(rcs);
+	 * }
+	 */
 
 	@Override
 	public void init(Element config) throws IOException {
@@ -436,7 +429,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
 			// Do not wait between retries
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
-			
+
 			Location region = null;
 			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
@@ -487,7 +480,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			 */
 
 			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			Map<String, String> md = this.getMetaData(lbi);
+			Map<String, String> md = new HashMap<String, String>();
 			if (blobStore.blobExists(this.name, lbi)) {
 				md = this.getMetaData(lbi);
 			}
@@ -547,7 +540,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			}
 			HashBlobArchive.currentLength.set(sz);
 			HashBlobArchive.compressedLength.set(cl);
-			//this.resetCurrentSize();
+			// this.resetCurrentSize();
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -574,11 +567,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 		if (this.atmosStore)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("keys/"));
-		else if(this.b2Store)
+		else if (this.b2Store)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/").maxResults(100));
 		else
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/"));
-		//SDFSLogger.getLog().info("llsz=" + ips.size());
+		// SDFSLogger.getLog().info("llsz=" + ips.size());
 		iter = ips.iterator();
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
@@ -729,7 +722,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			else
 				blob = blobStore.blobBuilder("blocks/" + haName).userMetadata(metaData).payload(f).contentLength(csz)
 						.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
-			
+
 			if (csz >= MPSZ)
 				this.writeBlob(blob, true);
 			else
@@ -826,7 +819,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				Blob blob = st.getBlob(this.name, key);
 				BufferedInputStream in = new BufferedInputStream(blob.getPayload().openStream());
 				IOUtils.copy(in, os);
-				//SDFSLogger.getLog().info("read " +key +  " br=" + br);
+				// SDFSLogger.getLog().info("read " +key + " br=" + br);
 				os.flush();
 				IOUtils.closeQuietly(os);
 				blob.getPayload().release();
@@ -918,56 +911,56 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			SDFSLogger.getLog().info("doing Delete " + "keys/" + haName);
 			if (clustered) {
 				BlobStore bk = this.blobStore;
-				if(this.b2Store) {
+				if (this.b2Store) {
 					bk = bPool.borrowObject();
 				}
-				try{
-				String pth = this.getClaimName(id);
-				bk.removeBlob(this.name, pth);
-				removeMetaData(pth);
+				try {
+					String pth = this.getClaimName(id);
+					bk.removeBlob(this.name, pth);
+					removeMetaData(pth);
 
-				SDFSLogger.getLog().info("cheching Delete " + pth);
-				PageSet<? extends StorageMetadata> _ps = null;
-				
-				if (this.atmosStore)
-					_ps = bk.list(this.name, ListContainerOptions.Builder.inDirectory("claims/keys/" + haName));
-				else if(this.b2Store) {
-					_ps = bk.list(this.name, ListContainerOptions.Builder.prefix("claims/keys/" + haName).maxResults(100));
-				}
-				else
-					_ps = bk.list(this.name, ListContainerOptions.Builder.prefix("claims/keys/" + haName));
-				if (_ps.size() == 0 || this.atmosStore) {
-					metaData = this.getMetaData("blocks/" + haName);
-					bk.removeBlob(this.name, "keys/" + haName);
-					removeMetaData("keys/" + haName);
-					SDFSLogger.getLog().info("Deleting " + "keys/" + haName);
-					bk.removeBlob(this.name, "blocks/" + haName);
-					removeMetaData("blocks/" + haName);
-					SDFSLogger.getLog().info("Deleting " + "blocks/" + haName + " size=" + metaData.get("size")
-							+ " compressed size=" + metaData.get("compressedsize"));
+					SDFSLogger.getLog().info("cheching Delete " + pth);
+					PageSet<? extends StorageMetadata> _ps = null;
 
-					int _size = Integer.parseInt((String) metaData.get("size"));
-					int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-					HashBlobArchive.currentLength.addAndGet(-1 * _size);
-					HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
-					if (HashBlobArchive.currentLength.get() < 0)
-						HashBlobArchive.currentLength.set(0);
-					if (HashBlobArchive.compressedLength.get() < 0) {
-						HashBlobArchive.compressedLength.set(0);
+					if (this.atmosStore)
+						_ps = bk.list(this.name, ListContainerOptions.Builder.inDirectory("claims/keys/" + haName));
+					else if (this.b2Store) {
+						_ps = bk.list(this.name,
+								ListContainerOptions.Builder.prefix("claims/keys/" + haName).maxResults(100));
+					} else
+						_ps = bk.list(this.name, ListContainerOptions.Builder.prefix("claims/keys/" + haName));
+					if (_ps.size() == 0 || this.atmosStore) {
+						metaData = this.getMetaData("blocks/" + haName);
+						bk.removeBlob(this.name, "keys/" + haName);
+						removeMetaData("keys/" + haName);
+						SDFSLogger.getLog().info("Deleting " + "keys/" + haName);
+						bk.removeBlob(this.name, "blocks/" + haName);
+						removeMetaData("blocks/" + haName);
+						SDFSLogger.getLog().info("Deleting " + "blocks/" + haName + " size=" + metaData.get("size")
+								+ " compressed size=" + metaData.get("compressedsize"));
+
+						int _size = Integer.parseInt((String) metaData.get("size"));
+						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
+						HashBlobArchive.currentLength.addAndGet(-1 * _size);
+						HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
+						if (HashBlobArchive.currentLength.get() < 0)
+							HashBlobArchive.currentLength.set(0);
+						if (HashBlobArchive.compressedLength.get() < 0) {
+							HashBlobArchive.compressedLength.set(0);
+						}
+						SDFSLogger.getLog().info("Current DSE Size  size=" + HashBlobArchive.currentLength.get()
+								+ " compressed size=" + HashBlobArchive.compressedLength.get());
+					} else {
+						SDFSLogger.getLog().info("Not deleting becuase still claimed by " + _ps.size());
+						Iterator<? extends StorageMetadata> _di = _ps.iterator();
+						while (_di.hasNext()) {
+							SDFSLogger.getLog().info("claimed by " + _di.next().getName());
+						}
+
 					}
-					SDFSLogger.getLog().info("Current DSE Size  size=" + HashBlobArchive.currentLength.get()
-							+ " compressed size=" + HashBlobArchive.compressedLength.get());
-				} else {
-					SDFSLogger.getLog().info("Not deleting becuase still claimed by " + _ps.size());
-					Iterator<? extends StorageMetadata> _di = _ps.iterator();
-					while (_di.hasNext()) {
-						SDFSLogger.getLog().info("claimed by " + _di.next().getName());
-					}
 
-				}
-				
-				}finally {
-					if(this.b2Store && bk != null) {
+				} finally {
+					if (this.b2Store && bk != null) {
 						bPool.returnObject(bk);
 					}
 				}
@@ -1046,10 +1039,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
 								Main.chunkStoreEncryptionEnabled);
 						try {
-							
+
 							HashBlobArchive.removeCache(k.longValue());
 							if (this.deleteUnclaimed) {
-								DeleteObject obj = new DeleteObject(k.longValue(),this);
+								DeleteObject obj = new DeleteObject(k.longValue(), this);
 								executor.execute(obj);
 							} else {
 								// BlobMetadata dmd =
@@ -1382,8 +1375,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				PageSet<? extends StorageMetadata> _ps = null;
 				if (this.atmosStore)
 					_ps = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("claims/" + haName));
-				else if(this.b2Store)
-					_ps = blobStore.list(this.name, ListContainerOptions.Builder.prefix("claims/" + haName).maxResults(100));
+				else if (this.b2Store)
+					_ps = blobStore.list(this.name,
+							ListContainerOptions.Builder.prefix("claims/" + haName).maxResults(100));
 				else
 					_ps = blobStore.list(this.name, ListContainerOptions.Builder.prefix("claims/" + haName));
 				if (_ps.size() == 0 || this.atmosStore) {
@@ -1427,20 +1421,20 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@SuppressWarnings("deprecation")
 	public String getNextName(String pp, long id) throws IOException {
-		while(pp.startsWith("/"))
+		while (pp.startsWith("/"))
 			pp = pp.substring(1);
-		if(!pp.endsWith("/"))
-			pp +="/";
+		if (!pp.endsWith("/"))
+			pp += "/";
 		String pfx = pp;
-			
+
 		if (di == null) {
 			if (this.atmosStore)
 				ps = blobStore.list(this.name, ListContainerOptions.Builder.recursive().inDirectory(pp));
-			else if(this.b2Store)
+			else if (this.b2Store)
 				ps = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix(pp).maxResults(100));
 			else
 				ps = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix(pp));
-			//SDFSLogger.getLog().info("lsize=" + ps.size() + "pp=" + pp);
+			// SDFSLogger.getLog().info("lsize=" + ps.size() + "pp=" + pp);
 			di = ps.iterator();
 		}
 		if (!di.hasNext()) {
@@ -1452,9 +1446,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				if (this.atmosStore)
 					ps = blobStore.list(this.name,
 							ListContainerOptions.Builder.recursive().afterMarker(ps.getNextMarker()).inDirectory(pp));
-				else if(this.b2Store)
-					ps = blobStore.list(this.name,
-							ListContainerOptions.Builder.recursive().afterMarker(ps.getNextMarker()).prefix(pp).maxResults(100));
+				else if (this.b2Store)
+					ps = blobStore.list(this.name, ListContainerOptions.Builder.recursive()
+							.afterMarker(ps.getNextMarker()).prefix(pp).maxResults(100));
 				else
 					ps = blobStore.list(this.name,
 							ListContainerOptions.Builder.recursive().afterMarker(ps.getNextMarker()).prefix(pp));
@@ -1464,7 +1458,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		while (di.hasNext()) {
 			StorageMetadata bi = di.next();
 			try {
-				//SDFSLogger.getLog().info("name=" + bi.getName());
+				// SDFSLogger.getLog().info("name=" + bi.getName());
 				if (!bi.getName().endsWith(mdExt) && !bi.getName().endsWith("/")) {
 
 					Map<String, String> md = this.getMetaData(bi.getName());
@@ -1583,30 +1577,31 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				String creds = org.apache.commons.io.IOUtils.toString(is);
 				org.apache.commons.io.IOUtils.closeQuietly(is);
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
-				context = ContextBuilder.newBuilder(service).overrides(props)
-						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
+				context = ContextBuilder.newBuilder(service).overrides(props).credentialsSupplier(credentialSupplier)
+						.buildView(BlobStoreContext.class);
 
 			} else if (service.equals("google-cloud-storage")) {
 				props.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
 				props.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
 				props.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
-				context = ContextBuilder.newBuilder("s3").overrides(props)
-						.credentials(username,password).buildView(BlobStoreContext.class);
+				context = ContextBuilder.newBuilder("s3").overrides(props).credentials(username, password)
+						.buildView(BlobStoreContext.class);
 
 			} else if (service.equals("filesystem")) {
 				EncyptUtils.baseEncode = true;
-				//SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
-				//overrides.setProperty(FilesystemConstants.PROPERTY_BASEDIR, config.getAttribute("share-path"));
-				context = ContextBuilder.newBuilder("filesystem").overrides(props)
-						.buildView(BlobStoreContext.class);
+				// SDFSLogger.getLog().info("share-path=" +
+				// config.getAttribute("share-path"));
+				// overrides.setProperty(FilesystemConstants.PROPERTY_BASEDIR,
+				// config.getAttribute("share-path"));
+				context = ContextBuilder.newBuilder("filesystem").overrides(props).buildView(BlobStoreContext.class);
 				this.accessStore = true;
 			} else {
-				context = ContextBuilder.newBuilder(service).credentials(username, password)
-						.overrides(props).buildView(BlobStoreContext.class);
+				context = ContextBuilder.newBuilder(service).credentials(username, password).overrides(props)
+						.buildView(BlobStoreContext.class);
 			}
-			
+
 			blobStore = context.getBlobStore();
-			
+
 		} catch (Exception e) {
 			System.err.println("Cannot authenticate to provider");
 			e.printStackTrace();
@@ -1617,7 +1612,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	public static void main(String[] args) throws Exception {
 		BatchJCloudChunkStore st = new BatchJCloudChunkStore();
-		st.name ="datishpool0";
+		st.name = "datishpool0";
 		Properties p = new Properties();
 		p.setProperty("service-type", "b2");
 		st.checkAccess("a6ba900eebf7", "001c60230bbe493db4bbb8d5031a9707628790c7a9", p);
@@ -1650,19 +1645,19 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				if (this.atmosStore)
 					ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive()
 							.afterMarker(ips.getNextMarker()).inDirectory(prefix));
-				else if(this.b2Store)
-					ips = blobStore.list(this.name,
-							ListContainerOptions.Builder.recursive().afterMarker(ips.getNextMarker()).prefix(prefix).maxResults(100));
+				else if (this.b2Store)
+					ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive()
+							.afterMarker(ips.getNextMarker()).prefix(prefix).maxResults(100));
 				else
 					ips = blobStore.list(this.name,
 							ListContainerOptions.Builder.recursive().afterMarker(ips.getNextMarker()).prefix(prefix));
-				//SDFSLogger.getLog().info("lsize=" + ips.size());
+				// SDFSLogger.getLog().info("lsize=" + ips.size());
 				iter = ips.iterator();
 			}
 		}
 		while (iter.hasNext()) {
 			String fn = iter.next().getName();
-			//SDFSLogger.getLog().info("fn=" + fn);
+			// SDFSLogger.getLog().info("fn=" + fn);
 			if (!fn.endsWith(mdExt) && !fn.endsWith("/")) {
 				al.add(fn);
 			}
@@ -1812,7 +1807,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			PageSet<? extends StorageMetadata> bips = null;
 			if (this.atmosStore)
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("bucketinfo"));
-			else if(this.b2Store)
+			else if (this.b2Store)
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo").maxResults(100));
 			else
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo"));
@@ -1879,7 +1874,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 		if (this.atmosStore)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().inDirectory("claims"));
-		else if(this.b2Store)
+		else if (this.b2Store)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims").maxResults(100));
 		else
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims"));
@@ -1898,7 +1893,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					PageSet<? extends StorageMetadata> bips = null;
 					if (this.atmosStore)
 						bips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory(fldr));
-					else if(this.b2Store)
+					else if (this.b2Store)
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr).maxResults(100));
 					else
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr));
@@ -1942,39 +1937,40 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 
 	}
-	
+
 	private static class DeleteObject implements Runnable {
 		long id;
 		BatchJCloudChunkStore st;
+
 		private DeleteObject(long id, BatchJCloudChunkStore st) {
 			this.id = id;
 			this.st = st;
 		}
-		
+
 		@Override
 		public void run() {
-			int tries=0;
+			int tries = 0;
 			Exception e1 = null;
-			for(;;) {
-			try {
-				st.verifyDelete(id);
-				e1 = null;
-				break;
-			}catch(Exception e) {
-				e1 = e;
-				if(tries > 6)
+			for (;;) {
+				try {
+					st.verifyDelete(id);
+					e1 = null;
 					break;
-				else
-					tries++;
+				} catch (Exception e) {
+					e1 = e;
+					if (tries > 6)
+						break;
+					else
+						tries++;
+				}
+
 			}
-			
-			}
-			if(e1 != null) {
+			if (e1 != null) {
 				SDFSLogger.getLog().warn("unable to delete object " + id, e1);
 			}
-			
+
 		}
-		
+
 	}
 
 }

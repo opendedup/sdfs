@@ -1,17 +1,11 @@
 package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
-
-
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.opendedup.collections.ByteArrayWrapper;
-import org.opendedup.collections.KeyNotFoundException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
@@ -19,13 +13,6 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.StringUtils;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 /**
  * 
@@ -47,14 +34,13 @@ public class DedupFileStore {
 	 */
 	private static ConcurrentHashMap<String, SparseDedupFile> openFile = new ConcurrentHashMap<String, SparseDedupFile>();
 	
+	/*
 	private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup = CacheBuilder.newBuilder()
 			.maximumSize(100).concurrencyLevel(64)
 			.removalListener(new RemovalListener<ByteLongArrayWrapper, AtomicLong>() {
 				public void onRemoval(RemovalNotification<ByteLongArrayWrapper, AtomicLong> removal) {
 					ByteLongArrayWrapper bk = removal.getKey();
 					try {
-						//SDFSLogger.getLog().info("flushing");
-						
 						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
 							SDFSLogger.getLog().debug("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
 						}
@@ -68,7 +54,7 @@ public class DedupFileStore {
 					return new AtomicLong(0);
 				}
 			});
-
+*/
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -87,20 +73,24 @@ public class DedupFileStore {
 
 	}
 	
-	private static boolean gcRunning;
+	//private static boolean gcRunning;
 	static ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 	public static void gcRunning(boolean running) {
+		/*
 		gcLock.writeLock().lock();
 		try{
+			
 		if(running) {
 			gcRunning = true;
 			keyLookup.invalidateAll();
 		}
+		
 		else
 			gcRunning = false;
 		}finally {
 			gcLock.writeLock().unlock();
 		}
+		*/
 		
 	}
 
@@ -165,16 +155,16 @@ public class DedupFileStore {
 			else {
 				gcLock.readLock().lock();
 				try {
-				if(gcRunning)
+				//if(gcRunning)
 					return HCServiceProxy.claimKey(entry, val,1);
-				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
-				try {
-					keyLookup.get(bl).decrementAndGet();
-					return true;
-				} catch (ExecutionException e) {
-					SDFSLogger.getLog().error("unable to increment", e);;
-					return false;
-				}
+				//ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
+				//try {
+					//keyLookup.get(bl).decrementAndGet();
+					//return true;
+				//} catch (ExecutionException e) {
+					//SDFSLogger.getLog().error("unable to increment", e);;
+					//return false;
+				//}
 				}finally {
 					gcLock.readLock().unlock();
 				}
@@ -342,9 +332,11 @@ public class DedupFileStore {
 				}
 			}
 		} 
+		/*
 		if(Main.refCount) {
 			keyLookup.invalidateAll();
 		}
+		*/
 
 	}
 
@@ -365,51 +357,10 @@ public class DedupFileStore {
 		}
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("write caches flushed");
+		/*
 		if(Main.refCount) {
 			keyLookup.invalidateAll();
 		}
-	}
-	
-	private static class ByteLongArrayWrapper
-	{
-	    private final byte[] data;
-	    private final long val;
-
-	    public ByteLongArrayWrapper(byte[] data,long val)
-	    {
-	        if (data == null)
-	        {
-	            throw new NullPointerException();
-	        }
-	        this.val = val;
-	        this.data = data;
-	    }
-	    
-	    public byte [] getData() {
-	    	return this.data;
-	    }
-	    
-	    public long getVal() {
-	    	return this.val;
-	    }
-
-	    @Override
-	    public boolean equals(Object other)
-	    {
-	        if (!(other instanceof ByteArrayWrapper))
-	        {
-	            return false;
-	        }
-	        if(Arrays.equals(data, ((ByteLongArrayWrapper)other).data) && val ==((ByteLongArrayWrapper)other).val )
-	        	return true;
-	        else
-	        	return false;
-	    }
-
-	    @Override
-	    public int hashCode()
-	    {
-	        return Arrays.hashCode(data);
-	    }
+		*/
 	}
 }

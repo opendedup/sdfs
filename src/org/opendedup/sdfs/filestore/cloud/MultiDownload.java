@@ -123,6 +123,7 @@ public class MultiDownload implements Runnable {
 						st = md.getNextKey();
 					}catch(Exception e) {
 						SDFSLogger.getLog().error("error getting string result for " + st, e);
+						st = md.getNextKey();
 					}
 				}
 			} catch (Exception e) {

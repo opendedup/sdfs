@@ -243,6 +243,24 @@ public class SDFSCmdline {
 						Boolean.parseBoolean(vals[2]));
 				System.exit(0);
 			}
+			if(cmd.hasOption("set-attribute")) {
+				String file = cmd.getOptionValue("file-path");
+				String[] vals = cmd.getOptionValues("set-attribute");
+				if (vals.length != 2) {
+					System.err
+							.println("name and value are required options");
+					System.exit(-1);
+				}
+				ProcessSetFileAttribute.runCmd(file,vals[0],vals[1]);
+				System.exit(0);
+			}
+			
+			if(cmd.hasOption("delete-attribute")) {
+				String file = cmd.getOptionValue("file-path");
+				String name = cmd.getOptionValue("delete-attribute");
+				ProcessSetFileAttribute.runCmd(file,name,null);
+				System.exit(0);
+			}
 
 			if (cmd.hasOption("partition-update")) {
 				String[] vals = cmd.getOptionValues("partition-update");
@@ -561,6 +579,18 @@ public class SDFSCmdline {
 						"Creates a partition inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
 				.hasArgs(3)
 				.withArgName("device-name size start-on-vol-startup").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("set-attribute")
+				.withDescription(
+						"Sets an attribute for a file \n e.g. --file-path=afile --set-attribute name value")
+				.hasArgs(2)
+				.withArgName("name value").create());
+		options.addOption(OptionBuilder
+				.withLongOpt("delete-attribute")
+				.withDescription(
+						"deletes an attribute for a file \n e.g. --file-path=afile --delete-attribute name")
+				.hasArg()
+				.withArgName("name").create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-rm")
 				.withDescription(

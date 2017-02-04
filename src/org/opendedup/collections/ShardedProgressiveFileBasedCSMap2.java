@@ -63,7 +63,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap {
+public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractHashesMap {
 	// RandomAccessFile kRaf = null;
 	private long size = 0;
 	// private final ReentrantLock klock = new ReentrantLock();
@@ -79,7 +79,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
 	private int hashTblSz = 10_000_000;
-	private ShardedFileByteArrayLongMap activeWMap = null;
+	private ShardedFileByteArrayLongMap2 activeWMap = null;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
@@ -215,8 +215,8 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 
 	}
 
-	private ShardedFileByteArrayLongMap createWriteMap() throws IOException {
-		ShardedFileByteArrayLongMap activeWMap = null;
+	private ShardedFileByteArrayLongMap2 createWriteMap() throws IOException {
+		ShardedFileByteArrayLongMap2 activeWMap = null;
 		try {
 			String guid = null;
 			boolean written = false;
@@ -225,7 +225,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
-					activeWMap = new ShardedFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
+					activeWMap = new ShardedFileByteArrayLongMap2(fileName + "-" + guid, this.hashTblSz);
 					activeWMap.activate();
 					activeWMap.setUp();
 					this.maps.add(activeWMap);
@@ -239,7 +239,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		}
 	}
 
-	private ShardedFileByteArrayLongMap getWriteMap() throws IOException {
+	private ShardedFileByteArrayLongMap2 getWriteMap() throws IOException {
 		if (activeWMap.isFull() || !activeWMap.isActive()) {
 			synchronized (this) {
 				if (activeWMap.isFull() || !activeWMap.isActive()) {
@@ -452,7 +452,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 						m.iterInit();
 						KVPair p = m.nextKeyValue();
 						while (p != null) {
-							ShardedFileByteArrayLongMap _m = this.getWriteMap();
+							ShardedFileByteArrayLongMap2 _m = this.getWriteMap();
 							try {
 								_m.put(p.key, p.value, p.loc);
 								p = m.nextKeyValue();
@@ -602,7 +602,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 						m.iterInit();
 						KVPair p = m.nextKeyValue();
 						while (p != null) {
-							ShardedFileByteArrayLongMap _m = this.getWriteMap();
+							ShardedFileByteArrayLongMap2 _m = this.getWriteMap();
 							try {
 								_m.put(p.key, p.value);
 								p = m.nextKeyValue();
@@ -725,10 +725,10 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				int sz = NextPrime.getNextPrimeI((int) (this.hashTblSz));
 				// SDFSLogger.getLog().debug("will create byte array of size "
 				// + sz + " propsize was " + propsize);
-				ShardedFileByteArrayLongMap m = null;
+				ShardedFileByteArrayLongMap2 m = null;
 				String pth = files[i].getPath();
 				String pfx = pth.substring(0, pth.length() - 5);
-				m = new ShardedFileByteArrayLongMap(pfx, sz);
+				m = new ShardedFileByteArrayLongMap2(pfx, sz);
 				long mep = m.setUp();
 				if (mep > endPos)
 					endPos = mep;
@@ -832,7 +832,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 
 				File f = new File(fileName + "-" + guid + ".keys");
 				if (!f.exists()) {
-					activeWMap = new ShardedFileByteArrayLongMap(fileName + "-" + guid, this.hashTblSz);
+					activeWMap = new ShardedFileByteArrayLongMap2(fileName + "-" + guid, this.hashTblSz);
 					activeWMap.activate();
 					activeWMap.setUp();
 
@@ -918,7 +918,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		// this.flushFullBuffer();
 		Lock l = gcLock.readLock();
 		l.lock();
-		ShardedFileByteArrayLongMap bm = null;
+		ShardedFileByteArrayLongMap2 bm = null;
 		try {
 			// long tm = System.currentTimeMillis();
 			AbstractShard rm = this.getReadMap(cm.getHash(),false);
@@ -1140,7 +1140,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	}
 
 	public static void main(String[] args) throws Exception {
-		ShardedProgressiveFileBasedCSMap b = new ShardedProgressiveFileBasedCSMap();
+		ShardedProgressiveFileBasedCSMap2 b = new ShardedProgressiveFileBasedCSMap2();
 		b.init(1000000, "/opt/sdfs/hash", .001);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();

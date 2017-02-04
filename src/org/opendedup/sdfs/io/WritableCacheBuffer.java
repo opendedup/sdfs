@@ -382,7 +382,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public long getEndPosition() {
 		return endPosition;
 	}
-
 	private void writeBlock(byte[] b, int pos) throws IOException, DataArchivedException {
 		try {
 			this.initBuffer();
@@ -393,7 +392,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} catch (InterruptedException e) {
 			throw new IOException(e);
 		}
-
 	}
 
 	

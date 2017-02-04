@@ -30,6 +30,8 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.gson.JsonObject;
+
 public class IOMonitor implements java.io.Serializable {
 
 	private static final long serialVersionUID = 6582549274733666474L;
@@ -238,6 +240,34 @@ public class IOMonitor implements java.io.Serializable {
 				Long.toString(this.bps.get() / (1024 * 1024)));
 		root.setAttribute("io-qos", Integer.toString(this.qos));
 		root.setAttribute("io-profile", this.iopProfile);
+		return root;
+	}
+	
+	public JsonObject toJson() {
+		JsonObject root = new JsonObject();
+		root.addProperty("virtual-bytes-written",
+				this.virtualBytesWritten.get());
+		root.addProperty("actual-bytes-written",
+				this.actualBytesWritten.get());
+		root.addProperty("bytes-read",this.bytesRead.get());
+		root.addProperty("duplicate-blocks",
+				this.duplicateBlocks.get());
+		root.addProperty("readops", this.readOperations.get());
+		root.addProperty("writeops",
+				this.writeOperations.get());
+		root.addProperty("max-readops",
+				this.riops.intValue());
+		root.addProperty("max-writeops",
+				this.wiops.intValue());
+		root.addProperty("max-iops", this.iops.intValue());
+		root.addProperty("max-readmbps",
+				this.rbps.get() / (1024 * 1024));
+		root.addProperty("max-writembps",
+				this.wbps.get() / (1024 * 1024));
+		root.addProperty("max-mbps",
+				this.bps.get() / (1024 * 1024));
+		root.addProperty("io-qos", Integer.toString(this.qos));
+		root.addProperty("io-profile", this.iopProfile);
 		return root;
 	}
 

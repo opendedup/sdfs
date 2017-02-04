@@ -39,6 +39,7 @@ public class Finger implements Runnable {
 	public int start;
 	public int len;
 	public int ap;
+	public boolean noPersist;
 	public AsyncChunkWriteActionListener l;
 
 	public void run() {
@@ -50,6 +51,7 @@ public class Finger implements Runnable {
 			else
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
 						this.hl.getHashLocs());
+			
 			l.commandResponse(this);
 
 		} catch (Throwable e) {

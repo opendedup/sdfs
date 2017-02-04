@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1930,15 +1931,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					s3Service.deleteObject(this.name, blb);
 					if (this.simpleMD)
 						s3Service.deleteObject(this.name, blb + mdExt);
-					SDFSLogger.getLog().info("deleted " + "claims/" + haName + "/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
-					String vid = "claims/volumes/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + "/"
-							+ haName;
-					s3Service.deleteObject(this.name, vid);
-					if (this.simpleMD)
-						s3Service.deleteObject(this.name, vid + mdExt);
+					SDFSLogger.getLog().info("deleted " + "claims/" + haName + "/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled) + " object claims=" +ol.getObjectSummaries().size());
 					if (ol.getObjectSummaries().size() == 0) {
 						s3Service.deleteObject(this.name, haName);
 						if (this.simpleMD)
@@ -1982,7 +1977,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} catch (Exception e1) {
 			throw new IOException(e1);
 		}
-
 	}
 
 	ObjectListing nck = null;

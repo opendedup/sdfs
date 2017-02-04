@@ -1,6 +1,7 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,6 +21,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.opendedup.sdfs.io.AbstractStreamMatcher;
 
 public class Config {
 
@@ -63,6 +65,13 @@ public class Config {
 			Main.hashDBStore = locations.getAttribute("hash-db-store");
 			Element cbe = (Element) doc.getElementsByTagName("chunk-store")
 					.item(0);
+			if( doc.getElementsByTagName("matcher").getLength() > 0) {
+				Element matcher = (Element) doc.getElementsByTagName("matcher")
+						.item(0);
+				Main.matcher= (AbstractStreamMatcher) Class
+						.forName(matcher.getAttribute("class")).newInstance();
+				Main.matcher.initialize(matcher);
+			}
 			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
 			if (cbe.hasAttribute("chunkstore-class")) {
 				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
@@ -513,6 +522,13 @@ public class Config {
 				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
 				Main.cloudChunkStore = Boolean.parseBoolean(azure
 						.getAttribute("enabled"));
+			}
+			if( doc.getElementsByTagName("matcher").getLength() > 0) {
+				Element matcher = (Element) doc.getElementsByTagName("matcher")
+						.item(0);
+				Main.matcher= (AbstractStreamMatcher) Class
+						.forName(matcher.getAttribute("class")).newInstance();
+				Main.matcher.initialize(matcher);
 			}
 
 		}

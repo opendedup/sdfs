@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
+import org.opendedup.sdfs.io.AbstractStreamMatcher;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
@@ -31,6 +32,7 @@ public class Main {
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
+	public static AbstractStreamMatcher matcher = null;
 
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
@@ -101,7 +103,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.3.7";
+	public static String version = "3.3.8";
 
 	public static boolean readAhead = false;
 
@@ -123,7 +125,7 @@ public class Main {
 
 	// public static String hashesDBClass =
 	// "com.opendedup.collections.FileBasedCSMap";
-	public static String hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap";
+	public static String hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
