@@ -117,7 +117,11 @@ public class MgmtWebServer implements Container {
 						break;
 					case "info":
 						try {
-							Element msg = new GetAttributes().getResult(cmdOptions, file);
+							boolean shortList = false;
+							if(request.getQuery().containsKey("short")) {
+								shortList  = Boolean.parseBoolean(request.getQuery().get("short"));
+							}
+							Element msg = new GetAttributes().getResult(cmdOptions, file,shortList);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							doc.adoptNode(msg);
@@ -132,9 +136,9 @@ public class MgmtWebServer implements Container {
 						try {
 							String name = request.getQuery().get("name");
 							String value = null;
-							if(request.getQuery().containsKey("value"))
+							if (request.getQuery().containsKey("value"))
 								value = request.getQuery().get("value");
-							SetFileAttribute.getResult(file,name,value);
+							SetFileAttribute.getResult(file, name, value);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 						} catch (IOException e) {
@@ -977,7 +981,7 @@ public class MgmtWebServer implements Container {
 					body.println("invalid path " + reqPath.getPath());
 					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
 					body.close();
-				} else if (Main.matcher !=null && request.getTarget().startsWith(Main.matcher.getWPath())) {
+				} else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
@@ -990,7 +994,7 @@ public class MgmtWebServer implements Container {
 					SDFSLogger.getLog().info("pth=" + pth);
 					long start = Long.parseLong(guid.split("/")[1]);
 					pth = URLDecoder.decode(pth, "UTF-8");
-					Main.matcher.getResult(pth,start,response);
+					Main.matcher.getResult(pth, start, response);
 				} else if (request.getTarget().startsWith(METADATA_PATH)) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
@@ -1018,14 +1022,23 @@ public class MgmtWebServer implements Container {
 
 					path = path.split("\\?")[0];
 					path = URLDecoder.decode(path, "UTF-8");
-					long time = System.currentTimeMillis();
-					response.setContentType("application/json");
-					response.setValue("Server", "SDFS Management Server");
-					response.setDate("Date", time);
-					response.setDate("Last-Modified", time);
-					PrintStream body = response.getPrintStream();
-					body.println(GetJSONAttributes.getResult(path));
-					body.close();
+					File f = new File(path);
+					if (!f.exists()) {
+						response.setCode(404);
+						PrintStream body = response.getPrintStream();
+						body.println("could not find path " + f.getPath());
+						SDFSLogger.getLog().error("could not find path " + f.getPath());
+						body.close();
+					} else {
+						long time = System.currentTimeMillis();
+						response.setContentType("application/json");
+						response.setValue("Server", "SDFS Management Server");
+						response.setDate("Date", time);
+						response.setDate("Last-Modified", time);
+						PrintStream body = response.getPrintStream();
+						body.println(GetJSONAttributes.getResult(path));
+						body.close();
+					}
 				} else if (request.getTarget().startsWith(MAPDATA_PATH)) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
@@ -1187,9 +1200,9 @@ public class MgmtWebServer implements Container {
 			Map<String, Service> routes = new HashMap<String, Service>();
 			routes.put("/metadatasocket", new MetaDataUpdate());
 			routes.put("/ddbsocket", new DDBUpdate());
-			if(Main.matcher != null) {
+			if (Main.matcher != null) {
 				Main.matcher.start();
-				routes.put(Main.matcher.getWSPath(),Main.matcher);
+				routes.put(Main.matcher.getWSPath(), Main.matcher);
 			}
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());

@@ -19,8 +19,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,6 +33,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -193,9 +193,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void addXAttribute(String name, String value) {
 		addXAttribute(name, value, true);
-		
-	}
 
+	}
 	/**
 	 * adds a posix extended attribute
 	 * 
@@ -207,19 +206,32 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void addXAttribute(String name, String value, boolean propigateEvent) {
-		extendedAttrs.put(name, value);
-		this.dirty = true;
-		eventBus.post(new MMetaUpdated(this,name,value));
-		this.unmarshal();
-	}
-	
-	public void removeXAttribute(String name) {
-		extendedAttrs.remove(name);
-		this.dirty = true;
-		eventBus.post(new MMetaUpdated(this,name,null));
-		this.unmarshal();
+		this.writeLock.lock();
+		try {
+			extendedAttrs.put(name, value);
+			if(propigateEvent) {
+				this.dirty = true;
+				eventBus.post(new MMetaUpdated(this, name, value));
+				this.unmarshal();
+			} else {
+				this.writeFile(false);
+			}
+		} finally {
+			this.writeLock.unlock();
+		}
 	}
 
+	public void removeXAttribute(String name) {
+		this.writeLock.lock();
+		try {
+			extendedAttrs.remove(name);
+			this.dirty = true;
+			eventBus.post(new MMetaUpdated(this, name, null));
+			this.unmarshal();
+		} finally {
+			this.writeLock.unlock();
+		}
+	}
 
 	public void setBackingFile(String file) {
 		this.backingFile = file;
@@ -394,7 +406,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public static MetaDataDedupFile getFile(String path) {
-
 		File f = new File(path);
 		MetaDataDedupFile mf = null;
 		Path p = Paths.get(path);
@@ -809,7 +820,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	}
 
-	private ReentrantLock writeLock = new ReentrantLock();
+	public ReentrantLock writeLock = new ReentrantLock();
 
 	/**
 	 * Writes the stub for this file to disk. Stubs are pointers written to a
@@ -818,7 +829,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if written
 	 */
-	private boolean writeFile() {
+	private boolean writeFile(boolean notify) {
 		writeLock.lock();
 		ObjectOutputStream out = null;
 		try {
@@ -833,8 +844,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					out.writeObject(this);
 					out.flush();
 					out.close();
-
-					eventBus.post(new MFileWritten(this));
+					if(notify)
+						eventBus.post(new MFileWritten(this,this.dirty));
 					this.dirty = false;
 
 				} catch (Exception e) {
@@ -854,7 +865,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return true if serialized
 	 */
 	public boolean unmarshal() {
-		return this.writeFile();
+		return this.writeFile(true);
 	}
 
 	/**
@@ -1034,7 +1045,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (rn) {
 					this.path = dest;
 				}
-				eventBus.post(new MFileWritten(this));
+				eventBus.post(new MFileWritten(this,this.dirty));
 				return rn;
 			} else {
 				// MetaFileStore.removeMetaFile(dest, true);
@@ -1320,9 +1331,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
-		if (!propigateEvent)
-			this.dirty = false;
-		this.unmarshal();
+		this.dirty = true;
+		this.writeFile(propigateEvent);
 	}
 
 	/**
@@ -1441,7 +1451,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.localowner = in.readBoolean();
 				}
-				if(in.available() > 0) {
+				if (in.available() > 0) {
 					this.retentionLock = in.readLong();
 				}
 				/*
@@ -1521,8 +1531,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public JsonObject toJSON(boolean compact) throws IOException {
+
 		JsonObject dataset = new JsonObject();
-		dataset.addProperty("file", this.getName());
+		dataset.addProperty("file.name", this.getName());
+		String fl = this.getPath().substring(Main.volume.getPath().length());
+		while(fl.startsWith("/") || fl.startsWith("\\"))
+			fl =fl.substring(1, fl.length());
+		dataset.addProperty("file.path", fl);
 		dataset.addProperty("mtime", this.lastModified());
 		dataset.addProperty("volumeid", Long.toString(Main.volume.getSerialNumber()));
 		if (this.isFile())
@@ -1530,9 +1545,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		else if (this.isDirectory())
 			dataset.addProperty("type", "dir");
 		if (!compact && this.isFile()) {
-			dataset.addProperty("atime", this.getLastAccessed());
-			dataset.addProperty("mtime", this.lastModified());
-			dataset.addProperty("ctime", -1L);
+			dataset.addProperty("atimeL", this.getLastAccessed());
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+			Instant instant = Instant.ofEpochMilli(this.getLastAccessed());
+			dataset.addProperty("atime", formatter.format(instant));
+			instant = Instant.ofEpochMilli(this.lastModified());
+			dataset.addProperty("mtimeL", this.lastModified());
+			dataset.addProperty("mtime", formatter.format(instant));
+			instant = Instant.ofEpochMilli(0);
+			dataset.addProperty("ctimeL", -1L);
+			dataset.addProperty("ctime", formatter.format(instant));
 			dataset.addProperty("hidden", this.isHidden());
 			dataset.addProperty("size", this.length());
 			dataset.addProperty("read", this.read);
@@ -1549,15 +1571,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.extendedAttrs.size() > 0) {
 				JsonObject jo = new JsonObject();
 				for (String key : this.extendedAttrs.keySet()) {
-					if(key.trim().length() > 0) {
+					if (key.trim().length() > 0) {
 						jo.addProperty(key, this.extendedAttrs.get(key));
 					}
 				}
 				dataset.add("extendedattrs", jo);
 			}
-			dataset.addProperty("file-guid", this.getGUID());
-			dataset.addProperty("dedup-map-guid", this.getDfGuid());
-			dataset.addProperty("dedup", this.isDedup());
+			dataset.addProperty("file.guid", this.getGUID());
+			dataset.addProperty("dedupe.map.guid", this.getDfGuid());
+			dataset.addProperty("dedupe", this.isDedup());
 			dataset.addProperty("vmdk", this.isVmdk());
 			if (symlink) {
 				dataset.addProperty("symlink", this.isSymlink());
@@ -1576,7 +1598,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("size", attrs.size());
 			if (symlink) {
 				dataset.addProperty("symlink", this.isSymlink());
-				dataset.addProperty("symlink-path", this.getSymlinkPath());
+				dataset.addProperty("symlink.path", this.getSymlinkPath());
 			}
 		}
 		return dataset;
@@ -1586,6 +1608,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		Element root = doc.createElement("file-info");
 
 		root.setAttribute("file-name", URLEncoder.encode(this.getName(), "UTF-8"));
+		String fl = this.getPath().substring(Main.volume.getPath().length());
+		while(fl.startsWith("/") || fl.startsWith("\\"))
+			fl =fl.substring(1, fl.length());
+		root.setAttribute("file-path", fl);
 		root.setAttribute("sdfs-path", URLEncoder.encode(this.getPath(), "UTF-8"));
 		if (this.isFile()) {
 			root.setAttribute("type", "file");
@@ -1610,10 +1636,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (!this.extendedAttrs.isEmpty()) {
 				Element ear = doc.createElement("extended-attributes");
 				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
-
+					
 					Element ar = doc.createElement("extended-attribute");
-					ar.setAttribute("name", en.getKey());
-					ar.setAttribute("value", en.getValue());
+					if(en.getKey().length() > 0) {
+						ar.setAttribute("name", en.getKey());
+						ar.setAttribute("value", en.getValue());
+					}
 					ear.appendChild(ar);
 				}
 				root.appendChild(ear);

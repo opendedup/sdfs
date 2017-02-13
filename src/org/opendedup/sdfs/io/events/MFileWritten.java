@@ -29,10 +29,12 @@ import com.google.gson.JsonObject;
 public class MFileWritten extends GenericEvent {
 	private static final int pl = Main.volume.getPath().length();
 	public MetaDataDedupFile mf;
+	public boolean dirty;
 
-	public MFileWritten(MetaDataDedupFile f) {
+	public MFileWritten(MetaDataDedupFile f,boolean dirty) {
 		super();
 		this.mf = f;
+		this.dirty = dirty;
 	}
 
 	public String toJSON() {

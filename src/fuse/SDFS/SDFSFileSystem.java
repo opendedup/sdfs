@@ -376,7 +376,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 			try {
 				MetaFileStore.mkDir(f, mode);
-				eventBus.post(new MFileWritten(MetaFileStore.getMF(f)));
+				eventBus.post(new MFileWritten(MetaFileStore.getMF(f),true));
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("error while making dir " + path, e);
 				throw new FuseException("access denied for " + path).initErrno(Errno.EACCES);
@@ -653,7 +653,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			// "symlink " + src.getPath() + " to " + dst.getPath());
 			try {
 				Files.createSymbolicLink(dstP, srcP);
-				eventBus.post(new MFileWritten(MetaFileStore.getMF(dst.getPath())));
+				eventBus.post(new MFileWritten(MetaFileStore.getMF(dst.getPath()),true));
 			} catch (IOException e) {
 
 				SDFSLogger.getLog().error("error linking " + from + " to " + to, e);
@@ -752,7 +752,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				if (mf.isFile())
 					mf.setDirty(true);
-				eventBus.post(new MFileWritten(mf));
+				eventBus.post(new MFileWritten(mf,true));
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable change utime path " + path, e);
@@ -997,7 +997,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					SDFSLogger.getLog().debug("set " + name + " to " + valStr);
 				if (mf.isFile())
 					mf.setDirty(true);
-				eventBus.post(new MFileWritten(mf));
 
 			}
 		} catch (Exception e) {
@@ -1059,7 +1058,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				mf.addXAttribute(name, valStr);
 				if (mf.isFile())
 					mf.setDirty(true);
-				eventBus.post(new MFileWritten(mf));
+				eventBus.post(new MFileWritten(mf,true));
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting exattr for " + path, e);

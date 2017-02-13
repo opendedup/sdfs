@@ -1039,7 +1039,6 @@ public class SparseDedupFile implements DedupFile {
 				}
 				this.bdb = null;
 				this.closed = true;
-
 				
 			}
 			if (this.toOccured) {

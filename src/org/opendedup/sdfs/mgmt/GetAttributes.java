@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -13,7 +14,7 @@ import org.w3c.dom.Element;
 
 public class GetAttributes {
 
-	public Element getResult(String cmd, String file) throws IOException {
+	public Element getResult(String cmd, String file,boolean shortList) throws IOException {
 		if(file.equals("lastClosedFile")) {
 			try {
 				MetaDataDedupFile mf = CloseFile.lastClosedFile;
@@ -40,10 +41,21 @@ public class GetAttributes {
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element root = doc.getDocumentElement();
 				for (int i = 0; i < files.length; i++) {
+					if(shortList) {
+						Element fl = doc.createElement("file-info");
+						fl.setAttribute("file-name", URLEncoder.encode(files[i].getName(), "UTF-8"));
+						if(files[i].isDirectory()) {
+							fl.setAttribute("type", "directory");
+						}else {
+							fl.setAttribute("type", "file");
+						}
+						root.appendChild(fl);
+					}else {
 					MetaDataDedupFile mf = MetaFileStore.getMF(files[i]
 							.getPath());
 					Element fe = mf.toXML(doc);
 					root.appendChild(fe);
+					}
 				}
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {

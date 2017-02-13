@@ -245,29 +245,29 @@ public class IOMonitor implements java.io.Serializable {
 	
 	public JsonObject toJson() {
 		JsonObject root = new JsonObject();
-		root.addProperty("virtual-bytes-written",
+		root.addProperty("virtual.bytes.written",
 				this.virtualBytesWritten.get());
-		root.addProperty("actual-bytes-written",
+		root.addProperty("actual.bytes.written",
 				this.actualBytesWritten.get());
-		root.addProperty("bytes-read",this.bytesRead.get());
-		root.addProperty("duplicate-blocks",
+		root.addProperty("bytes.read",this.bytesRead.get());
+		root.addProperty("duplicate.blocks",
 				this.duplicateBlocks.get());
 		root.addProperty("readops", this.readOperations.get());
 		root.addProperty("writeops",
 				this.writeOperations.get());
-		root.addProperty("max-readops",
+		root.addProperty("max.readops",
 				this.riops.intValue());
-		root.addProperty("max-writeops",
+		root.addProperty("max.writeops",
 				this.wiops.intValue());
-		root.addProperty("max-iops", this.iops.intValue());
-		root.addProperty("max-readmbps",
+		root.addProperty("max.iops", this.iops.intValue());
+		root.addProperty("max.readmbps",
 				this.rbps.get() / (1024 * 1024));
-		root.addProperty("max-writembps",
+		root.addProperty("max.writembps",
 				this.wbps.get() / (1024 * 1024));
-		root.addProperty("max-mbps",
+		root.addProperty("max.mbps",
 				this.bps.get() / (1024 * 1024));
-		root.addProperty("io-qos", Integer.toString(this.qos));
-		root.addProperty("io-profile", this.iopProfile);
+		root.addProperty("io.qos", Integer.toString(this.qos));
+		root.addProperty("io.profile", this.iopProfile);
 		return root;
 	}
 

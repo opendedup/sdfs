@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -63,8 +61,7 @@ public class FileReplicationService {
 	private static final int sl = Main.dedupDBStore.length();
 	private static final int maxTries = 3;
 	private static final String DM = "/ThisIsADirectoryMarkerDoNotDelete";
-	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(
-			2);
+	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
 	public static FileReplicationService service = null;
 
@@ -87,8 +84,7 @@ public class FileReplicationService {
 		service = this;
 	}
 
-	private MetaDataDedupFile downloadMetaFile(String fname, File to)
-			throws Exception {
+	private MetaDataDedupFile downloadMetaFile(String fname, File to) throws Exception {
 		int tries = 0;
 		for (;;) {
 			to.delete();
@@ -96,19 +92,14 @@ public class FileReplicationService {
 				MetaFileStore.removedCachedMF(to.getPath());
 				sync.downloadFile(fname, to, "files");
 				MetaDataDedupFile mf = MetaFileStore.getMF(to);
-				Main.volume.addDuplicateBytes(mf.getIOMonitor()
-						.getDuplicateBlocks()
-						+ mf.getIOMonitor().getActualBytesWritten(), true);
-				Main.volume.addVirtualBytesWritten(mf.getIOMonitor()
-						.getVirtualBytesWritten(), true);
-				SDFSLogger.getLog().debug(
-						"downloaded " + to.getPath() + " sz=" + to.length());
+				Main.volume.addDuplicateBytes(
+						mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
+				Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
+				SDFSLogger.getLog().debug("downloaded " + to.getPath() + " sz=" + to.length());
 				return mf;
 			} catch (Exception e) {
 				if (tries > maxTries) {
-					SDFSLogger.getLog().error(
-							"unable to sync file " + fname + " to "
-									+ to.getPath(), e);
+					SDFSLogger.getLog().error("unable to sync file " + fname + " to " + to.getPath(), e);
 					throw e;
 				} else
 					tries++;
@@ -117,23 +108,20 @@ public class FileReplicationService {
 	}
 
 	private File downloadDDBFile(String guid) throws Exception {
-		String sfp = Main.dedupDBStore + File.separator + guid.substring(0, 2)
-				+ File.separator + guid + File.separator + guid + ".map";
+		String sfp = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid + File.separator
+				+ guid + ".map";
 		File f = new File(sfp);
 		int tries = 0;
 		for (;;) {
 			f.delete();
 			try {
 				sync.downloadFile(sfp.substring(sl), f, "ddb");
-				SDFSLogger.getLog().debug(
-						"downloaded " + f.getPath() + " sz=" + f.length());
-				
+				SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
+
 				return f;
 			} catch (Exception e) {
 				if (tries > maxTries) {
-					SDFSLogger.getLog().error(
-							"unable to sync ddb " + sfp + " to " + f.getPath(),
-							e);
+					SDFSLogger.getLog().error("unable to sync ddb " + sfp + " to " + f.getPath(), e);
 					throw e;
 				} else
 					tries++;
@@ -144,7 +132,7 @@ public class FileReplicationService {
 
 	public static MetaDataDedupFile getMF(String fname) throws Exception {
 		File f = new File(Main.volume.getPath() + File.separator + fname);
-		fname = fname.replaceAll( Matcher.quoteReplacement("\\"),"/");
+		fname = fname.replaceAll(Matcher.quoteReplacement("\\"), "/");
 		MetaDataDedupFile mf = service.downloadMetaFile(fname, f);
 		while (fname.startsWith(File.separator))
 			fname = fname.substring(1);
@@ -157,11 +145,11 @@ public class FileReplicationService {
 		service.sync.checkoutFile("ddb/" + fname);
 		return m;
 	}
-	
+
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
 		return service.sync.getConnectedVolumes();
 	}
-	
+
 	public static void removeVolume(long id) throws IOException {
 		service.sync.removeVolume(id);
 	}
@@ -195,8 +183,7 @@ public class FileReplicationService {
 			}
 		} finally {
 			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"hmpa size=" + this.activeTasks.size());
+				SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
 			iLock.unlock();
 		}
 	}
@@ -209,8 +196,7 @@ public class FileReplicationService {
 			SDFSLogger.getLog().debug("deleted " + evt.mf.getPath());
 			eventUploadBus.post(evt);
 		} catch (Exception e) {
-			SDFSLogger.getLog()
-					.error("unable to delete " + evt.mf.getPath(), e);
+			SDFSLogger.getLog().error("unable to delete " + evt.mf.getPath(), e);
 			throw new IOException(e);
 		}
 	}
@@ -229,8 +215,7 @@ public class FileReplicationService {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("renm " + evt.mf.getPath());
 
-					this.sync.renameFile("files/" + evt.from.substring(pl),
-							evt.to.substring(pl), "files");
+					this.sync.renameFile("files/" + evt.from.substring(pl), evt.to.substring(pl), "files");
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)
@@ -240,8 +225,7 @@ public class FileReplicationService {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog()
-					.error("unable to rename " + evt.mf.getPath(), e);
+			SDFSLogger.getLog().error("unable to rename " + evt.mf.getPath(), e);
 		} finally {
 			removeLock(evt.mf.getPath());
 		}
@@ -256,12 +240,10 @@ public class FileReplicationService {
 		try {
 			if (f.exists()) {
 				if (!OSValidator.isWindows()) {
-					isDir = Files.readAttributes(f.toPath(),
-							PosixFileAttributes.class,
-							LinkOption.NOFOLLOW_LINKS).isDirectory();
-					isSymlink = Files.readAttributes(f.toPath(),
-							PosixFileAttributes.class,
-							LinkOption.NOFOLLOW_LINKS).isSymbolicLink();
+					isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+							.isDirectory();
+					isSymlink = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+							.isSymbolicLink();
 				} else {
 					isDir = f.isDirectory();
 				}
@@ -310,17 +292,19 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-						if (evt.mf.isDirty() || evt.mf.isSymlink()) {
-							SDFSLogger.getLog().debug(
-									"writem=" + evt.mf.getPath() + " len="
-											+ evt.mf.length());
-							this.sync.uploadFile(new File(evt.mf.getPath()),
-									evt.mf.getPath().substring(pl), "files");
+						if (evt.dirty || evt.mf.isSymlink()) {
+							evt.mf.writeLock.lock();
+							try {
+								SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
+								this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl),
+										"files");
+							} finally {
+								evt.mf.writeLock.unlock();
+							}
 							eventUploadBus.post(evt);
 						} else {
 							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug(
-										"nowritem " + evt.mf.getPath());
+								SDFSLogger.getLog().debug("nowritem " + evt.mf.getPath());
 						}
 						done = true;
 					} catch (Exception e) {
@@ -331,8 +315,7 @@ public class FileReplicationService {
 					}
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to write " + evt.mf.getPath(), e);
+				SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
 			} finally {
 				removeLock(evt.mf.getPath());
 			}
@@ -345,10 +328,9 @@ public class FileReplicationService {
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
-			isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class,
-					LinkOption.NOFOLLOW_LINKS).isDirectory();
-			isSymlink = Files.readAttributes(f.toPath(),
-					PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+			isDir = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+					.isDirectory();
+			isSymlink = Files.readAttributes(f.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 					.isSymbolicLink();
 		} else {
 			isDir = f.isDirectory();
@@ -388,41 +370,36 @@ public class FileReplicationService {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void sFileWritten(SFileWritten evt) {
-		try {
-			ReentrantLock l = this.getLock(evt.sf.getDatabasePath());
-			l.lock();
-			int tries = 0;
-			boolean done = false;
-			while (!done) {
-				try {
-					if (evt.sf.isDirty()) {
-						SDFSLogger.getLog().debug(
-								"writed "
-										+ evt.sf.getDatabasePath()
-												.substring(sl));
-						this.sync
-								.uploadFile(new File(evt.sf.getDatabasePath()),
-										evt.sf.getDatabasePath().substring(sl),
-										"ddb");
-						eventUploadBus.post(evt);
-					} else {
-						SDFSLogger.getLog().debug(
-								"nowrited " + evt.sf.getDatabasePath());
-					}
-					done = true;
+		if (evt.getLocation() == -1) {
+			try {
+				ReentrantLock l = this.getLock(evt.sf.getDatabasePath());
+				l.lock();
+				int tries = 0;
+				boolean done = false;
+				while (!done) {
+					try {
+						if (evt.sf.isDirty()) {
+							SDFSLogger.getLog().debug("writed " + evt.sf.getDatabasePath().substring(sl));
+							this.sync.uploadFile(new File(evt.sf.getDatabasePath()),
+									evt.sf.getDatabasePath().substring(sl), "ddb");
+							eventUploadBus.post(evt);
+						} else {
+							SDFSLogger.getLog().debug("nowrited " + evt.sf.getDatabasePath());
+						}
+						done = true;
 
-				} catch (Exception e) {
-					if (tries > maxTries)
-						throw e;
-					else
-						tries++;
+					} catch (Exception e) {
+						if (tries > maxTries)
+							throw e;
+						else
+							tries++;
+					}
 				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to write " + evt.sf.getDatabasePath(), e);
+			} finally {
+				removeLock(evt.sf.getDatabasePath());
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to write " + evt.sf.getDatabasePath(), e);
-		} finally {
-			removeLock(evt.sf.getDatabasePath());
 		}
 
 	}
@@ -439,8 +416,7 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
-					this.sync.uploadFile(evt.sf,
-							evt.sf.getPath().substring(sl), "ddb");
+					this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb");
 
 					done = true;
 				} catch (Exception e) {
@@ -471,8 +447,7 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
-					this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf
-							.getPath().substring(pl), "files");
+					this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files");
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)
@@ -530,10 +505,8 @@ public class FileReplicationService {
 			while (!done) {
 				try {
 					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug(
-								"writev " + evt.vol.getConfigPath());
-					this.sync.uploadFile(new File(evt.vol.getConfigPath()),
-							new File(evt.vol.getConfigPath()).getName(),
+						SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
+					this.sync.uploadFile(new File(evt.vol.getConfigPath()), new File(evt.vol.getConfigPath()).getName(),
 							"volume");
 					done = true;
 				} catch (Exception e) {
@@ -544,8 +517,7 @@ public class FileReplicationService {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug(
-					"unable to write " + evt.vol.getConfigPath(), e);
+			SDFSLogger.getLog().debug("unable to write " + evt.vol.getConfigPath(), e);
 		} finally {
 			removeLock(evt.vol.getConfigPath());
 		}
@@ -553,11 +525,9 @@ public class FileReplicationService {
 
 	@Subscribe
 	public void downloadAll(CloudSyncDLRequest req) {
-		SDFSLogger
-				.getLog()
-				.info("##################### Syncing Files from cloud now ########################");
-		executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads,
-				10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+		SDFSLogger.getLog().info("##################### Syncing Files from cloud now ########################");
+		executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
+				new ThreadPoolExecutor.CallerRunsPolicy());
 
 		try {
 			this.sync.clearIter();
@@ -566,9 +536,8 @@ public class FileReplicationService {
 			String fname = this.sync.getNextName("files", req.getVolumeID());
 			while (fname != null) {
 				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
-				if (this.sync.isCheckedOut("files/" +efs, req.getVolumeID())) {
-					File f = new File(Main.volume.getPath() + File.separator
-							+ fname);
+				if (this.sync.isCheckedOut("files/" + efs, req.getVolumeID())) {
+					File f = new File(Main.volume.getPath() + File.separator + fname);
 					if (fname.endsWith(DM)) {
 						f = f.getParentFile();
 						f.mkdirs();
@@ -576,51 +545,40 @@ public class FileReplicationService {
 						executor.execute(new MetaFileDownloader(fname, f, sync));
 					}
 				} else {
-					SDFSLogger.getLog().info("not checked out " +fname);
+					SDFSLogger.getLog().info("not checked out " + fname);
 				}
 				fname = this.sync.getNextName("files", req.getVolumeID());
 			}
 			executor.shutdown();
 			// Wait for everything to finish.
 			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().info(
-						"Awaiting file download completion of threads.");
+				SDFSLogger.getLog().info("Awaiting file download completion of threads.");
 			}
 			if (MetaFileDownloader.downloadSyncException != null)
 				throw MetaFileDownloader.downloadSyncException;
 			this.sync.clearIter();
-			executor = new ThreadPoolExecutor(Main.dseIOThreads,
-					Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
+			executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
 			fname = this.sync.getNextName("ddb", req.getVolumeID());
 			while (fname != null) {
 				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
-				if (this.sync.isCheckedOut("ddb/" +efs, req.getVolumeID())) {
-					executor.execute(new DDBDownloader(fname, sync,req.isUpdateRef()));
+				if (this.sync.isCheckedOut("ddb/" + efs, req.getVolumeID())) {
+					executor.execute(new DDBDownloader(fname, sync, req.isUpdateRef()));
 				}
 				fname = this.sync.getNextName("ddb", req.getVolumeID());
 			}
 			executor.shutdown();
 			// Wait for everything to finish.
 			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().info(
-						"Awaiting ddb download completion of threads.");
+				SDFSLogger.getLog().info("Awaiting ddb download completion of threads.");
 			}
 			if (DDBDownloader.downloadSyncException != null)
 				throw DDBDownloader.downloadSyncException;
-			SDFSLogger
-					.getLog()
-					.info("################# done syncing files from cloud #######################");
-			SDFSLogger.getLog().info(
-					"Metadata Files downloaded : "
-							+ MetaFileDownloader.fdl.get());
-			SDFSLogger.getLog().info(
-					"Metadata File download errors: "
-							+ MetaFileDownloader.fer.get());
-			SDFSLogger.getLog().info(
-					"Map Files downloaded : " + DDBDownloader.ddl.get());
-			SDFSLogger.getLog().info(
-					"Map File download errors :" + DDBDownloader.der.get());
+			SDFSLogger.getLog().info("################# done syncing files from cloud #######################");
+			SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
+			SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
+			SDFSLogger.getLog().info("Map Files downloaded : " + DDBDownloader.ddl.get());
+			SDFSLogger.getLog().info("Map File download errors :" + DDBDownloader.der.get());
 			Main.syncDL = false;
 
 		} catch (Exception e) {
@@ -659,22 +617,16 @@ public class FileReplicationService {
 					sync.downloadFile(fname, to, "files");
 					sync.checkoutFile("files/" + fname);
 					MetaDataDedupFile mf = MetaFileStore.getMF(to);
-					Main.volume.addDuplicateBytes(mf.getIOMonitor()
-							.getDuplicateBlocks()
-							+ mf.getIOMonitor().getActualBytesWritten(), true);
-					Main.volume.addVirtualBytesWritten(mf.getIOMonitor()
-							.getVirtualBytesWritten(), true);
+					Main.volume.addDuplicateBytes(
+							mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
+					Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
 					Main.volume.addFile();
-					SDFSLogger.getLog()
-							.info("downloaded " + to.getPath() + " sz="
-									+ to.length());
+					SDFSLogger.getLog().info("downloaded " + to.getPath() + " sz=" + to.length());
 					done = true;
 					fdl.incrementAndGet();
 				} catch (Exception e) {
 					if (tries > maxTries) {
-						SDFSLogger.getLog().error(
-								"unable to sync file " + fname + " to "
-										+ to.getPath(), e);
+						SDFSLogger.getLog().error("unable to sync file " + fname + " to " + to.getPath(), e);
 						downloadSyncException = e;
 						done = true;
 						fer.incrementAndGet();
@@ -690,7 +642,7 @@ public class FileReplicationService {
 		private static Exception downloadSyncException;
 		AbstractCloudFileSync sync;
 		String fname;
-		boolean updateRef =true;
+		boolean updateRef = true;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
 
@@ -700,7 +652,7 @@ public class FileReplicationService {
 			downloadSyncException = null;
 		}
 
-		DDBDownloader(String fname, AbstractCloudFileSync sync,boolean updateRef) {
+		DDBDownloader(String fname, AbstractCloudFileSync sync, boolean updateRef) {
 			this.sync = sync;
 			this.fname = fname;
 			this.updateRef = updateRef;
@@ -717,17 +669,15 @@ public class FileReplicationService {
 					try {
 						sync.downloadFile(fname, f, "ddb");
 						sync.checkoutFile("ddb/" + fname);
-						SDFSLogger.getLog().info(
-								"downloaded " + f.getPath() + " sz="
-										+ f.length());
-						LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getName().substring(0, f.getName().length() - 4));
+						SDFSLogger.getLog().info("downloaded " + f.getPath() + " sz=" + f.length());
+						LongByteArrayMap ddb = LongByteArrayMap
+								.getMap(f.getName().substring(0, f.getName().length() - 4));
 						Set<Long> blks = new HashSet<Long>();
-						boolean ref= false;
-						if(this.updateRef && Main.refCount)
+						boolean ref = false;
+						if (this.updateRef && Main.refCount)
 							ref = true;
 						if (ddb.getVersion() < 3)
-							throw new IOException(
-									"only files version 3 or later can be imported");
+							throw new IOException("only files version 3 or later can be imported");
 						try {
 							ddb.iterInit();
 							for (;;) {
@@ -736,13 +686,11 @@ public class FileReplicationService {
 									break;
 								SparseDataChunk ck = kv.getValue();
 								boolean dirty = false;
-								TreeMap<Integer,HashLocPair> al = ck.getFingers();
+								TreeMap<Integer, HashLocPair> al = ck.getFingers();
 								for (HashLocPair p : al.values()) {
 
-									ChunkData cm = new ChunkData(
-											Longs.fromByteArray(p.hashloc), p.hash);
-									InsertRecord ir = HCServiceProxy.getHashesMap().put(cm,
-											false);
+									ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
+									InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
 									Main.volume.addVirtualBytesWritten(p.len, false);
 									Main.volume.addDuplicateBytes(p.len, false);
 									if (ir.getInserted())
@@ -777,8 +725,7 @@ public class FileReplicationService {
 								}
 							}
 						} catch (Throwable e) {
-							SDFSLogger.getLog().warn("error while checking file [" + ddb + "]",
-									e);
+							SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
 							throw new IOException(e);
 						} finally {
 							ddb.close();
@@ -788,9 +735,7 @@ public class FileReplicationService {
 						ddl.incrementAndGet();
 					} catch (Exception e) {
 						if (tries > maxTries) {
-							SDFSLogger.getLog().error(
-									"unable to sync ddb " + fname + " to "
-											+ f.getPath(), e);
+							SDFSLogger.getLog().error("unable to sync ddb " + fname + " to " + f.getPath(), e);
 							downloadSyncException = e;
 							der.incrementAndGet();
 							done = true;

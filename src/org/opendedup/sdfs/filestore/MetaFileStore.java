@@ -299,7 +299,7 @@ public class MetaFileStore {
 							eventBus.post(new MFileDeleted(mf, true));
 						deleted = Files.deleteIfExists(p);
 						if (!localOnly && !deleted)
-							eventBus.post(new MFileWritten(mf));
+							eventBus.post(new MFileWritten(mf,true));
 					} else if (isDir) {
 						File ps = new File(path);
 						if (force) {
