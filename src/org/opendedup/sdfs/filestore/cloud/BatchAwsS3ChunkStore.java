@@ -2437,7 +2437,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					String key = iter.next().getKey();
 					if (!key.endsWith(mdExt)) {
-						SDFSLogger.getLog().info("key=" + key);
+						SDFSLogger.getLog().debug("key=" + key);
 						String vid = key.substring("bucketinfo/".length());
 						if (vid.length() > 0) {
 
@@ -2532,7 +2532,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		s3Service.deleteObject(this.name, "bucketinfo/" + vid);
 		if (this.simpleMD)
 			s3Service.deleteObject(this.name, "bucketinfo/" + vid + mdExt);
-		SDFSLogger.getLog().info("Deleted " + volumeID);
+		SDFSLogger.getLog().debug("Deleted " + volumeID);
 	}
 
 	private void updateObject(String km, ObjectMetadata om) throws IOException {
@@ -2611,13 +2611,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (st.deleteUnclaimed) {
 						int cl = st.verifyDelete(k.longValue());
 						if (cl == 0) {
-							SDFSLogger.getLog().info("deleted " + k.longValue());
+							SDFSLogger.getLog().debug("deleted " + k.longValue());
 							HashBlobArchive.removeCache(k.longValue());
 						}
 					} else {
 						Map<String, String> mp = st.getUserMetaData(name);
 						for (String s : mp.keySet()) {
-							SDFSLogger.getLog().info(s + " = " + mp.get(s));
+							SDFSLogger.getLog().debug(s + " = " + mp.get(s));
 						}
 						// int objects = Integer.parseInt((String)
 						// mp.get("objects"));

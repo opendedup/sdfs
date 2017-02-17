@@ -35,6 +35,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.io.events.SFileDeleted;
@@ -119,6 +120,24 @@ public class MetaDataUpload implements Service {
 		} finally {
 			removeLock(evt.mf.getPath());
 		}
+	}
+	@Subscribe
+	@AllowConcurrentEvents
+	public void metaFileRenamed(MFileRenamed evt) {
+		try {
+			ReentrantLock l = this.getLock(evt.mf.getPath());
+			l.lock();
+			SDFSLogger.getLog().info(evt.toJSON());
+			
+			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
+			this.distribute(replay);
+		} catch (Exception e) {
+			SDFSLogger.getLog()
+					.error("unable to rename " + evt.mf.getPath(), e);
+		} finally {
+			removeLock(evt.mf.getPath());
+		}
+
 	}
 
 	@Override

@@ -51,6 +51,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.monitor.IOMonitor;
@@ -1048,12 +1049,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				eventBus.post(new MFileWritten(this,this.dirty));
 				return rn;
 			} else {
+				String oldPath = f.getPath();
+				String newPath = dest;
 				// MetaFileStore.removeMetaFile(dest, true);
 				if (this.dfGuid != null)
 					DedupFileStore.updateDedupFile(this);
 				boolean rename = f.renameTo(new File(dest));
 
 				if (rename) {
+					eventBus.post(new MFileRenamed(this,oldPath,newPath));
 					this.dirty = true;
 					eventBus.post(new MFileDeleted(this));
 					if (SDFSLogger.isDebug())

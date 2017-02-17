@@ -326,7 +326,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			md.put("clustered", Boolean.toString(clustered));
 			long sz = 0;
 			long cl = 0;
-			SDFSLogger.getLog().info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 			if (!this.clustered) {
 				if (md.containsKey("currentlength")) {
 					sz = Long.parseLong(md.get("currentlength"));
@@ -349,7 +348,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					container.uploadMetadata();
 				}
 			} else {
-				SDFSLogger.getLog().info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 				String lbi = "bucketinfo/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference(lbi);
@@ -381,7 +379,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				blob.uploadMetadata();
 				container.setMetadata(md);
 				container.uploadMetadata();
-				SDFSLogger.getLog().info("set user metadata " + metaData.size());
+				SDFSLogger.getLog().debug("set user metadata " + metaData.size());
 			}
 			HashBlobArchive.currentLength.set(sz);
 			HashBlobArchive.compressedLength.set(cl);
@@ -1448,7 +1446,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			StringResult rslt = new StringResult();
 			rslt.id = sid;
 			rslt.st = sht;
-			SDFSLogger.getLog().info("st=" + rslt.st);
+			SDFSLogger.getLog().debug("st=" + rslt.st);
 			return rslt;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -1542,9 +1540,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					CloudBlob bi = (CloudBlob) it.next();
 					bi.downloadAttributes();
 					HashMap<String, String> md = bi.getMetadata();
-					SDFSLogger.getLog().info("keysize=" + md.size());
+					SDFSLogger.getLog().debug("keysize=" + md.size());
 					for (String st : md.keySet()) {
-						SDFSLogger.getLog().info("key=" + st + " val=" + md.get(st));
+						SDFSLogger.getLog().debug("key=" + st + " val=" + md.get(st));
 					}
 					RemoteVolumeInfo info = new RemoteVolumeInfo();
 					info.id = EncyptUtils.decHashArchiveName(bi.getName().substring("bucketinfo/".length()),

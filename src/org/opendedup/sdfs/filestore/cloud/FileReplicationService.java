@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -36,7 +37,6 @@ import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
-import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileSync;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.SFileDeleted;
@@ -200,7 +200,7 @@ public class FileReplicationService {
 			throw new IOException(e);
 		}
 	}
-
+	/*
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileRenamed(MFileRenamed evt) {
@@ -231,6 +231,7 @@ public class FileReplicationService {
 		}
 
 	}
+	*/
 
 	private void deleteFile(File f) throws IOException {
 		boolean isDir = false;

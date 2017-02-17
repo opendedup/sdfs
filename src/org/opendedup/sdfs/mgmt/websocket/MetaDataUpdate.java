@@ -121,10 +121,10 @@ public class MetaDataUpdate implements Service {
 	@Subscribe
 	@AllowConcurrentEvents
 	public void metaFileRenamed(MFileRenamed evt) {
-
 		try {
 			ReentrantLock l = this.getLock(evt.mf.getPath());
 			l.lock();
+			
 			Frame replay = new DataFrame(FrameType.TEXT, evt.toJSON());
 			this.distribute(replay);
 		} catch (Exception e) {
@@ -197,9 +197,8 @@ public class MetaDataUpdate implements Service {
 		try {
 			for (String user : users) {
 				FrameChannel operation = sockets.get(user);
-
+				
 				try {
-
 					operation.send(frame);
 					SDFSLogger.getLog().info("sent " + frame.getText());
 				} catch (Exception e) {
@@ -211,7 +210,7 @@ public class MetaDataUpdate implements Service {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			SDFSLogger.getLog().error("unable to send frame " +frame.getText(), e);
 		}
 	}
 

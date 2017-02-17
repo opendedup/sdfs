@@ -727,7 +727,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				this.writeBlob(blob, true);
 			else
 				this.writeBlob(blob, false);
-			SDFSLogger.getLog().info("uploaded blocks/" + haName);
+			SDFSLogger.getLog().debug("uploaded blocks/" + haName);
 			if (this.accessStore || this.atmosStore || b2Store)
 				this.updateObject("blocks/" + haName, metaData);
 			// upload the metadata
@@ -763,7 +763,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			blob = blobStore.blobBuilder(this.getClaimName(id)).userMetadata(metaData)
 					.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM)
 					.build();
-			SDFSLogger.getLog().info("uploaded " + this.getClaimName(id));
+			SDFSLogger.getLog().debug("uploaded " + this.getClaimName(id));
 			if (this.accessStore || this.atmosStore || b2Store) {
 				blob = blobStore.blobBuilder(this.getClaimName(id)).payload(Long.toString(System.currentTimeMillis()))
 						.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
@@ -908,7 +908,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			metaData = this.getMetaData("keys/" + haName);
 		int claims = this.getClaimedObjects("keys/" + haName);
 		if (claims == 0) {
-			SDFSLogger.getLog().info("doing Delete " + "keys/" + haName);
+			SDFSLogger.getLog().debug("doing Delete " + "keys/" + haName);
 			if (clustered) {
 				BlobStore bk = this.blobStore;
 				if (this.b2Store) {
@@ -919,7 +919,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					bk.removeBlob(this.name, pth);
 					removeMetaData(pth);
 
-					SDFSLogger.getLog().info("cheching Delete " + pth);
+					SDFSLogger.getLog().debug("cheching Delete " + pth);
 					PageSet<? extends StorageMetadata> _ps = null;
 
 					if (this.atmosStore)
@@ -933,10 +933,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						metaData = this.getMetaData("blocks/" + haName);
 						bk.removeBlob(this.name, "keys/" + haName);
 						removeMetaData("keys/" + haName);
-						SDFSLogger.getLog().info("Deleting " + "keys/" + haName);
+						SDFSLogger.getLog().debug("Deleting " + "keys/" + haName);
 						bk.removeBlob(this.name, "blocks/" + haName);
 						removeMetaData("blocks/" + haName);
-						SDFSLogger.getLog().info("Deleting " + "blocks/" + haName + " size=" + metaData.get("size")
+						SDFSLogger.getLog().debug("Deleting " + "blocks/" + haName + " size=" + metaData.get("size")
 								+ " compressed size=" + metaData.get("compressedsize"));
 
 						int _size = Integer.parseInt((String) metaData.get("size"));
@@ -948,13 +948,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						if (HashBlobArchive.compressedLength.get() < 0) {
 							HashBlobArchive.compressedLength.set(0);
 						}
-						SDFSLogger.getLog().info("Current DSE Size  size=" + HashBlobArchive.currentLength.get()
+						SDFSLogger.getLog().debug("Current DSE Size  size=" + HashBlobArchive.currentLength.get()
 								+ " compressed size=" + HashBlobArchive.compressedLength.get());
 					} else {
-						SDFSLogger.getLog().info("Not deleting becuase still claimed by " + _ps.size());
+						SDFSLogger.getLog().debug("Not deleting becuase still claimed by " + _ps.size());
 						Iterator<? extends StorageMetadata> _di = _ps.iterator();
 						while (_di.hasNext()) {
-							SDFSLogger.getLog().info("claimed by " + _di.next().getName());
+							SDFSLogger.getLog().debug("claimed by " + _di.next().getName());
 						}
 
 					}
@@ -1018,7 +1018,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					SDFSLogger.getLog().error("unable to update size", e);
 				}
 				if (this.deletes.size() > 0) {
-					SDFSLogger.getLog().info("running garbage collection for " + this.deletes.size());
+					SDFSLogger.getLog().debug("running garbage collection for " + this.deletes.size());
 					this.delLock.lock();
 
 					HashMap<Long, Integer> odel = null;

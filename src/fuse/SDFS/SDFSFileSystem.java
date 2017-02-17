@@ -906,7 +906,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			SDFSLogger.getLog().debug("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
 		}
@@ -938,7 +938,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			SDFSLogger.getLog().error("error getting exattr size for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
 		}
@@ -958,7 +958,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error getting exattr for " + path, e);
+			SDFSLogger.getLog().debug("error getting exattr for " + path, e);
 			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
 
