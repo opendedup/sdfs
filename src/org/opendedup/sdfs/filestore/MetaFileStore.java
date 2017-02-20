@@ -46,27 +46,33 @@ public class MetaFileStore {
 	}
 
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder.newBuilder()
-			.concurrencyLevel(Main.writeThreads).maximumSize(1024)
+			.concurrencyLevel(Main.writeThreads).maximumSize(10)
 			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
 				@Override
 				public void onRemoval(RemovalNotification<String, MetaDataDedupFile> removal) {
-					if (removal.getValue().exists()) {
-						//SDFSLogger.getLog().info("writing " + removal.getValue().getPath());
-						removal.getValue().sync();
+					try {
+						if (removal.getValue().exists()) {
+							// SDFSLogger.getLog().info("writing " +
+							// removal.getValue().getPath());
+							removal.getValue().sync();
+						}
+					} catch (Exception e) {
+						SDFSLogger.getLog().error("unable to close file", e);
 					}
-					
+
 				}
 			}).build(new CacheLoader<String, MetaDataDedupFile>() {
 
 				@Override
 				public MetaDataDedupFile load(String path) throws Exception {
-					
+
 					return MetaDataDedupFile.getFile(path);
 				}
 
 			});
+
 
 	static {
 		if (Main.version.startsWith("0.8")) {
@@ -85,7 +91,7 @@ public class MetaFileStore {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("removing [" + dst + "] and replacing with [" + src + "]");
 			MetaDataDedupFile mf = getMF(src);
-			if(new File(dst).exists()) {
+			if (new File(dst).exists()) {
 				MetaDataDedupFile _mf = getMF(dst);
 				DedupFileStore.removeOpenDedupFile(_mf.getDfGuid());
 				_mf.getDedupFile(false).delete();
@@ -93,7 +99,7 @@ public class MetaFileStore {
 			}
 			boolean rn = mf.renameTo(dst);
 			pathMap.invalidate(src);
-			
+
 			pathMap.put(dst, mf);
 			return rn;
 		} finally {
@@ -115,6 +121,8 @@ public class MetaFileStore {
 		pathMap.put(mf.getPath(), mf);
 	}
 
+	
+
 	/**
 	 * 
 	 * @param path
@@ -127,9 +135,32 @@ public class MetaFileStore {
 		ReadLock l = getMFLock.readLock();
 		l.lock();
 		try {
-			return pathMap.get(f.getPath());
+			
+				MetaDataDedupFile mf = pathMap.get(f.getPath());
+			if (mf == null) {
+				SDFSLogger.getLog().error("unable to load " + f.getPath());
+			}
+			return mf;
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("unable to get " + f.getPath(), e);
+			SDFSLogger.getLog().error("unable to get " + f.getPath(), e);
+			return null;
+		} finally {
+			l.unlock();
+		}
+	}
+	
+	public static MetaDataDedupFile getNCMF(File f) {
+		ReadLock l = getMFLock.readLock();
+		l.lock();
+		try {
+			
+				MetaDataDedupFile mf = pathMap.getIfPresent(f.getPath());
+			if (mf == null) {
+				mf = MetaDataDedupFile.getFile(f.getPath());
+			}
+			return mf;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to get " + f.getPath(), e);
 			return null;
 		} finally {
 			l.unlock();
@@ -142,7 +173,7 @@ public class MetaFileStore {
 			throw new IOException("folder exists");
 		}
 		f.mkdir();
-		//SDFSLogger.getLog().info("mkdir=" + mk + " for " + f);
+		// SDFSLogger.getLog().info("mkdir=" + mk + " for " + f);
 		Path p = Paths.get(f.getPath());
 		try {
 			if (!OSValidator.isWindows())
@@ -157,7 +188,11 @@ public class MetaFileStore {
 		WriteLock l = getMFLock.writeLock();
 		l.lock();
 		try {
+
 			return MetaDataDedupFile.getFile(f.getPath());
+		} catch (IOException e) {
+			SDFSLogger.getLog().error("error while getting dir " + f.getPath(), e);
+			return null;
 		} finally {
 			l.unlock();
 		}
@@ -299,7 +334,7 @@ public class MetaFileStore {
 							eventBus.post(new MFileDeleted(mf, true));
 						deleted = Files.deleteIfExists(p);
 						if (!localOnly && !deleted)
-							eventBus.post(new MFileWritten(mf,true));
+							eventBus.post(new MFileWritten(mf, true));
 					} else if (isDir) {
 						File ps = new File(path);
 						if (force) {
@@ -317,13 +352,13 @@ public class MetaFileStore {
 						if (!localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
 						deleted = new File(path).delete();
-						
+
 						if (deleted && !localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
-						
+
 					} else {
 						mf = getMF(new File(path));
-						if(mf.isRetentionLock())
+						if (mf.isRetentionLock())
 							return false;
 						pathMap.invalidate(mf.getPath());
 						DedupFileStore.removeOpenDedupFile(mf.getDfGuid());
@@ -334,7 +369,7 @@ public class MetaFileStore {
 						} else if (mf.getDfGuid() != null) {
 							try {
 								deleted = mf.getDedupFile(false).delete();
-								
+
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
 									SDFSLogger.getLog().debug("unable to delete dedup file for " + path, e);

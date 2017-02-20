@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -70,9 +71,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static int MAX_LEN = 1048576 * 20;
 	public static int MAX_HM_SZ = 0;
 	public static int MAX_HM_OPSZ = 0;
-	// private static int LEN_VARIANCE = 1048576;
+	private static double LEN_VARIANCE = .25;
 	public static int THREAD_SLEEP_TIME = 5000;
 	public static int VARIANCE_THREAD_SLEEP_TIME = 2000;
+	
 	IvParameterSpec ivspec = new IvParameterSpec(EncryptUtils.iv);
 	private static Random r = new Random();
 	private static ConcurrentHashMap<Long, HashBlobArchive> rchunks = new ConcurrentHashMap<Long, HashBlobArchive>();
@@ -112,7 +114,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static ConcurrentHashMap<Long, SimpleByteArrayLongMap> wMaps = new ConcurrentHashMap<Long, SimpleByteArrayLongMap>();
 	private static ConcurrentHashMap<Long, FileChannel> wOpenFiles = new ConcurrentHashMap<Long, FileChannel>();
 	private static boolean closed = false;
-	private int blocksz = MAX_LEN;
+	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 
 	// public FileLock fl = null;
@@ -194,6 +196,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 			int High = THREAD_SLEEP_TIME + VARIANCE_THREAD_SLEEP_TIME;
 			nxt = r.nextInt(High - Low) + Low;
 		}
+		return THREAD_SLEEP_TIME;
+	}
+	
+	private static int nextSize() {
+		int nxt = -1;
+		int nsz = (int)((double)MAX_LEN * LEN_VARIANCE);
+		while (nxt < 1) {
+			int Low = MAX_LEN - nsz;
+			int High = MAX_LEN + nsz;
+			nxt = r.nextInt(High - Low) + Low;
+		}
 		return nxt;
 	}
 
@@ -233,8 +246,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive IO Threads : " + Main.dseIOThreads);
 			SDFSLogger.getLog().info("HashBlobArchive Max Upload Size : " + MAX_LEN);
 			try {
-				MAX_HM_SZ = (int) ((MAX_LEN / HashFunctionPool.getHashEngine().getMinLen()) / .75f);
-				MAX_HM_OPSZ = (int) ((MAX_LEN / HashFunctionPool.getHashEngine().getMinLen()));
+				int msz = (int)((double)MAX_LEN * LEN_VARIANCE) +MAX_LEN;
+				MAX_HM_SZ = (int) ((msz / HashFunctionPool.getHashEngine().getMinLen()) / .75f);
+				MAX_HM_OPSZ = (int) ((msz / HashFunctionPool.getHashEngine().getMinLen()));
 			} catch (NoSuchAlgorithmException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -247,7 +261,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
-					worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+					worksQueue, new BlockPolicy());
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
@@ -515,12 +529,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 				return archive.id;
 				}catch(Exception e1) {
 					l.unlock();
-					l = slock.readLock();
-					l.lock();
+					l = null;
 				}
 			}
 			}
 		} finally {
+			if(l !=null)
 			l.unlock();
 		}
 	}
@@ -889,8 +903,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					if (np.get() >= this.blocksz || wMaps.get(this.id).getCurrentSize() >= MAX_HM_OPSZ) {
 						this.writeable = false;
 
-						synchronized (this) {
-							this.notifyAll();
+						synchronized (LOCK) {
+							LOCK.notify();
 						}
 						throw new ArchiveFullException("archive full");
 					}
@@ -925,8 +939,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					} catch (MapClosedException e1) {
 						np.set(cp);
 						this.writeable = false;
-						synchronized (this) {
-							this.notifyAll();
+						synchronized (LOCK) {
+							LOCK.notifyAll();
 						}
 						throw new ArchiveFullException("archive closed");
 					} catch (HashExistsException e) {
@@ -1469,16 +1483,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return true;
 	}
 
+	final Object LOCK = new Object();
+	
 	@Override
 	public void run() {
-
+		long tm = System.currentTimeMillis();
 		try {
-			synchronized (this) {
-				this.wait(nextSleepTime());
+			synchronized (LOCK) {
+				LOCK.wait(nextSleepTime());
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 		}
+		long dur = System.currentTimeMillis() - tm;
+		SDFSLogger.getLog().info(dur + " len=" + f.length());
 		while (!this.upload(this.id)) {
 			try {
 				Thread.sleep(100);
@@ -1514,7 +1532,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				Collection<HashBlobArchive> st = rchunks.values();
 				for (HashBlobArchive ar : st) {
 					synchronized(ar) {
-						ar.notifyAll();
+						ar.LOCK.notify();
 					}
 				}
 				while (rchunks.size() > 0) {
@@ -1580,6 +1598,35 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		wMaps.clear();
 		wOpenFiles.clear();
+	}
+	
+	public static class BlockPolicy implements RejectedExecutionHandler {
+
+		/**
+		 * Creates a <tt>BlockPolicy</tt>.
+		 */
+		public BlockPolicy() {
+		}
+
+		/**
+		 * Puts the Runnable to the blocking queue, effectively blocking the
+		 * delegating thread until space is available.
+		 * 
+		 * @param r
+		 *            the runnable task requested to be executed
+		 * @param e
+		 *            the executor attempting to execute this task
+		 */
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+			try {
+				e.getQueue().put(r);
+			} catch (Exception e1) {
+				SDFSLogger
+						.getLog()
+						.error("Work discarded, thread was interrupted while waiting for space to schedule: {}",
+								e1);
+			}
+		}
 	}
 
 	public static void main(String [] args) {

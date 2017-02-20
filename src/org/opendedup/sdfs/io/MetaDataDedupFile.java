@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -406,7 +407,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.vmdk = vmdk;
 	}
 
-	public static MetaDataDedupFile getFile(String path) {
+	public static MetaDataDedupFile getFile(String path) throws IOException {
 		File f = new File(path);
 		MetaDataDedupFile mf = null;
 		Path p = Paths.get(path);
@@ -432,11 +433,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				mf.path = path;
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("reading in file " + mf.path + " df=" + mf.dfGuid);
-				MetaFileStore.addToCache(mf);
 			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("unable to de-serialize " + path, e);
-				mf = new MetaDataDedupFile(path);
-				MetaFileStore.addToCache(mf);
+				SDFSLogger.getLog().error("unable to de-serialize " + path, e);
+				throw new IOException(e);
 			} finally {
 				if (in != null) {
 					try {
@@ -1480,6 +1479,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				return;
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("writing out file=" + this.path + " df=" + this.dfGuid);
+			SDFSLogger.getLog().info("writing out file=" + this.path + " df=" + this.dfGuid + " length=" + this.length);
 			out.writeLong(-1);
 			out.writeLong(length);
 			out.writeLong(lastModified.get());
@@ -1491,7 +1491,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeBoolean(ownerWriteOnly);
 			out.writeBoolean(ownerExecOnly);
 			out.writeBoolean(ownerReadOnly);
-
 			if (this.dfGuid != null) {
 				byte[] dfb = this.dfGuid.getBytes();
 				out.writeInt(dfb.length);
@@ -1539,9 +1538,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("file.name", this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
+		String pl = this.getParent().substring(Main.volume.getPath().length());
 		while(fl.startsWith("/") || fl.startsWith("\\"))
 			fl =fl.substring(1, fl.length());
 		dataset.addProperty("file.path", fl);
+		dataset.addProperty("file.path.parent", pl);
 		dataset.addProperty("mtime", this.lastModified());
 		dataset.addProperty("volumeid", Long.toString(Main.volume.getSerialNumber()));
 		if (this.isFile())
@@ -1565,21 +1566,18 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("write", this.write);
 			dataset.addProperty("localowner", this.localowner);
 			dataset.addProperty("execute", this.execute);
-			JsonObject io = this.getIOMonitor().toJson();
-			dataset.add("io", io);
+			this.getIOMonitor().toJson(dataset);
 			try {
 				dataset.addProperty("open", DedupFileStore.fileOpen(this));
 			} catch (NullPointerException e) {
 				dataset.addProperty("open", Boolean.toString(false));
 			}
 			if (this.extendedAttrs.size() > 0) {
-				JsonObject jo = new JsonObject();
 				for (String key : this.extendedAttrs.keySet()) {
 					if (key.trim().length() > 0) {
-						jo.addProperty(key, this.extendedAttrs.get(key));
+						dataset.addProperty("extendedattrs."+key, this.extendedAttrs.get(key));
 					}
 				}
-				dataset.add("extendedattrs", jo);
 			}
 			dataset.addProperty("file.guid", this.getGUID());
 			dataset.addProperty("dedupe.map.guid", this.getDfGuid());

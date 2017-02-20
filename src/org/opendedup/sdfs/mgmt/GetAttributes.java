@@ -3,6 +3,10 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -12,10 +16,11 @@ import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+
 public class GetAttributes {
 
-	public Element getResult(String cmd, String file,boolean shortList) throws IOException {
-		if(file.equals("lastClosedFile")) {
+	public Element getResult(String cmd, String file, boolean shortList) throws IOException {
+		if (file.equals("lastClosedFile")) {
 			try {
 				MetaDataDedupFile mf = CloseFile.lastClosedFile;
 				Document doc = XMLUtils.getXMLDoc("files");
@@ -24,11 +29,8 @@ public class GetAttributes {
 				root.appendChild(fe);
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to fulfill request on file " + file, e);
-				throw new IOException(
-						"request to fetch attributes failed because "
-								+ e.toString());
+				SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
+				throw new IOException("request to fetch attributes failed because " + e.toString());
 			}
 		}
 		String internalPath = Main.volume.getPath() + File.separator + file;
@@ -37,51 +39,51 @@ public class GetAttributes {
 			throw new IOException("requeste file " + file + " does not exist");
 		if (f.isDirectory()) {
 			try {
-				File[] files = f.listFiles();
+				Path dir = FileSystems.getDefault().getPath(f.getPath());
+				DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
+
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element root = doc.getDocumentElement();
-				for (int i = 0; i < files.length; i++) {
-					if(shortList) {
+				for (Path p : stream) {
+					File _mf = p.toFile();
+					if (shortList) {
 						Element fl = doc.createElement("file-info");
-						fl.setAttribute("file-name", URLEncoder.encode(files[i].getName(), "UTF-8"));
-						if(files[i].isDirectory()) {
+						fl.setAttribute("file-name", URLEncoder.encode(_mf.getName(), "UTF-8"));
+						if (_mf.isDirectory()) {
 							fl.setAttribute("type", "directory");
-						}else {
+						} else {
 							fl.setAttribute("type", "file");
 						}
 						root.appendChild(fl);
-					}else {
-					MetaDataDedupFile mf = MetaFileStore.getMF(files[i]
-							.getPath());
-					Element fe = mf.toXML(doc);
-					root.appendChild(fe);
+					} else {
+						MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
+						Element fe = mf.toXML(doc);
+						root.appendChild(fe);
 					}
+					_mf = null;
+					
 				}
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to fulfill request on file " + file, e);
-				throw new IOException(
-						"request to fetch attributes failed because "
-								+ e.toString());
+				SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
+				throw new IOException("request to fetch attributes failed because " + e.toString());
 			}
 		} else {
 
 			try {
-				MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
+				MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
 				root.appendChild(fe);
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error(
-						"unable to fulfill request on file " + file, e);
-				throw new IOException(
-						"request to fetch attributes failed because "
-								+ e.toString());
+				SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
+				throw new IOException("request to fetch attributes failed because " + e.toString());
 			}
 		}
 	}
+	
+	
 
 }

@@ -2,10 +2,13 @@ package fuse.SDFS;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -24,8 +27,10 @@ import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.util.StringUtils;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.io.BaseEncoding;
 
 import fuse.Errno;
 import fuse.Filesystem3;
@@ -318,14 +323,16 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = null;
 			try {
 				f = resolvePath(path);
-				File[] mfs = f.listFiles();
 				dirFiller.add(".", ".".hashCode(), FuseFtypeConstants.TYPE_DIR);
 				dirFiller.add("..", "..".hashCode(), FuseFtypeConstants.TYPE_DIR);
-				for (int i = 0; i < mfs.length; i++) {
-					File _mf = mfs[i];
-					//SDFSLogger.getLog().info("lf=" + _mf.getPath());
-					dirFiller.add(_mf.getName(), _mf.hashCode(), this.getFtype(_mf));
-				}
+				Path dir = FileSystems.getDefault().getPath( f.getPath() );
+			    DirectoryStream<Path> stream = Files.newDirectoryStream( dir );
+			      for (Path p : stream) {
+			    	  File _f = p.toFile();
+			        dirFiller.add(f.getName(), f.hashCode(), this.getFtype(_f));
+			        _f = null;
+			      }
+			      stream.close();
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to read path " + path, e);
 				throw new FuseException().initErrno(Errno.EACCES);
@@ -987,6 +994,10 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			byte valB[] = new byte[value.capacity()];
 			value.get(valB);
 			String valStr = new String(valB);
+			if(!StringUtils.checkIfString(valB)) {
+				valStr = "!Base64:"+BaseEncoding.base64().encode(valB);
+			}
+			
 			if (name.startsWith("user.cmd.") || name.startsWith("user.sdfs.") || name.startsWith("user.dse")) {
 				sdfsCmds.runCMD(path, name, valStr);
 			} else {
@@ -1023,9 +1034,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					File f = this.resolvePath(path);
 					MetaDataDedupFile mf = MetaFileStore.getMF(f);
 					String st = mf.getXAttribute(name);
-					if(st != null)
-						dst.put(st.getBytes());
-					else
+					
+					if(st != null) {
+						if(st.startsWith("!Base64:")) {
+							String mk = st.substring("!Base64:".length());
+							dst.put(BaseEncoding.base64().decode(mk));
+						}else
+							dst.put(st.getBytes());
+					}else
 						throw new FuseException().initErrno(Errno.ENODATA);
 					
 

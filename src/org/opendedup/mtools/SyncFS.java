@@ -166,7 +166,12 @@ public class SyncFS {
 
 		@Override
 		public void run() {
-			fd.checkDedupFile(MetaDataDedupFile.getFile(f.getPath()));
+			try {
+				fd.checkDedupFile(MetaDataDedupFile.getFile(f.getPath()));
+			} catch (IOException e) {
+				SDFSLogger.getLog()
+				.error("Cloud Storage Conistancy Check failed", e);
+			}
 		}
 	}
 

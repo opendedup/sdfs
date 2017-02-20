@@ -19,9 +19,12 @@
 package org.opendedup.util;
 
 import java.io.IOException;
+
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
+import java.util.regex.Pattern;
 
 public class StringUtils {
 	final static long pbc = 1125899906842624L;
@@ -42,6 +45,23 @@ public class StringUtils {
 		byte[] b = new byte[l];
 		in.readFully(b);
 		return new String(b);
+	}
+	
+	static Pattern utfp = Pattern.compile("\\A(\n" +
+			    "  [\\x09\\x0A\\x0D\\x20-\\x7E]             # ASCII\\n" +
+			    "| [\\xC2-\\xDF][\\x80-\\xBF]               # non-overlong 2-byte\n" +
+			    "|  \\xE0[\\xA0-\\xBF][\\x80-\\xBF]         # excluding overlongs\n" +
+			    "| [\\xE1-\\xEC\\xEE\\xEF][\\x80-\\xBF]{2}  # straight 3-byte\n" +
+			    "|  \\xED[\\x80-\\x9F][\\x80-\\xBF]         # excluding surrogates\n" +
+			    "|  \\xF0[\\x90-\\xBF][\\x80-\\xBF]{2}      # planes 1-3\n" +
+			    "| [\\xF1-\\xF3][\\x80-\\xBF]{3}            # planes 4-15\n" +
+			    "|  \\xF4[\\x80-\\x8F][\\x80-\\xBF]{2}      # plane 16\n" +
+			    ")*\\z", Pattern.COMMENTS);
+	public static boolean checkIfString(byte [] b) throws UnsupportedEncodingException {
+		
+
+				  String phonyString = new String(b, "ISO-8859-1");
+				  return utfp.matcher(phonyString).matches(); 
 	}
 
 	static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2',
@@ -115,7 +135,11 @@ public class StringUtils {
 	}
 
 	public static void main(String[] args) throws IOException {
-		System.out.println("Volume = ");
-		System.out.println("Volume = " + parseSize("750GB"));
+		byte [] b = new byte[256];
+		Random rnd = new Random();
+		rnd.nextBytes(b);
+		System.out.println(checkIfString(b));
+		System.out.println(checkIfString("alsjdf;ldsa;mcamcieowqureqpo".getBytes()));
+		
 	}
 }

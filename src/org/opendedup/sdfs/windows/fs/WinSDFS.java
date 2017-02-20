@@ -13,6 +13,11 @@ import static net.decasdev.dokan.WinError.ERROR_WRITE_FAULT;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
@@ -479,7 +484,7 @@ public class WinSDFS implements DokanOperations {
 		} catch (Exception e) {
 
 			log.error("unable to list file " + pathName, e);
-			throw new DokanOperationException(ERROR_WRITE_FAULT);
+			throw new DokanOperationException(WinError.ERROR_OPEN_FAILED);
 		}
 	}
 
@@ -1005,21 +1010,22 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				File f = WinSDFS.resolvePath(pathName);
-				File[] mfs = f.listFiles();
-				if (mfs == null)
+				if (!f.exists())
 					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
-				SDFSLogger.getFSLog().debug("found " + mfs.length + "ojects");
-				filedata = new Win32FindData[mfs.length];
-				int i = 0;
-				for (File _mf : mfs) {
-					MetaDataDedupFile mf = MetaFileStore.getMF(_mf.getPath());
-					MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(), mf);
-					log.debug(fi.toString());
-					filedata[i] = fi.toWin32FindData();
-					i++;
-				}
+				ArrayList<Win32FindData> al = new ArrayList<Win32FindData>();
+				Path dir = FileSystems.getDefault().getPath( f.getPath() );
+			    DirectoryStream<Path> stream = Files.newDirectoryStream( dir );
+			      for (Path p : stream) {
+			    	  File _mf = p.toFile();
+			    	  MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(_mf.getPath()));
+						MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(), mf);
+						log.debug(fi.toString());
+						al.add(fi.toWin32FindData());
+			      }
+			      stream.close();
+			      filedata = al.toArray(new Win32FindData[al.size()]);
 			} catch (Exception e) {
-				SDFSLogger.getLog().debug("error while listing files", e);
+				SDFSLogger.getLog().error("error while listing files", e);
 				errRtn = e;
 			} finally {
 				done = true;
