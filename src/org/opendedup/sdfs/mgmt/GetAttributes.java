@@ -46,6 +46,9 @@ public class GetAttributes {
 				Element root = doc.getDocumentElement();
 				for (Path p : stream) {
 					File _mf = p.toFile();
+					MetaDataDedupFile mf = MetaFileStore.getMF(_mf);
+					try {
+					
 					if (shortList) {
 						Element fl = doc.createElement("file-info");
 						fl.setAttribute("file-name", URLEncoder.encode(_mf.getName(), "UTF-8"));
@@ -56,12 +59,14 @@ public class GetAttributes {
 						}
 						root.appendChild(fl);
 					} else {
-						MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
+						
 						Element fe = mf.toXML(doc);
 						root.appendChild(fe);
 					}
 					_mf = null;
-					
+					}catch(Exception e) {
+						SDFSLogger.getLog().error("unable to load file " + _mf.getPath(),e);
+					}
 				}
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
@@ -71,7 +76,7 @@ public class GetAttributes {
 		} else {
 
 			try {
-				MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
+				MetaDataDedupFile mf = MetaFileStore.getMF(new File(internalPath));
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();

@@ -231,8 +231,8 @@ public class WinSDFS implements DokanOperations {
 				}
 				if (sn.errRtn != null)
 					throw sn.errRtn;
-
-				// ch.force(true);
+				
+				this.onCloseFile(fileName, arg1);
 			} catch (DokanOperationException e) {
 				throw e;
 			} catch (Exception e) {
@@ -776,21 +776,28 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	protected static DedupFileChannel getFileChannel(String path, long handleNo) throws DokanOperationException {
-		DedupFileChannel ch = dedupChannels.get(handleNo);
+		Long k = new Long(handleNo);
+		
+		DedupFileChannel ch = dedupChannels.get(k);
 		if (ch == null) {
 			File f = resolvePath(path);
+			if(f.isFile()) {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-				ch = mf.getDedupFile(true).getChannel(-1);
-				if (dedupChannels.containsKey(handleNo)) {
+				ch = mf.getDedupFile(false).getChannel(-1);
+				if (dedupChannels.containsKey(k)) {
 					ch.getDedupFile().unRegisterChannel(ch, -1);
-					ch = dedupChannels.get(handleNo);
+					ch = dedupChannels.get(k);
 				} else {
-					dedupChannels.put(handleNo, ch);
+					dedupChannels.put(k, ch);
+					SDFSLogger.getLog().info("added channel " + k + " for " +path + " hno " + handleNo);
 				}
 			} catch (Exception e) {
 				log.error("unable to open file" + f.getPath(), e);
 				throw new DokanOperationException(WinError.ERROR_GEN_FAILURE);
+			}
+			}else {
+				return null;
 			}
 		}
 		return ch;
@@ -800,7 +807,7 @@ public class WinSDFS implements DokanOperations {
 
 		try {
 			CloseThread cl = new CloseThread();
-			cl.handleNo = info.handle;
+			cl.handleNo = handleNo;
 			try {
 
 				executor.execute(cl);
@@ -811,7 +818,7 @@ public class WinSDFS implements DokanOperations {
 					}
 					if (!cl.done && info != null) {
 						z++;
-						log.debug("waiting for close for " + (z * CHANNEL_TIMEOUT) / 1000 + " " + info.handle);
+						log.debug("waiting for close for " + (z * CHANNEL_TIMEOUT) / 1000 + " " + handleNo);
 						Dokan.resetTimeout(RESET_DURATION, info);
 					} else {
 						return;
@@ -954,10 +961,11 @@ public class WinSDFS implements DokanOperations {
 
 		@Override
 		public void run() {
-
+			
 			try {
-				DedupFileChannel ch = getFileChannel(fileName, info.handle);
-				ch.force(true);
+					DedupFileChannel ch = getFileChannel(fileName, info.handle);
+					if(ch != null)
+						ch.force(true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while sync data", e);
 				errRtn = e;
@@ -979,15 +987,20 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-
-				DedupFileChannel ch = dedupChannels.remove(handleNo);
+				Long k = new Long(handleNo);
+				DedupFileChannel ch = dedupChannels.remove(k);
 				if (ch != null) {
+					SDFSLogger.getLog().info("removed channel " + k);
 					ch.getDedupFile().unRegisterChannel(ch, -1);
 					if (ch.getFile() != null && ch.getFile().deleteOnClose) {
 						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true);
 						log.debug("Deleted file on close");
 					}
 				}
+				else {
+					SDFSLogger.getLog().info("did not remove channel " + k);
+				}
+				SDFSLogger.getLog().info("open channel size is " + dedupChannels.size());
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while reading data", e);
 				errRtn = e;
@@ -1010,6 +1023,9 @@ public class WinSDFS implements DokanOperations {
 		public void run() {
 			try {
 				File f = WinSDFS.resolvePath(pathName);
+				//SDFSLogger.getLog().info("Listing " + f.getPath() +  " sz=" +f.listFiles().length);
+				
+				
 				if (!f.exists())
 					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 				ArrayList<Win32FindData> al = new ArrayList<Win32FindData>();
@@ -1017,10 +1033,14 @@ public class WinSDFS implements DokanOperations {
 			    DirectoryStream<Path> stream = Files.newDirectoryStream( dir );
 			      for (Path p : stream) {
 			    	  File _mf = p.toFile();
-			    	  MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(_mf.getPath()));
+			    	  try {
+			    	  MetaDataDedupFile mf = MetaFileStore.getMF(new File(_mf.getPath()));
 						MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(), mf);
 						log.debug(fi.toString());
 						al.add(fi.toWin32FindData());
+			    	  }catch(Exception e) {
+			    		  SDFSLogger.getLog().error("error getting file " + _mf.getPath(),e);
+			    	  }
 			      }
 			      stream.close();
 			      filedata = al.toArray(new Win32FindData[al.size()]);
@@ -1285,6 +1305,7 @@ public class WinSDFS implements DokanOperations {
 							nextHandle = getNextHandle();
 						} else
 							throw new DokanOperationException(ERROR_PATH_NOT_FOUND);
+						arg5.handle = nextHandle;
 						break;
 					case FILE_OPEN_IF:
 						try {
@@ -1308,6 +1329,7 @@ public class WinSDFS implements DokanOperations {
 							log.error("unable to create directory", e);
 							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 						}
+						arg5.handle = nextHandle;
 						break;
 					default:
 						log.error("wring disposition " + disposition);
@@ -1334,9 +1356,11 @@ public class WinSDFS implements DokanOperations {
 							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
 						case FILE_OPEN:
 							nextHandle = getNextHandle();
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OPEN_IF:
 							nextHandle = getNextHandle();
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OVERWRITE:
 							throw new DokanOperationException(WinError.ERROR_ALREADY_EXISTS);
@@ -1358,6 +1382,7 @@ public class WinSDFS implements DokanOperations {
 								MetaDataDedupFile mf = MetaFileStore.getMF(mountedVolume + fileName);
 								mf.deleteOnClose = deleteOnClose;
 							}
+							arg5.handle = nextHandle;
 							break;
 						case FILE_OPEN:
 							log.debug("\\FILE_OPEN");

@@ -30,8 +30,8 @@ public class CloseFile {
 			mf.setRetentionLock();
 			mf.setDirty(true);
 			mf.unmarshal();
-			mf.getDedupFile(true).forceClose();
-			if (f.exists() && f.getName().endsWith("F1.img")) {
+			mf.getDedupFile(false).forceClose();
+			if (f.exists() && (f.getName().endsWith("F1.img") || f.getName().startsWith("BEOST_"))) {
 				lastClosedFile = mf;
 			}
 			return (Element) root.cloneNode(true);

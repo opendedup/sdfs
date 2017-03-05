@@ -515,7 +515,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 							.debug("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
 				if (addtoopen)
 					DedupFileStore.addOpenDedupFiles(df);
-				this.sync();
+				//this.sync();
 				return df;
 			} else {
 				if (addtoopen)
@@ -1334,8 +1334,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 */
 	public void sync(boolean propigateEvent) {
-		this.dirty = true;
-		this.writeFile(propigateEvent);
+		if(this.dirty) {
+			this.writeFile(propigateEvent);
+		}
 	}
 
 	/**
@@ -1350,7 +1351,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 		if (this.retentionLock <= 0)
 			this.retentionLock = System.currentTimeMillis();
-		SDFSLogger.getLog().info("retention lock set to " + this.retentionLock);
+		//SDFSLogger.getLog().info("retention lock set to " + this.retentionLock);
 	}
 
 	public synchronized void clearRetentionLock() {
@@ -1479,7 +1480,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				return;
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("writing out file=" + this.path + " df=" + this.dfGuid);
-			SDFSLogger.getLog().info("writing out file=" + this.path + " df=" + this.dfGuid + " length=" + this.length);
+			//SDFSLogger.getLog().info("writing out file=" + this.path + " df=" + this.dfGuid + " length=" + this.length);
 			out.writeLong(-1);
 			out.writeLong(length);
 			out.writeLong(lastModified.get());
@@ -1534,13 +1535,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public JsonObject toJSON(boolean compact) throws IOException {
-
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("file.name", this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
 		String pl = this.getParent().substring(Main.volume.getPath().length());
 		while(fl.startsWith("/") || fl.startsWith("\\"))
 			fl =fl.substring(1, fl.length());
+		dataset.addProperty("id", Long.toString(Main.volume.getSerialNumber()) + "/" + fl);
 		dataset.addProperty("file.path", fl);
 		dataset.addProperty("file.path.parent", pl);
 		dataset.addProperty("mtime", this.lastModified());

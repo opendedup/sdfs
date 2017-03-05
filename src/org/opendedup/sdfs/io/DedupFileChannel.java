@@ -231,6 +231,8 @@ public class DedupFileChannel {
 		l.lock();
 		try {
 			df.sync(false);
+			if(metaData)
+				df.mf.sync();
 		} catch (FileClosedException e) {
 			if (Main.safeClose)
 				SDFSLogger.getLog().warn(

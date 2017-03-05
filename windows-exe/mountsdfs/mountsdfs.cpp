@@ -149,7 +149,7 @@ int _tmain(int argc, TCHAR *argv[])
 		exit(1);
 	}
 	if (mt) {
-		mem = 1000;
+		mem = 1500;
 		HANDLE hFile = CreateFile(configFile,               // file to open
 			GENERIC_READ, 0, 0,
 			OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);                 // no attr. template

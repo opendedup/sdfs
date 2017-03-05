@@ -3,12 +3,11 @@ package fuse.SDFS;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -161,7 +160,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = this.resolvePath(path);
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-				ch = mf.getDedupFile(true).getChannel(flags);
+				ch = mf.getDedupFile(false).getChannel(flags);
 				try {
 					if (this.dedupChannels.containsKey(handleNo)) {
 						ch.getDedupFile().unRegisterChannel(ch, flags);
@@ -323,16 +322,14 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			File f = null;
 			try {
 				f = resolvePath(path);
+				File[] mfs = f.listFiles();
 				dirFiller.add(".", ".".hashCode(), FuseFtypeConstants.TYPE_DIR);
 				dirFiller.add("..", "..".hashCode(), FuseFtypeConstants.TYPE_DIR);
-				Path dir = FileSystems.getDefault().getPath( f.getPath() );
-			    DirectoryStream<Path> stream = Files.newDirectoryStream( dir );
-			      for (Path p : stream) {
-			    	  File _f = p.toFile();
-			        dirFiller.add(f.getName(), f.hashCode(), this.getFtype(_f));
-			        _f = null;
-			      }
-			      stream.close();
+				for (int i = 0; i < mfs.length; i++) {
+					File _mf = mfs[i];
+					//SDFSLogger.getLog().info("lf=" + _mf.getPath());
+					dirFiller.add(_mf.getName(), _mf.hashCode(), this.getFtype(_mf));
+				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to read path " + path, e);
 				throw new FuseException().initErrno(Errno.EACCES);
@@ -887,7 +884,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 		try {
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			return mf.getDedupFile(true).getChannel(flags);
+			return mf.getDedupFile(false).getChannel(flags);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to open file" + path, e);
 			throw new FuseException("error opening " + path).initErrno(Errno.EACCES);
