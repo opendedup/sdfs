@@ -25,7 +25,6 @@ public class CloseFile {
 			Document doc = XMLUtils.getXMLDoc("close-file");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
-
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			mf.setRetentionLock();
 			mf.setDirty(true);

@@ -293,7 +293,7 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-						if (evt.dirty || evt.mf.isSymlink()) {
+						//if (evt.dirty || evt.mf.isSymlink()) {
 							evt.mf.writeLock.lock();
 							try {
 								SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
@@ -303,10 +303,10 @@ public class FileReplicationService {
 								evt.mf.writeLock.unlock();
 							}
 							eventUploadBus.post(evt);
-						} else {
+						/*} else {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug("nowritem " + evt.mf.getPath());
-						}
+						}*/
 						done = true;
 					} catch (Exception e) {
 						if (tries > maxTries)

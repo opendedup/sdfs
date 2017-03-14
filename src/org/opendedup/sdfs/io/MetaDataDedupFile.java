@@ -1541,6 +1541,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		String pl = this.getParent().substring(Main.volume.getPath().length());
 		while(fl.startsWith("/") || fl.startsWith("\\"))
 			fl =fl.substring(1, fl.length());
+		if(pl.trim().length() == 0)
+			pl= "##rootDir##";
 		dataset.addProperty("id", Long.toString(Main.volume.getSerialNumber()) + "/" + fl);
 		dataset.addProperty("file.path", fl);
 		dataset.addProperty("file.path.parent", pl);
