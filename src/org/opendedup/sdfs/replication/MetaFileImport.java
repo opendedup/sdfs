@@ -169,6 +169,7 @@ public class MetaFileImport implements Serializable {
 	}
 
 	private void traverse(File dir) throws IOException, ReplicationCanceledException {
+		SDFSLogger.getLog().debug("Traversing " + dir);
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		if (Files.isSymbolicLink(dir.toPath())) {
@@ -180,7 +181,7 @@ public class MetaFileImport implements Serializable {
 				traverse(new File(dir, children[i]));
 			}
 		} else {
-
+			
 			this.checkDedupFile(dir);
 		}
 	}
@@ -234,9 +235,11 @@ public class MetaFileImport implements Serializable {
 		if (this.closed)
 			throw new ReplicationCanceledException("MetaFile Import Canceled");
 		MetaDataDedupFile mf = MetaDataDedupFile.getFile(metaFile.getPath());
+		SDFSLogger.getLog().debug("Checking file " + metaFile);
 		ArrayList<HashLocPair> bh = new ArrayList<HashLocPair>(MAX_BATCHHASH_SIZE);
 		mf.getIOMonitor().clearFileCounters(true);
 		String dfGuid = mf.getDfGuid();
+		SDFSLogger.getLog().debug("DFGuid for file " + dfGuid);
 		if (dfGuid != null) {
 			LongByteArrayMap mp = LongByteArrayMap.getMap(dfGuid);
 			try {
@@ -244,6 +247,7 @@ public class MetaFileImport implements Serializable {
 				long prevpos = 0;
 				mp.iterInit();
 				while (ck != null) {
+					SDFSLogger.getLog().debug("checking in file " + dfGuid + " " + mp.getIterPos());
 					if (this.closed)
 						throw new ReplicationCanceledException("MetaFile Import Canceled");
 					if (this.lastException != null)

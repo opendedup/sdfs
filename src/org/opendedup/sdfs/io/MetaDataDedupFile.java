@@ -532,6 +532,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			if (this.dfGuid == null) {
+				
 				DedupFile df = new SparseDedupFile(this);
 				this.dfGuid = df.getGUID();
 				if (SDFSLogger.isDebug())
@@ -553,6 +554,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public void setDfGuid(String guid, boolean propigateEvent) {
 		this.dfGuid = guid;
+		this.dirty = true;
 	}
 
 	/**
@@ -976,6 +978,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	protected void setDedupFile(DedupFile df, boolean propigateEvent) {
 		if (!df.getGUID().equalsIgnoreCase(this.dfGuid)) {
+			
 			this.dirty = true;
 			this.dfGuid = df.getGUID();
 		}

@@ -161,6 +161,7 @@ public class ImportFileCmd implements Runnable {
 		IOUtils.copy(bis, bout);
 		IOUtils.closeQuietly(bis);
 		IOUtils.closeQuietly(bout);
+		SDFSLogger.getLog().info("downloaded " + _f.getPath() + " size=" + _f.length());
 		return ng;
 	} finally {
 		if (mtd != null) {

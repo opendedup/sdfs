@@ -1051,6 +1051,7 @@ public class MgmtWebServer implements Container {
 					guid = URLDecoder.decode(guid, "UTF-8");
 					String path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
 							+ File.separator + guid + ".map";
+					SDFSLogger.getLog().info("Downloading " + path);
 					File f = new File(path);
 					if (!f.exists()) {
 						path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
@@ -1061,6 +1062,7 @@ public class MgmtWebServer implements Container {
 						response.setValue("metadatacomp", "false");
 					}
 					f = new File(path);
+					SDFSLogger.getLog().info("Downloading " + path + " size=" + f.length());
 					response.setContentLength(f.length());
 					this.downloadFile(f, request, response);
 				} else if (request.getTarget().startsWith(BLOCK_PATH)) {

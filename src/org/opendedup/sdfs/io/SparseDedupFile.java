@@ -175,6 +175,7 @@ public class SparseDedupFile implements DedupFile {
 		if (mf.getDfGuid() == null) {
 			// new Instance
 			this.GUID = UUID.randomUUID().toString();
+			mf.setDfGuid(this.GUID);
 		} else {
 			this.GUID = mf.getDfGuid();
 		}
@@ -1022,7 +1023,7 @@ public class SparseDedupFile implements DedupFile {
 				}
 				if (!this.deleted) {
 					try {
-						MetaFileStore.getMF(mf.getPath()).setDedupFile(this);
+						
 						MetaFileStore.getMF(mf.getPath()).sync();
 						eventBus.post(new SFileWritten(this));
 					} catch (Exception e) {

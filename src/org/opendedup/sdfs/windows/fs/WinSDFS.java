@@ -1034,7 +1034,7 @@ public class WinSDFS implements DokanOperations {
 			      for (Path p : stream) {
 			    	  File _mf = p.toFile();
 			    	  try {
-			    	  MetaDataDedupFile mf = MetaFileStore.getMF(new File(_mf.getPath()));
+			    	  MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(_mf.getPath()));
 						MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(), mf);
 						log.debug(fi.toString());
 						al.add(fi.toWin32FindData());

@@ -46,7 +46,7 @@ public class GetAttributes {
 				Element root = doc.getDocumentElement();
 				for (Path p : stream) {
 					File _mf = p.toFile();
-					MetaDataDedupFile mf = MetaFileStore.getMF(_mf);
+					MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
 					try {
 					
 					if (shortList) {
