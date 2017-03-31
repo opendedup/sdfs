@@ -145,7 +145,7 @@ public class LargeBloomFilter implements Serializable {
 	public void save(File dir) throws IOException {
 		CommandLineProgressBar bar = new CommandLineProgressBar(
 				"Saving BloomFilters", bfs.length, System.out);
-		SDFSLogger.getLog().info("saving bloomfilter to " + dir.getPath());
+		//SDFSLogger.getLog().info("saving bloomfilter to " + dir.getPath());
 		if(!dir.exists())
 			dir.mkdirs();
 		executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,

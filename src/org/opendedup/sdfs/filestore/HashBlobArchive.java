@@ -1496,7 +1496,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 		}
 		long dur = System.currentTimeMillis() - tm;
-		SDFSLogger.getLog().info(dur + " len=" + f.length());
+		SDFSLogger.getLog().debug(dur + " len=" + f.length());
 		while (!this.upload(this.id)) {
 			try {
 				Thread.sleep(100);

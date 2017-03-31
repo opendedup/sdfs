@@ -324,7 +324,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public void vanish() {
-		SDFSLogger.getLog().info("removed" + this.path);
+		//SDFSLogger.getLog().info("removed" + this.path);
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {

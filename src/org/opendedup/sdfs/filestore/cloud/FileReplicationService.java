@@ -176,7 +176,9 @@ public class FileReplicationService {
 
 				if (l != null && !l.hasQueuedThreads()) {
 					this.activeTasks.remove(st);
+					SDFSLogger.getLog().debug("removed lock for "+st);
 				}
+				SDFSLogger.getLog().debug("lock count size is " + this.activeTasks.size());
 			} finally {
 				if (l != null)
 					l.unlock();
@@ -476,7 +478,7 @@ public class FileReplicationService {
 				try {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("dels " + evt.sfp);
-					SDFSLogger.getLog().info("dels " + evt.sfp);
+					SDFSLogger.getLog().debug("dels " + evt.sfp);
 					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
 					eventUploadBus.post(evt);
@@ -622,7 +624,7 @@ public class FileReplicationService {
 							mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
 					Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
 					Main.volume.addFile();
-					SDFSLogger.getLog().info("downloaded " + to.getPath() + " sz=" + to.length());
+					SDFSLogger.getLog().debug("downloaded " + to.getPath() + " sz=" + to.length());
 					done = true;
 					fdl.incrementAndGet();
 				} catch (Exception e) {
@@ -670,7 +672,7 @@ public class FileReplicationService {
 					try {
 						sync.downloadFile(fname, f, "ddb");
 						sync.checkoutFile("ddb/" + fname);
-						SDFSLogger.getLog().info("downloaded " + f.getPath() + " sz=" + f.length());
+						SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
 						LongByteArrayMap ddb = LongByteArrayMap
 								.getMap(f.getName().substring(0, f.getName().length() - 4));
 						Set<Long> blks = new HashSet<Long>();

@@ -76,7 +76,7 @@ public class GetAttributes {
 		} else {
 
 			try {
-				MetaDataDedupFile mf = MetaFileStore.getMF(new File(internalPath));
+				MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();

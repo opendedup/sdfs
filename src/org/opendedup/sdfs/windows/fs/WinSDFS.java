@@ -790,7 +790,7 @@ public class WinSDFS implements DokanOperations {
 					ch = dedupChannels.get(k);
 				} else {
 					dedupChannels.put(k, ch);
-					SDFSLogger.getLog().info("added channel " + k + " for " +path + " hno " + handleNo);
+					SDFSLogger.getLog().debug("added channel " + k + " for " +path + " hno " + handleNo);
 				}
 			} catch (Exception e) {
 				log.error("unable to open file" + f.getPath(), e);

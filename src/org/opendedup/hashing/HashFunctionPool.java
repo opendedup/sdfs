@@ -71,7 +71,7 @@ public class HashFunctionPool {
 	}
 
 	public static void returnObject(AbstractHashEngine hc) throws IOException {
-		SDFSLogger.getLog().info("Size="+passiveObjects.size());
+		SDFSLogger.getLog().debug("Size="+passiveObjects.size());
 		passiveObjects.add(hc);
 	}
 

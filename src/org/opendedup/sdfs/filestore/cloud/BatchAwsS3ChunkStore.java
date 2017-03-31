@@ -1571,7 +1571,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			to = to.substring(1);
 
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().info("uploading " + f.getPath() + " to " + to + " pth " + pth);
+		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth);
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -1924,7 +1924,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.isClustered()) {
 
 				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-				SDFSLogger.getLog().info("deleting " + haName);
+				SDFSLogger.getLog().debug("deleting " + haName);
 				if (s3Service.doesObjectExist(this.name, haName)) {
 					String blb = "claims/" + haName + "/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);

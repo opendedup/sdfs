@@ -270,7 +270,7 @@ public class SimpleMemoryByteArrayLongMap implements SimpleMapInterface{
 	boolean closed = false;
 
 	public void vanish() {
-		SDFSLogger.getLog().info("removed" + this.path);
+		//SDFSLogger.getLog().info("removed" + this.path);
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {

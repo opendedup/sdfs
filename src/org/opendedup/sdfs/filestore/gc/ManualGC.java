@@ -34,7 +34,7 @@ public class ManualGC {
 	
 	public static SDFSEvent evt = null;
 	private static long lastGC = 0;
-	private static long MINGCTIME = 1;
+	private static long MINGCTIME = 60*1000*60;
 
 	public static long clearChunks() throws InterruptedException, IOException {
 		return clearChunksMills();

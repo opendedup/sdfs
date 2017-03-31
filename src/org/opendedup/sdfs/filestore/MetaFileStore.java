@@ -46,7 +46,7 @@ public class MetaFileStore {
 	}
 
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder.newBuilder()
-			.concurrencyLevel(Main.writeThreads).maximumSize(5000)
+			.concurrencyLevel(Main.writeThreads).maximumSize(500)
 			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added

@@ -21,6 +21,7 @@ package org.opendedup.hashing;
 import java.io.ByteArrayOutputStream;
 
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,7 +32,6 @@ import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
-import org.opendedup.logging.SDFSLogger;
 import org.opendedup.utils.hashing.FileBasedBloomFilter;
 
 import static java.lang.Math.toIntExact;
@@ -136,7 +136,7 @@ public class FLBF implements Serializable {
 
 	public void save() throws IOException {
 		if (this.counting) {
-			SDFSLogger.getLog().info("writing to " + path);
+			//SDFSLogger.getLog().info("writing to " + path);
 			FileOutputStream fout = new FileOutputStream(path);
 			ObjectOutputStream oon = new ObjectOutputStream(fout);
 			oon.writeObject(this.filter);
@@ -144,7 +144,7 @@ public class FLBF implements Serializable {
 			oon.close();
 			fout.flush();
 			fout.close();
-			SDFSLogger.getLog().info("wrote to " + path);
+			//SDFSLogger.getLog().info("wrote to " + path);
 		} else {
 			bfs.close();
 		}
