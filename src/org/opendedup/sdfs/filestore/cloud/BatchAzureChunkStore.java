@@ -1380,11 +1380,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		for (int i = 0; i < 1000; i++) {
 			if (iter.hasNext()) {
 				CloudBlob bi = (CloudBlob) iter.next();
-				try {
 					al.add(bi.getName());
-				} catch (URISyntaxException e) {
-					throw new IOException(e);
-				}
 			} else
 				return al.iterator();
 		}

@@ -123,6 +123,7 @@ public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 		BasicAWSCredentials creds = null;
 		try {
 			creds = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+			@SuppressWarnings("deprecation")
 			AmazonS3Client s3Service = new AmazonS3Client(creds);
 			s3Service.listBuckets();
 			return true;
@@ -137,6 +138,7 @@ public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 		BasicAWSCredentials creds = null;
 		try {
 			creds = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+			@SuppressWarnings("deprecation")
 			AmazonS3Client s3Service = new AmazonS3Client(creds);
 			boolean exists = s3Service.doesBucketExist(bucketName);
 			if (!exists) {
@@ -415,6 +417,7 @@ public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 	AmazonS3Client bs3Service = null;
 	String lastKey = null;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void iterationInit(boolean deep) {
 		bs3Service = new AmazonS3Client(awsCredentials);

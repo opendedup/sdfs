@@ -58,7 +58,6 @@ public class AWSS3ServicePool {
 	public void returnObject(AmazonS3Client hc) throws IOException {
 		alock.lock();
 		try {
-
 			this.activeObjects.remove(hc);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to get object out of pool ", e);
@@ -86,6 +85,7 @@ public class AWSS3ServicePool {
 		jProps.setProperty("httpclient.max-connections",
 				Integer.toString(this.poolSize));
 
+		@SuppressWarnings("deprecation")
 		AmazonS3Client s3Service = new AmazonS3Client(awsCredentials);
 		return s3Service;
 	}
