@@ -60,11 +60,13 @@ public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath()).getParent() + File.separator + "archives";
 	public static final String METADATA_PATH = "/metadata/";
+	public static final String IO_PATH = "/io/";
 	public static final String METADATA_INFO_PATH = "/metadatainfo/";
 	public static final String MAPDATA_PATH = "/mapdata/";
 	public static final String BLOCK_PATH = "/blockdata/";
 	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
+	private static Io io = null;
 
 	@Override
 	public void handle(Request request, Response response) {
@@ -83,16 +85,7 @@ public class MgmtWebServer implements Container {
 			if (request.getQuery().containsKey("options"))
 				cmdOptions = request.getQuery().get("options");
 			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder;
-			builder = factory.newDocumentBuilder();
-			DOMImplementation impl = builder.getDOMImplementation();
-			// Document.
-			Document doc = impl.createDocument(null, "result", null);
-			// Root element.
-			Element result = doc.getDocumentElement();
-			result.setAttribute("status", "failed");
-			result.setAttribute("msg", "could not authenticate user");
+			
 			boolean auth = false;
 			if (Main.sdfsCliRequireAuth) {
 				String password = request.getQuery().get("password");
@@ -108,6 +101,16 @@ public class MgmtWebServer implements Container {
 				auth = true;
 			}
 			if (cmdReq) {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder builder;
+				builder = factory.newDocumentBuilder();
+				DOMImplementation impl = builder.getDOMImplementation();
+				// Document.
+				Document doc = impl.createDocument(null, "result", null);
+				// Root element.
+				Element result = doc.getDocumentElement();
+				result.setAttribute("status", "failed");
+				result.setAttribute("msg", "could not authenticate user");
 				if (auth) {
 					switch (cmd) {
 					case "shutdown":
@@ -981,17 +984,21 @@ public class MgmtWebServer implements Container {
 					body.println("invalid path " + reqPath.getPath());
 					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
 					body.close();
-				} else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
+				} else if(request.getTarget().startsWith(IO_PATH)){
+					String pth = request.getTarget().substring(IO_PATH.length()).split("\\?")[0];
+					//SDFSLogger.getLog().info("io path=" + pth);
+					io.processIo(request, response, pth);
+				}else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
 					String guid = request.getTarget().substring(Main.matcher.getWPath().length());
-					SDFSLogger.getLog().info("path=" + request.getTarget());
-					SDFSLogger.getLog().info("guid=" + guid);
+					//SDFSLogger.getLog().info("path=" + request.getTarget());
+					//SDFSLogger.getLog().info("guid=" + guid);
 					guid = guid.split("\\?")[0];
-					SDFSLogger.getLog().info("guid=" + guid);
+					//SDFSLogger.getLog().info("guid=" + guid);
 					String pth = guid.split("/")[0];
-					SDFSLogger.getLog().info("pth=" + pth);
+					//SDFSLogger.getLog().info("pth=" + pth);
 					long start = Long.parseLong(guid.split("/")[1]);
 					pth = URLDecoder.decode(pth, "UTF-8");
 					Main.matcher.getResult(pth, start, response);
@@ -1045,13 +1052,13 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 
 					String guid = request.getTarget().substring(MAPDATA_PATH.length());
-					SDFSLogger.getLog().info("path=" + request.getTarget());
-					SDFSLogger.getLog().info("guid=" + guid);
+					//SDFSLogger.getLog().info("path=" + request.getTarget());
+					//SDFSLogger.getLog().info("guid=" + guid);
 					guid = guid.split("\\?")[0];
 					guid = URLDecoder.decode(guid, "UTF-8");
 					String path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
 							+ File.separator + guid + ".map";
-					SDFSLogger.getLog().info("Downloading " + path);
+					//SDFSLogger.getLog().info("Downloading " + path);
 					File f = new File(path);
 					if (!f.exists()) {
 						path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
@@ -1062,7 +1069,7 @@ public class MgmtWebServer implements Container {
 						response.setValue("metadatacomp", "false");
 					}
 					f = new File(path);
-					SDFSLogger.getLog().info("Downloading " + path + " size=" + f.length());
+					//SDFSLogger.getLog().info("Downloading " + path + " size=" + f.length());
 					response.setContentLength(f.length());
 					this.downloadFile(f, request, response);
 				} else if (request.getTarget().startsWith(BLOCK_PATH)) {
@@ -1209,6 +1216,8 @@ public class MgmtWebServer implements Container {
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());
+			io = new Io(Main.volume.getPath(),
+					Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
 			SocketProcessor server = new ContainerSocketProcessor(rn, 24, 3);

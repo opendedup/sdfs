@@ -100,6 +100,7 @@ public class VolumeConfigWriter {
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(6);
 	String sdfsCliListenAddr = "localhost";
+	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
@@ -498,6 +499,9 @@ public class VolumeConfigWriter {
 			this.sdfsCliListenAddr = "0.0.0.0";
 			this.networkEnable = true;
 		}
+		if(cmd.hasOption("sdfscli-disable-ssl")) {
+			this.sdfsCliSSL = false;
+		}
 		if (cmd.hasOption("sdfscli-password")) {
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
@@ -659,6 +663,7 @@ public class VolumeConfigWriter {
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
+		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		try {
 			sdfscli.setAttribute("password",
 					HashFunctions.getSHAHash(this.sdfsCliPassword.getBytes(), this.sdfsCliSalt.getBytes()));
@@ -905,6 +910,9 @@ public class VolumeConfigWriter {
 				.withDescription("The aws location for this bucket").hasArg(true).withArgName("aws location").create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-require-auth")
 				.withDescription("Require authentication to connect to the sdfscli managment interface").hasArg(false)
+				.create());
+		options.addOption(OptionBuilder.withLongOpt("sdfscli-disable-ssl")
+				.withDescription("disables ssl to management interface").hasArg(false)
 				.create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-listen-port")
 				.withDescription("TCP/IP Listenting port for the sdfscli management interface").hasArg(true)

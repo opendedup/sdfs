@@ -56,6 +56,9 @@ public class SDFSService {
 
 	public void start(boolean useSSL, int port) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile);
+		if(useSSL) {
+			useSSL = Main.sdfsCliSSL;
+		}
 		if (port != -1)
 			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
@@ -75,6 +78,7 @@ public class SDFSService {
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
 		MgmtWebServer.start(useSSL);
+		
 		if (Main.chunkStoreLocal) {
 			try {
 

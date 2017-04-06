@@ -355,12 +355,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					blob.downloadAttributes();
 					HashMap<String, String> metaData = blob.getMetadata();
 					if (metaData.containsKey("currentlength")) {
-						sz = Long.parseLong(md.get("currentlength"));
+						sz = Long.parseLong(metaData.get("currentlength"));
 						if (sz < 0)
 							sz = 0;
 					}
 					if (metaData.containsKey("compressedlength")) {
-						cl = Long.parseLong(md.get("compressedlength"));
+						cl = Long.parseLong(metaData.get("compressedlength"));
 						if (cl < 0)
 							cl = 0;
 					}

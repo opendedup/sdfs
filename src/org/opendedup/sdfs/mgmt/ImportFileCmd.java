@@ -34,7 +34,7 @@ public class ImportFileCmd implements Runnable {
 	String password;
 	int port;
 	int maxSz= 0;
-	boolean useSSL;
+	boolean useSSL = false;
 	SDFSEvent evt;
 
 	public Element getResult(String srcFile, String destFile, String serverURL, int maxSz)

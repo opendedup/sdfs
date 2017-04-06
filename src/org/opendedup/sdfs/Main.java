@@ -33,7 +33,7 @@ public class Main {
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
 	public static AbstractStreamMatcher matcher = null;
-
+	
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
@@ -47,12 +47,13 @@ public class Main {
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	public static byte MAPVERSION = 0;
-
+	
 	public static String sdfsPassword = "";
 	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
-
+	
+	public static boolean sdfsCliSSL = true;
 	public static boolean sdfsCliRequireAuth = false;
 	public static int sdfsCliPort = 6442;
 	public static boolean sdfsCliEnabled = true;

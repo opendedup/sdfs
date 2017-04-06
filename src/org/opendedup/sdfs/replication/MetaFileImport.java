@@ -72,7 +72,7 @@ public class MetaFileImport implements Serializable {
 	BlockImportEvent levt = null;
 	private boolean closed = false;
 	boolean firstrun = true;
-	private boolean useSSL;
+	private boolean useSSL =false;
 	private Exception lastException;
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,

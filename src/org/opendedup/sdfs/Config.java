@@ -404,6 +404,9 @@ public class Config {
 		Main.sdfsPassword = cli.getAttribute("password");
 		Main.sdfsPasswordSalt = cli.getAttribute("salt");
 		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
+		if(cli.hasAttribute("use-ssl")) {
+			Main.sdfsCliSSL =  Boolean.parseBoolean(cli.getAttribute("use-ssl"));
+		}
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
 				.getAttribute("enable-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");

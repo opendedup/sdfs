@@ -43,7 +43,7 @@ public class ProcessBatchGetBlocks {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try{
 			method = MgmtServerConnection.connectAndPost(server, port,
-					password, sb.toString(), "", file, true);
+					password, sb.toString(), "", file, useSSL);
 			in = method.getResponseBodyAsStream();
 			SDFSLogger.getLog().debug("reading imported blocks");
 			IOUtils.copy(in, out);

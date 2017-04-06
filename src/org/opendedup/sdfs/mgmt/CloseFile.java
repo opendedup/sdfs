@@ -26,17 +26,22 @@ public class CloseFile {
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			mf.setRetentionLock();
-			mf.setDirty(true);
-			mf.unmarshal();
-			mf.getDedupFile(false).forceClose();
-			if (f.exists() && (f.getName().endsWith("F1.img") || f.getName().startsWith("BEOST_"))) {
-				lastClosedFile = mf;
-			}
+			close(mf);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
 			throw new IOException("request to fetch attributes failed because " + e.toString());
+		}
+	}
+	
+	
+	public static void close(MetaDataDedupFile mf) throws IOException {
+		mf.setRetentionLock();
+		mf.setDirty(true);
+		mf.unmarshal();
+		mf.getDedupFile(false).forceClose();
+		if (mf.exists() && (mf.getName().endsWith("F1.img") || mf.getName().startsWith("BEOST_"))) {
+			lastClosedFile = mf;
 		}
 	}
 
