@@ -1352,8 +1352,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public synchronized void setRetentionLock() {
 
-		if (this.retentionLock <= 0)
+		if (this.retentionLock <= 0) {
+			this.dirty = true;
 			this.retentionLock = System.currentTimeMillis();
+		}
 		//SDFSLogger.getLog().info("retention lock set to " + this.retentionLock);
 	}
 

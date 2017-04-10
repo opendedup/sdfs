@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -35,7 +36,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.eventbus.EventBus;
-
 import fuse.Errno;
 import fuse.FuseException;
 import fuse.FuseFtypeConstants;
@@ -148,17 +148,15 @@ public class Io {
 			long start = Long.parseLong(path[2]);
 			int len = Integer.parseInt(path[3]);
 			try {
-				byte[] b = IOUtils.toByteArray(req.getInputStream());
-				if (b.length != len) {
+				ByteBuffer buf = ByteBuffer.allocateDirect(len);
+				req.getByteChannel().read(buf);
+				if (buf.position() != len) {
 					throw new FuseException().initErrno(Errno.EIO);
 				}
-				this.write(fh, ByteBuffer.wrap(b), start);
-				rsp.setContentType("text/xml");
-				rsp.setContentLength(writeof.length);
-				rsp.getOutputStream().write(writeof);
-				rsp.getOutputStream().flush();
+				buf.position(0);
+				this.write(fh, buf, start);
+				rsp.setCode(200);
 				rsp.close();
-				SDFSLogger.getLog().info("done writing");
 			} catch (FuseException e) {
 				this.printError(req, rsp, e.getErrno(), e);
 
@@ -538,7 +536,7 @@ public class Io {
 				return;
 			if (ch != null) {
 				ch.getDedupFile().unRegisterChannel(ch, -2);
-				CloseFile.close(ch.getFile());
+				CloseFile.close(ch.getFile(),ch.isWrittenTo());
 				ch = null;
 			} else {
 				SDFSLogger.getLog().info("channel not found");

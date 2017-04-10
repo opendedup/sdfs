@@ -191,6 +191,10 @@ public class DedupFileChannel {
 	public long size() {
 		return df.getMetaFile().length();
 	}
+	
+	public boolean isWrittenTo(){
+		return this.writtenTo;
+	}
 
 	/**
 	 * 

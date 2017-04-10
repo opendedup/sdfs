@@ -526,6 +526,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				System.out.println("bucketLocation=" + bucketLocation.toString());
 			}
 			if (s3Target != null) {
+				s3Target = s3Target.toLowerCase();
 				s3Service.setEndpoint(s3Target);
 				System.out.println("target=" + s3Target);
 			}

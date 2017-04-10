@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,27 +70,53 @@ public class MgmtWebServer implements Container {
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
 	private static Io io = null;
 
+	public static Map<String, String> splitQuery(String query) {
+
+		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+		if (query != null) {
+			try {
+				String[] pairs = query.split("&");
+				for (String pair : pairs) {
+					int idx = pair.indexOf("=");
+					query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
+							URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to parse " + query, e);
+			}
+		}
+		return query_pairs;
+	}
+
 	@Override
 	public void handle(Request request, Response response) {
 		try {
 			Path reqPath = request.getPath();
-
+			String[] parts = request.getTarget().split("\\?");
+			Map<String, String> qry =null;
+			if (parts.length > 1) {
+				qry = splitQuery(parts[1]);
+			} else {
+				qry = splitQuery(null);
+			}
 			boolean cmdReq = reqPath.getPath().trim().equalsIgnoreCase("/");
+
 			String file = null;
-			if (request.getQuery().containsKey("file"))
-				file = request.getQuery().get("file");
-			String cmd = request.getQuery().get("cmd");
+
+			if (qry.containsKey("file"))
+				file = qry.get("file");
+			String cmd = qry.get("cmd");
 			if (cmd != null)
 				cmd = cmd.toLowerCase();
 
 			String cmdOptions = null;
-			if (request.getQuery().containsKey("options"))
-				cmdOptions = request.getQuery().get("options");
+			if (qry.containsKey("options"))
+				cmdOptions = qry.get("options");
 			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
-			
+
 			boolean auth = false;
 			if (Main.sdfsCliRequireAuth) {
-				String password = request.getQuery().get("password");
+				String password = qry.get("password");
 				if (password != null) {
 					String hash = HashFunctions.getSHAHash(password.trim().getBytes(),
 							Main.sdfsPasswordSalt.getBytes());
@@ -121,10 +149,10 @@ public class MgmtWebServer implements Container {
 					case "info":
 						try {
 							boolean shortList = false;
-							if(request.getQuery().containsKey("short")) {
-								shortList  = Boolean.parseBoolean(request.getQuery().get("short"));
+							if (qry.containsKey("short")) {
+								shortList = Boolean.parseBoolean(qry.get("short"));
 							}
-							Element msg = new GetAttributes().getResult(cmdOptions, file,shortList);
+							Element msg = new GetAttributes().getResult(cmdOptions, file, shortList);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							doc.adoptNode(msg);
@@ -137,10 +165,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "setattribute":
 						try {
-							String name = request.getQuery().get("name");
+							String name = qry.get("name");
 							String value = null;
-							if (request.getQuery().containsKey("value"))
-								value = request.getQuery().get("value");
+							if (qry.containsKey("value"))
+								value = qry.get("value");
 							SetFileAttribute.getResult(file, name, value);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -178,11 +206,11 @@ public class MgmtWebServer implements Container {
 						break;
 					case "ostevtset":
 						try {
-							long seqnum = Long.parseLong(request.getQuery().get("num"));
-							String data = request.getQuery().get("event");
+							long seqnum = Long.parseLong(qry.get("num"));
+							String data = qry.get("event");
 							String payload = null;
-							if (request.getQuery().containsKey("payload"))
-								payload = request.getQuery().get("payload");
+							if (qry.containsKey("payload"))
+								payload = qry.get("payload");
 							OSTEventStore.AddOSTEvent(seqnum, data, payload);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -195,8 +223,8 @@ public class MgmtWebServer implements Container {
 						break;
 					case "ostevtsetpayload":
 						try {
-							long seqnum = Long.parseLong(request.getQuery().get("num"));
-							String payload = request.getQuery().get("payload");
+							long seqnum = Long.parseLong(qry.get("num"));
+							String payload = qry.get("payload");
 							OSTEventStore.SetOSTEventPayload(seqnum, payload);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -209,7 +237,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "ostevtget":
 						try {
-							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							long seqnum = Long.parseLong(qry.get("num"));
 							Element msg = OSTEventStore.getOSTEvent(seqnum);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -223,7 +251,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "ostevtdelete":
 						try {
-							long seqnum = Long.parseLong(request.getQuery().get("num"));
+							long seqnum = Long.parseLong(qry.get("num"));
 							OSTEventStore.DeleteOSTEvent(seqnum);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -262,7 +290,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "syncvolume":
 						try {
-							new SyncFromConnectedVolume().getResult(Long.parseLong(request.getQuery().get("id")));
+							new SyncFromConnectedVolume().getResult(Long.parseLong(qry.get("id")));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 						} catch (IOException e) {
@@ -273,7 +301,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "deletevolume":
 						try {
-							new DeleteConnectedVolume().getResult(Long.parseLong(request.getQuery().get("id")));
+							new DeleteConnectedVolume().getResult(Long.parseLong(qry.get("id")));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 						} catch (IOException e) {
@@ -285,12 +313,12 @@ public class MgmtWebServer implements Container {
 					case "deletefile":
 						try {
 							String changeid = null;
-							if (request.getQuery().containsKey("changeid")) {
-								changeid = request.getQuery().get("changeid");
+							if (qry.containsKey("changeid")) {
+								changeid = qry.get("changeid");
 							}
 							boolean rmlock = false;
-							if (request.getQuery().containsKey("retentionlock"))
-								rmlock = Boolean.parseBoolean(request.getQuery().get("retentionlock"));
+							if (qry.containsKey("retentionlock"))
+								rmlock = Boolean.parseBoolean(qry.get("retentionlock"));
 							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -305,12 +333,12 @@ public class MgmtWebServer implements Container {
 						try {
 
 							String dstfile = null;
-							if (request.getQuery().containsKey("dstfile")) {
-								dstfile = request.getQuery().get("dstfile");
+							if (qry.containsKey("dstfile")) {
+								dstfile = qry.get("dstfile");
 							}
 							boolean overwrite = false;
-							if (request.getQuery().containsKey("overwrite")) {
-								overwrite = Boolean.parseBoolean(request.getQuery().get("overwrite"));
+							if (qry.containsKey("overwrite")) {
+								overwrite = Boolean.parseBoolean(qry.get("overwrite"));
 							}
 							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite);
 							result.setAttribute("status", "success");
@@ -326,10 +354,10 @@ public class MgmtWebServer implements Container {
 						try {
 
 							String dstfile = null;
-							if (request.getQuery().containsKey("dstfile")) {
-								dstfile = request.getQuery().get("dstfile");
+							if (qry.containsKey("dstfile")) {
+								dstfile = qry.get("dstfile");
 							}
-							String changeid = request.getQuery().get("changeid");
+							String changeid = qry.get("changeid");
 							Element msg = new GetCloudMetaFile().getResult(file, dstfile, changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -342,7 +370,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "clouddbfile":
 						try {
-							String changeid = request.getQuery().get("changeid");
+							String changeid = qry.get("changeid");
 							Element msg = new GetCloudDBFile().getResult(file, changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -355,7 +383,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "setcachesz":
 						try {
-							Element msg = new SetCacheSize().getResult(request.getQuery().get("sz"));
+							Element msg = new SetCacheSize().getResult(qry.get("sz"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
@@ -367,7 +395,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "setreadspeed":
 						try {
-							Element msg = new SetReadSpeed().getResult(request.getQuery().get("sp"));
+							Element msg = new SetReadSpeed().getResult(qry.get("sp"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
@@ -392,7 +420,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "setwritespeed":
 						try {
-							Element msg = new SetWriteSpeed().getResult(request.getQuery().get("sp"));
+							Element msg = new SetWriteSpeed().getResult(qry.get("sp"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
@@ -430,11 +458,11 @@ public class MgmtWebServer implements Container {
 						break;
 					case "copyextents":
 						try {
-							String srcfile = request.getQuery().get("srcfile");
-							String dstfile = request.getQuery().get("dstfile");
-							long sstart = Long.parseLong(request.getQuery().get("sstart"));
-							long len = Long.parseLong(request.getQuery().get("len"));
-							long dstart = Long.parseLong(request.getQuery().get("dstart"));
+							String srcfile = qry.get("srcfile");
+							String dstfile = qry.get("dstfile");
+							long sstart = Long.parseLong(qry.get("sstart"));
+							long len = Long.parseLong(qry.get("len"));
+							long dstart = Long.parseLong(qry.get("dstart"));
 
 							Element msg = new CopyExtents().getResult(srcfile, dstfile, sstart, len, dstart);
 							result.setAttribute("status", "success");
@@ -449,9 +477,9 @@ public class MgmtWebServer implements Container {
 
 					case "filteredinfo":
 						try {
-							boolean includeFiles = Boolean.parseBoolean(request.getQuery().get("includefiles"));
-							boolean includeFolders = Boolean.parseBoolean(request.getQuery().get("includefolders"));
-							int level = Integer.parseInt(request.getQuery().get("level"));
+							boolean includeFiles = Boolean.parseBoolean(qry.get("includefiles"));
+							boolean includeFolders = Boolean.parseBoolean(qry.get("includefolders"));
+							int level = Integer.parseInt(qry.get("level"));
 							Element msg = new GetFilteredFileAttributes().getResult(cmdOptions, file, includeFiles,
 									includeFolders, level);
 							result.setAttribute("status", "success");
@@ -522,12 +550,11 @@ public class MgmtWebServer implements Container {
 						break;
 					case "blockdev-add":
 						try {
-							Element el = new BlockDeviceAdd().getResult(request.getQuery().get("devname"),
-									request.getQuery().get("size"), request.getQuery().get("start"));
+							Element el = new BlockDeviceAdd().getResult(qry.get("devname"), qry.get("size"),
+									qry.get("start"));
 
 							result.setAttribute("status", "success");
-							result.setAttribute("msg",
-									"successfully added block device [" + request.getQuery().get("devname") + "]");
+							result.setAttribute("msg", "successfully added block device [" + qry.get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -537,10 +564,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "blockdev-rm":
 						try {
-							Element el = new BlockDeviceRm().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceRm().getResult(qry.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully removed block device [" + request.getQuery().get("devname") + "]");
+									"successfully removed block device [" + qry.get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -550,10 +577,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "blockdev-start":
 						try {
-							Element el = new BlockDeviceStart().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStart().getResult(qry.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully started block device [" + request.getQuery().get("devname") + "]");
+									"successfully started block device [" + qry.get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -563,10 +590,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "blockdev-stop":
 						try {
-							Element el = new BlockDeviceStop().getResult(request.getQuery().get("devname"));
+							Element el = new BlockDeviceStop().getResult(qry.get("devname"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully stopped block device [" + request.getQuery().get("devname") + "]");
+									"successfully stopped block device [" + qry.get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -590,11 +617,11 @@ public class MgmtWebServer implements Container {
 						break;
 					case "blockdev-update":
 						try {
-							Element el = new BlockDeviceUpdate().getResult(request.getQuery().get("devname"),
-									request.getQuery().get("param"), request.getQuery().get("value"));
+							Element el = new BlockDeviceUpdate().getResult(qry.get("devname"), qry.get("param"),
+									qry.get("value"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg",
-									"successfully updated block device [" + request.getQuery().get("devname") + "]");
+									"successfully updated block device [" + qry.get("devname") + "]");
 							result.appendChild(doc.adoptNode(el));
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
@@ -604,13 +631,15 @@ public class MgmtWebServer implements Container {
 						break;
 					case "close-file":
 						long fd = -1;
-						if (request.getQuery().containsKey("fd"))
-							fd = Long.parseLong(request.getQuery().get("fd"));
-						new CloseFile().getResult(cmdOptions, file, fd);
+						if (qry.containsKey("fd"))
+							fd = Long.parseLong(qry.get("fd"));
+						boolean written = false;
+						if(qry.containsKey("written"))
+							written = Boolean.parseBoolean(qry.get("written"));
+						new CloseFile().getResult(cmdOptions,written, file, fd);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", "command completed successfully");
 						break;
-
 					case "set-gc-schedule":
 						try {
 							new SetGCSchedule().getResult(cmdOptions, file);
@@ -708,7 +737,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "changepassword":
 						try {
-							String msg = new SetPasswordCmd().getResult("", request.getQuery().get("newpassword"));
+							String msg = new SetPasswordCmd().getResult("", qry.get("newpassword"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
 						} catch (IOException e) {
@@ -745,18 +774,18 @@ public class MgmtWebServer implements Container {
 						break;
 					case "importarchive":
 						try {
-							String server = request.getQuery().get("server");
-							String password = request.getQuery().get("spasswd");
-							int port = Integer.parseInt(request.getQuery().get("port"));
+							String server = qry.get("server");
+							String password = qry.get("spasswd");
+							int port = Integer.parseInt(qry.get("port"));
 							boolean lz4 = false;
 							int maxSz = 30;
 							boolean useSSL = false;
-							if (request.getQuery().containsKey("maxsz"))
-								maxSz = Integer.parseInt(request.getQuery().get("maxsz"));
-							if (request.getQuery().containsKey("useSSL"))
-								useSSL = Boolean.parseBoolean(request.getQuery().get("useSSL"));
-							if (request.getQuery().containsKey("uselz4"))
-								lz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
+							if (qry.containsKey("maxsz"))
+								maxSz = Integer.parseInt(qry.get("maxsz"));
+							if (qry.containsKey("useSSL"))
+								useSSL = Boolean.parseBoolean(qry.get("useSSL"));
+							if (qry.containsKey("uselz4"))
+								lz4 = Boolean.parseBoolean(qry.get("uselz4"));
 							Element msg = new ImportArchiveCmd().getResult(file, cmdOptions, server, password, port,
 									maxSz, useSSL, lz4);
 							result.setAttribute("status", "success");
@@ -771,10 +800,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "importfile":
 						try {
-							String srcFile = request.getQuery().get("srcfile");
-							String destFile = request.getQuery().get("dstfile");
-							String server = request.getQuery().get("server");
-							int maxsz = Integer.parseInt(request.getQuery().get("maxsz"));
+							String srcFile = qry.get("srcfile");
+							String destFile = qry.get("dstfile");
+							String server = qry.get("server");
+							int maxsz = Integer.parseInt(qry.get("maxsz"));
 							Element msg = new ImportFileCmd().getResult(srcFile, destFile, server, maxsz);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "replication started successfully");
@@ -807,7 +836,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "cancelimport":
 						try {
-							String uuid = request.getQuery().get("uuid");
+							String uuid = qry.get("uuid");
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", new CancelImportArchiveCmd().getResult(uuid));
 						} catch (Exception e) {
@@ -819,8 +848,8 @@ public class MgmtWebServer implements Container {
 					case "archiveout":
 						try {
 							boolean uselz4 = false;
-							if (request.getQuery().containsKey("uselz4"))
-								uselz4 = Boolean.parseBoolean(request.getQuery().get("uselz4"));
+							if (qry.containsKey("uselz4"))
+								uselz4 = Boolean.parseBoolean(qry.get("uselz4"));
 							Element msg = new ArchiveOutCmd().getResult(cmdOptions, file, uselz4);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "archive out started successfully");
@@ -835,7 +864,7 @@ public class MgmtWebServer implements Container {
 
 					case "msnapshot":
 						try {
-							int snaps = request.getQuery().getInteger("snaps");
+							int snaps = Integer.parseInt(qry.get("snaps"));
 							String msg = new MultiSnapshotCmd(snaps).getResult(cmdOptions, file);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
@@ -858,7 +887,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "expandvolume":
 						try {
-							String size = request.getQuery().get("size");
+							String size = qry.get("size");
 							String msg = new ExpandVolumeCmd().getResult(cmdOptions, size);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
@@ -932,7 +961,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "event":
 						try {
-							String uuid = request.getQuery().get("uuid");
+							String uuid = qry.get("uuid");
 							Element emsg = new GetEvent().getResult(uuid);
 							result.setAttribute("status", "success");
 							doc.adoptNode(emsg);
@@ -984,21 +1013,21 @@ public class MgmtWebServer implements Container {
 					body.println("invalid path " + reqPath.getPath());
 					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
 					body.close();
-				} else if(request.getTarget().startsWith(IO_PATH)){
+				} else if (request.getTarget().startsWith(IO_PATH)) {
 					String pth = request.getTarget().substring(IO_PATH.length()).split("\\?")[0];
-					//SDFSLogger.getLog().info("io path=" + pth);
+					// SDFSLogger.getLog().info("io path=" + pth);
 					io.processIo(request, response, pth);
-				}else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
+				} else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);
 					response.setDate("Last-Modified", time);
 					String guid = request.getTarget().substring(Main.matcher.getWPath().length());
-					//SDFSLogger.getLog().info("path=" + request.getTarget());
-					//SDFSLogger.getLog().info("guid=" + guid);
+					// SDFSLogger.getLog().info("path=" + request.getTarget());
+					// SDFSLogger.getLog().info("guid=" + guid);
 					guid = guid.split("\\?")[0];
-					//SDFSLogger.getLog().info("guid=" + guid);
+					// SDFSLogger.getLog().info("guid=" + guid);
 					String pth = guid.split("/")[0];
-					//SDFSLogger.getLog().info("pth=" + pth);
+					// SDFSLogger.getLog().info("pth=" + pth);
 					long start = Long.parseLong(guid.split("/")[1]);
 					pth = URLDecoder.decode(pth, "UTF-8");
 					Main.matcher.getResult(pth, start, response);
@@ -1052,13 +1081,13 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 
 					String guid = request.getTarget().substring(MAPDATA_PATH.length());
-					//SDFSLogger.getLog().info("path=" + request.getTarget());
-					//SDFSLogger.getLog().info("guid=" + guid);
+					// SDFSLogger.getLog().info("path=" + request.getTarget());
+					// SDFSLogger.getLog().info("guid=" + guid);
 					guid = guid.split("\\?")[0];
 					guid = URLDecoder.decode(guid, "UTF-8");
 					String path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
 							+ File.separator + guid + ".map";
-					//SDFSLogger.getLog().info("Downloading " + path);
+					// SDFSLogger.getLog().info("Downloading " + path);
 					File f = new File(path);
 					if (!f.exists()) {
 						path = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid
@@ -1069,7 +1098,8 @@ public class MgmtWebServer implements Container {
 						response.setValue("metadatacomp", "false");
 					}
 					f = new File(path);
-					//SDFSLogger.getLog().info("Downloading " + path + " size=" + f.length());
+					// SDFSLogger.getLog().info("Downloading " + path + " size="
+					// + f.length());
 					response.setContentLength(f.length());
 					this.downloadFile(f, request, response);
 				} else if (request.getTarget().startsWith(BLOCK_PATH)) {
@@ -1216,11 +1246,10 @@ public class MgmtWebServer implements Container {
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());
-			io = new Io(Main.volume.getPath(),
-					Main.volumeMountPoint);
+			io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
-			SocketProcessor server = new ContainerSocketProcessor(rn, 24, 3);
+			SocketProcessor server = new ContainerSocketProcessor(rn, 32, 16);
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);

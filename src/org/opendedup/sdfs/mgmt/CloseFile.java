@@ -16,7 +16,7 @@ public class CloseFile {
 
 	public static MetaDataDedupFile lastClosedFile = null;
 
-	public Element getResult(String cmd, String file, long fd) throws IOException {
+	public Element getResult(String cmd, boolean written, String file, long fd) throws IOException {
 		try {
 			if (fd != -1) {
 				DedupFileChannel ch = OpenFile.OpenChannels.remove(fd);
@@ -26,22 +26,23 @@ public class CloseFile {
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
-			close(mf);
+			close(mf, written);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
 			throw new IOException("request to fetch attributes failed because " + e.toString());
 		}
 	}
-	
-	
-	public static void close(MetaDataDedupFile mf) throws IOException {
-		mf.setRetentionLock();
-		mf.setDirty(true);
-		mf.unmarshal();
-		mf.getDedupFile(false).forceClose();
-		if (mf.exists() && (mf.getName().endsWith("F1.img") || mf.getName().startsWith("BEOST_"))) {
-			lastClosedFile = mf;
+
+	public static void close(MetaDataDedupFile mf, boolean written) throws IOException {
+
+		if (written) {
+			mf.setRetentionLock();
+			mf.setDirty(true);
+			mf.unmarshal();
+			if (mf.exists() && (mf.getName().endsWith("F1.img") || mf.getName().startsWith("BEOST_"))) {
+				lastClosedFile = mf;
+			}
 		}
 	}
 
