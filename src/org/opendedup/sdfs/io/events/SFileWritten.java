@@ -53,7 +53,7 @@ public class SFileWritten  extends GenericEvent{
 		dataset.addProperty("timestamp", Long.toString(System.currentTimeMillis()));
 		dataset.addProperty("location", this.location);
 		dataset.addProperty("file", fl);
-		dataset.addProperty("object", sf.getGUID() + "-" + this.location);
+		dataset.addProperty("object", sf.getGUID());
 		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
 				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
 				.create();
