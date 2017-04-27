@@ -1633,4 +1633,10 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		
 	}
 
+	@Override
+	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

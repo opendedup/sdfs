@@ -1973,4 +1973,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	}
 
+	@Override
+	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -60,8 +60,9 @@ public class GetCloudDBFile implements Runnable {
 			Element root = doc.getDocumentElement();
 			fevt.maxCt = 4;
 			fevt.curCt = 1;
-			fevt.shortMsg = "Downloading Metadata at [" + guid + "]";
+			fevt.shortMsg = "Downloading ddb at [" + guid + "]";
 			ddb = FileReplicationService.getDDB(guid);
+			SDFSLogger.getLog().info("size is " +ddb.size() + " guid is " + guid);
 			if (ddb.getVersion() < 3)
 				throw new IOException(
 						"only files version 3 or later can be imported");
@@ -88,14 +89,18 @@ public class GetCloudDBFile implements Runnable {
 	private void checkDedupFile(LongByteArrayMap ddb, SDFSEvent fevt)
 			throws IOException {
 		fevt.shortMsg = "Importing hashes for file";
+		SDFSLogger.getLog().info( "Importing hashes for file");
 		Set<Long> blks = new HashSet<Long>();
 		if (ddb.getVersion() < 3)
 			throw new IOException(
 					"only files version 3 or later can be imported");
+		long k = 0;
 		try {
+			
 			ddb.iterInit();
 			for (;;) {
 				LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+				
 				if (kv == null)
 					break;
 				SparseDataChunk ck = kv.getValue();
@@ -119,6 +124,7 @@ public class GetCloudDBFile implements Runnable {
 				}
 				if (dirty)
 					ddb.put(kv.getKey(), ck);
+				k++;
 			}
 			for (Long l : blks) {
 				boolean inserted = false;
@@ -143,6 +149,7 @@ public class GetCloudDBFile implements Runnable {
 					e);
 			throw new IOException(e);
 		} finally {
+			SDFSLogger.getLog().info("done checking file [" + ddb + "] imported " +blks.size() + " k=" +k);
 			ddb.close();
 			ddb = null;
 		}

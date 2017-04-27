@@ -1635,4 +1635,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 	}
 
+	@Override
+	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

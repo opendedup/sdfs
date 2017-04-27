@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -662,7 +663,6 @@ public class ShardedFileByteArrayLongMap2
 	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		this.hashlock.readLock().lock();
 		try {
-
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
@@ -745,7 +745,6 @@ public class ShardedFileByteArrayLongMap2
 		} finally {
 			this.hashlock.readLock().unlock();
 		}
-
 	}
 
 	/*
@@ -1337,6 +1336,7 @@ public class ShardedFileByteArrayLongMap2
 				} else {
 					long _val = this.kFC.getLong(pos + VP);
 					if (_val == val) {
+						
 						ct += this.kFC.getLong(pos + ZL);
 						this.kFC.putLong(pos + ZL, ct);
 						this.claims.set(pos / EL);
@@ -1367,7 +1367,10 @@ public class ShardedFileByteArrayLongMap2
 
 						if (claim) {
 							long clr = this.kFC.getLong(pos + ZL);
+							if(clr < 0)
+								clr =0;
 							this.kFC.position(pos + ZL);
+							
 							clr++;
 							this.kFC.putLong(clr);
 							pos = (pos / EL);
@@ -1409,11 +1412,15 @@ public class ShardedFileByteArrayLongMap2
 				}
 				if (pos < 0) {
 					int npos = -pos - 1;
-					// npos = (npos / EL);
+					long nv = this.kFC.getLong(npos + VP);
 					long ct = this.kFC.getLong(npos + ZL);
+					if(ct < 0)
+						ct = 0;
 					this.kFC.putLong(npos + ZL, ct++);
 					this.claims.set(npos / EL);
-					return new InsertRecord(false, this.get(key, true));
+					this.removed.clear(npos / EL);
+					this.mapped.set(npos / EL);
+					return new InsertRecord(false, nv);
 				} else {
 					this.kFC.position(pos);
 					this.kFC.put(key);
@@ -1427,7 +1434,6 @@ public class ShardedFileByteArrayLongMap2
 					this.mapped.set(pos);
 					this.currentSz++;
 					this.removed.clear(pos);
-
 					return new InsertRecord(true, value);
 				}
 			}

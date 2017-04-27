@@ -708,4 +708,10 @@ public class BatchFileChunkStore implements AbstractChunkStore,
 		HashBlobArchive.setCompressedLength(0);
 	}
 
+	@Override
+	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -21,6 +21,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -326,7 +327,6 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 				} catch (MapClosedException e) {
 				}
 			}
-			SDFSLogger.getLog().debug("miss2");
 			return false;
 		} finally {
 			l.unlock();
@@ -947,10 +947,14 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 				}
 			} else {
 				try {
-					rec = new InsertRecord(false, rm.get(cm.getHash(),true));
+					long lp = rm.get(cm.getHash(),true);
+					if(lp == -1)
+						return put(cm, persist);
+					else
+						rec = new InsertRecord(false,lp);
 				} catch (MapClosedException e) {
 					this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
-					put(cm, persist);
+					return put(cm, persist);
 				}
 			}
 			// this.msTr.addAndGet(tm);

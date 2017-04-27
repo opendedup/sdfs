@@ -64,6 +64,7 @@ public class GetCloudFile implements Runnable {
 				mf = FileReplicationService.getMF(file);
 				mf.setLocalOwner(false);
 				fevt.shortMsg = "Downloading Map Metadata for [" + file + "]";
+				
 				LongByteArrayMap ddb = null;
 				FileReplicationService.getDDB(mf.getDfGuid());
 				if (df != null) {

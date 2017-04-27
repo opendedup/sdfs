@@ -141,7 +141,9 @@ public class FileReplicationService {
 	}
 
 	public static LongByteArrayMap getDDB(String fname) throws Exception {
-		LongByteArrayMap m = LongByteArrayMap.getMap(service.downloadDDBFile(fname).getPath());
+		File f = service.downloadDDBFile(fname);
+		SDFSLogger.getLog().info("downloaded " + f.getPath() + " size= " + f.length());
+		LongByteArrayMap m = LongByteArrayMap.getMap(fname);
 		service.sync.checkoutFile("ddb/" + fname);
 		return m;
 	}
