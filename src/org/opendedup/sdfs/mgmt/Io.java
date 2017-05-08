@@ -43,8 +43,8 @@ import fuse.FuseFtypeConstants;
 public class Io {
 	AtomicLong nextHandleNo = new AtomicLong(1000);
 	ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
-	public String mountedVolume;
-	public String mountPoint;
+	public final String mountedVolume;
+	public final String mountPoint;
 
 	private static EventBus eventBus = new EventBus();
 
@@ -55,26 +55,29 @@ public class Io {
 	public Io(String mountedVolume, String mountPoint) {
 
 		SDFSLogger.getLog().info("mounting " + mountedVolume + " to " + mountPoint);
+		
+		if (!mountedVolume.endsWith("/"))
+			mountedVolume = mountedVolume + "/";
 		this.mountedVolume = mountedVolume;
-		if (!this.mountedVolume.endsWith("/"))
-			this.mountedVolume = this.mountedVolume + "/";
+		if (!mountPoint.endsWith("/"))
+			mountPoint = mountPoint + "/";
+
 		this.mountPoint = mountPoint;
-		if (!this.mountPoint.endsWith("/"))
-			this.mountPoint = this.mountPoint + "/";
 		File f = new File(this.mountedVolume);
 		if (!f.exists())
 			f.mkdirs();
 	}
 
 	private File resolvePath(String path) throws FuseException {
-		String pt = mountedVolume + path;
+		String pt = mountedVolume + path.trim();
 		File _f = new File(pt);
 
 		if (!_f.exists()) {
-			_f = null;
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("No such node");
-			SDFSLogger.getLog().error("no such node " + path);
+			SDFSLogger.getLog().error("no such node " + _f.getPath());
+
+			_f = null;
 			throw new FuseException().initErrno(Errno.ENOENT);
 		}
 		return _f;

@@ -294,7 +294,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						SparseDataChunk ck = new SparseDataChunk(val, this.version);
 						if (index) {
 							for (HashLocPair p : ck.getFingers().values()) {
-								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
+								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 							}
 						}
 						return ck;
@@ -329,7 +329,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						SparseDataChunk ck = new SparseDataChunk(val, this.version);
 						if (index) {
 							for (HashLocPair p : ck.getFingers().values()) {
-								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
+								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 							}
 						}
 						return new LongKeyValue(iterPos.get() * Main.CHUNK_LENGTH, ck);
@@ -477,6 +477,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			 * IOException("data length " + data.length + " does not equal " +
 			 * arrayLength);
 			 */
+			/*
 			if (Main.refCount) {
 				SparseDataChunk ck = this.get(pos);
 				if (ck != null) {
@@ -484,12 +485,13 @@ public class LongByteArrayMap implements DataMapInterface {
 						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc));
 					}
 				}
+				*/
 				/*
 				for (HashLocPair p : data.getFingers().values()) {
 					DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
 				}
 				*/
-			}
+			//}
 			// rf.seek(fpos);
 			// rf.write(data);
 			pbdb.write(ByteBuffer.wrap(data.getBytes()), fpos);
@@ -542,7 +544,7 @@ public class LongByteArrayMap implements DataMapInterface {
 							if (!Arrays.equals(val, FREE)) {
 								SparseDataChunk ck = new SparseDataChunk(val, this.version);
 								for (HashLocPair p : ck.getFingers().values()) {
-									DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc));
+									DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 								}
 							}
 						}
@@ -588,7 +590,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				while (kv != null && kv.getKey() < fpos) {
 					SparseDataChunk ck = kv.getValue();
 					for (HashLocPair p : ck.getFingers().values()) {
-						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc));
+						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 					}
 					kv = this.nextKeyValue(false);
 				}
@@ -746,7 +748,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				SparseDataChunk ck = this.nextValue(false);
 				while (ck != null) {
 					for (HashLocPair p : ck.getFingers().values()) {
-						boolean rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc));
+						boolean rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 						if (!rm)
 							SDFSLogger.getLog().warn("unable to remove orphaned reference "
 									+ StringUtils.getHexString(p.hash) + " loc=" + Longs.fromByteArray(p.hashloc));

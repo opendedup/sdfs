@@ -990,17 +990,14 @@ public class WinSDFS implements DokanOperations {
 				Long k = new Long(handleNo);
 				DedupFileChannel ch = dedupChannels.remove(k);
 				if (ch != null) {
-					SDFSLogger.getLog().info("removed channel " + k);
 					ch.getDedupFile().unRegisterChannel(ch, -1);
 					if (ch.getFile() != null && ch.getFile().deleteOnClose) {
 						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true);
 						log.debug("Deleted file on close");
 					}
 				}
-				else {
-					SDFSLogger.getLog().info("did not remove channel " + k);
-				}
-				SDFSLogger.getLog().info("open channel size is " + dedupChannels.size());
+				
+				//SDFSLogger.getLog().info("open channel size is " + dedupChannels.size());
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while reading data", e);
 				errRtn = e;

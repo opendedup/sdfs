@@ -32,8 +32,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 //import org.opendedup.util.StringUtils;
+
+import com.google.common.primitives.Longs;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
@@ -187,7 +190,9 @@ public class SparseDataChunk implements Externalizable {
 					h.pos = ep;
 					h.offset += no;
 					h.nlen -= no;
-					ar.remove(hpos);
+					HashLocPair k = ar.remove(hpos);
+					if(Main.refCount)
+						DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1);
 					ar.put(h.pos, h);
 					
 					// SDFSLogger.getLog().info("2 changing pos from " +oh
@@ -206,11 +211,15 @@ public class SparseDataChunk implements Externalizable {
 						else
 							_h.setDup(true);
 						ar.put(_h.pos, h);
+						
 					}
 					if (h.pos < p.pos) {
 						h.nlen = (p.pos - h.pos);
 					} else {
-						ar.remove(h.pos);
+						
+						HashLocPair k= ar.remove(h.pos);
+						if(Main.refCount)
+							DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1);
 					}
 				}
 			_ep = h.pos-1;
@@ -221,6 +230,8 @@ public class SparseDataChunk implements Externalizable {
 			
 			
 		} ar.put(p.pos, p);
+		if(Main.refCount)
+			DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 			
 	}
 

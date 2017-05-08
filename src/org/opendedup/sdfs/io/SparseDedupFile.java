@@ -479,7 +479,6 @@ public class SparseDedupFile implements DedupFile {
 
 							TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
-
 								@Override
 								public void commandException(Finger result, Throwable e) {
 									int _dn = this.incrementandGetDN();

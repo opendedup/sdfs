@@ -150,6 +150,10 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	public int getMaxSz() {
 		return this.size;
 	}
+	
+	public int getWMaxSz() {
+		return (int)(this.size *.75);
+	}
 
 	/**
 	 * initializes the Object set of this hash table.

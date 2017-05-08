@@ -221,6 +221,8 @@ public class HashStore {
 		byte [] data = bdb.getData(hash,pos);
 		if (data == null && Arrays.equals(hash, blankHash)) {
 			hs = new HashChunk(hash, new byte[blankData.length], false);
+		} else if(data == null) {
+			SDFSLogger.getLog().warn("data null for [" + StringUtils.getHexString(hash) + "] [" + pos + "]");
 		}
 		hs = new HashChunk(hash, data, false);
 		// this.cacheBuffers.put(hStr, hs);

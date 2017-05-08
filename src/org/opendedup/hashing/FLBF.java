@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 
 
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,12 +35,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob;
 import org.opendedup.utils.hashing.FileBasedBloomFilter;
 
-import static java.lang.Math.toIntExact;
+import com.duprasville.guava.probably.CuckooFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
-import orestes.bloomfilter.FilterBuilder;
-import orestes.bloomfilter.memory.CountingBloomFilterMemory;
 
 public class FLBF implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -47,7 +46,7 @@ public class FLBF implements Serializable {
 	public transient ReentrantReadWriteLock l = new ReentrantReadWriteLock();
 	boolean counting = false;
 	File path = null;
-	CountingBloomFilterMemory<Object> filter = null;
+	CuckooFilter filter = null;
 	private static Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
 		/**
 		 * 
@@ -64,7 +63,6 @@ public class FLBF implements Serializable {
 		}
 	};
 
-	@SuppressWarnings("unchecked")
 	public FLBF(long sz, double fpp, File path, boolean memory, boolean counting) throws IOException {
 		this.counting = counting;
 		if (counting) {
@@ -74,7 +72,7 @@ public class FLBF implements Serializable {
 				FileInputStream fin = new FileInputStream(path);
 				ObjectInputStream oon = new ObjectInputStream(fin);
 				try {
-					filter = (CountingBloomFilterMemory<Object>) oon.readObject();
+					filter = (CuckooFilter) oon.readObject();
 				} catch (Exception e) {
 					try {
 						oon.close();
@@ -88,8 +86,7 @@ public class FLBF implements Serializable {
 				oon.close();
 				path.delete();
 			} else {
-				FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(1);
-				filter = new CountingBloomFilterMemory<>(fb);
+				this.filter =  CuckooFilter.create( sz, fpp);
 			}
 		} else {
 			this.bfs = FileBasedBloomFilter.create(getFunnel(), sz, fpp, path.getPath(), memory);
@@ -97,9 +94,7 @@ public class FLBF implements Serializable {
 	}
 
 	public long getSize() {
-		if (this.counting)
-			return Math.round(this.filter.getEstimatedPopulation());
-		else
+		
 			return 0;
 	}
 
@@ -114,12 +109,12 @@ public class FLBF implements Serializable {
 			l.readLock().unlock();
 		}
 	}
-
+	
 	public void put(byte[] bytes) {
 		l.writeLock().lock();
 		try {
 			if (this.counting) {
-				this.filter.addRaw(bytes);
+				this.filter.add(bytes);
 				return;
 			} else {
 
@@ -168,7 +163,7 @@ public class FLBF implements Serializable {
 		l.writeLock().lock();
 		try {
 			if (counting) {
-				this.filter.removeRaw(data);
+				this.filter.remove(data);
 			} else {
 				throw new IOException("not implemented");
 			}

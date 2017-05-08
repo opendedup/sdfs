@@ -385,6 +385,9 @@ public class Config {
 		if(localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
 		}
+		if(localChunkStore.hasAttribute("cuckoo")) {
+			Main.CUCKOO = Boolean.parseBoolean(localChunkStore.getAttribute("cuckoo"));
+		}
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
 		if (localChunkStore.hasAttribute("io-threads")) {

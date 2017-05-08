@@ -169,5 +169,19 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public void setDup(boolean dup) {
 		this.dup = dup;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		HashLocPair p = (HashLocPair)obj;
+		if(Arrays.equals(p.hash, this.hash) && Arrays.equals(p.hashloc, this.hashloc))
+			return true;
+		else
+			return false;
+	}
 
+	
+	@Override
+	public int hashCode() {
+		return ByteBuffer.wrap(this.hash).getInt();
+	}
 }

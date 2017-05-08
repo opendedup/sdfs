@@ -20,12 +20,12 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
-
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -45,6 +45,7 @@ import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 
@@ -83,7 +84,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean reconstructed;
 	private boolean hlAdded = false;
 	private boolean direct = false;
-	private TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
+	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
 	int sz;
 	private static SynchronousQueue<Runnable> lworksQueue = null;
 	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
@@ -91,11 +92,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static ThreadPoolExecutor executor = null;
 	private static SynchronousQueue<Runnable> worksQueue = null;
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
-	public static final byte [] blankBlock = new byte[VariableHashEngine.minLen+1];
-	public static final byte [] bk = new Murmur3HashEngine().getHash(blankBlock);
+	public static final byte[] blankBlock = new byte[VariableHashEngine.minLen + 1];
+	public static final byte[] bk = new Murmur3HashEngine().getHash(blankBlock);
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
-		if(!Main.chunkStoreLocal) {
+		if (!Main.chunkStoreLocal) {
 			if (maxTasks > 120)
 				maxTasks = 120;
 			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
@@ -103,14 +104,15 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
 		} else {
 			worksQueue = new SynchronousQueue<Runnable>();
-			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue,
+					new ThreadPoolExecutor.CallerRunsPolicy());
 		}
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,
 				new ThreadPoolExecutor.CallerRunsPolicy());
 	}
 
-	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, TreeMap<Integer,HashLocPair> ar,
+	public WritableCacheBuffer(long startPos, int length, SparseDedupFile df, TreeMap<Integer, HashLocPair> ar,
 			boolean reconstructed) throws IOException {
 		this.length = length;
 		this.position = startPos;
@@ -207,8 +209,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 
 	}
-
-	
 
 	int tries = 0;
 
@@ -311,8 +311,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					throw l.getDAR();
 				}
 				if (l.getDNEX() > 0) {
-					
-						throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
+
+					throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
 
 				}
 				if (l.getDN() < sz) {
@@ -347,12 +347,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 			} else {
-				if(Arrays.equals(this.ar.get(0).hash, bk))
-					this.buf = ByteBuffer
-							.wrap(new byte[blankBlock.length]);
+				if (Arrays.equals(this.ar.get(0).hash, bk))
+					this.buf = ByteBuffer.wrap(new byte[blankBlock.length]);
 				else
-				this.buf = ByteBuffer
-						.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc, direct));
+					this.buf = ByteBuffer
+							.wrap(HCServiceProxy.fetchChunk(this.ar.get(0).hash, this.ar.get(0).hashloc, direct));
 
 			}
 		}
@@ -369,7 +368,26 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return Main.CHUNK_LENGTH;
 	}
 
-	public void setAR(TreeMap<Integer,HashLocPair> al) {
+	public void setAR(TreeMap<Integer, HashLocPair> al) {
+		try {
+			if (Main.refCount && this.ar != null && this.dirty) {
+				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
+				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
+					int val = -1;
+					if (ct.containsKey(e.getValue())) {
+						val = ct.get(e.getValue()) - 1;
+					}
+					ct.put(e.getValue(), val);
+
+				}
+				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
+					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue());
+
+				}
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to remove reference", e);
+		}
 		this.ar = al;
 	}
 
@@ -382,6 +400,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public long getEndPosition() {
 		return endPosition;
 	}
+
 	private void writeBlock(byte[] b, int pos) throws IOException, DataArchivedException {
 		try {
 			this.initBuffer();
@@ -393,8 +412,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			throw new IOException(e);
 		}
 	}
-
-	
 
 	/*
 	 * (non-Javadoc)
@@ -433,7 +450,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
 
 					this.writeBlock(b, pos);
-					this.ar = new TreeMap<Integer,HashLocPair>();
+					this.setAR(new TreeMap<Integer, HashLocPair>());
 				} else if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
 					// SDFSLogger.getLog().info("poop " + b.length + " pos=" +
 					// pos + "_spos=" + _spos + " bpos=" +bpos );
@@ -514,7 +531,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							.debug("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
 									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
 				byte[] b = null;
-				if(Arrays.equals(p.hash, bk))
+				if (Arrays.equals(p.hash, bk))
 					b = new byte[blankBlock.length];
 				else
 					b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
@@ -1077,10 +1094,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		@Override
 		public void run() {
 			try {
-				if(Arrays.equals(hash, bk)) {
+				if (Arrays.equals(hash, bk)) {
 					ck = blankBlock;
 					l.commandResponse(this);
-				}else {				
+				} else {
 					this.ck = HCServiceProxy.fetchChunk(hash, hashloc, direct);
 					l.commandResponse(this);
 				}
@@ -1100,8 +1117,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		public void read() throws IOException, DataArchivedException {
 			for (Shard s : shards) {
-				if(Arrays.equals(s.hash, bk))
-					s.ck =blankBlock;
+				if (Arrays.equals(s.hash, bk))
+					s.ck = blankBlock;
 				else
 					s.ck = HCServiceProxy.fetchChunk(s.hash, s.hashloc, direct);
 
@@ -1123,7 +1140,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	@Override
-	public TreeMap<Integer,HashLocPair> getFingers() {
+	public TreeMap<Integer, HashLocPair> getFingers() {
 		// TODO Auto-generated method stub
 		return ar;
 	}

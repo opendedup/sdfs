@@ -931,6 +931,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 							try {
 								cm.persistData(true);
 							} catch (org.opendedup.collections.HashExistsException e) {
+								this.lbf.put(cm.getHash());
 								return new InsertRecord(false, e.getPos());
 							} 
 						}
@@ -947,10 +948,18 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 				}
 			} else {
 				try {
-					rec = new InsertRecord(false, rm.get(cm.getHash(),true));
+					long lp = rm.get(cm.getHash(), true);
+					if (lp == -1) {
+						
+						this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
+						return put(cm, persist);
+					} else {
+						this.lbf.put(cm.getHash());
+						rec = new InsertRecord(false, lp);
+					}
 				} catch (MapClosedException e) {
 					this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
-					put(cm, persist);
+					return put(cm, persist);
 				}
 			}
 			// this.msTr.addAndGet(tm);
@@ -1019,20 +1028,28 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		boolean direct = false;
+		long zp = pos;
 		if (pos == -1) {
 			pos = this.get(key);
 		} else {
 			direct = true;
 		}
 		if (pos != -1) {
-			byte[] data = ChunkData.getChunk(key, pos);
+			byte[] data = null;
+			try {
+				data = ChunkData.getChunk(key, pos);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
+			}
 			if (direct && (data == null || data.length == 0)) {
-				return this.getData(key);
+				SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + pos + "] ");
+				return null;
 			} else {
 				return data;
 			}
 		} else {
-			SDFSLogger.getLog().error("found no data for key [" + StringUtils.getHexString(key) + "]");
+			SDFSLogger.getLog()
+					.error("found no data for key [" + StringUtils.getHexString(key) + "] [" + pos + "] [" + zp + "]");
 			return null;
 		}
 
@@ -1244,9 +1261,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
-			if(!this.runningGC)
-			return this.lbf.mightContain(key);
-			else {
+			
 				long ps = -1;
 				try {
 					ps = this.get(key);
@@ -1258,7 +1273,6 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 					return true;
 				}else
 					return false;
-			}
 				
 		} finally {
 			l.unlock();

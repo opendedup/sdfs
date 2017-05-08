@@ -167,7 +167,7 @@ public class FDisk {
 				}
 				TreeMap<Integer,HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
-					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc));
+					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 					//k++;
 					if(!added)
 						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash=" + StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));

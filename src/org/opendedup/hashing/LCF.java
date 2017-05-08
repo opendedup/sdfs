@@ -36,7 +36,7 @@ import com.google.common.hash.PrimitiveSink;
 public class LCF implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public transient ReentrantReadWriteLock l = new ReentrantReadWriteLock();
-	CuckooFilter<org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob> filter = new CuckooFilter.Builder<>(getFunnel(), 2000000).build();
+	CuckooFilter<org.opendedup.collections.ShardedFileByteArrayLongMap.KeyBlob> filter = null;
 	File f = null;
 	private static Funnel<KeyBlob> kbFunnel = new Funnel<KeyBlob>() {
 		/**

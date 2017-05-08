@@ -32,6 +32,7 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.NextPrime;
+
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
@@ -1107,6 +1108,7 @@ public class ShardedFileByteArrayLongMap2
 		int maxSz = 0;
 		int iterPos = 0;
 		int start;
+		private Object obj = new Object();
 
 		public Shard(ShardedFileByteArrayLongMap2 m, int start, int size, BitSet mapped, BitSet claims, BitSet removed)
 				throws IOException {
@@ -1307,7 +1309,7 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public boolean containsKey(byte[] key) throws MapClosedException {
-			synchronized (this) {
+			synchronized (obj) {
 				try {
 					int index = index(key);
 					if (index >= 0) {
@@ -1338,14 +1340,25 @@ public class ShardedFileByteArrayLongMap2
 					if (_val == val) {
 						
 						ct += this.kFC.getLong(pos + ZL);
+						if(ct < 0) {
+							SDFSLogger.getLog().warn("ct< 0 ct=" + ct + " val=" + val);
+							try {
+								throw new Exception();
+							}catch(Exception e) {
+								SDFSLogger.getLog().warn("qqq",e);
+							}
+							ct=0;
+						}
 						this.kFC.putLong(pos + ZL, ct);
-						this.claims.set(pos / EL);
-						// SDFSLogger.getLog().info("added " + ct + " " +
-						// StringUtils.getHexString(key));
+						if(ct > 0)
+							this.claims.set(pos / EL);
+						//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
 
 						return true;
-					} else
+					} else {
+						//SDFSLogger.getLog().info("not " + ct + " " + StringUtils.getHexString(key) + "val=" + val + " _val=" + _val);
 						return false;
+					}
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().fatal("error setting claim", e);
@@ -1354,7 +1367,7 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public long get(byte[] key, boolean claim) {
-			synchronized (this) {
+			synchronized (obj) {
 				try {
 					int pos = -1;
 
@@ -1370,8 +1383,7 @@ public class ShardedFileByteArrayLongMap2
 							if(clr < 0)
 								clr =0;
 							this.kFC.position(pos + ZL);
-							
-							clr++;
+							clr = clr+1;
 							this.kFC.putLong(clr);
 							pos = (pos / EL);
 							this.claims.set(pos);
@@ -1393,7 +1405,7 @@ public class ShardedFileByteArrayLongMap2
 
 		public InsertRecord put(byte[] key, long value, long cl, boolean mightContain)
 				throws HashtableFullException, IOException {
-			synchronized (this) {
+			synchronized (obj) {
 
 				if (!m.active || m.full || this.currentSz >= maxSz) {
 					m.full = true;
@@ -1416,7 +1428,9 @@ public class ShardedFileByteArrayLongMap2
 					long ct = this.kFC.getLong(npos + ZL);
 					if(ct < 0)
 						ct = 0;
-					this.kFC.putLong(npos + ZL, ct++);
+					ct = ct+1;
+					this.kFC.putLong(npos + ZL, ct+1);
+					//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
 					this.claims.set(npos / EL);
 					this.removed.clear(npos / EL);
 					this.mapped.set(npos / EL);
@@ -1432,7 +1446,7 @@ public class ShardedFileByteArrayLongMap2
 					// this.rFC.putLong(pos*8, 1);
 					this.claims.set(pos);
 					this.mapped.set(pos);
-					this.currentSz++;
+					this.currentSz = this.currentSz++;
 					this.removed.clear(pos);
 					return new InsertRecord(true, value);
 				}
@@ -1447,7 +1461,7 @@ public class ShardedFileByteArrayLongMap2
 		public byte[] nextKey(boolean recreate) throws IOException {
 			this.mapped.cardinality();
 			while (iterPos < size) {
-				synchronized (this) {
+				synchronized (obj) {
 					if (m.isClosed())
 						throw new IOException("map closed");
 					if (recreate || this.mapped.get(iterPos)) {
@@ -1478,7 +1492,7 @@ public class ShardedFileByteArrayLongMap2
 
 		public KVPair nextKeyValue() throws IOException {
 			while (iterPos < size) {
-				synchronized (this) {
+				synchronized (obj) {
 
 					if (this.mapped.get(iterPos)) {
 						byte[] key = new byte[FREE.length];
@@ -1510,7 +1524,7 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public boolean isClaimed(byte[] key) throws KeyNotFoundException, IOException {
-			synchronized (this) {
+			synchronized (obj) {
 				int index = index(key);
 				if (index >= 0) {
 					int pos = (index / EL);
@@ -1534,7 +1548,7 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public boolean update(byte[] key, long value) throws IOException {
-			synchronized (this) {
+			synchronized (obj) {
 				try {
 					int pos = this.index(key);
 					if (pos == -1) {
@@ -1558,7 +1572,7 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public boolean remove(byte[] key) throws IOException {
-			synchronized (this) {
+			synchronized (obj) {
 				try {
 
 					int pos = this.index(key);
@@ -1606,13 +1620,13 @@ public class ShardedFileByteArrayLongMap2
 
 			try {
 				this.iterInit();
-				synchronized (this) {
+				synchronized (obj) {
 					this.claims.clear();
 				}
 				while (iterPos < size) {
 
 					try {
-						synchronized (this) {
+						synchronized (obj) {
 
 							boolean claimed = claims.get(iterPos);
 							claims.clear(iterPos);
@@ -1656,13 +1670,13 @@ public class ShardedFileByteArrayLongMap2
 
 			try {
 				this.iterInit();
-				synchronized (this) {
+				synchronized (obj) {
 					this.claims.clear();
 				}
 				while (iterPos < size) {
 
 					try {
-						synchronized (this) {
+						synchronized (obj) {
 
 							boolean claimed = claims.get(iterPos);
 							claims.clear(iterPos);
@@ -1678,13 +1692,11 @@ public class ShardedFileByteArrayLongMap2
 								byte[] key = new byte[FREE.length];
 								kFC.position(iterPos * EL);
 								kFC.get(key);
-								kFC.getLong();
+								long ov = kFC.getLong();
 								long val = kFC.getLong();
 								if (val <= 0) {
 									int pos = iterPos * EL;
-									long ov = kFC.getLong(pos + VP);
 									kFC.position(pos);
-
 									this.kFC.put(REMOVED);
 									this.kFC.putLong(0);
 									ChunkData ck = new ChunkData(ov, key);
@@ -1716,7 +1728,7 @@ public class ShardedFileByteArrayLongMap2
 				// ByteBuffer bk = ByteBuffer.allocateDirect(FREE.length + 8);
 				while (iterPos < size) {
 
-					synchronized (this) {
+					synchronized (obj) {
 
 						try {
 							if (m.isClosed())
@@ -1738,6 +1750,7 @@ public class ShardedFileByteArrayLongMap2
 									this.removed.set(iterPos);
 									_sz++;
 								} else {
+									lbf.put(key);
 									this.mapped.set(iterPos);
 
 								}
