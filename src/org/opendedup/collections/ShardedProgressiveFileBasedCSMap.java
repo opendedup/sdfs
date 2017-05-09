@@ -931,8 +931,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 							try {
 								cm.persistData(true);
 							} catch (org.opendedup.collections.HashExistsException e) {
-								this.lbf.put(cm.getHash());
-								return new InsertRecord(false, e.getPos());
+								return put(cm, persist);
 							} 
 						}
 						bm = this.getWriteMap();

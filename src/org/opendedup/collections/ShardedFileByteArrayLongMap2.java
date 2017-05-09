@@ -1375,8 +1375,7 @@ public class ShardedFileByteArrayLongMap2
 					if (pos == -1) {
 						return -1;
 					} else {
-						long val = -1;
-						val = this.kFC.getLong(pos + VP);
+						long val = this.kFC.getLong(pos + VP);
 
 						if (claim) {
 							long clr = this.kFC.getLong(pos + ZL);
@@ -1428,7 +1427,6 @@ public class ShardedFileByteArrayLongMap2
 					long ct = this.kFC.getLong(npos + ZL);
 					if(ct < 0)
 						ct = 0;
-					ct = ct+1;
 					this.kFC.putLong(npos + ZL, ct+1);
 					//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
 					this.claims.set(npos / EL);

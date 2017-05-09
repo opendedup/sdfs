@@ -685,6 +685,7 @@ public class SparseDedupFile implements DedupFile {
 			throw new FileClosedException("file already closed");
 		}
 		if (this.toOccured) {
+			this.toOccured = false;
 			throw new IOException("timeout occured");
 		}
 		if (this.errOccured) {
@@ -837,8 +838,10 @@ public class SparseDedupFile implements DedupFile {
 				this.writeCache();
 			}*/
 
-			if (this.toOccured)
+			if (this.toOccured) {
+				this.toOccured = false;
 				throw new IOException("timeout occured");
+			}
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -862,8 +865,10 @@ public class SparseDedupFile implements DedupFile {
 	public DedupFileChannel getChannel(int flags) throws IOException {
 		if (!Volume.getStorageConnected())
 			throw new IOException("storage offline");
-		if (this.toOccured)
+		if (this.toOccured) {
+			this.toOccured = false;
 			throw new IOException("timeout occured");
+		}
 		if (!Main.safeClose || Main.blockDev) {
 			if (this.staticChannel == null) {
 				if (this.isClosed())
@@ -925,8 +930,10 @@ public class SparseDedupFile implements DedupFile {
 	public void registerChannel(DedupFileChannel channel) throws IOException {
 		if (!Volume.getStorageConnected())
 			throw new IOException("storage offline");
-		if (this.toOccured)
+		if (this.toOccured) {
+			this.toOccured = false;
 			throw new IOException("timeout occured");
+		}
 		if (!Main.safeClose) {
 			try {
 				if (this.staticChannel == null) {
