@@ -43,6 +43,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	private static BasicAWSCredentials awsCredentials = null;
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
+	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
 	private Region bucketLocation = null;
 	AmazonS3Client s3Service = null;
@@ -149,7 +151,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private int mdVersion = 0;
 	private boolean simpleMD;
 	private final static String mdExt = ".6442";
-
+	
 	static {
 		try {
 			if (!Main.useAim)
@@ -191,7 +193,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public BatchAwsS3ChunkStore() {
 
 	}
-
+	
+	public void addRefresh(long id)
+	{
+		this.delLock.lock();
+		try {
+		if(this.glacierDays > 0)
+			this.refresh.add(id);
+		}finally {
+			this.delLock.unlock();
+		}
+	}
 	@Override
 	public long bytesRead() {
 		// TODO Auto-generated method stub
@@ -1412,6 +1424,26 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					SDFSLogger.getLog().info("done running garbage collection");
 				}
+				
+				if (this.refresh.size() > 0) {
+					SDFSLogger.getLog().info("running object refesh");
+					this.delLock.lock();
+					HashSet<Long> odel = null;
+					try {
+						odel = this.refresh;
+						this.refresh = new HashSet<Long>();
+						// SDFSLogger.getLog().info("delete hash table size of "
+						// + odel.size());
+					} finally {
+						this.delLock.unlock();
+					}
+					
+					for (Long k : odel) {
+						this.refreshObject(k);
+					}
+					odel = null;
+					SDFSLogger.getLog().info("done running refresh");
+				}
 			} catch (InterruptedException e) {
 				break;
 			} catch (Exception e) {
@@ -2535,7 +2567,47 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			s3Service.deleteObject(this.name, "bucketinfo/" + vid + mdExt);
 		SDFSLogger.getLog().debug("Deleted " + volumeID);
 	}
+	
+	private void refreshObject(long id) throws IOException{
+		String km = "blocks/" + EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+		if (this.simpleMD) {
+			if (s3Service.doesObjectExist(this.name, km + mdExt+ ".cpy")) {
+				s3Service.deleteObject(this.name, km + mdExt + ".cpy");
+			}
+			CopyObjectRequest creq = new CopyObjectRequest(name, km + mdExt, name, km + mdExt + ".cpy");
+			s3Service.copyObject(creq);
+			s3Service.deleteObject(this.name, km + mdExt);
+			creq = new CopyObjectRequest(name, km + mdExt + ".cpy", name, km + mdExt);
+			s3Service.copyObject(creq);
+			s3Service.deleteObject(this.name, km + mdExt + ".cpy");
+			
+			if (s3Service.doesObjectExist(this.name, km + ".cpy")) {
+				s3Service.deleteObject(this.name, km + ".cpy");
+			}
+			creq = new CopyObjectRequest(name, km, name, km + ".cpy");
+			s3Service.copyObject(creq);
+			s3Service.deleteObject(this.name, km);
+			creq = new CopyObjectRequest(name, km + ".cpy", name, km );
+			s3Service.copyObject(creq);
+			s3Service.deleteObject(this.name, km + ".cpy");
 
+		} else {
+			try {
+				CopyObjectRequest req = new CopyObjectRequest(name, km, name, km);
+				s3Service.copyObject(req);
+			} catch (AmazonS3Exception e) {
+
+				CopyObjectRequest req = new CopyObjectRequest(name, km, name, km + ".cpy");
+				s3Service.copyObject(req);
+				s3Service.deleteObject(name, km);
+				req = new CopyObjectRequest(name, km + ".cpy", name, km);
+				s3Service.copyObject(req);
+				s3Service.deleteObject(name, km + ".cpy");
+			}
+		}
+	}
+	
+	
 	private void updateObject(String km, ObjectMetadata om) throws IOException {
 		if (this.simpleMD) {
 			Map<String, String> md = om.getUserMetadata();

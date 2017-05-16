@@ -550,7 +550,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
-
 						removal.getValue().removeCache();
 					}
 				}).build(new CacheLoader<Long, HashBlobArchive>() {

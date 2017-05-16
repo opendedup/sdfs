@@ -8,6 +8,8 @@ public interface AbstractCloudFileSync {
 	public abstract void uploadFile(File f, String to, String parentPath)
 			throws IOException;
 	
+	public void addRefresh(long id);
+	
 	public abstract void checkoutFile(String name) throws IOException;
 	
 	public abstract boolean isCheckedOut(String name,long volumeID) throws IOException;

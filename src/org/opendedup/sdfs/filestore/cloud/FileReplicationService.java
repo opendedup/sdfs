@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -178,7 +177,7 @@ public class FileReplicationService {
 
 				if (l != null && !l.hasQueuedThreads()) {
 					this.activeTasks.remove(st);
-					SDFSLogger.getLog().debug("removed lock for "+st);
+					SDFSLogger.getLog().debug("removed lock for " + st);
 				}
 				SDFSLogger.getLog().debug("lock count size is " + this.activeTasks.size());
 			} finally {
@@ -205,37 +204,23 @@ public class FileReplicationService {
 		}
 	}
 	/*
-	@Subscribe
-	@AllowConcurrentEvents
-	public void metaFileRenamed(MFileRenamed evt) {
-
-		try {
-			ReentrantLock l = this.getLock(evt.mf.getPath());
-			l.lock();
-			int tries = 0;
-			boolean done = false;
-			while (!done) {
-				try {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("renm " + evt.mf.getPath());
-
-					this.sync.renameFile("files/" + evt.from.substring(pl), evt.to.substring(pl), "files");
-					done = true;
-				} catch (Exception e) {
-					if (tries > maxTries)
-						throw e;
-					else
-						tries++;
-				}
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to rename " + evt.mf.getPath(), e);
-		} finally {
-			removeLock(evt.mf.getPath());
-		}
-
-	}
-	*/
+	 * @Subscribe
+	 * 
+	 * @AllowConcurrentEvents public void metaFileRenamed(MFileRenamed evt) {
+	 * 
+	 * try { ReentrantLock l = this.getLock(evt.mf.getPath()); l.lock(); int
+	 * tries = 0; boolean done = false; while (!done) { try { if
+	 * (SDFSLogger.isDebug()) SDFSLogger.getLog().debug("renm " +
+	 * evt.mf.getPath());
+	 * 
+	 * this.sync.renameFile("files/" + evt.from.substring(pl),
+	 * evt.to.substring(pl), "files"); done = true; } catch (Exception e) { if
+	 * (tries > maxTries) throw e; else tries++; } } } catch (Exception e) {
+	 * SDFSLogger.getLog().error("unable to rename " + evt.mf.getPath(), e); }
+	 * finally { removeLock(evt.mf.getPath()); }
+	 * 
+	 * }
+	 */
 
 	private void deleteFile(File f) throws IOException {
 		boolean isDir = false;
@@ -297,7 +282,7 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-					if (evt.dirty || evt.mf.isSymlink()) {
+						if (evt.dirty || evt.mf.isSymlink()) {
 							evt.mf.writeLock.lock();
 							try {
 								SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
@@ -387,6 +372,15 @@ public class FileReplicationService {
 							SDFSLogger.getLog().debug("writed " + evt.sf.getDatabasePath().substring(sl));
 							this.sync.uploadFile(new File(evt.sf.getDatabasePath()),
 									evt.sf.getDatabasePath().substring(sl), "ddb");
+							if (Main.REFRESH_BLOBS) {
+								evt.sf.bdb.iterInit();
+								SparseDataChunk ck = evt.sf.bdb.nextValue(false);
+								while (ck != null) {
+									for (HashLocPair p : ck.getFingers().values()) {
+										this.sync.addRefresh(Longs.fromByteArray(p.hashloc));
+									}
+								}
+							}
 							eventUploadBus.post(evt);
 						} else {
 							SDFSLogger.getLog().debug("nowrited " + evt.sf.getDatabasePath());

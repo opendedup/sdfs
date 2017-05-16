@@ -1641,4 +1641,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		
 	}
 
+	@Override
+	public void addRefresh(long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

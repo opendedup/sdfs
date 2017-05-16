@@ -1639,4 +1639,10 @@ public class BatchGSChunkStore implements AbstractChunkStore,
 		
 	}
 
+	@Override
+	public void addRefresh(long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

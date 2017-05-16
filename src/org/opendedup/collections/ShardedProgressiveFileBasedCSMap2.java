@@ -407,7 +407,6 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 				try {
 					m = iter.next();
 					if (!m.isFull() && !m.isActive()) {
-
 						// SDFSLogger.getLog().info("deleting " +
 						// m.toString());
 						m.iterInit();
@@ -438,7 +437,9 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 						m.vanish();
 
 						m = null;
-					} else if (m.isMaxed()) {
+					} 
+					/*
+					else if (m.isMaxed()) {
 						SDFSLogger.getLog().info("deleting maxed " + m.toString());
 						m.iterInit();
 						KVPair p = m.nextKeyValue();
@@ -467,6 +468,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 
 						m = null;
 					}
+					*/
 				} catch (Exception e) {
 					tEvt.endEvent("Unable to compact " + m + " because : [" + e.toString() + "]", SDFSEvent.ERROR);
 					SDFSLogger.getLog().error("to compact " + m, e);
@@ -570,7 +572,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 								this.lbf.put(p.key);
 								p = m.nextKeyValue();
 							} catch (HashtableFullException e) {
-
+								
 							}
 
 						}
@@ -1250,18 +1252,35 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
-
-			long ps = -1;
-			try {
-				ps = this.get(key);
-			} catch (IOException e) {
-				SDFSLogger.getLog().warn("unable to check", e);
-				return true;
+			if (!runningGC && lbf.mightContain(key)) {
+				return lbf.mightContain(key);
 			}
-			if (ps != -1) {
-				return true;
-			} else
-				return false;
+			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(key));
+			if (k != null) {
+				try {
+					long pos = k.get(key, false);
+					if (pos != -1) {
+
+						return true;
+					} else {
+						this.keyLookup.invalidate(new ByteArrayWrapper(key));
+					}
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(key));
+				}
+			}
+
+			for (AbstractShard m : this.maps.getAL()) {
+				try {
+					long pos = m.get(key,false);
+					if (pos != -1) {
+						return true;
+					}
+				} catch (MapClosedException e) {
+					this.keyLookup.invalidate(new ByteArrayWrapper(key));
+				}
+			}
+			return false;
 		} finally {
 			l.unlock();
 		}

@@ -845,10 +845,37 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public void getBytes(long id, File f) throws IOException {
 		try {
+			Exception e = null;
+			FileOutputStream out = null;
+			Map<String, String> metaData = null;
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-			Map<String, String> metaData = this.getMetaData("blocks/" + haName);
-			FileOutputStream out = new FileOutputStream(f);
-			this.readBlob("blocks/" + haName, out);
+			for (int i = 0; i < 5; i++) {
+				try {
+					metaData = this.getMetaData("blocks/" + haName);
+					out = new FileOutputStream(f);
+					this.readBlob("blocks/" + haName, out);
+					e = null;
+					break;
+				} catch (java.io.FileNotFoundException e1) {
+					try {
+						Thread.sleep(1000);
+					}catch(Exception e2) {}
+					IOUtils.closeQuietly(out);
+					f.delete();
+					e = e1;
+				}
+				catch (Exception e1) {
+					IOUtils.closeQuietly(out);
+					f.delete();
+					e = e1;
+				}
+			}
+			if (e != null) {
+				SDFSLogger.getLog().error("getnewblob unable to get block", e);
+				throw new IOException(e);
+			}
+
+			
 
 			if (metaData.containsKey("deleted")) {
 				boolean del = Boolean.parseBoolean(metaData.get("deleted"));
@@ -1975,6 +2002,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addRefresh(long id) {
 		// TODO Auto-generated method stub
 		
 	}

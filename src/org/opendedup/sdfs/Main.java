@@ -39,6 +39,7 @@ public class Main {
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
 	public static boolean LOWMEM = false;
+	public static boolean REFRESH_BLOBS=false;
 	public static int MAX_TBLS=0;
 
 	public static boolean COMPRESS_METADATA = false;
@@ -105,7 +106,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.1";
+	public static String version = "3.4.2";
 
 	public static boolean readAhead = false;
 

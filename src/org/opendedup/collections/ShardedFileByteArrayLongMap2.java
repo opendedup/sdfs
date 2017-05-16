@@ -244,7 +244,6 @@ public class ShardedFileByteArrayLongMap2
 				}
 			}
 			KVPair key = this.currentIter.nextKeyValue();
-
 			if (key != null) {
 				return key;
 			} else {
@@ -1421,13 +1420,16 @@ public class ShardedFileByteArrayLongMap2
 					m.full = true;
 					throw e;
 				}
+				if(cl <=0)
+					cl = 1;
 				if (pos < 0) {
+					
 					int npos = -pos - 1;
 					long nv = this.kFC.getLong(npos + VP);
 					long ct = this.kFC.getLong(npos + ZL);
 					if(ct < 0)
 						ct = 0;
-					this.kFC.putLong(npos + ZL, ct+1);
+					this.kFC.putLong(npos + ZL, ct + cl);
 					//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
 					this.claims.set(npos / EL);
 					this.removed.clear(npos / EL);
@@ -1437,7 +1439,7 @@ public class ShardedFileByteArrayLongMap2
 					this.kFC.position(pos);
 					this.kFC.put(key);
 					this.kFC.putLong(value);
-					this.kFC.putLong(1);
+					this.kFC.putLong(cl);
 					// this.kFC.put(key);
 					// this.kFC.putLong(value);
 					pos = (pos / EL);

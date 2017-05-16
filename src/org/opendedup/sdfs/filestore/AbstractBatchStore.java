@@ -20,6 +20,8 @@ public interface AbstractBatchStore {
 			throws IOException;
 
 	public void checkoutObject(long id, int claims) throws IOException;
+	
+	
 
 	public void getBytes(long id,File f) throws IOException, DataArchivedException;
 	
