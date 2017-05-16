@@ -198,7 +198,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	{
 		this.delLock.lock();
 		try {
-		if(this.glacierDays > 0)
+		if(Main.REFRESH_BLOBS)
 			this.refresh.add(id);
 		}finally {
 			this.delLock.unlock();
