@@ -851,6 +851,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 			for (int i = 0; i < 5; i++) {
 				try {
+					f.delete();
 					metaData = this.getMetaData("blocks/" + haName);
 					out = new FileOutputStream(f);
 					this.readBlob("blocks/" + haName, out);

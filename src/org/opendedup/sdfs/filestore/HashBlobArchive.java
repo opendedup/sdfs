@@ -559,7 +559,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 							File f = getPath(hashid);
 							if (!f.exists()) {
 								har = new HashBlobArchive(hashid);
-
 							} else
 								har = new HashBlobArchive(f, hashid);
 							har.cached = true;

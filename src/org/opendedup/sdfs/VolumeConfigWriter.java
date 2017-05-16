@@ -86,6 +86,7 @@ public class VolumeConfigWriter {
 	int maxSegSize = 32;
 	int windowSize = 48;
 	int cloudThreads = 8;
+	private int glacierInDays = 0;
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
@@ -129,6 +130,7 @@ public class VolumeConfigWriter {
 	private boolean usebasicsigner = false;
 	private boolean disableDNSBucket = false;
 	private boolean simpleMD = false;
+	private boolean refreshBlobs = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
 	private String volumeType = "standard";
@@ -201,6 +203,8 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd.getOptionValue("io-safe-close"));
 		}
+		if(cmd.hasOption("refresh-blobs"))
+			this.refreshBlobs = true;
 		if (cmd.hasOption("io-max-file-write-buffers")) {
 			this.max_file_write_buffers = Integer.parseInt(cmd.getOptionValue("io-max-file-write-buffers"));
 		} 
@@ -258,6 +262,9 @@ public class VolumeConfigWriter {
 
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd.getOptionValue("io-safe-sync"));
+		}
+		if(cmd.hasOption("glacier-in-days")) {
+			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
 		}
 		if(cmd.hasOption("simple-metadata")) {
 			this.simpleMD = true;
@@ -734,7 +741,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
-				extended.setAttribute("glacier-archive-days", "0");
+				extended.setAttribute("refresh-blobs", Boolean.toString(this.refreshBlobs));
+				extended.setAttribute("glacier-archive-days", Integer.toString(this.glacierInDays));
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
@@ -917,6 +925,11 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-listen-port")
 				.withDescription("TCP/IP Listenting port for the sdfscli management interface").hasArg(true)
 				.withArgName("tcp port").create());
+		options.addOption(OptionBuilder.withLongOpt("glacier-in-days")
+				.withDescription("Set to move to glacier from s3 after x number of days").hasArg(true)
+				.withArgName("number of days e.g. 30").create());
+		options.addOption(OptionBuilder.withLongOpt("refresh-blobs")
+				.withDescription("Updates blobs in s3 to keep them from moving to glacier if clamined by newly written files").hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-listen-addr")
 				.withDescription(
 						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
