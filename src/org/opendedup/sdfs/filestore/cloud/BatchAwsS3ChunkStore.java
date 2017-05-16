@@ -1441,7 +1441,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					
 					for (Long k : odel) {
+						try {
 						this.refreshObject(k);
+						}catch(Exception e) {
+							
+						}
 					}
 					odel = null;
 					SDFSLogger.getLog().info("done running refresh");
