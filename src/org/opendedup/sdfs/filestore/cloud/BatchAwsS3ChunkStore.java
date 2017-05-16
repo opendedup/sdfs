@@ -402,6 +402,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.hasAttribute("cache-reads")) {
 				HashBlobArchive.cacheReads = Boolean.parseBoolean(config.getAttribute("cache-reads"));
 			}
+			if(config.hasAttribute("refresh-blobs"))
+				Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
 			if (config.hasAttribute("sync-files")) {
 				boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
 				if (syncf) {

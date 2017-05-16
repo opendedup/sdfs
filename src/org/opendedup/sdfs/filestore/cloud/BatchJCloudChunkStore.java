@@ -851,7 +851,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 			for (int i = 0; i < 5; i++) {
 				try {
-					f.delete();
+					if(f.exists())
+						f.delete();
 					metaData = this.getMetaData("blocks/" + haName);
 					out = new FileOutputStream(f);
 					this.readBlob("blocks/" + haName, out);
@@ -859,7 +860,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					break;
 				} catch (java.io.FileNotFoundException e1) {
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(5000);
 					}catch(Exception e2) {}
 					IOUtils.closeQuietly(out);
 					f.delete();
