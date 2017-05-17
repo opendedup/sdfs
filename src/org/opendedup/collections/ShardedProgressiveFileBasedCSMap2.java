@@ -1030,7 +1030,10 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			byte[] data = null;
 			try {
 				data = ChunkData.getChunk(key, pos);
-			} catch (Exception e) {
+			}catch(DataArchivedException e) {
+				throw e;
+			}
+			catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
 			}
 			if (direct && (data == null || data.length == 0)) {

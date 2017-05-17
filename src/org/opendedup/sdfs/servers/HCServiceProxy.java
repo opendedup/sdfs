@@ -613,7 +613,7 @@ public class HCServiceProxy {
 			if (direct) {
 				pos = Longs.fromByteArray(hashloc);
 			}
-
+			
 			data = HCServiceProxy.hcService.fetchChunk(hash,pos).getData();
 				
 

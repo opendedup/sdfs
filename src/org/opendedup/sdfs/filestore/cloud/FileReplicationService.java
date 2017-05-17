@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -376,9 +377,11 @@ public class FileReplicationService {
 								evt.sf.bdb.iterInit();
 								SparseDataChunk ck = evt.sf.bdb.nextValue(false);
 								while (ck != null) {
-									for (HashLocPair p : ck.getFingers().values()) {
+									Collection<HashLocPair> pr =ck.getFingers().values();
+									for (HashLocPair p : pr) {
 										this.sync.addRefresh(Longs.fromByteArray(p.hashloc));
 									}
+									 ck = evt.sf.bdb.nextValue(false);
 								}
 							}
 							eventUploadBus.post(evt);

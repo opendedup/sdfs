@@ -643,8 +643,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			try {
 				archive = archives.get(hbid);
 			} catch (ExecutionException e1) {
-				if (e1.getCause() instanceof DataArchivedException)
+				if (e1.getCause() instanceof DataArchivedException) {
 					throw (DataArchivedException) e1.getCause();
+				}
 				else if (e1.getCause() instanceof IOException) {
 					SDFSLogger.getLog().warn("unable to get block " + hbid, e1);
 					throw (IOException) e1.getCause();
