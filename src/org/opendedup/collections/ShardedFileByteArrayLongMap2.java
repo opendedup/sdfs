@@ -2,7 +2,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1328,40 +1327,40 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		public boolean claimKey(byte[] key, long val, long ct) {
-			try {
-				int pos = -1;
+			synchronized (obj) {
+				try {
+					int pos = -1;
 
-				pos = this.index(key);
-				if (pos == -1) {
-					return false;
-				} else {
-					long _val = this.kFC.getLong(pos + VP);
-					if (_val == val) {
-						
-						ct += this.kFC.getLong(pos + ZL);
-						if(ct < 0) {
-							SDFSLogger.getLog().warn("ct< 0 ct=" + ct + " val=" + val);
-							try {
-								throw new Exception();
-							}catch(Exception e) {
-								SDFSLogger.getLog().warn("qqq",e);
-							}
-							ct=0;
-						}
-						this.kFC.putLong(pos + ZL, ct);
-						if(ct > 0)
-							this.claims.set(pos / EL);
-						//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
-
-						return true;
-					} else {
-						//SDFSLogger.getLog().info("not " + ct + " " + StringUtils.getHexString(key) + "val=" + val + " _val=" + _val);
+					pos = this.index(key);
+					if (pos == -1) {
 						return false;
+					} else {
+						long _val = this.kFC.getLong(pos + VP);
+						if (_val == val) {
+
+							ct += this.kFC.getLong(pos + ZL);
+							if (ct < 0) {
+								SDFSLogger.getLog().warn("ct< 0 ct=" + ct + " val=" + val);
+								ct = 0;
+							}
+							this.kFC.putLong(pos + ZL, ct);
+							if (ct > 0)
+								this.claims.set(pos / EL);
+							// SDFSLogger.getLog().info("added " + ct + " " +
+							// StringUtils.getHexString(key));
+
+							return true;
+						} else {
+							// SDFSLogger.getLog().info("not " + ct + " " +
+							// StringUtils.getHexString(key) + "val=" + val + "
+							// _val=" + _val);
+							return false;
+						}
 					}
+				} catch (Exception e) {
+					SDFSLogger.getLog().fatal("error setting claim", e);
+					return false;
 				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("error setting claim", e);
-				return false;
 			}
 		}
 
@@ -1378,10 +1377,10 @@ public class ShardedFileByteArrayLongMap2
 
 						if (claim) {
 							long clr = this.kFC.getLong(pos + ZL);
-							if(clr < 0)
-								clr =0;
+							if (clr < 0)
+								clr = 0;
 							this.kFC.position(pos + ZL);
-							clr = clr+1;
+							clr = clr + 1;
 							this.kFC.putLong(clr);
 							pos = (pos / EL);
 							this.claims.set(pos);
@@ -1420,17 +1419,18 @@ public class ShardedFileByteArrayLongMap2
 					m.full = true;
 					throw e;
 				}
-				if(cl <=0)
+				if (cl <= 0)
 					cl = 1;
 				if (pos < 0) {
-					
+
 					int npos = -pos - 1;
 					long nv = this.kFC.getLong(npos + VP);
 					long ct = this.kFC.getLong(npos + ZL);
-					if(ct < 0)
+					if (ct < 0)
 						ct = 0;
 					this.kFC.putLong(npos + ZL, ct + cl);
-					//SDFSLogger.getLog().info("added " + ct + " " + StringUtils.getHexString(key));
+					// SDFSLogger.getLog().info("added " + ct + " " +
+					// StringUtils.getHexString(key));
 					this.claims.set(npos / EL);
 					this.removed.clear(npos / EL);
 					this.mapped.set(npos / EL);

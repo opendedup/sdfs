@@ -32,7 +32,7 @@ public class OSTEventStore {
 
 	public static Element reserverSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.incrementAndGet();
-		SDFSLogger.getLog().info("reserve sequence number " + sqnum);
+		SDFSLogger.getLog().debug("reserve sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -44,7 +44,7 @@ public class OSTEventStore {
 
 	public static Element getCurrentSeqNum() throws ParserConfigurationException {
 		long sqnum = seqnum.get();
-		SDFSLogger.getLog().info("getting sequence number " + sqnum);
+		SDFSLogger.getLog().debug("getting sequence number " + sqnum);
 		Document doc = XMLUtils.getXMLDoc("seq");
 		/*
 		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
@@ -94,7 +94,7 @@ public class OSTEventStore {
 	}
 
 	public static Element getOSTEvent(long id) throws IOException {
-		SDFSLogger.getLog().info("getting event " + id);
+		SDFSLogger.getLog().debug("getting event " + id);
 		try {
 			synchronized (seqnum) {
 				//OSTEvent evt = map.get(id);
@@ -111,7 +111,7 @@ public class OSTEventStore {
 	}
 
 	public static Element getOSTEvents() throws IOException {
-		SDFSLogger.getLog().info("getting all events");
+		SDFSLogger.getLog().debug("getting all events");
 		try {
 			Document doc = XMLUtils.getXMLDoc("events");
 			Element root = doc.getDocumentElement();

@@ -1428,6 +1428,8 @@ public class ShardedFileByteArrayLongMap
 		public InsertRecord put(byte[] key, long value, long cl, boolean mightContain)
 				throws HashtableFullException, IOException {
 			synchronized (this) {
+				if(cl <= 0)
+					cl =1;
 				if (!m.active || m.full || this.currentSz >= maxSz) {
 					m.full = true;
 					m.active = false;
@@ -1449,10 +1451,11 @@ public class ShardedFileByteArrayLongMap
 					this.claims.set(npos);
 					long clr = this.rFC.getLong(npos * 8);
 					this.rFC.position(npos * 8);
-					clr++;
+					clr +=cl;
 					this.rFC.putLong(clr);
 					return new InsertRecord(false, this.get(key, true));
 				} else {
+					
 					this.kFC.position(pos);
 					pbuf.position(0);
 					this.pbuf.put(key);
@@ -1463,7 +1466,7 @@ public class ShardedFileByteArrayLongMap
 					// this.kFC.putLong(value);
 					pos = (pos / EL);
 					this.rFC.position(pos * 8);
-					this.rFC.putLong(1);
+					this.rFC.putLong(cl);
 					this.claims.set(pos);
 					this.mapped.set(pos);
 					this.currentSz++;

@@ -447,11 +447,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.setDirty(true);
 			} else {
 
-				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-
-					this.writeBlock(b, pos);
-					this.setAR(new TreeMap<Integer, HashLocPair>());
-				} else if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
+				if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
 					// SDFSLogger.getLog().info("poop " + b.length + " pos=" +
 					// pos + "_spos=" + _spos + " bpos=" +bpos );
 					if (b.length < VariableHashEngine.minLen) {

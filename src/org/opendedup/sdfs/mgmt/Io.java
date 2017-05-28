@@ -75,7 +75,6 @@ public class Io {
 		if (!_f.exists()) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("No such node");
-			SDFSLogger.getLog().error("no such node " + _f.getPath());
 
 			_f = null;
 			throw new FuseException().initErrno(Errno.ENOENT);
@@ -360,8 +359,17 @@ public class Io {
 				int len = Integer.parseInt(path[3]);
 				ByteBuffer bf = ByteBuffer.wrap(new byte[len]);
 				try {
-					byte[] k = bf.array();
-					this.read(fh, bf, start);
+					
+					int read =this.read(fh, bf, start);
+					SDFSLogger.getLog().info("Bytes read is " + read);
+					byte [] k = null;
+					if(read == len)
+						k = bf.array();
+					else {
+						k = new byte[read];
+						bf.position(0);
+						bf.get(k);
+					}
 					long time = System.currentTimeMillis();
 					rsp.setContentType("application/octet-stream");
 					rsp.addValue("Server", "SDFS Management Server");
@@ -521,14 +529,13 @@ public class Io {
 			 */
 			if (read == -1)
 				read = 0;
-
+			return read;
 		} catch (DataArchivedException e) {
 			throw new FuseException("File Archived").initErrno(Errno.ENODATA);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + fh, e);
 			throw new FuseException("error reading " + fh).initErrno(Errno.ENODATA);
 		}
-		return 0;
 	}
 
 	public void release(long fh) throws FuseException {
@@ -565,7 +572,7 @@ public class Io {
 				f = null;
 				throw new FuseException("file exists").initErrno(Errno.EEXIST);
 			} else {
-				SDFSLogger.getLog().info("creating file " + f.getPath());
+				SDFSLogger.getLog().debug("creating file " + f.getPath());
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.unmarshal();
 				// SDFSLogger.getLog().info("44=");

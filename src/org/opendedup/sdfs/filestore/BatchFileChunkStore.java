@@ -432,7 +432,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 								long z = HashBlobArchive.compactArchive(k);
 								long m =  Integer.parseInt(metaData.get("bsize"));
 								sz += z;
-								SDFSLogger.getLog().info("remove requests for " + k + "=" + odel.get(k) + " delob=" + delobj
+								SDFSLogger.getLog().debug("remove requests for " + k + "=" + odel.get(k) + " delob=" + delobj
 										+ " bsz=" + m + " z=" + z);
 								if (blob.exists()) {
 									this.writeHashMap(metaData, k);
