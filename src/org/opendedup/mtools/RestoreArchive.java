@@ -131,9 +131,9 @@ public class RestoreArchive implements Runnable {
 							al.add(id);
 							this.fEvt.curCt++;
 							this.importedArchives.incrementAndGet();
-							SDFSLogger.getLog().debug("restored " + id);
+							SDFSLogger.getLog().info("restored " + id);
 						} else {
-							SDFSLogger.getLog().debug("not restored " + id);
+							SDFSLogger.getLog().info("not restored " + id);
 						}
 					} catch (Exception e) {
 
