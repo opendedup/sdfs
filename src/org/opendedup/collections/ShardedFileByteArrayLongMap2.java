@@ -162,6 +162,7 @@ public class ShardedFileByteArrayLongMap2
 
 	@Override
 	public synchronized void cache() {
+		/*
 		if (this.nextCached.get() < System.currentTimeMillis() && !this.cacheRunning) {
 			synchronized (this.nextCached) {
 				if (!this.cacheRunning) {
@@ -171,6 +172,7 @@ public class ShardedFileByteArrayLongMap2
 				}
 			}
 		}
+		*/
 	}
 
 	/*

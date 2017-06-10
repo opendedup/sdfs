@@ -53,6 +53,8 @@ public class PFullGC implements GCControllerImpl {
 
 	@Override
 	public void runGC() {
+		if(Main.disableAutoGC)
+			return;
 		if (this.calcPFull() > this.nextPFull) {
 			SDFSEvent task = SDFSEvent
 					.gcInfoEvent("Percentage Full Exceeded : Running Orphaned Block Collection");

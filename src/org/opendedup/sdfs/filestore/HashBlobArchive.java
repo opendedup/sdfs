@@ -562,6 +562,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							} else
 								har = new HashBlobArchive(f, hashid);
 							har.cached = true;
+							
 							return har;
 						} catch (DataArchivedException e) {
 							throw e;
@@ -679,6 +680,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static void cacheArchive(long hbid) throws ExecutionException, IOException, DataArchivedException {
 		HashBlobArchive archive = rchunks.get(hbid);
 		if (archive == null) {
+			SDFSLogger.getLog().debug("caching " + hbid);
 			archive = archives.get(hbid);
 		}
 	}
@@ -1047,6 +1049,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private void loadData() throws Exception {
 		try {
+			SDFSLogger.getLog().debug("loading " + this.id);
 			store.getBytes(this.id, f);
 			if (rrl != null) {
 				int _sz = 1;

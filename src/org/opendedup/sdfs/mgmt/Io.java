@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -55,7 +54,7 @@ public class Io {
 	public Io(String mountedVolume, String mountPoint) {
 
 		SDFSLogger.getLog().info("mounting " + mountedVolume + " to " + mountPoint);
-		
+
 		if (!mountedVolume.endsWith("/"))
 			mountedVolume = mountedVolume + "/";
 		this.mountedVolume = mountedVolume;
@@ -135,38 +134,33 @@ public class Io {
 		}
 	}
 
-	public static final byte[] writeof = "<result status=\"success\" msg=\"file written\"/>".getBytes();
+	// public static final byte[] writeof = "<result status=\"success\"
+	// msg=\"file written\"/>".getBytes();
 
 	void handlePut(Request req, Response rsp, String[] path) {
 
-		String tp = path[0].toLowerCase();
-		/*
-		for (String s : path) {
-			SDFSLogger.getLog().info("putting " + s);
-		}
-		*/
-		if (tp.equals("write")) {
-			long fh = Long.parseLong(path[1]);
-			long start = Long.parseLong(path[2]);
-			int len = Integer.parseInt(path[3]);
-			try {
-				ByteBuffer buf = ByteBuffer.allocateDirect(len);
-				req.getByteChannel().read(buf);
-				if (buf.position() != len) {
-					throw new FuseException().initErrno(Errno.EIO);
-				}
-				buf.position(0);
-				this.write(fh, buf, start);
-				rsp.setCode(200);
-				rsp.close();
-			} catch (FuseException e) {
-				this.printError(req, rsp, e.getErrno(), e);
-
-			} catch (Exception e) {
-				this.printError(req, rsp, -1, e);
+		long fh = Long.parseLong(path[1]);
+		long start = Long.parseLong(path[2]);
+		int len = Integer.parseInt(path[3]);
+		try {
+			ByteBuffer buf = ByteBuffer.allocate(len);
+			req.getByteChannel().read(buf);
+			if (buf.position() != len) {
+				SDFSLogger.getLog().warn("length is " + len + " buffer size " + buf.position());
+				throw new FuseException().initErrno(Errno.EIO);
 			}
+			buf.position(0);
+			this.write(fh, buf, start);
+			rsp.setCode(200);
+			rsp.close();
+		} catch (FuseException e) {
+			SDFSLogger.getLog().error("error during write",e);
+			this.printError(req, rsp, e.getErrno(), e);
+
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error during write",e);
+			this.printError(req, rsp, -1, e);
 		}
-		return;
 
 	}
 
@@ -347,9 +341,7 @@ public class Io {
 		Element result = null;
 		boolean closed = false;
 		/*
-		for (String s : path) {
-			SDFSLogger.getLog().info("getting " + s);
-		}
+		 * for (String s : path) { SDFSLogger.getLog().info("getting " + s); }
 		 */
 		try {
 			String tp = path[0].toLowerCase();
@@ -359,11 +351,11 @@ public class Io {
 				int len = Integer.parseInt(path[3]);
 				ByteBuffer bf = ByteBuffer.wrap(new byte[len]);
 				try {
-					
-					int read =this.read(fh, bf, start);
+
+					int read = this.read(fh, bf, start);
 					SDFSLogger.getLog().info("Bytes read is " + read);
-					byte [] k = null;
-					if(read == len)
+					byte[] k = null;
+					if (read == len)
 						k = bf.array();
 					else {
 						k = new byte[read];
@@ -509,7 +501,7 @@ public class Io {
 
 	public int read(long fh, ByteBuffer buf, long offset) throws FuseException {
 		// SDFSLogger.getLog().info("1911 " + path);
-		
+
 		if (Main.volume.isOffLine())
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
@@ -546,7 +538,7 @@ public class Io {
 				return;
 			if (ch != null) {
 				ch.getDedupFile().unRegisterChannel(ch, -2);
-				CloseFile.close(ch.getFile(),ch.isWrittenTo());
+				CloseFile.close(ch.getFile(), ch.isWrittenTo());
 				ch = null;
 			} else {
 				SDFSLogger.getLog().info("channel not found");

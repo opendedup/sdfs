@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -74,8 +75,8 @@ public class DedupFileChannel {
 			this.recoverArchives();
 		}
 		try {
-			//if (Main.readAhead)
-			//	ReadAhead.getReadAhead(file);
+			if (Main.readAhead)
+				ReadAhead.getReadAhead(file);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to load readahead for " + df.mf.getPath(), e);

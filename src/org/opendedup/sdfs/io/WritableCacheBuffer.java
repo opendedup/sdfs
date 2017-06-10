@@ -873,9 +873,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			}
 			if (this.buf == null)
 				SDFSLogger.getLog().debug(this.getFilePosition() + " buffer is null");
-			byte[] b = new byte[this.buf.capacity()];
-			System.arraycopy(this.buf.array(), 0, b, 0, b.length);
-			return b;
+			//byte[] b = new byte[this.buf.capacity()];
+			//System.arraycopy(this.buf.array(), 0, b, 0, b.length);
+			return this.buf.array();
 		} finally {
 			this.lock.unlock();
 		}

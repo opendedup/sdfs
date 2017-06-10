@@ -310,6 +310,10 @@ public class Config {
 			Main.readAhead = Boolean.parseBoolean(cache
 					.getAttribute("read-ahead"));
 		}
+		if(cache.hasAttribute("read-ahead-threads")) {
+			Main.readAheadThreads = Integer.parseInt(cache
+					.getAttribute("read-ahead-threads"));
+		}
 		Main.safeClose = Boolean.parseBoolean(cache.getAttribute("safe-close"));
 		// Makes sure writes are sync'd when set to true.
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
@@ -379,8 +383,10 @@ public class Config {
 			Main.MAX_TABLES_SCAN= Integer.parseInt(localChunkStore.getAttribute("max-scan-depth"));
 		}
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
-			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore
-					.getAttribute("average-chunk-size"));
+			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
+		}
+		if (localChunkStore.hasAttribute("disable-auto-gc")) {
+			Main.disableAutoGC = Boolean.parseBoolean(localChunkStore.getAttribute("disable-auto-gc"));
 		}
 		if(localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));

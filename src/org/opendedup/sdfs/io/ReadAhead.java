@@ -22,8 +22,9 @@ import java.io.IOException;
 
 
 
+
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -31,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.LongByteArrayMap;
@@ -51,14 +53,14 @@ public class ReadAhead implements Runnable {
 	boolean closeWhenDone;
 	private DedupFileChannel ch = null;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads * 4,
-			Main.writeThreads * 4, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(16,
+			Main.readAheadThreads, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 	public HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
-		//if (Main.readAhead)
-		//	return new  ReadAhead(df,false);
-		//else
+		if (Main.readAhead)
+			return new  ReadAhead(df,false);
+		else
 			throw new IOException("ReadAhead disabled");
 	}
 
@@ -69,6 +71,7 @@ public class ReadAhead implements Runnable {
 
 	public ReadAhead(SparseDedupFile df, boolean closeWhenDone) throws IOException {
 		synchronized (active) {
+			SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
 			if(active.containsKey(df.getMetaFile().getPath()))
 				return;
 			if (closeWhenDone) {
@@ -82,12 +85,17 @@ public class ReadAhead implements Runnable {
 			th.start();
 		}
 	}
+	
+	public static void readAhead() {}
+	private static AtomicInteger ct = new AtomicInteger();
 
 	private static class CacheChunk implements Runnable {
 		long pos;
 
 		public void run() {
 			try {
+				int vt = ct.incrementAndGet();
+				SDFSLogger.getLog().debug("active gets is " +vt);
 				HCServiceProxy.cacheData(pos);
 			} catch (IOException e) {
 				SDFSLogger.getLog()
@@ -96,6 +104,7 @@ public class ReadAhead implements Runnable {
 				SDFSLogger.getLog()
 						.debug("error caching chunk [" + pos + "] ", e);
 			}
+			ct.decrementAndGet();
 		}
 	}
 
@@ -104,7 +113,7 @@ public class ReadAhead implements Runnable {
 		try {
 			LongByteArrayMap mp =(LongByteArrayMap) df.bdb;
 			mp.iterInit();
-			Set<Long> blks = new HashSet<Long>();
+			Set<Long> blks = new LinkedHashSet<Long>();
 			for (;;) {
 				LongKeyValue kv = mp.nextKeyValue(false);
 				if (kv == null)
@@ -113,7 +122,7 @@ public class ReadAhead implements Runnable {
 				TreeMap<Integer,HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
 					long pos = Longs.fromByteArray(p.hashloc);
-					if(pos >100) {
+					if(pos >100 || pos <-100) {
 						blks.add(pos);
 					}
 				}

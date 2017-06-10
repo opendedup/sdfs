@@ -867,6 +867,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					e = e1;
 				}
 				catch (Exception e1) {
+					try {
+						Thread.sleep(5000);
+					}catch(Exception e2) {}
 					IOUtils.closeQuietly(out);
 					f.delete();
 					e = e1;

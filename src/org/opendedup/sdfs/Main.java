@@ -26,6 +26,7 @@ public class Main {
 	public static boolean checkArchiveOnRead = false;
 	public static double fpp = .01;
 	public static boolean CUCKOO =false;
+	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
@@ -374,6 +375,8 @@ public class Main {
 	 * If the Dedup Storage Engine is remote or local
 	 */
 	public static boolean enableNetworkChunkStore = false;
+	
+	public static boolean disableAutoGC = false;
 
 	/**
 	 * hash type can be tiger or murmur

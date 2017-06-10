@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
 import org.opendedup.util.XMLUtils;
+import org.simpleframework.common.buffer.FileAllocator;
 import org.simpleframework.http.Path;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
@@ -1249,7 +1251,7 @@ public class MgmtWebServer implements Container {
 			io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
-			SocketProcessor server = new ContainerSocketProcessor(rn, 32, 16);
+			SocketProcessor server = new ContainerSocketProcessor(rn,new FileAllocator(1024*1024*8));
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);

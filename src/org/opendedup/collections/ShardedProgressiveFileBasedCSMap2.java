@@ -1255,7 +1255,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		Lock l = gcLock.readLock();
 		l.lock();
 		try {
-			if (!runningGC && lbf.mightContain(key)) {
+			if (!runningGC) {
 				return lbf.mightContain(key);
 			}
 			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(key));
