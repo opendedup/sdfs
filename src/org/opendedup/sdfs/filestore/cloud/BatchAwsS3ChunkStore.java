@@ -2259,10 +2259,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean blockRestored(String id) {
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
-			if (omd == null || omd.getOngoingRestore())
-				return false;
-			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER"))
+			if (omd != null && !omd.getStorageClass().equalsIgnoreCase("GLACIER"))
 				return true;
+			else if (omd == null || omd.getOngoingRestore())
+				return false;
 			else
 				return true;
 		} catch (Exception e) {

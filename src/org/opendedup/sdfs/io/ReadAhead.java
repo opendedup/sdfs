@@ -41,6 +41,7 @@ import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -70,6 +71,11 @@ public class ReadAhead implements Runnable {
 	}
 
 	public ReadAhead(SparseDedupFile df, boolean closeWhenDone) throws IOException {
+		if((df.mf.length()/2) > HashBlobArchive.getLocalCacheSize()) {
+			SDFSLogger.getLog().warn("unable to readahead " + df.mf.getPath() + " because probable "
+					+ "deduped file lenth " + (df.mf.length()/2) + " is greater than cache of " +HashBlobArchive.getLocalCacheSize());
+		}
+			
 		synchronized (active) {
 			SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
 			if(active.containsKey(df.getMetaFile().getPath()))
