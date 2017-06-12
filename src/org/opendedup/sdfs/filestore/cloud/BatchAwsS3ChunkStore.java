@@ -477,8 +477,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
-			clientConfig.setConnectionTimeout(10000);
-			clientConfig.setSocketTimeout(10000);
+			clientConfig.setConnectionTimeout(120000);
+			clientConfig.setSocketTimeout(120000);
 
 			String s3Target = null;
 			if (config.getElementsByTagName("connection-props").getLength() > 0) {
