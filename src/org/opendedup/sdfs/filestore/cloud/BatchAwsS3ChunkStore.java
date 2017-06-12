@@ -477,8 +477,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
-			clientConfig.setConnectionTimeout(10000);
-			clientConfig.setSocketTimeout(10000);
+			clientConfig.setConnectionTimeout(120000);
+			clientConfig.setSocketTimeout(120000);
 
 			String s3Target = null;
 			if (config.getElementsByTagName("connection-props").getLength() > 0) {
@@ -2208,15 +2208,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception _e = null;
 		for (int i = 0; i < 10; i++) {
 			try {
-
-				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
-				s3Service.restoreObject(request);
-				if (blockRestored(haName)) {
-					restoreRequests.put(new Long(id), "InvalidObjectState");
-					return null;
+				ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
+				if (omd == null || omd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+					RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
+					s3Service.restoreObject(request);
+					if (blockRestored(haName)) {
+						restoreRequests.put(new Long(id), "InvalidObjectState");
+						return null;
+					}
+					restoreRequests.put(new Long(id), haName);
+					return haName;
 				}
-				restoreRequests.put(new Long(id), haName);
-				return haName;
 			} catch (AmazonS3Exception e) {
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 
@@ -2246,24 +2248,26 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 		}
-		throw new IOException(_e);
+		if (_e != null)
+			throw new IOException(_e);
+		else
+			return null;
 
 	}
 
 	@Override
 	public boolean blockRestored(String id) {
-
-		
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
-			if (omd == null || omd.getOngoingRestore() || omd.getStorageClass().equalsIgnoreCase("GLACIER"))
+			if (omd != null && !omd.getStorageClass().equalsIgnoreCase("GLACIER"))
+				return true;
+			else if (omd == null || omd.getOngoingRestore())
 				return false;
 			else
 				return true;
 		} catch (Exception e) {
 			return false;
 		}
-
 	}
 
 	@Override

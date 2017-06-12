@@ -2,6 +2,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.NextPrime;
+import org.opendedup.utils.hashing.FileBasedBloomFilter;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
@@ -63,7 +65,7 @@ public class ShardedFileByteArrayLongMap2
 	transient private ArrayList<BitSet> claims = new ArrayList<BitSet>(16);
 	transient private ArrayList<BitSet> removed = new ArrayList<BitSet>(16);
 	transient private ArrayList<BitSet> mapped = new ArrayList<BitSet>(16);
-	// transient private FileBasedBloomFilter<KeyBlob> bf = null;
+	transient private FileBasedBloomFilter<KeyBlob> bf = null;
 	transient private AtomicInteger sz = new AtomicInteger(0);
 	transient RandomAccessFile kRaf = null;
 	transient boolean full = false;
@@ -225,6 +227,7 @@ public class ShardedFileByteArrayLongMap2
 			}
 			byte[] key = this.currentIter.nextKey(recreate);
 			if (key != null) {
+				this.bf.put(key);
 				return key;
 			} else
 				currentIter = null;
@@ -244,8 +247,11 @@ public class ShardedFileByteArrayLongMap2
 					return null;
 				}
 			}
+			
 			KVPair key = this.currentIter.nextKeyValue();
+			
 			if (key != null) {
+				this.bf.put(key.key);
 				return key;
 			} else {
 				currentIter = null;
@@ -283,8 +289,8 @@ public class ShardedFileByteArrayLongMap2
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			// bf = FileBasedBloomFilter.create(kbFunnel, size, .01, new
-			// File(path + ".nbf").getPath(), true);
+			bf = FileBasedBloomFilter.create(kbFunnel, size, .04, new
+			File(path + ".nbf").getPath(), true);
 			this.iterInit();
 			byte[] key = this._nextKey(true);
 			while (key != null) {
@@ -344,7 +350,7 @@ public class ShardedFileByteArrayLongMap2
 				}
 				// lastPacket = NextPrime.getNextPrimeI((int)lastPacket);
 				size = (partSize * numshards);
-
+				
 				nsz = (long) size * (long) EL;
 				// System.out.println("nsize="+size + "nsz=" + nsz);
 			} else {
@@ -366,6 +372,8 @@ public class ShardedFileByteArrayLongMap2
 					this.removed.add(i, rm);
 					this.claims.add(i, cl);
 					// long pos = (long) i * (long) partSize * (long) EL;
+					bf = FileBasedBloomFilter.create(kbFunnel, size, .04, new
+							File(path + ".nbf").getPath(), true);
 					Shard sh = new Shard(this, i * partSize, partSize, mp, cl, rm);
 					this.shards.add(i, sh);
 				}
@@ -435,6 +443,18 @@ public class ShardedFileByteArrayLongMap2
 					}
 					f.delete();
 				}
+				f = new File(path + ".nbf");
+				if (!f.exists()) {
+					closedCorrectly = false;
+					SDFSLogger.getLog().warn("bf does not exist");
+				} else {
+					try {
+						bf = FileBasedBloomFilter.create(kbFunnel, size, .04,new File(path + ".nbf").getPath(),true);
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("bf load error", e);
+						closedCorrectly = false;
+					}
+				}
 				for (int i = 0; i < (numshards); i++) {
 					BitSet cl = new BitSet(partSize);
 					this.claims.add(i, cl);
@@ -500,9 +520,9 @@ public class ShardedFileByteArrayLongMap2
 	public boolean containsKey(byte[] key) {
 
 		try {
-			/*
-			 * if (bf.mightContain(key)) { return false; }
-			 */
+			if (!bf.mightContain(key)) {
+				return false;
+			}
 			Shard sh = this.getMap(key);
 			synchronized (sh) {
 				return sh.containsKey(key);
@@ -612,6 +632,7 @@ public class ShardedFileByteArrayLongMap2
 				r = sh.put(cm.getHash(), cm.getcPos(), -1, true);
 			}
 			if (r.getInserted()) {
+				this.bf.put(cm.getHash());
 				this.sz.incrementAndGet();
 				/*
 				 * synchronized(bf) { this.bf.put(key); }
@@ -645,6 +666,7 @@ public class ShardedFileByteArrayLongMap2
 				r = sh.put(key, value, -1, true);
 			}
 			if (r.getInserted()) {
+				this.bf.put(key);
 				this.sz.incrementAndGet();
 				/*
 				 * synchronized(bf) { this.bf.put(key); }
@@ -678,6 +700,7 @@ public class ShardedFileByteArrayLongMap2
 			}
 			if (r.getInserted()) {
 				this.sz.incrementAndGet();
+				this.bf.put(key);
 				/*
 				 * synchronized(bf) { this.bf.put(key); }
 				 */
@@ -721,6 +744,8 @@ public class ShardedFileByteArrayLongMap2
 	public long get(byte[] key, boolean claim) throws MapClosedException {
 		this.hashlock.readLock().lock();
 		try {
+			if(!this.bf.mightContain(key))
+				return -1;
 			if (this.isClosed())
 				throw new MapClosedException();
 			Shard sh = this.getMap(key);
@@ -831,6 +856,13 @@ public class ShardedFileByteArrayLongMap2
 				fout.close();
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("error closing", e);
+			}
+			if (this.bf != null) {
+				try {
+					bf.close();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("error closing", e);
+				}
 			}
 			try {
 				File f = new File(path + ".vrp");

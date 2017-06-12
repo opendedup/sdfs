@@ -1,1 +1,0 @@
-LDPATH := -L/usr/java/packages/lib/amd64 -L/usr/lib/x86_64-linux-gnu/jni -L/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu -L/usr/lib/jni -L/lib -L/usr/lib

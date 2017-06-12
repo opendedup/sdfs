@@ -78,6 +78,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 	private long endPos = 0;
 	private LargeBloomFilter lbf = null;
 	private int hashTblSz = 10_000_000;
+	private double prob = .001;
 	private ShardedFileByteArrayLongMap2 activeWMap = null;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
@@ -360,7 +361,8 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			try {
 				File _fs = new File(fileName);
 				lbf = null;
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, Main.CUCKOO);
+				if(Main.LOWMEM)
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
 			} finally {
 				l.unlock();
 			}
@@ -512,7 +514,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			try {
 				File _fs = new File(fileName);
 				lbf = null;
-				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, Main.CUCKOO);
+				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
 			} finally {
 				l.unlock();
 			}
@@ -708,6 +710,10 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		long rsz = 0;
 		this.setMaxSize(maxSz);
+		if(Main.LOWMEM) {
+			this.maxTbls = 4;
+			this.prob = .04;
+		}
 		File[] files = _fs.getParentFile().listFiles(new DBFileFilter());
 		if (files.length > 0) {
 			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Existing Hash Tables", files.length,
@@ -742,7 +748,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		this.loadEvent.shortMsg = "Loading BloomFilters";
 
 		if (maps.size() != 0 && !LargeBloomFilter.exists(_fs.getParentFile())) {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, Main.CUCKOO);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
 			SDFSLogger.getLog().warn("Recreating BloomFilters...");
 			this.loadEvent.shortMsg = "Recreating BloomFilters";
 
@@ -772,7 +778,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 				for (LBFReconstructThread th : al) {
 					if (th.ex != null) {
 						lbf.vanish();
-						lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, Main.CUCKOO);
+						lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
 						SDFSLogger.getLog().warn("Recreating BloomFilters...");
 						this.loadEvent.shortMsg = "Recreating BloomFilters";
 
@@ -816,7 +822,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 				throw new IOException(e1);
 			}
 		} else {
-			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, .001, true, true, Main.CUCKOO);
+			lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
 		}
 		if (this.activeWMap == null) {
 			boolean written = false;
@@ -1200,7 +1206,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		FileUtils.copyDirectory(new File(parent), new File(parent + ".compact"));
 
 		try {
-			this.init(maxSz, this.fileName, .001);
+			this.init(maxSz, this.fileName, prob);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}

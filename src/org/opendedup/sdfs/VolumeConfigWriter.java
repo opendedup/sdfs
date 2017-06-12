@@ -73,6 +73,7 @@ public class VolumeConfigWriter {
 	// String chunk_gc_schedule = "0 0 0/4 * * ?";
 	// String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
+	String ltrfdisk_schedule = "0 15 10 L * ?";
 	String syncfs_schedule = "4 59 23 * * ?";
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
@@ -188,6 +189,7 @@ public class VolumeConfigWriter {
 			this.max_file_write_buffers=80;
 			this.chunk_size = 40960;
 			this.volumeType ="backup";
+			this.fdisk_schedule = this.ltrfdisk_schedule;
 		}
 		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
