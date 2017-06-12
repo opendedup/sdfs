@@ -136,7 +136,6 @@ public class RestoreArchive implements Runnable {
 							SDFSLogger.getLog().info("not restored " + id);
 						}
 					} catch (Exception e) {
-
 						SDFSLogger.getLog().error(
 								"unable to check restore for " + id, e);
 					}

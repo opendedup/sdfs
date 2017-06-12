@@ -2208,8 +2208,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception _e = null;
 		for (int i = 0; i < 10; i++) {
 			try {
-				ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
-				if (omd == null || omd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+
 					RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
 					s3Service.restoreObject(request);
 					if (blockRestored(haName)) {
@@ -2218,7 +2217,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					restoreRequests.put(new Long(id), haName);
 					return haName;
-				}
 			} catch (AmazonS3Exception e) {
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 
@@ -2266,6 +2264,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			else
 				return true;
 		} catch (Exception e) {
+			SDFSLogger.getLog().warn("error while checking block restored", e);
 			return false;
 		}
 	}

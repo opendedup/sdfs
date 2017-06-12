@@ -92,7 +92,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 
-	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder().maximumSize(1_000_000)
+	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder().maximumSize(3_000_000)
 			.concurrencyLevel(Main.writeThreads).build(new CacheLoader<ByteArrayWrapper, AbstractShard>() {
 				public AbstractShard load(ByteArrayWrapper key) throws KeyNotFoundException {
 					return _getReadMap(key.getData());
