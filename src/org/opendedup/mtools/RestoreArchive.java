@@ -146,7 +146,7 @@ public class RestoreArchive implements Runnable {
 				}
 				al = null;
 				if (this.restoreRequests.size() > 0)
-					Thread.sleep(15 * 60 * 1000);
+					Thread.sleep(2 * 60 * 1000);
 			}
 			SDFSLogger.getLog().info(
 					"took [" + (System.currentTimeMillis() - start)

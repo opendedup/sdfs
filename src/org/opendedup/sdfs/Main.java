@@ -107,9 +107,11 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.3.2";
+	public static String version = "3.4.3.3";
 
 	public static boolean readAhead = false;
+	
+	public static int MAX_TBL_SIZE=600_000_000;
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

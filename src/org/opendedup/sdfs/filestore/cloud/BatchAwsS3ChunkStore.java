@@ -1116,15 +1116,20 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				FileOutputStream out = null;
 				InputStream in = null;
 				try {
+					
 					out = new FileOutputStream(f);
 					in = sobj.getObjectContent();
 					IOUtils.copy(in, out);
 					out.flush();
+					out.close();
+					InputStream fin = new FileInputStream(f);
+					String mds = BaseEncoding.base16().encode(ServiceUtils.computeMD5Hash(fin));
+					SDFSLogger.getLog().info("Downloaded " + f.getPath() + " " + f.length() + " md5=" + mds);
+					fin.close();
 
 				} catch (Exception e) {
 					throw new IOException(e);
 				} finally {
-					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
 
 				}
@@ -1205,8 +1210,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			dtm = (System.currentTimeMillis() - tm) / 1000d;
 			bps = (cl / 1024) / dtm;
 		} catch (AmazonS3Exception e) {
-			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+				SDFSLogger.getLog().error("invalid object state",e);
 				throw new DataArchivedException(id, null);
+			}
 			else {
 				SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
 				throw e;
@@ -2215,6 +2222,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						restoreRequests.put(new Long(id), "InvalidObjectState");
 						return null;
 					}
+					if(this.simpleMD) {
+						request = new RestoreObjectRequest(this.name, "blocks/" + haName+mdExt, 2);
+						s3Service.restoreObject(request);
+					}
 					restoreRequests.put(new Long(id), haName);
 					return haName;
 			} catch (AmazonS3Exception e) {
@@ -2257,9 +2268,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean blockRestored(String id) {
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
-			if (omd != null && !omd.getStorageClass().equalsIgnoreCase("GLACIER"))
+			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
+			if(omd == null || momd == null)
+				return false;
+			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") )
 				return true;
-			else if (omd == null || omd.getOngoingRestore())
+			else if (omd.getOngoingRestore() || momd.getOngoingRestore())
 				return false;
 			else
 				return true;

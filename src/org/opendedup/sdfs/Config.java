@@ -391,6 +391,9 @@ public class Config {
 		if(localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
 		}
+		if(localChunkStore.hasAttribute("max-table-size")) {
+			Main.MAX_TBL_SIZE =Integer.parseInt(localChunkStore.getAttribute("max-table-size"));
+		}
 		if(localChunkStore.hasAttribute("cuckoo")) {
 			Main.CUCKOO = Boolean.parseBoolean(localChunkStore.getAttribute("cuckoo"));
 		}

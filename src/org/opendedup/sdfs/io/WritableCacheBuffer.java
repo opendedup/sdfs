@@ -20,6 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -297,10 +298,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 								+ "] block read but only [" + l.getDN() + "] were completed");
 					}
 					if (l.getDAR() != null) {
+						this.buf = null;
 						throw l.getDAR();
 					}
-					if (l.getDNEX() > 0)
+					if (l.getDNEX() > 0) {
+						this.buf = null;
 						throw new IOException("error while reading data");
+					}
 					synchronized (l) {
 						l.wait(1000);
 					}
@@ -308,14 +312,16 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					al++;
 				}
 				if (l.getDAR() != null) {
+					this.buf = null;
 					throw l.getDAR();
 				}
 				if (l.getDNEX() > 0) {
-
+					this.buf = null;
 					throw new IOException("error while getting blocks " + l.getDNEX() + " errors found");
 
 				}
 				if (l.getDN() < sz) {
+					this.buf = null;
 					throw new IOException("thread timed out before read was complete ");
 				}
 				buf.position(0);
@@ -328,6 +334,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							// + "ck sz=" + sh.ck.length + " hcb sz=" +
 							// hcb.position() + " cks sz=" +cks.size() + " len="
 							// + (hcb.position() +sh.ck.length));
+							this.buf = null;
 							throw new IOException(e);
 						}
 					} else {
@@ -336,6 +343,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							buf.put(sh.ck, sh.offset, sh.nlen);
 
 						} catch (Exception e) {
+							this.buf = null;
 							String hp = StringUtils.getHexString(sh.hash);
 							SDFSLogger.getLog()
 									.error("hash=" + hp + " pos = " + this.position + " ck nlen=" + sh.nlen
@@ -345,6 +353,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						}
 					}
 				}
+				
 
 			} else {
 				if (Arrays.equals(this.ar.get(0).hash, bk))
@@ -615,9 +624,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					throw new IOException("Write Timed Out after [" + nt + "] seconds. Expected [" + fs.size()
 							+ "] block writes but only [" + l.getDN() + "] were completed");
 				}
-				if (l.dar != null)
+				if (l.dar != null) {
+					this.buf = null;
 					throw l.dar;
+				}
 				if (l.getDNEX() > 0) {
+					this.buf = null;
 					throw new IOException("Unable to read shard");
 				}
 				synchronized (l) {
@@ -626,14 +638,19 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				al++;
 				wl += tm;
 			}
-			if (l.dar != null)
+			if (l.dar != null) {
+				this.buf = null;
 				throw l.dar;
+			}
 			if (l.getDN() < fs.size()) {
+				this.buf = null;
 				df.toOccured = true;
 				throw new IOException("Write Timed Out expected [" + fs.size() + "] but got [" + l.getDN() + "]");
 			}
-			if (l.getDNEX() > 0)
+			if (l.getDNEX() > 0) {
+				this.buf = null;
 				throw new IOException("Write Failed because unable to read shard");
+			}
 			for (Finger f : fs) {
 				HashLocPair p = new HashLocPair();
 				try {

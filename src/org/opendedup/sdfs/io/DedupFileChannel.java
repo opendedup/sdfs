@@ -372,7 +372,7 @@ public class DedupFileChannel {
 								+ df.getMetaFile().getPath()
 								+ " at "
 								+ pos
-								+ ". Recovering data from archive. This may take up to 4 hours");
+								+ ". Recovering data from archive. This may take up to 4 hours for " +e.getPos(),e);
 				this.recoverArchives();
 				this.writeFile(buf, len, pos, offset, propigate);
 			} else
@@ -569,7 +569,7 @@ public class DedupFileChannel {
 										+ df.getMetaFile().getPath()
 										+ " at "
 										+ startPos
-										+ ". Recovering data from archive. This may take up to 4 hours");
+										+ ". Recovering data from archive. This may take up to 4 hours " + e.getPos(),e);
 						this.recoverArchives();
 						this.read(buf, bufPos, siz, filePos);
 					} else
@@ -600,6 +600,7 @@ public class DedupFileChannel {
 			}
 			return read;
 		} catch (DataArchivedException e) {
+			SDFSLogger.getLog().error("archive exception " + e.getPos(),e);
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
