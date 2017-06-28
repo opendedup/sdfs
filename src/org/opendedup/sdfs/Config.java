@@ -304,6 +304,9 @@ public class Config {
 			SDFSLogger.setLevel(Integer.parseInt(cache
 					.getAttribute("log-level")));
 		}
+		if (cache.hasAttribute("log-size")) {
+			SDFSLogger.setLogSize(cache.getAttribute("log-size"));
+		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
 		if (cache.hasAttribute("read-ahead")) {

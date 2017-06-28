@@ -1096,7 +1096,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
-
 			try {
 				sobj = s3Service.getObject(this.name, "blocks/" + haName);
 			} catch (AmazonS3Exception e) {
@@ -1123,8 +1122,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					out.flush();
 					out.close();
 					InputStream fin = new FileInputStream(f);
-					String mds = BaseEncoding.base16().encode(ServiceUtils.computeMD5Hash(fin));
-					SDFSLogger.getLog().info("Downloaded " + f.getPath() + " " + f.length() + " md5=" + mds);
 					fin.close();
 
 				} catch (Exception e) {
@@ -1236,11 +1233,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception e = null;
 		for (int i = 0; i < 5; i++) {
 			try {
+				
 				this.getData(id, f);
 				return;
 			} catch (DataArchivedException e1) {
 				throw e1;
 			} catch (Exception e1) {
+				try {
+					Thread.sleep(5000);
+					if(f.exists())
+						f.delete();
+				} catch (Exception e2) {
+					
+				}
 				e = e1;
 			}
 		}
@@ -2278,7 +2283,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			else
 				return true;
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error while checking block restored", e);
+			//SDFSLogger.getLog().warn("error while checking block restored", e);
 			return false;
 		}
 	}

@@ -35,19 +35,19 @@ public class SDFSLogger {
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
 	private static boolean fsdebug = false;
+	static RollingFileAppender app = null;
 	static {
 
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
 
 		basicLog.setLevel(Level.WARN);
-		RollingFileAppender app = null;
 		try {
 
 			app = new RollingFileAppender(new PatternLayout(
 					"%d [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
 			app.setMaxBackupIndex(2);
-			app.setMaxFileSize("10MB");
+			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {
 			log.debug("unable to change appender", e);
 		}
@@ -85,6 +85,10 @@ public class SDFSLogger {
 
 	public static boolean isFSDebug() {
 		return fsdebug;
+	}
+	
+	public static void setLogSize(String size) {
+		app.setMaxFileSize(size);
 	}
 
 	public static void setLevel(int level) {

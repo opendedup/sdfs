@@ -520,7 +520,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 				} catch (HashExistsException e) {
 					throw e;
 				} catch (ArchiveFullException | NullPointerException | ReadOnlyArchiveException e) {
-					l.unlock();
+					if(l != null)
+						l.unlock();
 					l = slock.writeLock();
 					l.lock();
 					try {
@@ -536,7 +537,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}
 			}
-		} finally {
+		} catch(NullPointerException e)  {
+			SDFSLogger.getLog().error("unable to write data", e);
+			throw new IOException(e);
+		}
+		finally {
 			if (l != null)
 				l.unlock();
 		}
