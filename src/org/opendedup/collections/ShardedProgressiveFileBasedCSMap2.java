@@ -361,8 +361,9 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			try {
 				File _fs = new File(fileName);
 				lbf = null;
-				if(Main.LOWMEM)
 				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
+				
+				
 			} finally {
 				l.unlock();
 			}
