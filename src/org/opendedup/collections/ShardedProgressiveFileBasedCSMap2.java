@@ -92,7 +92,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 
-	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder().maximumSize(1_000_000)
+	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder().maximumSize(3_000_000)
 			.concurrencyLevel(Main.writeThreads).build(new CacheLoader<ByteArrayWrapper, AbstractShard>() {
 				public AbstractShard load(ByteArrayWrapper key) throws KeyNotFoundException {
 					return _getReadMap(key.getData());
@@ -361,8 +361,9 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			try {
 				File _fs = new File(fileName);
 				lbf = null;
-				if(Main.LOWMEM)
 				lbf = new LargeBloomFilter(_fs.getParentFile(), maxSz, prob, true, true, Main.CUCKOO);
+				
+				
 			} finally {
 				l.unlock();
 			}
@@ -680,7 +681,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 	public void setMaxSize(long maxSz) throws IOException {
 		this.maxSz = maxSz;
 		long _tbs = maxSz / (32);
-		int max = 600_000_000;
+		int max = Main.MAX_TBL_SIZE;
 		if (_tbs > max) {
 			this.hashTblSz = max;
 		} else if (_tbs > this.hashTblSz) {

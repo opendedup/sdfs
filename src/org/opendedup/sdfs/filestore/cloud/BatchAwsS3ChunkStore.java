@@ -1096,7 +1096,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
-
 			try {
 				sobj = s3Service.getObject(this.name, "blocks/" + haName);
 			} catch (AmazonS3Exception e) {
@@ -1116,15 +1115,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				FileOutputStream out = null;
 				InputStream in = null;
 				try {
+					
 					out = new FileOutputStream(f);
 					in = sobj.getObjectContent();
 					IOUtils.copy(in, out);
 					out.flush();
+					out.close();
+					InputStream fin = new FileInputStream(f);
+					fin.close();
 
 				} catch (Exception e) {
 					throw new IOException(e);
 				} finally {
-					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
 
 				}
@@ -1205,8 +1207,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			dtm = (System.currentTimeMillis() - tm) / 1000d;
 			bps = (cl / 1024) / dtm;
 		} catch (AmazonS3Exception e) {
-			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+				SDFSLogger.getLog().error("invalid object state",e);
 				throw new DataArchivedException(id, null);
+			}
 			else {
 				SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
 				throw e;
@@ -1229,11 +1233,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception e = null;
 		for (int i = 0; i < 5; i++) {
 			try {
+				
 				this.getData(id, f);
 				return;
 			} catch (DataArchivedException e1) {
 				throw e1;
 			} catch (Exception e1) {
+				try {
+					Thread.sleep(5000);
+					if(f.exists())
+						f.delete();
+				} catch (Exception e2) {
+					
+				}
 				e = e1;
 			}
 		}
@@ -2137,13 +2149,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean checkAccess() {
 
 		Exception e = null;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
 				Map<String, String> obj = this.getUserMetaData(binm);
 				obj.get("currentsize");
 				return true;
 			} catch (Exception _e) {
 				e = _e;
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					
+				}
 				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
 		}
@@ -2208,17 +2225,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception _e = null;
 		for (int i = 0; i < 10; i++) {
 			try {
-				ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
-				if (omd == null || omd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+
 					RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
 					s3Service.restoreObject(request);
 					if (blockRestored(haName)) {
 						restoreRequests.put(new Long(id), "InvalidObjectState");
 						return null;
 					}
+					if(this.simpleMD) {
+						request = new RestoreObjectRequest(this.name, "blocks/" + haName+mdExt, 2);
+						s3Service.restoreObject(request);
+					}
 					restoreRequests.put(new Long(id), haName);
 					return haName;
-				}
 			} catch (AmazonS3Exception e) {
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 
@@ -2259,13 +2278,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean blockRestored(String id) {
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id);
-			if (omd != null && !omd.getStorageClass().equalsIgnoreCase("GLACIER"))
+			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
+			if(omd == null || momd == null)
+				return false;
+			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") )
 				return true;
-			else if (omd == null || omd.getOngoingRestore())
+			else if (omd.getOngoingRestore() || momd.getOngoingRestore())
 				return false;
 			else
 				return true;
 		} catch (Exception e) {
+			//SDFSLogger.getLog().warn("error while checking block restored", e);
 			return false;
 		}
 	}

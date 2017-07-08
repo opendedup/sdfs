@@ -25,6 +25,7 @@ public class Main {
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
 	public static double fpp = .01;
+	public static String logSize="10MB";
 	public static boolean CUCKOO =false;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
@@ -107,9 +108,11 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.3.1";
+	public static String version = "3.4.5.2";
 
 	public static boolean readAhead = false;
+	
+	public static int MAX_TBL_SIZE=600_000_000;
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be

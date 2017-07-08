@@ -2,21 +2,16 @@ package org.opendedup.collections;
 
 import org.mapdb.*;
 
-
 import org.mapdb.serializer.GroupSerializer;
-import org.opendedup.hashing.HashFunctionPool;
 
+import net.jpountz.xxhash.XXHash32;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
 
-/**
- * Created by jan on 2/28/16.
- */
-public class SerializerKey implements GroupSerializer<byte[]> {
-
+public class LongLongValueSerializer implements GroupSerializer<byte[]> {
+	private static final XXHash32 HASHER = CC.HASH_FACTORY.hash32();
     @Override
     public void serialize(DataOutput2 out, byte[] value) throws IOException {
         out.write(value);
@@ -24,7 +19,8 @@ public class SerializerKey implements GroupSerializer<byte[]> {
 
     @Override
     public byte[] deserialize(DataInput2 in, int available) throws IOException {
-        byte[] ret = new byte[HashFunctionPool.hashLength];
+    	
+        byte[] ret = new byte[16];
         in.readFully(ret);
         return ret;
     }
@@ -32,7 +28,7 @@ public class SerializerKey implements GroupSerializer<byte[]> {
 
     @Override
     public boolean isTrusted() {
-        return true;
+        return false;
     }
 
     @Override
@@ -41,7 +37,7 @@ public class SerializerKey implements GroupSerializer<byte[]> {
     }
 
     public int hashCode(byte[] bytes, int seed) {
-        return ByteBuffer.wrap(bytes).getInt();
+        return HASHER.hash(bytes, 0, bytes.length, seed);
     }
 
     @Override

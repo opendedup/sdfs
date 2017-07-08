@@ -304,6 +304,9 @@ public class Config {
 			SDFSLogger.setLevel(Integer.parseInt(cache
 					.getAttribute("log-level")));
 		}
+		if (cache.hasAttribute("log-size")) {
+			SDFSLogger.setLogSize(cache.getAttribute("log-size"));
+		}
 		// Close files when close cmd is executed. This should be set to false
 		// if running over nfs
 		if (cache.hasAttribute("read-ahead")) {
@@ -390,6 +393,9 @@ public class Config {
 		}
 		if(localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
+		}
+		if(localChunkStore.hasAttribute("max-table-size")) {
+			Main.MAX_TBL_SIZE =Integer.parseInt(localChunkStore.getAttribute("max-table-size"));
 		}
 		if(localChunkStore.hasAttribute("cuckoo")) {
 			Main.CUCKOO = Boolean.parseBoolean(localChunkStore.getAttribute("cuckoo"));

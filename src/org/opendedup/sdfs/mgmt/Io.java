@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -35,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.eventbus.EventBus;
+
 import fuse.Errno;
 import fuse.FuseException;
 import fuse.FuseFtypeConstants;
@@ -145,8 +147,10 @@ public class Io {
 		try {
 			ByteBuffer buf = ByteBuffer.allocate(len);
 			req.getByteChannel().read(buf);
+			
 			if (buf.position() != len) {
 				SDFSLogger.getLog().warn("length is " + len + " buffer size " + buf.position());
+				
 				throw new FuseException().initErrno(Errno.EIO);
 			}
 			buf.position(0);
@@ -353,7 +357,7 @@ public class Io {
 				try {
 
 					int read = this.read(fh, bf, start);
-					SDFSLogger.getLog().info("Bytes read is " + read);
+					//SDFSLogger.getLog().info("Bytes read is " + read);
 					byte[] k = null;
 					if (read == len)
 						k = bf.array();

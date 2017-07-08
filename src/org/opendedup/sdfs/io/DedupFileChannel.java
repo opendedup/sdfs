@@ -53,6 +53,7 @@ public class DedupFileChannel {
 	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
+	private boolean readAheadInitiated = false;
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
@@ -74,13 +75,7 @@ public class DedupFileChannel {
 		if (Main.checkArchiveOnOpen) {
 			this.recoverArchives();
 		}
-		try {
-			if (Main.readAhead)
-				ReadAhead.getReadAhead(file);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to load readahead for " + df.mf.getPath(), e);
-		}
+		
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"Initializing Cache " + df.getMetaFile().getPath());
@@ -372,7 +367,7 @@ public class DedupFileChannel {
 								+ df.getMetaFile().getPath()
 								+ " at "
 								+ pos
-								+ ". Recovering data from archive. This may take up to 4 hours");
+								+ ". Recovering data from archive. This may take up to 4 hours for " +e.getPos(),e);
 				this.recoverArchives();
 				this.writeFile(buf, len, pos, offset, propigate);
 			} else
@@ -514,6 +509,15 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
+			if (filePos > 0 && !readAheadInitiated && Main.readAhead) {
+				this.readAheadInitiated = true;
+				ReadAhead.getReadAhead(df);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"unable to load readahead for " + df.mf.getPath(), e);
+		}
+		try {
 			if (filePos >= df.getMetaFile().length() && !Main.blockDev) {
 				return -1;
 			}
@@ -569,7 +573,7 @@ public class DedupFileChannel {
 										+ df.getMetaFile().getPath()
 										+ " at "
 										+ startPos
-										+ ". Recovering data from archive. This may take up to 4 hours");
+										+ ". Recovering data from archive. This may take up to 4 hours " + e.getPos(),e);
 						this.recoverArchives();
 						this.read(buf, bufPos, siz, filePos);
 					} else
@@ -600,6 +604,7 @@ public class DedupFileChannel {
 			}
 			return read;
 		} catch (DataArchivedException e) {
+			SDFSLogger.getLog().error("archive exception " + e.getPos(),e);
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

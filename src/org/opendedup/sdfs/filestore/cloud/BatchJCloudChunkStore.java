@@ -1530,7 +1530,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public boolean checkAccess() {
 		Exception e = null;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
 				String lbi = "bucketinfo/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -1540,6 +1540,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					return true;
 				}
 			} catch (Exception _e) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					
+				}
 				e = _e;
 				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
