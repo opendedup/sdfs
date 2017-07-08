@@ -1180,7 +1180,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public boolean checkAccess() {
 		Exception e = null;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
 				if (!this.clustered) {
 					HashMap<String, String> md = container.getMetadata();
@@ -1198,6 +1198,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					return true;
 				}
 			} catch (Exception _e) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					
+				}
 				e = _e;
 				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}

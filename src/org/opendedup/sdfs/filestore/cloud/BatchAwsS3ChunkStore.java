@@ -2149,13 +2149,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean checkAccess() {
 
 		Exception e = null;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 10; i++) {
 			try {
 				Map<String, String> obj = this.getUserMetaData(binm);
 				obj.get("currentsize");
 				return true;
 			} catch (Exception _e) {
 				e = _e;
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					
+				}
 				SDFSLogger.getLog().debug("unable to connect to bucket try " + i + " of 3", e);
 			}
 		}

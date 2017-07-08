@@ -53,6 +53,7 @@ public class DedupFileChannel {
 	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
+	private boolean readAheadInitiated = false;
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
@@ -74,13 +75,7 @@ public class DedupFileChannel {
 		if (Main.checkArchiveOnOpen) {
 			this.recoverArchives();
 		}
-		try {
-			if (Main.readAhead)
-				ReadAhead.getReadAhead(file);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"unable to load readahead for " + df.mf.getPath(), e);
-		}
+		
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"Initializing Cache " + df.getMetaFile().getPath());
@@ -513,6 +508,15 @@ public class DedupFileChannel {
 							+ siz + " bcpos=" + bufPos);
 		Lock l = df.getReadLock();
 		l.lock();
+		try {
+			if (filePos > 0 && !readAheadInitiated && Main.readAhead) {
+				this.readAheadInitiated = true;
+				ReadAhead.getReadAhead(df);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"unable to load readahead for " + df.mf.getPath(), e);
+		}
 		try {
 			if (filePos >= df.getMetaFile().length() && !Main.blockDev) {
 				return -1;

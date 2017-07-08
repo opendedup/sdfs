@@ -1247,7 +1247,7 @@ public class ShardedFileByteArrayLongMap2
 					return -1;
 				}
 			} while (index != loopIndex);
-			SDFSLogger.getLog().warn("looped through everything");
+			SDFSLogger.getLog().debug("looped through everything in hashtable");
 			return -1;
 		}
 

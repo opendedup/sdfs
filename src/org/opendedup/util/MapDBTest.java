@@ -25,7 +25,7 @@ public class MapDBTest {
 		File f  = new File("c:\\temp\\watchhashes.db");
 		SecureRandom _rnd = new SecureRandom();
 		rnd = new MersenneTwisterFast(_rnd.nextInt());
-		indexMap = hashDB.treeMap("map", new SerializerKey(), new LongLongValueSerializer()).createOrOpen();
+		indexMap = hashDB.treeMap("map", new SerializerKey(),new LongLongValueSerializer() ).createOrOpen();
 		byte[] k = new byte[16];
 		byte[] v = new byte[16];
 		long tm = System.currentTimeMillis();

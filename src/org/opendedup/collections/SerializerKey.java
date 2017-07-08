@@ -2,8 +2,10 @@ package org.opendedup.collections;
 
 import org.mapdb.*;
 
+
 import org.mapdb.serializer.GroupSerializer;
 import org.opendedup.hashing.HashFunctionPool;
+
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,16 +17,13 @@ import java.util.Comparator;
  */
 public class SerializerKey implements GroupSerializer<byte[]> {
 
-
     @Override
     public void serialize(DataOutput2 out, byte[] value) throws IOException {
-        //out.packInt(value.length);
         out.write(value);
     }
 
     @Override
     public byte[] deserialize(DataInput2 in, int available) throws IOException {
-        //int size = in.unpackInt();
         byte[] ret = new byte[HashFunctionPool.hashLength];
         in.readFully(ret);
         return ret;
@@ -47,17 +46,25 @@ public class SerializerKey implements GroupSerializer<byte[]> {
 
     @Override
     public int compare(byte[] o1, byte[] o2) {
-       return 0;
+        if (o1 == o2) return 0;
+        final int len = Math.min(o1.length, o2.length);
+        for (int i = 0; i < len; i++) {
+            int b1 = o1[i] & 0xFF;
+            int b2 = o2[i] & 0xFF;
+            if (b1 != b2)
+                return b1 - b2;
+        }
+        return o1.length - o2.length;
     }
 
     @Override
     public int valueArraySearch(Object keys, byte[] key) {
-        return Arrays.binarySearch((byte[][])keys, key, new SerializerKey());
+        return Arrays.binarySearch((byte[][])keys, key, Serializer.BYTE_ARRAY);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
 	@Override
-    public int valueArraySearch(Object keys, byte[] key, Comparator comparator) {
+    public int valueArraySearch(Object keys, byte[] key, @SuppressWarnings("rawtypes") Comparator comparator) {
         //TODO PERF optimize search
         Object[] v = valueArrayToArray(keys);
         return Arrays.binarySearch(v, key, comparator);
@@ -66,15 +73,15 @@ public class SerializerKey implements GroupSerializer<byte[]> {
     @Override
     public void valueArraySerialize(DataOutput2 out, Object vals) throws IOException {
         byte[][] vals2 = (byte[][]) vals;
-        //out.packInt(vals2.length);
+        out.packInt(vals2.length);
         for(byte[]b:vals2){
-           this.serialize(out, b);
+            this.serialize(out, b);
         }
     }
 
     @Override
     public byte[][] valueArrayDeserialize(DataInput2 in, int size) throws IOException {
-        int s = HashFunctionPool.hashLength;
+    	int s = in.unpackInt();
         byte[][] ret = new byte[s][];
         for(int i=0;i<s;i++) {
             ret[i] = this.deserialize(in, -1);
