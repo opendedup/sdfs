@@ -105,7 +105,7 @@ public interface AbstractShard {
 
 	int avail();
 
-	void put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
+	InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
 
 	boolean isMaxed();
 

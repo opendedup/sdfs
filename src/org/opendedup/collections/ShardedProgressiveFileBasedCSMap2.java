@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -708,6 +709,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			_fs.getParentFile().mkdirs();
 		}
 		SDFSLogger.getLog().info("Folder = " + _fs.getPath());
+		System.out.println("Folder = " + _fs.getPath());
 		SDFSLogger.getLog().info("Loading freebits bitset");
 		long rsz = 0;
 		this.setMaxSize(maxSz);
@@ -935,7 +937,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 							}
 						}
 						bm = this.getWriteMap();
-						rec = bm.put(cm.getHash(), cm.getcPos());
+						rec = bm.put(cm.getHash(), cm.getcPos(),cm.references);
 						this.lbf.put(cm.getHash());
 					} catch (HashtableFullException e) {
 						rec = null;

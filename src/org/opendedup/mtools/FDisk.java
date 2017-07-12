@@ -113,8 +113,8 @@ public class FDisk {
 					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
-			fEvt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
-			evt.endEvent("fdisk failed because [" + e.toString() + "]", SDFSEvent.ERROR);
+			fEvt.endEvent("reference count failed because [" + e.toString() + "]", SDFSEvent.ERROR);
+			evt.endEvent("reference count failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 			this.failed = true;
 			throw new FDiskException(e);
 		}

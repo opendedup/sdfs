@@ -669,7 +669,7 @@ public class ShardedFileByteArrayLongMap
 	}
 
 	@Override
-	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
+	public InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		try {
 
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
@@ -690,6 +690,7 @@ public class ShardedFileByteArrayLongMap
 				 * synchronized(bf) { this.bf.put(key); }
 				 */
 			}
+			return r;
 
 		} catch (HashtableFullException e) {
 			this.full = true;

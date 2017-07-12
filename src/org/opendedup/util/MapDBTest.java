@@ -33,7 +33,8 @@ public class MapDBTest {
 		for (int i = 0; i < 100_000_000; i++) {
 			rnd.nextBytes(k);
 			rnd.nextBytes(v);
-			indexMap.put(k, v);
+			if(!indexMap.containsKey(k))
+				indexMap.put(k, v);
 			
 			if (it == 1_000_000) {
 				long ct = (System.currentTimeMillis() - tm) / 1000;

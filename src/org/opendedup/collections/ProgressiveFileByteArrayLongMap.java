@@ -1465,8 +1465,8 @@ public class ProgressiveFileByteArrayLongMap implements AbstractShard,
 	}
 
 	@Override
-	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
-		// TODO Auto-generated method stub
+	public InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
+		return null;
 		
 	}
 

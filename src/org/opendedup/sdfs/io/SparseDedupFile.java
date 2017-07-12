@@ -71,6 +71,7 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
 public class SparseDedupFile implements DedupFile {
 
+	
 	private ArrayList<DedupFileLock> locks = new ArrayList<DedupFileLock>();
 	private String GUID = "";
 	private static EventBus eventBus = new EventBus();
@@ -124,7 +125,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder.newBuilder()
-			.maximumSize(maxWriteBuffers + 1).concurrencyLevel(64).expireAfterAccess(15, TimeUnit.SECONDS)
+			.maximumSize(maxWriteBuffers + 1).expireAfterAccess(15, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
 				public void onRemoval(RemovalNotification<Long, DedupChunkInterface> removal) {
 					DedupChunkInterface ck = removal.getValue();

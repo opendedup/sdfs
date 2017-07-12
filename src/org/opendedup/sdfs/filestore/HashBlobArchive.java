@@ -274,8 +274,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 								SDFSLogger.getLog().warn("unable to close filechannel", e);
 							}
 						}
-					}).concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
-					.build(new CacheLoader<Long, FileChannel>() {
+					}).build(new CacheLoader<Long, FileChannel>() {
 						public FileChannel load(Long hashid) throws IOException {
 							try {
 
@@ -301,8 +300,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 								SDFSLogger.getLog().warn("unable to close filechannel", e);
 							}
 						}
-					}).concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
-					.build(new CacheLoader<Long, SimpleByteArrayLongMap>() {
+					}).build(new CacheLoader<Long, SimpleByteArrayLongMap>() {
 						public SimpleByteArrayLongMap load(Long hashid) throws IOException {
 							try {
 								return getRawMap(hashid);

@@ -33,6 +33,7 @@ public class ChunkData {
 	private AbstractChunkStore writeStore = null;
 	public boolean recoverd = false;
 	public boolean blank;
+	public long references =1;
 
 	public ChunkData() {
 		this.blank = true;

@@ -683,7 +683,7 @@ public class ShardedFileByteArrayLongMap2
 	}
 
 	@Override
-	public void put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
+	public InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		this.hashlock.readLock().lock();
 		try {
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
@@ -705,6 +705,7 @@ public class ShardedFileByteArrayLongMap2
 				 * synchronized(bf) { this.bf.put(key); }
 				 */
 			}
+			return r;
 
 		} catch (HashtableFullException e) {
 			this.full = true;

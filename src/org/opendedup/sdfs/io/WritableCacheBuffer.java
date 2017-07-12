@@ -391,7 +391,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
 					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue());
-
 				}
 			}
 		} catch (Exception e) {
