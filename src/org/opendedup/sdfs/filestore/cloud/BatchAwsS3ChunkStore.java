@@ -499,6 +499,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						clientConfig.setProtocol(Protocol.HTTPS);
 
 				}
+				if(config.hasAttribute("user-agent-prefix")) {
+					clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
+				}
 				if (el.hasAttribute("s3-target")) {
 					s3Target = el.getAttribute("s3-target");
 				}
