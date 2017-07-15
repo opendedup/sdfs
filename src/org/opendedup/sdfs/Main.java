@@ -24,6 +24,7 @@ public class Main {
 	}
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
+	public static int hashSeed=6442;
 	public static double fpp = .01;
 	public static String logSize="10MB";
 	public static boolean CUCKOO =false;

@@ -420,8 +420,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				EncyptUtils.baseEncode = true;
 				this.b2Store = true;
 			}
+			String userAgent = "SDFS/"+Main.version;
+			if(config.hasAttribute("user-agent-prefix"))
+				userAgent = config.getAttribute("user-agent-prefix") + " " + userAgent;
 			overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
 			overrides.setProperty(Constants.PROPERTY_USER_THREADS, "0");
+			overrides.setProperty(Constants.PROPERTY_USER_AGENT, userAgent);
 			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_CONTEXT,
 					Integer.toString(Main.dseIOThreads * 2));
 			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_HOST, 0 + "");

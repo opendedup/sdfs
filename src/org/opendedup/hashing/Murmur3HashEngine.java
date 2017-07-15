@@ -25,10 +25,13 @@ import com.google.common.hash.Hashing;
 
 public class Murmur3HashEngine implements AbstractHashEngine {
 
-	public static final int seed = 6442;
-	HashFunction hf = Hashing.murmur3_128(seed);
+	public static int defaultSeed = 6442;
+	private int seed;
+	HashFunction hf = null;
 
 	public Murmur3HashEngine() {
+		this.seed = defaultSeed;
+		hf = Hashing.murmur3_128(seed);
 	}
 
 	@Override
@@ -62,5 +65,12 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	public int getMinLen() {
 		// TODO Auto-generated method stub
 		return Main.CHUNK_LENGTH;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		this.seed = seed;
+		hf = Hashing.murmur3_128(seed);
+		
 	}
 }

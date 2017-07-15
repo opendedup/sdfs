@@ -34,7 +34,7 @@ import org.rabinfingerprint.polynomial.Polynomial;
 
 public class VariableHashEngine implements AbstractHashEngine {
 
-	public static final int seed = 6442;
+	public int seed;
 	public static int minLen = Main.MIN_CHUNK_LENGTH;
 	public static int maxLen = Main.CHUNK_LENGTH;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
@@ -43,6 +43,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 	private EnhancedFingerFactory ff = null;
 
 	public VariableHashEngine() throws NoSuchAlgorithmException {
+		this.seed = Main.hashSeed;
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +minLen + " maxlen=" + maxLen + " windowSize=" + bytesPerWindow);
 			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
@@ -53,9 +54,11 @@ public class VariableHashEngine implements AbstractHashEngine {
 
 	@Override
 	public byte[] getHash(byte[] data) {
-		byte[] hash = MurMurHash3.murmurhash3_x64_128(data, 6442);
+		byte[] hash = MurMurHash3.murmurhash3_x64_128(data, seed);
 		return hash;
 	}
+	
+	
 
 	public List<Finger> getChunks(byte[] data) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
@@ -104,5 +107,11 @@ public class VariableHashEngine implements AbstractHashEngine {
 	public int getMinLen() {
 		// TODO Auto-generated method stub
 		return minLen;
+	}
+
+	@Override
+	public void setSeed(int seed) {
+		this.seed = seed;
+		
 	}
 }
