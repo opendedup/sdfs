@@ -23,6 +23,8 @@ public interface AbstractHashEngine {
 	public boolean isVariableLength();
 
 	public byte[] getHash(byte[] data);
+	
+	public void setSeed(int seed);
 
 	public void destroy();
 

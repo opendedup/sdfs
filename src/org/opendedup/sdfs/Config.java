@@ -330,12 +330,13 @@ public class Config {
 				Main.hashType = HashFunctionPool.TIGER_24;
 			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 		}
-		if(cache.hasAttribute("hash-seed")) {
-			VariableHashEngine.seed = Integer.parseInt(cache.getAttribute("hash-seed"));
-		}
+		
 		if (cache.hasAttribute("hash-type")) {
 			Main.hashType = cache.getAttribute("hash-type");
 			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
+		}
+		if(cache.hasAttribute("hash-seed")) {
+			Main.hashSeed = Integer.parseInt(cache.getAttribute("hash-seed"));
 		}
 		Main.dedupFiles = Boolean.parseBoolean(cache
 				.getAttribute("dedup-files"));

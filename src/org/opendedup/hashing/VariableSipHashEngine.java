@@ -19,20 +19,27 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.StringUtils;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.polynomial.Polynomial;
 
-public class VariableHashEngine implements AbstractHashEngine {
+import software.pando.crypto.siphash.SipHash;
+
+
+public class VariableSipHashEngine implements AbstractHashEngine {
 
 	public int seed;
 	public static int minLen = Main.MIN_CHUNK_LENGTH;
@@ -41,24 +48,25 @@ public class VariableHashEngine implements AbstractHashEngine {
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	public static long bytesPerWindow = 48;
 	private EnhancedFingerFactory ff = null;
+	private SecretKey KEY = null;
+	SipHash sipHash128;
 
-	public VariableHashEngine() throws NoSuchAlgorithmException {
-		this.seed = Main.hashSeed;
+	public VariableSipHashEngine() throws NoSuchAlgorithmException {
+		this.setSeed(Main.hashSeed);
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +minLen + " maxlen=" + maxLen + " windowSize=" + bytesPerWindow);
 			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
 					minLen, maxLen);
 		}
+		sipHash128 = SipHash.getInstance(2, 4,128, KEY);
 
 	}
 
 	@Override
 	public byte[] getHash(byte[] data) {
-		byte[] hash = MurMurHash3.murmurhash3_x64_128(data, seed);
+		byte[] hash = sipHash128.mac(data);
 		return hash;
 	}
-	
-	
 
 	public List<Finger> getChunks(byte[] data) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
@@ -112,6 +120,20 @@ public class VariableHashEngine implements AbstractHashEngine {
 	@Override
 	public void setSeed(int seed) {
 		this.seed = seed;
+		byte [] b = new byte[16];
+		ByteBuffer buf = ByteBuffer.wrap(b);
+		for(int i = 0;i<4;i++) {
+			buf.putInt(seed);
+		}
+		KEY = new SecretKeySpec(buf.array(), "RAW");
+		sipHash128 = SipHash.getInstance(2, 4,128, KEY);
+	}
+	
+	public static void main(String [] args) throws NoSuchAlgorithmException {
+		byte [] test  = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".getBytes();
+		VariableSipHashEngine e = new VariableSipHashEngine();
+		String h = StringUtils.getHexString(e.getHash(test));
+		System.out.println(h);
 		
 	}
 }
