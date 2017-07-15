@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,10 +38,12 @@ import org.opendedup.utils.hashing.FileBasedBloomFilter;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
 
+import net.jpountz.xxhash.XXHash32;
+import net.jpountz.xxhash.XXHashFactory;
 import sun.nio.ch.DirectBuffer;
 
-public class ShardedFileByteArrayLongMap2
-		implements Runnable, AbstractShard, Serializable, Comparable<ShardedFileByteArrayLongMap2> {
+public class ShardedFileByteArrayLongMap3
+		implements Runnable, AbstractShard, Serializable, Comparable<ShardedFileByteArrayLongMap3> {
 	/**
 	 * 
 	 */
@@ -48,7 +51,7 @@ public class ShardedFileByteArrayLongMap2
 	// transient MappedByteBuffer keys = null;
 	transient private int size = 0;
 	transient private int maxSz = 0;
-	transient private double loadFactor = .75;
+	transient private double loadFactor = .70;
 	transient private String path = null;
 	transient private FileChannel kFC = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8 + 8;
@@ -76,6 +79,7 @@ public class ShardedFileByteArrayLongMap2
 	private static final long mixCacheTM = 60 * 60 * 1000;
 	private boolean cacheRunning = false;
 	int minSz = 10000;
+	
 
 	private ArrayList<Shard> shards = new ArrayList<Shard>(numshards);
 
@@ -86,20 +90,20 @@ public class ShardedFileByteArrayLongMap2
 		Arrays.fill(REMOVED, (byte) 1);
 	}
 
-	protected ShardedFileByteArrayLongMap2(String path, int size) throws IOException {
+	protected ShardedFileByteArrayLongMap3(String path, int size) throws IOException {
 		this.size = size;
 		this.path = path;
 		if (this.size < 1_000_000) {
-			this.numshards = 4;
-
-		} else if (this.size < 10_000_000) {
 			this.numshards = 8;
 
-		} else if (this.size < 40_000_000) {
+		} else if (this.size < 10_000_000) {
 			this.numshards = 16;
 
-		} else if (this.size < 100_000_000) {
+		} else if (this.size < 40_000_000) {
 			this.numshards = 32;
+
+		} else if (this.size < 100_000_000) {
+			this.numshards = 64;
 
 		} else
 			this.numshards = 64;
@@ -117,7 +121,7 @@ public class ShardedFileByteArrayLongMap2
 		return this.lastFound.get();
 	}
 
-	public boolean equals(ShardedFileByteArrayLongMap2 m) {
+	public boolean equals(ShardedFileByteArrayLongMap3 m) {
 		if (m == null)
 			return false;
 		if (m.path == null)
@@ -503,9 +507,9 @@ public class ShardedFileByteArrayLongMap2
 
 	private Shard getMap(byte[] hash) {
 
-		int hashb = hash[1];
+		int hashb = hash[9];
 		if (hashb < 0) {
-			hashb = ((hashb * -1) + 127);
+			hashb = ((hashb * -1) + Byte.MAX_VALUE);
 		}
 		Shard m = this.shards.get(hashb / numdiv);
 		return m;
@@ -1050,8 +1054,8 @@ public class ShardedFileByteArrayLongMap2
 	@Override
 	public boolean equals(Object object) {
 		boolean sameSame = false;
-		if (object != null && object instanceof ShardedFileByteArrayLongMap2) {
-			ShardedFileByteArrayLongMap2 m = (ShardedFileByteArrayLongMap2) object;
+		if (object != null && object instanceof ShardedFileByteArrayLongMap3) {
+			ShardedFileByteArrayLongMap3 m = (ShardedFileByteArrayLongMap3) object;
 			sameSame = this.path.equalsIgnoreCase(m.path);
 		}
 		return sameSame;
@@ -1120,7 +1124,7 @@ public class ShardedFileByteArrayLongMap2
 	}
 
 	@Override
-	public int compareTo(ShardedFileByteArrayLongMap2 m1) {
+	public int compareTo(ShardedFileByteArrayLongMap3 m1) {
 		long dif = this.lastFound.get() - m1.lastFound.get();
 		if (dif > 0)
 			return 1;
@@ -1132,7 +1136,7 @@ public class ShardedFileByteArrayLongMap2
 
 	public static class Shard implements Runnable {
 		MappedByteBuffer kFC = null;
-		ShardedFileByteArrayLongMap2 m;
+		ShardedFileByteArrayLongMap3 m;
 		private int size;
 		BitSet mapped;
 		BitSet claims;
@@ -1142,21 +1146,26 @@ public class ShardedFileByteArrayLongMap2
 		int iterPos = 0;
 		int start;
 		private Object obj = new Object();
-		
-		public Shard(ShardedFileByteArrayLongMap2 m, int start, int size, BitSet mapped, BitSet claims, BitSet removed)
+		int blocks = 0;
+		int scans;
+		int requiests;
+		static final XXHash32 hashFunction = XXHashFactory.nativeInstance().hash32();
+
+		public Shard(ShardedFileByteArrayLongMap3 m, int start, int size, BitSet mapped, BitSet claims, BitSet removed)
 				throws IOException {
 			this.m = m;
 			this.size = size;
 			this.start = start;
 			this.maxSz = (int) (size * m.loadFactor);
-			long ep = (long) ((long) size * (long) ShardedFileByteArrayLongMap2.EL);
-			long sp = (long) ((long) start * (long) ShardedFileByteArrayLongMap2.EL);
+			long ep = (long) ((long) size * (long) ShardedFileByteArrayLongMap3.EL);
+			long sp = (long) ((long) start * (long) ShardedFileByteArrayLongMap3.EL);
 			kFC = m.kFC.map(FileChannel.MapMode.READ_WRITE, sp, ep);
 			// System.out.println("start=" + start + " ep=" + ep + " fl=" +
 			// m.kFC.size());
 			this.mapped = mapped;
 			this.removed = removed;
 			this.claims = claims;
+			blocks = size/8;
 		}
 
 		public synchronized void iterInit() {
@@ -1193,7 +1202,7 @@ public class ShardedFileByteArrayLongMap2
 			// From here on we know obj to be non-null
 			ByteBuffer buf = ByteBuffer.wrap(key);
 			byte[] current = new byte[FREE.length];
-			buf.position(8);
+			buf.position(0);
 			int hash = buf.getInt() & 0x7fffffff;
 			int index = this.hashFunc1(hash);
 			if (this.isFree(index)) {
@@ -1224,19 +1233,22 @@ public class ShardedFileByteArrayLongMap2
 		 * @return
 		 * @throws IOException
 		 */
-
+		
+		
 		private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
 
 			// NOTE: here it has to be REMOVED or FULL (some user-given value)
 			// see Knuth, p. 529
-			int length = size * EL;
-			int probe = (1 + (hash % (size - 2))) * EL;
+			
 			final long loopIndex = index;
-
+			int length = size * EL;
+			int i = hash/EL, h = 1;
+			
 			do {
-				index -= probe;
-				if (index < 0) {
-					index += length;
+				i = (i + h * h++) % size;
+				index = i * EL;
+				if (index >= length) {
+					index = 0;
 				}
 				if (!this.isFree((index / EL))) {
 					kFC.position(index);
@@ -1253,8 +1265,10 @@ public class ShardedFileByteArrayLongMap2
 		}
 
 		private int insertionIndex(byte[] key, boolean migthexist) throws IOException, HashtableFullException {
+			this.requiests++;
+			this.scans++;
 			ByteBuffer buf = ByteBuffer.wrap(key);
-			buf.position(8);
+			buf.position(0);
 			int hash = buf.getInt() & 0x7fffffff;
 			int index = this.hashFunc1(hash);
 			byte[] current = new byte[FREE.length];
@@ -1289,17 +1303,18 @@ public class ShardedFileByteArrayLongMap2
 		 */
 		private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur, boolean mightexist)
 				throws IOException, HashtableFullException {
-			final int length = size * EL;
-			final int probe = (1 + (hash % (size - 2))) * EL;
 			final int loopIndex = index;
 			int firstRemoved = -1;
+			int length = size * EL;
 
 			/**
 			 * Look until FREE slot or we start to loop
 			 */
-			// int k = 0;
+			int k = 0;
+			int i = hash/EL, h = 1;
 
 			do {
+				scans++;
 				// Identify first removed slot
 
 				if (removed.get(index / EL) && firstRemoved == -1) {
@@ -1307,11 +1322,12 @@ public class ShardedFileByteArrayLongMap2
 					if (!mightexist)
 						return index;
 				}
-				index -= probe;
-				if (index < 0) {
-					index += length;
+				i = (i + h * h++) % size;
+				index = i * EL;
+				if (index >= length) {
+					index =0;
 				}
-
+				
 				// A FREE slot stops the search
 				if (this.isFree(index / EL)) {
 					if (firstRemoved != -1) {
@@ -1327,11 +1343,16 @@ public class ShardedFileByteArrayLongMap2
 						return -index - 1;
 					}
 				}
-
+				if(k>10) {
+					int m = (hash % size);
+					double sp = (double)scans/(double)this.requiests;
+					System.out.println("Probes=" + k + " pl=" + m + " sp=" +sp);
+				}
+				k++;
 				// Detect loop
 			} while (index != loopIndex);
 
-			// We inspected all reachable slots and did not find a FREE one
+			// We inspected all reachable slots and did not find a FREE oneb
 			// If we found a REMOVED slot we return the first one found
 			if (firstRemoved != -1) {
 				return firstRemoved;

@@ -24,7 +24,7 @@ public class ShardDBTest {
 		hashDB = new ShardedProgressiveFileBasedCSMap2();
 		
 		
-		File f  = new File("c:\\temp\\shards\\shard");
+		File f  = new File("c:\\temp\\shards\\shard3");
 		hashDB.init(150_000_000, f.getPath(), .001);
 		SecureRandom _rnd = new SecureRandom();
 		byte[] v = new byte[16];

@@ -2,6 +2,8 @@ package org.opendedup.util;
 
 import java.io.File;
 
+
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.RocksDBMap;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap2;
+import org.opendedup.collections.ShardedProgressiveFileBasedCSMap3;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 import com.google.common.hash.HashFunction;
@@ -24,15 +27,15 @@ public class RocksDBProdTest {
 	static AtomicLong inserts = new AtomicLong();
 	
 	public static void main(String[] args) throws IOException, HashtableFullException, InterruptedException {
-		boolean rdb = true;
+		boolean rdb = false;
 		File f  = null;
 		if(rdb) {
-		hashDB = new RocksDBMap();
-		f  = new File("c:\\temp\\rdbshards");
+		hashDB = new ShardedProgressiveFileBasedCSMap2();
+		f  = new File("c:\\temp\\psharddb2\\shards");
 		}
 		else {
-			hashDB = new ShardedProgressiveFileBasedCSMap2();
-			f  = new File("c:\\temp\\psharddb\\shards");
+			hashDB = new RocksDBMap();
+			f  = new File("c:\\temp\\rdbshard");
 		}
 		
 		

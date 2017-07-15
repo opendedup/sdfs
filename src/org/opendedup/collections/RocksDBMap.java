@@ -19,6 +19,7 @@
 package org.opendedup.collections;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -72,16 +73,16 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		      
 		      BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 		      blockConfig.setFilter(new BloomFilter(16,false));
-		      blockConfig.setBlockSize(1*1024);
+		      blockConfig.setBlockSize(4*1024);
 		      blockConfig.setFormatVersion(2);
-		      blockConfig.setBlockCacheSize(1024*1024*1024);
+		      blockConfig.setBlockCacheSize(512*1024*1024);
 		      //blockConfig.setCacheIndexAndFilterBlocks(true);
 		      options.setTableFormatConfig(blockConfig);
-		      options.setWriteBufferSize(128*1024*1024);
-		      //options.setAllowMmapWrites(true);
-		      //options.setAllowMmapReads(true);
+		      options.setWriteBufferSize(512*1024*1024);
+		      options.setAllowMmapWrites(true);
+		      options.setAllowMmapReads(true);
 		      options.setMaxOpenFiles(-1);
-		      options.setTargetFileSizeBase(512*1024*1024);
+		      options.setTargetFileSizeBase(1024*1024*1024*4);
 			    // a factory method that returns a RocksDB instance
 		      wo = new WriteOptions();
 		      wo.setDisableWAL(true);
