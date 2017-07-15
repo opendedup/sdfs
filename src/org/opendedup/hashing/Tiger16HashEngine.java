@@ -69,4 +69,10 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 		// TODO Auto-generated method stub
 		return Main.CHUNK_LENGTH;
 	}
+
+	@Override
+	public void setSeed(int seed) {
+		// TODO Auto-generated method stub
+		
+	}
 }

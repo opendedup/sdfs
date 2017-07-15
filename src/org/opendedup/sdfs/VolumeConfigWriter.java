@@ -135,6 +135,7 @@ public class VolumeConfigWriter {
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
 	private String volumeType = "standard";
+	private String userAgentPrefix = null;
 	private long sn = new Random().nextLong();
 
 	public VolumeConfigWriter() {
@@ -185,7 +186,7 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
 			this.maxSegSize = 128;
-			this.max_open_files = 32*3;
+			this.max_open_files = 20;
 			this.max_file_write_buffers=80;
 			this.chunk_size = 40960;
 			this.volumeType ="backup";
@@ -369,6 +370,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("gc-class")) {
 			this.gc_class = cmd.getOptionValue("gc-class");
+		}
+		if(cmd.hasOption("user-agent-prefix")) {
+			this.userAgentPrefix = cmd.getOptionValue("user-agent-prefix");
 		}
 		if (this.awsEnabled || minIOEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
@@ -710,6 +714,8 @@ public class VolumeConfigWriter {
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "10000");
 			extended.setAttribute("sync-files", "true");
+			if(this.userAgentPrefix != null)
+				extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 			extended.setAttribute("local-cache-size", this.cacheSize);
 			extended.setAttribute("share-path", this.accessPath);
 			extended.setAttribute("map-cache-size", "100");
@@ -739,6 +745,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
+				if(this.userAgentPrefix != null)
+					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "200");
 				extended.setAttribute("io-threads", "16");
@@ -789,6 +797,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
+				if(this.userAgentPrefix != null)
+					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
@@ -816,6 +826,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
+				if(this.userAgentPrefix != null)
+					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 				extended.setAttribute("sync-files", "true");
 				extended.setAttribute("local-cache-size", this.cacheSize);
 				extended.setAttribute("map-cache-size", "100");
@@ -831,6 +843,8 @@ public class VolumeConfigWriter {
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "1500");
 			extended.setAttribute("sync-files", "false");
+			if(this.userAgentPrefix != null)
+				extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 			extended.setAttribute("local-cache-size", this.cacheSize);
 			extended.setAttribute("map-cache-size", "100");
 			extended.setAttribute("io-threads", "16");
@@ -1140,6 +1154,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")
 				.hasArg().withArgName("Unique Cloud Bucket Name").create());
+		options.addOption(OptionBuilder.withLongOpt("user-agent-prefix")
+				.withDescription(
+						"Set the user agent prefix for the client when uploading to the cloud.")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder.withLongOpt("low-memory")
 				.withDescription("Sets the volume to mimimize the amount of ram used at the expense of speed")
 				.hasArg(false).create());
