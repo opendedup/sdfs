@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,11 +58,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.crypto.spec.IvParameterSpec;
 
 import static java.lang.Math.toIntExact;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.jets3t.service.utils.ServiceUtils;
@@ -481,6 +484,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			clientConfig.setSocketTimeout(120000);
 
 			String s3Target = null;
+			if(config.hasAttribute("user-agent-prefix")) {
+				clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
+			}
 			if (config.getElementsByTagName("connection-props").getLength() > 0) {
 				Element el = (Element) config.getElementsByTagName("connection-props").item(0);
 				if (el.hasAttribute("connection-timeout"))
@@ -499,9 +505,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						clientConfig.setProtocol(Protocol.HTTPS);
 
 				}
-				if(config.hasAttribute("user-agent-prefix")) {
-					clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
-				}
+				
 				if (el.hasAttribute("s3-target")) {
 					s3Target = el.getAttribute("s3-target");
 				}
@@ -1653,9 +1657,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		InputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
-
+		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth);
+		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -2489,6 +2493,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
+		name = FilenameUtils.separatorsToUnix(name);
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();

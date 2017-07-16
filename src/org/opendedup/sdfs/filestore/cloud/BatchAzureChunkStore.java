@@ -31,6 +31,7 @@ import org.jets3t.service.utils.ServiceUtils;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -872,6 +873,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		BufferedInputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
+		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		boolean isDir = false;
 		boolean isSymlink = false;
@@ -1517,6 +1519,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public void checkoutFile(String name) throws IOException {
 		try {
+			name = FilenameUtils.separatorsToUnix(name);
 			CloudBlockBlob kblob = container.getBlockBlobReference("claims/" + name + "/"
 					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 			kblob.uploadText(Long.toString(System.currentTimeMillis()));
