@@ -1,8 +1,9 @@
 package org.opendedup.util;
 
 import java.io.File;
-
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.Random;
 
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
@@ -30,9 +31,11 @@ public class MapDBTest {
 		byte[] v = new byte[16];
 		long tm = System.currentTimeMillis();
 		int it = 0;
+		ByteBuffer bf = ByteBuffer.wrap(v);
 		for (int i = 0; i < 100_000_000; i++) {
-			rnd.nextBytes(k);
-			rnd.nextBytes(v);
+			//rnd.nextBytes(k);
+			bf.position(0);
+			bf.putInt(i);
 			if(!indexMap.containsKey(k))
 				indexMap.put(k, v);
 			
@@ -42,6 +45,33 @@ public class MapDBTest {
 				System.out.println( ct + "," + i + "," +fl);
 				it = 0;
 				tm = System.currentTimeMillis();
+			}
+			it++;
+		}
+		
+		Random r = new Random();
+		int ki = -1;
+		it=0;
+		tm = System.currentTimeMillis();
+		for (int i = 0; i < 20_000_000; i++) {
+			
+			while(ki < 0)
+				ki = r.nextInt(10_000_000);
+			
+			bf.position(0);
+			bf.putInt(ki);
+			
+			byte [] z = indexMap.get(v);
+			if(z == null)
+				System.out.println(ki);
+				
+			ki = -1;
+			if (it == 1_000_000) {
+				long ct = (System.currentTimeMillis() - tm);
+				System.out.println( ct + "," + i);
+				it = 0;
+				tm = System.currentTimeMillis();
+				
 			}
 			it++;
 		}

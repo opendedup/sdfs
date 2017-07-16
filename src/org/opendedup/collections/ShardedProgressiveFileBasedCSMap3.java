@@ -92,9 +92,9 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 	ReentrantLock al = new ReentrantLock();
 	private ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
 
-	private LoadingCache<ByteArrayWrapper, AbstractShard> keyLookup = CacheBuilder.newBuilder().maximumSize(3_000_000)
-			.concurrencyLevel(Main.writeThreads).build(new CacheLoader<ByteArrayWrapper, AbstractShard>() {
-				public AbstractShard load(ByteArrayWrapper key) throws KeyNotFoundException {
+	private LoadingCache<ByteArrayWrapper, HashLookup> keyLookup = CacheBuilder.newBuilder().maximumSize(3_000_000)
+			.concurrencyLevel(Main.writeThreads).build(new CacheLoader<ByteArrayWrapper, HashLookup>() {
+				public HashLookup load(ByteArrayWrapper key) throws KeyNotFoundException {
 					return _getReadMap(key.getData());
 				}
 			});
@@ -120,7 +120,7 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 	AtomicLong amt = new AtomicLong();
 	AtomicLong zmt = new AtomicLong();
 
-	private AbstractShard getReadMap(byte[] hash, boolean deep) throws IOException {
+	private HashLookup getReadMap(byte[] hash, boolean deep) throws IOException {
 		Lock l = gcLock.readLock();
 		l.lock();
 		ct.incrementAndGet();
@@ -138,14 +138,14 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 			 * (_m.containsKey(hash)) return _m; }
 			 */
 			zmt.incrementAndGet();
-			AbstractShard _km;
+			HashLookup _km;
 			_km = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
-			if (_km != null && !_km.isClosed()) {
-				if (!_km.isClosed()) {
+			if (_km != null && !_km.sh.isClosed()) {
+				if (!_km.sh.isClosed()) {
 					// long chl = ch.incrementAndGet();
 					// SDFSLogger.getLog().info("found ch=" + chl + " sz=" +
 					// this.keyLookup.size());
-					_km.cache();
+					_km.sh.cache();
 					return _km;
 				} else {
 					this.keyLookup.invalidate(new ByteArrayWrapper(hash));
@@ -165,6 +165,7 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 				deep = true;
 			for (AbstractShard _m : this.maps.getAL()) {
 				trs++;
+				ShardedFileByteArrayLongMap3 _m1 = (ShardedFileByteArrayLongMap3)_m;
 				if (!deep && trs == this.maxTbls) {
 					sns = this.tblrnd.nextInt(0, this.maps.size());
 				}
@@ -172,15 +173,16 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 					break;
 				}
 				amt.incrementAndGet();
-				try {
-					if (_m.containsKey(hash)) {
-						this.keyLookup.put(new ByteArrayWrapper(hash), _m);
-						_m.cache();
-						return _m;
-					}
-				} catch (MapClosedException e) {
-					getReadMap(hash, deep);
+				int pos = _m1.getKeyLoc(hash);
+				if (pos >=0) {	
+					_m.cache();
+					HashLookup hl = new HashLookup();
+					hl.loc = pos;
+					hl.sh = _m1;
+					this.keyLookup.put(new ByteArrayWrapper(hash),hl);
+					return hl;
 				}
+				
 			}
 			mt.incrementAndGet();
 
@@ -192,14 +194,22 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 
 	}
 
-	private AbstractShard _getReadMap(byte[] hash) throws KeyNotFoundException {
+	private HashLookup _getReadMap(byte[] hash) throws KeyNotFoundException {
 		for (AbstractShard _m : this.maps.getAL()) {
+			ShardedFileByteArrayLongMap3 _m1 = (ShardedFileByteArrayLongMap3)_m;
 			// sns++;
 			try {
-				if (_m.containsKey(hash)) {
+				int pos = _m1.getKeyLoc(hash);
+				
+				if (pos >=0) {
 					if (runningGC)
 						this.lbf.put(hash);
-					return _m;
+					_m.cache();
+					HashLookup hl = new HashLookup();
+					hl.loc = pos;
+					hl.sh = _m1;
+					this.keyLookup.put(new ByteArrayWrapper(hash),hl);
+					return hl;
 				}
 			} catch (Exception e) {
 
@@ -255,10 +265,10 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 			if (!runningGC && !lbf.mightContain(hash)) {
 				return pos;
 			}
-			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			HashLookup k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
 			if (k != null) {
 				try {
-					pos = k.get(hash, claim);
+					pos = k.sh.get(hash, claim,k.loc);
 					if (pos != -1) {
 
 						// m.cache();
@@ -297,10 +307,10 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 			if (!runningGC && !lbf.mightContain(hash)) {
 				return false;
 			}
-			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
+			HashLookup k = this.keyLookup.getIfPresent(new ByteArrayWrapper(hash));
 			if (k != null) {
 				try {
-					boolean pos = k.claim(hash, val, ct);
+					boolean pos = k.sh.claim(hash, val, ct);
 					if (pos) {
 						// m.cache();
 						return pos;
@@ -879,7 +889,7 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		AbstractShard m = this.getReadMap(key, true);
+		HashLookup m = this.getReadMap(key, true);
 		if (m == null)
 			return false;
 		return true;
@@ -921,7 +931,7 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 		ShardedFileByteArrayLongMap3 bm = null;
 		try {
 			// long tm = System.currentTimeMillis();
-			AbstractShard rm = this.getReadMap(cm.getHash(), false);
+			HashLookup rm = this.getReadMap(cm.getHash(), false);
 			if (rm == null) {
 				// this.misses.incrementAndGet();
 				// tm = System.currentTimeMillis() - tm;
@@ -947,7 +957,7 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 				}
 			} else {
 				try {
-					long lp = rm.get(cm.getHash(), true);
+					long lp = rm.sh.get(cm.getHash(), true,rm.loc);
 					if (lp == -1) {
 
 						this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
@@ -989,9 +999,9 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
 		boolean added = false;
-		AbstractShard bm = this.getReadMap(cm.getHash(), true);
+		HashLookup bm = this.getReadMap(cm.getHash(), true);
 		if (bm != null) {
-			added = bm.update(cm.getHash(), cm.getcPos());
+			added = bm.sh.update(cm.getHash(), cm.getcPos());
 		}
 		return added;
 	}
@@ -1070,10 +1080,10 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 			try {
 				if (cm.getHash().length == 0)
 					return true;
-				AbstractShard m = this.getReadMap(cm.getHash(), true);
+				HashLookup m = this.getReadMap(cm.getHash(), true);
 				if (m == null)
 					return false;
-				if (!m.remove(cm.getHash())) {
+				if (!m.sh.remove(cm.getHash())) {
 					return false;
 				} else {
 					cm.setmDelete(true);
@@ -1265,10 +1275,10 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 			if (!runningGC) {
 				return lbf.mightContain(key);
 			}
-			AbstractShard k = this.keyLookup.getIfPresent(new ByteArrayWrapper(key));
+			HashLookup k = this.keyLookup.getIfPresent(new ByteArrayWrapper(key));
 			if (k != null) {
 				try {
-					long pos = k.get(key, false);
+					long pos = k.sh.get(key, false);
 					if (pos != -1) {
 
 						return true;
@@ -1294,6 +1304,11 @@ public class ShardedProgressiveFileBasedCSMap3 implements AbstractMap, AbstractH
 		} finally {
 			l.unlock();
 		}
+	}
+	
+	private static class HashLookup {
+		ShardedFileByteArrayLongMap3 sh;
+		int loc;
 	}
 
 }

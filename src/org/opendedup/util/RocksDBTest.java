@@ -67,7 +67,6 @@ public class RocksDBTest {
 						}
 						it++;
 					}
-					db.compactRange();
 					Random r = new Random();
 					int ki = -1;
 					it=0;

@@ -6,14 +6,17 @@ import java.io.File;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.MapDBMap;
 import org.opendedup.collections.RocksDBMap;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap2;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap3;
+import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 import com.google.common.hash.HashFunction;
@@ -25,24 +28,32 @@ public class RocksDBProdTest {
 	static AbstractHashesMap hashDB = null;
 	
 	static AtomicLong inserts = new AtomicLong();
-	
-	public static void main(String[] args) throws IOException, HashtableFullException, InterruptedException {
-		boolean rdb = false;
+	static VariableSipHashEngine ve = null;
+	public static void main(String[] args) throws IOException, HashtableFullException, InterruptedException, NoSuchAlgorithmException {
+		int rb = 1;
 		File f  = null;
-		if(rdb) {
+		ve = new VariableSipHashEngine();
+		if(rb==0) {
 		hashDB = new ShardedProgressiveFileBasedCSMap2();
 		f  = new File("c:\\temp\\psharddb2\\shards");
 		}
-		else {
+		else if(rb == 1) {
 			hashDB = new RocksDBMap();
 			f  = new File("c:\\temp\\rdbshard");
 		}
+		else if(rb==2) {
+			hashDB = new ShardedProgressiveFileBasedCSMap3();
+			f  = new File("c:\\temp\\psharddb3\\shards");
+		}else {
+			hashDB = new MapDBMap();
+			f  = new File("c:\\temp\\mdbshard");
+		}
 		
 		
-		hashDB.init(150_000_000, f.getPath(), .001);
+		hashDB.init(1_000_000_000, f.getPath(), .001);
 		ArrayList<DataWriter> dr = new ArrayList<DataWriter>();
 		for(int i = 0;i<16;i++) {
-			DataWriter d = new DataWriter(7_000_000,100_000_000);
+			DataWriter d = new DataWriter(10_000_000,300_000_000);
 			Thread th = new Thread(d);
 			th.start();
 			dr.add(d);
@@ -87,14 +98,14 @@ public class RocksDBProdTest {
 			Random r = new Random();
 			byte[] v = new byte[16];
 			ByteBuffer bf = ByteBuffer.wrap(v);
-			HashFunction hf = Hashing.murmur3_128(6442);
+			
 			int ki = -1;
 			for (int i = 0; i < numRuns; i++) {
 				while(ki < 0)
 					ki = r.nextInt(range);
 				bf.position(0);
 				bf.putInt(ki);
-				byte [] k = hf.hashBytes(v).asBytes();
+				byte [] k = ve.getHash(v);
 				ChunkData cm = new ChunkData(k,i);
 				inserts.incrementAndGet();
 				try {

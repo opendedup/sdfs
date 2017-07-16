@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,6 +32,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
+import org.mapdb.BTreeMap;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.Tiger16HashEngine;
 import org.opendedup.logging.SDFSLogger;
@@ -49,9 +54,9 @@ import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteOptions;
 
 
-public class RocksDBMap implements AbstractMap, AbstractHashesMap {
-	WriteOptions wo = new WriteOptions();
-	RocksDB db = null;
+public class MapDBMap implements AbstractMap, AbstractHashesMap {
+	 BTreeMap<byte[], byte[]> indexMap = null;
+	 DB hashDB = null;
 	String fileName = null;
 	ReentrantLock [] lockMap = new ReentrantLock[256];
 	boolean closed = false;
@@ -65,33 +70,13 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		
 		try {
 			this.fileName = fileName;
-			Options options = new Options();
-			options.setCreateIfMissing(true);
-			this.size = maxSize;
-		      options.setCompactionStyle(CompactionStyle.UNIVERSAL);
-		      options.setCompressionType(CompressionType.NO_COMPRESSION);
-		      
-		      BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-		      blockConfig.setFilter(new BloomFilter(32,true));
-		      blockConfig.setBlockSize(4*1024);
-		      blockConfig.setFormatVersion(2);
-		      //blockConfig.setBlockCacheSize(1024*1024*1024);
-		      //blockConfig.setCacheIndexAndFilterBlocks(true);
-		      options.setTableFormatConfig(blockConfig);
-		      options.setWriteBufferSize(512*1024*1024);
-		      options.setAllowMmapWrites(true);
-		      options.setAllowMmapReads(true);
-		      options.setMaxOpenFiles(-1);
-		      options.setTargetFileSizeBase(1024*1024*1024);
-			    // a factory method that returns a RocksDB instance
-		      wo = new WriteOptions();
-		      wo.setDisableWAL(true);
-		      wo.setSync(false);
-			  db = RocksDB.open(options, fileName);
-			  for(int i = 0; i < lockMap.length;i++) {
+			hashDB = DBMaker.fileDB(fileName+".db").closeOnJvmShutdown().fileMmapEnable()
+					.allocateIncrement(1024 * 1024 * 512).concurrencyScale(64).make();
+			indexMap = hashDB.treeMap("map", new SerializerKey(),new LongLongValueSerializer() ).maxNodeSize(16).create();
+			 for(int i = 0; i < lockMap.length;i++) {
 				  lockMap[i] = new ReentrantLock();
 			  }
-			  this.setUp();
+			this.setUp();
 		}catch(Exception e) {
 			throw new IOException(e);
 		}
@@ -115,7 +100,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(hash);
 		l.lock();
 		try {
-			byte [] v = db.get(hash);
+			byte [] v = indexMap.get(hash);
 			if(v != null) {
 				ByteBuffer bk = ByteBuffer.wrap(v);
 				long oval = bk.getLong();
@@ -125,16 +110,14 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				}
 				ct += bk.getLong();
 				bk.putLong(v.length - 8, ct);
-				db.put(wo,hash, v);
+				indexMap.put(hash, v);
 				return true;
 			}
 				
 			
 			SDFSLogger.getLog().warn("When updating reference count. Key [" + StringUtils.getHexString(hash) + "] not found");	
 			return false;
-		} catch (RocksDBException e) {
-			throw new IOException(e);
-		}finally {
+		} finally {
 			l.unlock();
 		}
 	}
@@ -146,23 +129,13 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long getSize() {
-		try {
-			return db.getLongProperty("rocksdb.estimate-num-keys");
-		} catch (RocksDBException e) {
-			SDFSLogger.getLog().error("unable to get lenght for rocksdb",e);
-			return 0;
-		}
+			return indexMap.sizeLong();
 	}
 
 	@Override
 	public long getUsedSize() {
 
-		try {
-			return db.getLongProperty("rocksdb.estimate-num-keys")*Main.CHUNK_LENGTH;
-		} catch (RocksDBException e) {
-			SDFSLogger.getLog().error("unable to get lenght for rocksdb",e);
-			return 0;
-		}
+		return indexMap.sizeLong();
 	}
 
 	@Override
@@ -176,21 +149,22 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
 		try {
-			RocksIterator iter = db.newIterator();
+			Iterator<Entry<byte[], byte[]>> iter = indexMap.entryIterator();
 			ByteBuffer bk = ByteBuffer.allocateDirect(16);
-			for(iter.seekToFirst();iter.isValid();iter.next()) {
+			while(iter.hasNext()) {
+				Entry<byte[], byte[]> ent = iter.next();
 				bk.position(0);
-				bk.put(iter.value());
+				bk.put(ent.getValue());
 				bk.position(0);
 				bk.getLong();
 				long ct = bk.getLong();
 				if(ct <= 0) {
-					Lock l = this.getLock(iter.key());
+					Lock l = this.getLock(ent.getKey());
 					l.lock();
 					try {
 						bk.position(0);
-						byte [] k = iter.key();
-						byte [] v = db.get(k);
+						byte [] k = ent.getKey();
+						byte [] v = indexMap.get(k);
 						if(v != null) {
 							bk.put(v);
 							bk.position(0);
@@ -200,7 +174,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							if(ct <= 0) {
 								ChunkData ck = new ChunkData(pos, k);
 								ck.setmDelete(true);
-								db.delete(k);
+								indexMap.remove(ent.getKey());
 							}
 						}
 					}catch(Exception e){
@@ -243,7 +217,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	 * @throws FileNotFoundException
 	 */
 	public long setUp() throws Exception {
-		long size =db.getLongProperty("rocksdb.estimate-num-keys");
+		long size =this.indexMap.sizeLong();
 		this.closed = false;
 		return size;
 	}
@@ -266,15 +240,11 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed()) {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
-		try {
-			byte [] v = db.get(key);
+			byte [] v = indexMap.get(key);
 			if(v == null)
 				return false;
 			else
 				return true;
-		} catch (RocksDBException e) {
-			throw new IOException(e);
-		}
 		
 	}
 
@@ -306,7 +276,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								byte [] v = null;
 								//if(db.keyMayExist(cm.getHash(), sb)) {
 									//System.out.println("miss="+sb.toString());
-								v = db.get(cm.getHash());
+								v = indexMap.get(cm.getHash());
 								//}
 								if(v == null) {
 									cm.persistData(true);
@@ -314,7 +284,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 									ByteBuffer bf = ByteBuffer.wrap(v);
 									bf.putLong(cm.getcPos());
 									bf.putLong(1);
-									db.put(wo,cm.getHash(), v);
+									indexMap.put(cm.getHash(), v);
 									return new InsertRecord(true, cm.getcPos());
 								} else {
 									ByteBuffer bk = ByteBuffer.wrap(v);
@@ -322,14 +292,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 									long ct = bk.getLong();
 									ct++;
 									bk.putLong(8, ct);
-									db.put(wo,cm.getHash(), v);
+									indexMap.put(cm.getHash(), v);
 									return new InsertRecord(false, cm.getcPos());
 								}
 							} catch (org.opendedup.collections.HashExistsException e) {
 								return put(cm, persist);
-							} catch (RocksDBException e) {
-								throw new IOException(e);
-							} 
+							}
 			
 
 		} finally {
@@ -351,21 +319,17 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		l.lock();
 		try {
 						
-							try {
 								
-								byte [] v = db.get(cm.getHash());
+								byte [] v = indexMap.get(cm.getHash());
 								if(v == null) {
 									
 									return false;
 								} else {
 									ByteBuffer bk = ByteBuffer.wrap(v);
 									bk.putLong(0, cm.getcPos());
-									db.put(wo,cm.getHash(), v);
+									indexMap.put(cm.getHash(), v);
 									return true;
 								}
-							}  catch (RocksDBException e) {
-								throw new IOException(e);
-							} 
 			
 
 		} finally {
@@ -383,10 +347,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
-						
-							try {
 								
-								byte [] v = db.get(key);
+								byte [] v = indexMap.get(key);
 								if(v == null) {
 									
 									return -1;
@@ -394,9 +356,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 									ByteBuffer bk = ByteBuffer.wrap(v);
 									return bk.getLong();
 								}
-							}  catch (RocksDBException e) {
-								throw new IOException(e);
-							} 
 			
 
 		} finally {
@@ -458,20 +417,15 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(cm.getHash());
 		l.lock();
 		try {
-						
-							try {
 								
-								byte [] v = db.get(cm.getHash());
+								byte [] v = indexMap.get(cm.getHash());
 								if(v == null) {
 									
 									return false;
 								} else {
-									db.delete(cm.getHash());
+									indexMap.remove(cm.getHash());
 									return true;
 								}
-							}  catch (RocksDBException e) {
-								throw new IOException(e);
-							} 
 			
 
 		} finally {
@@ -489,11 +443,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			if (this.isClosed()) {
 				throw new IOException("hashtable [" + this.fileName + "] is close");
 			}
-			try {
-				this.db.flush(new FlushOptions().setWaitForFlush(true));
-			} catch (RocksDBException e) {
-				throw new IOException(e);
-			}
+			
 		} finally {
 			syncLock.unlock();
 		}
@@ -504,7 +454,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			this.db.close();
+			this.indexMap.close();
+			this.hashDB.close();
 
 			
 		} finally {
@@ -520,7 +471,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	public static void main(String[] args) throws Exception {
-		RocksDBMap b = new RocksDBMap();
+		MapDBMap b = new MapDBMap();
 		b.init(1000000, "/opt/sdfs/hash", .001);
 		long start = System.currentTimeMillis();
 		Random rnd = new Random();
@@ -562,11 +513,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public void commitCompact(boolean force) throws IOException {
-		try {
-			this.db.compactRange();
-		} catch (RocksDBException e) {
-			throw new IOException(e);
-		}
+		
 
 	}
 
@@ -606,8 +553,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
-			StringBuilder retValue = new StringBuilder();
-				return this.db.keyMayExist(key, retValue);
+				return this.indexMap.containsKey(key);
 				
 		} finally {
 			l.unlock();
