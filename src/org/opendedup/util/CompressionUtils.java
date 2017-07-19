@@ -134,6 +134,7 @@ public class CompressionUtils {
 		os.flush();
 		os.close();
 		fis.close();
+		
 	}
 
 	public static void decompressFile(File src, File dst) throws IOException {

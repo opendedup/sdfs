@@ -1,17 +1,16 @@
 package org.opendedup.util;
 
 import java.io.File;
-
-
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.MapDBMap;
 import org.opendedup.collections.RocksDBMap;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap2;
@@ -19,53 +18,61 @@ import org.opendedup.collections.ShardedProgressiveFileBasedCSMap3;
 import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.sdfs.filestore.ChunkData;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
+import ec.util.MersenneTwisterFast;
 
 
 
 public class RocksDBProdTest {
 	static AbstractHashesMap hashDB = null;
 	
+	static AtomicLong transactions = new AtomicLong();
 	static AtomicLong inserts = new AtomicLong();
 	static VariableSipHashEngine ve = null;
 	public static void main(String[] args) throws IOException, HashtableFullException, InterruptedException, NoSuchAlgorithmException {
-		int rb = 1;
-		File f  = null;
+		int rb = Integer.parseInt(args[1]);
+		String fp = args[0];
+		long maxSz= Long.parseLong(args[2]);
+		int threads = Integer.parseInt(args[3]);
+		int numRuns = Integer.parseInt(args[4]);
+		long range = Long.parseLong(args[5]);
+		File f  = new File(fp);
 		ve = new VariableSipHashEngine();
 		if(rb==0) {
 		hashDB = new ShardedProgressiveFileBasedCSMap2();
-		f  = new File("c:\\temp\\psharddb2\\shards");
+		
 		}
 		else if(rb == 1) {
 			hashDB = new RocksDBMap();
-			f  = new File("c:\\temp\\rdbshard");
 		}
 		else if(rb==2) {
 			hashDB = new ShardedProgressiveFileBasedCSMap3();
-			f  = new File("c:\\temp\\psharddb3\\shards");
 		}else {
 			hashDB = new MapDBMap();
-			f  = new File("c:\\temp\\mdbshard");
 		}
 		
 		
-		hashDB.init(1_000_000_000, f.getPath(), .001);
+		
+		hashDB.init(maxSz, f.getPath(), .001);
+		inserts.set(hashDB.getSize());
 		ArrayList<DataWriter> dr = new ArrayList<DataWriter>();
-		for(int i = 0;i<16;i++) {
-			DataWriter d = new DataWriter(10_000_000,300_000_000);
+		for(int i = 0;i<threads;i++) {
+			DataWriter d = new DataWriter(numRuns,range);
 			Thread th = new Thread(d);
 			th.start();
 			dr.add(d);
 		}
 		boolean running = true;
 		long st = System.currentTimeMillis();
-		long ci = inserts.get();
+		long ci = transactions.get();
+		ShutdownHook shutdownHook = new ShutdownHook(dr,
+				hashDB);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		while(running) {
 			Thread.sleep(30000);
-			long nci = inserts.get();
+			long nci = transactions.get();
+			long ic = inserts.get();
 			long tps = (nci-ci)/30;
-			System.out.println("Transactions = " + (nci-ci) + " tps = " + tps);
+			System.out.println("Transactions = " + (nci-ci) + " tps = " + tps + " transactions=" + nci + " inserts=" + ic);
 			ci = nci;
 			running = false;
 			for(DataWriter d : dr) {
@@ -76,8 +83,8 @@ public class RocksDBProdTest {
 			
 		}
 		long dur = (System.currentTimeMillis() - st)/1000;
-		long tps = inserts.get()/dur;
-		System.out.println("took " +dur + " seconds to insert " +inserts.get() +" tps = " + tps);
+		long tps = transactions.get()/dur;
+		System.out.println("took " +dur + " seconds to insert " +transactions.get() +" tps = " + tps);
 		
 		hashDB.close();
 
@@ -85,31 +92,38 @@ public class RocksDBProdTest {
 	
 	private static class DataWriter implements Runnable {
 		int numRuns;
-		int range;
+		long range;
 		boolean done = false;
-		public DataWriter(int numRuns,int range) {
+		private MersenneTwisterFast rnd = null;
+		public DataWriter(int numRuns,long range) {
 			this.numRuns = numRuns;
 			this.range =range;
+			SecureRandom srnd = new SecureRandom();
+			rnd = new MersenneTwisterFast(srnd.nextInt());
 		}
 		
 
 		@Override
 		public void run() {
-			Random r = new Random();
 			byte[] v = new byte[16];
 			ByteBuffer bf = ByteBuffer.wrap(v);
 			
-			int ki = -1;
+			long ki = -1;
 			for (int i = 0; i < numRuns; i++) {
+				if(done == true) {
+					break;
+				}
 				while(ki < 0)
-					ki = r.nextInt(range);
+					ki = rnd.nextLong(range);
 				bf.position(0);
-				bf.putInt(ki);
+				bf.putLong(ki);
 				byte [] k = ve.getHash(v);
 				ChunkData cm = new ChunkData(k,i);
-				inserts.incrementAndGet();
+				transactions.incrementAndGet();
 				try {
-					hashDB.put(cm,false);
+					InsertRecord ir = hashDB.put(cm,false);
+					if(ir.getInserted())
+						inserts.incrementAndGet();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -124,6 +138,35 @@ public class RocksDBProdTest {
 			
 		}
 		
+	}
+	
+	static class ShutdownHook extends Thread {
+		ArrayList<DataWriter> dr;
+		AbstractHashesMap hashDB;
+
+		public ShutdownHook(ArrayList<DataWriter> dr,AbstractHashesMap hashDB) {
+			this.dr = dr;
+			this.hashDB = hashDB;
+		}
+
+		@Override
+		public void run() {
+
+			System.out.println("Please Wait while shutting down the service");
+			System.out.println("Data Can be lost if this is interrupted");
+			for(DataWriter d :dr ) {
+				d.done = true;
+			}
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			hashDB.close();
+			System.out.println("Shut Down Cleanly");
+
+		}
 	}
 
 }

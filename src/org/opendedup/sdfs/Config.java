@@ -2,6 +2,7 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,7 +15,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -343,18 +343,18 @@ public class Config {
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
 		if(cache.hasAttribute("min-variable-segment-size")) {
 			
-			VariableHashEngine.minLen = (Integer.parseInt(cache
+			HashFunctionPool.minLen = (Integer.parseInt(cache
 					.getAttribute("min-variable-segment-size")) * 1024)-1;
 		} else {
-			VariableHashEngine.minLen = Main.MIN_CHUNK_LENGTH;
+			HashFunctionPool.minLen = Main.MIN_CHUNK_LENGTH;
 		}
 		if(cache.hasAttribute("variable-window-size"))
-			VariableHashEngine.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
+			HashFunctionPool.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
-			VariableHashEngine.maxLen = Integer.parseInt(cache
+			HashFunctionPool.maxLen = Integer.parseInt(cache
 					.getAttribute("max-variable-segment-size")) * 1024;
 		} else {
-			VariableHashEngine.maxLen = Main.CHUNK_LENGTH;
+			HashFunctionPool.maxLen = Main.CHUNK_LENGTH;
 		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 

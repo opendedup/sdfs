@@ -93,7 +93,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static ThreadPoolExecutor executor = null;
 	private static SynchronousQueue<Runnable> worksQueue = null;
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
-	public static final byte[] blankBlock = new byte[VariableHashEngine.minLen + 1];
+	public static final byte[] blankBlock = new byte[HashFunctionPool.minLen + 1];
 	public static final byte[] bk = new Murmur3HashEngine().getHash(blankBlock);
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
@@ -377,9 +377,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return Main.CHUNK_LENGTH;
 	}
 
-	public void setAR(TreeMap<Integer, HashLocPair> al) {
+	public void setAR(TreeMap<Integer, HashLocPair> al,boolean claim) {
 		try {
-			if (Main.refCount && this.ar != null && this.dirty) {
+			if (claim && Main.refCount && this.ar != null && this.dirty) {
+				
 				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
 				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
 					int val = -1;
@@ -458,12 +459,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
 					// SDFSLogger.getLog().info("poop " + b.length + " pos=" +
 					// pos + "_spos=" + _spos + " bpos=" +bpos );
-					if (b.length < VariableHashEngine.minLen) {
+					if (b.length < HashFunctionPool.minLen) {
 						HashLocPair p = new HashLocPair();
 						AbstractHashEngine eng = HashFunctionPool.borrowObject();
 						try {
 							p.hash = eng.getHash(b);
-							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b);
+							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,1);
 
 							p.hashloc = rec.getHashLocs();
 							p.len = b.length;
@@ -560,7 +561,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	private void wm(byte[] b, int pos) throws IOException {
-		VariableHashEngine hc = (VariableHashEngine) HashFunctionPool.borrowObject();
+		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
 
 		try {
 			List<Finger> fs = hc.getChunks(b);

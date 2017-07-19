@@ -64,6 +64,7 @@ public class Main {
 	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
 	public static boolean runCompact = false;
+	public static boolean INLINE_REF_INSERT = false;
 
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;

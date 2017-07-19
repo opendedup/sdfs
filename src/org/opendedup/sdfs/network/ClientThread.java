@@ -142,7 +142,7 @@ public class ClientThread extends Thread {
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
 					InsertRecord rec = HCServiceProxy.writeChunk(hash,
-							chunkBytes);
+							chunkBytes,-1);
 					try {
 						writelock.lock();
 						os.writeBoolean(rec.getInserted());
@@ -177,7 +177,7 @@ public class ClientThread extends Thread {
 							HashChunk ck = chunks.get(i);
 							if (ck != null) {
 								rsults.add(i, Boolean.valueOf(HCServiceProxy
-										.writeChunk(ck.getName(), ck.getData())
+										.writeChunk(ck.getName(), ck.getData(),-1)
 										.getInserted()));
 							} else
 								rsults.add(i, null);

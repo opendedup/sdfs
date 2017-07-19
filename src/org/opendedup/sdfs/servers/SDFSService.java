@@ -20,8 +20,8 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
+
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Config;
@@ -71,8 +71,8 @@ public class SDFSService {
 		Main.mountEvent = SDFSEvent
 				.mountEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
-			SDFSLogger.getLog().info("HashFunction Min Block Size=" + VariableHashEngine.minLen + " Max Block Size="
-					+ VariableHashEngine.maxLen);
+			SDFSLogger.getLog().info("HashFunction Min Block Size=" + HashFunctionPool.minLen + " Max Block Size="
+					+ HashFunctionPool.maxLen);
 		Main.DSEID = Main.volume.getSerialNumber();
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);

@@ -220,11 +220,11 @@ public class HashStore {
 		 */
 		byte [] data = bdb.getData(hash,pos);
 		if (data == null && Arrays.equals(hash, blankHash)) {
-			hs = new HashChunk(hash, new byte[blankData.length], false);
+			hs = new HashChunk(hash, new byte[blankData.length], false,1);
 		} else if(data == null) {
 			SDFSLogger.getLog().warn("data null for [" + StringUtils.getHexString(hash) + "] [" + pos + "]");
 		}
-		hs = new HashChunk(hash, data, false);
+		hs = new HashChunk(hash, data, false,1);
 		// this.cacheBuffers.put(hStr, hs);
 
 		return hs;
@@ -270,6 +270,7 @@ public class HashStore {
 			// long start = chunkStore.reserveWritePosition(chunk.getLen());
 			ChunkData cm = new ChunkData(chunk.getName(),
 					Main.chunkStorePageSize, chunk.getData());
+			cm.references = chunk.getCT();
 			written = bdb.put(cm);
 			// SDFSLogger.getLog().debug("wrote hash " +
 			// StringUtils.getHexString(chunk.getName()) + " = " +written);

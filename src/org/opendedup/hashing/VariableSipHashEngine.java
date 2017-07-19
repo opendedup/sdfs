@@ -41,12 +41,10 @@ import software.pando.crypto.siphash.SipHash;
 
 public class VariableSipHashEngine implements AbstractHashEngine {
 
-	public int seed;
-	public static int minLen = Main.MIN_CHUNK_LENGTH;
-	public static int maxLen = Main.CHUNK_LENGTH;
+
+	
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
-	public static long bytesPerWindow = 48;
 	private EnhancedFingerFactory ff = null;
 	private SecretKey KEY = null;
 	SipHash sipHash128;
@@ -54,9 +52,9 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 	public VariableSipHashEngine() throws NoSuchAlgorithmException {
 		this.setSeed(Main.hashSeed);
 		while (ff == null) {
-			SDFSLogger.getLog().info("Variable minLen=" +minLen + " maxlen=" + maxLen + " windowSize=" + bytesPerWindow);
-			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
-					minLen, maxLen);
+			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
+			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
+					HashFunctionPool.minLen, HashFunctionPool.maxLen);
 		}
 		sipHash128 = SipHash.getInstance(2, 4,128, KEY);
 
@@ -91,7 +89,7 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 	}
 
 	public static int getMaxCluster() {
-		return Main.CHUNK_LENGTH / minLen;
+		return Main.CHUNK_LENGTH / HashFunctionPool.minLen;
 	}
 
 	@Override
@@ -114,12 +112,11 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 	@Override
 	public int getMinLen() {
 		// TODO Auto-generated method stub
-		return minLen;
+		return HashFunctionPool.minLen;
 	}
 
 	@Override
 	public void setSeed(int seed) {
-		this.seed = seed;
 		byte [] b = new byte[16];
 		ByteBuffer buf = ByteBuffer.wrap(b);
 		for(int i = 0;i<4;i++) {

@@ -62,7 +62,7 @@ public class BatchWriteHashCmd implements IOClientCmd {
 			}
 			if (ncopies == 0) {
 				buff.resetHashLoc();
-				hk.add(i, new HashChunk(buff.hash, buff.data, false));
+				hk.add(i, new HashChunk(buff.hash, buff.data, false,-1));
 			} else {
 				hk.add(i, null);
 			}

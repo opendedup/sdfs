@@ -42,6 +42,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.collections.ByteArrayWrapper;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.DataMapInterface;
 import org.opendedup.collections.HashtableFullException;
@@ -96,7 +97,7 @@ public class SparseDedupFile implements DedupFile {
 	protected boolean errOccured = false;
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
-	public static VariableHashEngine eng = null;
+	public static AbstractHashEngine eng = null;
 
 	static {
 		maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
@@ -430,7 +431,7 @@ public class SparseDedupFile implements DedupFile {
 				if (writeBuffer.isBatchProcessed() && HashFunctionPool.max_hash_cluster == 1) {
 					for (HashLocPair p : writeBuffer.getFingers().values()) {
 						if (!writeBuffer.isBatchwritten())
-							p.hashloc = HCServiceProxy.writeChunk(p.hash, p.data, p.hashloc).getHashLocs();
+							p.hashloc = HCServiceProxy.writeChunk(p.hash, p.data, p.hashloc,-1).getHashLocs();
 					}
 				} else {
 					if (HashFunctionPool.max_hash_cluster == 1) {
@@ -448,7 +449,7 @@ public class SparseDedupFile implements DedupFile {
 							HashFunctionPool.returnObject(hc);
 						}
 						byte[] b = writeBuffer.getFlushedBuffer();
-						InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b);
+						InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,-1);
 						p.hashloc = rec.getHashLocs();
 						if (!rec.getInserted())
 							dups = writeBuffer.capacity();
@@ -477,6 +478,20 @@ public class SparseDedupFile implements DedupFile {
 									fs.add(f);
 								}
 							}
+							HashMap<ByteArrayWrapper,Finger> mp = new HashMap<ByteArrayWrapper,Finger>();
+							for(Finger f : fs) {
+								ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
+								Finger _f = mp.get(ba);
+								if(ba == null) {
+									f.claims = 1;
+									mp.put(ba, f);
+								}
+								else {
+									_f.claims++;
+								}
+									
+							}
+							
 
 							TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
@@ -517,7 +532,7 @@ public class SparseDedupFile implements DedupFile {
 
 							};
 							l.setMaxSize(fs.size());
-							for (Finger f : fs) {
+							for (Finger f : mp.values()) {
 								f.l = l;
 								executor.execute(f);
 							}
@@ -587,7 +602,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 							}
 							writeBuffer.setDoop(dups);
-							writeBuffer.setAR(ar);
+							writeBuffer.setAR(ar,false);
 						} catch (DataArchivedException e) {
 							throw e;
 						} catch (Exception e) {

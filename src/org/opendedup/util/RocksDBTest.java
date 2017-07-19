@@ -28,7 +28,7 @@ public class RocksDBTest {
 		      options.setCompressionType(CompressionType.NO_COMPRESSION);
 		      BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 		      blockConfig.setFilter(new BloomFilter(16,false));
-		      blockConfig.setBlockSize(4*1024);
+		      blockConfig.setBlockSize(64*1024);
 		      blockConfig.setFormatVersion(2);
 		      //blockConfig.setCacheIndexAndFilterBlocks(true);
 		      options.setTableFormatConfig(blockConfig);
@@ -36,7 +36,9 @@ public class RocksDBTest {
 		      options.setAllowMmapWrites(true);
 		      options.setAllowMmapReads(true);
 		      options.setMaxOpenFiles(-1);
-		      options.setTargetFileSizeBase(1024*1024*1024*2);
+		      options.setTargetFileSizeBase(1024*1024*1024*8);
+		      options.setAdviseRandomOnOpen(true);
+		      //options.setAllowMmapReads(true);
 			    // a factory method that returns a RocksDB instance
 		      WriteOptions wo = new WriteOptions();
 		      wo.setDisableWAL(true);

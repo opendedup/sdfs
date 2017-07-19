@@ -961,6 +961,7 @@ public class ShardedFileByteArrayLongMap3
 	}
 
 	protected void initialize() throws IOException {
+		/*
 		if (this.newInstance) {
 			byte[] key = new byte[EL * 43690];
 			Arrays.fill(key, (byte) 0);
@@ -987,6 +988,7 @@ public class ShardedFileByteArrayLongMap3
 			SDFSLogger.getLog().info("initialize " + this.path + " ref map");
 
 		}
+		*/
 	}
 
 	/*

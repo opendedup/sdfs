@@ -373,7 +373,7 @@ public class HCServiceProxy {
 	}
 
 	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			byte[] hashloc) throws IOException {
+			byte[] hashloc,int ct) throws IOException {
 
 		int tries = 0;
 		while (true) {
@@ -438,11 +438,11 @@ public class HCServiceProxy {
 
 	}
 
-	public static InsertRecord writeChunk(byte[] hash, byte[] aContents)
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,int ct)
 			throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			return HCServiceProxy.hcService.writeChunk(hash, aContents, false);
+			return HCServiceProxy.hcService.writeChunk(hash, aContents, false,ct);
 		} else {
 			try {
 				if (SDFSLogger.isDebug())

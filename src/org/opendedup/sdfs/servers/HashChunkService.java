@@ -97,14 +97,14 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			boolean compressed) throws IOException, HashtableFullException {
+			boolean compressed,long ct) throws IOException, HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
 					+ "]");
 		chunksRead++;
 		InsertRecord written = hs.addHashChunk(new HashChunk(hash, aContents,
-				compressed));
+				compressed,ct));
 		if (written.getInserted()) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -144,7 +144,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 			ArrayList<HashChunk> hck = hc.fetchChunks(al);
 			for (int i = 0; i < hck.size(); i++) {
 				HashChunk _hc = hck.get(i);
-				writeChunk(_hc.getName(), _hc.getData(), false);
+				writeChunk(_hc.getName(), _hc.getData(), false,1);
 			}
 		} finally {
 			hc.close();

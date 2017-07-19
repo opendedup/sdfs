@@ -18,7 +18,9 @@
  *******************************************************************************/
 package org.opendedup.hashing;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import org.opendedup.sdfs.Main;
 
@@ -74,5 +76,10 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 	public void setSeed(int seed) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public List<Finger> getChunks(byte[] data) throws IOException {
+		throw new IOException("not supported");
 	}
 }

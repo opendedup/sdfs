@@ -44,7 +44,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 	private final QuickList<WritableCacheBuffer> tasks = new QuickList<WritableCacheBuffer>(
 			maxTasks);
 	Thread th = null;
-	public static VariableHashEngine eng = null;
+	public static AbstractHashEngine eng = null;
 
 	static {
 		if (maxTasks > 120)
@@ -105,7 +105,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.hash = hash;
 									p.data = b;
 									ar.put(p.pos,p);
-									runnable.setAR(ar);
+									runnable.setAR(ar,true);
 								} catch (BufferClosedException e) {
 
 								} finally {
@@ -131,7 +131,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.pos = f.start;
 									ar.put(p.pos,p);
 								}
-								writeBuffer.setAR(ar);
+								writeBuffer.setAR(ar,true);
 							}
 						}
 						ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();

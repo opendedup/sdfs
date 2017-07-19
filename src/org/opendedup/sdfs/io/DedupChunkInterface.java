@@ -107,7 +107,7 @@ public interface DedupChunkInterface {
 
 	public boolean isBatchwritten();
 
-	public void setAR(TreeMap<Integer,HashLocPair> al);
+	public void setAR(TreeMap<Integer,HashLocPair> al,boolean claim);
 
 	public void setBatchwritten(boolean written);
 
