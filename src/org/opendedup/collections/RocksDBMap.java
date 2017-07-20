@@ -44,6 +44,7 @@ import org.rocksdb.CompactionStyle;
 import org.rocksdb.CompressionType;
 import org.rocksdb.Env;
 import org.rocksdb.FlushOptions;
+import org.rocksdb.HashSkipListMemTableConfig;
 import org.rocksdb.IndexType;
 import org.rocksdb.LRUCache;
 import org.rocksdb.Options;
@@ -75,7 +76,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			this.size = maxSize;
 		      
 		      //blockConfig.setChecksumType(ChecksumType.kNoChecksum);
-		      long totmem = (long)(HashFunctionPool.avg_page_size * maxSize *.065);
+		      long totmem = (long)(HashFunctionPool.avg_page_size * maxSize *.1);
 		      LRUCache c = new LRUCache(totmem);
 		      long memperDB = totmem/dbs.length;
 		      System.out.println("mem=" + totmem + " memperDB="+ memperDB);
@@ -97,25 +98,28 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 				blockConfig.setFilter(new BloomFilter(32, false));
 
-				blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
-				blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
-				blockConfig.setBlockSize(64 * 1024);
-				blockConfig.setFormatVersion(2);
-				options.setTableFormatConfig(blockConfig);
-				Env env = Env.getDefault();
-				env.setBackgroundThreads(8, Env.FLUSH_POOL);
-				env.setBackgroundThreads(8, Env.COMPACTION_POOL);
-				options.setMaxBackgroundCompactions(8);
-				options.setMaxBackgroundFlushes(8);
-				options.setEnv(env);
+				//blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+				//blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
+				//blockConfig.setBlockSize(512 * 1024);
+				//blockConfig.setFormatVersion(2);
+				//options.useFixedLengthPrefixExtractor(3);
+				//options.setTableFormatConfig(blockConfig);
+				//Env env = Env.getDefault();
+				//env.setBackgroundThreads(8, Env.FLUSH_POOL);
+				//env.setBackgroundThreads(8, Env.COMPACTION_POOL);
+				//options.setMaxBackgroundCompactions(8);
+				//options.setMaxBackgroundFlushes(8);
+				//options.setEnv(env);
 				options.setWriteBufferSize(1024 * 1024 * 256);
-				// options.setCompactionReadaheadSize(1024*1024*5);
-
+				options.setWritableFileMaxBufferSize(1024 * 1024 * 512);
+				options.setCompactionReadaheadSize(1024*1024*5);
+				options.setUseDirectIoForFlushAndCompaction(true);
+				options.setUseDirectReads(true);
 				options.setRowCache(c);
 				// options.setAllowMmapWrites(true);
-				// options.setAllowMmapReads(true);
+				//options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
-				options.setTargetFileSizeBase(1024 * 1024 * 1024 * 3);
+				options.setTargetFileSizeBase(1024 * 1024 * 1024);
 		    	
 			      File f = new File(fileName  + File.separator + i);
 		    	  f.mkdirs();
@@ -143,7 +147,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 	
 	private RocksDB getDB(byte [] key) {
-		int l = key[0];
+		int l = key[key.length-1];
 		if (l < 0) {
 			l = ((l * -1) + 127);
 		}
