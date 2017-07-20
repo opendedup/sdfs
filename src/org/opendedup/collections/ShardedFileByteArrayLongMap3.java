@@ -49,7 +49,7 @@ public class ShardedFileByteArrayLongMap3
 	// transient MappedByteBuffer keys = null;
 	transient private int size = 0;
 	transient private int maxSz = 0;
-	transient private double loadFactor = .70;
+	transient private double loadFactor = .50;
 	transient private String path = null;
 	transient private FileChannel kFC = null;
 	transient protected static final int EL = HashFunctionPool.hashLength + 8 + 8;

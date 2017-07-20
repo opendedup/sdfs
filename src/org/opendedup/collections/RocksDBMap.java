@@ -21,6 +21,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,7 +31,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
-import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -42,12 +42,11 @@ import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
 import org.rocksdb.CompactionStyle;
 import org.rocksdb.CompressionType;
-import org.rocksdb.Env;
 import org.rocksdb.FlushOptions;
-import org.rocksdb.HashSkipListMemTableConfig;
 import org.rocksdb.IndexType;
 import org.rocksdb.LRUCache;
 import org.rocksdb.Options;
+import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
@@ -76,8 +75,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			this.size = maxSize;
 		      
 		      //blockConfig.setChecksumType(ChecksumType.kNoChecksum);
-		      long totmem = (long)(HashFunctionPool.avg_page_size * maxSize *.1);
-		      LRUCache c = new LRUCache(totmem);
+		      long totmem = maxSize;
+		      
 		      long memperDB = totmem/dbs.length;
 		      System.out.println("mem=" + totmem + " memperDB="+ memperDB);
 		      //blockConfig.setBlockCacheSize(memperDB);
@@ -87,35 +86,39 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		      wo = new WriteOptions();
 		      wo.setDisableWAL(false);
 		      wo.setSync(false);
+		      LRUCache c = new LRUCache(totmem);
 		      CommandLineProgressBar bar = new CommandLineProgressBar("Loading Existing Hash Tables", dbs.length,
 						System.out);
 		      for(int i = 0;i < dbs.length;i++) {
 				Options options = new Options();
 				options.setCreateIfMissing(true);
-
 				options.setCompactionStyle(CompactionStyle.LEVEL);
-				options.setCompressionType(CompressionType.NO_COMPRESSION);
+				options.setCompressionType(CompressionType.LZ4_COMPRESSION);
 				BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 				blockConfig.setFilter(new BloomFilter(32, false));
-
-				//blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
-				//blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
-				//blockConfig.setBlockSize(512 * 1024);
+				blockConfig.setCacheIndexAndFilterBlocks(true);
+				blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+				blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
+				blockConfig.setBlockSize(512 * 1024);
 				//blockConfig.setFormatVersion(2);
 				//options.useFixedLengthPrefixExtractor(3);
-				//options.setTableFormatConfig(blockConfig);
+				options.setTableFormatConfig(blockConfig);
 				//Env env = Env.getDefault();
 				//env.setBackgroundThreads(8, Env.FLUSH_POOL);
 				//env.setBackgroundThreads(8, Env.COMPACTION_POOL);
 				//options.setMaxBackgroundCompactions(8);
 				//options.setMaxBackgroundFlushes(8);
 				//options.setEnv(env);
-				blockConfig.setBlockCacheSize(memperDB);
+				//
+				
+				options.setRowCache(c);
+				//blockConfig.setBlockCacheSize(1024*1024*1024);
 				options.setWriteBufferSize(1024 * 1024 * 256);
-				options.setWritableFileMaxBufferSize(1024 * 1024 * 512);
-				options.setCompactionReadaheadSize(1024*1024*5);
-				options.setUseDirectIoForFlushAndCompaction(true);
-				options.setUseDirectReads(true);
+				//options.setCompactionReadaheadSize(1024*1024*25);
+				//options.setUseDirectIoForFlushAndCompaction(true);
+				//options.setUseDirectReads(true);
+				options.setStatsDumpPeriodSec(30);
+				options.setReportBgIoStats(true);
 				// options.setAllowMmapWrites(true);
 				//options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
@@ -124,6 +127,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			      File f = new File(fileName  + File.separator + i);
 		    	  f.mkdirs();
 		    	  RocksDB db = RocksDB.open(options, f.getPath());
+		    	 
 		    	  dbs[i] = db;
 		    	  bar.update(i);
 		      }
@@ -366,10 +370,11 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							try {
 								RocksDB db = this.getDB(cm.getHash());
 								byte [] v = null;
-								//if(db.keyMayExist(cm.getHash(), sb)) {
-									//System.out.println("miss="+sb.toString());
-								v = db.get(cm.getHash());
-								//}
+
+								StringBuilder sb = new StringBuilder();
+								if(db.keyMayExist(cm.getHash(), sb)) {
+									v = db.get(cm.getHash());
+								}
 								if(v == null) {
 									cm.persistData(true);
 									v = new byte[16];
@@ -654,7 +659,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		l.lock();
 		try {
 			StringBuilder retValue = new StringBuilder();
-				return this.getDB(key).keyMayExist(key, retValue);
+			ReadOptions ro = new ReadOptions();
+			ro.setFillCache(false);
+			return this.getDB(key).keyMayExist(ro, key, retValue);
 				
 		} finally {
 			l.unlock();
