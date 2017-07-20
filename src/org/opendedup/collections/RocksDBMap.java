@@ -110,12 +110,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				//options.setMaxBackgroundCompactions(8);
 				//options.setMaxBackgroundFlushes(8);
 				//options.setEnv(env);
+				blockConfig.setBlockCacheSize(memperDB);
 				options.setWriteBufferSize(1024 * 1024 * 256);
 				options.setWritableFileMaxBufferSize(1024 * 1024 * 512);
 				options.setCompactionReadaheadSize(1024*1024*5);
 				options.setUseDirectIoForFlushAndCompaction(true);
 				options.setUseDirectReads(true);
-				options.setRowCache(c);
 				// options.setAllowMmapWrites(true);
 				//options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
