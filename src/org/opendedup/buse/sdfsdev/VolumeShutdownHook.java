@@ -44,7 +44,11 @@ public class VolumeShutdownHook extends Thread {
 			try {
 				Main.volume.closeAllDevices();
 				Thread.sleep(1000);
-				BUSEMkDev.release();
+				try {
+					BUSEMkDev.release();
+				}catch(Exception e) {
+					
+				}
 				service.stop();
 			} catch (Throwable e) {
 				e.printStackTrace();
