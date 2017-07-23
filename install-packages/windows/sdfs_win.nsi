@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.4.6'
+!define VERSION '3.4.7'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -67,31 +67,22 @@
   ;--------------------------------
 ;Version Information
 
-  VIProductVersion "3.4.6.0"
+  VIProductVersion "3.4.7.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.6.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.6.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.7.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.7.0"
 ;--------------------------------
 ;Installer Sections
 
 Function .onInit
  ${If} ${RunningX64}
-    ${If} ${IsWin2008R2}
-    ${ElseIf} ${IsWin7}
-	${ElseIf} ${IsWin2012}
-	${ElseIf} ${IsWin8}
-	${ElseIf} ${IsWin2012R2}
-	${ElseIf} ${IsWin8.1}
-    ${Else}
-      MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
-      Abort
-    ${EndIf}
+    
   ${Else}
-	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
+	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
       Abort
   ${EndIf}
 FunctionEnd
@@ -132,7 +123,7 @@ SectionEnd
 
 Function .onInstSuccess
   IfSilent noreboot
-    MessageBox MB_YESNO "A reboot is required to finish the uninstallation. Do you wish to reboot now?" IDNO noreboot
+    MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" IDNO noreboot
     Reboot
   noreboot:
 FunctionEnd

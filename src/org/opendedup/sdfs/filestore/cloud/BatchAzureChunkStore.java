@@ -543,6 +543,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 
 		byte[] f = arc.getBytes();
+		IOException e = null;
+		for (int i = 0; i < 9; i++) {
 		try {
 			// container = pool.borrowObject();
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
@@ -615,19 +617,27 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob = container.getBlockBlobReference(this.getClaimName(id));
 			blob.setMetadata(metaData);
 			blob.uploadText(Long.toString(System.currentTimeMillis()));
-
-		} catch (Throwable e) {
-			SDFSLogger.getLog().error("unable to write archive " + arc.getID() + " with id " + id, e);
-			throw new IOException(e);
-		} finally {
-			// pool.returnObject(container);
+			return;
+		} catch (Throwable e1) {
+			SDFSLogger.getLog().debug("unable to write archive " + arc.getID() + " with id " + id, e1);
+			e= new IOException(e1);
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e2) {
+				
+			}
+		}
+		}
+		if(e!=null) {
+			SDFSLogger.getLog().error("unable to write block", e);
+			throw e;
 		}
 	}
 
 	@Override
 	public void getBytes(long id, File f) throws IOException {
 		Exception e = null;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 9; i++) {
 			try {
 				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
@@ -667,6 +677,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				}
 			} catch (Exception e1) {
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e2) {
+					
+				}
 				e = e1;
 			} finally {
 
@@ -1195,7 +1210,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public boolean checkAccess() {
 		Exception e = null;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 9; i++) {
 			try {
 				if (!this.clustered) {
 					HashMap<String, String> md = container.getMetadata();
@@ -1214,7 +1229,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			} catch (Exception _e) {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(10000);
 				} catch (InterruptedException e1) {
 					
 				}

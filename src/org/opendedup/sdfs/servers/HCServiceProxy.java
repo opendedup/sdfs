@@ -21,6 +21,7 @@ package org.opendedup.sdfs.servers;
 import java.io.File;
 
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -211,15 +212,13 @@ public class HCServiceProxy {
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true,false));
 				}
-				/*
 				if (Main.runConsistancyCheck|| file.exists() || Main.syncDL) {
 					SDFSLogger.getLog().info("running consistency check");
 					SDFSEvent evt = SDFSEvent
 							.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
 									+ Main.volume.getName());
-							//new FDisk(evt);
+							new FDisk(evt);
 				}
-				*/
 				touchRunFile();
 			}
 

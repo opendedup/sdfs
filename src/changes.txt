@@ -1,3 +1,9 @@
+Version 3.4.7
+   Fixes
+   * Fixed ignore corrupt files on fdisk
+   Enhancements
+   * added mkfs.sdfs parameter -encrypt-config to encrypt the cloud secret key and aes key on disk in the config with the admin password. This is 'admin' by default.
+   * added mount.sdfs parameter -e to decrypt the cloud secret key and aes key on mount. The -e parameter takes the admin password.
 Version 3.4.6
    Fixes
    * Disabled weak ciphers for java install
