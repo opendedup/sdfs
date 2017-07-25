@@ -1,9 +1,9 @@
-; MUI Settings 
+; MUI Settings
 ; MUI Settings / Icons
 ; Sets the theme path
 
 
-!define VERSION '3.4.5'
+!define VERSION '3.5.0'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -32,7 +32,7 @@
 
   ;Default installation folder
   InstallDir $PROGRAMFILES64\sdfs
-  
+
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
@@ -50,13 +50,13 @@
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
-  
+
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-  
+
 ;--------------------------------
 ;Languages
- 
+
   !insertmacro MUI_LANGUAGE "English"
 
 
@@ -65,16 +65,7 @@
 
 Function .onInit
  ${If} ${RunningX64}
-    ${If} ${IsWin2008R2}
-    ${ElseIf} ${IsWin7}
-	${ElseIf} ${IsWin2012}
-	${ElseIf} ${IsWin8}
-	${ElseIf} ${IsWin2012R2}
-	${ElseIf} ${IsWin8.1}
-    ${Else}
-      MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
-      Abort
-    ${EndIf}
+  
   ${Else}
 	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
       Abort
@@ -83,7 +74,7 @@ FunctionEnd
 
 
 Section "SDFS Setup" SecMain
-  
+
   SetOutPath "$INSTDIR"
   SectionIn RO
   File *
@@ -95,7 +86,7 @@ Section "SDFS Setup" SecMain
   File etc\*
   ;Store installation folder
   WriteRegStr HKLM "Software\SDFS" "path" $INSTDIR
-  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
+  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -117,16 +108,16 @@ SectionEnd
 
 Function .onInstSuccess
   IfSilent noreboot
-    MessageBox MB_YESNO "A reboot is required to finish the uninstallation. Do you wish to reboot now?" IDNO noreboot
+    MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" IDNO noreboot
     Reboot
   noreboot:
 FunctionEnd
- 
- 
+
+
 Function un.onUninstSuccess
   MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
 FunctionEnd
-  
+
 
 ;--------------------------------
 ;Descriptions

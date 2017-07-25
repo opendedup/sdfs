@@ -289,7 +289,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void setAR(TreeMap<Integer,HashLocPair> al,boolean claim) {
+	public void setAR(TreeMap<Integer,HashLocPair> al) {
 		this.ar = al;
 
 	}

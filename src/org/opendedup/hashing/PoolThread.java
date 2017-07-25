@@ -105,7 +105,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.hash = hash;
 									p.data = b;
 									ar.put(p.pos,p);
-									runnable.setAR(ar,true);
+									runnable.setAR(ar);
 								} catch (BufferClosedException e) {
 
 								} finally {
@@ -131,7 +131,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 									p.pos = f.start;
 									ar.put(p.pos,p);
 								}
-								writeBuffer.setAR(ar,true);
+								writeBuffer.setAR(ar);
 							}
 						}
 						ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();

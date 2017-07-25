@@ -21,6 +21,7 @@ package org.opendedup.sdfs.servers;
 import java.io.File;
 
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
-import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
@@ -211,6 +211,7 @@ public class HCServiceProxy {
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true,false));
 				}
+				/*
 				if (Main.runConsistancyCheck|| file.exists() || Main.syncDL) {
 					SDFSLogger.getLog().info("running consistency check");
 					SDFSEvent evt = SDFSEvent
@@ -218,6 +219,7 @@ public class HCServiceProxy {
 									+ Main.volume.getName());
 							new FDisk(evt);
 				}
+				*/
 				touchRunFile();
 			}
 

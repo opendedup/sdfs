@@ -23,7 +23,8 @@ public class RocksDBTest {
 		RocksDB.loadLibrary();
 		SecureRandom _rnd = new SecureRandom();
 		rnd = new MersenneTwisterFast(_rnd.nextInt());
-		try (final Options options = new Options().setCreateIfMissing(true)) {
+		try (@SuppressWarnings("resource")
+		final Options options = new Options().setCreateIfMissing(true)) {
 		      options.setCompactionStyle(CompactionStyle.UNIVERSAL);
 		      options.setCompressionType(CompressionType.NO_COMPRESSION);
 		      BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();

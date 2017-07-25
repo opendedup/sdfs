@@ -40,6 +40,7 @@ import static java.lang.Math.toIntExact;
 //import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
+//import org.apache.lucene.store.NativePosixUtil;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
@@ -49,6 +50,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 
@@ -280,8 +282,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 								File lf = new File(getPath(hashid).getPath());
 								if (lf.exists()) {
-									Path path = Paths.get(getPath(hashid).getPath());
-									FileChannel fileChannel = FileChannel.open(path);
+									@SuppressWarnings("resource")
+									RandomAccessFile rf = new RandomAccessFile(lf,"rw");
+									
+									FileChannel fileChannel = rf.getChannel();
+									if(OSValidator.isUnix()) {
+										////NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.SEQUENTIAL);
+										////NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.DONTNEED);
+									}
 									return fileChannel;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
@@ -718,6 +726,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		f = new File(staged_chunk_location, Long.toString(id));
 		if (VERSION > 0) {
 			RandomAccessFile zraf = new RandomAccessFile(f, "rw");
+			
 			FileChannel zfc = zraf.getChannel();
 			ByteBuffer zb = ByteBuffer.allocate(offset);
 			zb.putInt(VERSION);
@@ -749,7 +758,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 			this.id = pid;
 			f = new File(getStagedPath(pid), Long.toString(id));
 			@SuppressWarnings("resource")
-			FileChannel ch = new RandomAccessFile(f, "rw").getChannel();
+			
+			RandomAccessFile rf = new RandomAccessFile(f, "rw");
+			FileChannel ch = rf.getChannel();
+			if(OSValidator.isUnix()) {
+				//NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.SEQUENTIAL);
+				//NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.DONTNEED);
+			}
 			this.writeable = true;
 			cf.setLastModified(System.currentTimeMillis());
 			wOpenFiles.put(id, ch);
@@ -822,6 +837,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
 		if (VERSION > 0) {
 			RandomAccessFile zraf = new RandomAccessFile(f, "rw");
+			
 			FileChannel zfc = zraf.getChannel();
 			ByteBuffer hbuf = ByteBuffer.allocate(offset);
 			zfc.read(hbuf);
@@ -847,6 +863,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		if (VERSION > 0) {
 			RandomAccessFile zraf = new RandomAccessFile(f, "rw");
 			FileChannel zfc = zraf.getChannel();
+			
 			ByteBuffer hbuf = ByteBuffer.allocate(offset);
 			zfc.read(hbuf);
 			zfc.close();
@@ -918,7 +935,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 					ch = wOpenFiles.get(this.id);
 					if (ch == null) {
-						ch = new RandomAccessFile(f, "rw").getChannel();
+						@SuppressWarnings("resource")
+						RandomAccessFile rf = new RandomAccessFile(f, "rw");
+						ch = rf.getChannel();
+						if(OSValidator.isUnix()) {
+							//NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.SEQUENTIAL);
+							//NativePosixUtil.advise(rf.getFD(), 0, 0, //NativePosixUtil.DONTNEED);
+						}
 						wOpenFiles.put(id, ch);
 					}
 
@@ -1452,6 +1475,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 		try {
 			if (f.exists() && (f.length() - offset) > 0) {
+				
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("writing " + id);
 				if (!this.uploadFile(nid))

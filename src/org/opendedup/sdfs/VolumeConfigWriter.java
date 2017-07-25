@@ -95,7 +95,7 @@ public class VolumeConfigWriter {
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 
-	String hashType = HashFunctionPool.VARIABLE_MURMUR3;
+	String hashType = HashFunctionPool.VARIABLE_SIP;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
@@ -185,6 +185,7 @@ public class VolumeConfigWriter {
 		}
 		if(cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
+			this.compress = true;
 			this.maxSegSize = 128;
 			this.max_open_files = 20;
 			this.max_file_write_buffers=80;

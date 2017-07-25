@@ -3,6 +3,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,7 +33,9 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.util.NextPrime;
+import org.opendedup.util.OSValidator;
 import org.opendedup.utils.hashing.FileBasedBloomFilter;
+import org.apache.lucene.store.NativePosixUtil;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.PrimitiveSink;
@@ -362,6 +365,11 @@ public class ShardedFileByteArrayLongMap2
 			kRaf = new RandomAccessFile(path + ".keys", "rw");
 			this.kFC = FileChannel.open(new File(path + ".keys").toPath(), StandardOpenOption.CREATE,
 					StandardOpenOption.WRITE, StandardOpenOption.SPARSE, StandardOpenOption.READ);
+			if(OSValidator.isUnix()) {
+				NativePosixUtil.advise(kRaf.getFD(),0,0, NativePosixUtil.RANDOM);
+				NativePosixUtil.advise(kRaf.getFD(),0,0, NativePosixUtil.WILLNEED);
+				
+			}
 			if (newInstance) {
 				kRaf.setLength(nsz);
 				for (int i = 0; i < (numshards); i++) {
@@ -629,7 +637,7 @@ public class ShardedFileByteArrayLongMap2
 			Shard sh = this.getMap(key);
 			InsertRecord r = null;
 			synchronized (sh) {
-				r = sh.put(cm.getHash(), cm.getcPos(), -1, true);
+				r = sh.put(cm.getHash(), cm.getcPos(), cm.references, true);
 			}
 			if (r.getInserted()) {
 				this.bf.put(cm.getHash());
@@ -1152,6 +1160,11 @@ public class ShardedFileByteArrayLongMap2
 			long ep = (long) ((long) size * (long) ShardedFileByteArrayLongMap2.EL);
 			long sp = (long) ((long) start * (long) ShardedFileByteArrayLongMap2.EL);
 			kFC = m.kFC.map(FileChannel.MapMode.READ_WRITE, sp, ep);
+			if(OSValidator.isUnix()) {
+				NativePosixUtil.madvise(kFC, NativePosixUtil.RANDOM);
+				NativePosixUtil.madvise(kFC, NativePosixUtil.WILLNEED);
+				
+			}
 			// System.out.println("start=" + start + " ep=" + ep + " fl=" +
 			// m.kFC.size());
 			this.mapped = mapped;

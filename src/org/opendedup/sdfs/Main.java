@@ -110,7 +110,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.5.2";
+	public static String version = "3.5.0";
 
 	public static boolean readAhead = false;
 	
@@ -134,7 +134,7 @@ public class Main {
 
 	// public static String hashesDBClass =
 	// "com.opendedup.collections.FileBasedCSMap";
-	public static String hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
+	public static String hashesDBClass = "org.opendedup.collections.RocksDBMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */

@@ -1,6 +1,7 @@
 package org.opendedup.util;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
@@ -11,10 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.collections.MapDBMap;
 import org.opendedup.collections.RocksDBMap;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap2;
-import org.opendedup.collections.ShardedProgressiveFileBasedCSMap3;
 import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.sdfs.filestore.ChunkData;
 
@@ -43,11 +42,6 @@ public class RocksDBProdTest {
 		}
 		else if(rb == 1) {
 			hashDB = new RocksDBMap();
-		}
-		else if(rb==2) {
-			hashDB = new ShardedProgressiveFileBasedCSMap3();
-		}else {
-			hashDB = new MapDBMap();
 		}
 		
 		

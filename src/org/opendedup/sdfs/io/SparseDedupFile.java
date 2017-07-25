@@ -482,7 +482,7 @@ public class SparseDedupFile implements DedupFile {
 							for(Finger f : fs) {
 								ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
 								Finger _f = mp.get(ba);
-								if(ba == null) {
+								if(_f == null) {
 									f.claims = 1;
 									mp.put(ba, f);
 								}
@@ -531,7 +531,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 
 							};
-							l.setMaxSize(fs.size());
+							l.setMaxSize(mp.size());
 							for (Finger f : mp.values()) {
 								f.l = l;
 								executor.execute(f);
@@ -540,7 +540,7 @@ public class SparseDedupFile implements DedupFile {
 							int tm = 1000;
 
 							int al = 0;
-							while (l.getDN() < fs.size() && l.getDNEX() == 0) {
+							while (l.getDN() < mp.size() && l.getDNEX() == 0) {
 								
 								if (al == 30) {
 									int nt = wl / 1000;
@@ -552,7 +552,7 @@ public class SparseDedupFile implements DedupFile {
 									int nt = wl / 1000;
 									this.toOccured = true;
 									throw new IOException("Write Timed Out after [" + nt + "] seconds. Expected ["
-											+ fs.size() + "] block writes but only [" + l.getDN() + "] were completed");
+											+ mp.size() + "] block writes but only [" + l.getDN() + "] were completed");
 								}
 								if (l.dar != null) {
 									throw l.dar;
@@ -565,10 +565,10 @@ public class SparseDedupFile implements DedupFile {
 								al++;
 								wl += tm;
 							}
-							if (l.getDN() < fs.size()) {
+							if (l.getDN() < mp.size()) {
 								this.toOccured = true;
 								throw new IOException(
-										"Write Timed Out expected [" + fs.size() + "] but got [" + l.getDN() + "]");
+										"Write Timed Out expected [" + mp.size() + "] but got [" + l.getDN() + "]");
 							}
 							if (l.dar != null)
 								throw l.dar;
@@ -581,14 +581,19 @@ public class SparseDedupFile implements DedupFile {
 							for (Finger f : fs) {
 								HashLocPair p = new HashLocPair();
 								try {
+									ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
+									Finger _f = mp.get(ba);
 									p.hash = f.hash;
-									p.hashloc = f.hl.getHashLocs();
+									p.hashloc = _f.hl.getHashLocs();
 									p.len = f.len;
 									p.offset = 0;
 									p.nlen = f.len;
 									p.pos = f.start;
-									p.setDup(!f.hl.getInserted());
-									if (!f.hl.getInserted()) {
+									if(f.hl != null)
+										p.setDup(!f.hl.getInserted());
+									else
+										p.setDup(true);
+									if (p.isDup()) {
 										dups += f.len;
 									}
 									
@@ -602,7 +607,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 							}
 							writeBuffer.setDoop(dups);
-							writeBuffer.setAR(ar,false);
+							writeBuffer.setAR(ar);
 						} catch (DataArchivedException e) {
 							throw e;
 						} catch (Exception e) {

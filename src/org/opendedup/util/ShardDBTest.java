@@ -3,19 +3,14 @@ package org.opendedup.util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.util.Random;
 
-import org.mapdb.CC;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.ShardedProgressiveFileBasedCSMap2;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-
-import ec.util.MersenneTwisterFast;
-import net.jpountz.xxhash.XXHash32;
 
 public class ShardDBTest {
 	static ShardedProgressiveFileBasedCSMap2 hashDB = null;
@@ -26,7 +21,6 @@ public class ShardDBTest {
 		
 		File f  = new File("c:\\temp\\shards\\shard3");
 		hashDB.init(150_000_000, f.getPath(), .001);
-		SecureRandom _rnd = new SecureRandom();
 		byte[] v = new byte[16];
 		ByteBuffer bf = ByteBuffer.wrap(v);
 		long tm = System.currentTimeMillis();

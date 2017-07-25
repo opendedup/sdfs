@@ -1,8 +1,8 @@
 package org.opendedup.util;
 
 import java.io.File;
+
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.util.Random;
 
 import org.mapdb.BTreeMap;
@@ -11,12 +11,9 @@ import org.mapdb.DBMaker;
 import org.opendedup.collections.LongLongValueSerializer;
 import org.opendedup.collections.SerializerKey;
 
-import ec.util.MersenneTwisterFast;
-
 public class MapDBTest {
 	static BTreeMap<byte[], byte[]> indexMap = null;
 	static DB hashDB = null;
-	private static MersenneTwisterFast rnd = null;
 
 	public static void main(String[] args) {
 		hashDB = DBMaker.fileDB("c:\\temp\\watchhashes.db").closeOnJvmShutdown().fileMmapEnable()
@@ -24,8 +21,6 @@ public class MapDBTest {
 				// TODO memory mapped files enable here
 				.make();
 		File f  = new File("c:\\temp\\watchhashes.db");
-		SecureRandom _rnd = new SecureRandom();
-		rnd = new MersenneTwisterFast(_rnd.nextInt());
 		indexMap = hashDB.treeMap("map", new SerializerKey(),new LongLongValueSerializer() ).createOrOpen();
 		byte[] k = new byte[16];
 		byte[] v = new byte[16];

@@ -21,6 +21,7 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +44,6 @@ import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.Murmur3HashEngine;
-import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -377,9 +377,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return Main.CHUNK_LENGTH;
 	}
 
-	public void setAR(TreeMap<Integer, HashLocPair> al,boolean claim) {
+	public void setAR(TreeMap<Integer, HashLocPair> al) {
 		try {
-			if (claim && Main.refCount && this.ar != null && this.dirty) {
+			if (Main.refCount && this.ar != null && this.dirty) {
 				
 				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
 				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
@@ -390,9 +390,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					ct.put(e.getValue(), val);
 
 				}
-				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue());
-				}
+					for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
+						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue());
+					}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to remove reference", e);
