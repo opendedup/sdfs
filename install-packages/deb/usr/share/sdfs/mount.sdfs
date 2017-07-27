@@ -42,7 +42,7 @@ if [ -n "$CFG" ] && [ -f "$CFG" ]; then
                 else
                         MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY+cm))
                 fi
-                MEMORY=$((MEMORY+((bm*th*2)/1024)))
+                MEMORY=$((MEMORY+((bm*th*3)/1024)))
 
 fi
 else
