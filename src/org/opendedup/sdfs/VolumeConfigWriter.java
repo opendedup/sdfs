@@ -574,6 +574,7 @@ public class VolumeConfigWriter {
 		}
 		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim() + "-volume-cfg.xml");
 		if(this.encryptConfig) {
+			System.out.println("Encrypting Configuration");
 			String password = this.sdfsCliPassword;
 			String iv = this.chunk_store_iv;
 			byte [] ec = EncryptUtils.encryptCBC(this.chunk_store_encryption_key.getBytes(), password, iv);

@@ -563,10 +563,14 @@ public class Config {
 
 		}
 		if(password != null) {
+			if(Main.cloudSecretKey != null) {
 			byte [] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password, Main.chunkStoreEncryptionIV);
 			Main.cloudSecretKey = new String(dc);
-			dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey), password, Main.chunkStoreEncryptionIV);
+			}
+			if(Main.chunkStoreEncryptionKey != null) {
+			byte [] dc  = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey), password, Main.chunkStoreEncryptionIV);
 			Main.chunkStoreEncryptionKey = new String(dc);
+			}
 		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger
