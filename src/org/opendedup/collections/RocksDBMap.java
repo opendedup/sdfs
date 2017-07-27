@@ -705,7 +705,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Existing Hash Tables", dbs.length,
+			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length,
 					System.out);
 			int i = 0;
 			for (RocksDB db : dbs) {
