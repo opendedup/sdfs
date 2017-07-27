@@ -132,6 +132,7 @@ public class VolumeConfigWriter {
 	private boolean disableDNSBucket = false;
 	private boolean simpleMD = false;
 	private boolean refreshBlobs = false;
+	private boolean disableAutoGC = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
 	private String volumeType = "standard";
@@ -192,6 +193,7 @@ public class VolumeConfigWriter {
 			this.chunk_size = 40960;
 			this.volumeType ="backup";
 			this.fdisk_schedule = this.ltrfdisk_schedule;
+			this.disableAutoGC = true;
 		}
 		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
@@ -656,6 +658,7 @@ public class VolumeConfigWriter {
 		cs.setAttribute("gc-class", this.gc_class);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("fpp", ".001");
+		cs.setAttribute("disable-auto-gc", Boolean.toString(this.disableAutoGC));
 		cs.setAttribute("encrypt", Boolean.toString(this.chunk_store_encrypt));
 		cs.setAttribute("encryption-key", this.chunk_store_encryption_key);
 		cs.setAttribute("encryption-iv", this.chunk_store_iv);
