@@ -66,7 +66,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 	// RocksDB db = null;
 	String fileName = null;
 	ReentrantLock[] lockMap = new ReentrantLock[256];
-	RocksDB[] dbs = new RocksDB[8];
+	RocksDBShard[] dbs = new RocksDBShard[8];
 	RocksDB rmdb = null;
 	private static final long GB = 1024*1024*1024;
 	private static final long MB = 1024*1024;
@@ -128,7 +128,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 			executor = new ThreadPoolExecutor(Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
 					worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 			AtomicInteger ct = new AtomicInteger();
-			ArrayList<StartShard> shs = new ArrayList<StartShard>();
+			ArrayList<RocksDBShard> shs = new ArrayList<RocksDBShard>();
 			colFamily.add("default");
 	        colFamily.add("testing2");
 			for (int i = 0; i < dbs.length; i++) {
@@ -190,7 +190,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 				options.setTableFormatConfig(blockConfig);
 				File f = new File(fileName + File.separator + i);
 				f.mkdirs();
-				StartShard sh = new StartShard(i,this.dbs, options,f,bar,ct);
+				RocksDBShard sh = new RocksDBShard( options,f,bar,ct);
 				executor.execute(sh);
 				shs.add(sh);
 			}
@@ -202,7 +202,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 			} catch (InterruptedException e) {
 				throw new IOException(e);
 			}
-			for(StartShard sh : shs) {
+			for(RocksDBShard sh : shs) {
 				if(sh.e != null)
 					throw sh.e;
 			}
@@ -277,7 +277,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		return lockMap[l];
 	}
 
-	private RocksDB getDB(byte[] key) {
+	private RocksDBShard getDB(byte[] key) {
 		int l = key[key.length - 1];
 		if (l < 0) {
 			l = ((l * -1) + 127);
@@ -292,7 +292,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		try {
 			byte[] v = null;
 			
-				v = this.getDB(hash).get(hash);
+				v = this.getDB(hash).db.get(hash);
 			if (v != null) {
 				ByteBuffer bk = ByteBuffer.wrap(v);
 				long oval = bk.getLong();
@@ -305,10 +305,10 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 				if(ct <=0) {
 					
 					rmdb.put(hash, v);
-					getDB(hash).delete(hash);
+					getDB(hash).db.delete(hash);
 				} else {
 					bk.putLong(v.length - 8, ct);
-					getDB(hash).put(wo, hash, v);
+					getDB(hash).db.put(wo, hash, v);
 				}
 
 				return true;
@@ -333,8 +333,8 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 	public long getSize() {
 		try {
 			long sz = 0;
-			for (RocksDB db : dbs) {
-				sz += db.getLongProperty("rocksdb.estimate-num-keys");
+			for (RocksDBShard db : dbs) {
+				sz += db.db.getLongProperty("rocksdb.estimate-num-keys");
 			}
 			return sz;
 		} catch (RocksDBException e) {
@@ -348,8 +348,8 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 
 		try {
 			long sz = 0;
-			for (RocksDB db : dbs) {
-				sz += db.getLongProperty("rocksdb.estimate-num-keys");
+			for (RocksDBShard db : dbs) {
+				sz += db.db.getLongProperty("rocksdb.estimate-num-keys");
 			}
 			return sz * Main.CHUNK_LENGTH;
 		} catch (RocksDBException e) {
@@ -415,9 +415,9 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 	 */
 	public long setUp() throws Exception {
 		long sz = 0;
-		for (RocksDB db : dbs) {
+		for (RocksDBShard db : dbs) {
 			//System.out.println("s="+i);
-			sz += db.getLongProperty("rocksdb.estimate-num-keys");
+			sz += db.db.getLongProperty("rocksdb.estimate-num-keys");
 		}
 		long size = sz;
 		this.closed = false;
@@ -443,7 +443,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 			throw new IOException("hashtable [" + this.fileName + "] is close");
 		}
 		try {
-			byte[] v = this.getDB(key).get(key);
+			byte[] v = this.getDB(key).db.get(key);
 			if (v == null)
 				return false;
 			else
@@ -473,10 +473,10 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		l.lock();
 		try {
 			try {
-				RocksDB db = this.getDB(cm.getHash());
+				RocksDBShard db = this.getDB(cm.getHash());
 				byte[] v = null;
 				
-					v = db.get(cm.getHash());
+					v = db.db.get(cm.getHash());
 				if (v == null) {
 					try {
 						cm.persistData(true);
@@ -490,7 +490,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 						bf.putLong(1);
 					else
 						bf.putLong(cm.references);
-					db.put(cm.getHash(), v);
+					db.db.put(cm.getHash(), v);
 					return new InsertRecord(true, cm.getcPos());
 				} else {
 					//SDFSLogger.getLog().info("Hash Found");
@@ -502,7 +502,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 					else
 						ct += cm.references;
 					bk.putLong(8, ct);
-					db.put(cm.getHash(), v);
+					db.db.put(cm.getHash(), v);
 					return new InsertRecord(false, pos);
 				}
 			}  catch (RocksDBException e) {
@@ -528,15 +528,15 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		try {
 
 			try {
-				RocksDB db = this.getDB(cm.getHash());
-				byte[] v = db.get(cm.getHash());
+				RocksDBShard db = this.getDB(cm.getHash());
+				byte[] v = db.db.get(cm.getHash());
 				if (v == null) {
 
 					return false;
 				} else {
 					ByteBuffer bk = ByteBuffer.wrap(v);
 					bk.putLong(0, cm.getcPos());
-					db.put(wo, cm.getHash(), v);
+					db.db.put(wo, cm.getHash(), v);
 					return true;
 				}
 			} catch (RocksDBException e) {
@@ -561,7 +561,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 
 			try {
 
-				byte[] v = this.getDB(key).get(key);
+				byte[] v = this.getDB(key).db.get(key);
 				if (v == null) {
 
 					return -1;
@@ -634,13 +634,13 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		try {
 
 			try {
-				RocksDB db = this.getDB(cm.getHash());
-				byte[] v = db.get(cm.getHash());
+				RocksDBShard db = this.getDB(cm.getHash());
+				byte[] v = db.db.get(cm.getHash());
 				if (v == null) {
 
 					return false;
 				} else {
-					db.delete(cm.getHash());
+					db.db.delete(cm.getHash());
 					return true;
 				}
 			} catch (RocksDBException e) {
@@ -663,8 +663,8 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 				throw new IOException("hashtable [" + this.fileName + "] is close");
 			}
 			try {
-				for (RocksDB db : dbs) {
-					db.flush(new FlushOptions().setWaitForFlush(true));
+				for (RocksDBShard db : dbs) {
+					db.db.flush(new FlushOptions().setWaitForFlush(true));
 				}
 			} catch (RocksDBException e) {
 				throw new IOException(e);
@@ -682,8 +682,8 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length,
 					System.out);
 			int i = 0;
-			for (RocksDB db : dbs) {
-				db.close();
+			for (RocksDBShard db : dbs) {
+				db.db.close();
 				bar.update(i);
 				i++;
 			}
@@ -709,8 +709,8 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 	@Override
 	public void commitCompact(boolean force) throws IOException {
 		try {
-			for (RocksDB db : dbs)
-				db.compactRange();
+			for (RocksDBShard db : dbs)
+				db.db.compactRange();
 		} catch (RocksDBException e) {
 			throw new IOException(e);
 		}
@@ -755,26 +755,23 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 			StringBuilder retValue = new StringBuilder();
 			ReadOptions ro = new ReadOptions();
 			ro.setFillCache(false);
-			return this.getDB(key).keyMayExist(ro, key, retValue);
+			return this.getDB(key).db.keyMayExist(ro, key, retValue);
 
 		} finally {
 			l.unlock();
 		}
 	}
 	
-	private static class StartShard implements Runnable {
+	private static class RocksDBShard implements Runnable {
 
-		RocksDB [] dbs = null;
-		int n = -1;
+		RocksDB db = null;
 		Options options = null;
 		String path = null;
 		Exception e = null;
 		CommandLineProgressBar bar = null;
 		AtomicInteger ct = null;
 
-		protected StartShard(int n,RocksDB [] dbs,Options options,File f,CommandLineProgressBar bar,AtomicInteger ct) {
-			this.dbs = dbs;
-			this.n = n;
+		protected RocksDBShard(Options options,File f,CommandLineProgressBar bar,AtomicInteger ct) {
 			this.options = options;
 			this.path = f.getPath();
 			this.bar = bar;
@@ -786,7 +783,7 @@ public class RocksDBMapMerge implements AbstractMap, AbstractHashesMap {
 		@Override
 		public void run() {
 			try {
-				dbs[n] = RocksDB.open(options, path);
+				db = RocksDB.open(options, path);
 				//System.out.println(dbs[n].toString());
 			} catch (Exception e) {
 				this.e = e;
