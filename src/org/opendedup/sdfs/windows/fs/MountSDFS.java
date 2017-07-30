@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.opendedup.sdfs.windows.fs;
 
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class MountSDFS {
 				"the drive letter for SDFS file system \n e.g. \'S\'");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
+		options.addOption("e",true, "password to decrypt config");
 		options.addOption("d", false, "turn on filesystem debugging");
 		options.addOption("cfr", false,
 				"Restores files from cloud storage if the backend cloud store supports it");
@@ -73,6 +75,7 @@ public class MountSDFS {
 		checkJavaVersion();
 		int port = -1;
 		String volumeConfigFile = null;
+		String password = null;
 		boolean useSSL = true;
 		boolean debug = false;
 		CommandLineParser parser = new PosixParser();
@@ -98,6 +101,9 @@ public class MountSDFS {
 			Main.runCompact = true;
 			if (cmd.hasOption("forcecompact"))
 				Main.forceCompact = true;
+		}
+		if (cmd.hasOption("e")) {
+			password = cmd.getOptionValue("e");
 		}
 		if (cmd.hasOption("cfr")) {
 			Main.syncDL = true;
@@ -167,7 +173,7 @@ public class MountSDFS {
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
 
 		try {
-			sdfsService.start(useSSL, port);
+			sdfsService.start(useSSL, port,password);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -300,7 +300,10 @@ public class WinSDFS implements DokanOperations {
 			// if (read == -1)
 			// read = 0;
 			return wr.read;
-		} catch (Exception e) {
+		} catch(NullPointerException e) {
+			log.debug("unable to read file " + fileName, e);
+			throw new DokanOperationException(ERROR_READ_FAULT);
+		}catch (Exception e) {
 			log.error("unable to read file " + fileName, e);
 			throw new DokanOperationException(ERROR_READ_FAULT);
 		}

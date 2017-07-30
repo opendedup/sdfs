@@ -47,6 +47,12 @@ public class GetDSE {
 					Long.toString(HCServiceProxy.getMaxCacheSize()));
 			root.setAttribute("listen-encrypted",
 					Boolean.toString(Main.serverUseSSL));
+			root.setAttribute("ecryption-key", Main.chunkStoreEncryptionKey);
+			root.setAttribute("ecryption-iv", Main.chunkStoreEncryptionIV);
+			if(Main.cloudAccessKey != null)
+				root.setAttribute("cloud-access-key", Main.cloudAccessKey);
+			if(Main.cloudSecretKey != null)
+				root.setAttribute("cloud-secret-key", Main.cloudSecretKey);
 			return (Element) root.cloneNode(true);
 		} catch (Exception e) {
 			throw new IOException("request to fetch attributes failed because "

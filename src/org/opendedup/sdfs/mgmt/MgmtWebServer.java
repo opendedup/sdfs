@@ -93,6 +93,7 @@ public class MgmtWebServer implements Container {
 	@Override
 	public void handle(Request request, Response response) {
 		try {
+			//SDFSLogger.getLog().info(request.getTarget());
 			Path reqPath = request.getPath();
 			String[] parts = request.getTarget().split("\\?");
 			Map<String, String> qry =null;
@@ -125,7 +126,7 @@ public class MgmtWebServer implements Container {
 					if (hash.equals(Main.sdfsPassword))
 						auth = true;
 				} else {
-					SDFSLogger.getLog().warn("could not authenticate user to cli");
+					SDFSLogger.getLog().warn("could not authenticate user");
 				}
 			} else {
 				auth = true;
@@ -1170,6 +1171,7 @@ public class MgmtWebServer implements Container {
 				}
 			}
 		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to satify request ", e);
 			response.setCode(500);
 			try {
 				PrintStream body = response.getPrintStream();

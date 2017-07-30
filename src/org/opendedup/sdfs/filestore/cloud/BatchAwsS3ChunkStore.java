@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,11 +58,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.crypto.spec.IvParameterSpec;
 
 import static java.lang.Math.toIntExact;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.jets3t.service.utils.ServiceUtils;
@@ -481,6 +484,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			clientConfig.setSocketTimeout(120000);
 
 			String s3Target = null;
+			if(config.hasAttribute("user-agent-prefix")) {
+				clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
+			}
 			if (config.getElementsByTagName("connection-props").getLength() > 0) {
 				Element el = (Element) config.getElementsByTagName("connection-props").item(0);
 				if (el.hasAttribute("connection-timeout"))
@@ -499,9 +505,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						clientConfig.setProtocol(Protocol.HTTPS);
 
 				}
-				if(config.hasAttribute("user-agent-prefix")) {
-					clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
-				}
+				
 				if (el.hasAttribute("s3-target")) {
 					s3Target = el.getAttribute("s3-target");
 				}
@@ -921,6 +925,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();
+		IOException e = null;
+		for (int i = 0; i < 9; i++) {
 		try {
 			byte[] k = arc.getBytes();
 			int csz = toIntExact(k.length);
@@ -994,9 +1000,20 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			s3Service.putObject(req);
 			if (this.simpleMD)
 				this.updateObject("keys/" + haName, md);
-		} catch (Throwable e) {
-			SDFSLogger.getLog().fatal("unable to upload " + arc.getID() + " with id " + id, e);
-			throw new IOException(e);
+			return;
+		} catch (Throwable e1) {
+			//SDFSLogger.getLog().warn("unable to upload " + arc.getID() + " with id " + id, e1);
+			e = new IOException(e1);
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e2) {
+				
+			}
+		}
+		}
+		if(e!=null) {
+			SDFSLogger.getLog().error("unable to write block", e);
+			throw e;
 		}
 
 	}
@@ -1234,7 +1251,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public void getBytes(long id, File f) throws IOException, DataArchivedException {
 		Exception e = null;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 9; i++) {
 			try {
 				
 				this.getData(id, f);
@@ -1243,7 +1260,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw e1;
 			} catch (Exception e1) {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(10000);
 					if(f.exists())
 						f.delete();
 				} catch (Exception e2) {
@@ -1653,9 +1670,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		InputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
-
+		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth);
+		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -2152,7 +2169,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean checkAccess() {
 
 		Exception e = null;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 9; i++) {
 			try {
 				Map<String, String> obj = this.getUserMetaData(binm);
 				obj.get("currentsize");
@@ -2160,7 +2177,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception _e) {
 				e = _e;
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(10000);
 				} catch (InterruptedException e1) {
 					
 				}
@@ -2226,7 +2243,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			return haName;
 		}
 		Exception _e = null;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 9; i++) {
 			try {
 
 					RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName, 2);
@@ -2256,7 +2273,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							"Error while restoring block " + e.getErrorCode() + " id=" + id + " name=blocks/" + haName);
 					_e = e;
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(10000);
 					} catch (InterruptedException e1) {
 
 					}
@@ -2264,7 +2281,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception e) {
 				_e = e;
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(10000);
 				} catch (InterruptedException e1) {
 
 				}
@@ -2489,6 +2506,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
+		name = FilenameUtils.separatorsToUnix(name);
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();

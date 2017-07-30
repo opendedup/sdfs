@@ -18,9 +18,13 @@ import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.io.BaseEncoding;
+
 import org.opendedup.sdfs.io.AbstractStreamMatcher;
 
 public class Config {
@@ -46,7 +50,7 @@ public class Config {
 				version = doc.getDocumentElement().getAttribute("version");
 				Main.version = version;
 			}
-
+			
 			SDFSLogger.getLog().info(
 					"Parsing " + doc.getDocumentElement().getNodeName()
 							+ " version " + version);
@@ -274,14 +278,13 @@ public class Config {
 	 * @param fileName
 	 * @throws Exception
 	 */
-	public synchronized static void parseSDFSConfigFile(String fileName)
+	public synchronized static void parseSDFSConfigFile(String fileName,String password)
 			throws Exception {
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		doc.getDocumentElement().normalize();
-
 		String version = "0.8.12";
 		SDFSLogger.getLog().info(
 				"############ Running SDFS Version " + Main.version);
@@ -289,6 +292,19 @@ public class Config {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
 		}
+		
+		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
+		Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
+		Main.sdfsPassword = cli.getAttribute("password");
+		Main.sdfsPasswordSalt = cli.getAttribute("salt");
+		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
+		if(cli.hasAttribute("use-ssl")) {
+			Main.sdfsCliSSL =  Boolean.parseBoolean(cli.getAttribute("use-ssl"));
+		}
+		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
+				.getAttribute("enable-auth"));
+		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
+		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 
 		Main.version = version;
 		SDFSLogger.getLog().info(
@@ -300,6 +316,9 @@ public class Config {
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
 		Main.ioLogFile = locations.getAttribute("io-log.log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
+		if(cache.hasAttribute("encrypt-config")) {
+			
+		}
 		if (cache.hasAttribute("log-level")) {
 			SDFSLogger.setLevel(Integer.parseInt(cache
 					.getAttribute("log-level")));
@@ -418,18 +437,7 @@ public class Config {
 					.getAttribute("cluster-dse-password");
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
-		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
-		Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
-		Main.sdfsPassword = cli.getAttribute("password");
-		Main.sdfsPasswordSalt = cli.getAttribute("salt");
-		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
-		if(cli.hasAttribute("use-ssl")) {
-			Main.sdfsCliSSL =  Boolean.parseBoolean(cli.getAttribute("use-ssl"));
-		}
-		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
-				.getAttribute("enable-auth"));
-		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
-		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
+		
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume, fileName);
 		if (Main.chunkStoreLocal) {
@@ -554,6 +562,16 @@ public class Config {
 			}
 
 		}
+		if(password != null) {
+			if(Main.cloudSecretKey != null) {
+			byte [] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password, Main.chunkStoreEncryptionIV);
+			Main.cloudSecretKey = new String(dc);
+			}
+			if(Main.chunkStoreEncryptionKey != null) {
+			byte [] dc  = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey), password, Main.chunkStoreEncryptionIV);
+			Main.chunkStoreEncryptionKey = new String(dc);
+			}
+		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger
 					.getLog()
@@ -576,6 +594,34 @@ public class Config {
 	 * @throws Exception
 	 */
 	public synchronized static void writeSDFSConfigFile(String fileName)
+			throws Exception {
+		File file = new File(fileName);
+		Document doc = getSDFSConfigFile(fileName,false);
+		try {
+			// Prepare the DOM document for writing
+			Source source = new DOMSource(doc);
+
+			Result result = new StreamResult(file);
+
+			// Write the DOM document to the file
+			Transformer xformer = TransformerFactory.newInstance()
+					.newTransformer();
+			xformer.transform(source, result);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"Unable to write volume config " + fileName, e);
+		}
+		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
+	}
+	
+	
+	/**
+	 * write the client side config file
+	 * 
+	 * @param fileName
+	 * @throws Exception
+	 */
+	public synchronized static Document getSDFSConfigFile(String fileName,boolean decrypt)
 			throws Exception {
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -612,22 +658,9 @@ public class Config {
 						Integer.toString(HCServiceProxy.getWriteSpeed()));
 			}
 		}
-
-		try {
-			// Prepare the DOM document for writing
-			Source source = new DOMSource(doc);
-
-			Result result = new StreamResult(file);
-
-			// Write the DOM document to the file
-			Transformer xformer = TransformerFactory.newInstance()
-					.newTransformer();
-			xformer.transform(source, result);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error(
-					"Unable to write volume config " + fileName, e);
-		}
-		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
+		return doc;
 	}
+	
+	
 
 }

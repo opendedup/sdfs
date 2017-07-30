@@ -51,6 +51,7 @@ import com.google.common.base.Supplier;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -1188,6 +1189,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		BufferedInputStream in = null;
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
+		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		boolean isDir = false;
 		boolean isSymlink = false;
@@ -1813,6 +1815,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
+		name = FilenameUtils.separatorsToUnix(name);
 		String blb = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 		Blob b = blobStore.blobBuilder(blb).payload(Long.toString(System.currentTimeMillis())).build();

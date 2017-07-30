@@ -27,12 +27,15 @@ import org.apache.commons.cli.PosixParser;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.sdfs.filestore.S3ChunkStore;
+import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.io.BaseEncoding;
 
 public class VolumeConfigWriter {
 	/**
@@ -136,6 +139,7 @@ public class VolumeConfigWriter {
 	private boolean minIOEnabled;
 	private String volumeType = "standard";
 	private String userAgentPrefix = null;
+	private boolean encryptConfig = false;
 	private long sn = new Random().nextLong();
 
 	public VolumeConfigWriter() {
@@ -152,6 +156,20 @@ public class VolumeConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
+		if(cmd.hasOption("encrypt-config")) {
+			this.encryptConfig = true;
+		}
+		if (cmd.hasOption("sdfscli-password")) {
+			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
+		}
+		if (cmd.hasOption("sdfscli-require-auth")) {
+			this.sdfsCliRequireAuth = true;
+		}
+		if (cmd.hasOption("sdfscli-listen-port")) {
+			this.sdfsCliPort = Integer.parseInt(cmd.getOptionValue("sdfscli-listen-port"));
+		}
+		if (cmd.hasOption("sdfscli-listen-addr"))
+			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
 		if (cmd.hasOption("chunk-store-local")) {
 			this.chunk_store_local = Boolean.parseBoolean((cmd.getOptionValue("chunk-store-local")));
 		}
@@ -170,7 +188,6 @@ public class VolumeConfigWriter {
 			System.out.println("--volume-name cannot contain any special characters");
 			System.exit(-1);
 		}
-
 		this.perfMonFile = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + "volume-"
 				+ volume_name + "-perf.json";
 		this.volume_capacity = cmd.getOptionValue("volume-capacity");
@@ -515,17 +532,7 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("sdfscli-disable-ssl")) {
 			this.sdfsCliSSL = false;
 		}
-		if (cmd.hasOption("sdfscli-password")) {
-			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
-		}
-		if (cmd.hasOption("sdfscli-require-auth")) {
-			this.sdfsCliRequireAuth = true;
-		}
-		if (cmd.hasOption("sdfscli-listen-port")) {
-			this.sdfsCliPort = Integer.parseInt(cmd.getOptionValue("sdfscli-listen-port"));
-		}
-		if (cmd.hasOption("sdfscli-listen-addr"))
-			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
+		
 
 		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim() + "-volume-cfg.xml");
 		if (file.exists()) {
@@ -566,6 +573,15 @@ public class VolumeConfigWriter {
 			dir.mkdirs();
 		}
 		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim() + "-volume-cfg.xml");
+		if(this.encryptConfig) {
+			System.out.println("Encrypting Configuration");
+			String password = this.sdfsCliPassword;
+			String iv = this.chunk_store_iv;
+			byte [] ec = EncryptUtils.encryptCBC(this.chunk_store_encryption_key.getBytes(), password, iv);
+			this.chunk_store_encryption_key = BaseEncoding.base64Url().encode(ec);
+			ec = EncryptUtils.encryptCBC(this.cloudSecretKey.getBytes(), password, iv);
+			this.cloudSecretKey = BaseEncoding.base64Url().encode(ec);
+		}
 
 		if (vrts_appliance) {
 			dir = new File("/config/sdfs/etc/");
@@ -688,6 +704,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
+		
 
 		root.appendChild(sdfscli);
 		if (this.accessEnabled || this.atmosEnabled || this.backblazeEnabled) {
@@ -1117,6 +1134,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"The encryption  initialization vector (IV) used for encrypting data. If not specified a strong key will be generated automatically")
 				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder.withLongOpt("encrypt-config")
+				.withDescription(
+						"Encrypt security sensitive encryption parameters with the admin password")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("aws-enabled")
 				.withDescription(
 						"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
