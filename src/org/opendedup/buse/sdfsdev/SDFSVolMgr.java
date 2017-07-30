@@ -42,12 +42,14 @@ public class SDFSVolMgr implements Daemon {
 	private static SDFSService sdfsService = null;
 	private static int port;
 	private static boolean useSSL;
+	private static String password = null;
 
 	public static Options buildOptions() {
 		Options options = new Options();
 		options.addOption("d", false, "verbose debug output");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
+		options.addOption("e", true, "password to decrypt config");
 		options.addOption("vc", true,
 				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("c", false,
@@ -72,7 +74,7 @@ public class SDFSVolMgr implements Daemon {
 	public static void main(String[] args) throws ParseException {
 		setup(args);
 		try {
-			sdfsService.start(useSSL, port);
+			sdfsService.start(useSSL, port,password);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -116,6 +118,9 @@ public class SDFSVolMgr implements Daemon {
 		String volname = "SDFS";
 		if (cmd.hasOption("nocheck")) {
 			Main.runConsistancyCheck = false;
+		}
+		if (cmd.hasOption("e")) {
+			password = cmd.getOptionValue("e");
 		}
 		if (cmd.hasOption("c")) {
 			Main.runCompact = true;
@@ -215,7 +220,7 @@ public class SDFSVolMgr implements Daemon {
 
 	@Override
 	public void start() throws Exception {
-		sdfsService.start(useSSL, port);
+		sdfsService.start(useSSL, port,password);
 
 	}
 

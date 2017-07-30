@@ -30,6 +30,7 @@ public class MountSDFS implements Daemon, Runnable {
 	private static SDFSService sdfsService;
 	private static String mountOptions;
 	protected static ShutdownHook shutdownHook = null;
+	private static String password = null;
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -43,6 +44,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("s", false, "Run single threaded");
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("cc", false, "Runs Consistency Check");
+		options.addOption("e", true, "password to decrypt config");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -118,6 +120,9 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("d")) {
 			fal.add("-d");
+		}
+		if (cmd.hasOption("e")) {
+			password = cmd.getOptionValue("e");
 		}
 		if (cmd.hasOption("s")) {
 			fal.add("-s");
@@ -200,7 +205,7 @@ public class MountSDFS implements Daemon, Runnable {
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start(useSSL, port);
+			sdfsService.start(useSSL, port,password);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

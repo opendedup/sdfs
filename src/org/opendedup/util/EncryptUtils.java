@@ -19,7 +19,6 @@
 package org.opendedup.util;
 
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -239,39 +238,9 @@ public class EncryptUtils {
 		cis.close();
 	}
 
-	private static final ThreadLocal<Cipher> localDigest = new ThreadLocal<Cipher>() {
-		@Override
-		protected Cipher initialValue() {
-			try {
-				return Cipher.getInstance("AES/CBC/PKCS5Padding");
-			} catch (Exception e) {
-				// ugly but necessary
-				throw new RuntimeException(e);
-			}
-		}
-	};
-
-	public static void main(String[] args) {
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-		new Thread(new MyRunnable()).start();
-	}
-
-	private static class MyRunnable implements Runnable {
-		@Override
-		public void run() {
-			try {
-				Cipher cipher = localDigest.get();
-				System.out.println("Got digest "
-						+ System.identityHashCode(cipher));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+	public static void main(String[] args) throws IOException {
+		
+		
 	}
 
 }

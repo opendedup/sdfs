@@ -55,6 +55,7 @@ public class FDisk {
 	private AtomicLong files = new AtomicLong(0);
 	private FDiskEvent fEvt = null;
 	private boolean failed = false;
+	private AtomicLong corruptFiles = new AtomicLong(0);
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
@@ -105,12 +106,12 @@ public class FDisk {
 			if (failed)
 				throw new IOException("FDisk traverse failed");
 			SDFSLogger.getLog().info(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"].");
 
 			fEvt.endEvent(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"].");
 			evt.endEvent(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "].");
+					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"]. ");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("reference count failed because [" + e.toString() + "]", SDFSEvent.ERROR);
@@ -182,7 +183,7 @@ public class FDisk {
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error("error while checking file [" + mapFile.getPath() + "]", e);
-			this.failed = true;
+			this.corruptFiles.incrementAndGet();
 		} finally {
 			mp.close();
 			mp = null;

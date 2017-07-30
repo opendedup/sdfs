@@ -192,7 +192,7 @@ public class Io {
 		doc = impl.createDocument(null, "result", null);
 		// Root element.
 		result = doc.getDocumentElement();
-		SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), err);
+		SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), err);
 		result.setAttribute("status", "failed");
 		result.setAttribute("msg", err.toString());
 		result.setAttribute("error", Integer.toString(-1));
@@ -200,11 +200,11 @@ public class Io {
 		try {
 			rsString = XMLUtils.toXMLString(doc);
 		} catch (TransformerException e2) {
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e2);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e2);
 			try {
 				rsp.close();
 			} catch (IOException e) {
-				SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+				SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 			}
 		}
 		// SDFSLogger.getLog().debug(rsString);
@@ -217,7 +217,7 @@ public class Io {
 			rsp.getOutputStream().flush();
 			rsp.close();
 		} catch (IOException e) {
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 		}
 	}
 
@@ -416,13 +416,13 @@ public class Io {
 		} catch (FuseException e) {
 
 			rsp.setCode(500);
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 			result.setAttribute("status", "failed");
 			result.setAttribute("msg", e.toString());
 			result.setAttribute("error", Integer.toString(e.getErrno()));
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 			rsp.setCode(500);
 			result.setAttribute("status", "failed");
 			result.setAttribute("msg", e.toString());
@@ -433,7 +433,7 @@ public class Io {
 				try {
 					rsString = XMLUtils.toXMLString(doc);
 				} catch (TransformerException e) {
-					SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+					SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 					rsp.close();
 				}
 				// SDFSLogger.getLog().debug(rsString);
@@ -473,13 +473,13 @@ public class Io {
 		} catch (FuseException e) {
 
 			rsp.setCode(500);
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 			result.setAttribute("status", "failed");
 			result.setAttribute("msg", e.toString());
 			result.setAttribute("error", Integer.toString(e.getErrno()));
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+			SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 			rsp.setCode(500);
 			result.setAttribute("status", "failed");
 			result.setAttribute("msg", e.toString());
@@ -489,7 +489,7 @@ public class Io {
 			try {
 				rsString = XMLUtils.toXMLString(doc);
 			} catch (TransformerException e) {
-				SDFSLogger.getLog().error("unable to process get request " + req.getTarget(), e);
+				SDFSLogger.getLog().debug("unable to process get request " + req.getTarget(), e);
 				rsp.close();
 			}
 			// SDFSLogger.getLog().debug(rsString);

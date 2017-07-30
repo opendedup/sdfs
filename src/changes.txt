@@ -1,4 +1,18 @@
-Version 3.3.5
+Version 3.4.7
+   Fixes
+   * Fixed ignore corrupt files on fdisk
+   Enhancements
+   * added mkfs.sdfs parameter -encrypt-config to encrypt the cloud secret key and aes key on disk in the config with the admin password. This is 'admin' by default.
+   * added mount.sdfs parameter -e to decrypt the cloud secret key and aes key on mount. The -e parameter takes the admin password.
+Version 3.4.6
+   Fixes
+   * Disabled weak ciphers for java install
+   * Fixed Garbage Collection issue
+   * Fixed debug log message overload "looped through everything in hashtable"
+   * Fixed retry of gets over bad slow http connections
+   * Added file info to windows setup
+   Enhancements
+   * added --user-agent-prefix parameter to add a prefix for http(s) traffic to specific cloud providers. Usefull to keep track of uploads from sdfs.
 	
 Version 3.3.2
 	Enhancements
