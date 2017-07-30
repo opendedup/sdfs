@@ -850,7 +850,7 @@ public class WinSDFS implements DokanOperations {
 
 	private static File resolvePath(String path) throws DokanOperationException {
 		File _f = new File(mountedVolume + path);
-		if (!_f.exists()) {
+		if (!_f.exists() || !_f.getPath().startsWith(mountedVolume)) {
 			_f = null;
 			log.debug("No such node " + path);
 			throw new DokanOperationException(WinError.ERROR_FILE_NOT_FOUND);
