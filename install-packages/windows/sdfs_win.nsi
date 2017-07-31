@@ -1,9 +1,9 @@
-; MUI Settings
+; MUI Settings 
 ; MUI Settings / Icons
 ; Sets the theme path
 
 
-!define VERSION '3.5.0'
+!define VERSION '3.5.1'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -32,11 +32,15 @@
 
   ;Default installation folder
   InstallDir $PROGRAMFILES64\sdfs
-
+  
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
   BrandingText "${MUI_PRODUCT} ${VERSION}"
+  
+
+
+;--------------------------------
 
 ;--------------------------------
 ;Interface Settings
@@ -50,31 +54,42 @@
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
-
+  
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-
+  
 ;--------------------------------
 ;Languages
-
+ 
   !insertmacro MUI_LANGUAGE "English"
 
 
+  ;--------------------------------
+;Version Information
+
+  VIProductVersion "3.5.1.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.5.1.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.5.1.0"
 ;--------------------------------
 ;Installer Sections
 
 Function .onInit
  ${If} ${RunningX64}
-  
+    
   ${Else}
-	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows 2008R2, 7, 2012, 8, 2012R2, 8.1 for x64."
+	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
       Abort
   ${EndIf}
 FunctionEnd
 
 
 Section "SDFS Setup" SecMain
-
+  
   SetOutPath "$INSTDIR"
   SectionIn RO
   File *
@@ -86,7 +101,7 @@ Section "SDFS Setup" SecMain
   File etc\*
   ;Store installation folder
   WriteRegStr HKLM "Software\SDFS" "path" $INSTDIR
-  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR
+  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -112,12 +127,12 @@ Function .onInstSuccess
     Reboot
   noreboot:
 FunctionEnd
-
-
+ 
+ 
 Function un.onUninstSuccess
   MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
 FunctionEnd
-
+  
 
 ;--------------------------------
 ;Descriptions
