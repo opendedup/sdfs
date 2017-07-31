@@ -98,16 +98,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			else if (this.size < 10_000_000_000L) {
 				fsize = 128*MB;
 				bufferSize = fsize*10*dbs.length;
-			} else if (this.size < 100_000_000_000L) {
+			} else {
 				//long mp = this.size / 10_000_000_000L;
 				
 				fsize = 256*MB;
 				bufferSize = GB*dbs.length;
-			} else {
-				fsize = 512*GB;
-				bufferSize = GB* 10*dbs.length;
-				
-			}
+			} 
 
 			// blockConfig.setChecksumType(ChecksumType.kNoChecksum);
 			long totmem = maxSize;
@@ -787,6 +783,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		public void run() {
 			try {
 				dbs[n] = RocksDB.open(options, path);
+				dbs[n].compactRange();
 				//System.out.println(dbs[n].toString());
 			} catch (Exception e) {
 				this.e = e;

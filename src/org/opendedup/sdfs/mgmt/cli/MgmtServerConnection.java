@@ -14,16 +14,19 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.util.EasySSLProtocolSocketFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class MgmtServerConnection {
 	public static int port = 6442;
 	public static String server = "localhost";
 	public static String userName = "admin";
-	public static String password = null;
+	public static String hmac = null;
 	public static boolean useSSL = true;
 	private static HttpClient client = null;
 	static {
@@ -42,6 +45,52 @@ public class MgmtServerConnection {
 		client.getParams().setParameter("http.socket.timeout", 60*1000);
 		client.getParams().setParameter("http.connection.timeout", 60*1000);
 	}
+	
+	public static String getAuth(String password) throws IOException {
+		InputStream in = null;
+		GetMethod method = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			String prot = "http";
+			if (useSSL) {
+				prot = "https";
+			}
+			String req = prot + "://" + server + ":" + port + "/session/";
+			SDFSLogger.getLog().debug(req);
+			method = new GetMethod(req);
+			int returnCode = client.executeMethod(method);
+			if (returnCode != 200)
+				throw new IOException("Unable to process command "
+						+ method.getQueryString() + " return code was"
+						+ returnCode + " return msg was "
+						+ method.getResponseBodyAsString());
+			in = method.getResponseBodyAsStream();
+			Document doc = db.parse(in);
+			Element el = doc.getDocumentElement();
+			String salt = el.getAttribute("salt");
+			String sessionid = el.getAttribute("session-id");
+			String key = HashFunctions.getSHAHash(password.trim().getBytes(),
+					salt.getBytes());
+			String im = HashFunctions.getHmacSHA256(sessionid,StringUtils.getHexBytes(key))+ ":" +sessionid;
+			return URLEncoder.encode(im,"UTF-8");
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (Exception e) {
+				}
+			}
+			if (method != null) {
+				try {
+					method.releaseConnection();
+				} catch (Exception e) {
+				}
+			}
+		}
+	}
 
 	public static Document getResponse(String url) throws IOException {
 		InputStream in = null;
@@ -50,11 +99,11 @@ public class MgmtServerConnection {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 
-			if (userName != null && password != null)
+			if (userName != null && hmac != null)
 				if (url.trim().length() == 0)
-					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(hmac, "UTF-8");
 				else
-					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(hmac, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";
@@ -98,11 +147,11 @@ public class MgmtServerConnection {
 
 	public static GetMethod connectAndGet(String url, String file,
 			boolean useSSL) throws IOException {
-		if (userName != null && password != null)
+		if (userName != null && hmac != null)
 			if (url.trim().length() == 0)
-				url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+				url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(hmac, "UTF-8");
 			else
-				url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+				url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(hmac, "UTF-8");
 		String prot = "http";
 		if (useSSL) {
 			prot = "https";
@@ -181,15 +230,15 @@ public class MgmtServerConnection {
 	}
 
 	public static PostMethod connectAndPost(String server, int port,
-			String password, String url, String file, String postData,
+			String url, String hmac,String file, String postData,
 			boolean useSSL) throws Exception {
 		String req = null;
 		try {
-			if (userName != null && password != null)
+			if (userName != null && hmac != null)
 				if (url.trim().length() == 0)
-					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(hmac, "UTF-8");
 				else
-					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(hmac, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";

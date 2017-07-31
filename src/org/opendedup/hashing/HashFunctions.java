@@ -15,6 +15,9 @@ import java.security.Security;
 import java.util.Date;
 import java.util.zip.Adler32;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.util.ElapsedTime;
 import org.opendedup.util.StringUtils;
@@ -223,14 +226,16 @@ public class HashFunctions {
 		 * 
 		 * ?
 		 */
-		String rndStr = getRandomString(12);
+		String rndStr = getRandomString(6);
 
 		System.out.println(rndStr);
 		String auth = getSHAHash("admin".getBytes(), "test".getBytes());
-		if (auth.equals(getSHAHash("admin".getBytes(), "test".getBytes())))
-			System.out.println(auth);
-		else
-			System.out.println("failed");
+		byte [] key = StringUtils.getHexBytes(auth);
+		System.out.println(auth);
+		auth = getSHAHash(rndStr.getBytes(),key);
+		System.out.println(auth);
+		auth = getSHAHash("admin".getBytes(), "test".getBytes(),rndStr.getBytes());
+		System.out.println(auth);
 	}
 
 	public static String getSHAHash(byte[] input)
@@ -245,10 +250,27 @@ public class HashFunctions {
 			throws NoSuchAlgorithmException, UnsupportedEncodingException,
 			NoSuchProviderException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		digest.reset();
 		digest.update(salt);
 		digest.update(input);
 		return StringUtils.getHexString(digest.digest());
+	}
+	
+	public static String getSHAHash(byte[] input, byte[] salt,byte [] sessionID)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException,
+			NoSuchProviderException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		digest.reset();
+		digest.update(salt);
+		digest.update(input);
+		digest.update(sessionID);
+		return StringUtils.getHexString(digest.digest());
+	}
+	
+	public static String getHmacSHA256(String data, byte[] key) throws Exception {
+	    String algorithm="HmacSHA256";
+	    Mac mac = Mac.getInstance(algorithm);
+	    mac.init(new SecretKeySpec(key, algorithm));
+	    return StringUtils.getHexString(mac.doFinal(data.getBytes("UTF8")));
 	}
 
 	public static String getRandomString(int sz) {
@@ -316,5 +338,7 @@ public class HashFunctions {
 		buf.putLong(alder.getValue());
 		return buf.array();
 	}
+	
+	
 
 }

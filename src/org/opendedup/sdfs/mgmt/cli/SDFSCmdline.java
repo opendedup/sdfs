@@ -31,7 +31,7 @@ public class SDFSCmdline {
 			if (cmd.hasOption("server"))
 				MgmtServerConnection.server = cmd.getOptionValue("server");
 			if (cmd.hasOption("password"))
-				MgmtServerConnection.password = cmd.getOptionValue("password");
+				MgmtServerConnection.hmac = MgmtServerConnection.getAuth(cmd.getOptionValue("password"));
 			
 			if (cmd.hasOption("port"))
 				MgmtServerConnection.port = Integer.parseInt(cmd

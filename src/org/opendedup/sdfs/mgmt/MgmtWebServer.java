@@ -33,12 +33,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
 import org.opendedup.sdfs.mgmt.websocket.PingService;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
@@ -70,6 +72,7 @@ public class MgmtWebServer implements Container {
 	public static final String BLOCK_PATH = "/blockdata/";
 	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
+	public static final String SESSION = "/session/";
 	private static Io io = null;
 
 	public static Map<String, String> splitQuery(String query) {
@@ -89,6 +92,16 @@ public class MgmtWebServer implements Container {
 		}
 		return query_pairs;
 	}
+	
+	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(500, .075F,
+			false) {
+		private static final long serialVersionUID = -1L;
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, String> entry) {
+			return size() > 100;
+		}
+	};
 
 	@Override
 	public void handle(Request request, Response response) {
@@ -118,9 +131,40 @@ public class MgmtWebServer implements Container {
 			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
 
 			boolean auth = false;
+			if(request.getTarget().startsWith(SESSION)) {
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder builder;
+				builder = factory.newDocumentBuilder();
+				DOMImplementation impl = builder.getDOMImplementation();
+				// Document.
+				Document doc = impl.createDocument(null, "result", null);
+				// Root element.
+				Element result = doc.getDocumentElement();
+				result.setAttribute("status", "success");
+				result.setAttribute("session-id", HashFunctions.getRandomString(8));
+				result.setAttribute("salt", Main.sdfsPasswordSalt);
+				String rsString = XMLUtils.toXMLString(doc);
+
+				// SDFSLogger.getLog().debug(rsString);
+				response.setContentType("text/xml");
+				byte[] rb = rsString.getBytes();
+				response.setContentLength(rb.length);
+				response.getOutputStream().write(rb);
+				response.getOutputStream().flush();
+				response.close();
+				return;
+			}
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
-				if (password != null) {
+				String hmac = qry.get("hmac");
+				if(hmac != null) {
+					String [] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
+					String hsh = tks[0]; 
+					String session = tks[1];
+					String im = HashFunctions.getHmacSHA256(session,StringUtils.getHexBytes(Main.sdfsPassword));
+					if(im.equalsIgnoreCase(hsh))
+						auth = true;
+				} else if (password != null) {
 					String hash = HashFunctions.getSHAHash(password.trim().getBytes(),
 							Main.sdfsPasswordSalt.getBytes());
 					if (hash.equals(Main.sdfsPassword))

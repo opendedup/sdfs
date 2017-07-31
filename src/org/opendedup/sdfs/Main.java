@@ -64,12 +64,8 @@ public class Main {
 	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
 	public static boolean runCompact = false;
-<<<<<<< HEAD
 	public static boolean INLINE_REF_INSERT = false;
-=======
 	public static byte [] decKey = null;
->>>>>>> master
-
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 
@@ -114,11 +110,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-<<<<<<< HEAD
 	public static String version = "3.5.1";
-=======
-	public static String version = "3.4.7.1";
->>>>>>> master
 
 	public static boolean readAhead = false;
 	

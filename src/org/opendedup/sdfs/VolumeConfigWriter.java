@@ -1,6 +1,7 @@
 package org.opendedup.sdfs;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -142,6 +143,7 @@ public class VolumeConfigWriter {
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
 	private long sn = new Random().nextLong();
+	
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
