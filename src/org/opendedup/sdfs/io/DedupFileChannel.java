@@ -57,6 +57,7 @@ public class DedupFileChannel {
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
+	private static int READHEAD_TRIGGER_SIZE=30*1024*1024;
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -509,7 +510,7 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
-			if (filePos > 0 && !readAheadInitiated && Main.readAhead) {
+			if (filePos > READHEAD_TRIGGER_SIZE && !readAheadInitiated && Main.readAhead) {
 				this.readAheadInitiated = true;
 				ReadAhead.getReadAhead(df);
 			}
