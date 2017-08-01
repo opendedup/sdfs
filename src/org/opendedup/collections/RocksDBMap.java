@@ -98,11 +98,14 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			else if (this.size < 10_000_000_000L) {
 				fsize = 128*MB;
 				bufferSize = fsize*10*dbs.length;
+			} else if (this.size < 50_000_000_000L) {
+				fsize = 256*MB;
+				bufferSize = GB*dbs.length;
 			} else {
 				//long mp = this.size / 10_000_000_000L;
 				
-				fsize = 256*MB;
-				bufferSize = GB*dbs.length;
+				fsize = 512*MB;
+				bufferSize = 2*GB*dbs.length;
 			} 
 
 			// blockConfig.setChecksumType(ChecksumType.kNoChecksum);
