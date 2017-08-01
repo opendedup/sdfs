@@ -73,7 +73,7 @@ public class Io {
 		String pt = mountedVolume + path.trim();
 		File _f = new File(pt);
 
-		if (!_f.exists() || !_f.getPath().startsWith(mountedVolume)) {
+		if (!_f.exists()) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("No such node");
 
@@ -562,11 +562,6 @@ public class Io {
 				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 			if (Main.volume.isFull()) {
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
-			}
-			if (!f.getPath().startsWith(this.mountedVolume)) {
-				// SDFSLogger.getLog().info("42=");
-				f = null;
-				throw new FuseException("file is outside of filesystem").initErrno(Errno.ENOENT);
 			}
 			if (f.exists()) {
 				// SDFSLogger.getLog().info("42=");

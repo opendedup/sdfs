@@ -112,11 +112,7 @@ public class PFullGC implements GCControllerImpl {
 		if (next >= .92)
 			return .90;
 		if (next >= 0)
-			next = .6;
-		if(next > .6)
 			next = next +.1;
-		if(next > .8)
-			next = next + .05;
 		return next;
 	}
 
