@@ -957,7 +957,7 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 						this.keyLookup.invalidate(new ByteArrayWrapper(cm.getHash()));
 						return put(cm, persist);
 					} else {
-						rm.put(cm.getHash(), cm.getcPos(),cm.references);
+						rm.claim(cm.getHash(), cm.getcPos(),cm.references);
 						this.lbf.put(cm.getHash());
 						rec = new InsertRecord(false, lp);
 					}

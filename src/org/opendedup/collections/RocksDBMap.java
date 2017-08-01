@@ -155,6 +155,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setCreateIfMissing(true);
 				options.setCompactionStyle(CompactionStyle.LEVEL);
 				options.setCompressionType(CompressionType.NO_COMPRESSION);
+				options.setLevel0FileNumCompactionTrigger(8);
 				options.setMaxBackgroundCompactions(2);
 				options.setMaxBackgroundFlushes(8);
 				options.setEnv(env);
@@ -184,7 +185,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				//options.createStatistics();
 				//options.setTargetFileSizeBase(512*1024*1024);
 				
-				options.setMaxBytesForLevelBase(fsize*10);
+				options.setMaxBytesForLevelBase(fsize*20);
 				options.setTargetFileSizeBase(fsize);
 				options.setTableFormatConfig(blockConfig);
 				File f = new File(fileName + File.separator + i);
@@ -786,7 +787,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		public void run() {
 			try {
 				dbs[n] = RocksDB.open(options, path);
-				dbs[n].compactRange();
 				//System.out.println(dbs[n].toString());
 			} catch (Exception e) {
 				this.e = e;
