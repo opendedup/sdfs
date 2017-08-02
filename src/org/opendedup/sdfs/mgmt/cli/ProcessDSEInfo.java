@@ -79,13 +79,13 @@ public class ProcessDSEInfo {
 				System.out.printf("Trottled Write Speed : %s/s\n", StorageUnit
 						.of(wsp).format(wsp));
 				if(dse.hasAttribute("ecryption-key"))
-					System.out.printf("Encryption Key : %s/s\n",dse.getAttribute("ecryption-key"));
+					System.out.printf("Encryption Key : %s\n",dse.getAttribute("ecryption-key"));
 				if(dse.hasAttribute("ecryption-iv"))
-					System.out.printf("Encryption IV : %s/s\n",dse.getAttribute("ecryption-iv"));
+					System.out.printf("Encryption IV : %s/n",dse.getAttribute("ecryption-iv"));
 				if(dse.hasAttribute("cloud-access-key"))
-					System.out.printf("Cloud Access Key : %s/s\n",dse.getAttribute("cloud-access-key"));
+					System.out.printf("Cloud Access Key : %s\n",dse.getAttribute("cloud-access-key"));
 				if(dse.hasAttribute("cloud-secret-key"))
-					System.out.printf("Cloud Secret Key : %s/s\n",dse.getAttribute("cloud-secret-key"));
+					System.out.printf("Cloud Secret Key : %s\n",dse.getAttribute("cloud-secret-key"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
