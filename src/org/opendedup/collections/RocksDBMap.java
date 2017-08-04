@@ -168,7 +168,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setAllowConcurrentMemtableWrite(true);
 				//LRUCache c = new LRUCache(memperDB);
 				//options.setRowCache(c);
-				//blockConfig.setBlockCacheSize((bufferSize*2)/dbs.length);		
+				blockConfig.setBlockCacheSize(GB*2);		
 				
 				options.setWriteBufferSize(bufferSize/dbs.length);
 				//options.setMinWriteBufferNumberToMerge(2);

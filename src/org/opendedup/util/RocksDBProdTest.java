@@ -26,6 +26,7 @@ public class RocksDBProdTest {
 	
 	static AtomicLong transactions = new AtomicLong();
 	static AtomicLong inserts = new AtomicLong();
+	static AtomicLong dupes = new AtomicLong();
 	static VariableSipHashEngine ve = null;
 	public static void main(String[] args) throws IOException, HashtableFullException, InterruptedException, NoSuchAlgorithmException {
 		int rb = Integer.parseInt(args[1]);
@@ -58,16 +59,22 @@ public class RocksDBProdTest {
 		boolean running = true;
 		long st = System.currentTimeMillis();
 		long ci = transactions.get();
+		long dd = dupes.get();
 		ShutdownHook shutdownHook = new ShutdownHook(dr,
 				hashDB);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		while(running) {
 			Thread.sleep(30000);
 			long nci = transactions.get();
+			long dd1 = dupes.get();
+			long ddif = dd1-dd;
 			long ic = inserts.get();
+			long ts = (nci-ci);
+			double ddr = (double)ddif/(double)ts;
 			long tps = (nci-ci)/30;
-			System.out.println("Transactions = " + (nci-ci) + " tps = " + tps + " transactions=" + nci + " inserts=" + ic);
+			System.out.println("Transactions = " + ts + " tps = " + tps + " dedupe rate = " + ddr+ " dedupes = " + ddif+" transactions=" + nci + " inserts=" + ic);
 			ci = nci;
+			dd =dd1;
 			running = false;
 			for(DataWriter d : dr) {
 				if(!d.done) {
@@ -118,6 +125,8 @@ public class RocksDBProdTest {
 					InsertRecord ir = hashDB.put(cm,false);
 					if(ir.getInserted())
 						inserts.incrementAndGet();
+					else
+						dupes.incrementAndGet();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

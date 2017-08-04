@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,6 @@ import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
 import org.opendedup.sdfs.mgmt.websocket.PingService;
-import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
@@ -92,7 +90,7 @@ public class MgmtWebServer implements Container {
 		}
 		return query_pairs;
 	}
-	
+
 	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(500, .075F,
 			false) {
 		private static final long serialVersionUID = -1L;
@@ -106,10 +104,10 @@ public class MgmtWebServer implements Container {
 	@Override
 	public void handle(Request request, Response response) {
 		try {
-			//SDFSLogger.getLog().info(request.getTarget());
+			// SDFSLogger.getLog().info(request.getTarget());
 			Path reqPath = request.getPath();
 			String[] parts = request.getTarget().split("\\?");
-			Map<String, String> qry =null;
+			Map<String, String> qry = null;
 			if (parts.length > 1) {
 				qry = splitQuery(parts[1]);
 			} else {
@@ -131,7 +129,7 @@ public class MgmtWebServer implements Container {
 			SDFSLogger.getLog().debug("cmd=" + cmd + " file=" + file + " options=" + cmdOptions);
 
 			boolean auth = false;
-			if(request.getTarget().startsWith(SESSION)) {
+			if (request.getTarget().startsWith(SESSION)) {
 				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder builder;
 				builder = factory.newDocumentBuilder();
@@ -139,9 +137,11 @@ public class MgmtWebServer implements Container {
 				// Document.
 				Document doc = impl.createDocument(null, "result", null);
 				// Root element.
+				String sessionid = HashFunctions.getRandomString(8);
+				sessions.put(sessionid, request.getClientAddress().getHostString());
 				Element result = doc.getDocumentElement();
 				result.setAttribute("status", "success");
-				result.setAttribute("session-id", HashFunctions.getRandomString(8));
+				result.setAttribute("session-id", sessionid);
 				result.setAttribute("salt", Main.sdfsPasswordSalt);
 				String rsString = XMLUtils.toXMLString(doc);
 
@@ -157,13 +157,17 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
 				String hmac = qry.get("hmac");
-				if(hmac != null) {
-					String [] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
-					String hsh = tks[0]; 
+				if (hmac != null) {
+					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
+					String hsh = tks[0];
 					String session = tks[1];
-					String im = HashFunctions.getHmacSHA256(session,StringUtils.getHexBytes(Main.sdfsPassword));
-					if(im.equalsIgnoreCase(hsh))
-						auth = true;
+					if (!sessions.containsKey(session))
+						auth = false;
+					else {
+						String im = HashFunctions.getHmacSHA256(session, StringUtils.getHexBytes(Main.sdfsPassword));
+						if (im.equalsIgnoreCase(hsh))
+							auth = true;
+					}
 				} else if (password != null) {
 					String hash = HashFunctions.getSHAHash(password.trim().getBytes(),
 							Main.sdfsPasswordSalt.getBytes());
@@ -681,9 +685,9 @@ public class MgmtWebServer implements Container {
 						if (qry.containsKey("fd"))
 							fd = Long.parseLong(qry.get("fd"));
 						boolean written = false;
-						if(qry.containsKey("written"))
+						if (qry.containsKey("written"))
 							written = Boolean.parseBoolean(qry.get("written"));
-						new CloseFile().getResult(cmdOptions,written, file, fd);
+						new CloseFile().getResult(cmdOptions, written, file, fd);
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", "command completed successfully");
 						break;
@@ -759,16 +763,12 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("debug-info", e);
 						}
 						break; /*
-								 * else if (cmd.equalsIgnoreCase("events")) {
-								 * try { String msg = new
-								 * GetEvents().getResult(cmdOptions, file);
-								 * result =
-								 * "<result status=\"success\" msg=\"command completed successfully\">"
-								 * ; result = result + msg; result = result +
-								 * "</result>"; } catch (IOException e) {
-								 * result.setAttribute("status", "failed");
-								 * result.setAttribute("msg", e.toString());
-								 * SDFSLogger.getLog().warn(e); } }
+								 * else if (cmd.equalsIgnoreCase("events")) { try { String msg = new
+								 * GetEvents().getResult(cmdOptions, file); result =
+								 * "<result status=\"success\" msg=\"command completed successfully\">" ; result
+								 * = result + msg; result = result + "</result>"; } catch (IOException e) {
+								 * result.setAttribute("status", "failed"); result.setAttribute("msg",
+								 * e.toString()); SDFSLogger.getLog().warn(e); } }
 								 */
 					case "volume-info":
 						try {
@@ -1297,7 +1297,7 @@ public class MgmtWebServer implements Container {
 			io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, 10);
-			SocketProcessor server = new ContainerSocketProcessor(rn,new FileAllocator(1024*1024*8));
+			SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8));
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);
