@@ -5,6 +5,9 @@ import java.io.IOException;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.EncryptUtils;
+
+import com.google.common.io.BaseEncoding;
 
 public class SetPasswordCmd implements XtendedCmd {
 
@@ -25,6 +28,13 @@ public class SetPasswordCmd implements XtendedCmd {
 					salt.getBytes());
 			Main.sdfsPassword = password;
 			Main.sdfsPasswordSalt = salt;
+			if(Main.eChunkStoreEncryptionKey != null) {
+				byte [] ec = EncryptUtils.encryptCBC(Main.chunkStoreEncryptionKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
+				Main.eChunkStoreEncryptionKey = BaseEncoding.base64Url().encode(ec);
+			} if(Main.eCloudSecretKey != null) {
+				byte [] ec = EncryptUtils.encryptCBC(Main.eCloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
+				Main.eChunkStoreEncryptionKey = BaseEncoding.base64Url().encode(ec);
+			}
 			return "password changed";
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
