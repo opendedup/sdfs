@@ -183,28 +183,19 @@ int _tmain(int argc, TCHAR *argv[])
 							lowm = true;
 						}
 					}
-					if (lowm == true) {
-						std::stringstream sstr(ssz);
-						__int64 sz;
-						sstr >> sz;
-						long gb = sz / (1073741824);
-						mem += .2 * gb;
-					}
-					else {
-						std::stringstream sstr(ssz);
-						std::stringstream bstr(bsz);
-						std::stringstream tstr(tsz);
-						__int64 sz;
-						__int64 bz;
-						__int64 tz;
-						bstr >> bz;
-						tstr >> tz;
-						sstr >> sz;
-						long tt = (bz* tz)/1024;
-						mem += tt;
-						long gb = sz / (1073741824);
-						mem += .3 * gb;
-					}
+					std::stringstream sstr(ssz);
+					std::stringstream bstr(bsz);
+					std::stringstream tstr(tsz);
+					__int64 sz;
+					__int64 bz;
+					__int64 tz;
+					bstr >> bz;
+					tstr >> tz;
+					sstr >> sz;
+					long tt = (bz* tz*3)/1024;
+					mem += tt;
+					long gb = sz / (1073741824);
+					mem += .3 * gb;
 					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
 				}
 				else {

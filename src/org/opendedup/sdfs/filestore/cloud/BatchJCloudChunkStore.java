@@ -572,6 +572,31 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		else
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/"));
 		// SDFSLogger.getLog().info("llsz=" + ips.size());
+		try {
+		String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+		// BlobMetadata dmd = blobStore.blobMetadata(this.name,
+		// lbi);
+		Map<String, String> md = this.getMetaData(lbi);
+		md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+		md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+		md.put("clustered", Boolean.toString(this.clustered));
+		md.put("hostname", InetAddress.getLocalHost().getHostName());
+		md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+		md.put("bucketversion", Integer.toString(version));
+		md.put("sdfsversion", Main.version);
+		if (Main.volume != null) {
+			md.put("port", Integer.toString(Main.sdfsCliPort));
+		}
+
+		Blob b = blobStore
+				.blobBuilder(
+						"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
+								+ "-" + System.currentTimeMillis())
+				.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+		this.writeBlob(b, false);
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("unable to backu config", e);
+		}
 		iter = ips.iterator();
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
