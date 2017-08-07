@@ -81,7 +81,7 @@ public class ProcessDSEInfo {
 				if(dse.hasAttribute("ecryption-key"))
 					System.out.printf("Encryption Key : %s\n",dse.getAttribute("ecryption-key"));
 				if(dse.hasAttribute("ecryption-iv"))
-					System.out.printf("Encryption IV : %s/n",dse.getAttribute("ecryption-iv"));
+					System.out.printf("Encryption IV : %s\n",dse.getAttribute("ecryption-iv"));
 				if(dse.hasAttribute("cloud-access-key"))
 					System.out.printf("Cloud Access Key : %s\n",dse.getAttribute("cloud-access-key"));
 				if(dse.hasAttribute("cloud-secret-key"))

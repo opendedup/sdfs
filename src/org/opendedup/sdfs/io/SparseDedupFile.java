@@ -309,8 +309,8 @@ public class SparseDedupFile implements DedupFile {
 						} else
 							this.bdb = LongByteArrayMap.getMap(this.GUID);
 					}
-					
 					this.bdb.vanish(Main.refCount);
+					this.bdb.close();
 				}
 
 			}

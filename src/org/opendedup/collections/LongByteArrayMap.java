@@ -21,6 +21,7 @@ package org.opendedup.collections;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
@@ -48,7 +49,6 @@ import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.OSValidator;
-import org.opendedup.util.StringUtils;
 
 import com.google.common.primitives.Longs;
 
@@ -743,15 +743,16 @@ public class LongByteArrayMap implements DataMapInterface {
 		WriteLock l = this.hashlock.writeLock();
 		l.lock();
 		try {
+			AtomicLong rmct = new AtomicLong();
 			if (index) {
 				this.iterInit();
 				SparseDataChunk ck = this.nextValue(false);
 				while (ck != null) {
 					for (HashLocPair p : ck.getFingers().values()) {
 						boolean rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
-						if (!rm)
-							SDFSLogger.getLog().warn("unable to remove orphaned reference "
-									+ StringUtils.getHexString(p.hash) + " loc=" + Longs.fromByteArray(p.hashloc));
+						if (!rm) {
+							rmct.incrementAndGet();
+						}
 					}
 					ck = this.nextValue(false);
 				}
@@ -760,6 +761,10 @@ public class LongByteArrayMap implements DataMapInterface {
 				this.close();
 			File f = new File(this.filePath);
 			f.delete();
+			if(rmct.get() > 0) {
+				SDFSLogger.getLog().warn("unable to remove orphaned reference total="
+						+ rmct.get());
+			}
 
 		} catch (Exception e) {
 			throw new IOException(e);

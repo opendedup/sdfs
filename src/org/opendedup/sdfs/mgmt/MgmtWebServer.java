@@ -1252,7 +1252,7 @@ public class MgmtWebServer implements Container {
 			Router negotiator = new PathRouter(routes, new PingService());
 			io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
-			RouterContainer rn = new RouterContainer(container, negotiator, 10);
+			RouterContainer rn = new RouterContainer(container, negotiator, Main.writeThreads);
 			SocketProcessor server = new ContainerSocketProcessor(rn,new FileAllocator(1024*1024*8));
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);

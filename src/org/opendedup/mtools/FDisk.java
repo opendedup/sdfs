@@ -167,12 +167,24 @@ public class FDisk {
 					return;
 				}
 				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				boolean hpc = false;
 				for (HashLocPair p : al.values()) {
 					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
 					//k++;
-					if(!added)
-						SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash=" + StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));
+					if(!added) {
+						long pos = HCServiceProxy.hashExists(p.hash, false);
+						if (pos != -1) {
+							p.hashloc = Longs.toByteArray(pos);
+							hpc = true;
+							added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+						}
+						if(!added)
+							SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash=" + StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));
+					}
 					
+				}
+				if (hpc) {
+					mp.put(ck.getFpos(), ck);
 				}
 				ck = mp.nextValue(false);
 			}

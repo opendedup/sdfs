@@ -325,7 +325,8 @@ public class Config {
 			VariableHashEngine.maxLen = Main.CHUNK_LENGTH;
 		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
-
+		if(cache.hasAttribute("replication-threads"))
+			Main.REPLICATION_THREADS = Integer.parseInt(cache.getAttribute("replication-threads"));
 		Main.maxWriteBuffers = Integer.parseInt(cache.getAttribute("max-file-write-buffers"));
 		Main.maxOpenFiles = Integer.parseInt(cache.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache.getAttribute("max-file-inactive")) * 1000;
