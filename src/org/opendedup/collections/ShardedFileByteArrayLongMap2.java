@@ -73,8 +73,8 @@ public class ShardedFileByteArrayLongMap2
 	transient private boolean compacting = false;
 	transient private boolean active = false;
 	private transient AtomicLong lastFound = new AtomicLong();
-	private AtomicLong nextCached = new AtomicLong();
-	private static final long mixCacheTM = 60 * 60 * 1000;
+	//private AtomicLong nextCached = new AtomicLong();
+	//private static final long mixCacheTM = 60 * 60 * 1000;
 	private boolean cacheRunning = false;
 	int minSz = 10000;
 
@@ -137,29 +137,23 @@ public class ShardedFileByteArrayLongMap2
 
 	@Override
 	public void inActive() {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
-		this.active = false;
-		l.unlock();
+		synchronized(this) {
+			this.active = false;
+		}
 	}
 
 	@Override
 	public void activate() {
-		Lock l = this.hashlock.writeLock();
-		l.lock();
+		synchronized(this) {
 		this.lastFound.set(System.currentTimeMillis());
 		this.active = true;
-		l.unlock();
+		}
 	}
 
 	@Override
 	public boolean isActive() {
-		Lock l = this.hashlock.readLock();
-		l.lock();
-		try {
+		synchronized(this) {
 			return this.active;
-		} finally {
-			l.unlock();
 		}
 	}
 
@@ -192,17 +186,17 @@ public class ShardedFileByteArrayLongMap2
 
 	@Override
 	public boolean isFull() {
-		if (full)
-			return true;
-		else
-			full = this.sz.get() >= maxSz;
+		synchronized(this) {
 		return full;
+		}
 	}
 
 	@Override
 	public boolean isMaxed() {
+		synchronized(this) {
 		double nms = (double) maxSz + ((double) maxSz * .1);
 		return this.sz.get() >= nms;
+		}
 	}
 
 	/*
@@ -268,19 +262,12 @@ public class ShardedFileByteArrayLongMap2
 		try {
 			ByteBuffer bk = ByteBuffer.allocateDirect(8);
 			bk.putLong(0);
-			try {
 				kFC.position(0);
 				while (!this.isClosed() && (kFC.position() + EL) < kFC.size() && !this.closed) {
 					kFC.position(kFC.position() + ZL);
 					bk.position(0);
 					kFC.write(bk);
 				}
-			} finally {
-				try {
-					this.hashlock.readLock().unlock();
-				} catch (Exception e) {
-				}
-			}
 		} finally {
 			l.unlock();
 		}
@@ -596,8 +583,9 @@ public class ShardedFileByteArrayLongMap2
 			if (sh.remove(key)) {
 				this.lastFound.set(System.currentTimeMillis());
 				this.sz.decrementAndGet();
-
+				synchronized(this) {
 				this.full = false;
+				}
 				return true;
 			} else {
 				return false;
@@ -620,13 +608,16 @@ public class ShardedFileByteArrayLongMap2
 			if (this.isClosed())
 				throw new MapClosedException();
 			byte[] key = cm.getHash();
-
+			synchronized(this) {
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
+				SDFSLogger.getLog().warn("entries is greater than or equal to the maximum number of entries. You need to expand"
+								+ "the volume or DSE allocation size");
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
+			}
 			}
 			Shard sh = this.getMap(key);
 			InsertRecord r = null;
@@ -642,7 +633,9 @@ public class ShardedFileByteArrayLongMap2
 			}
 			return r;
 		} catch (HashtableFullException e) {
+			synchronized(this) {
 			this.full = true;
+			}
 			throw e;
 		} finally {
 			this.hashlock.readLock().unlock();
@@ -654,13 +647,14 @@ public class ShardedFileByteArrayLongMap2
 	public InsertRecord put(byte[] key, long value) throws HashtableFullException, IOException {
 		this.hashlock.readLock().lock();
 		try {
-
+			synchronized(this) {
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
+			}
 			}
 			Shard sh = this.getMap(key);
 			InsertRecord r = null;
@@ -677,7 +671,9 @@ public class ShardedFileByteArrayLongMap2
 			return r;
 
 		} catch (HashtableFullException e) {
+			synchronized(this) {
 			this.full = true;
+			}
 			throw e;
 		} finally {
 			this.hashlock.readLock().unlock();
@@ -688,12 +684,14 @@ public class ShardedFileByteArrayLongMap2
 	public InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException {
 		this.hashlock.readLock().lock();
 		try {
+			synchronized(this) {
 			if (!this.active || this.full || this.sz.get() >= maxSz) {
 				this.full = true;
 				this.active = false;
 				throw new HashtableFullException(
 						"entries is greater than or equal to the maximum number of entries. You need to expand"
 								+ "the volume or DSE allocation size");
+			}
 			}
 			Shard sh = this.getMap(key);
 			InsertRecord r = null;
@@ -710,7 +708,9 @@ public class ShardedFileByteArrayLongMap2
 			return r;
 
 		} catch (HashtableFullException e) {
+			synchronized(this) {
 			this.full = true;
+			}
 			throw e;
 		} finally {
 			this.hashlock.readLock().unlock();
@@ -931,6 +931,8 @@ public class ShardedFileByteArrayLongMap2
 	}
 
 	protected void initialize() throws IOException {
+		this.sz.set(0);
+		/*
 		if (this.newInstance) {
 			byte[] key = new byte[EL * 43690];
 			Arrays.fill(key, (byte) 0);
@@ -957,6 +959,8 @@ public class ShardedFileByteArrayLongMap2
 			SDFSLogger.getLog().info("initialize " + this.path + " ref map");
 
 		}
+		
+		*/
 	}
 
 	/*
@@ -1025,7 +1029,9 @@ public class ShardedFileByteArrayLongMap2
 			k += sh.claimRecords(nbf);
 		}
 		if (k > 0) {
+			synchronized(this) {
 			this.full = false;
+			}
 			this.sz.addAndGet((int) -1 * (int) k);
 		}
 
@@ -1042,7 +1048,9 @@ public class ShardedFileByteArrayLongMap2
 			k += sh.claimRecords(nbf, lbf);
 		}
 		if (k > 0) {
+			synchronized(this) {
 			this.full = false;
+			}
 			this.sz.addAndGet((int) -1 * (int) k);
 		}
 
@@ -1441,10 +1449,8 @@ public class ShardedFileByteArrayLongMap2
 		public InsertRecord put(byte[] key, long value, long cl, boolean mightContain)
 				throws HashtableFullException, IOException {
 			synchronized (obj) {
-
+				
 				if (!m.active || m.full || this.currentSz >= maxSz) {
-					m.full = true;
-					m.active = false;
 					throw new HashtableFullException(
 							"entries is greater than or equal to the maximum number of entries. You need to expand"
 									+ "the volume or DSE allocation size");
@@ -1454,7 +1460,6 @@ public class ShardedFileByteArrayLongMap2
 				try {
 					pos = this.insertionIndex(key, mightContain);
 				} catch (HashtableFullException e) {
-					m.full = true;
 					throw e;
 				}
 				if (cl <= 0)
@@ -1688,7 +1693,9 @@ public class ShardedFileByteArrayLongMap2
 									ck.setmDelete(true);
 									this.mapped.clear(iterPos);
 									this.removed.set(iterPos);
+									synchronized(m) {
 									m.full = false;
+									}
 									k++;
 								}
 							}
@@ -1741,7 +1748,9 @@ public class ShardedFileByteArrayLongMap2
 									ck.setmDelete(true);
 									this.mapped.clear(iterPos);
 									this.removed.set(iterPos);
+									synchronized(m) {
 									m.full = false;
+									}
 									k++;
 								} else {
 									nbf.put(key);
@@ -1825,6 +1834,7 @@ public class ShardedFileByteArrayLongMap2
 
 	@Override
 	public void run() {
+		/*
 		try {
 			byte[] key = new byte[EL * 256];
 			SDFSLogger.getLog().info("caching " + this.path);
@@ -1866,6 +1876,7 @@ public class ShardedFileByteArrayLongMap2
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to cache", e);
 		}
+		*/
 
 	}
 

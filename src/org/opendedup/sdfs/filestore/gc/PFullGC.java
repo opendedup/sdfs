@@ -110,8 +110,8 @@ public class PFullGC implements GCControllerImpl {
 	private double calcNxtRun() {
 		double next = this.calcPFull();
 		if (next >= .92)
-			return .95;
-		if(next > 0)
+			return .90;
+		if (next >= 0)
 			next = next +.1;
 		return next;
 	}

@@ -37,6 +37,7 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.BloomFDisk;
+import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.ClusterSocket;
@@ -211,15 +212,13 @@ public class HCServiceProxy {
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true,false));
 				}
-				/*
-				if (Main.runConsistancyCheck|| file.exists() || Main.syncDL) {
+				if (Main.syncDL) {
 					SDFSLogger.getLog().info("running consistency check");
 					SDFSEvent evt = SDFSEvent
 							.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
 									+ Main.volume.getName());
 							new FDisk(evt);
 				}
-				*/
 				touchRunFile();
 			}
 

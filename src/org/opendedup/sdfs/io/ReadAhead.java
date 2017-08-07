@@ -74,6 +74,7 @@ public class ReadAhead implements Runnable {
 		if((df.mf.length()/2) > HashBlobArchive.getLocalCacheSize()) {
 			SDFSLogger.getLog().warn("unable to readahead " + df.mf.getPath() + " because probable "
 					+ "deduped file lenth " + (df.mf.length()/2) + " is greater than cache of " +HashBlobArchive.getLocalCacheSize());
+			return;
 		}
 			
 		synchronized (active) {

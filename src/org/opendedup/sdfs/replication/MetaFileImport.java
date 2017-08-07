@@ -410,8 +410,9 @@ public class MetaFileImport implements Serializable {
 
 						break;
 					} catch (Exception e) {
+						Thread.sleep(10000 * tries);
 						tries++;
-						if (tries > 3)
+						if (tries > 10)
 							throw e;
 					}
 

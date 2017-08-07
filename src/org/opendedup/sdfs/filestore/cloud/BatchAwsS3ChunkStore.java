@@ -853,8 +853,45 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	protected void resetLength() {
+		try {
+			ObjectMetadata omd = null;
+		if (this.simpleMD) {
+			Map<String, String> md = this.getUserMetaData(binm);
+			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+			md.put("hostname", InetAddress.getLocalHost().getHostName());
+			md.put("port", Integer.toString(Main.sdfsCliPort));
+			omd = new ObjectMetadata();
+			omd.setUserMetadata(md);
+			
+		} else {
+			omd = s3Service.getObjectMetadata(name, binm);
+			Map<String, String> md = omd.getUserMetadata();
+			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+			md.put("hostname", InetAddress.getLocalHost().getHostName());
+			md.put("port", Integer.toString(Main.sdfsCliPort));
+			omd.setUserMetadata(md);
+			
+		}
+		byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+		String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+		omd.addUserMetadata("md5sum", st);
+		omd.setContentMD5(st);
+		omd.setContentLength(sz.length);
+		s3Service.putObject(this.name, binm + "-" + System.currentTimeMillis(), new ByteArrayInputStream(sz), omd);
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("unable to create backup of filesystem metadata", e);
+		}
 		HashBlobArchive.currentLength.set(0);
 		HashBlobArchive.compressedLength.set(0);
+		
 	}
 
 	@Override

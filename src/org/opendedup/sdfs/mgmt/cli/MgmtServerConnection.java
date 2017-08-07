@@ -73,6 +73,7 @@ public class MgmtServerConnection {
 			String key = HashFunctions.getSHAHash(password.trim().getBytes(),
 					salt.getBytes());
 			String im = HashFunctions.getHmacSHA256(sessionid,StringUtils.getHexBytes(key))+ ":" +sessionid;
+			System.out.println(im);
 			return URLEncoder.encode(im,"UTF-8");
 		} catch (Exception e) {
 			throw new IOException(e);
