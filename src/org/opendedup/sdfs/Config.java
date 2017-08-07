@@ -568,15 +568,15 @@ public class Config {
 				}
 				if (googleSz > 0) {
 					Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-					aws.setAttribute("secret-key", Main.eCloudSecretKey);
+					aws.setAttribute("gs-secret-key", Main.eCloudSecretKey);
 				}
 				if (awsSz > 0) {
 					Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
-					aws.setAttribute("secret-key", Main.eCloudSecretKey);
+					aws.setAttribute("aws-secret-key", Main.eCloudSecretKey);
 				}
 				if (azureSz > 0) {
 					Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
-					azure.setAttribute("secret-key", Main.eCloudSecretKey);
+					azure.setAttribute("azure-secret-key", Main.eCloudSecretKey);
 				}
 			}
 		}

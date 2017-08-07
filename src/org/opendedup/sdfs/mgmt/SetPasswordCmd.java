@@ -36,7 +36,7 @@ public class SetPasswordCmd implements XtendedCmd {
 				byte [] ec = EncryptUtils.encryptCBC(Main.chunkStoreEncryptionKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
 				Main.eChunkStoreEncryptionKey = BaseEncoding.base64Url().encode(ec);
 			} if(Main.eCloudSecretKey != null) {
-				byte [] ec = EncryptUtils.encryptCBC(Main.eCloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
+				byte [] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
 				Main.eCloudSecretKey = BaseEncoding.base64Url().encode(ec);
 			}
 			Main.volume.writeUpdate();
