@@ -1220,7 +1220,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void uploadFile(File f, String to, String pp) throws IOException {
-
 		IOException e2 = null;
 		for (int i = 0; i < 10; i++) {
 			try {

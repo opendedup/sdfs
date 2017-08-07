@@ -104,6 +104,7 @@ public class MgmtWebServer implements Container {
 	@Override
 	public void handle(Request request, Response response) {
 		try {
+			//SDFSLogger.getLog().info(request.getTarget());
 			Path reqPath = request.getPath();
 			String[] parts = request.getTarget().split("\\?");
 			Map<String, String> qry = null;

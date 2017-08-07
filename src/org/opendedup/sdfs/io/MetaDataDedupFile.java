@@ -99,6 +99,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private String guid = "";
 	private IOMonitor monitor;
 	private boolean vmdk;
+	private boolean importing;
 	private int permissions;
 	private int owner_id = -1;
 	private int group_id = -1;
@@ -1463,6 +1464,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.retentionLock = in.readLong();
 				}
+				if(in.available() > 0) {
+					this.importing = in.readBoolean();
+				}
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1529,6 +1533,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeBoolean(this.deleteOnClose);
 			out.writeBoolean(this.localowner);
 			out.writeLong(this.retentionLock);
+			out.writeBoolean(this.importing);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);
@@ -1591,6 +1596,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("dedupe.map.guid", this.getDfGuid());
 			dataset.addProperty("dedupe", this.isDedup());
 			dataset.addProperty("vmdk", this.isVmdk());
+			dataset.addProperty("importing",this.importing);
 			if (symlink) {
 				dataset.addProperty("symlink", this.isSymlink());
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
@@ -1643,6 +1649,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("execute", Boolean.toString(this.execute));
 			root.setAttribute("read", Boolean.toString(this.read));
 			root.setAttribute("write", Boolean.toString(this.write));
+			root.setAttribute("importing", Boolean.toString(this.importing));
 			if (!this.extendedAttrs.isEmpty()) {
 				Element ear = doc.createElement("extended-attributes");
 				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
@@ -1717,5 +1724,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if (this.localowner)
 
 			this.attributes = attributes;
+	}
+
+	public boolean isImporting() {
+		return importing;
+	}
+
+	public void setImporting(boolean importing) {
+		this.importing = importing;
 	}
 }

@@ -254,20 +254,18 @@ public class Config {
 			Main.version = version;
 		}
 		
+
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
 		Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
 		Main.sdfsPassword = cli.getAttribute("password");
 		Main.sdfsPasswordSalt = cli.getAttribute("salt");
 		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
-		if(cli.hasAttribute("use-ssl")) {
-			Main.sdfsCliSSL =  Boolean.parseBoolean(cli.getAttribute("use-ssl"));
+		if (cli.hasAttribute("use-ssl")) {
+			Main.sdfsCliSSL = Boolean.parseBoolean(cli.getAttribute("use-ssl"));
 		}
-		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli
-				.getAttribute("enable-auth"));
+		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
-
-		
 
 		Main.version = version;
 		SDFSLogger.getLog().info("Parsing volume " + doc.getDocumentElement().getNodeName() + " version " + version);
@@ -276,6 +274,9 @@ public class Config {
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
 		Main.ioLogFile = locations.getAttribute("io-log.log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
+		if (cache.hasAttribute("encrypt-config")) {
+
+		}
 		if (cache.hasAttribute("log-level")) {
 			SDFSLogger.setLevel(Integer.parseInt(cache.getAttribute("log-level")));
 		}
@@ -316,18 +317,24 @@ public class Config {
 			
 			HashFunctionPool.minLen = (Integer.parseInt(cache
 					.getAttribute("min-variable-segment-size")) * 1024)-1;
+
 		} else {
 			HashFunctionPool.minLen = Main.MIN_CHUNK_LENGTH;
 		}
+
 		if(cache.hasAttribute("variable-window-size"))
 			HashFunctionPool.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
 			HashFunctionPool.maxLen = Integer.parseInt(cache
 					.getAttribute("max-variable-segment-size")) * 1024;
+
 		} else {
 			HashFunctionPool.maxLen = Main.CHUNK_LENGTH;
 		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
+
+		if(cache.hasAttribute("replication-threads"))
+			Main.REPLICATION_THREADS = Integer.parseInt(cache.getAttribute("replication-threads"));
 
 		Main.maxWriteBuffers = Integer.parseInt(cache.getAttribute("max-file-write-buffers"));
 		Main.maxOpenFiles = Integer.parseInt(cache.getAttribute("max-open-files"));
@@ -474,14 +481,19 @@ public class Config {
 			}
 
 		}
-		if(password != null) {
-			if(Main.cloudSecretKey != null) {
-			byte [] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password, Main.chunkStoreEncryptionIV);
-			Main.cloudSecretKey = new String(dc);
+
+		if (password != null) {
+			if (Main.cloudSecretKey != null) {
+				Main.eCloudSecretKey = Main.cloudSecretKey;
+				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
+						Main.chunkStoreEncryptionIV);
+				Main.cloudSecretKey = new String(dc);
 			}
-			if(Main.chunkStoreEncryptionKey != null) {
-			byte [] dc  = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey), password, Main.chunkStoreEncryptionIV);
-			Main.chunkStoreEncryptionKey = new String(dc);
+			if (Main.chunkStoreEncryptionKey != null) {
+				Main.eChunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
+				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
+						password, Main.chunkStoreEncryptionIV);
+				Main.chunkStoreEncryptionKey = new String(dc);
 			}
 		}
 		if (Main.chunkStoreEncryptionEnabled)
@@ -518,8 +530,6 @@ public class Config {
 		}
 		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
 	}
-	
-	
 	/**
 	 * write the client side config file
 	 * 

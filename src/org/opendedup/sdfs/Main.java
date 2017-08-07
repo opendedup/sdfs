@@ -44,6 +44,7 @@ public class Main {
 	public static boolean LOWMEM = false;
 	public static boolean REFRESH_BLOBS=false;
 	public static int MAX_TBLS=0;
+	public static int REPLICATION_THREADS=8;
 
 	public static boolean COMPRESS_METADATA = false;
 	public static boolean syncDL = false;

@@ -988,9 +988,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				blob.setMetadata(metaData);
 				// Encode the md5 content using Base64 encoding
-				blob.uploadFromFile(p.getPath());
+
+				is = new BufferedInputStream(new FileInputStream(p));
+				blob.upload(is, p.length());
 				if (this.isClustered())
 					this.checkoutFile(pth);
+				IOUtils.closeQuietly(is);
 			} catch (Exception e1) {
 				throw new IOException(e1);
 			} finally {

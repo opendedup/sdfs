@@ -212,7 +212,8 @@ public class HCServiceProxy {
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID,true,false));
 				}
-				if (Main.syncDL) {
+
+				if (Main.syncDL || file.exists() || Main.runConsistancyCheck) {
 					SDFSLogger.getLog().info("running consistency check");
 					SDFSEvent evt = SDFSEvent
 							.gcInfoEvent("SDFS Volume Reference Recreation Starting for "
