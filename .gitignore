@@ -19,3 +19,9 @@ install-packages/deb/usr/share/sdfs/lib/sdfs.isajar
 install-packages/SDFS-3.2.1-Setup.exe
 install-packages/SDFS-3.2.5-Setup.exe
 install-packages/*.exe
+windows-exe/.vs/SDFSCli/v15/Solution.VC.db-wal
+windows-exe/.vs/SDFSCli/v15/Solution.VC.db-shm
+windows-exe/.vs/SDFSCli/v15/Solution.VC.db
+windows-exe/.vs/SDFSCli/v15/ipch/MOUNTSDFS-d5bb52ab/MOUNTSDFS-4f69e207.ipch
+windows-exe/.vs/SDFSCli/v15/Browse.VC.db
+windows-exe/.vs/SDFSCli/v15/.suo
