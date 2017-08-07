@@ -58,15 +58,16 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		Arrays.fill(FREE, (byte) 0);
 	}
 
-	public SimpleByteArrayLongMap(String path, int sz,int ver)
-			throws IOException {
+	public SimpleByteArrayLongMap(String path, int sz, int ver) throws IOException {
 		this.size = NextPrime.getNextPrimeI(sz);
 		this.path = path;
 		this.version = ver;
 		this.setUp();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#getVersion()
 	 */
 	@Override
@@ -74,7 +75,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		return this.version;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#getPath()
 	 */
 	@Override
@@ -84,7 +87,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	private ReentrantLock iterlock = new ReentrantLock();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#iterInit()
 	 */
 	@Override
@@ -94,7 +99,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		this.iterlock.unlock();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#getCurrentSize()
 	 */
 	@Override
@@ -108,7 +115,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#next()
 	 */
 	@Override
@@ -143,16 +152,18 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#getMaxSz()
 	 */
 	@Override
 	public int getMaxSz() {
 		return this.size;
 	}
-	
+
 	public int getWMaxSz() {
-		return (int)(this.size *.75);
+		return (int) (this.size * .75);
 	}
 
 	/**
@@ -170,7 +181,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			mapped = new BitSet(size);
 		}
 		rf = new RandomAccessFile(path, "rw");
-		this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE,StandardOpenOption.WRITE,StandardOpenOption.SPARSE,StandardOpenOption.READ);
+		this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+				StandardOpenOption.SPARSE, StandardOpenOption.READ);
 		if (version != 0) {
 			if (nf) {
 				ByteBuffer nbf = ByteBuffer.allocate(16);
@@ -180,7 +192,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 				this.kFC.write(nbf);
 				EL = HashFunctionPool.hashLength + 8;
 				this.offset = 16;
-				rf.setLength((EL * size)+offset);
+				rf.setLength((EL * size) + offset);
 			} else {
 				ByteBuffer nbf = ByteBuffer.allocate(16);
 				this.kFC.read(nbf);
@@ -206,14 +218,16 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			if (!nf) {
 				size = (int) (new File(path).length() - offset) / EL;
 			} else {
-				rf.setLength((EL * size)+offset);
+				rf.setLength((EL * size) + offset);
 			}
 		}
 		vb = ByteBuffer.allocateDirect(EL);
 		this.closed = false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#containsKey(byte[])
 	 */
 	@Override
@@ -290,8 +304,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 * @return
 	 * @throws IOException
 	 */
-	private int indexRehashed(byte[] key, int index, int hash, byte[] cur)
-			throws IOException {
+	private int indexRehashed(byte[] key, int index, int hash, byte[] cur) throws IOException {
 
 		// NOTE: here it has to be REMOVED or FULL (some user-given value)
 		// see Knuth, p. 529
@@ -323,12 +336,14 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	boolean closed = false;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#vanish()
 	 */
 	@Override
 	public void vanish() {
-		//SDFSLogger.getLog().info("removed" + this.path);
+		// SDFSLogger.getLog().info("removed" + this.path);
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
@@ -366,8 +381,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	/**
-	 * Looks for a slot using double hashing for a non-null key values and
-	 * inserts the value in the slot
+	 * Looks for a slot using double hashing for a non-null key values and inserts
+	 * the value in the slot
 	 * 
 	 * @param key
 	 *            non-null key value
@@ -379,8 +394,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 * @return
 	 * @throws IOException
 	 */
-	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur)
-			throws IOException {
+	private int insertKeyRehash(byte[] key, int index, int hash, byte[] cur) throws IOException {
 		final int length = size * (EL);
 		final int probe = (1 + (hash % (size - 2))) * EL;
 
@@ -418,13 +432,14 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		// If we found a REMOVED slot we return the first one found
 
 		// Can a resizing strategy be found that resizes the set?
-		throw new IllegalStateException(
-				"No free or removed slots available. Key set full?!!");
+		throw new IllegalStateException("No free or removed slots available. Key set full?!!");
 	}
 
 	ByteBuffer vb = null;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#put(byte[], long)
 	 */
 	@Override
@@ -440,7 +455,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 				npos = (npos / EL);
 				return false;
 			}
-			//SDFSLogger.getLog().info("wrote at " + pos + " fp " + (pos + offset) + " val " + value);
+			// SDFSLogger.getLog().info("wrote at " + pos + " fp " + (pos + offset) + " val
+			// " + value);
 			vb.position(0);
 			vb.put(key);
 			if (version == 0) {
@@ -466,7 +482,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#get(byte[])
 	 */
 	@Override
@@ -485,7 +503,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 				return -1;
 			} else {
 				kb.position(0);
-				
+
 				this.kFC.read(kb, pos + offset);
 				kb.position(VP);
 				long val = -1;
@@ -493,7 +511,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 					val = kb.getInt();
 				else
 					val = kb.getLong();
-				//SDFSLogger.getLog().info("read at " + pos + " fp " + (pos + offset) + " val " +val);
+				// SDFSLogger.getLog().info("read at " + pos + " fp " + (pos + offset) + " val "
+				// +val);
 				return val;
 
 			}
@@ -508,40 +527,43 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#close()
 	 */
 	@Override
 	public void close() {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
-		this.closed = true;
 		try {
-			this.kFC.close();
-		} catch (Exception e) {
+			this.closed = true;
+			try {
+				this.kFC.close();
+			} catch (Exception e) {
 
-		}
-		try {
-			this.rf.close();
-		} catch (Exception e) {
+			}
+			try {
+				this.rf.close();
+			} catch (Exception e) {
 
+			}
+			this.mapped = null;
+		} finally {
+			l.unlock();
+			SDFSLogger.getLog().debug("closed " + this.path);
 		}
-		this.mapped = null;
-		l.unlock();
-		SDFSLogger.getLog().debug("closed " + this.path);
 	}
 
 	public static void main(String[] args) throws Exception {
-		SimpleMapInterface b = new SimpleByteArrayLongMap(
-				"c:\\tmp\\-3581905307694103699.map", 10000000,1);
+		SimpleMapInterface b = new SimpleByteArrayLongMap("c:\\tmp\\-3581905307694103699.map", 10000000, 1);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;
-		byte [] key =null;
+		byte[] key = null;
 		while (p != null) {
 			i++;
-			System.out.println("key=" + StringUtils.getHexString(p.key)
-					+ " value=" + p.value);
+			System.out.println("key=" + StringUtils.getHexString(p.key) + " value=" + p.value);
 			key = p.key;
 			p = b.next();
 
@@ -550,37 +572,36 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		System.out.println(b.get(key));
 
 		/*
-		 * Random rnd = new Random(); byte[] hash = null; int val = -33; byte[]
-		 * hash1 = null; int val1 = -33; for (int i = 0; i < 60000; i++) { hash
-		 * = new byte[16]; rnd.nextBytes(hash); val = rnd.nextInt(); if (i ==
-		 * 5000) { val1 = val; hash1 = hash; } if (val < 0) val = val * -1;
-		 * boolean k = b.put(hash, val); if (k == false) System.out.println(
-		 * "Unable to add this " + k); } long end = System.currentTimeMillis();
-		 * System.out.println("Took " + (end - start) / 1000 + " s " + val1);
-		 * System.out.println("Took " + (System.currentTimeMillis() - end) /
-		 * 1000 + " ms at pos " + b.get(hash1)); b.iterInit(); int vals = 0;
-		 * byte[] key = new byte[16]; start = System.currentTimeMillis(); while
-		 * (key != null) { KeyValuePair p = b.next(); if(p == null) key = null;
-		 * else { key = p.key; if (Arrays.equals(key, hash1))
-		 * System.out.println("found it! at " + vals); vals++; } }
-		 * System.out.println("Took " + (System.currentTimeMillis() - start) +
-		 * " ms " + vals); b.iterInit(); key = new byte[16]; start =
-		 * System.currentTimeMillis(); vals = 0; while (key != null) {
-		 * KeyValuePair p = b.next(); if(p == null) key = null; else { key =
-		 * p.key; int _val = p.value; if (Arrays.equals(key, hash1))
-		 * System.out.println("found it! at " + vals); int cval = b.get(key);
-		 * if(cval !=_val) System.out.println("poop " + cval + " " +_val);
-		 * vals++; } } b.vanish(); System.out.println("Took " +
+		 * Random rnd = new Random(); byte[] hash = null; int val = -33; byte[] hash1 =
+		 * null; int val1 = -33; for (int i = 0; i < 60000; i++) { hash = new byte[16];
+		 * rnd.nextBytes(hash); val = rnd.nextInt(); if (i == 5000) { val1 = val; hash1
+		 * = hash; } if (val < 0) val = val * -1; boolean k = b.put(hash, val); if (k ==
+		 * false) System.out.println( "Unable to add this " + k); } long end =
+		 * System.currentTimeMillis(); System.out.println("Took " + (end - start) / 1000
+		 * + " s " + val1); System.out.println("Took " + (System.currentTimeMillis() -
+		 * end) / 1000 + " ms at pos " + b.get(hash1)); b.iterInit(); int vals = 0;
+		 * byte[] key = new byte[16]; start = System.currentTimeMillis(); while (key !=
+		 * null) { KeyValuePair p = b.next(); if(p == null) key = null; else { key =
+		 * p.key; if (Arrays.equals(key, hash1)) System.out.println("found it! at " +
+		 * vals); vals++; } } System.out.println("Took " + (System.currentTimeMillis() -
+		 * start) + " ms " + vals); b.iterInit(); key = new byte[16]; start =
+		 * System.currentTimeMillis(); vals = 0; while (key != null) { KeyValuePair p =
+		 * b.next(); if(p == null) key = null; else { key = p.key; int _val = p.value;
+		 * if (Arrays.equals(key, hash1)) System.out.println("found it! at " + vals);
+		 * int cval = b.get(key); if(cval !=_val) System.out.println("poop " + cval +
+		 * " " +_val); vals++; } } b.vanish(); System.out.println("Took " +
 		 * (System.currentTimeMillis() - start) + " ms " + vals);
 		 */
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.opendedup.collections.SimpleMapInterface#sync()
 	 */
 	@Override
 	public void sync() throws SyncFailedException, IOException {
-		//this.kFC.force(false);
+		// this.kFC.force(false);
 
 	}
 

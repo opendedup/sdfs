@@ -216,31 +216,41 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			boolean written = false;
 			while (!written) {
 				guid = RandomGUID.getGuid();
-
+				SDFSLogger.getLog().info("1");
 				File f = new File(fileName + "-" + guid + ".keys");
+				SDFSLogger.getLog().info("2");
 				if (!f.exists()) {
 					activeWMap = new ShardedFileByteArrayLongMap2(fileName + "-" + guid, this.hashTblSz);
-					activeWMap.activate();
 					activeWMap.setUp();
+					activeWMap.activate();
 					this.maps.add(activeWMap);
-
 					written = true;
 				}
+				SDFSLogger.getLog().info("3");
 			}
+			SDFSLogger.getLog().info("Created Write Map");
 			return activeWMap;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
+	
+	Object lo = new Object();
 
 	private ShardedFileByteArrayLongMap2 getWriteMap() throws IOException {
 		if (activeWMap.isFull() || !activeWMap.isActive()) {
-			synchronized (this) {
+			//SDFSLogger.getLog().info("5");
+			synchronized (lo) {
+				//SDFSLogger.getLog().info("5.1");
 				if (activeWMap.isFull() || !activeWMap.isActive()) {
+					//SDFSLogger.getLog().info("6 isfull=" + Boolean.toString(activeWMap.isFull()) + " isactive=" +activeWMap.isActive());
 					activeWMap.inActive();
+					//SDFSLogger.getLog().info("7");
 					activeWMap = this.createWriteMap();
+					//SDFSLogger.getLog().info("8");
 				}
 			}
+			//SDFSLogger.getLog().info("9");
 		}
 		return activeWMap;
 	}
@@ -889,10 +899,13 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 	public InsertRecord put(ChunkData cm) throws IOException, HashtableFullException {
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
-		if (this.kSz.get() >= this.maxSz)
+		if (this.kSz.get() >= this.maxSz) {
+			SDFSLogger.getLog().warn("entries is greater than or equal to the maximum number of entries. You need to expand"
+							+ "the volume or DSE allocation size maxSz =" + this.maxSz + " current size=" +this.kSz.get());
 			throw new HashtableFullException(
 					"entries is greater than or equal to the maximum number of entries. You need to expand"
-							+ "the volume or DSE allocation size");
+							+ "the volume or DSE allocation size maxSz =" + this.maxSz + " current size=" +this.kSz.get() );
+		}
 		if (cm.getHash().length != this.FREE.length)
 			throw new IOException("key length mismatch");
 		if (this.isClosed()) {
@@ -911,8 +924,11 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 		// persist = false;
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
-		if (kSz.get() >= this.maxSz)
+		if (kSz.get() >= this.maxSz) {
+			SDFSLogger.getLog().warn("entries is greater than or equal to the maximum number of entries. You need to expand"
+					+ "the volume or DSE allocation size maxSz =" + this.maxSz + " current size=" +this.kSz.get());
 			throw new HashtableFullException("maximum sized reached");
+		}
 		InsertRecord rec = null;
 		// if (persist)
 		// this.flushFullBuffer();

@@ -117,16 +117,18 @@ public class ImportFileCmd implements Runnable {
 		BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
 		String pt = Main.volume.getPath() + File.separator + this.destFile;
 		File _f = new File(pt);
+		/*
 		if(_f.exists()) {
 			MetaDataDedupFile _mf = MetaFileStore.getMF(_f);
 			_mf.clearRetentionLock();
 			MetaFileStore.removeMetaFile(pt);
-		}
+		}*/
 		BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(_f));
+		MetaFileStore.removedCachedMF(_f.getPath());
 		IOUtils.copy(bis, bout);
 		IOUtils.closeQuietly(bis);
 		IOUtils.closeQuietly(bout);
-		
+		MetaFileStore.removedCachedMF(_f.getPath());
 		return MetaFileStore.getMF(_f);
 	} finally {
 		if (mtd != null) {

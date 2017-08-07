@@ -110,7 +110,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.7.1";
+	public static String version = "3.4.8.0";
 
 	public static boolean readAhead = false;
 	
@@ -144,6 +144,7 @@ public class Main {
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
 	public static String chunkStoreEncryptionKey = "Password";
+	public static String eChunkStoreEncryptionKey = "Password";
 	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
 	/**
 	 * whether encryption should be enabled for the DSE
@@ -338,6 +339,7 @@ public class Main {
 	 * The awsSecretKey. This is used on the client.
 	 */
 	public static String cloudSecretKey = null;
+	public static String eCloudSecretKey = null;
 
 	/**
 	 * use Aim for AWS S3 authentication
