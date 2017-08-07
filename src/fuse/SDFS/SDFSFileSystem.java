@@ -401,10 +401,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		//SDFSLogger.getLog().info("4=" + path);
 		try {
 			File f = new File(this.mountedVolume + path);
+			/*
 			if(!f.getPath().startsWith(this.mountedVolume)) {
 				f = null;
 				throw new FuseException("file exists").initErrno(Errno.ENOENT);
 			}
+			*/
 			if (Main.volume.isOffLine())
 				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 			if (Main.volume.isFull()) {
@@ -815,7 +817,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
 		
-		if (!_f.exists() || !_f.getPath().startsWith(mountedVolume)) {
+		if (!_f.exists()) {
 			_f = null;
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("No such node");

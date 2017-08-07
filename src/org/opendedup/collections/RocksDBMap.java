@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import java.io.File;
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -104,8 +105,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			} else {
 				//long mp = this.size / 10_000_000_000L;
 				
-				fsize = 512*MB;
-				bufferSize = 2*GB*dbs.length;
+				fsize = GB;
+				bufferSize = 1*GB*dbs.length;
 			} 
 
 			// blockConfig.setChecksumType(ChecksumType.kNoChecksum);
@@ -178,14 +179,14 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setCompactionReadaheadSize(1024*1024*25);
 				// options.setUseDirectIoForFlushAndCompaction(true);
 				// options.setUseDirectReads(true);
-				//options.setStatsDumpPeriodSec(30);
+				options.setStatsDumpPeriodSec(30);
 				// options.setAllowMmapWrites(true);
 				//options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
-				//options.createStatistics();
+				options.createStatistics();
 				//options.setTargetFileSizeBase(512*1024*1024);
 				
-				options.setMaxBytesForLevelBase(fsize*20);
+				options.setMaxBytesForLevelBase(fsize*5);
 				options.setTargetFileSizeBase(fsize);
 				options.setTableFormatConfig(blockConfig);
 				File f = new File(fileName + File.separator + i);
@@ -787,6 +788,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		public void run() {
 			try {
 				dbs[n] = RocksDB.open(options, path);
+				dbs[n].compactRange();
 				//System.out.println(dbs[n].toString());
 			} catch (Exception e) {
 				this.e = e;
