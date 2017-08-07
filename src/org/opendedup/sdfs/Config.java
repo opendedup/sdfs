@@ -557,6 +557,9 @@ public class Config {
 				chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
 				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
 			}
+			if (Main.chunkStoreEncryptionKey != null) {
+				localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
+			}
 			if (Main.eCloudSecretKey != null) {
 				int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
 				int googleSz = localChunkStore.getElementsByTagName("google-store").getLength();
