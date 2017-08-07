@@ -1,3 +1,52 @@
+Version 3.4.9
+	Fixes
+	* Fixed google timeouts over slow or bad connections
+	* Fixed Azure rebuild from cloud hashtable
+	* Fixed Volume Hangs during file deletes
+	* Fixed Optimized replication of large files
+	* Increased base memory to 3GB for windows
+	* Ensure filechannels are closed for uploads of archive files
+	* Changing admin password now changes encryption password as well.
+	Enhancements
+	* Base memory on windows can be set at startup with parameter -basemem. By default its set to 3GB.
+Version 3.4.7
+   Fixes
+   * Fixed ignore corrupt files on fdisk
+   Enhancements
+   * added mkfs.sdfs parameter -encrypt-config to encrypt the cloud secret key and aes key on disk in the config with the admin password. This is 'admin' by default.
+   * added mount.sdfs parameter -e to decrypt the cloud secret key and aes key on mount. The -e parameter takes the admin password.
+Version 3.4.6
+   Fixes
+   * Disabled weak ciphers for java install
+   * Fixed Garbage Collection issue
+   * Fixed debug log message overload "looped through everything in hashtable"
+   * Fixed retry of gets over bad slow http connections
+   * Added file info to windows setup
+   Enhancements
+   * added --user-agent-prefix parameter to add a prefix for http(s) traffic to specific cloud providers. Usefull to keep track of uploads from sdfs.
+	
+Version 3.3.2
+	Enhancements
+	* Added support for veritas access backend --access-enabled --access-path
+	* Added support for metadata compression. This can be enabled by setting compress-metadata="true" in the volume xml tag or --compress-metadata during volume creation.
+Version 3.3.1
+	Fixes
+	* Fixed Garbage collection with reference checking
+	* Fixed performance issue with reference checking
+	* Fixed Minio compatibility with metadata
+Version 3.3.0
+	Enhancements
+	* New Hashtable format to support better performance at scale
+	* New incremental garbage collection using reference checking
+	* Reduced memory footprint
+	* New switch --vrts-appliance in mkfs.sdfs to support placement of metadata on the appliance
+Version 3.2.5
+	Fixes
+	* Windows Thread Exhaustion
+	* Password is required for volumes that have a control port listening on an external interface
+	* Windows File timestamp shows correctly now
+	* Compatibility with Hitachi Content Platform
+	* Changed DSE restore from cloud to /keys to keys/ on aws iterator
 Version 3.2.1
 	Fixes
 	* Fixed non english character file names
@@ -43,7 +92,6 @@ Version 3.0.2
 	* Cloud storage libs overlap for Joda
 	* Included export encryption libs
 	* Compaction of hashmaps now working properly
-	
 Version 3.0.1
 	This is a major new release of SDFS with a rewrite of the storage subsystem. This release includes enhancements to the following elements
 
@@ -68,17 +116,16 @@ Version 3.0.1
 	* Faster Volume Replication
 	* Local Encryption support - Uses AES-CBC 256
 	* Faster Garbage Collection - 300% improvement
-	
 Version 2.0.11
 	Fixes :
 	* Fixed copy of files with non-english characters
 	* Fixed JNI hook to fuse referencing non-existent objects.
 	* Fixed replication service failures when replication occurs during garbage collection process
-	* Fixed org.opendedup.collections.ProgessiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
+	* Fixed org.opendedup.collections.ProgressiveFileBasedCSMap to use maximum write thread for bloomfilter recreation process
 	* Fixed volume state shown and unclean after unmount.
 	* Updated shared libs to latest compatible versions.
 	Enhancements :
-	* Added org.opendedup.collections.ProgessiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
+	* Added org.opendedup.collections.ProgressiveFileBasedCSMap as default unique block hash table. This hashtable scales extremely well under load and large volume sets.
 Version 2.0.9
 	Fixes :
 	* Fixed Block Chunk Store errors when writing with variable block deduplication
@@ -86,15 +133,21 @@ Version 2.0.9
 	* Garbage collection now done using new method that will increase performance
 	* Cloud Storage bucket location can now be defined using --aws-bucket-location
 Version 2.0.8
-	This release include a lot of internal code refactoring for adding back windows support and other features. 	
-	Fixes :	
+	Fixes :
 	* Fixed More Replication Symlink issues.
 	* Fixed random deadlock under high load
 	* Nested Snapshots looping
 	* Fixed odvol mapping files and releasing them. This cause a hang during creation and subsequent restarts
 	Enhancements :
 	* Added more replication resilience
-	* Support for faster garbage collection in distributed DSE mode
+Version 2.0.2
+	Fixes :
+	* Fixed More Symlink issues.
+	* Fixed random IO corruption under high load
+	* Fixed concurrent file read and delete issues
+	* Fixed libfuse.so issue where Native library was used over custom library.
+	Enhancements :
+	* Improved read/write performance by 20%-50%
 Version 2.0.1
 	Fixes :
 	* Fixed Replication Reporting of progress by bytes transferred.
@@ -164,17 +217,6 @@ Version 2.0-beta1
 	* Refactored filesystem Sync action
 	* Refactored XML configuration
 	* Refactored Replication :Now all traffice is encrypted over a single SSL port (6442)
-Version 1.2.3
-	Fixes:
-	* Fixed Unique block deletion for filebasedchunkstore
-	* Fixed volume freezing due to thread deadlock. Presented during rsync
-	* Fixed Azure bucket name not being honored.
-	Enhancements:
-	* 40% Read performance improvement under NFS through better locking techniques and file caching
-	* Better file level locking under concurrent IO should allow for lower latency multi write to the same file
-	* Added block caching for the S3,Azure, and FileChunkStore and defaults to 10MB. This should improve performance
-	  for multiple writes. This option can be configured during volume creation using the --chunk-store-read-cache option.
-	* Replaced the version of java that ships with SDFS.
 Version 1.2.1
 	Fixes:
 	* Free space calculation was causing problems with new volumes in 1.2.0 not being able to be more than .95 full.

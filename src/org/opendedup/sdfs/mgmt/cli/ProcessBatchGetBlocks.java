@@ -11,17 +11,26 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.IOUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 
 
 public class ProcessBatchGetBlocks {
+	private static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
+			new ThreadPoolExecutor.CallerRunsPolicy());
 	public static long runCmd(ArrayList<byte[]> hashes, String server,
 			int port, String password, boolean useSSL) throws Exception,
 			ClassNotFoundException, HashtableFullException {
@@ -64,14 +73,36 @@ public class ProcessBatchGetBlocks {
 			if (hck.size() != hashes.size())
 				throw new IOException("unable to import all blocks requested ["
 						+ hashes.size() + "] and received [" + hck.size() + "]");
-			long imsz = 0;
+			AtomicLong imsz = new AtomicLong();
+			ArrayList<DataWriter> th = new ArrayList<DataWriter>();
 			for (int i = 0; i < hck.size(); i++) {
-				HashChunk _hc = hck.get(i);
-				imsz += _hc.getData().length;
-				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData());
+				DataWriter dw = new DataWriter();
+				dw._hc = hck.get(i);
+				dw.imsz = imsz;
+				th.add(dw);
+				executor.execute(dw);
 			}
+			Exception e1 = null;
+			
+			for(;;) {
+				int nd = 0;
+				for(DataWriter dw : th) {
+					if(dw.done) {
+						if(dw.e1 != null) {
+							e1 = dw.e1;
+						}
+					} else {
+						nd++;
+					}
+				}
+				if(nd == 0)
+					break;
+				Thread.sleep(10);
+			}
+			if(e1!=null)
+				throw e1;
 			SDFSLogger.getLog().debug("imported " + hck.size());
-			return imsz;
+			return imsz.get();
 
 		} catch(Exception e) {
 			he = e;
@@ -92,5 +123,27 @@ public class ProcessBatchGetBlocks {
 		}
 		throw new IOException(he);
 
+	}
+	
+	private static class DataWriter implements Runnable {
+		HashChunk _hc = null;
+		AtomicLong imsz = null;
+		Exception e1 = null;
+		boolean done = false;
+		@Override
+		public void run() {
+			try {
+				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData());
+				imsz.addAndGet(_hc.getData().length);
+			} catch (IOException e) {
+				e1 = e;
+			} catch (HashtableFullException e) {
+				e1 = e;
+			} finally {
+				done = true;
+			}
+			
+		}
+		
 	}
 }

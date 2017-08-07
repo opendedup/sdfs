@@ -8,6 +8,10 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -40,6 +44,9 @@ import com.google.common.eventbus.EventBus;
 public class MetaFileStore {
 
 	private static EventBus eventBus = new EventBus();
+	private static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
+			new ThreadPoolExecutor.CallerRunsPolicy());
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -358,6 +365,8 @@ public class MetaFileStore {
 
 					} else {
 						mf = getMF(new File(path));
+						if(mf.isImporting())
+							return false;
 						if (mf.isRetentionLock())
 							return false;
 						pathMap.invalidate(mf.getPath());
@@ -368,7 +377,9 @@ public class MetaFileStore {
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
-								deleted = mf.getDedupFile(false).delete();
+								DeleteMap m = new DeleteMap();
+								m.mf = mf;
+								executor.execute(m);
 
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
@@ -413,7 +424,30 @@ public class MetaFileStore {
 		} catch (Exception e) {
 
 		}
+		executor.shutdown();
+		try {
+			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+				SDFSLogger.getLog().info("Awaiting fdisk completion of threads.");
+			}
+		} catch (InterruptedException e) {
+			
+		}
 		SDFSLogger.getLog().info("metafilestore closed");
+	}
+	
+	private static class DeleteMap implements Runnable {
+		MetaDataDedupFile mf = null;
+
+		@Override
+		public void run() {
+			try {
+				mf.getDedupFile(false).delete();
+			} catch (IOException e) {
+				SDFSLogger.getLog().debug(e);
+			}
+			
+		}
+		
 	}
 
 }

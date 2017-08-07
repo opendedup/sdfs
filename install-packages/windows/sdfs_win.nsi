@@ -3,13 +3,9 @@
 ; Sets the theme path
 
 
-!define VERSION '3.4.8'
+!define VERSION '3.4.9'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
-
-;NSIS Modern User Interface
-;Basic Example Script
-;Written by Joost Verburg
 
 ;--------------------------------
 ;Include Modern UI
@@ -67,14 +63,14 @@
   ;--------------------------------
 ;Version Information
 
-  VIProductVersion "3.4.8.0"
+  VIProductVersion "3.4.9.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.8.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.8.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.9.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.9.0"
 ;--------------------------------
 ;Installer Sections
 

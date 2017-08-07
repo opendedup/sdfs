@@ -44,6 +44,7 @@ public class Main {
 	public static boolean LOWMEM = false;
 	public static boolean REFRESH_BLOBS=false;
 	public static int MAX_TBLS=0;
+	public static int REPLICATION_THREADS=8;
 
 	public static boolean COMPRESS_METADATA = false;
 	public static boolean syncDL = false;
@@ -110,7 +111,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.8.0";
+	public static String version = "3.4.9.0";
 
 	public static boolean readAhead = false;
 	

@@ -1035,7 +1035,6 @@ public class ShardedProgressiveFileBasedCSMap2 implements AbstractMap, AbstractH
 			SDFSLogger.getLog().error("found no data for key [" + StringUtils.getHexString(key) + "]");
 			return null;
 		}
-
 	}
 
 	@Override
