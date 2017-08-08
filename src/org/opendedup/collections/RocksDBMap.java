@@ -788,7 +788,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		public void run() {
 			try {
 				dbs[n] = RocksDB.open(options, path);
-				dbs[n].compactRange();
 				//System.out.println(dbs[n].toString());
 			} catch (Exception e) {
 				this.e = e;
