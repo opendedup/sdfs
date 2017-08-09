@@ -8,12 +8,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -660,7 +662,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
-				blob.downloadToFile(f.getPath(), null, null, opContext);
+				OutputStream out = Files.newOutputStream(f.toPath(),StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
+				blob.download(out);
+				IOUtils.closeQuietly(out);
 				HashMap<String, String> metaData = blob.getMetadata();
 				if (metaData.containsKey("deleted")) {
 					boolean del = Boolean.parseBoolean(metaData.get("deleted"));
@@ -696,6 +700,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				}
 			} catch (Exception e1) {
+				if(f.exists())
+					f.delete();
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e2) {

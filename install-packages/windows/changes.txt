@@ -1,3 +1,7 @@
+Version 3.4.10
+	Fixes
+	* set-cache-size now immediatley writes cache to xml
+	* truncate archive files if they exist to address access denied errors.
 Version 3.4.9
 	Fixes
 	* Fixed google timeouts over slow or bad connections

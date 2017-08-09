@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -886,7 +887,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public void getBytes(long id, File f) throws IOException {
 		try {
 			Exception e = null;
-			FileOutputStream out = null;
+			OutputStream out = null;
 			Map<String, String> metaData = null;
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 			for (int i = 0; i < 10; i++) {
@@ -894,7 +895,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					if (f.exists())
 						f.delete();
 					metaData = this.getMetaData("blocks/" + haName);
-					out = new FileOutputStream(f);
+					out = Files.newOutputStream(f.toPath(),StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
+	
 					this.readBlob("blocks/" + haName, out);
 					e = null;
 					break;
@@ -919,7 +921,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				}
 			}
 			if (e != null) {
-				SDFSLogger.getLog().error("getnewblob unable to get block", e);
+				SDFSLogger.getLog().error("getnewblob unable to get block " + f.exists(), e);
+				if(f.exists())
+					f.delete();
 				throw new IOException(e);
 			}
 

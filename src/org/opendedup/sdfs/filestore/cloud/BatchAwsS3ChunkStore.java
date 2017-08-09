@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
+import java.nio.file.StandardOpenOption;
 
 
 import java.io.BufferedOutputStream;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -1169,11 +1171,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int cl = (int) omd.getContentLength();
 			if (this.simpleS3) {
 
-				FileOutputStream out = null;
+				OutputStream out = null;
 				InputStream in = null;
 				try {
-					
-					out = new FileOutputStream(f);
+					out = Files.newOutputStream(f.toPath(),StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
 					in = sobj.getObjectContent();
 					IOUtils.copy(in, out);
 					out.flush();
@@ -1182,6 +1183,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					fin.close();
 
 				} catch (Exception e) {
+					if(f.exists())
+						f.delete();
 					throw new IOException(e);
 				} finally {
 					IOUtils.closeQuietly(in);
@@ -1199,6 +1202,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 					}
 				} catch (Exception e) {
+					if(f.exists())
+						f.delete();
 					throw new IOException(e);
 				}
 			}
@@ -1290,7 +1295,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
-				
 				this.getData(id, f);
 				return;
 			} catch (DataArchivedException e1) {
