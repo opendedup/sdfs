@@ -3,15 +3,8 @@
 ; Sets the theme path
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-!define VERSION '3.5.1'
-=======
-!define VERSION '3.4.8'
->>>>>>> master
-=======
-!define VERSION '3.4.9'
->>>>>>> master
+!define VERSION '3.5.2'
+
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -71,32 +64,16 @@
   ;--------------------------------
 ;Version Information
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  VIProductVersion "3.5.1.0"
-=======
-  VIProductVersion "3.4.8.0"
->>>>>>> master
-=======
-  VIProductVersion "3.4.9.0"
->>>>>>> master
+
+  VIProductVersion "3.5.2.0"
+
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-<<<<<<< HEAD
-<<<<<<< HEAD
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.5.1.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.5.1.0"
-=======
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.8.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.8.0"
->>>>>>> master
-=======
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.9.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.9.0"
->>>>>>> master
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.5.2.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.5.2.0"
 ;--------------------------------
 ;Installer Sections
 
