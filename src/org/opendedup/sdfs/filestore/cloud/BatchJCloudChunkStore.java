@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.ArrayList;
@@ -852,7 +853,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	private void readBlob(String key, OutputStream os) throws IOException {
-
 		if (this.b2Store) {
 			BlobStore st = null;
 			try {
@@ -896,8 +896,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					return;
 				}
 				try {
-					if (f.exists())
-						f.delete();
+					if(f.exists()&& !f.delete()) {
+						SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+						File nf = new File(f.getPath() + " " + ".old");
+						Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					}
 					metaData = this.getMetaData("blocks/" + haName);
 					out = Files.newOutputStream(f.toPath(),StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
 	

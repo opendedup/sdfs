@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -1152,7 +1153,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// this.s3clientLock.readLock().lock();
 		S3Object sobj = null;
 		try {
-
+			if(f.exists()&& !f.delete()) {
+				SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+				File nf = new File(f.getPath() + " " + ".old");
+				Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			}
 			long tm = System.currentTimeMillis();
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName);
 			try {
@@ -1180,7 +1185,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					out.flush();
 					out.close();
 
-				} catch(java.io.FileNotFoundException e) {
+				} catch(java.nio.file.AccessDeniedException e) {
 					if(f.exists()) {
 						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length() + " cl=" +cl);
 					}
@@ -1230,13 +1235,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					chash = ServiceUtils.computeMD5Hash(in);
 				} catch (Exception e) {
+					
 					throw new IOException(e);
+				} finally {
+					IOUtils.closeQuietly(in);
 				}
-				IOUtils.closeQuietly(in);
+				
 				if (!Arrays.equals(shash, chash))
 					throw new IOException("download corrupt at " + id);
 			}
-
 			try {
 				mp.put("lastaccessed", Long.toString(System.currentTimeMillis()));
 				omd.setUserMetadata(mp);
