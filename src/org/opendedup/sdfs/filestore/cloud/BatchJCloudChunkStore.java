@@ -891,6 +891,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			Map<String, String> metaData = null;
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 			for (int i = 0; i < 10; i++) {
+				if(f.exists()) {
+					SDFSLogger.getLog().warn("file already exists in cache " + i);
+					return;
+				}
 				try {
 					if (f.exists())
 						f.delete();
@@ -901,23 +905,24 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					e = null;
 					break;
 				} catch (java.io.FileNotFoundException e1) {
+					IOUtils.closeQuietly(out);
+					f.delete();
+					e = e1;
 					try {
 						Thread.sleep(5000);
 					} catch (Exception e2) {
 
 					}
-					IOUtils.closeQuietly(out);
-					f.delete();
-					e = e1;
 				} catch (Exception e1) {
+					IOUtils.closeQuietly(out);
+					f.delete();
+					e = e1;
 					try {
 						Thread.sleep(5000);
 					} catch (Exception e2) {
 
 					}
-					IOUtils.closeQuietly(out);
-					f.delete();
-					e = e1;
+					
 				}
 			}
 			if (e != null) {

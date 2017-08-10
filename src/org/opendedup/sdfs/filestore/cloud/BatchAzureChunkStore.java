@@ -416,8 +416,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		this.hid = 0;
 		this.ht = null;
 		try {
-			String lbi = "bucketinfo/"
-					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			CloudBlockBlob blob = container.getBlockBlobReference(lbi);
 			blob.downloadAttributes();
 			HashMap<String, String> md = blob.getMetadata();
@@ -429,11 +428,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			md.put("bucketversion", Integer.toString(version));
 			md.put("sdfsversion", Main.version);
 			md.put("port", Integer.toString(Main.sdfsCliPort));
-			blob = container.getBlockBlobReference(lbi + "-" +System.currentTimeMillis());
+			blob = container.getBlockBlobReference(lbi + "-" + System.currentTimeMillis());
 			blob.setMetadata(md);
 			blob.uploadMetadata(null, null, opContext);
-		}catch(Exception e) {
-			SDFSLogger.getLog().info("unable to create backup of current volume info",e);
+		} catch (Exception e) {
+			SDFSLogger.getLog().info("unable to create backup of current volume info", e);
 		}
 		iter = container.listBlobs("keys/").iterator();
 		HashBlobArchive.currentLength.set(0);
@@ -659,12 +658,23 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void getBytes(long id, File f) throws IOException {
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
+
 			try {
 				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
-				OutputStream out = Files.newOutputStream(f.toPath(),StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.CREATE);
-				blob.download(out);
-				IOUtils.closeQuietly(out);
+				OutputStream out = null;
+				try {
+					out = Files.newOutputStream(f.toPath(), StandardOpenOption.TRUNCATE_EXISTING,
+							StandardOpenOption.CREATE);
+					blob.download(out);
+				} catch (java.io.FileNotFoundException e1) {
+					if (f.exists()) {
+						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length());
+					}
+					throw e1;
+				} finally {
+					IOUtils.closeQuietly(out);
+				}
 				HashMap<String, String> metaData = blob.getMetadata();
 				if (metaData.containsKey("deleted")) {
 					boolean del = Boolean.parseBoolean(metaData.get("deleted"));
@@ -700,7 +710,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				}
 			} catch (Exception e1) {
-				if(f.exists())
+				if (f.exists())
 					f.delete();
 				try {
 					Thread.sleep(10000);
@@ -712,7 +722,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			}
 			if (e != null) {
-				SDFSLogger.getLog().error("unable to fetch block [" + id + "] to file " + f.getPath() + " file exists=" +f.exists(), e);
+				SDFSLogger.getLog().error(
+						"unable to fetch block [" + id + "] to file " + f.getPath() + " file exists=" + f.exists(), e);
 				throw new IOException(e);
 			}
 		}

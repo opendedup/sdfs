@@ -25,3 +25,4 @@ windows-exe/.vs/SDFSCli/v15/Solution.VC.db
 windows-exe/.vs/SDFSCli/v15/ipch/MOUNTSDFS-d5bb52ab/MOUNTSDFS-4f69e207.ipch
 windows-exe/.vs/SDFSCli/v15/Browse.VC.db
 windows-exe/.vs/SDFSCli/v15/.suo
+/target/

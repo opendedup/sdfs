@@ -1179,16 +1179,27 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					IOUtils.copy(in, out);
 					out.flush();
 					out.close();
-					InputStream fin = new FileInputStream(f);
-					fin.close();
 
-				} catch (Exception e) {
+				} catch(java.io.FileNotFoundException e) {
+					if(f.exists()) {
+						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length() + " cl=" +cl);
+					}
+					IOUtils.closeQuietly(in);
+					IOUtils.closeQuietly(out);
+					if(f.exists())
+						f.delete();
+					throw new IOException(e);
+				} 
+				catch (Exception e) {
+					IOUtils.closeQuietly(in);
+					IOUtils.closeQuietly(out);
 					if(f.exists())
 						f.delete();
 					throw new IOException(e);
 				} finally {
 					IOUtils.closeQuietly(in);
-
+					IOUtils.closeQuietly(out);
+					
 				}
 			} else {
 				try {
