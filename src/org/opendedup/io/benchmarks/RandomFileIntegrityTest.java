@@ -55,7 +55,6 @@ public class RandomFileIntegrityTest implements Runnable {
 			hashcode = BaseEncoding.base16().encode(nhc);
 			path = new File(path.getPath() + File.separator + hashcode);
 			Files.write(b, path);
-			@SuppressWarnings("deprecation")
 			byte[] hc = Files.hash(path, Hashing.murmur3_128()).asBytes();
 			passed = Arrays.equals(hc, nhc);
 			hashcode = BaseEncoding.base16().encode(hc);
@@ -126,7 +125,6 @@ public class RandomFileIntegrityTest implements Runnable {
 		int passed = 0;
 		for (File hf : fs) {
 			byte[] hc = BaseEncoding.base16().decode(hf.getName());
-			@SuppressWarnings("deprecation")
 			byte[] nhc = Files.hash(hf, Hashing.murmur3_128()).asBytes();
 			if (Arrays.equals(hc, nhc)) {
 				passed++;

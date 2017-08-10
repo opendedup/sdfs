@@ -20,6 +20,7 @@ package org.opendedup.util;
 
 import java.io.File;
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,6 +43,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.opendedup.logging.SDFSLogger;
 
+@SuppressWarnings("deprecation")
 public class KeyGenerator {
 
 	public static void generateKey(File key) throws KeyStoreException,

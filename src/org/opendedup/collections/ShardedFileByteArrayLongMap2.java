@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import com.google.common.hash.PrimitiveSink;
 
 import sun.nio.ch.DirectBuffer;
 
+@SuppressWarnings("restriction")
 public class ShardedFileByteArrayLongMap2
 		implements Runnable, AbstractShard, Serializable, Comparable<ShardedFileByteArrayLongMap2> {
 	/**

@@ -47,6 +47,7 @@ public class ImportFileCmd implements Runnable {
 		this.srcFile = srcFile;
 		this.destFile = destFile;
 		this.maxSz = maxSz;
+		@SuppressWarnings("deprecation")
 		List<NameValuePair> params = URLEncodedUtils.parse(new URI(serverURL), "UTF-8");
 		for (NameValuePair param : params) {
 			  if(param.getName().equalsIgnoreCase("password"))

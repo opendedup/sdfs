@@ -19,12 +19,11 @@
 package org.opendedup.sdfs.io;
 
 import java.io.IOException;
-
-
-
-
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -55,9 +54,21 @@ public class ReadAhead implements Runnable {
 	private DedupFileChannel ch = null;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(16,
-			Main.readAheadThreads, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
-	public HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
+			Main.readAheadThreads, 10, TimeUnit.SECONDS, worksQueue);
+	public static HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
+	LongByteArrayMap mp = null;
+	
+	Set<Long> readAheadSet = Collections.newSetFromMap(new LinkedHashMap<Long, Boolean>(){
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
+		protected boolean removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
+	        return size() > 1000;
+	    }
+	});
+	
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
 		if (Main.readAhead)
 			return new  ReadAhead(df,false);
@@ -113,6 +124,28 @@ public class ReadAhead implements Runnable {
 			}
 			ct.decrementAndGet();
 		}
+	}
+	
+	public void readAhead(long pos) throws IOException, FileClosedException {
+		SparseDataChunk sck = df.getSparseDataChunk(pos);
+		TreeMap<Integer,HashLocPair> al = sck.getFingers();
+		for (HashLocPair p : al.values()) {
+			long ppos = Longs.fromByteArray(p.hashloc);
+			if(ppos >100 || ppos <-100) {
+				CacheChunk ck = new CacheChunk();
+				ck.pos = ppos;
+				try {
+				executor.execute(ck);
+				}catch(Exception e) {
+					
+				}
+			}
+		}
+		
+		CacheChunk ck = new CacheChunk();
+		
+		
+		executor.execute(ck);
 	}
 
 	@Override

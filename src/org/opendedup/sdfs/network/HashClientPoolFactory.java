@@ -22,6 +22,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServer;
 
+@SuppressWarnings("rawtypes")
 public class HashClientPoolFactory implements PoolableObjectFactory {
 	private HCServer server;
 	private byte id;

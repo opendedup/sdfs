@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.monitor;
 
 import java.io.IOException;
+
 import java.lang.management.ManagementFactory;
 
 import org.apache.log4j.Level;
@@ -32,6 +33,7 @@ import org.slf4j.MDC;
 
 import com.sun.management.UnixOperatingSystemMXBean;
 
+@SuppressWarnings("restriction")
 public class VolumeIOMeter implements Runnable {
 
 	private Volume vol;

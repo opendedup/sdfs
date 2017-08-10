@@ -24,8 +24,10 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.servers.HCServer;
 
+@SuppressWarnings("rawtypes")
 public class HashClientPool extends GenericObjectPool {
 
+	@SuppressWarnings("unchecked")
 	public HashClientPool(HCServer server, String name, int size, byte id)
 			throws IOException {
 		super(new HashClientPoolFactory(server, id));

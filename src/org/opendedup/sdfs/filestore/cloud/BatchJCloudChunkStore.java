@@ -434,7 +434,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			Location region = null;
 			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
-				String creds = org.apache.commons.io.IOUtils.toString(is);
+				String creds = org.apache.commons.io.IOUtils.toString(is, "UTF-8");
 				org.apache.commons.io.IOUtils.closeQuietly(is);
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
 				context = ContextBuilder.newBuilder(service).overrides(overrides)
@@ -573,28 +573,28 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/"));
 		// SDFSLogger.getLog().info("llsz=" + ips.size());
 		try {
-		String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-		// BlobMetadata dmd = blobStore.blobMetadata(this.name,
-		// lbi);
-		Map<String, String> md = this.getMetaData(lbi);
-		md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-		md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
-		md.put("clustered", Boolean.toString(this.clustered));
-		md.put("hostname", InetAddress.getLocalHost().getHostName());
-		md.put("lastupdated", Long.toString(System.currentTimeMillis()));
-		md.put("bucketversion", Integer.toString(version));
-		md.put("sdfsversion", Main.version);
-		if (Main.volume != null) {
-			md.put("port", Integer.toString(Main.sdfsCliPort));
-		}
+			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			// BlobMetadata dmd = blobStore.blobMetadata(this.name,
+			// lbi);
+			Map<String, String> md = this.getMetaData(lbi);
+			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("clustered", Boolean.toString(this.clustered));
+			md.put("hostname", InetAddress.getLocalHost().getHostName());
+			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+			md.put("bucketversion", Integer.toString(version));
+			md.put("sdfsversion", Main.version);
+			if (Main.volume != null) {
+				md.put("port", Integer.toString(Main.sdfsCliPort));
+			}
 
-		Blob b = blobStore
-				.blobBuilder(
-						"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
-								+ "-" + System.currentTimeMillis())
-				.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
-		this.writeBlob(b, false);
-		}catch(Exception e) {
+			Blob b = blobStore
+					.blobBuilder(
+							"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
+									+ "-" + System.currentTimeMillis())
+					.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+			this.writeBlob(b, false);
+		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to backu config", e);
 		}
 		iter = ips.iterator();
@@ -741,7 +741,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				metaData.put("compressedsize", Long.toString(csz));
 				metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 				metaData.put("objects", Integer.toString(arc.getSz()));
-				@SuppressWarnings("deprecation")
 				HashCode hc = Hashing.md5().hashBytes(f);
 				metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 				Blob blob = null;
@@ -857,14 +856,20 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			BlobStore st = null;
 			try {
 				st = bPool.borrowObject();
-				Blob blob = st.getBlob(this.name, key);
-				BufferedInputStream in = new BufferedInputStream(blob.getPayload().openStream());
-				IOUtils.copy(in, os);
-				// SDFSLogger.getLog().info("read " +key + " br=" + br);
-				os.flush();
-				IOUtils.closeQuietly(os);
-				blob.getPayload().release();
-				IOUtils.closeQuietly(blob.getPayload());
+				Blob blob = null;
+				try {
+					blob = st.getBlob(this.name, key);
+					BufferedInputStream in = new BufferedInputStream(blob.getPayload().openStream());
+					IOUtils.copy(in, os);
+					// SDFSLogger.getLog().info("read " +key + " br=" + br);
+					os.flush();
+				} finally {
+					IOUtils.closeQuietly(os);
+					if (blob != null) {
+						blob.getPayload().release();
+						IOUtils.closeQuietly(blob.getPayload());
+					}
+				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to borrow object", e);
 				throw new IOException(e);
@@ -874,12 +879,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			}
 
 		} else {
-			Blob blob = blobStore.getBlob(this.name, key);
-			IOUtils.copy(blob.getPayload().openStream(), os);
-			os.flush();
-			IOUtils.closeQuietly(os);
-			blob.getPayload().release();
-			IOUtils.closeQuietly(blob.getPayload());
+			Blob blob = null;
+			try {
+				blob = blobStore.getBlob(this.name, key);
+				IOUtils.copy(blob.getPayload().openStream(), os);
+				os.flush();
+			} finally {
+				IOUtils.closeQuietly(os);
+				if (blob != null) {
+					blob.getPayload().release();
+					IOUtils.closeQuietly(blob.getPayload());
+				}
+			}
 		}
 	}
 
@@ -1314,7 +1325,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						while (to.startsWith(File.separator))
 							to = to.substring(1);
 						FilePayload fp = new FilePayload(p);
-						@SuppressWarnings("deprecation")
 						HashCode hc = com.google.common.io.Files.hash(p, Hashing.md5());
 						HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
 								Main.chunkStoreEncryptionEnabled);
@@ -1669,7 +1679,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			props.remove("service-type");
 			if (service.equals("google-cloud-storage") && props.containsKey("auth-file")) {
 				InputStream is = new FileInputStream(props.getProperty("auth-file"));
-				String creds = org.apache.commons.io.IOUtils.toString(is);
+				String creds = org.apache.commons.io.IOUtils.toString(is, "UTF-8");
 				org.apache.commons.io.IOUtils.closeQuietly(is);
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
 				context = ContextBuilder.newBuilder(service).overrides(props).credentialsSupplier(credentialSupplier)

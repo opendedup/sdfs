@@ -1184,7 +1184,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 					throw new IOException(e);
 				} finally {
+					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
+					f.delete();
 
 				}
 			} else {

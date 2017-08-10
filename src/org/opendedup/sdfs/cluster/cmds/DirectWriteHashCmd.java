@@ -97,6 +97,7 @@ public class DirectWriteHashCmd implements IOClientCmd {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
 		if (this.numberOfCopies > 7)

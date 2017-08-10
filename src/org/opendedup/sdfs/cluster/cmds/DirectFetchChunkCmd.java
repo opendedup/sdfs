@@ -42,6 +42,7 @@ public class DirectFetchChunkCmd implements IOClientCmd {
 		shuffleArray(this.hashlocs);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void executeCmd(DSEClientSocket soc) throws IOException {
 		byte[] b = new byte[1 + 2 + hash.length];
