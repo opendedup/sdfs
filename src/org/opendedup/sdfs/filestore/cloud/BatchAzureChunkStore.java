@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -658,6 +659,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
+				if(f.exists()&& !f.delete()) {
+					SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+					File nf = new File(f.getPath() + " " + ".old");
+					Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
 				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 				blob.downloadToFile(f.getPath(), null, null, opContext);
