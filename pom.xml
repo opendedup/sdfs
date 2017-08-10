@@ -1,0 +1,237 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.opendedup</groupId>
+  <artifactId>sdfs</artifactId>
+  <version>3.5.2</version>
+  <packaging>jar</packaging>
+
+  <name>sdfs</name>
+  <url>http://maven.apache.org</url>
+<repositories>
+    <repository>
+        <id>jclouds-snapshots</id>
+        <url>https://repository.apache.org/content/repositories/snapshots</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+    <repository>
+        <id>external-sdk</id>
+        <url>https://github.com/opendedup/maven-repo/raw/master/external-sdk/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+  <dependency>
+    <groupId>org.xerial.snappy</groupId>
+    <artifactId>snappy-java</artifactId>
+    <version>1.1.4</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-compress</artifactId>
+    <version>1.14</version>
+</dependency>
+  <dependency>
+       <groupId>jonelo</groupId>
+       <artifactId>jacksum</artifactId>
+       <version>1.7.0</version>
+   </dependency>
+  <dependency>
+       <groupId>com.baqend</groupId>
+       <artifactId>bloom-filter</artifactId>
+       <version>1.0.7</version>
+   </dependency>
+   
+<dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>rabinwindow</artifactId>
+    <version>1.0.0</version>
+</dependency>
+
+  <dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>fuse</artifactId>
+    <version>1.0.0</version>
+</dependency>
+  <dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>cuckcoo</artifactId>
+    <version>1.0.0</version>
+</dependency>
+  <dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>utils</artifactId>
+    <version>1.0.0</version>
+</dependency>
+<dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.5</version>
+</dependency>
+<dependency>
+    <groupId>org.jgroups</groupId>
+    <artifactId>jgroups</artifactId>
+    <version>3.6.13.Final</version>
+</dependency>
+<dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>jdokan</artifactId>
+    <version>8.0.0</version>
+</dependency>
+  <dependency>
+    <groupId>commons-daemon</groupId>
+    <artifactId>commons-daemon</artifactId>
+    <version>1.0.15</version>
+</dependency>
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+  <dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+    <version>23.0</version>
+</dependency>
+<dependency>
+    <groupId>commons-collections</groupId>
+    <artifactId>commons-collections</artifactId>
+    <version>3.2.2</version>
+</dependency>
+<dependency>
+    <groupId>commons-cli</groupId>
+    <artifactId>commons-cli</artifactId>
+    <version>1.4</version>
+</dependency>
+<dependency>
+    <groupId>net.jpountz.lz4</groupId>
+    <artifactId>lz4</artifactId>
+    <version>1.3.0</version>
+</dependency>
+  <dependency>
+        <groupId>org.apache.jclouds</groupId>
+        <artifactId>jclouds-allblobstore</artifactId>
+        <version>2.0.2</version>
+    </dependency>
+	<dependency>
+    <groupId>software.pando.crypto</groupId>
+    <artifactId>siphash</artifactId>
+    <version>1.0.0</version>
+</dependency>
+<dependency>
+    <groupId>org.mapdb</groupId>
+    <artifactId>mapdb</artifactId>
+    <version>3.0.5</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.3</version>
+</dependency>
+	<dependency>
+    <groupId>org.apache.jclouds.labs</groupId>
+    <artifactId>b2</artifactId>
+    <version>2.0.2</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.jclouds.labs</groupId>
+    <artifactId>google-cloud-storage</artifactId>
+    <version>2.0.2</version>
+</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+   <dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-s3</artifactId>
+    <version>1.11.173</version>
+</dependency>
+    <dependency>
+  <groupId>io.grpc</groupId>
+  <artifactId>grpc-netty</artifactId>
+  <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>org.simpleframework</groupId>
+    <artifactId>simple-http</artifactId>
+    <version>6.0.1</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-misc</artifactId>
+    <version>6.6.0</version>
+</dependency>
+<dependency>
+    <groupId>org.quartz-scheduler</groupId>
+    <artifactId>quartz</artifactId>
+    <version>1.8.6</version>
+</dependency>
+<dependency>
+	<groupId>com.microsoft.azure</groupId>
+	<artifactId>azure-storage</artifactId>
+	<version>5.4.0</version>
+</dependency>
+<dependency>
+    <groupId>org.rocksdb</groupId>
+    <artifactId>rocksdbjni</artifactId>
+    <version>5.6.1</version>
+</dependency>
+<dependency>
+  <groupId>io.grpc</groupId>
+  <artifactId>grpc-protobuf</artifactId>
+  <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>net.java.dev.jets3t</groupId>
+    <artifactId>jets3t</artifactId>
+    <version>0.9.4</version>
+</dependency>
+<dependency>
+  <groupId>io.grpc</groupId>
+  <artifactId>grpc-stub</artifactId>
+  <version>1.5.0</version>
+</dependency>
+<dependency>
+    <groupId>maven</groupId>
+    <artifactId>maven-nsis-plugin</artifactId>
+    <version>2.1</version>
+</dependency>
+  </dependencies>
+  <build>
+  <sourceDirectory>./src/</sourceDirectory>
+    <scriptSourceDirectory>./scripts</scriptSourceDirectory>
+    <testSourceDirectory>./test/java</testSourceDirectory>
+    <outputDirectory>./target/classes</outputDirectory>
+    <testOutputDirectory>./target/test-classes</testOutputDirectory>
+  <extensions>
+    <extension>
+      <groupId>kr.motd.maven</groupId>
+      <artifactId>os-maven-plugin</artifactId>
+      <version>1.5.0.Final</version>
+    </extension>
+  </extensions>
+  <plugins>
+    <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+    
+  </plugins>
+</build>
+</project>

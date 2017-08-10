@@ -741,6 +741,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				metaData.put("compressedsize", Long.toString(csz));
 				metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 				metaData.put("objects", Integer.toString(arc.getSz()));
+				@SuppressWarnings("deprecation")
 				HashCode hc = Hashing.md5().hashBytes(f);
 				metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 				Blob blob = null;
@@ -1313,6 +1314,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						while (to.startsWith(File.separator))
 							to = to.substring(1);
 						FilePayload fp = new FilePayload(p);
+						@SuppressWarnings("deprecation")
 						HashCode hc = com.google.common.io.Files.hash(p, Hashing.md5());
 						HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
 								Main.chunkStoreEncryptionEnabled);

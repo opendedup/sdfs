@@ -19,3 +19,4 @@ install-packages/deb/usr/share/sdfs/lib/sdfs.isajar
 install-packages/SDFS-3.2.1-Setup.exe
 install-packages/SDFS-3.2.5-Setup.exe
 install-packages/*.exe
+/target/
