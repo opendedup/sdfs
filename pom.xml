@@ -24,6 +24,15 @@
             <enabled>true</enabled>
         </snapshots>
     </repository>
+     <repository>
+       <snapshots>
+        <enabled>false</enabled>
+       </snapshots>
+       <id>central</id>
+       <name>bintray</name>
+       <url>http://jcenter.bintray.com</url>
+   </repository>
+   
 </repositories>
 
   <properties>
@@ -36,6 +45,11 @@
     <version>3.1</version>
 </dependency>
 <dependency>
+       <groupId>com.baqend</groupId>
+       <artifactId>bloom-filter</artifactId>
+       <version>1.0.7</version>
+   </dependency>
+<dependency>
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>
     <version>1.0</version>
@@ -44,6 +58,11 @@
     <groupId>de.schlichtherle.truezip</groupId>
     <artifactId>truezip-file</artifactId>
     <version>7.7.10</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-pool2</artifactId>
+    <version>2.4.2</version>
 </dependency>
   <dependency>
     <groupId>commons-pool</groupId>
@@ -65,12 +84,7 @@
        <artifactId>jacksum</artifactId>
        <version>1.7.0</version>
    </dependency>
-  <dependency>
-       <groupId>com.baqend</groupId>
-       <artifactId>bloom-filter</artifactId>
-       <version>1.0.7</version>
-   </dependency>
-   
+
 <dependency>
     <groupId>org.opendedupe</groupId>
     <artifactId>rabinwindow</artifactId>
