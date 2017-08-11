@@ -73,7 +73,7 @@ public class Io {
 		String pt = mountedVolume + path.trim();
 		File _f = new File(pt);
 
-		if (!_f.exists() || !_f.getPath().startsWith(mountedVolume)) {
+		if (!_f.exists()) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("No such node");
 
@@ -558,10 +558,9 @@ public class Io {
 		try {
 			path = URLDecoder.decode(path, "UTF-8");
 			File f = new File(this.mountedVolume + path);
+			
 			if (Main.volume.isOffLine())
 				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
-			if(!f.getPath().startsWith(this.mountedVolume))
-				throw new FuseException("volume offline").initErrno(Errno.ENOENT);
 			if (Main.volume.isFull()) {
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 			}
@@ -611,6 +610,7 @@ public class Io {
 			// SDFSLogger.getLog().info("555=" + path + " z=" + z);
 			return z;
 		} catch (FuseException e) {
+			SDFSLogger.getLog().error("error while opening file", e);
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while opening file", e);

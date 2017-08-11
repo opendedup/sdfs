@@ -39,7 +39,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
-  <dependency>
+<dependency>
     <groupId>commons-httpclient</groupId>
     <artifactId>commons-httpclient</artifactId>
     <version>3.1</version>
@@ -53,6 +53,12 @@
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>
     <version>1.0</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>1.7.25</version>
+    <scope>test</scope>
 </dependency>
   <dependency>
     <groupId>de.schlichtherle.truezip</groupId>

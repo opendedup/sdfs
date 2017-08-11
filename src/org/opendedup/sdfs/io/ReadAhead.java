@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +42,12 @@ import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
 import com.google.common.primitives.Longs;
 
 public class ReadAhead {
@@ -48,21 +55,24 @@ public class ReadAhead {
 	ReadAheadEvent evt = null;
 	boolean closeWhenDone;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(16, Main.readAheadThreads, 10,
+	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.readAheadThreads, 10,
 			TimeUnit.SECONDS, worksQueue);
 	public static HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
 	LongByteArrayMap mp = null;
-
-	Set<Long> readAheadSet = Collections.newSetFromMap(new LinkedHashMap<Long, Boolean>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		protected boolean removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
-			return size() > 1000;
-		}
-	});
+	private static LoadingCache<Long, Boolean> readAheads =  CacheBuilder.newBuilder().maximumSize(10000)
+			.build(new CacheLoader<Long, Boolean>() {
+				public Boolean load(Long pos) throws Exception {
+					try {
+						HCServiceProxy.cacheData(pos);
+					}catch(Exception e) {
+						SDFSLogger.getLog().debug("error caching chunk [" + pos + "] ", e);
+						return false;
+					}
+					return true;
+				}
+			});
+	
+	
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
 		if (active.containsKey(df.getMetaFile().getPath()))
@@ -97,48 +107,40 @@ public class ReadAhead {
 
 	private static class CacheChunk implements Runnable {
 		long pos;
+		SparseDedupFile df;
+		
 
 		public void run() {
-			try {
-				SDFSLogger.getLog().info("getting data for " + pos);
-				HCServiceProxy.cacheData(pos);
-				SDFSLogger.getLog().info("done getting data for " + pos);
-			} catch (IOException e) {
-				SDFSLogger.getLog().debug("error caching chunk [" + pos + "] ", e);
-			} catch (DataArchivedException e) {
-				SDFSLogger.getLog().debug("error caching chunk [" + pos + "] ", e);
-			}
-		}
-	}
-
-	public void readAhead(long pos) throws IOException, FileClosedException {
-
-		int trs = 0;
-		while (trs < Main.readAheadThreads) {
+/*
 			if (pos >= df.mf.length())
-				return;
-			SparseDataChunk sck = df.getSparseDataChunk(pos);
-			TreeMap<Integer, HashLocPair> al = sck.getFingers();
-			for (HashLocPair p : al.values()) {
-				long ppos = Longs.fromByteArray(p.hashloc);
-				if (ppos > 100 || ppos < -100) {
-					synchronized (readAheadSet) {
-						if (!readAheadSet.contains(ppos)) {
-							CacheChunk ck = new CacheChunk();
-							ck.pos = ppos;
-							try {
-								executor.execute(ck);
-								readAheadSet.add(ppos);
-								trs++;
-								pos += Main.CHUNK_LENGTH;
-							} catch (Exception e) {
-								return;
+					return;
+				SparseDataChunk sck = df.getSparseDataChunk(pos);
+				TreeMap<Integer, HashLocPair> al = sck.getFingers();
+				for (HashLocPair p : al.values()) {
+					long ppos = Longs.fromByteArray(p.hashloc);
+					if (ppos > 100 || ppos < -100) {
+						if(ppos != 0) {
+							boolean read = readAheads.get(ppos);
+								try {
+									executor.execute(ck);
+									readAheadSet.add(ppos);
+									trs++;
+									
+								} catch (Exception e) {
+									return;
+								}
 							}
 						}
 					}
 				}
 			}
+			*/
 		}
+	}
+
+	public void readAhead(long pos) throws IOException, FileClosedException {
+		
+		
 	}
 
 }
