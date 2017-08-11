@@ -298,10 +298,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	public void cacheData(long start) throws IOException, DataArchivedException {
 		try {
+			if(start !=0)
 			HashBlobArchive.cacheArchive(start);
 		} catch (ExecutionException e) {
-			SDFSLogger.getLog().error("Unable to get block at " + start, e);
-			throw new IOException(e);
+			SDFSLogger.getLog().debug("Unable to get block at " + start, e);
+			//throw new IOException(e);
 		}
 
 	}
@@ -1187,6 +1188,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				} catch(java.nio.file.AccessDeniedException e) {
 					if(f.exists()) {
+						if(!f.delete()) {
+							SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+							File nf = new File(f.getPath() + " " + ".old");
+							Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						}
 						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length() + " cl=" +cl);
 					}
 					IOUtils.closeQuietly(in);

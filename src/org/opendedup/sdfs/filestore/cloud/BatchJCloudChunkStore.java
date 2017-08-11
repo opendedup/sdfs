@@ -206,10 +206,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	public void cacheData(long start) throws IOException, DataArchivedException {
 		try {
-			HashBlobArchive.cacheArchive(start);
+			if(start !=0)
+				HashBlobArchive.cacheArchive(start);
 		} catch (ExecutionException e) {
-			SDFSLogger.getLog().error("Unable to get block at " + start, e);
-			throw new IOException(e);
+			//SDFSLogger.getLog().error("Unable to get block at " + start, e);
+			//throw new IOException(e);
 		}
 
 	}

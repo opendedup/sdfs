@@ -28,7 +28,7 @@ public class Main {
 	public static double fpp = .01;
 	public static String logSize="10MB";
 	public static boolean CUCKOO =false;
-	public static int readAheadThreads = 16;
+	public static int readAheadThreads = 32;
 	public static boolean refCount = true;
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout

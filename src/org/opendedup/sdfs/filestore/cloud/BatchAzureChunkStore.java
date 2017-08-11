@@ -175,10 +175,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	public void cacheData(long start) throws IOException, DataArchivedException {
 		try {
-			HashBlobArchive.cacheArchive(start);
+			if(start !=0)
+				HashBlobArchive.cacheArchive(start);
 		} catch (ExecutionException e) {
-			SDFSLogger.getLog().error("Unable to get block at " + start, e);
-			throw new IOException(e);
+			SDFSLogger.getLog().debug("Unable to get block at " + start, e);
+			//throw new IOException(e);
 		}
 
 	}
@@ -676,6 +677,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (java.io.FileNotFoundException e1) {
 					if (f.exists()) {
 						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length());
+					}
+					if(f.exists()) {
+						if(!f.delete()) {
+							SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+							File nf = new File(f.getPath() + " " + ".old");
+							Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						}
 					}
 					throw e1;
 				} finally {
