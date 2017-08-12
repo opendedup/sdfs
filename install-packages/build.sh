@@ -1,6 +1,12 @@
-VERSION=3.2.0
+VERSION=3.5.2
 DEBFILE="sdfs_${VERSION}_amd64.deb"
 echo $DEBFILE
+sudo rm -rf deb/usr/share/sdfs/lib/*
+cd ../
+mvn package
+cd install-packages
+cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar deb/usr/share/sdfs/lib/sdfs.jar
+echo 
 sudo rm *.rpm
 sudo rm *.deb
 sudo rm deb/usr/share/sdfs/bin/libfuse.so.2
