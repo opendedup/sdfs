@@ -127,7 +127,6 @@ Function .onInstSuccess
   noreboot:
 FunctionEnd
  
- 
 Function un.onUninstSuccess
   MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
 FunctionEnd
