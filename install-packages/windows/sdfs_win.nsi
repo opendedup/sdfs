@@ -95,7 +95,7 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File ..\deb\usr\share\sdfs\lib\*
+  File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder

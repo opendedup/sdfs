@@ -31,6 +31,7 @@ public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
 	private static Logger awslog = Logger.getLogger("com.amazonaws");
+	private static Logger quartzLog = Logger.getLogger("org.quartz");
 	private static Logger fslog = Logger.getLogger("fs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
@@ -52,7 +53,9 @@ public class SDFSLogger {
 			log.debug("unable to change appender", e);
 		}
 		awslog.setLevel(Level.WARN);
+		quartzLog.setLevel(Level.INFO);
 		awslog.removeAllAppenders();
+		quartzLog.removeAllAppenders();
 		log.setLevel(Level.INFO);
 		fsdebug = true;
 		fslog.setLevel(Level.INFO);

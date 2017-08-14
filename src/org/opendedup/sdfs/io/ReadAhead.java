@@ -18,13 +18,7 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -32,22 +26,17 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
-import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-import com.google.common.cache.Weigher;
 import com.google.common.primitives.Longs;
 
 public class ReadAhead {
@@ -57,13 +46,15 @@ public class ReadAhead {
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.readAheadThreads, 10,
 			TimeUnit.SECONDS, worksQueue);
-	public static HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
 	LongByteArrayMap mp = null;
+	long maxExtent;
 	private static LoadingCache<Long, Boolean> readAheads =  CacheBuilder.newBuilder().maximumSize(10000)
 			.build(new CacheLoader<Long, Boolean>() {
 				public Boolean load(Long pos) throws Exception {
 					try {
+						SDFSLogger.getLog().info("downloading "+ pos);
 						HCServiceProxy.cacheData(pos);
+						SDFSLogger.getLog().info("done downloading "+ pos);
 					}catch(Exception e) {
 						SDFSLogger.getLog().debug("error caching chunk [" + pos + "] ", e);
 						return false;
@@ -75,8 +66,7 @@ public class ReadAhead {
 	
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
-		if (active.containsKey(df.getMetaFile().getPath()))
-			active.get(df.getMetaFile().getPath());
+		
 		if (Main.readAhead)
 			return new ReadAhead(df);
 		else
@@ -89,19 +79,8 @@ public class ReadAhead {
 	}
 
 	public ReadAhead(SparseDedupFile df) throws IOException {
-		if ((df.mf.length() / 2) > HashBlobArchive.getLocalCacheSize()) {
-			SDFSLogger.getLog()
-					.warn("unable to readahead " + df.mf.getPath() + " because probable " + "deduped file lenth "
-							+ (df.mf.length() / 2) + " is greater than cache of "
-							+ HashBlobArchive.getLocalCacheSize());
-			return;
-		}
-
-		synchronized (active) {
-			SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
-			this.df = df;
-			active.put(df.mf.getPath(), this);
-		}
+		SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
+		this.df = df;
 	}
 
 
@@ -111,34 +90,52 @@ public class ReadAhead {
 		
 
 		public void run() {
-/*
 			if (pos >= df.mf.length())
 					return;
-				SparseDataChunk sck = df.getSparseDataChunk(pos);
+				SparseDataChunk sck;
+				try {
+					sck = df.getSparseDataChunk(pos);
+				} catch (IOException | FileClosedException e) {
+					return;
+				}
 				TreeMap<Integer, HashLocPair> al = sck.getFingers();
 				for (HashLocPair p : al.values()) {
 					long ppos = Longs.fromByteArray(p.hashloc);
 					if (ppos > 100 || ppos < -100) {
 						if(ppos != 0) {
-							boolean read = readAheads.get(ppos);
-								try {
-									executor.execute(ck);
-									readAheadSet.add(ppos);
-									trs++;
-									
-								} catch (Exception e) {
-									return;
-								}
+							try {
+								readAheads.get(ppos);
+							} catch (ExecutionException e) {
+								
 							}
 						}
 					}
 				}
 			}
-			*/
-		}
 	}
 
-	public void readAhead(long pos) throws IOException, FileClosedException {
+	public void readAhead(long pos) {
+		synchronized(this) {
+		if(pos <= this.maxExtent)
+			return;
+		else
+			this.maxExtent = pos + (Main.readAheadThreads-2)*Main.CHUNK_LENGTH;
+		}
+		try {
+				for(int i = 0;i<Main.readAheadThreads;i++) {
+					CacheChunk ck = new CacheChunk();
+					ck.df = df;
+					ck.pos = pos;
+					pos +=Main.CHUNK_LENGTH;
+					executor.execute(ck);
+				}
+			}catch(Exception e) {
+				
+			} finally {
+				synchronized(this) {
+					this.maxExtent = pos;
+				}
+			}
 		
 		
 	}

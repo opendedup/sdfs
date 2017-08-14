@@ -197,10 +197,7 @@ int _tmain(int argc, TCHAR *argv[])
 					tstr >> tz;
 					sstr >> sz;
 					long tt = (bz* tz*3)/1024;
-<<<<<<< HEAD
-=======
 					mem += basemem;
->>>>>>> master
 					mem += tt;
 					long gb = sz / (1073741824);
 					mem += .3 * gb;
@@ -227,8 +224,6 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcsncat_s(cmd, buf, 2048);
 	_tcsncat_s(cmd, _T(" -XX:+UseG1GC -Djava.awt.headless=true -server "), 2048);
 	_tcsncat_s(cmd, _T("-cp \""), 2048);
-	_tcsncat_s(cmd, path, 2048);
-	_tcsncat_s(cmd, "\\lib\\sdfs.jar\";\"", 2048);
 	_tcsncat_s(cmd, path, 2048);
 	_tcsncat_s(cmd, "\\lib\\*\" org.opendedup.sdfs.windows.fs.MountSDFS", 2048);
 
