@@ -1,6 +1,4 @@
 /bin/
-.project
-.classpath
 install-packages/windows/SDFS-2.0.13-Setup.exe
 install-packages/SDFS-3.0.1-Setup.exe
 windows-exe/*/x64

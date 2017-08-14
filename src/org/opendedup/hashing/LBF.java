@@ -95,7 +95,7 @@ public class LBF implements Serializable {
 	
 	public void remove(KeyBlob kb) {
 		if(counting) {
-			filter.removeRaw(kb.key);
+			filter.remove(kb.key);
 		}
 	}
 
@@ -113,7 +113,7 @@ public class LBF implements Serializable {
 
 	public void put(KeyBlob kb) {
 		if(counting) {
-			filter.addRaw(kb.key);
+			filter.add(kb.key);
 		}else {
 		l.writeLock().lock();
 		try {

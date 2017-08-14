@@ -21,6 +21,7 @@ package org.opendedup.sdfs.servers;
 import java.io.IOException;
 
 
+
 import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
@@ -32,8 +33,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ConsistancyCheck;
-import org.opendedup.sdfs.filestore.DSECompaction;
-import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.cloud.AbstractCloudFileSync;
@@ -236,8 +235,6 @@ public class HashChunkService implements HashChunkServiceInterface {
 
 	public void init() throws IOException {
 		if (Main.runCompact) {
-			DSECompaction.runCheck(hs.bdb,
-					(FileChunkStore) this.getChuckStore());
 			SDFSLogger.getLog().info("Finished compaction");
 
 		}
