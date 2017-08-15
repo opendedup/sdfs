@@ -2,15 +2,15 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -44,9 +44,7 @@ import com.google.common.eventbus.EventBus;
 public class MetaFileStore {
 
 	private static EventBus eventBus = new EventBus();
-	private static BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.writeThreads, 15, TimeUnit.MINUTES, worksQueue,
-			new ThreadPoolExecutor.CallerRunsPolicy());
+	private final static ExecutorService service = Executors.newFixedThreadPool(Main.writeThreads);
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -379,7 +377,7 @@ public class MetaFileStore {
 							try {
 								DeleteMap m = new DeleteMap();
 								m.mf = mf;
-								executor.execute(m);
+								service.execute(m);
 
 							} catch (Exception e) {
 								if (SDFSLogger.isDebug())
@@ -424,9 +422,9 @@ public class MetaFileStore {
 		} catch (Exception e) {
 
 		}
-		executor.shutdown();
+		service.shutdown();
 		try {
-			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+			while (!service.awaitTermination(10, TimeUnit.SECONDS)) {
 				SDFSLogger.getLog().info("Awaiting fdisk completion of threads.");
 			}
 		} catch (InterruptedException e) {
