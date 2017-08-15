@@ -111,7 +111,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.10.0";
+	public static String version = "3.4.10.1";
 
 	public static boolean readAhead = false;
 	
@@ -147,6 +147,7 @@ public class Main {
 	public static String chunkStoreEncryptionKey = "Password";
 	public static String eChunkStoreEncryptionKey = "Password";
 	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
+	
 	/**
 	 * whether encryption should be enabled for the DSE
 	 */
