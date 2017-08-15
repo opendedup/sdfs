@@ -71,7 +71,7 @@ public class MgmtWebServer implements Container {
 	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
 	public static final String SESSION = "/session/";
-	private static Io io = null;
+	public static Io io = null;
 
 	public static Map<String, String> splitQuery(String query) {
 
