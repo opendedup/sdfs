@@ -30,7 +30,6 @@
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/aspectjrt.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/atmos-2.0.2.jar"/>
-	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/aws-java-sdk-1.11.113.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/aws-s3-2.0.2.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/azure-storage-5.0.0.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/azureblob-2.0.2.jar"/>
@@ -152,7 +151,6 @@
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/s3-2.0.2.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/scala-library-2.11.7.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/scala-parser-combinators_2.11-1.0.4.jar"/>
-	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/sdfs-3.5.2-jar-with-dependencies.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/simple-common-6.0.1.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/simple-http-6.0.1.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/simple-transport-6.0.1.jar"/>
@@ -171,5 +169,6 @@
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/uuid-3.1.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/xerial-core_2.11-3.5.0.jar"/>
 	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/xerial-core-2.0.6.jar"/>
+	<classpathentry kind="lib" path="install-packages/deb/usr/share/sdfs/lib/aws-java-sdk-1.11.177.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
