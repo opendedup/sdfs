@@ -1185,12 +1185,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					out.close();
 
 				} catch (Exception e) {
+					f.delete();
 					throw new IOException(e);
 				} finally {
 					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
-					f.delete();
-
 				}
 			} else {
 				try {
@@ -1219,6 +1218,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					chash = ServiceUtils.computeMD5Hash(in);
 				} catch (Exception e) {
+					SDFSLogger.getLog().error("file " + f.getPath() + " exists=" + f.exists());
 					throw new IOException(e);
 				}finally {
 					IOUtils.closeQuietly(in);

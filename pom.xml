@@ -95,7 +95,11 @@
     <artifactId>rabinwindow</artifactId>
     <version>1.0.0</version>
 </dependency>
-
+<dependency>
+    <groupId>org.opendedupe</groupId>
+    <artifactId>grpc</artifactId>
+    <version>1.0.0</version>
+</dependency>
   <dependency>
     <groupId>org.opendedupe</groupId>
     <artifactId>fuse</artifactId>
