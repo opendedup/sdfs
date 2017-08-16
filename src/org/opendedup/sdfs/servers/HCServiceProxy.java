@@ -123,7 +123,7 @@ public class HCServiceProxy {
 		hcService.clearRefMap();
 	}
 
-	public static synchronized boolean hashExists(byte[] hash)
+	public static synchronized boolean hashExists(byte[] hash,String guid)
 			throws IOException, HashtableFullException {
 		long pos = hcService.hashExists(hash);
 		if(pos != -1)
@@ -183,7 +183,7 @@ public class HCServiceProxy {
 		}
 	}
 	
-	public static boolean claimKey(byte [] key,long val,long ct) throws IOException {
+	public static boolean claimKey(byte [] key,long val,long ct,String guid) throws IOException {
 		if (Main.chunkStoreLocal) {
 			return hcService.claimKey(key,val,ct);
 		}
@@ -257,7 +257,7 @@ public class HCServiceProxy {
 		}
 	}
 	
-	public static boolean mightContainKey(byte [] key) {
+	public static boolean mightContainKey(byte [] key,String guid) {
 		return hcService.mightContainKey(key);
 	}
 
@@ -337,10 +337,10 @@ public class HCServiceProxy {
 	}
 
 	private static InsertRecord _write(byte[] hash, byte[] aContents,
-			byte[] hashloc) throws IOException, RedundancyNotMetException {
+			byte[] hashloc,String guid) throws IOException, RedundancyNotMetException {
 		if (Main.DSEClusterDirectIO)
 			return new InsertRecord(true, directWriteChunk(hash, aContents,
-					hashloc));
+					hashloc,guid));
 		else {
 			int ncopies = 0;
 			for (int i = 1; i < 8; i++) {
@@ -375,12 +375,12 @@ public class HCServiceProxy {
 	}
 
 	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			byte[] hashloc,int ct) throws IOException {
+			byte[] hashloc,int ct,String guid) throws IOException {
 
 		int tries = 0;
 		while (true) {
 			try {
-				return _write(hash, aContents, hashloc);
+				return _write(hash, aContents, hashloc,guid);
 			} catch (IOException e) {
 				tries++;
 				if (tries > 10) {
@@ -400,7 +400,7 @@ public class HCServiceProxy {
 	}
 
 	public static byte[] directWriteChunk(byte[] hash, byte[] aContents,
-			byte[] hashloc) throws IOException {
+			byte[] hashloc,String guid) throws IOException {
 		int ncopies = 0;
 		for (int i = 1; i < 8; i++) {
 			if (hashloc[i] > (byte) 0) {
@@ -440,7 +440,7 @@ public class HCServiceProxy {
 
 	}
 
-	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,int ct)
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents,int ct,String guid)
 			throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
@@ -556,7 +556,7 @@ public class HCServiceProxy {
 	 * "not implemented for remote chunkstores"); } }
 	 */
 
-	public static long hashExists(byte[] hash, boolean findAll)
+	public static long hashExists(byte[] hash, boolean findAll,String guid)
 			throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 				return HCServiceProxy.hcService.hashExists(hash);
@@ -594,7 +594,7 @@ public class HCServiceProxy {
 	}
 
 	public static long hashExists(byte[] hash, boolean findAll,
-			byte numtowaitfor) throws IOException, HashtableFullException {
+			byte numtowaitfor,String guid) throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.hashExists(hash);
 		} else {
