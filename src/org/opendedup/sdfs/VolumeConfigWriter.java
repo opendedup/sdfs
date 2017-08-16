@@ -83,6 +83,7 @@ public class VolumeConfigWriter {
 	boolean gsEnabled = false;
 	String cloudAccessKey = "";
 	String cacheSize = "10GB";
+	String windowsCacheSize = "100GB";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
 	int clusterRSPTimeout = 4000;
@@ -155,6 +156,9 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("--help")) {
 			printHelp(options);
 			System.exit(1);
+		}
+		if(OSValidator.isWindows()) {
+			this.cacheSize = this.windowsCacheSize;
 		}
 		if(cmd.hasOption("encrypt-config")) {
 			this.encryptConfig = true;

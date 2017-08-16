@@ -674,18 +674,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					out = Files.newOutputStream(f.toPath(), StandardOpenOption.TRUNCATE_EXISTING,
 							StandardOpenOption.CREATE);
 					blob.download(out);
-				} catch (java.io.FileNotFoundException e1) {
-					if (f.exists()) {
-						SDFSLogger.getLog().warn("file already exists in cache fl=" + f.length());
+				} catch (java.io.FileNotFoundException | java.nio.file.AccessDeniedException e1) {
+					IOUtils.closeQuietly(out);
+					SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+					File nf = new File(f.getPath() + " " + ".old");
+					try {
+						Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						nf.delete();
+					} catch (Exception e2) {
+						SDFSLogger.getLog().warn("unable to move file", e2);
 					}
-					if(f.exists()) {
-						if(!f.delete()) {
-							SDFSLogger.getLog().warn("file already exists! " + f.getPath());
-							File nf = new File(f.getPath() + " " + ".old");
-							Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
-						}
-					}
-					throw e1;
+					f.delete();
+					throw new IOException(e1);
 				} finally {
 					IOUtils.closeQuietly(out);
 				}

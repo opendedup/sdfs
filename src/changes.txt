@@ -1,3 +1,12 @@
+Version 3.4.10.1
+	Fixes
+	* Set default cache size to 100GB for windows
+	* Added threaded deletion to prevent volume hangs
+	* Set AWS SDK version to 1.11.177
+Version 3.4.10
+	Fixes
+	* set-cache-size now immediatley writes cache to xml
+	* truncate archive files if they exist to address access denied errors. 
 Version 3.4.9
 	Fixes
 	* Fixed google timeouts over slow or bad connections

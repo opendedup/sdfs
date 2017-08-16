@@ -908,6 +908,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					this.readBlob("blocks/" + haName, out);
 					e = null;
 					break;
+				} catch (java.nio.file.AccessDeniedException e1) {
+					IOUtils.closeQuietly(out);
+					SDFSLogger.getLog().warn("file already exists! " + f.getPath());
+					File nf = new File(f.getPath() + " " + ".old");
+					try {
+						Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						nf.delete();
+					} catch (Exception e2) {
+						SDFSLogger.getLog().warn("unable to move file", e2);
+					}
+					f.delete();
+					throw new IOException(e1);
 				} catch (java.io.FileNotFoundException e1) {
 					IOUtils.closeQuietly(out);
 					f.delete();
