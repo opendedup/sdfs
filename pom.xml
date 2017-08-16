@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.5.2</version>
+  <version>3.5.2.5</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -149,7 +149,7 @@
   <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>23.0</version>
+    <version>19.0</version>
 </dependency>
 <dependency>
     <groupId>commons-collections</groupId>

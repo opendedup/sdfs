@@ -21,7 +21,6 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,7 +58,6 @@ public class DedupFileChannel {
 	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
 	private static int READHEAD_TRIGGER_SIZE=30*1024*1024;
-	private ReadAhead rh =null;
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -74,12 +72,6 @@ public class DedupFileChannel {
 		df = file;
 		this.flags = flags;
 		SparseDedupFile sdf = (SparseDedupFile) df;
-		if(Main.readAhead)
-			try {
-				rh = ReadAhead.getReadAhead(sdf);
-			} catch (ExecutionException e) {
-				SDFSLogger.getLog().warn("unable to initiate readahead for " + df.mf.getPath(),e);
-			}
 		eventBus.register(sdf.bdb);
 		if (Main.checkArchiveOnOpen) {
 			this.recoverArchives();
@@ -506,7 +498,6 @@ public class DedupFileChannel {
 	 * @throws IOException
 	 * @throws DataArchivedException
 	 */
-	
 	public int read(ByteBuffer buf, int bufPos, int siz, long filePos)
 			throws IOException, DataArchivedException {
 		// this.addAio();
@@ -519,9 +510,9 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
-			if (filePos > READHEAD_TRIGGER_SIZE && !readAheadInitiated && Main.readAhead && rh!=null) {
+			if (filePos > READHEAD_TRIGGER_SIZE && !readAheadInitiated && Main.readAhead) {
 				this.readAheadInitiated = true;
-				rh.readAhead(filePos);
+				ReadAhead.getReadAhead(df);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
