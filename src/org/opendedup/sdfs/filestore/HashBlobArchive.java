@@ -268,12 +268,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
 							try {
-								try {
+								if(removal.getValue().isOpen())
 									removal.getValue().close();
-								} catch (Exception e) {
-
-								}
-
 							} catch (Exception e) {
 								SDFSLogger.getLog().warn("unable to close filechannel", e);
 							}
@@ -834,11 +830,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 			} catch (Exception e) {
 
 			}
-			try {
-				zfc.close();
-			} catch (Exception e) {
-
-			}
 
 			hbuf.flip();
 			hbuf.getInt();
@@ -1018,19 +1009,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 			archives.invalidate(this.id);
 			SimpleByteArrayLongMap _m = maps.getIfPresent(this.id);
-			if (_m != null)
+			if(_m != null)
 				_m.close();
 			maps.invalidate(this.id);
 			FileChannel fc = openFiles.getIfPresent(this.id);
-			if (fc != null) {
+			if(fc != null) {
 				try {
-					fc.close();
-				} catch (Exception e) {
-
+				fc.close();
+				}catch(Exception e) {
+					
 				}
 			}
+				
 			openFiles.invalidate(this.id);
-
+			
 			rchunks.remove(this.id);
 			SDFSLogger.getLog().debug("removed " + f.getPath());
 			f.delete();
@@ -1057,26 +1049,23 @@ public class HashBlobArchive implements Runnable, Serializable {
 			try {
 				SDFSLogger.getLog().debug("removing " + f.getPath());
 				SimpleByteArrayLongMap m = maps.getIfPresent(this.id);
-				if (m != null) {
+				if(m!= null) {
 					try {
-						m.close();
-					} catch (Exception e) {
-					}
+					m.close();
+					}catch(Exception e) {}
 				}
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
 				FileChannel fc = openFiles.getIfPresent(this.id);
-				if (fc != null) {
+				if(fc != null) {
 					try {
 						fc.close();
-					} catch (Exception e) {
-
+					}catch(Exception e) {
+						
 					}
 				}
 				openFiles.invalidate(this.id);
-				boolean deleted = f.delete();
-				if (!deleted)
-					SDFSLogger.getLog().warn("unable to delete " + f.getPath());
+				f.delete();
 				File lf = new File(f.getPath() + ".map");
 				lf.delete();
 				SDFSLogger.getLog().debug("removed " + f.getPath());
@@ -1090,58 +1079,41 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	private void loadData() throws Exception {
-		synchronized (f) {
-			if(f.exists()) {
-				SDFSLogger.getLog().warn("file already exists! " + f.getPath());
-				File nf = new File(f.getPath() + " " + ".old");
-				Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		try {
+			SimpleByteArrayLongMap m = maps.getIfPresent(this.id);
+			if(m!= null) {
+				try {
+				m.close();
+				}catch(Exception e) {}
 			}
-			try {
-				SimpleByteArrayLongMap m = maps.getIfPresent(this.id);
-				if (m != null) {
-					try {
-						m.close();
-					} catch (Exception e) {
-					}
+			maps.invalidate(this.id);
+			wMaps.remove(this.id);
+			FileChannel fc = openFiles.getIfPresent(this.id);
+			if(fc != null) {
+				try {
+					fc.close();
+				}catch(Exception e) {
+					
 				}
-				maps.invalidate(this.id);
-				wMaps.remove(this.id);
-				FileChannel fc = openFiles.getIfPresent(this.id);
-				if (fc != null) {
-					try {
-						fc.close();
-					} catch (Exception e) {
-
-					}
-				}
-				openFiles.invalidate(this.id);
-				if (wOpenFiles.containsKey(this.id)) {
-					fc = wOpenFiles.get(this.id);
-					if (fc != null) {
-						try {
-							fc.close();
-						} catch (Exception e) {
-
-						}
-					}
-				}
-
-				if (!f.exists()) {
-					SDFSLogger.getLog().debug("loading " + this.id);
-					store.getBytes(this.id, f);
-					if (rrl != null) {
-						int _sz = 1;
-						if (f.length() > 1024)
-							_sz = toIntExact(f.length() / 1024);
-						rrl.acquire(_sz);
-					}
-				}
-
-			} catch (Exception e) {
-				throw e;
-			} finally {
-
 			}
+			openFiles.invalidate(this.id);
+			
+			
+			if (!f.exists()) {
+				SDFSLogger.getLog().debug("loading " + this.id);
+				store.getBytes(this.id, f);
+				if (rrl != null) {
+					int _sz = 1;
+					if (f.length() > 1024)
+						_sz = toIntExact(f.length() / 1024);
+					rrl.acquire(_sz);
+				}
+			}
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+
 		}
 	}
 
@@ -1152,28 +1124,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 		long pos = 0;
 		int nlen = 0;
 		try {
-			if (!f.exists()) {
-				synchronized (f) {
-					
-					SDFSLogger.getLog().info("file does not exist " + f.getPath());
-					if (!f.exists())
+			if(!f.exists()) {
+				synchronized(f) {
+					if(!f.exists())
 						this.loadData();
 				}
 			}
 			FileChannel ch = null;
 			if (!this.cached) {
-
 				ch = wOpenFiles.get(this.id);
 				if (ch == null) {
-					synchronized (f) {
-						if (!wOpenFiles.contains(this.id)) {
-							Path path = Paths.get(getPath(id).getPath());
-							ch = FileChannel.open(path);
-							wOpenFiles.put(id, ch);
-						} else {
-							ch = wOpenFiles.get(this.id);
-						}
-					}
+					Path path = Paths.get(getPath(id).getPath());
+					ch = FileChannel.open(path);
+					wOpenFiles.put(id, ch);
 				}
 			}
 			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
@@ -1425,21 +1388,21 @@ public class HashBlobArchive implements Runnable, Serializable {
 				try {
 					l.lock();
 					if (_har.f.exists() && (_har.f.length() - offset) > 0) {
-
+						
 						wMaps.remove(this.id);
 						SimpleByteArrayLongMap _ma = maps.getIfPresent(this.id);
-						if (_ma != null)
+						if(_ma != null)
 							_ma.close();
 						maps.invalidate(this.id);
 						FileChannel fc = openFiles.getIfPresent(this.id);
-						if (fc != null) {
+						if(fc != null) {
 							try {
-								fc.close();
-							} catch (Exception e) {
-
+							fc.close();
+							}catch(Exception e) {
+								
 							}
 						}
-
+							
 						openFiles.invalidate(this.id);
 						rchunks.remove(this.id);
 						int trys = 0;
@@ -1515,13 +1478,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 				om.close();
 			}
 			FileChannel ch = wOpenFiles.remove(this.id);
-			if (ch != null) {
-				try {
-					ch.close();
-				} catch (Exception e) {
-
-				}
-			}
+			if (ch != null)
+				ch.close();
 			File nf = getPath(nid);
 			File omf = new File(f.getPath() + ".map");
 			Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
