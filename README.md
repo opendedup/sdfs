@@ -119,7 +119,8 @@ Initialization Instructions for A Multi-Node Configuration
 			net.ipv4.tcp_rmem=4096 87380 25480000
 			net.ipv4.tcp_wmem=4096 65536 25480000
 			net.ipv4.tcp_low_latency=1
-			Creating and Starting a DSE
+			
+Creating and Starting a DSE
 
 The following steps will create 2 DSEs on server1 and server2
 
