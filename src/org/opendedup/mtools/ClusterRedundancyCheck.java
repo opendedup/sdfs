@@ -153,7 +153,7 @@ public class ClusterRedundancyCheck {
 					}
 					if (ncopies < Main.volume.getClusterCopies()) {
 						byte[] nb = HCServiceProxy.fetchChunk(p.hash, exists, false);
-						exists = HCServiceProxy.writeChunk(p.hash, nb, exists,-1).getHashLocs();
+						exists = HCServiceProxy.writeChunk(p.hash, nb, exists,-1,null).getHashLocs();
 						ncopies = 0;
 						for (int i = 1; i < 8; i++) {
 							if (exists[i] > (byte) 0) {
@@ -187,7 +187,7 @@ public class ClusterRedundancyCheck {
 	private void checkDedupFile(File mapFile) throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Cluster check " + mapFile.getPath());
-		LongByteArrayMap mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
+		LongByteArrayMap mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4),null);
 		long prevpos = 0;
 		try {
 			ArrayList<SparseDataChunk> chunks = new ArrayList<SparseDataChunk>(MAX_BATCH_SIZE);
@@ -201,7 +201,7 @@ public class ClusterRedundancyCheck {
 				ck.setFpos((prevpos / mp.getFree().length) * Main.CHUNK_LENGTH);
 				HashLocPair p = ck.getFingers().get(0);
 				if (Main.chunkStoreLocal) {
-					byte[] exists = Longs.toByteArray(HCServiceProxy.hashExists(p.hash, true));
+					byte[] exists = Longs.toByteArray(HCServiceProxy.hashExists(p.hash, true,null));
 
 					if (exists[0] == -1) {
 						if (SDFSLogger.isDebug())
@@ -221,7 +221,7 @@ public class ClusterRedundancyCheck {
 							if (ncopies < Main.volume.getClusterCopies()
 									&& ncopies < HCServiceProxy.cs.getStorageNodes().size()) {
 								byte[] nb = HCServiceProxy.fetchChunk(p.hash, exists, false);
-								exists = HCServiceProxy.writeChunk(p.hash, nb, exists,-1).getHashLocs();
+								exists = HCServiceProxy.writeChunk(p.hash, nb, exists,-1,null).getHashLocs();
 								ncopies = 0;
 								for (int i = 1; i < 8; i++) {
 									if (exists[i] > (byte) 0) {

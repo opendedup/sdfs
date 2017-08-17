@@ -165,7 +165,7 @@ public class SparseDataChunk implements Externalizable {
 
 	}
 
-	public static void insertHashLocPair(TreeMap<Integer,HashLocPair> ar, HashLocPair p) throws IOException {
+	public static void insertHashLocPair(TreeMap<Integer,HashLocPair> ar, HashLocPair p,String lookupFilter) throws IOException {
 		int ep = p.pos + p.nlen;
 		if (ep > Main.CHUNK_LENGTH)
 			throw new IOException("Overflow ep=" + ep);
@@ -192,7 +192,7 @@ public class SparseDataChunk implements Externalizable {
 					h.nlen -= no;
 					HashLocPair k = ar.remove(hpos);
 					if(Main.refCount)
-						DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1);
+						DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1,lookupFilter);
 					ar.put(h.pos, h);
 					
 					// SDFSLogger.getLog().info("2 changing pos from " +oh
@@ -219,7 +219,7 @@ public class SparseDataChunk implements Externalizable {
 						
 						HashLocPair k= ar.remove(h.pos);
 						if(Main.refCount)
-							DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1);
+							DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1,lookupFilter);
 					}
 				}
 			_ep = h.pos-1;
@@ -231,18 +231,8 @@ public class SparseDataChunk implements Externalizable {
 			
 		} ar.put(p.pos, p);
 		if(Main.refCount)
-			DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+			DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 			
-	}
-
-	public void putHash(HashLocPair p) throws IOException {
-		l.writeLock().lock();
-		try {
-			insertHashLocPair(ar, p);
-			this.flags = RECONSTRUCTED;
-		} finally {
-			l.writeLock().unlock();
-		}
 	}
 
 	public void setRecontructed(boolean reconstructed) {

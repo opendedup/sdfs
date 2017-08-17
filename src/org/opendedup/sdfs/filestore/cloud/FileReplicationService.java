@@ -107,7 +107,7 @@ public class FileReplicationService {
 		}
 	}
 
-	private File downloadDDBFile(String guid) throws Exception {
+	private File downloadDDBFile(String guid,String lookupFilter) throws Exception {
 		String sfp = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid + File.separator
 				+ guid + ".map";
 		File f = new File(sfp);
@@ -140,10 +140,10 @@ public class FileReplicationService {
 		return mf;
 	}
 
-	public static LongByteArrayMap getDDB(String fname) throws Exception {
-		File f = service.downloadDDBFile(fname);
+	public static LongByteArrayMap getDDB(String fname,String lookupFilter) throws Exception {
+		File f = service.downloadDDBFile(fname,lookupFilter);
 		SDFSLogger.getLog().info("downloaded " + f.getPath() + " size= " + f.length());
-		LongByteArrayMap m = LongByteArrayMap.getMap(fname);
+		LongByteArrayMap m = LongByteArrayMap.getMap(fname,lookupFilter);
 		service.sync.checkoutFile("ddb/" + fname);
 		return m;
 	}
@@ -544,7 +544,7 @@ public class FileReplicationService {
 						f = f.getParentFile();
 						f.mkdirs();
 					} else {
-						executor.execute(new MetaFileDownloader(fname, f, sync));
+						executor.execute(new MetaFileDownloader(fname, f, sync,executor,req));
 					}
 				} else {
 					SDFSLogger.getLog().info("not checked out " + fname);
@@ -559,21 +559,7 @@ public class FileReplicationService {
 			if (MetaFileDownloader.downloadSyncException != null)
 				throw MetaFileDownloader.downloadSyncException;
 			this.sync.clearIter();
-			executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
-					new ThreadPoolExecutor.CallerRunsPolicy());
-			fname = this.sync.getNextName("ddb", req.getVolumeID());
-			while (fname != null) {
-				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
-				if (this.sync.isCheckedOut("ddb/" + efs, req.getVolumeID())) {
-					executor.execute(new DDBDownloader(fname, sync, req.isUpdateRef()));
-				}
-				fname = this.sync.getNextName("ddb", req.getVolumeID());
-			}
-			executor.shutdown();
-			// Wait for everything to finish.
-			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().info("Awaiting ddb download completion of threads.");
-			}
+			
 			if (DDBDownloader.downloadSyncException != null)
 				throw DDBDownloader.downloadSyncException;
 			SDFSLogger.getLog().info("################# done syncing files from cloud #######################");
@@ -596,17 +582,20 @@ public class FileReplicationService {
 		File to;
 		private static AtomicInteger fer = new AtomicInteger();
 		private static AtomicInteger fdl = new AtomicInteger();
-
+		private transient ThreadPoolExecutor executor = null;
+		CloudSyncDLRequest req = null;
 		private static void reset() {
 			fer.set(0);
 			fdl.set(0);
 			downloadSyncException = null;
 		}
 
-		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync) {
+		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync,ThreadPoolExecutor executor,CloudSyncDLRequest req) {
 			this.sync = sync;
 			this.to = to;
 			this.fname = fname;
+			this.executor = executor;
+			this.req = req;
 		}
 
 		@Override
@@ -619,6 +608,8 @@ public class FileReplicationService {
 					sync.downloadFile(fname, to, "files");
 					sync.checkoutFile("files/" + fname);
 					MetaDataDedupFile mf = MetaFileStore.getMF(to);
+					String efs = "ddb/" + EncyptUtils.encString(mf.getDfGuid(), Main.chunkStoreEncryptionEnabled);
+					executor.execute(new DDBDownloader(efs, sync, req.isUpdateRef(),mf.getLookupFilter()));
 					Main.volume.addDuplicateBytes(
 							mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
 					Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
@@ -645,6 +636,7 @@ public class FileReplicationService {
 		AbstractCloudFileSync sync;
 		String fname;
 		boolean updateRef = true;
+		String lookupFilter = null;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
 
@@ -654,10 +646,11 @@ public class FileReplicationService {
 			downloadSyncException = null;
 		}
 
-		DDBDownloader(String fname, AbstractCloudFileSync sync, boolean updateRef) {
+		DDBDownloader(String fname, AbstractCloudFileSync sync, boolean updateRef,String lookupFilter) {
 			this.sync = sync;
 			this.fname = fname;
 			this.updateRef = updateRef;
+			this.lookupFilter = lookupFilter;
 		}
 
 		@Override
@@ -673,7 +666,7 @@ public class FileReplicationService {
 						sync.checkoutFile("ddb/" + fname);
 						SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
 						LongByteArrayMap ddb = LongByteArrayMap
-								.getMap(f.getName().substring(0, f.getName().length() - 4));
+								.getMap(f.getName().substring(0, f.getName().length() - 4),lookupFilter);
 						Set<Long> blks = new HashSet<Long>();
 						boolean ref = false;
 						if (this.updateRef && Main.refCount)

@@ -22,6 +22,7 @@ import java.io.File;
 
 
 
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
@@ -48,7 +48,6 @@ import org.opendedup.sdfs.cluster.cmds.BatchWriteHashCmd;
 import org.opendedup.sdfs.cluster.cmds.ClaimHashesCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectFetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.DirectWriteHashCmd;
-import org.opendedup.sdfs.cluster.cmds.FDiskCmd;
 import org.opendedup.sdfs.cluster.cmds.FetchChunkCmd;
 import org.opendedup.sdfs.cluster.cmds.HashExistsCmd;
 import org.opendedup.sdfs.cluster.cmds.RedundancyNotMetException;
@@ -536,15 +535,7 @@ public class HCServiceProxy {
 
 	public static void runFDisk(FDiskEvent evt) throws FDiskException,
 			IOException {
-		if (Main.chunkStoreLocal) {
-			BloomFDisk fd = new BloomFDisk(evt);
-			fd.vanish();
-		}
-		else {
-			long sz = HCServiceProxy.getSize();
-			FDiskCmd cmd = new FDiskCmd(sz, evt);
-			cmd.executeCmd(cs);
-		}
+		throw new IOException("not implemented");
 	}
 
 	/*

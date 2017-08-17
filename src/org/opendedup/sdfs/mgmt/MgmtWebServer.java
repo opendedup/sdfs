@@ -418,7 +418,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("cloudmfile", e);
 						}
-						break;
+						break;/*
 					case "clouddbfile":
 						try {
 							String changeid = qry.get("changeid");
@@ -431,7 +431,7 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("clouddbfile", e);
 						}
-						break;
+						break;*/
 					case "setcachesz":
 						try {
 							Element msg = new SetCacheSize().getResult(qry.get("sz"));

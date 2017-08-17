@@ -119,7 +119,7 @@ public class ClientThread extends Thread {
 				if (cmd == NetworkCMDS.HASH_EXISTS_CMD) {
 					byte[] hash = new byte[is.readShort()];
 					is.readFully(hash);
-					boolean exists = HCServiceProxy.hashExists(hash);
+					boolean exists = HCServiceProxy.hashExists(hash,null);
 
 					try {
 						writelock.lock();
@@ -142,7 +142,7 @@ public class ClientThread extends Thread {
 					byte[] chunkBytes = new byte[len];
 					is.readFully(chunkBytes);
 					InsertRecord rec = HCServiceProxy.writeChunk(hash,
-							chunkBytes,-1);
+							chunkBytes,-1,null);
 					try {
 						writelock.lock();
 						os.writeBoolean(rec.getInserted());
@@ -177,7 +177,7 @@ public class ClientThread extends Thread {
 							HashChunk ck = chunks.get(i);
 							if (ck != null) {
 								rsults.add(i, Boolean.valueOf(HCServiceProxy
-										.writeChunk(ck.getName(), ck.getData(),-1)
+										.writeChunk(ck.getName(), ck.getData(),-1,null)
 										.getInserted()));
 							} else
 								rsults.add(i, null);

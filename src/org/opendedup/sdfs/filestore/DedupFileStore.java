@@ -115,7 +115,7 @@ public class DedupFileStore {
 		}
 	}
 
-	public static boolean addRef(byte[] entry, long val,int ct) throws IOException {
+	public static boolean addRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
 		if (val == 1 || val == 0)
 			return true;
 		
@@ -126,7 +126,7 @@ public class DedupFileStore {
 				gcLock.readLock().lock();
 				try {
 				//if(gcRunning)
-					return HCServiceProxy.claimKey(entry, val,ct);
+					return HCServiceProxy.claimKey(entry, val,ct,lookupfilter);
 				/*
 				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
 				try {
@@ -145,7 +145,7 @@ public class DedupFileStore {
 		}
 	}
 	
-	public static boolean removeRef(byte[] entry, long val,int ct) throws IOException {
+	public static boolean removeRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
 		if (val == 1|| val == 0)
 			return true;
 		
@@ -156,7 +156,7 @@ public class DedupFileStore {
 				gcLock.readLock().lock();
 				try {
 				//if(gcRunning)
-					return HCServiceProxy.claimKey(entry, val,-1*ct);
+					return HCServiceProxy.claimKey(entry, val,-1*ct,lookupfilter);
 				//ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
 				//try {
 					//keyLookup.get(bl).decrementAndGet();

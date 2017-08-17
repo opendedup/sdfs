@@ -210,7 +210,7 @@ public class MetaFileImport implements Serializable {
 		String dfGuid = mf.getDfGuid();
 		SDFSLogger.getLog().debug("DFGuid for file " + dfGuid);
 		if (dfGuid != null) {
-			LongByteArrayMap mp = LongByteArrayMap.getMap(dfGuid);
+			LongByteArrayMap mp = LongByteArrayMap.getMap(dfGuid,mf.getLookupFilter());
 			try {
 				SparseDataChunk ck = new SparseDataChunk();
 				long prevpos = 0;
@@ -237,7 +237,7 @@ public class MetaFileImport implements Serializable {
 								if (Main.refCount && Arrays.areEqual(WritableCacheBuffer.bk, p.hash))
 									pos = 1;
 								else
-									pos = HCServiceProxy.hashExists(p.hash, false);
+									pos = HCServiceProxy.hashExists(p.hash, false,mf.getLookupFilter());
 								boolean exists = false;
 								if (pos != -1) {
 									p.hashloc = Longs.toByteArray(pos);

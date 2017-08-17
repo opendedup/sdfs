@@ -19,10 +19,10 @@
 package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
+
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.notification.FDiskEvent;
@@ -138,14 +138,7 @@ public class ManualGC {
 				return 0;
 			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				if(!Main.refCount) {
-				BloomFDisk fd = new BloomFDisk(evt);
-				try{
-				evt.curCt = 33;
-				rm = HCServiceProxy.processHashClaims(evt, fd.getResults());
-				evt.curCt = 66;
-				}finally {
-					fd.vanish();
-				}
+					throw new IOException("not implemented");
 				}else {
 					DedupFileStore.gcRunning(true);
 					try {

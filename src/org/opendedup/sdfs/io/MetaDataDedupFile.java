@@ -113,6 +113,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
+	private String lookupfilter = null;
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -151,6 +152,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.dirty = true;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
+	}
+	
+	public void setLookupFilter(String filter) {
+		this.lookupfilter = filter;
+	}
+	
+	public String getLookupFilter() {
+		return this.lookupfilter;
 	}
 
 	/**
@@ -1466,7 +1475,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				}
 				if(in.available() > 0) {
 					this.importing = in.readBoolean();
+				}if(in.available() > 0) {
+					int sz = in.readInt();
+					if(sz > 0) {
+						gfb = new byte[sz];
+						in.readFully(gfb);
+						this.lookupfilter = new String(gfb);
+					}
 				}
+				
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb =
 				 * new byte[vlen]; in.readFully(vb); this.backingFile = new
@@ -1534,6 +1551,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeBoolean(this.localowner);
 			out.writeLong(this.retentionLock);
 			out.writeBoolean(this.importing);
+			if(this.lookupfilter == null) {
+				out.writeInt(-1);
+			}else {
+				dfb = this.lookupfilter.getBytes();
+				out.writeInt(dfb.length);
+				out.write(dfb);
+			}
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);
@@ -1601,6 +1625,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				dataset.addProperty("symlink", this.isSymlink());
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
+			if(this.lookupfilter != null) {
+				dataset.addProperty("lookup-filter",this.lookupfilter);
+			}
 		}
 		if (!compact && this.isDirectory()) {
 			Path p = Paths.get(this.getPath());
@@ -1666,6 +1693,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (symlink) {
 				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
 				root.setAttribute("symlink-path", this.getSymlinkPath());
+			}
+			if(this.lookupfilter != null) {
+				root.setAttribute("lookup-filter",this.lookupfilter);
 			}
 
 			Element monEl = this.getIOMonitor().toXML(doc);

@@ -78,7 +78,7 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	}
 
 	@Override
-	public List<Finger> getChunks(byte[] data) throws IOException {
+	public List<Finger> getChunks(byte[] data,String fp) throws IOException {
 		throw new IOException("not supported");
 	}
 }

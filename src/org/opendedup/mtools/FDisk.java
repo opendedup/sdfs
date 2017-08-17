@@ -83,7 +83,7 @@ public class FDisk {
 		
 		if (entries == 0)
 			entries = HCServiceProxy.getSize();
-		File f = new File(Main.dedupDBStore);
+		File f = new File(Main);
 		if (!f.exists()) {
 			SDFSEvent.fdiskInfoEvent("FDisk Will not start because the volume has not been written too", evt)
 					.endEvent("FDisk Will not start because the volume has not been written too");

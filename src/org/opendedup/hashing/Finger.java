@@ -42,15 +42,19 @@ public class Finger implements Runnable {
 	public boolean noPersist;
 	public AsyncChunkWriteActionListener l;
 	public int claims = -1;
+	public String lookupFilter = null;
+	public Finger(String lookupFilter) {
+		this.lookupFilter = lookupFilter;
+	}
 
 	public void run() {
 		try {
 			if(Arrays.equals(this.hash, k))
 				this.hl = new InsertRecord(false,1);
 			else if (Main.chunkStoreLocal)
-				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,claims);
+				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,claims,this.lookupFilter);
 			else
-				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,this.hl.getHashLocs(),claims);
+				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,this.hl.getHashLocs(),claims,this.lookupFilter);
 			
 			l.commandResponse(this);
 
@@ -69,10 +73,10 @@ public class Finger implements Runnable {
 			for (Finger f : fingers) {
 				try {
 					if (Main.chunkStoreLocal)
-						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims);
+						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims,f.lookupFilter);
 					else
 						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
-								f.hl.getHashLocs(),f.claims);
+								f.hl.getHashLocs(),f.claims,f.lookupFilter);
 					l.commandResponse(f);
 
 				} catch (Throwable e) {
@@ -87,9 +91,9 @@ public class Finger implements Runnable {
 				if(Arrays.equals(f.hash, WritableCacheBuffer.bk))
 					f.hl = new InsertRecord(false,1);
 				else if (Main.chunkStoreLocal)
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims);
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims,f.lookupFilter);
 				else
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims);
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims,f.lookupFilter);
 
 			}
 		}

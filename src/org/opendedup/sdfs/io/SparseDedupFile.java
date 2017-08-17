@@ -309,7 +309,7 @@ public class SparseDedupFile implements DedupFile {
 						if (mf.getDev() != null) {
 							this.bdb = new BlockDevSocket(mf.getDev(), dbf.getPath());
 						} else
-							this.bdb = LongByteArrayMap.getMap(this.GUID);
+							this.bdb = LongByteArrayMap.getMap(this.GUID,this.mf.getLookupFilter());
 					}
 					this.bdb.vanish(Main.refCount);
 					this.bdb.close();
@@ -431,7 +431,7 @@ public class SparseDedupFile implements DedupFile {
 				if (writeBuffer.isBatchProcessed() && HashFunctionPool.max_hash_cluster == 1) {
 					for (HashLocPair p : writeBuffer.getFingers().values()) {
 						if (!writeBuffer.isBatchwritten())
-							p.hashloc = HCServiceProxy.writeChunk(p.hash, p.data, p.hashloc,-1).getHashLocs();
+							p.hashloc = HCServiceProxy.writeChunk(p.hash, p.data, p.hashloc,-1,this.mf.getLookupFilter()).getHashLocs();
 					}
 				} else {
 					if (HashFunctionPool.max_hash_cluster == 1) {
@@ -449,7 +449,7 @@ public class SparseDedupFile implements DedupFile {
 							HashFunctionPool.returnObject(hc);
 						}
 						byte[] b = writeBuffer.getFlushedBuffer();
-						InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,-1);
+						InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,-1,this.mf.getLookupFilter());
 						p.hashloc = rec.getHashLocs();
 						if (!rec.getInserted())
 							dups = writeBuffer.capacity();
@@ -465,11 +465,11 @@ public class SparseDedupFile implements DedupFile {
 						try {
 							List<Finger> fs = null;
 							if (Main.chunkStoreLocal)
-								fs = eng.getChunks(writeBuffer.getFlushedBuffer());
+								fs = eng.getChunks(writeBuffer.getFlushedBuffer(),this.mf.getLookupFilter());
 							else {
 								fs = new ArrayList<Finger>();
 								for (HashLocPair p : writeBuffer.getFingers().values()) {
-									Finger f = new Finger();
+									Finger f = new Finger(this.mf.getLookupFilter());
 									f.hash = p.hash;
 									f.chunk = p.data;
 									f.len = p.data.length;
@@ -1184,7 +1184,7 @@ public class SparseDedupFile implements DedupFile {
 				if (mf.getDev() != null) {
 					this.bdb = new BlockDevSocket(mf.getDev(), this.GUID);
 				} else
-					this.bdb = LongByteArrayMap.getMap(GUID);
+					this.bdb = LongByteArrayMap.getMap(GUID,this.mf.getLookupFilter());
 
 				this.closed = false;
 			}

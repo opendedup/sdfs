@@ -234,7 +234,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				byte[] hash = new byte[buf.getShort()];
 				buf.get(hash);
 				try {
-					rtrn = Boolean.valueOf(HCServiceProxy.hashExists(hash));
+					rtrn = Boolean.valueOf(HCServiceProxy.hashExists(hash,null));
 
 				} catch (Exception e) {
 					SDFSLogger.getLog()
@@ -254,7 +254,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 					try {
 						if (chunks.get(i) != null)
 							rsults.add(i, Boolean.valueOf(HCServiceProxy
-									.hashExists(chunks.get(i).hash)));
+									.hashExists(chunks.get(i).hash,null)));
 						else
 							rsults.add(i, Boolean.valueOf(false));
 					} catch (Exception e) {
@@ -305,7 +305,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 							rsults.add(
 									i,
 									HCServiceProxy.writeChunk(ck.getName(),
-											ck.getData(),-1).getInserted());
+											ck.getData(),-1,null).getInserted());
 						} else
 							rsults.add(i, null);
 					} catch (Exception e) {
@@ -328,7 +328,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				// SDFSLogger.getLog().debug("Writing " +
 				// StringUtils.getHexString(hash) + " done=" +done);
 				rtrn = Boolean.valueOf(HCServiceProxy.writeChunk(hash,
-						chunkBytes,-1).getInserted());
+						chunkBytes,-1,null).getInserted());
 				break;
 			}
 			case NetworkCMDS.FETCH_CMD: {

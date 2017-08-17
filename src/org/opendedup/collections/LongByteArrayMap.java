@@ -86,6 +86,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static ConcurrentHashMap<String, LongByteArrayMap> mp = new ConcurrentHashMap<String, LongByteArrayMap>();
 	private static ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
 	private static ReentrantLock iLock = new ReentrantLock(true);
+	private String lookupFilter = null;
 
 	static {
 		SDFSLogger.getLog().info("File Map Version is = " + Main.MAPVERSION);
@@ -131,12 +132,12 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 	}
 
-	private LongByteArrayMap(String filePath) throws IOException {
+	private LongByteArrayMap(String filePath,String lookupFilter) throws IOException {
 		this.filePath = filePath;
 		this.openFile();
 	}
 
-	public static LongByteArrayMap getMap(String GUID) throws IOException {
+	public static LongByteArrayMap getMap(String GUID,String lookupFilter) throws IOException {
 		File mapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
 				+ File.separator + GUID + ".map");
 		ReentrantLock l = getLock(GUID);
@@ -150,9 +151,9 @@ public class LongByteArrayMap implements DataMapInterface {
 				File zmapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator
 						+ GUID + File.separator + GUID + ".map.lz4");
 				if (zmapFile.exists())
-					map = new LongByteArrayMap(zmapFile.getPath());
+					map = new LongByteArrayMap(zmapFile.getPath(),lookupFilter);
 				else
-					map = new LongByteArrayMap(mapFile.getPath());
+					map = new LongByteArrayMap(mapFile.getPath(),lookupFilter);
 				mp.put(mapFile.getPath(), map);
 				return map;
 			}
@@ -294,7 +295,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						SparseDataChunk ck = new SparseDataChunk(val, this.version);
 						if (index) {
 							for (HashLocPair p : ck.getFingers().values()) {
-								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 							}
 						}
 						return ck;
@@ -329,7 +330,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						SparseDataChunk ck = new SparseDataChunk(val, this.version);
 						if (index) {
 							for (HashLocPair p : ck.getFingers().values()) {
-								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+								DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 							}
 						}
 						return new LongKeyValue(iterPos.get() * Main.CHUNK_LENGTH, ck);
@@ -544,7 +545,7 @@ public class LongByteArrayMap implements DataMapInterface {
 							if (!Arrays.equals(val, FREE)) {
 								SparseDataChunk ck = new SparseDataChunk(val, this.version);
 								for (HashLocPair p : ck.getFingers().values()) {
-									DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+									DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 								}
 							}
 						}
@@ -590,7 +591,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				while (kv != null && kv.getKey() < fpos) {
 					SparseDataChunk ck = kv.getValue();
 					for (HashLocPair p : ck.getFingers().values()) {
-						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+						DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 					}
 					kv = this.nextKeyValue(false);
 				}
@@ -749,7 +750,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				SparseDataChunk ck = this.nextValue(false);
 				while (ck != null) {
 					for (HashLocPair p : ck.getFingers().values()) {
-						boolean rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+						boolean rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
 						if (!rm) {
 							rmct.incrementAndGet();
 						}
@@ -823,7 +824,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 			if (index) {
-				LongByteArrayMap m = new LongByteArrayMap(dest.getPath());
+				LongByteArrayMap m = new LongByteArrayMap(dest.getPath(),this.lookupFilter);
 				m.index();
 				m.close();
 			} else if (Main.COMPRESS_METADATA) {

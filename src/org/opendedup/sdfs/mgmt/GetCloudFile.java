@@ -80,7 +80,7 @@ public class GetCloudFile implements Runnable {
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
 				
 				LongByteArrayMap ddb = null;
-				FileReplicationService.getDDB(mf.getDfGuid());
+				FileReplicationService.getDDB(mf.getDfGuid(),mf.getLookupFilter());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
 					sdd = sdf.getDedupFile(false);

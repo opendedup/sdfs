@@ -85,9 +85,9 @@ public class RestoreArchive implements Runnable {
 		DataMapInterface mp = null;
 		try {
 			if(mapFile.getName().endsWith(".lz4"))
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8));
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8),f.getLookupFilter());
 			else
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4),f.getLookupFilter());
 			mp.iterInit();
 			SparseDataChunk ck= mp.nextValue(false);
 			while (ck != null) {

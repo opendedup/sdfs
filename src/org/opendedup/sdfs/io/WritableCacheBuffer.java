@@ -376,6 +376,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 		return Main.CHUNK_LENGTH;
 	}
+	
+	public MetaDataDedupFile getMF() {
+		return this.df.mf;
+	}
 
 	public void setAR(TreeMap<Integer, HashLocPair> al) {
 		try {
@@ -391,7 +395,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				}
 					for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue());
+						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),df.mf.getLookupFilter());
 					}
 			}
 		} catch (Exception e) {
@@ -464,7 +468,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						AbstractHashEngine eng = HashFunctionPool.borrowObject();
 						try {
 							p.hash = eng.getHash(b);
-							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,1);
+							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b,1,this.df.mf.getLookupFilter());
 
 							p.hashloc = rec.getHashLocs();
 							p.len = b.length;
@@ -478,7 +482,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 							df.mf.getIOMonitor().addActualBytesWritten(b.length - dups, true);
 							df.mf.getIOMonitor().addDulicateData(dups, true);
 							this.prevDoop += dups;
-							SparseDataChunk.insertHashLocPair(ar, p);
+							SparseDataChunk.insertHashLocPair(ar, p,this.df.mf.getLookupFilter());
 							this.hlAdded = true;
 
 							/*
@@ -549,7 +553,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				try {
 					this.reconstructed = true;
 					this.hlAdded = true;
-					SparseDataChunk.insertHashLocPair(ar, p);
+					SparseDataChunk.insertHashLocPair(ar, p,this.df.mf.getLookupFilter());
 				} catch (Throwable e) {
 					df.errOccured = true;
 					throw new IOException(e);
@@ -564,7 +568,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
 
 		try {
-			List<Finger> fs = hc.getChunks(b);
+			List<Finger> fs = hc.getChunks(b,this.df.mf.getLookupFilter());
 			AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
 
 				@Override
@@ -668,7 +672,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					df.mf.getIOMonitor().addActualBytesWritten(f.len - dups, true);
 					df.mf.getIOMonitor().addDulicateData(dups, true);
 					this.prevDoop += dups;
-					SparseDataChunk.insertHashLocPair(ar, p);
+					SparseDataChunk.insertHashLocPair(ar, p,this.df.mf.getLookupFilter());
 				} catch (Throwable e) {
 					SDFSLogger.getLog().warn("unable to write object finger", e);
 					throw e;

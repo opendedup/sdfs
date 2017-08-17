@@ -80,7 +80,7 @@ public class Tiger16HashEngine implements AbstractHashEngine {
 	}
 	
 	@Override
-	public List<Finger> getChunks(byte[] data) throws IOException {
+	public List<Finger> getChunks(byte[] data,String lp) throws IOException {
 		throw new IOException("not supported");
 	}
 }

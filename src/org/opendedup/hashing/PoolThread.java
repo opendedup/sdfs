@@ -118,7 +118,7 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 								writeBuffer.startClose();
 
 								List<Finger> fs = eng.getChunks(writeBuffer
-										.getFlushedBuffer());
+										.getFlushedBuffer(),writeBuffer.getMF().getLookupFilter());
 								TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
 								for (Finger f : fs) {
 									HashLocPair p = new HashLocPair();
