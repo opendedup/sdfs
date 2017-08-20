@@ -156,6 +156,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	
 	public void setLookupFilter(String filter) {
 		this.lookupfilter = filter;
+		this.extendedAttrs.put("lookup.filter", filter);
 	}
 	
 	public String getLookupFilter() {
@@ -202,8 +203,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the name of the attribute
 	 * @param value
 	 *            the value of the attribute
+	 * @throws IOException 
 	 */
-	public void addXAttribute(String name, String value) {
+	public void addXAttribute(String name, String value) throws IOException {
 		addXAttribute(name, value, true);
 
 	}
@@ -216,10 +218,16 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            the value of the attribute
 	 * @param propigateEvent
 	 *            TODO
+	 * @throws IOException 
 	 */
-	public void addXAttribute(String name, String value, boolean propigateEvent) {
+	public void addXAttribute(String name, String value, boolean propigateEvent) throws IOException {
 		this.writeLock.lock();
 		try {
+			if(name.equals("lookup.filter")) {
+				if(this.extendedAttrs.containsKey("lookup.filter")) {
+					throw new IOException("cannot reset lookup filter");
+				}
+			}
 			extendedAttrs.put(name, value);
 			if(propigateEvent) {
 				this.dirty = true;
@@ -233,9 +241,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
-	public void removeXAttribute(String name) {
+	public void removeXAttribute(String name) throws IOException {
 		this.writeLock.lock();
 		try {
+			if(name.equals("lookup.filter")) {
+				throw new IOException("cannot reset lookup filter");
+			}
 			extendedAttrs.remove(name);
 			this.dirty = true;
 			eventBus.post(new MMetaUpdated(this, name, null));
@@ -1475,13 +1486,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				}
 				if(in.available() > 0) {
 					this.importing = in.readBoolean();
-				}if(in.available() > 0) {
-					int sz = in.readInt();
-					if(sz > 0) {
-						gfb = new byte[sz];
-						in.readFully(gfb);
-						this.lookupfilter = new String(gfb);
-					}
+				}
+				if(this.extendedAttrs.containsKey("lookup.filter")) {
+					this.lookupfilter = this.extendedAttrs.get("lookup.filter");
 				}
 				
 				/*
@@ -1551,13 +1558,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeBoolean(this.localowner);
 			out.writeLong(this.retentionLock);
 			out.writeBoolean(this.importing);
-			if(this.lookupfilter == null) {
-				out.writeInt(-1);
-			}else {
-				dfb = this.lookupfilter.getBytes();
-				out.writeInt(dfb.length);
-				out.write(dfb);
-			}
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length);
@@ -1626,7 +1626,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
 			if(this.lookupfilter != null) {
-				dataset.addProperty("lookup-filter",this.lookupfilter);
+				dataset.addProperty("lookup.filter",this.lookupfilter);
 			}
 		}
 		if (!compact && this.isDirectory()) {

@@ -987,15 +987,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				throw new FuseException().initErrno(Errno.ENFILE);
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			mf.removeXAttribute(name);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error removing exattr for " + path, e);
+			throw new FuseException().initErrno(Errno.ENODATA);
 		} finally {
 		}
 		return 0;
 	}
 
 	public int setxattr(String path, String name, ByteBuffer value, int flags) throws FuseException {
-		// SDFSLogger.getLog().info("1dddddddddd93");
-		// Thread.currentThread().setName("25
-		// "+Long.toString(System.currentTimeMillis()));
 		try {
 			byte valB[] = new byte[value.capacity()];
 			value.get(valB);

@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 Version 3.4.9
 	Fixes
 	* Fixed google timeouts over slow or bad connections
@@ -9,7 +7,6 @@ Version 3.4.9
 	* Increased base memory to 3GB for windows
 	* Ensure filechannels are closed for uploads of archive files
 	* Changing admin password now changes encryption password as well.
->>>>>>> master
 Version 3.4.7
    Fixes
    * Fixed ignore corrupt files on fdisk
