@@ -20,7 +20,6 @@ package org.opendedup.collections;
 
 import java.io.Externalizable;
 
-
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -32,11 +31,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
 //import org.opendedup.util.StringUtils;
-
-import com.google.common.primitives.Longs;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
@@ -49,7 +45,7 @@ public class SparseDataChunk implements Externalizable {
 	public byte flags = 0;
 	public static final int RECONSTRUCTED = 1; // 0001
 	private byte version = 0;
-	private TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
+	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
 
 	public SparseDataChunk() {
 
@@ -60,11 +56,11 @@ public class SparseDataChunk implements Externalizable {
 		this.marshall(rawData);
 	}
 
-	public SparseDataChunk(int doop, TreeMap<Integer,HashLocPair> ar, boolean localData, byte version) {
+	public SparseDataChunk(int doop, TreeMap<Integer, HashLocPair> ar, boolean localData, byte version) {
 
 		this.version = version;
 		this.doop = doop;
-		for(HashLocPair p : ar.values()) {
+		for (HashLocPair p : ar.values()) {
 			this.ar.put(p.pos, p);
 		}
 
@@ -72,9 +68,9 @@ public class SparseDataChunk implements Externalizable {
 
 	private void marshall(byte[] raw) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(raw);
-		ar = new TreeMap<Integer,HashLocPair>();
+		ar = new TreeMap<Integer, HashLocPair>();
 		if (this.version == 0) {
-			
+
 			byte b = buf.get();
 			if (b == 0)
 				doop = 0;
@@ -90,10 +86,10 @@ public class SparseDataChunk implements Externalizable {
 			p.len = Main.CHUNK_LENGTH;
 			p.nlen = p.len;
 			p.offset = 0;
-			ar.put(p.pos,p);
+			ar.put(p.pos, p);
 		} else if (version == 1) {
 			this.doop = buf.getInt();
-			ar = new TreeMap<Integer,HashLocPair>();
+			ar = new TreeMap<Integer, HashLocPair>();
 			byte[] hash = new byte[HashFunctionPool.hashLength * HashFunctionPool.max_hash_cluster];
 			buf.get(hash);
 			byte[] hashlocs = new byte[8 * HashFunctionPool.max_hash_cluster];
@@ -111,7 +107,7 @@ public class SparseDataChunk implements Externalizable {
 					p.hash = _hash;
 					p.hashloc = _hl;
 					p.pos = -1;
-					ar.put(z,p);
+					ar.put(z, p);
 				} else
 					break;
 			}
@@ -120,12 +116,12 @@ public class SparseDataChunk implements Externalizable {
 			this.flags = buf.get();
 			buf.getInt();
 			int zlen = buf.getInt();
-			ar = new TreeMap<Integer,HashLocPair>();
+			ar = new TreeMap<Integer, HashLocPair>();
 			for (int i = 0; i < zlen; i++) {
 				byte[] b = new byte[HashLocPair.BAL];
 				buf.get(b);
 				HashLocPair p = new HashLocPair(b);
-				ar.put(p.pos,p);
+				ar.put(p.pos, p);
 				int ep = p.pos + p.len;
 				if (ep > len)
 					len = ep;
@@ -141,10 +137,10 @@ public class SparseDataChunk implements Externalizable {
 	public HashLocPair getWL(int _pos) throws IOException {
 		l.readLock().lock();
 		try {
-				
-				Entry<Integer,HashLocPair>he =this.ar.floorEntry(_pos);
-				if(he != null) {
-					HashLocPair h = he.getValue();
+
+			Entry<Integer, HashLocPair> he = this.ar.floorEntry(_pos);
+			if (he != null) {
+				HashLocPair h = he.getValue();
 				int ep = h.pos + h.nlen;
 				if (_pos >= h.pos && _pos < ep) {
 					HashLocPair _h = h.clone();
@@ -154,9 +150,9 @@ public class SparseDataChunk implements Externalizable {
 					_h.pos = _pos;
 					return _h;
 				}
-				}
+			}
 			for (HashLocPair h : ar.values()) {
-				SDFSLogger.getLog().warn(h);
+				SDFSLogger.getLog().warn("Pos  = " + _pos + " not found in =" + h);
 			}
 			throw new IOException("Position not found " + _pos);
 		} finally {
@@ -165,74 +161,76 @@ public class SparseDataChunk implements Externalizable {
 
 	}
 
-	public static void insertHashLocPair(TreeMap<Integer,HashLocPair> ar, HashLocPair p,String lookupFilter) throws IOException {
+	public static void insertHashLocPair(TreeMap<Integer, HashLocPair> ar, HashLocPair p, String lookupFilter)
+			throws IOException {
 		int ep = p.pos + p.nlen;
 		if (ep > Main.CHUNK_LENGTH)
 			throw new IOException("Overflow ep=" + ep);
 		// SDFSLogger.getLog().info("p = " + p);
 		int _ep = ep;
-		//int k = 0;
-		for(;;) {
-			Entry<Integer,HashLocPair> he = ar.floorEntry(_ep);
-			if(he== null)
+		// int k = 0;
+		for (;;) {
+			Entry<Integer, HashLocPair> he = ar.floorEntry(_ep);
+			if (he == null)
 				break;
 			HashLocPair h = he.getValue();
 			int hpos = h.pos;
-			
+
 			int hep = h.pos + h.nlen;
-			//SDFSLogger.getLog().info("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos + " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" + StringUtils.getHexString(p.hash) +" h.hash=" + StringUtils.getHexString(h.hash));
-			if(hep < p.pos) {
+			// SDFSLogger.getLog().info("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos
+			// + " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" +
+			// StringUtils.getHexString(p.hash) +" h.hash=" +
+			// StringUtils.getHexString(h.hash));
+			if (hep < p.pos) {
 				break;
 			}
-				else if (h.pos >= p.pos && h.pos < ep && hep > ep) {
-					int no = ep - h.pos;
-					// int oh = h.pos;
-					h.pos = ep;
-					h.offset += no;
-					h.nlen -= no;
-					HashLocPair k = ar.remove(hpos);
-					if(Main.refCount)
-						DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1,lookupFilter);
+			if (h.pos >= p.pos) {
+				int no = ep - h.pos;
+				// int oh = h.pos;
+				h.pos = ep;
+				h.offset += no;
+				h.nlen -= no;
+
+				ar.remove(hpos);
+				if (h.nlen > 0)
 					ar.put(h.pos, h);
-					
-					// SDFSLogger.getLog().info("2 changing pos from " +oh
-					// +" to " + h.pos + " offset = " + h.offset);
-					
+
+				// SDFSLogger.getLog().info("2 changing pos from " +oh
+				// +" to " + h.pos + " offset = " + h.offset);
+			} else if (h.pos < p.pos && hep >= p.pos) {
+				if (hep > ep) {
+					int offset = ep - h.pos;
+					HashLocPair _h = h.clone();
+					_h.offset += offset;
+					_h.nlen -= offset;
+					_h.pos = ep;
+					if (!Main.chunkStoreLocal)
+						_h.hashloc[0] = 1;
+					else
+						_h.setDup(true);
+					if(_h.nlen <= 0)
+						SDFSLogger.getLog().error("LZ " + _h);
+					ar.put(_h.pos, h);
+
 				}
-				else if (h.pos <= p.pos && hep > p.pos) {
-					if (hep > ep) {
-						int offset = ep - h.pos;
-						HashLocPair _h = h.clone();
-						_h.offset += offset;
-						_h.nlen -= offset;
-						_h.pos = ep;
-						if (!Main.chunkStoreLocal)
-							_h.hashloc[0] = 1;
-						else
-							_h.setDup(true);
-						ar.put(_h.pos, h);
-						
-					}
-					if (h.pos < p.pos) {
-						h.nlen = (p.pos - h.pos);
-					} else {
-						
-						HashLocPair k= ar.remove(h.pos);
-						if(Main.refCount)
-							DedupFileStore.removeRef(k.hash, Longs.fromByteArray(k.hashloc),1,lookupFilter);
-					}
+				if (h.pos < p.pos) {
+					h.nlen = (p.pos - h.pos);
+				} else {
+					ar.remove(h.pos);
 				}
-			_ep = h.pos-1;
+				if(h.nlen <=0)
+					ar.remove(h.pos);
+			}
+			_ep = h.pos - 1;
+			/*
 			if (h.isInvalid()) {
 				SDFSLogger.getLog().error("h = " + h.toString());
 			}
-			//k++;
-			
-			
-		} ar.put(p.pos, p);
-		if(Main.refCount)
-			DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1,lookupFilter);
-			
+			*/
+
+		}
+		ar.put(p.pos, p);
+
 	}
 
 	public void setRecontructed(boolean reconstructed) {
@@ -309,7 +307,7 @@ public class SparseDataChunk implements Externalizable {
 		this.fpos = fpos;
 	}
 
-	public TreeMap<Integer,HashLocPair> getFingers() {
+	public TreeMap<Integer, HashLocPair> getFingers() {
 		return ar;
 	}
 

@@ -467,6 +467,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				bconfig.setMaxTotal(Main.dseIOThreads * 2);
 				bconfig.setTestOnBorrow(false);
 				bconfig.setTestOnReturn(false);
+				GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+				cfg.setMinIdle(Main.dseIOThreads);
 				this.bPool = new GenericObjectPool<BlobStore>(
 						new B2ConnectionFactory(Main.cloudAccessKey, Main.cloudSecretKey, overrides));
 			}

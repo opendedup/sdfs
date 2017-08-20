@@ -2,17 +2,20 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -112,9 +116,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static boolean DISABLE_WRITE = false;
 	private static LoadingCache<Long, HashBlobArchive> archives = null;
 	private static LoadingCache<Long, SimpleByteArrayLongMap> maps = null;
-	private static LoadingCache<Long, FileChannel> openFiles = null;
+	private static LoadingCache<Long, AsynchronousFileChannel> openFiles = null;
 	private static ConcurrentHashMap<Long, SimpleByteArrayLongMap> wMaps = new ConcurrentHashMap<Long, SimpleByteArrayLongMap>();
-	private static ConcurrentHashMap<Long, FileChannel> wOpenFiles = new ConcurrentHashMap<Long, FileChannel>();
+	private static ConcurrentHashMap<Long, AsynchronousFileChannel> wOpenFiles = new ConcurrentHashMap<Long, AsynchronousFileChannel>();
 	private static boolean closed = false;
 	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
@@ -265,8 +269,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
 					worksQueue, new BlockPolicy());
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
-					.removalListener(new RemovalListener<Long, FileChannel>() {
-						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
+					.removalListener(new RemovalListener<Long, AsynchronousFileChannel>() {
+						public void onRemoval(RemovalNotification<Long, AsynchronousFileChannel> removal) {
 							try {
 								try {
 									removal.getValue().close();
@@ -279,15 +283,15 @@ public class HashBlobArchive implements Runnable, Serializable {
 							}
 						}
 					}).concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
-					.build(new CacheLoader<Long, FileChannel>() {
-						public FileChannel load(Long hashid) throws IOException {
+					.build(new CacheLoader<Long, AsynchronousFileChannel>() {
+						public AsynchronousFileChannel load(Long hashid) throws IOException {
 							try {
 
 								File lf = new File(getPath(hashid).getPath());
 								if (lf.exists()) {
 									Path path = Paths.get(getPath(hashid).getPath());
-									FileChannel fileChannel = FileChannel.open(path);
-									return fileChannel;
+									AsynchronousFileChannel fc = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ);
+									return fc;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
 							} catch (Exception e) {
@@ -751,10 +755,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 			File cf = new File(getStagedPath(pid), Main.DSEID + "-" + Long.toString(pid) + ".vol");
 			this.id = pid;
 			f = new File(getStagedPath(pid), Long.toString(id));
-			@SuppressWarnings("resource")
-			FileChannel ch = new RandomAccessFile(f, "rw").getChannel();
 			this.writeable = true;
 			cf.setLastModified(System.currentTimeMillis());
+			Path path = f.toPath();
+			AsynchronousFileChannel ch =AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ,StandardOpenOption.CREATE);
+
 			wOpenFiles.put(id, ch);
 
 			rchunks.put(this.id, this);
@@ -769,7 +774,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 				byte[] biv = PassPhrase.getByteIV();
 				zb.put(biv);
 				zb.position(0);
-				ch.write(zb);
+				Future<Integer> result = ch.write(zb,0);
+				try {
+					result.get();
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
 				this.ivspec = new IvParameterSpec(biv);
 			}
 			this.putChunk(hash, chunk);
@@ -909,7 +919,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				} else {
 					chunk = bf.array();
 				}
-				FileChannel ch = null;
+				AsynchronousFileChannel ch = null;
 				long cp = -1;
 				Lock l = this.lock.writeLock();
 				l.lock();
@@ -927,7 +937,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 					ch = wOpenFiles.get(this.id);
 					if (ch == null) {
-						ch = new RandomAccessFile(f, "rw").getChannel();
+						Path path = f.toPath();
+						ch =AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ,StandardOpenOption.CREATE);
+
 						wOpenFiles.put(id, ch);
 					}
 
@@ -983,7 +995,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 				// SDFSLogger.getLog().info("writing at " +f.length() + " bl=" +
 				// buf.remaining() + "cs=" +chunk.length );
-				ch.write(buf, cp);
+				Future<Integer> fu = ch.write(buf, cp);
+				try {
+					fu.get();
+				}catch(Exception e) {
+					throw new IOException(e);
+				}
 			} finally {
 				ul.unlock();
 			}
@@ -1008,7 +1025,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 				}
 			}
-			FileChannel ch = wOpenFiles.remove(this.id);
+			AsynchronousFileChannel ch = wOpenFiles.remove(this.id);
 			if (ch != null) {
 				try {
 					ch.close();
@@ -1021,7 +1038,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			if (_m != null)
 				_m.close();
 			maps.invalidate(this.id);
-			FileChannel fc = openFiles.getIfPresent(this.id);
+			AsynchronousFileChannel fc = openFiles.getIfPresent(this.id);
 			if (fc != null) {
 				try {
 					fc.close();
@@ -1065,7 +1082,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
-				FileChannel fc = openFiles.getIfPresent(this.id);
+				AsynchronousFileChannel fc = openFiles.getIfPresent(this.id);
 				if (fc != null) {
 					try {
 						fc.close();
@@ -1106,7 +1123,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
-				FileChannel fc = openFiles.getIfPresent(this.id);
+				AsynchronousFileChannel fc = openFiles.getIfPresent(this.id);
 				if (fc != null) {
 					try {
 						fc.close();
@@ -1160,7 +1177,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						this.loadData();
 				}
 			}
-			FileChannel ch = null;
+			AsynchronousFileChannel ch = null;
 			if (!this.cached) {
 
 				ch = wOpenFiles.get(this.id);
@@ -1168,7 +1185,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					synchronized (f) {
 						if (!wOpenFiles.contains(this.id)) {
 							Path path = Paths.get(getPath(id).getPath());
-							ch = FileChannel.open(path);
+							ch = AsynchronousFileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
 							wOpenFiles.put(id, ch);
 						} else {
 							ch = wOpenFiles.get(this.id);
@@ -1189,15 +1206,26 @@ public class HashBlobArchive implements Runnable, Serializable {
 				if (ch == null)
 					ch = openFiles.get(id);
 				try {
-					ch.read(hb, pos);
+					Future<Integer> fu = ch.read(hb, pos);
+					fu.get();
 				} catch (Exception e) {
 					ch = openFiles.get(id);
-					ch.read(hb, pos);
+					Future<Integer> fu = ch.read(hb, pos);
+					try {
+						fu.get();
+					}catch(Exception e1) {
+						throw new IOException(e1);
+					}
 				}
 				hb.position(0);
 				nlen = hb.getInt();
 				ub = new byte[nlen];
-				ch.read(ByteBuffer.wrap(ub), pos + 4);
+				Future<Integer> fu = ch.read(ByteBuffer.wrap(ub), pos + 4);
+				try {
+					fu.get();
+				}catch(Exception e) {
+					throw new IOException(e);
+				}
 			} else {
 				byte[] h = new byte[8];
 				ByteBuffer hb = ByteBuffer.wrap(h);
@@ -1210,7 +1238,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 					ub = new byte[nlen];
 					if (ch == null)
 						ch = openFiles.get(id);
-					ch.read(ByteBuffer.wrap(ub), npos + 4);
+					Future<Integer> fu = ch.read(ByteBuffer.wrap(ub), npos + 4);
+					try {
+						fu.get();
+					}catch(Exception e) {
+						throw new IOException(e);
+					}
 				} else {
 					// SDFSLogger.getLog().info("getting " + npos + " nlen " +
 					// nlen + " from " + this.id + " pos " +pos);
@@ -1431,7 +1464,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						if (_ma != null)
 							_ma.close();
 						maps.invalidate(this.id);
-						FileChannel fc = openFiles.getIfPresent(this.id);
+						AsynchronousFileChannel fc = openFiles.getIfPresent(this.id);
 						if (fc != null) {
 							try {
 								fc.close();
@@ -1514,7 +1547,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			if (om != null) {
 				om.close();
 			}
-			FileChannel ch = wOpenFiles.remove(this.id);
+			AsynchronousFileChannel ch = wOpenFiles.remove(this.id);
 			if (ch != null) {
 				try {
 					ch.close();
@@ -1585,7 +1618,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}
 			} else {
-				FileChannel ch = wOpenFiles.remove(this.id);
+				AsynchronousFileChannel ch = wOpenFiles.remove(this.id);
 				if (ch != null) {
 					try {
 						ch.close();
@@ -1720,7 +1753,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		cc.stop();
 		maps.invalidateAll();
 		openFiles.invalidateAll();
-		for (FileChannel ch : wOpenFiles.values()) {
+		for (AsynchronousFileChannel ch : wOpenFiles.values()) {
 			try {
 				ch.close();
 			} catch (IOException e) {

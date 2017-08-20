@@ -510,6 +510,7 @@ public class Io {
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
+			//SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos=" +offset + " len=" + buf.capacity());
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*
 			 * if (buf.position() < buf.capacity()) { byte[] k = new

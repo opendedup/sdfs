@@ -530,14 +530,14 @@ public class Config {
 		}
 		SDFSLogger.getLog().debug("Wrote volume config = " + fileName);
 	}
+
 	/**
 	 * write the client side config file
 	 * 
 	 * @param fileName
 	 * @throws Exception
 	 */
-	public synchronized static Document getSDFSConfigFile(String fileName,boolean decrypt)
-			throws Exception {
+	public synchronized static Document getSDFSConfigFile(String fileName, boolean decrypt) throws Exception {
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -567,7 +567,7 @@ public class Config {
 				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
 			}
 			if (Main.chunkStoreEncryptionKey != null) {
-				 				localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
+				localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
 			}
 			if (Main.eCloudSecretKey != null) {
 				int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
@@ -580,15 +580,15 @@ public class Config {
 				}
 				if (googleSz > 0) {
 					Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-					aws.setAttribute("secret-key", Main.eCloudSecretKey);
+					aws.setAttribute("gs-secret-key", Main.eCloudSecretKey);
 				}
 				if (awsSz > 0) {
 					Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
-					aws.setAttribute("secret-key", Main.eCloudSecretKey);
+					aws.setAttribute("aws-secret-key", Main.eCloudSecretKey);
 				}
 				if (azureSz > 0) {
 					Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
-					azure.setAttribute("secret-key", Main.eCloudSecretKey);
+					azure.setAttribute("azure-secret-key", Main.eCloudSecretKey);
 				}
 			}
 		}

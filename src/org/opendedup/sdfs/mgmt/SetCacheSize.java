@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.w3c.dom.Element;
@@ -29,6 +30,7 @@ public class SetCacheSize implements Runnable {
 
 			long csz = Long.parseLong(sz);
 			HCServiceProxy.setCacheSize(csz);
+			Main.volume.writeUpdate();
 			evt.endEvent("Set Cache Size to " + csz + " bytes");
 
 		} catch (Exception e) {

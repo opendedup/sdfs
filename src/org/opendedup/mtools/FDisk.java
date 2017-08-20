@@ -20,9 +20,6 @@ package org.opendedup.mtools;
 
 import java.io.File;
 
-
-
-
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.concurrent.SynchronousQueue;
@@ -41,6 +38,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.HashLocPair;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -58,8 +56,8 @@ public class FDisk {
 	private AtomicLong corruptFiles = new AtomicLong(0);
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads,
-			10, TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+	private transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 10,
+			TimeUnit.SECONDS, worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 	public static boolean closed;
 
 	public FDisk() {
@@ -80,10 +78,10 @@ public class FDisk {
 	}
 
 	public void init(SDFSEvent evt, long entries) throws FDiskException {
-		
+
 		if (entries == 0)
 			entries = HCServiceProxy.getSize();
-		File f = new File(Main);
+		File f = new File(Main.volume.getPath());
 		if (!f.exists()) {
 			SDFSEvent.fdiskInfoEvent("FDisk Will not start because the volume has not been written too", evt)
 					.endEvent("FDisk Will not start because the volume has not been written too");
@@ -105,13 +103,13 @@ public class FDisk {
 			}
 			if (failed)
 				throw new IOException("FDisk traverse failed");
-			SDFSLogger.getLog().info(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"].");
+			SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check ["
+					+ files + "] corrupt files [" + corruptFiles.get() + "].");
 
-			fEvt.endEvent(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"].");
-			evt.endEvent(
-					"took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files + "] corrupt files ["+corruptFiles.get()+"]. ");
+			fEvt.endEvent("took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files
+					+ "] corrupt files [" + corruptFiles.get() + "].");
+			evt.endEvent("took [" + (System.currentTimeMillis() - start) / 1000 + "] seconds to check [" + files
+					+ "] corrupt files [" + corruptFiles.get() + "]. ");
 		} catch (Exception e) {
 			SDFSLogger.getLog().info("fdisk failed", e);
 			fEvt.endEvent("reference count failed because [" + e.toString() + "]", SDFSEvent.ERROR);
@@ -120,8 +118,6 @@ public class FDisk {
 			throw new FDiskException(e);
 		}
 	}
-
-	
 
 	private void traverse(File dir) throws IOException {
 		if (closed)
@@ -136,59 +132,61 @@ public class FDisk {
 		} else {
 			if (failed)
 				throw new IOException("FDisk traverse failed");
-			if (dir.getPath().endsWith(".map") || dir.getPath().endsWith(".map.lz4")) {
-				executor.execute(new CheckDedupFile(this, dir));
-			}
+			executor.execute(new CheckDedupFile(this, MetaDataDedupFile.getFile(dir.getPath())));
 		}
 	}
 
-	private void checkDedupFile(File mapFile) throws IOException {  
+	private void checkDedupFile(File mapFile, String lookupFilter) throws IOException {
 		if (closed) {
 			this.failed = true;
 			return;
 		}
 		LongByteArrayMap mp = null;
 		try {
-			if(mapFile.getName().endsWith(".lz4"))
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8));
+
+			if (mapFile.getName().endsWith(".lz4"))
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length() - 8),
+						lookupFilter);
 			else
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4));
-			
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length() - 4),
+						lookupFilter);
+
 			if (closed) {
 				this.failed = true;
 				return;
 			}
 			mp.iterInit();
 			SparseDataChunk ck = mp.nextValue(false);
-			//long k = 0;
+			// long k = 0;
 			while (ck != null) {
 				if (closed) {
 					this.failed = true;
 					return;
 				}
-				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				boolean hpc = false;
 				for (HashLocPair p : al.values()) {
-					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
-					//k++;
-					if(!added) {
-						long pos = HCServiceProxy.hashExists(p.hash, false);
+					boolean added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc), 1, lookupFilter);
+					// k++;
+					if (!added) {
+						long pos = HCServiceProxy.hashExists(p.hash, false, lookupFilter);
 						if (pos != -1) {
 							p.hashloc = Longs.toByteArray(pos);
 							hpc = true;
-							added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc),1);
+							added = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc), 1, lookupFilter);
 						}
-						if(!added)
-							SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash=" + StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));
+						if (!added)
+							SDFSLogger.getLog().warn("ref not added for " + mapFile + " at " + ck.getFpos() + " hash="
+									+ StringUtils.getHexString(p.hash) + " lh=" + Longs.fromByteArray(p.hashloc));
 					}
-					
+
 				}
 				if (hpc) {
 					mp.put(ck.getFpos(), ck);
 				}
 				ck = mp.nextValue(false);
 			}
-			//SDFSLogger.getLog().info("ref added for " + mapFile + " k= " +k);
+			// SDFSLogger.getLog().info("ref added for " + mapFile + " k= " +k);
 
 			synchronized (fEvt) {
 				fEvt.curCt++;
@@ -222,9 +220,9 @@ public class FDisk {
 	private static class CheckDedupFile implements Runnable {
 
 		FDisk fd = null;
-		File f = null;
+		MetaDataDedupFile f = null;
 
-		protected CheckDedupFile(FDisk fd, File f) {
+		protected CheckDedupFile(FDisk fd, MetaDataDedupFile f) {
 			this.fd = fd;
 			this.f = f;
 		}
@@ -232,7 +230,13 @@ public class FDisk {
 		@Override
 		public void run() {
 			try {
-				fd.checkDedupFile(f);
+				File directory = new File(Main.dedupDBStore + File.separator + f.getDfGuid().substring(0, 2)
+						+ File.separator + f.getDfGuid());
+				File dbf = new File(directory.getPath() + File.separator + f.getDfGuid() + ".map");
+				if (!dbf.exists())
+					dbf = new File(directory.getPath() + File.separator + f.getDfGuid() + ".map.lz4");
+				if (dbf.exists())
+					fd.checkDedupFile(dbf, f.getLookupFilter());
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("error doing fdisk", e);
 			}

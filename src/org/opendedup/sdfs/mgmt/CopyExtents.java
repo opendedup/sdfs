@@ -32,8 +32,8 @@ import com.google.common.cache.RemovalNotification;
 public class CopyExtents {
 	SDFSEvent evt;
 
-	private static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(30)
-			.concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
+	private static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(Main.maxOpenFiles*2)
+			.concurrencyLevel(64).expireAfterAccess(120, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<String, DedupFileChannel>() {
 				public void onRemoval(RemovalNotification<String, DedupFileChannel> removal) {
 					DedupFileChannel ck = removal.getValue();
