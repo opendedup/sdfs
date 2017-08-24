@@ -21,7 +21,10 @@ public class Main {
 			Main.chunkStore = System.getenv("programfiles") + File.separator
 					+ "sdfs" + File.separator;
 		}
+		
 	}
+	
+	
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
 	public static int hashSeed=6442;

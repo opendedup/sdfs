@@ -37,6 +37,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   	<timestamp>${maven.build.timestamp}</timestamp>
+   	<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
   </properties>
   <dependencies>
 <dependency>
@@ -259,6 +261,15 @@
 </dependency>
   </dependencies>
   <build>
+  <resources>
+        <resource>
+      <directory>src/resources</directory>
+      <includes>
+        <include>version.properties</include>
+      </includes>
+      <filtering>true</filtering>
+    </resource>
+ </resources>
   <sourceDirectory>./src/</sourceDirectory>
     <scriptSourceDirectory>./scripts</scriptSourceDirectory>
     <testSourceDirectory>./test/java</testSourceDirectory>
@@ -314,6 +325,24 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            
+            <plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>1.1.1</version>
+    <executions>
+      <execution>
+        <id>some-execution</id>
+        <phase>compile</phase>
+        <goals>
+          <goal>exec</goal>
+        </goals>
+      </execution>
+    </executions>
+    <configuration>
+      <executable>hostname</executable>
+    </configuration>
+  </plugin>
             
     
   </plugins>

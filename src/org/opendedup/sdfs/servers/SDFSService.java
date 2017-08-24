@@ -19,8 +19,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
-
-
+import java.util.Properties;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -49,7 +48,19 @@ public class SDFSService {
 
 		this.configFile = configFile;
 		this.volumes = volumes;
-		System.out.println("Running Program SDFS Version " + Main.version);
+		String ts = "";
+		Properties props = new Properties();
+	    try 
+	    {
+			props.load(this.getClass().getResourceAsStream("/version.properties"));
+	        Main.version = props.getProperty("version");
+	        ts = props.getProperty("timestamp");
+	        
+	    } catch (Exception e) 
+	    {
+	        e.printStackTrace();
+	    }
+		System.out.println("Running Program SDFS Version " + Main.version + " build date " + ts);
 
 		System.out.println("reading config file = " + this.configFile);
 	}

@@ -225,8 +225,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		try {
 			if(name.equals("lookup.filter")) {
 				if(this.extendedAttrs.containsKey("lookup.filter")) {
-					throw new IOException("cannot reset lookup filter");
+					SDFSLogger.getLog().warn("cannot reset lookup filter");
+					return;
 				}
+				else
+					this.lookupfilter=value;
 			}
 			extendedAttrs.put(name, value);
 			if(propigateEvent) {
@@ -245,12 +248,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.writeLock.lock();
 		try {
 			if(name.equals("lookup.filter")) {
-				throw new IOException("cannot reset lookup filter");
-			}
+				SDFSLogger.getLog().warn("cannot reset lookup filter");
+			} else {
 			extendedAttrs.remove(name);
 			this.dirty = true;
 			eventBus.post(new MMetaUpdated(this, name, null));
 			this.unmarshal();
+			}
 		} finally {
 			this.writeLock.unlock();
 		}
