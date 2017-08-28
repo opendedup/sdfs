@@ -1,3 +1,6 @@
+Version 3.4.11
+	Fixes
+	* Added SDFS Version to user agent.
 Version 3.4.10.1
 	Fixes
 	* Set default cache size to 100GB for windows

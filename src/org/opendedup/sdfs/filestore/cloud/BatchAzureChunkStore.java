@@ -258,13 +258,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			HashBlobArchive.MAX_LEN = sz;
 
 		}
-		if (config.hasAttribute("user-agent-prefix")) {
-			String ua = config.getAttribute("user-agent-prefix");
+		String userAgent = "SDFS/" + Main.version;
+		if (config.hasAttribute("user-agent-prefix"))
+			userAgent = config.getAttribute("user-agent-prefix") + " " + userAgent;
 			HashMap<String, String> headers = new HashMap<String, String>();
-			headers.put("User-Agent", ua);
+			headers.put("User-Agent", userAgent);
 			opContext.setUserHeaders(headers);
 
-		}
 		if (config.hasAttribute("connection-check-interval")) {
 			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 		}

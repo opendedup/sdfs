@@ -490,6 +490,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.hasAttribute("user-agent-prefix")) {
 				clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
 			}
+			clientConfig.setUserAgentSuffix("SDFS/" + Main.version);
 			if (config.getElementsByTagName("connection-props").getLength() > 0) {
 				Element el = (Element) config.getElementsByTagName("connection-props").item(0);
 				if (el.hasAttribute("connection-timeout"))
