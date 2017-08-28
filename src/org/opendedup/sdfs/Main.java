@@ -154,7 +154,7 @@ public class Main {
 	 * whether encryption should be enabled for the DSE
 	 */
 	public static boolean chunkStoreEncryptionEnabled = false;
-
+	
 	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
@@ -164,8 +164,9 @@ public class Main {
 	 * The location where dedup file maps will be stored. Dedup file maps are
 	 * database files and the virtual representation of a file on disk. This is
 	 * used on the client.
-	 */
+	*/
 	public static String dedupDBStore = null;
+	public static String lookupfilterStore = null;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem

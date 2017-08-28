@@ -421,7 +421,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String userAgent = "SDFS/" + Main.version;
 			if (config.hasAttribute("user-agent-prefix"))
 				userAgent = config.getAttribute("user-agent-prefix") + " " + userAgent;
-			overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
+			if (service.equalsIgnoreCase("b2"))
+				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "60000");
+			else
+				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
+			
 			overrides.setProperty(Constants.PROPERTY_USER_THREADS, "0");
 			overrides.setProperty(Constants.PROPERTY_USER_AGENT, userAgent);
 			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_CONTEXT,
@@ -833,13 +837,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			BlobStore st = null;
 			try {
 				st = bPool.borrowObject();
-				if (mp)
+				if (mp) {
 					st.putBlob(this.name, blob, multipart());
-				else
+				}else {
 					st.putBlob(this.name, blob);
+				}
+				
 			} catch (java.lang.IllegalArgumentException e) {
+				SDFSLogger.getLog().error("unable to borrow object", e);
 				if (e.getMessage().startsWith("large files must have at least"))
 					writeBlob(blob, false);
+				else
+					SDFSLogger.getLog().error("unable to borrow object", e);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to borrow object", e);
 				throw new IOException(e);
