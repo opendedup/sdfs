@@ -725,7 +725,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	}
 
-	protected final static class ProcessPriorityThreadFactory implements ThreadFactory {
+	public final static class ProcessPriorityThreadFactory implements ThreadFactory {
 
 		private final int threadPriority;
 
@@ -764,17 +764,17 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 	
-	private static class StartShard implements Runnable {
+	public static class StartShard implements Runnable {
 
 		RocksDB [] dbs = null;
 		int n = -1;
 		Options options = null;
 		String path = null;
-		Exception e = null;
+		public Exception e = null;
 		CommandLineProgressBar bar = null;
 		AtomicInteger ct = null;
 
-		protected StartShard(int n,RocksDB [] dbs,Options options,File f,CommandLineProgressBar bar,AtomicInteger ct) {
+		public StartShard(int n,RocksDB [] dbs,Options options,File f,CommandLineProgressBar bar,AtomicInteger ct) {
 			this.dbs = dbs;
 			this.n = n;
 			this.options = options;
