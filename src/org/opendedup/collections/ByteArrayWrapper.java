@@ -1,10 +1,17 @@
 package org.opendedup.collections;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
 
-public final class ByteArrayWrapper
+public final class ByteArrayWrapper implements Externalizable
 {
-    private final byte[] data;
+    private byte[] data;
+    public ByteArrayWrapper() {
+    	
+    }
 
     public ByteArrayWrapper(byte[] data)
     {
@@ -34,4 +41,20 @@ public final class ByteArrayWrapper
     {
         return Arrays.hashCode(data);
     }
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(data.length);
+		out.write(data);
+		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		
+		data = new byte[in.readInt()];
+		in.readFully(data);
+		
+		
+	}
 }

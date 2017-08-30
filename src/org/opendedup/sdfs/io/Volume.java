@@ -298,9 +298,11 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("closed-gracefully")) {
 			Main.closedGracefully = Boolean.parseBoolean(vol
 					.getAttribute("closed-gracefully"));
-			if (!Main.closedGracefully)
-				Main.runConsistancyCheck = true;
 		}
+		if (vol.hasAttribute("rebuild-hashtable")) {
+			Main.runConsistancyCheck = true;
+		}
+		
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));

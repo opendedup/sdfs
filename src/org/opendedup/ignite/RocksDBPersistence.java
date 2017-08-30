@@ -1,9 +1,11 @@
 package org.opendedup.ignite;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -16,7 +18,7 @@ import javax.cache.Cache.Entry;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 
-import org.apache.ignite.cache.store.CacheStoreAdapter;
+import org.apache.ignite.lang.IgniteBiInClosure;
 import org.opendedup.collections.ByteArrayWrapper;
 import org.opendedup.collections.RocksDBMap.ProcessPriorityThreadFactory;
 import org.opendedup.collections.RocksDBMap.StartShard;
@@ -34,18 +36,19 @@ import org.rocksdb.Env;
 import org.rocksdb.IndexType;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
 import org.rocksdb.WriteOptions;
 
-public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, ByteArrayWrapper> {
-	
+public class RocksDBPersistence implements org.apache.ignite.cache.store.CacheStore<ByteArrayWrapper, ByteArrayWrapper> {
+
 	WriteOptions wo = new WriteOptions();
 	// RocksDB db = null;
 	String fileName = null;
 	ReentrantLock[] lockMap = new ReentrantLock[256];
 	RocksDB[] dbs = new RocksDB[8];
 	RocksDB rmdb = null;
-	private static final long GB = 1024*1024*1024;
-	private static final long MB = 1024*1024;
+	private static final long GB = 1024 * 1024 * 1024;
+	private static final long MB = 1024 * 1024;
 	int multiplier = 0;
 	boolean closed = false;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
@@ -54,14 +57,14 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 	static {
 		RocksDB.loadLibrary();
 	}
-	
+
 	public RocksDBPersistence() {
 		super();
 		File directory = new File(Main.hashDBStore + File.separator);
 		if (!directory.exists())
 			directory.mkdirs();
 		this.fileName = directory.getPath();
-		
+
 		long size = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			size = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
@@ -69,23 +72,22 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 		try {
 			multiplier = 256 / dbs.length;
 			System.out.println("multiplier=" + this.multiplier + " size=" + dbs.length);
-			long bufferSize =GB;
-			long fsize = 128*MB;
+			long bufferSize = GB;
+			long fsize = 128 * MB;
 			if (size < 1_000_000_000L) {
-				bufferSize = 512*MB*dbs.length;
-			}
-			else if (size < 10_000_000_000L) {
-				fsize = 128*MB;
-				bufferSize = fsize*10*dbs.length;
+				bufferSize = 512 * MB * dbs.length;
+			} else if (size < 10_000_000_000L) {
+				fsize = 128 * MB;
+				bufferSize = fsize * 10 * dbs.length;
 			} else if (size < 50_000_000_000L) {
-				fsize = 256*MB;
-				bufferSize = GB*dbs.length;
+				fsize = 256 * MB;
+				bufferSize = GB * dbs.length;
 			} else {
-				//long mp = this.size / 10_000_000_000L;
-				
+				// long mp = this.size / 10_000_000_000L;
+
 				fsize = GB;
-				bufferSize = 1*GB*dbs.length;
-			} 
+				bufferSize = 1 * GB * dbs.length;
+			}
 
 			// blockConfig.setChecksumType(ChecksumType.kNoChecksum);
 			long totmem = size;
@@ -108,12 +110,12 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 			AtomicInteger ct = new AtomicInteger();
 			ArrayList<StartShard> shs = new ArrayList<StartShard>();
 			for (int i = 0; i < dbs.length; i++) {
-				
+
 				BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-				//ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
-				//DBOptions dbo = new DBOptions();
-				//cfOptions.optimizeLevelStyleCompaction();
-				//cfOptions.optimizeForPointLookup(8192);
+				// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
+				// DBOptions dbo = new DBOptions();
+				// cfOptions.optimizeLevelStyleCompaction();
+				// cfOptions.optimizeForPointLookup(8192);
 				blockConfig.setFilter(new BloomFilter(16, false));
 				// blockConfig.setHashIndexAllowCollision(false);
 				// blockConfig.setCacheIndexAndFilterBlocks(false);
@@ -143,31 +145,31 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 				// options.setLevelCompactionDynamicLevelBytes(true);
 				//
 				options.setAllowConcurrentMemtableWrite(true);
-				//LRUCache c = new LRUCache(memperDB);
-				//options.setRowCache(c);
-				blockConfig.setBlockCacheSize(GB*2);		
-				
-				options.setWriteBufferSize(bufferSize/dbs.length);
-				//options.setMinWriteBufferNumberToMerge(2);
-				//options.setMaxWriteBufferNumber(6);
-				//options.setLevelZeroFileNumCompactionTrigger(2);
+				// LRUCache c = new LRUCache(memperDB);
+				// options.setRowCache(c);
+				blockConfig.setBlockCacheSize(GB * 2);
 
-				options.setCompactionReadaheadSize(1024*1024*25);
+				options.setWriteBufferSize(bufferSize / dbs.length);
+				// options.setMinWriteBufferNumberToMerge(2);
+				// options.setMaxWriteBufferNumber(6);
+				// options.setLevelZeroFileNumCompactionTrigger(2);
+
+				options.setCompactionReadaheadSize(1024 * 1024 * 25);
 				// options.setUseDirectIoForFlushAndCompaction(true);
 				// options.setUseDirectReads(true);
 				options.setStatsDumpPeriodSec(30);
 				// options.setAllowMmapWrites(true);
-				//options.setAllowMmapReads(true);
+				// options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
 				options.createStatistics();
-				//options.setTargetFileSizeBase(512*1024*1024);
-				
-				options.setMaxBytesForLevelBase(fsize*5);
+				// options.setTargetFileSizeBase(512*1024*1024);
+
+				options.setMaxBytesForLevelBase(fsize * 5);
 				options.setTargetFileSizeBase(fsize);
 				options.setTableFormatConfig(blockConfig);
 				File f = new File(fileName + File.separator + i);
 				f.mkdirs();
-				StartShard sh = new StartShard(i,this.dbs, options,f,bar,ct);
+				StartShard sh = new StartShard(i, this.dbs, options, f, bar, ct);
 				executor.execute(sh);
 				shs.add(sh);
 			}
@@ -179,15 +181,14 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 			} catch (InterruptedException e) {
 				throw new IOException(e);
 			}
-			for(StartShard sh : shs) {
-				if(sh.e != null)
+			for (StartShard sh : shs) {
+				if (sh.e != null)
 					throw sh.e;
 			}
 
 			for (int i = 0; i < lockMap.length; i++) {
 				lockMap[i] = new ReentrantLock();
 			}
-			
 
 			Options options = new Options();
 			options.setCreateIfMissing(true);
@@ -209,15 +210,15 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 			options.setMaxBackgroundCompactions(8);
 			options.setMaxBackgroundFlushes(8);
 			options.setEnv(env);
-		
+
 			// options.setNumLevels(8);
 			// options.setLevelCompactionDynamicLevelBytes(true);
 			//
 			options.setAllowConcurrentMemtableWrite(true);
-			//LRUCache c = new LRUCache(memperDB);
-			//options.setRowCache(c);
-			
-			//blockConfig.setBlockCacheSize(memperDB);
+			// LRUCache c = new LRUCache(memperDB);
+			// options.setRowCache(c);
+
+			// blockConfig.setBlockCacheSize(memperDB);
 			blockConfig.setNoBlockCache(true);
 			options.setWriteBufferSize(GB);
 			options.setMinWriteBufferNumberToMerge(2);
@@ -241,26 +242,74 @@ public class RocksDBPersistence extends CacheStoreAdapter<ByteArrayWrapper, Byte
 			rmdb = RocksDB.open(options, f.getPath());
 			bar.finish();
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to initiate datastore",e);
+			SDFSLogger.getLog().fatal("unable to initiate datastore", e);
 			System.exit(1);
 		}
+	}
+	@Override public void loadCache(IgniteBiInClosure<ByteArrayWrapper, ByteArrayWrapper> clo, Object... args) {
+		SDFSLogger.getLog().info("loading cache");
+	}
+
+	private RocksDB getDB(byte[] key) {
+		int l = key[key.length - 1];
+		if (l < 0) {
+			l = ((l * -1) + 127);
+		}
+		return dbs[l / multiplier];
 	}
 
 	@Override
 	public ByteArrayWrapper load(ByteArrayWrapper key) throws CacheLoaderException {
-		byte [] b  =
+		try {
+			byte[] b = this.getDB(key.getData()).get(key.getData());
+			if (b != null)
+				return new ByteArrayWrapper(b);
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to load hash", e);
+			throw new CacheLoaderException(e);
+		}
+
 		return null;
 	}
 
 	@Override
 	public void delete(Object key) throws CacheWriterException {
-		// TODO Auto-generated method stub
-		
+		try {
+			ByteArrayWrapper bw = (ByteArrayWrapper) key;
+			this.getDB(bw.getData()).delete(bw.getData());
+		} catch (RocksDBException e) {
+			throw new CacheWriterException(e);
+		}
+
 	}
 
 	@Override
-	public void write(Entry<? extends ByteArrayWrapper, ? extends ByteArrayWrapper> arg0) throws CacheWriterException {
-		// TODO Auto-generated method stub
+	public void write(Entry<? extends ByteArrayWrapper, ? extends ByteArrayWrapper> entry) throws CacheWriterException {
+		try {
+			ByteArrayWrapper key = entry.getKey();
+			ByteArrayWrapper value = entry.getValue();
+			this.getDB(key.getData()).put(key.getData(), value.getData());
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to persist hash", e);
+			throw new CacheWriterException(e);
+		}
+	}
+	@Override
+	public Map<ByteArrayWrapper, ByteArrayWrapper> loadAll(Iterable<? extends ByteArrayWrapper> arg0)
+			throws CacheLoaderException {
+		return null;
+	}
+	@Override
+	public void deleteAll(Collection<?> arg0) throws CacheWriterException {
+		
+	}
+	@Override
+	public void writeAll(Collection<Entry<? extends ByteArrayWrapper, ? extends ByteArrayWrapper>> arg0)
+			throws CacheWriterException {
+		
+	}
+	@Override
+	public void sessionEnd(boolean arg0) throws CacheWriterException {
 		
 	}
 

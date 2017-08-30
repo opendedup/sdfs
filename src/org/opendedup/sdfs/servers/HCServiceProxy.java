@@ -226,9 +226,15 @@ public class HCServiceProxy {
 				hcService = new HashChunkService();
 				hcService.init();
 				File file = new File(Main.hashDBStore + File.separator + ".lock");
-				if (Main.runConsistancyCheck || file.exists()) {
+				if(file.exists()) {
+					SDFSLogger.getLog().fatal("lock file exists " + file.getPath());
+					SDFSLogger.getLog().fatal("Please remove lock file to proceed");
+					System.out.println("lock file exists " + file.getPath());
+					System.out.println("Please remove lock file to proceed");
+					System.exit(2);
+				}
+				if (Main.runConsistancyCheck) {
 					hcService.runConsistancyCheck();
-
 				}
 
 				if (Main.syncDL) {

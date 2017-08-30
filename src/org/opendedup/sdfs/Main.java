@@ -405,5 +405,6 @@ public class Main {
 	public static String fDkiskSchedule = "0 59 23 * * ?";
 
 	public static boolean closedGracefully = true;
+	public static boolean rebuildHashTable = false;
 
 }

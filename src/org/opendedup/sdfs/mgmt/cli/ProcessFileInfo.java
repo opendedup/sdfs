@@ -93,10 +93,11 @@ public class ProcessFileInfo {
 								.getAttribute("actual-bytes-written"));
 						long dedupBytes = Long.parseLong(ioEl
 								.getAttribute("duplicate-blocks"));
-						if (dedupBytes == 0 || realBytes == 0) {
-
+						if (dedupBytes == 0) {
+							System.out.printf("dedup rate : %d%%\n", 100);
+						} else if( realBytes == 0){
 							System.out.printf("dedup rate : %d%%\n", 0);
-						} else {
+						}else {
 							double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
 							if (Double.isFinite(dedupRate)) {
 								DecimalFormat twoDForm = (DecimalFormat) NumberFormat
