@@ -160,10 +160,17 @@ public class WinSDFS implements DokanOperations {
 		return nextHandleNo++;
 	}
 
+	private void checkLocal(String fileName) throws DokanOperationException {
+		if(!new File(mountedVolume + fileName).getPath().startsWith(mountedVolume)) {
+			log.error("access denied to " +new File(mountedVolume + fileName).getPath());
+			throw new DokanOperationException(WinError.ERROR_ACCESS_DENIED); 
+		}
+	}
 	@Override
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode, int creationDisposition,
 			int flagsAndAttributes, int createOptions, DokanFileInfo fileInfo) throws DokanOperationException {
 		try {
+			this.checkLocal(fileName);
 			CreateFileThread sn = new CreateFileThread(fileName, desiredAccess, shareMode, creationDisposition,
 					createOptions, flagsAndAttributes, fileInfo, this);
 			int z = 0;
