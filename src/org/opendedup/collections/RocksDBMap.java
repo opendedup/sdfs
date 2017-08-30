@@ -609,9 +609,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			byte[] data = null;
 			try {
 				data = ChunkData.getChunk(key, pos);
-			} catch (Exception e) {
+			}catch (DataArchivedException e) {
+				throw e;
+			}catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
-			}
+			} 
+			
 			if (direct && (data == null || data.length == 0)) {
 				SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + pos + "] ");
 				return null;
