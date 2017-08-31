@@ -21,6 +21,7 @@ package org.opendedup.collections;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,6 +40,12 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.WriteOptions;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+
 public class LocalLookupFilter {
 	WriteOptions wo = new WriteOptions();
 	// RocksDB db = null;
@@ -48,7 +55,41 @@ public class LocalLookupFilter {
 	private static final long GB = 1024 * 1024 * 1024;
 	private static final long MB = 1024 * 1024;
 	boolean closed = false;
+	private static final LoadingCache<String, LocalLookupFilter> lfs = CacheBuilder.newBuilder()
+			.maximumSize(Main.maxOpenFiles).concurrencyLevel(72).expireAfterAccess(120, TimeUnit.MINUTES)
+			.removalListener(new RemovalListener<String, LocalLookupFilter>() {
+
+				@Override
+				public void onRemoval(RemovalNotification<String, LocalLookupFilter> ev) {
+					try {
+						ev.getValue().close();
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("unable to close " + ev.getKey(), e);
+					}
+
+				}
+
+			}).build(new CacheLoader<String, LocalLookupFilter>() {
+
+				@Override
+				public LocalLookupFilter load(String name) throws Exception {
+					LocalLookupFilter lf = new LocalLookupFilter();
+					lf.init(name);
+					return lf;
+				}
+			});
 	
+	public static LocalLookupFilter getLocalLookupFilter(String filter) throws IOException {
+		try {
+		return lfs.get(filter);
+		}catch(Exception e) {
+			throw new IOException(e);
+		}
+	}
+	
+	public static void closeAll() {
+		lfs.invalidateAll();
+	}
 	static {
 		RocksDB.loadLibrary();
 		if (Main.lookupfilterStore == null) {
@@ -58,7 +99,7 @@ public class LocalLookupFilter {
 		}
 	}
 
-	public void init(String lookupfilter) throws IOException, HashtableFullException {
+	private void init(String lookupfilter) throws IOException, HashtableFullException {
 
 		try {
 			this.fileName = Main.lookupfilterStore + File.separator + lookupfilter;

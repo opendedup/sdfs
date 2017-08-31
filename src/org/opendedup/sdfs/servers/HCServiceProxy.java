@@ -23,8 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
@@ -55,11 +53,6 @@ import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Longs;
 
@@ -70,39 +63,12 @@ public class HCServiceProxy {
 	private static EventBus eventBus = new EventBus();
 	public static ClusterSocket cs = null;
 
-	private static final LoadingCache<String, LocalLookupFilter> lfs = CacheBuilder.newBuilder()
-			.maximumSize(Main.maxOpenFiles).concurrencyLevel(72).expireAfterAccess(120, TimeUnit.MINUTES)
-			.removalListener(new RemovalListener<String, LocalLookupFilter>() {
-
-				@Override
-				public void onRemoval(RemovalNotification<String, LocalLookupFilter> ev) {
-					try {
-						ev.getValue().close();
-					} catch (Exception e) {
-						SDFSLogger.getLog().warn("unable to close " + ev.getKey(), e);
-					}
-
-				}
-
-			}).build(new CacheLoader<String, LocalLookupFilter>() {
-
-				@Override
-				public LocalLookupFilter load(String name) throws Exception {
-					LocalLookupFilter lf = new LocalLookupFilter();
-					lf.init(name);
-					return lf;
-				}
-			});
+	
 
 	// private static boolean initialized = false;
 	
 	public static LocalLookupFilter getLookupFilter(String filter) throws IOException {
-		try {
-			return lfs.get(filter);
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			throw new IOException(e);
-		}
+			return LocalLookupFilter.getLocalLookupFilter(filter);
 	}
 
 	public static void registerListener(Object obj) {
@@ -133,13 +99,10 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized boolean hashExists(byte[] hash, String guid) throws IOException, HashtableFullException {
-		try {
-			if (guid != null && lfs.get(guid).containsKey(hash)) {
+		if (guid != null && LocalLookupFilter.getLocalLookupFilter(guid).containsKey(hash)) {
 				return true;
 			}
-		} catch (ExecutionException e) {
-			throw new IOException(e);
-		}
+		
 		long pos = hcService.hashExists(hash);
 		if (pos != -1)
 			return true;
@@ -201,11 +164,7 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			if (guid != null) {
 				long nc;
-				try {
-					nc = lfs.get(guid).claimKey(key, val, ct);
-				} catch (ExecutionException e) {
-					throw new IOException(e);
-				}
+					nc = LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
 				if (nc == 0) {
 					return true;
 				}
@@ -460,18 +419,14 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (guid != null) {
-				try {
-					long pos = lfs.get(guid).put(hash, ct);
+					long pos = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, ct);
 					if (pos == -1) {
 						InsertRecord ir = HCServiceProxy.hcService.writeChunk(hash, aContents, false, 1);
-						lfs.get(guid).put(hash, Longs.fromByteArray(ir.getHashLocs()), ct);
+						LocalLookupFilter.getLocalLookupFilter(guid).put(hash, Longs.fromByteArray(ir.getHashLocs()), ct);
 						return ir;
 					} else {
 						return new InsertRecord(false, pos);
 					}
-				} catch (ExecutionException e) {
-					throw new IOException(e);
-				}
 
 			} else
 				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct);
@@ -576,15 +531,11 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			if (guid != null) {
 				long pos;
-				try {
-					pos = lfs.get(guid).get(hash);
+					pos = LocalLookupFilter.getLocalLookupFilter(guid).get(hash);
 
 					if (pos != -1) {
 						return pos;
 					}
-				} catch (ExecutionException e) {
-					throw new IOException(e);
-				}
 			}
 
 			return HCServiceProxy.hcService.hashExists(hash);
@@ -623,15 +574,12 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			if (guid != null) {
 				long pos;
-				try {
-					pos = lfs.get(guid).get(hash);
+					pos = LocalLookupFilter.getLocalLookupFilter(guid).get(hash);
 
 					if (pos != -1) {
 						return pos;
 					}
-				} catch (ExecutionException e) {
-					throw new IOException(e);
-				}
+				
 			}
 
 			return HCServiceProxy.hcService.hashExists(hash);
@@ -696,7 +644,7 @@ public class HCServiceProxy {
 	}
 
 	public static void close() {
-		lfs.invalidateAll();
+		LocalLookupFilter.closeAll();
 		hcService.close();
 		SDFSLogger.getLog().info("Deleting lock file");
 		File file = new File(Main.hashDBStore + File.separator + ".lock");
