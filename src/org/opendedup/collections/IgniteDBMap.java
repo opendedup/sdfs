@@ -85,15 +85,13 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 
 			IgniteConfiguration cfg = new IgniteConfiguration();
 			MemoryConfiguration memCfg = new MemoryConfiguration();
-			// Defining a policy for 20 GB memory region with RANDOM_LRU eviction.
 			MemoryPolicyConfiguration memPlc = new MemoryPolicyConfiguration();
 
-			memPlc.setName("Standar Eviction");
-			memPlc.setMaxSize(20L * 1024 * 1024 * 1024);
+			memPlc.setName("Standard Eviction");
+			memPlc.setMaxSize(maxSize);
 
 			// Enabling RANDOM_LRU eviction.
 			memPlc.setPageEvictionMode(DataPageEvictionMode.RANDOM_LRU);
-			// Setting the size of the default memory region to 4GB to achieve this.
 			memCfg.setMemoryPolicies(memPlc);
 			cfg.setMemoryConfiguration(memCfg);
 			cfg.setCacheConfiguration(cacheCfg);
