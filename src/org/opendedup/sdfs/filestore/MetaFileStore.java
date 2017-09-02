@@ -424,8 +424,14 @@ public class MetaFileStore {
 		}
 		service.shutdown();
 		try {
+			int i = 0;
 			while (!service.awaitTermination(10, TimeUnit.SECONDS)) {
 				SDFSLogger.getLog().info("Awaiting fdisk completion of threads.");
+				if(i >30) {
+					SDFSLogger.getLog().info("Done Waiting.Will exit without tasks completed");
+					break;
+				}
+			
 			}
 		} catch (InterruptedException e) {
 			
