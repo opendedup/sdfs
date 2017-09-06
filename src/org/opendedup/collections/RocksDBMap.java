@@ -380,8 +380,15 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						long ct = 0;
 						if (v != null) {
 							ByteBuffer nbk = ByteBuffer.wrap(v);
-							nbk.getLong();
-							ct = nbk.getLong();
+							long pos  = nbk.getLong();
+							bk.position(0);
+							bk.put(iter.value());
+							bk.position(0);
+							long cpos = bk.getLong();
+							if(pos == cpos) {
+								this.getDB(hash).delete(hash);
+								ct = nbk.getLong();
+							}
 						}
 						if(ct <=0) {
 							bk.position(0);
@@ -390,7 +397,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							long pos = bk.getLong();
 							ChunkData ck = new ChunkData(pos, iter.key());
 							ck.setmDelete(true);
-							this.getDB(hash).delete(hash);
+							
 						}
 						rmdb.delete(iter.key());
 					}finally {
