@@ -328,7 +328,7 @@ public class SparseDedupFile implements DedupFile {
 			return DeleteDir.deleteDirectory(new File(filePath));
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error in delete " + this.GUID, e);
+			SDFSLogger.getLog().debug("error in delete " + this.GUID, e);
 		} finally {
 			this.syncLock.unlock();
 		}
@@ -488,8 +488,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 								else {
 									_f.claims++;
-								}
-									
+								}	
 							}
 							
 
@@ -596,7 +595,6 @@ public class SparseDedupFile implements DedupFile {
 									if (p.isDup()) {
 										dups += f.len;
 									}
-									
 									ar.put(p.pos,p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to write object finger", e);
@@ -765,7 +763,7 @@ public class SparseDedupFile implements DedupFile {
 			l.unlock();
 		}
 	}
-
+	
 	private DedupChunkInterface marshalWriteBuffer(long chunkPos) throws IOException, FileClosedException {
 		DedupChunk ck = null;
 		try {
