@@ -496,6 +496,7 @@ public class SparseDedupFile implements DedupFile {
 								}
 
 								TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
+								writeBuffer.setAR(ar);
 								AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
 									@Override
 									public void commandException(Finger result, Throwable e) {
@@ -609,7 +610,7 @@ public class SparseDedupFile implements DedupFile {
 									}
 								}
 								writeBuffer.setDoop(dups);
-								writeBuffer.setAR(ar);
+								
 							} catch(BufferClosedException e) {
 								return;
 							}catch (DataArchivedException e) {
