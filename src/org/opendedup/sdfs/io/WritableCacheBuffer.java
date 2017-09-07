@@ -409,58 +409,63 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void setAR(TreeMap<Integer, HashLocPair> al) {
-		try {
-			if (Main.refCount && this.ar != null && this.dirty) {
+		synchronized (this.ar) {
+			try {
+				if (Main.refCount && this.ar != null && this.dirty) {
 
-				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
-				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
-					int val = -1;
-					if (ct.containsKey(e.getValue())) {
-						val = ct.get(e.getValue()) - 1;
-					}
-					ct.put(e.getValue(), val);
-				}
-				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
-							df.mf.getLookupFilter());
-				}
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to remove reference", e);
-		}
-		this.ar = al;
-	}
-
-	private void reReference() {
-		try {
-			if (Main.refCount && this.ar != null && this.hlAdded) {
-				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
-				if (_ar != null) {
-					for (Entry<Integer, HashLocPair> e : this._ar.entrySet()) {
+					HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
+					for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
 						int val = -1;
 						if (ct.containsKey(e.getValue())) {
 							val = ct.get(e.getValue()) - 1;
 						}
 						ct.put(e.getValue(), val);
 					}
-					_ar = null;
-				}
-				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
-					int val = 1;
-					if (ct.containsKey(e.getValue())) {
-						if (!e.getValue().inserted)
-							val = ct.get(e.getValue()) + 1;
+					for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
+						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
+								df.mf.getLookupFilter());
 					}
-					ct.put(e.getValue(), val);
 				}
-
-				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
-							df.mf.getLookupFilter());
-				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to remove reference", e);
 			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to remove reference", e);
+			this.ar = al;
+		}
+	}
+
+	private void reReference() {
+		synchronized (this.ar) {
+			SDFSLogger.getLog().info("Rereferencing cache buffer");
+			try {
+				if (Main.refCount && this.ar != null && this.hlAdded) {
+					HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
+					if (_ar != null) {
+						for (Entry<Integer, HashLocPair> e : this._ar.entrySet()) {
+							int val = -1;
+							if (ct.containsKey(e.getValue())) {
+								val = ct.get(e.getValue()) - 1;
+							}
+							ct.put(e.getValue(), val);
+						}
+						_ar = null;
+					}
+					for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
+						int val = 1;
+						if (ct.containsKey(e.getValue())) {
+							if (!e.getValue().inserted)
+								val = ct.get(e.getValue()) + 1;
+						}
+						ct.put(e.getValue(), val);
+					}
+
+					for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
+						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
+								df.mf.getLookupFilter());
+					}
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to remove reference", e);
+			}
 		}
 	}
 

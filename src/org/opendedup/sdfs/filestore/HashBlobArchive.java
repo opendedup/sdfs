@@ -1410,18 +1410,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		int blks = 0;
 
 		try {
-			SimpleByteArrayLongMap _m = null;
+			SimpleByteArrayLongMap _m = getRawMap(this.id);
+			ArrayList<KeyValuePair> ar = new ArrayList<KeyValuePair>();
 			try {
-				_m = maps.get(this.id);
-				if (_m == null)
-					return 0;
-			} catch (com.google.common.cache.CacheLoader.InvalidCacheLoadException e) {
-				return 0;
-			}
-
 			_m.iterInit();
 			KeyValuePair p = _m.next();
-			ArrayList<KeyValuePair> ar = new ArrayList<KeyValuePair>();
+			
 			while (p != null) {
 				if (HCServiceProxy.getHashesMap().mightContainKey(p.getKey())) {
 					ar.add(p);
@@ -1430,6 +1424,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 					SDFSLogger.getLog().debug("nk [" + StringUtils.getHexString(p.getKey()) + "] ");
 				}
 				p = _m.next();
+			}
+			}finally {
+				try {
+					_m.close();
+				}catch(Exception e) {
+					
+				}
 			}
 
 			/*

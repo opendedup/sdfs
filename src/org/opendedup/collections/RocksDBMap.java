@@ -306,9 +306,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				ct += bk.getLong();
 				if(ct <=0) {
 					rmdb.put(hash, v);
-				} 
-				bk.putLong(v.length - 8, ct);
-				getDB(hash).put(wo, hash, v);
+					getDB(hash).delete(hash);
+				} else {
+					bk.putLong(v.length - 8, ct);
+					getDB(hash).put(wo, hash, v);
+				}
+
 				return true;
 			}
 
@@ -371,40 +374,13 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				SDFSLogger.getLog().info("Removing hashes " + rmdb.getLongProperty("rocksdb.estimate-num-keys"));
 				ByteBuffer bk = ByteBuffer.allocateDirect(16);
 				for (iter.seekToFirst(); iter.isValid(); iter.next()) {
-					byte [] hash = iter.key();
-					Lock l = this.getLock(hash);
-					l.lock();
-					try {
-						byte[] v = null;
-						v = this.getDB(hash).get(hash);
-						long ct = 0;
-						if (v != null) {
-							ByteBuffer nbk = ByteBuffer.wrap(v);
-							long pos  = nbk.getLong();
-							bk.position(0);
-							bk.put(iter.value());
-							bk.position(0);
-							long cpos = bk.getLong();
-							if(pos == cpos) {
-								this.getDB(hash).delete(hash);
-								ct = nbk.getLong();
-							}
-						}
-						if(ct <=0) {
-							bk.position(0);
-							bk.put(iter.value());
-							bk.position(0);
-							long pos = bk.getLong();
-							ChunkData ck = new ChunkData(pos, iter.key());
-							ck.setmDelete(true);
-							
-						}
-						rmdb.delete(iter.key());
-					}finally {
-						l.unlock();
-					}
-						
-					
+					bk.position(0);
+					bk.put(iter.value());
+					bk.position(0);
+					long pos = bk.getLong();
+					ChunkData ck = new ChunkData(pos, iter.key());
+					ck.setmDelete(true);
+					rmdb.delete(iter.key());
 				}
 
 		} catch (Exception e) {

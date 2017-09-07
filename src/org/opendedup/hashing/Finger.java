@@ -55,7 +55,6 @@ public class Finger implements Runnable {
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,claims,this.lookupFilter);
 			else
 				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,this.hl.getHashLocs(),claims,this.lookupFilter);
-			
 			l.commandResponse(this);
 
 		} catch (Throwable e) {
