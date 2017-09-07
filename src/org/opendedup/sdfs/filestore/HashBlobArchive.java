@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -290,7 +289,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 								File lf = new File(getPath(hashid).getPath());
 								if (lf.exists()) {
 									Path path = Paths.get(getPath(hashid).getPath());
-									AsynchronousFileChannel fc = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ);
+									AsynchronousFileChannel fc = AsynchronousFileChannel.open(path,
+											StandardOpenOption.WRITE, StandardOpenOption.READ);
 									return fc;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
@@ -758,7 +758,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			this.writeable = true;
 			cf.setLastModified(System.currentTimeMillis());
 			Path path = f.toPath();
-			AsynchronousFileChannel ch =AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ,StandardOpenOption.CREATE);
+			AsynchronousFileChannel ch = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,
+					StandardOpenOption.READ, StandardOpenOption.CREATE);
 
 			wOpenFiles.put(id, ch);
 
@@ -774,7 +775,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				byte[] biv = PassPhrase.getByteIV();
 				zb.put(biv);
 				zb.position(0);
-				Future<Integer> result = ch.write(zb,0);
+				Future<Integer> result = ch.write(zb, 0);
 				try {
 					result.get();
 				} catch (Exception e) {
@@ -938,7 +939,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					ch = wOpenFiles.get(this.id);
 					if (ch == null) {
 						Path path = f.toPath();
-						ch =AsynchronousFileChannel.open(path, StandardOpenOption.WRITE,StandardOpenOption.READ,StandardOpenOption.CREATE);
+						ch = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.READ,
+								StandardOpenOption.CREATE);
 
 						wOpenFiles.put(id, ch);
 					}
@@ -998,7 +1000,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				Future<Integer> fu = ch.write(buf, cp);
 				try {
 					fu.get();
-				}catch(Exception e) {
+				} catch (Exception e) {
 					throw new IOException(e);
 				}
 			} finally {
@@ -1108,7 +1110,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private void loadData() throws Exception {
 		synchronized (f) {
-			if(f.exists()) {
+			if (f.exists()) {
 				SDFSLogger.getLog().warn("file already exists! " + f.getPath());
 				File nf = new File(f.getPath() + " " + ".old");
 				Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -1171,7 +1173,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		try {
 			if (!f.exists()) {
 				synchronized (f) {
-					
+
 					SDFSLogger.getLog().info("file does not exist " + f.getPath());
 					if (!f.exists())
 						this.loadData();
@@ -1213,7 +1215,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					Future<Integer> fu = ch.read(hb, pos);
 					try {
 						fu.get();
-					}catch(Exception e1) {
+					} catch (Exception e1) {
 						throw new IOException(e1);
 					}
 				}
@@ -1223,7 +1225,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				Future<Integer> fu = ch.read(ByteBuffer.wrap(ub), pos + 4);
 				try {
 					fu.get();
-				}catch(Exception e) {
+				} catch (Exception e) {
 					throw new IOException(e);
 				}
 			} else {
@@ -1241,7 +1243,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					Future<Integer> fu = ch.read(ByteBuffer.wrap(ub), npos + 4);
 					try {
 						fu.get();
-					}catch(Exception e) {
+					} catch (Exception e) {
 						throw new IOException(e);
 					}
 				} else {
@@ -1408,28 +1410,28 @@ public class HashBlobArchive implements Runnable, Serializable {
 		HashBlobArchive _har = null;
 		long ofl = f.length();
 		int blks = 0;
-
 		try {
 			SimpleByteArrayLongMap _m = getRawMap(this.id);
+			if(_m == null)
+				return 0;
 			ArrayList<KeyValuePair> ar = new ArrayList<KeyValuePair>();
 			try {
-			_m.iterInit();
-			KeyValuePair p = _m.next();
-			
-			while (p != null) {
-				if (HCServiceProxy.getHashesMap().mightContainKey(p.getKey())) {
-					ar.add(p);
-					blks++;
-				} else {
-					SDFSLogger.getLog().debug("nk [" + StringUtils.getHexString(p.getKey()) + "] ");
+				_m.iterInit();
+				KeyValuePair p = _m.next();
+				while (p != null) {
+					if (HCServiceProxy.getHashesMap().mightContainKey(p.getKey())) {
+						ar.add(p);
+						blks++;
+					} else {
+						SDFSLogger.getLog().debug("nk [" + StringUtils.getHexString(p.getKey()) + "] ");
+					}
+					p = _m.next();
 				}
-				p = _m.next();
-			}
-			}finally {
+			} finally {
 				try {
 					_m.close();
-				}catch(Exception e) {
-					
+				} catch (Exception e) {
+
 				}
 			}
 

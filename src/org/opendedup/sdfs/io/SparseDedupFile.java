@@ -20,6 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -145,13 +146,14 @@ public class SparseDedupFile implements DedupFile {
 					}
 					DedupChunkInterface writeBuffer = null;
 					synchronized (flushingBuffers) {
-						if (flushingBuffers.containsKey(key))
-							writeBuffer = flushingBuffers.remove(key);
+						writeBuffer = flushingBuffers.get(key);
 					}
 					if (writeBuffer == null) {
 						writeBuffer = marshalWriteBuffer(key);
 					}
-					writeBuffer.open();
+					synchronized(writeBuffer) {
+						writeBuffer.open();
+					}
 
 					return writeBuffer;
 				}
@@ -608,7 +610,9 @@ public class SparseDedupFile implements DedupFile {
 								}
 								writeBuffer.setDoop(dups);
 								writeBuffer.setAR(ar);
-							} catch (DataArchivedException e) {
+							} catch(BufferClosedException e) {
+								return;
+							}catch (DataArchivedException e) {
 								throw e;
 							} catch (Exception e) {
 								this.errOccured = true;
@@ -634,7 +638,9 @@ public class SparseDedupFile implements DedupFile {
 					}
 					mf.getIOMonitor().addDulicateData((dups - writeBuffer.getPrevDoop()), true);
 					this.updateMap(writeBuffer, dups);
-				} catch (DataArchivedException e) {
+				} catch(BufferClosedException e) {
+					return;
+				}catch (DataArchivedException e) {
 					throw e;
 				} catch (Exception e) {
 					SDFSLogger.getLog().fatal("unable to add chunk at position " + writeBuffer.getFilePosition(), e);
@@ -1352,6 +1358,12 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().debug("on remove hashcodes are not equal");
 				}
 			}
+		}
+	}
+	
+	public boolean bufferInFlush(DedupChunkInterface writeBuffer) {
+		synchronized (flushingBuffers) {
+			return this.flushingBuffers.containsKey(writeBuffer.getFilePosition());
 		}
 	}
 
