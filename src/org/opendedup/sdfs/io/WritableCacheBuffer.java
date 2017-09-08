@@ -818,6 +818,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		synchronized (this) {
 			try {
 				this.df.removeBufferFromFlush(this);
+				this.df.openBuffers.add(this.position);
 				this.closed = false;
 				this.flushing = false;
 			} catch (Exception e) {
@@ -843,6 +844,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				throw new BufferClosedException("Buffer Closed");
 			}
 			this.flushing = true;
+			this.df.openBuffers.remove(this.position);
 			if (this.isDirty() || this.isHlAdded()) {
 				if (Main.chunkStoreLocal) {
 					this.df.putBufferIntoFlush(this);

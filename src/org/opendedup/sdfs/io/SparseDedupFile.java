@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -88,6 +89,7 @@ public class SparseDedupFile implements DedupFile {
 	private static int maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
 	private transient final HashMap<Long, DedupChunkInterface> flushingBuffers = new HashMap<Long, DedupChunkInterface>(
 			256, .75f);
+	protected transient final Set<Long> openBuffers = ConcurrentHashMap.newKeySet();
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private boolean deleted = false;
 	protected static transient ThreadPoolExecutor executor = null;
@@ -97,9 +99,57 @@ public class SparseDedupFile implements DedupFile {
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
 	public static AbstractHashEngine eng = null;
-
+	private static LoadingCache<String, DedupChunkInterface> writeBuffers = null;
 	static {
-		maxWriteBuffers = ((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) + 1;
+		
+		File f = new File(Main.dedupDBStore);
+		if (!f.exists())
+			f.mkdirs();
+		try {
+			maxWriteBuffers = (int)(Main.GLOBAL_CACHE_SIZE / (Main.CHUNK_LENGTH*1024)) + 1;
+			
+			writeBuffers = CacheBuilder.newBuilder()
+				.maximumSize(maxWriteBuffers + 1).expireAfterAccess(15, TimeUnit.SECONDS)
+				.removalListener(new RemovalListener<String, DedupChunkInterface>() {
+					public void onRemoval(RemovalNotification<String, DedupChunkInterface> removal) {
+						DedupChunkInterface ck = removal.getValue();
+						try {
+							ck.flush();
+						} catch (BufferClosedException e) {
+							SDFSLogger.getLog().debug("Error while closing buffer at " + removal.getKey());
+						} catch (IOException e) {
+							SDFSLogger.getLog().error("unable to flush", e);
+						}
+						// flushingBuffers.put(pos, ck);
+					}
+				}).build(new CacheLoader<String, DedupChunkInterface>() {
+					public DedupChunkInterface load(String skey) throws IOException, FileClosedException {
+						String [] pts = skey.split("#");
+						SparseDedupFile df = DedupFileStore.get(pts[0]);
+						Long key = Long.parseLong(pts[1]);
+						if (df.closed) {
+							throw new FileClosedException("file already closed");
+						}
+						DedupChunkInterface writeBuffer = null;
+						synchronized (df.flushingBuffers) {
+							writeBuffer = df.flushingBuffers.get(key);
+						}
+						if (writeBuffer == null) {
+							writeBuffer = df.marshalWriteBuffer(key);
+						}
+						synchronized(writeBuffer) {
+							writeBuffer.open();
+						}
+
+						return writeBuffer;
+					}
+
+				});
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.exit(2);
+		}
+		SDFSLogger.getLog().info("done loading1111111");
 		SDFSLogger.getLog().debug("Maximum Write Buffers are " + maxWriteBuffers);
 		if (!Main.chunkStoreLocal) {
 			pool = new ThreadPool(Main.writeThreads + 1,
@@ -124,47 +174,18 @@ public class SparseDedupFile implements DedupFile {
 		eventBus.register(obj);
 
 	}
+	
+	
+	public static void flushAllBuffers() {
+		writeBuffers.invalidateAll();
+	}
 
-	private LoadingCache<Long, DedupChunkInterface> writeBuffers = CacheBuilder.newBuilder()
-			.maximumSize(maxWriteBuffers + 1).expireAfterAccess(15, TimeUnit.SECONDS)
-			.removalListener(new RemovalListener<Long, DedupChunkInterface>() {
-				public void onRemoval(RemovalNotification<Long, DedupChunkInterface> removal) {
-					DedupChunkInterface ck = removal.getValue();
-					try {
-						ck.flush();
-					} catch (BufferClosedException e) {
-						SDFSLogger.getLog().debug("Error while closing buffer at " + removal.getKey());
-					} catch (IOException e) {
-						SDFSLogger.getLog().error("unable to flush", e);
-					}
-					// flushingBuffers.put(pos, ck);
-				}
-			}).build(new CacheLoader<Long, DedupChunkInterface>() {
-				public DedupChunkInterface load(Long key) throws IOException, FileClosedException {
-					if (closed) {
-						throw new FileClosedException("file already closed");
-					}
-					DedupChunkInterface writeBuffer = null;
-					synchronized (flushingBuffers) {
-						writeBuffer = flushingBuffers.get(key);
-					}
-					if (writeBuffer == null) {
-						writeBuffer = marshalWriteBuffer(key);
-					}
-					synchronized(writeBuffer) {
-						writeBuffer.open();
-					}
-
-					return writeBuffer;
-				}
-
-			});
+	
 
 	private boolean closed = true;
 	static {
-		File f = new File(Main.dedupDBStore);
-		if (!f.exists())
-			f.mkdirs();
+		
+		
 	}
 
 	public static synchronized void flushThreadPool() {
@@ -350,19 +371,11 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog()
-						.debug("Flushing Cache of for " + mf.getPath() + " of size " + this.writeBuffers.size());
-			this.writeBuffers.invalidateAll();
-			Iterator<Long> iter = this.writeBuffers.asMap().keySet().iterator();
+						.debug("Flushing Cache of for " + mf.getPath() + " of size " + this.openBuffers.size());
+			Iterator<Long> iter = this.openBuffers.iterator();
 			while (iter.hasNext()) {
 				Long key = iter.next();
-				WritableCacheBuffer bf = (WritableCacheBuffer) this.writeBuffers.getIfPresent(key);
-				if (bf != null) {
-					try {
-						bf.flush();
-					} catch (BufferClosedException e) {
-
-					}
-				}
+				writeBuffers.invalidate(this.GUID + "#" +key);
 			}
 			int z = 0;
 			synchronized (flushingBuffers) {
@@ -753,8 +766,7 @@ public class SparseDedupFile implements DedupFile {
 				if (Main.volume.isClustered()) {
 					wb = this.load(chunkPos);
 				} else {
-					wb = this.writeBuffers.get(chunkPos);
-
+					wb = writeBuffers.get(this.GUID + "#" +chunkPos);
 				}
 				wb.open();
 				return wb;
@@ -845,7 +857,7 @@ public class SparseDedupFile implements DedupFile {
 				long st = 0;
 				if (SDFSLogger.isDebug())
 					tm = System.currentTimeMillis();
-				long wsz = this.writeBuffers.size();
+				long wsz = this.openBuffers.size();
 				int fsz = 0;
 				synchronized (flushingBuffers) {
 					fsz = this.flushingBuffers.size();
