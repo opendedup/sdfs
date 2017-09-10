@@ -1475,7 +1475,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 							}
 						}
-
 						openFiles.invalidate(this.id);
 						rchunks.remove(this.id);
 						int trys = 0;
