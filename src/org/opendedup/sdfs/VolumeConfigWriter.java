@@ -56,7 +56,7 @@ public class VolumeConfigWriter {
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
-	int max_file_write_buffers = 1;
+	long max_file_write_buffers = (Main.GLOBAL_CACHE_SIZE/(1024L*1024L));
 	int max_open_files = 4096;
 	int meta_file_cache = 1024;
 	int write_timeout = Main.writeTimeoutSeconds;
@@ -208,8 +208,8 @@ public class VolumeConfigWriter {
 			this.mdCompresstion = true;
 			this.compress = true;
 			this.maxSegSize = 128;
-			this.max_open_files = 20;
-			this.max_file_write_buffers=160;
+			this.max_open_files = 1024;
+			this.max_file_write_buffers=2048;
 			this.chunk_size = 40960*2;
 			this.volumeType ="backup";
 			this.fdisk_schedule = this.ltrfdisk_schedule;
@@ -629,7 +629,7 @@ public class VolumeConfigWriter {
 			io.setAttribute("max-file-inactive", "0");
 		else
 			io.setAttribute("max-file-inactive", "900");
-		io.setAttribute("max-file-write-buffers", Integer.toString(this.max_file_write_buffers));
+		io.setAttribute("max-file-write-buffers", Long.toString(this.max_file_write_buffers));
 		io.setAttribute("max-open-files", Integer.toString(this.max_open_files));
 		io.setAttribute("meta-file-cache", Integer.toString(this.meta_file_cache));
 		io.setAttribute("safe-close", Boolean.toString(this.safe_close));

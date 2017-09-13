@@ -1,6 +1,7 @@
 #!/bin/bash
 #modprobe fuse > /dev/null
 BASEMEMORY="2000"
+CACHEMEMORY=512
 CFG=""
 MPTG=3
 LMPTG=2
@@ -35,14 +36,19 @@ if [ -n "$CFG" ] && [ -f "$CFG" ]; then
                 bm=$(echo 'cat //subsystem-config/io/@chunk-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 th=$(echo 'cat //subsystem-config/io/@write-threads' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-                cst=$(echo 'cat //subsystem-config/local-chunkstore/@ hashdb-class' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                cst=$(echo 'cat //subsystem-config/local-chunkstore/@hashdb-class' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                _wb=$(echo 'cat //subsystem-config/io/@max-file-write-buffers' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 cm=$(((bm*th)/1024));
+                wb = $((_wb*1))
                 if [ $cst == "org.opendedup.collections.RocksDBMap" ]; then
                         MEMORY=BASEMEMORY
                 else
                         MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY+cm))
                 fi
-                MEMORY=$((MEMORY+((bm*th*3)/1024)))
+                if [ wb > CACHEMEMORY ]
+                		CACHEMEMORY = $((wb))
+               	fi
+                MEMORY=$((MEMORY+CACHEMEMORY))
 
 fi
 else
