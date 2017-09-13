@@ -337,6 +337,10 @@ public class Config {
 			Main.REPLICATION_THREADS = Integer.parseInt(cache.getAttribute("replication-threads"));
 
 		Main.maxWriteBuffers = Integer.parseInt(cache.getAttribute("max-file-write-buffers"));
+		SDFSLogger.getLog().info("ZZZZ " +Main.GLOBAL_CACHE_SIZE + " " + (Main.maxWriteBuffers*1024*1024));
+		long k = (long)(Main.maxWriteBuffers) * (1024L*1024L);
+		if(k > Main.GLOBAL_CACHE_SIZE)
+			Main.GLOBAL_CACHE_SIZE = k;
 		Main.maxOpenFiles = Integer.parseInt(cache.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache.getAttribute("max-file-inactive")) * 1000;
 		Main.fDkiskSchedule = cache.getAttribute("claim-hash-schedule");

@@ -431,9 +431,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setVmdk(boolean vmdk, boolean propigateEvent) {
 		this.vmdk = vmdk;
 	}
-
 	public static MetaDataDedupFile getFile(String path) throws IOException {
 		File f = new File(path);
+		if(!f.getCanonicalPath().startsWith(Main.volume.connicalPath)) {
+			throw new IOException(" get file connical path ["+f.getCanonicalPath()+"] is not in folder structure " + Main.volume.connicalPath);
+		}
 		MetaDataDedupFile mf = null;
 		Path p = Paths.get(path);
 		if (Files.isSymbolicLink(p)) {
@@ -861,6 +863,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		ObjectOutputStream out = null;
 		try {
 			File f = new File(this.path);
+			try {
+			if(!f.getCanonicalPath().startsWith(Main.volume.connicalPath)) {
+				SDFSLogger.getLog().debug("in writefile connical path ["+f.getCanonicalPath()+"] is not in folder structure " + Main.volume.connicalPath);
+				f = new File( Main.volume.connicalPath + File.separator +  f.getCanonicalPath());
+			}
+			}catch(IOException e) {
+				SDFSLogger.getLog().error("connical path ["+f.getPath()+"] is not in folder structure " + Main.volume.connicalPath,e);
+				return false;
+			}
 			if (!f.isDirectory()) {
 
 				try {

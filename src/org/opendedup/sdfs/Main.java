@@ -31,6 +31,7 @@ public class Main {
 	public static double fpp = .01;
 	public static String logSize="10MB";
 	public static boolean CUCKOO =false;
+	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
 	public static int parallelDBCount = 4;
@@ -114,7 +115,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.5.3";
+	public static String version = "3.5.6.0";
 
 	public static boolean readAhead = false;
 	
@@ -407,4 +408,6 @@ public class Main {
 	public static boolean closedGracefully = true;
 	public static boolean rebuildHashTable = false;
 
+
+	public static boolean rebuildHashTable = false;
 }

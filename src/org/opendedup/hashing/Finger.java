@@ -19,6 +19,7 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
 
 
 
@@ -94,7 +96,6 @@ public class Finger implements Runnable {
 					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims,f.lookupFilter);
 				else
 					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,f.claims,f.lookupFilter);
-
 			}
 		}
 

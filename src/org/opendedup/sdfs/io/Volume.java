@@ -93,6 +93,7 @@ public class Volume implements java.io.Serializable {
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
 	public transient VolumeSocket soc = null;
 	private ReentrantLock devLock = new ReentrantLock();
+	public String connicalPath;
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -220,6 +221,7 @@ public class Volume implements java.io.Serializable {
 		if (!pathF.exists())
 			pathF.mkdirs();
 		this.path = pathF.getPath();
+		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
 		if (vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
@@ -298,6 +300,9 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("closed-gracefully")) {
 			Main.closedGracefully = Boolean.parseBoolean(vol
 					.getAttribute("closed-gracefully"));
+		}
+		if (vol.hasAttribute("rebuild-hashtable")) {
+			Main.runConsistancyCheck = true;
 		}
 		if (vol.hasAttribute("rebuild-hashtable")) {
 			Main.runConsistancyCheck = true;

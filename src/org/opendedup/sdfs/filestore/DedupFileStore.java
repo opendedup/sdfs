@@ -235,6 +235,9 @@ public class DedupFileStore {
 			throw new IOException("DedupFileStore is closed");
 		}
 	}
+	public static SparseDedupFile get(String guid) {
+		return openFile.get(guid);
+	}
 
 	/**
 	 * Clones a dedupFile
@@ -315,6 +318,7 @@ public class DedupFileStore {
 		if (openFileMonitor != null)
 			openFileMonitor.close();
 		if (openFile.size() > 0) {
+			SparseDedupFile.flushAllBuffers();
 			Object[] dfs = getArray();
 			SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
 			for (int i = 0; i < dfs.length; i++) {

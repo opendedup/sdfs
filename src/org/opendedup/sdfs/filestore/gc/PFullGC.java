@@ -97,7 +97,7 @@ public class PFullGC implements GCControllerImpl {
 			double pFull = 0;
 			if (HCServiceProxy.getSize() > 0) {
 				pFull = (double) HCServiceProxy.getSize()
-						/ (double) HCServiceProxy.getMaxSize();
+						/ (double) (HCServiceProxy.getMaxSize()*10);
 			}
 
 			return pFull;

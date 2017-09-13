@@ -110,8 +110,6 @@ public class SDFSService {
 
 			Main.pFullSched = new StandAloneGCScheduler();
 		}
-
-		Main.mountEvent.endEvent("Volume Mounted");
 		try {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
@@ -121,6 +119,7 @@ public class SDFSService {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		Main.volume.init();
+		Main.mountEvent.endEvent("Volume Mounted");
 		SDFSLogger.getLog().debug("############### SDFSService Started ##################");
 	}
 

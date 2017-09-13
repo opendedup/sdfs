@@ -246,7 +246,6 @@ public class MountSDFS implements Daemon, Runnable {
 	@Override
 	public void init(DaemonContext arg0) throws DaemonInitException, Exception {
 		setup(arg0.getArguments());
-
 	}
 
 	@Override
@@ -254,7 +253,6 @@ public class MountSDFS implements Daemon, Runnable {
 		MountSDFS sd = new MountSDFS();
 		Thread th = new Thread(sd);
 		th.start();
-
 	}
 
 	@Override
@@ -269,7 +267,6 @@ public class MountSDFS implements Daemon, Runnable {
 		} catch (Exception e) {
 		}
 		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
-
 	}
 
 	@Override
@@ -284,6 +281,5 @@ public class MountSDFS implements Daemon, Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }

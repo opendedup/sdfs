@@ -1297,7 +1297,7 @@ public class MgmtWebServer implements Container {
 			io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, Main.writeThreads);
-			SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8));
+			SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8),Main.writeThreads,4);
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);
