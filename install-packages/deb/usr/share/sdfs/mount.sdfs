@@ -39,16 +39,16 @@ if [ -n "$CFG" ] && [ -f "$CFG" ]; then
                 cst=$(echo 'cat //subsystem-config/local-chunkstore/@hashdb-class' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 _wb=$(echo 'cat //subsystem-config/io/@max-file-write-buffers' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 cm=$(((bm*th)/1024));
-                wb = $((_wb*1))
+                wb=$((_wb*1));
                 if [ $cst == "org.opendedup.collections.RocksDBMap" ]; then
                         MEMORY=BASEMEMORY
                 else
                         MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY+cm))
                 fi
-                if [ wb > CACHEMEMORY ]
-                		CACHEMEMORY = $((wb))
-               	fi
-                MEMORY=$((MEMORY+CACHEMEMORY))
+                if [ $wb > $CACHEMEMORY ]; then
+                                CACHEMEMORY=$((wb))
+                fi
+                MEMORY=$((MEMORY+(CACHEMEMORY*3)))
 
 fi
 else
