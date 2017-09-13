@@ -209,7 +209,7 @@ public class VolumeConfigWriter {
 			this.compress = true;
 			this.maxSegSize = 128;
 			this.max_open_files = 1024;
-			this.max_file_write_buffers=2048;
+			this.max_file_write_buffers=1024;
 			this.chunk_size = 40960*2;
 			this.volumeType ="backup";
 			this.fdisk_schedule = this.ltrfdisk_schedule;
