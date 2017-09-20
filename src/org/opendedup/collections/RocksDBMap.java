@@ -91,15 +91,16 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			System.out.println("multiplier=" + this.multiplier + " size=" + dbs.length);
 			long bufferSize = GB;
 			long fsize = 128 * MB;
-			if (this.size < 1_000_000_000L) {
-				bufferSize = 512 * MB * dbs.length;
-			} else if (this.size < 10_000_000_000L) {
+			if (this.size < 10_000_000_000L) {
+				SDFSLogger.getLog().info("Setting up Small Hash Table");
 				fsize = 128 * MB;
-				bufferSize = fsize * 10 * dbs.length;
+				bufferSize = fsize * dbs.length;
 			} else if (this.size < 50_000_000_000L) {
+				SDFSLogger.getLog().info("Setting up Medium Hash Table");
 				fsize = 256 * MB;
 				bufferSize = GB * dbs.length;
 			} else {
+				SDFSLogger.getLog().info("Setting up Large Hash Table");
 				// long mp = this.size / 10_000_000_000L;
 
 				fsize = GB;
@@ -111,6 +112,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 			long memperDB = totmem / dbs.length;
 			System.out.println("mem=" + totmem + " memperDB=" + memperDB + " bufferSize=" + bufferSize
+					+ " bufferSizePerDB=" + (bufferSize / dbs.length));
+			SDFSLogger.getLog().info("mem=" + totmem + " memperDB=" + memperDB + " bufferSize=" + bufferSize
 					+ " bufferSizePerDB=" + (bufferSize / dbs.length));
 			// blockConfig.setBlockCacheSize(memperDB);
 			// blockConfig.setCacheIndexAndFilterBlocks(true);
@@ -166,7 +169,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setAllowConcurrentMemtableWrite(true);
 				// LRUCache c = new LRUCache(memperDB);
 				// options.setRowCache(c);
-				blockConfig.setBlockCacheSize(GB * 2);
+				//blockConfig.setBlockCacheSize(GB * 2);
 
 				options.setWriteBufferSize(bufferSize / dbs.length);
 				// options.setMinWriteBufferNumberToMerge(2);
@@ -180,7 +183,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				// options.setAllowMmapWrites(true);
 				// options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
-				options.createStatistics();
 				// options.setTargetFileSizeBase(512*1024*1024);
 
 				options.setMaxBytesForLevelBase(fsize * 5);
@@ -251,7 +253,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
-			options.createStatistics();
 			// options.setTargetFileSizeBase(512*1024*1024);
 			options.setMaxBytesForLevelBase(GB);
 			options.setTargetFileSizeBase(128 * 1024 * 1024);

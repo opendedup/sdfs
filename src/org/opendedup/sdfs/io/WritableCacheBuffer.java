@@ -866,7 +866,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			}
 			return;
 		}
-		if(lobj.tryLock()) {
+		lobj.lock(); 
 		try {
 
 			if (this.flushing) {
@@ -900,9 +900,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}finally {
 			lobj.unlock();
 		}
-		} else {
-			SDFSLogger.getLog().info("this is locked");
-		}
+		
 	}
 
 	public boolean isClosed() {

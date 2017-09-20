@@ -180,6 +180,7 @@ int _tmain(int argc, TCHAR *argv[])
 					string ssz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("allocation-size"));
 					string bsz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("io")->Attribute("chunk-size"));
 					string tsz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("io")->Attribute("write-threads"));
+					string csz = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("io")->Attribute("max-file-write-buffers"));
 					bool lowm = false;
 					if (doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory")) {
 						string lm = string(doc.FirstChildElement("subsystem-config")->FirstChildElement("local-chunkstore")->Attribute("low-memory"));
@@ -190,17 +191,24 @@ int _tmain(int argc, TCHAR *argv[])
 					std::stringstream sstr(ssz);
 					std::stringstream bstr(bsz);
 					std::stringstream tstr(tsz);
+					std::stringstream cstr(csz);
 					__int64 sz;
 					__int64 bz;
 					__int64 tz;
+					__int64 cz;
 					bstr >> bz;
 					tstr >> tz;
 					sstr >> sz;
-					long tt = (bz* tz*3)/1024;
+					cstr >> cz;
+					//long tt = (bz* tz*3)/1024;
+
 					mem += basemem;
-					mem += tt;
-					long gb = sz / (1073741824);
-					mem += .3 * gb;
+					if(cz < 512) {
+						cz = 512;
+					}
+					mem += cz*3;
+					//long gb = sz / (1073741824);
+					//mem += .3 * gb;
 					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
 				}
 				else {
