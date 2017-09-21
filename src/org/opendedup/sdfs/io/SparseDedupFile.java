@@ -1372,9 +1372,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {
-		synchronized(this.activeBuffers.get(writeBuffer.getFilePosition())) {
 		return this.flushingBuffers.containsKey(writeBuffer.getFilePosition());
-		}
 	}
 
 	@Override
