@@ -422,8 +422,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void setAR(TreeMap<Integer, HashLocPair> al) {
-		lobj.lock();
-		try {
 			try {
 
 				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
@@ -442,9 +440,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				SDFSLogger.getLog().warn("unable to remove reference", e);
 			}
 			this.ar = al;
-		} finally {
-			lobj.unlock();
-		}
 	}
 
 	private void reReference() {
@@ -931,7 +926,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				return;
 			}
 			try {
-
 				if (this.closed) {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug(this.getFilePosition() + " already closed");
@@ -961,7 +955,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			}
 		} finally {
-			lobj.unlock();
+			if(lobj.isLocked())
+				lobj.unlock();
 		}
 	}
 
@@ -975,7 +970,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void endClose() throws IOException {
-		SDFSLogger.getLog().info("??");
+		SDFSLogger.getLog().warn("??");
 		try {
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
@@ -999,8 +994,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public byte[] getFlushedBuffer() throws BufferClosedException {
-		lobj.lock();
-		try {
 			if (this.closed) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(this.getFilePosition() + " already closed");
@@ -1016,9 +1009,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			byte[] b = new byte[this.buf.capacity()];
 			System.arraycopy(this.buf.array(), 0, b, 0, b.length);
 			return b;
-		} finally {
-			lobj.unlock();
-		}
 	}
 
 	/*

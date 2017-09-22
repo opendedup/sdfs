@@ -103,7 +103,7 @@ public class Io {
 					SDFSLogger.getLog().debug("number of channels is " + this.dedupChannels.size());
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to open file" + f.getPath(), e);
+				SDFSLogger.getLog().debug("unable to open file" + f.getPath(), e);
 				throw new FuseException("unable to open file " + path).initErrno(Errno.EINVAL);
 			}
 		}
@@ -113,7 +113,7 @@ public class Io {
 	private DedupFileChannel getFileChannel(long handleNo) throws FuseException {
 		DedupFileChannel ch = this.dedupChannels.get(handleNo);
 		if (ch == null) {
-			SDFSLogger.getLog().error("unable to read file " + handleNo);
+			SDFSLogger.getLog().debug("unable to read file " + handleNo);
 			throw new FuseException("error reading " + handleNo).initErrno(Errno.EBADFD);
 		}
 		return ch;

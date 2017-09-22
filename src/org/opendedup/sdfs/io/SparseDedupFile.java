@@ -119,7 +119,7 @@ public class SparseDedupFile implements DedupFile {
 							} catch (BufferClosedException e) {
 								SDFSLogger.getLog().debug("Error while closing buffer at " + removal.getKey());
 							} catch (Exception e) {
-								SDFSLogger.getLog().error("unable to flush", e);
+								SDFSLogger.getLog().debug("unable to flush", e);
 							}
 						}
 					}).build(new CacheLoader<String, WritableCacheBuffer>() {
@@ -408,7 +408,6 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void writeCache(WritableCacheBuffer writeBuffer)
 			throws IOException, HashtableFullException, FileClosedException, DataArchivedException {
-		writeBuffer.lobj.lock();
 		try {
 			if (this.closed) {
 				throw new FileClosedException("file already closed");
@@ -646,7 +645,7 @@ public class SparseDedupFile implements DedupFile {
 				this.updateMap(writeBuffer, writeBuffer.getPrevDoop());
 			}
 		} finally {
-			writeBuffer.lobj.unlock();
+			
 		}
 
 	}

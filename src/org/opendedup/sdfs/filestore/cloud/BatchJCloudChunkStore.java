@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -409,7 +410,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String service = config.getAttribute("service-type");
 			if (service.equalsIgnoreCase("azureblob"))
 				this.azureStore = true;
-			// Retry after 25 seconds of no response
 			if (service.equalsIgnoreCase("atmos")) {
 				EncyptUtils.baseEncode = true;
 				this.atmosStore = true;
@@ -431,7 +431,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
 			// Do not wait between retries
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
-
 			Location region = null;
 			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
@@ -447,7 +446,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
 						.credentials(Main.cloudAccessKey, Main.cloudSecretKey).buildView(BlobStoreContext.class);
-
 			} else if (service.equals("filesystem")) {
 				EncyptUtils.baseEncode = true;
 				SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
