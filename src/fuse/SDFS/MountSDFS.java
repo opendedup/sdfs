@@ -32,6 +32,7 @@ public class MountSDFS implements Daemon, Runnable {
 	private static String mountOptions;
 	protected static ShutdownHook shutdownHook = null;
 	private static String password = null;
+	private static boolean nm;
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -46,6 +47,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("cc", false, "Runs Consistency Check");
 		options.addOption("e", true, "password to decrypt config");
+		options.addOption("nm", false, "disable drive mount");
 		options.addOption("m", true,
 				"mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -115,6 +117,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("h")) {
 			printHelp(options);
 			System.exit(1);
+		}
+		if (cmd.hasOption("nm")) {
+			nm = true;
 		}
 		if (cmd.hasOption("cc")) {
 			Main.runConsistancyCheck = true;
@@ -250,9 +255,11 @@ public class MountSDFS implements Daemon, Runnable {
 
 	@Override
 	public void start() throws Exception {
+		if(!nm) {
 		MountSDFS sd = new MountSDFS();
 		Thread th = new Thread(sd);
 		th.start();
+		}
 	}
 
 	@Override

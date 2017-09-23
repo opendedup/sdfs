@@ -18,3 +18,9 @@ install-packages/SDFS-3.2.1-Setup.exe
 install-packages/SDFS-3.2.5-Setup.exe
 install-packages/*.exe
 /target/
+windows-exe/.vs/SDFSCli/v15/.suo
+windows-exe/.vs/SDFSCli/v15/.suo
+windows-exe/.vs/SDFSCli/v15/Browse.VC.db
+windows-exe/.vs/SDFSCli/v15/.suo
+windows-exe/.vs/SDFSCli/v15/ipch/48cd406675cd87b5.ipch
+windows-exe/.vs/SDFSCli/v15/Solution.VC.db-shm
