@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.5.6.0</version>
+  <version>3.5.4.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -37,6 +37,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   	<timestamp>${maven.build.timestamp}</timestamp>
+   	<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
   </properties>
   <dependencies>
 <dependency>
@@ -58,6 +60,11 @@
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-log4j12</artifactId>
     <version>1.7.25</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.ignite</groupId>
+    <artifactId>ignite-core</artifactId>
+    <version>2.1.0</version>
 </dependency>
   <dependency>
     <groupId>de.schlichtherle.truezip</groupId>
@@ -259,6 +266,15 @@
 </dependency>
   </dependencies>
   <build>
+  <resources>
+        <resource>
+      <directory>src/resources</directory>
+      <includes>
+        <include>version.properties</include>
+      </includes>
+      <filtering>true</filtering>
+    </resource>
+ </resources>
   <sourceDirectory>./src/</sourceDirectory>
     <scriptSourceDirectory>./scripts</scriptSourceDirectory>
     <testSourceDirectory>./test/java</testSourceDirectory>
@@ -313,7 +329,8 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
+       </plugin>
+            
             
     
   </plugins>
