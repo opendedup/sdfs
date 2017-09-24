@@ -4,7 +4,10 @@ import java.io.IOException;
 
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -114,7 +117,10 @@ public class MgmtServerConnection {
 			SDFSLogger.getLog().debug(req);
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
-			if (returnCode != 200)
+			if(returnCode == 403) {
+				throw new IOException("Authentication failed");
+			}
+			else if (returnCode != 200)
 				throw new IOException("Unable to process command "
 						+ method.getQueryString() + " return code was"
 						+ returnCode + " return msg was "
@@ -265,8 +271,5 @@ public class MgmtServerConnection {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		Document doc = getResponse("file=/&cmd=info");
-		System.out.println(doc.getDocumentElement().getAttribute("status"));
-	}
+	
 }

@@ -91,13 +91,13 @@ public class MgmtWebServer implements Container {
 		return query_pairs;
 	}
 
-	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(500, .075F,
+	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(Main.maxOpenFiles*2, .075F,
 			false) {
 		private static final long serialVersionUID = -1L;
 
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<String, String> entry) {
-			return size() > 100;
+			return size() > Main.maxOpenFiles*2;
 		}
 	};
 
@@ -1035,17 +1035,22 @@ public class MgmtWebServer implements Container {
 						result.setAttribute("status", "failed");
 						result.setAttribute("msg", "no command specified");
 					}
-					if (!cmd.equalsIgnoreCase("batchgetblocks")) {
-						String rsString = XMLUtils.toXMLString(doc);
+					
+				} else {
+					result.setAttribute("status", "failed");
+					result.setAttribute("msg", "authentication failed");
+					response.setCode(403);
+				}
+				if (!cmd.equalsIgnoreCase("batchgetblocks")) {
+					String rsString = XMLUtils.toXMLString(doc);
 
-						// SDFSLogger.getLog().debug(rsString);
-						response.setContentType("text/xml");
-						byte[] rb = rsString.getBytes();
-						response.setContentLength(rb.length);
-						response.getOutputStream().write(rb);
-						response.getOutputStream().flush();
-						response.close();
-					}
+					// SDFSLogger.getLog().debug(rsString);
+					response.setContentType("text/xml");
+					byte[] rb = rsString.getBytes();
+					response.setContentLength(rb.length);
+					response.getOutputStream().write(rb);
+					response.getOutputStream().flush();
+					response.close();
 				}
 			} else {
 				if (!auth) {

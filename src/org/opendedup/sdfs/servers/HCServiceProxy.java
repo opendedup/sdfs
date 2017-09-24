@@ -197,9 +197,6 @@ public class HCServiceProxy {
 	public static synchronized void init(ArrayList<String> volumes) {
 		try {
 			if (Main.chunkStoreLocal) {
-				SDFSLogger.getLog().info("Starting local chunkstore");
-				hcService = new HashChunkService();
-				hcService.init();
 				File file = new File(Main.hashDBStore + File.separator + ".lock");
 				if(file.exists()) {
 					SDFSLogger.getLog().fatal("lock file exists " + file.getPath());
@@ -208,6 +205,11 @@ public class HCServiceProxy {
 					System.out.println("Please remove lock file to proceed");
 					System.exit(2);
 				}
+				SDFSLogger.getLog().info("Starting local chunkstore");
+				
+				hcService = new HashChunkService();
+				hcService.init();
+				
 				if (Main.runConsistancyCheck) {
 					hcService.runConsistancyCheck();
 				}

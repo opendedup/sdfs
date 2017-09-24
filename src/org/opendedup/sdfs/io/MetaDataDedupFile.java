@@ -1692,12 +1692,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				Element ear = doc.createElement("extended-attributes");
 				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
 					
-					Element ar = doc.createElement("extended-attribute");
+					
 					if(en.getKey().length() > 0) {
-						ar.setAttribute("name", en.getKey());
+						Element ar = doc.createElement(en.getKey());
 						ar.setAttribute("value", en.getValue());
+						ear.appendChild(ar);
 					}
-					ear.appendChild(ar);
+					
 				}
 				root.appendChild(ear);
 			}
