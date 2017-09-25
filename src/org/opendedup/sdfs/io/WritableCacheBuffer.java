@@ -73,8 +73,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private int doop = 0;
 	private int bytesWritten = 0;
 	private SparseDedupFile df;
-	private boolean closed = true;
-	private boolean flushing = false;
+	protected boolean closed = true;
+	protected boolean flushing = false;
 	boolean rafInit = false;
 	int prevDoop = 0;
 	private boolean batchprocessed;
@@ -217,7 +217,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				return this.readChunk(startPos, len);
 			}
 
-		}finally {
+		} finally {
 			lobj.unlock();
 		}
 
@@ -422,62 +422,57 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void setAR(TreeMap<Integer, HashLocPair> al) {
-			try {
+		try {
 
+			HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
+			for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
+				int val = -1;
+				if (ct.containsKey(e.getValue())) {
+					val = ct.get(e.getValue()) - 1;
+				}
+				ct.put(e.getValue(), val);
+			}
+			for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
+				DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
+						df.mf.getLookupFilter());
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to remove reference", e);
+		}
+		this.ar = al;
+	}
+
+	private void reReference() {
+		SDFSLogger.getLog().debug("Rereferencing cache buffer");
+		try {
+			if (Main.refCount && this.ar != null && this.hlAdded) {
 				HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
+				if (_ar != null) {
+					for (Entry<Integer, HashLocPair> e : this._ar.entrySet()) {
+						int val = -1;
+						if (ct.containsKey(e.getValue())) {
+							val = ct.get(e.getValue()) - 1;
+						}
+						ct.put(e.getValue(), val);
+					}
+					_ar = null;
+				}
 				for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
-					int val = -1;
+					int val = 1;
 					if (ct.containsKey(e.getValue())) {
-						val = ct.get(e.getValue()) - 1;
+						if (!e.getValue().inserted)
+							val = ct.get(e.getValue()) + 1;
 					}
 					ct.put(e.getValue(), val);
 				}
+
 				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
 					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
 							df.mf.getLookupFilter());
 				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to remove reference", e);
 			}
-			this.ar = al;
-	}
-
-	private void reReference() {
-		lobj.lock();
-		try {
-			SDFSLogger.getLog().info("Rereferencing cache buffer");
-			try {
-				if (Main.refCount && this.ar != null && this.hlAdded) {
-					HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
-					if (_ar != null) {
-						for (Entry<Integer, HashLocPair> e : this._ar.entrySet()) {
-							int val = -1;
-							if (ct.containsKey(e.getValue())) {
-								val = ct.get(e.getValue()) - 1;
-							}
-							ct.put(e.getValue(), val);
-						}
-						_ar = null;
-					}
-					for (Entry<Integer, HashLocPair> e : this.ar.entrySet()) {
-						int val = 1;
-						if (ct.containsKey(e.getValue())) {
-							if (!e.getValue().inserted)
-								val = ct.get(e.getValue()) + 1;
-						}
-						ct.put(e.getValue(), val);
-					}
-
-					for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-						DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
-								df.mf.getLookupFilter());
-					}
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to remove reference", e);
-			}
-		} finally {
-			lobj.unlock();
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to remove reference", e);
 		}
 	}
 
@@ -600,41 +595,37 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			throw new BufferClosedException("Buffer Closed while writing");
 		if (this.flushing)
 			throw new BufferClosedException("Buffer Flushing");
-		lobj.lock();
-		try {
-			if (!this.dirty && this.buf != null) {
-				this.buf = null;
+
+		if (!this.dirty && this.buf != null) {
+			this.buf = null;
+		}
+		if (_ar == null) {
+			_ar = new TreeMap<Integer, HashLocPair>(ar);
+		}
+		if (this.buf != null || this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
+			if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR)
+				SDFSLogger.getLog()
+						.info("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
+								+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
+			byte[] b = null;
+			if (Arrays.equals(p.hash, bk))
+				b = new byte[blankBlock.length];
+			else
+				b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
+			ByteBuffer bf = ByteBuffer.wrap(b);
+			byte[] z = new byte[p.nlen];
+			bf.position(p.offset);
+			bf.get(z);
+			this.writeBlock(z, p.pos);
+		} else {
+			try {
+				this.reconstructed = true;
+				this.hlAdded = true;
+				SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
+			} catch (Throwable e) {
+				df.errOccured = true;
+				throw new IOException(e);
 			}
-			if (_ar == null) {
-				_ar = new TreeMap<Integer, HashLocPair>(ar);
-			}
-			if (this.buf != null || this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR)
-					SDFSLogger.getLog()
-							.info("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
-									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
-				byte[] b = null;
-				if (Arrays.equals(p.hash, bk))
-					b = new byte[blankBlock.length];
-				else
-					b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
-				ByteBuffer bf = ByteBuffer.wrap(b);
-				byte[] z = new byte[p.nlen];
-				bf.position(p.offset);
-				bf.get(z);
-				this.writeBlock(z, p.pos);
-			} else {
-				try {
-					this.reconstructed = true;
-					this.hlAdded = true;
-					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
-				} catch (Throwable e) {
-					df.errOccured = true;
-					throw new IOException(e);
-				}
-			}
-		} finally {
-			lobj.unlock();
 		}
 	}
 
@@ -836,7 +827,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			try {
 				this.lobj = obj;
 				synchronized (df.activeBuffers) {
-					df.activeBuffers.put(this.position,lobj);
+					df.activeBuffers.put(this.position, lobj);
 				}
 				this.df.removeBufferFromFlush(this);
 				this.df.openBuffers.put(this.position, this);
@@ -852,16 +843,17 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void flush() throws BufferClosedException {
-		if(lobj == null) {
+		if (lobj == null) {
 			this.flushing = false;
 			this.closed = true;
 			df.openBuffers.remove(this.position);
-			synchronized(df.activeBuffers) {
+			synchronized (df.activeBuffers) {
 				df.activeBuffers.remove(this.position);
 			}
+			this.df.removeBufferFromFlush(this);
 			return;
 		}
-		lobj.lock(); 
+		lobj.lock();
 		try {
 			this.df.openBuffers.remove(this.position);
 			if (this.flushing) {
@@ -889,19 +881,19 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.flushing = false;
 				this.closed = true;
 			}
-		} catch(Exception e){
-			SDFSLogger.getLog().error("unable to flush",e);
-		}finally {
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to flush", e);
+		} finally {
 			lobj.unlock();
 		}
-		
+
 	}
 
 	public boolean isClosed() {
 		lobj.lock();
 		try {
 			return this.closed;
-		}finally {
+		} finally {
 			lobj.unlock();
 		}
 	}
@@ -943,19 +935,18 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.flushing = false;
 				}
 				df.removeBufferFromFlush(this);
-				
+
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
 				try {
-					
-					
+
 				} catch (Exception e) {
 				}
 
 			}
 		} finally {
-			if(lobj.isLocked())
+			if (lobj.isLocked())
 				lobj.unlock();
 		}
 	}
@@ -993,22 +984,24 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
-	public byte[] getFlushedBuffer() throws BufferClosedException {
-			if (this.closed) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(this.getFilePosition() + " already closed");
-				throw new BufferClosedException("Buffer Closed");
-			}
-			if (!this.flushing) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(this.getFilePosition() + " not flushed");
-				throw new BufferClosedException("Buffer not flushed");
-			}
-			if (this.buf == null)
-				SDFSLogger.getLog().debug(this.getFilePosition() + " buffer is null");
-			byte[] b = new byte[this.buf.capacity()];
-			System.arraycopy(this.buf.array(), 0, b, 0, b.length);
-			return b;
+	public byte[] getFlushedBuffer() throws BufferClosedException, IOException, InterruptedException, DataArchivedException {
+		if (this.closed) {
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(this.getFilePosition() + " already closed");
+			throw new BufferClosedException("Buffer Closed");
+		}
+		if (!this.flushing) {
+			if (SDFSLogger.isDebug())
+				SDFSLogger.getLog().debug(this.getFilePosition() + " not flushed");
+			throw new BufferClosedException("Buffer not flushed");
+		}
+		if (this.buf == null)
+			SDFSLogger.getLog().debug(this.getFilePosition() + " buffer is null");
+		if(this.buf == null)
+			this.initBuffer();
+		byte[] b = new byte[this.buf.capacity()];
+		System.arraycopy(this.buf.array(), 0, b, 0, b.length);
+		return b;
 	}
 
 	/*
@@ -1019,16 +1012,16 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	@Override
 	public void persist() {
 		lobj.lock();
-		
-			try {
-				this.df.writeCache(this);
-				this.closed = true;
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("Error while closing", e);
-				throw new IllegalArgumentException("error while closing " + e.toString());
-			} finally {
-				lobj.unlock();
-			}
+
+		try {
+			this.df.writeCache(this);
+			this.closed = true;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Error while closing", e);
+			throw new IllegalArgumentException("error while closing " + e.toString());
+		} finally {
+			lobj.unlock();
+		}
 	}
 
 	/*

@@ -34,6 +34,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.OSValidator;
@@ -188,8 +189,9 @@ public class ArchiveImporter {
 					}
 
 				}
+				String hmac = MgmtServerConnection.getAuth(password);
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
-						+ sdest, server, password, port, maxSz, evt, useSSL);
+						+ sdest, server, hmac, port, maxSz, evt, useSSL);
 				imp.runImport();
 				if (imp.isCorrupt()) {
 

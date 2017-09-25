@@ -611,10 +611,10 @@ public class Io {
 			// SDFSLogger.getLog().info("555=" + path + " z=" + z);
 			return z;
 		} catch (FuseException e) {
-			SDFSLogger.getLog().error("error while opening file", e);
+			SDFSLogger.getLog().debug("error while opening file " + path, e);
 			throw e;
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error while opening file", e);
+			SDFSLogger.getLog().error("error while opening file " + path, e);
 			throw new FuseException("error opending " + path).initErrno(Errno.ENODATA);
 		}
 	}

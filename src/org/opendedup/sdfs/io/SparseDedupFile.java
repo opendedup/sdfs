@@ -117,9 +117,9 @@ public class SparseDedupFile implements DedupFile {
 							try {
 								ck.flush();
 							} catch (BufferClosedException e) {
-								SDFSLogger.getLog().debug("Error while closing buffer at " + removal.getKey());
+								SDFSLogger.getLog().error("Error while closing buffer at " + removal.getKey());
 							} catch (Exception e) {
-								SDFSLogger.getLog().debug("unable to flush", e);
+								SDFSLogger.getLog().error("unable to flush", e);
 							}
 						}
 					}).build(new CacheLoader<String, WritableCacheBuffer>() {
@@ -371,10 +371,16 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().warn("interrupted");
 					break;
 				}
-				if (i > 120000) {
+				if (i > 12000) {
 					int sec = (i / 1000) * x;
 					SDFSLogger.getLog().warn("WriteCache has take over [" + sec + "] seconds. There are still "
 							+ this.flushingBuffers.size() + " in flush");
+					for(WritableCacheBuffer buf : this.flushingBuffers.values()) {
+						if(buf== null) {
+							SDFSLogger.getLog().info("Buf is null");
+						}
+						SDFSLogger.getLog().info("closed=" + buf.closed + " flushing=" + buf.flushing + " pos=" + buf.getFilePosition());
+					}
 					i = 0;
 					x++;
 				}
@@ -1355,13 +1361,13 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void putBufferIntoFlush(WritableCacheBuffer writeBuffer) {
 		synchronized(this.activeBuffers.get(writeBuffer.getFilePosition())) {
-		this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
+			this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
 		}
 	}
 
 	@Override
 	public void removeBufferFromFlush(WritableCacheBuffer writeBuffer) {
-		synchronized(writeBuffer.lobj) {
+		synchronized(writeBuffer) {
 			this.flushingBuffers.remove(writeBuffer.getFilePosition());
 		}
 		/*
@@ -1371,7 +1377,9 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {
+		synchronized(writeBuffer) {
 		return this.flushingBuffers.containsKey(writeBuffer.getFilePosition());
+		}
 	}
 
 	@Override

@@ -30,12 +30,14 @@ public class SDFSCmdline {
 				MgmtServerConnection.useSSL = false;
 			if (cmd.hasOption("server"))
 				MgmtServerConnection.server = cmd.getOptionValue("server");
-			if (cmd.hasOption("password"))
-				MgmtServerConnection.hmac = MgmtServerConnection.getAuth(cmd.getOptionValue("password"));
+			
 			
 			if (cmd.hasOption("port"))
 				MgmtServerConnection.port = Integer.parseInt(cmd
 						.getOptionValue("port"));
+			
+			if (cmd.hasOption("password"))
+				MgmtServerConnection.hmac = MgmtServerConnection.getAuth(cmd.getOptionValue("password"));
 
 			if (cmd.hasOption("file-info")) {
 				if (cmd.hasOption("file-path")) {

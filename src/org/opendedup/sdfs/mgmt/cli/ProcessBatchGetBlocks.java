@@ -51,9 +51,9 @@ public class ProcessBatchGetBlocks {
 					"ninja");
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			try{
-				String hmac = MgmtServerConnection.getAuth(password);
+				//String hmac = MgmtServerConnection.getAuth(password);
 			method = MgmtServerConnection.connectAndPost(server, port,
-					hmac, sb.toString(), "", file, useSSL);
+					 sb.toString(),password, "", file, useSSL);
 			in = method.getResponseBodyAsStream();
 			SDFSLogger.getLog().debug("reading imported blocks");
 			IOUtils.copy(in, out);
@@ -108,7 +108,7 @@ public class ProcessBatchGetBlocks {
 		} catch(Exception e) {
 			he = e;
 			Thread.sleep(1000);
-		}finally {
+		}finally {	
 			if (in != null) {
 				try {
 					in.close();

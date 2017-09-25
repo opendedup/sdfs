@@ -4,10 +4,7 @@ import java.io.IOException;
 
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -118,7 +115,8 @@ public class MgmtServerConnection {
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
 			if(returnCode == 403) {
-				throw new IOException("Authentication failed");
+				System.err.println("Authenitcation Failed");
+				System.exit(1);
 			}
 			else if (returnCode != 200)
 				throw new IOException("Unable to process command "
@@ -210,6 +208,43 @@ public class MgmtServerConnection {
 					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 				else
 					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+			String prot = "http";
+			if (useSSL) {
+				prot = "https";
+
+			}
+			
+			req = prot + "://" + server + ":" + port + "/" + file + "?" + url;
+			if(useSSL) {
+				req = req.replaceAll("(?<!https:)//", "/");
+			}else
+				req = req.replaceAll("(?<!http:)//", "/");
+			GetMethod method = new GetMethod(req);
+			int returnCode = client.executeMethod(method);
+			if (returnCode != 200)
+				throw new IOException("Unable to process command "
+						+ method.getQueryString() + " return code was"
+						+ returnCode + " return msg was "
+						+ method.getResponseBodyAsString());
+			return method;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(
+					"unable to connect " + server + " on port " + port);
+			SDFSLogger.getLog().error("unable to connect url = " + req);
+			throw e;
+		}
+	}
+	
+	public static GetMethod connectAndGetHMAC(String server, int port,
+			String password, String url, String file, boolean useSSL)
+			throws Exception {
+		String req = null;
+		try {
+			if (userName != null && password != null)
+				if (url.trim().length() == 0)
+					url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(password, "UTF-8");
+				else
+					url = url + "&username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(password, "UTF-8");
 			String prot = "http";
 			if (useSSL) {
 				prot = "https";

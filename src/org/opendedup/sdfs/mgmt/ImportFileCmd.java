@@ -50,7 +50,7 @@ public class ImportFileCmd implements Runnable {
 		@SuppressWarnings("deprecation")
 		List<NameValuePair> params = URLEncodedUtils.parse(new URI(serverURL), "UTF-8");
 		for (NameValuePair param : params) {
-			  if(param.getName().equalsIgnoreCase("password"))
+			  if(param.getName().equalsIgnoreCase("hmac"))
 				  this.password = param.getValue();
 		}
 		
@@ -114,7 +114,7 @@ public class ImportFileCmd implements Runnable {
 		String fp = MgmtWebServer.METADATA_PATH + URLEncoder.encode(this.srcFile,"UTF-8");
 		GetMethod mtd = null;
 		try{
-			mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
+			mtd = MgmtServerConnection.connectAndGetHMAC(server, port, password, "", fp, useSSL);
 		BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
 		String pt = Main.volume.getPath() + File.separator + this.destFile;
 		File _f = new File(pt);
@@ -147,7 +147,7 @@ public class ImportFileCmd implements Runnable {
 		String fp = MgmtWebServer.MAPDATA_PATH + guid;
 		GetMethod mtd = null;
 		try{
-		 mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
+		 mtd = MgmtServerConnection.connectAndGetHMAC(server, port, password, "", fp, useSSL);
 		BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
 		
 		String ng = UUID.randomUUID().toString();

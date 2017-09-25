@@ -66,10 +66,6 @@ public class ProcessDSEInfo {
 					System.out.printf("Average DSE Block Size : %s\n",
 							avgbs);
 				}
-				System.out.printf("DSE Listen Port : %s\n", port);
-				System.out.printf("DSE Listen Host : %s\n", host);
-				System.out.printf("DSE Listen SSL : %s\n",
-						dse.getAttribute("listen-encrypted"));
 				System.out.printf("DSE Current Cache Size : %s\n", StorageUnit
 						.of(cacheSz).format(cacheSz));
 				System.out.printf("DSE Max Cache Size : %s\n",
