@@ -544,7 +544,7 @@ public class FileReplicationService {
 						f = f.getParentFile();
 						f.mkdirs();
 					} else {
-						executor.execute(new MetaFileDownloader(fname, f, sync,executor,req));
+						executor.execute(new MetaFileDownloader(fname, f, sync,executor));
 					}
 				} else {
 					SDFSLogger.getLog().info("not checked out " + fname);
@@ -583,19 +583,17 @@ public class FileReplicationService {
 		private static AtomicInteger fer = new AtomicInteger();
 		private static AtomicInteger fdl = new AtomicInteger();
 		private transient ThreadPoolExecutor executor = null;
-		CloudSyncDLRequest req = null;
 		private static void reset() {
 			fer.set(0);
 			fdl.set(0);
 			downloadSyncException = null;
 		}
 
-		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync,ThreadPoolExecutor executor,CloudSyncDLRequest req) {
+		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync,ThreadPoolExecutor executor) {
 			this.sync = sync;
 			this.to = to;
 			this.fname = fname;
 			this.executor = executor;
-			this.req = req;
 		}
 
 		@Override
@@ -609,7 +607,7 @@ public class FileReplicationService {
 					sync.checkoutFile("files/" + fname);
 					MetaDataDedupFile mf = MetaFileStore.getMF(to);
 					String efs = "ddb/" + EncyptUtils.encString(mf.getDfGuid(), Main.chunkStoreEncryptionEnabled);
-					executor.execute(new DDBDownloader(efs, sync, req.isUpdateRef(),mf.getLookupFilter()));
+					executor.execute(new DDBDownloader(efs, sync, mf.getLookupFilter()));
 					Main.volume.addDuplicateBytes(
 							mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
 					Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
@@ -635,7 +633,6 @@ public class FileReplicationService {
 		private static Exception downloadSyncException;
 		AbstractCloudFileSync sync;
 		String fname;
-		boolean updateRef = true;
 		String lookupFilter = null;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
@@ -646,10 +643,9 @@ public class FileReplicationService {
 			downloadSyncException = null;
 		}
 
-		DDBDownloader(String fname, AbstractCloudFileSync sync, boolean updateRef,String lookupFilter) {
+		DDBDownloader(String fname, AbstractCloudFileSync sync, String lookupFilter) {
 			this.sync = sync;
 			this.fname = fname;
-			this.updateRef = updateRef;
 			this.lookupFilter = lookupFilter;
 		}
 
@@ -668,24 +664,33 @@ public class FileReplicationService {
 						LongByteArrayMap ddb = LongByteArrayMap
 								.getMap(f.getName().substring(0, f.getName().length() - 4),lookupFilter);
 						Set<Long> blks = new HashSet<Long>();
-						boolean ref = false;
-						if (this.updateRef && Main.refCount)
-							ref = true;
 						if (ddb.getVersion() < 3)
 							throw new IOException("only files version 3 or later can be imported");
 						try {
 							ddb.iterInit();
 							for (;;) {
-								LongKeyValue kv = ddb.nextKeyValue(ref);
+								LongKeyValue kv = ddb.nextKeyValue(false);
 								if (kv == null)
 									break;
 								SparseDataChunk ck = kv.getValue();
 								boolean dirty = false;
 								TreeMap<Integer, HashLocPair> al = ck.getFingers();
 								for (HashLocPair p : al.values()) {
-
 									ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
-									InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
+								
+									InsertRecord ir = null;
+									if(lookupFilter != null) {
+										long pos = HCServiceProxy.getLookupFilter(lookupFilter).put(p.hash,Longs.fromByteArray(p.hashloc));
+										if(pos != -1) {
+											ir = new InsertRecord(false,pos);
+										} else {
+											ir = HCServiceProxy.getHashesMap().put(cm, false);
+											HCServiceProxy.getLookupFilter(lookupFilter).put(p.hash,1,Longs.fromByteArray(ir.getHashLocs()));
+										}
+									}
+									else {
+										ir = HCServiceProxy.getHashesMap().put(cm, false);
+									}
 									Main.volume.addVirtualBytesWritten(p.len, false);
 									Main.volume.addDuplicateBytes(p.len, false);
 									if (ir.getInserted())

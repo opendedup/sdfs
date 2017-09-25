@@ -304,6 +304,10 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("rebuild-hashtable")) {
 			Main.runConsistancyCheck = true;
 		}
+		if (vol.hasAttribute("rebuild-hashtable")) {
+			Main.runConsistancyCheck = true;
+		}
+		
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));
