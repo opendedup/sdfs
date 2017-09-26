@@ -29,7 +29,7 @@ public class GetAttributes {
 				root.appendChild(fe);
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
+				SDFSLogger.getLog().debug("unable to fulfill request on file " + file, e);
 				throw new IOException("request to fetch attributes failed because " + e.toString());
 			}
 		}

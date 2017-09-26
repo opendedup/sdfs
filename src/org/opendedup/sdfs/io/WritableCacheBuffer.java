@@ -20,6 +20,7 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,6 +95,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 	public static final byte[] blankBlock = new byte[HashFunctionPool.minLen + 1];
 	public static final byte[] bk = new Murmur3HashEngine().getHash(blankBlock);
+	//private static AtomicLong wbsz= new AtomicLong();
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
 		if (!Main.chunkStoreLocal) {
@@ -255,7 +257,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.hlAdded = false;
 				if (HashFunctionPool.max_hash_cluster > 1) {
 					this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
-
 					final ArrayList<Shard> cks = new ArrayList<Shard>();
 					int i = 0;
 					// long fp = this.position;
@@ -822,6 +823,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void open(ReentrantLock obj) {
+		//long ksz = wbsz.incrementAndGet();
 		obj.lock();
 		try {
 			try {
@@ -840,6 +842,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			lobj.unlock();
 		}
+		//SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb=" +SparseDedupFile.writeBuffers.size());
 	}
 
 	public void flush() throws BufferClosedException {
@@ -878,6 +881,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.df.putBufferIntoFlush(this);
 				}
 			} else {
+				//wbsz.decrementAndGet();
 				this.flushing = false;
 				this.closed = true;
 			}
@@ -905,6 +909,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void close() throws IOException {
+		//long ksz = wbsz.decrementAndGet();
 		lobj.lock();
 		try {
 			synchronized (df.activeBuffers) {
@@ -937,6 +942,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				df.removeBufferFromFlush(this);
 
 			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to close " + this.position, e);
+				String key = df.getGUID() + "#" + this.getFilePosition();
+				SparseDedupFile.writeBuffers.put(key, this);
+				this.open(this.lobj);
+				SDFSLogger.getLog().warn("re-opened" + this.position);
 				throw new IOException(e);
 			} finally {
 				try {
@@ -948,6 +958,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			if (lobj.isLocked())
 				lobj.unlock();
+			
+			//SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" + df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb=" +SparseDedupFile.writeBuffers.size());
 		}
 	}
 
@@ -999,9 +1011,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			SDFSLogger.getLog().debug(this.getFilePosition() + " buffer is null");
 		if(this.buf == null)
 			this.initBuffer();
-		byte[] b = new byte[this.buf.capacity()];
-		System.arraycopy(this.buf.array(), 0, b, 0, b.length);
-		return b;
+		return this.buf.array();
 	}
 
 	/*

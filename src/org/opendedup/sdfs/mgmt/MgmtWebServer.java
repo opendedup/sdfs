@@ -211,7 +211,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("info", e);
+							SDFSLogger.getLog().debug("info", e);
 						}
 						break;
 					case "setattribute":
@@ -297,7 +297,7 @@ public class MgmtWebServer implements Container {
 						} catch (Exception e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("info", e);
+							SDFSLogger.getLog().debug("info", e);
 						}
 						break;
 					case "ostevtdelete":
