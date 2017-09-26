@@ -164,7 +164,6 @@ public class LocalLookupFilter {
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
-			options.createStatistics();
 			// options.setTargetFileSizeBase(512*1024*1024);
 
 			options.setMaxBytesForLevelBase(fsize * 5);

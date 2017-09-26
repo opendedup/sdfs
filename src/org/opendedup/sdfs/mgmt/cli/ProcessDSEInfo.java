@@ -39,8 +39,6 @@ public class ProcessDSEInfo {
 				long freeBlocks = Long.parseLong(dse
 						.getAttribute("free-blocks"));
 				int pageSize = Integer.parseInt(dse.getAttribute("page-size"));
-				int port = Integer.parseInt(dse.getAttribute("listen-port"));
-				String host = dse.getAttribute("listen-hostname");
 				double pFull = 0.00;
 				if (currentSz > 0) {
 					pFull = (((double) currentSz / (double) maxSz) * 100);

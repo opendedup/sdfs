@@ -793,7 +793,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 
-	private static class StartShard implements Runnable {
+	public static class StartShard implements Runnable {
 
 		RocksDB[] dbs = null;
 		int n = -1;
@@ -804,7 +804,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		AtomicInteger ct = null;
 
 
-		protected StartShard(int n, RocksDB[] dbs, Options options, File f, CommandLineProgressBar bar,
+		public StartShard(int n, RocksDB[] dbs, Options options, File f, CommandLineProgressBar bar,
 				AtomicInteger ct) {
 			this.dbs = dbs;
 			this.n = n;

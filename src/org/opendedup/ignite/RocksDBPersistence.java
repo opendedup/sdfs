@@ -2,6 +2,7 @@ package org.opendedup.ignite;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -161,7 +162,6 @@ public class RocksDBPersistence implements org.apache.ignite.cache.store.CacheSt
 				// options.setAllowMmapWrites(true);
 				// options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
-				options.createStatistics();
 				// options.setTargetFileSizeBase(512*1024*1024);
 
 				options.setMaxBytesForLevelBase(fsize * 5);
@@ -232,7 +232,6 @@ public class RocksDBPersistence implements org.apache.ignite.cache.store.CacheSt
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
-			options.createStatistics();
 			// options.setTargetFileSizeBase(512*1024*1024);
 			options.setMaxBytesForLevelBase(GB);
 			options.setTargetFileSizeBase(128 * 1024 * 1024);

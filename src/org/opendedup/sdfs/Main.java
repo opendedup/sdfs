@@ -407,7 +407,4 @@ public class Main {
 
 	public static boolean closedGracefully = true;
 	public static boolean rebuildHashTable = false;
-
-
-	public static boolean rebuildHashTable = false;
 }

@@ -147,7 +147,6 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
-			options.createStatistics();
 			// options.setTargetFileSizeBase(512*1024*1024);
 			options.setMaxBytesForLevelBase(GB);
 			options.setTargetFileSizeBase(128 * 1024 * 1024);
