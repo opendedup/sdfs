@@ -58,7 +58,7 @@ import com.google.common.primitives.Longs;
 
 public class HCServiceProxy {
 
-	private static HashChunkServiceInterface hcService = null;
+	public static HashChunkServiceInterface hcService = null;
 	private static DSEClientSocket socket = null;
 	private static EventBus eventBus = new EventBus();
 	public static ClusterSocket cs = null;
@@ -99,7 +99,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized boolean hashExists(byte[] hash, String guid) throws IOException, HashtableFullException {
-		if (guid != null && LocalLookupFilter.getLocalLookupFilter(guid).containsKey(hash)) {
+		if (guid != null && Main.enableLookupFilter && LocalLookupFilter.getLocalLookupFilter(guid).containsKey(hash)) {
 				return true;
 			}
 		
@@ -162,14 +162,14 @@ public class HCServiceProxy {
 
 	public static boolean claimKey(byte[] key, long val, long ct, String guid) throws IOException {
 		if (Main.chunkStoreLocal) {
-			if (guid != null) {
-				long nc;
-					nc = LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
-				if (nc == 0) {
+			if (guid != null && Main.enableLookupFilter) {
+					LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
 					return true;
-				}
+				
+			} else {
+				
+				return hcService.claimKey(key, val, ct);
 			}
-			return hcService.claimKey(key, val, ct);
 		} else
 			return false;
 	}
@@ -422,16 +422,10 @@ public class HCServiceProxy {
 			throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			if (guid != null) {
-					long pos = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, ct);
-					if (pos == -1) {
+			if (guid != null && Main.enableLookupFilter) {
 						InsertRecord ir = HCServiceProxy.hcService.writeChunk(hash, aContents, false, 1);
-						LocalLookupFilter.getLocalLookupFilter(guid).put(hash, Longs.fromByteArray(ir.getHashLocs()), ct);
+						LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct);
 						return ir;
-					} else {
-						return new InsertRecord(false, pos);
-					}
-
 			} else
 				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct);
 		} else {

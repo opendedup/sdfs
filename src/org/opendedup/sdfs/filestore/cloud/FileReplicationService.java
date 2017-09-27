@@ -679,7 +679,7 @@ public class FileReplicationService {
 									ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
 								
 									InsertRecord ir = null;
-									if(lookupFilter != null) {
+									if(lookupFilter != null && Main.enableLookupFilter) {
 										long pos = HCServiceProxy.getLookupFilter(lookupFilter).put(p.hash,Longs.fromByteArray(p.hashloc));
 										if(pos != -1) {
 											ir = new InsertRecord(false,pos);

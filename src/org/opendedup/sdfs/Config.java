@@ -381,6 +381,9 @@ public class Config {
 		if (localChunkStore.hasAttribute("io-threads")) {
 			Main.dseIOThreads = Integer.parseInt(localChunkStore.getAttribute("io-threads"));
 		}
+		if(localChunkStore.hasAttribute("enable-lookup-filter")) {
+			Main.enableLookupFilter = Boolean.parseBoolean(localChunkStore.getAttribute("enable-lookup-filter"));
+		}
 		if (localChunkStore.hasAttribute("cluster-config"))
 			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
 		if (localChunkStore.hasAttribute("cluster-dse-password"))

@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 import org.rocksdb.AccessHint;
 import org.rocksdb.BlockBasedTableConfig;
@@ -207,16 +208,19 @@ public class LocalLookupFilter {
 				if (oval != val) {
 					SDFSLogger.getLog().warn("When updating reference count for key [" + StringUtils.getHexString(hash)
 							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
+					HCServiceProxy.hcService.claimKey(hash, val, ct);
 					return ct;
 				}
 				ct += bk.getLong();
 				if (ct <= 0) {
 					if (ct == 0)
 						ct = -1;
+					this.getDB(hash).delete(wo,hash);
+					HCServiceProxy.hcService.claimKey(hash, val, ct);
 					return ct;
 				} else {
 					bk.putLong(v.length - 8, ct);
-					getDB(hash).put(wo, hash, v);
+					this.getDB(hash).put(wo, hash, v);
 					return 0;
 				}
 			} else {
@@ -269,6 +273,54 @@ public class LocalLookupFilter {
 
 	}
 
+	public InsertRecord put(byte [] key,byte [] contents,long ct) throws IOException, HashtableFullException {
+		// persist = false;
+		if (this.isClosed())
+			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
+		// if (persist)
+		// this.flushFullBuffer();
+		Lock l = this.getLock(key);
+		l.lock();
+		try {
+			try {
+				RocksDB db = this.getDB(key);
+				byte[] v = null;
+
+				v = db.get(key);
+				if (v == null) {
+					InsertRecord ir = HCServiceProxy.hcService.writeChunk(key, contents, false, 1);
+					v = new byte[16];
+					ByteBuffer bf = ByteBuffer.wrap(v);
+					bf.put(ir.getHashLocs());
+					if (ct <= 0)
+						bf.putLong(1);
+					else
+						bf.putLong(ct);
+					db.put(key, v);
+					return ir;
+				} else {
+					// SDFSLogger.getLog().info("Hash Found");
+					ByteBuffer bk = ByteBuffer.wrap(v);
+					long pos = bk.getLong();
+					
+					if (ct <= 0)
+						ct =  bk.getLong() +1;
+					else
+						ct += bk.getLong();
+					bk.putLong(8, ct);
+					db.put(key, v);
+					return new InsertRecord(false, pos);
+				}
+			} catch (RocksDBException e) {
+				throw new IOException(e);
+			}
+
+		} finally {
+
+			l.unlock();
+		}
+	}
+	
 	public long put(byte [] key,long ct) throws IOException, HashtableFullException {
 		// persist = false;
 		if (this.isClosed())

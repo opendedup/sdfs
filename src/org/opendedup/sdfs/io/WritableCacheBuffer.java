@@ -592,6 +592,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void copyExtent(HashLocPair p) throws IOException, BufferClosedException, DataArchivedException {
+		this.lobj.lock();
+		try {
 		if (this.closed)
 			throw new BufferClosedException("Buffer Closed while writing");
 		if (this.flushing)
@@ -625,8 +627,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
 			} catch (Throwable e) {
 				df.errOccured = true;
+				SDFSLogger.getLog().error("Error inserting " + p,e);
 				throw new IOException(e);
 			}
+		}
+		}finally {
+			this.lobj.unlock();
 		}
 	}
 
@@ -750,6 +756,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.hlAdded = true;
 		} catch (Throwable e) {
 			df.errOccured = true;
+			SDFSLogger.getLog().error("write failed", e);
 			throw new IOException(e);
 		} finally {
 			HashFunctionPool.returnObject(hc);
@@ -886,7 +893,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.closed = true;
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to flush", e);
+			SDFSLogger.getLog().debug("unable to flush", e);
 		} finally {
 			lobj.unlock();
 		}
@@ -929,8 +936,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				} else if (this.dirty || this.hlAdded) {
 					if (hlAdded) {
 						this.reReference();
-					}
+						this.df.updateExtents(this);
+					} else {
 					this.df.writeCache(this);
+					}
 					this.closed = true;
 					this.flushing = false;
 					this.dirty = false;

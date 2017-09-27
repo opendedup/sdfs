@@ -134,6 +134,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	private LongByteArrayMap(String filePath,String lookupFilter) throws IOException {
 		this.filePath = filePath;
+		this.lookupFilter = lookupFilter;
 		this.openFile();
 	}
 

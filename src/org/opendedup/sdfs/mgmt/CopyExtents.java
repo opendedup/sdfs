@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -89,7 +90,7 @@ public class CopyExtents {
 			Lock l = ddf.getWriteLock();
 			l.lock();
 			writeChannels.get(f.getPath());
-			writeChannels.get(nf.getPath());
+			DedupFileChannel dc = writeChannels.get(nf.getPath());
 			try {
 				while (written < len) {
 					long _sstart = written + sstart;
@@ -103,6 +104,18 @@ public class CopyExtents {
 					while (!insdone) {
 						try {
 							SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
+							if(sdc.getFingers().size() == 0) {
+								int _nlen = 128 *1024; //128K
+								if(_nlen > _rem) {
+									_nlen = (int)_rem;
+								}
+								dc.writeFile(ByteBuffer.allocate(_nlen), _nlen, 0, _dpos, true);
+								//ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+								//ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+								//ddf.mf.setLastModified(System.currentTimeMillis());
+								written += _nlen;
+								insdone = true;
+							} else {
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
 
 							HashLocPair p = sdc.getWL(_so);
@@ -128,11 +141,14 @@ public class CopyExtents {
 								} else
 									throw e;
 							}
+							
 							ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
 							ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
 							ddf.mf.setLastModified(System.currentTimeMillis());
 							written += p.nlen;
 							insdone = true;
+							
+							}
 						} catch (org.opendedup.sdfs.io.FileClosedException e) {
 							insdone = false;
 						} catch (Exception e) {

@@ -663,6 +663,20 @@ public class SparseDedupFile implements DedupFile {
 		}
 
 	}
+	
+	public void updateExtents(WritableCacheBuffer writeBuffer) throws FileClosedException, IOException {
+		mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
+		if (writeBuffer.isNewChunk()) {
+			mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - writeBuffer.getDoop(), true);
+		} else {
+			int prev = (writeBuffer.capacity() - writeBuffer.getPrevDoop());
+			int nw = writeBuffer.capacity() - writeBuffer.getDoop();
+
+			mf.getIOMonitor().addActualBytesWritten(nw - prev, true);
+		}
+		mf.getIOMonitor().addDulicateData((writeBuffer.capacity() - writeBuffer.getPrevDoop()), true);
+		this.updateMap(writeBuffer, writeBuffer.capacity());
+	}
 
 	@Override
 	public void updateMap(DedupChunkInterface writeBuffer, int doop) throws FileClosedException, IOException {
