@@ -377,7 +377,7 @@ public class MgmtWebServer implements Container {
 						} catch (IOException e) {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("deletefile", e);
+							SDFSLogger.getLog().debug("deletefile", e);
 						}
 						break;
 					case "cloudfile":

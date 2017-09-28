@@ -20,7 +20,6 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +94,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 	public static final byte[] blankBlock = new byte[HashFunctionPool.minLen + 1];
 	public static final byte[] bk = new Murmur3HashEngine().getHash(blankBlock);
-	//private static AtomicLong wbsz= new AtomicLong();
+	// private static AtomicLong wbsz= new AtomicLong();
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
 		if (!Main.chunkStoreLocal) {
@@ -594,44 +593,44 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	public void copyExtent(HashLocPair p) throws IOException, BufferClosedException, DataArchivedException {
 		this.lobj.lock();
 		try {
-		if (this.closed)
-			throw new BufferClosedException("Buffer Closed while writing");
-		if (this.flushing)
-			throw new BufferClosedException("Buffer Flushing");
+			if (this.closed)
+				throw new BufferClosedException("Buffer Closed while writing");
+			if (this.flushing)
+				throw new BufferClosedException("Buffer Flushing");
 
-		if (!this.dirty && this.buf != null) {
-			this.buf = null;
-		}
-		if (_ar == null) {
-			_ar = new TreeMap<Integer, HashLocPair>(ar);
-		}
-		if (this.buf != null || this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
-			if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR)
-				SDFSLogger.getLog()
-						.info("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
-								+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
-			byte[] b = null;
-			if (Arrays.equals(p.hash, bk))
-				b = new byte[blankBlock.length];
-			else
-				b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
-			ByteBuffer bf = ByteBuffer.wrap(b);
-			byte[] z = new byte[p.nlen];
-			bf.position(p.offset);
-			bf.get(z);
-			this.writeBlock(z, p.pos);
-		} else {
-			try {
-				this.reconstructed = true;
-				this.hlAdded = true;
-				SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
-			} catch (Throwable e) {
-				df.errOccured = true;
-				SDFSLogger.getLog().error("Error inserting " + p,e);
-				throw new IOException(e);
+			if (!this.dirty && this.buf != null) {
+				this.buf = null;
 			}
-		}
-		}finally {
+			if (_ar == null) {
+				_ar = new TreeMap<Integer, HashLocPair>(ar);
+			}
+			if (this.buf != null || this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
+				if (this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR)
+					SDFSLogger.getLog()
+							.info("copy extent Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
+									+ " at " + (this.getFilePosition() + p.pos) + " for file " + this.df.mf.getPath());
+				byte[] b = null;
+				if (Arrays.equals(p.hash, bk))
+					b = new byte[blankBlock.length];
+				else
+					b = HCServiceProxy.fetchChunk(p.hash, p.hashloc, direct);
+				ByteBuffer bf = ByteBuffer.wrap(b);
+				byte[] z = new byte[p.nlen];
+				bf.position(p.offset);
+				bf.get(z);
+				this.writeBlock(z, p.pos);
+			} else {
+				try {
+					this.reconstructed = true;
+					this.hlAdded = true;
+					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
+				} catch (Throwable e) {
+					df.errOccured = true;
+					SDFSLogger.getLog().error("Error inserting " + p, e);
+					throw new IOException(e);
+				}
+			}
+		} finally {
 			this.lobj.unlock();
 		}
 	}
@@ -830,7 +829,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void open(ReentrantLock obj) {
-		//long ksz = wbsz.incrementAndGet();
+		// long ksz = wbsz.incrementAndGet();
 		obj.lock();
 		try {
 			try {
@@ -849,18 +848,22 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			lobj.unlock();
 		}
-		//SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb=" +SparseDedupFile.writeBuffers.size());
+		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
+		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
+		// +SparseDedupFile.writeBuffers.size());
 	}
 
 	public void flush() throws BufferClosedException {
 		if (lobj == null) {
 			this.flushing = false;
 			this.closed = true;
-			df.openBuffers.remove(this.position);
 			synchronized (df.activeBuffers) {
+				df.openBuffers.remove(this.position);
+
+				this.df.removeBufferFromFlush(this);
+
 				df.activeBuffers.remove(this.position);
 			}
-			this.df.removeBufferFromFlush(this);
 			return;
 		}
 		lobj.lock();
@@ -888,7 +891,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.df.putBufferIntoFlush(this);
 				}
 			} else {
-				//wbsz.decrementAndGet();
+				// wbsz.decrementAndGet();
 				this.flushing = false;
 				this.closed = true;
 			}
@@ -916,17 +919,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void close() throws IOException {
-		//long ksz = wbsz.decrementAndGet();
+		// long ksz = wbsz.decrementAndGet();
+		boolean ex = false;
 		lobj.lock();
 		try {
-			synchronized (df.activeBuffers) {
-				df.activeBuffers.remove(this.position);
-			}
 			df.openBuffers.remove(this.position);
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("#### " + this.getFilePosition() + " not flushing ");
-				df.removeBufferFromFlush(this);
 				return;
 			}
 			try {
@@ -938,7 +938,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						this.reReference();
 						this.df.updateExtents(this);
 					} else {
-					this.df.writeCache(this);
+						this.df.writeCache(this);
 					}
 					this.closed = true;
 					this.flushing = false;
@@ -948,9 +948,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.closed = true;
 					this.flushing = false;
 				}
-				df.removeBufferFromFlush(this);
 
 			} catch (Exception e) {
+				ex = true;
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
 				String key = df.getGUID() + "#" + this.getFilePosition();
 				SparseDedupFile.writeBuffers.put(key, this);
@@ -967,8 +967,16 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			if (lobj.isLocked())
 				lobj.unlock();
-			
-			//SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" + df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb=" +SparseDedupFile.writeBuffers.size());
+			if (!ex) {
+				synchronized (df.activeBuffers) {
+					df.removeBufferFromFlush(this);
+					df.activeBuffers.remove(this.position);
+				}
+			}
+
+			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
+			// df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" +
+			// df.flushingBuffers.size() + " wb=" +SparseDedupFile.writeBuffers.size());
 		}
 	}
 
@@ -1005,7 +1013,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 	}
 
-	public byte[] getFlushedBuffer() throws BufferClosedException, IOException, InterruptedException, DataArchivedException {
+	public byte[] getFlushedBuffer()
+			throws BufferClosedException, IOException, InterruptedException, DataArchivedException {
 		if (this.closed) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(this.getFilePosition() + " already closed");
@@ -1018,7 +1027,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 		if (this.buf == null)
 			SDFSLogger.getLog().debug(this.getFilePosition() + " buffer is null");
-		if(this.buf == null)
+		if (this.buf == null)
 			this.initBuffer();
 		return this.buf.array();
 	}
