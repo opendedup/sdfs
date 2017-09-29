@@ -51,7 +51,7 @@ public class MetaFileStore {
 	}
 
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder.newBuilder()
-			.concurrencyLevel(Main.writeThreads).maximumSize(500)
+			.concurrencyLevel(Main.writeThreads).maximumSize(Main.maxOpenFiles).expireAfterAccess(1, TimeUnit.MINUTES)
 			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {
 				// This method is called just after a new entry has been
 				// added
@@ -66,16 +66,13 @@ public class MetaFileStore {
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("unable to close file", e);
 					}
-
 				}
 			}).build(new CacheLoader<String, MetaDataDedupFile>() {
-
 				@Override
 				public MetaDataDedupFile load(String path) throws Exception {
 
 					return MetaDataDedupFile.getFile(path);
 				}
-
 			});
 
 
