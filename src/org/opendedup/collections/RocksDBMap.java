@@ -381,8 +381,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.position(0);
 					long pos = bk.getLong();
 					long tm = bk.getLong();
-					v = this.getDB(hash).get(hash);
+					
 					if (System.currentTimeMillis() > tm) {
+						v = this.getDB(hash).get(hash);
 						if (v != null) {
 							ByteBuffer nbk = ByteBuffer.wrap(v);
 							long oval = nbk.getLong();

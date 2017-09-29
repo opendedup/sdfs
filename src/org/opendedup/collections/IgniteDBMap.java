@@ -18,14 +18,16 @@
  *******************************************************************************/
 package org.opendedup.collections;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.cache.Cache.Entry;
 import javax.cache.configuration.FactoryBuilder;
 
 import org.apache.ignite.Ignite;
@@ -47,28 +49,25 @@ import org.apache.ignite.transactions.TransactionOptimisticException;
 import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.ignite.RocksDBPersistence;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.StringUtils;
-import org.rocksdb.BlockBasedTableConfig;
-import org.rocksdb.BloomFilter;
-import org.rocksdb.CompactionStyle;
-import org.rocksdb.CompressionType;
-import org.rocksdb.Env;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksIterator;
 
-
-public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
+public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 	IgniteCache<ByteArrayWrapper, ByteArrayWrapper> db = null;
+	IgniteCache<ByteArrayWrapper, ByteArrayWrapper> rmdb = null;
+	Ignite ig = null;
+	Ignite rig = null;
+
 	boolean closed = false;
 	private long size = 0;
 	IgniteTransactions transactions = null;
-	RocksDB rmdb = null;
-	private static final long GB = 1024*1024*1024;
-	
-	
+	IgniteTransactions rtransactions = null;
+	private static final long rmthreashold = 5 * 60 * 1000;
+	Lock gclock = null;
+	private final static ByteArrayWrapper lobj =new ByteArrayWrapper("gclock".getBytes());
+
 	@Override
 	public void init(long maxSize, String fileName, double fpp) throws IOException, HashtableFullException {
 
@@ -78,11 +77,8 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 			cacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(RocksDBPersistence.class));
 			cacheCfg.setReadThrough(true);
 			cacheCfg.setWriteThrough(true);
-			cacheCfg.setName("sdfs");
-			
-			cacheCfg.setName("cacheName");
+			cacheCfg.setName(Main.volume.getUuid());
 			cacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
-
 			IgniteConfiguration cfg = new IgniteConfiguration();
 			MemoryConfiguration memCfg = new MemoryConfiguration();
 			MemoryPolicyConfiguration memPlc = new MemoryPolicyConfiguration();
@@ -99,61 +95,32 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 			TransactionConfiguration txCfg = new TransactionConfiguration();
 			cfg.setTransactionConfiguration(txCfg);
 			cacheCfg.setCacheMode(CacheMode.PARTITIONED);
-			cacheCfg.setBackups(1);
+			cacheCfg.setBackups(Main.volume.getClusterCopies());
 			// Start Ignite node.
-			Ignite ig  = Ignition.start(cfg);
+			ig = Ignition.start(cfg);
 			db = ig.getOrCreateCache(cacheCfg);
 			transactions = ig.transactions();
-			
-			Options options = new Options();
-			options.setCreateIfMissing(true);
-			options.setCompactionStyle(CompactionStyle.LEVEL);
-			options.setCompressionType(CompressionType.NO_COMPRESSION);
-			BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-			blockConfig.setFilter(new BloomFilter(16, false));
-			// blockConfig.setHashIndexAllowCollision(false);
-			// blockConfig.setCacheIndexAndFilterBlocks(false);
-			// blockConfig.setIndexType(IndexType.kBinarySearch);
-			// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
-			blockConfig.setBlockSize(4 * 1024);
-			blockConfig.setFormatVersion(2);
-			// options.useFixedLengthPrefixExtractor(3);
 
-			Env env = Env.getDefault();
-			env.setBackgroundThreads(8, Env.FLUSH_POOL);
-			env.setBackgroundThreads(8, Env.COMPACTION_POOL);
-			options.setMaxBackgroundCompactions(8);
-			options.setMaxBackgroundFlushes(8);
-			options.setEnv(env);
-		
-			// options.setNumLevels(8);
-			// options.setLevelCompactionDynamicLevelBytes(true);
-			//
-			options.setAllowConcurrentMemtableWrite(true);
-			//LRUCache c = new LRUCache(memperDB);
-			//options.setRowCache(c);
+			CacheConfiguration<ByteArrayWrapper, ByteArrayWrapper> rcacheCfg = new CacheConfiguration<ByteArrayWrapper, ByteArrayWrapper>();
+			rcacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(RocksDBPersistence.class));
+			rcacheCfg.setReadThrough(true);
+			rcacheCfg.setWriteThrough(true);
+			rcacheCfg.setName(Main.volume.getUuid() + "rmdb");
+			rcacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
+			IgniteConfiguration rcfg = new IgniteConfiguration();
+			MemoryConfiguration rmemCfg = new MemoryConfiguration();
+			MemoryPolicyConfiguration rmemPlc = new MemoryPolicyConfiguration();
+			rmemPlc.setName("Standard Eviction");
+			rmemPlc.setMaxSize(maxSize);
+			rmemPlc.setPageEvictionMode(DataPageEvictionMode.RANDOM_LRU);
+			rmemCfg.setMemoryPolicies(rmemPlc);
+			rcfg.setMemoryConfiguration(rmemCfg);
+			rcfg.setCacheConfiguration(rcacheCfg);
+			rig = Ignition.start(cfg);
+			rmdb = rig.getOrCreateCache(cacheCfg);
 			
-			//blockConfig.setBlockCacheSize(memperDB);
-			blockConfig.setNoBlockCache(true);
-			options.setWriteBufferSize(GB);
-			options.setMinWriteBufferNumberToMerge(2);
-			options.setMaxWriteBufferNumber(6);
-			options.setLevelZeroFileNumCompactionTrigger(2);
-
-			// options.setCompactionReadaheadSize(1024*1024*25);
-			// options.setUseDirectIoForFlushAndCompaction(true);
-			// options.setUseDirectReads(true);
-			options.setStatsDumpPeriodSec(30);
-			// options.setAllowMmapWrites(true);
-			// options.setAllowMmapReads(true);
-			options.setMaxOpenFiles(-1);
-			// options.setTargetFileSizeBase(512*1024*1024);
-			options.setMaxBytesForLevelBase(GB);
-			options.setTargetFileSizeBase(128 * 1024 * 1024);
-			options.setTableFormatConfig(blockConfig);
-			File f = new File(fileName + File.separator + "rmdb");
-			f.mkdirs();
-			rmdb = RocksDB.open(options, f.getPath());
+			rtransactions = rig.transactions();
+			gclock =rmdb.lock(lobj);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -162,9 +129,9 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public boolean claimKey(byte[] hash, long val, long ct) throws IOException {
 		ByteArrayWrapper hv = new ByteArrayWrapper(hash);
-		
+
 		try (Transaction tx = transactions.txStart(TransactionConcurrency.OPTIMISTIC,
-                TransactionIsolation.SERIALIZABLE)) {
+				TransactionIsolation.SERIALIZABLE)) {
 			ByteArrayWrapper v = db.get(hv);
 			if (v != null) {
 				ByteBuffer bk = ByteBuffer.wrap(v.getData());
@@ -176,29 +143,28 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 					return false;
 				}
 				ct += bk.getLong();
-				if(ct <=0) {
-					
-					rmdb.put(hash, v.getData());
-					db.remove(new ByteArrayWrapper(hash));
-				} else {
-					bk.putLong(v.getData().length - 8, ct);
-					db.put(hv, v);
+				if (ct <= 0) {
+					bk.position(8);
+					bk.putLong(System.currentTimeMillis());
+					rmdb.put(hv, new ByteArrayWrapper(bk.array()));
+				} else if (rmdb.get(hv) != null) {
+					rmdb.remove(hv);
 				}
+				bk.putLong(v.getData().length - 8, ct);
+				db.put(hv, v);
 				tx.commit();
 				return true;
 			}
 			SDFSLogger.getLog()
 					.warn("When updating reference count. Key [" + StringUtils.getHexString(hash) + "] not found");
 			return false;
-		}catch(TransactionOptimisticException e) {
-			SDFSLogger.getLog()
-			.warn("Transaction Failed.",e);
+		} catch (TransactionOptimisticException e) {
+			SDFSLogger.getLog().warn("Transaction Failed.", e);
 			return this.claimKey(hash, val, ct);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
-			
+
 		}
 	}
 
@@ -209,14 +175,14 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long getSize() {
-			long sz = 0;
-			return sz;
-		
+		long sz = 0;
+		return sz;
+
 	}
 
 	@Override
 	public long getUsedSize() {
-			return 0;
+		return 0;
 	}
 
 	@Override
@@ -229,22 +195,54 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 		if (this.isClosed())
 			throw new IOException("Hashtable is close");
 		long rmk = 0;
+		if(gclock.tryLock()) {
 		try {
-				RocksIterator iter = rmdb.newIterator();
-				SDFSLogger.getLog().info("Removing hashes " + rmdb.getLongProperty("rocksdb.estimate-num-keys"));
-				ByteBuffer bk = ByteBuffer.allocateDirect(16);
-				for (iter.seekToFirst(); iter.isValid(); iter.next()) {
-					bk.position(0);
-					bk.put(iter.value());
-					bk.position(0);
-					long pos = bk.getLong();
-					ChunkData ck = new ChunkData(pos, iter.key());
-					ck.setmDelete(true);
-					rmdb.delete(iter.key());
+			Iterator<Entry<ByteArrayWrapper, ByteArrayWrapper>> iter = rmdb.iterator();
+			SDFSLogger.getLog().info("Removing hashes");
+			ByteBuffer bk = ByteBuffer.allocateDirect(16);
+			while (iter.hasNext()) {
+				Entry<ByteArrayWrapper, ByteArrayWrapper> ent = iter.next();
+				ByteArrayWrapper w = ent.getKey();
+				ByteArrayWrapper v = ent.getValue();
+
+				bk.position(0);
+				bk.put(v.getData());
+				bk.position(0);
+				long pos = bk.getLong();
+				long tm = bk.getLong() + rmthreashold;
+				if (tm > System.currentTimeMillis()) {
+					try (Transaction tx = transactions.txStart(TransactionConcurrency.OPTIMISTIC,
+							TransactionIsolation.SERIALIZABLE)) {
+						ByteArrayWrapper pv = this.db.get(w);
+						if (pv != null) {
+							ByteBuffer nbk = ByteBuffer.wrap(pv.getData());
+							long oval = nbk.getLong();
+							long ct = nbk.getLong();
+							if (ct <= 0 && oval == pos) {
+								ChunkData ck = new ChunkData(pos, w.getData());
+								ck.setmDelete(true);
+								this.db.remove(w);
+							}
+							this.rmdb.remove(w);
+
+						} else {
+							rmdb.remove(w);
+							ChunkData ck = new ChunkData(pos, w.getData());
+							ck.setmDelete(true);
+						}
+					} catch (TransactionOptimisticException e) {
+						SDFSLogger.getLog().warn("Transaction Failed.", e);
+					}
 				}
+			}
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish Garbage Collection", e);
+		} finally {
+			gclock.unlock();
+		}
+		} else {
+			SDFSLogger.getLog().info("Garbage Collection already running on another node");
 		}
 		return rmk;
 	}
@@ -324,51 +322,50 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 		// if (persist)
 		// this.flushFullBuffer();
 		try (Transaction tx = transactions.txStart(TransactionConcurrency.OPTIMISTIC,
-                TransactionIsolation.SERIALIZABLE)) {
-				
-				byte[] v = null;
-				ByteArrayWrapper hv = new ByteArrayWrapper(cm.getHash());
-				ByteArrayWrapper bv = db.get(hv);
-				if (bv == null) {
-					try {
-						cm.persistData(true);
-					}catch (org.opendedup.collections.HashExistsException e) {
-						cm.setcPos(e.getPos());
-					}
-					v = new byte[16];
-					ByteBuffer bf = ByteBuffer.wrap(v);
-					bf.putLong(cm.getcPos());
-					if (cm.references <= 0)
-						bf.putLong(1);
-					else
-						bf.putLong(cm.references);
-					db.put(hv, new ByteArrayWrapper(v));
-					tx.commit();
-					return new InsertRecord(true, cm.getcPos());
-				} else {
-					//SDFSLogger.getLog().info("Hash Found");
-					v = bv.getData();
-					ByteBuffer bk = ByteBuffer.wrap(v);
-					long pos = bk.getLong();
-					long ct = bk.getLong();
-					if (cm.references <= 0)
-						ct++;
-					else
-						ct += cm.references;
-					bk.putLong(8, ct);
-					db.put(hv,bv);
-					tx.commit();
-					return new InsertRecord(false, pos);
+				TransactionIsolation.SERIALIZABLE)) {
+
+			byte[] v = null;
+			ByteArrayWrapper hv = new ByteArrayWrapper(cm.getHash());
+			ByteArrayWrapper bv = db.get(hv);
+			if (bv == null) {
+				try {
+					cm.persistData(true);
+				} catch (org.opendedup.collections.HashExistsException e) {
+					cm.setcPos(e.getPos());
 				}
-			} catch(TransactionOptimisticException e) {
-				SDFSLogger.getLog()
-				.warn("Transaction Failed.",e);
-				return this.put(cm, persist);
-			} catch(IOException e) {
-				throw e;
-			}catch(Exception e) {
-				throw new IOException(e);
+				v = new byte[16];
+				ByteBuffer bf = ByteBuffer.wrap(v);
+				bf.putLong(cm.getcPos());
+				if (cm.references <= 0)
+					bf.putLong(1);
+				else
+					bf.putLong(cm.references);
+				db.put(hv, new ByteArrayWrapper(v));
+				tx.commit();
+				return new InsertRecord(true, cm.getcPos());
+			} else {
+				// SDFSLogger.getLog().info("Hash Found");
+				v = bv.getData();
+				ByteBuffer bk = ByteBuffer.wrap(v);
+				long pos = bk.getLong();
+				long ct = bk.getLong();
+				if (cm.references <= 0)
+					ct++;
+				else
+					ct += cm.references;
+				bk.putLong(8, ct);
+				db.put(hv, bv);
+				tx.commit();
+				return new InsertRecord(false, pos);
 			}
+		} catch (TransactionOptimisticException e) {
+			SDFSLogger.getLog().warn("Transaction Failed.", e);
+			return this.put(cm, persist);
+		} catch (IOException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	/*
@@ -380,27 +377,26 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 	@Override
 	public boolean update(ChunkData cm) throws IOException {
 		try (Transaction tx = transactions.txStart(TransactionConcurrency.OPTIMISTIC,
-                TransactionIsolation.SERIALIZABLE)) {
-				
-				byte[] v = null;
-				ByteArrayWrapper hv = new ByteArrayWrapper(cm.getHash());
-				ByteArrayWrapper bv = db.get(hv);
-				if (bv == null) {
-					tx.commit();
-					return false;
-				} else {
-					v = bv.getData();
-					ByteBuffer bk = ByteBuffer.wrap(v);
-					bk.putLong(0, cm.getcPos());
-					db.put(hv,bv);
-					tx.commit();
-					return true;
-				}
-		} catch(TransactionOptimisticException e) {
-			SDFSLogger.getLog()
-			.warn("Transaction Failed.",e);
+				TransactionIsolation.SERIALIZABLE)) {
+
+			byte[] v = null;
+			ByteArrayWrapper hv = new ByteArrayWrapper(cm.getHash());
+			ByteArrayWrapper bv = db.get(hv);
+			if (bv == null) {
+				tx.commit();
+				return false;
+			} else {
+				v = bv.getData();
+				ByteBuffer bk = ByteBuffer.wrap(v);
+				bk.putLong(0, cm.getcPos());
+				db.put(hv, bv);
+				tx.commit();
+				return true;
+			}
+		} catch (TransactionOptimisticException e) {
+			SDFSLogger.getLog().warn("Transaction Failed.", e);
 			return this.update(cm);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
@@ -411,19 +407,19 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long get(byte[] key) throws IOException {
-			ByteArrayWrapper hv = new ByteArrayWrapper(key);
-			ByteArrayWrapper bv = db.get(hv);
-			try {
-				if (bv == null) {
+		ByteArrayWrapper hv = new ByteArrayWrapper(key);
+		ByteArrayWrapper bv = db.get(hv);
+		try {
+			if (bv == null) {
 
-					return -1;
-				} else {
-					ByteBuffer bk = ByteBuffer.wrap(bv.getData());
-					return bk.getLong();
-				}
-			} catch (Exception e) {
-				throw new IOException(e);
+				return -1;
+			} else {
+				ByteBuffer bk = ByteBuffer.wrap(bv.getData());
+				return bk.getLong();
 			}
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 
 	}
 
@@ -456,7 +452,7 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 			byte[] data = null;
 			try {
 				data = ChunkData.getChunk(key, pos);
-			} catch(DataArchivedException e) {
+			} catch (DataArchivedException e) {
 				throw e;
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
@@ -481,13 +477,13 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("hashtable is close");
 		}
 
-			try {
-				db.remove(new ByteArrayWrapper(cm.getHash()));
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
+		try {
+			db.remove(new ByteArrayWrapper(cm.getHash()));
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 
-			return true;
+		return true;
 	}
 
 	private ReentrantLock syncLock = new ReentrantLock();
@@ -521,7 +517,6 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public void commitCompact(boolean force) throws IOException {
-		
 
 	}
 
@@ -556,7 +551,9 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public boolean mightContainKey(byte[] key) {
-			return this.db.containsKey(new ByteArrayWrapper(key));
+		return this.db.containsKey(new ByteArrayWrapper(key));
 	}
+	
+	
 
 }
