@@ -111,8 +111,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void clearCounters() {
-		HashBlobArchive.compressedLength.set(0);
-		HashBlobArchive.currentLength.set(0);
+		HashBlobArchive.setCompressedLength(0);
+		HashBlobArchive.setLength(0);
 	}
 
 	@Override
@@ -133,8 +133,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
 			HashMap<String, String> md = container.getMetadata();
-			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 			container.setMetadata(md);
 			container.uploadMetadata();
 			SDFSLogger.getLog().info("Updated container on close");
@@ -184,7 +184,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return HashBlobArchive.currentLength.get();
+		return HashBlobArchive.getLength();
 	}
 
 	@Override
@@ -350,8 +350,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 
 				if (cl == 0 || sz == 0) {
-					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+					md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 					md.put("clustered", Boolean.toString(this.clustered));
 					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 					md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -377,8 +377,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				}
 				HashMap<String, String> metaData = new HashMap<String, String>();
-				metaData.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-				metaData.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+				metaData.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+				metaData.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 				metaData.put("clustered", Boolean.toString(this.clustered));
 				metaData.put("hostname", InetAddress.getLocalHost().getHostName());
 				metaData.put("port", Integer.toString(Main.sdfsCliPort));
@@ -392,8 +392,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				container.uploadMetadata(null, null, opContext);
 				SDFSLogger.getLog().debug("set user metadata " + metaData.size());
 			}
-			HashBlobArchive.currentLength.set(sz);
-			HashBlobArchive.compressedLength.set(cl);
+			HashBlobArchive.setLength(sz);
+			HashBlobArchive.setCompressedLength(cl);
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -420,8 +420,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			CloudBlockBlob blob = container.getBlockBlobReference(lbi);
 			blob.downloadAttributes();
 			HashMap<String, String> md = blob.getMetadata();
-			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("clustered", Boolean.toString(this.clustered));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
@@ -435,8 +435,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			SDFSLogger.getLog().info("unable to create backup of current volume info",e);
 		}
 		iter = container.listBlobs("keys/").iterator();
-		HashBlobArchive.currentLength.set(0);
-		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 		dl = new MultiDownload(this, "keys/");
 		dl.iterationInit(false, "/keys");
 		this.ht = null;
@@ -483,7 +483,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long compressedSize() {
-		return HashBlobArchive.compressedLength.get();
+		return HashBlobArchive.getCompressedLength();
 	}
 
 	@Override
@@ -686,8 +686,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						metaData.put("suspect", "true");
 						int _size = Integer.parseInt((String) metaData.get("size"));
 						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-						HashBlobArchive.currentLength.addAndGet(_size);
-						HashBlobArchive.compressedLength.addAndGet(_compressedSize);
+						HashBlobArchive.addToLength(_size);
+						HashBlobArchive.addToCompressedLength(_compressedSize);
 						blob.setMetadata(metaData);
 						blob.uploadMetadata(null, null, opContext);
 						metaData = kblob.getMetadata();
@@ -745,8 +745,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			metaData.put("suspect", "true");
 			int _size = Integer.parseInt((String) metaData.get("size"));
 			int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-			HashBlobArchive.currentLength.addAndGet(_size);
-			HashBlobArchive.compressedLength.addAndGet(_compressedSize);
+			HashBlobArchive.addToLength(_size);
+			HashBlobArchive.addToCompressedLength(_compressedSize);
 			metaData = kblob.getMetadata();
 			metaData.remove("deleted");
 			metaData.put("deletedobjects", Integer.toString(delobj));
@@ -784,8 +784,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					if (!this.clustered) {
 						HashMap<String, String> md = container.getMetadata();
-						md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+						md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 						container.setMetadata(md);
 						container.uploadMetadata(null, null, opContext);
 					} else {
@@ -794,8 +794,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						CloudBlockBlob blob = container.getBlockBlobReference(lbi);
 						blob.downloadAttributes();
 						HashMap<String, String> md = blob.getMetadata();
-						md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+						md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 						md.put("clustered", Boolean.toString(this.clustered));
 						md.put("hostname", InetAddress.getLocalHost().getHostName());
 						md.put("lastupdated", Long.toString(System.currentTimeMillis()));
@@ -843,16 +843,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							if (objs <= delobj) {
 								int size = Integer.parseInt((String) metaData.get("size"));
 								int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-								if (HashBlobArchive.compressedLength.get() > 0) {
-
-									HashBlobArchive.compressedLength.addAndGet(-1 * compressedSize);
-								} else if (HashBlobArchive.compressedLength.get() < 0)
-									HashBlobArchive.compressedLength.set(0);
-								HashBlobArchive.currentLength.addAndGet(-1 * size);
-								if (HashBlobArchive.currentLength.get() > 0) {
-									HashBlobArchive.currentLength.addAndGet(-1 * size);
-								} else if (HashBlobArchive.currentLength.get() < 0)
-									HashBlobArchive.currentLength.set(0);
+								if (HashBlobArchive.getCompressedLength() > 0) {
+									HashBlobArchive.addToCompressedLength((-1 * compressedSize));
+								} else if (HashBlobArchive.getCompressedLength() < 0)
+									HashBlobArchive.setCompressedLength(0);
+									
+								if (HashBlobArchive.getLength()> 0) {
+									HashBlobArchive.addToLength(-1 * size);
+								} else if (HashBlobArchive.getLength() < 0)
+									HashBlobArchive.setLength(0);
+								else
+									HashBlobArchive.setLength(-1 * size);
 								HashBlobArchive.removeCache(k.longValue());
 								if (this.deleteUnclaimed) {
 									this.verifyDelete(k.longValue());
@@ -1471,8 +1472,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				int _sz = Integer.parseInt(md.get("bsize"));
 				int _cl = Integer.parseInt(md.get("compressedsize"));
-				HashBlobArchive.currentLength.addAndGet(_sz);
-				HashBlobArchive.compressedLength.addAndGet(_cl);
+				HashBlobArchive.addToLength(_sz);
+				HashBlobArchive.addToCompressedLength(_cl);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to update size", e);
 			}

@@ -47,6 +47,7 @@ import org.apache.ignite.transactions.TransactionConcurrency;
 import org.apache.ignite.transactions.TransactionIsolation;
 import org.apache.ignite.transactions.TransactionOptimisticException;
 import org.opendedup.hashing.LargeBloomFilter;
+import org.opendedup.ignite.RMDBPersistence;
 import org.opendedup.ignite.RocksDBPersistence;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -58,7 +59,6 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 	IgniteCache<ByteArrayWrapper, ByteArrayWrapper> db = null;
 	IgniteCache<ByteArrayWrapper, ByteArrayWrapper> rmdb = null;
 	Ignite ig = null;
-	Ignite rig = null;
 
 	boolean closed = false;
 	private long size = 0;
@@ -102,25 +102,14 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 			transactions = ig.transactions();
 
 			CacheConfiguration<ByteArrayWrapper, ByteArrayWrapper> rcacheCfg = new CacheConfiguration<ByteArrayWrapper, ByteArrayWrapper>();
-			rcacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(RocksDBPersistence.class));
+			rcacheCfg.setCacheStoreFactory(FactoryBuilder.factoryOf(RMDBPersistence.class));
 			rcacheCfg.setReadThrough(true);
 			rcacheCfg.setWriteThrough(true);
 			rcacheCfg.setName(Main.volume.getUuid() + "rmdb");
 			rcacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
-			IgniteConfiguration rcfg = new IgniteConfiguration();
-			MemoryConfiguration rmemCfg = new MemoryConfiguration();
-			MemoryPolicyConfiguration rmemPlc = new MemoryPolicyConfiguration();
-			rmemPlc.setName("Standard Eviction");
-			rmemPlc.setMaxSize(maxSize);
-			rmemPlc.setPageEvictionMode(DataPageEvictionMode.RANDOM_LRU);
-			rmemCfg.setMemoryPolicies(rmemPlc);
-			rcfg.setMemoryConfiguration(rmemCfg);
-			rcfg.setCacheConfiguration(rcacheCfg);
-			rig = Ignition.start(cfg);
-			rmdb = rig.getOrCreateCache(cacheCfg);
-			
-			rtransactions = rig.transactions();
+			rmdb = ig.getOrCreateCache(rcacheCfg);
 			gclock =rmdb.lock(lobj);
+			Main.DSEClusterEnabled = true;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}

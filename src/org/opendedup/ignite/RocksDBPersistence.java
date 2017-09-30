@@ -47,7 +47,6 @@ public class RocksDBPersistence implements org.apache.ignite.cache.store.CacheSt
 	String fileName = null;
 	ReentrantLock[] lockMap = new ReentrantLock[256];
 	RocksDB[] dbs = new RocksDB[8];
-	RocksDB rmdb = null;
 	private static final long GB = 1024 * 1024 * 1024;
 	private static final long MB = 1024 * 1024;
 	int multiplier = 0;
@@ -189,56 +188,6 @@ public class RocksDBPersistence implements org.apache.ignite.cache.store.CacheSt
 			for (int i = 0; i < lockMap.length; i++) {
 				lockMap[i] = new ReentrantLock();
 			}
-
-			Options options = new Options();
-			options.setCreateIfMissing(true);
-			options.setCompactionStyle(CompactionStyle.LEVEL);
-			options.setCompressionType(CompressionType.NO_COMPRESSION);
-			BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-			blockConfig.setFilter(new BloomFilter(16, false));
-			// blockConfig.setHashIndexAllowCollision(false);
-			// blockConfig.setCacheIndexAndFilterBlocks(false);
-			// blockConfig.setIndexType(IndexType.kBinarySearch);
-			// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
-			blockConfig.setBlockSize(4 * 1024);
-			blockConfig.setFormatVersion(2);
-			// options.useFixedLengthPrefixExtractor(3);
-
-			Env env = Env.getDefault();
-			env.setBackgroundThreads(8, Env.FLUSH_POOL);
-			env.setBackgroundThreads(8, Env.COMPACTION_POOL);
-			options.setMaxBackgroundCompactions(8);
-			options.setMaxBackgroundFlushes(8);
-			options.setEnv(env);
-
-			// options.setNumLevels(8);
-			// options.setLevelCompactionDynamicLevelBytes(true);
-			//
-			options.setAllowConcurrentMemtableWrite(true);
-			// LRUCache c = new LRUCache(memperDB);
-			// options.setRowCache(c);
-
-			// blockConfig.setBlockCacheSize(memperDB);
-			blockConfig.setNoBlockCache(true);
-			options.setWriteBufferSize(GB);
-			options.setMinWriteBufferNumberToMerge(2);
-			options.setMaxWriteBufferNumber(6);
-			options.setLevelZeroFileNumCompactionTrigger(2);
-
-			// options.setCompactionReadaheadSize(1024*1024*25);
-			// options.setUseDirectIoForFlushAndCompaction(true);
-			// options.setUseDirectReads(true);
-			options.setStatsDumpPeriodSec(30);
-			// options.setAllowMmapWrites(true);
-			// options.setAllowMmapReads(true);
-			options.setMaxOpenFiles(-1);
-			// options.setTargetFileSizeBase(512*1024*1024);
-			options.setMaxBytesForLevelBase(GB);
-			options.setTargetFileSizeBase(128 * 1024 * 1024);
-			options.setTableFormatConfig(blockConfig);
-			File f = new File(fileName + File.separator + "rmdb");
-			f.mkdirs();
-			rmdb = RocksDB.open(options, f.getPath());
 			bar.finish();
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to initiate datastore", e);

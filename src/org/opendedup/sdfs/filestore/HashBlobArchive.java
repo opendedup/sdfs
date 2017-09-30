@@ -42,6 +42,9 @@ import static java.lang.Math.toIntExact;
 //import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteAtomicLong;
+import org.apache.ignite.Ignition;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
@@ -92,7 +95,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static File chunk_location;
 	private static File staged_chunk_location;
 	private static int VERSION = 0;
-	public static AtomicInteger ct = new AtomicInteger(0);
 	private boolean cached = false;
 	public static boolean allowSync = false;
 	private boolean compactStaged = false;
@@ -104,8 +106,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 	// BlockPolicy();
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private static transient ThreadPoolExecutor executor = null;
-	public static AtomicLong currentLength = new AtomicLong(0);
-	public static AtomicLong compressedLength = new AtomicLong(0);
+	private static AtomicLong currentLength = new AtomicLong(0);
+	private static AtomicLong compressedLength = new AtomicLong(0);
+	private static IgniteAtomicLong iCurrentLength = null;
+	private static IgniteAtomicLong iCompressedLength = null;
 	private static long LOCAL_CACHE_SIZE = 209715200;
 	public static int MAP_CACHE_SIZE = 200;
 	public static ConnectionChecker cc = null;
@@ -121,6 +125,24 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static boolean closed = false;
 	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
+	
+	static {
+		if(Main.DSEClusterEnabled) {
+			Ignite ignite = Ignition.ignite();
+			 
+			iCurrentLength = ignite.atomicLong(
+			    Main.volume.getUuid() + "-l", // Atomic long name.
+			    0,        		// Initial value.
+			    true     		// Create if it does not exist.
+			);
+			iCompressedLength = ignite.atomicLong(
+				    Main.volume.getUuid() + "-cl", // Atomic long name.
+				    0,        		// Initial value.
+				    true     		// Create if it does not exist.
+				);
+			
+		}
+	}
 
 	// public FileLock fl = null;
 
@@ -143,27 +165,49 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static long getCompressedLength() {
+		if(Main.DSEClusterEnabled)
+			return iCompressedLength.get();
+		else
 		return compressedLength.get();
 	}
 
 	public static void setCompressedLength(long val) {
-		compressedLength.set(val);
+		if(Main.DSEClusterEnabled) {
+			iCompressedLength.compareAndSet(0, val);
+		} else
+			compressedLength.set(val);
 	}
 
 	public static void addToCompressedLength(long val) {
-		compressedLength.addAndGet(val);
+		if(Main.DSEClusterEnabled) {
+			iCompressedLength.addAndGet(val);
+		} else {
+			compressedLength.addAndGet(val);
+		}
 	}
 
 	public static long getLength() {
-		return currentLength.get();
+		if(Main.DSEClusterEnabled) {
+			return iCurrentLength.get();
+		}else {
+			return currentLength.get();
+		}
 	}
 
 	public static void setLength(long val) {
-		currentLength.set(val);
+		if(Main.DSEClusterEnabled) {
+			iCurrentLength.compareAndSet(0, val);
+		}else {
+			currentLength.set(val);
+		}
 	}
 
 	public static void addToLength(long val) {
-		currentLength.addAndGet(val);
+		if(Main.DSEClusterEnabled) {
+			iCurrentLength.addAndGet(val);
+		}else {
+			currentLength.addAndGet(val);
+		}
 	}
 
 	public static SimpleByteArrayLongMap getMap(long id) throws IOException {
@@ -1443,7 +1487,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			 */
 			if (blks == 0) {
 				this.delete();
-				HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
+				HashBlobArchive.addToCompressedLength(-1 * ofl);
 				return -1 * ofl;
 			} else {
 				int ssz = (int) ((ar.size() * 2) + 5);
@@ -1484,7 +1528,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							if (trys > 4)
 								throw new IOException();
 						}
-						HashBlobArchive.compressedLength.addAndGet(_har.f.length());
+						HashBlobArchive.addToCompressedLength(_har.f.length());
 					} else {
 						_har.delete();
 						return 0;
@@ -1498,8 +1542,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to compact " + id, e);
 			if (_har != null) {
-				HashBlobArchive.compressedLength.addAndGet(-1 * _har.f.length());
-				HashBlobArchive.currentLength.addAndGet(-1 * _har.uncompressedLength.get());
+				HashBlobArchive.addToCompressedLength(-1 * _har.f.length());
+				HashBlobArchive.addToLength(-1 * _har.uncompressedLength.get());
 				if (_har.id != this.id)
 					_har.delete();
 			}
@@ -1507,7 +1551,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			// _har.delete();
 			throw new IOException(e);
 		}
-		HashBlobArchive.compressedLength.addAndGet(-1 * ofl);
+		HashBlobArchive.addToCompressedLength(-1 * ofl);
 
 		return f.length() - ofl;
 	}
@@ -1646,8 +1690,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			ul.unlock();
 		}
 		if (f.exists()) {
-			HashBlobArchive.compressedLength.addAndGet(f.length());
-			HashBlobArchive.currentLength.addAndGet(uncompressedLength.get());
+			HashBlobArchive.addToCompressedLength(f.length());
+			HashBlobArchive.addToLength(uncompressedLength.get());
 			// SDFSLogger.getLog().info("size=" + k + " uc=" + z + " fs=" +
 			// f.length() + " ufs=" + uncompressedLength.get());
 		}

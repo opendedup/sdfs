@@ -157,8 +157,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 			Map<String, String> md = this.getMetaData(
 					"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
-			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			if (Main.volume != null) {
 				md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -272,7 +272,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return HashBlobArchive.currentLength.get();
+		return HashBlobArchive.getLength();
 	}
 
 	@Override
@@ -509,8 +509,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					cl = 0;
 			}
 			if (cl == 0 || sz == 0) {
-				md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-				md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+				md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+				md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 				md.put("clustered", Boolean.toString(this.clustered));
 				md.put("hostname", InetAddress.getLocalHost().getHostName());
 				if (Main.volume != null) {
@@ -543,8 +543,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				}
 				this.writeBlob(b, false);
 			}
-			HashBlobArchive.currentLength.set(sz);
-			HashBlobArchive.compressedLength.set(cl);
+			HashBlobArchive.setLength(sz);
+			HashBlobArchive.setCompressedLength(cl);
 			// this.resetCurrentSize();
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -582,8 +582,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			// BlobMetadata dmd = blobStore.blobMetadata(this.name,
 			// lbi);
 			Map<String, String> md = this.getMetaData(lbi);
-			md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("clustered", Boolean.toString(this.clustered));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
@@ -603,8 +603,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			SDFSLogger.getLog().warn("unable to backu config", e);
 		}
 		iter = ips.iterator();
-		HashBlobArchive.currentLength.set(0);
-		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 		dl = new MultiDownload(this, "keys/");
 		dl.iterationInit(false, "keys/");
 		this.ht = null;
@@ -651,7 +651,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public long compressedSize() {
-		return HashBlobArchive.compressedLength.get();
+		return HashBlobArchive.getCompressedLength();
 	}
 
 	@Override
@@ -1037,22 +1037,21 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 						int _size = Integer.parseInt((String) metaData.get("size"));
 						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-						HashBlobArchive.currentLength.addAndGet(-1 * _size);
-						HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
-						if (HashBlobArchive.currentLength.get() < 0)
-							HashBlobArchive.currentLength.set(0);
-						if (HashBlobArchive.compressedLength.get() < 0) {
-							HashBlobArchive.compressedLength.set(0);
+						HashBlobArchive.addToLength(-1 * _size);
+						HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
+						if (HashBlobArchive.getLength() < 0)
+							HashBlobArchive.setLength(0);
+						if (HashBlobArchive.getCompressedLength() < 0) {
+							HashBlobArchive.setCompressedLength(0);
 						}
-						SDFSLogger.getLog().debug("Current DSE Size  size=" + HashBlobArchive.currentLength.get()
-								+ " compressed size=" + HashBlobArchive.compressedLength.get());
+						SDFSLogger.getLog().debug("Current DSE Size  size=" + HashBlobArchive.getLength()
+								+ " compressed size=" + HashBlobArchive.getLength());
 					} else {
 						SDFSLogger.getLog().debug("Not deleting becuase still claimed by " + _ps.size());
 						Iterator<? extends StorageMetadata> _di = _ps.iterator();
 						while (_di.hasNext()) {
 							SDFSLogger.getLog().debug("claimed by " + _di.next().getName());
 						}
-
 					}
 
 				} finally {
@@ -1074,8 +1073,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void clearCounters() {
-		HashBlobArchive.compressedLength.set(0);
-		HashBlobArchive.currentLength.set(0);
+		HashBlobArchive.setCompressedLength(0);
+		HashBlobArchive.setLength(0);
 	}
 
 	@Override
@@ -1089,8 +1088,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					// BlobMetadata dmd = blobStore.blobMetadata(this.name,
 					// lbi);
 					Map<String, String> md = this.getMetaData(lbi);
-					md.put("currentlength", Long.toString(HashBlobArchive.currentLength.get()));
-					md.put("compressedlength", Long.toString(HashBlobArchive.compressedLength.get()));
+					md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+					md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 					md.put("clustered", Boolean.toString(this.clustered));
 					md.put("hostname", InetAddress.getLocalHost().getHostName());
 					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
@@ -1831,8 +1830,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				try {
 					int _sz = Integer.parseInt(md.get("bsize"));
 					int _cl = Integer.parseInt(md.get("bcompressedsize"));
-					HashBlobArchive.currentLength.addAndGet(_sz);
-					HashBlobArchive.compressedLength.addAndGet(_cl);
+					HashBlobArchive.addToLength(_sz);
+					HashBlobArchive.addToCompressedLength(_cl);
 				} catch (Exception e1) {
 					SDFSLogger.getLog().warn("unable to update size", e);
 				}

@@ -234,10 +234,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md = omd.getUserMetadata();
 			ObjectMetadata nmd = new ObjectMetadata();
 			nmd.setUserMetadata(md);
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -317,7 +315,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return HashBlobArchive.currentLength.get();
+		return HashBlobArchive.getLength();
 	}
 
 	@Override
@@ -632,7 +630,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (obj.containsKey("currentsize")) {
 						long cl = Long.parseLong((String) obj.get("currentsize"));
 						if (cl >= 0) {
-							HashBlobArchive.currentLength.set(cl);
+							HashBlobArchive.setLength(cl);
 
 						} else
 							SDFSLogger.getLog().warn("The S3 objectstore DSE did not close correctly len=" + cl);
@@ -644,7 +642,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (obj.containsKey("currentcompressedsize")) {
 						long cl = Long.parseLong((String) obj.get("currentcompressedsize"));
 						if (cl >= 0) {
-							HashBlobArchive.compressedLength.set(cl);
+							HashBlobArchive.setCompressedLength(cl);
 
 						} else
 							SDFSLogger.getLog().warn("The S3 objectstore DSE did not close correctly clen=" + cl);
@@ -858,10 +856,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			ObjectMetadata omd = null;
 		if (this.simpleMD) {
 			Map<String, String> md = this.getUserMetaData(binm);
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -871,10 +867,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} else {
 			omd = s3Service.getObjectMetadata(name, binm);
 			Map<String, String> md = omd.getUserMetadata();
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-			md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+			md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+			md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+			md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 			md.put("hostname", InetAddress.getLocalHost().getHostName());
 			md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -890,8 +886,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}catch(Exception e) {
 			SDFSLogger.getLog().warn("unable to create backup of filesystem metadata", e);
 		}
-		HashBlobArchive.currentLength.set(0);
-		HashBlobArchive.compressedLength.set(0);
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 		
 	}
 
@@ -907,7 +903,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long compressedSize() {
-		return HashBlobArchive.compressedLength.get();
+		return HashBlobArchive.getCompressedLength();
 	}
 
 	@Override
@@ -1261,8 +1257,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-					HashBlobArchive.currentLength.addAndGet(_size);
-					HashBlobArchive.compressedLength.addAndGet(_compressedSize);
+					HashBlobArchive.addToLength(_size);
+					HashBlobArchive.addToCompressedLength(_compressedSize);
 					SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 					kobj.close();
 				}
@@ -1405,13 +1401,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-					HashBlobArchive.currentLength.addAndGet(-1 * _size);
-					HashBlobArchive.compressedLength.addAndGet(-1 * _compressedSize);
-					if (HashBlobArchive.currentLength.get() < 0) {
-						HashBlobArchive.currentLength.set(0);
+					HashBlobArchive.addToLength(-1 * _size);
+					HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
+					if (HashBlobArchive.getLength() < 0) {
+						HashBlobArchive.setLength(0);
 					}
-					if (HashBlobArchive.compressedLength.get() < 0) {
-						HashBlobArchive.compressedLength.set(0);
+					if (HashBlobArchive.getCompressedLength() < 0) {
+						HashBlobArchive.setCompressedLength(0);
 					}
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
 					if (ol.getObjectSummaries().size() == 0) {
@@ -1444,10 +1440,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					if (this.simpleMD) {
 						Map<String, String> md = this.getUserMetaData(binm);
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 						md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 						md.put("hostname", InetAddress.getLocalHost().getHostName());
 						md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -1459,10 +1455,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						Map<String, String> md = omd.getUserMetadata();
 						ObjectMetadata nmd = new ObjectMetadata();
 						nmd.setUserMetadata(md);
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 						md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 						md.put("hostname", InetAddress.getLocalHost().getHostName());
 						md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -1480,10 +1476,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						Map<String, String> md = omd.getUserMetadata();
 						ObjectMetadata nmd = new ObjectMetadata();
 						nmd.setUserMetadata(md);
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
-						md.put("currentsize", Long.toString(HashBlobArchive.currentLength.get()));
-						md.put("currentcompressedsize", Long.toString(HashBlobArchive.compressedLength.get()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+						md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
 						md.put("lastupdate", Long.toString(System.currentTimeMillis()));
 						md.put("hostname", InetAddress.getLocalHost().getHostName());
 						md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -1671,10 +1667,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			st.id = _hid;
 			st.st = _ht;
 			if (mp.containsKey("bsize")) {
-				HashBlobArchive.currentLength.addAndGet(Integer.parseInt(mp.get("bsize")));
+				HashBlobArchive.addToLength(Integer.parseInt(mp.get("bsize")));
 			}
 			if (mp.containsKey("bcompressedsize")) {
-				HashBlobArchive.compressedLength.addAndGet(Integer.parseInt(mp.get("bcompressedsize")));
+				HashBlobArchive.addToCompressedLength(Integer.parseInt(mp.get("bcompressedsize")));
 			}
 			if (changed) {
 				try {
@@ -2484,10 +2480,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md.remove("deleted-objects");
 			}
 			if (md.containsKey("bsize")) {
-				HashBlobArchive.currentLength.addAndGet(Integer.parseInt(md.get("bsize")));
+				HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
 			}
 			if (md.containsKey("bcompressedsize")) {
-				HashBlobArchive.compressedLength.addAndGet(Integer.parseInt(md.get("bcompressedsize")));
+				HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -2788,8 +2784,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void clearCounters() {
-		HashBlobArchive.compressedLength.set(0);
-		HashBlobArchive.currentLength.set(0);
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 	}
 
 	private static class DeleteObject implements Runnable {
