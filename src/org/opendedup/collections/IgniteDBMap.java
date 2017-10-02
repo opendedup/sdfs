@@ -42,6 +42,7 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.configuration.MemoryConfiguration;
 import org.apache.ignite.configuration.MemoryPolicyConfiguration;
 import org.apache.ignite.configuration.TransactionConfiguration;
+import org.apache.ignite.lang.IgniteBiPredicate;
 import org.apache.ignite.transactions.Transaction;
 import org.apache.ignite.transactions.TransactionConcurrency;
 import org.apache.ignite.transactions.TransactionIsolation;
@@ -199,6 +200,18 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 				bk.position(0);
 				long pos = bk.getLong();
 				long tm = bk.getLong() + rmthreashold;
+				IgniteBiPredicate<ByteArrayWrapper, ByteArrayWrapper> callback = new IgniteBiPredicate<ByteArrayWrapper, ByteArrayWrapper>() {
+
+			        /**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+					@Override
+			        public boolean apply(ByteArrayWrapper key, ByteArrayWrapper value) {
+			            return true;
+			        }
+			    };
 				if (tm > System.currentTimeMillis()) {
 					try (Transaction tx = transactions.txStart(TransactionConcurrency.OPTIMISTIC,
 							TransactionIsolation.SERIALIZABLE)) {
