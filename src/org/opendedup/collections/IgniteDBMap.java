@@ -109,7 +109,6 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 			rcacheCfg.setAtomicityMode(CacheAtomicityMode.TRANSACTIONAL);
 			rmdb = ig.getOrCreateCache(rcacheCfg);
 			gclock =rmdb.lock(lobj);
-			Main.DSEClusterEnabled = true;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -136,6 +135,7 @@ public class IgniteDBMap implements AbstractMap, AbstractHashesMap  {
 					bk.position(8);
 					bk.putLong(System.currentTimeMillis());
 					rmdb.put(hv, new ByteArrayWrapper(bk.array()));
+					SDFSLogger.getLog().info("removed");
 				} else if (rmdb.get(hv) != null) {
 					rmdb.remove(hv);
 				}

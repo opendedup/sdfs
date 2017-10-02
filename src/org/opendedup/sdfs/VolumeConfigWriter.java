@@ -140,6 +140,7 @@ public class VolumeConfigWriter {
 	private boolean disableAutoGC = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
+	private boolean aliEnabled;
 	private String volumeType = "standard";
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
@@ -351,6 +352,11 @@ public class VolumeConfigWriter {
 			this.minIOEnabled = true;
 			this.simpleMD = true;
 		}
+		if (cmd.hasOption("ali-enabled")) {
+			this.safe_sync = false;
+			this.aliEnabled = true;
+			this.simpleMD = true;
+		}
 		if (cmd.hasOption("atmos-enabled")) {
 
 			this.safe_sync = false;
@@ -397,10 +403,10 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("user-agent-prefix")) {
 			this.userAgentPrefix = cmd.getOptionValue("user-agent-prefix");
 		}
-		if (this.awsEnabled || minIOEnabled) {
+		if (this.awsEnabled || minIOEnabled || this.aliEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
-				if (this.minIOEnabled && !cmd.hasOption("cloud-url")) {
+				if ((this.minIOEnabled|| this.aliEnabled) && !cmd.hasOption("cloud-url")) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println(
 							"cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
@@ -417,13 +423,13 @@ public class VolumeConfigWriter {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
 				}
-				if (!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
+				if (!this.aliEnabled && !minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
+				if (!this.aliEnabled &&!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
 						&& !S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
 					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
 					System.out.println(
@@ -500,7 +506,8 @@ public class VolumeConfigWriter {
 			this.cloudUrl = cmd.getOptionValue("cloud-url");
 			this.genericS3 = true;
 			this.simpleS3 = true;
-			this.disableDNSBucket = true;
+			if(!this.aliEnabled)
+				this.disableDNSBucket = true;
 			if (!this.minIOEnabled) {
 				this.usebasicsigner = true;
 			}
@@ -751,7 +758,7 @@ public class VolumeConfigWriter {
 			cs.appendChild(aws);
 		}
 
-		else if (this.awsEnabled || this.minIOEnabled) {
+		else if (this.awsEnabled || this.minIOEnabled || this.aliEnabled) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
@@ -762,8 +769,11 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if (ext) {
 				
-
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
+				if(this.aliEnabled)
+					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAliS3ChunkStore");
+				else
+					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
+				
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
@@ -780,7 +790,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
-				if (this.genericS3) {
+				if (this.genericS3 || this.aliEnabled) {
 					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
 					extended.setAttribute("disableDNSBucket", Boolean.toString(this.disableDNSBucket));

@@ -39,10 +39,7 @@ import org.jgroups.blocks.MessageDispatcher;
 import org.jgroups.blocks.RequestHandler;
 import org.jgroups.blocks.RequestOptions;
 import org.jgroups.blocks.ResponseMode;
-import org.jgroups.blocks.locking.LockService;
 import org.jgroups.fork.ForkChannel;
-import org.jgroups.protocols.CENTRAL_LOCK;
-import org.jgroups.stack.ProtocolStack;
 import org.jgroups.util.Rsp;
 import org.jgroups.util.RspList;
 import org.jgroups.util.Util;
@@ -72,7 +69,6 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	private static final byte SZ = 9;
 	private static final byte GTMASTER = 10;
 	private static final byte SMWRITE = 11;
-	private VolumeSocket vs;
 	BlockDev dev;
 
 	private ForkChannel channel;
@@ -81,7 +77,6 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 	private boolean peermaster = false;
 	private Address pmAddr = null;
 	private LongByteArrayMap map;
-	private LockService lock_service;
 	private ArrayList<LongKeyValue> cmap = new ArrayList<LongKeyValue>();
 	private int mxSz = 400;
 	private final ReentrantLock flushlock = new ReentrantLock();
@@ -94,122 +89,15 @@ public class BlockDevSocket implements RequestHandler, MembershipListener,
 		SDFSLogger.getLog().info(
 				"Starting block device map for " + dev.getDevName());
 		map = LongByteArrayMap.getMap(guid,null);
-		if (Main.volume.isClustered()) {
-			this.vs = Main.volume.getSoc();
-			this.dev = dev;
-			try {
-				channel = new ForkChannel(vs.channel,
-
-				"dev-stack",
-
-				dev.getDevName(),
-
-				true,
-
-				ProtocolStack.ABOVE,
-
-				CENTRAL_LOCK.class);
-				disp = new MessageDispatcher(channel, null, null, this);
-				disp.setMembershipListener(this);
-				disp.setMessageListener(this);
-				channel.connect(dev.getDevName());
-				lock_service = new LockService(channel);
-				this.rsyncLock = this.lock_service.getLock("rsync");
-				this.smWriteLock = this.lock_service.getLock("smwrite");
-				this.pmAddr = this.getMaster();
-				if (this.pmAddr == null
-						|| this.pmAddr.equals(channel.getAddress())) {
-					this.pmAddr = channel.getAddress();
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("First node in cluster");
-				} else {
-					SDFSLogger
-							.getLog()
-							.info("Not first node in cluster, clearing and resyncing");
-					this.map.vanish(true);
-					this.map = LongByteArrayMap.getMap(guid,null);
-					this.resync();
-					SDFSLogger.getLog().info("Done Resync'ing");
-				}
-				this.started = true;
-				this.ft = new Thread(this);
-				this.ft.start();
-			} catch (Throwable e) {
-				throw new IOException(e);
-			}
-
-		}
 
 	}
 
 	@Subscribe
 	public void smallWriteEvent(BlockDeviceSmallWriteEvent evt) {
-		if (Main.volume.isClustered()) {
-
-			this.smWriteLock.lock();
-			try {
-				RequestOptions opts = null;
-				opts = new RequestOptions(ResponseMode.GET_NONE,
-						Main.ClusterRSPTimeout, false);
-				opts.setFlags(Message.Flag.DONT_BUNDLE);
-				byte[] data = Util.objectToByteBuffer(evt);
-				byte[] b = new byte[1 + 4 + data.length];
-
-				// dev.getMF().setLastModified(System.currentTimeMillis());
-				ByteBuffer buf = ByteBuffer.wrap(b);
-				buf.put(SMWRITE);
-				buf.putInt(data.length);
-				buf.put(data);
-				disp.castMessage(null, new Message(null, null, buf.array()),
-						opts);
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to do small write", e);
-			} finally {
-				this.smWriteLock.unlock();
-			}
-		}
+		
 	}
 
-	private void resync() throws IOException {
-		if (this.peermaster) {
-			SDFSLogger.getLog().info(
-					"Returning because trying to resync with self");
-			return;
-		}
-
-		SDFSLogger.getLog()
-				.info("Resyncing [" + this.dev.getDevName() + "] with "
-						+ this.pmAddr);
-		rsyncLock.lock();
-		try {
-			this.iterInit(this.pmAddr);
-			List<LongKeyValue> kvs = this.nextValues(pmAddr);
-			boolean done = false;
-			Address prevm = this.pmAddr;
-			while (!done) {
-				for (LongKeyValue kv : kvs) {
-					if (kv == null)
-						done = true;
-					else {
-						try {
-							map.putIfNull(kv.getKey(),kv.getValue());
-						} catch (FileClosedException e) {
-							throw new IOException(e);
-						}
-					}
-				}
-				if (!done && prevm.equals(this.pmAddr)) {
-					kvs = this.nextValues(this.pmAddr);
-					prevm = this.pmAddr;
-				} else {
-					SDFSLogger.getLog().info(
-							prevm.toString() + " - " + this.pmAddr.toString());
-				}
-			}
-		} finally {
-			rsyncLock.unlock();
-		}
-	}
+	
 
 	@Override
 	public void getState(OutputStream output) throws Exception {

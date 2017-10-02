@@ -28,6 +28,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteAtomicLong;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.jgroups.Address;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
@@ -65,10 +70,13 @@ public class Volume implements java.io.Serializable {
 	long absoluteLength = -1;
 	private static boolean storageConnected = true;
 	private AtomicLong duplicateBytes = new AtomicLong(0);
+	private IgniteAtomicLong iduplicateBytes = null;
 	private AtomicLong files = new AtomicLong(0);
+	private IgniteAtomicLong ifiles = null;
 	private AtomicDouble virtualBytesWritten = new AtomicDouble(0);
 	private AtomicDouble readBytes = new AtomicDouble(0);
 	private AtomicLong actualWriteBytes = new AtomicLong(0);
+	private IgniteAtomicLong iactualWriteBytes = null;
 	private boolean closedGracefully = false;
 	private AtomicLong readOperations = new AtomicLong(0);
 	private AtomicLong writeOperations = new AtomicLong(0);
@@ -94,6 +102,7 @@ public class Volume implements java.io.Serializable {
 	public transient VolumeSocket soc = null;
 	private ReentrantLock devLock = new ReentrantLock();
 	public String connicalPath;
+	private Ignite ignite = null;
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -130,10 +139,16 @@ public class Volume implements java.io.Serializable {
 	}
 	
 	public void addFile() {
-		this.files.incrementAndGet();
+		if(this.isClustered())
+			this.ifiles.incrementAndGet();
+		else
+			this.files.incrementAndGet();
 	}
 	
 	public long getFiles() {
+		if(this.isClustered()) {
+			return this.ifiles.get();
+		}
 		return this.files.get();
 	}
 	
@@ -212,6 +227,53 @@ public class Volume implements java.io.Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	private void setCluster(Element vol) {
+		if (vol.hasAttribute("volume-clustered")) {
+			this.clustered = Boolean.parseBoolean(vol
+					.getAttribute("volume-clustered"));
+		}
+		if (vol.hasAttribute("cluster-id"))
+			this.uuid = vol.getAttribute("cluster-id");
+		else
+			this.uuid = RandomGUID.getGuid();
+		if (vol.hasAttribute("cluster-block-copies")) {
+			this.clusterCopies = Byte.valueOf(vol
+					.getAttribute("cluster-block-copies"));
+			if (this.clusterCopies > 7) {
+				this.clusterCopies = 7;
+			}
+		}
+		
+		if (vol.hasAttribute("cluster-rack-aware")) {
+			this.clusterRackAware = Boolean.parseBoolean(vol
+					.getAttribute("cluster-rack-aware"));
+		}
+		if (vol.hasAttribute("cluster-response-timeout"))
+			Main.ClusterRSPTimeout = Integer.parseInt(vol
+					.getAttribute("cluster-response-timeout"));
+		if(this.isClustered()) {
+			IgniteConfiguration cfg = new IgniteConfiguration();
+			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
+			cfg.getAtomicConfiguration().setBackups(Main.volume.getClusterCopies());
+			ignite = Ignition.start(cfg);
+			this.iactualWriteBytes = ignite.atomicLong(
+				    Main.volume.getUuid() + "-vawb", // Atomic long name.
+				    0,        		// Initial value.
+				    true     		// Create if it does not exist.
+				);
+			this.iduplicateBytes = ignite.atomicLong(
+				    Main.volume.getUuid() + "-vdb", // Atomic long name.
+				    0,        		// Initial value.
+				    true     		// Create if it does not exist.
+				);
+			this.ifiles = ignite.atomicLong(
+				    Main.volume.getUuid() + "-vf", // Atomic long name.
+				    0,        		// Initial value.
+				    true     		// Create if it does not exist.
+				);
+		}
+	}
 
 	public Volume(Element vol, String path) throws IOException {
 		this.configPath = path;
@@ -223,6 +285,7 @@ public class Volume implements java.io.Serializable {
 		this.path = pathF.getPath();
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
+		this.setCluster(vol);
 		if (vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
 		else
@@ -242,10 +305,6 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("use-dse-size"))
 			this.useDSESize = Boolean.parseBoolean(vol
 					.getAttribute("use-dse-size"));
-		if (vol.hasAttribute("cluster-id"))
-			this.uuid = vol.getAttribute("cluster-id");
-		else
-			this.uuid = RandomGUID.getGuid();
 		if (vol.hasAttribute("use-dse-capacity"))
 			this.useDSECapacity = Boolean.parseBoolean(vol
 					.getAttribute("use-dse-capacity"));
@@ -258,16 +317,31 @@ public class Volume implements java.io.Serializable {
 			this.perfMonFile = "/var/log/sdfs/volume-" + this.name
 					+ "-perf.json";
 		this.currentSize.set(Long.parseLong(vol.getAttribute("current-size")));
-		if (vol.hasAttribute("duplicate-bytes"))
+		if (vol.hasAttribute("duplicate-bytes")) {
+			if(this.clustered) {
+				this.iduplicateBytes.compareAndSet(0, Long.parseLong(vol
+					.getAttribute("duplicate-bytes")));
+			}
 			this.duplicateBytes.set(Long.parseLong(vol
 					.getAttribute("duplicate-bytes")));
-		if (vol.hasAttribute("read-bytes"))
+		}
+		if (vol.hasAttribute("read-bytes")) {
+			
 			this.readBytes.set(Double.parseDouble(vol
 					.getAttribute("read-bytes")));
-		if (vol.hasAttribute("write-bytes"))
+		}
+		if (vol.hasAttribute("write-bytes")) {
+			if(this.clustered) {
+				this.iactualWriteBytes.compareAndSet(0, Long.parseLong(vol
+					.getAttribute("write-bytes")));
+			}
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
+		}
 		if(vol.hasAttribute("files")) {
+			if(this.clustered) {
+				this.ifiles.compareAndSet(0, Long.parseLong(vol.getAttribute("files")));
+			}
 			this.files.set(Long.parseLong(vol.getAttribute("files")));
 		} else {
 			File vf = new File(Main.dedupDBStore);
@@ -304,32 +378,11 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("rebuild-hashtable")) {
 			Main.runConsistancyCheck = true;
 		}
-		if (vol.hasAttribute("rebuild-hashtable")) {
-			Main.runConsistancyCheck = true;
-		}
 		
 		if (vol.hasAttribute("allow-external-links"))
 			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
 					.getAttribute("allow-external-links"));
-		if (vol.hasAttribute("cluster-block-copies")) {
-			this.clusterCopies = Byte.valueOf(vol
-					.getAttribute("cluster-block-copies"));
-			if (this.clusterCopies > 7) {
-				this.clusterCopies = 7;
-			}
-		}
-		if (vol.hasAttribute("volume-clustered")) {
-
-			this.clustered = Boolean.parseBoolean(vol
-					.getAttribute("volume-clustered"));
-		}
-		if (vol.hasAttribute("cluster-rack-aware")) {
-			this.clusterRackAware = Boolean.parseBoolean(vol
-					.getAttribute("cluster-rack-aware"));
-		}
-		if (vol.hasAttribute("cluster-response-timeout"))
-			Main.ClusterRSPTimeout = Integer.parseInt(vol
-					.getAttribute("cluster-response-timeout"));
+		
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
 			SDFSLogger.getLog().info(
@@ -352,9 +405,6 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void init() throws Exception {
-		if (this.clustered) {
-			this.soc = new VolumeSocket(this, Main.DSEClusterConfig);
-		}
 		if (Main.blockDev)
 			this.startAllOnStartupDevices();
 		
@@ -613,16 +663,21 @@ public class Volume implements java.io.Serializable {
 				StorageUnit.of(this.capacity).format(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
+		if(this.isClustered())
+			root.setAttribute("duplicate-bytes",
+					Long.toString(this.iduplicateBytes.get()));
+		else
 		root.setAttribute("duplicate-bytes",
 				Long.toString(this.duplicateBytes.get()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
-		root.setAttribute("write-bytes",
-				Long.toString(this.actualWriteBytes.get()));
+		
+			root.setAttribute("write-bytes",
+					Long.toString(this.getActualWriteBytes()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("cluster-id", this.uuid);
-		root.setAttribute("files", Long.toString(this.files.get()));
+			root.setAttribute("files", Long.toString(this.getFiles()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("allow-external-links",
@@ -670,10 +725,10 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
 		root.setAttribute("duplicate-bytes",
-				Long.toString(this.duplicateBytes.get()));
+				Long.toString(this.getDuplicateBytes()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
 		root.setAttribute("write-bytes",
-				Long.toString(this.actualWriteBytes.get()));
+				Long.toString(this.getActualWriteBytes()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
@@ -697,7 +752,7 @@ public class Volume implements java.io.Serializable {
 				Double.toString(this.writeOperations.get()));
 		root.setAttribute("readerrors", Long.toString(this.readErrors.get()));
 		root.setAttribute("writeerrors", Long.toString(this.writeErrors.get()));
-		root.setAttribute("files", Long.toString(this.files.get()));
+		root.setAttribute("files", Long.toString(this.getFiles()));
 		root.setAttribute("closed-gracefully",
 				Boolean.toString(this.closedGracefully));
 		root.setAttribute("allow-external-links",
@@ -736,13 +791,22 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addDuplicateBytes(long duplicateBytes, boolean propigateEvent) {
+		if(this.isClustered()) {
+			long val = this.iduplicateBytes.addAndGet(duplicateBytes);
+			if (val < 0)
+				this.iduplicateBytes.compareAndSet(val, 0);
+		}
 		double val = this.duplicateBytes.addAndGet(duplicateBytes);
 		if (val < 0)
 			this.duplicateBytes.set(0);
 	}
 
-	public double getDuplicateBytes() {
-		return duplicateBytes.get();
+	public long getDuplicateBytes() {
+		if(this.isClustered()) {
+			return this.iduplicateBytes.get();
+		}else {
+			return duplicateBytes.get();
+		}
 	}
 
 	public void addReadBytes(long readBytes, boolean propigateEvent) {
@@ -757,12 +821,20 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addActualWriteBytes(long writeBytes, boolean propigateEvent) {
+		if(this.isClustered()) {
+			long val = this.iactualWriteBytes.addAndGet(writeBytes);
+			if (val < 0)
+				this.iactualWriteBytes.compareAndSet(val, 0);
+		}
 		double val = this.actualWriteBytes.addAndGet(writeBytes);
 		if (val < 0)
 			this.actualWriteBytes.set(0);
 	}
 
 	public long getActualWriteBytes() {
+		if(this.isClustered()) {
+			return this.iactualWriteBytes.get();
+		}
 		return actualWriteBytes.get();
 	}
 

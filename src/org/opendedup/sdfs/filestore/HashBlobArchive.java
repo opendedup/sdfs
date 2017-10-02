@@ -45,6 +45,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteAtomicLong;
 import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
@@ -125,11 +127,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static boolean closed = false;
 	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
-	
+	private static Ignite ignite;
 	static {
-		if(Main.DSEClusterEnabled) {
-			Ignite ignite = Ignition.ignite();
-			 
+		
+		if(Main.volume.isClustered()) {
+			IgniteConfiguration cfg = new IgniteConfiguration();
+			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
+			cfg.getAtomicConfiguration().setBackups(Main.volume.getClusterCopies());
+			ignite = Ignition.start(cfg);
 			iCurrentLength = ignite.atomicLong(
 			    Main.volume.getUuid() + "-l", // Atomic long name.
 			    0,        		// Initial value.
@@ -165,21 +170,21 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static long getCompressedLength() {
-		if(Main.DSEClusterEnabled)
+		if(Main.volume.isClustered())
 			return iCompressedLength.get();
 		else
 		return compressedLength.get();
 	}
 
 	public static void setCompressedLength(long val) {
-		if(Main.DSEClusterEnabled) {
+		if(Main.volume.isClustered()) {
 			iCompressedLength.compareAndSet(0, val);
 		} else
 			compressedLength.set(val);
 	}
 
 	public static void addToCompressedLength(long val) {
-		if(Main.DSEClusterEnabled) {
+		if(Main.volume.isClustered()) {
 			iCompressedLength.addAndGet(val);
 		} else {
 			compressedLength.addAndGet(val);
@@ -187,7 +192,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static long getLength() {
-		if(Main.DSEClusterEnabled) {
+		if(Main.volume.isClustered()) {
 			return iCurrentLength.get();
 		}else {
 			return currentLength.get();
@@ -195,7 +200,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static void setLength(long val) {
-		if(Main.DSEClusterEnabled) {
+		if(Main.volume.isClustered()) {
 			iCurrentLength.compareAndSet(0, val);
 		}else {
 			currentLength.set(val);
@@ -203,7 +208,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static void addToLength(long val) {
-		if(Main.DSEClusterEnabled) {
+		if(Main.volume.isClustered()) {
 			iCurrentLength.addAndGet(val);
 		}else {
 			currentLength.addAndGet(val);
@@ -1815,6 +1820,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		wMaps.clear();
 		wOpenFiles.clear();
+		if(ignite != null) {
+			ignite.close();
+		}
 	}
 
 	public static class BlockPolicy implements RejectedExecutionHandler {

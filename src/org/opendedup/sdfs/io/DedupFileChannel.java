@@ -343,8 +343,10 @@ public class DedupFileChannel {
 									ByteBuffer.wrap(b), filePos + startPos,
 									_len));
 						}
+						/*
 						if (Main.volume.isClustered())
 							writeBuffer.flush();
+						*/
 					} catch (BufferClosedException e) {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("trying to write again");
@@ -557,8 +559,10 @@ public class DedupFileChannel {
 							currentLocation = currentLocation + _len;
 							bytesLeft = bytesLeft - _len;
 							read = read + _len;
+							/*
 							if (Main.volume.isClustered())
 								readBuffer.flush();
+								*/
 						} catch (BufferClosedException e) {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
