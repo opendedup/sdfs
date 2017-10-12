@@ -894,7 +894,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					out.writeObject(this);
 					out.flush();
 					out.close();
-					fout.getFD().sync();
+					//fout.getFD().sync();
 					if (notify)
 						eventBus.post(new MFileWritten(this, this.dirty));
 					this.dirty = false;

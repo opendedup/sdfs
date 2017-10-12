@@ -35,6 +35,7 @@ public class HashFunctionPool {
 	public static final String MURMUR3_16 = "murmur3_128";
 	public static final String VARIABLE_MURMUR3 = "VARIABLE_MURMUR3";
 	public static final String VARIABLE_SIP = "VARIABLE_SIP";
+	public static final String VARIABLE_SIP2 = "VARIABLE_SIP2";
 	public static int hashLength = 16;
 	public static int max_hash_cluster = 1;
 	// public static int min_page_size = Main.CHUNK_LENGTH;
@@ -48,7 +49,7 @@ public class HashFunctionPool {
 			hashLength = Tiger16HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
-		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3) || Main.hashType.equalsIgnoreCase(VARIABLE_SIP)) {
+		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3) || Main.hashType.equalsIgnoreCase(VARIABLE_SIP) || Main.hashType.equalsIgnoreCase(VARIABLE_SIP2)) {
 			hashLength = VariableHashEngine.getHashLenth();
 			if(Main.chunkStoreLocal)
 				Main.MAPVERSION = 3;
@@ -98,7 +99,7 @@ public class HashFunctionPool {
 		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
 			hc = new VariableHashEngine();
 		}
-		else if (Main.hashType.equalsIgnoreCase("VARIABLE_SIP")) {
+		else if (Main.hashType.equalsIgnoreCase("VARIABLE_SIP") || Main.hashType.equalsIgnoreCase("VARIABLE_SIP2")) {
 			hc = new VariableSipHashEngine();
 		}
 		return hc;

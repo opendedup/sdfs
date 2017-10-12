@@ -20,8 +20,8 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.util.TreeMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
 
@@ -146,6 +146,6 @@ public interface DedupChunkInterface {
 
 	public abstract int hashCode();
 
-	void open(ReentrantLock obj);
+	void open();
 
 }

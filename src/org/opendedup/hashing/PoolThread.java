@@ -52,7 +52,11 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 		SDFSLogger.getLog().debug("Pool List Size will be " + maxTasks);
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
-				eng = new VariableHashEngine();
+				if(Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
+					eng = new VariableHashEngine();
+				}else {
+					eng = new VariableSipHashEngine();
+				}
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 				System.exit(1);

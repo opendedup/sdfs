@@ -4,6 +4,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +30,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
-import org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
@@ -101,7 +101,7 @@ public class VolumeConfigWriter {
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
 
-	String hashType = HashFunctionPool.VARIABLE_SIP;
+	String hashType = HashFunctionPool.VARIABLE_SIP2;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;

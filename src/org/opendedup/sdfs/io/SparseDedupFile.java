@@ -53,6 +53,7 @@ import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.ThreadPool;
 import org.opendedup.hashing.VariableHashEngine;
+import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.cluster.BlockDevSocket;
@@ -138,10 +139,13 @@ public class SparseDedupFile implements DedupFile {
 							WritableCacheBuffer writeBuffer = null;
 							synchronized (df.flushingBuffers) {
 								writeBuffer = df.flushingBuffers.get(key);
+								if (writeBuffer != null)
+									df.flushingBuffers.remove(key);
 							}
 							if (writeBuffer == null) {
 								writeBuffer = df.marshalWriteBuffer(key);
 							}
+							writeBuffer.open();
 							return writeBuffer;
 						}
 
@@ -162,7 +166,11 @@ public class SparseDedupFile implements DedupFile {
 		}
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
-				eng = new VariableHashEngine();
+				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
+					eng = new VariableHashEngine();
+				} else {
+					eng = new VariableSipHashEngine();
+				}
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -780,38 +788,16 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				WritableCacheBuffer wb = null;
 				String key = this.GUID + "#" + chunkPos;
-				ReentrantLock o = null;
-				synchronized (this.activeBuffers) {
-
-					o = this.activeBuffers.get(chunkPos);
-					if (o == null) {
-						o = new ReentrantLock();
-
-					} else {
-						wb = writeBuffers.getIfPresent(key);
-						if (wb == null)
-							wb = this.flushingBuffers.get(chunkPos);
-						if (wb == null)
-							wb = this.openBuffers.get(chunkPos);
-						if (wb != null)
-							o = wb.lobj;
-					}
-					this.activeBuffers.put(chunkPos, o);
-				}
-				o.lock();
-				try {
-
-					if (!this.activeBuffers.containsKey(chunkPos)) {
-						if (wb != null)
-							writeBuffers.put(key, wb);
-					}
-					if (wb == null)
-						wb = writeBuffers.get(key);
-					wb.open(o);
-					return wb;
-				} finally {
-					o.unlock();
-				}
+				wb = writeBuffers.get(key);
+				/*
+				SDFSLogger.getLog()
+						.info("active buffers=" + this.activeBuffers.size() + " flushingBuffers="
+								+ this.flushingBuffers.size() + " open buffers=" + this.openBuffers.size()
+								+ " writeBuffers=" + writeBuffers.size());
+				*/
+				this.activeBuffers.put(chunkPos, wb.lobj);
+				wb.open();
+				return wb;
 
 			} catch (ExecutionException e) {
 				// TODO Auto-generated catch block
@@ -1393,16 +1379,12 @@ public class SparseDedupFile implements DedupFile {
 
 	@Override
 	public void putBufferIntoFlush(WritableCacheBuffer writeBuffer) {
-		synchronized (this.activeBuffers.get(writeBuffer.getFilePosition())) {
 			this.flushingBuffers.put(writeBuffer.getFilePosition(), writeBuffer);
-		}
 	}
 
 	@Override
 	public void removeBufferFromFlush(WritableCacheBuffer writeBuffer) {
-		synchronized (writeBuffer) {
 			this.flushingBuffers.remove(writeBuffer.getFilePosition());
-		}
 		/*
 		 * if (_wb != null && _wb.hashCode() != writeBuffer.hashCode()) {
 		 * SDFSLogger.getLog().info("on remove hashcodes are not equal"); }
@@ -1410,9 +1392,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {
-		synchronized (writeBuffer) {
 			return this.flushingBuffers.containsKey(writeBuffer.getFilePosition());
-		}
 	}
 
 	@Override

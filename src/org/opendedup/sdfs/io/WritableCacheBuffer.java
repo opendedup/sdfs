@@ -828,12 +828,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#open()
 	 */
 	@Override
-	public void open(ReentrantLock obj) {
+	public synchronized void open() {
 		// long ksz = wbsz.incrementAndGet();
-		obj.lock();
-		try {
+		if(this.lobj == null)
+			this.lobj = new ReentrantLock();
 			try {
-				this.lobj = obj;
 				synchronized (df.activeBuffers) {
 					df.activeBuffers.put(this.position, lobj);
 				}
@@ -845,9 +844,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				SDFSLogger.getLog().fatal("Error while opening", e);
 				throw new IllegalArgumentException("error");
 			}
-		} finally {
-			lobj.unlock();
-		}
+		
 		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
 		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
 		// +SparseDedupFile.writeBuffers.size());
@@ -954,7 +951,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
 				String key = df.getGUID() + "#" + this.getFilePosition();
 				SparseDedupFile.writeBuffers.put(key, this);
-				this.open(this.lobj);
+				this.open();
 				SDFSLogger.getLog().warn("re-opened" + this.position);
 				throw new IOException(e);
 			} finally {
