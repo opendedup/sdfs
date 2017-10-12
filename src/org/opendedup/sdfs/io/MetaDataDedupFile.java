@@ -889,10 +889,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
-					out = new ObjectOutputStream(new FileOutputStream(this.path));
+					FileOutputStream fout =new FileOutputStream(this.path);
+					out = new ObjectOutputStream(fout);
 					out.writeObject(this);
 					out.flush();
 					out.close();
+					fout.getFD().sync();
 					if (notify)
 						eventBus.post(new MFileWritten(this, this.dirty));
 					this.dirty = false;

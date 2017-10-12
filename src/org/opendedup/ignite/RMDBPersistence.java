@@ -1,6 +1,7 @@
 package org.opendedup.ignite;
 
 import java.io.File;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,7 +30,7 @@ public class RMDBPersistence implements org.apache.ignite.cache.store.CacheStore
 	// RocksDB db = null;
 	String fileName = null;
 	ReentrantLock[] lockMap = new ReentrantLock[256];
-	RocksDB rmdb = null;
+	static RocksDB rmdb = null;
 	private static final long MB = 1024 * 1024;
 	int multiplier = 0;
 	boolean closed = false;
@@ -112,13 +113,7 @@ public class RMDBPersistence implements org.apache.ignite.cache.store.CacheStore
 		}
 	}
 	@Override public void loadCache(IgniteBiInClosure<ByteArrayWrapper, ByteArrayWrapper> clo, Object... args) {
-		SDFSLogger.getLog().info("loading cache");
-		if (args == null || args.length == 0 || args[0] == null)
-		      throw new CacheLoaderException("Expected entry count parameter is not provided.");
-		for(Object a : args) {
-			SDFSLogger.getLog().info("arg:" + a);
-		}
-		final int entryCnt = (Integer)args[0];
+		return;
 		
 	}
 

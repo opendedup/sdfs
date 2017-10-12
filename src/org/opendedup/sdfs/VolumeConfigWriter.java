@@ -3,6 +3,7 @@ package org.opendedup.sdfs;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
-import org.opendedup.sdfs.filestore.S3ChunkStore;
+import org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
@@ -423,18 +424,15 @@ public class VolumeConfigWriter {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
 				}
+				/*
 				if (!this.aliEnabled && !minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
-						&& !S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
+						&& !BatchAwsS3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println("cloud-access-key or cloud-secret-key is incorrect");
 					System.exit(-1);
 				}
-				if (!this.aliEnabled &&!minIOEnabled && !awsAim && !cmd.hasOption("cloud-disable-test")
-						&& !S3ChunkStore.checkBucketUnique(cloudAccessKey, cloudSecretKey, cloudBucketName)) {
-					System.out.println("!!!!!!! Warning cloud-bucket-name is not unique !!!!!!!!!!!");
-					System.out.println(
-							"Make sure you own the bucket and it is not used for other purposes or by other SDFS Volumes");
-				}
+				*/
+				
 			} else {
 				System.out.println("Error : Unable to create volume");
 				System.out.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
@@ -770,7 +768,7 @@ public class VolumeConfigWriter {
 			if (ext) {
 				
 				if(this.aliEnabled)
-					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAliS3ChunkStore");
+					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAliChunkStore");
 				else
 					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				
@@ -1169,6 +1167,10 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("minio-enabled")
 				.withDescription(
 						"Set to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder.withLongOpt("ali-enabled")
+				.withDescription(
+						"Set to enable this volume to store to Alibaba Object Storage (OSS). cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("atmos-enabled")
 				.withDescription(
