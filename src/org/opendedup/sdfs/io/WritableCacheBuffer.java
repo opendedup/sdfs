@@ -830,21 +830,18 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	@Override
 	public synchronized void open() {
 		// long ksz = wbsz.incrementAndGet();
-		if(this.lobj == null)
+		if (this.lobj == null)
 			this.lobj = new ReentrantLock();
-			try {
-				synchronized (df.activeBuffers) {
-					df.activeBuffers.put(this.position, lobj);
-				}
-				this.df.removeBufferFromFlush(this);
-				this.df.openBuffers.put(this.position, this);
-				this.closed = false;
-				this.flushing = false;
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("Error while opening", e);
-				throw new IllegalArgumentException("error");
-			}
-		
+		try {
+			this.df.removeBufferFromFlush(this);
+			this.df.openBuffers.put(this.position, this);
+			this.closed = false;
+			this.flushing = false;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Error while opening", e);
+			throw new IllegalArgumentException("error");
+		}
+
 		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
 		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
 		// +SparseDedupFile.writeBuffers.size());
@@ -854,13 +851,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		if (lobj == null) {
 			this.flushing = false;
 			this.closed = true;
-			synchronized (df.activeBuffers) {
-				df.openBuffers.remove(this.position);
+			df.openBuffers.remove(this.position);
 
-				this.df.removeBufferFromFlush(this);
+			this.df.removeBufferFromFlush(this);
 
-				df.activeBuffers.remove(this.position);
-			}
 			return;
 		}
 		lobj.lock();
@@ -919,7 +913,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		boolean ex = false;
 		lobj.lock();
 		try {
-			
+
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("#### " + this.getFilePosition() + " not flushing ");
@@ -965,10 +959,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			if (lobj.isLocked())
 				lobj.unlock();
 			if (!ex) {
-				synchronized (df.activeBuffers) {
-					df.removeBufferFromFlush(this);
-					df.activeBuffers.remove(this.position);
-				}
+				df.removeBufferFromFlush(this);
 			}
 
 			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
@@ -987,7 +978,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	}
 
 	public void endClose() throws IOException {
-		SDFSLogger.getLog().warn("??");
 		try {
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())

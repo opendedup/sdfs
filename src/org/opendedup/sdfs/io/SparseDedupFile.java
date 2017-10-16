@@ -90,7 +90,6 @@ public class SparseDedupFile implements DedupFile {
 	protected transient final ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
 			256, .75f);
 	protected transient final ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>();
-	protected transient final HashMap<Long, ReentrantLock> activeBuffers = new HashMap<Long, ReentrantLock>();
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
 	private boolean deleted = false;
 	protected static transient ThreadPoolExecutor executor = null;
@@ -795,7 +794,6 @@ public class SparseDedupFile implements DedupFile {
 								+ this.flushingBuffers.size() + " open buffers=" + this.openBuffers.size()
 								+ " writeBuffers=" + writeBuffers.size());
 				*/
-				this.activeBuffers.put(chunkPos, wb.lobj);
 				wb.open();
 				return wb;
 

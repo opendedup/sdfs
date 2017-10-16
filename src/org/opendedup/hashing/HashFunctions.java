@@ -2,6 +2,7 @@ package org.opendedup.hashing;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -11,14 +12,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.Date;
 import java.util.zip.Adler32;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.util.ElapsedTime;
 import org.opendedup.util.StringUtils;
 
@@ -51,21 +50,9 @@ import org.opendedup.util.StringUtils;
  */
 public class HashFunctions {
 
-	static MessageDigest algorithm;
+	//static MessageDigest algorithm;
 
-	static {
-
-		try {
-			Security.addProvider(new BouncyCastleProvider());
-			algorithm = MessageDigest.getInstance("Tiger", "BC");
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	
 
 	private static int seed = 1;
 	private static int m = 0x5bd1e995;
@@ -294,12 +281,7 @@ public class HashFunctions {
 		return digest.digest(input);
 	}
 
-	public static byte[] getTigerHashBytes(byte[] input)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException,
-			NoSuchProviderException {
-		algorithm.reset();
-		return algorithm.digest(input);
-	}
+
 
 	/*
 	 * public static String getMD5Hash(byte[] input) { MD5 md5 = new MD5();
