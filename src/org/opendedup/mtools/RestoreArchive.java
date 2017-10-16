@@ -118,6 +118,7 @@ public class RestoreArchive implements Runnable {
 
 	@Override
 	public void run() {
+		
 		try {
 			long start = System.currentTimeMillis();
 			this.init();
@@ -125,7 +126,7 @@ public class RestoreArchive implements Runnable {
 				ArrayList<String> al = new ArrayList<String>();
 				for (String id : this.restoreRequests) {
 					try {
-						SDFSLogger.getLog().debug("will check " + id);
+						SDFSLogger.getLog().info("archive restore will check " + id);
 						if (HCServiceProxy.blockRestored(id)) {
 
 							al.add(id);

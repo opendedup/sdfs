@@ -21,10 +21,13 @@ public class SetFileAttribute {
 		else {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(internalPath);
+				if(mf != null) {
 				if(value != null)
 					mf.addXAttribute(name, value);
 				else
 					mf.removeXAttribute(name);
+				}else 
+					SDFSLogger.getLog().warn("file " + file + " could not be found.");
 			} catch (Exception e) {
 				SDFSLogger.getLog().error(
 						"unable to fulfill request on file " + file, e);

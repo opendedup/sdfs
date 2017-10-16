@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.io.File;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +31,6 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LocalLookupFilter;
 import org.opendedup.hashing.LargeBloomFilter;
-import org.opendedup.hashing.Murmur3HashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
@@ -588,7 +588,6 @@ public class HCServiceProxy {
 		}
 	}
 
-	static Murmur3HashEngine he = new Murmur3HashEngine();
 
 	public static byte[] fetchChunk(byte[] hash, byte[] hashloc, boolean direct)
 			throws IOException, DataArchivedException {

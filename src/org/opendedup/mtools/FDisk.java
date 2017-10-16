@@ -88,7 +88,11 @@ public class FDisk {
 			return;
 		}
 		try {
-			HCServiceProxy.clearRefMap();
+			try {
+				HCServiceProxy.clearRefMap();
+			}catch(Exception e) {
+				SDFSLogger.getLog().warn("unable to clear refmap");
+			}
 			long sz = Main.volume.getFiles();
 			fEvt = SDFSEvent.fdiskInfoEvent("Starting FDISK for " + Main.volume.getName() + " file size = " + sz, evt);
 			fEvt.maxCt = sz;

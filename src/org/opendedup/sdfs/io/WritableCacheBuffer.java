@@ -865,7 +865,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		}
 		lobj.lock();
 		try {
-			this.df.openBuffers.remove(this.position);
 			if (this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog()
@@ -920,7 +919,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		boolean ex = false;
 		lobj.lock();
 		try {
-			df.openBuffers.remove(this.position);
+			
 			if (!this.flushing) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("#### " + this.getFilePosition() + " not flushing ");
@@ -962,6 +961,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			}
 		} finally {
+			df.openBuffers.remove(this.position);
 			if (lobj.isLocked())
 				lobj.unlock();
 			if (!ex) {

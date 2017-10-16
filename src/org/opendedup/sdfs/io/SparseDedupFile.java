@@ -167,9 +167,9 @@ public class SparseDedupFile implements DedupFile {
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
 				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
-					eng = new VariableHashEngine();
-				} else {
 					eng = new VariableSipHashEngine();
+				} else {
+					eng = new VariableHashEngine();
 				}
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
