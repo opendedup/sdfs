@@ -127,7 +127,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	private static Ignite ignite;
 	static {
-
 		if (Main.volume.isClustered()) {
 			IgniteConfiguration cfg = new IgniteConfiguration();
 			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
