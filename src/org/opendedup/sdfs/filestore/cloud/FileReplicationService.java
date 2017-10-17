@@ -110,12 +110,16 @@ public class FileReplicationService {
 	private File downloadDDBFile(String guid,String lookupFilter) throws Exception {
 		String sfp = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid + File.separator
 				+ guid + ".map";
+		String dlf = guid.substring(0, 2) + "/" + guid + "/"
+				+ guid + ".map";
+		SDFSLogger.getLog().info("downloading " + dlf + " to " + sfp);
 		File f = new File(sfp);
 		int tries = 0;
 		for (;;) {
 			f.delete();
 			try {
-				sync.downloadFile(sfp.substring(sl), f, "ddb");
+				
+				sync.downloadFile(dlf, f, "ddb");
 				SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
 
 				return f;
@@ -544,7 +548,7 @@ public class FileReplicationService {
 						f = f.getParentFile();
 						f.mkdirs();
 					} else {
-						executor.execute(new MetaFileDownloader(fname, f, sync,executor));
+						executor.execute(new MetaFileDownloader(fname, f, sync));
 					}
 				} else {
 					SDFSLogger.getLog().info("not checked out " + fname);
@@ -560,13 +564,10 @@ public class FileReplicationService {
 				throw MetaFileDownloader.downloadSyncException;
 			this.sync.clearIter();
 			
-			if (DDBDownloader.downloadSyncException != null)
-				throw DDBDownloader.downloadSyncException;
+			
 			SDFSLogger.getLog().info("################# done syncing files from cloud #######################");
 			SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
 			SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
-			SDFSLogger.getLog().info("Map Files downloaded : " + DDBDownloader.ddl.get());
-			SDFSLogger.getLog().info("Map File download errors :" + DDBDownloader.der.get());
 			Main.syncDL = false;
 
 		} catch (Exception e) {
@@ -582,18 +583,16 @@ public class FileReplicationService {
 		File to;
 		private static AtomicInteger fer = new AtomicInteger();
 		private static AtomicInteger fdl = new AtomicInteger();
-		private transient ThreadPoolExecutor executor = null;
 		private static void reset() {
 			fer.set(0);
 			fdl.set(0);
 			downloadSyncException = null;
 		}
 
-		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync,ThreadPoolExecutor executor) {
+		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync) {
 			this.sync = sync;
 			this.to = to;
 			this.fname = fname;
-			this.executor = executor;
 		}
 
 		@Override
@@ -606,8 +605,8 @@ public class FileReplicationService {
 					sync.downloadFile(fname, to, "files");
 					sync.checkoutFile("files/" + fname);
 					MetaDataDedupFile mf = MetaFileStore.getMF(to);
-					String efs = "ddb/" + EncyptUtils.encString(mf.getDfGuid(), Main.chunkStoreEncryptionEnabled);
-					executor.execute(new DDBDownloader(efs, sync, mf.getLookupFilter()));
+					DDBDownloader dl = new DDBDownloader(mf);
+					dl.download();
 					Main.volume.addDuplicateBytes(
 							mf.getIOMonitor().getDuplicateBlocks() + mf.getIOMonitor().getActualBytesWritten(), true);
 					Main.volume.addVirtualBytesWritten(mf.getIOMonitor().getVirtualBytesWritten(), true);
@@ -629,43 +628,32 @@ public class FileReplicationService {
 
 	}
 
-	private static class DDBDownloader implements Runnable {
-		private static Exception downloadSyncException;
-		AbstractCloudFileSync sync;
-		String fname;
-		String lookupFilter = null;
+	private static class DDBDownloader {
+		MetaDataDedupFile mf;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
 
 		private static void reset() {
 			der.set(0);
 			ddl.set(0);
-			downloadSyncException = null;
 		}
 
-		DDBDownloader(String fname, AbstractCloudFileSync sync, String lookupFilter) {
-			this.sync = sync;
-			this.fname = fname;
-			this.lookupFilter = lookupFilter;
+		DDBDownloader(MetaDataDedupFile mf) {
+			this.mf = mf;
 		}
 
-		@Override
-		public void run() {
+		public void download() {
 			try {
-				File f = new File(Main.dedupDBStore + File.separator + fname);
 				int tries = 0;
 				boolean done = false;
 				while (!done) {
-					f.delete();
 					try {
-						sync.downloadFile(fname, f, "ddb");
-						sync.checkoutFile("ddb/" + fname);
-						SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
-						LongByteArrayMap ddb = LongByteArrayMap
-								.getMap(f.getName().substring(0, f.getName().length() - 4),lookupFilter);
+						FileReplicationService.getDDB(mf.getDfGuid(),mf.getLookupFilter());
+						SDFSLogger.getLog().info("downloaded " + mf.getDfGuid());
+						LongByteArrayMap ddb = (LongByteArrayMap)mf.getDedupFile(false).bdb;
 						Set<Long> blks = new HashSet<Long>();
-						if (ddb.getVersion() < 3)
-							throw new IOException("only files version 3 or later can be imported");
+						if (ddb.getVersion() < 2)
+							throw new IOException("only files version 2 or later can be imported");
 						try {
 							ddb.iterInit();
 							for (;;) {
@@ -679,13 +667,13 @@ public class FileReplicationService {
 									ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
 								
 									InsertRecord ir = null;
-									if(lookupFilter != null && Main.enableLookupFilter) {
-										long pos = HCServiceProxy.getLookupFilter(lookupFilter).put(p.hash,Longs.fromByteArray(p.hashloc));
+									if(mf.getLookupFilter() != null && Main.enableLookupFilter) {
+										long pos = HCServiceProxy.getLookupFilter(mf.getLookupFilter()).put(p.hash,Longs.fromByteArray(p.hashloc));
 										if(pos != -1) {
 											ir = new InsertRecord(false,pos);
 										} else {
 											ir = HCServiceProxy.getHashesMap().put(cm, false);
-											HCServiceProxy.getLookupFilter(lookupFilter).put(p.hash,1,Longs.fromByteArray(ir.getHashLocs()));
+											HCServiceProxy.getLookupFilter(mf.getLookupFilter()).put(p.hash,1,Longs.fromByteArray(ir.getHashLocs()));
 										}
 									}
 									else {
@@ -735,8 +723,7 @@ public class FileReplicationService {
 						ddl.incrementAndGet();
 					} catch (Exception e) {
 						if (tries > maxTries) {
-							SDFSLogger.getLog().error("unable to sync ddb " + fname + " to " + f.getPath(), e);
-							downloadSyncException = e;
+							SDFSLogger.getLog().error("unable to sync ddb " + mf.getPath() + " to " + mf.getDfGuid(), e);
 							der.incrementAndGet();
 							done = true;
 						} else
@@ -745,13 +732,14 @@ public class FileReplicationService {
 				}
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to recover " + fname, e);
-				downloadSyncException = e;
+				SDFSLogger.getLog().warn("unable to recover " + mf.getPath(), e);
 				der.incrementAndGet();
 			}
 
 		}
 
 	}
+
+	
 
 }

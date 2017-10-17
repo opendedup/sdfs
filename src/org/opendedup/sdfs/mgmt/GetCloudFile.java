@@ -74,13 +74,16 @@ public class GetCloudFile implements Runnable {
 			else {
 				fevt.maxCt = 3;
 				fevt.curCt = 1;
+				SDFSLogger.getLog().info("downloading " + sfile);
 				fevt.shortMsg = "Downloading [" + sfile + "]";
 				mf = FileReplicationService.getMF(sfile);
+				SDFSLogger.getLog().info("downloaded " + sfile);
 				mf.setLocalOwner(false);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
-				
+				SDFSLogger.getLog().info("downloading ddb " + mf.getDfGuid() + " lf=" +mf.getLookupFilter());
 				LongByteArrayMap ddb = null;
 				FileReplicationService.getDDB(mf.getDfGuid(),mf.getLookupFilter());
+				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
 					sdd = sdf.getDedupFile(false);
@@ -90,13 +93,14 @@ public class GetCloudFile implements Runnable {
 
 				} else {
 					sdd = mf.getDedupFile(false);
+					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" +sdd.getGUID());
 					DedupFileChannel ch = sdd.getChannel(-1);
 					ddb = (LongByteArrayMap) sdd.bdb;
 					sdd.unRegisterChannel(ch, -1);
 				}
 				fevt.curCt++;
-				if (ddb.getVersion() < 3)
-					throw new IOException("only files version 3 or later can be imported");
+				if (ddb.getVersion() < 2)
+					throw new IOException("only files version 2 or later can be imported");
 
 				
 			}
@@ -116,13 +120,13 @@ public class GetCloudFile implements Runnable {
 
 	private void checkDedupFile(SparseDedupFile sdb, SDFSEvent fevt) throws IOException {
 		fevt.shortMsg = "Importing hashes for file";
-		//SDFSLogger.getLog().info("Importing " + sdb.getGUID());
+		SDFSLogger.getLog().info("Importing " + sdb.getGUID());
 		Set<Long> blks = new HashSet<Long>();
 		DedupFileChannel ch = sdb.getChannel(-1);
 		LongByteArrayMap ddb = (LongByteArrayMap) sdb.bdb;
 		mf.getIOMonitor().clearFileCounters(false);
-		if (ddb.getVersion() < 3)
-			throw new IOException("only files version 3 or later can be imported");
+		if (ddb.getVersion() < 2)
+			throw new IOException("only files version 2 or later can be imported");
 		try {
 			ddb.iterInit();
 			for (;;) {

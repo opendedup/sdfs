@@ -1711,7 +1711,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			to = to.substring(1);
 		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
+		SDFSLogger.getLog().info("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -1962,7 +1962,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			if (this.simpleS3) {
 				S3Object obj = null;
-				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
 				obj = s3Service.getObject(this.name, pp + "/" + haName);
 				BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
@@ -1978,7 +1978,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e1) {
 				}
 			} else {
-				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
 				this.multiPartDownload(pp + "/" + haName, p);
 				mp = this.getUserMetaData(pp + "/" + haName);
 				if (md5sum && mp.containsKey("md5sum")) {
