@@ -254,7 +254,6 @@ public class DedupFileChannel {
 		if (df.getMetaFile().getDev() != null)
 			df.getMetaFile().sync();
 	}
-
 	/**
 	 * writes data to the DedupFile
 	 * 

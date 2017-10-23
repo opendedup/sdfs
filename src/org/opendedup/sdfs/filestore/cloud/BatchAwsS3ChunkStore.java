@@ -1711,7 +1711,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			to = to.substring(1);
 		to = FilenameUtils.separatorsToUnix(to);
 		String pth = pp + "/" + EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().info("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
+		SDFSLogger.getLog().debug("uploading " + f.getPath() + " to " + to + " pth " + pth +  " pp " + pp + " ");
 		boolean isDir = false;
 		boolean isSymlink = false;
 		if (!OSValidator.isWindows()) {
@@ -2073,16 +2073,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, blb + mdExt);
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/" + haName + "/");
 					SDFSLogger.getLog()
-							.info("deleted " + "claims/" + haName + "/"
+							.debug("deleted " + "claims/" + haName + "/"
 									+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
 									+ " object claims=" + ol.getObjectSummaries().size());
 					if (ol.getObjectSummaries().size() == 0) {
 						s3Service.deleteObject(this.name, haName);
 						if (this.simpleMD)
 							s3Service.deleteObject(this.name, haName + mdExt);
-						SDFSLogger.getLog().info("deleted " + haName);
+						SDFSLogger.getLog().debug("deleted " + haName);
 					} else {
-						SDFSLogger.getLog().info("not deleting " + haName);
+						SDFSLogger.getLog().debug("not deleting " + haName);
 					}
 
 				}
@@ -2340,8 +2340,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
 			if(omd == null || momd == null)
 				return false;
-			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") )
+			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") ) {
 				return true;
+			}
 			else if (omd.getOngoingRestore() || momd.getOngoingRestore())
 				return false;
 			else

@@ -210,8 +210,8 @@ public class VolumeConfigWriter {
 			this.mdCompresstion = true;
 			this.compress = true;
 			this.maxSegSize = 128;
-			this.max_open_files = 1024;
-			this.max_file_write_buffers=1024;
+			this.max_open_files = 20;
+			this.max_file_write_buffers=80;
 			this.chunk_size = 40960*2;
 			this.volumeType ="backup";
 			this.fdisk_schedule = this.ltrfdisk_schedule;
@@ -284,6 +284,9 @@ public class VolumeConfigWriter {
 			this.ext = false;
 			this.hash_db_class = "org.opendedup.collections.RocksDBMap";
 			this.hashType = HashFunctionPool.MURMUR3_16;
+		}
+		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008 ||  org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2012) {
+			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 		}
 		if (cmd.hasOption("aws-aim"))
 			this.awsAim = true;

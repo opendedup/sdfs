@@ -1286,6 +1286,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 				hb.position(0);
 				nlen = hb.getInt();
+				if(nlen == 0) {
+					SDFSLogger.getLog().info("zero data read from " + this.id + ", redownloading");
+					this.loadData();
+					hb.position(0);
+					ch.read(hb, pos);
+					hb.position(0);
+					nlen = hb.getInt();
+				}
 				ub = new byte[nlen];
 
 				try {
@@ -1300,8 +1308,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 				hb.position(0);
 				int npos = hb.getInt();
 				nlen = hb.getInt();
-
+				if(nlen == 0) {
+					SDFSLogger.getLog().info("zero data read from " + this.id + ", redownloading");
+					this.loadData();
+					hb.position(0);
+					ch.read(hb, pos);
+					hb.position(0);
+					npos = hb.getInt();
+					nlen = hb.getInt();
+				}
 				if (cacheReads || f.exists()) {
+					
 					ub = new byte[nlen];
 					if (ch == null)
 						ch = openFiles.get(id);

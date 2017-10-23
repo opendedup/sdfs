@@ -3,14 +3,15 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -44,8 +45,10 @@ import com.google.common.eventbus.EventBus;
 public class MetaFileStore {
 
 	private static EventBus eventBus = new EventBus();
-	private final static ExecutorService service = Executors.newFixedThreadPool(Main.writeThreads);
-
+	private static SynchronousQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	
+	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue,
+			new ThreadPoolExecutor.CallerRunsPolicy());
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -377,8 +380,7 @@ public class MetaFileStore {
 								service.execute(m);
 
 							} catch (Exception e) {
-								if (SDFSLogger.isDebug())
-									SDFSLogger.getLog().debug("unable to delete dedup file for " + path, e);
+									SDFSLogger.getLog().warn("unable to delete dedup file for " + path, e);
 							}
 						}
 						if (deleted) {

@@ -633,7 +633,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			try {
 				data = ChunkData.getChunk(key, pos);
 			} catch (DataArchivedException e) {
-				SDFSLogger.getLog().info("data archived " + pos);
 				throw e;
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);

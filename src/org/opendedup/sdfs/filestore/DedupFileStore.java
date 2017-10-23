@@ -318,7 +318,6 @@ public class DedupFileStore {
 		if (openFileMonitor != null)
 			openFileMonitor.close();
 		if (openFile.size() > 0) {
-			SparseDedupFile.flushAllBuffers();
 			Object[] dfs = getArray();
 			SDFSLogger.getLog().info("closing openfiles of size " + dfs.length);
 			for (int i = 0; i < dfs.length; i++) {
