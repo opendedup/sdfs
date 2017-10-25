@@ -365,7 +365,7 @@ public class DedupFileChannel {
 			if (Main.checkArchiveOnRead) {
 				SDFSLogger
 						.getLog()
-						.warn("Archived data found in "
+						.warn("Archived data found during write at ["+offset+ "]in "
 								+ df.getMetaFile().getPath()
 								+ " at "
 								+ pos
@@ -573,7 +573,7 @@ public class DedupFileChannel {
 					if (Main.checkArchiveOnRead) {
 						SDFSLogger
 								.getLog()
-								.warn("Archived data found in "
+								.warn("Archived data found in read at ["+filePos+ "]in "
 										+ df.getMetaFile().getPath()
 										+ " at "
 										+ startPos

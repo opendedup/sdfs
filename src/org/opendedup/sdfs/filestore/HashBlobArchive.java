@@ -1278,7 +1278,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 				} catch (Exception e) {
 
 					try {
+						try {
 						ch = openFiles.get(id);
+						}catch(Exception e1) {
+							SDFSLogger.getLog().warn("file not found during read from " + this.id + ", redownloading");
+							this.loadData();
+							ch = openFiles.get(id);
+						}
 						ch.read(hb, pos);
 					} catch (Exception e1) {
 						throw new IOException(e1);
@@ -1287,7 +1293,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				hb.position(0);
 				nlen = hb.getInt();
 				if(nlen == 0) {
-					SDFSLogger.getLog().info("zero data read from " + this.id + ", redownloading");
+					SDFSLogger.getLog().warn("zero data read from " + this.id + ", redownloading");
 					this.loadData();
 					hb.position(0);
 					ch.read(hb, pos);
