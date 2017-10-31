@@ -327,7 +327,7 @@ public class SparseDedupFile implements DedupFile {
 			return DeleteDir.deleteDirectory(new File(filePath));
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("error in delete " + this.GUID, e);
+			SDFSLogger.getLog().info("error in delete " + this.GUID, e);
 		} finally {
 			this.syncLock.unlock();
 		}

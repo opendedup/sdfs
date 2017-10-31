@@ -34,12 +34,15 @@ public class DeleteFileCmd {
 			throw new IOException("requeste file " + file + " does not exist");
 		String internalPath = Main.volume.getPath() + File.separator + file;
 		File f = new File(internalPath);
+		SDFSLogger.getLog().info("removing " + internalPath );
 		if (!f.exists())
 			throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 		else {
 			if (rmlock)
 				MetaFileStore.getMF(f).clearRetentionLock();
 			boolean removed = MetaFileStore.removeMetaFile(internalPath, true, true);
+			SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
+			
 			if (removed) {
 				SDFSEvent.deleteFileEvent(f);
 				return "removed [" + file + "]";
