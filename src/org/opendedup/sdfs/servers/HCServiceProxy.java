@@ -423,8 +423,7 @@ public class HCServiceProxy {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (guid != null && Main.enableLookupFilter) {
-						InsertRecord ir = HCServiceProxy.hcService.writeChunk(hash, aContents, false, 1);
-						LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct);
+						InsertRecord ir = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct);
 						return ir;
 			} else
 				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct);

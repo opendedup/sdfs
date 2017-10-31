@@ -213,6 +213,7 @@ public class LocalLookupFilter {
 				}
 				ct += bk.getLong();
 				if (ct <= 0) {
+					//SDFSLogger.getLog().info("!!!!!!!!!!!!!! " + ct);
 					if (ct == 0)
 						ct = -1;
 					this.getDB(hash).delete(wo,hash);
