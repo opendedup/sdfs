@@ -1338,7 +1338,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				return new HashMap<String, String>();
 			}
 		}
-		ObjectMetadata obj = s3Service.getObjectMetadata(this.name + this.dExt, name);
+		if(name.startsWith("blocks/") && !name.endsWith(this.dExt))
+			name = name + this.dExt;
+		ObjectMetadata obj = s3Service.getObjectMetadata(this.name, name);
 		try {
 			if (simpleS3) {
 				HashMap<String, String> omd = new HashMap<String, String>();
