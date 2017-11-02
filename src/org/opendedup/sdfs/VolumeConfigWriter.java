@@ -81,6 +81,7 @@ public class VolumeConfigWriter {
 	String fdisk_schedule = "0 0 12 ? * SUN";
 	String ltrfdisk_schedule = "0 15 10 L * ?";
 	String syncfs_schedule = "4 59 23 * * ?";
+	private String dExt = null;
 	boolean azureEnabled = false;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
@@ -324,6 +325,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("io-claim-chunks-schedule")) {
 			this.fdisk_schedule = cmd.getOptionValue("io-claim-chunks-schedule");
+		}
+		if (cmd.hasOption("data-appendix")) {
+			this.dExt = cmd.getOptionValue("data-appendix");
 		}
 		if (cmd.hasOption("permissions-file")) {
 			this.filePermissions = cmd.getOptionValue("permissions-file");
@@ -742,6 +746,8 @@ public class VolumeConfigWriter {
 			if (this.backblazeEnabled)
 				extended.setAttribute("service-type", "b2");
 			extended.setAttribute("block-size", this.blockSize);
+			if (this.dExt != null)
+				 extended.setAttribute("data-appendix", this.dExt);
 			extended.setAttribute("share-path", this.accessPath);
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "10000");
@@ -777,6 +783,8 @@ public class VolumeConfigWriter {
 				
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
+				if (this.dExt != null)
+					 extended.setAttribute("data-appendix", this.dExt);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
@@ -829,6 +837,8 @@ public class VolumeConfigWriter {
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("service-type", "google-cloud-storage");
 				extended.setAttribute("block-size", this.blockSize);
+				if (this.dExt != null)
+					 extended.setAttribute("data-appendix", this.dExt);
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
@@ -875,6 +885,8 @@ public class VolumeConfigWriter {
 		} else if (ext) {
 			Element extended = xmldoc.createElement("extended-config");
 			extended.setAttribute("block-size", "60 MB");
+			if (this.dExt != null)
+				 extended.setAttribute("data-appendix", this.dExt);
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "1500");
 			extended.setAttribute("sync-files", "false");
@@ -1076,6 +1088,10 @@ public class VolumeConfigWriter {
 				.withDescription("The schedule, in cron format, to claim deduped chunks with the Volume(s). "
 						+ " \n Defaults to: \n 0 59 23 * * ?")
 				.hasArg().withArgName("CRON Schedule").create());
+		options.addOption(OptionBuilder.withLongOpt("data-appendix")
+				.withDescription(
+						"Add an appendix for data files.")
+				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder.withLongOpt("permissions-file")
 				.withDescription("Default File Permissions. " + " \n Defaults to: \n 0644").hasArg()
 				.withArgName("POSIX PERMISSIONS").create());
