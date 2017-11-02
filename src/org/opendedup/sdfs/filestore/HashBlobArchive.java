@@ -1181,6 +1181,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					} catch (Exception e) {
 					}
 				}
+				
 				maps.invalidate(this.id);
 				wMaps.remove(this.id);
 				FileChannel fc = openFiles.getIfPresent(this.id);
@@ -1202,6 +1203,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 						}
 					}
 				}
+				f.delete();
+				File lf = new File(f.getPath() + ".map");
+				lf.delete();
 				SDFSLogger.getLog().debug("loading " + this.id);
 				store.getBytes(this.id, f);
 				if (rrl != null) {

@@ -97,7 +97,7 @@ public class MgmtWebServer implements Container {
 
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<String, String> entry) {
-			return size() > Main.maxOpenFiles*2;
+			return size() > Main.maxOpenFiles*6;
 		}
 	};
 
@@ -1220,7 +1220,7 @@ public class MgmtWebServer implements Container {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("unable to satify request ", e);
+			SDFSLogger.getLog().error("unable to satify request ", e);
 			response.setCode(500);
 			try {
 				PrintStream body = response.getPrintStream();
