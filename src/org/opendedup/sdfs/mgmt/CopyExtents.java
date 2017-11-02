@@ -105,7 +105,7 @@ public class CopyExtents {
 						try {
 							SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 							if(sdc.getFingers().size() == 0) {
-								int _nlen = 128 *1024; //128K
+								int _nlen = 4 *1024;
 								if(_nlen > _rem) {
 									_nlen = (int)_rem;
 								}
@@ -114,7 +114,8 @@ public class CopyExtents {
 								//ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
 								//ddf.mf.setLastModified(System.currentTimeMillis());
 								written += _nlen;
-								insdone = true;
+								if(written >= len)
+									insdone = true;
 							} else {
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
 

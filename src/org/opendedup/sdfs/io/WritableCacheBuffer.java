@@ -376,7 +376,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						} else {
 							try {
 								buf.position(sh.pos);
-								buf.put(sh.ck, sh.offset, sh.nlen);
+								if(sh.nlen > sh.ck.length)
+									buf.put(sh.ck, sh.offset, sh.ck.length);
+								else
+									buf.put(sh.ck, sh.offset, sh.nlen);
 
 							} catch (Exception e) {
 								

@@ -91,7 +91,7 @@ public class MgmtWebServer implements Container {
 		return query_pairs;
 	}
 
-	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(Main.maxOpenFiles*2, .075F,
+	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(Main.maxOpenFiles*6, .075F,
 			false) {
 		private static final long serialVersionUID = -1L;
 
