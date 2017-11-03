@@ -466,6 +466,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				SDFSLogger.getLog().error("unable to read " + lf.getPath(), e);
 			}
 			if (m == null && HashBlobArchive.REMOVE_FROM_CACHE) {
+				lf.delete();
 				Map<String, Long> _m = store.getHashMap(hashid);
 				double z = _m.size() * 1.25;
 				int sz = new Long(Math.round(z)).intValue();
