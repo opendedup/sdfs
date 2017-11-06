@@ -82,7 +82,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean reconstructed;
 	private boolean hlAdded = false;
 	private boolean direct = false;
-	protected ReentrantLock lobj;
+	protected ReentrantLock lobj = null;
 	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
 	private TreeMap<Integer, HashLocPair> _ar = null;
 	int sz;
@@ -376,13 +376,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						} else {
 							try {
 								buf.position(sh.pos);
-								if(sh.nlen > sh.ck.length)
+								if (sh.nlen > sh.ck.length)
 									buf.put(sh.ck, sh.offset, sh.ck.length);
 								else
 									buf.put(sh.ck, sh.offset, sh.nlen);
 
 							} catch (Exception e) {
-								
+
 								String hp = StringUtils.getHexString(sh.hash);
 								SDFSLogger.getLog()
 										.error("hash=" + hp + " pos = " + this.position + " ck nlen=" + sh.nlen
@@ -830,18 +830,25 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#open()
 	 */
 	@Override
-	public synchronized void open() {
-		// long ksz = wbsz.incrementAndGet();
-		if (this.lobj == null)
-			this.lobj = new ReentrantLock();
+	public synchronized void open(ReentrantLock obj) {
+		obj.lock();
 		try {
-			this.df.removeBufferFromFlush(this);
-			this.closed = false;
-			this.flushing = false;
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("Error while opening", e);
-			throw new IllegalArgumentException("error");
+			try {
+				this.lobj = obj;
+				synchronized (df.activeBuffers) {
+					df.activeBuffers.put(this.position, lobj);
+				}
+				this.df.removeBufferFromFlush(this);
+				this.closed = false;
+				this.flushing = false;
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal("Error while opening", e);
+				throw new IllegalArgumentException("error");
+			}
+		} finally {
+			lobj.unlock();
 		}
+		
 
 		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
 		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
@@ -852,9 +859,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		if (lobj == null) {
 			this.flushing = false;
 			this.closed = true;
+			synchronized (df.activeBuffers) {
 
-			this.df.removeBufferFromFlush(this);
+				this.df.removeBufferFromFlush(this);
 
+				df.activeBuffers.remove(this.position);
+			}
 			return;
 		}
 		lobj.lock();
@@ -909,8 +919,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void close() throws IOException {
-		// long ksz = wbsz.decrementAndGet();
-		boolean ex = false;
+		// long ksz = wbsz.decrementAndGet()
 		lobj.lock();
 		try {
 
@@ -940,16 +949,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 			} catch (Exception e) {
-				ex = true;
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
-				String key = df.getGUID() + "#" + this.getFilePosition();
-				df.writeBuffers.put(key, this);
-				this.open();
+				df.writeBuffers.put(this.getFilePosition(), this);
+				this.open(this.lobj	);
 				SDFSLogger.getLog().warn("re-opened" + this.position);
 				throw new IOException(e);
 			} finally {
 				try {
-
+					df.removeBufferFromFlush(this);
 				} catch (Exception e) {
 				}
 
@@ -957,8 +964,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			if (lobj.isLocked())
 				lobj.unlock();
-			if (!ex) {
+			synchronized (df.activeBuffers) {
 				df.removeBufferFromFlush(this);
+				df.activeBuffers.remove(this.position);
 			}
 
 			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
