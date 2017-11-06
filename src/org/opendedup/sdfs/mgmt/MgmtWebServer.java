@@ -164,7 +164,7 @@ public class MgmtWebServer implements Container {
 					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
 					String hsh = tks[0];
 					String session = tks[1];
-					if (sessions.getIfPresent(session) != null)
+					if (sessions.getIfPresent(session)  == null)
 						auth = false;
 					else {
 						String im = HashFunctions.getHmacSHA256(session, StringUtils.getHexBytes(Main.sdfsPassword));
