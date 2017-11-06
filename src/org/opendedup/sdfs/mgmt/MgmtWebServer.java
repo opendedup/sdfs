@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -60,6 +61,10 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class MgmtWebServer implements Container {
 	private static Connection connection = null;
 	private static String archivePath = new File(Main.volume.getPath()).getParent() + File.separator + "archives";
@@ -91,16 +96,14 @@ public class MgmtWebServer implements Container {
 		return query_pairs;
 	}
 
-	private transient static LinkedHashMap<String, String> sessions = new LinkedHashMap<String, String>(Main.maxOpenFiles*6, .075F,
-			false) {
-		private static final long serialVersionUID = -1L;
-
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<String, String> entry) {
-			return size() > Main.maxOpenFiles*6;
-		}
-	};
-
+	
+	private transient static LoadingCache<String, String> sessions = CacheBuilder.newBuilder().maximumSize(100000).expireAfterAccess(15, TimeUnit.MINUTES).build(
+			new CacheLoader<String, String>() {
+	             public String load(String key) { // no checked exception
+	               return HashFunctions.getRandomString(8);
+	             }
+	           });
+	
 	@Override
 	public void handle(Request request, Response response) {
 		try {
@@ -161,7 +164,7 @@ public class MgmtWebServer implements Container {
 					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
 					String hsh = tks[0];
 					String session = tks[1];
-					if (!sessions.containsKey(session))
+					if (sessions.getIfPresent(session) == null)
 						auth = false;
 					else {
 						String im = HashFunctions.getHmacSHA256(session, StringUtils.getHexBytes(Main.sdfsPassword));
@@ -1220,7 +1223,7 @@ public class MgmtWebServer implements Container {
 				}
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("unable to satify request ", e);
+			SDFSLogger.getLog().error("unable to satify request ", e);
 			response.setCode(500);
 			try {
 				PrintStream body = response.getPrintStream();
