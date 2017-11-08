@@ -21,8 +21,8 @@ package org.opendedup.sdfs.io;
 import java.io.IOException;
 
 
+
 import java.util.TreeMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 
@@ -172,7 +172,7 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	 * @see org.opendedup.sdfs.io.DedupChunkInterface#open()
 	 */
 	@Override
-	public void open(ReentrantLock l) {
+	public void open() {
 	}
 
 	@Override

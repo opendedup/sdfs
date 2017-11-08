@@ -82,7 +82,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean reconstructed;
 	private boolean hlAdded = false;
 	private boolean direct = false;
-	protected ReentrantLock lobj = null;
+	protected ReentrantLock lobj = new ReentrantLock();
 	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
 	private TreeMap<Integer, HashLocPair> _ar = null;
 	int sz;
@@ -830,43 +830,23 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 * @see org.opendedup.sdfs.io.CacheBufferInterface2#open()
 	 */
 	@Override
-	public synchronized void open(ReentrantLock obj) {
-		obj.lock();
-		try {
-			try {
-				this.lobj = obj;
-				synchronized (df.activeBuffers) {
-					df.activeBuffers.put(this.position, lobj);
-				}
-				this.df.removeBufferFromFlush(this);
-				this.closed = false;
-				this.flushing = false;
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal("Error while opening", e);
-				throw new IllegalArgumentException("error");
-			}
-		} finally {
-			lobj.unlock();
-		}
-		
+	public synchronized void open() {
 
-		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
-		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
-		// +SparseDedupFile.writeBuffers.size());
+		this.lobj.lock();
+		try {
+			this.df.removeBufferFromFlush(this);
+			this.closed = false;
+			this.flushing = false;
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Error while opening", e);
+			throw new IllegalArgumentException("error");
+		} finally {
+			this.lobj.unlock();
+		}
 	}
 
 	public void flush() throws BufferClosedException {
-		if (lobj == null) {
-			this.flushing = false;
-			this.closed = true;
-			synchronized (df.activeBuffers) {
 
-				this.df.removeBufferFromFlush(this);
-
-				df.activeBuffers.remove(this.position);
-			}
-			return;
-		}
 		lobj.lock();
 		try {
 			if (this.flushing) {
@@ -881,19 +861,21 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					SDFSLogger.getLog().debug("cannot flush buffer at pos " + this.getFilePosition() + " closed");
 				throw new BufferClosedException("Buffer Closed");
 			}
-			this.flushing = true;
-			if (this.dirty || this.isHlAdded()) {
-				if (Main.chunkStoreLocal) {
-					this.df.putBufferIntoFlush(this);
-					lexecutor.execute(this);
+			synchronized (df.flushingBuffers) {
+				this.flushing = true;
+				if (this.dirty || this.isHlAdded()) {
+					if (Main.chunkStoreLocal) {
+						this.df.putBufferIntoFlush(this);
+						lexecutor.execute(this);
+					} else {
+						SparseDedupFile.pool.execute(this);
+						this.df.putBufferIntoFlush(this);
+					}
 				} else {
-					SparseDedupFile.pool.execute(this);
-					this.df.putBufferIntoFlush(this);
+					// wbsz.decrementAndGet();
+					this.flushing = false;
+					this.closed = true;
 				}
-			} else {
-				// wbsz.decrementAndGet();
-				this.flushing = false;
-				this.closed = true;
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug("unable to flush", e);
@@ -919,7 +901,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public void close() throws IOException {
-		// long ksz = wbsz.decrementAndGet()
+		// long ksz = wbsz.decrementAndGet();
+		boolean ex = false;
 		lobj.lock();
 		try {
 
@@ -949,9 +932,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 			} catch (Exception e) {
+				ex = true;
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
 				df.writeBuffers.put(this.getFilePosition(), this);
-				this.open(this.lobj	);
+				this.open();
 				SDFSLogger.getLog().warn("re-opened" + this.position);
 				throw new IOException(e);
 			} finally {
@@ -964,9 +948,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			if (lobj.isLocked())
 				lobj.unlock();
-			synchronized (df.activeBuffers) {
-				df.removeBufferFromFlush(this);
-				df.activeBuffers.remove(this.position);
+			if (!ex) {
+
 			}
 
 			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
