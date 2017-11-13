@@ -82,7 +82,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private boolean reconstructed;
 	private boolean hlAdded = false;
 	private boolean direct = false;
-	protected ReentrantLock lobj = new ReentrantLock();
+	protected ReentrantLock lobj;
 	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
 	private TreeMap<Integer, HashLocPair> _ar = null;
 	int sz;
@@ -250,7 +250,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private void initBuffer() throws IOException, InterruptedException, DataArchivedException {
 		lobj.lock();
 		try {
-			if (this.buf == null) {
+			while (this.buf == null) {
 				this.hlAdded = false;
 				if (HashFunctionPool.max_hash_cluster > 1) {
 					this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
@@ -376,13 +376,13 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						} else {
 							try {
 								buf.position(sh.pos);
-								if (sh.nlen > sh.ck.length)
+								if(sh.nlen > sh.ck.length)
 									buf.put(sh.ck, sh.offset, sh.ck.length);
 								else
 									buf.put(sh.ck, sh.offset, sh.nlen);
 
 							} catch (Exception e) {
-
+								
 								String hp = StringUtils.getHexString(sh.hash);
 								SDFSLogger.getLog()
 										.error("hash=" + hp + " pos = " + this.position + " ck nlen=" + sh.nlen
@@ -831,8 +831,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	 */
 	@Override
 	public synchronized void open() {
-
-		this.lobj.lock();
+		// long ksz = wbsz.incrementAndGet();
+		if (this.lobj == null)
+			this.lobj = new ReentrantLock();
 		try {
 			this.df.removeBufferFromFlush(this);
 			this.closed = false;
@@ -840,13 +841,22 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Error while opening", e);
 			throw new IllegalArgumentException("error");
-		} finally {
-			this.lobj.unlock();
 		}
+
+		// SDFSLogger.getLog().info(" wbsz=" + ksz + " ab=" + df.activeBuffers.size() +
+		// " ob=" + df.openBuffers.size() + " fb=" + df.flushingBuffers.size() + " wb="
+		// +SparseDedupFile.writeBuffers.size());
 	}
 
 	public void flush() throws BufferClosedException {
+		if (lobj == null) {
+			this.flushing = false;
+			this.closed = true;
 
+			this.df.removeBufferFromFlush(this);
+
+			return;
+		}
 		lobj.lock();
 		try {
 			if (this.flushing) {
@@ -861,21 +871,19 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					SDFSLogger.getLog().debug("cannot flush buffer at pos " + this.getFilePosition() + " closed");
 				throw new BufferClosedException("Buffer Closed");
 			}
-			synchronized (df.flushingBuffers) {
-				this.flushing = true;
-				if (this.dirty || this.isHlAdded()) {
-					if (Main.chunkStoreLocal) {
-						this.df.putBufferIntoFlush(this);
-						lexecutor.execute(this);
-					} else {
-						SparseDedupFile.pool.execute(this);
-						this.df.putBufferIntoFlush(this);
-					}
+			this.flushing = true;
+			if (this.dirty || this.isHlAdded()) {
+				if (Main.chunkStoreLocal) {
+					this.df.putBufferIntoFlush(this);
+					lexecutor.execute(this);
 				} else {
-					// wbsz.decrementAndGet();
-					this.flushing = false;
-					this.closed = true;
+					SparseDedupFile.pool.execute(this);
+					this.df.putBufferIntoFlush(this);
 				}
+			} else {
+				// wbsz.decrementAndGet();
+				this.flushing = false;
+				this.closed = true;
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug("unable to flush", e);
@@ -940,7 +948,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				throw new IOException(e);
 			} finally {
 				try {
-					df.removeBufferFromFlush(this);
+
 				} catch (Exception e) {
 				}
 
@@ -949,7 +957,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			if (lobj.isLocked())
 				lobj.unlock();
 			if (!ex) {
-
+				df.removeBufferFromFlush(this);
 			}
 
 			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
