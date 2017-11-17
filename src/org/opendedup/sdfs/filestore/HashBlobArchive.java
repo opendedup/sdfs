@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -1114,11 +1115,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		if (DISABLE_WRITE)
 			return;
 		if (REMOVE_FROM_CACHE) {
-			synchronized (f) {
+			
 				Lock l = this.lock.writeLock();
 				l.lock();
 				Lock ul = this.uploadlock.writeLock();
 				ul.lock();
+				synchronized (f) {
 				try {
 					SDFSLogger.getLog().debug("removing " + f.getPath());
 					SimpleByteArrayLongMap m = maps.getIfPresent(this.id);
@@ -1222,6 +1224,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	private byte[] getChunk(byte[] hash) throws IOException, DataArchivedException {
 		byte[] ub = null;
 
@@ -1306,7 +1309,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 							}
 						}
-						ch.read(hb, pos);
+						synchronized(f) {
+							ch.read(hb, pos);
+						}
 					} catch (Exception e1) {
 						throw new IOException(e1);
 					}
@@ -1340,7 +1345,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 				ub = new byte[nlen];
 
 				try {
-					ch.read(ByteBuffer.wrap(ub), pos + 4);
+					synchronized(f) {
+						ch.read(ByteBuffer.wrap(ub), pos + 4);
+					}
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
@@ -1376,11 +1383,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 						}
 
 					}
-					hb.position(0);
-					ch.read(hb, pos);
-					hb.position(0);
-					npos = hb.getInt();
-					nlen = hb.getInt();
 				}
 				if (cacheReads || f.exists()) {
 
