@@ -97,7 +97,7 @@ public class MgmtWebServer implements Container {
 	}
 
 	
-	private transient static LoadingCache<String, String> sessions = CacheBuilder.newBuilder().maximumSize(100000).expireAfterAccess(15, TimeUnit.MINUTES).build(
+	private transient static LoadingCache<String, String> sessions = CacheBuilder.newBuilder().maximumSize(100000).expireAfterAccess(24, TimeUnit.HOURS).build(
 			new CacheLoader<String, String>() {
 	             public String load(String key) { // no checked exception
 	               return HashFunctions.getRandomString(8);

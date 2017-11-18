@@ -321,6 +321,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			/*
 			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs( 10 * 1000);
 			 * 
+			 * 
 			 * serviceClient.getDefaultRequestOptions().setRetryPolicyFactory( new
 			 * RetryExponentialRetry(500, 5));
 			 */
