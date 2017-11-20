@@ -250,7 +250,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private void initBuffer() throws IOException, InterruptedException, DataArchivedException {
 		lobj.lock();
 		try {
-			if (this.buf == null) {
+			while (this.buf == null) {
 				this.hlAdded = false;
 				if (HashFunctionPool.max_hash_cluster > 1) {
 					this.buf = ByteBuffer.wrap(new byte[Main.CHUNK_LENGTH]);
@@ -942,8 +942,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} catch (Exception e) {
 				ex = true;
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
-				String key = df.getGUID() + "#" + this.getFilePosition();
-				df.writeBuffers.put(key, this);
+				df.writeBuffers.put(this.getFilePosition(), this);
 				this.open();
 				SDFSLogger.getLog().warn("re-opened" + this.position);
 				throw new IOException(e);
