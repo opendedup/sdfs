@@ -1024,7 +1024,7 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			if (!this.closed) {
 				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("Closing dedupfile [" + mf.getPath() + "] guid=" + this.GUID);
+					SDFSLogger.getLog().debug("Closing dedupfile [" + mf.getPath() + "] guid=" + this.GUID + " lenght=" + MetaFileStore.getMF(mf.getPath()).getPath());
 				if (Main.safeClose) {
 					try {
 						ArrayList<DedupFileChannel> al = new ArrayList<DedupFileChannel>();
