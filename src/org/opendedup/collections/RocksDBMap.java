@@ -426,6 +426,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	public void setMaxSize(long maxSz) throws IOException {
+		this.size = maxSz;
 
 	}
 

@@ -133,6 +133,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 		fileStore.setCacheSize(sz);
 	}
 
+	public void setDseSize(long sz) throws IOException {
+		hs.bdb.setMaxSize(sz);
+	}
+
 	public void remoteFetchChunks(ArrayList<String> al, String server,
 			String password, int port, boolean useSSL) throws IOException,
 			HashtableFullException {

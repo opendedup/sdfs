@@ -666,4 +666,10 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void setDseSize(long sz) {
+		// TODO Auto-generated method stub
+
+	}
 }

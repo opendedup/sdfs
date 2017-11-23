@@ -2128,4 +2128,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	}
 
+	@Override
+	public void setDseSize(long sz) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

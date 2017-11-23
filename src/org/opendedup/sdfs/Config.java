@@ -571,6 +571,9 @@ public class Config {
 				chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
 				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
 			}
+
+			localChunkStore.setAttribute("allocation-size", Long.toString(Main.volume.capacity));
+
 			if (Main.chunkStoreEncryptionKey != null) {
 				localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
 			}
