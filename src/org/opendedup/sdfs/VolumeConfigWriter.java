@@ -83,6 +83,7 @@ public class VolumeConfigWriter {
 	String syncfs_schedule = "4 59 23 * * ?";
 	private String dExt = null;
 	boolean azureEnabled = false;
+	boolean tcpKeepAlive = true;
 	boolean awsEnabled = false;
 	boolean gsEnabled = false;
 	String cloudAccessKey = "";
@@ -325,6 +326,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("io-claim-chunks-schedule")) {
 			this.fdisk_schedule = cmd.getOptionValue("io-claim-chunks-schedule");
+		}
+		if (cmd.hasOption("tcp-keepalive")) {
+			this.tcpKeepAlive = Boolean.parseBoolean(cmd.getOptionValue("tcp-keepalive"));
 		}
 		if (cmd.hasOption("data-appendix")) {
 			this.dExt = cmd.getOptionValue("data-appendix");
@@ -746,6 +750,8 @@ public class VolumeConfigWriter {
 			if (this.backblazeEnabled)
 				extended.setAttribute("service-type", "b2");
 			extended.setAttribute("block-size", this.blockSize);
+			if (!this.tcpKeepAlive)
+				extended.setAttribute("tcp-keepalive", "false");
 			if (this.dExt != null)
 				 extended.setAttribute("data-appendix", this.dExt);
 			extended.setAttribute("share-path", this.accessPath);
@@ -785,6 +791,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("block-size", this.blockSize);
 				if (this.dExt != null)
 					 extended.setAttribute("data-appendix", this.dExt);
+				if (!this.tcpKeepAlive)
+					extended.setAttribute("tcp-keepalive", "false");
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
@@ -839,6 +847,8 @@ public class VolumeConfigWriter {
 				extended.setAttribute("block-size", this.blockSize);
 				if (this.dExt != null)
 					 extended.setAttribute("data-appendix", this.dExt);
+				if (!this.tcpKeepAlive)
+					extended.setAttribute("tcp-keepalive", "false");
 				extended.setAttribute("allow-sync", "false");
 				extended.setAttribute("upload-thread-sleep-time", "10000");
 				extended.setAttribute("sync-files", "true");
@@ -887,6 +897,8 @@ public class VolumeConfigWriter {
 			extended.setAttribute("block-size", "60 MB");
 			if (this.dExt != null)
 				 extended.setAttribute("data-appendix", this.dExt);
+			if (!this.tcpKeepAlive)
+				extended.setAttribute("tcp-keepalive", "false");
 			extended.setAttribute("allow-sync", "false");
 			extended.setAttribute("upload-thread-sleep-time", "1500");
 			extended.setAttribute("sync-files", "false");
@@ -1091,6 +1103,10 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("data-appendix")
 				.withDescription(
 						"Add an appendix for data files.")
+				.hasArg().withArgName("String").create());
+		options.addOption(OptionBuilder.withLongOpt("tcp-keepalive")
+				.withDescription(
+						"Set tcp-keepalive setting for the connection with S3 storage")
 				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder.withLongOpt("permissions-file")
 				.withDescription("Default File Permissions. " + " \n Defaults to: \n 0644").hasArg()
