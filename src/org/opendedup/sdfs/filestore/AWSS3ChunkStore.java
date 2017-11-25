@@ -478,6 +478,12 @@ public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
+	public void setDseSize(long bps) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public int getReadSpeed() {
 		// TODO Auto-generated method stub
 		return 0;

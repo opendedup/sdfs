@@ -155,6 +155,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private boolean simpleMD;
 	private final static String mdExt = ".6442";
 	private String dExt = "";
+	private boolean tcpKeepAlive = true;
 
 	static {
 		try {
@@ -488,7 +489,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
 			clientConfig.setConnectionTimeout(120000);
 			clientConfig.setSocketTimeout(120000);
-
+			if (config.hasAttribute("tcp-keepalive")) {
+				this.tcpKeepAlive = Boolean.parseBoolean(config.getAttribute("tcp-keepalive"));
+			}
+			if (!this.tcpKeepAlive) {
+				clientConfig.setUseTcpKeepAlive(false);
+			}
 			String s3Target = null;
 			if(config.hasAttribute("user-agent-prefix")) {
 				clientConfig.setUserAgentPrefix(config.getAttribute("user-agent-prefix"));
@@ -2873,6 +2879,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void timeStampData(long key) throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setDseSize(long sz) {
 		// TODO Auto-generated method stub
 
 	}

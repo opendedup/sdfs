@@ -160,6 +160,10 @@ public class HCServiceProxy {
 		}
 	}
 
+	public static synchronized void setDseSize(long sz) throws IOException {
+		hcService.setDseSize(sz);
+	}
+
 	public static boolean claimKey(byte[] key, long val, long ct, String guid) throws IOException {
 		if (Main.chunkStoreLocal) {
 			if (guid != null && Main.enableLookupFilter) {

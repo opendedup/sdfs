@@ -48,6 +48,8 @@ public interface AbstractChunkStore {
 
 	public abstract void setCacheSize(long sz) throws IOException;
 
+	public abstract void setDseSize(long sz);
+
 	/**
 	 * Closes the chunk store, if this is required
 	 */
