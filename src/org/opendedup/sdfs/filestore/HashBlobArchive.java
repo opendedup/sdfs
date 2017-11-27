@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -313,16 +312,31 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
 					worksQueue, new BlockPolicy());
+
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
 							try {
-								try {
-									removal.getValue().close();
-								} catch (Exception e) {
+								boolean fcClosed = false;
+								int tries = 0;
+								while (!fcClosed) {
+									try {
+										removal.getValue().close();
+										fcClosed = true;
+									} catch (Exception e) {
+										if (tries > 100) {
+											SDFSLogger.getLog().warn("Unable to close filechannel", e);
+											fcClosed = true;
+											break;
+										} else {
+											try {
+												Thread.sleep(1000);
+											} catch (Exception e1) {
 
+											}
+										}
+									}
 								}
-
 							} catch (Exception e) {
 								SDFSLogger.getLog().warn("unable to close filechannel", e);
 							}
@@ -1115,12 +1129,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		if (DISABLE_WRITE)
 			return;
 		if (REMOVE_FROM_CACHE) {
-			
-				Lock l = this.lock.writeLock();
-				l.lock();
-				Lock ul = this.uploadlock.writeLock();
-				ul.lock();
-				synchronized (f) {
+
+			Lock l = this.lock.writeLock();
+			l.lock();
+			Lock ul = this.uploadlock.writeLock();
+			ul.lock();
+			synchronized (f) {
 				try {
 					SDFSLogger.getLog().debug("removing " + f.getPath());
 					SimpleByteArrayLongMap m = maps.getIfPresent(this.id);
@@ -1309,7 +1323,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 							}
 						}
-						synchronized(f) {
+						synchronized (f) {
 							ch.read(hb, pos);
 						}
 					} catch (Exception e1) {
@@ -1331,7 +1345,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
+									+ "], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
@@ -1345,7 +1360,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				ub = new byte[nlen];
 
 				try {
-					synchronized(f) {
+					synchronized (f) {
 						ch.read(ByteBuffer.wrap(ub), pos + 4);
 					}
 				} catch (Exception e) {
@@ -1372,7 +1387,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
+									+ "], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
