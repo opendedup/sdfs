@@ -2416,4 +2416,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	}
 
+	@Override
+	public void setDseSize(long sz) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
