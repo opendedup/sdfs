@@ -17,7 +17,7 @@ public class ProcessSetCache {
 			Element root = doc.getDocumentElement();
 			formatter.close();
 			if (root.getAttribute("status").equals("failed"))
-				System.out.println(root.getAttribute("msg"));
+				System.out.printf("%s\n", root.getAttribute("msg"));
 			else {
 				if (root.getAttribute("status").equals("failed")) {
 					System.out.println(root.getAttribute("msg"));
