@@ -17,7 +17,6 @@ package org.opendedup.cassandra;
 
 import org.opendedup.sdfs.Main;
 
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -46,7 +45,7 @@ public class example1 {
         example1 client = new example1();
 
         try {
-        	client.c
+
             client.connect(CONTACT_POINTS, PORT);
             client.createSchema();
             client.loadData();
@@ -71,7 +70,7 @@ public class example1 {
     public void connect(String[] contactPoints, int port) {
 
         cluster = Cluster.builder()
-                .addContactPoints(contactPoints).with
+                .addContactPoints(contactPoints).withPort(port)
                 .build();
 
         System.out.printf("Connected to cluster: %s%n", cluster.getMetadata().getClusterName());
