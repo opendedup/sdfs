@@ -98,10 +98,10 @@ public class SparseDedupFile implements DedupFile {
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
 	public static AbstractHashEngine eng = null;
-	protected LoadingCache<String, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
+	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
 			.expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(64)
-			.removalListener(new RemovalListener<String, WritableCacheBuffer>() {
-				public void onRemoval(RemovalNotification<String, WritableCacheBuffer> removal) {
+			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
+				public void onRemoval(RemovalNotification<Long, WritableCacheBuffer> removal) {
 					WritableCacheBuffer ck = removal.getValue();
 					try {
 						ck.flush();
@@ -111,26 +111,20 @@ public class SparseDedupFile implements DedupFile {
 						SDFSLogger.getLog().debug("unable to flush", e);
 					}
 				}
-			}).build(new CacheLoader<String, WritableCacheBuffer>() {
-				public WritableCacheBuffer load(String skey) throws IOException, FileClosedException {
-					String[] pts = skey.split("#");
-					SparseDedupFile df = DedupFileStore.get(pts[0]);
-					if (df == null) {
-						SDFSLogger.getLog().error("df " + pts[0] + " is not open");
-						throw new IOException("not open");
-					}
-					Long key = Long.parseLong(pts[1]);
-					if (df.closed) {
+			}).build(new CacheLoader<Long, WritableCacheBuffer>() {
+				public WritableCacheBuffer load(Long key) throws IOException, FileClosedException {
+					
+					if (closed) {
 						throw new FileClosedException("file already closed");
 					}
 					WritableCacheBuffer writeBuffer = null;
-					synchronized (df.flushingBuffers) {
-						writeBuffer = df.flushingBuffers.get(key);
+					synchronized (flushingBuffers) {
+						writeBuffer = flushingBuffers.get(key);
 						if (writeBuffer != null)
-							df.flushingBuffers.remove(key);
+							flushingBuffers.remove(key);
 					}
 					if (writeBuffer == null) {
-						writeBuffer = df.marshalWriteBuffer(key);
+						writeBuffer = marshalWriteBuffer(key);
 					}
 					writeBuffer.open();
 					return writeBuffer;
@@ -766,8 +760,7 @@ public class SparseDedupFile implements DedupFile {
 			long chunkPos = this.getChuckPosition(position);
 			try {
 				WritableCacheBuffer wb = null;
-				String key = this.GUID + "#" + chunkPos;
-				wb = writeBuffers.get(key);
+				wb = writeBuffers.get(chunkPos);
 				/*
 				SDFSLogger.getLog()
 						.info("active buffers=" + this.activeBuffers.size() + " flushingBuffers="
