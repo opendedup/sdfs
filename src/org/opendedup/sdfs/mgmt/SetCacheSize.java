@@ -1,7 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 import java.io.IOException;
+
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
