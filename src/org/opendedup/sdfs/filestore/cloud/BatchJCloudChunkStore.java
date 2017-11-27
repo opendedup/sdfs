@@ -288,6 +288,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	private ReentrantLock delLock = new ReentrantLock();
+	private int mdVersion;
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
@@ -379,6 +380,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if (config.hasAttribute("local-cache-size")) {
 			long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 			HashBlobArchive.setLocalCacheSize(sz);
+		}
+		if (config.hasAttribute("metadata-version")) {
+			this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
+			SDFSLogger.getLog().info("Set Metadata Version to " + this.mdVersion);
 		}
 		if (config.hasAttribute("map-cache-size")) {
 			int sz = Integer.parseInt(config.getAttribute("map-cache-size"));

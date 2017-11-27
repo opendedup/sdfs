@@ -149,8 +149,16 @@ public class LongByteArrayMap implements DataMapInterface {
 			} else {
 				File zmapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator
 						+ GUID + File.separator + GUID + ".map.lz4");
-				if (zmapFile.exists())
+				if (zmapFile.exists()) {
+					try {
 					map = new LongByteArrayMap(zmapFile.getPath(), lookupFilter);
+					}catch(java.io.EOFException e) {
+						if(mapFile.exists()) {
+							map = new LongByteArrayMap(mapFile.getPath(), lookupFilter);
+							zmapFile.delete();
+						}
+					}
+				}
 				else
 					map = new LongByteArrayMap(mapFile.getPath(), lookupFilter);
 				mp.put(mapFile.getPath(), map);

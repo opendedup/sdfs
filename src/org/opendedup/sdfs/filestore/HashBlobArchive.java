@@ -1324,7 +1324,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 							}
 						}
-						ch.read(hb, pos);
+						synchronized(f) {
+							ch.read(hb, pos);
+						}
 					} catch (Exception e1) {
 						throw new IOException(e1);
 					}
@@ -1344,8 +1346,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
-									+ "], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
@@ -1359,7 +1360,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 				ub = new byte[nlen];
 
 				try {
-					ch.read(ByteBuffer.wrap(ub), pos + 4);
+					synchronized(f) {
+						ch.read(ByteBuffer.wrap(ub), pos + 4);
+					}
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
@@ -1384,8 +1387,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
-									+ "], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
@@ -1396,11 +1398,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 						}
 
 					}
-					hb.position(0);
-					ch.read(hb, pos);
-					hb.position(0);
-					npos = hb.getInt();
-					nlen = hb.getInt();
 				}
 				if (cacheReads || f.exists()) {
 

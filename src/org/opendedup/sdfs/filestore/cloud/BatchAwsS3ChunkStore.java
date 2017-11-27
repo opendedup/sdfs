@@ -427,9 +427,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 				HashBlobArchive.setLocalCacheSize(sz);
 			}
+			
 			if (config.hasAttribute("metadata-version")) {
 				this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
+				
 			}
+			SDFSLogger.getLog().info("###### Set Metadata Version to " + this.mdVersion);
 			if(config.hasAttribute("data-appendix")) {
 				this.dExt = config.getAttribute("data-appendix");
 			}
