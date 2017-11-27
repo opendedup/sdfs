@@ -98,6 +98,7 @@ public class SparseDedupFile implements DedupFile {
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
 	public static AbstractHashEngine eng = null;
+	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers= new ConcurrentHashMap<Long, WritableCacheBuffer>();
 	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
 			.expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(64)
 			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
@@ -118,10 +119,9 @@ public class SparseDedupFile implements DedupFile {
 						throw new FileClosedException("file already closed");
 					}
 					WritableCacheBuffer writeBuffer = null;
-					synchronized (flushingBuffers) {
-						writeBuffer = flushingBuffers.get(key);
-						if (writeBuffer != null)
-							flushingBuffers.remove(key);
+					writeBuffer = flushingBuffers.get(key);
+					if(writeBuffer == null) {
+						writeBuffer = openBuffers.get(key);
 					}
 					if (writeBuffer == null) {
 						writeBuffer = marshalWriteBuffer(key);
@@ -1355,12 +1355,16 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public void removeBufferFromFlush(WritableCacheBuffer writeBuffer) {
 			this.flushingBuffers.remove(writeBuffer.getFilePosition());
-		/*
-		 * if (_wb != null && _wb.hashCode() != writeBuffer.hashCode()) {
-		 * SDFSLogger.getLog().info("on remove hashcodes are not equal"); }
-		 */
+	}
+	
+	public void addOpenBuffer(WritableCacheBuffer bf) {
+		this.openBuffers.put(bf.getFilePosition(), bf);
 	}
 
+	public void removeOpenBuffer(WritableCacheBuffer bf) {
+		this.openBuffers.remove(bf.getFilePosition());
+	}
+	
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {
 			return this.flushingBuffers.containsKey(writeBuffer.getFilePosition());
 	}

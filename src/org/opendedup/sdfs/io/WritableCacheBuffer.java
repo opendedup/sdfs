@@ -836,6 +836,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.lobj = new ReentrantLock();
 		try {
 			this.df.removeBufferFromFlush(this);
+			this.df.addOpenBuffer(this);
 			this.closed = false;
 			this.flushing = false;
 		} catch (Exception e) {
@@ -910,7 +911,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	@Override
 	public void close() throws IOException {
 		// long ksz = wbsz.decrementAndGet();
-		boolean ex = false;
 		lobj.lock();
 		try {
 
@@ -938,9 +938,10 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.closed = true;
 					this.flushing = false;
 				}
+				df.removeBufferFromFlush(this);
+				df.removeOpenBuffer(this);
 
 			} catch (Exception e) {
-				ex = true;
 				SDFSLogger.getLog().warn("unable to close " + this.position, e);
 				df.writeBuffers.put(this.getFilePosition(), this);
 				this.open();
@@ -956,9 +957,6 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		} finally {
 			if (lobj.isLocked())
 				lobj.unlock();
-			if (!ex) {
-				df.removeBufferFromFlush(this);
-			}
 
 			// SDFSLogger.getLog().info("close wbsz=" + ksz + " ab=" +
 			// df.activeBuffers.size() + " ob=" + df.openBuffers.size() + " fb=" +
