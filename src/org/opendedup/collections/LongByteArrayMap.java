@@ -218,8 +218,15 @@ public class LongByteArrayMap implements DataMapInterface {
 		return (this.iterPos.get() * arrayLength);
 	}
 
-	public void setIterPos(long pos) {
-		this.iterPos.set(pos / arrayLength);
+	public void setLogicalIterPos(long pos) throws IOException {
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
+		try {
+			long ipos = this.getMapFilePosition(pos);
+			this.iterPos.set(ipos / arrayLength);
+		}finally {
+			l.unlock();
+		}
 	}
 
 	/*

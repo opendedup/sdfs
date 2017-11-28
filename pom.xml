@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.5.8.3</version>
+  <version>3.6.0.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -51,6 +51,16 @@
        <artifactId>bloom-filter</artifactId>
        <version>1.0.7</version>
    </dependency>
+<dependency>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-core</artifactId>
+  <version>3.3.0</version>
+</dependency>
+<dependency>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-mapping</artifactId>
+  <version>3.3.0</version>
+</dependency>
 <dependency>
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>

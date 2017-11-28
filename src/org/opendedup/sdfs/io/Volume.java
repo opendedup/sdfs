@@ -103,6 +103,7 @@ public class Volume implements java.io.Serializable {
 	private ReentrantLock devLock = new ReentrantLock();
 	public String connicalPath;
 	private Ignite ignite = null;
+	private String seedHost = "127.0.0.1";
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -243,6 +244,10 @@ public class Volume implements java.io.Serializable {
 			if (this.clusterCopies > 7) {
 				this.clusterCopies = 7;
 			}
+		}
+		
+		if(vol.hasAttribute("cluster-seed-host")) {
+			this.seedHost = vol.getAttribute("cluster-seed-host");
 		}
 		
 		if (vol.hasAttribute("cluster-rack-aware")) {
@@ -699,6 +704,7 @@ public class Volume implements java.io.Serializable {
 				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
+		root.setAttribute("cluster-seed-host", this.seedHost);
 		try {
 			root.setAttribute("dse-comp-size",
 					Long.toString(HCServiceProxy.getDSECompressedSize()));
@@ -764,6 +770,7 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
+		root.setAttribute("cluster-seed-host", this.seedHost);
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
 		root.setAttribute("read-timeout-seconds",
 				Integer.toString(Main.readTimeoutSeconds));
@@ -841,6 +848,10 @@ public class Volume implements java.io.Serializable {
 
 	public String getUuid() {
 		return uuid;
+	}
+	
+	public String getClusterSeedHost() {
+		return this.seedHost;
 	}
 
 	public void setUuid(String uuid) {
