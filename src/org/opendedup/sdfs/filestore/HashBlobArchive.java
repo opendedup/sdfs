@@ -323,6 +323,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 									try {
 										removal.getValue().close();
 										fcClosed = true;
+										SDFSLogger.getLog().debug("close " + removal.getKey());
 									} catch (Exception e) {
 										if (tries > 100) {
 											SDFSLogger.getLog().warn("Unable to close filechannel", e);
@@ -351,6 +352,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 									Path path = Paths.get(getPath(hashid).getPath());
 									FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE,
 											StandardOpenOption.READ);
+									SDFSLogger.getLog().debug("opened " + path.toString() + " opensize=" + openFiles.size());
 									return fc;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
