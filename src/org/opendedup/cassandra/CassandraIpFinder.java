@@ -86,7 +86,6 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 				+ "= {'class':'SimpleStrategy', 'replication_factor': 3};");
 		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".igep (" + "id uuid PRIMARY KEY," + "host text,"
 				+ "port int);");
-		session.
 		
 	}
 
@@ -108,8 +107,8 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 				+ "port int);");
 		// resolve configured addresses
 		final Collection<InetSocketAddress> inets = new CopyOnWriteArrayList<>();
-		final String fqdn = "_" + containerPortName + "._tcp." + serviceName;
-		log.debug("Looking up SRV records with FQDN [" + fqdn + "].");
+		//final String fqdn = "_" + containerPortName + "._tcp." + serviceName;
+		//log.debug("Looking up SRV records with FQDN [" + fqdn + "].");
 
 		/*
 		 * final List<LookupResult> nodes = resolver.resolve(fqdn); for (LookupResult

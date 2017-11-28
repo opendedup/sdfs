@@ -854,7 +854,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.flushing = false;
 			this.closed = true;
 
-			this.df.removeBufferFromFlush(this);
+			df.removeBufferFromFlush(this);
+			df.removeOpenBuffer(this);
 
 			return;
 		}
@@ -868,9 +869,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 			}
 			if (this.closed) {
+				df.removeBufferFromFlush(this);
+				df.removeOpenBuffer(this);
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("cannot flush buffer at pos " + this.getFilePosition() + " closed");
 				throw new BufferClosedException("Buffer Closed");
+				
 			}
 			this.flushing = true;
 			if (this.dirty || this.isHlAdded()) {
@@ -915,6 +919,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		try {
 
 			if (!this.flushing) {
+				df.removeOpenBuffer(this);
+				df.removeBufferFromFlush(this);
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("#### " + this.getFilePosition() + " not flushing ");
 				return;
