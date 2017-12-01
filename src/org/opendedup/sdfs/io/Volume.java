@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-
+import org.opendedup.sdfs.VolumeConfigWriter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ignite.Ignite;
@@ -60,7 +60,7 @@ public class Volume implements java.io.Serializable {
 	 */
 
 	private static final long serialVersionUID = 5505952237500542215L;
-	long capacity;
+	public long capacity;
 	String name;
 	AtomicLong currentSize = new AtomicLong(0);
 	String path;
@@ -548,6 +548,7 @@ public class Volume implements java.io.Serializable {
 							+ this.currentSize + "] requested capacity ["
 							+ capacity + "]");
 		this.capacity = capacity;
+		HCServiceProxy.setDseSize((capacity / HashFunctionPool.avg_page_size) + 8000);
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
 		writer.writeConfig();
 

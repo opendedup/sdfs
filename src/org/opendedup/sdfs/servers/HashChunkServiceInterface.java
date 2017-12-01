@@ -115,6 +115,8 @@ public interface HashChunkServiceInterface {
 
 	public abstract void setCacheSize(long sz) throws IOException;
 	
+	public abstract void setDseSize(long sz) throws IOException;
+
 	public abstract RemoteVolumeInfo[] getConnectedVolumes() throws IOException;
 
 	void clearRefMap() throws IOException;

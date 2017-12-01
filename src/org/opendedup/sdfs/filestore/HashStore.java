@@ -103,6 +103,10 @@ public class HashStore {
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
+
+	public void setMaxSize(long sz) throws IOException  {
+		this.bdb.setMaxSize(sz);
+	}
 	
 	public boolean mightContainKey(byte [] key) {
 		return this.bdb.mightContainKey(key);
@@ -122,7 +126,7 @@ public class HashStore {
 	 */
 
 	/**
-	 * returns the name of the TCHashStore
+	 * returns the name of the TCHashStoreentrie
 	 * 
 	 * @return the name of the hash store
 	 */

@@ -312,6 +312,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
 			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
 					worksQueue, new BlockPolicy());
+
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
@@ -322,19 +323,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 									try {
 										removal.getValue().close();
 										fcClosed = true;
-									} catch (Exception e) {
+										SDFSLogger.getLog().debug("close " + removal.getKey());
+									}catch (ClosedChannelException e) {
+										fcClosed =true;
+										break;
+									}
+									catch (Exception e) {
 										if (tries > 100) {
 											SDFSLogger.getLog().warn("Unable to close filechannel", e);
 											fcClosed = true;
 											break;
-										}
-										else {
+										} else {
 											try {
 												Thread.sleep(1000);
-											}catch(Exception e1) {
-												
+											} catch (Exception e1) {
+
 											}
-											
 										}
 									}
 								}
@@ -352,6 +356,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 									Path path = Paths.get(getPath(hashid).getPath());
 									FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE,
 											StandardOpenOption.READ);
+									SDFSLogger.getLog().debug("opened " + path.toString() + " opensize=" + openFiles.size());
 									return fc;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
@@ -1324,7 +1329,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 							}
 						}
-						synchronized(f) {
+						synchronized (f) {
 							ch.read(hb, pos);
 						}
 					} catch (Exception e1) {
@@ -1346,7 +1351,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
+									+ "], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
@@ -1360,7 +1366,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				ub = new byte[nlen];
 
 				try {
-					synchronized(f) {
+					synchronized (f) {
 						ch.read(ByteBuffer.wrap(ub), pos + 4);
 					}
 				} catch (Exception e) {
@@ -1387,7 +1393,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 							nlen = 0;
 						}
 						if (nlen == 0) {
-							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at ["+ this.f.getPath() +"], redownloading...");
+							SDFSLogger.getLog().error("Data length is zero in [" + this.id + "] at [" + this.f.getPath()
+									+ "], redownloading...");
 							this.loadData();
 							ch = openFiles.get(id);
 							hb.position(0);
