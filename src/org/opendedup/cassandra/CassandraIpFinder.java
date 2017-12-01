@@ -87,6 +87,7 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".igep (" + "id uuid PRIMARY KEY," + "host text,"
 				+ "port int);");
 		
+		
 	}
 
 	/**

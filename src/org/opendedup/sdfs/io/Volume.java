@@ -19,13 +19,13 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-import org.opendedup.sdfs.VolumeConfigWriter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ignite.Ignite;

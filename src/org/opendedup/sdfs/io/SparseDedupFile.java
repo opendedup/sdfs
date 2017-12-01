@@ -98,7 +98,7 @@ public class SparseDedupFile implements DedupFile {
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
 	public static AbstractHashEngine eng = null;
-	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers= new ConcurrentHashMap<Long, WritableCacheBuffer>();
+	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers= new ConcurrentHashMap<Long, WritableCacheBuffer>(256, .75f);
 	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
 			.expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(64)
 			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
@@ -107,9 +107,9 @@ public class SparseDedupFile implements DedupFile {
 					try {
 						ck.flush();
 					} catch (BufferClosedException e) {
-						SDFSLogger.getLog().debug("Error while closing buffer at " + removal.getKey());
+						SDFSLogger.getLog().warn("Error while closing buffer at " + removal.getKey());
 					} catch (Exception e) {
-						SDFSLogger.getLog().debug("unable to flush", e);
+						SDFSLogger.getLog().warn("unable to flush", e);
 					}
 				}
 			}).build(new CacheLoader<Long, WritableCacheBuffer>() {
@@ -767,7 +767,6 @@ public class SparseDedupFile implements DedupFile {
 								+ this.flushingBuffers.size() + " open buffers=" + this.openBuffers.size()
 								+ " writeBuffers=" + writeBuffers.size());
 				*/
-				wb.open();
 				return wb;
 
 			} catch (ExecutionException e) {
@@ -1359,10 +1358,12 @@ public class SparseDedupFile implements DedupFile {
 	
 	public void addOpenBuffer(WritableCacheBuffer bf) {
 		this.openBuffers.put(bf.getFilePosition(), bf);
+		SDFSLogger.getLog().info("open Size is " +this.openBuffers.size());
 	}
 
 	public void removeOpenBuffer(WritableCacheBuffer bf) {
 		this.openBuffers.remove(bf.getFilePosition());
+		SDFSLogger.getLog().info("Size is " +this.openBuffers.size());
 	}
 	
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {
