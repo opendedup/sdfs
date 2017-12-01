@@ -55,11 +55,10 @@ public class DedupFileChannel {
 	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
-	private boolean readAheadInitiated = false;
+	private ReadAhead rh = null;
 	private int flags = -1;
 	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
-	private static int READHEAD_TRIGGER_SIZE=30*1024*1024;
 	MetaDataDedupFile mf = null;
 
 	/**
@@ -515,9 +514,10 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
-			if (filePos > READHEAD_TRIGGER_SIZE && !readAheadInitiated && Main.readAhead) {
-				this.readAheadInitiated = true;
-				ReadAhead.getReadAhead(df);
+			if (Main.readAhead) {
+				if(rh == null)
+					rh =ReadAhead.getReadAhead(df);
+				rh.setReadAhead(filePos);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
