@@ -1009,6 +1009,10 @@ public class SparseDedupFile implements DedupFile {
 			}
 		}
 	}
+	
+	public void closeBuffer(WritableCacheBuffer bf) {
+		this.writeBuffers.invalidate(bf.getFilePosition());
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -1358,12 +1362,12 @@ public class SparseDedupFile implements DedupFile {
 	
 	public void addOpenBuffer(WritableCacheBuffer bf) {
 		this.openBuffers.put(bf.getFilePosition(), bf);
-		SDFSLogger.getLog().info("open Size is " +this.openBuffers.size());
+		//SDFSLogger.getLog().info("open Size is " +this.openBuffers.size());
 	}
 
 	public void removeOpenBuffer(WritableCacheBuffer bf) {
 		this.openBuffers.remove(bf.getFilePosition());
-		SDFSLogger.getLog().info("Size is " +this.openBuffers.size());
+		//SDFSLogger.getLog().info("Size is " +this.openBuffers.size());
 	}
 	
 	public boolean bufferInFlush(WritableCacheBuffer writeBuffer) {

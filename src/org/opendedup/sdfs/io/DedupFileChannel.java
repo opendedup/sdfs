@@ -352,6 +352,7 @@ public class DedupFileChannel {
 					} catch (BufferClosedException e) {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("trying to write again");
+						df.closeBuffer((WritableCacheBuffer)writeBuffer);
 						writeBuffer = null;
 					}
 				}
@@ -570,6 +571,8 @@ public class DedupFileChannel {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
 										"trying to write again");
+							df.closeBuffer((WritableCacheBuffer)readBuffer);
+							
 							readBuffer = null;
 						}
 					}

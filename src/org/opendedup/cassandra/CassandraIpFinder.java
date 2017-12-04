@@ -1,14 +1,16 @@
 package org.opendedup.cassandra;
 
+import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteLogger;
-
+import org.apache.ignite.Ignition;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.internal.util.tostring.GridToStringInclude;
 import org.apache.ignite.internal.util.typedef.internal.S;
 import org.apache.ignite.resources.LoggerResource;
 import org.apache.ignite.spi.IgniteSpiConfiguration;
 import org.apache.ignite.spi.IgniteSpiException;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
-import org.opendedup.sdfs.Main;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -31,10 +33,11 @@ import com.datastax.driver.core.Session;
  */
 public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 
-	String[] contactPoints = { "127.0.0.1" };
-	int port = 9042;
+	InetSocketAddress[] contactPoints = { new InetSocketAddress("127.0.0.1",9042)};
 	private Cluster cluster = null;
 	private Session session = null;
+	private String dataCenter ="datacenter1";
+	private int replicationFactor = 3;
 
 	/**
 	 * Grid logger.
@@ -47,10 +50,6 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 
 	public CassandraIpFinder() {
 		super(true);
-	}
-
-	public CassandraIpFinder(boolean shared) {
-		super(shared);
 	}
 
 	/**
@@ -66,28 +65,43 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 	}
 
 	@IgniteSpiConfiguration(optional = true)
-	public synchronized void setCassandraContactPoints(String[] contactPoints) throws IgniteSpiException {
+	public synchronized void setCassandraContactPoints(InetSocketAddress[] contactPoints) throws IgniteSpiException {
 		this.contactPoints = contactPoints;
 	}
-
-	public synchronized void setCassandraPort(int port) throws IgniteSpiException {
-		this.port = port;
+	
+	@IgniteSpiConfiguration(optional = true)
+	public synchronized void setCassandraDataCenter(String dataCenter) throws IgniteSpiException {
+		this.dataCenter = dataCenter;
 	}
-
-	public synchronized void registerAddresses(Collection<InetSocketAddress> addrs) {
+	
+	private void createTableSpace() {
 		if (cluster == null) {
-			cluster = Cluster.builder().addContactPoints(contactPoints).withPort(port).build();
+			cluster = Cluster.builder().addContactPointsWithPorts(contactPoints).build();
 
 			log.info("Connected Cassandra to cluster: " + cluster.getMetadata().getClusterName());
 
 			session = cluster.connect();
 		}
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + serviceName + " WITH replication "
-				+ "= {'class':'SimpleStrategy', 'replication_factor': 3};");
-		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".igep (" + "id uuid PRIMARY KEY," + "host text,"
+				+ "= {'class':'NetworkTopologyStrategy', '"+this.dataCenter+"': "+this.replicationFactor+"};");
+		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".igep (" + "id text PRIMARY KEY," + "host text,"
 				+ "port int);");
+	}
+
+	public synchronized void registerAddresses(Collection<InetSocketAddress> addrs) {
+		this.createTableSpace();
+		for(InetSocketAddress addr : addrs) {
+			session.execute("INSERT INTO " + serviceName + ".igep (id, host,port) VALUES ('"+addr.getHostString()+":" + addr.getPort()+"','"+addr.getHostString()+"',"+addr.getPort()+") IF NOT EXISTS");
+		}
 		
 		
+	}
+	
+	public synchronized void unregisterAddresses(Collection<InetSocketAddress> addrs) {
+		this.createTableSpace();
+		for(InetSocketAddress addr : addrs) {
+			session.execute("DELETE FROM " + serviceName + ".igep where id='"+addr.getHostString()+":" + addr.getPort()+"'");
+		}
 	}
 
 	/**
@@ -95,27 +109,17 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 	 */
 	@Override
 	public synchronized Collection<InetSocketAddress> getRegisteredAddresses() {
-		if (cluster == null) {
-			cluster = Cluster.builder().addContactPoints(contactPoints).withPort(port).build();
-
-			log.info("Connected to cluster: " + cluster.getMetadata().getClusterName());
-
-			session = cluster.connect();
-		}
-		session.execute("CREATE KEYSPACE IF NOT EXISTS " + serviceName + " WITH replication "
-				+ "= {'class':'SimpleStrategy', 'replication_factor': 3};");
-		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".igep (" + "id uuid PRIMARY KEY," + "host text,"
-				+ "port int);");
+		this.createTableSpace();
+		ResultSet set = session.execute("SELECT * from " + serviceName + ".igep;");
+		List<Row> rows = set.all();
+		
+		
 		// resolve configured addresses
 		final Collection<InetSocketAddress> inets = new CopyOnWriteArrayList<>();
-		//final String fqdn = "_" + containerPortName + "._tcp." + serviceName;
-		//log.debug("Looking up SRV records with FQDN [" + fqdn + "].");
-
-		/*
-		 * final List<LookupResult> nodes = resolver.resolve(fqdn); for (LookupResult
-		 * node : nodes) { inets.add(InetSocketAddress.createUnresolved(node.host(),
-		 * node.port())); } log.debug("Found " + nodes.size() + " nodes.");
-		 */
+		for(Row r : rows) {
+			log.info("adding " + r.getString(0));
+			inets.add(new InetSocketAddress(r.getString("host"),r.getInt("port")));
+		}
 		return inets;
 	}
 
@@ -125,6 +129,24 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 	@Override
 	public String toString() {
 		return S.toString(CassandraIpFinder.class, this, "super", super.toString());
+	}
+	
+	public static void main(String [] args) {
+		CassandraIpFinder cip = new CassandraIpFinder();
+		TcpDiscoverySpi spi = new TcpDiscoverySpi();
+		spi.setIpFinder(cip);
+		InetSocketAddress [] cipep = {new InetSocketAddress("192.168.0.146",9042)};
+		cip.setCassandraContactPoints(cipep);
+		IgniteConfiguration cfg = new IgniteConfiguration();
+		 
+		// Override default discovery SPI.
+		cfg.setDiscoverySpi(spi);
+		 
+		// Start Ignite node.
+		Ignite ig= Ignition.start(cfg);
+		ig.close();
+		
+		
 	}
 
 }

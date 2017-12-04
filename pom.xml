@@ -52,16 +52,6 @@
        <version>1.0.7</version>
    </dependency>
 <dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-core</artifactId>
-  <version>3.3.0</version>
-</dependency>
-<dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-mapping</artifactId>
-  <version>3.3.0</version>
-</dependency>
-<dependency>
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>
     <version>1.0</version>
@@ -71,6 +61,7 @@
     <artifactId>slf4j-log4j12</artifactId>
     <version>1.7.25</version>
 </dependency>
+
 <dependency>
     <groupId>org.apache.ignite</groupId>
     <artifactId>ignite-core</artifactId>
@@ -121,6 +112,16 @@
     <groupId>org.opendedupe</groupId>
     <artifactId>odd-grpc</artifactId>
     <version>1.0.0</version>
+</dependency>
+<dependency>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-core</artifactId>
+  <version>3.3.0</version>
+</dependency>
+<dependency>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-mapping</artifactId>
+  <version>3.3.0</version>
 </dependency>
   <dependency>
     <groupId>org.opendedupe</groupId>

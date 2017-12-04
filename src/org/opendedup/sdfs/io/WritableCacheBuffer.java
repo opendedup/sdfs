@@ -1075,6 +1075,11 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		lobj.lock();
 		try {
 			HashFunction hf = Hashing.murmur3_128(6442);
+			try {
+				this.initBuffer();
+			} catch (IOException | InterruptedException | DataArchivedException e) {
+				SDFSLogger.getLog().warn("error getting cache",e);
+			}
 			return hf.hashBytes(buf.array()).asInt();
 		} finally {
 			lobj.unlock();
