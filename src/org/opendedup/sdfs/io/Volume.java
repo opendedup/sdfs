@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-import org.opendedup.sdfs.VolumeConfigWriter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ignite.Ignite;
