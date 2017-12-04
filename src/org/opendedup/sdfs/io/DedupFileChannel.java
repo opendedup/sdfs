@@ -572,7 +572,6 @@ public class DedupFileChannel {
 								SDFSLogger.getLog().debug(
 										"trying to write again");
 							df.closeBuffer((WritableCacheBuffer)readBuffer);
-							
 							readBuffer = null;
 						}
 					}
