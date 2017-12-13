@@ -575,7 +575,7 @@ public class Config {
 			localChunkStore.setAttribute("allocation-size", Long.toString(Main.volume.capacity));
 
 			if (Main.chunkStoreEncryptionKey != null) {
-				localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
+				localChunkStore.setAttribute("encryption-key", Main.chunkStoreEncryptionKey);
 			}
 			if (Main.eCloudSecretKey != null) {
 				int awsSz = localChunkStore.getElementsByTagName("aws").getLength();

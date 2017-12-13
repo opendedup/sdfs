@@ -126,6 +126,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	private int mdVersion = 0;
 	private boolean simpleMD;
 	private final static String mdExt = ".6442";
+	private String accessKey = Main.cloudAccessKey;
+	private String secretKey = Main.cloudSecretKey;
+	private boolean standAlone = true;
+
 
 	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
 		return true;
@@ -166,7 +170,8 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		this.closed = true;
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
-			HashBlobArchive.close();
+			if(this.standAlone)
+				HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
 			Map<String, String> md = null;
@@ -301,8 +306,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			if (config.hasAttribute("connection-check-interval")) {
 				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 			}
+			if(this.standAlone) {
 			if (config.hasAttribute("block-size")) {
 				int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+				
 				HashBlobArchive.MAX_LEN = sz;
 			}
 			if (config.hasAttribute("allow-sync")) {
@@ -326,6 +333,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			if (config.hasAttribute("cache-reads")) {
 				HashBlobArchive.cacheReads = Boolean.parseBoolean(config.getAttribute("cache-reads"));
 			}
+			
 			if (config.hasAttribute("refresh-blobs"))
 				Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
 			if (config.hasAttribute("sync-files")) {
@@ -333,6 +341,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				if (syncf) {
 					new FileReplicationService(this);
 				}
+			}
 			}
 			if (config.hasAttribute("simple-metadata")) {
 				this.simpleMD = Boolean.parseBoolean(config.getAttribute("simple-metadata"));
@@ -345,14 +354,14 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			if (config.hasAttribute("write-speed")) {
 				wsp = Integer.parseInt(config.getAttribute("write-speed"));
 			}
-			if (config.hasAttribute("local-cache-size")) {
+			if (this.standAlone && config.hasAttribute("local-cache-size")) {
 				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 				HashBlobArchive.setLocalCacheSize(sz);
 			}
 			if (config.hasAttribute("metadata-version")) {
 				this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
 			}
-			if (config.hasAttribute("map-cache-size")) {
+			if (this.standAlone && config.hasAttribute("map-cache-size")) {
 				int sz = Integer.parseInt(config.getAttribute("map-cache-size"));
 				HashBlobArchive.MAP_CACHE_SIZE = sz;
 			}
@@ -429,7 +438,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					clientConfig.setProxyUsername(el.getAttribute("proxy-username"));
 				}
 			}
-			s3Service = new OSSClient(s3Target, Main.cloudAccessKey, Main.cloudSecretKey);
+			s3Service = new OSSClient(s3Target, this.accessKey, this.secretKey);
 
 			if (s3Target != null) {
 				s3Target = s3Target.toLowerCase();
@@ -503,7 +512,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					if (this.simpleMD)
 						this.updateObject(binm, md);
 				} else {
-					if (obj.containsKey("currentsize")) {
+					if (this.standAlone && obj.containsKey("currentsize")) {
 						long cl = Long.parseLong((String) obj.get("currentsize"));
 						if (cl >= 0) {
 							HashBlobArchive.setLength(cl);
@@ -515,7 +524,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 								"The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
 					}
 
-					if (obj.containsKey("currentcompressedsize")) {
+					if (this.standAlone && obj.containsKey("currentcompressedsize")) {
 						long cl = Long.parseLong((String) obj.get("currentcompressedsize"));
 						if (cl >= 0) {
 							HashBlobArchive.setCompressedLength(cl);
@@ -560,9 +569,11 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					}
 				}
 			}
+			if(this.standAlone) {
 			HashBlobArchive.init(this);
 			HashBlobArchive.setReadSpeed(rsp, false);
 			HashBlobArchive.setWriteSpeed(wsp, false);
+			}
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
@@ -1089,8 +1100,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
+					if(this.standAlone) {
 					HashBlobArchive.addToLength(_size);
 					HashBlobArchive.addToCompressedLength(_compressedSize);
+					}
 					SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 					kobj.close();
 				}
@@ -1223,6 +1236,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
+					if(this.standAlone) {
 					HashBlobArchive.addToLength(-1 * _size);
 					HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
 					if (HashBlobArchive.getLength() < 0) {
@@ -1230,6 +1244,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					}
 					if (HashBlobArchive.getCompressedLength() < 0) {
 						HashBlobArchive.setCompressedLength(0);
+					}
 					}
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
 					if (ol.getObjectSummaries().size() == 0) {
@@ -1488,11 +1503,13 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			StringResult st = new StringResult();
 			st.id = _hid;
 			st.st = _ht;
+			if(this.standAlone) {
 			if (mp.containsKey("bsize")) {
 				HashBlobArchive.addToLength(Integer.parseInt(mp.get("bsize")));
 			}
 			if (mp.containsKey("bcompressedsize")) {
 				HashBlobArchive.addToCompressedLength(Integer.parseInt(mp.get("bcompressedsize")));
+			}
 			}
 			if (changed) {
 				try {
@@ -2051,11 +2068,13 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			if (md.containsKey("deleted-objects")) {
 				md.remove("deleted-objects");
 			}
+			if(this.standAlone) {
 			if (md.containsKey("bsize")) {
 				HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
 			}
 			if (md.containsKey("bcompressedsize")) {
 				HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
+			}
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -2335,8 +2354,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	@Override
 	public void clearCounters() {
+		if(this.standAlone) {
 		HashBlobArchive.setLength(0);
 		HashBlobArchive.setCompressedLength(0);
+		}
 	}
 
 	private static class DeleteObject implements Runnable {
@@ -2420,6 +2441,35 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	public void setDseSize(long sz) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setCredentials(String accessKey, String secretKey) {
+		this.accessKey = accessKey;
+		this.secretKey = secretKey;
+		
+	}
+	
+	@Override
+	public boolean isStandAlone() {
+		return this.standAlone;
+	}
+
+	@Override
+	public void setStandAlone(boolean standAlone) {
+		this.standAlone = standAlone;
+		
+	}
+	boolean metaStore = true;
+	@Override
+	public void setMetaStore(boolean metaStore) {
+		this.metaStore = metaStore;
+		
+	}
+
+	@Override
+	public boolean isMetaStore(boolean metaStore) {
+		return this.metaStore;
 	}
 
 }

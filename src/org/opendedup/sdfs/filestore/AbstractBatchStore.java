@@ -47,4 +47,9 @@ public interface AbstractBatchStore {
 	public boolean isClustered();
 	
 	public int getMetaDataVersion();
+	
+	public boolean isStandAlone();
+	public void setStandAlone(boolean standAlone);
+	public void setMetaStore(boolean metaStore);
+	public boolean isMetaStore(boolean metaStore);
 }

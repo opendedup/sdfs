@@ -35,6 +35,7 @@ public class ImportFileCmd implements Runnable {
 	int port;
 	int maxSz= 0;
 	boolean useSSL = false;
+	boolean hmac = false;
 	SDFSEvent evt;
 
 	public Element getResult(String srcFile, String destFile, String serverURL, int maxSz)
@@ -50,8 +51,10 @@ public class ImportFileCmd implements Runnable {
 		@SuppressWarnings("deprecation")
 		List<NameValuePair> params = URLEncodedUtils.parse(new URI(serverURL), "UTF-8");
 		for (NameValuePair param : params) {
-			  if(param.getName().equalsIgnoreCase("hmac"))
+			  if(param.getName().equalsIgnoreCase("hmac")) {
 				  this.password = param.getValue();
+				  this.hmac = true;
+			  }
 		}
 		
 		return importArchive();

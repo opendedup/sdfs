@@ -1,6 +1,6 @@
 #!/bin/bash
 #modprobe fuse > /dev/null
-BASEMEMORY="2000"
+BASEMEMORY="4000"
 CACHEMEMORY=512
 CFG=""
 MPTG=3

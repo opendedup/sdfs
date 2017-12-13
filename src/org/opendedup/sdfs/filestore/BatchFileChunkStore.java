@@ -672,4 +672,30 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public boolean isStandAlone() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setStandAlone(boolean standAlone) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setMetaStore(boolean metaStore) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isMetaStore(boolean metaStore) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	
 }

@@ -132,7 +132,7 @@ import com.amazonaws.services.s3.transfer.Upload;
  */
 @SuppressWarnings("deprecation")
 public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
-	private static BasicAWSCredentials awsCredentials = null;
+	private BasicAWSCredentials awsCredentials = null;
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
@@ -156,11 +156,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private final static String mdExt = ".6442";
 	private String dExt = "";
 	private boolean tcpKeepAlive = true;
+	private String accessKey = Main.cloudAccessKey;
+	private String secretKey = Main.cloudSecretKey;
+	private boolean standAlone = true;
+
 
 	static {
 		try {
-			if (!Main.useAim)
-				awsCredentials = new BasicAWSCredentials(Main.cloudAccessKey, Main.cloudSecretKey);
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to authenticate to AWS", e);
 			System.out.println("unable to authenticate");
@@ -226,6 +229,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		this.closed = true;
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
+			if(this.standAlone)
 			HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
@@ -373,6 +377,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		this.name = Main.cloudBucket.toLowerCase();
 		this.staged_sync_location.mkdirs();
 		try {
+			if (!Main.useAim)
+				awsCredentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
 			if (config.hasAttribute("default-bucket-location")) {
 				bucketLocation = RegionUtils.getRegion(config.getAttribute("default-bucket-location"));
 
@@ -380,6 +386,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.hasAttribute("connection-check-interval")) {
 				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 			}
+			if(this.standAlone) {
 			if (config.hasAttribute("block-size")) {
 				int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 				HashBlobArchive.MAX_LEN = sz;
@@ -413,6 +420,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					new FileReplicationService(this);
 				}
 			}
+			}
 			if (config.hasAttribute("simple-metadata")) {
 				this.simpleMD = Boolean.parseBoolean(config.getAttribute("simple-metadata"));
 			}
@@ -424,7 +432,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.hasAttribute("write-speed")) {
 				wsp = Integer.parseInt(config.getAttribute("write-speed"));
 			}
-			if (config.hasAttribute("local-cache-size")) {
+			if (this.standAlone && config.hasAttribute("local-cache-size")) {
 				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 				HashBlobArchive.setLocalCacheSize(sz);
 			}
@@ -437,7 +445,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if(config.hasAttribute("data-appendix")) {
 				this.dExt = config.getAttribute("data-appendix");
 			}
-			if (config.hasAttribute("map-cache-size")) {
+			if (this.standAlone && config.hasAttribute("map-cache-size")) {
 				int sz = Integer.parseInt(config.getAttribute("map-cache-size"));
 				HashBlobArchive.MAP_CACHE_SIZE = sz;
 			}
@@ -640,7 +648,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (this.simpleMD)
 						this.updateObject(binm, md);
 				} else {
-					if (obj.containsKey("currentsize")) {
+					if (this.standAlone && obj.containsKey("currentsize")) {
 						long cl = Long.parseLong((String) obj.get("currentsize"));
 						if (cl >= 0) {
 							HashBlobArchive.setLength(cl);
@@ -652,7 +660,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 								"The S3 objectstore DSE did not close correctly. Metadata tag currentsize was not added");
 					}
 
-					if (obj.containsKey("currentcompressedsize")) {
+					if (this.standAlone && obj.containsKey("currentcompressedsize")) {
 						long cl = Long.parseLong((String) obj.get("currentcompressedsize"));
 						if (cl >= 0) {
 							HashBlobArchive.setCompressedLength(cl);
@@ -724,9 +732,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} else if (s3Target == null) {
 				s3Service.deleteBucketLifecycleConfiguration(this.name);
 			}
+			if(this.standAlone) {
 			HashBlobArchive.init(this);
 			HashBlobArchive.setReadSpeed(rsp, false);
 			HashBlobArchive.setWriteSpeed(wsp, false);
+			}
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
@@ -865,6 +875,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	protected void resetLength() {
+		if(this.standAlone) {
 		try {
 			ObjectMetadata omd = null;
 		if (this.simpleMD) {
@@ -901,7 +912,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		HashBlobArchive.setLength(0);
 		HashBlobArchive.setCompressedLength(0);
-		
+		}
 	}
 
 	@Override
@@ -1270,8 +1281,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
+					if(this.standAlone) {
 					HashBlobArchive.addToLength(_size);
 					HashBlobArchive.addToCompressedLength(_compressedSize);
+					}
 					SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 					kobj.close();
 				}
@@ -1415,6 +1428,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
+					if(this.standAlone) {
 					HashBlobArchive.addToLength(-1 * _size);
 					HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
 					if (HashBlobArchive.getLength() < 0) {
@@ -1422,6 +1436,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					if (HashBlobArchive.getCompressedLength() < 0) {
 						HashBlobArchive.setCompressedLength(0);
+					}
 					}
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
 					if (ol.getObjectSummaries().size() == 0) {
@@ -1680,11 +1695,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			StringResult st = new StringResult();
 			st.id = _hid;
 			st.st = _ht;
+			if(this.standAlone) {
 			if (mp.containsKey("bsize")) {
 				HashBlobArchive.addToLength(Integer.parseInt(mp.get("bsize")));
 			}
 			if (mp.containsKey("bcompressedsize")) {
 				HashBlobArchive.addToCompressedLength(Integer.parseInt(mp.get("bcompressedsize")));
+			}
 			}
 			if (changed) {
 				try {
@@ -2494,11 +2511,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (md.containsKey("deleted-objects")) {
 				md.remove("deleted-objects");
 			}
+			if(this.standAlone) {
 			if (md.containsKey("bsize")) {
 				HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
 			}
 			if (md.containsKey("bcompressedsize")) {
 				HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
+			}
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -2887,6 +2906,35 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void setDseSize(long sz) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setCredentials(String accessKey, String secretKey) {
+		this.accessKey = accessKey;
+		this.secretKey = secretKey;
+		
+	}
+	
+	@Override
+	public boolean isStandAlone() {
+		return this.standAlone;
+	}
+
+	@Override
+	public void setStandAlone(boolean standAlone) {
+		this.standAlone = standAlone;
+		
+	}
+	boolean metaStore = true;
+	@Override
+	public void setMetaStore(boolean metaStore) {
+		this.metaStore = metaStore;
+		
+	}
+
+	@Override
+	public boolean isMetaStore(boolean metaStore) {
+		return this.metaStore;
 	}
 
 }
