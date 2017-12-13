@@ -115,7 +115,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.5.8.4";
+	public static String version = "3.5.8.5";
 
 	public static boolean readAhead = false;
 	
@@ -148,8 +148,7 @@ public class Main {
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
-	public static String chunkStoreEncryptionKey = "Password";
-	public static String eChunkStoreEncryptionKey = "Password";
+	public static String chunkStoreEncryptionKey = "nw";
 	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
 	/**
 	 * whether encryption should be enabled for the DSE
@@ -409,4 +408,5 @@ public class Main {
 	public static boolean rebuildHashTable = false;
 	
 	public static boolean enableLookupFilter = false;
+	public static String secondaryKey = "Password";
 }
