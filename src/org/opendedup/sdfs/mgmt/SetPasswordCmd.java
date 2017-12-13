@@ -22,7 +22,6 @@ public class SetPasswordCmd implements XtendedCmd {
 		String oldSalt = Main.sdfsPasswordSalt;
 		String oldPassword = Main.sdfsPassword;
 		String oeCloudSecretKey = Main.eCloudSecretKey;
-		String oeChunkStoreEncryptionKey = Main.eChunkStoreEncryptionKey;
 		try {
 			
 			String salt = HashFunctions.getRandomString(6);
@@ -32,10 +31,7 @@ public class SetPasswordCmd implements XtendedCmd {
 			Main.sdfsPassword = password;
 			Main.sdfsPasswordSalt = salt;
 			
-			if(Main.eChunkStoreEncryptionKey != null) {
-				byte [] ec = EncryptUtils.encryptCBC(Main.chunkStoreEncryptionKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
-				Main.eChunkStoreEncryptionKey = BaseEncoding.base64Url().encode(ec);
-			} if(Main.eCloudSecretKey != null) {
+			 if(Main.eCloudSecretKey != null) {
 				byte [] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
 				Main.eCloudSecretKey = BaseEncoding.base64Url().encode(ec);
 			}
@@ -46,7 +42,6 @@ public class SetPasswordCmd implements XtendedCmd {
 					"password could not be changed" + e.toString(), e);
 			Main.sdfsPassword = oldPassword;
 			Main.sdfsPasswordSalt = oldSalt;
-			Main.eChunkStoreEncryptionKey = oeChunkStoreEncryptionKey;
 			Main.eCloudSecretKey = oeCloudSecretKey;
 			throw new IOException("password could not be changed");
 		}
