@@ -2351,7 +2351,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean blockRestored(String id) {
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ this.dExt);
-			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
+			ObjectMetadata momd = omd;
+			if (this.simpleMD)
+				momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
 			if(omd == null || momd == null)
 				return false;
 			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") ) {

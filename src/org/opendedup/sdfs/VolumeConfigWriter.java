@@ -5,6 +5,7 @@ import java.io.File;
 
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -287,7 +288,7 @@ public class VolumeConfigWriter {
 			this.hash_db_class = "org.opendedup.collections.RocksDBMap";
 			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
-		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008 ||  org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2012) {
+		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008) {
 			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 		}
 		if (cmd.hasOption("aws-aim"))
