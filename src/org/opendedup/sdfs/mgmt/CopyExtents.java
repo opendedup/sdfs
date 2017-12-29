@@ -104,6 +104,7 @@ public class CopyExtents {
 					while (!insdone) {
 						try {
 							SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
+							/*
 							if(sdc.getFingers().size() == 0) {
 								int _nlen = 4 *1024;
 								if(_nlen > _rem) {
@@ -117,6 +118,7 @@ public class CopyExtents {
 								if(written >= len)
 									insdone = true;
 							} else {
+							*/
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
 
 							HashLocPair p = sdc.getWL(_so);
@@ -142,14 +144,13 @@ public class CopyExtents {
 								} else
 									throw e;
 							}
-							
 							ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
 							ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
 							ddf.mf.setLastModified(System.currentTimeMillis());
 							written += p.nlen;
 							insdone = true;
 							
-							}
+							//}
 						} catch (org.opendedup.sdfs.io.FileClosedException e) {
 							insdone = false;
 						} catch (Exception e) {
