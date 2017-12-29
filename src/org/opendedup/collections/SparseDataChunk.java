@@ -122,7 +122,7 @@ public class SparseDataChunk implements Externalizable {
 				buf.get(b);
 				HashLocPair p = new HashLocPair(b);
 				ar.put(p.pos, p);
-				int ep = p.pos + p.len;
+				int ep = p.pos + p.nlen;
 				if (ep > len)
 					len = ep;
 			}
