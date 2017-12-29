@@ -1339,8 +1339,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throw new IOException(e);
 		}
 	}
-
-	private Map<String, String> getUserMetaData(String name) throws IOException {
+	@Override
+	public Map<String, String> getUserMetaData(String name) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		if (this.simpleMD) {
 			if (s3Service.doesObjectExist(this.name, name + mdExt)) {
@@ -2763,6 +2763,61 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (AmazonS3Exception e) {
 				CopyObjectRequest req = new CopyObjectRequest(name, km+ this.dExt, name, km+ this.dExt);
 				s3Service.copyObject(req);
+			}
+		}
+	}
+	
+	@Override
+	public Map<String,String> getBucketInfo() {
+		try {
+			if (this.simpleMD) {
+				return this.getUserMetaData(binm);
+				
+			} else {
+				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
+				Map<String, String> md = omd.getUserMetadata();
+				return md;
+			}
+		} catch (Exception e) {
+			
+				SDFSLogger.getLog().warn("unable to update metadata for " + binm, e);
+				return null;
+		}
+	}
+	
+	@Override
+	public void updateBucketInfo(Map<String,String> md) {
+		try {
+			if (this.simpleMD) {
+				
+				ObjectMetadata omd = new ObjectMetadata();
+				omd.setUserMetadata(md);
+				this.updateObject(binm, omd);
+			} else {
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
+				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+			}
+		} catch (Exception e) {
+			try {
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
+
+				this.updateObject(binm, nmd);
+			} catch (Exception e1) {
+				SDFSLogger.getLog().error("unable to update metadata for " + binm, e);
 			}
 		}
 	}

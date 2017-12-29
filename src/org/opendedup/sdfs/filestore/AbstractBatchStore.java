@@ -21,6 +21,7 @@ public interface AbstractBatchStore {
 
 	public void checkoutObject(long id, int claims) throws IOException;
 	
+	public Map<String, String> getUserMetaData(String name) throws IOException;
 	
 
 	public void getBytes(long id,File f) throws IOException, DataArchivedException;
@@ -52,4 +53,8 @@ public interface AbstractBatchStore {
 	public void setStandAlone(boolean standAlone);
 	public void setMetaStore(boolean metaStore);
 	public boolean isMetaStore(boolean metaStore);
+
+	Map<String, String> getBucketInfo();
+
+	void updateBucketInfo(Map<String, String> md) throws IOException;
 }

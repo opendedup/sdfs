@@ -697,5 +697,23 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		return true;
 	}
 
+	@Override
+	public Map<String, String> getUserMetaData(String name) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getBucketInfo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateBucketInfo(Map<String, String> md) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }

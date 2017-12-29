@@ -1157,8 +1157,64 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			throw new IOException(e);
 		}
 	}
+	
+	@Override
+	public Map<String,String> getBucketInfo() {
+		try {
+			if (this.simpleMD) {
+				return this.getUserMetaData(binm);
+				
+			} else {
+				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
+				Map<String, String> md = omd.getUserMetadata();
+				return md;
+			}
+		} catch (Exception e) {
+			
+				SDFSLogger.getLog().warn("unable to update metadata for " + binm, e);
+				return null;
+		}
+	}
+	
+	@Override
+	public void updateBucketInfo(Map<String,String> md) {
+		try {
+			if (this.simpleMD) {
+				
+				ObjectMetadata omd = new ObjectMetadata();
+				omd.setUserMetadata(md);
+				this.updateObject(binm, omd);
+			} else {
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
+				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+			}
+		} catch (Exception e) {
+			try {
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
 
-	private Map<String, String> getUserMetaData(String name) throws IOException {
+				this.updateObject(binm, nmd);
+			} catch (Exception e1) {
+				SDFSLogger.getLog().error("unable to update metadata for " + binm, e);
+			}
+		}
+	}
+	
+	@Override
+	public Map<String, String> getUserMetaData(String name) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		if (this.simpleMD) {
 			if (s3Service.doesObjectExist(this.name, name + mdExt)) {

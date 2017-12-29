@@ -2,7 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,22 +44,6 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.jclouds.Constants;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.blobstore.domain.BlobMetadata;
-import org.jclouds.blobstore.domain.PageSet;
-import org.jclouds.blobstore.domain.StorageMetadata;
-import org.jclouds.blobstore.options.CopyOptions;
-import org.jclouds.blobstore.options.ListContainerOptions;
-import org.jclouds.domain.Credentials;
-import org.jclouds.domain.Location;
-import org.jclouds.filesystem.reference.FilesystemConstants;
-import org.jclouds.googlecloud.GoogleCredentialsFromJson;
-import org.jclouds.io.ContentMetadata;
-import org.jclouds.io.payloads.FilePayload;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.logging.SDFSLogger;
@@ -80,6 +63,7 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
 import com.google.common.base.Supplier;
 import com.google.common.hash.HashCode;
@@ -88,8 +72,6 @@ import com.google.common.io.BaseEncoding;
 
 public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync{
 
-	BlobStoreContext context = null;
-	BlobStore blobStore = null;
 	String bucketLocation = null;
 	private String name;
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
@@ -104,8 +86,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	private boolean b2Store = false;
 	private boolean atmosStore = false;
 	private final static String mdExt = ".6442";
-	private ArrayList<AbstractBatchStore> pools;
-	
+	private ArrayList<AbstractBatchStore> datapools;
+	private ArrayList<AbstractBatchStore> metapools;
+	private ArrayList<AbstractChunkStore> stores;
+	private static enum RAID {MIRROR,EC,STRIPE};
+	private RAID rl = RAID.MIRROR;
+	private int ecn = 0;
 
 	// private String bucketLocation = null;
 	static {
@@ -142,21 +128,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
 
-			Map<String, String> md = this.getMetaData(
-					"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
-			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
-			md.put("hostname", InetAddress.getLocalHost().getHostName());
-			if (Main.volume != null) {
-				md.put("port", Integer.toString(Main.sdfsCliPort));
+			for(AbstractChunkStore store : this.stores) {
+				store.close();
 			}
-			md.put("bucketversion", Integer.toString(version));
-			md.put("sdfsversion", Main.version);
-			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
-			this.updateObject(
-					"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), md);
-
-			this.context.close();
 			SDFSLogger.getLog().info("Updated container on close");
 			SDFSLogger.getLog().info("############ Container Closed ##################");
 		} catch (Exception e) {
@@ -199,61 +173,6 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			throw new IOException(e);
 		}
 
-	}
-
-	private Map<String, String> getMetaData(String obj) throws IOException {
-		if (this.accessStore || this.atmosStore || b2Store) {
-			if (blobStore.blobExists(this.name, obj + mdExt)) {
-				if (this.b2Store) {
-					BlobStore st = null;
-					try {
-						st = bPool.borrowObject();
-
-						Blob blob = st.getBlob(this.name, obj + mdExt);
-						ObjectInputStream in = new ObjectInputStream(blob.getPayload().openStream());
-						@SuppressWarnings("unchecked")
-						Map<String, String> md = (Map<String, String>) in.readObject();
-						blob.getPayload().release();
-						IOUtils.closeQuietly(blob.getPayload());
-						return md;
-					} catch (Exception e) {
-						// SDFSLogger.getLog().error("unable to borrow
-						// object",e);
-						throw new IOException(e);
-					} finally {
-						if (st != null)
-							bPool.returnObject(st);
-					}
-				} else {
-					Blob blob = blobStore.getBlob(this.name, obj + mdExt);
-
-					ObjectInputStream in = new ObjectInputStream(blob.getPayload().openStream());
-					try {
-						@SuppressWarnings("unchecked")
-						Map<String, String> md = (Map<String, String>) in.readObject();
-						blob.getPayload().release();
-						IOUtils.closeQuietly(blob.getPayload());
-						return md;
-					} catch (ClassNotFoundException e) {
-						throw new IOException(e);
-					}
-				}
-			} else {
-				return new HashMap<String, String>();
-			}
-		} else {
-			BlobMetadata omd = blobStore.blobMetadata(this.name, obj);
-
-			Map<String, String> md = new HashMap<String, String>();
-			if (omd != null) {
-				Map<String, String> zk = omd.getUserMetadata();
-				for (String key : zk.keySet()) {
-					md.put(key.toLowerCase(), zk.get(key));
-				}
-			}
-			return md;
-
-		}
 	}
 
 	@Override
@@ -309,15 +228,6 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		 */
 	}
 
-	public void deleteBucket() throws IOException {
-		try {
-			blobStore.deleteContainer(this.name);
-		} finally {
-			// pool.returnObject(container);
-		}
-		this.close();
-	}
-
 	/*
 	 * @SuppressWarnings("deprecation") private void resetCurrentSize() throws
 	 * IOException { PageSet<? extends StorageMetadata> bul = null; if
@@ -339,11 +249,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	@Override
 	public void init(Element config) throws IOException {
 		SDFSLogger.getLog().info("Accessing CloudRaid Buckets for bucket " + Main.cloudBucket.toLowerCase());
+		try {
 		this.name = Main.cloudBucket.toLowerCase();
 		this.staged_sync_location.mkdirs();
-		if (config.hasAttribute("default-bucket-location")) {
-			bucketLocation = config.getAttribute("default-bucket-location");
-		}
+		
 		if (config.hasAttribute("block-size")) {
 			int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 			HashBlobArchive.MAX_LEN = sz;
@@ -388,98 +297,55 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		if (config.hasAttribute("write-speed")) {
 			wsp = Integer.parseInt(config.getAttribute("write-speed"));
 		}
-		Properties overrides = new Properties();
-		if (config.getElementsByTagName("connection-props").getLength() > 0) {
-			Element el = (Element) config.getElementsByTagName("connection-props").item(0);
-			NamedNodeMap ls = el.getAttributes();
-			for (int i = 0; i < ls.getLength(); i++) {
-				overrides.put(ls.item(i).getNodeName(), ls.item(i).getNodeValue());
-				SDFSLogger.getLog()
-						.debug("set connection value" + ls.item(i).getNodeName() + " to " + ls.item(i).getNodeValue());
+		if(config.hasAttribute("raid-level")) {
+			int rl = Integer.parseInt(config.getAttribute("raid-level"));
+		}
+		NodeList pls = config.getElementsByTagName("pool");
+		if(pls.getLength() == 0) {
+			System.err.println("No Subpools found. Exiting");
+			System.exit(254);
+		}
+		else {
+			for(int i = 0; i < pls.getLength();i++) {
+				Element el = (Element)pls.item(i);
+				String chunkClass = el.getAttribute("chunkstore-class");
+				
+				AbstractChunkStore cl  =(AbstractChunkStore) Class
+				.forName(chunkClass).newInstance();
+				cl.init(el);
+				this.stores.add(cl);
+				AbstractBatchStore bs = (AbstractBatchStore)cl;
+				if(el.hasAttribute("metadata-store")) {
+					boolean b = Boolean.parseBoolean(el.getAttribute("metadata-store"));
+					if(b) {
+						this.metapools.add(bs);
+					}
+				}
+				if(el.hasAttribute("data-store")) {
+					boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
+					if(b) {
+						if(rl.equals(RAID.EC) || rl.equals(RAID.STRIPE)) {
+							int pos = Integer.parseInt(el.getAttribute("raid-position"));
+							this.datapools.add(pos, bs);
+						}
+					}
+				}
 			}
 		}
-		try {
-			String service = config.getAttribute("service-type");
-			if (service.equalsIgnoreCase("azureblob"))
-				this.azureStore = true;
-			if (service.equalsIgnoreCase("atmos")) {
-				EncyptUtils.baseEncode = true;
-				this.atmosStore = true;
+			Map<String, String> md = null;
+			long lastUpdated = 0;
+			for(AbstractBatchStore st : this.metapools) {
+				Map<String,String> _md = st.getBucketInfo();
+				if(_md != null) {
+				long tm = Long.parseLong(_md.get("lastupdated"));
+				if(tm > lastUpdated) {
+					lastUpdated = tm;
+					md = _md;
+				}
+				}
 			}
-			if (service.equalsIgnoreCase("b2")) {
-				EncyptUtils.baseEncode = true;
-				this.b2Store = true;
-			}
-			String userAgent = "SDFS/" + Main.version;
-			if (config.hasAttribute("user-agent-prefix"))
-				userAgent = config.getAttribute("user-agent-prefix") + " " + userAgent;
-			if (service.equalsIgnoreCase("b2"))
-				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "60000");
-			else
-				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
-			
-			overrides.setProperty(Constants.PROPERTY_USER_THREADS, "0");
-			overrides.setProperty(Constants.PROPERTY_USER_AGENT, userAgent);
-			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_CONTEXT,
-					Integer.toString(Main.dseIOThreads * 2));
-			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_HOST, 0 + "");
-			// Keep retrying indefinitely
-			overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
-			// Do not wait between retries
-			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
-			Location region = null;
-			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
-				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
-				String creds = org.apache.commons.io.IOUtils.toString(is, "UTF-8");
-				org.apache.commons.io.IOUtils.closeQuietly(is);
-				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
-				context = ContextBuilder.newBuilder(service).overrides(overrides)
-						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
-
-			} else if (service.equals("google-cloud-storage")) {
-				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
-				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
-				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
-				context = ContextBuilder.newBuilder("s3").overrides(overrides)
-						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
-			} else if (service.equals("filesystem")) {
-				EncyptUtils.baseEncode = true;
-				SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
-				overrides.setProperty(FilesystemConstants.PROPERTY_BASEDIR, config.getAttribute("share-path"));
-				context = ContextBuilder.newBuilder("filesystem").overrides(overrides)
-						.buildView(BlobStoreContext.class);
-				this.accessStore = true;
-			} else {
-				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
-				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
-						.overrides(overrides).buildView(BlobStoreContext.class);
-			}
-			blobStore = context.getBlobStore();
-			if (this.b2Store) {
-				GenericObjectPoolConfig bconfig = new GenericObjectPoolConfig();
-				bconfig.setMaxIdle(1);
-				bconfig.setMaxTotal(Main.dseIOThreads * 2);
-				bconfig.setTestOnBorrow(false);
-				bconfig.setTestOnReturn(false);
-				GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
-				cfg.setMinIdle(Main.dseIOThreads);
-				this.bPool = new GenericObjectPool<BlobStore>(
-						new B2ConnectionFactory(this.accessKey, this.secretKey, overrides));
-			}
-
-			if (!blobStore.containerExists(this.name))
-				blobStore.createContainerInLocation(region, this.name);
-			/*
-			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs( 10 * 1000);
-			 * 
-			 * serviceClient.getDefaultRequestOptions().setRetryPolicyFactory( new
-			 * RetryExponentialRetry(500, 5));
-			 */
-
-			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			Map<String, String> md = new HashMap<String, String>();
-			if (blobStore.blobExists(this.name, lbi)) {
-				md = this.getMetaData(lbi);
+			if (md ==null) {
+				md = new HashMap<String,String>();
 			}
 			if (md.size() == 0)
 				this.clustered = true;
@@ -511,32 +377,24 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				md.put("bucketversion", Integer.toString(version));
 				md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 				md.put("sdfsversion", Main.version);
-
-				if (this.accessStore || this.atmosStore || b2Store)
-					this.updateObject("bucketinfo/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), md);
-				Blob b = blobStore
-						.blobBuilder("bucketinfo/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).build();
-				this.writeBlob(b, false);
-			} else {
-				Blob b = blobStore
-						.blobBuilder("bucketinfo/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
-				if (this.accessStore || this.atmosStore || b2Store) {
-					b = blobStore
-							.blobBuilder("bucketinfo/"
-									+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-							.payload(Long.toString(System.currentTimeMillis())).build();
-					this.updateObject("bucketinfo/"
-							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), md);
+				for(AbstractBatchStore st : this.metapools) {
+					st.updateBucketInfo(md);
 				}
-				this.writeBlob(b, false);
+				
+			} else {
+				md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+				md.put("sdfsversion", Main.version);
+				for(AbstractBatchStore st : this.metapools) {
+					st.updateBucketInfo(md);
+				}
 			}
 			HashBlobArchive.setLength(sz);
 			HashBlobArchive.setCompressedLength(cl);
+			Thread thread = new Thread(this);
+			thread.start();
+			HashBlobArchive.init(this);
+			HashBlobArchive.setReadSpeed(rsp, false);
+			HashBlobArchive.setWriteSpeed(wsp, false);
 			// this.resetCurrentSize();
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -544,63 +402,17 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			// if (pool != null)
 			// pool.returnObject(container);
 		}
-		Thread thread = new Thread(this);
-		thread.start();
-		HashBlobArchive.init(this);
-		HashBlobArchive.setReadSpeed(rsp, false);
-		HashBlobArchive.setWriteSpeed(wsp, false);
+		
 	}
-
-	Iterator<? extends StorageMetadata> iter = null;
-	PageSet<? extends StorageMetadata> ips = null;
-	MultiDownload dl = null;
 
 	@SuppressWarnings("deprecation")
 	@Override
 
 	public void iterationInit(boolean deep) throws IOException {
-		this.hid = 0;
-		this.ht = null;
-
-		if (this.atmosStore)
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("keys/"));
-		else if (this.b2Store)
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/").maxResults(100));
-		else
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("keys/"));
-		// SDFSLogger.getLog().info("llsz=" + ips.size());
-		try {
-			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			// BlobMetadata dmd = blobStore.blobMetadata(this.name,
-			// lbi);
-			Map<String, String> md = this.getMetaData(lbi);
-			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
-			md.put("clustered", Boolean.toString(this.clustered));
-			md.put("hostname", InetAddress.getLocalHost().getHostName());
-			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
-			md.put("bucketversion", Integer.toString(version));
-			md.put("sdfsversion", Main.version);
-			if (Main.volume != null) {
-				md.put("port", Integer.toString(Main.sdfsCliPort));
-			}
-
-			Blob b = blobStore
-					.blobBuilder(
-							"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
-									+ "-" + System.currentTimeMillis())
-					.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
-			this.writeBlob(b, false);
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to backu config", e);
+		for(AbstractBatchStore b : this.datapools) {
+			AbstractChunkStore st = (AbstractChunkStore) b;
+			st.iterationInit(deep);
 		}
-		iter = ips.iterator();
-		HashBlobArchive.setLength(0);
-		HashBlobArchive.setCompressedLength(0);
-		dl = new MultiDownload(this, "keys/");
-		dl.iterationInit(false, "keys/");
-		this.ht = null;
-		this.hid = 0;
 
 	}
 
@@ -2123,8 +1935,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public void setCredentials(String accessKey, String secretKey) {
-		this.accessKey =accessKey;
-		this.secretKey = secretKey;
+		
 		
 	}
 
@@ -2136,6 +1947,36 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public void setStandAlone(boolean standAlone) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setMetaStore(boolean metaStore) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isMetaStore(boolean metaStore) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Map<String, String> getUserMetaData(String name) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getBucketInfo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateBucketInfo(Map<String, String> md) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}

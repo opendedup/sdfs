@@ -422,6 +422,49 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	MultiDownload dl = null;
 
 	@Override
+	public HashMap<String,String> getUserMetaData(String object) throws IOException {
+		try {
+			CloudBlockBlob blob = container.getBlockBlobReference(object);
+			blob.downloadAttributes();
+			return blob.getMetadata();
+		} catch(Exception e) {
+			SDFSLogger.getLog().info("unable to download attribute",e);
+			throw new IOException(e);
+		}
+	}
+	
+	@Override
+	public void updateBucketInfo(Map<String,String> md) throws IOException {
+		try {
+		String lbi = "bucketinfo/"
+				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+		CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+		blob.downloadAttributes();
+		blob.setMetadata((HashMap<String,String>)md);
+		blob.uploadText(Long.toString(System.currentTimeMillis()));
+		blob.uploadMetadata(null, null, opContext);
+		}catch(Exception e) {
+			throw new IOException(e);
+		}
+	}
+	
+	@Override
+	public Map<String,String> getBucketInfo() {
+		
+		try {
+			String lbi = "bucketinfo/"
+					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+			blob.downloadAttributes();
+			HashMap<String, String> md = blob.getMetadata();
+			return md;
+		}catch(Exception e ) {
+			SDFSLogger.getLog().warn("unable to update metadata for bucket" + Main.DSEID, e);
+			return null;
+		}
+	}
+	
+	@Override
 	public void iterationInit(boolean deep) throws IOException {
 		this.hid = 0;
 		this.ht = null;
