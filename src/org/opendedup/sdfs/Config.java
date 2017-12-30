@@ -412,6 +412,7 @@ public class Config {
 			if (localChunkStore.hasAttribute("encrypt")) {
 				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(localChunkStore.getAttribute("encrypt"));
 				Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
+				
 			}
 			if (localChunkStore.hasAttribute("encryption-iv"))
 				Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
@@ -493,13 +494,13 @@ public class Config {
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
 						Main.chunkStoreEncryptionIV);
 				Main.cloudSecretKey = new String(dc);
-			}
+			}/*
 			if (Main.chunkStoreEncryptionKey != null) {
-				Main.eChunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
+				Main.chunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
 						password, Main.chunkStoreEncryptionIV);
 				Main.chunkStoreEncryptionKey = new String(dc);
-			}
+			}*/
 		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger.getLog().info("################## Encryption is enabled ##################");

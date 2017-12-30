@@ -25,6 +25,7 @@ public class CloseFile {
 			Document doc = XMLUtils.getXMLDoc("close-file");
 			Element root = doc.getDocumentElement();
 			File f = new File(Main.volume.getPath() + File.separator + file);
+			CopyExtents.writeChannels.invalidate(f.getPath());
 			MetaDataDedupFile mf = MetaFileStore.getMF(f);
 			close(mf, written);
 			return (Element) root.cloneNode(true);

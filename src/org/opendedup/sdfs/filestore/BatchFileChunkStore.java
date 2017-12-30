@@ -672,48 +672,4 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 
 	}
-
-	@Override
-	public boolean isStandAlone() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setStandAlone(boolean standAlone) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setMetaStore(boolean metaStore) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isMetaStore(boolean metaStore) {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public Map<String, String> getUserMetaData(String name) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Map<String, String> getBucketInfo() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateBucketInfo(Map<String, String> md) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
 }

@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -118,9 +119,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private boolean atmosStore = false;
 	private final static String mdExt = ".6442";
 	private GenericObjectPool<BlobStore> bPool;
-	private String accessKey = Main.cloudAccessKey;
-	private String secretKey = Main.cloudSecretKey;
-	private boolean standAlone = true;
 
 	// private String bucketLocation = null;
 	static {
@@ -155,10 +153,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		try {
 			SDFSLogger.getLog().info("############ Closing Container ##################");
 			// container = pool.borrowObject();
-			if (this.standAlone)
-				HashBlobArchive.close();
+			HashBlobArchive.close();
 
-			Map<String, String> md = this.getUserMetaData(
+			Map<String, String> md = this.getMetaData(
 					"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
 			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
@@ -217,42 +214,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	}
 
-	@Override
-	public Map<String, String> getBucketInfo() {
-		try {
-			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			// BlobMetadata dmd = blobStore.blobMetadata(this.name,
-			// lbi);
-			Map<String, String> md = this.getUserMetaData(lbi);
-			return md;
-		} catch (Exception e) {
-			return null;
-
-		}
-	}
-	
-	@Override
-	public void updateBucketInfo(Map<String,String> md) throws IOException {
-		try {
-			String lbi = "bucketinfo/"
-					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			try {
-				this.updateObject(lbi, md);
-			} catch (Exception e) {
-				Blob b = blobStore
-						.blobBuilder("bucketinfo/"
-								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
-				this.writeBlob(b, false);
-			}
-			// this.resetCurrentSize();
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to update size", e);
-		}
-	}
-
-	@Override
-	public Map<String, String> getUserMetaData(String obj) throws IOException {
+	private Map<String, String> getMetaData(String obj) throws IOException {
 		if (this.accessStore || this.atmosStore || b2Store) {
 			if (blobStore.blobExists(this.name, obj + mdExt)) {
 				if (this.b2Store) {
@@ -395,43 +357,41 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if (config.hasAttribute("default-bucket-location")) {
 			bucketLocation = config.getAttribute("default-bucket-location");
 		}
-		if (this.standAlone) {
-			if (config.hasAttribute("block-size")) {
-				int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
-				HashBlobArchive.MAX_LEN = sz;
+		if (config.hasAttribute("block-size")) {
+			int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+			HashBlobArchive.MAX_LEN = sz;
+		}
+		if (config.hasAttribute("sync-files")) {
+			boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
+			if (syncf) {
+				new FileReplicationService(this);
 			}
-			if (config.hasAttribute("sync-files")) {
-				boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
-				if (syncf) {
-					new FileReplicationService(this);
-				}
-			}
-			if (config.hasAttribute("connection-check-interval")) {
-				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
-			}
-			if (config.hasAttribute("delete-unclaimed")) {
-				this.deleteUnclaimed = Boolean.parseBoolean(config.getAttribute("delete-unclaimed"));
-			}
-			if (config.hasAttribute("upload-thread-sleep-time")) {
-				int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
-				HashBlobArchive.THREAD_SLEEP_TIME = tm;
-			}
-			if (config.hasAttribute("local-cache-size")) {
-				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
-				HashBlobArchive.setLocalCacheSize(sz);
-			}
-			if (config.hasAttribute("metadata-version")) {
-				this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
-				SDFSLogger.getLog().info("Set Metadata Version to " + this.mdVersion);
-			}
-			if (config.hasAttribute("map-cache-size")) {
-				int sz = Integer.parseInt(config.getAttribute("map-cache-size"));
-				HashBlobArchive.MAP_CACHE_SIZE = sz;
-			}
-			if (config.hasAttribute("io-threads")) {
-				int sz = Integer.parseInt(config.getAttribute("io-threads"));
-				Main.dseIOThreads = sz;
-			}
+		}
+		if (config.hasAttribute("connection-check-interval")) {
+			this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
+		}
+		if (config.hasAttribute("delete-unclaimed")) {
+			this.deleteUnclaimed = Boolean.parseBoolean(config.getAttribute("delete-unclaimed"));
+		}
+		if (config.hasAttribute("upload-thread-sleep-time")) {
+			int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
+			HashBlobArchive.THREAD_SLEEP_TIME = tm;
+		}
+		if (config.hasAttribute("local-cache-size")) {
+			long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
+			HashBlobArchive.setLocalCacheSize(sz);
+		}
+		if (config.hasAttribute("metadata-version")) {
+			this.mdVersion = Integer.parseInt(config.getAttribute("metadata-version"));
+			SDFSLogger.getLog().info("Set Metadata Version to " + this.mdVersion);
+		}
+		if (config.hasAttribute("map-cache-size")) {
+			int sz = Integer.parseInt(config.getAttribute("map-cache-size"));
+			HashBlobArchive.MAP_CACHE_SIZE = sz;
+		}
+		if (config.hasAttribute("io-threads")) {
+			int sz = Integer.parseInt(config.getAttribute("io-threads"));
+			Main.dseIOThreads = sz;
 		}
 		int rsp = 0;
 		int wsp = 0;
@@ -470,7 +430,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "60000");
 			else
 				overrides.setProperty(Constants.PROPERTY_SO_TIMEOUT, "5000");
-
+			
 			overrides.setProperty(Constants.PROPERTY_USER_THREADS, "0");
 			overrides.setProperty(Constants.PROPERTY_USER_AGENT, userAgent);
 			overrides.setProperty(Constants.PROPERTY_MAX_CONNECTIONS_PER_CONTEXT,
@@ -494,7 +454,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
-						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
+						.credentials(Main.cloudAccessKey, Main.cloudSecretKey).buildView(BlobStoreContext.class);
 			} else if (service.equals("filesystem")) {
 				EncyptUtils.baseEncode = true;
 				SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
@@ -503,8 +463,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						.buildView(BlobStoreContext.class);
 				this.accessStore = true;
 			} else {
-				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
-				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
+				SDFSLogger.getLog().debug("ca=" + Main.cloudAccessKey + " cs=" + Main.cloudSecretKey);
+				context = ContextBuilder.newBuilder(service).credentials(Main.cloudAccessKey, Main.cloudSecretKey)
 						.overrides(overrides).buildView(BlobStoreContext.class);
 			}
 			blobStore = context.getBlobStore();
@@ -517,7 +477,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
 				cfg.setMinIdle(Main.dseIOThreads);
 				this.bPool = new GenericObjectPool<BlobStore>(
-						new B2ConnectionFactory(this.accessKey, this.secretKey, overrides));
+						new B2ConnectionFactory(Main.cloudAccessKey, Main.cloudSecretKey, overrides));
 			}
 
 			if (!blobStore.containerExists(this.name))
@@ -532,7 +492,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			Map<String, String> md = new HashMap<String, String>();
 			if (blobStore.blobExists(this.name, lbi)) {
-				md = this.getUserMetaData(lbi);
+				md = this.getMetaData(lbi);
 			}
 			if (md.size() == 0)
 				this.clustered = true;
@@ -588,10 +548,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				}
 				this.writeBlob(b, false);
 			}
-			if (this.standAlone) {
-				HashBlobArchive.setLength(sz);
-				HashBlobArchive.setCompressedLength(cl);
-			}
+			HashBlobArchive.setLength(sz);
+			HashBlobArchive.setCompressedLength(cl);
 			// this.resetCurrentSize();
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -601,11 +559,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		}
 		Thread thread = new Thread(this);
 		thread.start();
-		if (this.standAlone) {
-			HashBlobArchive.init(this);
-			HashBlobArchive.setReadSpeed(rsp, false);
-			HashBlobArchive.setWriteSpeed(wsp, false);
-		}
+		HashBlobArchive.init(this);
+		HashBlobArchive.setReadSpeed(rsp, false);
+		HashBlobArchive.setWriteSpeed(wsp, false);
 	}
 
 	Iterator<? extends StorageMetadata> iter = null;
@@ -630,7 +586,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			// BlobMetadata dmd = blobStore.blobMetadata(this.name,
 			// lbi);
-			Map<String, String> md = this.getUserMetaData(lbi);
+			Map<String, String> md = this.getMetaData(lbi);
 			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
 			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 			md.put("clustered", Boolean.toString(this.clustered));
@@ -652,10 +608,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			SDFSLogger.getLog().warn("unable to backu config", e);
 		}
 		iter = ips.iterator();
-		if (this.standAlone) {
-			HashBlobArchive.setLength(0);
-			HashBlobArchive.setCompressedLength(0);
-		}
+		HashBlobArchive.setLength(0);
+		HashBlobArchive.setCompressedLength(0);
 		dl = new MultiDownload(this, "keys/");
 		dl.iterationInit(false, "keys/");
 		this.ht = null;
@@ -725,7 +679,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	private String[] getStrings(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		Map<String, String> md = this.getUserMetaData("keys/" + haName);
+		Map<String, String> md = this.getMetaData("keys/" + haName);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		this.readBlob("keys/" + haName, out);
 
@@ -888,10 +842,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				st = bPool.borrowObject();
 				if (mp) {
 					st.putBlob(this.name, blob, multipart());
-				} else {
+				}else {
 					st.putBlob(this.name, blob);
 				}
-
+				
 			} catch (java.lang.IllegalArgumentException e) {
 				SDFSLogger.getLog().error("unable to borrow object", e);
 				if (e.getMessage().startsWith("large files must have at least"))
@@ -964,12 +918,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 			for (int i = 0; i < 10; i++) {
 				try {
-					if (f.exists() && !f.delete()) {
+					if(f.exists()&& !f.delete()) {
 						SDFSLogger.getLog().warn("file already exists! " + f.getPath());
 						File nf = new File(f.getPath() + " " + ".old");
 						Files.move(f.toPath(), nf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					}
-					metaData = this.getUserMetaData("blocks/" + haName);
+					metaData = this.getMetaData("blocks/" + haName);
 					out = new FileOutputStream(f);
 					this.readBlob("blocks/" + haName, out);
 					e = null;
@@ -1005,7 +959,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					// BlobMetadata kmd = blobStore.blobMetadata(this.name,
 					// "keys/" + haName);
 
-					Map<String, String> kmetaData = this.getUserMetaData("keys/" + haName);
+					Map<String, String> kmetaData = this.getMetaData("keys/" + haName);
 					int claims = this.getClaimedObjects("keys/" + haName);
 					int delobj = 0;
 					if (kmetaData.containsKey("deletedobjects")) {
@@ -1050,9 +1004,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 		Map<String, String> metaData = null;
 		if (clustered)
-			metaData = this.getUserMetaData(this.getClaimName(id));
+			metaData = this.getMetaData(this.getClaimName(id));
 		else
-			metaData = this.getUserMetaData("keys/" + haName);
+			metaData = this.getMetaData("keys/" + haName);
 		int claims = this.getClaimedObjects("keys/" + haName);
 		if (claims == 0) {
 			SDFSLogger.getLog().debug("doing Delete " + "keys/" + haName);
@@ -1077,7 +1031,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					} else
 						_ps = bk.list(this.name, ListContainerOptions.Builder.prefix("claims/keys/" + haName));
 					if (_ps.size() == 0 || this.atmosStore) {
-						metaData = this.getUserMetaData("blocks/" + haName);
+						metaData = this.getMetaData("blocks/" + haName);
 						bk.removeBlob(this.name, "keys/" + haName);
 						removeMetaData("keys/" + haName);
 						SDFSLogger.getLog().debug("Deleting " + "keys/" + haName);
@@ -1088,14 +1042,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 						int _size = Integer.parseInt((String) metaData.get("size"));
 						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-						if (this.standAlone) {
-							HashBlobArchive.addToLength(-1 * _size);
-							HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
-							if (HashBlobArchive.getLength() < 0)
-								HashBlobArchive.setLength(0);
-							if (HashBlobArchive.getCompressedLength() < 0) {
-								HashBlobArchive.setCompressedLength(0);
-							}
+						HashBlobArchive.addToLength(-1 * _size);
+						HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
+						if (HashBlobArchive.getLength() < 0)
+							HashBlobArchive.setLength(0);
+						if (HashBlobArchive.getCompressedLength() < 0) {
+							HashBlobArchive.setCompressedLength(0);
 						}
 						SDFSLogger.getLog().debug("Current DSE Size  size=" + HashBlobArchive.getLength()
 								+ " compressed size=" + HashBlobArchive.getLength());
@@ -1126,10 +1078,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public void clearCounters() {
-		if (this.standAlone) {
-			HashBlobArchive.setCompressedLength(0);
-			HashBlobArchive.setLength(0);
-		}
+		HashBlobArchive.setCompressedLength(0);
+		HashBlobArchive.setLength(0);
 	}
 
 	@Override
@@ -1142,7 +1092,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					// BlobMetadata dmd = blobStore.blobMetadata(this.name,
 					// lbi);
-					Map<String, String> md = this.getUserMetaData(lbi);
+					Map<String, String> md = this.getMetaData(lbi);
 					md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
 					md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
 					md.put("clustered", Boolean.toString(this.clustered));
@@ -1189,38 +1139,37 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
 								Main.chunkStoreEncryptionEnabled);
 						try {
-							if (this.standAlone) {
-								HashBlobArchive.removeCache(k.longValue());
-								if (this.deleteUnclaimed) {
-									DeleteObject obj = new DeleteObject(k.longValue(), this);
-									executor.execute(obj);
+
+							HashBlobArchive.removeCache(k.longValue());
+							if (this.deleteUnclaimed) {
+								DeleteObject obj = new DeleteObject(k.longValue(), this);
+								executor.execute(obj);
+							} else {
+								// BlobMetadata dmd =
+								// blobStore.blobMetadata(this.name,
+								// this.getClaimName(k));
+								Map<String, String> metaData = this.getMetaData(this.getClaimName(k));
+								// SDFSLogger.getLog().info("remove requests for
+								// " +
+								// hashString + "=" + odel.get(k));
+								int delobj = 0;
+								if (metaData.containsKey("deletedobjects"))
+									delobj = Integer.parseInt((String) metaData.get("deletedobjects"));
+								// SDFSLogger.getLog().info("remove requests for
+								// " +
+								// hashString + "=" + odel.get(k));
+								delobj = delobj + odel.get(k);
+								// SDFSLogger.getLog().info("deleting " +
+								// hashString);
+								metaData.put("deleted", "true");
+								metaData.put("deletedobjects", Integer.toString(delobj));
+								if (this.atmosStore || this.accessStore || b2Store) {
+									this.updateObject(this.getClaimName(k), metaData);
 								} else {
 									// BlobMetadata dmd =
 									// blobStore.blobMetadata(this.name,
 									// this.getClaimName(k));
-									Map<String, String> metaData = this.getUserMetaData(this.getClaimName(k));
-									// SDFSLogger.getLog().info("remove requests for
-									// " +
-									// hashString + "=" + odel.get(k));
-									int delobj = 0;
-									if (metaData.containsKey("deletedobjects"))
-										delobj = Integer.parseInt((String) metaData.get("deletedobjects"));
-									// SDFSLogger.getLog().info("remove requests for
-									// " +
-									// hashString + "=" + odel.get(k));
-									delobj = delobj + odel.get(k);
-									// SDFSLogger.getLog().info("deleting " +
-									// hashString);
-									metaData.put("deleted", "true");
-									metaData.put("deletedobjects", Integer.toString(delobj));
-									if (this.atmosStore || this.accessStore || b2Store) {
-										this.updateObject(this.getClaimName(k), metaData);
-									} else {
-										// BlobMetadata dmd =
-										// blobStore.blobMetadata(this.name,
-										// this.getClaimName(k));
-										this.updateObject(this.getClaimName(k), metaData);
-									}
+									this.updateObject(this.getClaimName(k), metaData);
 								}
 							}
 
@@ -1461,7 +1410,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 			this.readBlob(fn, os);
 
-			Map<String, String> metaData = this.getUserMetaData(fn);
+			Map<String, String> metaData = this.getMetaData(fn);
 			boolean encrypt = false;
 			boolean lz4compress = false;
 			boolean snappycompress = false;
@@ -1572,7 +1521,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		String tn = EncyptUtils.encString(to, Main.chunkStoreEncryptionEnabled);
 		try {
 			blobStore.copyBlob(this.name, fn, this.name, tn,
-					CopyOptions.builder().userMetadata(this.getUserMetaData(fn)).build());
+					CopyOptions.builder().userMetadata(this.getMetaData(fn)).build());
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -1629,7 +1578,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				// SDFSLogger.getLog().info("name=" + bi.getName());
 				if (!bi.getName().endsWith(mdExt) && !bi.getName().endsWith("/")) {
 
-					Map<String, String> md = this.getUserMetaData(bi.getName());
+					Map<String, String> md = this.getMetaData(bi.getName());
 					boolean encrypt = Boolean.parseBoolean(md.get("encrypt"));
 					String fname = EncyptUtils.decString(bi.getName().substring(pfx.length()), encrypt);
 					return fname;
@@ -1670,7 +1619,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			try {
 				String lbi = "bucketinfo/"
 						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-				Map<String, String> md = this.getUserMetaData(lbi);
+				Map<String, String> md = this.getMetaData(lbi);
 				if (md.containsKey("currentlength")) {
 					Long.parseLong(md.get("currentlength"));
 					return true;
@@ -1845,7 +1794,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		for (int i = 0; i < 10; i++) {
 			try {
 				// BlobMetadata dmd = blobStore.blobMetadata(this.name, key);
-				Map<String, String> md = this.getUserMetaData(key);
+				Map<String, String> md = this.getMetaData(key);
 				// HashCode md5 =
 				// dmd.getContentMetadata().getContentMD5AsHashCode();
 
@@ -1871,7 +1820,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				StringTokenizer _ht = new StringTokenizer(st, ",");
 				boolean changed = false;
 				// dmd = blobStore.blobMetadata(this.name, this.getClaimName(hid));
-				md = this.getUserMetaData(this.getClaimName(_hid));
+				md = this.getMetaData(this.getClaimName(_hid));
 				if (md.containsKey("deleted")) {
 					md.remove("deleted");
 					changed = true;
@@ -1886,10 +1835,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				try {
 					int _sz = Integer.parseInt(md.get("bsize"));
 					int _cl = Integer.parseInt(md.get("bcompressedsize"));
-					if (this.standAlone) {
-						HashBlobArchive.addToLength(_sz);
-						HashBlobArchive.addToCompressedLength(_cl);
-					}
+					HashBlobArchive.addToLength(_sz);
+					HashBlobArchive.addToCompressedLength(_cl);
 				} catch (Exception e1) {
 					SDFSLogger.getLog().warn("unable to update size", e);
 				}
@@ -1925,7 +1872,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					return;
 				else {
 					haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-					Map<String, String> md = this.getUserMetaData("keys/" + haName);
+					Map<String, String> md = this.getMetaData("keys/" + haName);
 					int objs = Integer.parseInt(md.get("objects"));
 					int delobj = objs - claims;
 					md.put("deletedobjects", Integer.toString(delobj));
@@ -2014,7 +1961,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					String st = md.getName().substring("bucketinfo/".length());
 					long mids = EncyptUtils.decHashArchiveName(st, Main.chunkStoreEncryptionEnabled);
 					RemoteVolumeInfo info = new RemoteVolumeInfo();
-					Map<String, String> mdk = this.getUserMetaData(md.getName());
+					Map<String, String> mdk = this.getMetaData(md.getName());
 					info.id = mids;
 					info.hostname = mdk.get("hostname");
 					info.port = Integer.parseInt(mdk.get("port"));
@@ -2063,7 +2010,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if (volumeID == Main.DSEID)
 			throw new IOException("volume can not remove its self");
 		String klbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
-		Map<String, String> md = this.getUserMetaData(klbi);
+		Map<String, String> md = this.getMetaData(klbi);
 		long dur = System.currentTimeMillis() - Long.parseLong(md.get("lastupdated"));
 		if (dur < (60000 * 2)) {
 			throw new IOException("Volume [" + volumeID + "] is currently mounted");
@@ -2185,37 +2132,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public void setDseSize(long sz) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void setCredentials(String accessKey, String secretKey) {
-		this.accessKey = accessKey;
-		this.secretKey = secretKey;
-
-	}
-
-	@Override
-	public boolean isStandAlone() {
-		return this.standAlone;
-	}
-
-	@Override
-	public void setStandAlone(boolean standAlone) {
-		this.standAlone = standAlone;
-
-	}
-
-	boolean metaStore = true;
-
-	@Override
-	public void setMetaStore(boolean metaStore) {
-		this.metaStore = metaStore;
-
-	}
-
-	@Override
-	public boolean isMetaStore(boolean metaStore) {
-		return this.metaStore;
 	}
 
 }

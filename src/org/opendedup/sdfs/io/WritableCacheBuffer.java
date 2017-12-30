@@ -34,8 +34,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.DataArchivedException;
-import org.opendedup.collections.HashtableFullException;
-import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
@@ -50,6 +48,8 @@ import org.opendedup.util.StringUtils;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Longs;
 
 /**
@@ -234,6 +234,16 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				SDFSLogger.getLog().debug("cannot read buffer at pos " + this.getFilePosition() + " closed");
 			throw new BufferClosedException("Buffer Closed");
 		}
+		if(this.accelBuffer != null) {
+			if(startPos >= this.accelBuffPos && (startPos + len) <= this.accelBuffEp) {
+				ByteBuffer _buf = ByteBuffer.wrap(this.accelBuffer.toByteArray());
+				int sp = this.accelBuffPos - startPos;
+				byte [] _b = new byte[len];
+				_buf.position(sp);
+				_buf.get(_b);
+				return _b;
+			}
+		}
 		try {
 			this.initBuffer();
 		} catch (InterruptedException e) {
@@ -250,6 +260,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private void initBuffer() throws IOException, InterruptedException, DataArchivedException {
 		lobj.lock();
 		try {
+			this.writeAccelBuffer();
 			while (this.buf == null) {
 				this.hlAdded = false;
 				if (HashFunctionPool.max_hash_cluster > 1) {
@@ -532,53 +543,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			} else {
 
 				if (this.buf == null && this.reconstructed && HashFunctionPool.max_hash_cluster > 1) {
-					// SDFSLogger.getLog().info("poop " + b.length + " pos=" +
-					// pos + "_spos=" + _spos + " bpos=" +bpos );
-					if (b.length < HashFunctionPool.minLen) {
-						HashLocPair p = new HashLocPair();
-						AbstractHashEngine eng = HashFunctionPool.borrowObject();
-						try {
-							p.hash = eng.getHash(b);
-							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b, 1, this.df.mf.getLookupFilter());
-							p.hashloc = rec.getHashLocs();
-							p.len = b.length;
-							p.nlen = b.length;
-							p.offset = 0;
-							p.pos = pos;
-							int dups = 0;
-							if (!rec.getInserted())
-								dups = b.length;
-							df.mf.getIOMonitor().addVirtualBytesWritten(b.length, true);
-							df.mf.getIOMonitor().addActualBytesWritten(b.length - dups, true);
-							df.mf.getIOMonitor().addDulicateData(dups, true);
-							this.prevDoop += dups;
-							SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
-							this.hlAdded = true;
-
-							/*
-							 * HashLocPair _h =null;
-							 * 
-							 * for(HashLocPair h : ar) { if(_h!=null && h.pos != (_h.pos + _h.nlen)) {
-							 * SDFSLogger.getLog().info( "data mismatch"); SDFSLogger.getLog().info(_h);
-							 * SDFSLogger.getLog().info(h); } _h=h; }
-							 */
-
-						} catch (HashtableFullException e) {
-							SDFSLogger.getLog().error("unable to write with accelerator", e);
-							throw new IOException(e);
-						} finally {
-							HashFunctionPool.returnObject(eng);
-						}
-					} else {
+					
+					
 						this.wm(b, pos);
-						/*
-						 * HashLocPair _h =null;
-						 * 
-						 * for(HashLocPair h : ar) { if(_h!=null && h.pos != (_h.pos + _h.nlen)) {
-						 * SDFSLogger.getLog().info( "data mismatch"); SDFSLogger.getLog().info(_h);
-						 * SDFSLogger.getLog().info(h); } _h=h; }
-						 */
-					}
 				} else {
 					// SDFSLogger.getLog().info("writing at " + pos + " recon="
 					// + this.reconstructed + " sz=" + this.ar.size());
@@ -621,6 +588,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				bf.position(p.offset);
 				bf.get(z);
 				this.writeBlock(z, p.pos);
+				this.reconstructed = false;
+				this.hlAdded = false;
 			} else {
 				try {
 					this.reconstructed = true;
@@ -636,10 +605,35 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.lobj.unlock();
 		}
 	}
-
+	
+	ByteArrayDataOutput accelBuffer = null;
+	int accelBuffPos = 0;
+	int accelBuffEp = 0;
 	private void wm(byte[] b, int pos) throws IOException {
+		this.reconstructed = true;
+		if(accelBuffer == null) {
+			accelBuffPos = pos;
+			accelBuffEp = accelBuffPos + b.length;
+			accelBuffer = ByteStreams.newDataOutput();
+			accelBuffer.write(b);
+		} else if(accelBuffEp == pos) {
+			accelBuffer.write(b);
+			accelBuffEp = accelBuffPos + b.length;
+		} else {
+			writeAccelBuffer();
+			accelBuffPos = pos;
+			accelBuffEp = accelBuffPos + b.length;
+			accelBuffer = ByteStreams.newDataOutput();
+			accelBuffer.write(b);
+		}
+	}
+	
+	public void writeAccelBuffer() throws IOException {
+		if(accelBuffer == null)
+			return;
+		int opos = accelBuffPos;
 		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
-
+		byte [] b = accelBuffer.toByteArray();
 		try {
 			List<Finger> fs = hc.getChunks(b, this.df.mf.getLookupFilter());
 			AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
@@ -728,6 +722,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				this.buf = null;
 				throw new IOException("Write Failed because unable to read shard");
 			}
+			int ep = opos;
 			for (Finger f : fs) {
 				HashLocPair p = new HashLocPair();
 				try {
@@ -735,26 +730,42 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					p.hashloc = f.hl.getHashLocs();
 					p.len = f.len;
 					p.offset = 0;
-					p.nlen = f.len;
-					p.pos = pos;
+					if((ep+ f.len) <= Main.CHUNK_LENGTH)
+						p.nlen = f.len;
+					else
+						p.nlen = Main.CHUNK_LENGTH -ep;
+					p.pos = ep;
 					p.inserted = true;
-					pos += f.len;
+					ep += f.len;
 					int dups = 0;
 					if (!f.hl.getInserted())
 						dups = f.len;
 					df.mf.getIOMonitor().addVirtualBytesWritten(f.len, true);
-					df.mf.getIOMonitor().addActualBytesWritten(f.len - dups, true);
-					df.mf.getIOMonitor().addDulicateData(dups, true);
+					if(dups >0)
+						df.mf.getIOMonitor().addActualBytesWritten(f.len, true);
+					else
+						df.mf.getIOMonitor().addDulicateData(dups, true);
 					this.prevDoop += dups;
 					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
 				} catch (Throwable e) {
-					SDFSLogger.getLog().warn("unable to write object finger", e);
+					SDFSLogger.getLog().warn("unable to write object finger pos=" + opos + " len=" + b.length , e);
 					throw e;
 					// SDFSLogger.getLog().info("this chunk size is "
 					// + f.chunk.length);
 				}
 			}
-			this.hlAdded = true;
+			if(this.ar.size() >= LongByteArrayMap.MAX_ELEMENTS_PER_AR) {
+				
+					SDFSLogger.getLog()
+							.info("write accelerator Chuck Array Size greater than " + LongByteArrayMap.MAX_ELEMENTS_PER_AR
+									+ " at " + (this.getFilePosition() + accelBuffPos) + " for file " + this.df.mf.getPath());
+					this.initBuffer();
+					this.dirty=true;
+					
+			}else {
+				this.hlAdded = true;
+			}
+			accelBuffer = null;
 		} catch (Throwable e) {
 			df.errOccured = true;
 			SDFSLogger.getLog().error("write failed", e);
@@ -910,6 +921,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		// long ksz = wbsz.decrementAndGet();
 		lobj.lock();
 		try {
+			
 
 			if (!this.flushing) {
 				df.removeOpenBuffer(this);
@@ -919,6 +931,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				return;
 			}
 			try {
+				if(accelBuffer != null) {
+					this.writeAccelBuffer();
+				}
 				if (this.closed) {
 					
 					if (SDFSLogger.isDebug())
