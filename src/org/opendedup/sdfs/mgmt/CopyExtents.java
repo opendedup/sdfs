@@ -2,8 +2,8 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -33,7 +33,7 @@ import com.google.common.cache.RemovalNotification;
 public class CopyExtents {
 	SDFSEvent evt;
 
-	private static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(Main.maxOpenFiles*2)
+	protected static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(Main.maxOpenFiles*2)
 			.concurrencyLevel(64).expireAfterAccess(120, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<String, DedupFileChannel>() {
 				public void onRemoval(RemovalNotification<String, DedupFileChannel> removal) {
@@ -90,7 +90,7 @@ public class CopyExtents {
 			Lock l = ddf.getWriteLock();
 			l.lock();
 			writeChannels.get(f.getPath());
-			DedupFileChannel dc = writeChannels.get(nf.getPath());
+			writeChannels.get(nf.getPath());
 			try {
 				while (written < len) {
 					long _sstart = written + sstart;
