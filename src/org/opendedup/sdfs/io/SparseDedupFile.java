@@ -97,6 +97,7 @@ public class SparseDedupFile implements DedupFile {
 	protected boolean errOccured = false;
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
+	
 	public static AbstractHashEngine eng = null;
 	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers= new ConcurrentHashMap<Long, WritableCacheBuffer>(256, .75f);
 	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
@@ -196,6 +197,10 @@ public class SparseDedupFile implements DedupFile {
 			SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath() + " df=" + this.GUID);
 			SDFSLogger.getLog().debug("LRU Size is " + (maxWriteBuffers + 1));
 		}
+	}
+	
+	public void setReconstructed(boolean reconstructed) {
+		this.reconstructed = reconstructed;
 	}
 
 	/*
@@ -657,6 +662,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	public void updateExtents(WritableCacheBuffer writeBuffer) throws FileClosedException, IOException {
+		/*
 		mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
 		if (writeBuffer.isNewChunk()) {
 			mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - writeBuffer.getDoop(), true);
@@ -667,6 +673,7 @@ public class SparseDedupFile implements DedupFile {
 			mf.getIOMonitor().addActualBytesWritten(nw - prev, true);
 		}
 		mf.getIOMonitor().addDulicateData((writeBuffer.capacity() - writeBuffer.getPrevDoop()), true);
+		*/
 		this.updateMap(writeBuffer, writeBuffer.capacity());
 	}
 
