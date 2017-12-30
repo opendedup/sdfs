@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.5.9.0</version>
+  <version>3.6.0.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -52,16 +52,6 @@
        <version>1.0.7</version>
    </dependency>
 <dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-core</artifactId>
-  <version>3.3.0</version>
-</dependency>
-<dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-mapping</artifactId>
-  <version>3.3.0</version>
-</dependency>
-<dependency>
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>
     <version>1.0</version>
@@ -70,6 +60,18 @@
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-log4j12</artifactId>
     <version>1.7.25</version>
+</dependency>
+<dependency>
+<groupId>jdk.tools</groupId>
+<artifactId>jdk.tools</artifactId>
+<version>1.8</version>
+<scope>system</scope>
+<systemPath>${JAVA_HOME}/../lib/tools.jar</systemPath>
+</dependency>
+<dependency>
+    <groupId>org.apache.hadoop</groupId>
+    <artifactId>hadoop-common</artifactId>
+    <version>3.0.0-beta1</version>
 </dependency>
 <dependency>
     <groupId>org.apache.ignite</groupId>
@@ -111,16 +113,20 @@
        <artifactId>jacksum</artifactId>
        <version>1.7.0</version>
    </dependency>
-
 <dependency>
     <groupId>org.opendedupe</groupId>
     <artifactId>rabinwindow</artifactId>
     <version>1.0.0</version>
 </dependency>
 <dependency>
-    <groupId>org.opendedupe</groupId>
-    <artifactId>odd-grpc</artifactId>
-    <version>1.0.0</version>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-core</artifactId>
+  <version>3.3.0</version>
+</dependency>
+<dependency>
+  <groupId>com.datastax.cassandra</groupId>
+  <artifactId>cassandra-driver-mapping</artifactId>
+  <version>3.3.0</version>
 </dependency>
   <dependency>
     <groupId>org.opendedupe</groupId>
@@ -229,11 +235,6 @@
     <artifactId>aws-java-sdk-s3</artifactId>
     <version>1.11.173</version>
 </dependency>
-    <dependency>
-  <groupId>io.grpc</groupId>
-  <artifactId>grpc-netty</artifactId>
-  <version>1.5.0</version>
-</dependency>
 <dependency>
     <groupId>org.simpleframework</groupId>
     <artifactId>simple-http</artifactId>
@@ -252,32 +253,18 @@
 <dependency>
 	<groupId>com.microsoft.azure</groupId>
 	<artifactId>azure-storage</artifactId>
-	<version>5.4.0</version>
+	<version>6.1.0</version>
 </dependency>
 <dependency>
     <groupId>org.rocksdb</groupId>
     <artifactId>rocksdbjni</artifactId>
     <version>5.8.7</version>
 </dependency>
-<dependency>
-  <groupId>io.grpc</groupId>
-  <artifactId>grpc-protobuf</artifactId>
-  <version>1.5.0</version>
-</dependency>
+
 <dependency>
     <groupId>net.java.dev.jets3t</groupId>
     <artifactId>jets3t</artifactId>
     <version>0.9.4</version>
-</dependency>
-<dependency>
-  <groupId>io.grpc</groupId>
-  <artifactId>grpc-stub</artifactId>
-  <version>1.5.0</version>
-</dependency>
-<dependency>
-    <groupId>maven</groupId>
-    <artifactId>maven-nsis-plugin</artifactId>
-    <version>2.1</version>
 </dependency>
   </dependencies>
   <build>

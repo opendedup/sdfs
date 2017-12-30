@@ -16,6 +16,8 @@ public interface AbstractCloudFileSync {
 
 	public abstract void downloadFile(String name, File to, String parentPath)
 			throws IOException;
+	
+	public abstract void setCredentials(String accessKey,String secretKey);
 
 	public abstract String getNextName(String prefix,long id) throws IOException;
 	

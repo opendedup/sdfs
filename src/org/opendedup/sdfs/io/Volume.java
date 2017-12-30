@@ -19,7 +19,9 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
@@ -32,7 +34,9 @@ import org.apache.ignite.IgniteAtomicLong;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.jgroups.Address;
+import org.opendedup.cassandra.CassandraIpFinder;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -95,6 +99,7 @@ public class Volume implements java.io.Serializable {
 	AtomicLong readErrors = new AtomicLong(0);
 	private long serialNumber = 0;
 	private boolean volumeFull = false;
+	private String dataCenter ="datacenter1";
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
@@ -102,7 +107,7 @@ public class Volume implements java.io.Serializable {
 	private ReentrantLock devLock = new ReentrantLock();
 	public String connicalPath;
 	private Ignite ignite = null;
-	private String seedHost = "127.0.0.1";
+	ArrayList<InetSocketAddress> car = new ArrayList<InetSocketAddress>();
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -229,9 +234,21 @@ public class Volume implements java.io.Serializable {
 	}
 	
 	private void setCluster(Element vol) {
+		
+		if(vol.getElementsByTagName("cassandra-nodes").getLength() > 0) {
+			NodeList nl = vol.getElementsByTagName("cassandra-nodes");
+			for(int i = 0;i <nl.getLength();i++) {
+				Element el = (Element)nl.item(i);
+				car.add(new InetSocketAddress(el.getAttribute("hostname"),Integer.parseInt(el.getAttribute("port"))));
+			}
+		}
+		
 		if (vol.hasAttribute("volume-clustered")) {
 			this.clustered = Boolean.parseBoolean(vol
 					.getAttribute("volume-clustered"));
+		}
+		if(vol.hasAttribute("cluser-datacenter")) {
+			this.dataCenter = vol.getAttribute("cluster-datacenter");
 		}
 		if (vol.hasAttribute("cluster-id"))
 			this.uuid = vol.getAttribute("cluster-id");
@@ -245,10 +262,6 @@ public class Volume implements java.io.Serializable {
 			}
 		}
 		
-		if(vol.hasAttribute("cluster-seed-host")) {
-			this.seedHost = vol.getAttribute("cluster-seed-host");
-		}
-		
 		if (vol.hasAttribute("cluster-rack-aware")) {
 			this.clusterRackAware = Boolean.parseBoolean(vol
 					.getAttribute("cluster-rack-aware"));
@@ -257,6 +270,13 @@ public class Volume implements java.io.Serializable {
 			Main.ClusterRSPTimeout = Integer.parseInt(vol
 					.getAttribute("cluster-response-timeout"));
 		if(this.isClustered()) {
+			CassandraIpFinder cip = new CassandraIpFinder();
+			TcpDiscoverySpi spi = new TcpDiscoverySpi();
+			spi.setIpFinder(cip);
+			InetSocketAddress [] cipep = car.toArray(new InetSocketAddress[car.size()]);
+			cip.setServiceName(this.uuid);
+			cip.setCassandraDataCenter(dataCenter);
+			cip.setCassandraContactPoints(cipep);
 			IgniteConfiguration cfg = new IgniteConfiguration();
 			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
 			cfg.getAtomicConfiguration().setBackups(Main.volume.getClusterCopies());
@@ -685,6 +705,7 @@ public class Volume implements java.io.Serializable {
 			root.setAttribute("files", Long.toString(this.getFiles()));
 		root.setAttribute("cluster-response-timeout",
 				Integer.toString(Main.ClusterRSPTimeout));
+		root.setAttribute("cluster-datacenter", this.dataCenter);
 		root.setAttribute("allow-external-links",
 				Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-dse-capacity",
@@ -703,7 +724,14 @@ public class Volume implements java.io.Serializable {
 				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
-		root.setAttribute("cluster-seed-host", this.seedHost);
+		if(this.car.size() > 0) {
+			for(InetSocketAddress ar : car) {
+				Element addr = doc.createElement("cassandra-nodes");
+				addr.setAttribute("hostname", ar.getHostName());
+				addr.setAttribute("port", Integer.toString(ar.getPort()));
+				root.appendChild(addr);
+			}
+		}
 		try {
 			root.setAttribute("dse-comp-size",
 					Long.toString(HCServiceProxy.getDSECompressedSize()));
@@ -769,7 +797,6 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
 		root.setAttribute("cluster-rack-aware",
 				Boolean.toString(this.clusterRackAware));
-		root.setAttribute("cluster-seed-host", this.seedHost);
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
 		root.setAttribute("read-timeout-seconds",
 				Integer.toString(Main.readTimeoutSeconds));
@@ -781,6 +808,14 @@ public class Volume implements java.io.Serializable {
 			Element el = blk.getElement();
 			doc.adoptNode(el);
 			root.appendChild(el);
+		}
+		if(this.car.size() > 0) {
+			for(InetSocketAddress ar : car) {
+				Element addr = doc.createElement("cassandra-nodes");
+				addr.setAttribute("hostname", ar.getHostName());
+				addr.setAttribute("port", Integer.toString(ar.getPort()));
+				root.appendChild(addr);
+			}
 		}
 		return doc;
 	}
@@ -847,10 +882,6 @@ public class Volume implements java.io.Serializable {
 
 	public String getUuid() {
 		return uuid;
-	}
-	
-	public String getClusterSeedHost() {
-		return this.seedHost;
 	}
 
 	public void setUuid(String uuid) {

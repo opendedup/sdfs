@@ -35,6 +35,7 @@ public class ImportFileCmd implements Runnable {
 	int port;
 	int maxSz = 0;
 	boolean useSSL = false;
+	boolean hmac = false;
 	SDFSEvent evt;
 	boolean hmac = false;
 
@@ -60,7 +61,6 @@ public class ImportFileCmd implements Runnable {
 				this.password = param.getValue();
 				this.hmac = true;
 			}
-
 		}
 
 		return importArchive();
