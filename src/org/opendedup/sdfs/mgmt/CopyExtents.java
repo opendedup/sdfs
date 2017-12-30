@@ -81,6 +81,7 @@ public class CopyExtents {
 			len = smf.length();
 		SparseDedupFile sdf = (SparseDedupFile) smf.getDedupFile(true);
 		SparseDedupFile ddf = (SparseDedupFile) dmf.getDedupFile(true);
+		ddf.setReconstructed(true);
 		long _spos = -1;
 		long _dpos = -1;
 		try {
@@ -120,7 +121,7 @@ public class CopyExtents {
 							} else {
 							*/
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
-
+							ddc.writeAccelBuffer();
 							HashLocPair p = sdc.getWL(_so);
 
 							if (p.nlen > _rem) {
@@ -144,9 +145,9 @@ public class CopyExtents {
 								} else
 									throw e;
 							}
-							ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
-							ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
-							ddf.mf.setLastModified(System.currentTimeMillis());
+							dmf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+							dmf.getIOMonitor().addDulicateData(p.nlen, true);
+							dmf.setLastModified(System.currentTimeMillis());
 							written += p.nlen;
 							insdone = true;
 							
