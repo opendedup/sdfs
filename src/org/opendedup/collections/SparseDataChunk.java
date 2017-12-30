@@ -165,7 +165,7 @@ public class SparseDataChunk implements Externalizable {
 			throws IOException {
 		int ep = p.pos + p.nlen;
 		if (ep > Main.CHUNK_LENGTH)
-			throw new IOException("Overflow ep=" + ep);
+			throw new IOException("Overflow ep=" + ep + " sp=" + p.pos);
 		// SDFSLogger.getLog().info("p = " + p);
 		int _ep = ep;
 		// int k = 0;

@@ -50,6 +50,8 @@ import org.opendedup.util.StringUtils;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.google.common.primitives.Longs;
 
 /**
@@ -636,10 +638,32 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.lobj.unlock();
 		}
 	}
-
+	
+	ByteArrayDataOutput accelBuffer = null;
+	int accelBuffPos = 0;
+	int accelBuffEp = 0;
 	private void wm(byte[] b, int pos) throws IOException {
+		if(accelBuffer == null) {
+			accelBuffPos = pos;
+			accelBuffEp = accelBuffPos + b.length;
+			accelBuffer = ByteStreams.newDataOutput();
+			accelBuffer.write(b);
+		} else if(accelBuffEp == pos) {
+			accelBuffer.write(b);
+			accelBuffEp = accelBuffPos + b.length;
+		} else {
+			writeBuffer();
+			accelBuffPos = pos;
+			accelBuffEp = accelBuffPos + b.length;
+			accelBuffer = ByteStreams.newDataOutput();
+			accelBuffer.write(b);
+		}
+	}
+	
+	private void writeBuffer() throws IOException {
+		int opos = accelBuffPos;
 		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
-
+		byte [] b = accelBuffer.toByteArray();
 		try {
 			List<Finger> fs = hc.getChunks(b, this.df.mf.getLookupFilter());
 			AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
@@ -736,9 +760,9 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					p.len = f.len;
 					p.offset = 0;
 					p.nlen = f.len;
-					p.pos = pos;
+					p.pos = opos;
 					p.inserted = true;
-					pos += f.len;
+					opos += f.len;
 					int dups = 0;
 					if (!f.hl.getInserted())
 						dups = f.len;
@@ -748,13 +772,14 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.prevDoop += dups;
 					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
 				} catch (Throwable e) {
-					SDFSLogger.getLog().warn("unable to write object finger", e);
+					SDFSLogger.getLog().warn("unable to write object finger pos=" + opos + " len=" + b.length , e);
 					throw e;
 					// SDFSLogger.getLog().info("this chunk size is "
 					// + f.chunk.length);
 				}
 			}
 			this.hlAdded = true;
+			accelBuffer = null;
 		} catch (Throwable e) {
 			df.errOccured = true;
 			SDFSLogger.getLog().error("write failed", e);
@@ -871,6 +896,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			this.flushing = true;
 			if (this.dirty || this.isHlAdded()) {
 				if (Main.chunkStoreLocal) {
+					
 					this.df.putBufferIntoFlush(this);
 					lexecutor.execute(this);
 				} else {
@@ -910,7 +936,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		// long ksz = wbsz.decrementAndGet();
 		lobj.lock();
 		try {
-
+			if(this.accelBuffer  != null)
+				this.writeBuffer();
 			if (!this.flushing) {
 				df.removeOpenBuffer(this);
 				df.removeBufferFromFlush(this);
