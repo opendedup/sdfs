@@ -322,13 +322,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long size() {
 		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.data;
-		}
-		return sz;
-		}catch(Exception e) {
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.data;
+			}
+			return sz;
+		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
 		}
 		return HashBlobArchive.getLength();
@@ -871,7 +871,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		int claims = 0;
 		for (String ha : st) {
 			byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-			if (HCServiceProxy.getHashesMap().mightContainKey(b,id))
+			if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
 				claims++;
 		}
 		return claims;
@@ -953,13 +953,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long compressedSize() {
 		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.compressed;
-		}
-		return sz;
-		}catch(Exception e) {
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.compressed;
+			}
+			return sz;
+		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
 		}
 		return HashBlobArchive.getCompressedLength();
@@ -2371,8 +2371,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 2);
 				s3Service.restoreObject(request);
+
 				if (blockRestored(haName)) {
 					restoreRequests.put(new Long(id), "InvalidObjectState");
+
 					return null;
 				}
 				if (this.simpleMD) {
@@ -2423,18 +2425,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
 			ObjectMetadata momd = omd;
 			if (this.simpleMD)
-				momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
-			if (omd == null || momd == null)
+				momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
+			if(omd == null || momd == null) {
+				SDFSLogger.getLog().warn("Object with id " + id + " is null");
 				return false;
-			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
-					&& !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+			}
+			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") ) {
 				return true;
-			} else if (omd.getOngoingRestore() || momd.getOngoingRestore())
+			}
+			else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
+				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");
 				return false;
+			}
 			else
 				return true;
 		} catch (Exception e) {
-			// SDFSLogger.getLog().warn("error while checking block restored", e);
+			SDFSLogger.getLog().warn("error while checking block restored", e);
 			return false;
 		}
 	}
