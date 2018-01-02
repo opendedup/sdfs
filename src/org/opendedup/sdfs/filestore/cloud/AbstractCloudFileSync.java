@@ -3,9 +3,10 @@ package org.opendedup.sdfs.filestore.cloud;
 import java.io.File;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public interface AbstractCloudFileSync {
-	public abstract void uploadFile(File f, String to, String parentPath)
+	public abstract void uploadFile(File f, String to, String parentPath,HashMap<String,String> md,boolean disableComp)
 			throws IOException;
 	
 	public void addRefresh(long id);

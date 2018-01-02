@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -291,7 +292,7 @@ public class FileReplicationService {
 										SDFSLogger.getLog()
 												.debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
 										this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl),
-												"files");
+												"files",new HashMap<String,String>(),false);
 									} finally {
 										evt.mf.writeLock.unlock();
 									}
@@ -347,7 +348,7 @@ public class FileReplicationService {
 					String fn = f.getPath().substring(pl);
 					if (!isSymlink && f.isDirectory())
 						fn = fn + DM;
-					this.sync.uploadFile(f, fn, "files");
+					this.sync.uploadFile(f, fn, "files",new HashMap<String,String>(),false);
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)
@@ -377,7 +378,7 @@ public class FileReplicationService {
 							if (evt.sf.isDirty()) {
 								SDFSLogger.getLog().debug("writed " + evt.sf.getDatabasePath().substring(sl));
 								this.sync.uploadFile(new File(evt.sf.getDatabasePath()),
-										evt.sf.getDatabasePath().substring(sl), "ddb");
+										evt.sf.getDatabasePath().substring(sl), "ddb",new HashMap<String,String>(),false);
 								if (Main.REFRESH_BLOBS) {
 									evt.sf.bdb.iterInit();
 									SparseDataChunk ck = evt.sf.bdb.nextValue(false);
@@ -424,7 +425,7 @@ public class FileReplicationService {
 					try {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
-						this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb");
+						this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb",new HashMap<String,String>(),false);
 
 						done = true;
 					} catch (Exception e) {
@@ -456,7 +457,7 @@ public class FileReplicationService {
 					try {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
-						this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files");
+						this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files",new HashMap<String,String>(),false);
 						done = true;
 					} catch (Exception e) {
 						if (tries > maxTries)
@@ -517,7 +518,7 @@ public class FileReplicationService {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
 					this.sync.uploadFile(new File(evt.vol.getConfigPath()), new File(evt.vol.getConfigPath()).getName(),
-							"volume");
+							"volume",new HashMap<String,String>(),false);
 					done = true;
 				} catch (Exception e) {
 					if (tries > maxTries)

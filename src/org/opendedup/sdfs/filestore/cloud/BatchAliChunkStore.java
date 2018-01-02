@@ -1599,9 +1599,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	}
 
 	@Override
-	public void uploadFile(File f, String to, String pp) throws IOException {
+	public void uploadFile(File f, String to, String pp,HashMap<String,String> metaData,boolean disableComp) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		InputStream in = null;
+		
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
 		to = FilenameUtils.separatorsToUnix(to);
@@ -1619,7 +1620,6 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		}
 		if (isSymlink) {
 			try {
-				HashMap<String, String> metaData = new HashMap<String, String>();
 				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
@@ -1640,7 +1640,8 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				throw new IOException(e1);
 			}
 		} else if (isDir) {
-			HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+			HashMap<String, String> _metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+			metaData.putAll(_metaData);
 			metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 			metaData.put("lastmodified", Long.toString(f.lastModified()));
 			metaData.put("directory", "true");
@@ -1661,6 +1662,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				throw new IOException(e1);
 			}
 		} else {
+			
 			String rnd = RandomGUID.getGuid();
 			File p = new File(this.staged_sync_location, rnd);
 			File z = new File(this.staged_sync_location, rnd + ".z");
@@ -1671,7 +1673,12 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				z = new File(this.staged_sync_location, rnd + ".z");
 				e = new File(this.staged_sync_location, rnd + ".e");
 			}
+			
 			try {
+				byte[] ivb = null;
+				if(disableComp)
+					p = f;
+				else {
 				BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
 				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 				IOUtils.copy(is, os);
@@ -1683,7 +1690,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					p.delete();
 					p = z;
 				}
-				byte[] ivb = null;
+				
 				if (Main.chunkStoreEncryptionEnabled) {
 					try {
 						ivb = PassPhrase.getByteIV();
@@ -1695,10 +1702,12 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					p.delete();
 					p = e;
 				}
+				}
 				String objName = pth;
 				ObjectMetadata md = new ObjectMetadata();
 				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
-				md.setUserMetadata(umd);
+				metaData.putAll(umd);
+				md.setUserMetadata(metaData);
 				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
 				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				if (ivb != null)
@@ -1744,9 +1753,11 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					if (in != null)
 						in.close();
 				} finally {
+					if(!disableComp) {
 					p.delete();
 					z.delete();
 					e.delete();
+					}
 				}
 			}
 		}

@@ -1735,7 +1735,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public void uploadFile(File f, String to, String pp) throws IOException {
+	public void uploadFile(File f, String to, String pp,HashMap<String,String> metaData,boolean disableComp) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		InputStream in = null;
 		while (to.startsWith(File.separator))
@@ -1755,7 +1755,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		if (isSymlink) {
 			try {
-				HashMap<String, String> metaData = new HashMap<String, String>();
 				metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				metaData.put("lastmodified", Long.toString(f.lastModified()));
 				String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
@@ -1776,7 +1775,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw new IOException(e1);
 			}
 		} else if (isDir) {
-			HashMap<String, String> metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+			HashMap<String, String> _metaData = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
+			metaData.putAll(_metaData);
 			metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 			metaData.put("lastmodified", Long.toString(f.lastModified()));
 			metaData.put("directory", "true");
@@ -1808,6 +1808,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				e = new File(this.staged_sync_location, rnd + ".e");
 			}
 			try {
+				byte[] ivb = null;
+				if(disableComp) {
+					p = f;
+				}else {
 				BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
 				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 				IOUtils.copy(is, os);
@@ -1819,7 +1823,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					p.delete();
 					p = z;
 				}
-				byte[] ivb = null;
+				
 				if (Main.chunkStoreEncryptionEnabled) {
 					try {
 						ivb = PassPhrase.getByteIV();
@@ -1831,10 +1835,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					p.delete();
 					p = e;
 				}
+				}
 				String objName = pth;
 				ObjectMetadata md = new ObjectMetadata();
 				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
-				md.setUserMetadata(umd);
+				metaData.putAll(umd);
+				md.setUserMetadata(metaData);
 				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
 				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 				if (ivb != null)
@@ -1874,7 +1880,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 								s3Service.deleteObject(this.name, objName);
 								if (this.simpleMD)
 									s3Service.deleteObject(this.name, objName + mdExt);
-								this.uploadFile(f, to, pp);
+								this.uploadFile(f, to, pp,metaData,disableComp);
 								return;
 							} catch (Exception e2) {
 								throw new IOException(e2);
@@ -1909,7 +1915,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 								s3Service.deleteObject(this.name, objName);
 								if (this.simpleMD)
 									s3Service.deleteObject(this.name, objName + mdExt);
-								this.uploadFile(f, to, pp);
+								this.uploadFile(f, to, pp,metaData,disableComp);
 								return;
 							} catch (Exception e2) {
 								throw new IOException(e2);
@@ -1928,9 +1934,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (in != null)
 						in.close();
 				} finally {
+					if(!disableComp) {
 					p.delete();
 					z.delete();
 					e.delete();
+					}
 				}
 			}
 		}

@@ -1299,7 +1299,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	@Override
-	public void uploadFile(File f, String to, String pp) throws IOException {
+	public void uploadFile(File f, String to, String pp,HashMap<String,String> metaData,boolean disableComp) throws IOException {
 		IOException e2 = null;
 		for (int i = 0; i < 10; i++) {
 			try {
@@ -1320,7 +1320,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				}
 				if (isSymlink) {
 					try {
-						HashMap<String, String> metaData = new HashMap<String, String>();
 						metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 						metaData.put("lastmodified", Long.toString(f.lastModified()));
 						String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
@@ -1341,8 +1340,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					}
 				} else if (isDir) {
 					try {
-						HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
+						HashMap<String, String> _metaData = FileUtils.getFileMetaData(f,
 								Main.chunkStoreEncryptionEnabled);
+						metaData.putAll(_metaData);
 						metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 						metaData.put("lastmodified", Long.toString(f.lastModified()));
 						metaData.put("directory", "true");
@@ -1370,6 +1370,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						e = new File(this.staged_sync_location, rnd + ".e");
 					}
 					try {
+						if(disableComp)
+							p = f;
+						else {
 						BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
 						BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
 						IOUtils.copy(is, os);
@@ -1390,12 +1393,14 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 							p.delete();
 							p = e;
 						}
+						}
 						while (to.startsWith(File.separator))
 							to = to.substring(1);
 						FilePayload fp = new FilePayload(p);
 						HashCode hc = com.google.common.io.Files.hash(p, Hashing.md5());
-						HashMap<String, String> metaData = FileUtils.getFileMetaData(f,
+						HashMap<String, String> _metaData = FileUtils.getFileMetaData(f,
 								Main.chunkStoreEncryptionEnabled);
+						metaData.putAll(_metaData);
 						metaData.put("lz4compress", Boolean.toString(Main.compress));
 						metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 						metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
@@ -1419,9 +1424,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 							if (in != null)
 								in.close();
 						} finally {
+							if(!disableComp) {
 							p.delete();
 							z.delete();
 							e.delete();
+							}
 						}
 					}
 				}
