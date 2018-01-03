@@ -391,6 +391,15 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public void init(Element config) throws IOException {
 		SDFSLogger.getLog().info("Accessing JCloud bucket " + Main.cloudBucket.toLowerCase());
 		this.name = Main.cloudBucket.toLowerCase();
+		if(config.hasAttribute("bucket-name")) {
+			this.name = config.getAttribute("bucket-name").toLowerCase();
+		}
+		if(config.hasAttribute("access-key")) {
+			this.accessKey = config.getAttribute("access-key");
+		}
+		if(config.hasAttribute("secret-key")) {
+			this.secretKey = config.getAttribute("secret-key");
+		}
 		this.staged_sync_location.mkdirs();
 		if (config.hasAttribute("default-bucket-location")) {
 			bucketLocation = config.getAttribute("default-bucket-location");
@@ -1045,7 +1054,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	@SuppressWarnings("deprecation")
-	private int verifyDelete(long id) throws Exception {
+	public int verifyDelete(long id) throws IOException {
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 
 		Map<String, String> metaData = null;
@@ -1059,7 +1068,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if (clustered) {
 				BlobStore bk = this.blobStore;
 				if (this.b2Store) {
-					bk = bPool.borrowObject();
+					try {
+						bk = bPool.borrowObject();
+					}catch(Exception e) {
+						throw new IOException(e);
+					}
 				}
 				try {
 					String pth = this.getClaimName(id);

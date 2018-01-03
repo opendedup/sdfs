@@ -715,5 +715,11 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		
 	}
 
+	@Override
+	public int verifyDelete(long id) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 	
 }

@@ -130,7 +130,6 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
 
-
 	public static boolean checkAuth(String awsAccessKey, String awsSecretKey) {
 		return true;
 	}
@@ -170,7 +169,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		this.closed = true;
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
-			if(this.standAlone)
+			if (this.standAlone)
 				HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
@@ -301,47 +300,56 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	@Override
 	public void init(Element config) throws IOException {
 		this.name = Main.cloudBucket.toLowerCase();
+		if (config.hasAttribute("bucket-name")) {
+			this.name = config.getAttribute("bucket-name").toLowerCase();
+		}
+		if (config.hasAttribute("access-key")) {
+			this.accessKey = config.getAttribute("access-key");
+		}
+		if (config.hasAttribute("secret-key")) {
+			this.secretKey = config.getAttribute("secret-key");
+		}
 		this.staged_sync_location.mkdirs();
 		try {
 			if (config.hasAttribute("connection-check-interval")) {
 				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
 			}
-			if(this.standAlone) {
-			if (config.hasAttribute("block-size")) {
-				int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
-				
-				HashBlobArchive.MAX_LEN = sz;
-			}
-			if (config.hasAttribute("allow-sync")) {
-				HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
-				if (config.hasAttribute("sync-check-schedule")) {
-					try {
-						new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
-					} catch (Exception e) {
-						SDFSLogger.getLog().error("unable to start sync scheduler", e);
+			if (this.standAlone) {
+				if (config.hasAttribute("block-size")) {
+					int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+
+					HashBlobArchive.MAX_LEN = sz;
+				}
+				if (config.hasAttribute("allow-sync")) {
+					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
+					if (config.hasAttribute("sync-check-schedule")) {
+						try {
+							new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
+						} catch (Exception e) {
+							SDFSLogger.getLog().error("unable to start sync scheduler", e);
+						}
 					}
+
+				}
+				if (config.hasAttribute("upload-thread-sleep-time")) {
+					int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
+					HashBlobArchive.THREAD_SLEEP_TIME = tm;
+				}
+				if (config.hasAttribute("cache-writes")) {
+					HashBlobArchive.cacheWrites = Boolean.parseBoolean(config.getAttribute("cache-writes"));
+				}
+				if (config.hasAttribute("cache-reads")) {
+					HashBlobArchive.cacheReads = Boolean.parseBoolean(config.getAttribute("cache-reads"));
 				}
 
-			}
-			if (config.hasAttribute("upload-thread-sleep-time")) {
-				int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
-				HashBlobArchive.THREAD_SLEEP_TIME = tm;
-			}
-			if (config.hasAttribute("cache-writes")) {
-				HashBlobArchive.cacheWrites = Boolean.parseBoolean(config.getAttribute("cache-writes"));
-			}
-			if (config.hasAttribute("cache-reads")) {
-				HashBlobArchive.cacheReads = Boolean.parseBoolean(config.getAttribute("cache-reads"));
-			}
-			
-			if (config.hasAttribute("refresh-blobs"))
-				Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
-			if (config.hasAttribute("sync-files")) {
-				boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
-				if (syncf) {
-					new FileReplicationService(this);
+				if (config.hasAttribute("refresh-blobs"))
+					Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
+				if (config.hasAttribute("sync-files")) {
+					boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
+					if (syncf) {
+						new FileReplicationService(this);
+					}
 				}
-			}
 			}
 			if (config.hasAttribute("simple-metadata")) {
 				this.simpleMD = Boolean.parseBoolean(config.getAttribute("simple-metadata"));
@@ -569,10 +577,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					}
 				}
 			}
-			if(this.standAlone) {
-			HashBlobArchive.init(this);
-			HashBlobArchive.setReadSpeed(rsp, false);
-			HashBlobArchive.setWriteSpeed(wsp, false);
+			if (this.standAlone) {
+				HashBlobArchive.init(this);
+				HashBlobArchive.setReadSpeed(rsp, false);
+				HashBlobArchive.setWriteSpeed(wsp, false);
 			}
 			Thread th = new Thread(this);
 			th.start();
@@ -712,42 +720,45 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	}
 
 	protected void resetLength() {
-		try {
-			ObjectMetadata omd = null;
-			if (this.simpleMD) {
-				Map<String, String> md = this.getUserMetaData(binm);
-				md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
-				md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
-				md.put("lastupdate", Long.toString(System.currentTimeMillis()));
-				md.put("hostname", InetAddress.getLocalHost().getHostName());
-				md.put("port", Integer.toString(Main.sdfsCliPort));
-				omd = new ObjectMetadata();
-				omd.setUserMetadata(md);
+		if (this.standAlone) {
+			try {
+				ObjectMetadata omd = null;
+				if (this.simpleMD) {
+					Map<String, String> md = this.getUserMetaData(binm);
+					md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+					md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+					md.put("hostname", InetAddress.getLocalHost().getHostName());
+					md.put("port", Integer.toString(Main.sdfsCliPort));
+					omd = new ObjectMetadata();
+					omd.setUserMetadata(md);
 
-			} else {
-				omd = s3Service.getObjectMetadata(name, binm);
-				Map<String, String> md = omd.getUserMetadata();
-				md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
-				md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
-				md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
-				md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
-				md.put("lastupdate", Long.toString(System.currentTimeMillis()));
-				md.put("hostname", InetAddress.getLocalHost().getHostName());
-				md.put("port", Integer.toString(Main.sdfsCliPort));
-				omd.setUserMetadata(md);
+				} else {
+					omd = s3Service.getObjectMetadata(name, binm);
+					Map<String, String> md = omd.getUserMetadata();
+					md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+					md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+					md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+					md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+					md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+					md.put("hostname", InetAddress.getLocalHost().getHostName());
+					md.put("port", Integer.toString(Main.sdfsCliPort));
+					omd.setUserMetadata(md);
 
+				}
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				omd.addUserMetadata("md5sum", st);
+				omd.setContentMD5(st);
+				omd.setContentLength(sz.length);
+				s3Service.putObject(this.name, binm + "-" + System.currentTimeMillis(), new ByteArrayInputStream(sz),
+						omd);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to create backup of filesystem metadata", e);
 			}
-			byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
-			String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
-			omd.addUserMetadata("md5sum", st);
-			omd.setContentMD5(st);
-			omd.setContentLength(sz.length);
-			s3Service.putObject(this.name, binm + "-" + System.currentTimeMillis(), new ByteArrayInputStream(sz), omd);
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to create backup of filesystem metadata", e);
+			HashBlobArchive.setLength(0);
+			HashBlobArchive.setCompressedLength(0);
 		}
-		HashBlobArchive.setLength(0);
-		HashBlobArchive.setCompressedLength(0);
 
 	}
 
@@ -1100,9 +1111,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					updateObject("keys/" + haName, omd);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-					if(this.standAlone) {
-					HashBlobArchive.addToLength(_size);
-					HashBlobArchive.addToCompressedLength(_compressedSize);
+					if (this.standAlone) {
+						HashBlobArchive.addToLength(_size);
+						HashBlobArchive.addToCompressedLength(_compressedSize);
 					}
 					SDFSLogger.getLog().warn("Reclaimed [" + claims + "] blocks marked for deletion");
 					kobj.close();
@@ -1157,30 +1168,30 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			throw new IOException(e);
 		}
 	}
-	
+
 	@Override
-	public Map<String,String> getBucketInfo() {
+	public Map<String, String> getBucketInfo() {
 		try {
 			if (this.simpleMD) {
 				return this.getUserMetaData(binm);
-				
+
 			} else {
 				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
 				Map<String, String> md = omd.getUserMetadata();
 				return md;
 			}
 		} catch (Exception e) {
-			
-				SDFSLogger.getLog().warn("unable to update metadata for " + binm, e);
-				return null;
+
+			SDFSLogger.getLog().warn("unable to update metadata for " + binm, e);
+			return null;
 		}
 	}
-	
+
 	@Override
-	public void updateBucketInfo(Map<String,String> md) {
+	public void updateBucketInfo(Map<String, String> md) {
 		try {
 			if (this.simpleMD) {
-				
+
 				ObjectMetadata omd = new ObjectMetadata();
 				omd.setUserMetadata(md);
 				this.updateObject(binm, omd);
@@ -1212,7 +1223,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			}
 		}
 	}
-	
+
 	@Override
 	public Map<String, String> getUserMetaData(String name) throws IOException {
 		// this.s3clientLock.readLock().lock();
@@ -1257,7 +1268,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	}
 
-	private int verifyDelete(long id) throws IOException, Exception {
+	public int verifyDelete(long id) throws IOException {
 		// this.s3clientLock.readLock().lock();
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// ObjectMetadata om = null;
@@ -1268,7 +1279,11 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 		try {
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
-			claims = this.getClaimedObjects(kobj, id);
+			try {
+				claims = this.getClaimedObjects(kobj, id);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
 			String name = null;
 			if (this.clustered)
 				name = this.getClaimName(id);
@@ -1292,15 +1307,15 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
-					if(this.standAlone) {
-					HashBlobArchive.addToLength(-1 * _size);
-					HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
-					if (HashBlobArchive.getLength() < 0) {
-						HashBlobArchive.setLength(0);
-					}
-					if (HashBlobArchive.getCompressedLength() < 0) {
-						HashBlobArchive.setCompressedLength(0);
-					}
+					if (this.standAlone) {
+						HashBlobArchive.addToLength(-1 * _size);
+						HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
+						if (HashBlobArchive.getLength() < 0) {
+							HashBlobArchive.setLength(0);
+						}
+						if (HashBlobArchive.getCompressedLength() < 0) {
+							HashBlobArchive.setCompressedLength(0);
+						}
 					}
 					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
 					if (ol.getObjectSummaries().size() == 0) {
@@ -1330,7 +1345,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		while (!closed) {
 			try {
 				Thread.sleep(60000);
+				if(this.standAlone) {
 				try {
+					
 					if (this.simpleMD) {
 						Map<String, String> md = this.getUserMetaData(binm);
 						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
@@ -1417,6 +1434,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 					}
 					SDFSLogger.getLog().info("done running garbage collection");
+				}
 				}
 
 				if (this.refresh.size() > 0) {
@@ -1559,13 +1577,13 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			StringResult st = new StringResult();
 			st.id = _hid;
 			st.st = _ht;
-			if(this.standAlone) {
-			if (mp.containsKey("bsize")) {
-				HashBlobArchive.addToLength(Integer.parseInt(mp.get("bsize")));
-			}
-			if (mp.containsKey("bcompressedsize")) {
-				HashBlobArchive.addToCompressedLength(Integer.parseInt(mp.get("bcompressedsize")));
-			}
+			if (this.standAlone) {
+				if (mp.containsKey("bsize")) {
+					HashBlobArchive.addToLength(Integer.parseInt(mp.get("bsize")));
+				}
+				if (mp.containsKey("bcompressedsize")) {
+					HashBlobArchive.addToCompressedLength(Integer.parseInt(mp.get("bcompressedsize")));
+				}
 			}
 			if (changed) {
 				try {
@@ -1599,10 +1617,11 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	}
 
 	@Override
-	public void uploadFile(File f, String to, String pp,HashMap<String,String> metaData,boolean disableComp) throws IOException {
+	public void uploadFile(File f, String to, String pp, HashMap<String, String> metaData, boolean disableComp)
+			throws IOException {
 		// this.s3clientLock.readLock().lock();
 		InputStream in = null;
-		
+
 		while (to.startsWith(File.separator))
 			to = to.substring(1);
 		to = FilenameUtils.separatorsToUnix(to);
@@ -1662,7 +1681,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				throw new IOException(e1);
 			}
 		} else {
-			
+
 			String rnd = RandomGUID.getGuid();
 			File p = new File(this.staged_sync_location, rnd);
 			File z = new File(this.staged_sync_location, rnd + ".z");
@@ -1673,35 +1692,35 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				z = new File(this.staged_sync_location, rnd + ".z");
 				e = new File(this.staged_sync_location, rnd + ".e");
 			}
-			
+
 			try {
 				byte[] ivb = null;
-				if(disableComp)
+				if (disableComp)
 					p = f;
 				else {
-				BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
-				BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
-				IOUtils.copy(is, os);
-				os.flush();
-				os.close();
-				is.close();
-				if (Main.compress) {
-					CompressionUtils.compressFile(p, z);
-					p.delete();
-					p = z;
-				}
-				
-				if (Main.chunkStoreEncryptionEnabled) {
-					try {
-						ivb = PassPhrase.getByteIV();
-						EncryptUtils.encryptFile(p, e, new IvParameterSpec(ivb));
-
-					} catch (Exception e1) {
-						throw new IOException(e1);
+					BufferedInputStream is = new BufferedInputStream(new FileInputStream(f));
+					BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(p));
+					IOUtils.copy(is, os);
+					os.flush();
+					os.close();
+					is.close();
+					if (Main.compress) {
+						CompressionUtils.compressFile(p, z);
+						p.delete();
+						p = z;
 					}
-					p.delete();
-					p = e;
-				}
+
+					if (Main.chunkStoreEncryptionEnabled) {
+						try {
+							ivb = PassPhrase.getByteIV();
+							EncryptUtils.encryptFile(p, e, new IvParameterSpec(ivb));
+
+						} catch (Exception e1) {
+							throw new IOException(e1);
+						}
+						p.delete();
+						p = e;
+					}
 				}
 				String objName = pth;
 				ObjectMetadata md = new ObjectMetadata();
@@ -1753,10 +1772,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					if (in != null)
 						in.close();
 				} finally {
-					if(!disableComp) {
-					p.delete();
-					z.delete();
-					e.delete();
+					if (!disableComp) {
+						p.delete();
+						z.delete();
+						e.delete();
 					}
 				}
 			}
@@ -2135,13 +2154,13 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			if (md.containsKey("deleted-objects")) {
 				md.remove("deleted-objects");
 			}
-			if(this.standAlone) {
-			if (md.containsKey("bsize")) {
-				HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
-			}
-			if (md.containsKey("bcompressedsize")) {
-				HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
-			}
+			if (this.standAlone) {
+				if (md.containsKey("bsize")) {
+					HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
+				}
+				if (md.containsKey("bcompressedsize")) {
+					HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
+				}
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -2421,9 +2440,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	@Override
 	public void clearCounters() {
-		if(this.standAlone) {
-		HashBlobArchive.setLength(0);
-		HashBlobArchive.setCompressedLength(0);
+		if (this.standAlone) {
+			HashBlobArchive.setLength(0);
+			HashBlobArchive.setCompressedLength(0);
 		}
 	}
 
@@ -2514,9 +2533,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	public void setCredentials(String accessKey, String secretKey) {
 		this.accessKey = accessKey;
 		this.secretKey = secretKey;
-		
+
 	}
-	
+
 	@Override
 	public boolean isStandAlone() {
 		return this.standAlone;
@@ -2525,13 +2544,15 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	@Override
 	public void setStandAlone(boolean standAlone) {
 		this.standAlone = standAlone;
-		
+
 	}
+
 	boolean metaStore = true;
+
 	@Override
 	public void setMetaStore(boolean metaStore) {
 		this.metaStore = metaStore;
-		
+
 	}
 
 	@Override

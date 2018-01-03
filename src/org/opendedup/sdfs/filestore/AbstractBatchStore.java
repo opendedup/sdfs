@@ -35,6 +35,8 @@ public interface AbstractBatchStore {
 	
 	public boolean objectClaimed(String key) throws IOException;
 	
+	public int verifyDelete(long id) throws IOException;
+	
 	public void timeStampData(long key) throws IOException;
 
 	public Iterator<String> getNextObjectList(String prefix) throws IOException;

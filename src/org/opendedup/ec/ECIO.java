@@ -26,9 +26,10 @@ public class ECIO {
 	private HashFunction hf = Hashing.sipHash24();
 
 	public static void main(String[] args) throws IOException {
-		ECIO ec = new ECIO(3, 1);
+		ECIO ec = new ECIO(3, 2);
 		File [] fls =ec.encode(new File("c:/temp/pingme.txt"),new File("c:/temp/"));
 		fls[1]=null;
+		fls[3]=null;
 		ec.decode(fls, new File("c:/temp/test2.txt"));
 		
 	}

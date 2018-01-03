@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -9,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -63,6 +64,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import com.microsoft.azure.storage.blob.StandardBlobTier;
 import com.microsoft.azure.storage.core.Base64;
 
 import org.opendedup.collections.HashExistsException;
@@ -93,6 +95,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String secretKey = Main.cloudSecretKey;
 	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
 	private boolean standAlone = true;
+	private StandardBlobTier tier = null;
 
 	// private String bucketLocation = null;
 	static {
@@ -249,6 +252,15 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public void init(Element config) throws IOException {
 		this.name = Main.cloudBucket.toLowerCase();
+		if(config.hasAttribute("bucket-name")) {
+			this.name = config.getAttribute("bucket-name").toLowerCase();
+		}
+		if(config.hasAttribute("access-key")) {
+			this.accessKey = config.getAttribute("access-key");
+		}
+		if(config.hasAttribute("secret-key")) {
+			this.secretKey = config.getAttribute("secret-key");
+		}
 		this.staged_sync_location.mkdirs();
 		String connectionProtocol = "https";
 		if (config.hasAttribute("default-bucket-location")) {
@@ -302,7 +314,14 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (config.hasAttribute("write-speed")) {
 			wsp = Integer.parseInt(config.getAttribute("write-speed"));
 		}
-
+		if(config.hasAttribute("storage-tier")) {
+			if(config.getAttribute("storage-tier").equalsIgnoreCase("hot"))
+				this.tier = StandardBlobTier.HOT;
+			if(config.getAttribute("storage-tier").equalsIgnoreCase("cool"))
+				this.tier = StandardBlobTier.COOL;
+			if(config.getAttribute("storage-tier").equalsIgnoreCase("archive"))
+				this.tier = StandardBlobTier.ARCHIVE;
+		}
 		// System.setProperty("http.keepalive", "true");
 
 		System.setProperty("http.maxConnections", Integer.toString(Main.dseIOThreads * 2));
@@ -647,6 +666,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				blobProperties.setContentMD5(mds);
 				ByteArrayInputStream bin = new ByteArrayInputStream(f);
 				blob.upload(bin, csz, null, null, opContext);
+				if(tier != null)
+					blob.uploadStandardBlobTier(this.tier);
 				IOUtils.closeQuietly(bin);
 				// upload the metadata
 				byte[] chunks = arc.getHashesString().getBytes();
@@ -718,6 +739,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 				String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 				CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
+				if(this.tier != null && this.tier.equals(StandardBlobTier.ARCHIVE)) {
+					blob.downloadAttributes();
+					if(blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
+						throw new DataArchivedException(id,null);
+					}
+				}
 				blob.downloadToFile(f.getPath(), null, null, opContext);
 				HashMap<String, String> metaData = blob.getMetadata();
 				if (metaData.containsKey("deleted")) {
@@ -772,9 +799,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 	}
 
-	private int verifyDelete(long id) throws StorageException, URISyntaxException, IOException {
+	public int verifyDelete(long id) throws IOException {
+		int claims = 0;
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-
+		try {
 		CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
 		CloudBlockBlob cblob = null;
 		if (this.clustered)
@@ -786,7 +814,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			metaData = cblob.getMetadata();
 		else
 			metaData = kblob.getMetadata();
-		int claims = this.getClaimedObjects(kblob);
+		claims = this.getClaimedObjects(kblob);
 		if (claims > 0) {
 			SDFSLogger.getLog().warn("Reclaimed object " + id + " claims=" + claims);
 			int delobj = 0;
@@ -828,6 +856,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				kblob = container.getBlockBlobReference("blocks/" + haName);
 				kblob.delete();
 			}
+		}
+		}catch(Exception e) {
+			throw new IOException(e);
 		}
 
 		return claims;
@@ -1347,9 +1378,35 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		return HashBlobArchive.getLocalCacheSize();
 	}
 
+
+	private WeakHashMap<Long, String> restoreRequests = new WeakHashMap<Long, String>();
 	@Override
-	public String restoreBlock(long id, byte[] hash) {
-		return null;
+	public String restoreBlock(long id, byte[] hash) throws IOException {
+		if (id == -1) {
+			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
+			return null;
+		}
+		String haName = this.restoreRequests.get(new Long(id));
+		if (haName == null)
+			haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+		else {
+			return haName;
+		}
+		try {
+			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
+			blob.downloadAttributes();
+			if(blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
+					blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+					this.restoreRequests.put(new Long(id), haName);
+					return haName;
+			} else {
+				this.restoreRequests.put(new Long(id), null);
+				return null;
+			}
+		}catch(Exception e) {
+			throw new IOException(e);
+		}
+		
 
 	}
 
