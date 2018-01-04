@@ -56,9 +56,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	File ec_stage_location = new File(Main.chunkStore + File.separator + "ecstaged");
 	private int checkInterval = 15000;
 	private static final int version = 1;
-	private ArrayList<AbstractBatchStore> datapools;
-	private ArrayList<AbstractBatchStore> metapools;
-	private ArrayList<AbstractChunkStore> stores;
+	private ArrayList<AbstractBatchStore> datapools = new ArrayList<AbstractBatchStore>();
+	private ArrayList<AbstractBatchStore> metapools = new ArrayList<AbstractBatchStore>();
+	private ArrayList<AbstractChunkStore> stores = new ArrayList<AbstractChunkStore>();
 	private ECIO ecio = null;
 
 	private static enum RAID {
@@ -224,9 +224,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public void init(Element config) throws IOException {
-		SDFSLogger.getLog().info("Accessing CloudRaid Buckets for bucket " + Main.cloudBucket.toLowerCase());
+		SDFSLogger.getLog().info("Accessing CloudRaid Buckets");
 		try {
-			this.name = Main.cloudBucket.toLowerCase();
+			this.name = "cloudraid";
 			this.staged_sync_location.mkdirs();
 			this.ec_stage_location.mkdirs();
 
@@ -294,30 +294,53 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				for (int i = 0; i < pls.getLength(); i++) {
 					Element el = (Element) pls.item(i);
 					String chunkClass = el.getAttribute("chunkstore-class");
+					try {
+						AbstractChunkStore cl = (AbstractChunkStore) Class.forName(chunkClass).newInstance();
+						AbstractBatchStore bs = (AbstractBatchStore) cl;
+						bs.setStandAlone(false);
+						cl.init(el);
+						this.stores.add(cl);
 
-					AbstractChunkStore cl = (AbstractChunkStore) Class.forName(chunkClass).newInstance();
-					cl.init(el);
-					this.stores.add(cl);
-					AbstractBatchStore bs = (AbstractBatchStore) cl;
-					if (el.hasAttribute("metadata-store")) {
-						boolean b = Boolean.parseBoolean(el.getAttribute("metadata-store"));
-						if (b) {
-							this.metapools.add(bs);
+						if (el.hasAttribute("metadata-store")) {
+							boolean b = Boolean.parseBoolean(el.getAttribute("metadata-store"));
+							if (b) {
+								this.metapools.add(bs);
+							}
 						}
-					}
-					if (el.hasAttribute("data-store")) {
+						if (el.hasAttribute("data-store")) {
+							boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
+							if (b) {
+								if (rl.equals(RAID.EC) || rl.equals(RAID.STRIPE)) {
+									int pos = Integer.parseInt(el.getAttribute("raid-position"));
+									this.datapools.add(pos, bs);
+								}
+							}
+						}
+
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn(
+								"Unable to connect to subpool " + el.getAttribute("bucket-name") + " for " + chunkClass,
+								e);
 						boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
 						if (b) {
 							if (rl.equals(RAID.EC) || rl.equals(RAID.STRIPE)) {
 								int pos = Integer.parseInt(el.getAttribute("raid-position"));
-								this.datapools.add(pos, bs);
+								this.datapools.add(pos, null);
 							}
 						}
 					}
 				}
 			}
 			if (rl.equals(RAID.EC)) {
-				ecio = new ECIO(pls.getLength() - ecn, ecn);
+				if(this.datapools.size() < (this.datapools.size() - ecn)) {
+					System.err.println("Required subpools is " + (this.datapools.size() - ecn) + " total found was" + this.datapools.size() );
+					System.exit(253);
+				} else
+					ecio = new ECIO(pls.getLength() - ecn, ecn);
+			}
+			if(this.metapools.size() == 0) {
+				System.err.println("No metadata subpools found");
+				System.exit(253);
 			}
 			this.partSize = Long.MAX_VALUE / this.datapools.size();
 			Map<String, String> md = null;
@@ -325,10 +348,14 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			for (AbstractBatchStore st : this.metapools) {
 				Map<String, String> _md = st.getBucketInfo();
 				if (_md != null) {
-					long tm = Long.parseLong(_md.get("lastupdated"));
-					if (tm > lastUpdated) {
-						lastUpdated = tm;
-						md = _md;
+					try {
+						long tm = Long.parseLong(_md.get("lastupdated"));
+						if (tm > lastUpdated) {
+							lastUpdated = tm;
+							md = _md;
+						}
+					} catch (Exception e) {
+
 					}
 				}
 			}
@@ -465,7 +492,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			int part = Math.toIntExact(id / this.partSize);
 			return this.datapools.get(part);
 		} else {
-			return this.datapools.get(rnd.nextInt(this.datapools.size()));
+			AbstractBatchStore st = null;
+			while(st == null)
+				st = this.datapools.get(rnd.nextInt(this.datapools.size()));
+			return st;
 		}
 	}
 
@@ -488,12 +518,14 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		if (this.rl.equals(RAID.MIRROR)) {
 			ArrayList<Callable<Boolean>> ar = new ArrayList<Callable<Boolean>>();
 			for (AbstractBatchStore st : this.datapools) {
-				Callable<Boolean> task = () -> {
+				if(st==null)
+				throw new IOException("unable to write id=" + id + " because not all data pools are up");
+				Callable<Boolean> task = () -> {	
 					try {
 						st.writeHashBlobArchive(arc, id);
 						return true;
 					} catch (IOException e1) {
-						SDFSLogger.getLog().warn("unable to get id=" + id, e1);
+						SDFSLogger.getLog().warn("unable to write id=" + id, e1);
 						return false;
 					}
 				};
@@ -546,6 +578,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			for (int i = 0; i < datapools.size(); i++) {
 				final int z = i;
 				AbstractCloudFileSync st = (AbstractCloudFileSync) datapools.get(i);
+				if(st == null) {
+					throw new IOException("unable to write id=" + id + " because not all data pools are up");
+				}
 				Callable<Boolean> task = () -> {
 					try {
 						st.uploadFile(fls[z], Long.toString(id), "blocks", new HashMap<String, String>(metaData), true);
@@ -602,7 +637,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			_metaData.put("size", Integer.toString(sz));
 			_metaData.put("ivspec", BaseEncoding.base64().encode(ivb));
 			_metaData.put("lastaccessed", "0");
-			_metaData.put("lz4compress", Boolean.toString(Main.compress));
+			_metaData.put("lz4compress", "false");
 			_metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 			_metaData.put("compressedsize", Long.toString(arc.getFile().length()));
 			_metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
@@ -661,9 +696,15 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				for (int i = 0; i < (this.datapools.size() - ecn); i++) {
 					final int z = i;
 					AbstractBatchStore st = datapools.get(z);
+					if(st == null) {
+						zk[z] = null;
+						SDFSLogger.getLog().warn("unable to return " + id + " for data pool " + z);
+						ear.add(z);
+					} else {
 					Callable<File> task = () -> {
 						try {
 							File _f = new File(this.ec_stage_location, id + "." + z);
+							SDFSLogger.getLog().info("will write to " + _f.getPath());
 							st.getBytes(id, _f);
 							zk[z] = _f;
 							return _f;
@@ -675,30 +716,24 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 						}
 					};
 					ar.add(task);
-				}
-				uploadExecutor.invokeAll(ar).stream().forEach((k) -> {
-					try {
-						k.get();
-					} catch (InterruptedException | ExecutionException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
 					}
-				});
+				}
+				uploadExecutor.invokeAll(ar);
 				if (ear.size() > 0) {
 					if (ear.size() > ecn) {
 						throw new IOException(
 								"Unable to restore data ec level=" + ecn + " ,missing blocks=" + ear.size());
 					} else {
-						ArrayList<File> fal = new ArrayList<File>();
+						final ArrayList<File> fal = new ArrayList<File>();
 						for (int i = this.datapools.size() - ecn; i < (this.datapools.size()); i++) {
 							AbstractBatchStore st = datapools.get(i);
 							final int z = i;
 							Callable<File> task = () -> {
 								try {
 									File _f = new File(this.ec_stage_location, id + "." + z);
-
 									st.getBytes(id, _f);
 									zk[z] = _f;
+									fal.add(_f);
 									return _f;
 								} catch (Exception e1) {
 									SDFSLogger.getLog().warn("unable to return " + id, e1);
@@ -716,6 +751,8 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 							ecio.decode(zk, f);
 						}
 					}
+				} else {
+					ecio.decode(zk,f);
 				}
 			}
 		} catch (Exception e) {
@@ -738,7 +775,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			try {
 				Thread.sleep(60000);
 				try {
-					
+
 					Map<String, String> md = null;
 					for (AbstractBatchStore cst : this.metapools) {
 						try {
@@ -755,11 +792,11 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 					md.put("bucketversion", Integer.toString(version));
 					md.put("sdfsversion", Main.version);
-					
+
 					if (Main.volume != null) {
 						md.put("port", Integer.toString(Main.sdfsCliPort));
 					}
-					final HashMap<String,String> _md = new HashMap<String,String>();
+					final HashMap<String, String> _md = new HashMap<String, String>();
 					_md.putAll(md);
 					ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
 					for (AbstractBatchStore st : this.datapools) {
@@ -1133,8 +1170,13 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public boolean isCheckedOut(String name, long volumeID) throws IOException {
+		try {
+			throw new IOException("z");
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("!!!!!!!!!!!!!!!",e);
+		}
 		ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
-		for (AbstractBatchStore st : this.datapools) {
+		for (AbstractBatchStore st : this.metapools) {
 			AbstractCloudFileSync cst = (AbstractCloudFileSync) st;
 			Callable<Boolean> task = () -> {
 				try {
@@ -1196,7 +1238,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	@Override
 	public void removeVolume(long volumeID) throws IOException {
 
@@ -1304,12 +1346,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public int verifyDelete(long id) throws IOException {
-		int claims =0;
-		Map<String,Long> data = this.getHashMap(id);
-		for(String key : data.keySet()) {
-		byte[] b = BaseEncoding.base64().decode(key);
-		if (HCServiceProxy.getHashesMap().mightContainKey(b))
-			claims++;
+		int claims = 0;
+		Map<String, Long> data = this.getHashMap(id);
+		for (String key : data.keySet()) {
+			byte[] b = BaseEncoding.base64().decode(key);
+			if (HCServiceProxy.getHashesMap().mightContainKey(b))
+				claims++;
 		}
 		return claims;
 	}

@@ -227,51 +227,52 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		this.closed = true;
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
-			if (this.standAlone)
+			if (this.standAlone) {
 				HashBlobArchive.close();
 
-			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
-			Map<String, String> md = null;
-			if (this.simpleMD)
-				md = this.getUserMetaData(binm);
-			else
-				md = omd.getUserMetadata();
-			ObjectMetadata nmd = new ObjectMetadata();
-			nmd.setUserMetadata(md);
-			md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
-			md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
-			md.put("lastupdate", Long.toString(System.currentTimeMillis()));
-			md.put("hostname", InetAddress.getLocalHost().getHostName());
-			md.put("port", Integer.toString(Main.sdfsCliPort));
-			byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
-			String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
-			md.put("md5sum", st);
-			nmd.setContentMD5(st);
-			nmd.setContentLength(sz.length);
-			nmd.setUserMetadata(md);
-			try {
-
+				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
+				Map<String, String> md = null;
 				if (this.simpleMD)
-					this.updateObject(binm, nmd);
+					md = this.getUserMetaData(binm);
 				else
-					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
-			} catch (AmazonS3Exception e1) {
-				if (e1.getStatusCode() == 409) {
-					try {
-						if (this.simpleMD)
-							this.updateObject(binm, nmd);
-						else
-							s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
-					} catch (Exception e2) {
-						throw new IOException(e2);
-					}
-				} else {
+					md = omd.getUserMetadata();
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
+				md.put("currentcompressedsize", Long.toString(HashBlobArchive.getCompressedLength()));
+				md.put("lastupdate", Long.toString(System.currentTimeMillis()));
+				md.put("hostname", InetAddress.getLocalHost().getHostName());
+				md.put("port", Integer.toString(Main.sdfsCliPort));
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
+				try {
 
+					if (this.simpleMD)
+						this.updateObject(binm, nmd);
+					else
+						s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+				} catch (AmazonS3Exception e1) {
+					if (e1.getStatusCode() == 409) {
+						try {
+							if (this.simpleMD)
+								this.updateObject(binm, nmd);
+							else
+								s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+						} catch (Exception e2) {
+							throw new IOException(e2);
+						}
+					} else {
+
+						throw new IOException(e1);
+					}
+				} catch (Exception e1) {
+					// SDFSLogger.getLog().error("error uploading", e1);
 					throw new IOException(e1);
 				}
-			} catch (Exception e1) {
-				// SDFSLogger.getLog().error("error uploading", e1);
-				throw new IOException(e1);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
@@ -372,9 +373,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void init(Element config) throws IOException {
-		this.name = Main.cloudBucket.toLowerCase();
+
 		if (config.hasAttribute("bucket-name")) {
 			this.name = config.getAttribute("bucket-name").toLowerCase();
+		} else {
+			this.name = Main.cloudBucket.toLowerCase();
 		}
 		if (config.hasAttribute("access-key")) {
 			this.accessKey = config.getAttribute("access-key");
@@ -587,31 +590,35 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						.setAccelerateModeEnabled(Boolean.parseBoolean(config.getAttribute("use-accelerated-mode")))
 						.build());
 			}
+			this.binm = "bucketinfo/"
+					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
-				ObjectMetadata md = new ObjectMetadata();
-				md.addUserMetadata("currentsize", "0");
-				md.addUserMetadata("currentcompressedsize", "0");
-				md.addUserMetadata("clustered", "true");
-				md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
-				md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
-				md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
+				if (this.standAlone) {
+					ObjectMetadata md = new ObjectMetadata();
+					md.addUserMetadata("currentsize", "0");
+					md.addUserMetadata("currentcompressedsize", "0");
+					md.addUserMetadata("clustered", "true");
+					md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
+					md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
+					md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
 
-				this.clustered = true;
-				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
-				if (md5sum) {
-					String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
-					md.setContentMD5(mds);
+					this.clustered = true;
+					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+					if (md5sum) {
+						String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+						md.setContentMD5(mds);
+					}
+					md.setContentLength(sz.length);
+					this.binm = "bucketinfo/"
+							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
+					if (this.simpleMD)
+						this.updateObject(binm, md);
 				}
-				md.setContentLength(sz.length);
-				this.binm = "bucketinfo/"
-						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
-				if (this.simpleMD)
-					this.updateObject(binm, md);
+			} else if (this.standAlone) {
 
-			} else {
 				Map<String, String> obj = null;
 				try {
 					obj = this.getUserMetaData(binm);
@@ -1856,11 +1863,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
 				metaData.putAll(umd);
 				md.setUserMetadata(metaData);
-				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
-				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
-				if (ivb != null)
-					md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
-				md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
+				if (!disableComp) {
+					md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
+					md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
+					if (ivb != null)
+						md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
+					md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
+				}
 				if (simpleS3) {
 					md.setContentType("binary/octet-stream");
 					in = new BufferedInputStream(new FileInputStream(p), 32768);
@@ -2783,10 +2792,23 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			s3Service.copyObject(creq);
 		} else {
 			try {
-				CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt);
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
+				ObjectMetadata _om = new ObjectMetadata();
+				_om.setUserMetadata(om.getUserMetadata());
+				_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
+				CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt)
+						.withNewObjectMetadata(_om);
 				s3Service.copyObject(req);
 			} catch (AmazonS3Exception e) {
-				CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt);
+				SDFSLogger.getLog().warn("unable to update object", e);
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
+				ObjectMetadata _om = new ObjectMetadata();
+				_om.setUserMetadata(om.getUserMetadata());
+				_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
+				CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt + ".cpy")
+						.withNewObjectMetadata(_om);
+				s3Service.copyObject(req);
+				req = new CopyObjectRequest(name, km + this.dExt + ".cpy", name, km + this.dExt);
 				s3Service.copyObject(req);
 			}
 		}

@@ -169,7 +169,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		this.closed = true;
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
-			if (this.standAlone)
+			if (this.standAlone) {
 				HashBlobArchive.close();
 
 			ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
@@ -214,6 +214,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			} catch (Exception e1) {
 				// SDFSLogger.getLog().error("error uploading", e1);
 				throw new IOException(e1);
+			}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
@@ -299,9 +300,10 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	@Override
 	public void init(Element config) throws IOException {
-		this.name = Main.cloudBucket.toLowerCase();
 		if (config.hasAttribute("bucket-name")) {
 			this.name = config.getAttribute("bucket-name").toLowerCase();
+		}else {
+			this.name = Main.cloudBucket.toLowerCase();
 		}
 		if (config.hasAttribute("access-key")) {
 			this.accessKey = config.getAttribute("access-key");
@@ -447,13 +449,15 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				}
 			}
 			s3Service = new OSSClient(s3Target, this.accessKey, this.secretKey);
-
+			this.binm = "bucketinfo/"
+					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (s3Target != null) {
 				s3Target = s3Target.toLowerCase();
 				System.out.println("target=" + s3Target);
 			}
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
+				if (this.standAlone) {
 				SDFSLogger.getLog().info("created new store " + name);
 				ObjectMetadata md = new ObjectMetadata();
 				md.addUserMetadata("currentsize", "0");
@@ -475,8 +479,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), md);
 				if (this.simpleMD)
 					this.updateObject(binm, md);
+				}
 
-			} else {
+			} else if(this.standAlone) {
 				Map<String, String> obj = null;
 				try {
 					obj = this.getUserMetaData(binm);
@@ -1727,11 +1732,13 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
 				metaData.putAll(umd);
 				md.setUserMetadata(metaData);
-				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
-				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
-				if (ivb != null)
-					md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
-				md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
+				if (!disableComp) {
+					md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
+					md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
+					if (ivb != null)
+						md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
+					md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
+				}
 				md.setContentType("binary/octet-stream");
 				in = new BufferedInputStream(new FileInputStream(p), 32768);
 				try {

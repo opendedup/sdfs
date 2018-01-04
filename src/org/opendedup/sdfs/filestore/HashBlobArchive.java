@@ -685,7 +685,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	static long cAc = 0;
 
 	public static void traverseCache(File f) {
-		if (f.isDirectory() && !f.getName().equalsIgnoreCase("outgoing") && !f.getName().equalsIgnoreCase("syncstaged")
+		if (f.isDirectory() && !f.getName().equalsIgnoreCase("outgoing") && !f.getName().equalsIgnoreCase("syncstaged") && f.getName().equalsIgnoreCase("ecstaged")
 				&& !f.getName().equalsIgnoreCase("metadata") && !f.getName().equalsIgnoreCase("blocks")
 				&& !f.getName().equalsIgnoreCase("keys") && !f.getName().equalsIgnoreCase("sync")) {
 			File[] fs = f.listFiles();
