@@ -2746,10 +2746,21 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			s3Service.copyObject(creq);
 		} else {
 			try {
-				CopyObjectRequest req = new CopyObjectRequest(name, km+ this.dExt, name, km+ this.dExt);
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
+				ObjectMetadata _om = new ObjectMetadata();
+				_om.setUserMetadata(om.getUserMetadata());
+				_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
+				CopyObjectRequest req = new CopyObjectRequest(name, km+ this.dExt, name, km+ this.dExt).withNewObjectMetadata(_om);
 				s3Service.copyObject(req);
 			} catch (AmazonS3Exception e) {
-				CopyObjectRequest req = new CopyObjectRequest(name, km+ this.dExt, name, km+ this.dExt);
+				SDFSLogger.getLog().warn("unable to update object", e);
+				ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
+				ObjectMetadata _om = new ObjectMetadata();
+				_om.setUserMetadata(om.getUserMetadata());
+				_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
+				CopyObjectRequest req = new CopyObjectRequest(name, km+ this.dExt, name, km+ this.dExt + ".cpy").withNewObjectMetadata(_om);
+				s3Service.copyObject(req);
+				req = new CopyObjectRequest(name, km+ this.dExt +".cpy", name, km+ this.dExt);
 				s3Service.copyObject(req);
 			}
 		}
