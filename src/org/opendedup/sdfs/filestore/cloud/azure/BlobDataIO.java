@@ -19,6 +19,56 @@ public class BlobDataIO {
     final static String ROW_KEY = "RowKey";
     final static String TIMESTAMP = "Timestamp";
     String storageConnectionString = null;
+    CloudTable cloudTable = null;
+    CloudTableClient tableClient = null;
+    public BlobDataIO(String tableName,String accessKey,String secretKey,String connectionProtocol) throws InvalidKeyException, URISyntaxException, StorageException {
+    	storageConnectionString="DefaultEndpointsProtocol=" + connectionProtocol + ";" + "AccountName="
+				+ accessKey + ";" + "AccountKey=" + secretKey;
+    	CloudStorageAccount storageAccount =
+		        CloudStorageAccount.parse(storageConnectionString);
+		tableClient = storageAccount.createCloudTableClient();
+		cloudTable = tableClient.getTableReference(tableName);
+	    cloudTable.createIfNotExists();
+    }
+    
+    public void updateBlobDataTracker(long id) throws StorageException {
+    	 BlobDataTracker tr = new BlobDataTracker(id,"active");
+    	 TableOperation tro = TableOperation.insertOrReplace(tr);
+ 	    	cloudTable.execute(tro);
+    }
+    
+    public void removeBlobDataTracker(long id) throws StorageException {
+    	TableOperation to = TableOperation.retrieve("active", Long.toString(id), BlobDataTracker.class);
+    	BlobDataTracker btr = cloudTable.execute(to).getResultAsType();
+    	if(btr != null) {
+    		TableOperation deleteBtr = TableOperation.delete(btr);
+
+    	    // Submit the delete operation to the table service.
+    	    cloudTable.execute(deleteBtr);
+    	}
+    }
+    
+    public  Iterable<BlobDataTracker> getBlobDataTrackers(int daysBack) {
+    	long tm = System.currentTimeMillis() - ((long)daysBack * 86400000L);
+    	String partitionFilter = TableQuery.combineFilters(TableQuery.generateFilterCondition(
+	    		PARTITION_KEY,
+	            QueryComparisons.EQUAL,
+	            "active"), TableQuery.Operators.AND,TableQuery.generateFilterCondition(
+	            		TIMESTAMP,
+	    	            QueryComparisons.GREATER_THAN,
+	    	            new Date((long)(tm))));
+    	TableQuery<BlobDataTracker> partitionQuery =
+	            TableQuery.from(BlobDataTracker.class)
+	            .where(partitionFilter);
+    	 Iterable<BlobDataTracker> iter = cloudTable.execute(partitionQuery);
+    	 return iter;
+    }
+    
+    public void close() {
+    	
+    }
+    
+    
     
     
     public static void main(String [] args) throws InvalidKeyException, URISyntaxException, StorageException {
