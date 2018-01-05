@@ -18,6 +18,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
 	private boolean standAlone = true;
 	private StandardBlobTier tier = null;
+	private HashSet<Long> refresh = new HashSet<Long>();
 
 	// private String bucketLocation = null;
 	static {
@@ -659,6 +661,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData.put("compressedsize", Integer.toString(csz));
 				metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 				metaData.put("objects", Integer.toString(arc.getSz()));
+				metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
 
 				blob.setMetadata(metaData);
 
@@ -670,9 +673,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				blobProperties.setContentMD5(mds);
 				ByteArrayInputStream bin = new ByteArrayInputStream(f);
 				blob.upload(bin, csz, null, null, opContext);
+				IOUtils.closeQuietly(bin);
 				if (tier != null)
 					blob.uploadStandardBlobTier(this.tier);
-				IOUtils.closeQuietly(bin);
 				// upload the metadata
 				byte[] chunks = arc.getHashesString().getBytes();
 				blob = container.getBlockBlobReference("keys/" + haName);
@@ -786,6 +789,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 
 				}
+				metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
+				blob.setMetadata(metaData);
+				blob.uploadMetadata(null, null, opContext);
 			} catch (Exception e1) {
 				try {
 					Thread.sleep(10000);
@@ -910,6 +916,31 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						// + odel.size());
 					} finally {
 						this.delLock.unlock();
+					}
+					
+					if (this.tier != null && this.tier.equals(StandardBlobTier.ARCHIVE)) {
+						HashSet<Long> orr = new HashSet<Long>();
+						synchronized(this.refresh) {
+							
+							orr.addAll(this.refresh);
+							this.refresh.clear();
+						}
+						for(Long k : orr) {
+							try {
+							String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
+									Main.chunkStoreEncryptionEnabled);
+								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
+								blob.downloadAttributes();
+								HashMap<String, String> metaData = blob.getMetadata();
+								metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
+								blob.setMetadata(metaData);
+								blob.uploadMetadata(null, null, opContext);
+							}catch(Exception e) {
+								SDFSLogger.getLog().warn("unable to refresh blob " +k,e);
+							}
+						}
+					}else {
+						this.refresh.clear();
 					}
 					Set<Long> iter = odel.keySet();
 					for (Long k : iter) {
@@ -1814,7 +1845,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void addRefresh(long id) {
-		// TODO Auto-generated method stub
+		synchronized(this.refresh) {
+		if (Main.REFRESH_BLOBS)
+			this.refresh.add(id);
+		}
 
 	}
 

@@ -277,7 +277,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			if (config.hasAttribute("raid-level")) {
 				int _rl = Integer.parseInt(config.getAttribute("raid-level"));
 				if (_rl == 0)
-					rl = RAID.MIRROR;
+					rl = RAID.STRIPE;
 				if (_rl == 1)
 					rl = RAID.MIRROR;
 				if (_rl == 5)
@@ -286,6 +286,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			if (rl.equals(RAID.EC)) {
 				ecn = Integer.parseInt(config.getAttribute("erasure-copies"));
 			}
+			SDFSLogger.getLog().info("Raid Level Set to " + rl.name());
 			NodeList pls = config.getElementsByTagName("pool");
 			if (pls.getLength() == 0) {
 				System.err.println("No Subpools found. Exiting");
@@ -332,13 +333,14 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				}
 			}
 			if (rl.equals(RAID.EC)) {
-				if(this.datapools.size() < (this.datapools.size() - ecn)) {
-					System.err.println("Required subpools is " + (this.datapools.size() - ecn) + " total found was" + this.datapools.size() );
+				if (this.datapools.size() < (this.datapools.size() - ecn)) {
+					System.err.println("Required subpools is " + (this.datapools.size() - ecn) + " total found was"
+							+ this.datapools.size());
 					System.exit(253);
 				} else
 					ecio = new ECIO(pls.getLength() - ecn, ecn);
 			}
-			if(this.metapools.size() == 0) {
+			if (this.metapools.size() == 0) {
 				System.err.println("No metadata subpools found");
 				System.exit(253);
 			}
@@ -493,7 +495,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			return this.datapools.get(part);
 		} else {
 			AbstractBatchStore st = null;
-			while(st == null)
+			while (st == null)
 				st = this.datapools.get(rnd.nextInt(this.datapools.size()));
 			return st;
 		}
@@ -518,9 +520,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		if (this.rl.equals(RAID.MIRROR)) {
 			ArrayList<Callable<Boolean>> ar = new ArrayList<Callable<Boolean>>();
 			for (AbstractBatchStore st : this.datapools) {
-				if(st==null)
-				throw new IOException("unable to write id=" + id + " because not all data pools are up");
-				Callable<Boolean> task = () -> {	
+				if (st == null)
+					throw new IOException("unable to write id=" + id + " because not all data pools are up");
+				Callable<Boolean> task = () -> {
 					try {
 						st.writeHashBlobArchive(arc, id);
 						return true;
@@ -556,7 +558,6 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		} else if (this.rl.equals(RAID.STRIPE)) {
 			this.getStore(id).writeHashBlobArchive(arc, id);
 		} else if (this.rl.equals(RAID.EC)) {
-
 			final HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("size", Integer.toString(arc.uncompressedLength.get()));
 			if (Main.compress) {
@@ -578,7 +579,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			for (int i = 0; i < datapools.size(); i++) {
 				final int z = i;
 				AbstractCloudFileSync st = (AbstractCloudFileSync) datapools.get(i);
-				if(st == null) {
+				if (st == null) {
 					throw new IOException("unable to write id=" + id + " because not all data pools are up");
 				}
 				Callable<Boolean> task = () -> {
@@ -683,6 +684,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 		}
 	}
+	
 
 	@Override
 	public void getBytes(long id, File f) throws IOException {
@@ -696,26 +698,26 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				for (int i = 0; i < (this.datapools.size() - ecn); i++) {
 					final int z = i;
 					AbstractBatchStore st = datapools.get(z);
-					if(st == null) {
+					if (st == null) {
 						zk[z] = null;
 						SDFSLogger.getLog().warn("unable to return " + id + " for data pool " + z);
 						ear.add(z);
 					} else {
-					Callable<File> task = () -> {
-						try {
-							File _f = new File(this.ec_stage_location, id + "." + z);
-							SDFSLogger.getLog().info("will write to " + _f.getPath());
-							st.getBytes(id, _f);
-							zk[z] = _f;
-							return _f;
-						} catch (Exception e1) {
-							zk[z] = null;
-							SDFSLogger.getLog().warn("unable to return " + id, e1);
-							ear.add(z);
-							return null;
-						}
-					};
-					ar.add(task);
+						Callable<File> task = () -> {
+							try {
+								File _f = new File(this.ec_stage_location, id + "." + z);
+								SDFSLogger.getLog().info("will write to " + _f.getPath());
+								st.getBytes(id, _f);
+								zk[z] = _f;
+								return _f;
+							} catch (Exception e1) {
+								zk[z] = null;
+								SDFSLogger.getLog().warn("unable to return " + id, e1);
+								ear.add(z);
+								return null;
+							}
+						};
+						ar.add(task);
 					}
 				}
 				uploadExecutor.invokeAll(ar);
@@ -752,7 +754,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 						}
 					}
 				} else {
-					ecio.decode(zk,f);
+					ecio.decode(zk, f);
 				}
 			}
 		} catch (Exception e) {
@@ -800,16 +802,18 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 					_md.putAll(md);
 					ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
 					for (AbstractBatchStore st : this.datapools) {
-						Callable<Boolean> task = () -> {
-							try {
-								st.updateBucketInfo(_md);
-								return true;
-							} catch (Exception e) {
-								SDFSLogger.getLog().error("error in isCheckedOut thread", e);
-								return false;
-							}
-						};
-						al.add(task);
+						if (st != null) {
+							Callable<Boolean> task = () -> {
+								try {
+									st.updateBucketInfo(_md);
+									return true;
+								} catch (Exception e) {
+									SDFSLogger.getLog().error("error in thread", e);
+									return false;
+								}
+							};
+							al.add(task);
+						}
 					}
 					try {
 						uploadExecutor.invokeAll(al);
@@ -980,11 +984,17 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	public Map<String, Long> getHashMap(long id) throws IOException {
 		IOException e = null;
+		if(rl.equals(RAID.STRIPE)) {
+			return this.getStore(id).getHashMap(id);
+		}
 		for (AbstractBatchStore st : this.datapools) {
 			try {
-				return st.getHashMap(id);
-			} catch (IOException e1) {
-				e = e1;
+				Map<String, Long> hm = st.getHashMap(id);
+				if(hm != null) {
+					return hm;
+				}
+			} catch (Exception e1) {
+				e = new IOException(e1);
 			}
 		}
 		if (e != null)
@@ -1133,7 +1143,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	@Override
 	public void checkoutFile(String name) throws IOException {
 		ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
-		for (AbstractBatchStore st : this.datapools) {
+		for (AbstractBatchStore st : this.metapools) {
 			AbstractCloudFileSync cst = (AbstractCloudFileSync) st;
 			Callable<Boolean> task = () -> {
 				try {
@@ -1170,11 +1180,6 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public boolean isCheckedOut(String name, long volumeID) throws IOException {
-		try {
-			throw new IOException("z");
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("!!!!!!!!!!!!!!!",e);
-		}
 		ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
 		for (AbstractBatchStore st : this.metapools) {
 			AbstractCloudFileSync cst = (AbstractCloudFileSync) st;
@@ -1224,7 +1229,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
-		AbstractCloudFileSync cst = (AbstractCloudFileSync) this.datapools.get(0);
+		AbstractCloudFileSync cst = (AbstractCloudFileSync) this.metapools.get(0);
 		return cst.getConnectedVolumes();
 	}
 
