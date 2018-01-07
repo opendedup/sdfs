@@ -819,6 +819,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			try {
 				in.close();
+				sobj.close();
 			} catch (Exception e) {
 			}
 		}
@@ -862,7 +863,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		SDFSLogger.getLog().debug("reading hashes " + (String) mp.get("hashes") + " from " + sobj.getKey());
 		String[] st = hast.split(",");
 		return st;
-
 	}
 
 	private int getClaimedObjects(S3Object sobj, long id) throws Exception, IOException {
@@ -1217,6 +1217,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				sobj = s3Service.getObject(this.name, "blocks/" + haName + this.dExt);
 			} catch (AmazonS3Exception e) {
+				if (e.getErrorCode().equalsIgnoreCase("NoSuchKey") && Main.chunkStoreEncryptionEnabled) {
+					haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+					try {
+						omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName + this.dExt);
+					} catch (AmazonS3Exception e1) {
+						if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+							throw new DataArchivedException(id, null);
+					}
+				}
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
 					throw new DataArchivedException(id, null);
 				else {
@@ -2269,14 +2278,24 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		S3Object kobj = null;
 		// this.s3clientLock.readLock().lock();
 		try {
-			kobj = s3Service.getObject(this.name, "keys/" + haName);
+			try {
+				kobj = s3Service.getObject(this.name, "keys/" + haName);
+				kobj.getObjectMetadata();
+				s3Service.getObjectMetadata(this.name, "keys/" + haName);
+				kobj.getObjectMetadata();
+			} catch (AmazonS3Exception e) {
+				if (e.getErrorCode().equalsIgnoreCase("NoSuchKey") && Main.chunkStoreEncryptionEnabled) {
+					haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled, true);
+					// kobj = s3Service.getObject(this.name, "keys/" + haName);
+					// kobj.getObjectMetadata();
+				}
+			}
 			String[] ks = this.getStrings(kobj);
 			HashMap<String, Long> m = new HashMap<String, Long>(ks.length + 1);
 			for (String k : ks) {
 				String[] kv = k.split(":");
 				m.put(kv[0], Long.parseLong(kv[1]));
 			}
-
 			return m;
 		} finally {
 			// this.s3clientLock.readLock().unlock();
@@ -2371,7 +2390,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 2);
 				s3Service.restoreObject(request);
-
 				if (blockRestored(haName)) {
 					restoreRequests.put(new Long(id), "InvalidObjectState");
 
@@ -2425,19 +2443,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
 			ObjectMetadata momd = omd;
 			if (this.simpleMD)
-				momd = s3Service.getObjectMetadata(this.name, "blocks/" + id+ mdExt);
-			if(omd == null || momd == null) {
+				momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
+			if (omd == null || momd == null) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is null");
 				return false;
-			}
-			else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER") && !momd.getStorageClass().equalsIgnoreCase("GLACIER") ) {
+			} else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
+					&& !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
 				return true;
-			}
-			else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
+			} else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");
 				return false;
-			}
-			else
+			} else
 				return true;
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while checking block restored", e);

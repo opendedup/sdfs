@@ -76,6 +76,21 @@ public class EncyptUtils {
 					.encode(Long.toString(id).getBytes());
 		}
 	}
+	
+	public static String encHashArchiveName(long id,boolean useOldKey, boolean enc)
+			throws IOException {
+		if (baseEncode)
+			return Long.toString(id);
+		if (enc) {
+			byte[] encH = EncryptUtils.encryptCBC(Long.toString(id).getBytes(),useOldKey);
+			return BaseEncoding.base64Url().encode(encH);
+		} else {
+			return BaseEncoding.base64Url()
+					.encode(Long.toString(id).getBytes());
+		}
+	}
+	
+	
 
 	public static long decHashArchiveName(String fname, boolean enc)
 			throws IOException {
