@@ -31,14 +31,14 @@ public class BlobDataIO {
 	    cloudTable.createIfNotExists();
     }
     
-    public void updateBlobDataTracker(long id) throws StorageException {
-    	 BlobDataTracker tr = new BlobDataTracker(id,"active");
-    	 TableOperation tro = TableOperation.insertOrReplace(tr);
- 	    	cloudTable.execute(tro);
+    public void updateBlobDataTracker(long id,String volid) throws StorageException {
+    	BlobDataTracker tr = new BlobDataTracker(id,volid);
+    	TableOperation tro = TableOperation.insertOrReplace(tr);
+ 	    cloudTable.execute(tro);
     }
     
-    public void removeBlobDataTracker(long id) throws StorageException {
-    	TableOperation to = TableOperation.retrieve("active", Long.toString(id), BlobDataTracker.class);
+    public void removeBlobDataTracker(long id,String volid) throws StorageException {
+    	TableOperation to = TableOperation.retrieve(volid, Long.toString(id), BlobDataTracker.class);
     	BlobDataTracker btr = cloudTable.execute(to).getResultAsType();
     	if(btr != null) {
     		TableOperation deleteBtr = TableOperation.delete(btr);
@@ -48,14 +48,19 @@ public class BlobDataIO {
     	}
     }
     
-    public  Iterable<BlobDataTracker> getBlobDataTrackers(int daysBack) {
-    	long tm = System.currentTimeMillis() - ((long)daysBack * 86400000L);
+    public  Iterable<BlobDataTracker> getBlobDataTrackers(int daysBack,String volid) {
+    	long tm = ((long)daysBack * 86400000L);
+    	return this.getBlobDataTrackers(tm, volid);
+    }
+    
+    public Iterable<BlobDataTracker> getBlobDataTrackers(long msBack,String volid) {
+    	long tm = System.currentTimeMillis() - msBack;
     	String partitionFilter = TableQuery.combineFilters(TableQuery.generateFilterCondition(
 	    		PARTITION_KEY,
 	            QueryComparisons.EQUAL,
-	            "active"), TableQuery.Operators.AND,TableQuery.generateFilterCondition(
+	            volid), TableQuery.Operators.AND,TableQuery.generateFilterCondition(
 	            		TIMESTAMP,
-	    	            QueryComparisons.GREATER_THAN,
+	    	            QueryComparisons.LESS_THAN,
 	    	            new Date((long)(tm))));
     	TableQuery<BlobDataTracker> partitionQuery =
 	            TableQuery.from(BlobDataTracker.class)
@@ -72,40 +77,22 @@ public class BlobDataIO {
     
     
     public static void main(String [] args) throws InvalidKeyException, URISyntaxException, StorageException {
-		String storageConnectionString = "nothing";
-		CloudStorageAccount storageAccount =
-		        CloudStorageAccount.parse(storageConnectionString);
-		CloudTableClient tableClient = storageAccount.createCloudTableClient();
-
-	    // Create the table if it doesn't exist.
-	    String tableName = "aaadqadwe";
-	    CloudTable cloudTable = tableClient.getTableReference(tableName);
-	    cloudTable.createIfNotExists();
-	    Random rnd =new Random();
-	    BlobDataTracker tr = new BlobDataTracker(rnd.nextLong(),"archive");
-	    System.out.println("1");
-	    TableOperation insertCustomer1 = TableOperation.insertOrReplace(tr);
-	    // Submit the operation to the table service.
-	    cloudTable.execute(insertCustomer1);
-	    System.out.println("2");
-	    String partitionFilter = TableQuery.combineFilters(TableQuery.generateFilterCondition(
-	    		PARTITION_KEY,
-	            QueryComparisons.EQUAL,
-	            "archive"), TableQuery.Operators.AND,TableQuery.generateFilterCondition(
-	            		TIMESTAMP,
-	    	            QueryComparisons.GREATER_THAN,
-	    	            new Date((long)(1515118117098L))));
-	    System.out.println("3");
-	        // Specify a partition query, using "Smith" as the partition key filter.
-	        TableQuery<BlobDataTracker> partitionQuery =
-	            TableQuery.from(BlobDataTracker.class)
-	            .where(partitionFilter);
-	        System.out.println("4");
-	        // Loop through the results, displaying information about the entity.
-	        for (BlobDataTracker entity : cloudTable.execute(partitionQuery)) {
-	            System.out.println(entity.getPartitionKey() +
-	                "\t" + entity.getRowKey() + "\t" + entity.getTimestamp().getTime());
-	        }
-	        System.out.println("5");
-	}
+		BlobDataIO bio = new BlobDataIO("aaaabbbb","an","an","http");
+		String volid="schwing";
+		Random rnd = new Random();
+		for(int i = 0;i<100;i++) {
+			bio.updateBlobDataTracker(rnd.nextLong(), volid);
+		}
+		for(BlobDataTracker bt : bio.getBlobDataTrackers(1000L, volid)) {
+			bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), volid);
+			System.out.println("Removed " + bt.getRowKey());
+		}
+		int k = 0;
+		for(BlobDataTracker bt : bio.getBlobDataTrackers(1L, volid)) {
+			k++;
+			System.out.println("did not remove " + bt.getRowKey() + " k=" + k);
+		}
+		bio.removeBlobDataTracker(55, volid);
+		
+    }
 }

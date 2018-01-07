@@ -40,6 +40,8 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractBatchStore;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -97,6 +99,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private boolean standAlone = true;
 	private StandardBlobTier tier = null;
 	private HashSet<Long> refresh = new HashSet<Long>();
+	private BlobDataIO bio = null;
+	private int tierInDays = 30;
 
 	// private String bucketLocation = null;
 	static {
@@ -325,6 +329,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.getAttribute("storage-tier").equalsIgnoreCase("archive"))
 				this.tier = StandardBlobTier.ARCHIVE;
 		}
+		if (config.hasAttribute("azure-tier-in-days")) {
+			this.tierInDays = Integer.parseInt(config.getAttribute("azure-tier-in-days"));
+		}
 		// System.setProperty("http.keepalive", "true");
 
 		System.setProperty("http.maxConnections", Integer.toString(Main.dseIOThreads * 2));
@@ -344,6 +351,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			account = CloudStorageAccount.parse(storageConnectionString);
 			serviceClient = account.createCloudBlobClient();
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
+			if (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL)) {
+				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
+			}
 			/*
 			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs( 10 * 1000);
 			 * 
@@ -420,7 +430,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					container.uploadMetadata(null, null, opContext);
 					SDFSLogger.getLog().debug("set user metadata " + metaData.size());
 				}
-				
+
 			}
 			if (this.standAlone) {
 				HashBlobArchive.setLength(sz);
@@ -661,7 +671,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData.put("compressedsize", Integer.toString(csz));
 				metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 				metaData.put("objects", Integer.toString(arc.getSz()));
-				metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
+				metaData.put("lastaccessed", Long.toString(System.currentTimeMillis()));
 
 				blob.setMetadata(metaData);
 
@@ -674,8 +684,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				ByteArrayInputStream bin = new ByteArrayInputStream(f);
 				blob.upload(bin, csz, null, null, opContext);
 				IOUtils.closeQuietly(bin);
-				if (tier != null)
+				if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
+					this.bio.updateBlobDataTracker(id,
+							EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+				} else if (this.tier != null) {
 					blob.uploadStandardBlobTier(this.tier);
+				}
 				// upload the metadata
 				byte[] chunks = arc.getHashesString().getBytes();
 				blob = container.getBlockBlobReference("keys/" + haName);
@@ -753,6 +767,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				}
 				blob.downloadToFile(f.getPath(), null, null, opContext);
+				if (Main.REFRESH_BLOBS) {
+					synchronized (this.refresh) {
+						this.refresh.add(id);
+					}
+				}
 				HashMap<String, String> metaData = blob.getMetadata();
 				if (metaData.containsKey("deleted")) {
 					boolean del = Boolean.parseBoolean(metaData.get("deleted"));
@@ -789,9 +808,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 
 				}
-				metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
-				blob.setMetadata(metaData);
-				blob.uploadMetadata(null, null, opContext);
+
 			} catch (Exception e1) {
 				try {
 					Thread.sleep(10000);
@@ -856,6 +873,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} else {
 				if (clustered) {
 					cblob.delete();
+					try {
+						bio.removeBlobDataTracker(id,
+								EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+						if(Main.REFRESH_BLOBS) {
+						synchronized(this.refresh) {
+								this.refresh.remove(id);
+							}
+						}
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("unable to remove " + id + " from tablelob", e);
+					}
 					if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
 						kblob.delete();
 						kblob = container.getBlockBlobReference("blocks/" + haName);
@@ -906,6 +934,38 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to update size", e);
 				}
+				if (this.tier != null && (tier.equals(StandardBlobTier.ARCHIVE))) {
+					HashSet<Long> orr = new HashSet<Long>();
+					String dseID = EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+					if (Main.REFRESH_BLOBS) {
+						synchronized (this.refresh) {
+							orr.addAll(this.refresh);
+							this.refresh.clear();
+						}
+						for (Long id : orr) {
+							try {
+								bio.updateBlobDataTracker(id, dseID);
+							} catch (Exception e) {
+								SDFSLogger.getLog().warn("unable to update block id " + id, e);
+							}
+						}
+					} else {
+						this.refresh.clear();
+					}
+					Iterable<BlobDataTracker> tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
+					for (BlobDataTracker bt : tri) {
+						String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
+								Main.chunkStoreEncryptionEnabled);
+						try {
+							CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
+							blob.uploadStandardBlobTier(this.tier);
+							bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
+						}
+					}
+				}
+
 				if (this.deletes.size() > 0) {
 					this.delLock.lock();
 					HashMap<Long, Integer> odel = null;
@@ -916,31 +976,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						// + odel.size());
 					} finally {
 						this.delLock.unlock();
-					}
-					
-					if (this.tier != null && this.tier.equals(StandardBlobTier.ARCHIVE)) {
-						HashSet<Long> orr = new HashSet<Long>();
-						synchronized(this.refresh) {
-							
-							orr.addAll(this.refresh);
-							this.refresh.clear();
-						}
-						for(Long k : orr) {
-							try {
-							String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
-									Main.chunkStoreEncryptionEnabled);
-								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
-								blob.downloadAttributes();
-								HashMap<String, String> metaData = blob.getMetadata();
-								metaData.put("lastaccessed",Long.toString(System.currentTimeMillis()));
-								blob.setMetadata(metaData);
-								blob.uploadMetadata(null, null, opContext);
-							}catch(Exception e) {
-								SDFSLogger.getLog().warn("unable to refresh blob " +k,e);
-							}
-						}
-					}else {
-						this.refresh.clear();
 					}
 					Set<Long> iter = odel.keySet();
 					for (Long k : iter) {
@@ -1434,6 +1469,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
 				blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+				bio.removeBlobDataTracker(id,
+						EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 				this.restoreRequests.put(new Long(id), haName);
 				return haName;
 			} else {
@@ -1845,9 +1882,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void addRefresh(long id) {
-		synchronized(this.refresh) {
-		if (Main.REFRESH_BLOBS)
-			this.refresh.add(id);
+		synchronized (this.refresh) {
+			if (Main.REFRESH_BLOBS)
+				this.refresh.add(id);
 		}
 
 	}
