@@ -58,7 +58,6 @@ public class EncryptUtils {
 	}
 
 	public static byte[] encrypt(byte[] chunk) throws IOException {
-
 		return encryptCBC(chunk);
 	}
 
@@ -67,10 +66,17 @@ public class EncryptUtils {
 	}
 
 	public static byte[] encryptCBC(byte[] chunk) throws IOException {
+		return encryptCBC(chunk,false);
+	}
+	
+	public static byte[] encryptCBC(byte[] chunk,boolean useOldKey) throws IOException {
 
 		try {
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, key, spec);
+			if(useOldKey)
+				cipher.init(Cipher.ENCRYPT_MODE, oldKey, spec);
+			else
+				cipher.init(Cipher.ENCRYPT_MODE, key, spec);
 			byte[] encrypted = cipher.doFinal(chunk);
 			return encrypted;
 		} catch (Exception ce) {
@@ -79,6 +85,7 @@ public class EncryptUtils {
 		}
 
 	}
+	
 
 	public static byte[] decryptCBC(byte[] encChunk) throws IOException {
 
