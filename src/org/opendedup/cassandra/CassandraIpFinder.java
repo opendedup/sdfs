@@ -135,7 +135,7 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 		CassandraIpFinder cip = new CassandraIpFinder();
 		TcpDiscoverySpi spi = new TcpDiscoverySpi();
 		spi.setIpFinder(cip);
-		InetSocketAddress [] cipep = {new InetSocketAddress("192.168.0.146",9042)};
+		InetSocketAddress [] cipep = {new InetSocketAddress("192.168.0.105",9042)};
 		cip.setCassandraContactPoints(cipep);
 		IgniteConfiguration cfg = new IgniteConfiguration();
 		 

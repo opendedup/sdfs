@@ -18,7 +18,8 @@
  *******************************************************************************/
 package org.opendedup.sdfs.mgmt.websocket;
 
-import org.simpleframework.http.socket.Session;
+import org.simpleframework.http.socket.Session
+;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

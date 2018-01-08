@@ -51,6 +51,7 @@ import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.events.HashBlobArchiveUploaded;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
@@ -60,6 +61,7 @@ import org.opendedup.util.StringUtils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.Weigher;
+import com.google.common.eventbus.EventBus;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
@@ -102,6 +104,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static boolean cacheReads = true;
 	public static int offset = 0;
 	private File f = null;
+	private static EventBus eventUploadBus = new EventBus();
 	// private static transient RejectedExecutionHandler executionHandler = new
 	// BlockPolicy();
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
@@ -126,6 +129,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	private static Ignite ignite;
+	
+	public static void registerEventBus(Object obj) {
+		eventUploadBus.register(obj);
+	}
+	
 	static {
 
 		if (Main.volume.isClustered()) {
@@ -1695,6 +1703,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				wrl.acquire(_sz);
 			}
 			store.writeHashBlobArchive(this, nid);
+			eventUploadBus.post(new HashBlobArchiveUploaded(this));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 			return false;
