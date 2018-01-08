@@ -391,10 +391,13 @@ public class MgmtWebServer implements Container {
 								dstfile = qry.get("dstfile");
 							}
 							boolean overwrite = false;
+							String changeid = null;
+							if(qry.containsKey("changeid"))
+							 changeid = qry.get("changeid");
 							if (qry.containsKey("overwrite")) {
 								overwrite = Boolean.parseBoolean(qry.get("overwrite"));
 							}
-							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite);
+							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite,changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
@@ -421,7 +424,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("cloudmfile", e);
 						}
-						break;/*
+						break;
+						/*
 					case "clouddbfile":
 						try {
 							String changeid = qry.get("changeid");
@@ -434,7 +438,8 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("clouddbfile", e);
 						}
-						break;*/
+						break;
+						*/
 					case "setcachesz":
 						try {
 							Element msg = new SetCacheSize().getResult(qry.get("sz"));
