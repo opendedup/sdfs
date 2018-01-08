@@ -2,8 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,6 +26,9 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.LRUCache;
+import org.opendedup.util.XMLUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.primitives.Longs;
@@ -39,11 +40,26 @@ public class GetCloudFile implements Runnable {
 	SparseDedupFile sdd = null;
 	String sfile, dstfile;
 	boolean overwrite;
-	
+
 	File df = null;
 	SDFSEvent fevt = null;
+	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 
-	public Element getResult(String file, String dstfile, boolean overwrite) throws IOException {
+	public Element getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
+		synchronized (ck) {
+			if (changeid != null && ck.containsKey(changeid)) {
+				try {
+					SDFSLogger.getLog().info("ignoring " + changeid + " " + file);
+					Document doc = XMLUtils.getXMLDoc("cloudfile");
+					Element root = doc.getDocumentElement();
+					root.setAttribute("action", "ignored");
+					return (Element) root.cloneNode(true);
+				} catch (Exception e) {
+					throw new IOException(e);
+				}
+			}
+			ck.put(changeid, file);
+		}
 		this.sfile = file;
 		this.dstfile = dstfile;
 		this.overwrite = overwrite;
@@ -55,9 +71,9 @@ public class GetCloudFile implements Runnable {
 		} catch (ParserConfigurationException e) {
 			throw new IOException(e);
 		}
-		
+
 	}
-	
+
 	private void downloadFile() throws IOException {
 		if (dstfile != null && sfile.contentEquals(dstfile) && !overwrite)
 			throw new IOException("local filename in the same as source name");
@@ -80,9 +96,9 @@ public class GetCloudFile implements Runnable {
 				SDFSLogger.getLog().info("downloaded " + sfile);
 				mf.setLocalOwner(false);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
-				SDFSLogger.getLog().info("downloading ddb " + mf.getDfGuid() + " lf=" +mf.getLookupFilter());
+				SDFSLogger.getLog().info("downloading ddb " + mf.getDfGuid() + " lf=" + mf.getLookupFilter());
 				LongByteArrayMap ddb = null;
-				FileReplicationService.getDDB(mf.getDfGuid(),mf.getLookupFilter());
+				FileReplicationService.getDDB(mf.getDfGuid(), mf.getLookupFilter());
 				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
@@ -93,7 +109,7 @@ public class GetCloudFile implements Runnable {
 
 				} else {
 					sdd = mf.getDedupFile(false);
-					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" +sdd.getGUID());
+					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + sdd.getGUID());
 					DedupFileChannel ch = sdd.getChannel(-1);
 					ddb = (LongByteArrayMap) sdd.bdb;
 					sdd.unRegisterChannel(ch, -1);
@@ -102,7 +118,6 @@ public class GetCloudFile implements Runnable {
 				if (ddb.getVersion() < 2)
 					throw new IOException("only files version 2 or later can be imported");
 
-				
 			}
 		} catch (IOException e) {
 
@@ -146,20 +161,20 @@ public class GetCloudFile implements Runnable {
 					} else {
 						mf.getIOMonitor().addDulicateData(p.nlen, false);
 						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
-							SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " " +Longs.fromByteArray( p.hashloc) );
+							// SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " "
+							// +Longs.fromByteArray( p.hashloc) );
 							p.hashloc = ir.getHashLocs();
 							blks.add(Longs.fromByteArray(ir.getHashLocs()));
 							dirty = true;
 						}
 					}
-					
-					
+
 				}
 				if (dirty)
 					ddb.put(kv.getKey(), ck);
 			}
-			
-			//SDFSLogger.getLog().info("new objects of size " + blks.size());
+
+			// SDFSLogger.getLog().info("new objects of size " + blks.size());
 			for (Long l : blks) {
 				SDFSLogger.getLog().info("importing " + l);
 				HashBlobArchive.claimBlock(l);
@@ -180,7 +195,10 @@ public class GetCloudFile implements Runnable {
 			this.checkDedupFile(sdd, fevt);
 			fevt.endEvent("imported [" + mf.getPath() + "]");
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to process file " + mf.getPath(), e);
+			String pth = "";
+			if (mf != null)
+				pth = mf.getPath();
+			SDFSLogger.getLog().error("unable to process file " + pth, e);
 			fevt.endEvent("unable to process file " + mf.getPath(), SDFSEvent.ERROR);
 		} finally {
 			if (df != null && mf != null) {
