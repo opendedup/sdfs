@@ -27,7 +27,6 @@ public class GetCloudMetaFile {
 
 	public Element getResult(String file, String dstfile, String changeid)
 			throws IOException {
-
 		synchronized (ck) {
 			if (ck.containsKey(changeid)) {
 				try {
@@ -59,7 +58,6 @@ public class GetCloudMetaFile {
 			try {
 				Document doc = XMLUtils.getXMLDoc("cloudmfile");
 				Element root = doc.getDocumentElement();
-
 				fevt.maxCt = 4;
 				fevt.curCt = 1;
 				fevt.shortMsg = "Downloading [" + file + "]";

@@ -112,6 +112,20 @@ public class Volume implements java.io.Serializable {
 	public boolean isClustered() {
 		return this.clustered;
 	}
+	
+	public String getDataCenter() {
+		return this.dataCenter;
+	}
+	
+	
+	
+	public InetSocketAddress[] getCassandraNodes() {
+		InetSocketAddress[] ir = new InetSocketAddress[this.car.size()];
+		for(int i = 0;i< car.size();i++) {
+			ir[i]=car.get(i);
+		}
+		return ir;
+	}
 
 	public VolumeSocket getSoc() {
 		return this.soc;
@@ -279,24 +293,28 @@ public class Volume implements java.io.Serializable {
 			cip.setCassandraContactPoints(cipep);
 			IgniteConfiguration cfg = new IgniteConfiguration();
 			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
-			cfg.getAtomicConfiguration().setBackups(Main.volume.getClusterCopies());
+			cfg.getAtomicConfiguration().setBackups(this.clusterCopies);
 			ignite = Ignition.start(cfg);
 			this.iactualWriteBytes = ignite.atomicLong(
-				    Main.volume.getUuid() + "-vawb", // Atomic long name.
+				   this.uuid + "-vawb", // Atomic long name.
 				    0,        		// Initial value.
 				    true     		// Create if it does not exist.
 				);
 			this.iduplicateBytes = ignite.atomicLong(
-				    Main.volume.getUuid() + "-vdb", // Atomic long name.
+					this.uuid + "-vdb", // Atomic long name.
 				    0,        		// Initial value.
 				    true     		// Create if it does not exist.
 				);
 			this.ifiles = ignite.atomicLong(
-				    Main.volume.getUuid() + "-vf", // Atomic long name.
+					this.uuid + "-vf", // Atomic long name.
 				    0,        		// Initial value.
 				    true     		// Create if it does not exist.
 				);
 		}
+	}
+	
+	public Ignite getIgnite() {
+		return this.ignite;
 	}
 
 	public Volume(Element vol, String path) throws IOException {
@@ -888,7 +906,7 @@ public class Volume implements java.io.Serializable {
 		this.uuid = uuid;
 	}
 
-	public byte getClusterCopies() {
+	public Byte getClusterCopies() {
 		return clusterCopies;
 	}
 

@@ -15,6 +15,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
@@ -2242,6 +2244,29 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	@Override
 	public boolean isMetaStore(boolean metaStore) {
 		return this.metaStore;
+	}
+	
+Random rand = new Random();
+	
+	private long getLongID() {
+		byte [] k = new byte[7];
+		rand.nextBytes(k);
+		ByteBuffer bk = ByteBuffer.allocate(8);
+		byte bid = 0;
+		bk.put(bid);
+		bk.put(k);
+		bk.position(0);
+		return bk.getLong();
+	}
+	
+	
+	@Override
+	public long getNewArchiveID() throws IOException {
+		
+		long pid = this.getLongID();
+		while (pid < 100 && this.fileExists(pid))
+			pid = this.getLongID();
+		return pid;
 	}
 
 }

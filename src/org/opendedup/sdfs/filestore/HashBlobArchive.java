@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -40,11 +41,7 @@ import static java.lang.Math.toIntExact;
 //import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteAtomicLong;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.configuration.IgniteConfiguration;
+
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
@@ -87,7 +84,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 	IvParameterSpec ivspec = new IvParameterSpec(EncryptUtils.iv);
 	private static Random r = new Random();
 	private static ConcurrentHashMap<Long, HashBlobArchive> rchunks = new ConcurrentHashMap<Long, HashBlobArchive>();
-	private static Random rand = new Random();
 	private static AbstractBatchStore store = null;
 	private boolean writeable = false;
 	private static ReentrantReadWriteLock slock = new ReentrantReadWriteLock();
@@ -111,8 +107,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static transient ThreadPoolExecutor executor = null;
 	private static AtomicLong currentLength = new AtomicLong(0);
 	private static AtomicLong compressedLength = new AtomicLong(0);
-	private static IgniteAtomicLong iCurrentLength = null;
-	private static IgniteAtomicLong iCompressedLength = null;
 	private static long LOCAL_CACHE_SIZE = 209715200;
 	public static int MAP_CACHE_SIZE = 200;
 	public static ConnectionChecker cc = null;
@@ -128,30 +122,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static boolean closed = false;
 	private int blocksz = nextSize();
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
-	private static Ignite ignite;
 	
 	public static void registerEventBus(Object obj) {
 		eventUploadBus.register(obj);
 	}
 	
-	static {
-
-		if (Main.volume.isClustered()) {
-			IgniteConfiguration cfg = new IgniteConfiguration();
-			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
-			cfg.getAtomicConfiguration().setBackups(Main.volume.getClusterCopies());
-			ignite = Ignition.start(cfg);
-			iCurrentLength = ignite.atomicLong(Main.volume.getUuid() + "-l", // Atomic long name.
-					0, // Initial value.
-					true // Create if it does not exist.
-			);
-			iCompressedLength = ignite.atomicLong(Main.volume.getUuid() + "-cl", // Atomic long name.
-					0, // Initial value.
-					true // Create if it does not exist.
-			);
-
-		}
-	}
+	
 
 	// public FileLock fl = null;
 
@@ -174,49 +150,33 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static long getCompressedLength() {
-		if (Main.volume.isClustered())
-			return iCompressedLength.get();
-		else
+		
 			return compressedLength.get();
 	}
 
 	public static void setCompressedLength(long val) {
-		if (Main.volume.isClustered()) {
-			iCompressedLength.compareAndSet(0, val);
-		} else
+		
 			compressedLength.set(val);
 	}
 
 	public static void addToCompressedLength(long val) {
-		if (Main.volume.isClustered()) {
-			iCompressedLength.addAndGet(val);
-		} else {
+		
 			compressedLength.addAndGet(val);
-		}
 	}
 
 	public static long getLength() {
-		if (Main.volume.isClustered()) {
-			return iCurrentLength.get();
-		} else {
+		
 			return currentLength.get();
-		}
 	}
 
 	public static void setLength(long val) {
-		if (Main.volume.isClustered()) {
-			iCurrentLength.compareAndSet(0, val);
-		} else {
+
 			currentLength.set(val);
-		}
 	}
 
 	public static void addToLength(long val) {
-		if (Main.volume.isClustered()) {
-			iCurrentLength.addAndGet(val);
-		} else {
+		
 			currentLength.addAndGet(val);
-		}
 	}
 
 	public static SimpleByteArrayLongMap getMap(long id) throws IOException {
@@ -785,10 +745,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private HashBlobArchive(boolean compact, int sz, int bsz) throws IOException {
 		if (bsz > 0)
 			this.blocksz = bsz;
-		long pid = rand.nextLong();
-		while (pid < 100 && store.fileExists(pid))
-			pid = rand.nextLong();
-		this.id = pid;
+		this.id = store.getNewArchiveID();
 		rchunks.put(this.id, this);
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
@@ -824,9 +781,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
 
 		for (;;) {
-			long pid = rand.nextLong();
+			long pid = store.getNewArchiveID();
 			while (pid < 100 && store.fileExists(pid) && new File(getStagedPath(pid), Long.toString(pid)).exists()) {
-				pid = rand.nextLong();
+				pid = store.getNewArchiveID();
 			}
 			File cf = new File(getStagedPath(pid), Main.DSEID + "-" + Long.toString(pid) + ".vol");
 			this.id = pid;
@@ -1951,9 +1908,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		wMaps.clear();
 		wOpenFiles.clear();
-		if (ignite != null) {
-			ignite.close();
-		}
 	}
 
 	public static class BlockPolicy implements RejectedExecutionHandler {

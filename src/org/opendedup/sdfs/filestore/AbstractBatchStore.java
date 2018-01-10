@@ -17,6 +17,8 @@ public interface AbstractBatchStore {
 	
 	public int getCheckInterval();
 
+	public long getNewArchiveID() throws IOException;
+	
 	public void writeHashBlobArchive(HashBlobArchive arc, long id)
 			throws IOException;
 	

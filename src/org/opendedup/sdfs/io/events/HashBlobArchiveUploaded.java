@@ -33,6 +33,10 @@ public class HashBlobArchiveUploaded extends GenericEvent {
 		super();
 		this.ar = ar;
 	}
+	
+	public HashBlobArchive getArchive() {
+		return this.ar;
+	}
 
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();

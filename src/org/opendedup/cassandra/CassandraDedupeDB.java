@@ -44,7 +44,7 @@ public class CassandraDedupeDB {
 	
 	private String serviceName = "opendedupe";
 
-	public CassandraDedupeDB(InetSocketAddress[] contactPoints,String dataCenter,String serviceName) {
+	public CassandraDedupeDB(InetSocketAddress[] contactPoints,String dataCenter,String serviceName,int replicationFactor) {
 		this.contactPoints = contactPoints;
 		this.dataCenter = dataCenter;
 		this.serviceName = serviceName;
@@ -67,6 +67,7 @@ public class CassandraDedupeDB {
 		this.delHdb = session.prepare(_deleteHash).bind();
 		this.delRef = session.prepare(_deleteRef).bind();
 		this.delRefHdb = session.prepare(_deleteRefHdb).bind();
+		this.replicationFactor = replicationFactor;
 	}
 	
 	private void createTableSpace() {
@@ -81,7 +82,7 @@ public class CassandraDedupeDB {
 				+ "= {'class':'NetworkTopologyStrategy', '"+this.dataCenter+"': "+this.replicationFactor+"};");
 		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".hashdb (key blob PRIMARY KEY, archive bigint);");
 		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".refdb (archive bigint PRIMARY KEY, ref counter);");
-		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".refhashesdb (archive bigint PRIMARY KEY, hashes blob);");
+		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName + ".refhashesdb (archive bigint PRIMARY KEY, hashes text);");
 	}
 	
 	public long getHash(byte [] key) {
@@ -108,20 +109,8 @@ public class CassandraDedupeDB {
 		session.execute(this.refdbStatement.bind(ct,id));
 	}
 	
-	public void insertHashes(long id,byte [][] hashes,long count) {
-		int ct = hashes.length;
-		int hl = hashes[0].length;
-		int sz = (ct* hl) + 4 + 4;
-		ByteBuffer bf = ByteBuffer.allocate(sz);
-		bf.putInt(ct);
-		bf.putInt(hl);
-		for(byte [] b : hashes) {
-			bf.put(b);
-		}
-		bf.position(0);
-		session.execute(insertRefHashes.bind(id,bf));
-		session.execute(this.refdbStatement.bind(count,id));
-		
+	public void insertHashes(long id,String hashes) {
+		session.execute(insertRefHashes.bind(id,hashes));
 	}
 	
 	public void deleteRef(long id) {
@@ -149,12 +138,14 @@ public class CassandraDedupeDB {
 	
 	
 	public static void main(String [] args) {
+		byte ib = 3;
+		System.out.println(new Byte(ib).intValue());
 		InetSocketAddress [] cipep = {new InetSocketAddress("192.168.0.105",9042)};
-		CassandraDedupeDB db = new CassandraDedupeDB(cipep,"datacenter1","sam");
+		CassandraDedupeDB db = new CassandraDedupeDB(cipep,"datacenter1","sam",1);
 		
 		Random rnd = new Random();
 		
-		long id = 77;
+		long id = 78;
 		ArrayList<byte []> al = new ArrayList<byte []>();
 		long tm = System.currentTimeMillis();
 		for(int i = 0;i<1000;i++) {
@@ -173,12 +164,9 @@ public class CassandraDedupeDB {
 			}
 		}
 		System.out.println("Insert Time = "+ (System.currentTimeMillis()-tm));
-		byte [][] bk = new byte[al.size()][16];
-		for(int i = 0;i<al.size();i++) {
-			bk[i] = al.get(i);
-		}
+		
 		tm = System.currentTimeMillis();
-		db.insertHashes(id, bk, al.size());
+		db.insertHashes(id, "woweee");
 		System.out.println("Ref Insert Time = "+ (System.currentTimeMillis()-tm));
 		db.close();
 	}

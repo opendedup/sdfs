@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.locks.ReentrantLock;
@@ -719,6 +720,16 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	public int verifyDelete(long id) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	Random rand = new Random();
+
+	@Override
+	public long getNewArchiveID() throws IOException {
+		long pid = rand.nextLong();
+		while (pid < 100 && this.fileExists(pid))
+			pid = rand.nextLong();
+		return pid;
 	}
 
 	

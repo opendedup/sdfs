@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1359,6 +1360,29 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				claims++;
 		}
 		return claims;
+	}
+	
+Random rand = new Random();
+	
+	private long getLongID() {
+		byte [] k = new byte[7];
+		rand.nextBytes(k);
+		ByteBuffer bk = ByteBuffer.allocate(8);
+		byte bid = 0;
+		bk.put(bid);
+		bk.put(k);
+		bk.position(0);
+		return bk.getLong();
+	}
+	
+	
+	@Override
+	public long getNewArchiveID() throws IOException {
+		
+		long pid = this.getLongID();
+		while (pid < 100 && this.fileExists(pid))
+			pid = this.getLongID();
+		return pid;
 	}
 
 }
