@@ -264,6 +264,17 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
+		try {
+		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
+		long sz = 0;
+		for(RemoteVolumeInfo r : rv) {
+			sz += r.data;
+		}
+		return sz;
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+		}
+		//return HashBlobArchive.getCompressedLength();
 		return HashBlobArchive.getLength();
 	}
 
@@ -781,6 +792,16 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 
 	@Override
 	public long compressedSize() {
+		try {
+		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
+		long sz = 0;
+		for(RemoteVolumeInfo r : rv) {
+			sz += r.compressed;
+		}
+		return sz;
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+		}
 		return HashBlobArchive.getCompressedLength();
 	}
 
