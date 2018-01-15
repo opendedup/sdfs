@@ -89,7 +89,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static ReentrantReadWriteLock slock = new ReentrantReadWriteLock();
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private ReentrantReadWriteLock uploadlock = new ReentrantReadWriteLock();
-	private static HashBlobArchive archive = null;
+	private static final ConcurrentHashMap<String,HashBlobArchive> writableArchives = new ConcurrentHashMap<String,HashBlobArchive>();
 	private static File chunk_location;
 	private static File staged_chunk_location;
 	private static int VERSION = 0;
@@ -121,6 +121,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static ConcurrentHashMap<Long, FileChannel> wOpenFiles = new ConcurrentHashMap<Long, FileChannel>();
 	private static boolean closed = false;
 	private int blocksz = nextSize();
+	private String uuid = null;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	
 	public static void registerEventBus(Object obj) {
@@ -384,7 +385,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						}
 					}
 				}
-				archive = new HashBlobArchive(false, MAX_HM_SZ, -1);
+				//archive = new HashBlobArchive(false, MAX_HM_SZ, -1);
 
 				if (z > 0 || c > 0) {
 					SDFSLogger.getLog().info("Uploaded " + z + " archives. Failed to upload " + c + " archives");
@@ -549,17 +550,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	public static long writeBlock(byte[] hash, byte[] chunk)
+	public static long writeBlock(byte[] hash, byte[] chunk, String uuid)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
 		if (closed)
 			throw new IOException("Closed");
 		Lock l = slock.readLock();
 		l.lock();
+		if(uuid == null)
+			uuid = "default";
 		try {
 			for (;;) {
 				try {
-					archive.putChunk(hash, chunk);
-					return archive.id;
+					HashBlobArchive ar = writableArchives.get(uuid);
+					ar.putChunk(hash, chunk);
+					return ar.id;
 				} catch (HashExistsException e) {
 					throw e;
 				} catch (ArchiveFullException | NullPointerException | ReadOnlyArchiveException e) {
@@ -568,12 +572,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 					l = slock.writeLock();
 					l.lock();
 					try {
-						if (archive != null && archive.writeable)
-							archive.putChunk(hash, chunk);
+						HashBlobArchive ar = writableArchives.get(uuid);
+						if (ar != null && ar.writeable)
+							ar.putChunk(hash, chunk);
 						else
-							archive = new HashBlobArchive(hash, chunk);
+						{							
+							ar = new HashBlobArchive(hash, chunk);
+							ar.uuid =uuid;
+							writableArchives.put(uuid, ar);
+						}
 
-						return archive.id;
+						return ar.id;
 					} catch (Exception e1) {
 						l.unlock();
 						l = null;
@@ -1555,7 +1564,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				_m.iterInit();
 				KeyValuePair p = _m.next();
 				while (p != null) {
-					if (HCServiceProxy.getHashesMap().mightContainKey(p.getKey())) {
+					if (HCServiceProxy.getHashesMap().mightContainKey(p.getKey(),this.id)) {
 						ar.add(p);
 						blks++;
 					} else {
@@ -1719,14 +1728,21 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return true;
 	}
 
+	public String getUUID() {
+		return this.uuid;
+	}
+	
 	private boolean upload(long nid) {
 		if (this.compactStaged)
 			return true;
 		Lock l = this.lock.writeLock();
 		l.lock();
+		try {
 		this.writeable = false;
-
+		writableArchives.remove(this.uuid);
+		}finally {
 		l.unlock();
+		}
 		Lock ul = this.uploadlock.writeLock();
 		ul.lock();
 

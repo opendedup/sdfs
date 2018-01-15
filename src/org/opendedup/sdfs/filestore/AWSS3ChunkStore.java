@@ -243,7 +243,7 @@ public abstract class AWSS3ChunkStore implements AbstractChunkStore {
 	private static ReentrantLock lock = new ReentrantLock();
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		try {
 			String hashString = this.getHashName(hash,

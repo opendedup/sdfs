@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +77,7 @@ public class MgmtWebServer implements Container {
 	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
 	public static final String SESSION = "/session/";
+	public static final long MAX_TS_SYNC = 60*5*1000;
 	public static Io io = null;
 
 	public static Map<String, String> splitQuery(String query) {
@@ -160,6 +162,11 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
 				String hmac = qry.get("hmac");
+				String tss = qry.get("timestamp");
+				long ts =  Long.parseLong(tss);
+				if(ts < (System.currentTimeMillis()-MAX_TS_SYNC)) {
+					SDFSLogger.getLog().warn("could not authenticate because time [" + ts + "] is less than [" + System.currentTimeMillis() + "]");
+				}
 				if (hmac != null) {
 					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
 					String hsh = tks[0];
@@ -168,6 +175,13 @@ public class MgmtWebServer implements Container {
 						auth = false;
 					else {
 						String im = HashFunctions.getHmacSHA256(session, StringUtils.getHexBytes(Main.sdfsPassword));
+						if(qry.containsKey("cmd")) {
+							im = HashFunctions.getHmacSHA256(im,qry.get("cmd").getBytes());
+						}
+						if(qry.containsKey("file")) {
+							im = HashFunctions.getHmacSHA256(im,qry.get("file").getBytes());
+						}
+						im = HashFunctions.getHmacSHA256(im,tss.getBytes());
 						if (im.equalsIgnoreCase(hsh))
 							auth = true;
 					}

@@ -76,7 +76,7 @@ public class Main {
 
 	public static SDFSEvent mountEvent = null;
 
-	public static String DSEClusterID = "sdfs-cluster";
+	public static String DSEClusterID = "sdfscluster";
 	public static byte DSEClusterMemberID = 0;
 	public static int ClusterRSPTimeout = 1000;
 	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";

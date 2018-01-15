@@ -635,7 +635,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
 		byte [] b = accelBuffer.toByteArray();
 		try {
-			List<Finger> fs = hc.getChunks(b, this.df.mf.getLookupFilter());
+			List<Finger> fs = hc.getChunks(b, this.df.mf.getLookupFilter(),this.df.getGUID());
 			AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
 
 				@Override

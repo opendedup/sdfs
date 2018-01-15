@@ -108,8 +108,8 @@ public class HashStore {
 		this.bdb.setMaxSize(sz);
 	}
 	
-	public boolean mightContainKey(byte [] key) {
-		return this.bdb.mightContainKey(key);
+	public boolean mightContainKey(byte [] key,long id) {
+		return this.bdb.mightContainKey(key,id);
 	}
 
 	/**
@@ -224,11 +224,11 @@ public class HashStore {
 		 */
 		byte [] data = bdb.getData(hash,pos);
 		if (data == null && Arrays.equals(hash, blankHash)) {
-			hs = new HashChunk(hash, new byte[blankData.length], false,1);
+			hs = new HashChunk(hash, new byte[blankData.length], false,1,null);
 		} else if(data == null) {
 			SDFSLogger.getLog().warn("data null for [" + StringUtils.getHexString(hash) + "] [" + pos + "]");
 		}
-		hs = new HashChunk(hash, data, false,1);
+		hs = new HashChunk(hash, data, false,1,null);
 		// this.cacheBuffers.put(hStr, hs);
 
 		return hs;
@@ -273,7 +273,7 @@ public class HashStore {
 			// if (!bdb.containsKey(chunk.getName())) {
 			// long start = chunkStore.reserveWritePosition(chunk.getLen());
 			ChunkData cm = new ChunkData(chunk.getName(),
-					Main.chunkStorePageSize, chunk.getData());
+					Main.chunkStorePageSize, chunk.getData(),chunk.getUUID());
 			cm.references = chunk.getCT();
 			written = bdb.put(cm);
 			// SDFSLogger.getLog().debug("wrote hash " +

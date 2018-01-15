@@ -912,7 +912,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key) {
+	public boolean mightContainKey(byte[] key,long id) {
 		if (!this.runningGC)
 			return this.lbf.mightContain(key);
 		else {

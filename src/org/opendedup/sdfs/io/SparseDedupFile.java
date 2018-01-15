@@ -451,7 +451,7 @@ public class SparseDedupFile implements DedupFile {
 								HashFunctionPool.returnObject(hc);
 							}
 							byte[] b = writeBuffer.getFlushedBuffer();
-							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b, -1, this.mf.getLookupFilter());
+							InsertRecord rec = HCServiceProxy.writeChunk(p.hash, b, -1, this.mf.getLookupFilter(),this.GUID);
 							p.hashloc = rec.getHashLocs();
 							if (!rec.getInserted())
 								dups = writeBuffer.capacity();
@@ -467,11 +467,11 @@ public class SparseDedupFile implements DedupFile {
 							try {
 								List<Finger> fs = null;
 								if (Main.chunkStoreLocal)
-									fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter());
+									fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(),this.GUID);
 								else {
 									fs = new ArrayList<Finger>();
 									for (HashLocPair p : writeBuffer.getFingers().values()) {
-										Finger f = new Finger(this.mf.getLookupFilter());
+										Finger f = new Finger(this.mf.getLookupFilter(),this.GUID);
 										f.hash = p.hash;
 										f.chunk = p.data;
 										f.len = p.data.length;

@@ -123,7 +123,7 @@ public class VolumeConfigWriter {
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
 	private boolean basicS3Signer = false;
-	private String clusterID = "sdfs-cluster";
+	private String clusterID = "sdfscluster";
 	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
 	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";

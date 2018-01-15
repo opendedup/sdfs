@@ -203,9 +203,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid) throws IOException {
 		try {
-			return HashBlobArchive.writeBlock(hash, chunk);
+			return HashBlobArchive.writeBlock(hash, chunk,uuid);
 		} catch (HashExistsException e) {
 			throw e;
 		} catch (Exception e) {
@@ -625,7 +625,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 	}
 
-	private int getClaimedObjects(CloudBlockBlob blob) throws IOException {
+	private int getClaimedObjects(CloudBlockBlob blob,long id) throws IOException {
 		try {
 			String[] hs = this.getStrings(blob);
 			HashMap<String, String> md = blob.getMetadata();
@@ -637,7 +637,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int claims = 0;
 			for (String ha : hs) {
 				byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-				if (HCServiceProxy.getHashesMap().mightContainKey(b))
+				if (HCServiceProxy.getHashesMap().mightContainKey(b,id))
 					claims++;
 			}
 			return claims;
@@ -781,7 +781,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
 						kblob.downloadAttributes();
 						metaData = kblob.getMetadata();
-						int claims = this.getClaimedObjects(kblob);
+						int claims = this.getClaimedObjects(kblob,id);
 						int delobj = 0;
 						if (metaData.containsKey("deletedobjects")) {
 							delobj = Integer.parseInt(metaData.get("deletedobjects")) - claims;
@@ -843,7 +843,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData = cblob.getMetadata();
 			else
 				metaData = kblob.getMetadata();
-			claims = this.getClaimedObjects(kblob);
+			claims = this.getClaimedObjects(kblob,id);
 			if (claims > 0) {
 				SDFSLogger.getLog().warn("Reclaimed object " + id + " claims=" + claims);
 				int delobj = 0;

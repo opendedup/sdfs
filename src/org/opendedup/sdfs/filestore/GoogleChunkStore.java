@@ -112,7 +112,7 @@ public class GoogleChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 
 		String hashString = this.getHashName(hash);

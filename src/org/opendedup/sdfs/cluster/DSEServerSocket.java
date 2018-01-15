@@ -305,7 +305,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 							rsults.add(
 									i,
 									HCServiceProxy.writeChunk(ck.getName(),
-											ck.getData(),-1,null).getInserted());
+											ck.getData(),-1,null,null).getInserted());
 						} else
 							rsults.add(i, null);
 					} catch (Exception e) {
@@ -328,7 +328,7 @@ public class DSEServerSocket implements RequestHandler, MembershipListener,
 				// SDFSLogger.getLog().debug("Writing " +
 				// StringUtils.getHexString(hash) + " done=" +done);
 				rtrn = Boolean.valueOf(HCServiceProxy.writeChunk(hash,
-						chunkBytes,-1,null).getInserted());
+						chunkBytes,-1,null,null).getInserted());
 				break;
 			}
 			case NetworkCMDS.FETCH_CMD: {

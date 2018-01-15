@@ -247,8 +247,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static boolean mightContainKey(byte[] key, String guid) {
-		return hcService.mightContainKey(key);
+	public static boolean mightContainKey(byte[] key, String guid,long id) {
+		return hcService.mightContainKey(key,id);
 	}
 
 	public static AbstractHashesMap getHashesMap() {
@@ -422,15 +422,15 @@ public class HCServiceProxy {
 
 	}
 
-	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, int ct, String guid)
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, int ct, String guid,String uuid)
 			throws IOException, HashtableFullException {
 		if (Main.chunkStoreLocal) {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
 			if (guid != null && Main.enableLookupFilter) {
-						InsertRecord ir = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct);
+						InsertRecord ir = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct,uuid);
 						return ir;
 			} else
-				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct);
+				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct,uuid);
 		} else {
 			try {
 				if (SDFSLogger.isDebug())

@@ -91,7 +91,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		this.sz.addAndGet(chunk.length);
 		return 0;

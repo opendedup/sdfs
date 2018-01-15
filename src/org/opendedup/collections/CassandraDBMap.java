@@ -22,8 +22,11 @@ import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -37,6 +40,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.cache.Cache.Entry;
+
 import org.apache.commons.io.FileUtils;
 import org.opendedup.cassandra.CassandraDedupeDB;
 import org.opendedup.hashing.LargeBloomFilter;
@@ -48,6 +53,7 @@ import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.io.events.HashBlobArchiveUploaded;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
+import org.opendedup.util.LongConverter;
 import org.opendedup.util.StringUtils;
 import org.rocksdb.AccessHint;
 import org.rocksdb.BlockBasedTableConfig;
@@ -76,6 +82,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 	// RocksDB db = null;
 	String fileName = null;
 	ReentrantLock[] lockMap = new ReentrantLock[256];
+	ReentrantLock[] arLockMap = new ReentrantLock[256];
 	ReentrantReadWriteLock gclock = new ReentrantReadWriteLock();
 	RocksDB[] dbs = new RocksDB[8];
 	RocksDB rmdb = null;
@@ -85,7 +92,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 	int multiplier = 0;
 	boolean closed = false;
 	private long size = 0;
-	private static final long rmthreashold = 5 * 60 * 1000;
+	private static final long rmthreashold = 1 * 60 * 1000;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
@@ -221,6 +228,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 
 			for (int i = 0; i < lockMap.length; i++) {
 				lockMap[i] = new ReentrantLock();
+				arLockMap[i] = new ReentrantLock();
 			}
 			ArrayList<ColumnFamilyDescriptor> columnFamilyDescriptors = new ArrayList<>();
 
@@ -292,15 +300,18 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			coptions2.setMaxBytesForLevelBase(fsize * 5);
 			coptions2.setTargetFileSizeBase(fsize);
 			coptions2.setTableFormatConfig(blockConfig);
-			
+
 			columnFamilyDescriptors.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, coptions0));
 			columnFamilyDescriptors.add(new ColumnFamilyDescriptor("adb".getBytes(), coptions1));
 			columnFamilyDescriptors.add(new ColumnFamilyDescriptor("refdb".getBytes(), coptions2));
-			ArrayList<ColumnFamilyHandle> columnFamilyHandles = new ArrayList<>();
-			rmdb = RocksDB.open(options, f.getPath(), columnFamilyDescriptors, columnFamilyHandles);
-			System.out.println("Connecting Cassandra DB");
+			rmdb = RocksDB.open(options, f.getPath(), columnFamilyDescriptors, cf);
+			System.out.println("Connecting Cassandra DB Column Tables = " + cf.size());
+			for (InetSocketAddress addr : Main.volume.getCassandraNodes()) {
+				System.out.println(addr);
+			}
 			cdb = new CassandraDedupeDB(Main.volume.getCassandraNodes(), Main.volume.getDataCenter(),
-					Main.volume.getUuid(), Main.volume.getClusterCopies().intValue());
+					Main.volume.getUuid(), Main.volume.getClusterCopies().intValue(),true);
+
 			bar.finish();
 			HashBlobArchive.registerEventBus(this);
 			this.setUp();
@@ -317,6 +328,16 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		return lockMap[l];
 	}
 
+	private ReentrantLock getArchiveLock(long archive) {
+		archive = Math.abs(archive);
+		long val = archive / (Long.MAX_VALUE / this.arLockMap.length);
+		int l = Math.toIntExact(val);
+		if (l < 0) {
+			l = ((l * -1) + 127);
+		}
+		return this.arLockMap[l];
+	}
+
 	private RocksDB getDB(byte[] key) {
 		int l = key[key.length - 1];
 		if (l < 0) {
@@ -324,7 +345,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		}
 		return dbs[l / multiplier];
 	}
-	
+
 	@Subscribe
 	@AllowConcurrentEvents
 	public void hashBlobArchiveUploaded(HashBlobArchiveUploaded evt) {
@@ -333,14 +354,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		ByteBuffer _bid = ByteBuffer.wrap(bid);
 		_bid.putLong(id);
 		try {
-			byte [] v = rmdb.get(this.cf.get(2), bid);
-			cdb.insertHashes(id, new String(v));
-			String[] hsh = new String(v).split(",");
-			for (String hs : hsh) {
-				byte [] z =BaseEncoding.base64().decode(hs);
-				cdb.setHash(z, id);
+			if (this.rmdb.get(this.cf.get(0), bid) == null) {
+				byte[] v = rmdb.get(this.cf.get(2), bid);
+				cdb.insertHashes(id, new String(v).split(","), Main.volume.getSerialNumber());
+				String[] hsh = new String(v).split(",");
+				cdb.setHashes(hsh, id);
 			}
-			cdb.addCount(id, 1);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to do update for " + id, e);
 		}
@@ -352,6 +371,8 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		gl.lock();
 		Lock l = this.getLock(hash);
 		l.lock();
+		Lock al = this.getArchiveLock(val);
+		al.lock();
 		try {
 			byte[] v = null;
 			byte[] id = new byte[8];
@@ -369,29 +390,30 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					ByteBuffer bf = ByteBuffer.wrap(v);
 					bf.putLong(ha);
 					this.getDB(hash).put(hash, v);
-					byte[] ctb = new byte[8];
-					ByteBuffer cbf = ByteBuffer.wrap(ctb);
-					cbf.putLong(ct);
-					rmdb.merge(this.cf.get(1), v, ctb);
-					rmdb.merge(this.cf.get(2), v, BaseEncoding.base64().encode(hash).getBytes());
-					cbf.position(0);
-					cdb.addCount(ha, 1);
+
+					rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+					rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(hash).getBytes());
+					SDFSLogger.getLog().info("added " + ct + " from " + ha);
+					cdb.claimArchive(ha, Main.volume.getSerialNumber());
 				}
 			}
 			if (v != null) {
-				ByteBuffer bk = ByteBuffer.wrap(v);
-				ct += bk.getLong();
-				if (ct <= 0) {
+				long cct = LongConverter.toLong(v);
+				long nc = ct + cct;
+
+				if (nc <= 0) {
 					byte[] rv = new byte[8];
 					ByteBuffer rbk = ByteBuffer.wrap(rv);
 					rbk.putLong(System.currentTimeMillis() + rmthreashold);
 					rmdb.put(this.cf.get(0), id, rv);
+					SDFSLogger.getLog().info("adding removal record for " + ByteBuffer.wrap(id).getLong());
+
 				} else if (rmdb.get(id) != null) {
 					rmdb.delete(this.cf.get(0), id);
 				}
-				bk.position(0);
-				bk.putLong(ct);
-				rmdb.put(this.cf.get(1), id, v);
+				SDFSLogger.getLog()
+						.info("incremented " + ct + " to " + ByteBuffer.wrap(id).getLong() + " current ct is " + nc);
+				rmdb.merge(this.cf.get(1), id, LongConverter.toBytes(ct));
 				return true;
 			}
 
@@ -401,6 +423,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		} catch (RocksDBException e) {
 			throw new IOException(e);
 		} finally {
+			al.unlock();
 			l.unlock();
 			gl.unlock();
 		}
@@ -451,50 +474,81 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
 		try {
+			Iterator<Entry<Long, Long>> riter = this.cdb.getAllRmrg();
+			while (riter.hasNext()) {
+				Entry<Long, Long> et = riter.next();
+				if (et.getValue() < (System.currentTimeMillis() - rmthreashold)) {
+					long ct = this.cdb.getRefCt(et.getKey());
+					if (ct <= 0) {
+						SDFSLogger.getLog().info("Removing cassandra reference for " + et.getKey());
+						this.cdb.deleteRef(et.getKey());
+					} else {
+						this.cdb.delRMRef(et.getKey());
+					}
+				}
+			}
 			RocksIterator iter = rmdb.newIterator(cf.get(0));
 			SDFSLogger.getLog().info("Removing hashes");
 			ByteBuffer bk = ByteBuffer.allocateDirect(8);
+
 			for (iter.seekToFirst(); iter.isValid(); iter.next()) {
 				byte[] id = iter.key();
 
 				try {
+
+					SDFSLogger.getLog().info("removing key " + ByteBuffer.wrap(id).getLong());
 					byte[] v = null;
 					bk.position(0);
 					bk.put(iter.value());
 					bk.position(0);
 					long tm = bk.getLong();
+					if (tm < System.currentTimeMillis()) {
+						Lock al = this.getArchiveLock(ByteBuffer.wrap(id).getLong());
+						al.lock();
+						try {
+							byte[] kb = this.rmdb.get(cf.get(2), id);
+							if (kb != null) {
+								String[] hsh = new String(kb).split(",");
+								Lock l = this.gclock.writeLock();
+								l.lock();
+								try {
+									v = rmdb.get(this.cf.get(1), id);
+									long ct = 0;
+									if (v != null)
+										ct = LongConverter.toLong(v);
 
-					if (System.currentTimeMillis() > tm) {
-						byte[] kb = this.rmdb.get(cf.get(2), id);
-						if (kb != null) {
-							String[] hsh = new String(kb).split(",");
-							Lock l = this.gclock.writeLock();
-							try {
-								v = rmdb.get(this.cf.get(1), id);
-								long ct = ByteBuffer.wrap(v).getLong();
-								if (ct == 0) {
-									for (String hs : hsh) {
-										byte [] z =BaseEncoding.base64().decode(hs);
-										//byte [] bid = this.getDB(z).get(z);
-										this.getDB(z).delete(z);
-										ChunkData ck = new ChunkData(ByteBuffer.wrap(id).getLong(), z);
-										ck.setmDelete(true);
+									if (ct <= 0) {
+										for (String hs : hsh) {
+											byte[] z = BaseEncoding.base64Url().decode(hs);
+											// byte [] bid = this.getDB(z).get(z);
+											this.getDB(z).delete(z);
+											ChunkData ck = new ChunkData(ByteBuffer.wrap(id).getLong(), z);
+											ck.setmDelete(true);
+										}
+										this.rmdb.delete(cf.get(0), id);
+										this.rmdb.delete(cf.get(1), id);
+										this.rmdb.delete(cf.get(2), id);
+										this.cdb.unClaimArchive(ByteBuffer.wrap(id).getLong(),
+												Main.volume.getSerialNumber());
+										if (this.cdb.getRefCt(ByteBuffer.wrap(id).getLong()) <= 0) {
+											this.cdb.addRMRef(ByteBuffer.wrap(id).getLong());
+										}
+										rmk++;
+									} else {
+										this.rmdb.delete(cf.get(0), id);
 									}
-									this.rmdb.delete(cf.get(0),id);
-									this.rmdb.delete(cf.get(1),id);
-									this.rmdb.delete(cf.get(2),id);
-									this.cdb.addCount(ByteBuffer.wrap(id).getLong(), -1);
-									rmk++;
-								} else {
-									this.rmdb.delete(cf.get(0),id);
+
+								} finally {
+									l.unlock();
 								}
-							} finally {
-								l.unlock();
+							} else {
+								SDFSLogger.getLog()
+										.warn("HashList not found during GC for id " + ByteBuffer.wrap(id).getLong());
 							}
-						} else {
-							SDFSLogger.getLog().warn("HashList not found during GC for id " + ByteBuffer.wrap(id).getLong());
+						} finally {
+							al.unlock();
 						}
-						
+
 					}
 				} finally {
 
@@ -607,58 +661,64 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 						} catch (org.opendedup.collections.HashExistsException e) {
 							cm.setcPos(e.getPos());
 						}
-						v = new byte[8];
-						ByteBuffer bf = ByteBuffer.wrap(v);
-						bf.putLong(cm.getcPos());
-						/*
-						 * if (cm.references <= 0) bf.putLong(1); else bf.putLong(cm.references);
-						 */
-						db.put(cm.getHash(), v);
-						byte[] ct = new byte[8];
-						ByteBuffer cbf = ByteBuffer.wrap(ct);
-						if (cm.references <= 0)
-							cbf.putLong(1);
-						else
-							cbf.putLong(cm.references);
-						rmdb.merge(this.cf.get(1), v, ct);
-						db.merge(this.cf.get(2), v, BaseEncoding.base64().encode(cm.getHash()).getBytes());
-						return new InsertRecord(true, cm.getcPos());
+						Lock al = this.getArchiveLock(cm.getcPos());
+						al.lock();
+						try {
+							v = new byte[8];
+							ByteBuffer bf = ByteBuffer.wrap(v);
+							bf.putLong(cm.getcPos());
+							/*
+							 * if (cm.references <= 0) bf.putLong(1); else bf.putLong(cm.references);
+							 */
+							db.put(wo, cm.getHash(), v);
+							long ct = cm.references;
+							if (cm.references <= 0)
+								ct = 1;
+							rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
+							return new InsertRecord(true, cm.getcPos());
+						} finally {
+							al.unlock();
+						}
 					} else {
-						v = new byte[8];
-						ByteBuffer bf = ByteBuffer.wrap(v);
-						bf.putLong(hl);
-						db.put(cm.getHash(), v);
-						byte[] ct = new byte[8];
-						ByteBuffer cbf = ByteBuffer.wrap(ct);
-						if (cm.references <= 0)
-							cbf.putLong(1);
-						else
-							cbf.putLong(cm.references);
-						db.put(cm.getHash(), v);
-						rmdb.merge(this.cf.get(1), v, ct);
-						rmdb.merge(this.cf.get(2), v, BaseEncoding.base64().encode(cm.getHash()).getBytes());
-						cbf.position(0);
-						cdb.addCount(hl, 1);
-						return new InsertRecord(false, hl);
+						Lock al = this.getArchiveLock(hl);
+						al.lock();
+						try {
+							v = new byte[8];
+							ByteBuffer bf = ByteBuffer.wrap(v);
+							bf.putLong(hl);
+							db.put(wo, cm.getHash(), v);
+							long ct = cm.references;
+							if (cm.references <= 0)
+								ct = 1;
+							db.put(wo, cm.getHash(), v);
+							rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
+							cdb.claimArchive(hl, Main.volume.getSerialNumber());
+							return new InsertRecord(false, hl);
+						} finally {
+							al.unlock();
+						}
 					}
 				} else {
 					// SDFSLogger.getLog().info("Hash Found");
-					ByteBuffer bk = ByteBuffer.wrap(v);
-					long pos = bk.getLong();
-
-					db.put(cm.getHash(), v);
-					byte[] ct = new byte[8];
-					ByteBuffer cbf = ByteBuffer.wrap(ct);
-					if (cm.references <= 0)
-						cbf.putLong(1);
-					else
-						cbf.putLong(cm.references);
-
-					rmdb.merge(this.cf.get(1), v, ct);
-					if (rmdb.get(this.cf.get(0), v) != null) {
-						rmdb.delete(this.cf.get(0), v);
+					Lock al = this.getArchiveLock(cm.getcPos());
+					al.lock();
+					try {
+						ByteBuffer bk = ByteBuffer.wrap(v);
+						long pos = bk.getLong();
+						// db.put(cm.getHash(), v);
+						long ct = cm.references;
+						if (cm.references <= 0)
+							ct = 1;
+						rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+						if (rmdb.get(this.cf.get(0), v) != null) {
+							rmdb.delete(this.cf.get(0), v);
+						}
+						return new InsertRecord(false, pos);
+					} finally {
+						al.unlock();
 					}
-					return new InsertRecord(false, pos);
 				}
 			} catch (RocksDBException e) {
 				throw new IOException(e);
@@ -881,22 +941,33 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key) {
-		Lock l = this.getLock(key);
-		l.lock();
+	public boolean mightContainKey(byte[] key, long aid) {
+		Lock gl = this.gclock.readLock();
+		gl.lock();
+		Lock al = this.getArchiveLock(aid);
+		al.lock();
 		try {
-			byte[] k = this.getDB(key).get(key);
-			if (k == null)
-				return false;
-			else {
-				return true;
-			}
+			byte[] v = null;
+			byte[] id = new byte[8];
+			ByteBuffer bid = ByteBuffer.wrap(id);
+			bid.putLong(aid);
+			v = rmdb.get(this.cf.get(1), id);
 
+			if (v == null) {
+				return false;
+			} else {
+				long ct = LongConverter.toLong(v);
+				if (ct <= 0)
+					return false;
+				else
+					return true;
+			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("unable to check", e);
-			return false;
+			SDFSLogger.getLog().warn("unable to check key " + BaseEncoding.base64Url().encode(key) + " with id " + aid);
+			return true;
 		} finally {
-			l.unlock();
+			al.unlock();
+			gl.unlock();
 		}
 	}
 
@@ -932,5 +1003,56 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		}
 
 	}
+	
+	public static void main(String [] args) throws RocksDBException {
+		 RocksDB db;
+		 List<ColumnFamilyDescriptor> colFamily= new ArrayList<ColumnFamilyDescriptor>();
+		 List<ColumnFamilyHandle> colFamilyHandles= new ArrayList<ColumnFamilyHandle>();
+         RocksDB.loadLibrary();
+         BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
+			// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
+			// DBOptions dbo = new DBOptions();
+			// cfOptions.optimizeLevelStyleCompaction();
+			// cfOptions.optimizeForPointLookup(8192);
+			blockConfig.setFilter(new BloomFilter(16, false));
+			// blockConfig.setHashIndexAllowCollision(false);
+			// blockConfig.setCacheIndexAndFilterBlocks(false);
+			// blockConfig.setIndexType(IndexType.kBinarySearch);
+			// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
+			blockConfig.setBlockSize(4 * 1024);
+			blockConfig.setFormatVersion(2);
+			blockConfig.setNoBlockCache(true);
+			blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+         @SuppressWarnings("resource")
+		DBOptions options = new DBOptions().setCreateIfMissing(true);
+         ColumnFamilyOptions coptions1 = new ColumnFamilyOptions();
+         coptions1.setMergeOperatorName("uint64add");
+			coptions1.setCompactionStyle(CompactionStyle.LEVEL);
+			coptions1.setCompressionType(CompressionType.NO_COMPRESSION);
+			coptions1.setLevel0FileNumCompactionTrigger(8);
+			coptions1.setWriteBufferSize(4096L);
+			//coptions1.setMaxBytesForLevelBase(fsize * 5);
+			//coptions1.setTargetFileSizeBase(fsize);
+			coptions1.setTableFormatConfig(blockConfig);
+         options.setMaxBackgroundFlushes(1);
+         colFamily.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, coptions1));
+			
+         options.setCreateMissingColumnFamilies(true);
+         db = RocksDB.open(options, "c:/temp", colFamily, colFamilyHandles);
+         byte [] k = "6442".getBytes();
+         ByteBuffer bk = ByteBuffer.wrap(new byte[8]).order(ByteOrder.nativeOrder());
+         bk.putLong(10);
+         for(int i = 0; i < 10000;i++) {
+        	 db.merge(k, bk.array());
+         }
+         bk.position(0);
+         bk.put(db.get(k));
+         bk.position(0);
+         System.out.println(bk.getLong());
+         db.close();
+         
+	}
+	
+	
 
 }

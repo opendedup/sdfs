@@ -41,7 +41,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract boolean blockRestored(String id) throws IOException;
 	
-	public abstract boolean mightContainKey(byte [] key);
+	public abstract boolean mightContainKey(byte [] key,long id);
 
 	public abstract long getChunksFetched();
 
@@ -51,7 +51,7 @@ public interface HashChunkServiceInterface {
 	
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			boolean compressed,long ct) throws IOException, HashtableFullException;
+			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException;
 
 	public abstract void remoteFetchChunks(ArrayList<String> al, String server,
 			String password, int port, boolean useSSL) throws IOException,

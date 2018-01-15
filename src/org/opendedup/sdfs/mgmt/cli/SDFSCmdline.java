@@ -37,7 +37,7 @@ public class SDFSCmdline {
 						.getOptionValue("port"));
 			
 			if (cmd.hasOption("password"))
-				MgmtServerConnection.hmac = MgmtServerConnection.getAuth(cmd.getOptionValue("password"));
+				MgmtServerConnection.initAuth(cmd.getOptionValue("password"));
 
 			if (cmd.hasOption("file-info")) {
 				if (cmd.hasOption("file-path")) {

@@ -1,6 +1,7 @@
 package org.opendedup.cassandra;
 
 import org.apache.ignite.Ignite;
+
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.configuration.IgniteConfiguration;
@@ -11,11 +12,11 @@ import org.apache.ignite.spi.IgniteSpiConfiguration;
 import org.apache.ignite.spi.IgniteSpiException;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
-
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -112,8 +113,6 @@ public class CassandraIpFinder extends TcpDiscoveryVmIpFinder {
 		this.createTableSpace();
 		ResultSet set = session.execute("SELECT * from " + serviceName + ".igep;");
 		List<Row> rows = set.all();
-		
-		
 		// resolve configured addresses
 		final Collection<InetSocketAddress> inets = new CopyOnWriteArrayList<>();
 		for(Row r : rows) {

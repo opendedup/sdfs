@@ -159,9 +159,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid) throws IOException {
 		try {
-			return HashBlobArchive.writeBlock(hash, chunk);
+			return HashBlobArchive.writeBlock(hash, chunk,uuid);
 		} catch (HashExistsException e) {
 			throw e;
 		} catch (Exception e) {
@@ -1356,7 +1356,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		Map<String, Long> data = this.getHashMap(id);
 		for (String key : data.keySet()) {
 			byte[] b = BaseEncoding.base64().decode(key);
-			if (HCServiceProxy.getHashesMap().mightContainKey(b))
+			if (HCServiceProxy.getHashesMap().mightContainKey(b,id))
 				claims++;
 		}
 		return claims;

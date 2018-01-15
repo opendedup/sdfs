@@ -117,8 +117,10 @@ public class ImportFileCmd implements Runnable {
 		String fp = MgmtWebServer.METADATA_PATH + URLEncoder.encode(this.srcFile, "UTF-8");
 		GetMethod mtd = null;
 		try {
-			if (hmac)
-				mtd = MgmtServerConnection.connectAndGetHMAC(server, port, password, "", fp, useSSL);
+			if (hmac) {
+				String url = MgmtServerConnection.createAuthUrl("", password);
+				mtd = MgmtServerConnection.connectAndGetHMAC(server, port, url, fp, useSSL);
+			}
 			else
 				mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
 			BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
@@ -151,12 +153,14 @@ public class ImportFileCmd implements Runnable {
 		String fp = MgmtWebServer.MAPDATA_PATH + guid;
 		GetMethod mtd = null;
 		try {
-			if (hmac)
-				mtd = MgmtServerConnection.connectAndGetHMAC(server, port, password, "", fp, useSSL);
+			if (hmac) {
+					String url = MgmtServerConnection.createAuthUrl("", password);
+					mtd = MgmtServerConnection.connectAndGetHMAC(server, port, url, fp, useSSL);
+			}
+				
 			else
 				mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
 			BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
-
 			String ng = UUID.randomUUID().toString();
 			String path = Main.dedupDBStore + File.separator + ng.substring(0, 2) + File.separator + ng
 					+ File.separator;

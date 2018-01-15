@@ -321,14 +321,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
 		return HashBlobArchive.getLength();
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len) throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
-			return HashBlobArchive.writeBlock(hash, chunk);
+			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {
 			throw e;
 		} catch (Exception e) {
@@ -592,8 +591,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						.setAccelerateModeEnabled(Boolean.parseBoolean(config.getAttribute("use-accelerated-mode")))
 						.build());
 			}
-			this.binm = "bucketinfo/"
-					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			this.binm = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
@@ -863,7 +861,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		int claims = 0;
 		for (String ha : st) {
 			byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-			if (HCServiceProxy.getHashesMap().mightContainKey(b))
+			if (HCServiceProxy.getHashesMap().mightContainKey(b,id))
 				claims++;
 		}
 		return claims;
@@ -1012,6 +1010,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md.addUserMetadata("compressedsize", Integer.toString(csz));
 				md.addUserMetadata("bsize", Integer.toString(arc.getLen()));
 				md.addUserMetadata("objects", Integer.toString(arc.getSz()));
+				md.addUserMetadata("uuid", arc.getUUID());
 				md.addUserMetadata("bcompressedsize", Integer.toString(csz));
 				md.setContentType("binary/octet-stream");
 				md.setContentLength(csz);
@@ -2539,7 +2538,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (md != null)
 			return;
 		else {
-			md = new HashMap<String, String>();
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+			md = this.getUserMetaData("keys/" + haName);
 			md.put("objects", Integer.toString(claims));
 			if (md.containsKey("deleted")) {
 				md.remove("deleted");
@@ -2547,13 +2547,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (md.containsKey("deleted-objects")) {
 				md.remove("deleted-objects");
 			}
-			if (this.standAlone) {
-				if (md.containsKey("bsize")) {
-					HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
-				}
-				if (md.containsKey("bcompressedsize")) {
-					HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
-				}
+			if (md.containsKey("bsize")) {
+				HashBlobArchive.addToLength(Integer.parseInt(md.get("bsize")));
+			}
+			if (md.containsKey("bcompressedsize")) {
+				HashBlobArchive.addToCompressedLength(Integer.parseInt(md.get("bcompressedsize")));
 			}
 			byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
 			ObjectMetadata om = new ObjectMetadata();
@@ -3041,10 +3039,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean isMetaStore(boolean metaStore) {
 		return this.metaStore;
 	}
-	
+
 	Random rand = new Random();
+
 	private long getLongID() {
-		byte [] k = new byte[7];
+		byte[] k = new byte[7];
 		rand.nextBytes(k);
 		ByteBuffer bk = ByteBuffer.allocate(8);
 		byte bid = 0;
@@ -3053,11 +3052,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		bk.position(0);
 		return bk.getLong();
 	}
-	
-	
+
 	@Override
 	public long getNewArchiveID() throws IOException {
-		
+
 		long pid = this.getLongID();
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();

@@ -131,7 +131,7 @@ public interface AbstractChunkStore {
 	 *            stored at
 	 * @throws IOException
 	 */
-	public abstract long writeChunk(byte[] hash, byte[] chunk, int len)
+	public abstract long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException ;
 
 	/**

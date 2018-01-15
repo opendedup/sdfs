@@ -775,7 +775,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key) {
+	public boolean mightContainKey(byte[] key,long id) {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {

@@ -195,7 +195,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		String hashString = this.getHashName(hash,
 				Main.chunkStoreEncryptionEnabled);
@@ -347,7 +347,7 @@ public class MAzureChunkStore implements AbstractChunkStore {
 		byte[] hash = HashFunctionPool.getHashEngine().getHash(
 				testTxt.getBytes());
 		store.deleteChunk(hash, 0, 0);
-		store.writeChunk(hash, testTxt.getBytes(), 0);
+		store.writeChunk(hash, testTxt.getBytes(), 0,null);
 		System.out.println(new String(store.getChunk(hash, 0, 0)));
 	}
 

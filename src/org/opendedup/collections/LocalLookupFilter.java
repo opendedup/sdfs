@@ -274,7 +274,7 @@ public class LocalLookupFilter {
 
 	}
 
-	public InsertRecord put(byte [] key,byte [] contents,long ct) throws IOException, HashtableFullException {
+	public InsertRecord put(byte [] key,byte [] contents,long ct,String uuid) throws IOException, HashtableFullException {
 		// persist = false;
 		if (this.isClosed())
 			throw new HashtableFullException("Hashtable " + this.fileName + " is close");
@@ -289,7 +289,7 @@ public class LocalLookupFilter {
 
 				v = db.get(key);
 				if (v == null) {
-					InsertRecord ir = HCServiceProxy.hcService.writeChunk(key, contents, false, 1);
+					InsertRecord ir = HCServiceProxy.hcService.writeChunk(key, contents, false, 1,uuid);
 					v = new byte[16];
 					ByteBuffer bf = ByteBuffer.wrap(v);
 					bf.put(ir.getHashLocs());

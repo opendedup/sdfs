@@ -19,7 +19,6 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Paths;
@@ -27,16 +26,11 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteAtomicLong;
-import org.apache.ignite.Ignition;
-import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.jgroups.Address;
-import org.opendedup.cassandra.CassandraIpFinder;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -73,13 +67,10 @@ public class Volume implements java.io.Serializable {
 	long absoluteLength = -1;
 	private static boolean storageConnected = true;
 	private AtomicLong duplicateBytes = new AtomicLong(0);
-	private IgniteAtomicLong iduplicateBytes = null;
 	private AtomicLong files = new AtomicLong(0);
-	private IgniteAtomicLong ifiles = null;
 	private AtomicDouble virtualBytesWritten = new AtomicDouble(0);
 	private AtomicDouble readBytes = new AtomicDouble(0);
 	private AtomicLong actualWriteBytes = new AtomicLong(0);
-	private IgniteAtomicLong iactualWriteBytes = null;
 	private boolean closedGracefully = false;
 	private AtomicLong readOperations = new AtomicLong(0);
 	private AtomicLong writeOperations = new AtomicLong(0);
@@ -107,7 +98,7 @@ public class Volume implements java.io.Serializable {
 	private ReentrantLock devLock = new ReentrantLock();
 	public String connicalPath;
 	private Ignite ignite = null;
-	ArrayList<InetSocketAddress> car = new ArrayList<InetSocketAddress>();
+	InetSocketAddress[] car = null;
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -120,11 +111,8 @@ public class Volume implements java.io.Serializable {
 	
 	
 	public InetSocketAddress[] getCassandraNodes() {
-		InetSocketAddress[] ir = new InetSocketAddress[this.car.size()];
-		for(int i = 0;i< car.size();i++) {
-			ir[i]=car.get(i);
-		}
-		return ir;
+		
+		return car;
 	}
 
 	public VolumeSocket getSoc() {
@@ -158,16 +146,12 @@ public class Volume implements java.io.Serializable {
 	}
 	
 	public void addFile() {
-		if(this.isClustered())
-			this.ifiles.incrementAndGet();
-		else
+		
 			this.files.incrementAndGet();
 	}
 	
 	public long getFiles() {
-		if(this.isClustered()) {
-			return this.ifiles.get();
-		}
+		
 		return this.files.get();
 	}
 	
@@ -249,11 +233,12 @@ public class Volume implements java.io.Serializable {
 	
 	private void setCluster(Element vol) {
 		
-		if(vol.getElementsByTagName("cassandra-nodes").getLength() > 0) {
-			NodeList nl = vol.getElementsByTagName("cassandra-nodes");
+		if(vol.getElementsByTagName("cassandra-node").getLength() > 0) {
+			NodeList nl = vol.getElementsByTagName("cassandra-node");
+			car = new InetSocketAddress[vol.getElementsByTagName("cassandra-node").getLength()];
 			for(int i = 0;i <nl.getLength();i++) {
 				Element el = (Element)nl.item(i);
-				car.add(new InetSocketAddress(el.getAttribute("hostname"),Integer.parseInt(el.getAttribute("port"))));
+				car[i]=new InetSocketAddress(el.getAttribute("hostname"),Integer.parseInt(el.getAttribute("port")));
 			}
 		}
 		
@@ -283,34 +268,7 @@ public class Volume implements java.io.Serializable {
 		if (vol.hasAttribute("cluster-response-timeout"))
 			Main.ClusterRSPTimeout = Integer.parseInt(vol
 					.getAttribute("cluster-response-timeout"));
-		if(this.isClustered()) {
-			CassandraIpFinder cip = new CassandraIpFinder();
-			TcpDiscoverySpi spi = new TcpDiscoverySpi();
-			spi.setIpFinder(cip);
-			InetSocketAddress [] cipep = car.toArray(new InetSocketAddress[car.size()]);
-			cip.setServiceName(this.uuid);
-			cip.setCassandraDataCenter(dataCenter);
-			cip.setCassandraContactPoints(cipep);
-			IgniteConfiguration cfg = new IgniteConfiguration();
-			cfg.getAtomicConfiguration().setCacheMode(CacheMode.PARTITIONED);
-			cfg.getAtomicConfiguration().setBackups(this.clusterCopies);
-			ignite = Ignition.start(cfg);
-			this.iactualWriteBytes = ignite.atomicLong(
-				   this.uuid + "-vawb", // Atomic long name.
-				    0,        		// Initial value.
-				    true     		// Create if it does not exist.
-				);
-			this.iduplicateBytes = ignite.atomicLong(
-					this.uuid + "-vdb", // Atomic long name.
-				    0,        		// Initial value.
-				    true     		// Create if it does not exist.
-				);
-			this.ifiles = ignite.atomicLong(
-					this.uuid + "-vf", // Atomic long name.
-				    0,        		// Initial value.
-				    true     		// Create if it does not exist.
-				);
-		}
+		
 	}
 	
 	public Ignite getIgnite() {
@@ -360,10 +318,7 @@ public class Volume implements java.io.Serializable {
 					+ "-perf.json";
 		this.currentSize.set(Long.parseLong(vol.getAttribute("current-size")));
 		if (vol.hasAttribute("duplicate-bytes")) {
-			if(this.clustered) {
-				this.iduplicateBytes.compareAndSet(0, Long.parseLong(vol
-					.getAttribute("duplicate-bytes")));
-			}
+			
 			this.duplicateBytes.set(Long.parseLong(vol
 					.getAttribute("duplicate-bytes")));
 		}
@@ -373,17 +328,12 @@ public class Volume implements java.io.Serializable {
 					.getAttribute("read-bytes")));
 		}
 		if (vol.hasAttribute("write-bytes")) {
-			if(this.clustered) {
-				this.iactualWriteBytes.compareAndSet(0, Long.parseLong(vol
-					.getAttribute("write-bytes")));
-			}
+			
 			this.actualWriteBytes.set(Long.parseLong(vol
 					.getAttribute("write-bytes")));
 		}
 		if(vol.hasAttribute("files")) {
-			if(this.clustered) {
-				this.ifiles.compareAndSet(0, Long.parseLong(vol.getAttribute("files")));
-			}
+			
 			this.files.set(Long.parseLong(vol.getAttribute("files")));
 		} else {
 			File vf = new File(Main.dedupDBStore);
@@ -596,7 +546,7 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public long getCurrentSize() {
-		if (this.useDSESize)
+		if (this.useDSESize) 
 			return HCServiceProxy.getDSECompressedSize();
 		else
 			return currentSize.get();
@@ -706,10 +656,7 @@ public class Volume implements java.io.Serializable {
 				StorageUnit.of(this.capacity).format(this.capacity));
 		root.setAttribute("maximum-percentage-full",
 				Double.toString(this.fullPercentage));
-		if(this.isClustered())
-			root.setAttribute("duplicate-bytes",
-					Long.toString(this.iduplicateBytes.get()));
-		else
+		
 		root.setAttribute("duplicate-bytes",
 				Long.toString(this.duplicateBytes.get()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
@@ -742,9 +689,9 @@ public class Volume implements java.io.Serializable {
 				Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
-		if(this.car.size() > 0) {
+		if(this.car.length > 0) {
 			for(InetSocketAddress ar : car) {
-				Element addr = doc.createElement("cassandra-nodes");
+				Element addr = doc.createElement("cassandra-node");
 				addr.setAttribute("hostname", ar.getHostName());
 				addr.setAttribute("port", Integer.toString(ar.getPort()));
 				root.appendChild(addr);
@@ -827,9 +774,9 @@ public class Volume implements java.io.Serializable {
 			doc.adoptNode(el);
 			root.appendChild(el);
 		}
-		if(this.car.size() > 0) {
+		if(this.car.length > 0) {
 			for(InetSocketAddress ar : car) {
-				Element addr = doc.createElement("cassandra-nodes");
+				Element addr = doc.createElement("cassandra-node");
 				addr.setAttribute("hostname", ar.getHostName());
 				addr.setAttribute("port", Integer.toString(ar.getPort()));
 				root.appendChild(addr);
@@ -851,22 +798,15 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addDuplicateBytes(long duplicateBytes, boolean propigateEvent) {
-		if(this.isClustered()) {
-			long val = this.iduplicateBytes.addAndGet(duplicateBytes);
-			if (val < 0)
-				this.iduplicateBytes.compareAndSet(val, 0);
-		}
+		
 		double val = this.duplicateBytes.addAndGet(duplicateBytes);
 		if (val < 0)
 			this.duplicateBytes.set(0);
 	}
 
 	public long getDuplicateBytes() {
-		if(this.isClustered()) {
-			return this.iduplicateBytes.get();
-		}else {
+		
 			return duplicateBytes.get();
-		}
 	}
 
 	public void addReadBytes(long readBytes, boolean propigateEvent) {
@@ -881,20 +821,14 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addActualWriteBytes(long writeBytes, boolean propigateEvent) {
-		if(this.isClustered()) {
-			long val = this.iactualWriteBytes.addAndGet(writeBytes);
-			if (val < 0)
-				this.iactualWriteBytes.compareAndSet(val, 0);
-		}
+		
 		double val = this.actualWriteBytes.addAndGet(writeBytes);
 		if (val < 0)
 			this.actualWriteBytes.set(0);
 	}
 
 	public long getActualWriteBytes() {
-		if(this.isClustered()) {
-			return this.iactualWriteBytes.get();
-		}
+		
 		return actualWriteBytes.get();
 	}
 
