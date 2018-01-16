@@ -234,6 +234,11 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd.getOptionValue("io-safe-close"));
 		}
+		if(cmd.hasOption("glacier-in-days")) {
+			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
+			if(this.glacierInDays > 0)
+				this.refreshBlobs = true;
+		}
 		if(cmd.hasOption("refresh-blobs"))
 			this.refreshBlobs = true;
 		if (cmd.hasOption("io-max-file-write-buffers")) {
@@ -288,7 +293,7 @@ public class VolumeConfigWriter {
 			this.hash_db_class = "org.opendedup.collections.RocksDBMap";
 			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
-		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008 ||  org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2012) {
+		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008) {
 			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 		}
 		if (cmd.hasOption("aws-aim"))
@@ -296,9 +301,6 @@ public class VolumeConfigWriter {
 
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd.getOptionValue("io-safe-sync"));
-		}
-		if(cmd.hasOption("glacier-in-days")) {
-			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
 		}
 		if(cmd.hasOption("simple-metadata")) {
 			this.simpleMD = true;
