@@ -1813,6 +1813,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					info.compressed = Long.parseLong(md.get("compressedlength"));
 					info.data = Long.parseLong(md.get("currentlength"));
 					info.lastupdated = Long.parseLong(md.get("lastupdated"));
+					info.metaData = md;
 					al.add(info);
 				}
 				RemoteVolumeInfo[] ids = new RemoteVolumeInfo[al.size()];

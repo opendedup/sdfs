@@ -2314,6 +2314,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 							info.compressed = Long.parseLong(md.get("currentcompressedsize"));
 							info.data = Long.parseLong(md.get("currentsize"));
 							info.lastupdated = Long.parseLong(md.get("lastupdate"));
+							info.metaData = md;
 							al.add(info);
 						}
 					}

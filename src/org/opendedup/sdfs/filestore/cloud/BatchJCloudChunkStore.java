@@ -2072,6 +2072,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					info.lastupdated = Long.parseLong(mdk.get("lastupdated"));
 					info.sdfsversion = mdk.get("bucketversion");
 					info.version = Integer.parseInt(mdk.get("bucketversion"));
+					info.metaData = mdk;
 					ids.add(info);
 				}
 			}

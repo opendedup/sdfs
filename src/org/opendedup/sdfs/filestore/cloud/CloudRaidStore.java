@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.crypto.spec.IvParameterSpec;
@@ -42,6 +44,7 @@ import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import com.google.common.io.BaseEncoding;
 
@@ -60,10 +63,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	private ArrayList<AbstractBatchStore> datapools = new ArrayList<AbstractBatchStore>();
 	private ArrayList<AbstractBatchStore> metapools = new ArrayList<AbstractBatchStore>();
 	private ArrayList<AbstractChunkStore> stores = new ArrayList<AbstractChunkStore>();
+	private ArrayList<AtomicLong> bucketSizes = new ArrayList<AtomicLong>();
+	private SortedBucketList sbl = new SortedBucketList();
 	private ECIO ecio = null;
 
 	private static enum RAID {
-		MIRROR, EC, STRIPE
+		MIRROR, EC, STRIPE, CONCAT
 	};
 
 	private RAID rl = RAID.MIRROR;
@@ -159,9 +164,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid) throws IOException {
+	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
-			return HashBlobArchive.writeBlock(hash, chunk,uuid);
+			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {
 			throw e;
 		} catch (Exception e) {
@@ -312,10 +317,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 						if (el.hasAttribute("data-store")) {
 							boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
 							if (b) {
-								if (rl.equals(RAID.EC) || rl.equals(RAID.STRIPE)) {
-									int pos = Integer.parseInt(el.getAttribute("raid-position"));
+									byte pos = Byte.parseByte(el.getAttribute("raid-position"));
 									this.datapools.add(pos, bs);
-								}
+									this.bucketSizes.add(pos, new AtomicLong());
+									this.sbl.add(new SimpleImmutableEntry<Byte,AtomicLong>(pos, this.bucketSizes.get(pos)));
 							}
 						}
 
@@ -324,12 +329,11 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 								"Unable to connect to subpool " + el.getAttribute("bucket-name") + " for " + chunkClass,
 								e);
 						boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
+						byte pos = Byte.parseByte(el.getAttribute("raid-position"));
 						if (b) {
-							if (rl.equals(RAID.EC) || rl.equals(RAID.STRIPE)) {
-								int pos = Integer.parseInt(el.getAttribute("raid-position"));
 								this.datapools.add(pos, null);
-							}
 						}
+						this.bucketSizes.add(pos, new AtomicLong());
 					}
 				}
 			}
@@ -445,7 +449,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	@Override
 	public synchronized ChunkData getNextChunck() throws IOException {
 		if (ht == null) {
-			if (this.rl.equals(RAID.STRIPE) && hid >= this.datapools.size())
+			if ((this.rl.equals(RAID.STRIPE) || this.rl.equals(RAID.CONCAT)) && hid >= this.datapools.size())
 				return null;
 			else if (this.rl.equals(RAID.MIRROR) && hid > 0) {
 				return null;
@@ -487,25 +491,37 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	Random rnd = new Random();
 
-	private AbstractBatchStore getStore(long id) {
+	private Entry<Integer, AbstractBatchStore> getStore(long id) {
+		if(this.rl.equals(RAID.CONCAT)) {
+			ByteBuffer bf = ByteBuffer.allocate(8);
+			bf.putLong(id);
+			bf.flip();
+			byte pos = bf.get();
+			return new SimpleImmutableEntry<Integer, AbstractBatchStore>(Integer.valueOf(pos),
+					this.datapools.get(pos));
+		}
 		if (this.rl.equals(RAID.STRIPE)) {
 			if (id < 0) {
 				id = (id + 1) * -1;
 			}
 			int part = Math.toIntExact(id / this.partSize);
-			return this.datapools.get(part);
+			return new SimpleImmutableEntry<Integer, AbstractBatchStore>(part,
+					this.datapools.get(part));
 		} else {
 			AbstractBatchStore st = null;
-			while (st == null)
-				st = this.datapools.get(rnd.nextInt(this.datapools.size()));
-			return st;
+			int pos = 0;
+			while (st == null) {
+				pos = rnd.nextInt(this.datapools.size());
+				st = this.datapools.get(pos);
+			}
+			return new SimpleImmutableEntry<Integer, AbstractBatchStore>(pos, st);
 		}
 	}
 
 	@Override
 	public boolean fileExists(long id) throws IOException {
 		try {
-			return this.getStore(id).fileExists(id);
+			return this.getStore(id).getValue().fileExists(id);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to get id", e);
 			throw new IOException(e);
@@ -556,8 +572,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				throw new IOException(e1);
 			}
 
-		} else if (this.rl.equals(RAID.STRIPE)) {
-			this.getStore(id).writeHashBlobArchive(arc, id);
+		} else if (this.rl.equals(RAID.STRIPE) || this.rl.equals(RAID.CONCAT)) {
+			Entry<Integer, AbstractBatchStore> st = this.getStore(id);
+			st.getValue().writeHashBlobArchive(arc, id);
+			this.bucketSizes.get(st.getKey()).addAndGet(arc.getFile().length());
 		} else if (this.rl.equals(RAID.EC)) {
 			final HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("size", Integer.toString(arc.uncompressedLength.get()));
@@ -585,7 +603,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				}
 				Callable<Boolean> task = () -> {
 					try {
-						st.uploadFile(fls[z], Long.toString(id), "blocks", new HashMap<String, String>(metaData), true);
+						HashMap<String, String> nmet = new HashMap<String, String>(metaData);
+						nmet.put("shardsize", Long.toString(fls[z].length()));
+						st.uploadFile(fls[z], Long.toString(id), "blocks", nmet, true);
+						this.bucketSizes.get(z).addAndGet(fls[z].length());
 						return true;
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to write blocks " + id, e);
@@ -647,10 +668,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			_metaData.put("objects", Integer.toString(arc.getSz()));
 			ar = new ArrayList<Callable<Boolean>>();
 			for (int i = 0; i < ecn; i++) {
+				final int z = i;
 				AbstractCloudFileSync st = (AbstractCloudFileSync) datapools.get(i);
 				Callable<Boolean> task = () -> {
 					try {
 						st.uploadFile(f, Long.toString(id), "keys", new HashMap<String, String>(_metaData), true);
+						this.bucketSizes.get(z).addAndGet(f.length());
 						return true;
 					} catch (IOException e) {
 						SDFSLogger.getLog().warn("unable to write blocks " + id, e);
@@ -685,13 +708,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 		}
 	}
-	
 
 	@Override
 	public void getBytes(long id, File f) throws IOException {
 		try {
-			if (rl.equals(RAID.MIRROR) || rl.equals(RAID.STRIPE)) {
-				this.getStore(id).getBytes(id, f);
+			if (rl.equals(RAID.MIRROR) || rl.equals(RAID.STRIPE) || rl.equals(RAID.CONCAT)) {
+				this.getStore(id).getValue().getBytes(id, f);
 			} else if (rl.equals(RAID.EC)) {
 				ArrayList<Callable<File>> ar = new ArrayList<Callable<File>>();
 				File[] zk = new File[this.datapools.size()];
@@ -795,6 +817,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 					md.put("bucketversion", Integer.toString(version));
 					md.put("sdfsversion", Main.version);
+					for (int i = 0; i < this.bucketSizes.size(); i++) {
+						md.put("subbucket.size." + i, Long.toString(this.bucketSizes.get(i).get()));
+					}
 
 					if (Main.volume != null) {
 						md.put("port", Integer.toString(Main.sdfsCliPort));
@@ -802,7 +827,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 					final HashMap<String, String> _md = new HashMap<String, String>();
 					_md.putAll(md);
 					ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
-					for (AbstractBatchStore st : this.datapools) {
+					for (AbstractBatchStore st : this.metapools) {
 						if (st != null) {
 							Callable<Boolean> task = () -> {
 								try {
@@ -985,17 +1010,19 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	public Map<String, Long> getHashMap(long id) throws IOException {
 		IOException e = null;
-		if(rl.equals(RAID.STRIPE)) {
-			return this.getStore(id).getHashMap(id);
+		if (rl.equals(RAID.STRIPE) || rl.equals(RAID.CONCAT)) {
+			return this.getStore(id).getValue().getHashMap(id);
 		}
 		for (AbstractBatchStore st : this.datapools) {
-			try {
-				Map<String, Long> hm = st.getHashMap(id);
-				if(hm != null) {
-					return hm;
+			if (st != null) {
+				try {
+					Map<String, Long> hm = st.getHashMap(id);
+					if (hm != null) {
+						return hm;
+					}
+				} catch (Exception e1) {
+					e = new IOException(e1);
 				}
-			} catch (Exception e1) {
-				e = new IOException(e1);
 			}
 		}
 		if (e != null)
@@ -1005,10 +1032,19 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public boolean checkAccess() {
-		for (AbstractBatchStore st : this.datapools) {
-			return st.checkAccess();
+		int alstatus = 0;
+		for (int i = 0; i < datapools.size(); i++) {
+			AbstractBatchStore st = this.datapools.get(i);
+			if(st != null && st.checkAccess()) {
+				alstatus++;
+			}else {
+				SDFSLogger.getLog().warn("unable to connect to bucket " + i);
+			}
 		}
-		return true;
+		if(alstatus < this.datapools.size())
+			return false;
+		else
+			return true;
 	}
 
 	@Override
@@ -1096,8 +1132,8 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
-		if (rl.equals(RAID.STRIPE)) {
-			this.getStore(id).checkoutObject(id, claims);
+		if (rl.equals(RAID.STRIPE) || rl.equals(RAID.CONCAT)) {
+			this.getStore(id).getValue().checkoutObject(id, claims);
 		} else {
 			ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
 			for (AbstractBatchStore st : this.datapools) {
@@ -1352,30 +1388,107 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public int verifyDelete(long id) throws IOException {
-		int claims = 0;
-		Map<String, Long> data = this.getHashMap(id);
-		for (String key : data.keySet()) {
-			byte[] b = BaseEncoding.base64().decode(key);
-			if (HCServiceProxy.getHashesMap().mightContainKey(b,id))
-				claims++;
+		if (rl.equals(RAID.STRIPE) || rl.equals(RAID.CONCAT)) {
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+			Entry<Integer, AbstractBatchStore> ent = this.getStore(id);
+			Map<String, String> md = ent.getValue().getUserMetaData("blocks/" + haName);
+			long csz = 0;
+			if (md.containsKey("compressedsize")) {
+				csz = Long.parseLong(md.get("compressedsize"));
+
+			}
+			int claims = ent.getValue().verifyDelete(id);
+			if (claims == 0)
+				this.bucketSizes.get(ent.getKey()).addAndGet(-1 * csz);
+			return claims;
+		} else {
+			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+
+			int claims = 0;
+			Map<String, Long> data = this.getHashMap(id);
+			for (String key : data.keySet()) {
+				byte[] b = BaseEncoding.base64().decode(key);
+				if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
+					claims++;
+			}
+			if (claims == 0) {
+				ArrayList<Callable<Boolean>> ar = new ArrayList<Callable<Boolean>>();
+				for (int i = 0; i < datapools.size(); i++) {
+					final int z = i;
+					final int _ecn = this.ecn;
+
+					if (datapools.get(i) == null) {
+						throw new IOException("unable to write id=" + id + " because not all data pools are up");
+					}
+					Callable<Boolean> task = () -> {
+						try {
+							AbstractCloudFileSync st = (AbstractCloudFileSync) datapools.get(z);
+
+							Map<String, String> md = datapools.get(z).getUserMetaData("blocks/" + haName);
+							long csz = 0;
+							if (md.containsKey("compressedsize")) {
+								csz = Long.parseLong(md.get("compressedsize"));
+							}
+							if (md.containsKey("shardsize")) {
+								csz = Long.parseLong(md.get("shardsize"));
+							}
+
+							st.deleteFile(Long.toString(id), "blocks");
+							this.bucketSizes.get(z).addAndGet(-1 * csz);
+							if (rl.equals(RAID.MIRROR) || z < _ecn)
+								st.deleteFile(Long.toString(id), "keys");
+							return true;
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("unable to delete block " + id, e);
+							return false;
+						}
+					};
+					ar.add(task);
+				}
+				try {
+					final ArrayList<Boolean> al = new ArrayList<Boolean>();
+					uploadExecutor.invokeAll(ar).stream().forEach((k) -> {
+						try {
+							synchronized (al) {
+								al.add(k.get());
+							}
+
+						} catch (InterruptedException | ExecutionException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					});
+					for (Boolean bk : al) {
+						if (!bk)
+							throw new IOException("unable to delete id=" + id);
+					}
+				} catch (InterruptedException e1) {
+					SDFSLogger.getLog().warn("unable to delete id=" + id, e1);
+					throw new IOException(e1);
+				}
+
+			}
+			return claims;
 		}
-		return claims;
+
 	}
-	
-Random rand = new Random();
-	
+
+	Random rand = new Random();
+
 	private long getLongID() {
-		byte [] k = new byte[7];
+		byte bid = 0;
+		if(rl.equals(RAID.CONCAT)) {
+			bid = this.sbl.getAL().get(0).getKey();
+		}
+		byte[] k = new byte[7];
 		rand.nextBytes(k);
 		ByteBuffer bk = ByteBuffer.allocate(8);
-		byte bid = 0;
 		bk.put(bid);
 		bk.put(k);
 		bk.position(0);
 		return bk.getLong();
 	}
-	
-	
+
 	@Override
 	public long getNewArchiveID() throws IOException {
 		
