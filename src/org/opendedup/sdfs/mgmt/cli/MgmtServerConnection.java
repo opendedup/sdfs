@@ -3,8 +3,11 @@ package org.opendedup.sdfs.mgmt.cli;
 import java.io.IOException;
 
 
+
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,7 +23,6 @@ import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.util.EasySSLProtocolSocketFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,13 +101,13 @@ public class MgmtServerConnection {
 	public static String createAuthUrl(String url,String phmac) throws IOException {
 		try {
 		String _url = url;
-		Map<String, String> qry = MgmtWebServer.splitQuery(_url);
+		Map<String, String> qry = splitQuery(_url);
 		String hmac = phmac;
 		if(qry.containsKey("cmd")) {
 			hmac = HashFunctions.getHmacSHA256(hmac,qry.get("cmd").getBytes());
 		}
 		if(qry.containsKey("file")) {
-			hmac = HashFunctions.getHmacSHA256(hmac,qry.get("cmd").getBytes());
+			hmac = HashFunctions.getHmacSHA256(hmac,qry.get("file").getBytes());
 		}
 		String ts = Long.toString(System.currentTimeMillis());
 		hmac = HashFunctions.getHmacSHA256(hmac,ts.getBytes())+":" + sessionId;
@@ -119,6 +121,25 @@ public class MgmtServerConnection {
 		}catch(Exception e) {
 			throw new IOException(e);
 		}
+	}
+	
+	public static Map<String, String> splitQuery(String query) {
+		if(query.startsWith("?"))
+			query = query.substring(1);
+		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+		if (query != null) {
+			try {
+				String[] pairs = query.split("&");
+				for (String pair : pairs) {
+					int idx = pair.indexOf("=");
+					query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
+							URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+				}
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to parse " + query, e);
+			}
+		}
+		return query_pairs;
 	}
 	
 	
@@ -289,6 +310,16 @@ public class MgmtServerConnection {
 			SDFSLogger.getLog().error("unable to connect url = " + req);
 			throw e;
 		}
+	}
+	
+	public static void main(String  [] args) throws IOException {
+		MgmtServerConnection.server = "localhost";
+		MgmtServerConnection.port = 6442;
+		MgmtServerConnection.useSSL = false;
+		MgmtServerConnection.initAuth("admin");
+		System.out.println("baseAuth = " + MgmtServerConnection.baseHmac);
+		String url = "?cmd=test&file=bla";
+		System.out.println(MgmtServerConnection.createAuthUrl(url, baseHmac));
 	}
 
 	

@@ -556,7 +556,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			throw new IOException("Closed");
 		Lock l = slock.readLock();
 		l.lock();
-		if(uuid == null)
+		if(uuid == null || uuid.trim() == "")
 			uuid = "default";
 		try {
 			for (;;) {

@@ -109,7 +109,11 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			SDFSLogger.getLog().info("############ Closing Container ##################");
 			// container = pool.borrowObject();
 			HashBlobArchive.close();
-
+			try {
+			this.setBucketMetaData();
+			}catch(Exception e) {
+				SDFSLogger.getLog().warn("unable to set bucket metadata", e);
+			}
 			for (AbstractChunkStore store : this.stores) {
 				store.close();
 			}
@@ -159,7 +163,16 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
+		try {
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.data;
+			}
+			return sz;
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+		}
 		return HashBlobArchive.getLength();
 	}
 
@@ -281,13 +294,16 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				wsp = Integer.parseInt(config.getAttribute("write-speed"));
 			}
 			if (config.hasAttribute("raid-level")) {
-				int _rl = Integer.parseInt(config.getAttribute("raid-level"));
-				if (_rl == 0)
+				String _rl = config.getAttribute("raid-level");
+				
+				if (_rl.equalsIgnoreCase("STRIPE"))
 					rl = RAID.STRIPE;
-				if (_rl == 1)
+				if (_rl.equalsIgnoreCase("MIRROR"))
 					rl = RAID.MIRROR;
-				if (_rl == 5)
+				if (_rl.equalsIgnoreCase("EC"))
 					rl = RAID.EC;
+				if (_rl.equalsIgnoreCase("CONCAT"))
+					rl = RAID.CONCAT;
 			}
 			if (rl.equals(RAID.EC)) {
 				ecn = Integer.parseInt(config.getAttribute("erasure-copies"));
@@ -400,6 +416,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				md.put("lastupdated", Long.toString(System.currentTimeMillis()));
 				md.put("sdfsversion", Main.version);
 				for (AbstractBatchStore st : this.metapools) {
+					
 					st.updateBucketInfo(md);
 				}
 
@@ -408,6 +425,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				md.put("sdfsversion", Main.version);
 				for (AbstractBatchStore st : this.metapools) {
 					st.updateBucketInfo(md);
+				}
+			}
+			for(int i = 0;i< this.datapools.size();i++) {
+				if(md.containsKey("subbucket.size." + i)) {
+					this.bucketSizes.get(i).set(Long.parseLong(md.get("subbucket.size." + i)));
+					SDFSLogger.getLog().info("Set bucket size for " + i + " to " + md.get("subbucket.size." + i));
 				}
 			}
 			HashBlobArchive.setLength(sz);
@@ -480,6 +503,16 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	@Override
 	public long compressedSize() {
+		try {
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.compressed;
+			}
+			return sz;
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+		}
 		return HashBlobArchive.getCompressedLength();
 	}
 
@@ -793,6 +826,54 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		HashBlobArchive.setCompressedLength(0);
 		HashBlobArchive.setLength(0);
 	}
+	
+	private void setBucketMetaData() throws IOException {
+		Map<String, String> md = null;
+		for (AbstractBatchStore cst : this.metapools) {
+			try {
+				md = cst.getBucketInfo();
+				break;
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("bucket info error", e);
+			}
+		}
+		md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+		md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
+		md.put("clustered", Boolean.toString(this.clustered));
+		md.put("hostname", InetAddress.getLocalHost().getHostName());
+		md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+		md.put("bucketversion", Integer.toString(version));
+		md.put("sdfsversion", Main.version);
+		for (int i = 0; i < this.bucketSizes.size(); i++) {
+			md.put("subbucket.size." + i, Long.toString(this.bucketSizes.get(i).get()));
+		}
+
+		if (Main.volume != null) {
+			md.put("port", Integer.toString(Main.sdfsCliPort));
+		}
+		final HashMap<String, String> _md = new HashMap<String, String>();
+		_md.putAll(md);
+		ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
+		for (AbstractBatchStore st : this.metapools) {
+			if (st != null) {
+				Callable<Boolean> task = () -> {
+					try {
+						st.updateBucketInfo(_md);
+						return true;
+					} catch (Exception e) {
+						SDFSLogger.getLog().error("error in thread", e);
+						return false;
+					}
+				};
+				al.add(task);
+			}
+		}
+		try {
+			uploadExecutor.invokeAll(al);
+		} catch (InterruptedException e) {
+			throw new IOException(e);
+		}
+	}
 
 	@Override
 	public void run() {
@@ -801,51 +882,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				Thread.sleep(60000);
 				try {
 
-					Map<String, String> md = null;
-					for (AbstractBatchStore cst : this.metapools) {
-						try {
-							md = cst.getBucketInfo();
-							break;
-						} catch (Exception e) {
-							SDFSLogger.getLog().error("bucket info error", e);
-						}
-					}
-					md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
-					md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
-					md.put("clustered", Boolean.toString(this.clustered));
-					md.put("hostname", InetAddress.getLocalHost().getHostName());
-					md.put("lastupdated", Long.toString(System.currentTimeMillis()));
-					md.put("bucketversion", Integer.toString(version));
-					md.put("sdfsversion", Main.version);
-					for (int i = 0; i < this.bucketSizes.size(); i++) {
-						md.put("subbucket.size." + i, Long.toString(this.bucketSizes.get(i).get()));
-					}
-
-					if (Main.volume != null) {
-						md.put("port", Integer.toString(Main.sdfsCliPort));
-					}
-					final HashMap<String, String> _md = new HashMap<String, String>();
-					_md.putAll(md);
-					ArrayList<Callable<Boolean>> al = new ArrayList<Callable<Boolean>>();
-					for (AbstractBatchStore st : this.metapools) {
-						if (st != null) {
-							Callable<Boolean> task = () -> {
-								try {
-									st.updateBucketInfo(_md);
-									return true;
-								} catch (Exception e) {
-									SDFSLogger.getLog().error("error in thread", e);
-									return false;
-								}
-							};
-							al.add(task);
-						}
-					}
-					try {
-						uploadExecutor.invokeAll(al);
-					} catch (InterruptedException e) {
-						throw new IOException(e);
-					}
+					this.setBucketMetaData();
 
 					// this.resetCurrentSize();
 				} catch (Exception e) {
@@ -1267,7 +1304,9 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
 		AbstractCloudFileSync cst = (AbstractCloudFileSync) this.metapools.get(0);
-		return cst.getConnectedVolumes();
+		RemoteVolumeInfo[] rc = cst.getConnectedVolumes();
+		SDFSLogger.getLog().info("connected volume size=" + rc.length);
+		return rc;
 	}
 
 	@Override

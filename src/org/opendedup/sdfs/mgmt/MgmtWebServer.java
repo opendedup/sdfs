@@ -80,7 +80,7 @@ public class MgmtWebServer implements Container {
 	public static final long MAX_TS_SYNC = 60*5*1000;
 	public static Io io = null;
 
-	public static Map<String, String> splitQuery(String query) {
+	private static Map<String, String> splitQuery(String query) {
 
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 		if (query != null) {

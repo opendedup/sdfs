@@ -2738,9 +2738,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							info.id = id;
 							info.hostname = md.get("hostname");
 							info.port = Integer.parseInt(md.get("port"));
-							info.compressed = Long.parseLong(md.get("currentcompressedsize"));
-							info.data = Long.parseLong(md.get("currentsize"));
-							info.lastupdated = Long.parseLong(md.get("lastupdate"));
+							if(md.containsKey("currentcompressedsize"))
+								info.compressed = Long.parseLong(md.get("currentcompressedsize"));
+							if(md.containsKey("compressedlength"))
+								info.compressed = Long.parseLong(md.get("compressedlength"));
+							if(md.containsKey("currentlength"))
+								info.data = Long.parseLong(md.get("currentlength"));
+							if(md.containsKey("currentsize"))
+								info.data = Long.parseLong(md.get("currentsize"));
+							if(md.containsKey("lastupdated"))
+								info.lastupdated = Long.parseLong(md.get("lastupdated"));
+							if(md.containsKey("lastupdate"))
+								info.lastupdated = Long.parseLong(md.get("lastupdate"));
 							info.metaData = md;
 							al.add(info);
 						}
@@ -2879,10 +2888,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void updateBucketInfo(Map<String, String> md) {
 		try {
 			if (this.simpleMD) {
-
 				ObjectMetadata omd = new ObjectMetadata();
 				omd.setUserMetadata(md);
 				this.updateObject(binm, omd);
+				byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
+				String st = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(sz));
+				md.put("md5sum", st);
+				ObjectMetadata nmd = new ObjectMetadata();
+				nmd.setUserMetadata(md);
+				nmd.setContentMD5(st);
+				nmd.setContentLength(sz.length);
+				nmd.setUserMetadata(md);
+				s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
 			} else {
 				ObjectMetadata nmd = new ObjectMetadata();
 				nmd.setUserMetadata(md);
