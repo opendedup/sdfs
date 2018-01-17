@@ -93,6 +93,53 @@ public class MgmtServerConnection {
 			}
 		}
 	}
+	
+	public static String getAuth(String ss,int p, boolean ssl,String pwd) throws IOException {
+		InputStream in = null;
+		GetMethod method = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			String prot = "http";
+			if (ssl) {
+				prot = "https";
+			}
+			String req = prot + "://" + ss + ":" + p + "/session/";
+			SDFSLogger.getLog().debug(req);
+			method = new GetMethod(req);
+			int returnCode = client.executeMethod(method);
+			if (returnCode != 200)
+				throw new IOException("Unable to process command "
+						+ method.getQueryString() + " return code was"
+						+ returnCode + " return msg was "
+						+ method.getResponseBodyAsString());
+			in = method.getResponseBodyAsStream();
+			Document doc = db.parse(in);
+			Element el = doc.getDocumentElement();
+			String salt = el.getAttribute("salt");
+			String sessionid = el.getAttribute("session-id");
+			String key = HashFunctions.getSHAHash(pwd.trim().getBytes(),
+					salt.getBytes());
+			String im = HashFunctions.getHmacSHA256(sessionid,StringUtils.getHexBytes(key))+ ":" +sessionid;
+			//System.out.println(im);
+			return URLEncoder.encode(im,"UTF-8");
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (Exception e) {
+				}
+			}
+			if (method != null) {
+				try {
+					method.releaseConnection();
+				} catch (Exception e) {
+				}
+			}
+		}
+	}
 
 	public static Document getResponse(String url) throws IOException {
 		InputStream in = null;
