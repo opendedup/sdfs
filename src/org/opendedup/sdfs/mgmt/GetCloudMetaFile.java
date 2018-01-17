@@ -1,8 +1,8 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -10,7 +10,6 @@ import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.util.FileLock;
 import org.opendedup.util.LRUCache;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
@@ -19,20 +18,17 @@ import org.w3c.dom.Element;
 public class GetCloudMetaFile {
 
 	MetaDataDedupFile mf = null;
-
-	private static FileLock fl = new FileLock();
+	private Object obj = null;
 	File df = null;
 	SDFSEvent fevt = null;
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 
-	public Element getResult(String file, String dstfile, String changeid)
-			throws IOException {
+	public Element getResult(String file, String dstfile, String changeid) throws IOException {
 
 		synchronized (ck) {
 			if (ck.containsKey(changeid)) {
 				try {
-					SDFSLogger.getLog().info(
-							"ignoring " + changeid + " " + file);
+					SDFSLogger.getLog().info("ignoring " + changeid + " " + file);
 					Document doc = XMLUtils.getXMLDoc("cloudmfile");
 					Element root = doc.getDocumentElement();
 					root.setAttribute("action", "ignored");
@@ -42,14 +38,20 @@ public class GetCloudMetaFile {
 				}
 			}
 			ck.put(changeid, file);
+			synchronized (GetCloudFile.ck) {
+				if (GetCloudFile.fack.containsKey(file)) {
+					obj = GetCloudFile.fack.get(file);
+				} else {
+					obj = new Object();
+					GetCloudFile.fack.put(file, obj);
+				}
+			}
+
 		}
-		ReentrantLock l = fl.getLock(file);
-		l.lock();
-		try {
+		synchronized (obj) {
 			fevt = SDFSEvent.cfEvent(file);
 			if (dstfile != null && file.contentEquals(dstfile))
-				throw new IOException(
-						"local filename in the same as source name");
+				throw new IOException("local filename in the same as source name");
 
 			File df = null;
 			if (dstfile != null)
@@ -71,20 +73,16 @@ public class GetCloudMetaFile {
 			} catch (IOException e) {
 
 				if (mf != null) {
-					MetaFileStore.removeMetaFile(mf.getPath(), true,true);
+					MetaFileStore.removeMetaFile(mf.getPath(), true, true);
 				}
 				fevt.endEvent("unable to get file " + file, SDFSEvent.ERROR);
 				throw e;
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to get file " + file, e);
 				fevt.endEvent("unable to get file " + file, SDFSEvent.ERROR);
-				throw new IOException(
-						"request to fetch attributes failed because "
-								+ e.toString());
+				throw new IOException("request to fetch attributes failed because " + e.toString());
 
 			}
-		} finally {
-			fl.removeLock(file);
 		}
 	}
 

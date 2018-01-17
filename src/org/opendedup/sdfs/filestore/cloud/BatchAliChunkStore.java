@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import static java.lang.Math.toIntExact;
 
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -85,7 +86,8 @@ import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 
 import com.aliyun.oss.ClientConfiguration;
-import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.common.comm.Protocol;
 import com.aliyun.oss.model.CopyObjectRequest;
@@ -111,7 +113,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
-	OSSClient s3Service = null;
+	OSS s3Service = null;
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	boolean md5sum = true;
@@ -440,7 +442,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					clientConfig.setProxyUsername(el.getAttribute("proxy-username"));
 				}
 			}
-			s3Service = new OSSClient(s3Target, Main.cloudAccessKey, Main.cloudSecretKey);
+			s3Service = new OSSClientBuilder().build(s3Target, Main.cloudAccessKey, Main.cloudSecretKey);
 
 			if (s3Target != null) {
 				s3Target = s3Target.toLowerCase();

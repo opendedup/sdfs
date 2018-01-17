@@ -324,7 +324,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		return sz;
 		}catch(Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+			if(!this.closed)
+				SDFSLogger.getLog().warn("unable to get clustered size", e);
 		}
 		//return HashBlobArchive.getCompressedLength();
 		return HashBlobArchive.getLength();
@@ -934,7 +935,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		return sz;
 		}catch(Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
+			if(!this.closed)
+				SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
 		}
 		return HashBlobArchive.getCompressedLength();
 	}

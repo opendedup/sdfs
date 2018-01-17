@@ -9,7 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -85,13 +87,26 @@ public class ImportFileCmd implements Runnable {
 		MetaDataDedupFile mf = null;
 		try {
 			evt.shortMsg = "Importing " + this.srcFile + " to " + this.destFile;
+			Map<String,String> axa = null;
+			if(new File(this.destFile).exists()) {
+				MetaDataDedupFile _mf = MetaFileStore.getMF(this.destFile);
+				Map<String,String> xa = _mf.getExtendedAttributes();
+				if(xa != null && xa.containsKey("netbackup.data")) {
+					axa = new HashMap<String,String>();
+					axa.putAll(xa);
+				}
+			}
+			MetaFileStore.removeMetaFile(this.destFile);
 			mf = downloadMetaFile();
+			if(axa != null)
+				mf.getExtendedAttributes().putAll(axa);
 			evt.curCt++;
 			evt.shortMsg = "Importing map for " + this.destFile;
 			String ng = downloadDDB(mf.getDfGuid());
 			mf.setDfGuid(ng);
 			mf.sync();
 			MetaFileStore.removedCachedMF(mf.getPath());
+			MetaFileStore.addToCache(mf);
 			evt.curCt++;
 			MetaFileImport mi = new MetaFileImport(mf.getPath(), server, password, port, maxSz, evt, useSSL);
 			mi.runImport();

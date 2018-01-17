@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 
 public class DeleteFileCmd {
 	static LRUCache<String, String> ck = new LRUCache<String, String>(50);
+	private Object obj = null;
 
 	public String getResult(String cmd, String file, String changeid, boolean rmlock) throws IOException {
 		synchronized (ck) {
@@ -29,27 +30,37 @@ public class DeleteFileCmd {
 				}
 			}
 			ck.put(changeid, file);
+			synchronized (GetCloudFile.ck) {
+				if (GetCloudFile.fack.containsKey(file)) {
+					obj = GetCloudFile.fack.get(file);
+				} else {
+					obj= new Object();
+					GetCloudFile.fack.put(file, obj);
+				}
+			}
 		}
-		if (file.contains(".."))
-			throw new IOException("requeste file " + file + " does not exist");
-		String internalPath = Main.volume.getPath() + File.separator + file;
-		File f = new File(internalPath);
-		SDFSLogger.getLog().info("removing " + internalPath );
-		if (!f.exists())
-			throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
-		else {
-			if (rmlock)
-				MetaFileStore.getMF(f).clearRetentionLock();
-			boolean removed = MetaFileStore.removeMetaFile(internalPath, true, true);
-			SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
-			
-			if (removed) {
-				SDFSEvent.deleteFileEvent(f);
-				return "removed [" + file + "]";
+		synchronized (obj) {
+			if (file.contains(".."))
+				throw new IOException("requeste file " + file + " does not exist");
+			String internalPath = Main.volume.getPath() + File.separator + file;
+			File f = new File(internalPath);
+			SDFSLogger.getLog().info("removing " + internalPath);
+			if (!f.exists())
+				throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
+			else {
+				if (rmlock)
+					MetaFileStore.getMF(f).clearRetentionLock();
+				boolean removed = MetaFileStore.removeMetaFile(internalPath, true, true);
+				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
 
-			} else {
-				SDFSEvent.deleteFileFailedEvent(f);
-				return "failed to remove [" + file + "]";
+				if (removed) {
+					SDFSEvent.deleteFileEvent(f);
+					return "removed [" + file + "]";
+
+				} else {
+					SDFSEvent.deleteFileFailedEvent(f);
+					return "failed to remove [" + file + "]";
+				}
 			}
 		}
 	}
