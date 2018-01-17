@@ -356,6 +356,19 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("connectedvolumes", e);
 						}
 						break;
+					case "raidbuckets":
+						try {
+							Element msg = new GetRaidVolumes().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("connectedvolumes", e);
+						}
+						break;
 					case "syncvolume":
 						try {
 							new SyncFromConnectedVolume().getResult(Long.parseLong(qry.get("id")));

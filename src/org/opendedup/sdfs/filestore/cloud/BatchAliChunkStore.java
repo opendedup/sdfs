@@ -463,7 +463,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					clientConfig.setProxyUsername(el.getAttribute("proxy-username"));
 				}
 			}
-			s3Service = new OSSClientBuilder().build(s3Target, Main.cloudAccessKey, Main.cloudSecretKey);
+			s3Service = new OSSClientBuilder().build(s3Target, this.accessKey, this.secretKey);
 
 			if (s3Target != null) {
 				s3Target = s3Target.toLowerCase();

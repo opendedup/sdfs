@@ -20,18 +20,20 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.util.Collections;
 
+
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
+
+import org.opendedup.sdfs.filestore.cloud.CloudRaidStore.BucketStats;
 
 
 
 public class SortedBucketList implements Runnable {
-	private CopyOnWriteArrayList<Entry<Byte,AtomicLong>> al = new CopyOnWriteArrayList<Entry<Byte,AtomicLong>>();
+	private CopyOnWriteArrayList<Entry<Byte,BucketStats>> al = new CopyOnWriteArrayList<Entry<Byte,BucketStats>>();
 
 	public SortedBucketList() {
 		Thread th = new Thread(this);
@@ -64,7 +66,7 @@ public class SortedBucketList implements Runnable {
 	
 	
 
-	public void add(Entry<Byte,AtomicLong> m) {
+	public void add(Entry<Byte,BucketStats> m) {
 		try {
 			al.add(m);
 			Collections.reverse(al);
@@ -79,22 +81,24 @@ public class SortedBucketList implements Runnable {
 		return this.al.size();
 	}
 
-	public void remove(Entry<Byte,AtomicLong> m) {
+	public void remove(Entry<Byte,BucketStats> m) {
 		al.remove(m);
 	}
 
-	public List<Entry<Byte,AtomicLong>> getAL() {
+	public List<Entry<Byte,BucketStats>> getAL() {
 		return this.al;
 	}
 
-	public Iterator<Entry<Byte,AtomicLong>> iterator() {
+	public Iterator<Entry<Byte,BucketStats>> iterator() {
 		return al.iterator();
 	}
 
-	static final Comparator<Entry<Byte,AtomicLong>> SIZE_ORDER = new Comparator<Entry<Byte,AtomicLong>>() {
-		public int compare(Entry<Byte,AtomicLong> m0,
-				Entry<Byte,AtomicLong> m1) {
-			long dif = m1.getValue().get() - m0.getValue().get();
+	static final Comparator<Entry<Byte,BucketStats>> SIZE_ORDER = new Comparator<Entry<Byte,BucketStats>>() {
+		public int compare(Entry<Byte,BucketStats> m0,
+				Entry<Byte,BucketStats> m1) {
+			long m1r = m1.getValue().getAvail();
+			long m0r = m0.getValue().getAvail();
+			long dif = m0r - m1r;
 			if (dif > 0)
 				return -1;
 			if (dif < 0)
@@ -109,11 +113,13 @@ public class SortedBucketList implements Runnable {
 		Random rnd = new Random();
 		SortedBucketList l = new SortedBucketList();
 		for(byte i = 0;i < 100;i++) {
-			l.add(new java.util.AbstractMap.SimpleImmutableEntry<Byte, AtomicLong>(i,new AtomicLong(Long.valueOf(rnd.nextInt(1000)))));
+			byte id = 0;
+			BucketStats bs = new BucketStats(id,10000,Long.valueOf(rnd.nextInt(10000)),"bn","bc");
+			l.add(new java.util.AbstractMap.SimpleImmutableEntry<Byte, BucketStats>(i,bs));
 		}
 		l.sort();
-		for(Entry<Byte,AtomicLong> e : l.getAL()) {
-			System.out.println(e.getValue().get());
+		for(Entry<Byte,BucketStats> e : l.getAL()) {
+			System.out.println(e.getValue().getAvail());
 		}
 		
 	}

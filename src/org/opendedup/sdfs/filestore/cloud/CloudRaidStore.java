@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -63,9 +64,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	private ArrayList<AbstractBatchStore> datapools = new ArrayList<AbstractBatchStore>();
 	private ArrayList<AbstractBatchStore> metapools = new ArrayList<AbstractBatchStore>();
 	private ArrayList<AbstractChunkStore> stores = new ArrayList<AbstractChunkStore>();
-	private ArrayList<AtomicLong> bucketSizes = new ArrayList<AtomicLong>();
+	private ArrayList<BucketStats> bucketSizes = new ArrayList<BucketStats>();
 	private SortedBucketList sbl = new SortedBucketList();
 	private ECIO ecio = null;
+	private static CloudRaidStore cs = null;
 
 	private static enum RAID {
 		MIRROR, EC, STRIPE, CONCAT
@@ -334,9 +336,14 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 							boolean b = Boolean.parseBoolean(el.getAttribute("data-store"));
 							if (b) {
 									byte pos = Byte.parseByte(el.getAttribute("raid-position"));
+									long capacity = -1;
+									if(el.hasAttribute("capacity")) {
+										capacity = StringUtils.parseSize(el.getAttribute("capacity"));
+									}
+									BucketStats bStat = new BucketStats(pos,capacity,0,el.getAttribute("bucket-name"),chunkClass);
 									this.datapools.add(pos, bs);
-									this.bucketSizes.add(pos, new AtomicLong());
-									this.sbl.add(new SimpleImmutableEntry<Byte,AtomicLong>(pos, this.bucketSizes.get(pos)));
+									this.bucketSizes.add(pos, bStat);
+									this.sbl.add(new SimpleImmutableEntry<Byte,BucketStats>(pos, bStat));
 							}
 						}
 
@@ -349,7 +356,13 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 						if (b) {
 								this.datapools.add(pos, null);
 						}
-						this.bucketSizes.add(pos, new AtomicLong());
+						long capacity = -1;
+						if(el.hasAttribute("capacity")) {
+							capacity = StringUtils.parseSize(el.getAttribute("capacity"));
+						}
+						BucketStats bStat = new BucketStats(pos,capacity,0,el.getAttribute("bucket-name"),chunkClass);
+						bStat.connected = false;
+						this.bucketSizes.add(pos, bStat);
 					}
 				}
 			}
@@ -429,7 +442,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			}
 			for(int i = 0;i< this.datapools.size();i++) {
 				if(md.containsKey("subbucket.size." + i)) {
-					this.bucketSizes.get(i).set(Long.parseLong(md.get("subbucket.size." + i)));
+					this.bucketSizes.get(i).usage.set(Long.parseLong(md.get("subbucket.size." + i)));
 					SDFSLogger.getLog().info("Set bucket size for " + i + " to " + md.get("subbucket.size." + i));
 				}
 			}
@@ -440,6 +453,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			HashBlobArchive.init(this);
 			HashBlobArchive.setReadSpeed(rsp, false);
 			HashBlobArchive.setWriteSpeed(wsp, false);
+			cs = this;
 			// this.resetCurrentSize();
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -608,7 +622,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		} else if (this.rl.equals(RAID.STRIPE) || this.rl.equals(RAID.CONCAT)) {
 			Entry<Integer, AbstractBatchStore> st = this.getStore(id);
 			st.getValue().writeHashBlobArchive(arc, id);
-			this.bucketSizes.get(st.getKey()).addAndGet(arc.getFile().length());
+			this.bucketSizes.get(st.getKey()).usage.addAndGet(arc.getFile().length());
 		} else if (this.rl.equals(RAID.EC)) {
 			final HashMap<String, String> metaData = new HashMap<String, String>();
 			metaData.put("size", Integer.toString(arc.uncompressedLength.get()));
@@ -639,7 +653,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 						HashMap<String, String> nmet = new HashMap<String, String>(metaData);
 						nmet.put("shardsize", Long.toString(fls[z].length()));
 						st.uploadFile(fls[z], Long.toString(id), "blocks", nmet, true);
-						this.bucketSizes.get(z).addAndGet(fls[z].length());
+						this.bucketSizes.get(z).usage.addAndGet(fls[z].length());
 						return true;
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to write blocks " + id, e);
@@ -706,7 +720,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				Callable<Boolean> task = () -> {
 					try {
 						st.uploadFile(f, Long.toString(id), "keys", new HashMap<String, String>(_metaData), true);
-						this.bucketSizes.get(z).addAndGet(f.length());
+						this.bucketSizes.get(z).usage.addAndGet(f.length());
 						return true;
 					} catch (IOException e) {
 						SDFSLogger.getLog().warn("unable to write blocks " + id, e);
@@ -845,7 +859,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		md.put("bucketversion", Integer.toString(version));
 		md.put("sdfsversion", Main.version);
 		for (int i = 0; i < this.bucketSizes.size(); i++) {
-			md.put("subbucket.size." + i, Long.toString(this.bucketSizes.get(i).get()));
+			md.put("subbucket.size." + i, Long.toString(this.bucketSizes.get(i).usage.get()));
 		}
 
 		if (Main.volume != null) {
@@ -1073,8 +1087,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		for (int i = 0; i < datapools.size(); i++) {
 			AbstractBatchStore st = this.datapools.get(i);
 			if(st != null && st.checkAccess()) {
+				this.bucketSizes.get(i).connected = true;
 				alstatus++;
 			}else {
+				this.bucketSizes.get(i).connected = false;
 				SDFSLogger.getLog().warn("unable to connect to bucket " + i);
 			}
 		}
@@ -1438,7 +1454,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			}
 			int claims = ent.getValue().verifyDelete(id);
 			if (claims == 0)
-				this.bucketSizes.get(ent.getKey()).addAndGet(-1 * csz);
+				this.bucketSizes.get(ent.getKey()).usage.addAndGet(-1 * csz);
 			return claims;
 		} else {
 			String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
@@ -1473,7 +1489,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 							}
 
 							st.deleteFile(Long.toString(id), "blocks");
-							this.bucketSizes.get(z).addAndGet(-1 * csz);
+							this.bucketSizes.get(z).usage.addAndGet(-1 * csz);
 							if (rl.equals(RAID.MIRROR) || z < _ecn)
 								st.deleteFile(Long.toString(id), "keys");
 							return true;
@@ -1514,10 +1530,18 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 
 	Random rand = new Random();
 
-	private long getLongID() {
-		byte bid = 0;
+	private long getLongID() throws IOException {
+		byte bid = -1;
 		if(rl.equals(RAID.CONCAT)) {
-			bid = this.sbl.getAL().get(0).getKey();
+			for(int i = 0;i<this.sbl.size();i++) {
+				if(this.sbl.getAL().get(i).getValue().connected) {
+					bid = this.sbl.getAL().get(i).getKey();
+					break;
+				}
+			}
+		}
+		if(bid == -1) {
+			throw new IOException("no buckets available");
 		}
 		byte[] k = new byte[7];
 		rand.nextBytes(k);
@@ -1527,6 +1551,10 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		bk.position(0);
 		return bk.getLong();
 	}
+	
+	public static List<BucketStats> getBucketSizes() {
+		return cs.bucketSizes;
+	}
 
 	@Override
 	public long getNewArchiveID() throws IOException {
@@ -1535,6 +1563,38 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();
 		return pid;
+	}
+	
+	public static class BucketStats {
+		public byte id;
+		public AtomicLong capacity;
+		public AtomicLong usage;
+		public String bucketName;
+		public String bucketClass;
+		public boolean connected =true;
+		
+		public BucketStats(byte id,long capacity,long usage,String bucketName,String bucketClass) {
+			this.id = id;
+			if(capacity <0) {
+				this.capacity = new AtomicLong(Long.MAX_VALUE);
+			}else {
+				this.capacity = new AtomicLong(capacity);
+			}
+			this.usage = new AtomicLong(usage);
+			this.bucketName = bucketName;
+			this.bucketClass = bucketClass;
+		}
+		
+		public boolean isConnected() {
+			return this.connected;
+		}
+		
+		public long getAvail() {
+			if(capacity == null) {
+				return Long.MAX_VALUE - usage.get();
+			}else 
+				return capacity.get() - usage.get();
+		}
 	}
 
 }

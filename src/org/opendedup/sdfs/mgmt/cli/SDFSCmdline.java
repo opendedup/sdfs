@@ -77,6 +77,8 @@ public class SDFSCmdline {
 			}
 			if (cmd.hasOption("list-cloud-volumes"))
 				ProcessConnectedVolumes.runCmd();
+			if (cmd.hasOption("list-raid-buckets"))
+				ProcessRaidBuckets.runCmd();
 			if (cmd.hasOption("cluster-volume-remove")) {
 				ProcessClusterVolumeRemove.runCmd(cmd
 						.getOptionValue("cluster-volume-remove"));
@@ -359,6 +361,11 @@ public class SDFSCmdline {
 				.withLongOpt("list-cloud-volumes")
 				.withDescription(
 						"list sdfs volumes that use this bucket.")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("list-raid-buckets")
+				.withDescription(
+						"list buckets connected to cloud raid volume")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("sync-remote-cloud-volume")
