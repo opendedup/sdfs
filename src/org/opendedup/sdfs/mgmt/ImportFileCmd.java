@@ -60,7 +60,7 @@ public class ImportFileCmd implements Runnable {
 			}
 			if (param.getName().equalsIgnoreCase("password")) {
 				this.password = param.getValue();
-				this.hmac = true;
+				this.hmac = false;
 			}
 
 		}
