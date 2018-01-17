@@ -99,7 +99,7 @@ public class MetaFileStore {
 			if (new File(dst).exists()) {
 				MetaDataDedupFile _mf = getMF(dst);
 				DedupFileStore.removeOpenDedupFile(_mf.getDfGuid());
-				_mf.getDedupFile(false).delete();
+				_mf.getDedupFile(false).delete(true);
 				pathMap.invalidate(dst);
 			}
 			boolean rn = mf.renameTo(dst);
@@ -369,7 +369,7 @@ public class MetaFileStore {
 							return false;
 						pathMap.invalidate(mf.getPath());
 						DedupFileStore.removeOpenDedupFile(mf.getDfGuid());
-						deleted = mf.deleteStub();
+						deleted = mf.deleteStub(localOnly);
 						if (!deleted) {
 							SDFSLogger.getLog().warn("could not delete " + mf.getPath());
 							return deleted;
@@ -377,6 +377,7 @@ public class MetaFileStore {
 							try {
 								DeleteMap m = new DeleteMap();
 								m.mf = mf;
+								m.localOnly = localOnly;
 								service.execute(m);
 
 							} catch (Exception e) {
@@ -440,11 +441,11 @@ public class MetaFileStore {
 	
 	private static class DeleteMap implements Runnable {
 		MetaDataDedupFile mf = null;
-
+		boolean localOnly;
 		@Override
 		public void run() {
 			try {
-				mf.getDedupFile(false).delete();
+				mf.getDedupFile(false).delete(localOnly);
 			} catch (IOException e) {
 				SDFSLogger.getLog().debug(e);
 			}

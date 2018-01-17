@@ -32,7 +32,7 @@
        <name>bintray</name>
        <url>http://jcenter.bintray.com</url>
    </repository>
-   
+
 </repositories>
 
   <properties>
@@ -323,7 +323,7 @@
             </configuration>
         </execution>
     </executions>
-</plugin>         
+</plugin>
     <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -332,9 +332,9 @@
                     <target>1.8</target>
                 </configuration>
        </plugin>
-            
-            
-    
+
+
+
   </plugins>
 </build>
 </project>

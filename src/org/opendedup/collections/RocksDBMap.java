@@ -294,7 +294,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				ByteBuffer bk = ByteBuffer.wrap(v);
 				long oval = bk.getLong();
 				if (oval != val) {
-					SDFSLogger.getLog().warn("When updating reference count for key [" + StringUtils.getHexString(hash)
+					SDFSLogger.getLog().debug("When updating reference count for key [" + StringUtils.getHexString(hash)
 							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
 					return false;
 				}

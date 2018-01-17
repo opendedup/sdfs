@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import static java.lang.Math.toIntExact;
+
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -87,7 +88,8 @@ import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 
 import com.aliyun.oss.ClientConfiguration;
-import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.common.comm.Protocol;
 import com.aliyun.oss.model.CopyObjectRequest;
@@ -101,19 +103,19 @@ import com.aliyun.oss.model.PutObjectRequest;
 import com.google.common.io.BaseEncoding;
 
 /**
- * 
+ *
  * @author Sam Silverberg The S3 chunk store implements the AbstractChunkStore
  *         and is used to store deduped chunks to AWS S3 data storage. It is
  *         used if the aws tag is used within the chunk store config file. It is
  *         important to make the chunk size very large on the client when using
  *         this chunk store since S3 charges per http request.
- * 
+ *
  */
 public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
-	OSSClient s3Service = null;
+	OSS s3Service = null;
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	boolean md5sum = true;
@@ -461,9 +463,8 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					clientConfig.setProxyUsername(el.getAttribute("proxy-username"));
 				}
 			}
-			s3Service = new OSSClient(s3Target, this.accessKey, this.secretKey);
-			this.binm = "bucketinfo/"
-					+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			s3Service = new OSSClientBuilder().build(s3Target, Main.cloudAccessKey, Main.cloudSecretKey);
+
 			if (s3Target != null) {
 				s3Target = s3Target.toLowerCase();
 				System.out.println("target=" + s3Target);
@@ -994,9 +995,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			 * if (mp.containsKey("deleted")) { boolean del = Boolean.parseBoolean((String)
 			 * mp.get("deleted")); if (del) { OSSObject kobj =
 			 * s3Service.getObject(this.name, "keys/" + haName);
-			 * 
+			 *
 			 * int claims = this.getClaimedObjects(kobj, id);
-			 * 
+			 *
 			 * int delobj = 0; if (mp.containsKey("deleted-objects")) { delobj =
 			 * Integer.parseInt((String) mp .get("deleted-objects")) - claims; if (delobj <
 			 * 0) delobj = 0; } mp.remove("deleted"); mp.put("deleted-objects",
@@ -1375,7 +1376,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 				Thread.sleep(60000);
 				if(this.standAlone) {
 				try {
-					
+
 					if (this.simpleMD) {
 						Map<String, String> md = this.getUserMetaData(binm);
 						md.put("currentsize", Long.toString(HashBlobArchive.getLength()));
@@ -2528,14 +2529,14 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 						st.updateObject(km, om);
 					}
 					/*
-					 * 
+					 *
 					 * } else { try { mp.put("deleted-objects", Integer.toString(delobj));
 					 * om.setUserMetadata(mp); String km = null; if (st.clustered) km =
 					 * st.getClaimName(k.longValue()); else km = "keys/" + hashString;
 					 * st.updateObject(km, om); }catch(Exception e) { if (st.deleteUnclaimed) {
 					 * st.verifyDelete(k.longValue()); SDFSLogger.getLog().info("deleted " +
 					 * k.longValue()); }else throw e; }
-					 * 
+					 *
 					 * }
 					 */
 				}
@@ -2590,9 +2591,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	public boolean isMetaStore(boolean metaStore) {
 		return this.metaStore;
 	}
-	
+
 	Random rand = new Random();
-	
+
 	private long getLongID() {
 		byte [] k = new byte[7];
 		rand.nextBytes(k);
@@ -2603,11 +2604,11 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		bk.position(0);
 		return bk.getLong();
 	}
-	
-	
+
+
 	@Override
 	public long getNewArchiveID() throws IOException {
-		
+
 		long pid = this.getLongID();
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();

@@ -123,7 +123,7 @@ public interface DedupFile {
 	 * 
 	 * @return true if deleted
 	 */
-	public abstract boolean delete();
+	public abstract boolean delete(boolean localOnly);
 
 	
 	/**

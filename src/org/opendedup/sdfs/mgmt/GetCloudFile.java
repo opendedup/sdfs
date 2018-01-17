@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,10 +21,8 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
-import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.LRUCache;
@@ -37,19 +36,19 @@ public class GetCloudFile implements Runnable {
 
 	MetaDataDedupFile mf = null;
 	MetaDataDedupFile sdf = null;
-	SparseDedupFile sdd = null;
 	String sfile, dstfile;
 	boolean overwrite;
-
+	private Object obj = null;
 	File df = null;
 	SDFSEvent fevt = null;
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
+	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
 
 	public Element getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
 		synchronized (ck) {
 			if (changeid != null && ck.containsKey(changeid)) {
 				try {
-					SDFSLogger.getLog().info("ignoring " + changeid + " " + file);
+					SDFSLogger.getLog().debug("ignoring " + changeid + " " + file);
 					Document doc = XMLUtils.getXMLDoc("cloudfile");
 					Element root = doc.getDocumentElement();
 					root.setAttribute("action", "ignored");
@@ -57,8 +56,15 @@ public class GetCloudFile implements Runnable {
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
+
 			}
 			ck.put(changeid, file);
+			if (fack.containsKey(file)) {
+				obj = fack.get(file);
+			} else {
+				obj = new Object();
+				fack.put(file, obj);
+			}
 		}
 		this.sfile = file;
 		this.dstfile = dstfile;
@@ -88,35 +94,41 @@ public class GetCloudFile implements Runnable {
 			if (!overwrite && f.exists() && MetaDataDedupFile.getFile(f.getPath()).isLocalOwner())
 				throw new IOException("File [" + sfile + "] already exists and is owned locally.");
 			else {
+				MetaFileStore.removedCachedMF(new File(Main.volume.getPath() + File.separator + sfile).getPath());
+				if (df != null) {
+					MetaFileStore.removedCachedMF(df.getPath());
+				}
+				if (df == null) {
+					MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
+							true, true);
+					SDFSLogger.getLog()
+							.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
+				}
 				fevt.maxCt = 3;
 				fevt.curCt = 1;
-				SDFSLogger.getLog().info("downloading " + sfile);
+				SDFSLogger.getLog().debug("downloading " + sfile);
 				fevt.shortMsg = "Downloading [" + sfile + "]";
-				mf = FileReplicationService.getMF(sfile);
-				SDFSLogger.getLog().info("downloaded " + sfile);
-				mf.setLocalOwner(false);
+				MetaDataDedupFile _mf = FileReplicationService.getMF(sfile);
+				SDFSLogger.getLog().debug("downloaded " + sfile);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
-				SDFSLogger.getLog().info("downloading ddb " + mf.getDfGuid() + " lf=" + mf.getLookupFilter());
-				LongByteArrayMap ddb = null;
-				FileReplicationService.getDDB(mf.getDfGuid(), mf.getLookupFilter());
+				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid() + " lf=" + _mf.getLookupFilter());
+				LongByteArrayMap ddb = LongByteArrayMap.getMap(_mf.getDfGuid(), _mf.getLookupFilter());
+				ddb.vanish(Main.refCount);
+				FileReplicationService.getDDB(_mf.getDfGuid(), _mf.getLookupFilter());
+				mf = MetaFileStore.getMF(_mf.getPath());
+				mf.setLocalOwner(false);
+				
 				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
-					sdd = sdf.getDedupFile(false);
-					DedupFileChannel ch = sdd.getChannel(-1);
-					ddb = (LongByteArrayMap) sdd.bdb;
-					sdd.unRegisterChannel(ch, -1);
 
 				} else {
-					sdd = mf.getDedupFile(false);
-					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + sdd.getGUID());
-					DedupFileChannel ch = sdd.getChannel(-1);
-					ddb = (LongByteArrayMap) sdd.bdb;
-					sdd.unRegisterChannel(ch, -1);
+					
+					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
+					
 				}
 				fevt.curCt++;
-				if (ddb.getVersion() < 2)
-					throw new IOException("only files version 2 or later can be imported");
+				
 
 			}
 		} catch (IOException e) {
@@ -133,19 +145,23 @@ public class GetCloudFile implements Runnable {
 		}
 	}
 
-	private void checkDedupFile(SparseDedupFile sdb, SDFSEvent fevt) throws IOException {
+	private void checkDedupFile(SDFSEvent fevt) throws IOException {
+		
 		fevt.shortMsg = "Importing hashes for file";
-		SDFSLogger.getLog().info("Importing " + sdb.getGUID());
+		SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
-		DedupFileChannel ch = sdb.getChannel(-1);
-		LongByteArrayMap ddb = (LongByteArrayMap) sdb.bdb;
+		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
+		ddb.forceClose();
+		ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
 		mf.getIOMonitor().clearFileCounters(false);
 		if (ddb.getVersion() < 2)
 			throw new IOException("only files version 2 or later can be imported");
 		try {
+			long ct = 0;
 			ddb.iterInit();
 			for (;;) {
 				LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+				ct++;
 				if (kv == null)
 					break;
 				SparseDataChunk ck = kv.getValue();
@@ -174,32 +190,40 @@ public class GetCloudFile implements Runnable {
 					ddb.put(kv.getKey(), ck);
 			}
 
-			// SDFSLogger.getLog().info("new objects of size " + blks.size());
+			SDFSLogger.getLog().debug("new objects of size " + blks.size() + " iter count is " + ct);
 			for (Long l : blks) {
-				SDFSLogger.getLog().info("importing " + l);
+				SDFSLogger.getLog().debug("importing " + l);
 				HashBlobArchive.claimBlock(l);
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
 			throw new IOException(e);
 		} finally {
-			sdd.unRegisterChannel(ch, -1);
+			try {
+				ddb.forceClose();
+			}catch(Exception e) {
+				SDFSLogger.getLog().warn("error closing file [" + mf.getPath() + "]", e);
+			}
+			
 		}
+		SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
 		fevt.curCt++;
 	}
 
 	@Override
 	public void run() {
 		try {
-			this.downloadFile();
-			this.checkDedupFile(sdd, fevt);
-			fevt.endEvent("imported [" + mf.getPath() + "]");
+			synchronized (obj) {
+				this.downloadFile();
+				this.checkDedupFile(fevt);
+				fevt.endEvent("imported [" + mf.getPath() + "]");
+			}
 		} catch (Exception e) {
 			String pth = "";
 			if (mf != null)
 				pth = mf.getPath();
 			SDFSLogger.getLog().error("unable to process file " + pth, e);
-			fevt.endEvent("unable to process file " + mf.getPath(), SDFSEvent.ERROR);
+			fevt.endEvent("unable to process file " + pth, SDFSEvent.ERROR);
 		} finally {
 			if (df != null && mf != null) {
 				MetaFileStore.removeMetaFile(mf.getPath(), true, true);

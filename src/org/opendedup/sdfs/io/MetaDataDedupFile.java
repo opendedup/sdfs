@@ -38,6 +38,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -856,6 +857,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 
 	}
+	
+	public Map<String,String> getExtendedAttributes() {
+		return this.extendedAttrs;
+	}
 
 	public ReentrantLock writeLock = new ReentrantLock();
 
@@ -884,6 +889,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				return false;
 			}
 			if (!f.isDirectory()) {
+				/*
+				try {
+					throw new IOException("Writing mf ["+ f.getPath() +"] len=" + this.length());
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("Writing mf ["+ f.getPath() +"] len=" + this.length(),e);
+				}
+				*/
+				
 
 				try {
 
@@ -995,7 +1008,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * 
 	 * @return true if deleted
 	 */
-	public boolean deleteStub() {
+	public boolean deleteStub( boolean localonly) {
 		this.writeLock.lock();
 		try {
 			if (this.retentionLock > 0)
@@ -1004,7 +1017,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (f.exists()) {
 				boolean del = f.delete();
 				Main.volume.removeFile();
-				eventBus.post(new MFileDeleted(this));
+				if(!localonly)
+					eventBus.post(new MFileDeleted(this));
 				return del;
 			} else
 				return true;

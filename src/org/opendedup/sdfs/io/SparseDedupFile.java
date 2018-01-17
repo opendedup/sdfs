@@ -292,7 +292,7 @@ public class SparseDedupFile implements DedupFile {
 	}
 
 	@Override
-	public boolean delete() {
+	public boolean delete(boolean localOnly) {
 		this.syncLock.lock();
 		try {
 			this.deleted = true;
@@ -320,8 +320,8 @@ public class SparseDedupFile implements DedupFile {
 					+ this.GUID;
 
 			DedupFileStore.removeOpenDedupFile(this.GUID);
-
-			eventBus.post(new SFileDeleted(this));
+			if(!localOnly)
+				eventBus.post(new SFileDeleted(this));
 
 			return DeleteDir.deleteDirectory(new File(filePath));
 

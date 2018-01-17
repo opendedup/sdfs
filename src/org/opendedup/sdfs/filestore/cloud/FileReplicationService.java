@@ -281,7 +281,7 @@ public class FileReplicationService {
 		if (evt.mf.isFile() || evt.mf.isSymlink()) {
 			try {
 				ReentrantLock l = this.getLock(evt.mf.getPath());
-				if (l.tryLock()) {
+				l.lock();
 					int tries = 0;
 					boolean done = false;
 					while (!done) {
@@ -310,7 +310,6 @@ public class FileReplicationService {
 								tries++;
 						}
 					}
-				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
 			} finally {
@@ -370,7 +369,7 @@ public class FileReplicationService {
 		if (evt.getLocation() == -1) {
 			try {
 				ReentrantLock l = this.getLock(evt.sf.getDatabasePath());
-				if (l.tryLock()) {
+				l.lock();
 					int tries = 0;
 					boolean done = false;
 					while (!done) {
@@ -403,7 +402,6 @@ public class FileReplicationService {
 								tries++;
 						}
 					}
-				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write " + evt.sf.getDatabasePath(), e);
 			} finally {
@@ -418,7 +416,7 @@ public class FileReplicationService {
 	public void sFileSync(SFileSync evt) {
 		try {
 			ReentrantLock l = this.getLock(evt.sf.getPath());
-			if (l.tryLock()) {
+			l.lock();
 				int tries = 0;
 				boolean done = false;
 				while (!done) {
@@ -435,7 +433,6 @@ public class FileReplicationService {
 							tries++;
 					}
 				}
-			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.sf.getPath(), e);
 		} finally {
@@ -450,7 +447,7 @@ public class FileReplicationService {
 
 		try {
 			ReentrantLock l = this.getLock(evt.mf.getPath());
-			if (l.tryLock()) {
+			l.lock();
 				int tries = 0;
 				boolean done = false;
 				while (!done) {
@@ -466,7 +463,6 @@ public class FileReplicationService {
 							tries++;
 					}
 				}
-			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
 		} finally {

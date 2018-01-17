@@ -243,7 +243,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
 			}
 			long _cpos = getInternalIterFPos();
-			while (_cpos < pbdb.size()) {
+			while (_cpos < this.dbFile.length()) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					long pos = iterPos.get() * Main.CHUNK_LENGTH;
@@ -262,9 +262,9 @@ public class LongByteArrayMap implements DataMapInterface {
 					_cpos = getInternalIterFPos();
 				}
 			}
-			if ((iterPos.get() * arrayLength) + this.offset != pbdb.size())
+			if ((iterPos.get() * arrayLength) + this.offset != this.dbFile.length())
 				throw new IOException("did not reach end of file for [" + this.filePath + "] len="
-						+ iterPos.get() * arrayLength + " file len =" + pbdb.size());
+						+ iterPos.get() * arrayLength + " file len =" + this.dbFile.length());
 
 			return -1;
 		} finally {
@@ -290,7 +290,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
 			}
 			long _cpos = getInternalIterFPos();
-			while (_cpos < pbdb.size()) {
+			while (_cpos < this.dbFile.length()) {
 				try {
 					if (nbuf == null) {
 						nbuf = ByteBuffer.allocate(arrayLength);
@@ -298,7 +298,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					nbuf.position(0);
 					pbdb.read(nbuf, _cpos);
 					// SDFSLogger.getLog().info("al=" + al + " cpos=" +_cpos
-					// + " flen=" + flen + " fz=" +pbdb.size() + " nbfs=" +
+					// + " flen=" + flen + " fz=" +this.dbFile.length() + " nbfs=" +
 					// nbuf.position());
 					nbuf.position(0);
 					// SDFSLogger.getLog().info("arl=" + arrayLength + "
@@ -335,7 +335,8 @@ public class LongByteArrayMap implements DataMapInterface {
 				throw new FileClosedException("hashtable [" + this.filePath + "] is close");
 			}
 			long _cpos = getInternalIterFPos();
-			while (_cpos < pbdb.size()) {
+			//SDFSLogger.getLog().info("cpos=" + _cpos + " fl=" +this.dbFile.length());
+			while (_cpos < this.dbFile.length()) {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(new byte[arrayLength]);
 					pbdb.read(buf, _cpos);
@@ -683,7 +684,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 			fpos = this.getMapFilePosition(pos);
 
-			if (fpos > pbdb.size())
+			if (fpos > this.dbFile.length())
 				return null;
 			byte[] buf = null;
 			if (version > 1) {
@@ -767,7 +768,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				}
 			}
 			if (!this.isClosed())
-				this.close();
+				this.forceClose();
 			File f = new File(this.filePath);
 			f.delete();
 			File cf = new File(this.filePath + ".lz4");
@@ -889,7 +890,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
 				if (op <= 0) {
-					// SDFSLogger.getLog().info("closing " + this.filePath);
+					SDFSLogger.getLog().debug("closing " + this.filePath);
 					this.opens.set(0);
 
 					dbFile = null;
@@ -917,7 +918,23 @@ public class LongByteArrayMap implements DataMapInterface {
 					}
 					mp.remove(this.filePath);
 				}
+				else {
+					SDFSLogger.getLog().debug("not closing " + this.filePath + " opens=" + this.opens.get());
+				}
 			}
+		} finally {
+			l.unlock();
+		}
+	}
+	
+	public void forceClose() throws IOException {
+
+		WriteLock l = this.hashlock.writeLock();
+		l.lock();
+
+		try {
+			this.opens.set(0);
+			this.close();
 		} finally {
 			l.unlock();
 		}
