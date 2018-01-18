@@ -35,7 +35,7 @@ public class IgniteLongLongDBPersistence implements org.apache.ignite.cache.stor
 	@Override
 	public void loadCache(IgniteBiInClosure<Long, Long> clo, Object... args) {
 		this.db = (CassandraDedupeDB) args[0];
-		if (args.length > 1) {
+		if (args.length > 1 ) {
 			Iterator<Row> iter = db._getAllRmrf();
 			AtomicLong k = (AtomicLong) args[1];
 			while (iter.hasNext()) {

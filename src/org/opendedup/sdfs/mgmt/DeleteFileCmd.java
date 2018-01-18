@@ -50,7 +50,7 @@ public class DeleteFileCmd {
 			else {
 				if (rmlock)
 					MetaFileStore.getMF(f).clearRetentionLock();
-				boolean removed = MetaFileStore.removeMetaFile(internalPath, true, true);
+				boolean removed = MetaFileStore.removeMetaFile(internalPath, false, true);
 				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
 
 				if (removed) {

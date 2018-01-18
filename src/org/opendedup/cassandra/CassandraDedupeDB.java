@@ -133,9 +133,10 @@ public class CassandraDedupeDB {
 			idb.loadCache(null, obj);
 			System.out.println(" Loaded " + idb.sizeLong() + " objects into the rm cache");
 		} else {
-			Object[] obj = new Object[1];
-			obj[0] = this;
-			idb.loadCache(null, obj);
+			//Object[] obj = new Object[1];
+			//obj[0] = this;
+			//obj[1] = new AtomicLong();
+			//idb.loadCache(null, obj);
 			System.out.println(" Loaded " + idb.sizeLong() + " objects into the rm cache");
 		}
 	}
