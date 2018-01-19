@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -109,7 +110,6 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.google.common.io.BaseEncoding;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;

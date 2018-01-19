@@ -413,11 +413,7 @@ public class MgmtWebServer implements Container {
 						
 					case "syncfssize":
 						try {
-							String dstfile = null;
-							if (qry.containsKey("dstfile")) {
-								dstfile = qry.get("dstfile");
-							}
-							String changeid = qry.get("changeid");
+							
 							Element msg = new FileSystemusageCheck().getResult();
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
