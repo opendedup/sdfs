@@ -1306,6 +1306,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 						synchronized (f) {
 							ch.read(hb, pos);
 						}
+					} catch(ClosedChannelException e1) {
+						throw e1;
 					} catch (Exception e1) {
 						throw new IOException(e1);
 					}
@@ -1337,12 +1339,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 					}
 				}
-				ub = new byte[nlen];
 
+				ub = new byte[nlen];
 				try {
 					synchronized (f) {
 						ch.read(ByteBuffer.wrap(ub), pos + 4);
 					}
+				} catch(ClosedChannelException e) {
+					throw e;
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
@@ -1388,6 +1392,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					try {
 						ch.read(ByteBuffer.wrap(ub), npos + 4);
 
+					} catch(ClosedChannelException e) {
+						throw e;
 					} catch (Exception e) {
 						throw new IOException(e);
 					}

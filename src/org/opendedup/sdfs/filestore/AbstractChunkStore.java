@@ -166,6 +166,8 @@ public interface AbstractChunkStore {
 			throws IOException;
 
 	public abstract ChunkData getNextChunck() throws IOException;
+	
+	public abstract long getAllObjSummary(String pp, long id) throws IOException;
 
 	public abstract void iterationInit(boolean getchunks) throws IOException;
 

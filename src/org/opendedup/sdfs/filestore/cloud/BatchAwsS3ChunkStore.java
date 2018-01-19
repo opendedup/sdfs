@@ -97,6 +97,7 @@ import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.iterable.S3Objects;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
@@ -660,7 +661,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
 					md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
 					md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
-
 					this.clustered = true;
 					this.binm = "bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -2225,6 +2225,44 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		nck = null;
 		nobjPos = new AtomicInteger(0);
 		nsummaries = null;
+	}
+
+	public long getAllObjSummary(String pp, long id) throws IOException {
+		try {
+			this.clearIter();
+			String pfx = pp + "/";
+			long t_size = 0;
+			long t_compressedsize = 0;
+			int _size = 0;
+			int _compressedSize = 0;
+			String key = "";
+			for ( S3ObjectSummary summary : S3Objects.withPrefix(s3Service, this.name, pfx) ) {
+				key = summary.getKey();
+				if (!key.endsWith(mdExt)) {
+					Map<String, String> md = this.getUserMetaData(key);
+					if (md.containsKey("compressedsize")) {
+						_compressedSize = Integer.parseInt((String) md.get("compressedsize"));
+					}
+					if (md.containsKey("size")) {
+						_size = Integer.parseInt((String) md.get("size"));
+					}
+					t_size = t_size + _size;
+					t_compressedsize = t_compressedsize + _compressedSize;
+				}
+			}
+
+			if ( t_compressedsize >= 0) {
+				HashBlobArchive.setCompressedLength(t_compressedsize);
+			}
+			
+			if (t_size >= 0) {
+				HashBlobArchive.setLength(t_size);
+			}
+			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size );
+			return 0;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	public String getNextName(String pp, long id) throws IOException {

@@ -2614,5 +2614,9 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 			pid = this.getLongID();
 		return pid;
 	}
+	public long getAllObjSummary(String pp, long id) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }
