@@ -16,7 +16,7 @@ public class DeleteFileCmd {
 	static LRUCache<String, String> ck = new LRUCache<String, String>(50);
 	private Object obj = null;
 
-	public String getResult(String cmd, String file, String changeid, boolean rmlock) throws IOException {
+	public String getResult(String cmd, String file, String changeid, boolean rmlock,boolean localonly) throws IOException {
 		synchronized (ck) {
 			if (changeid != null && ck.containsKey(changeid)) {
 				try {
@@ -50,7 +50,7 @@ public class DeleteFileCmd {
 			else {
 				if (rmlock)
 					MetaFileStore.getMF(f).clearRetentionLock();
-				boolean removed = MetaFileStore.removeMetaFile(internalPath, true, true);
+				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true);
 				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
 
 				if (removed) {

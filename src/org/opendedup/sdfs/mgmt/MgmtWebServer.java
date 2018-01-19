@@ -371,9 +371,12 @@ public class MgmtWebServer implements Container {
 								changeid = qry.get("changeid");
 							}
 							boolean rmlock = false;
+							boolean localonly = false;
 							if (qry.containsKey("retentionlock"))
 								rmlock = Boolean.parseBoolean(qry.get("retentionlock"));
-							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock);
+							if(qry.containsKey("localonly"))
+								localonly = Boolean.parseBoolean(qry.get("localonly"));
+							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock,localonly);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
