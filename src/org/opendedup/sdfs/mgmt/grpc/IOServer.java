@@ -107,7 +107,7 @@ public class IOServer {
 			}catch(FuseException e) {
 				resp = OpenResponse.newBuilder().setFileHandle(e.getErrno() * -1).build();
 			}catch(Exception e) {
-				SDFSLogger.getLog().error("error opend", e);
+				SDFSLogger.getLog().error("error opening file", e);
 				resp = OpenResponse.newBuilder().setFileHandle(-1).build();
 			}
 			responseObserver.onNext(resp);
@@ -126,7 +126,7 @@ public class IOServer {
 			} catch(FuseException e) {
 				resp = CloseResponse.newBuilder().setFileHandle(e.getErrno() *-1).build();
 			} catch(Exception e) {
-				SDFSLogger.getLog().error("error opend", e);
+				SDFSLogger.getLog().error("error closing file", e);
 				resp = CloseResponse.newBuilder().setFileHandle(-1).build();
 			}
 			responseObserver.onNext(resp);
