@@ -52,7 +52,6 @@ public class DeleteFileCmd {
 					MetaFileStore.getMF(f).clearRetentionLock();
 				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true);
 				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
-
 				if (removed) {
 					SDFSEvent.deleteFileEvent(f);
 					return "removed [" + file + "]";
