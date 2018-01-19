@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
@@ -16,7 +17,8 @@ public class DeleteFileCmd {
 	static LRUCache<String, String> ck = new LRUCache<String, String>(50);
 	private Object obj = null;
 
-	public String getResult(String cmd, String file, String changeid, boolean rmlock,boolean localonly) throws IOException {
+	public String getResult(String cmd, String file, String changeid, boolean rmlock, boolean localonly)
+			throws IOException {
 		synchronized (ck) {
 			if (changeid != null && ck.containsKey(changeid)) {
 				try {
@@ -34,7 +36,7 @@ public class DeleteFileCmd {
 				if (GetCloudFile.fack.containsKey(file)) {
 					obj = GetCloudFile.fack.get(file);
 				} else {
-					obj= new Object();
+					obj = new Object();
 					GetCloudFile.fack.put(file, obj);
 				}
 			}
@@ -48,8 +50,18 @@ public class DeleteFileCmd {
 			if (!f.exists())
 				throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 			else {
-				if (rmlock)
-					MetaFileStore.getMF(f).clearRetentionLock();
+				try {
+					MetaFileStore.getMF(f);
+					if (rmlock) {
+
+						MetaFileStore.getMF(f).clearRetentionLock();
+
+					}
+				} catch (Exception e) {
+					SDFSLogger.getLog().info("forcing delete of file " + internalPath);
+					f.delete();
+					MetaFileStore.removedCachedMF(internalPath);
+				}
 				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true);
 				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
 

@@ -39,7 +39,6 @@ public class GetCloudFile implements Runnable {
 	String sfile, dstfile;
 	boolean overwrite;
 	private Object obj = null;
-	File df = null;
 	SDFSEvent fevt = null;
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
@@ -135,6 +134,17 @@ public class GetCloudFile implements Runnable {
 
 			if (sdf != null) {
 				MetaFileStore.removeMetaFile(sdf.getPath(), true, true);
+				sdf.deleteStub(true);
+			}
+			File f = new File(Main.volume.getPath() + File.separator + sfile);
+			if(f.exists()) {
+				try {
+					MetaFileStore.removeMetaFile(f.getPath(), true, true);
+				}catch (Exception e1) {
+					
+				}finally {
+				f.delete();
+				}
 			}
 			throw e;
 		} catch (Exception e) {
@@ -222,12 +232,22 @@ public class GetCloudFile implements Runnable {
 			String pth = "";
 			if (mf != null)
 				pth = mf.getPath();
+			try {
+			File f = new File(Main.volume.getPath() + File.separator + sfile);
+			if(f.exists()) {
+				try {
+					MetaFileStore.removeMetaFile(f.getPath(), true, true);
+				}catch (Exception e1) {
+					
+				}finally {
+				f.delete();
+				}
+			}
+			}catch(Exception e1) {
+				
+			}
 			SDFSLogger.getLog().error("unable to process file " + pth, e);
 			fevt.endEvent("unable to process file " + pth, SDFSEvent.ERROR);
-		} finally {
-			if (df != null && mf != null) {
-				MetaFileStore.removeMetaFile(mf.getPath(), true, true);
-			}
 		}
 
 	}
