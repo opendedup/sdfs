@@ -126,6 +126,10 @@ public class SDFSCmdline {
 				ProcessVolumeInfo.runCmd();
 				System.exit(0);
 			}
+			if (cmd.hasOption("sync-fs-size")) {
+				ProcessSyncFSsize.runCmd();
+				System.exit(0);
+			}
 			if (cmd.hasOption("cluster-redundancy-check")) {
 				ProcessClusterRedundancyCheck.runCmd();
 				System.exit(0);
@@ -136,6 +140,10 @@ public class SDFSCmdline {
 			}
 			if (cmd.hasOption("perfmon-on")) {
 				ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
+			}
+			if (cmd.hasOption("delete-file")) {
+				ProcessDeleteFileCmd.execute(cmd.getOptionValue("delete-file"), true);
+				System.exit(0);
 			}
 			if (cmd.hasOption("import-archive")) {
 				String server = cmd.getOptionValue("replication-master");
@@ -398,6 +406,11 @@ public class SDFSCmdline {
 						"Returns Dedup Storage Engine Statitics. "
 								+ "\n e.g. --dse-info").hasArg(false).create());
 		options.addOption(OptionBuilder
+				.withLongOpt("delete-file")
+				.withDescription(
+						"Delete file forcefully."
+								+ "\n e.g. --delete-file <filename>").hasArg(true).create());
+		options.addOption(OptionBuilder
 				.withLongOpt("cluster-dse-info")
 				.withDescription(
 						"Returns Dedup Storage Engine Statitics for all Storage Nodes in the cluster. "
@@ -427,6 +440,11 @@ public class SDFSCmdline {
 						"Removes an unassociated volume in the cluster. "
 								+ "\n e.g. --cluster-volume-remove <vol-name>")
 				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sync-fs-size")
+				.withDescription(
+						"sync File system usage")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-volume-add")
 				.withDescription(

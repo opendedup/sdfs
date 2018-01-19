@@ -108,6 +108,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.google.common.io.BaseEncoding;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;
@@ -2173,6 +2174,63 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		nck = null;
 		nobjPos = new AtomicInteger(0);
 		nsummaries = null;
+	}
+
+	public long getAllObjSummary(String pp, long id) throws IOException {
+		try {
+			this.clearIter();
+			String pfx = pp + "/";
+			if (nck == null) {
+				nck = s3Service.listObjects(this.getName(), pfx);
+				nsummaries = nck.getObjectSummaries();
+				nobjPos = new AtomicInteger(0);
+			} else if (nobjPos.get() == nsummaries.size()) {
+				nck = s3Service.listNextBatchOfObjects(nck);
+
+				nsummaries = nck.getObjectSummaries();
+				nobjPos = new AtomicInteger(0);
+			}
+			if (nsummaries.size() == 0)
+				return 0;
+			SDFSLogger.getLog().info("size  = " + nsummaries.size());
+			long total_size = 0;
+			long t_size = 0;
+			long t_compressedsize = 0;
+
+			int _size = 0;
+			int _compressedSize = 0;
+			long num_objects = nsummaries.size();
+			String key = "";
+			while (num_objects != 0 ) {
+				key = nsummaries.get(nobjPos.get()).getKey();
+				if (!key.endsWith(mdExt)) {
+					Map<String, String> md = this.getUserMetaData(key);
+					if (md.containsKey("compressedsize")) {
+						_compressedSize = Integer.parseInt((String) md.get("compressedsize"));
+					}
+					if (md.containsKey("size")) {
+						_size = Integer.parseInt((String) md.get("size"));
+					}
+					t_size = t_size + _size;
+					t_compressedsize = t_compressedsize + _compressedSize;
+					SDFSLogger.getLog().info("key, length, length2 = " + key + " " + _compressedSize +  " " + _size);
+					total_size = total_size + nsummaries.get(nobjPos.get()).getSize();
+				}
+				num_objects = num_objects - 1;
+				nobjPos.incrementAndGet();
+			}
+			if ( t_compressedsize >= 0) {
+				HashBlobArchive.setCompressedLength(t_compressedsize);
+			}
+			
+			if (t_size >= 0) {
+				HashBlobArchive.setLength(t_size);
+			}
+			//SDFSLogger.getLog().info("length = " + size3 + " " + size2 );
+			return total_size;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	public String getNextName(String pp, long id) throws IOException {
