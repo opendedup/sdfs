@@ -313,7 +313,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			}
 
 			SDFSLogger.getLog()
-					.warn("When updating reference count. Key [" + StringUtils.getHexString(hash) + "] not found");
+					.debug("When updating reference count. Key [" + StringUtils.getHexString(hash) + "] not found");
 			return false;
 		} catch (RocksDBException e) {
 			throw new IOException(e);
