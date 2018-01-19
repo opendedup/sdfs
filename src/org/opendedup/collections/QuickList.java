@@ -21,6 +21,7 @@ package org.opendedup.collections;
 import java.io.Externalizable;
 
 
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -29,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.jgroups.util.Util;
 import org.opendedup.hashing.HashFunctionPool;
 
 public class QuickList<E> implements java.util.List<E>, Externalizable {
@@ -223,20 +223,6 @@ public class QuickList<E> implements java.util.List<E>, Externalizable {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws Exception {
-		QuickList<String> l = new QuickList<String>(10);
-
-		l.add(0, "a");
-		l.add(1, null);
-		l.add(2, "b");
-		l.add(3, "c");
-		byte[] ar = Util.objectToByteBuffer(l);
-		QuickList<String> z = (QuickList<String>) Util.objectFromByteBuffer(ar);
-		for (int i = 0; i < z.size(); i++) {
-			System.out.println(z.get(i));
-		}
-
-	}
+	
 
 }

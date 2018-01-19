@@ -20,7 +20,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
@@ -53,9 +52,7 @@ public interface HashChunkServiceInterface {
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
 			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException;
 
-	public abstract void remoteFetchChunks(ArrayList<String> al, String server,
-			String password, int port, boolean useSSL) throws IOException,
-			HashtableFullException;
+	
 
 	public abstract long hashExists(byte[] hash) throws IOException,
 			HashtableFullException;

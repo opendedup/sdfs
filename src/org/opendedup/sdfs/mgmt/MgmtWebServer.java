@@ -591,52 +591,6 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("dse-info", e);
 						}
 						break;
-					case "cluster-dse-info":
-						try {
-							Element msg = new GetClusterDSE().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-							result.appendChild(doc.adoptNode(msg));
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("cluster-dse-info", e);
-						}
-						break;
-					case "cluster-volumes":
-						try {
-							Element msg = new GetRemoteVolumes().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-							result.appendChild(doc.adoptNode(msg));
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("cluster-volumes", e);
-						}
-						break;
-					case "cluster-volume-remove":
-						try {
-							new RemoveRemoteVolume().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("cluster-volume-remove", e);
-						}
-						break;
-					case "cluster-volume-add":
-						try {
-							new AddRemoteVolume().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("cluster-volume-add", e);
-						}
-						break;
 					case "blockdev-add":
 						try {
 							Element el = new BlockDeviceAdd().getResult(qry.get("devname"), qry.get("size"),
@@ -729,17 +683,6 @@ public class MgmtWebServer implements Container {
 						result.setAttribute("status", "success");
 						result.setAttribute("msg", "command completed successfully");
 						break;
-					case "set-gc-schedule":
-						try {
-							new SetGCSchedule().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("set-gc-schedule", e);
-						}
-						break;
 					case "get-gc-schedule":
 						try {
 							Element msg = new GetGCSchedule().getResult(cmdOptions, file);
@@ -751,30 +694,6 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("get-gc-schedule", e);
-						}
-						break;
-					case "get-gc-master":
-						try {
-							Element msg = new GetGCMaster().getResult();
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-							result.appendChild(doc.adoptNode(msg));
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("get-gc-master", e);
-						}
-						break;
-
-					case "cluster-promote-gc":
-						try {
-							new PromoteToGCMaster().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("cluster-promote-gc", e);
 						}
 						break;
 					case "open-files":
@@ -1030,18 +949,6 @@ public class MgmtWebServer implements Container {
 							result.setAttribute("status", "failed");
 							result.setAttribute("msg", e.toString());
 							SDFSLogger.getLog().warn("fdisk", e);
-						}
-						break;
-					case "redundancyck":
-						try {
-							Element emsg = new ClusterRedundancyCmd().getResult(cmdOptions, null);
-							result.setAttribute("status", "success");
-							doc.adoptNode(emsg);
-							result.appendChild(emsg);
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
 						}
 						break;
 					case "event":

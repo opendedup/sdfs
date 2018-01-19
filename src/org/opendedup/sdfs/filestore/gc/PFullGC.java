@@ -22,7 +22,6 @@ import java.text.DecimalFormat;
 
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -89,11 +88,7 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	private double calcPFull() {
-		Lock l = null;
-		try {
-			if (!Main.chunkStoreLocal) {
-				l = HCServiceProxy.cs.getLock("fdisk");
-			}
+			
 			double pFull = 0;
 			if (HCServiceProxy.getSize() > 0) {
 				pFull = (double) HCServiceProxy.getSize()
@@ -101,10 +96,6 @@ public class PFullGC implements GCControllerImpl {
 			}
 
 			return pFull;
-		} finally {
-			if (l != null)
-				l.unlock();
-		}
 	}
 
 	private double calcNxtRun() {

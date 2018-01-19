@@ -56,7 +56,6 @@ import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.cluster.BlockDevSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.events.SFileDeleted;
@@ -304,9 +303,7 @@ public class SparseDedupFile implements DedupFile {
 				File zdbf = new File(directory.getPath() + File.separator + this.GUID + ".map.lz4");
 				if (dbf.exists() || zdbf.exists()) {
 					if (bdb == null || bdb.isClosed()) {
-						if (mf.getDev() != null) {
-							this.bdb = new BlockDevSocket(mf.getDev(), dbf.getPath());
-						} else
+						
 							this.bdb = LongByteArrayMap.getMap(this.GUID, this.mf.getLookupFilter());
 					}
 					this.bdb.vanish(Main.refCount);
@@ -428,14 +425,7 @@ public class SparseDedupFile implements DedupFile {
 				try {
 
 					int dups = 0;
-					if (writeBuffer.isBatchProcessed() && HashFunctionPool.max_hash_cluster == 1) {
-						for (HashLocPair p : writeBuffer.getFingers().values()) {
-							if (!writeBuffer.isBatchwritten())
-								p.hashloc = HCServiceProxy
-										.writeChunk(p.hash, p.data, p.hashloc, -1, this.mf.getLookupFilter())
-										.getHashLocs();
-						}
-					} else {
+					
 						if (HashFunctionPool.max_hash_cluster == 1) {
 							HashLocPair p = null;
 							if (writeBuffer.getFingers().size() == 0)
@@ -621,8 +611,6 @@ public class SparseDedupFile implements DedupFile {
 
 							}
 						}
-
-					}
 					/*
 					 * if (hashloc[1] == 0 && !Main.chunkStoreLocal) throw new IOException(
 					 * "unable to write chunk hash location at 1 = " + hashloc[1]);
@@ -1203,9 +1191,7 @@ public class SparseDedupFile implements DedupFile {
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
-				if (mf.getDev() != null) {
-					this.bdb = new BlockDevSocket(mf.getDev(), this.GUID);
-				} else
+				
 					this.bdb = LongByteArrayMap.getMap(GUID, this.mf.getLookupFilter());
 
 				this.closed = false;

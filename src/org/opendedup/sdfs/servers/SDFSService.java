@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
+
 import java.util.Properties;
 
 import org.opendedup.hashing.HashFunctionPool;
@@ -29,14 +30,12 @@ import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
-import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
 public class SDFSService {
 	String configFile;
 
-	private NetworkDSEServer ndServer = null;
 	private ArrayList<String> volumes;
 	private static boolean stopped = false;
 
@@ -91,22 +90,7 @@ public class SDFSService {
 		MgmtWebServer.start(useSSL);
 		
 		if (Main.chunkStoreLocal) {
-			try {
-
-				if (Main.volume == null && !Main.runCompact) {
-					ndServer = new NetworkDSEServer();
-					new Thread(ndServer).start();
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to initialize volume ", e);
-				System.err.println("Unable to initialize Hash Chunk Service");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			if (Main.runCompact) {
-				this.stop();
-				System.exit(0);
-			}
+			
 
 			Main.pFullSched = new StandAloneGCScheduler();
 		}
@@ -186,12 +170,7 @@ public class SDFSService {
 			} catch (Exception e) {
 
 			}
-			if (Main.enableNetworkChunkStore && !Main.runCompact) {
-				try {
-					ndServer.close();
-				} catch (Exception e) {
-				}
-			}
+			
 		}
 		try {
 			Main.volume.setClosedGracefully(true);

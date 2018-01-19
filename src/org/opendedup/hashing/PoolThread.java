@@ -19,21 +19,13 @@
 package org.opendedup.hashing;
 
 import java.security.NoSuchAlgorithmException;
-
-import java.util.ArrayList;
-
-import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.collections.QuickList;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.io.BufferClosedException;
-import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 
 public class PoolThread implements AbstractPoolThread, Runnable {
 
@@ -75,7 +67,6 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 				tasks.clear();
 				int ts = taskQueue.drainTo(tasks, maxTasks);
 				if (ts > 0) {
-					if (Main.chunkStoreLocal) {
 						for (int i = 0; i < ts; i++) {
 							WritableCacheBuffer runnable = tasks.get(i);
 							try {
@@ -85,83 +76,6 @@ public class PoolThread implements AbstractPoolThread, Runnable {
 										"unable to execute thread", e);
 							}
 						}
-					} else {
-
-						if (HashFunctionPool.max_hash_cluster == 1) {
-							for (int i = 0; i < ts; i++) {
-								WritableCacheBuffer runnable = tasks.get(i);
-								runnable.startClose();
-
-								byte[] hash = null;
-								AbstractHashEngine hc = HashFunctionPool
-										.borrowObject();
-								try {
-
-									byte[] b = runnable.getFlushedBuffer();
-									hash = hc.getHash(b);
-									TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
-									HashLocPair p = new HashLocPair();
-									p.hash = hash;
-									p.pos = 0;
-									p.len = b.length;
-									p.nlen = b.length;
-									p.hashloc = new byte[8];
-									p.hash = hash;
-									p.data = b;
-									ar.put(p.pos,p);
-									runnable.setAR(ar);
-								} catch (BufferClosedException e) {
-
-								} finally {
-									HashFunctionPool.returnObject(hc);
-								}
-							}
-						} else {
-							for (int i = 0; i < ts; i++) {
-								WritableCacheBuffer writeBuffer = tasks.get(i);
-								writeBuffer.startClose();
-
-								List<Finger> fs = eng.getChunks(writeBuffer
-										.getFlushedBuffer(),writeBuffer.getMF().getLookupFilter(),writeBuffer.getDedupFile().getGUID());
-								TreeMap<Integer,HashLocPair> ar = new TreeMap<Integer,HashLocPair>();
-								for (Finger f : fs) {
-									HashLocPair p = new HashLocPair();
-									p.hash = f.hash;
-									p.hashloc = new byte[8];
-									p.len = f.len;
-									p.offset = 0;
-									p.nlen = f.len;
-									p.data = f.chunk;
-									p.pos = f.start;
-									ar.put(p.pos,p);
-								}
-								writeBuffer.setAR(ar);
-							}
-						}
-						ArrayList<HashLocPair> al = new ArrayList<HashLocPair>();
-
-						for (int i = 0; i < tasks.size(); i++) {
-							WritableCacheBuffer ck = tasks.get(i);
-							if (ck == null)
-								break;
-							else
-								al.addAll(ck.getFingers().values());
-						}
-
-						HCServiceProxy.batchHashExists(al);
-						for (int i = 0; i < ts; i++) {
-							WritableCacheBuffer runnable = tasks.get(i);
-							if (runnable != null) {
-
-								try {
-									runnable.endClose();
-								} catch (Exception e) {
-									SDFSLogger.getLog().warn(
-											"unable to close block", e);
-								}
-							}
-						}
-					}
 				} else {
 					Thread.sleep(1);
 				}

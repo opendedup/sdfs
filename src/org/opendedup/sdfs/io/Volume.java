@@ -30,11 +30,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.ignite.Ignite;
-import org.jgroups.Address;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.cluster.VolumeSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -85,7 +83,6 @@ public class Volume implements java.io.Serializable {
 	private String uuid = null;
 	private byte clusterCopies = 2;
 	private boolean clusterRackAware = false;
-	public Address host = null;
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
 	private long serialNumber = 0;
@@ -94,7 +91,6 @@ public class Volume implements java.io.Serializable {
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
-	public transient VolumeSocket soc = null;
 	private ReentrantLock devLock = new ReentrantLock();
 	public String connicalPath;
 	private Ignite ignite = null;
@@ -115,9 +111,7 @@ public class Volume implements java.io.Serializable {
 		return car;
 	}
 
-	public VolumeSocket getSoc() {
-		return this.soc;
-	}
+	
 
 	public static void setStorageConnected(boolean connected) {
 		if (connected && !storageConnected) {

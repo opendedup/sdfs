@@ -43,12 +43,9 @@ public class ManualGC {
 	public static synchronized long clearChunksMills()
 			throws InterruptedException, IOException {
 		Lock l = null;
-		if (Main.chunkStoreLocal) {
 			l = GCMain.gclock.writeLock();
 
-		} else {
-			l = HCServiceProxy.cs.getLock("fdisk");
-		}
+		
 		l.lock();
 		try {
 			

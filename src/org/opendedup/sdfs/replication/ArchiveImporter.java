@@ -20,6 +20,7 @@ package org.opendedup.sdfs.replication;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -29,7 +30,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.ClusterRedundancyCheck;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
@@ -211,10 +211,7 @@ public class ArchiveImporter {
 					throw new IOException(
 							"uable to import files: There are files that are missing blocks");
 				} else {
-					if (!Main.chunkStoreLocal)
-						new ClusterRedundancyCheck(ievt,
-								new File(Main.volume.getPath() + File.separator
-										+ sdest), true);
+					
 					commitImport(Main.volume.getPath() + File.separator + dest,
 							Main.volume.getPath() + File.separator + sdest);
 					DocumentBuilderFactory factory = DocumentBuilderFactory

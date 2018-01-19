@@ -149,11 +149,6 @@
     <version>2.5</version>
 </dependency>
 <dependency>
-    <groupId>org.jgroups</groupId>
-    <artifactId>jgroups</artifactId>
-    <version>3.6.13.Final</version>
-</dependency>
-<dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-api</artifactId>
     <version>1.7.25</version>

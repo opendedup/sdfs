@@ -20,10 +20,6 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
-
-import java.util.ArrayList;
-
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
@@ -37,7 +33,6 @@ import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.cloud.AbstractCloudFileSync;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
-import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class HashChunkService implements HashChunkServiceInterface {
@@ -137,22 +132,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 		hs.bdb.setMaxSize(sz);
 	}
 
-	public void remoteFetchChunks(ArrayList<String> al, String server,
-			String password, int port, boolean useSSL) throws IOException,
-			HashtableFullException {
-		HCServer hserver = new HCServer(server, port, false, false, useSSL);
-		HashClient hc = new HashClient(hserver, "replication", password,
-				(byte) 0);
-		try {
-			ArrayList<HashChunk> hck = hc.fetchChunks(al);
-			for (int i = 0; i < hck.size(); i++) {
-				HashChunk _hc = hck.get(i);
-				writeChunk(_hc.getName(), _hc.getData(), false,1,null);
-			}
-		} finally {
-			hc.close();
-		}
-	}
+	
 
 	public long hashExists(byte[] hash) throws IOException,
 			HashtableFullException {
