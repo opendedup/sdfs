@@ -12,8 +12,7 @@ import org.w3c.dom.Element;
 
 public class FileSystemusageCheck implements Runnable {
 	SDFSEvent evt = null;
-	private long objsize;
-
+	
 	public Element getResult() throws IOException,
 			ParserConfigurationException {
 		evt = SDFSEvent.cszEvent("Return FS size");
@@ -27,8 +26,7 @@ public class FileSystemusageCheck implements Runnable {
 		try {
 
             long volumeID = Main.DSEID;            
-            objsize = HCServiceProxy.getChunkStore().getAllObjSummary("blocks", volumeID);
-            SDFSLogger.getLog().error("Total size =  " + objsize);
+            HCServiceProxy.getChunkStore().getAllObjSummary("blocks", volumeID);
 
 		} catch (Exception e) {
 			evt.endEvent("unable to fulfill request because " + e.getMessage(),

@@ -94,6 +94,7 @@ import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.iterable.S3Objects;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
@@ -638,7 +639,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					md.addUserMetadata("lastupdate", Long.toString(System.currentTimeMillis()));
 					md.addUserMetadata("hostname", InetAddress.getLocalHost().getHostName());
 					md.addUserMetadata("port", Integer.toString(Main.sdfsCliPort));
-
 					this.clustered = true;
 					this.binm = "bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -2180,29 +2180,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			this.clearIter();
 			String pfx = pp + "/";
-			if (nck == null) {
-				nck = s3Service.listObjects(this.getName(), pfx);
-				nsummaries = nck.getObjectSummaries();
-				nobjPos = new AtomicInteger(0);
-			} else if (nobjPos.get() == nsummaries.size()) {
-				nck = s3Service.listNextBatchOfObjects(nck);
-
-				nsummaries = nck.getObjectSummaries();
-				nobjPos = new AtomicInteger(0);
-			}
-			if (nsummaries.size() == 0)
-				return 0;
-			SDFSLogger.getLog().info("size  = " + nsummaries.size());
-			long total_size = 0;
 			long t_size = 0;
 			long t_compressedsize = 0;
-
 			int _size = 0;
 			int _compressedSize = 0;
-			long num_objects = nsummaries.size();
 			String key = "";
-			while (num_objects != 0 ) {
-				key = nsummaries.get(nobjPos.get()).getKey();
+			for ( S3ObjectSummary summary : S3Objects.withPrefix(s3Service, this.name, pfx) ) {
+				key = summary.getKey();
 				if (!key.endsWith(mdExt)) {
 					Map<String, String> md = this.getUserMetaData(key);
 					if (md.containsKey("compressedsize")) {
@@ -2213,12 +2197,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					t_size = t_size + _size;
 					t_compressedsize = t_compressedsize + _compressedSize;
-					SDFSLogger.getLog().info("key, length, length2 = " + key + " " + _compressedSize +  " " + _size);
-					total_size = total_size + nsummaries.get(nobjPos.get()).getSize();
 				}
-				num_objects = num_objects - 1;
-				nobjPos.incrementAndGet();
 			}
+
 			if ( t_compressedsize >= 0) {
 				HashBlobArchive.setCompressedLength(t_compressedsize);
 			}
@@ -2226,8 +2207,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (t_size >= 0) {
 				HashBlobArchive.setLength(t_size);
 			}
-			//SDFSLogger.getLog().info("length = " + size3 + " " + size2 );
-			return total_size;
+			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size );
+			return 0;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
