@@ -672,4 +672,8 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		// TODO Auto-generated method stub
 
 	}
+	public long getAllObjSummary(String pp, long id) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
