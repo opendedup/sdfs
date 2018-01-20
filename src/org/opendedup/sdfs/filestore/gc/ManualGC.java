@@ -20,12 +20,12 @@ package org.opendedup.sdfs.filestore.gc;
 
 import java.io.IOException;
 
+
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
-import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
@@ -78,14 +78,10 @@ public class ManualGC {
 				}
 				return 0;
 			}
-			else if (Main.chunkStoreLocal)
-				evt = SDFSEvent
+			evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
 								+ Main.volume.getName());
-			else
-				evt = SDFSEvent
-						.gcInfoEvent("SDFS Volume Cleanup Initiated for "
-								+ Main.DSEClusterID);
+			
 			lastGC = System.currentTimeMillis();
 			evt.maxCt = 100;
 			evt.curCt = 0;
@@ -133,7 +129,6 @@ public class ManualGC {
 		try {
 			if (Main.disableGC)
 				return 0;
-			if (Main.chunkStoreLocal && Main.volume.getName() != null) {
 				if(!Main.refCount) {
 					throw new IOException("not implemented");
 				}else {
@@ -147,14 +142,7 @@ public class ManualGC {
 					}
 				}
 				
-			} else {
-				FDiskEvent fevt = SDFSEvent.fdiskInfoEvent(
-						"running distributed fdisk", evt);
-				HCServiceProxy.runFDisk(fevt);
-				evt.curCt = 33;
-				HCServiceProxy.processHashClaims(evt, null);
-				evt.curCt = 66;
-			}
+			
 
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);

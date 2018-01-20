@@ -204,9 +204,7 @@ public class SparseDataChunk implements Externalizable {
 					_h.offset += offset;
 					_h.nlen -= offset;
 					_h.pos = ep;
-					if (!Main.chunkStoreLocal)
-						_h.hashloc[0] = 1;
-					else
+					
 						_h.setDup(true);
 					if(_h.nlen <= 0)
 						SDFSLogger.getLog().error("LZ " + _h);
@@ -280,8 +278,7 @@ public class SparseDataChunk implements Externalizable {
 				this.len = 0;
 				for (HashLocPair p : ar.values()) {
 					boolean dup = p.isDup();
-					if (!Main.chunkStoreLocal && p.hashloc[0] == 1)
-						dup = true;
+					
 					if (dup)
 						this.doop += p.nlen;
 					buf.put(p.asArray());

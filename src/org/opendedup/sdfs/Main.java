@@ -262,28 +262,7 @@ public class Main {
 	 */
 	public static int defaultGroup = 0;
 
-	/**
-	 * The port the chunk store uses to listen of TCP and UDP connections. This
-	 * is used on the chunk store.
-	 */
-	public static int serverPort = 2222;
-	/**
-	 * The host name or IP that the chunk store network port will listen on.
-	 * This is used on the chunk store.
-	 */
-	public static String serverHostName = "0.0.0.0";
-
-	/**
-	 * The host name or IP that the chunk store network port will listen on.
-	 * This is used on the chunk store.
-	 */
-	public static boolean serverUseSSL = false;
-
-	/**
-	 * The maximum number of results that a specific query will return if H2 is
-	 * being used. This is used on the chunk store and the client.
-	 */
-	public static int maxReturnResults = 3000;
+	
 	/**
 	 * The Volume object. This is used on the client.
 	 */
@@ -299,10 +278,7 @@ public class Main {
 	 */
 	public static String volumeMountPoint;
 
-	/**
-	 * Enable the DSE Network Server
-	 */
-	public static boolean enableNetworkDSEServer = false;
+	
 
 	/**
 	 * Determines whether dedup file map will be closed when the filesystem
@@ -378,15 +354,7 @@ public class Main {
 	 */
 	public static int chunkStorePageSize = 4096;
 
-	/**
-	 * If the Dedup Storage Engine is remote or local
-	 */
-	public static boolean chunkStoreLocal = false;
-
-	/**
-	 * If the Dedup Storage Engine is remote or local
-	 */
-	public static boolean enableNetworkChunkStore = false;
+	
 	
 	public static boolean disableAutoGC = false;
 
@@ -408,5 +376,4 @@ public class Main {
 	public static boolean rebuildHashTable = false;
 	
 	public static boolean enableLookupFilter = false;
-	public static String secondaryKey = "Password";
 }

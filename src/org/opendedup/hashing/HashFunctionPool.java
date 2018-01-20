@@ -51,10 +51,7 @@ public class HashFunctionPool {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3) || Main.hashType.equalsIgnoreCase(VARIABLE_SIP) || Main.hashType.equalsIgnoreCase(VARIABLE_SIP2)) {
 			hashLength = VariableHashEngine.getHashLenth();
-			if(Main.chunkStoreLocal)
 				Main.MAPVERSION = 3;
-			else
-				Main.MAPVERSION = 2;
 			max_hash_cluster = VariableHashEngine.getMaxCluster();
 		}
 		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType);

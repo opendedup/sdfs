@@ -49,24 +49,22 @@ public class SDFSService {
 		this.volumes = volumes;
 		String ts = "";
 		Properties props = new Properties();
-	    try 
-	    {
+		try {
 			props.load(this.getClass().getResourceAsStream("/version.properties"));
-	        Main.version = props.getProperty("version");
-	        ts = props.getProperty("timestamp");
-	        
-	    } catch (Exception e) 
-	    {
-	        e.printStackTrace();
-	    }
+			Main.version = props.getProperty("version");
+			ts = props.getProperty("timestamp");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		System.out.println("Running Program SDFS Version " + Main.version + " build date " + ts);
 
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(boolean useSSL, int port,String password) throws Exception {
-		Config.parseSDFSConfigFile(this.configFile,password);
-		if(useSSL) {
+	public void start(boolean useSSL, int port, String password) throws Exception {
+		Config.parseSDFSConfigFile(this.configFile, password);
+		if (useSSL) {
 			useSSL = Main.sdfsCliSSL;
 		}
 		if (port != -1)
@@ -88,12 +86,8 @@ public class SDFSService {
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
 		MgmtWebServer.start(useSSL);
-		
-		if (Main.chunkStoreLocal) {
-			
 
-			Main.pFullSched = new StandAloneGCScheduler();
-		}
+		Main.pFullSched = new StandAloneGCScheduler();
 		try {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
@@ -114,7 +108,7 @@ public class SDFSService {
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
 
 		try {
-			//BloomFDisk.closed = true;
+			// BloomFDisk.closed = true;
 			Main.pFullSched.close();
 			Main.pFullSched = null;
 
@@ -142,8 +136,8 @@ public class SDFSService {
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
 		try {
-		MgmtWebServer.stop();
-		}catch(Exception e) {
+			MgmtWebServer.stop();
+		} catch (Exception e) {
 			System.out.println("Web Server did not close correctly");
 			SDFSLogger.getLog().error("Web server did not close correctly", e);
 		}
@@ -153,24 +147,21 @@ public class SDFSService {
 				p.waitFor();
 			}
 		} catch (Exception e) {
-			
-		}
-		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
-			try {
-			HCServiceProxy.close();
-			}catch(Exception e) {
-				System.out.println("HashStore did not close correctly");
-				SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-			}
-			SDFSLogger.getLog().info("######### HashStore Closed ###################");
-			Main.volume.setClosedGracefully(true);
-			try {
-				Config.writeSDFSConfigFile(configFile);
-			} catch (Exception e) {
 
-			}
-			
+		}
+		SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+		try {
+			HCServiceProxy.close();
+		} catch (Exception e) {
+			System.out.println("HashStore did not close correctly");
+			SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+		}
+		SDFSLogger.getLog().info("######### HashStore Closed ###################");
+		Main.volume.setClosedGracefully(true);
+		try {
+			Config.writeSDFSConfigFile(configFile);
+		} catch (Exception e) {
+
 		}
 		try {
 			Main.volume.setClosedGracefully(true);

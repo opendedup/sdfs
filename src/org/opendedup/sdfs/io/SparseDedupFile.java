@@ -144,15 +144,9 @@ public class SparseDedupFile implements DedupFile {
 			System.exit(2);
 		}
 		SDFSLogger.getLog().info("Maximum Write Buffers are " + maxWriteBuffers);
-		if (!Main.chunkStoreLocal) {
-			pool = new ThreadPool(Main.writeThreads + 1,
-					((Main.maxWriteBuffers * 1024 * 1024) / Main.CHUNK_LENGTH) * 2);
-			executor = new ThreadPoolExecutor(120, 120, 10, TimeUnit.SECONDS, worksQueue,
-					new ThreadPoolExecutor.CallerRunsPolicy());
-		} else {
+		
 			executor = new ThreadPoolExecutor(1, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
-		}
 		if (HashFunctionPool.max_hash_cluster > 1) {
 			try {
 				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
@@ -456,20 +450,8 @@ public class SparseDedupFile implements DedupFile {
 
 							try {
 								List<Finger> fs = null;
-								if (Main.chunkStoreLocal)
 									fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(),this.GUID);
-								else {
-									fs = new ArrayList<Finger>();
-									for (HashLocPair p : writeBuffer.getFingers().values()) {
-										Finger f = new Finger(this.mf.getLookupFilter(),this.GUID);
-										f.hash = p.hash;
-										f.chunk = p.data;
-										f.len = p.data.length;
-										f.hl = new InsertRecord(true, p.hashloc);
-										f.start = p.pos;
-										fs.add(f);
-									}
-								}
+								
 								HashMap<ByteArrayWrapper, Finger> mp = new HashMap<ByteArrayWrapper, Finger>();
 								for (Finger f : fs) {
 									ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);

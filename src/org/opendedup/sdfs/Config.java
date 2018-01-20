@@ -52,12 +52,7 @@ public class Config {
 			}
 
 			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
-			Element network = (Element) doc.getElementsByTagName("network").item(0);
-			Main.serverHostName = network.getAttribute("hostname");
-			Main.serverPort = Integer.parseInt(network.getAttribute("port"));
-			Main.enableNetworkChunkStore = true;
-			if (network.hasAttribute("use-ssl"))
-				Main.serverUseSSL = Boolean.parseBoolean(network.getAttribute("use-ssl"));
+			
 			Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
@@ -355,7 +350,6 @@ public class Config {
 		if (localChunkStore.hasAttribute("fpp")) {
 			Main.fpp = Double.parseDouble(localChunkStore.getAttribute("fpp"));
 		}
-		Main.chunkStoreLocal = Boolean.parseBoolean(localChunkStore.getAttribute("enabled"));
 		if (localChunkStore.hasAttribute("max-scan-depth")) {
 			Main.MAX_TABLES_SCAN = Integer.parseInt(localChunkStore.getAttribute("max-scan-depth"));
 		}
@@ -390,7 +384,6 @@ public class Config {
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume, fileName);
-		if (Main.chunkStoreLocal) {
 			SDFSLogger.getLog().debug("this is a local chunkstore");
 			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
 			// Main.chunkStoreMetaData =
@@ -417,17 +410,10 @@ public class Config {
 			if (localChunkStore.hasAttribute("encryption-iv"))
 				Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
 			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
-			Element networkcs = (Element) doc.getElementsByTagName("network").item(0);
+			
 			if (localChunkStore.hasAttribute("compress")) {
 				Main.compress = Boolean.parseBoolean(localChunkStore.getAttribute("compress"));
 			}
-			if (networkcs != null) {
-				Main.enableNetworkChunkStore = Boolean.parseBoolean(networkcs.getAttribute("enable"));
-				Main.serverHostName = networkcs.getAttribute("hostname");
-				Main.serverPort = Integer.parseInt(networkcs.getAttribute("port"));
-			}
-			if (networkcs.hasAttribute("use-ssl"))
-				Main.serverUseSSL = Boolean.parseBoolean(networkcs.getAttribute("use-ssl"));
 			SDFSLogger.getLog()
 					.info("######### Will allocate " + Main.chunkStoreAllocationSize + " in chunkstore ##############");
 			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
@@ -486,7 +472,6 @@ public class Config {
 				Main.matcher.initialize(matcher);
 			}
 
-		}
 
 		if (password != null) {
 			if (Main.cloudSecretKey != null) {
@@ -564,7 +549,6 @@ public class Config {
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
-		if (Main.chunkStoreLocal) {
 			if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
 				Element chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
 				chunkStoreConfig.setAttribute("local-cache-size",
@@ -599,7 +583,6 @@ public class Config {
 					Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
 					azure.setAttribute("azure-secret-key", Main.eCloudSecretKey);
 				}
-			}
 		}
 		return doc;
 	}

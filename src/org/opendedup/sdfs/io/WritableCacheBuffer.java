@@ -87,27 +87,18 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 	private TreeMap<Integer, HashLocPair> _ar = null;
 	int sz;
 	private static SynchronousQueue<Runnable> lworksQueue = null;
-	private static RejectedExecutionHandler lexecutionHandler = new BlockPolicy();
 	private static ThreadPoolExecutor lexecutor = null;
 	private static ThreadPoolExecutor executor = null;
 	private static SynchronousQueue<Runnable> worksQueue = null;
-	private static int maxTasks = (HashFunctionPool.max_hash_cluster) * Main.writeThreads;
 	public static final byte[] blankBlock = new byte[HashFunctionPool.minLen + 1];
 	public static final byte[] bk = new Murmur3HashEngine().getHash(blankBlock);
 	// private static AtomicLong wbsz= new AtomicLong();
 	static {
 		SDFSLogger.getLog().info("blankHash=" + StringUtils.getHexString(bk));
-		if (!Main.chunkStoreLocal) {
-			if (maxTasks > 120)
-				maxTasks = 120;
-			SDFSLogger.getLog().info("Maximum Read Threads is " + maxTasks);
-			worksQueue = new SynchronousQueue<Runnable>();
-			executor = new ThreadPoolExecutor(maxTasks, maxTasks, 0L, TimeUnit.SECONDS, worksQueue, lexecutionHandler);
-		} else {
+		
 			worksQueue = new SynchronousQueue<Runnable>();
 			executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
-		}
 		lworksQueue = new SynchronousQueue<Runnable>();
 		lexecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, lworksQueue,
 				new ThreadPoolExecutor.CallerRunsPolicy());
@@ -881,13 +872,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			}
 			this.flushing = true;
 			if (this.dirty || this.isHlAdded()) {
-				if (Main.chunkStoreLocal) {
 					this.df.putBufferIntoFlush(this);
 					lexecutor.execute(this);
-				} else {
-					SparseDedupFile.pool.execute(this);
-					this.df.putBufferIntoFlush(this);
-				}
 			} else {
 				// wbsz.decrementAndGet();
 				df.removeOpenBuffer(this);

@@ -90,49 +90,32 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized long getCacheSize() {
-		if (Main.chunkStoreLocal) {
 			return hcService.getCacheSize();
-		} else
-			return 0;
 	}
 
 	public static synchronized long getMaxCacheSize() {
-		if (Main.chunkStoreLocal) {
 			return hcService.getMaxCacheSize();
-		} else
-			return 0;
+		
 	}
 
 	public static synchronized int getReadSpeed() {
-		if (Main.chunkStoreLocal) {
 			return hcService.getReadSpeed();
-		} else
-			return 0;
 	}
 
 	public static synchronized int getWriteSpeed() {
-		if (Main.chunkStoreLocal) {
 			return hcService.getWriteSpeed();
-		} else
-			return 0;
 	}
 
 	public static synchronized void setReadSpeed(int speed) {
-		if (Main.chunkStoreLocal) {
 			hcService.setReadSpeed(speed);
-		}
 	}
 
 	public static synchronized void setWriteSpeed(int speed) {
-		if (Main.chunkStoreLocal) {
 			hcService.setWriteSpeed(speed);
-		}
 	}
 
 	public static synchronized void setCacheSize(long sz) throws IOException {
-		if (Main.chunkStoreLocal) {
 			hcService.setCacheSize(sz);
-		}
 	}
 
 	public static synchronized void setDseSize(long sz) throws IOException {
@@ -140,7 +123,6 @@ public class HCServiceProxy {
 	}
 
 	public static boolean claimKey(byte[] key, long val, long ct, String guid) throws IOException {
-		if (Main.chunkStoreLocal) {
 			if (guid != null && Main.enableLookupFilter) {
 					LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
 					return true;
@@ -149,8 +131,6 @@ public class HCServiceProxy {
 				
 				return hcService.claimKey(key, val, ct);
 			}
-		} else
-			return false;
 	}
 
 	public static long getChunksFetched() {
@@ -199,9 +179,7 @@ public class HCServiceProxy {
 	}
 
 	public static void syncVolume(long volumeID, boolean syncMap) {
-		if (Main.chunkStoreLocal) {
 			eventBus.post(new CloudSyncDLRequest(volumeID, syncMap, true));
-		}
 	}
 
 	public static byte getDseCount() {
@@ -214,10 +192,7 @@ public class HCServiceProxy {
 	}
 
 	public static AbstractHashesMap getHashesMap() {
-		if (Main.chunkStoreLocal)
 			return hcService.getHashesMap();
-		else
-			return null;
 	}
 
 	public static long getSize() {
@@ -256,15 +231,10 @@ public class HCServiceProxy {
 	}
 
 	public static int getPageSize() {
-		if (Main.chunkStoreLocal) {
 			return HCServiceProxy.hcService.getPageSize();
-		} else {
-			return Main.CHUNK_LENGTH;
-		}
 	}
 
 	public static void sync() throws IOException {
-		if (Main.chunkStoreLocal)
 			hcService.sync();
 	}
 
@@ -366,10 +336,7 @@ public class HCServiceProxy {
 	}
 
 	public static void cacheData(long pos) throws IOException, DataArchivedException {
-
-		if (Main.chunkStoreLocal) {
 			HCServiceProxy.hcService.cacheChunk(pos);
-		}
 	}
 
 	public static long getChunksRead() {
