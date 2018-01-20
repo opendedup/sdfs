@@ -253,9 +253,8 @@
 <dependency>
     <groupId>org.rocksdb</groupId>
     <artifactId>rocksdbjni</artifactId>
-    <version>5.8.7</version>
+    <version>5.9.2</version>
 </dependency>
-
 <dependency>
     <groupId>net.java.dev.jets3t</groupId>
     <artifactId>jets3t</artifactId>

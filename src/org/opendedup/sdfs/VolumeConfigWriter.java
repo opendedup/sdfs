@@ -96,6 +96,9 @@ public class VolumeConfigWriter {
 	int windowSize = 48;
 	int cloudThreads = 8;
 	private int glacierInDays = 0;
+	private int aruzreArchiveInDays =0;
+	private String azurestorageTier = null; 
+	
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
@@ -291,6 +294,10 @@ public class VolumeConfigWriter {
 		}
 		if(cmd.hasOption("glacier-in-days")) {
 			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
+		}
+		if(cmd.hasOption("azurearchive-in-days")) {
+			this.aruzreArchiveInDays = Integer.parseInt(cmd.getOptionValue("azurearchive-in-days"));
+			this.azurestorageTier = "archive";
 		}
 		if(cmd.hasOption("simple-metadata")) {
 			this.simpleMD = true;
@@ -848,6 +855,10 @@ public class VolumeConfigWriter {
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				extended.setAttribute("azure-tier-in-days", Integer.toString(aruzreArchiveInDays));
+				if(this.azurestorageTier != null) {
+					extended.setAttribute("storage-tier", this.azurestorageTier);
+				}
 				cs.appendChild(extended);
 			}
 			cs.appendChild(aws);
@@ -961,6 +972,9 @@ public class VolumeConfigWriter {
 				.withArgName("tcp port").create());
 		options.addOption(OptionBuilder.withLongOpt("glacier-in-days")
 				.withDescription("Set to move to glacier from s3 after x number of days").hasArg(true)
+				.withArgName("number of days e.g. 30").create());
+		options.addOption(OptionBuilder.withLongOpt("azurearchive-in-days")
+				.withDescription("Set to move to azure archive from hot after x number of days").hasArg(true)
 				.withArgName("number of days e.g. 30").create());
 		options.addOption(OptionBuilder.withLongOpt("refresh-blobs")
 				.withDescription("Updates blobs in s3 to keep them from moving to glacier if clamined by newly written files").hasArg(false).create());
