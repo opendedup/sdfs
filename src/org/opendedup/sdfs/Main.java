@@ -149,6 +149,7 @@ public class Main {
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
 	public static String chunkStoreEncryptionKey = "nw";
+	public static String eChunkStoreEncryptionKey = null;
 	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
 	/**
 	 * whether encryption should be enabled for the DSE

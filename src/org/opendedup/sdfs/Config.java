@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -52,7 +51,7 @@ public class Config {
 			}
 
 			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
-			
+
 			Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
@@ -248,7 +247,6 @@ public class Config {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
 		}
-		
 
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
 		Main.sdfsCliEnabled = Boolean.parseBoolean(cli.getAttribute("enable"));
@@ -308,31 +306,29 @@ public class Config {
 		}
 		Main.dedupFiles = Boolean.parseBoolean(cache.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-		if(cache.hasAttribute("min-variable-segment-size")) {
-			
-			HashFunctionPool.minLen = (Integer.parseInt(cache
-					.getAttribute("min-variable-segment-size")) * 1024)-1;
+		if (cache.hasAttribute("min-variable-segment-size")) {
+
+			HashFunctionPool.minLen = (Integer.parseInt(cache.getAttribute("min-variable-segment-size")) * 1024) - 1;
 
 		} else {
 			HashFunctionPool.minLen = Main.MIN_CHUNK_LENGTH;
 		}
 
-		if(cache.hasAttribute("variable-window-size"))
+		if (cache.hasAttribute("variable-window-size"))
 			HashFunctionPool.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
-			HashFunctionPool.maxLen = Integer.parseInt(cache
-					.getAttribute("max-variable-segment-size")) * 1024;
+			HashFunctionPool.maxLen = Integer.parseInt(cache.getAttribute("max-variable-segment-size")) * 1024;
 
 		} else {
 			HashFunctionPool.maxLen = Main.CHUNK_LENGTH;
 		}
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 
-		if(cache.hasAttribute("replication-threads"))
+		if (cache.hasAttribute("replication-threads"))
 			Main.REPLICATION_THREADS = Integer.parseInt(cache.getAttribute("replication-threads"));
 
 		Main.maxWriteBuffers = Integer.parseInt(cache.getAttribute("max-file-write-buffers"));
-		if(Main.maxWriteBuffers > 80)
+		if (Main.maxWriteBuffers > 80)
 			Main.maxWriteBuffers = 80;
 		Main.maxOpenFiles = Integer.parseInt(cache.getAttribute("max-open-files"));
 		Main.maxInactiveFileTime = Integer.parseInt(cache.getAttribute("max-file-inactive")) * 1000;
@@ -373,7 +369,7 @@ public class Config {
 		if (localChunkStore.hasAttribute("io-threads")) {
 			Main.dseIOThreads = Integer.parseInt(localChunkStore.getAttribute("io-threads"));
 		}
-		if(localChunkStore.hasAttribute("enable-lookup-filter")) {
+		if (localChunkStore.hasAttribute("enable-lookup-filter")) {
 			Main.enableLookupFilter = Boolean.parseBoolean(localChunkStore.getAttribute("enable-lookup-filter"));
 		}
 		if (localChunkStore.hasAttribute("cluster-config"))
@@ -384,94 +380,93 @@ public class Config {
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
 		Main.volume = new Volume(volume, fileName);
-			SDFSLogger.getLog().debug("this is a local chunkstore");
-			Main.chunkStore = localChunkStore.getAttribute("chunk-store");
-			// Main.chunkStoreMetaData =
-			// localChunkStore.getAttribute("chunk-store-metadata");
-			Main.chunkStoreAllocationSize = Long.parseLong(localChunkStore.getAttribute("allocation-size"));
-			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
-			if (localChunkStore.hasAttribute("chunkstore-class"))
-				Main.chunkStoreClass = localChunkStore.getAttribute("chunkstore-class");
-			if (localChunkStore.hasAttribute("parallel-db-count"))
-				Main.parallelDBCount = Integer.parseInt(localChunkStore.getAttribute("parallel-db-count"));
-			if (localChunkStore.hasAttribute("hashdb-class"))
-				Main.hashesDBClass = localChunkStore.getAttribute("hashdb-class");
-			if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
-				Main.chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
-			}
+		SDFSLogger.getLog().debug("this is a local chunkstore");
+		Main.chunkStore = localChunkStore.getAttribute("chunk-store");
+		// Main.chunkStoreMetaData =
+		// localChunkStore.getAttribute("chunk-store-metadata");
+		Main.chunkStoreAllocationSize = Long.parseLong(localChunkStore.getAttribute("allocation-size"));
+		Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
+		if (localChunkStore.hasAttribute("chunkstore-class"))
+			Main.chunkStoreClass = localChunkStore.getAttribute("chunkstore-class");
+		if (localChunkStore.hasAttribute("parallel-db-count"))
+			Main.parallelDBCount = Integer.parseInt(localChunkStore.getAttribute("parallel-db-count"));
+		if (localChunkStore.hasAttribute("hashdb-class"))
+			Main.hashesDBClass = localChunkStore.getAttribute("hashdb-class");
+		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
+			Main.chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
+		}
 
-			if (localChunkStore.hasAttribute("max-repl-batch-sz"))
-				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore.getAttribute("max-repl-batch-sz"));
-			if (localChunkStore.hasAttribute("encrypt")) {
-				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(localChunkStore.getAttribute("encrypt"));
-				Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
-				
-			}
-			if (localChunkStore.hasAttribute("encryption-iv"))
-				Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
-			Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
-			
-			if (localChunkStore.hasAttribute("compress")) {
-				Main.compress = Boolean.parseBoolean(localChunkStore.getAttribute("compress"));
-			}
-			SDFSLogger.getLog()
-					.info("######### Will allocate " + Main.chunkStoreAllocationSize + " in chunkstore ##############");
-			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
-			int googleSz = doc.getElementsByTagName("google-store").getLength();
-			int fileSz = doc.getElementsByTagName("file-store").getLength();
-			if (fileSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				Main.cloudBucket = aws.getAttribute("bucket-name");
-				Main.cloudAccessKey = aws.getAttribute("access-key");
-				Main.cloudSecretKey = aws.getAttribute("secret-key");
-			}
-			if (googleSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				Main.cloudAccessKey = aws.getAttribute("gs-access-key");
-				Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
-				Main.cloudBucket = aws.getAttribute("gs-bucket-name");
-			}
-			if (awsSz > 0) {
+		if (localChunkStore.hasAttribute("max-repl-batch-sz"))
+			Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore.getAttribute("max-repl-batch-sz"));
+		if (localChunkStore.hasAttribute("encrypt")) {
+			Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(localChunkStore.getAttribute("encrypt"));
+			Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
 
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				if (aws.hasAttribute("aws-aim")) {
-					Main.useAim = Boolean.parseBoolean(aws.getAttribute("aws-aim"));
-				}
-				if (!Main.useAim) {
-					Main.cloudAccessKey = aws.getAttribute("aws-access-key");
-					Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
-				}
-				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-			}
-			int azureSz = doc.getElementsByTagName("azure-store").getLength();
-			if (azureSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
-				if (azure.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
-				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
-				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
-				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
-				Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
-			}
-			if (doc.getElementsByTagName("matcher").getLength() > 0) {
-				Element matcher = (Element) doc.getElementsByTagName("matcher").item(0);
-				Main.matcher = (AbstractStreamMatcher) Class.forName(matcher.getAttribute("class")).newInstance();
-				Main.matcher.initialize(matcher);
-			}
+		}
+		if (localChunkStore.hasAttribute("encryption-iv"))
+			Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
+		Main.hashDBStore = localChunkStore.getAttribute("hash-db-store");
 
+		if (localChunkStore.hasAttribute("compress")) {
+			Main.compress = Boolean.parseBoolean(localChunkStore.getAttribute("compress"));
+		}
+		SDFSLogger.getLog()
+				.info("######### Will allocate " + Main.chunkStoreAllocationSize + " in chunkstore ##############");
+		int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
+		int googleSz = doc.getElementsByTagName("google-store").getLength();
+		int fileSz = doc.getElementsByTagName("file-store").getLength();
+		if (fileSz > 0) {
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
+			Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
+			if (aws.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+			Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
+			Main.cloudBucket = aws.getAttribute("bucket-name");
+			Main.cloudAccessKey = aws.getAttribute("access-key");
+			Main.cloudSecretKey = aws.getAttribute("secret-key");
+		}
+		if (googleSz > 0) {
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
+			Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
+			if (aws.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+			Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
+			Main.cloudAccessKey = aws.getAttribute("gs-access-key");
+			Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
+			Main.cloudBucket = aws.getAttribute("gs-bucket-name");
+		}
+		if (awsSz > 0) {
+
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
+			Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
+			if (aws.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
+			Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
+			if (aws.hasAttribute("aws-aim")) {
+				Main.useAim = Boolean.parseBoolean(aws.getAttribute("aws-aim"));
+			}
+			if (!Main.useAim) {
+				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
+				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
+			}
+			Main.cloudBucket = aws.getAttribute("aws-bucket-name");
+		}
+		int azureSz = doc.getElementsByTagName("azure-store").getLength();
+		if (azureSz > 0) {
+			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
+			Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
+			if (azure.hasAttribute("chunkstore-class"))
+				Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
+			Main.cloudAccessKey = azure.getAttribute("azure-access-key");
+			Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
+			Main.cloudBucket = azure.getAttribute("azure-bucket-name");
+			Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
+		}
+		if (doc.getElementsByTagName("matcher").getLength() > 0) {
+			Element matcher = (Element) doc.getElementsByTagName("matcher").item(0);
+			Main.matcher = (AbstractStreamMatcher) Class.forName(matcher.getAttribute("class")).newInstance();
+			Main.matcher.initialize(matcher);
+		}
 
 		if (password != null) {
 			if (Main.cloudSecretKey != null) {
@@ -479,13 +474,21 @@ public class Config {
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
 						Main.chunkStoreEncryptionIV);
 				Main.cloudSecretKey = new String(dc);
-			}/*
+			}
 			if (Main.chunkStoreEncryptionKey != null) {
-				Main.chunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
-				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
-						password, Main.chunkStoreEncryptionIV);
-				Main.chunkStoreEncryptionKey = new String(dc);
-			}*/
+				String oc = Main.chunkStoreEncryptionKey;
+				Main.eChunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
+				try {
+					byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
+							password, Main.chunkStoreEncryptionIV);
+					Main.chunkStoreEncryptionKey = new String(dc);
+				} catch (Exception e) {
+					Main.chunkStoreEncryptionKey = oc;
+					Main.eChunkStoreEncryptionKey = null;
+					SDFSLogger.getLog().warn("unable to decrypt encrytion key " + oc, e);
+				}
+
+			}
 		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
@@ -549,44 +552,42 @@ public class Config {
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
-			if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
-				Element chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
-				chunkStoreConfig.setAttribute("local-cache-size",
-						StorageUnit.of(HCServiceProxy.getMaxCacheSize()).format(HCServiceProxy.getMaxCacheSize()));
-				chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
-				chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
-			}
+		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
+			Element chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
+			chunkStoreConfig.setAttribute("local-cache-size",
+					StorageUnit.of(HCServiceProxy.getMaxCacheSize()).format(HCServiceProxy.getMaxCacheSize()));
+			chunkStoreConfig.setAttribute("read-speed", Integer.toString(HCServiceProxy.getReadSpeed()));
+			chunkStoreConfig.setAttribute("write-speed", Integer.toString(HCServiceProxy.getWriteSpeed()));
+		}
 
-			localChunkStore.setAttribute("allocation-size", Long.toString(Main.volume.capacity));
+		localChunkStore.setAttribute("allocation-size", Long.toString(Main.volume.capacity));
 
-			if (Main.chunkStoreEncryptionKey != null) {
-				localChunkStore.setAttribute("encryption-key", Main.chunkStoreEncryptionKey);
+		if (Main.eChunkStoreEncryptionKey != null) {
+			localChunkStore.setAttribute("encryption-key", Main.eChunkStoreEncryptionKey);
+		}
+		if (Main.eCloudSecretKey != null) {
+			int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
+			int googleSz = localChunkStore.getElementsByTagName("google-store").getLength();
+			int fileSz = localChunkStore.getElementsByTagName("file-store").getLength();
+			int azureSz = doc.getElementsByTagName("azure-store").getLength();
+			if (fileSz > 0) {
+				Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
+				aws.setAttribute("secret-key", Main.eCloudSecretKey);
 			}
-			if (Main.eCloudSecretKey != null) {
-				int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
-				int googleSz = localChunkStore.getElementsByTagName("google-store").getLength();
-				int fileSz = localChunkStore.getElementsByTagName("file-store").getLength();
-				int azureSz = doc.getElementsByTagName("azure-store").getLength();
-				if (fileSz > 0) {
-					Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
-					aws.setAttribute("secret-key", Main.eCloudSecretKey);
-				}
-				if (googleSz > 0) {
-					Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-					aws.setAttribute("gs-secret-key", Main.eCloudSecretKey);
-				}
-				if (awsSz > 0) {
-					Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
-					aws.setAttribute("aws-secret-key", Main.eCloudSecretKey);
-				}
-				if (azureSz > 0) {
-					Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
-					azure.setAttribute("azure-secret-key", Main.eCloudSecretKey);
-				}
+			if (googleSz > 0) {
+				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
+				aws.setAttribute("gs-secret-key", Main.eCloudSecretKey);
+			}
+			if (awsSz > 0) {
+				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
+				aws.setAttribute("aws-secret-key", Main.eCloudSecretKey);
+			}
+			if (azureSz > 0) {
+				Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
+				azure.setAttribute("azure-secret-key", Main.eCloudSecretKey);
+			}
 		}
 		return doc;
 	}
-	
-	
 
 }
