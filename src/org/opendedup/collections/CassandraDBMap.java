@@ -310,7 +310,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 				System.out.println(addr);
 			}
 			cdb = new CassandraDedupeDB(Main.volume.getCassandraNodes(), Main.volume.getDataCenter(),
-					Main.volume.getUuid(), Main.volume.getClusterCopies().intValue(),true);
+					Main.volume.getUuid(), Main.volume.getClusterCopies().intValue(), true);
 
 			bar.finish();
 			HashBlobArchive.registerEventBus(this);
@@ -474,16 +474,18 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
 		try {
-			Iterator<Entry<Long, Long>> riter = this.cdb.getAllRmrg();
-			while (riter.hasNext()) {
-				Entry<Long, Long> et = riter.next();
-				if (et.getValue() < (System.currentTimeMillis() - rmthreashold)) {
-					long ct = this.cdb.getRefCt(et.getKey());
-					if (ct <= 0) {
-						SDFSLogger.getLog().info("Removing cassandra reference for " + et.getKey());
-						this.cdb.deleteRef(et.getKey());
-					} else {
-						this.cdb.delRMRef(et.getKey());
+			if (cdb.isMaster()) {
+				Iterator<Entry<Long, Long>> riter = this.cdb.getAllRmrg();
+				while (riter.hasNext()) {
+					Entry<Long, Long> et = riter.next();
+					if (et.getValue() < (System.currentTimeMillis() - rmthreashold)) {
+						long ct = this.cdb.getRefCt(et.getKey());
+						if (ct <= 0) {
+							SDFSLogger.getLog().info("Removing cassandra reference for " + et.getKey());
+							this.cdb.deleteRef(et.getKey());
+						} else {
+							this.cdb.delRMRef(et.getKey());
+						}
 					}
 				}
 			}
@@ -1003,56 +1005,54 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		}
 
 	}
-	
-	public static void main(String [] args) throws RocksDBException {
-		 RocksDB db;
-		 List<ColumnFamilyDescriptor> colFamily= new ArrayList<ColumnFamilyDescriptor>();
-		 List<ColumnFamilyHandle> colFamilyHandles= new ArrayList<ColumnFamilyHandle>();
-         RocksDB.loadLibrary();
-         BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-			// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
-			// DBOptions dbo = new DBOptions();
-			// cfOptions.optimizeLevelStyleCompaction();
-			// cfOptions.optimizeForPointLookup(8192);
-			blockConfig.setFilter(new BloomFilter(16, false));
-			// blockConfig.setHashIndexAllowCollision(false);
-			// blockConfig.setCacheIndexAndFilterBlocks(false);
-			// blockConfig.setIndexType(IndexType.kBinarySearch);
-			// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
-			blockConfig.setBlockSize(4 * 1024);
-			blockConfig.setFormatVersion(2);
-			blockConfig.setNoBlockCache(true);
-			blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
-         @SuppressWarnings("resource")
+
+	public static void main(String[] args) throws RocksDBException {
+		RocksDB db;
+		List<ColumnFamilyDescriptor> colFamily = new ArrayList<ColumnFamilyDescriptor>();
+		List<ColumnFamilyHandle> colFamilyHandles = new ArrayList<ColumnFamilyHandle>();
+		RocksDB.loadLibrary();
+		BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
+		// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
+		// DBOptions dbo = new DBOptions();
+		// cfOptions.optimizeLevelStyleCompaction();
+		// cfOptions.optimizeForPointLookup(8192);
+		blockConfig.setFilter(new BloomFilter(16, false));
+		// blockConfig.setHashIndexAllowCollision(false);
+		// blockConfig.setCacheIndexAndFilterBlocks(false);
+		// blockConfig.setIndexType(IndexType.kBinarySearch);
+		// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
+		blockConfig.setBlockSize(4 * 1024);
+		blockConfig.setFormatVersion(2);
+		blockConfig.setNoBlockCache(true);
+		blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+		@SuppressWarnings("resource")
 		DBOptions options = new DBOptions().setCreateIfMissing(true);
-         ColumnFamilyOptions coptions1 = new ColumnFamilyOptions();
-         coptions1.setMergeOperatorName("uint64add");
-			coptions1.setCompactionStyle(CompactionStyle.LEVEL);
-			coptions1.setCompressionType(CompressionType.NO_COMPRESSION);
-			coptions1.setLevel0FileNumCompactionTrigger(8);
-			coptions1.setWriteBufferSize(4096L);
-			//coptions1.setMaxBytesForLevelBase(fsize * 5);
-			//coptions1.setTargetFileSizeBase(fsize);
-			coptions1.setTableFormatConfig(blockConfig);
-         options.setMaxBackgroundFlushes(1);
-         colFamily.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, coptions1));
-			
-         options.setCreateMissingColumnFamilies(true);
-         db = RocksDB.open(options, "c:/temp", colFamily, colFamilyHandles);
-         byte [] k = "6442".getBytes();
-         ByteBuffer bk = ByteBuffer.wrap(new byte[8]).order(ByteOrder.nativeOrder());
-         bk.putLong(10);
-         for(int i = 0; i < 10000;i++) {
-        	 db.merge(k, bk.array());
-         }
-         bk.position(0);
-         bk.put(db.get(k));
-         bk.position(0);
-         System.out.println(bk.getLong());
-         db.close();
-         
+		ColumnFamilyOptions coptions1 = new ColumnFamilyOptions();
+		coptions1.setMergeOperatorName("uint64add");
+		coptions1.setCompactionStyle(CompactionStyle.LEVEL);
+		coptions1.setCompressionType(CompressionType.NO_COMPRESSION);
+		coptions1.setLevel0FileNumCompactionTrigger(8);
+		coptions1.setWriteBufferSize(4096L);
+		// coptions1.setMaxBytesForLevelBase(fsize * 5);
+		// coptions1.setTargetFileSizeBase(fsize);
+		coptions1.setTableFormatConfig(blockConfig);
+		options.setMaxBackgroundFlushes(1);
+		colFamily.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, coptions1));
+
+		options.setCreateMissingColumnFamilies(true);
+		db = RocksDB.open(options, "c:/temp", colFamily, colFamilyHandles);
+		byte[] k = "6442".getBytes();
+		ByteBuffer bk = ByteBuffer.wrap(new byte[8]).order(ByteOrder.nativeOrder());
+		bk.putLong(10);
+		for (int i = 0; i < 10000; i++) {
+			db.merge(k, bk.array());
+		}
+		bk.position(0);
+		bk.put(db.get(k));
+		bk.position(0);
+		System.out.println(bk.getLong());
+		db.close();
+
 	}
-	
-	
 
 }

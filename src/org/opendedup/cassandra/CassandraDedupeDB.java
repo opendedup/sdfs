@@ -113,7 +113,6 @@ public class CassandraDedupeDB {
 		cacheCfg.setReadThrough(true);
 		cacheCfg.setWriteThrough(true);
 		cacheCfg.setName("rmarchives");
-		cacheCfg.setReadThrough(true);
 		cacheCfg.setCacheMode(CacheMode.REPLICATED);
 		cfg.setCacheConfiguration(cacheCfg);
 		ig = Ignition.start(cfg);
@@ -143,6 +142,10 @@ public class CassandraDedupeDB {
 
 	public void addRMRef(long archiveid) {
 		this.idb.put(archiveid, System.currentTimeMillis());
+	}
+	
+	public boolean isMaster() {
+		return ig.cluster().forOldest().node().equals(ig.cluster().localNode());
 	}
 
 	private void createTableSpace() {
