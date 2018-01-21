@@ -20,7 +20,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -324,14 +323,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long size() {
 		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.data;
-		}
-		return sz;
-		}catch(Exception e) {
-			if(!this.closed)
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.data;
+			}
+			return sz;
+		} catch (Exception e) {
+			if (!this.closed)
 				SDFSLogger.getLog().warn("unable to get clustered size", e);
 		}
 		return HashBlobArchive.getLength();
@@ -955,14 +954,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public long compressedSize() {
 		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.compressed;
-		}
-		return sz;
-		}catch(Exception e) {
-			if(!this.closed)
+			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
+			long sz = 0;
+			for (RemoteVolumeInfo r : rv) {
+				sz += r.compressed;
+			}
+			return sz;
+		} catch (Exception e) {
+			if (!this.closed)
 				SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
 		}
 		return HashBlobArchive.getCompressedLength();
@@ -1610,7 +1609,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 
 				if (this.refresh.size() > 0) {
-					SDFSLogger.getLog().info("running object refesh");
+					SDFSLogger.getLog().info("running object refesh for sz " + this.refresh.size());
 					this.delLock.lock();
 					HashSet<Long> odel = null;
 					try {
@@ -1628,7 +1627,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							this.refreshObject(k);
 							SDFSLogger.getLog().debug("done refreshing " + k);
 						} catch (Exception e) {
-							SDFSLogger.getLog().error("error in refresh thread", e);
+							SDFSLogger.getLog().debug("error in refresh thread for " + k, e);
 						}
 					}
 					odel = null;
@@ -2236,7 +2235,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int _size = 0;
 			int _compressedSize = 0;
 			String key = "";
-			for ( S3ObjectSummary summary : S3Objects.withPrefix(s3Service, this.name, pfx) ) {
+			for (S3ObjectSummary summary : S3Objects.withPrefix(s3Service, this.name, pfx)) {
 				key = summary.getKey();
 				if (!key.endsWith(mdExt)) {
 					Map<String, String> md = this.getUserMetaData(key);
@@ -2251,14 +2250,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 
-			if ( t_compressedsize >= 0) {
+			if (t_compressedsize >= 0) {
 				HashBlobArchive.setCompressedLength(t_compressedsize);
 			}
-			
+
 			if (t_size >= 0) {
 				HashBlobArchive.setLength(t_size);
 			}
-			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size );
+			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size);
 			return 0;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -2779,17 +2778,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							info.id = id;
 							info.hostname = md.get("hostname");
 							info.port = Integer.parseInt(md.get("port"));
-							if(md.containsKey("currentcompressedsize"))
+							if (md.containsKey("currentcompressedsize"))
 								info.compressed = Long.parseLong(md.get("currentcompressedsize"));
-							if(md.containsKey("compressedlength"))
+							if (md.containsKey("compressedlength"))
 								info.compressed = Long.parseLong(md.get("compressedlength"));
-							if(md.containsKey("currentlength"))
+							if (md.containsKey("currentlength"))
 								info.data = Long.parseLong(md.get("currentlength"));
-							if(md.containsKey("currentsize"))
+							if (md.containsKey("currentsize"))
 								info.data = Long.parseLong(md.get("currentsize"));
-							if(md.containsKey("lastupdated"))
+							if (md.containsKey("lastupdated"))
 								info.lastupdated = Long.parseLong(md.get("lastupdated"));
-							if(md.containsKey("lastupdate"))
+							if (md.containsKey("lastupdate"))
 								info.lastupdated = Long.parseLong(md.get("lastupdate"));
 							info.metaData = md;
 							al.add(info);
@@ -2878,6 +2877,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	private void refreshObject(long id) throws IOException {
 		String km = "blocks/" + EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
+		SDFSLogger.getLog().info("Refreshing " + km);
 		if (this.simpleMD) {
 			CopyObjectRequest creq = new CopyObjectRequest(name, km + mdExt, name, km + mdExt);
 			s3Service.copyObject(creq);
@@ -2893,16 +2893,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						.withNewObjectMetadata(_om);
 				s3Service.copyObject(req);
 			} catch (AmazonS3Exception e) {
-				SDFSLogger.getLog().warn("unable to update object", e);
-				ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
-				ObjectMetadata _om = new ObjectMetadata();
-				_om.setUserMetadata(om.getUserMetadata());
-				_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
-				CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt + ".cpy")
-						.withNewObjectMetadata(_om);
-				s3Service.copyObject(req);
-				req = new CopyObjectRequest(name, km + this.dExt + ".cpy", name, km + this.dExt);
-				s3Service.copyObject(req);
+				SDFSLogger.getLog().warn("unable to update object " + km + " with id " + id, e);
+				if (e.getStatusCode() != 404) {
+					ObjectMetadata om = s3Service.getObjectMetadata(this.name, km);
+					ObjectMetadata _om = new ObjectMetadata();
+					_om.setUserMetadata(om.getUserMetadata());
+					_om.addUserMetadata("lastaccessed", Long.toString(System.currentTimeMillis()));
+					CopyObjectRequest req = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt + ".cpy")
+							.withNewObjectMetadata(_om);
+					s3Service.copyObject(req);
+					req = new CopyObjectRequest(name, km + this.dExt + ".cpy", name, km + this.dExt);
+					s3Service.copyObject(req);
+				}
 			}
 		}
 	}

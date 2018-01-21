@@ -556,7 +556,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	public static void main(String[] args) throws Exception {
-		SimpleMapInterface b = new SimpleByteArrayLongMap("c:\\tmp\\-3581905307694103699.map", 10000000, 1);
+		SimpleMapInterface b = new SimpleByteArrayLongMap(args[0], 10000000, 1);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;

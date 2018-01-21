@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.mgmt.cli;
 
+import java.io.IOException;
 import java.util.Formatter;
 
 import org.w3c.dom.Document;
@@ -17,8 +18,11 @@ public class ProcessShutdown {
 			System.out.println(root.getAttribute("msg"));
 			formatter.close();
 
-		} catch(java.net.SocketException e) {
-			System.out.println("Volume Shut Down");
+		} catch(IOException e) {
+			if(e.getCause() != null && e.getCause().getMessage().equalsIgnoreCase("Connection reset"))
+				System.out.println("Volume Shut Down");
+			else
+				e.printStackTrace();
 		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

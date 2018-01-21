@@ -64,7 +64,7 @@ public class MgmtServerConnection {
 				prot = "https";
 			}
 			String req = prot + "://" + svr + ":" + pt + "/session/";
-			SDFSLogger.getLog().info("Getting session for " + req);
+			//SDFSLogger.getLog().info("Getting session for " + req);
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)
@@ -125,7 +125,7 @@ public class MgmtServerConnection {
 	}
 	
 	public static Map<String, String> splitQuery(String query) {
-		SDFSLogger.getLog().info("parsing " + query);
+		//SDFSLogger.getLog().info("parsing " + query);
 		
 		if(query.startsWith("?"))
 			query = query.substring(1);

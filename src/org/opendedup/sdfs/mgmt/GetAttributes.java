@@ -12,6 +12,8 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.ReadAhead;
+import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -77,6 +79,13 @@ public class GetAttributes {
 
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
+				if(mf.getName().equalsIgnoreCase("BEOST_SInf.img") || 
+						mf.getName().equalsIgnoreCase("BEOST_SInf-Bak.img") ||mf.getName().equalsIgnoreCase("BEOST_SMap.img")) {
+					SparseDedupFile df = MetaFileStore.getMF(internalPath).getDedupFile(true);
+					df.getChannel(-1);
+					ReadAhead rh = new ReadAhead(df.getChannel(-1),true);
+					rh.setReadAhead(0);
+				}
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();

@@ -587,6 +587,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 						l.unlock();
 						l = null;
 					}
+				}catch(Throwable t) {
+					SDFSLogger.getLog().error("unable to write", t);
+					throw new IOException(t);
 				}
 			}
 		} catch (NullPointerException e) {
@@ -999,7 +1002,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 							hf.putInt(chunk.length);
 							hf.position(0);
 							// int zd = (int) cp + 4 + hash.length;
-
 							ins = wMaps.get(this.id).put(hash, hf.getLong());
 							SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
 							// SDFSLogger.getLog().info("put " + zd + " len " +

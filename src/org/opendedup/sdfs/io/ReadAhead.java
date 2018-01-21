@@ -46,6 +46,7 @@ import com.google.common.primitives.Longs;
 
 public class ReadAhead implements Runnable {
 	SparseDedupFile df;
+	DedupFileChannel ch;
 	boolean closeWhenDone;
 	static final int maxReadAheadLen = Main.dseIOThreads;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
@@ -54,15 +55,15 @@ public class ReadAhead implements Runnable {
 	Thread th = null;
 	LongByteArrayMap mp;
 
-	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
+	public static ReadAhead getReadAhead(DedupFileChannel ch) throws ExecutionException, IOException {
 		if (Main.readAhead) {
-			return new  ReadAhead(df,false);
+			return new  ReadAhead(ch,false);
 		}
 		else
 			throw new IOException("ReadAhead disabled");
 	}
 
-	public ReadAhead(SparseDedupFile df, boolean closeWhenDone) throws IOException {
+	public ReadAhead(DedupFileChannel ch, boolean closeWhenDone) throws IOException {
 		/*
 		if((df.mf.length()/2) > HashBlobArchive.getLocalCacheSize()) {
 			SDFSLogger.getLog().warn("unable to readahead " + df.mf.getPath() + " because probable "
@@ -70,12 +71,10 @@ public class ReadAhead implements Runnable {
 			return;
 		}
 		*/
-			
+			this.ch = ch;
+			df = (SparseDedupFile)ch.getDedupFile();
 		
 			SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
-			
-			
-			this.df = df;
 			
 			mp =(LongByteArrayMap) df.bdb;
 			mp.iterInit();
@@ -147,10 +146,12 @@ public class ReadAhead implements Runnable {
 			}
 			if(evt.maxCt < maxReadAheadLen)
 				evt.maxCt=maxReadAheadLen;
+			if(this.closeWhenDone)
+				ch.forceClose();
 			evt.endEvent(df.getMetaFile().getPath() + " Cached");
 		} catch (Exception e) {
 			evt.endEvent("Failed to cache " +df.getMetaFile().getPath(), SDFSEvent.WARN, e);
-			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);
+			SDFSLogger.getLog().debug("unable to cache " +df.mf.getPath(),e);
 		}  finally {
 			
 		}

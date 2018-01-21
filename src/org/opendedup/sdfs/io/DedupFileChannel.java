@@ -453,7 +453,7 @@ public class DedupFileChannel {
 	 * 
 	 * @throws IOException
 	 */
-	protected void forceClose() throws IOException {
+	public void forceClose() throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
 					"close " + mf.getPath() + " flag=" + flags);
@@ -517,7 +517,7 @@ public class DedupFileChannel {
 		try {
 			if (Main.readAhead) {
 				if(rh == null)
-					rh =ReadAhead.getReadAhead(df);
+					rh =ReadAhead.getReadAhead(this);
 				rh.setReadAhead(filePos);
 			}
 		} catch (Exception e) {
