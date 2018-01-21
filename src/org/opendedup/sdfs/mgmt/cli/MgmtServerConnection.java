@@ -52,18 +52,19 @@ public class MgmtServerConnection {
 		client.getParams().setParameter("http.connection.timeout", 60*1000);
 	}
 	
-	public static void initAuth(String password) throws IOException {
+	public static String initAuth(String password,String svr,int pt,boolean ssl) throws IOException {
+		
 		InputStream in = null;
 		GetMethod method = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			String prot = "http";
-			if (useSSL) {
+			if (ssl) {
 				prot = "https";
 			}
-			String req = prot + "://" + server + ":" + port + "/session/";
-			SDFSLogger.getLog().debug(req);
+			String req = prot + "://" + svr + ":" + pt + "/session/";
+			SDFSLogger.getLog().info("Getting session for " + req);
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
 			if (returnCode != 200)
@@ -78,7 +79,7 @@ public class MgmtServerConnection {
 			sessionId = el.getAttribute("session-id");
 			String key = HashFunctions.getSHAHash(password.trim().getBytes(),
 					salt.getBytes());
-			baseHmac = HashFunctions.getHmacSHA256(sessionId,StringUtils.getHexBytes(key));
+			return HashFunctions.getHmacSHA256(sessionId,StringUtils.getHexBytes(key));
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -112,7 +113,7 @@ public class MgmtServerConnection {
 		String ts = Long.toString(System.currentTimeMillis());
 		hmac = HashFunctions.getHmacSHA256(hmac,ts.getBytes())+":" + sessionId;
 			
-		if (userName != null && baseHmac != null)
+		if (userName != null && hmac != null)
 			if (_url.trim().length() == 0)
 				_url = "username=" + URLEncoder.encode(userName, "UTF-8") + "&hmac=" + URLEncoder.encode(hmac, "UTF-8") + "&timestamp=" + ts;
 			else
@@ -124,10 +125,12 @@ public class MgmtServerConnection {
 	}
 	
 	public static Map<String, String> splitQuery(String query) {
+		SDFSLogger.getLog().info("parsing " + query);
+		
 		if(query.startsWith("?"))
 			query = query.substring(1);
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-		if (query != null) {
+		if (query != null && query.trim().length() > 0) {
 			try {
 				String[] pairs = query.split("&");
 				for (String pair : pairs) {
@@ -316,7 +319,7 @@ public class MgmtServerConnection {
 		MgmtServerConnection.server = "localhost";
 		MgmtServerConnection.port = 6442;
 		MgmtServerConnection.useSSL = false;
-		MgmtServerConnection.initAuth("admin");
+		MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth("admin",MgmtServerConnection.server,MgmtServerConnection.port,false);
 		System.out.println("baseAuth = " + MgmtServerConnection.baseHmac);
 		String url = "?cmd=test&file=bla";
 		System.out.println(MgmtServerConnection.createAuthUrl(url, baseHmac));

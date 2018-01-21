@@ -768,7 +768,7 @@ public class Volume implements java.io.Serializable {
 			doc.adoptNode(el);
 			root.appendChild(el);
 		}
-		if(this.car.length > 0) {
+		if(this.car != null && this.car.length > 0) {
 			for(InetSocketAddress ar : car) {
 				Element addr = doc.createElement("cassandra-node");
 				addr.setAttribute("hostname", ar.getHostName());

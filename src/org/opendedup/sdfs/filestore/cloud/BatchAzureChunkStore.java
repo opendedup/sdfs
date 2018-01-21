@@ -103,6 +103,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private BlobDataIO bio = null;
 	private int tierInDays = 30;
+	private boolean tierImmedately = false;
 
 	// private String bucketLocation = null;
 	static {
@@ -344,6 +345,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		if (config.hasAttribute("azure-tier-in-days")) {
 			this.tierInDays = Integer.parseInt(config.getAttribute("azure-tier-in-days"));
+			if(config.hasAttribute("tier-immediately")) {
+				this.tierImmedately = Boolean.parseBoolean(config.getAttribute("tier-immediately"));
+			}
 		}
 		// System.setProperty("http.keepalive", "true");
 
@@ -364,7 +368,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			account = CloudStorageAccount.parse(storageConnectionString);
 			serviceClient = account.createCloudBlobClient();
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
-			if (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL)) {
+			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
 				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
 			}
 			/*
@@ -975,14 +979,22 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					} else {
 						this.refresh.clear();
 					}
-					Iterable<BlobDataTracker> tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
+					Iterable<BlobDataTracker> tri = null;
+					if(this.tierImmedately) {
+						long mins = (Long.valueOf(this.tierInDays) * 60*1000)+60000;
+						SDFSLogger.getLog().info("Checking how many archives are " + mins + " back");
+						tri = bio.getBlobDataTrackers(mins, dseID);
+					} else
+						tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
 					for (BlobDataTracker bt : tri) {
 						String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 								Main.chunkStoreEncryptionEnabled);
 						try {
+							SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
 							CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
 							blob.uploadStandardBlobTier(this.tier);
 							bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
+							
 						} catch (Exception e) {
 							SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
 						}

@@ -255,7 +255,7 @@ public class ReplicationService implements Serializable {
 			int rport) throws IOException {
 		MgmtServerConnection.server = server;
 		
-		MgmtServerConnection.initAuth(password);
+		MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth(password,server,port,this.useLSSL);
 		MgmtServerConnection.port = port;
 		ProcessImportArchiveCmd.runCmd(archive, path, rserver, rpasswd, rport,
 				false, maxSz);
@@ -265,7 +265,7 @@ public class ReplicationService implements Serializable {
 	private String getRemoteArchive(String server, int port, String password,
 			String tempDir, String file) throws IOException {
 		MgmtServerConnection.server = server;
-		MgmtServerConnection.initAuth(password);
+		MgmtServerConnection.baseHmac =MgmtServerConnection.initAuth(password,server,port,this.useLSSL);
 		MgmtServerConnection.port = port;
 		SDFSLogger.getLog().debug("archive a copy of [" + file + "]");
 		ArchiveOutResult rslt = ProcessArchiveOutCmd.runCmd(file, tempDir);

@@ -162,12 +162,15 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
 				String hmac = qry.get("hmac");
-				String tss = qry.get("timestamp");
-				long ts =  Long.parseLong(tss);
-				if(ts < (System.currentTimeMillis()-MAX_TS_SYNC)) {
-					SDFSLogger.getLog().warn("could not authenticate because time [" + ts + "] is less than [" + System.currentTimeMillis() + "]");
-				}
+			
+				
+				
 				if (hmac != null) {
+					String tss = qry.get("timestamp");
+					long ts =  Long.parseLong(tss);
+					if(ts < (System.currentTimeMillis()-MAX_TS_SYNC)) {
+						SDFSLogger.getLog().warn("could not authenticate because time [" + ts + "] is less than [" + System.currentTimeMillis() + "]");
+					}
 					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
 					String hsh = tks[0];
 					String session = tks[1];

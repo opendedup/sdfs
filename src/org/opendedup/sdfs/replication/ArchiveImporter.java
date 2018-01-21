@@ -189,7 +189,7 @@ public class ArchiveImporter {
 					}
 
 				}
-				MgmtServerConnection.initAuth(password);
+				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth(password,server,port,useSSL);
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
 						+ sdest, server, MgmtServerConnection.baseHmac, port, maxSz, evt, useSSL);
 				imp.runImport();

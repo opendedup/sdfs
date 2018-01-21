@@ -17,7 +17,9 @@ public class ProcessShutdown {
 			System.out.println(root.getAttribute("msg"));
 			formatter.close();
 
-		} catch (Exception e) {
+		} catch(java.net.SocketException e) {
+			System.out.println("Volume Shut Down");
+		}catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
