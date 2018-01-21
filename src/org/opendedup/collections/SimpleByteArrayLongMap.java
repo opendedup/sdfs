@@ -554,7 +554,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			SDFSLogger.getLog().debug("closed " + this.path);
 		}
 	}
-
+	
 	public static void main(String[] args) throws Exception {
 		SimpleMapInterface b = new SimpleByteArrayLongMap(args[0], 10000000, 1);
 		b.iterInit();
@@ -570,6 +570,23 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		}
 		System.out.println("sz=" + i);
 		System.out.println(b.get(key));
+		@SuppressWarnings("resource")
+		FileChannel fc = new RandomAccessFile(args[1],"rw").getChannel();
+		long len = fc.size();
+		long pos = 0;
+		while(pos < len) {
+			ByteBuffer buf = ByteBuffer.allocateDirect(4 + 16 + 4);
+			fc.read(buf);
+			buf.flip();
+			buf.getInt();
+			byte [] hash = new byte [16];
+			buf.get(hash);
+			System.out.println("key=" + StringUtils.getHexString(hash) + " value=" + pos);
+			int nlen = buf.getInt();
+			pos =fc.position() + nlen;
+			fc.position(fc.position() + nlen);
+		}
+		fc.close();
 
 		/*
 		 * Random rnd = new Random(); byte[] hash = null; int val = -33; byte[] hash1 =
