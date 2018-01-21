@@ -401,7 +401,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 				long cct = LongConverter.toLong(v);
 				long nc = ct + cct;
 
-				if (nc <= 0) {
+				if (nc <= 0 && ct < 0) {
 					byte[] rv = new byte[8];
 					ByteBuffer rbk = ByteBuffer.wrap(rv);
 					rbk.putLong(System.currentTimeMillis() + rmthreashold);
@@ -505,47 +505,52 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					bk.position(0);
 					long tm = bk.getLong();
 					if (tm < System.currentTimeMillis()) {
+
 						Lock al = this.getArchiveLock(ByteBuffer.wrap(id).getLong());
 						al.lock();
-						try {
-							byte[] kb = this.rmdb.get(cf.get(2), id);
-							if (kb != null) {
-								String[] hsh = new String(kb).split(",");
-								Lock l = this.gclock.writeLock();
-								l.lock();
-								try {
-									v = rmdb.get(this.cf.get(1), id);
-									long ct = 0;
-									if (v != null)
-										ct = LongConverter.toLong(v);
 
-									if (ct <= 0) {
-										for (String hs : hsh) {
-											byte[] z = BaseEncoding.base64Url().decode(hs);
-											// byte [] bid = this.getDB(z).get(z);
-											this.getDB(z).delete(z);
-											ChunkData ck = new ChunkData(ByteBuffer.wrap(id).getLong(), z);
-											ck.setmDelete(true);
+						try {
+							if (rmdb.get(this.cf.get(0), id) != null) {
+								byte[] kb = this.rmdb.get(cf.get(2), id);
+								if (kb != null) {
+									String[] hsh = new String(kb).split(",");
+									Lock l = this.gclock.writeLock();
+									l.lock();
+									try {
+										v = rmdb.get(this.cf.get(1), id);
+										long ct = 0;
+										if (v != null)
+											ct = LongConverter.toLong(v);
+
+										if (ct <= 0) {
+											for (String hs : hsh) {
+												byte[] z = BaseEncoding.base64Url().decode(hs);
+												// byte [] bid = this.getDB(z).get(z);
+												this.getDB(z).delete(z);
+												ChunkData ck = new ChunkData(ByteBuffer.wrap(id).getLong(), z);
+												ck.setmDelete(true);
+											}
+											this.rmdb.delete(cf.get(0), id);
+											this.rmdb.delete(cf.get(1), id);
+											this.rmdb.delete(cf.get(2), id);
+											this.cdb.unClaimArchive(ByteBuffer.wrap(id).getLong(),
+													Main.volume.getSerialNumber());
+											if (this.cdb.getRefCt(ByteBuffer.wrap(id).getLong()) <= 0) {
+												this.cdb.addRMRef(ByteBuffer.wrap(id).getLong());
+											}
+											rmk++;
+										} else {
+											this.rmdb.delete(cf.get(0), id);
 										}
-										this.rmdb.delete(cf.get(0), id);
-										this.rmdb.delete(cf.get(1), id);
-										this.rmdb.delete(cf.get(2), id);
-										this.cdb.unClaimArchive(ByteBuffer.wrap(id).getLong(),
-												Main.volume.getSerialNumber());
-										if (this.cdb.getRefCt(ByteBuffer.wrap(id).getLong()) <= 0) {
-											this.cdb.addRMRef(ByteBuffer.wrap(id).getLong());
-										}
-										rmk++;
-									} else {
-										this.rmdb.delete(cf.get(0), id);
+
+									} finally {
+										l.unlock();
 									}
 
-								} finally {
-									l.unlock();
+								} else {
+									SDFSLogger.getLog().warn(
+											"HashList not found during GC for id " + ByteBuffer.wrap(id).getLong());
 								}
-							} else {
-								SDFSLogger.getLog()
-										.warn("HashList not found during GC for id " + ByteBuffer.wrap(id).getLong());
 							}
 						} finally {
 							al.unlock();
