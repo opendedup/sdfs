@@ -71,7 +71,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	int multiplier = 0;
 	boolean closed = false;
 	private long size = 0;
-	private static final long rmthreashold = 5 * 60 * 1000;
+	private static final long rmthreashold = 15 * 60 * 1000;
 	private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
@@ -169,7 +169,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setAllowConcurrentMemtableWrite(true);
 				// LRUCache c = new LRUCache(memperDB);
 				// options.setRowCache(c);
-				//blockConfig.setBlockCacheSize(GB * 2);
+				// blockConfig.setBlockCacheSize(GB * 2);
 
 				options.setWriteBufferSize(bufferSize / dbs.length);
 				// options.setMinWriteBufferNumberToMerge(2);
@@ -298,8 +298,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
 					return false;
 				}
+				long oct = ct;
 				ct += bk.getLong();
-				if (ct <= 0) {
+				if (ct <= 0 && oct < 0) {
 					bk.position(8);
 					bk.putLong(System.currentTimeMillis() + rmthreashold);
 					rmdb.put(hash, v);
@@ -375,32 +376,34 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				Lock l = this.getLock(hash);
 				l.lock();
 				try {
-					byte[] v = null;
-					bk.position(0);
-					bk.put(iter.value());
-					bk.position(0);
-					long pos = bk.getLong();
-					long tm = bk.getLong();
-					
-					if (System.currentTimeMillis() > tm) {
-						v = this.getDB(hash).get(hash);
-						if (v != null) {
-							ByteBuffer nbk = ByteBuffer.wrap(v);
-							long oval = nbk.getLong();
-							long ct = nbk.getLong();
-							if (ct <= 0 && oval == pos) {
+					if (this.rmdb.get(hash) != null) {
+						byte[] v = null;
+						bk.position(0);
+						bk.put(iter.value());
+						bk.position(0);
+						long pos = bk.getLong();
+						long tm = bk.getLong();
+
+						if (System.currentTimeMillis() > tm) {
+							v = this.getDB(hash).get(hash);
+							if (v != null) {
+								ByteBuffer nbk = ByteBuffer.wrap(v);
+								long oval = nbk.getLong();
+								long ct = nbk.getLong();
+								if (ct <= 0 && oval == pos) {
+									ChunkData ck = new ChunkData(pos, iter.key());
+									ck.setmDelete(true);
+									this.getDB(hash).delete(hash);
+								}
+								rmdb.delete(iter.key());
+							} else {
+								rmdb.delete(iter.key());
 								ChunkData ck = new ChunkData(pos, iter.key());
 								ck.setmDelete(true);
-								this.getDB(hash).delete(hash);
-							}
-							rmdb.delete(iter.key());
-						} else {
-							rmdb.delete(iter.key());
-							ChunkData ck = new ChunkData(pos, iter.key());
-							ck.setmDelete(true);
 
+							}
+							rmk++;
 						}
-						rmk++;
 					}
 				} finally {
 					l.unlock();
@@ -527,6 +530,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						ct++;
 					else
 						ct += cm.references;
+					if(ct <= 0) {
+						this.rmdb.delete(cm.getHash());
+					}
 					bk.putLong(8, ct);
 					db.put(cm.getHash(), v);
 					return new InsertRecord(false, pos);
@@ -639,18 +645,19 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
 			}
 			if (direct && (data == null || data.length == 0)) {
-				if(data != null && data.length == 0) {
+				if (data != null && data.length == 0) {
 					SDFSLogger.getLog().warn("Data Lenght is 0");
 				}
 				SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + pos + "] ");
 				long opos = pos;
 				pos = this.get(key);
-				if(pos != -1) {
-					SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + opos + "] found at [" + pos + "]");
+				if (pos != -1) {
+					SDFSLogger.getLog().warn(
+							" miss for [" + StringUtils.getHexString(key) + "] [" + opos + "] found at [" + pos + "]");
 					return data = ChunkData.getChunk(key, pos);
-				}
-				else {
-					SDFSLogger.getLog().warn(" do data found for [" + StringUtils.getHexString(key) + "] [" + pos + "]");
+				} else {
+					SDFSLogger.getLog()
+							.warn(" do data found for [" + StringUtils.getHexString(key) + "] [" + pos + "]");
 					return null;
 				}
 			} else {
@@ -806,7 +813,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		}
 	}
 
-
 	public static class StartShard implements Runnable {
 
 		RocksDB[] dbs = null;
@@ -817,9 +823,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		CommandLineProgressBar bar = null;
 		AtomicInteger ct = null;
 
-
-		public StartShard(int n, RocksDB[] dbs, Options options, File f, CommandLineProgressBar bar,
-				AtomicInteger ct) {
+		public StartShard(int n, RocksDB[] dbs, Options options, File f, CommandLineProgressBar bar, AtomicInteger ct) {
 			this.dbs = dbs;
 			this.n = n;
 			this.options = options;
