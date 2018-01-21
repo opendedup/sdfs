@@ -324,11 +324,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 										removal.getValue().close();
 										fcClosed = true;
 										SDFSLogger.getLog().debug("close " + removal.getKey());
-									}catch (ClosedChannelException e) {
-										fcClosed =true;
+									} catch (ClosedChannelException e) {
+										fcClosed = true;
 										break;
-									}
-									catch (Exception e) {
+									} catch (Exception e) {
 										if (tries > 100) {
 											SDFSLogger.getLog().warn("Unable to close filechannel", e);
 											fcClosed = true;
@@ -356,7 +355,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 									Path path = Paths.get(getPath(hashid).getPath());
 									FileChannel fc = FileChannel.open(path, StandardOpenOption.WRITE,
 											StandardOpenOption.READ);
-									SDFSLogger.getLog().debug("opened " + path.toString() + " opensize=" + openFiles.size());
+									SDFSLogger.getLog()
+											.debug("opened " + path.toString() + " opensize=" + openFiles.size());
 									return fc;
 								} else
 									throw new Exception("unable to find file " + lf.getPath());
@@ -477,14 +477,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 			try {
 				if (lf.exists() && lf.length() > 0) {
 					m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, VERSION);
-				} else
+					return m;
+				} else {
 					SDFSLogger.getLog().debug("could not find " + lf.getPath());
+				}
 
 			} catch (Exception e) {
-				m = null;
 				if (HashBlobArchive.REMOVE_FROM_CACHE)
 					lf.delete();
+
 				SDFSLogger.getLog().error("unable to read " + lf.getPath(), e);
+				throw new IOException("unable to read " + hashid);
 			}
 			if (m == null && HashBlobArchive.REMOVE_FROM_CACHE) {
 				lf.delete();
@@ -496,8 +499,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 				for (String key : keys) {
 					m.put(BaseEncoding.base64().decode(key), _m.get(key));
 				}
-			}
-			return m;
+
+				return m;
+			} else
+				throw new IOException("not able to fetch hashmap for " + hashid);
+		} catch (IOException e) {
+			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fetch hashmap [" + hashid + "]", e);
 			throw new IOException("unable to read " + hashid);
@@ -1278,8 +1285,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 			}
 			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
-			if (blockMap == null)
-				blockMap = maps.get(this.id);
+			synchronized (f) {
+				if (blockMap == null)
+					blockMap = maps.get(this.id);
+			}
 			pos = blockMap.get(hash);
 			if (pos == -1) {
 				synchronized (f) {
@@ -1332,7 +1341,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						synchronized (f) {
 							ch.read(hb, pos);
 						}
-					} catch(ClosedChannelException e1) {
+					} catch (ClosedChannelException e1) {
 						throw e1;
 					} catch (Exception e1) {
 						throw new IOException(e1);
@@ -1371,7 +1380,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					synchronized (f) {
 						ch.read(ByteBuffer.wrap(ub), pos + 4);
 					}
-				} catch(ClosedChannelException e) {
+				} catch (ClosedChannelException e) {
 					throw e;
 				} catch (Exception e) {
 					throw new IOException(e);
@@ -1418,7 +1427,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					try {
 						ch.read(ByteBuffer.wrap(ub), npos + 4);
 
-					} catch(ClosedChannelException e) {
+					} catch (ClosedChannelException e) {
 						throw e;
 					} catch (Exception e) {
 						throw new IOException(e);
@@ -1655,11 +1664,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 						openFiles.invalidate(this.id);
 						rchunks.remove(this.id);
 						int trys = 0;
-						while (!_har.moveFile(this.id)) {
-							Thread.sleep(100);
-							trys++;
-							if (trys > 4)
-								throw new IOException();
+						synchronized (f) {
+							while (!_har.moveFile(this.id)) {
+								Thread.sleep(100);
+								trys++;
+								if (trys > 4)
+									throw new IOException();
+							}
 						}
 						HashBlobArchive.addToCompressedLength(_har.f.length());
 					} else {
