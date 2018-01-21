@@ -639,15 +639,18 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				SDFSLogger.getLog().warn("unable to get key [" + StringUtils.getHexString(key) + "] [" + pos + "]", e);
 			}
 			if (direct && (data == null || data.length == 0)) {
-				if(data.length == 0) {
+				if(data != null && data.length == 0) {
 					SDFSLogger.getLog().warn("Data Lenght is 0");
 				}
 				SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + pos + "] ");
+				long opos = pos;
 				pos = this.get(key);
-				if(pos != -1)
+				if(pos != -1) {
+					SDFSLogger.getLog().warn(" miss for [" + StringUtils.getHexString(key) + "] [" + opos + "] found at [" + pos + "]");
 					return data = ChunkData.getChunk(key, pos);
+				}
 				else {
-					SDFSLogger.getLog().warn(" do data found for [" + StringUtils.getHexString(key) + "]");
+					SDFSLogger.getLog().warn(" do data found for [" + StringUtils.getHexString(key) + "] [" + pos + "]");
 					return null;
 				}
 			} else {
