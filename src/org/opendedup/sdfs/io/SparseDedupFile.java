@@ -868,7 +868,8 @@ public class SparseDedupFile implements DedupFile {
 		eventBus.post(new SFileWritten(this));
 		this.unRegisterChannel(ch, -1);
 	}
-
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 

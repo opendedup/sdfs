@@ -48,6 +48,7 @@ import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.HashBlobArchiveUploaded;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
@@ -732,6 +733,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 					throw new IOException(e1.getCause());
 			}
 			z = archive.getChunk(hash);
+		} if(z != null && Main.REFRESH_BLOBS) {
+			FileReplicationService.refreshArchive(hbid);
 		}
 		return z;
 	}
@@ -741,6 +744,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 		if (archive == null) {
 			SDFSLogger.getLog().debug("caching " + hbid);
 			archive = archives.get(hbid);
+		}
+		if(archive != null && Main.REFRESH_BLOBS) {
+			FileReplicationService.refreshArchive(hbid);
 		}
 	}
 

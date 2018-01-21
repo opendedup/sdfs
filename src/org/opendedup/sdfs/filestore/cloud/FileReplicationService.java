@@ -143,6 +143,10 @@ public class FileReplicationService {
 		service.sync.checkoutFile("files/" + fname);
 		return mf;
 	}
+	
+	public static void refreshArchive( long id) {
+		service.sync.addRefresh(id);
+	}
 
 	public static LongByteArrayMap getDDB(String fname, String lookupFilter) throws Exception {
 		File f = service.downloadDDBFile(fname, lookupFilter);

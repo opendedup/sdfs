@@ -535,6 +535,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						ct++;
 					else
 						ct += cm.references;
+					if(ct<=0) {
+						this.rmdb.delete(cm.getHash());
+					}
 					bk.putLong(8, ct);
 					db.put(cm.getHash(), v);
 					return new InsertRecord(false, pos);

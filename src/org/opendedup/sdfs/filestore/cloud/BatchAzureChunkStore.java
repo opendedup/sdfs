@@ -342,13 +342,21 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				this.tier = StandardBlobTier.COOL;
 			if (config.getAttribute("storage-tier").equalsIgnoreCase("archive"))
 				this.tier = StandardBlobTier.ARCHIVE;
+			if(this.tier != null) {
+				SDFSLogger.getLog().info("Set Storage Tier to " +tier);
+			} else {
+				SDFSLogger.getLog().warn("Storage Tier " + config.getAttribute("storage-tier") + " not found");
+			}
 		}
 		if (config.hasAttribute("azure-tier-in-days")) {
 			this.tierInDays = Integer.parseInt(config.getAttribute("azure-tier-in-days"));
 			if(config.hasAttribute("tier-immediately")) {
 				this.tierImmedately = Boolean.parseBoolean(config.getAttribute("tier-immediately"));
 			}
+			Main.REFRESH_BLOBS = true;
 		}
+		if (config.hasAttribute("refresh-blobs"))
+			Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
 		// System.setProperty("http.keepalive", "true");
 
 		System.setProperty("http.maxConnections", Integer.toString(Main.dseIOThreads * 2));
@@ -793,6 +801,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						throw new DataArchivedException(id, null);
 					}
 				}
+				if (this.tier != null && this.tier.equals(StandardBlobTier.COOL)) {
+					blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+				}
 				blob.downloadToFile(f.getPath(), null, null, opContext);
 				if (Main.REFRESH_BLOBS) {
 					synchronized (this.refresh) {
@@ -961,7 +972,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to update size", e);
 				}
-				if (this.tier != null && (tier.equals(StandardBlobTier.ARCHIVE))) {
+				if (this.tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
 					HashSet<Long> orr = new HashSet<Long>();
 					String dseID = EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					if (Main.REFRESH_BLOBS) {
@@ -989,13 +1000,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					for (BlobDataTracker bt : tri) {
 						String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 								Main.chunkStoreEncryptionEnabled);
+						
 						try {
 							SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
 							CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
+							
 							blob.uploadStandardBlobTier(this.tier);
+							SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to " + blob.getProperties().getStandardBlobTier());
 							bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
 							
-						} catch (Exception e) {
+							 
+						} catch (Throwable e) {
 							SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
 						}
 					}
@@ -1926,8 +1941,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	public static void main(String[] args) {
-		String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName=pauld;"
-				+ "AccountKey=KGKHMbp6EwHiTAGiU09x0PaWDeo0/2060u9rgzzISy9tvqJ2Ov0rCmgayaAjSoR16xHPjZlkBPHvTnFc5m6qag==";
+		String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName="+args[0]+";"
+				+ "AccountKey="+args[1];
 		try {
 			// Retrieve storage account from connection-string.
 			CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
@@ -1937,13 +1952,15 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			// Get a reference to a container.
 			// The container name must be lower case
-			CloudBlobContainer container = blobClient.getContainerReference("clab-pd-fp2-348-azure0");
+			CloudBlobContainer container = blobClient.getContainerReference(args[2]);
 			CloudBlockBlob kblob = container
-					.getBlockBlobReference("claims\\keys\\LTc0MjM1NTYzNDcxNzMwNjg2ODI=\\Nzg2OTU2NzA4MzQ3MDA3NzA3NQ==");
+					.getBlockBlobReference("blocks/MTAxNjQzMDU2OTY4MTEyNTA= ");
 			kblob.downloadAttributes();
 			for (String key : kblob.getMetadata().keySet()) {
 				System.out.println(key);
 			}
+			kblob.uploadStandardBlobTier(StandardBlobTier.COOL);
+			System.out.println(kblob.getProperties().getStandardBlobTier());
 
 		} catch (Exception e) {
 			// Output the stack trace.

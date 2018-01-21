@@ -435,8 +435,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (config.hasAttribute("cache-reads")) {
 					HashBlobArchive.cacheReads = Boolean.parseBoolean(config.getAttribute("cache-reads"));
 				}
-				if (config.hasAttribute("refresh-blobs"))
-					Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
+				
 				if (config.hasAttribute("sync-files")) {
 					boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
 					if (syncf) {
@@ -484,9 +483,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			if (config.hasAttribute("glacier-archive-days")) {
 				this.glacierDays = Integer.parseInt(config.getAttribute("glacier-archive-days"));
-				if (this.glacierDays > 0)
+				if (this.glacierDays > 0) {
 					Main.checkArchiveOnRead = true;
+					Main.REFRESH_BLOBS = true;
+				}
 			}
+			if (config.hasAttribute("refresh-blobs"))
+				Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
 			if (config.hasAttribute("infrequent-access-days")) {
 				this.infrequentAccess = Integer.parseInt(config.getAttribute("infrequent-access-days"));
 			}

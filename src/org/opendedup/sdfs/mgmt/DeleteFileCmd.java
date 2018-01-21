@@ -46,7 +46,7 @@ public class DeleteFileCmd {
 				throw new IOException("requeste file " + file + " does not exist");
 			String internalPath = Main.volume.getPath() + File.separator + file;
 			File f = new File(internalPath);
-			SDFSLogger.getLog().info("removing " + internalPath);
+			SDFSLogger.getLog().debug("removing " + internalPath);
 			if (!f.exists())
 				throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 			else {
@@ -63,7 +63,7 @@ public class DeleteFileCmd {
 					MetaFileStore.removedCachedMF(internalPath);
 				}
 				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true);
-				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
+				SDFSLogger.getLog().debug("removed " + internalPath + " success=" + removed);
 				if (removed) {
 					SDFSEvent.deleteFileEvent(f);
 					return "removed [" + file + "]";
