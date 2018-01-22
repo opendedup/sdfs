@@ -1009,10 +1009,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						try {
 							SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
 							CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
-
-							blob.uploadStandardBlobTier(this.tier);
-							SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to "
+							blob.downloadAttributes();
+							if(!blob.getProperties().getStandardBlobTier().equals(tier)) {
+								blob.uploadStandardBlobTier(this.tier);
+								SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to "
 									+ blob.getProperties().getStandardBlobTier());
+							}
 							bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
 
 						} catch (Throwable e) {
