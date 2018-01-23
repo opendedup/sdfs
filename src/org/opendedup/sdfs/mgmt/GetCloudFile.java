@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -97,11 +96,28 @@ public class GetCloudFile implements Runnable {
 				if (df != null) {
 					MetaFileStore.removedCachedMF(df.getPath());
 				}
-				if (df == null) {
-					MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
-							true, true);
-					SDFSLogger.getLog()
-							.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
+				if (f.exists()) {
+					if (df == null) {
+						MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
+								true, true);
+						SDFSLogger.getLog()
+								.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
+					}
+					try {
+						MetaFileStore.getMF(f);
+						MetaFileStore.getMF(f).clearRetentionLock();
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("File [" + f.getPath() + "] retention lock could not be removed ", e);
+					}
+					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true);
+					SDFSLogger.getLog().info("removed " + f.getPath() + " success=" + removed);
+
+					if (removed) {
+						SDFSEvent.deleteFileEvent(f);
+
+					} else {
+						SDFSEvent.deleteFileFailedEvent(f);
+					}
 				}
 				fevt.maxCt = 3;
 				fevt.curCt = 1;
@@ -111,23 +127,20 @@ public class GetCloudFile implements Runnable {
 				SDFSLogger.getLog().debug("downloaded " + sfile);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
 				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid() + " lf=" + _mf.getLookupFilter());
-				LongByteArrayMap ddb = LongByteArrayMap.getMap(_mf.getDfGuid(), _mf.getLookupFilter());
-				ddb.vanish(Main.refCount);
+				if(_mf.getDfGuid() == null) {
+					throw new IOException("File " + sfile + " has no data");
+				}
 				FileReplicationService.getDDB(_mf.getDfGuid(), _mf.getLookupFilter());
 				mf = MetaFileStore.getMF(_mf.getPath());
 				mf.setLocalOwner(false);
-				
 				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
-
 				} else {
-					
 					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
-					
+
 				}
 				fevt.curCt++;
-				
 
 			}
 		} catch (IOException e) {
@@ -137,13 +150,13 @@ public class GetCloudFile implements Runnable {
 				sdf.deleteStub(true);
 			}
 			File f = new File(Main.volume.getPath() + File.separator + sfile);
-			if(f.exists()) {
+			if (f.exists()) {
 				try {
 					MetaFileStore.removeMetaFile(f.getPath(), true, true);
-				}catch (Exception e1) {
-					
-				}finally {
-				f.delete();
+				} catch (Exception e1) {
+
+				} finally {
+					f.delete();
 				}
 			}
 			throw e;
@@ -156,7 +169,7 @@ public class GetCloudFile implements Runnable {
 	}
 
 	private void checkDedupFile(SDFSEvent fevt) throws IOException {
-		
+
 		fevt.shortMsg = "Importing hashes for file";
 		SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
@@ -170,7 +183,7 @@ public class GetCloudFile implements Runnable {
 			long ct = 0;
 			ddb.iterInit();
 			for (;;) {
-				LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+				LongKeyValue kv = ddb.nextKeyValue(false);
 				ct++;
 				if (kv == null)
 					break;
@@ -179,6 +192,7 @@ public class GetCloudFile implements Runnable {
 				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
 					ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
+					cm.references = 1;
 					InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
 					mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
 					if (ir.getInserted()) {
@@ -187,8 +201,8 @@ public class GetCloudFile implements Runnable {
 					} else {
 						mf.getIOMonitor().addDulicateData(p.nlen, false);
 						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
-							// SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " "
-							// +Longs.fromByteArray( p.hashloc) );
+							SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " "
+							 +Longs.fromByteArray( p.hashloc) );
 							p.hashloc = ir.getHashLocs();
 							blks.add(Longs.fromByteArray(ir.getHashLocs()));
 							dirty = true;
@@ -200,9 +214,9 @@ public class GetCloudFile implements Runnable {
 					ddb.put(kv.getKey(), ck);
 			}
 
-			SDFSLogger.getLog().debug("new objects of size " + blks.size() + " iter count is " + ct);
+			SDFSLogger.getLog().info("new objects of size " + blks.size() + " iter count is " + ct);
 			for (Long l : blks) {
-				SDFSLogger.getLog().debug("importing " + l);
+				SDFSLogger.getLog().info("importing " + l);
 				HashBlobArchive.claimBlock(l);
 			}
 		} catch (Throwable e) {
@@ -211,10 +225,10 @@ public class GetCloudFile implements Runnable {
 		} finally {
 			try {
 				ddb.forceClose();
-			}catch(Exception e) {
+			} catch (Exception e) {
 				SDFSLogger.getLog().warn("error closing file [" + mf.getPath() + "]", e);
 			}
-			
+
 		}
 		SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
 		fevt.curCt++;
@@ -233,18 +247,18 @@ public class GetCloudFile implements Runnable {
 			if (mf != null)
 				pth = mf.getPath();
 			try {
-			File f = new File(Main.volume.getPath() + File.separator + sfile);
-			if(f.exists()) {
-				try {
-					MetaFileStore.removeMetaFile(f.getPath(), true, true);
-				}catch (Exception e1) {
-					
-				}finally {
-				f.delete();
+				File f = new File(Main.volume.getPath() + File.separator + sfile);
+				if (f.exists()) {
+					try {
+						MetaFileStore.removeMetaFile(f.getPath(), true, true);
+					} catch (Exception e1) {
+
+					} finally {
+						f.delete();
+					}
 				}
-			}
-			}catch(Exception e1) {
-				
+			} catch (Exception e1) {
+
 			}
 			SDFSLogger.getLog().error("unable to process file " + pth, e);
 			fevt.endEvent("unable to process file " + pth, SDFSEvent.ERROR);
