@@ -317,6 +317,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long size() {
+<<<<<<< HEAD
 		// TODO Auto-generated method stub
 		try {
 		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
@@ -330,6 +331,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				SDFSLogger.getLog().warn("unable to get clustered size", e);
 		}
 		//return HashBlobArchive.getCompressedLength();
+=======
+		
+>>>>>>> 361f1542... Garbage Collection and size reporting Fixes
 		return HashBlobArchive.getLength();
 	}
 
@@ -928,6 +932,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long compressedSize() {
+<<<<<<< HEAD
 		try {
 		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
 		long sz = 0;
@@ -939,6 +944,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if(!this.closed)
 				SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
 		}
+=======
+		
+>>>>>>> 361f1542... Garbage Collection and size reporting Fixes
 		return HashBlobArchive.getCompressedLength();
 	}
 
@@ -1421,8 +1429,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// this.s3clientLock.readLock().lock();
 
 		try {
+<<<<<<< HEAD
 			kobj = s3Service.getObject(this.name, "keys/" + haName);
 			claims = this.getClaimedObjects(kobj, id);
+=======
+			kobj = null;
+			try {
+			kobj = s3Service.getObject(this.name, "keys/" + haName);
+			}catch(AmazonS3Exception e) {
+				if(e.getStatusCode() == 404) {
+					SDFSLogger.getLog().warn("object keys/" + haName+" already removed");
+					return 0;
+				}
+				else 
+					throw new IOException(e);
+			}
+>>>>>>> 361f1542... Garbage Collection and size reporting Fixes
 			String name = null;
 			if (this.clustered)
 				name = this.getClaimName(id);
@@ -1444,6 +1466,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					s3Service.deleteObject(this.name, this.getClaimName(id));
 					if (this.simpleMD)
 						s3Service.deleteObject(this.name, this.getClaimName(id) + mdExt);
+<<<<<<< HEAD
 					int _size = Integer.parseInt((String) mp.get("size"));
 					int _compressedSize = Integer.parseInt((String) mp.get("compressedsize"));
 					HashBlobArchive.addToLength(-1 * _size);
@@ -1453,8 +1476,21 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					if (HashBlobArchive.getCompressedLength() < 0) {
 						HashBlobArchive.setCompressedLength(0);
+=======
+					int _size = Integer.parseInt((String) mp.get("bsize"));
+					int _compressedSize = Integer.parseInt((String) mp.get("bcompressedsize"));
+					if (this.standAlone) {
+						HashBlobArchive.addToLength(-1 * _size);
+						HashBlobArchive.addToCompressedLength(-1 * _compressedSize);
+						if (HashBlobArchive.getLength() < 0) {
+							HashBlobArchive.setLength(0);
+						}
+						if (HashBlobArchive.getCompressedLength() < 0) {
+							HashBlobArchive.setCompressedLength(0);
+						}
+>>>>>>> 361f1542... Garbage Collection and size reporting Fixes
 					}
-					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName);
+					ObjectListing ol = s3Service.listObjects(this.getName(), "claims/keys/" + haName + "/");
 					if (ol.getObjectSummaries().size() == 0) {
 						s3Service.deleteObject(this.name, "blocks/" + haName + this.dExt);
 						s3Service.deleteObject(this.name, "keys/" + haName);

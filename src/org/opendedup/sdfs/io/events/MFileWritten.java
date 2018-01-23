@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io.events;
 
+import java.io.File;
+
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
@@ -27,7 +29,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 public class MFileWritten extends GenericEvent {
-	private static final int pl = Main.volume.getPath().length();
 	public MetaDataDedupFile mf;
 	public boolean dirty;
 
@@ -38,9 +39,12 @@ public class MFileWritten extends GenericEvent {
 	}
 
 	public String toJSON() {
+		String fl = new File(mf.getPath()).getPath().substring(Main.volume.getPath().length());
+		while(fl.startsWith("/") || fl.startsWith("\\"))
+			fl =fl.substring(1, fl.length());
 		JsonObject dataset = this.toJSONObject();
 		dataset.addProperty("actionType", "mfileWritten");
-		dataset.addProperty("object", mf.getPath().substring(pl));
+		dataset.addProperty("object", fl);
 		
 		if (mf.isSymlink())
 			dataset.addProperty("fileType", "symlink");

@@ -746,7 +746,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 				File f = this.resolvePath(path);
 				try {
-					if (MetaFileStore.removeMetaFile(f.getCanonicalPath())) {
+					if (MetaFileStore.removeMetaFile(f.getPath())) {
+						// SDFSLogger.getLog().info("deleted file " +
+						// f.getCanonicalPath());
+						return 0;
+					}else if (MetaFileStore.removeMetaFile(f.getCanonicalPath())) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getCanonicalPath());
 						return 0;
