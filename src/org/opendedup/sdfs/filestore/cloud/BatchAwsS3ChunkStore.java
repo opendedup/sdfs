@@ -99,6 +99,7 @@ import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.iterable.S3Objects;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
+import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Rule;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -110,6 +111,8 @@ import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
+import com.amazonaws.services.s3.model.lifecycle.LifecycleFilter;
+import com.amazonaws.services.s3.model.lifecycle.LifecyclePrefixPredicate;
 import com.google.common.io.BaseEncoding;
 
 import org.opendedup.collections.HashExistsException;
@@ -738,13 +741,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			if (trs.size() > 0) {
 				BucketLifecycleConfiguration.Rule ruleArchiveAndExpire = new BucketLifecycleConfiguration.Rule()
-						.withId("SDFS Automated Archive Rule for Block Data").withPrefix("blocks/").withTransitions(trs)
+						.withId("SDFS Automated Archive Rule for Block Data").withFilter(new LifecycleFilter(
+			                    new LifecyclePrefixPredicate("blocks/"))).withTransitions(trs)
 						.withStatus(BucketLifecycleConfiguration.ENABLED.toString());
 				List<BucketLifecycleConfiguration.Rule> rules = new ArrayList<BucketLifecycleConfiguration.Rule>();
 				rules.add(ruleArchiveAndExpire);
 
 				BucketLifecycleConfiguration configuration = new BucketLifecycleConfiguration().withRules(rules);
-
 				// Save configuration.
 				s3Service.setBucketLifecycleConfiguration(this.name, configuration);
 			} else if (s3Target == null) {
