@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -28,6 +30,10 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
+import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.VariableHashEngine;
+import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -58,6 +64,22 @@ public class Io {
 	private static Map<String, BERefresh> refreshmap = new HashMap<String, BERefresh>();
 	public final String mountedVolume;
 	public final String mountPoint;
+	public static AbstractHashEngine eng = null;
+
+	static {
+		if (HashFunctionPool.max_hash_cluster > 1) {
+			try {
+				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
+					eng = new VariableSipHashEngine();
+				} else {
+					eng = new VariableHashEngine();
+				}
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+	}
 
 	private static EventBus eventBus = new EventBus();
 
@@ -110,7 +132,7 @@ public class Io {
 					} else {
 						this.dedupChannels.put(handleNo, ch);
 					}
-					//SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
+					// SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
 					if (mf != null) {
 						if (mf.getName().equalsIgnoreCase("BEOST_SInf.img")
 								|| mf.getName().equalsIgnoreCase("BEOST_SInf-Bak.img")
@@ -307,7 +329,7 @@ public class Io {
 				File f = this.resolvePath(path);
 				try {
 					MetaFileStore.getMF(f).clearRetentionLock();
-					if (MetaFileStore.removeMetaFile(f.getPath(), true, true,true)) {
+					if (MetaFileStore.removeMetaFile(f.getPath(), true, true, true)) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getPath());
 						return;
@@ -341,6 +363,7 @@ public class Io {
 		try {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
+
 			/*
 			 * log.info("writing data to  " +path + " at " + offset + " and length of " +
 			 * buf.capacity());
@@ -353,13 +376,35 @@ public class Io {
 			// buf.capacity() + "==" + new String(b) + "==/n/n");
 
 			DedupFileChannel ch = this.getFileChannel(fh);
-			
+
 			try {
 				/*
-				 SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos="
-						 +offset + " len=" + buf.capacity());
-						 */
+				 * SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos="
+				 * +offset + " len=" + buf.capacity());
+				 */
+				/*
+				byte[] k = new byte[buf.capacity()];
+				buf.get(k);
+				buf.position(0);
+				Files.write(Paths.get("c:/temp/" + ch.openFile().getName()),
+						new String(offset + "," + buf.capacity() + "," + StringUtils.byteToHexString(eng.getHash(k)) + "\n")
+								.getBytes(),
+						StandardOpenOption.APPEND,StandardOpenOption.CREATE);
+				*/
+				byte[] k = new byte[buf.capacity()];
+				buf.get(k);
+				buf.position(0);
+				byte [] key = eng.getHash(k);
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
+				buf.position(0);
+				ch.read(buf, 0, buf.capacity(), offset);
+				buf.position(0);
+				byte[] _k = new byte[buf.capacity()];
+				buf.get(_k);
+				byte [] _key = eng.getHash(_k);
+				buf.position(0);
+				if(!Arrays.equals(key, _key))
+					SDFSLogger.getLog().info("arrays not equal at " + offset);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + fh, e);
 				throw new FuseException().initErrno(Errno.EACCES);
@@ -542,9 +587,9 @@ public class Io {
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
 			/*
-			 SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos="
-			 +offset + " len=" + buf.capacity());
-			*/
+			 * SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos="
+			 * +offset + " len=" + buf.capacity());
+			 */
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*
 			 * if (buf.position() < buf.capacity()) { byte[] k = new byte[buf.capacity() -
@@ -559,6 +604,7 @@ public class Io {
 				read = 0;
 			return read;
 		} catch (DataArchivedException e) {
+			SDFSLogger.getLog().warn("Data is archived");
 			throw new FuseException("File Archived").initErrno(Errno.ENODATA);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + fh, e);
@@ -667,34 +713,33 @@ public class Io {
 				try {
 					SparseDedupFile df = MetaFileStore.getMF(path).getDedupFile(true);
 					DedupFileChannel ch = df.getChannel(-1);
-					LongByteArrayMap mp =(LongByteArrayMap) df.bdb;
+					LongByteArrayMap mp = (LongByteArrayMap) df.bdb;
 					Set<Long> blks = new LinkedHashSet<Long>();
 					mp.iterInit();
 					LongKeyValue kv = mp.nextKeyValue(false);
-					
-					
-					while(kv != null) {
+
+					while (kv != null) {
 						SparseDataChunk ck = kv.getValue();
-						TreeMap<Integer,HashLocPair> al = ck.getFingers();
+						TreeMap<Integer, HashLocPair> al = ck.getFingers();
 						for (HashLocPair p : al.values()) {
 							long pos = Longs.fromByteArray(p.hashloc);
-							if(pos >100 || pos <-100) {
+							if (pos > 100 || pos < -100) {
 								blks.add(pos);
 							}
 						}
-						if(blks.size() < 10) {
+						if (blks.size() < 10) {
 							kv = mp.nextKeyValue(false);
-						}else {
-							kv =null;
+						} else {
+							kv = null;
 						}
 					}
-					for(Long id: blks) {
+					for (Long id : blks) {
 						FileReplicationService.refreshArchive(id);
 					}
 					df.unRegisterChannel(ch, -1);
 					SDFSLogger.getLog().debug("finished readahead for " + path);
 				} catch (Exception e) {
-					SDFSLogger.getLog().debug("unable to readahead " + path,e);
+					SDFSLogger.getLog().debug("unable to readahead " + path, e);
 				} finally {
 					try {
 						Thread.sleep(interval);
@@ -707,5 +752,7 @@ public class Io {
 		}
 
 	}
+	
+	
 
 }

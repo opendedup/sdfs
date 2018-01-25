@@ -118,8 +118,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static RateLimiter wrl = null;
 	public static boolean REMOVE_FROM_CACHE = true;
 	public static boolean DISABLE_WRITE = false;
-	public static boolean VERIFY_READS = true;
-	public static boolean VERIFY_WRITES = true;
+	public static boolean VERIFY_READS = false;
+	public static boolean VERIFY_WRITES = false;
 	private static LoadingCache<Long, HashBlobArchive> archives = null;
 	private static LoadingCache<Long, SimpleByteArrayLongMap> maps = null;
 	private static LoadingCache<Long, FileChannel> openFiles = null;
