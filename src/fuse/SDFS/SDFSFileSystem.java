@@ -612,7 +612,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				else {
 					try {
 
-						if (MetaFileStore.removeMetaFile(f.getCanonicalPath(), false, false))
+						if (MetaFileStore.removeMetaFile(f.getCanonicalPath(), false, false,true))
 							return 0;
 						else {
 

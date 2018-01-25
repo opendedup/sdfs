@@ -655,7 +655,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath + "]Cannot overwrite existing data ");
 			else if (f.exists()) {
-				MetaFileStore.removeMetaFile(snaptoPath, true, true);
+				MetaFileStore.removeMetaFile(snaptoPath, true, true,true);
 			}
 
 			if (!f.getParentFile().exists())

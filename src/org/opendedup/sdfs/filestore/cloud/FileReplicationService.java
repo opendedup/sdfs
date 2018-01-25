@@ -55,7 +55,7 @@ import com.google.common.primitives.Longs;
 import fuse.SDFS.SDFSFileSystem;
 
 public class FileReplicationService {
-	AbstractCloudFileSync sync = null;
+	public AbstractCloudFileSync sync = null;
 	private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
 	private static ReentrantLock iLock = new ReentrantLock(true);
 	private static final int pl = Main.volume.getPath().length();
@@ -230,7 +230,7 @@ public class FileReplicationService {
 	 * }
 	 */
 
-	private void deleteFile(File f) throws IOException {
+	public void deleteFile(File f) throws IOException {
 		boolean isDir = false;
 		boolean isSymlink = false;
 		ReentrantLock l = this.getLock(f.getPath());

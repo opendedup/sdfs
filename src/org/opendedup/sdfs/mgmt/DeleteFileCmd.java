@@ -2,11 +2,14 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.LRUCache;
 import org.opendedup.util.XMLUtils;
@@ -46,7 +49,7 @@ public class DeleteFileCmd {
 				throw new IOException("requeste file " + file + " does not exist");
 			String internalPath = Main.volume.getPath() + File.separator + file;
 			File f = new File(internalPath);
-			SDFSLogger.getLog().debug("removing " + internalPath);
+			SDFSLogger.getLog().info("removing " + internalPath);
 			if (!f.exists())
 				throw new IOException("requeste file " + file + " does not exist at " + f.getPath());
 			else {
@@ -62,8 +65,20 @@ public class DeleteFileCmd {
 					f.delete();
 					MetaFileStore.removedCachedMF(internalPath);
 				}
-				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true);
-				SDFSLogger.getLog().debug("removed " + internalPath + " success=" + removed);
+				try {
+					MetaDataDedupFile mf = MetaFileStore.getMF(f);
+					if (mf != null && mf.getDfGuid() != null)
+						FileReplicationService.service.sync.deleteFile(mf.getDfGuid().substring(0, 2) + File.separator
+								+ mf.getDfGuid() + File.separator + mf.getDfGuid() + ".map", "ddb");
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to delete map file from cloud", e);
+				}
+				boolean removed = MetaFileStore.removeMetaFile(internalPath, localonly, true, true);
+
+				FileReplicationService.service.deleteFile(f);
+
+				SDFSLogger.getLog().info("removed " + internalPath + " success=" + removed);
+
 				if (removed) {
 					SDFSEvent.deleteFileEvent(f);
 					return "removed [" + file + "]";

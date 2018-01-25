@@ -99,7 +99,7 @@ public class GetCloudFile implements Runnable {
 				if (f.exists()) {
 					if (df == null) {
 						MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
-								true, true);
+								true, true,false);
 						SDFSLogger.getLog()
 								.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
 					}
@@ -109,7 +109,7 @@ public class GetCloudFile implements Runnable {
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("File [" + f.getPath() + "] retention lock could not be removed ", e);
 					}
-					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true);
+					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true,false);
 					SDFSLogger.getLog().info("removed " + f.getPath() + " success=" + removed);
 
 					if (removed) {
@@ -146,19 +146,19 @@ public class GetCloudFile implements Runnable {
 		} catch (IOException e) {
 
 			if (sdf != null) {
-				MetaFileStore.removeMetaFile(sdf.getPath(), true, true);
 				sdf.deleteStub(true);
 			}
+			/*
 			File f = new File(Main.volume.getPath() + File.separator + sfile);
 			if (f.exists()) {
 				try {
-					MetaFileStore.removeMetaFile(f.getPath(), true, true);
+					MetaFileStore.removeMetaFile(f.getPath(), true, true,false);
 				} catch (Exception e1) {
 
 				} finally {
 					f.delete();
 				}
-			}
+			}*/
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to get file " + sfile, e);
@@ -201,7 +201,7 @@ public class GetCloudFile implements Runnable {
 					} else {
 						mf.getIOMonitor().addDulicateData(p.nlen, false);
 						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
-							SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " "
+							SDFSLogger.getLog().debug("importing " + Longs.fromByteArray( ir.getHashLocs()) + " "
 							 +Longs.fromByteArray( p.hashloc) );
 							p.hashloc = ir.getHashLocs();
 							blks.add(Longs.fromByteArray(ir.getHashLocs()));
@@ -216,7 +216,7 @@ public class GetCloudFile implements Runnable {
 
 			SDFSLogger.getLog().info("new objects of size " + blks.size() + " iter count is " + ct);
 			for (Long l : blks) {
-				SDFSLogger.getLog().info("importing " + l);
+				SDFSLogger.getLog().debug("importing " + l);
 				HashBlobArchive.claimBlock(l);
 			}
 		} catch (Throwable e) {
@@ -249,13 +249,8 @@ public class GetCloudFile implements Runnable {
 			try {
 				File f = new File(Main.volume.getPath() + File.separator + sfile);
 				if (f.exists()) {
-					try {
-						MetaFileStore.removeMetaFile(f.getPath(), true, true);
-					} catch (Exception e1) {
-
-					} finally {
+					
 						f.delete();
-					}
 				}
 			} catch (Exception e1) {
 

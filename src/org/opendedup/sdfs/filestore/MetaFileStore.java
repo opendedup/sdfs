@@ -308,10 +308,10 @@ public class MetaFileStore {
 	 */
 
 	public static boolean removeMetaFile(String path) {
-		return removeMetaFile(path, false, true);
+		return removeMetaFile(path, false, true,true);
 	}
 
-	public static boolean removeMetaFile(String path, boolean localOnly, boolean force) {
+	public static boolean removeMetaFile(String path, boolean localOnly, boolean force,boolean async) {
 
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
@@ -345,7 +345,7 @@ public class MetaFileStore {
 						if (force) {
 							File[] files = ps.listFiles();
 							for (int i = 0; i < files.length; i++) {
-								boolean sd = removeMetaFile(files[i].getPath(), localOnly, force);
+								boolean sd = removeMetaFile(files[i].getPath(), localOnly, force,async);
 								if (!sd) {
 									SDFSLogger.getLog().warn("delete failed : unable to delete [" + files[i] + "]");
 									return sd;
@@ -375,10 +375,14 @@ public class MetaFileStore {
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
+								if(async) {
 								DeleteMap m = new DeleteMap();
 								m.mf = mf;
 								m.localOnly = localOnly;
 								service.execute(m);
+								}else {
+									mf.getDedupFile(false).delete(localOnly);
+								}
 
 							} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to delete dedup file for " + path, e);

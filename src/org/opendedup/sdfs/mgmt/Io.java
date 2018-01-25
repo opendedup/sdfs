@@ -307,7 +307,7 @@ public class Io {
 				File f = this.resolvePath(path);
 				try {
 					MetaFileStore.getMF(f).clearRetentionLock();
-					if (MetaFileStore.removeMetaFile(f.getPath(), true, true)) {
+					if (MetaFileStore.removeMetaFile(f.getPath(), true, true,true)) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getPath());
 						return;

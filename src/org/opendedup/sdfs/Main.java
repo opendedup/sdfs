@@ -115,7 +115,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.5.9.2";
+	public static String version = "3.6.0.2";
 
 	public static boolean readAhead = false;
 	

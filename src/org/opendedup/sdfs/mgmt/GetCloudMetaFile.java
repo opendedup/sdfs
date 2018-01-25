@@ -72,7 +72,7 @@ public class GetCloudMetaFile {
 			} catch (IOException e) {
 
 				if (mf != null) {
-					MetaFileStore.removeMetaFile(mf.getPath(), true, true);
+					MetaFileStore.removeMetaFile(mf.getPath(), true, true,true);
 				}
 				fevt.endEvent("unable to get file " + file, SDFSEvent.ERROR);
 				throw e;

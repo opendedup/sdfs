@@ -1004,7 +1004,7 @@ public class WinSDFS implements DokanOperations {
 				if (ch != null) {
 					ch.getDedupFile().unRegisterChannel(ch, -1);
 					if (ch.getFile() != null && ch.getFile().deleteOnClose) {
-						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true);
+						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true,true);
 						log.debug("Deleted file on close");
 					}
 				}
@@ -1119,7 +1119,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				File f = resolvePath(fileName);
 
-				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false)) {
+				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false,true)) {
 					log.warn("unable to delete file " + f.getPath());
 					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 				}
@@ -1148,7 +1148,7 @@ public class WinSDFS implements DokanOperations {
 			try {
 				File f = resolvePath(path);
 
-				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false)) {
+				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false,true)) {
 					log.error("unable to delete folder " + f.getPath());
 					throw new DokanOperationException(WinError.ERROR_DIR_NOT_EMPTY);
 				}

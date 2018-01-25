@@ -1,7 +1,7 @@
 package org.opendedup.cassandra;
 
 import java.net.InetSocketAddress;
-
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,11 +21,16 @@ import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
 import com.google.common.io.BaseEncoding;
 
 /**
@@ -47,20 +52,14 @@ public class CassandraDedupeDB {
 	private Session session = null;
 	private String dataCenter = "datacenter1";
 	private int replicationFactor = 3;
-	// BoundStatement hdbStatement = null;
-	// BoundStatement hdbStatementUpdate = null;
-	// BoundStatement getHdbStatement = null;
-	// BoundStatement insertRefHashes = null;
-	// BoundStatement getRefHasheStrings = null;
-	// BoundStatement delRefHdb = null;
-	// BoundStatement delHdb = null;
-	// BoundStatement delRmRef = null;
-	// BoundStatement getRmRef = null;
-	// BoundStatement insertRmRef = null;
-	// BoundStatement getAllRmRef = null;
-	// BoundStatement getClaims = null;
-	// BoundStatement addClaim = null;
-	// BoundStatement rmClaim = null;
+	PreparedStatement addHashStatement = null;
+	PreparedStatement getHashStatement = null;
+	PreparedStatement addRmRefStatement = null;
+	PreparedStatement getRmRefStatement = null;
+	PreparedStatement getAllRmRefStatement = null;
+	PreparedStatement getRefCtStatement = null;
+	PreparedStatement getRefHashesStatement = null;
+	PreparedStatement deleteHashStatement = null;
 	private String serviceName = "opendedupe";
 
 	public CassandraDedupeDB(InetSocketAddress[] contactPoints, String dataCenter, String serviceName,
@@ -73,15 +72,6 @@ public class CassandraDedupeDB {
 		this.replicationFactor = replicationFactor;
 		if(useIgnite)
 			this.initIgnite(contactPoints);
-	}
-
-	public int getRefCt(long archive) {
-		ResultSet rs = session.execute("Select claims from " + serviceName + ".refhashesdb where archive=" + archive);
-		int ct = -1;
-		Row r = rs.one();
-		if (r != null)
-			ct = r.getSet(0, Long.class).size();
-		return ct;
 	}
 
 	public void claimArchive(long archive, long serialnumber) {
@@ -163,12 +153,23 @@ public class CassandraDedupeDB {
 				+ ".refhashesdb (archive bigint PRIMARY KEY, hashes list<text>,claims set<bigint>);");
 		session.execute(
 				"CREATE TABLE IF NOT EXISTS " + serviceName + ".rmref (archive bigint PRIMARY KEY, timestamp bigint);");
+		addHashStatement = session.prepare((RegularStatement) new SimpleStatement("INSERT INTO " + serviceName + ".hashdb"
+				+ " (key, archive) VALUES (?,?)").setConsistencyLevel(ConsistencyLevel.ONE));
+		getHashStatement = session.prepare((RegularStatement) new SimpleStatement("Select archive from " + serviceName + 
+				".hashdb WHERE key = ?").setConsistencyLevel(ConsistencyLevel.ONE));
+		addRmRefStatement = session.prepare((RegularStatement) new SimpleStatement("INSERT INTO " + serviceName + ".rmref"
+				+ " (archive, timestamp) VALUES (?,?) IF NOT EXISTS").setConsistencyLevel(ConsistencyLevel.ALL));
+		getRmRefStatement = session.prepare("Select timestamp from " + serviceName + ".rmref WHERE archive =?").setConsistencyLevel(ConsistencyLevel.ALL);
+		getAllRmRefStatement = session.prepare("Select archive,timestamp from " + serviceName + ".rmref");
+		getRefCtStatement = session.prepare("Select claims from " + serviceName + ".refhashesdb where archive=?");
+		getRefHashesStatement = session.prepare("Select hashes from " + serviceName + ".refhashesdb WHERE archive = ?");
+		deleteHashStatement = session.prepare("DELETE from " + serviceName + ".hashdb WHERE key = ?");
 	}
 
 	public long getHash(byte[] key) {
 		long id = -1;
-		ResultSet rs = session.execute("Select archive from " + serviceName + ".hashdb WHERE key = 0x"
-				+ BaseEncoding.base16().encode(key) + ";");
+		BoundStatement bound = this.getHashStatement.bind(ByteBuffer.wrap(key));
+		ResultSet rs = session.execute(bound);
 		Row r = rs.one();
 		if (r != null && !idb.containsKey(r.getLong(0)))
 			id = r.getLong(0);
@@ -176,8 +177,8 @@ public class CassandraDedupeDB {
 	}
 
 	public long getRMRef(long archive) {
-		ResultSet rs = session
-				.execute("Select timestamp from " + serviceName + ".rmref WHERE archive =" + archive + ";");
+		BoundStatement bound = this.getHashStatement.bind(archive);
+		ResultSet rs = session.execute(bound);
 		long id = -1;
 		Row r = rs.one();
 		if (r != null)
@@ -186,8 +187,9 @@ public class CassandraDedupeDB {
 	}
 
 	public void _setRMRef(long id, long ts) {
-		session.execute("INSERT INTO " + serviceName + ".rmref (archive, timestamp) VALUES (" + id + "," + ts
-				+ ") IF NOT EXISTS;");
+		BoundStatement bound = this.addRmRefStatement.bind(id,ts);
+		session
+		.execute(bound);
 	}
 
 	public void delRMRef(long id) {
@@ -199,17 +201,16 @@ public class CassandraDedupeDB {
 	}
 
 	public void setHash(byte[] key, long id) {
-		session.execute("INSERT INTO " + serviceName + ".hashdb (key, archive) VALUES (0x"
-				+ BaseEncoding.base16().encode(key) + "," + id + ");");
+		BoundStatement bound = this.addHashStatement.bind(ByteBuffer.wrap(key),id);
+		session.execute(bound);
 	}
 	
 	public void setHashes(String [] keys,long id) {
 		ArrayList<ResultSetFuture> alr = new ArrayList<ResultSetFuture>();
 		for (String k : keys) {
-			byte[] key = BaseEncoding.base64Url().decode(k);
-			
-				alr.add(session.executeAsync("INSERT INTO " + serviceName + ".hashdb (key, archive) VALUES (0x"
-						+ BaseEncoding.base16().encode(key) + "," + id + ");"));
+				byte[] key = BaseEncoding.base64Url().decode(k);
+				BoundStatement bound = this.addHashStatement.bind(ByteBuffer.wrap(key),id);
+				alr.add(session.executeAsync(bound));
 		}
 		int ds = 0;
 		while (ds < alr.size()) {
@@ -227,9 +228,20 @@ public class CassandraDedupeDB {
 			}
 		}
 	}
+	
+	public int getRefCt(long archive) {
+		BoundStatement bound = this.addHashStatement.bind(archive);
+		ResultSet rs = session.execute(bound);
+		int ct = -1;
+		Row r = rs.one();
+		if (r != null)
+			ct = r.getSet(0, Long.class).size();
+		return ct;
+	}
 
 	protected Iterator<Row> _getAllRmrf() {
-		ResultSet rs = session.execute("Select * from " + serviceName + ".rmref;");
+		BoundStatement bound = this.getAllRmRefStatement.bind();
+		ResultSet rs = session.execute(bound);
 		return rs.iterator();
 	}
 
@@ -245,19 +257,20 @@ public class CassandraDedupeDB {
 	}
 
 	public void deleteRef(long id) {
-		ResultSet rs = session.execute("Select hashes from " + serviceName + ".refhashesdb WHERE archive = " + id);
+		BoundStatement bound = this.getRefHashesStatement.bind(id);
+		ResultSet rs = session.execute(bound);
 		Row r = rs.one();
 		if (r != null) {
 			List<String> keys = r.getList(0, String.class);
 			ArrayList<ResultSetFuture> alr = new ArrayList<ResultSetFuture>();
 			for (String k : keys) {
 				byte[] key = BaseEncoding.base64Url().decode(k);
-				ResultSet _rs = session.execute("Select archive from " + serviceName + ".hashdb WHERE key = 0x"
-						+ BaseEncoding.base16().encode(key) + ";");
+				BoundStatement _bound = this.getHashStatement.bind(ByteBuffer.wrap(key));
+				ResultSet _rs = session.execute(_bound);
 				Row _r = _rs.one();
 				if (_r == null || _r.getLong(0) == id) {
-					alr.add(session.executeAsync("DELETE from " + serviceName + ".hashdb WHERE key = 0x"
-							+ BaseEncoding.base16().encode(key) + ";"));
+					BoundStatement _b2 = this.deleteHashStatement.bind(ByteBuffer.wrap(key));
+					alr.add(session.executeAsync(_b2));
 				}
 			}
 			int ds = 0;
@@ -290,7 +303,7 @@ public class CassandraDedupeDB {
 	public static void main(String[] args) {
 		byte ib = 3;
 		System.out.println(new Byte(ib).intValue());
-		InetSocketAddress[] cipep = { new InetSocketAddress("192.168.0.105", 9042) };
+		InetSocketAddress[] cipep = { new InetSocketAddress("192.168.0.215", 9042) };
 		CassandraDedupeDB db = new CassandraDedupeDB(cipep, "datacenter1", "sam2", 1,false);
 
 		Random rnd = new Random();

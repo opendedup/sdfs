@@ -58,7 +58,7 @@ public class VolumeConfigWriter {
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
-	long max_file_write_buffers = (Main.GLOBAL_CACHE_SIZE/(1024L*1024L));
+	long max_file_write_buffers = 1;
 	int max_open_files = 512;
 	int meta_file_cache = 512;
 	int write_timeout = Main.writeTimeoutSeconds;
@@ -283,9 +283,7 @@ public class VolumeConfigWriter {
 			this.hash_db_class = "org.opendedup.collections.RocksDBMap";
 			this.hashType = HashFunctionPool.MURMUR3_16;
 		}
-		if(org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008 ||  org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2012) {
-			this.hash_db_class = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
-		}
+		
 		if (cmd.hasOption("aws-aim"))
 			this.awsAim = true;
 

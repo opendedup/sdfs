@@ -273,7 +273,7 @@ public class MetaFileImport implements Serializable {
 				
 				Main.volume.updateCurrentSize(mf.length(), true);
 				if (corruption) {
-					MetaFileStore.removeMetaFile(mf.getPath(), true,true);
+					MetaFileStore.removeMetaFile(mf.getPath(), true,true,true);
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
 				}

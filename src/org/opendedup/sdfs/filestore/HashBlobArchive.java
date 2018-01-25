@@ -17,6 +17,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
@@ -44,7 +45,10 @@ import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
+import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.hashing.VariableHashEngine;
+import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
@@ -114,6 +118,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static RateLimiter wrl = null;
 	public static boolean REMOVE_FROM_CACHE = true;
 	public static boolean DISABLE_WRITE = false;
+	public static boolean VERIFY_READS = true;
+	public static boolean VERIFY_WRITES = true;
 	private static LoadingCache<Long, HashBlobArchive> archives = null;
 	private static LoadingCache<Long, SimpleByteArrayLongMap> maps = null;
 	private static LoadingCache<Long, FileChannel> openFiles = null;
@@ -123,7 +129,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private int blocksz = nextSize();
 	private String uuid = null;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
-
+	public static AbstractHashEngine eng = null;
+	
 	public static void registerEventBus(Object obj) {
 		eventUploadBus.register(obj);
 	}
@@ -136,6 +143,18 @@ public class HashBlobArchive implements Runnable, Serializable {
 			LOCAL_CACHE_SIZE = sz;
 		} finally {
 			// slock.unlock();
+		}
+		if (HashFunctionPool.max_hash_cluster > 1) {
+			try {
+				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
+					eng = new VariableSipHashEngine();
+				} else {
+					eng = new VariableHashEngine();
+				}
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 	}
 
@@ -957,6 +976,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private void putChunk(byte[] hash, byte[] chunk)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
 
+		if(VERIFY_WRITES) {
+			byte [] _hash = eng.getHash(chunk);
+			if(!Arrays.equals(_hash, hash)) {
+				SDFSLogger.getLog().warn("hashes do not match on insert for ["+this.id+"] expected [" + StringUtils.getHexString(hash) + "] recieved [" +StringUtils.getHexString(_hash) + "] " );
+			}
+		}
 		Lock ul = this.uploadlock.readLock();
 
 		if (ul.tryLock()) {
@@ -1040,6 +1065,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				} finally {
 					l.unlock();
 				}
+				
 
 				ByteBuffer buf = ByteBuffer.allocateDirect(4 + hash.length + 4 + chunk.length);
 				buf.putInt(hash.length);
@@ -1438,6 +1464,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			if (Main.chunkStoreEncryptionEnabled) {
 				ub = EncryptUtils.decryptCBC(ub, ivspec);
 			}
+			
 			ByteBuffer bf = ByteBuffer.wrap(ub);
 			int cpz = bf.getInt();
 			byte[] cp = new byte[bf.remaining()];
@@ -1446,7 +1473,15 @@ public class HashBlobArchive implements Runnable, Serializable {
 				cp = CompressionUtils.decompressLz4(cp, cpz);
 			}
 			// SDFSLogger.getLog().info("got " + cp.length + " cpz " +cpz);
+			if(VERIFY_READS) {
+				byte [] _hash = eng.getHash(cp);
+				if(!Arrays.equals(_hash, hash)) {
+					SDFSLogger.getLog().error("hash mismatch on read  at " + pos + " " + nlen + " flen " + f.length() + " file="
+							+ f.getPath() + " expected " + StringUtils.getHexString(hash) + " recieved " +StringUtils.getHexString(_hash));
+				}
+			}
 			return cp;
+			
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting data ul=" + ub.length + " file=" + this.id + " pos=" + pos, e);
 			throw e;

@@ -284,11 +284,11 @@ public class ArchiveImporter {
 					if (_mf.isDirectory())
 						rollBackImport(_mf.getPath());
 					else {
-						MetaFileStore.removeMetaFile(_mf.getPath(), true,true);
+						MetaFileStore.removeMetaFile(_mf.getPath(), true,true,true);
 					}
 				}
 			}
-			MetaFileStore.removeMetaFile(mf.getPath(), true,true);
+			MetaFileStore.removeMetaFile(mf.getPath(), true,true,true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to remove " + path + " during rollback ", e);
