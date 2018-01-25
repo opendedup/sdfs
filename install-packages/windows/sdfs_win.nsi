@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.4.11.1'
+!define VERSION '3.4.12.0'
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 
@@ -69,8 +69,8 @@
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.11.1"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.11.1"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.12.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.12.0"
 ;--------------------------------
 ;Installer Sections
 
