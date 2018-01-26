@@ -30,7 +30,7 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
 public class Finger implements Runnable {
-	private static final byte[] k = new byte[16];
+	private static final byte[] k = new byte[HashFunctionPool.hashLength];
 	public byte[] chunk;
 	public byte[] hash;
 	public InsertRecord hl;

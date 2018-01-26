@@ -212,12 +212,6 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void flush() throws BufferClosedException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void write(byte[] b, int pos) throws BufferClosedException,
 			IOException {
 		// TODO Auto-generated method stub

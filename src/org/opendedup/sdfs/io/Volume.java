@@ -312,7 +312,6 @@ public class Volume implements java.io.Serializable {
 					+ "-perf.json";
 		this.currentSize.set(Long.parseLong(vol.getAttribute("current-size")));
 		if (vol.hasAttribute("duplicate-bytes")) {
-			
 			this.duplicateBytes.set(Long.parseLong(vol
 					.getAttribute("duplicate-bytes")));
 		}

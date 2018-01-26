@@ -63,10 +63,6 @@ public interface DedupFile {
 	public void updateMap(DedupChunkInterface writeBuffer, int doop)
 			throws FileClosedException, IOException;
 
-	public void putBufferIntoFlush(WritableCacheBuffer writeBuffer);
-
-	public void removeBufferFromFlush(WritableCacheBuffer writeBuffer);
-
 	public void updateMap(DedupChunkInterface writeBuffer, int doop,
 			boolean propigateEvent) throws FileClosedException, IOException;
 

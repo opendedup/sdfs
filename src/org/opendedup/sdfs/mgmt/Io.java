@@ -1,7 +1,6 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -12,7 +11,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -391,20 +389,7 @@ public class Io {
 								.getBytes(),
 						StandardOpenOption.APPEND,StandardOpenOption.CREATE);
 				*/
-				byte[] k = new byte[buf.capacity()];
-				buf.get(k);
-				buf.position(0);
-				byte [] key = eng.getHash(k);
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
-				buf.position(0);
-				ch.read(buf, 0, buf.capacity(), offset);
-				buf.position(0);
-				byte[] _k = new byte[buf.capacity()];
-				buf.get(_k);
-				byte [] _key = eng.getHash(_k);
-				buf.position(0);
-				if(!Arrays.equals(key, _key))
-					SDFSLogger.getLog().info("arrays not equal at " + offset);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + fh, e);
 				throw new FuseException().initErrno(Errno.EACCES);

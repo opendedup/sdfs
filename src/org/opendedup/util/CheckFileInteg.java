@@ -16,6 +16,7 @@ public class CheckFileInteg {
 		String fn = "z:/" + args[0];
 		String nf = "c:/temp/" + args[0];
 		BufferedReader reader;
+		long pos = 0;
 		try {
 			reader = new BufferedReader(new FileReader(
 					nf));
@@ -23,9 +24,10 @@ public class CheckFileInteg {
 			RandomAccessFile r = new RandomAccessFile(fn,"r");
 			VariableSipHashEngine eng = new VariableSipHashEngine();
 			int ln = 0;
+			
 			while (line != null) {
 				String [] st  = line.split(",");
-				long pos = Long.parseLong(st[0]);
+				pos = Long.parseLong(st[0]);
 				int cap = Integer.parseInt(st[1]);
 				byte [] hash = StringUtils.hexStringToByte(st[2]);
 				byte [] b = new byte [cap];
@@ -41,6 +43,7 @@ public class CheckFileInteg {
 			reader.close();
 			r.close();
 		} catch (IOException e) {
+			System.out.println("unable to read at " + pos);
 			e.printStackTrace();
 		}
 	}
