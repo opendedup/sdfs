@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -10,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -30,8 +30,6 @@ import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
-import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -62,22 +60,9 @@ public class Io {
 	private static Map<String, BERefresh> refreshmap = new HashMap<String, BERefresh>();
 	public final String mountedVolume;
 	public final String mountPoint;
-	public static AbstractHashEngine eng = null;
+	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
-	static {
-		if (HashFunctionPool.max_hash_cluster > 1) {
-			try {
-				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
-					eng = new VariableSipHashEngine();
-				} else {
-					eng = new VariableHashEngine();
-				}
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
-	}
+	
 
 	private static EventBus eventBus = new EventBus();
 

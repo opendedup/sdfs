@@ -232,9 +232,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		byte[] dd = new byte[len];
 		buf.position(startPos);
 		buf.get(dd);
-		if((this.position + startPos) >=4655611904L && (this.position + startPos) < (65536L+ 4655611904L)) {
-			SDFSLogger.getLog().info("read" + StringUtils.getHexString(SparseDedupFile.eng.getHash(dd)) + " at " +(this.position + startPos) + " len " + dd.length );
-		}
+		
 		return dd;
 	}
 

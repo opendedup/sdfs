@@ -129,7 +129,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private int blocksz = nextSize();
 	private String uuid = null;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
-	public static AbstractHashEngine eng = null;
+	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 	
 	public static void registerEventBus(Object obj) {
 		eventUploadBus.register(obj);
@@ -144,18 +144,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} finally {
 			// slock.unlock();
 		}
-		if (HashFunctionPool.max_hash_cluster > 1) {
-			try {
-				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
-					eng = new VariableSipHashEngine();
-				} else {
-					eng = new VariableHashEngine();
-				}
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
+		
 	}
 
 	public static long getLocalCacheSize() {
@@ -281,17 +270,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("Version : " + VERSION);
 			SDFSLogger.getLog().info("HashBlobArchive IO Threads : " + Main.dseIOThreads);
 			SDFSLogger.getLog().info("HashBlobArchive Max Upload Size : " + MAX_LEN);
-			try {
 				int msz = (int) ((double) MAX_LEN * LEN_VARIANCE) + MAX_LEN;
-				MAX_HM_SZ = (int) ((msz / HashFunctionPool.getHashEngine().getMinLen()) / .75f);
-				MAX_HM_OPSZ = (int) ((msz / HashFunctionPool.getHashEngine().getMinLen()));
-			} catch (NoSuchAlgorithmException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (NoSuchProviderException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+				MAX_HM_SZ = (int) ((msz / eng.getMinLen()) / .75f);
+				MAX_HM_OPSZ = (int) ((msz / eng.getMinLen()));
+			
 			SDFSLogger.getLog().info("HashBlobArchive Max Map Size : " + MAX_HM_SZ);
 			SDFSLogger.getLog().info("HashBlobArchive Maximum Local Cache Size : " + LOCAL_CACHE_SIZE);
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);

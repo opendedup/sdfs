@@ -85,11 +85,6 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 		return al;
 	}
 
-	public static int getHashLenth() {
-		// TODO Auto-generated method stub
-		return 16;
-	}
-
 	public static int getMaxCluster() {
 		return Main.CHUNK_LENGTH / HashFunctionPool.minLen;
 	}

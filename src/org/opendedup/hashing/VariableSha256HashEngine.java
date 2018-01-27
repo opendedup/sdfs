@@ -19,8 +19,7 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-
-
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +39,12 @@ public class VariableSha256HashEngine implements AbstractHashEngine {
 
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
-	
+	public static enum HASHTYPE {HASH160,HASH256};
 	private EnhancedFingerFactory ff = null;
 	HashFunction hf = Hashing.sha256();
-
-	public VariableSha256HashEngine() throws NoSuchAlgorithmException {
+	private final HASHTYPE ht;
+	public VariableSha256HashEngine(HASHTYPE ht) throws NoSuchAlgorithmException {
+		this.ht = ht;
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
 			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
@@ -56,6 +56,12 @@ public class VariableSha256HashEngine implements AbstractHashEngine {
 	@Override
 	public byte[] getHash(byte[] data) {
 		byte[] hash = hf.hashBytes(data).asBytes();
+		if(ht.equals(HASHTYPE.HASH160)) {
+			ByteBuffer bf = ByteBuffer.wrap(hash);
+			byte [] b = new byte[18];
+			bf.get(b);
+			return b;
+		}
 		return hash;
 	}
 	

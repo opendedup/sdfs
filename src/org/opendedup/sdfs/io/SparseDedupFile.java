@@ -19,9 +19,9 @@
 package org.opendedup.sdfs.io;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,8 +50,6 @@ import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.ThreadPool;
-import org.opendedup.hashing.VariableHashEngine;
-import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -96,7 +94,7 @@ public class SparseDedupFile implements DedupFile {
 	public boolean isCopyExt;
 	private boolean reconstructed = false;
 	
-	public static AbstractHashEngine eng = null;
+	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers= new ConcurrentHashMap<Long, WritableCacheBuffer>(256, .75f);
 	
 	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers =  CacheBuilder.newBuilder().maximumSize(maxWriteBuffers)
@@ -145,16 +143,7 @@ public class SparseDedupFile implements DedupFile {
 			bufferExecutor = new ThreadPoolExecutor(1, Main.writeThreads, 10, TimeUnit.SECONDS, bWorksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
 		if (HashFunctionPool.max_hash_cluster > 1) {
-			try {
-				if (Main.hashType.equalsIgnoreCase(HashFunctionPool.VARIABLE_SIP2)) {
-					eng = new VariableSipHashEngine();
-				} else {
-					eng = new VariableHashEngine();
-				}
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
+			
 		}
 	}
 

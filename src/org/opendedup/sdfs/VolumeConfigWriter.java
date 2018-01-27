@@ -98,14 +98,12 @@ public class VolumeConfigWriter {
 	private int glacierInDays = 0;
 	private int aruzreArchiveInDays =0;
 	private String azurestorageTier = null; 
-	
 	boolean compress = Main.compress;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
-
 	String hashType = HashFunctionPool.VARIABLE_MD5;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
