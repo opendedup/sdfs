@@ -1,6 +1,7 @@
 package org.opendedup.cassandra;
 
 import java.net.InetSocketAddress;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,8 +19,10 @@ import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.util.StorageUnit;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
@@ -61,6 +64,7 @@ public class CassandraDedupeDB {
 	PreparedStatement getRefHashesStatement = null;
 	PreparedStatement deleteHashStatement = null;
 	private String serviceName = "opendedupe";
+	private long cacheSize = 2L * 1024L * 1024L *1024L;
 
 	public CassandraDedupeDB(InetSocketAddress[] contactPoints, String dataCenter, String serviceName,
 			int replicationFactor,boolean useIgnite) {
@@ -147,12 +151,15 @@ public class CassandraDedupeDB {
 		}
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + serviceName + " WITH replication "
 				+ "= {'class':'NetworkTopologyStrategy', '" + this.dataCenter + "': " + this.replicationFactor + "};");
+		long rowCache = this.cacheSize/(long)(HashFunctionPool.hashLength + 8);
+		SDFSLogger.getLog().info("Cassandra Row Cache is " + rowCache + " Size in memory= " + StorageUnit.of(this.cacheSize));
 		session.execute(
-				"CREATE TABLE IF NOT EXISTS " + serviceName + ".hashdb (key blob PRIMARY KEY, archive bigint);");
+				"CREATE TABLE IF NOT EXISTS " + serviceName + ".hashdb (key blob PRIMARY KEY, archive bigint) WITH  caching ="
+						+ "{'keys' : 'NONE' , 'rows_per_partition' : '"+rowCache+"' } and compression = { 'enabled' : false };");
 		session.execute("CREATE TABLE IF NOT EXISTS " + serviceName
-				+ ".refhashesdb (archive bigint PRIMARY KEY, hashes list<text>,claims set<bigint>);");
+				+ ".refhashesdb (archive bigint PRIMARY KEY, hashes list<text>,claims set<bigint>) WITH compression = { 'enabled' : false };");
 		session.execute(
-				"CREATE TABLE IF NOT EXISTS " + serviceName + ".rmref (archive bigint PRIMARY KEY, timestamp bigint);");
+				"CREATE TABLE IF NOT EXISTS " + serviceName + ".rmref (archive bigint PRIMARY KEY, timestamp bigint) WITH compression = { 'enabled' : false };");
 		addHashStatement = session.prepare((RegularStatement) new SimpleStatement("INSERT INTO " + serviceName + ".hashdb"
 				+ " (key, archive) VALUES (?,?)").setConsistencyLevel(ConsistencyLevel.ONE));
 		getHashStatement = session.prepare((RegularStatement) new SimpleStatement("Select archive from " + serviceName + 
@@ -304,7 +311,7 @@ public class CassandraDedupeDB {
 		byte ib = 3;
 		System.out.println(new Byte(ib).intValue());
 		InetSocketAddress[] cipep = { new InetSocketAddress("192.168.0.215", 9042) };
-		CassandraDedupeDB db = new CassandraDedupeDB(cipep, "datacenter1", "sam2", 1,false);
+		CassandraDedupeDB db = new CassandraDedupeDB(cipep, "datacenter1", "sam3", 1,false);
 
 		Random rnd = new Random();
 
