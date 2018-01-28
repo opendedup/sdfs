@@ -1,7 +1,8 @@
 package org.opendedup.sdfs.filestore;
 
-import java.io.File;
+import static java.lang.Math.toIntExact;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
@@ -14,8 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,19 +35,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.crypto.spec.IvParameterSpec;
 
-import static java.lang.Math.toIntExact;
-
 //import objectexplorer.MemoryMeasurer;
 
 import org.apache.commons.io.FileUtils;
-
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.MapClosedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
-import org.opendedup.hashing.VariableSipHashEngine;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
@@ -61,16 +57,13 @@ import org.opendedup.util.StringUtils;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
-import com.google.common.cache.Weigher;
-import com.google.common.eventbus.EventBus;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.cache.Weigher;
+import com.google.common.eventbus.EventBus;
 import com.google.common.io.BaseEncoding;
 import com.google.common.util.concurrent.RateLimiter;
-
-import org.opendedup.collections.HashExistsException;
-import org.opendedup.collections.MapClosedException;
 
 public class HashBlobArchive implements Runnable, Serializable {
 	/**

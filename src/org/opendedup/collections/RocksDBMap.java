@@ -592,7 +592,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long get(byte[] key) throws IOException {
-		SDFSLogger.getLog().info("key length is " + key.length);
+		//SDFSLogger.getLog().info("key length is " + key.length);
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
