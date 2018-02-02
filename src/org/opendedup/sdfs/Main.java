@@ -30,6 +30,7 @@ public class Main {
 	public static int hashSeed=6442;
 	public static double fpp = .01;
 	public static String logSize="10MB";
+	public static boolean ignoreDSEHTSize = true;
 	public static boolean CUCKOO =false;
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
@@ -115,7 +116,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.6.0.4";
+	public static String version = "3.6.0.5";
 
 	public static boolean readAhead = false;
 	

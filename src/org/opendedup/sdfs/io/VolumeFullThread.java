@@ -99,7 +99,7 @@ public class VolumeFullThread implements Runnable {
 			}
 			full = true;
 			return true;
-		} else if ((HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
+		} else if (!Main.ignoreDSEHTSize &&(HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
 				.getDSEMaxSize()) {
 			if(!full) {
 			SDFSLogger.getLog().warn(

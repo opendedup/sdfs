@@ -22,6 +22,7 @@ import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +44,9 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.windows.utils.WinRegistry;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.StringUtils;
-import org.rocksdb.AccessHint;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
 import org.rocksdb.CompactionStyle;
@@ -76,8 +77,25 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
 	private List<String> colFamily = new ArrayList<String>();
+	static boolean windowsLegacy = false;
 	static {
-		RocksDB.loadLibrary();
+		if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
+			windowsLegacy = true;
+			try {
+				String libpath = WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS",
+						"path") + File.separator + "bin" + File.separator;
+				ArrayList<String> al = new ArrayList<String>();
+				al.add(libpath);
+				RocksDB.loadLibrary(al);
+			} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(-1);
+			}
+
+		} else {
+			RocksDB.loadLibrary();
+		}
 	}
 
 	@Override
@@ -160,7 +178,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setMaxBackgroundCompactions(2);
 				options.setMaxBackgroundFlushes(8);
 				options.setEnv(env);
-				options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
+
+				// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
 				options.setIncreaseParallelism(32);
 				options.setAdviseRandomOnOpen(true);
 				// options.setNumLevels(8);
@@ -175,11 +194,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				// options.setMinWriteBufferNumberToMerge(2);
 				// options.setMaxWriteBufferNumber(6);
 				// options.setLevelZeroFileNumCompactionTrigger(2);
-
-				options.setCompactionReadaheadSize(1024 * 1024 * 25);
-				// options.setUseDirectIoForFlushAndCompaction(true);
-				// options.setUseDirectReads(true);
-				options.setStatsDumpPeriodSec(30);
+				if (!windowsLegacy) {
+					options.setCompactionReadaheadSize(1024 * 1024 * 25);
+					// options.setUseDirectIoForFlushAndCompaction(true);
+					// options.setUseDirectReads(true);
+					options.setStatsDumpPeriodSec(30);
+				}
 				// options.setAllowMmapWrites(true);
 				// options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
@@ -249,7 +269,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// options.setCompactionReadaheadSize(1024*1024*25);
 			// options.setUseDirectIoForFlushAndCompaction(true);
 			// options.setUseDirectReads(true);
-			options.setStatsDumpPeriodSec(30);
+			if (!windowsLegacy)
+				options.setStatsDumpPeriodSec(30);
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
@@ -304,7 +325,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.position(8);
 					bk.putLong(System.currentTimeMillis() + rmthreashold);
 					rmdb.put(hash, v);
-				} else if(rmdb.get(hash) != null) {
+				} else if (rmdb.get(hash) != null) {
 					rmdb.delete(hash);
 				}
 				bk.putLong(v.length - 8, ct);
@@ -535,7 +556,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						ct++;
 					else
 						ct += cm.references;
-					if(ct<=0) {
+					if (ct <= 0) {
 						this.rmdb.delete(cm.getHash());
 					}
 					bk.putLong(8, ct);
@@ -592,7 +613,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long get(byte[] key) throws IOException {
-		//SDFSLogger.getLog().info("key length is " + key.length);
+		// SDFSLogger.getLog().info("key length is " + key.length);
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
