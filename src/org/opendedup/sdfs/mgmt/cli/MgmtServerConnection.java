@@ -97,6 +97,7 @@ public class MgmtServerConnection {
 	public static String getAuth(String ss,int p, boolean ssl,String pwd) throws IOException {
 		InputStream in = null;
 		GetMethod method = null;
+		String req = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -104,7 +105,7 @@ public class MgmtServerConnection {
 			if (ssl) {
 				prot = "https";
 			}
-			String req = prot + "://" + ss + ":" + p + "/session/";
+			req = prot + "://" + ss + ":" + p + "/session/";
 			SDFSLogger.getLog().debug(req);
 			method = new GetMethod(req);
 			int returnCode = client.executeMethod(method);
@@ -124,6 +125,7 @@ public class MgmtServerConnection {
 			//System.out.println(im);
 			return URLEncoder.encode(im,"UTF-8");
 		} catch (Exception e) {
+			SDFSLogger.getLog().warn("unable to get session for " + req, e);
 			throw new IOException(e);
 		} finally {
 			if (in != null) {
