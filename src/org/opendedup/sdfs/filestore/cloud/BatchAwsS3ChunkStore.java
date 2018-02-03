@@ -150,6 +150,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	boolean md5sum = true;
 	boolean simpleS3 = false;
 	private int glacierDays = 0;
+	private boolean useGlacier = false;
 	private int infrequentAccess = 0;
 	private boolean clustered = true;
 	// private ReentrantReadWriteLock s3clientLock = new
@@ -482,12 +483,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (this.glacierDays > 0) {
 					Main.checkArchiveOnRead = true;
 					Main.REFRESH_BLOBS = true;
+					this.useGlacier = true;
 				} else if(config.hasAttribute("glacier-zero-day")) {
 					this.glacierDays = 0;
 					Main.checkArchiveOnRead = true;
 					Main.REFRESH_BLOBS = true;
+					this.useGlacier = true;
 				}
-				if(Main.checkArchiveOnRead) {
+				if(this.useGlacier) {
 				if(config.hasAttribute("glacier-tier")) {
 					String ts = config.getAttribute("glacier-tier");
 					if(ts.equalsIgnoreCase("standard"))
@@ -496,6 +499,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.glacierTier = Tier.Expedited;
 					if(ts.equalsIgnoreCase("bulk"))
 						this.glacierTier = Tier.Bulk;
+					
 					
 				}
 					SDFSLogger.getLog().info("Glacier Will be initialized after " + this.glacierDays + 
@@ -748,7 +752,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 			ArrayList<Transition> trs = new ArrayList<Transition>();
-			if (this.glacierDays > 0 && s3Target == null) {
+			if (this.useGlacier && s3Target == null) {
 				Transition transToArchive = new Transition().withDays(this.glacierDays)
 						.withStorageClass(StorageClass.Glacier);
 				trs.add(transToArchive);
