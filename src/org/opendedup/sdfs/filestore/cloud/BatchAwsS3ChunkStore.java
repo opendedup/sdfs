@@ -107,10 +107,12 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.GlacierJobParameters;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
+import com.amazonaws.services.s3.model.Tier;
 import com.amazonaws.services.s3.model.lifecycle.LifecycleFilter;
 import com.amazonaws.services.s3.model.lifecycle.LifecyclePrefixPredicate;
 import com.google.common.io.BaseEncoding;
@@ -164,6 +166,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String accessKey = Main.cloudAccessKey;
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
+	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
 
 	static {
 		try {
@@ -479,6 +482,24 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (this.glacierDays > 0) {
 					Main.checkArchiveOnRead = true;
 					Main.REFRESH_BLOBS = true;
+				} else if(config.hasAttribute("glacier-zero-day")) {
+					this.glacierDays = 0;
+					Main.checkArchiveOnRead = true;
+					Main.REFRESH_BLOBS = true;
+				}
+				if(Main.checkArchiveOnRead) {
+				if(config.hasAttribute("glacier-tier")) {
+					String ts = config.getAttribute("glacier-tier");
+					if(ts.equalsIgnoreCase("standard"))
+						this.glacierTier = Tier.Standard;
+					if(ts.equalsIgnoreCase("expedited"))
+						this.glacierTier = Tier.Expedited;
+					if(ts.equalsIgnoreCase("bulk"))
+						this.glacierTier = Tier.Bulk;
+					
+				}
+					SDFSLogger.getLog().info("Glacier Will be initialized after " + this.glacierDays + 
+							" and restored with tier " + this.glacierTier);
 				}
 			}
 			if (config.hasAttribute("refresh-blobs"))
@@ -2420,6 +2441,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 
 				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 2);
+				GlacierJobParameters params = new GlacierJobParameters();
+				params.setTier(this.glacierTier);
+				request.setGlacierJobParameters(params);
 				s3Service.restoreObject(request);
 				if (blockRestored(haName)) {
 					restoreRequests.put(new Long(id), "InvalidObjectState");
