@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -46,9 +44,10 @@ public class MetaFileStore {
 
 	private static EventBus eventBus = new EventBus();
 	private static SynchronousQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	
-	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L, TimeUnit.SECONDS, worksQueue,
-			new ThreadPoolExecutor.CallerRunsPolicy());
+
+	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L,
+			TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -77,7 +76,6 @@ public class MetaFileStore {
 					return MetaDataDedupFile.getFile(path);
 				}
 			});
-
 
 	static {
 		if (Main.version.startsWith("0.8")) {
@@ -126,8 +124,6 @@ public class MetaFileStore {
 		pathMap.put(mf.getPath(), mf);
 	}
 
-	
-
 	/**
 	 * 
 	 * @param path
@@ -140,8 +136,8 @@ public class MetaFileStore {
 		ReadLock l = getMFLock.readLock();
 		l.lock();
 		try {
-			
-				MetaDataDedupFile mf = pathMap.get(f.getPath());
+			MetaDataDedupFile mf = pathMap.get(f.getPath());
+
 			if (mf == null) {
 				SDFSLogger.getLog().error("unable to load " + f.getPath());
 			}
@@ -153,13 +149,13 @@ public class MetaFileStore {
 			l.unlock();
 		}
 	}
-	
+
 	public static MetaDataDedupFile getNCMF(File f) {
 		ReadLock l = getMFLock.readLock();
 		l.lock();
 		try {
-			
-				MetaDataDedupFile mf = pathMap.getIfPresent(f.getPath());
+
+			MetaDataDedupFile mf = pathMap.getIfPresent(f.getPath());
 			if (mf == null) {
 				mf = MetaDataDedupFile.getFile(f.getPath());
 			}
@@ -308,10 +304,10 @@ public class MetaFileStore {
 	 */
 
 	public static boolean removeMetaFile(String path) {
-		return removeMetaFile(path, false, true,true);
+		return removeMetaFile(path, false, true, true);
 	}
 
-	public static boolean removeMetaFile(String path, boolean localOnly, boolean force,boolean async) {
+	public static boolean removeMetaFile(String path, boolean localOnly, boolean force, boolean async) {
 
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("deleting " + path);
@@ -345,7 +341,7 @@ public class MetaFileStore {
 						if (force) {
 							File[] files = ps.listFiles();
 							for (int i = 0; i < files.length; i++) {
-								boolean sd = removeMetaFile(files[i].getPath(), localOnly, force,async);
+								boolean sd = removeMetaFile(files[i].getPath(), localOnly, force, async);
 								if (!sd) {
 									SDFSLogger.getLog().warn("delete failed : unable to delete [" + files[i] + "]");
 									return sd;
@@ -363,7 +359,7 @@ public class MetaFileStore {
 
 					} else {
 						mf = getMF(new File(path));
-						if(mf.isImporting())
+						if (mf.isImporting())
 							return false;
 						if (mf.isRetentionLock())
 							return false;
@@ -375,17 +371,17 @@ public class MetaFileStore {
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
-								if(async) {
-								DeleteMap m = new DeleteMap();
-								m.mf = mf;
-								m.localOnly = localOnly;
-								service.execute(m);
-								}else {
+								if (async) {
+									DeleteMap m = new DeleteMap();
+									m.mf = mf;
+									m.localOnly = localOnly;
+									service.execute(m);
+								} else {
 									mf.getDedupFile(false).delete(localOnly);
 								}
 
 							} catch (Exception e) {
-									SDFSLogger.getLog().warn("unable to delete dedup file for " + path, e);
+								SDFSLogger.getLog().warn("unable to delete dedup file for " + path, e);
 							}
 						}
 						if (deleted) {
@@ -431,21 +427,22 @@ public class MetaFileStore {
 			int i = 0;
 			while (!service.awaitTermination(10, TimeUnit.SECONDS)) {
 				SDFSLogger.getLog().info("Awaiting fdisk completion of threads.");
-				if(i >30) {
+				if (i > 30) {
 					SDFSLogger.getLog().info("Done Waiting.Will exit without tasks completed");
 					break;
 				}
-			
+
 			}
 		} catch (InterruptedException e) {
-			
+
 		}
 		SDFSLogger.getLog().info("metafilestore closed");
 	}
-	
+
 	private static class DeleteMap implements Runnable {
 		MetaDataDedupFile mf = null;
 		boolean localOnly;
+
 		@Override
 		public void run() {
 			try {
@@ -453,9 +450,9 @@ public class MetaFileStore {
 			} catch (IOException e) {
 				SDFSLogger.getLog().debug(e);
 			}
-			
+
 		}
-		
+
 	}
 
 }

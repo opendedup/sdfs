@@ -162,7 +162,7 @@ public class SparseDedupFile implements DedupFile {
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
 		// SDFSLogger.getLog().info("Using LRU Max WriteBuffers=" +
 		// this.maxWriteBuffers);
-		this.mf = mf;
+		this.mf =mf;
 		if (mf.getDfGuid() == null) {
 			// new Instance
 			this.GUID = UUID.randomUUID().toString();

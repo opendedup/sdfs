@@ -120,7 +120,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static ConcurrentHashMap<Long, FileChannel> wOpenFiles = new ConcurrentHashMap<Long, FileChannel>();
 	private static boolean closed = false;
 	private int blocksz = nextSize();
-	private String uuid = null;
+	private String uuid = "default";
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 	
@@ -1773,7 +1773,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 		l.lock();
 		try {
 			this.writeable = false;
-			writableArchives.remove(this.uuid);
+			if(this.uuid != null)
+				writableArchives.remove(this.uuid);
 		} finally {
 			l.unlock();
 		}

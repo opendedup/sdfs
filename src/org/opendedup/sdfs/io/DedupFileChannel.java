@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.nio.ByteBuffer;
@@ -30,7 +29,6 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 
@@ -73,9 +71,8 @@ public class DedupFileChannel {
 			throws IOException {
 		df = file;
 		this.flags = flags;
-		SparseDedupFile sdf = (SparseDedupFile) df;
-		this.mf = MetaFileStore.getMF(new File(df.getMetaFile().getPath()));
-		eventBus.register(sdf.bdb);
+		this.mf = this.df.mf;
+		eventBus.register(df.bdb);
 		if (Main.checkArchiveOnOpen) {
 			this.recoverArchives();
 		}
