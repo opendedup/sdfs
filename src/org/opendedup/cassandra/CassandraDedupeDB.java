@@ -50,7 +50,7 @@ public class CassandraDedupeDB {
 
 	private IgniteCache<Long, Long> idb = null;
 	private Ignite ig = null;
-	InetSocketAddress[] contactPoints = { new InetSocketAddress("127.0.0.1", 9042) };
+	InetSocketAddress[] contactPoints = { new InetSocketAddress("localhost", 9042) };
 	private Cluster cluster = null;
 	private Session session = null;
 	private String dataCenter = "datacenter1";

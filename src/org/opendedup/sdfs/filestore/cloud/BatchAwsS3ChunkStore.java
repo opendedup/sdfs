@@ -484,7 +484,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					Main.checkArchiveOnRead = true;
 					Main.REFRESH_BLOBS = true;
 					this.useGlacier = true;
-				} else if(config.hasAttribute("glacier-zero-day")) {
+				} else if(config.hasAttribute("glacier-zero-day") && 
+						config.getAttribute("glacier-zero-day").equalsIgnoreCase("true")) {
 					this.glacierDays = 0;
 					Main.checkArchiveOnRead = true;
 					Main.REFRESH_BLOBS = true;

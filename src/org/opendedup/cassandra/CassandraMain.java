@@ -8,7 +8,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
 public class CassandraMain {
-	private InetSocketAddress[] contactPoints = { new InetSocketAddress("127.0.0.1",9042)};
+	private InetSocketAddress[] contactPoints = { new InetSocketAddress("localhost",9042)};
 	private Cluster cluster = null;
 	private Session session = null;
 	private String dataCenter ="datacenter1";

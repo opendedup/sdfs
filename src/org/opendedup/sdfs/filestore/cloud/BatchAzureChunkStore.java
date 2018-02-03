@@ -946,6 +946,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void run() {
+		long startTime = System.currentTimeMillis() + 15 * 60 * 1000; // Start Archiving after 15 minutes
 		while (!closed) {
 			try {
 				Thread.sleep(60000);
@@ -995,30 +996,33 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					} else {
 						this.refresh.clear();
 					}
-					Iterable<BlobDataTracker> tri = null;
-					if (this.tierImmedately) {
-						long mins = (Long.valueOf(this.tierInDays) * 60 * 1000) + 60000;
-						SDFSLogger.getLog().info("Checking how many archives are " + mins + " back");
-						tri = bio.getBlobDataTrackers(mins, dseID);
-					} else
-						tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
-					for (BlobDataTracker bt : tri) {
-						String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
-								Main.chunkStoreEncryptionEnabled);
+					long currentTime = System.currentTimeMillis();
+					if (currentTime > startTime) {
+						Iterable<BlobDataTracker> tri = null;
+						if (this.tierImmedately) {
+							long mins = (Long.valueOf(this.tierInDays) * 60 * 1000) + 60000;
+							SDFSLogger.getLog().info("Checking how many archives are " + mins + " back");
+							tri = bio.getBlobDataTrackers(mins, dseID);
+						} else
+							tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
+						for (BlobDataTracker bt : tri) {
+							String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
+									Main.chunkStoreEncryptionEnabled);
 
-						try {
-							SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
-							CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
-							blob.downloadAttributes();
-							if(!blob.getProperties().getStandardBlobTier().equals(tier)) {
-								blob.uploadStandardBlobTier(this.tier);
-								SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to "
-									+ blob.getProperties().getStandardBlobTier());
+							try {
+								SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
+								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
+								blob.downloadAttributes();
+								if (!blob.getProperties().getStandardBlobTier().equals(tier)) {
+									blob.uploadStandardBlobTier(this.tier);
+									SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to "
+											+ blob.getProperties().getStandardBlobTier());
+								}
+								bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
+
+							} catch (Throwable e) {
+								SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
 							}
-							bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
-
-						} catch (Throwable e) {
-							SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
 						}
 					}
 				}

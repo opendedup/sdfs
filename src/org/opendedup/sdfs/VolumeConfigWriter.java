@@ -116,7 +116,7 @@ public class VolumeConfigWriter {
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
 	String bucketLocation = null;
-	String list_ip = "0.0.0.0";
+	String list_ip = "::";
 	private boolean useDSESize = true;
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
@@ -519,7 +519,7 @@ public class VolumeConfigWriter {
 			this.clusterRackAware = Boolean.parseBoolean(cmd.getOptionValue("cluster-rack-aware"));
 		if (cmd.hasOption("enable-replication-master")) {
 			this.sdfsCliRequireAuth = true;
-			this.sdfsCliListenAddr = "0.0.0.0";
+			this.sdfsCliListenAddr = "::";
 			this.sdfsCliEnabled = true;
 		}
 		if(cmd.hasOption("sdfscli-disable-ssl")) {
