@@ -551,14 +551,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					long ct = bk.getLong();
 					if (ct <= 0) {
 						ct = 0;
+						this.rmdb.delete(cm.getHash());
 					}
 					if (cm.references <= 0)
 						ct++;
 					else
 						ct += cm.references;
-					if (ct <= 0) {
-						this.rmdb.delete(cm.getHash());
-					}
 					bk.putLong(8, ct);
 					db.put(cm.getHash(), v);
 					return new InsertRecord(false, pos);

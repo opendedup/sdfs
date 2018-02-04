@@ -1473,6 +1473,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				else 
 					throw new IOException(e);
 			}
+			try {
+			claims = this.getClaimedObjects(kobj, id);
+			}catch(Exception e) {
+				throw new IOException(e);
+			}
 			String name = null;
 			if (this.clustered)
 				name = this.getClaimName(id);
@@ -1510,7 +1515,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					if (ol.getObjectSummaries().size() == 0) {
 						s3Service.deleteObject(this.name, "blocks/" + haName + this.dExt);
 						s3Service.deleteObject(this.name, "keys/" + haName);
-						SDFSLogger.getLog().debug("deleted block " + "blocks/" + haName + " id " + id);
+						SDFSLogger.getLog().info("deleted block " + "blocks/" + haName + " id " + id);
 						if (this.simpleMD) {
 							s3Service.deleteObject(this.name, "blocks/" + haName + mdExt);
 							s3Service.deleteObject(this.name, "keys/" + haName + mdExt);
