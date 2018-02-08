@@ -195,7 +195,23 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static void claimBlock(long id) throws IOException {
-		store.checkoutObject(id, 1);
+		IOException e = null;
+		for(int i = 0;i <10;i++) {
+			try {
+			store.checkoutObject(id, 1);
+			e = null;
+			}catch(IOException e1) {
+				e = e1;
+				try {
+					Thread.sleep(30*1000);
+				} catch (InterruptedException e2) {
+					// TODO Auto-generated catch block
+					
+				} //30 seconds;
+			}
+		}
+		if(e != null)
+			throw e;
 	}
 
 	public static void deleteArchive(long id) throws IOException {
@@ -1881,6 +1897,21 @@ public class HashBlobArchive implements Runnable, Serializable {
 					rf.close();
 			} finally {
 				l.unlock();
+			}
+		}
+	}
+	
+	public static void sync(String uuid) {
+		if (uuid == null || uuid.trim() == "")
+			uuid = "default";
+		HashBlobArchive ar = writableArchives.get(uuid);
+		if(ar != null) {
+			while (!ar.upload(ar.id)) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+
+				}
 			}
 		}
 	}

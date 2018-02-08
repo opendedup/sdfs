@@ -1738,8 +1738,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			boolean changed = false;
 
 			Long _hid = EncyptUtils.decHashArchiveName(sobj.getKey().substring(5), encrypt);
-			if (this.clustered)
+			if (this.clustered) {
+				try {
 				mp = s3Service.getObjectMetadata(this.name, this.getClaimName(_hid)).getUserMetadata();
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("unable to get object " +this.getClaimName(_hid),e);
+				}
+			}
 			if (mp.containsKey("deleted")) {
 				mp.remove("deleted");
 				changed = true;

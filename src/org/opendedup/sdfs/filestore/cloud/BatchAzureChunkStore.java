@@ -1734,7 +1734,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (changed) {
 				bi.setMetadata(md);
 				bi.uploadMetadata(null, null, opContext);
-				String bnm = "claims/keys/" + bi.getName().substring(5);
+				String bnm = this.getClaimName(sid);
+				try {
+				
 				CloudBlockBlob blob = container.getBlockBlobReference(bnm);
 				blob.downloadAttributes();
 				HashMap<String, String> bmd = blob.getMetadata();
@@ -1742,6 +1744,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				bmd.remove("deleted");
 				blob.setMetadata(bmd);
 				blob.uploadMetadata(null, null, opContext);
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("unable to update key " +bnm,e);
+				}
 			}
 			try {
 				int _sz = Integer.parseInt(md.get("bsize"));
