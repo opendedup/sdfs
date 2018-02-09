@@ -66,6 +66,7 @@ public class ChunkData {
 	public ChunkData(byte[] hash, int chunkLen, byte[] chunk,String uuid) {
 		long tm = System.currentTimeMillis();
 		this.added = tm;
+		this.uuid = uuid;
 		this.lastClaimed = tm;
 		this.numClaimed = 1;
 		this.mDelete = false;
