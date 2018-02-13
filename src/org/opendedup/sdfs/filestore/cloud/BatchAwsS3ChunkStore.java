@@ -2079,7 +2079,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-		haName = haName.replaceAll("\\", "/");
+		//haName = haName.replaceAll("\\", "/");
 		Map<String, String> mp = null;
 		byte[] shash = null;
 		try {
@@ -2186,7 +2186,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.isClustered()) {
 
 				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-				haName.replaceAll("\\", "/");
+				//haName.replaceAll("\\", "/");
 				SDFSLogger.getLog().info("deleting " + haName);
 				boolean exists = false;
 				try {

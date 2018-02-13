@@ -16,8 +16,8 @@ public class ProcessCleanStore {
 			Formatter formatter = new Formatter(sb);
 			System.out.printf("Cleaning store\n");
 			System.out.flush();
-			formatter.format("file=%s&cmd=%s&options=%s", file, "cleanstore",
-					"1");
+			formatter.format("file=%s&cmd=%s&options=%s&compact=%s", file, "cleanstore",
+					"1",Boolean.toString(compact));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();
@@ -31,8 +31,8 @@ public class ProcessCleanStore {
 
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
-				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s&compact=%s", file,
-						"event", "1", URLEncoder.encode(uuid, "UTF-8"),Boolean.toString(compact));
+				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
+						"event", "1", URLEncoder.encode(uuid, "UTF-8"));
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);
