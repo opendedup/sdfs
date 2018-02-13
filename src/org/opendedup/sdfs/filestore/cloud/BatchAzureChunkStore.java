@@ -357,8 +357,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			Main.REFRESH_BLOBS = true;
 			Main.checkArchiveOnRead = true;
 		}
-		if (config.hasAttribute("refresh-blobs"))
-			Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
+		
 		// System.setProperty("http.keepalive", "true");
 
 		System.setProperty("http.maxConnections", Integer.toString(Main.dseIOThreads * 2));

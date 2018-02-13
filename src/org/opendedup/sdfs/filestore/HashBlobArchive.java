@@ -200,6 +200,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			try {
 			store.checkoutObject(id, 1);
 			e = null;
+			return;
 			}catch(IOException e1) {
 				e = e1;
 				try {
@@ -890,6 +891,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			String dir = st.substring(0, 3);
 			nf = new File(chunk_location.getPath() + File.separator + dir + File.separator + st);
 		}
+		if(!nf.getParentFile().exists())
+			nf.getParentFile().mkdirs();
 		return nf;
 	}
 
@@ -1782,7 +1785,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return this.uuid;
 	}
 
+	private boolean uploaded;
 	private boolean upload(long nid) {
+		
 		if (this.compactStaged)
 			return true;
 		Lock l = this.lock.writeLock();
@@ -1796,8 +1801,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		Lock ul = this.uploadlock.writeLock();
 		ul.lock();
-
+		
 		try {
+			if(this.uploaded)
+				return true;
 			if (f.exists() && (f.length() - offset) > 0) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("writing " + id);
@@ -1842,7 +1849,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 				rchunks.remove(this.id);
 			}
-
+			this.uploaded = true;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 			return false;

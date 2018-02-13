@@ -49,7 +49,6 @@ public class SDFSCmdline {
 							.warn("file info request failed. --file-path option is required");
 					System.exit(1);
 				}
-
 			}
 			if (cmd.hasOption("restore-from-archive")) {
 				if (cmd.hasOption("file-path")) {
@@ -217,8 +216,13 @@ public class SDFSCmdline {
 				System.exit(0);
 			}
 			if (cmd.hasOption("cleanstore")) {
-				ProcessCleanStore.runCmd();
+				ProcessCleanStore.runCmd(false);
 				System.exit(0);
+			}
+			if (cmd.hasOption("compactcleanstore")) {
+				ProcessCleanStore.runCmd(true);
+				System.exit(0);
+				
 			}
 			if (cmd.hasOption("fdisk")) {
 				ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
@@ -597,8 +601,12 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder
 				.withLongOpt("cleanstore")
 				.withDescription(
-						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
-								+ "if the dedup storage engine is local and not in network mode")
+						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files.")
+				.create());
+		options.addOption(OptionBuilder
+				.withLongOpt("compactcleanstore")
+				.withDescription(
+						"Compact the hashtable and clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files.")
 				.create());
 		options.addOption(OptionBuilder
 				.withLongOpt("partition-add")

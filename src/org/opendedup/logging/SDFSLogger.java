@@ -46,7 +46,7 @@ public class SDFSLogger {
 		try {
 
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
+					"%d [%p] [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
 			app.setMaxBackupIndex(2);
 			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {

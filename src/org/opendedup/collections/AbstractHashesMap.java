@@ -39,7 +39,7 @@ public interface AbstractHashesMap {
 
 	public abstract boolean mightContainKey(byte [] key,long id);
 
-	public abstract long claimRecords(SDFSEvent evt) throws IOException;
+	public abstract long claimRecords(SDFSEvent evt,boolean compact) throws IOException;
 
 	public abstract long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;

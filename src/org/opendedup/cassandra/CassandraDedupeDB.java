@@ -27,6 +27,7 @@ import org.opendedup.util.StorageUnit;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.RegularStatement;
 import com.datastax.driver.core.ResultSet;
@@ -145,7 +146,9 @@ public class CassandraDedupeDB {
 
 	private void createTableSpace() {
 		if (cluster == null) {
-			cluster = Cluster.builder().addContactPointsWithPorts(contactPoints).build();
+			PoolingOptions poolingOptions = new PoolingOptions();
+			poolingOptions.setMaxQueueSize(2048);
+			cluster = Cluster.builder().addContactPointsWithPorts(contactPoints).withPoolingOptions(poolingOptions).build();
 			SDFSLogger.getLog().info("Connected Cassandra to cluster: " + cluster.getMetadata().getClusterName());
 			session = cluster.connect();
 		}

@@ -164,8 +164,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashRoute;
 	}
 
-	public long processHashClaims(SDFSEvent evt) throws IOException {
-		return hs.processHashClaims(evt);
+	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
+		return hs.processHashClaims(evt,compact);
 	}
 
 	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)

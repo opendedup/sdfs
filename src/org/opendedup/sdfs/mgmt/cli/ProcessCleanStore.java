@@ -9,7 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessCleanStore {
-	public static void runCmd() {
+	public static void runCmd(boolean compact) {
 		try {
 			String file = URLEncoder.encode("null", "UTF-8");
 			StringBuilder sb = new StringBuilder();
@@ -31,8 +31,8 @@ public class ProcessCleanStore {
 
 				sb = new StringBuilder();
 				formatter = new Formatter(sb);
-				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s", file,
-						"event", "1", URLEncoder.encode(uuid, "UTF-8"));
+				formatter.format("file=%s&cmd=%s&options=%s&uuid=%s&compact=%s", file,
+						"event", "1", URLEncoder.encode(uuid, "UTF-8"),Boolean.toString(compact));
 				doc = MgmtServerConnection.getResponse(sb.toString());
 				root = doc.getDocumentElement();
 				evt = (Element) root.getElementsByTagName("event").item(0);

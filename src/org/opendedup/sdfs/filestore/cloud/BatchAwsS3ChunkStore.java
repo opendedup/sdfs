@@ -507,8 +507,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							" and restored with tier " + this.glacierTier);
 				}
 			}
-			if (config.hasAttribute("refresh-blobs"))
-				Main.REFRESH_BLOBS = Boolean.parseBoolean(config.getAttribute("refresh-blobs"));
+			
 			if (config.hasAttribute("infrequent-access-days")) {
 				this.infrequentAccess = Integer.parseInt(config.getAttribute("infrequent-access-days"));
 			}
@@ -2066,6 +2065,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// this.s3clientLock.readLock().lock();
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
+		
 		String rnd = RandomGUID.getGuid();
 		File p = new File(this.staged_sync_location, rnd);
 		File z = new File(this.staged_sync_location, rnd + ".uz");
@@ -2079,6 +2079,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (nm.startsWith(File.separator))
 			nm = nm.substring(1);
 		String haName = EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+		haName = haName.replaceAll("\\", "/");
 		Map<String, String> mp = null;
 		byte[] shash = null;
 		try {
@@ -2181,13 +2182,19 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		// this.s3clientLock.readLock().lock();
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
-
 		try {
 			if (this.isClustered()) {
 
 				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
-				SDFSLogger.getLog().debug("deleting " + haName);
-				if (s3Service.doesObjectExist(this.name, haName)) {
+				haName.replaceAll("\\", "/");
+				SDFSLogger.getLog().info("deleting " + haName);
+				boolean exists = false;
+				try {
+					exists = s3Service.doesObjectExist(this.name, haName);
+				}catch(Exception e) {
+					SDFSLogger.getLog().debug("not able to check " +haName );
+				}
+				if (exists) {
 					String blb = "claims/" + haName + "/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					s3Service.deleteObject(this.name, blb);

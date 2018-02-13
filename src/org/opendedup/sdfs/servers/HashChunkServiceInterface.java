@@ -65,7 +65,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract byte getHashRoute(byte[] hash);
 
-	public abstract long processHashClaims(SDFSEvent evt) throws IOException;
+	public abstract long processHashClaims(SDFSEvent evt,boolean compact) throws IOException;
 
 	public abstract long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
 			throws IOException;

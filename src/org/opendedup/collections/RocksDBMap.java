@@ -162,52 +162,56 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				// blockConfig.setIndexType(IndexType.kBinarySearch);
 				// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
 				blockConfig.setBlockSize(4 * 1024);
-				blockConfig.setFormatVersion(2);
+
 				blockConfig.setNoBlockCache(true);
-				blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+
 				// options.useFixedLengthPrefixExtractor(3);
 
-				Env env = Env.getDefault();
-				env.setBackgroundThreads(8, Env.FLUSH_POOL);
-				env.setBackgroundThreads(8, Env.COMPACTION_POOL);
 				Options options = new Options();
 				options.setCreateIfMissing(true);
 				options.setCompactionStyle(CompactionStyle.LEVEL);
 				options.setCompressionType(CompressionType.NO_COMPRESSION);
-				options.setLevel0FileNumCompactionTrigger(8);
-				options.setMaxBackgroundCompactions(2);
-				options.setMaxBackgroundFlushes(8);
-				options.setEnv(env);
 
-				// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
-				options.setIncreaseParallelism(32);
-				options.setAdviseRandomOnOpen(true);
-				// options.setNumLevels(8);
-				// options.setLevelCompactionDynamicLevelBytes(true);
-				//
-				options.setAllowConcurrentMemtableWrite(true);
-				// LRUCache c = new LRUCache(memperDB);
-				// options.setRowCache(c);
-				// blockConfig.setBlockCacheSize(GB * 2);
-
-				options.setWriteBufferSize(bufferSize / dbs.length);
 				// options.setMinWriteBufferNumberToMerge(2);
 				// options.setMaxWriteBufferNumber(6);
 				// options.setLevelZeroFileNumCompactionTrigger(2);
 				if (!windowsLegacy) {
+					Env env = Env.getDefault();
+					env.setBackgroundThreads(8, Env.FLUSH_POOL);
+					env.setBackgroundThreads(8, Env.COMPACTION_POOL);
+					options.setEnv(env);
 					options.setCompactionReadaheadSize(1024 * 1024 * 25);
 					// options.setUseDirectIoForFlushAndCompaction(true);
 					// options.setUseDirectReads(true);
 					options.setStatsDumpPeriodSec(30);
+					options.setLevel0FileNumCompactionTrigger(8);
+					options.setMaxBackgroundCompactions(2);
+					options.setMaxBackgroundFlushes(8);
+
+					// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
+					options.setIncreaseParallelism(32);
+					options.setAdviseRandomOnOpen(true);
+					// options.setNumLevels(8);
+					// options.setLevelCompactionDynamicLevelBytes(true);
+					//
+					options.setAllowConcurrentMemtableWrite(true);
+					// LRUCache c = new LRUCache(memperDB);
+					// options.setRowCache(c);
+					// blockConfig.setBlockCacheSize(GB * 2);
+					options.setWriteBufferSize(bufferSize / dbs.length);
+					options.setMaxBytesForLevelBase(fsize * 5);
+					options.setTargetFileSizeBase(fsize);
+
+					blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+					blockConfig.setFormatVersion(2);
+
 				}
+				options.setTableFormatConfig(blockConfig);
 				// options.setAllowMmapWrites(true);
 				// options.setAllowMmapReads(true);
 				options.setMaxOpenFiles(-1);
 				// options.setTargetFileSizeBase(512*1024*1024);
 
-				options.setMaxBytesForLevelBase(fsize * 5);
-				options.setTargetFileSizeBase(fsize);
-				options.setTableFormatConfig(blockConfig);
 				File f = new File(fileName + File.separator + i);
 				f.mkdirs();
 				StartShard sh = new StartShard(i, this.dbs, options, f, bar, ct);
@@ -233,8 +237,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 			Options options = new Options();
 			options.setCreateIfMissing(true);
-			options.setCompactionStyle(CompactionStyle.LEVEL);
-			options.setCompressionType(CompressionType.NO_COMPRESSION);
+
 			BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 			blockConfig.setFilter(new BloomFilter(16, false));
 			// blockConfig.setHashIndexAllowCollision(false);
@@ -242,41 +245,45 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// blockConfig.setIndexType(IndexType.kBinarySearch);
 			// blockConfig.setPinL0FilterAndIndexBlocksInCache(true);
 			blockConfig.setBlockSize(4 * 1024);
-			blockConfig.setFormatVersion(2);
-			// options.useFixedLengthPrefixExtractor(3);
-
-			Env env = Env.getDefault();
-			env.setBackgroundThreads(8, Env.FLUSH_POOL);
-			env.setBackgroundThreads(8, Env.COMPACTION_POOL);
-			options.setMaxBackgroundCompactions(8);
-			options.setMaxBackgroundFlushes(8);
-			options.setEnv(env);
-
 			// options.setNumLevels(8);
 			// options.setLevelCompactionDynamicLevelBytes(true);
 			//
-			options.setAllowConcurrentMemtableWrite(true);
+
 			// LRUCache c = new LRUCache(memperDB);
 			// options.setRowCache(c);
 
 			// blockConfig.setBlockCacheSize(memperDB);
 			blockConfig.setNoBlockCache(true);
-			options.setWriteBufferSize(GB);
-			options.setMinWriteBufferNumberToMerge(2);
-			options.setMaxWriteBufferNumber(6);
-			options.setLevelZeroFileNumCompactionTrigger(2);
 
 			// options.setCompactionReadaheadSize(1024*1024*25);
 			// options.setUseDirectIoForFlushAndCompaction(true);
 			// options.setUseDirectReads(true);
-			if (!windowsLegacy)
+			if (!windowsLegacy) {
+				options.setCompactionStyle(CompactionStyle.LEVEL);
+				options.setCompressionType(CompressionType.NO_COMPRESSION);
+				options.setWriteBufferSize(GB);
+				options.setMinWriteBufferNumberToMerge(2);
+				options.setMaxWriteBufferNumber(6);
+				options.setLevelZeroFileNumCompactionTrigger(2);
 				options.setStatsDumpPeriodSec(30);
+				blockConfig.setFormatVersion(2);
+				options.setAllowConcurrentMemtableWrite(true);
+				// options.useFixedLengthPrefixExtractor(3);
+
+				Env env = Env.getDefault();
+				env.setBackgroundThreads(8, Env.FLUSH_POOL);
+				env.setBackgroundThreads(8, Env.COMPACTION_POOL);
+				options.setEnv(env);
+				options.setMaxBackgroundCompactions(8);
+				options.setMaxBackgroundFlushes(8);
+				options.setMaxBytesForLevelBase(GB);
+				options.setTargetFileSizeBase(128 * 1024 * 1024);
+			}
 			// options.setAllowMmapWrites(true);
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
 			// options.setTargetFileSizeBase(512*1024*1024);
-			options.setMaxBytesForLevelBase(GB);
-			options.setTargetFileSizeBase(128 * 1024 * 1024);
+
 			options.setTableFormatConfig(blockConfig);
 			File f = new File(fileName + File.separator + "rmdb");
 			f.mkdirs();
@@ -382,9 +389,10 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	public long getMaxSize() {
 		return this.size;
 	}
+	
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt, boolean compact) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
@@ -430,6 +438,17 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				} finally {
 					l.unlock();
 				}
+				
+			}
+			if (compact) {
+				SDFSLogger.getLog().info("compacting archives");
+				int i = 0;
+				for (RocksDB db : dbs) {
+					SDFSLogger.getLog().info("compacting rocksdb " + i);
+					db.compactRange();
+					i++;
+				}
+				SDFSLogger.getLog().info("done compacting rocksdb");
 			}
 
 		} catch (Exception e) {
@@ -541,7 +560,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						bf.putLong(1);
 					else
 						bf.putLong(cm.references);
-					db.put(cm.getHash(), v);
+					db.put(wo, cm.getHash(), v);
 					this.rmdb.delete(cm.getHash());
 					return new InsertRecord(true, cm.getcPos());
 				} else {
@@ -558,13 +577,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					else
 						ct += cm.references;
 					bk.putLong(8, ct);
-					db.put(cm.getHash(), v);
+					db.put(wo, cm.getHash(), v);
 					return new InsertRecord(false, pos);
 				}
 			} catch (RocksDBException e) {
 				throw new IOException(e);
 			}
-
 		} finally {
 
 			l.unlock();
@@ -754,7 +772,15 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length, System.out);
 			int i = 0;
 			for (RocksDB db : dbs) {
-				db.close();
+				
+				try {
+					FlushOptions op = new FlushOptions();
+					op.setWaitForFlush(true);
+					db.flush(op);
+					db.close();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("While closing hashtable ", e);
+				}
 				bar.update(i);
 				i++;
 			}
@@ -819,23 +845,33 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key, long id) {
+	public boolean mightContainKey(byte[] key, long archive) {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
 			byte[] k = this.getDB(key).get(key);
+
 			if (k == null)
 				return false;
 			else {
-				return true;
+				ByteBuffer bk = ByteBuffer.wrap(k);
+				long ar = bk.getLong();
+				if (ar != archive && archive != -1)
+					return false;
+				else
+					return true;
 			}
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("unable to check", e);
+			SDFSLogger.getLog().warn("unable to check", e);
 			return false;
 		} finally {
 			l.unlock();
 		}
+	}
+
+	public void compactArchive() {
+
 	}
 
 	public static class StartShard implements Runnable {

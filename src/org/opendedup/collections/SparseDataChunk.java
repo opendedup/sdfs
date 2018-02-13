@@ -65,6 +65,10 @@ public class SparseDataChunk implements Externalizable {
 		}
 
 	}
+	
+	public byte getVersion() {
+		return this.version;
+	}
 
 	private void marshall(byte[] raw) throws IOException {
 		ByteBuffer buf = ByteBuffer.wrap(raw);
@@ -278,7 +282,6 @@ public class SparseDataChunk implements Externalizable {
 				this.len = 0;
 				for (HashLocPair p : ar.values()) {
 					boolean dup = p.isDup();
-					
 					if (dup)
 						this.doop += p.nlen;
 					buf.put(p.asArray());

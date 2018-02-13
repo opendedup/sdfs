@@ -246,7 +246,7 @@ public class ProgressiveFileBasedCSMap implements AbstractMap, AbstractHashesMap
 	}
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt,boolean compact) throws IOException {
 		throw new IOException("nor implemented");
 	}
 

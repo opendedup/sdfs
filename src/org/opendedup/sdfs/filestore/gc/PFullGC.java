@@ -60,7 +60,7 @@ public class PFullGC implements GCControllerImpl {
 			task.longMsg = "Running Garbage Collection because percentage full is "
 					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
-				ManualGC.clearChunks();
+				ManualGC.clearChunks(false);
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				double pFull = (this.prevPFull * 100);

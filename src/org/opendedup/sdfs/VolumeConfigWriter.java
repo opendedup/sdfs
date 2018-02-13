@@ -59,7 +59,7 @@ public class VolumeConfigWriter {
 	boolean dedup_files = true;
 	int chunk_size = 256;
 	long max_file_write_buffers = 1;
-	int max_open_files = 512;
+	int max_open_files = 128;
 	int meta_file_cache = 512;
 	int write_timeout = Main.writeTimeoutSeconds;
 	int read_timeout = Main.readTimeoutSeconds;
@@ -227,8 +227,7 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-safe-close")) {
 			this.safe_close = Boolean.parseBoolean(cmd.getOptionValue("io-safe-close"));
 		}
-		if(cmd.hasOption("refresh-blobs"))
-			this.refreshBlobs = true;
+		
 		if (cmd.hasOption("io-max-file-write-buffers")) {
 			this.max_file_write_buffers = Integer.parseInt(cmd.getOptionValue("io-max-file-write-buffers"));
 		} 
@@ -290,11 +289,14 @@ public class VolumeConfigWriter {
 		}
 		if(cmd.hasOption("glacier-in-days")) {
 			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
+			this.refreshBlobs = true;
 		}
 		if(cmd.hasOption("azurearchive-in-days")) {
 			this.aruzreArchiveInDays = Integer.parseInt(cmd.getOptionValue("azurearchive-in-days"));
 			this.azurestorageTier = "archive";
+			this.refreshBlobs = true;
 		}
+		
 		if(cmd.hasOption("simple-metadata")) {
 			this.simpleMD = true;
 		}
@@ -756,7 +758,7 @@ public class VolumeConfigWriter {
 				if (!this.tcpKeepAlive)
 					extended.setAttribute("tcp-keepalive", "false");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "10000");
+				extended.setAttribute("upload-thread-sleep-time", "300000");
 				extended.setAttribute("sync-files", "true");
 				if(this.userAgentPrefix != null)
 					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
@@ -812,7 +814,7 @@ public class VolumeConfigWriter {
 				if (!this.tcpKeepAlive)
 					extended.setAttribute("tcp-keepalive", "false");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "10000");
+				extended.setAttribute("upload-thread-sleep-time", "300000");
 				extended.setAttribute("sync-files", "true");
 				if(this.userAgentPrefix != null)
 					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
@@ -842,7 +844,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("service-type", "azureblob");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "10000");
+				extended.setAttribute("upload-thread-sleep-time", "300000");
 				if(this.userAgentPrefix != null)
 					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 				extended.setAttribute("sync-files", "true");

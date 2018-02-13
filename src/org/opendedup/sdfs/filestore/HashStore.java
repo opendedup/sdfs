@@ -243,8 +243,8 @@ public class HashStore {
 		bdb.cache(pos);
 	}
 
-	public long processHashClaims(SDFSEvent evt) throws IOException {
-		return this.bdb.claimRecords(evt);
+	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
+		return this.bdb.claimRecords(evt,compact);
 	}
 	
 	public void clearRefMap() throws IOException {

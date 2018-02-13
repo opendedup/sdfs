@@ -948,7 +948,10 @@ public class MgmtWebServer implements Container {
 						break;
 					case "cleanstore":
 						try {
-							Element emsg = new CleanStoreCmd().getResult();
+							boolean compact=false;
+							if (qry.containsKey("compact"))
+								compact = Boolean.parseBoolean(qry.get("compact"));
+							Element emsg = new CleanStoreCmd().getResult(compact);
 							result.setAttribute("status", "success");
 							doc.adoptNode(emsg);
 							result.appendChild(emsg);

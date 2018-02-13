@@ -20,7 +20,6 @@ package org.opendedup.collections;
 
 import java.io.File;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -180,7 +179,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 				options.setMaxBackgroundCompactions(2);
 				options.setMaxBackgroundFlushes(8);
 				options.setEnv(env);
-				//options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
+				// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
 				options.setIncreaseParallelism(32);
 				options.setAdviseRandomOnOpen(true);
 				// options.setNumLevels(8);
@@ -259,8 +258,8 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			// LRUCache c = new LRUCache(memperDB);
 			// options.setRowCache(c);
 
-			//blockConfig.setBlockCacheSize(memperDB);
-			//blockConfig.setNoBlockCache(true);
+			// blockConfig.setBlockCacheSize(memperDB);
+			// blockConfig.setNoBlockCache(true);
 
 			// options.setCompactionReadaheadSize(1024*1024*25);
 			// options.setUseDirectIoForFlushAndCompaction(true);
@@ -270,6 +269,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			// options.setAllowMmapReads(true);
 			options.setMaxOpenFiles(-1);
 			options.setCreateMissingColumnFamilies(true);
+			options.setRowCache(new LRUCache(memperDB));
 			// options.setTargetFileSizeBase(512*1024*1024);
 
 			File f = new File(fileName + File.separator + "rmdb");
@@ -285,7 +285,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			coptions0.setMaxBytesForLevelBase(fsize * 5);
 			coptions0.setTargetFileSizeBase(fsize);
 			coptions0.setTableFormatConfig(blockConfig);
-			coptions1.setMergeOperatorName("uint64add");
+			// coptions1.setMergeOperatorName("uint64add");
 			coptions1.setCompactionStyle(CompactionStyle.LEVEL);
 			coptions1.setCompressionType(CompressionType.NO_COMPRESSION);
 			coptions1.setLevel0FileNumCompactionTrigger(8);
@@ -310,14 +310,13 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			for (InetSocketAddress addr : Main.volume.getCassandraNodes()) {
 				System.out.println(addr);
 			}
-			if(Main.volume.isClustered()) {
+			if (Main.volume.isClustered()) {
 				cdb = new CassandraDedupeDB(Main.volume.getCassandraNodes(), Main.volume.getDataCenter(),
-					Main.volume.getUuid(), Main.volume.getClusterCopies().intValue(), true);
+						Main.volume.getUuid(), Main.volume.getClusterCopies().intValue(), true);
 				HashBlobArchive.registerEventBus(this);
 			}
 			bar.finish();
-			
-			
+
 			this.setUp();
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -394,11 +393,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					ByteBuffer bf = ByteBuffer.wrap(v);
 					bf.putLong(ha);
 					this.getDB(hash).put(hash, v);
-
-					rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+					rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct));
 					rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(hash).getBytes());
-					SDFSLogger.getLog().info("added " + ct + " from " + ha);
+					SDFSLogger.getLog().debug("added " + ct + " from " + ha);
 					cdb.claimArchive(ha, Main.volume.getSerialNumber());
+					HashBlobArchive.claimBlock(ha);
+					return true;
 				}
 			}
 			if (v != null) {
@@ -410,14 +410,14 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					ByteBuffer rbk = ByteBuffer.wrap(rv);
 					rbk.putLong(System.currentTimeMillis() + rmthreashold);
 					rmdb.put(this.cf.get(0), id, rv);
-					SDFSLogger.getLog().info("adding removal record for " + ByteBuffer.wrap(id).getLong());
+					SDFSLogger.getLog().debug("adding removal record for " + ByteBuffer.wrap(id).getLong());
 
 				} else if (rmdb.get(id) != null) {
 					rmdb.delete(this.cf.get(0), id);
 				}
 				SDFSLogger.getLog()
-						.info("incremented " + ct + " to " + ByteBuffer.wrap(id).getLong() + " current ct is " + nc);
-				rmdb.merge(this.cf.get(1), id, LongConverter.toBytes(ct));
+						.debug("incremented " + ct + " to " + ByteBuffer.wrap(id).getLong() + " current ct is " + nc);
+				rmdb.put(this.cf.get(1), id, LongConverter.toBytes(nc));
 				return true;
 			}
 
@@ -473,12 +473,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 	}
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt,boolean compact) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
 		try {
-			
+
 			if (Main.volume.isClustered() && cdb.isMaster()) {
 				Iterator<Entry<Long, Long>> riter = this.cdb.getAllRmrg();
 				while (riter.hasNext()) {
@@ -486,7 +486,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					if (et.getValue() < (System.currentTimeMillis() - rmthreashold)) {
 						long ct = this.cdb.getRefCt(et.getKey());
 						if (ct <= 0) {
-							SDFSLogger.getLog().info("Removing cassandra reference for " + et.getKey());
+							SDFSLogger.getLog().debug("Removing cassandra reference for " + et.getKey());
 							this.cdb.deleteRef(et.getKey());
 						} else {
 							this.cdb.delRMRef(et.getKey());
@@ -503,7 +503,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 
 				try {
 
-					SDFSLogger.getLog().info("removing key " + ByteBuffer.wrap(id).getLong());
+					SDFSLogger.getLog().debug("removing key " + ByteBuffer.wrap(id).getLong());
 					byte[] v = null;
 					bk.position(0);
 					bk.put(iter.value());
@@ -538,12 +538,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 											this.rmdb.delete(cf.get(0), id);
 											this.rmdb.delete(cf.get(1), id);
 											this.rmdb.delete(cf.get(2), id);
-											if(Main.volume.isClustered()) {
-											this.cdb.unClaimArchive(ByteBuffer.wrap(id).getLong(),
-													Main.volume.getSerialNumber());
-											if (this.cdb.getRefCt(ByteBuffer.wrap(id).getLong()) <= 0) {
-												this.cdb.addRMRef(ByteBuffer.wrap(id).getLong());
-											}
+											if (Main.volume.isClustered()) {
+												this.cdb.unClaimArchive(ByteBuffer.wrap(id).getLong(),
+														Main.volume.getSerialNumber());
+												if (this.cdb.getRefCt(ByteBuffer.wrap(id).getLong()) <= 0) {
+													this.cdb.addRMRef(ByteBuffer.wrap(id).getLong());
+												}
 											}
 											rmk++;
 										} else {
@@ -664,13 +664,29 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		try {
 			try {
 				RocksDB db = this.getDB(cm.getHash());
-
+				boolean clusterFound = false;
 				byte[] v = null;
 				v = db.get(cm.getHash());
 				if (v == null) {
 					long hl = -1;
-					if(Main.volume.isClustered())
+					if (Main.volume.isClustered()) {
 						hl = cdb.getHash(cm.getHash());
+						if (hl != -1) {
+							Lock al = this.getArchiveLock(hl);
+							al.lock();
+							try {
+								v = new byte[8];
+								ByteBuffer bf = ByteBuffer.wrap(v);
+								bf.putLong(hl);
+								if (rmdb.get(v) == null) {
+									clusterFound = true;
+
+								}
+							} finally {
+								al.unlock();
+							}
+						}
+					}
 					if (hl == -1) {
 						try {
 							cm.persistData(true);
@@ -690,7 +706,9 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 							long ct = cm.references;
 							if (cm.references <= 0)
 								ct = 1;
-							rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
+
+							this.rmdb.delete(this.cf.get(0), v);
+							rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct));
 							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
 							return new InsertRecord(true, cm.getcPos());
 						} finally {
@@ -700,6 +718,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 						Lock al = this.getArchiveLock(hl);
 						al.lock();
 						try {
+
 							v = new byte[8];
 							ByteBuffer bf = ByteBuffer.wrap(v);
 							bf.putLong(hl);
@@ -708,10 +727,16 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 							if (cm.references <= 0)
 								ct = 1;
 							db.put(wo, cm.getHash(), v);
-							rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
-							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
-							if(Main.volume.isClustered())
+							byte[] oct = rmdb.get(this.cf.get(1), v);
+							if (oct == null) {
+								HashBlobArchive.claimBlock(hl);
 								cdb.claimArchive(hl, Main.volume.getSerialNumber());
+							}
+							rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct));
+							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
+							if (Main.volume.isClustered() && clusterFound) {
+
+							}
 							return new InsertRecord(false, hl);
 						} finally {
 							al.unlock();
@@ -728,11 +753,20 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 						long ct = cm.references;
 						if (cm.references <= 0)
 							ct = 1;
-						rmdb.merge(this.cf.get(1), v, LongConverter.toBytes(ct));
-						if (rmdb.get(this.cf.get(0), v) != null) {
-							rmdb.delete(this.cf.get(0), v);
+						byte[] octb = rmdb.get(this.cf.get(1), v);
+						if (octb == null) {
+							SDFSLogger.getLog().warn("refernce count table could not find "
+									+ ByteBuffer.wrap(v).getLong() + ". This could be due to garbage collection");
+							return this.put(cm, persist);
+						} else {
+							long oct = LongConverter.toLong(octb);
+							if (oct < 0) {
+								this.rmdb.delete(this.cf.get(0), v);
+							}
+
+							rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct + oct));
+							return new InsertRecord(false, pos);
 						}
-						return new InsertRecord(false, pos);
 					} finally {
 						al.unlock();
 					}

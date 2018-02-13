@@ -59,8 +59,8 @@ public class HCServiceProxy {
 		eventBus.register(obj);
 	}
 
-	public static synchronized long processHashClaims(SDFSEvent evt) throws IOException {
-			return hcService.processHashClaims(evt);
+	public static synchronized long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
+			return hcService.processHashClaims(evt,compact);
 		
 	}
 

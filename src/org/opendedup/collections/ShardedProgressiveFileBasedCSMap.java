@@ -355,7 +355,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 	}
 
 	@Override
-	public synchronized long claimRecords(SDFSEvent evt) throws IOException {
+	public synchronized long claimRecords(SDFSEvent evt,boolean compact) throws IOException {
 		if (this.isClosed())
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		executor = new ThreadPoolExecutor(Main.writeThreads + 1, Main.writeThreads + 1, 10, TimeUnit.SECONDS,
@@ -1185,7 +1185,7 @@ public class ShardedProgressiveFileBasedCSMap implements AbstractMap, AbstractHa
 		long end = System.currentTimeMillis();
 		System.out.println("Took " + (end - start) / 1000 + " s " + val1);
 		System.out.println("Took " + (System.currentTimeMillis() - end) / 1000 + " ms at pos " + b.get(hash1));
-		b.claimRecords(SDFSEvent.gcInfoEvent("testing 123"));
+		b.claimRecords(SDFSEvent.gcInfoEvent("testing 123"),false);
 		b.close();
 
 	}

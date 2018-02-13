@@ -36,11 +36,11 @@ public class ManualGC {
 	private static long lastGC = 0;
 	//private static long MINGCTIME = 60*1000*60;
 	private static long MINGCTIME = 1;
-	public static long clearChunks() throws InterruptedException, IOException {
-		return clearChunksMills();
+	public static long clearChunks(boolean compact) throws InterruptedException, IOException {
+		return clearChunksMills(compact);
 	}
 
-	public static synchronized long clearChunksMills()
+	public static synchronized long clearChunksMills(boolean compact)
 			throws InterruptedException, IOException {
 		Lock l = null;
 			l = GCMain.gclock.writeLock();
@@ -86,7 +86,7 @@ public class ManualGC {
 			evt.maxCt = 100;
 			evt.curCt = 0;
 			try {
-				rm = runGC();
+				rm = runGC(compact);
 			} catch (IOException e) {
 				if (!Main.firstRun)
 					throw e;
@@ -107,7 +107,7 @@ public class ManualGC {
 				}
 				wevt.endEvent("Done Waiting");
 				try {
-					rm = rm + runGC();
+					rm = rm + runGC(compact);
 				} finally {
 					try {
 						Main.pFullSched.recalcScheduler();
@@ -124,7 +124,7 @@ public class ManualGC {
 		}
 	}
 
-	private static long runGC() throws IOException {
+	private static long runGC(boolean compact) throws IOException {
 		long rm = 0;
 		try {
 			if (Main.disableGC)
@@ -135,7 +135,7 @@ public class ManualGC {
 					DedupFileStore.gcRunning(true);
 					try {
 					evt.curCt = 33;
-					rm = HCServiceProxy.processHashClaims(evt);
+					rm = HCServiceProxy.processHashClaims(evt,compact);
 					evt.curCt = 66;
 					}finally {
 						DedupFileStore.gcRunning(false);
