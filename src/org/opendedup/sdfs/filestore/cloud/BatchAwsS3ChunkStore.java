@@ -1190,8 +1190,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			dtm = (System.currentTimeMillis() - tm) / 1000d;
 			bps = (cl / 1024) / dtm;
 		} catch (AmazonS3Exception e) {
-			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+			
+			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+				SDFSLogger.getLog().info(
+						"block [" + id + "] at [blocks/" + haName + "] is in glacier", e);
 				throw new DataArchivedException(id, null);
+			}
 			else {
 				SDFSLogger.getLog().error(
 						"unable to get block [" + id + "] at [blocks/" + haName + "] pos " + from + " to " + to, e);
@@ -1235,12 +1239,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					try {
 						omd = s3Service.getObjectMetadata(this.name, "blocks/" + haName + this.dExt);
 					} catch (AmazonS3Exception e1) {
-						if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+						if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+							SDFSLogger.getLog().info(
+									"block [" + id + "] at [blocks/" + haName + "] is in glacier", e);
 							throw new DataArchivedException(id, null);
+						}
 					}
 				}
-				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+					SDFSLogger.getLog().info(
+							"block [" + id + "] at [blocks/" + haName + "] is in glacier", e);
 					throw new DataArchivedException(id, null);
+				}
 				else {
 					SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
 					throw e;
@@ -1273,9 +1283,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				try {
 					this.multiPartDownload("blocks/" + haName + this.dExt, f);
 				} catch (AmazonS3Exception e) {
-					if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState"))
+					if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
+						SDFSLogger.getLog().info(
+								"block [" + id + "] at [blocks/" + haName + "] is in glacier", e);
 						throw new DataArchivedException(id, null);
-					else {
+					}
+						else {
 						SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
 						throw e;
 
@@ -1352,6 +1365,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} catch (AmazonS3Exception e) {
 			if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 				SDFSLogger.getLog().error("invalid object state", e);
+				SDFSLogger.getLog().info(
+						"block [" + id + "] at [blocks/" + haName + "] is in glacier", e);
 				throw new DataArchivedException(id, null);
 			} else {
 				SDFSLogger.getLog().error("unable to get block [" + id + "] at [blocks/" + haName + "]", e);
@@ -2445,7 +2460,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public synchronized String restoreBlock(long id, byte[] hash) throws IOException {
-
+		SDFSLogger.getLog().info("restoring block " + id);
 		if (id == -1) {
 			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
 			return null;
@@ -2458,6 +2473,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		else {
 			return haName;
 		}
+		SDFSLogger.getLog().info("start restore block loop for " + id);
 		Exception _e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
@@ -2467,6 +2483,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				params.setTier(this.glacierTier);
 				request.setGlacierJobParameters(params);
 				s3Service.restoreObject(request);
+				SDFSLogger.getLog().info(
+						"restoring block [" + id + "] at [blocks/" + haName + "] from glacier " +this.glacierTier.toString());
 				if (blockRestored(haName)) {
 					restoreRequests.put(new Long(id), "InvalidObjectState");
 
@@ -2480,12 +2498,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				return haName;
 			} catch (AmazonS3Exception e) {
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
-
+					SDFSLogger.getLog().warn("InvalidObjectState for blocks/" + haName + this.dExt);
 					restoreRequests.put(new Long(id), "InvalidObjectState");
 					return null;
 				}
 				if (e.getErrorCode().equalsIgnoreCase("RestoreAlreadyInProgress")) {
-
+					SDFSLogger.getLog().warn("RestoreAlreadyInProgress for blocks/" + haName + this.dExt);
 					restoreRequests.put(new Long(id), haName);
 					return haName;
 				} else {
@@ -2499,6 +2517,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 				}
 			} catch (Exception e) {
+				SDFSLogger.getLog().warn("general exception for blocks/" + haName + this.dExt,e);
 				_e = e;
 				try {
 					Thread.sleep(10000);
@@ -2507,8 +2526,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 		}
-		if (_e != null)
+		if (_e != null) {
+			SDFSLogger.getLog().error("unalbe tor restore block " + id,_e);
 			throw new IOException(_e);
+		}
 		else
 			return null;
 
@@ -2524,8 +2545,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (omd == null || momd == null) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is null");
 				return false;
-			} else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
+			}else if(omd.getStorageClass() == null) {
+				return true;
+			}else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
 					&& !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+				SDFSLogger.getLog().warn("Object with id " + id + " is restored");
 				return true;
 			} else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");

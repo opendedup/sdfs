@@ -52,16 +52,16 @@ public class RestoreArchive implements Runnable {
 
 	private void init() throws IOException {
 		SDFSLogger.getLog().info("Starting Archive Restore for " + f.getPath());
-
-		File directory = new File(Main.dedupDBStore + File.separator
-				+ this.f.getDfGuid().substring(0, 2) + File.separator
-				+ this.f.getDfGuid());
-		File dbf = new File(directory.getPath() + File.separator
-				+ this.f.getDfGuid() + ".map");
-		if(!dbf.exists())
-			 dbf = new File(directory.getPath() + File.separator
-						+ this.f.getDfGuid() + ".map.lz4");
-		this.initiateArchive(dbf);
+		try {
+			File directory = new File(Main.dedupDBStore + File.separator + this.f.getDfGuid().substring(0, 2)
+					+ File.separator + this.f.getDfGuid());
+			File dbf = new File(directory.getPath() + File.separator + this.f.getDfGuid() + ".map");
+			if (!dbf.exists())
+				dbf = new File(directory.getPath() + File.separator + this.f.getDfGuid() + ".map.lz4");
+			this.initiateArchive(dbf);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error while restoring file [" + f.getPath() + "]", e);
+		}
 	}
 
 	public static void recoverArchives(MetaDataDedupFile f) throws IOException {
@@ -76,39 +76,50 @@ public class RestoreArchive implements Runnable {
 			}
 		}
 		if (ar.fEvt.level != SDFSEvent.INFO) {
-			throw new IOException("unable to restore all archived data for "
-					+ f.getPath());
+			throw new IOException("unable to restore all archived data for " + f.getPath());
 		}
 	}
 
 	private void initiateArchive(File mapFile) throws IOException {
 		DataMapInterface mp = null;
 		try {
-			if(mapFile.getName().endsWith(".lz4"))
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-8),f.getLookupFilter());
+			SDFSLogger.getLog().info("Starting for " + mapFile.getName());
+			if (mapFile.getName().endsWith(".lz4"))
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length() - 8),
+						f.getLookupFilter());
 			else
-				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length()-4),f.getLookupFilter());
+				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length() - 4),
+						f.getLookupFilter());
+			SDFSLogger.getLog().info("2");
 			mp.iterInit();
-			SparseDataChunk ck= mp.nextValue(false);
+			SDFSLogger.getLog().info("3");
+			SparseDataChunk ck = mp.nextValue(false);
+			SDFSLogger.getLog().info("4");
 			while (ck != null) {
-				
-				TreeMap<Integer,HashLocPair> al = ck.getFingers();
+				SDFSLogger.getLog().info("5");
+				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
-						String req = HCServiceProxy.restoreBlock(p.hash);
-						if (req != null && !this.restoreRequests.contains(req)) {
-							this.restoreRequests.add(req);
-							SDFSLogger.getLog().info("will restore " + req);
-							this.fEvt.maxCt++;
-							this.totalArchives.incrementAndGet();
-						}
+					SDFSLogger.getLog().info("5-1");
+					String req = HCServiceProxy.restoreBlock(p.hash);
+					SDFSLogger.getLog().info("5-2");
+					if (req != null && !this.restoreRequests.contains(req)) {
+						this.restoreRequests.add(req);
+						SDFSLogger.getLog().info("will restore " + req);
+						this.fEvt.maxCt++;
+						this.totalArchives.incrementAndGet();
 					}
-					ck = mp.nextValue(false);
+				}
+				SDFSLogger.getLog().info("6");
+				ck = mp.nextValue(false);
 			}
 			SDFSLogger.getLog().info("Restore Initiated for " + this.restoreRequests.size());
-			
+
 		} catch (Throwable e) {
-			SDFSLogger.getLog().error(
-					"error while restoring file [" + f.getPath() + "]", e);
+			try {
+			SDFSLogger.getLog().error("error while restoring file [" + f.getPath() + "]", e);
+			}catch(Exception e1) {
+				SDFSLogger.getLog().error("error while restoring file ", e);
+			}
 			// throw new IOException(e);
 		} finally {
 			mp.close();
@@ -118,7 +129,7 @@ public class RestoreArchive implements Runnable {
 
 	@Override
 	public void run() {
-		
+
 		try {
 			long start = System.currentTimeMillis();
 			this.init();
@@ -137,8 +148,7 @@ public class RestoreArchive implements Runnable {
 							SDFSLogger.getLog().info("not restored " + id);
 						}
 					} catch (Exception e) {
-						SDFSLogger.getLog().error(
-								"unable to check restore for " + id, e);
+						SDFSLogger.getLog().error("unable to check restore for " + id, e);
 					}
 
 				}
@@ -149,15 +159,12 @@ public class RestoreArchive implements Runnable {
 				if (this.restoreRequests.size() > 0)
 					Thread.sleep(2 * 60 * 1000);
 			}
-			SDFSLogger.getLog().info(
-					"took [" + (System.currentTimeMillis() - start)
-							/ (1000 * 60) + "] Minutes to import ["
-							+ totalArchives.get() + "]");
+			SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / (1000 * 60)
+					+ "] Minutes to import [" + totalArchives.get() + "]");
 			fEvt.endEvent("Archive Restore Succeeded for " + f.getPath());
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("archive restore failed", e);
-			fEvt.endEvent("Archive Restore failed because [" + e.toString()
-					+ "]", SDFSEvent.ERROR);
+			fEvt.endEvent("Archive Restore failed because [" + e.toString() + "]", SDFSEvent.ERROR);
 		}
 	}
 

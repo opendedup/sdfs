@@ -392,9 +392,9 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					v = new byte[8];
 					ByteBuffer bf = ByteBuffer.wrap(v);
 					bf.putLong(ha);
-					this.getDB(hash).put(hash, v);
-					rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct));
-					rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(hash).getBytes());
+					this.getDB(hash).put(wo,hash, v);
+					rmdb.put(this.cf.get(1),wo, v, LongConverter.toBytes(ct));
+					rmdb.merge(this.cf.get(2),wo, v, BaseEncoding.base64Url().encode(hash).getBytes());
 					SDFSLogger.getLog().debug("added " + ct + " from " + ha);
 					cdb.claimArchive(ha, Main.volume.getSerialNumber());
 					HashBlobArchive.claimBlock(ha);
@@ -409,7 +409,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					byte[] rv = new byte[8];
 					ByteBuffer rbk = ByteBuffer.wrap(rv);
 					rbk.putLong(System.currentTimeMillis() + rmthreashold);
-					rmdb.put(this.cf.get(0), id, rv);
+					rmdb.put(this.cf.get(0),wo, id, rv);
 					SDFSLogger.getLog().debug("adding removal record for " + ByteBuffer.wrap(id).getLong());
 
 				} else if (rmdb.get(id) != null) {
@@ -417,7 +417,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 				}
 				SDFSLogger.getLog()
 						.debug("incremented " + ct + " to " + ByteBuffer.wrap(id).getLong() + " current ct is " + nc);
-				rmdb.put(this.cf.get(1), id, LongConverter.toBytes(nc));
+				rmdb.put(this.cf.get(1),wo, id, LongConverter.toBytes(nc));
 				return true;
 			}
 

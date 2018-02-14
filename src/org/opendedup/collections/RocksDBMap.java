@@ -84,6 +84,11 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			try {
 				String libpath = WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\SDFS",
 						"path") + File.separator + "bin" + File.separator;
+				if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS_2008) {
+					libpath = libpath + File.separator + "2008";
+				} else {
+					libpath = libpath + File.separator + "2012";
+				}
 				ArrayList<String> al = new ArrayList<String>();
 				al.add(libpath);
 				RocksDB.loadLibrary(al);

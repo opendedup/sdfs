@@ -87,7 +87,17 @@ Function .onInit
 FunctionEnd
 
 
+
 Section "SDFS Setup" SecMain
+  IfFileExists "$INSTDIR\*.*" file_found done 
+  file_found:
+	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
+	RMDir /r "$INSTDIR\bin"
+	RMDir /r "$INSTDIR\lib"
+	Goto done
+  noupgrade:
+	Quit
+  done:
   
   SetOutPath "$INSTDIR"
   SectionIn RO
@@ -103,7 +113,8 @@ Section "SDFS Setup" SecMain
   ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-
+  
+	
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "DisplayName" "SDFS ${VERSION}  (remove only)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "UninstallString" '"$INSTDIR\Uninstall.exe"'
