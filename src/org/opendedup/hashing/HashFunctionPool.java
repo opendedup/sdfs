@@ -69,8 +69,10 @@ public class HashFunctionPool {
 			Main.MAPVERSION = 3;
 			max_hash_cluster = Main.CHUNK_LENGTH / HashFunctionPool.minLen;
 		}
-		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType + " hash length = " + hashLength);
+		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType + " hash length = " + hashLength + " maxhashcluster= " + max_hash_cluster + " chunk-length=" + Main.CHUNK_LENGTH + " minlen=" + minLen);
 	}
+	
+	
 
 	public static AbstractHashEngine borrowObject() throws IOException {
 		AbstractHashEngine hc = null;

@@ -24,7 +24,7 @@ public class Main {
 		
 	}
 	
-	
+	public static int hlVersion = 0;
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = false;
 	public static int hashSeed=6442;
@@ -116,7 +116,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.6.0.8";
+	public static String version = "3.6.0.9";
 
 	public static boolean readAhead = false;
 	

@@ -54,6 +54,8 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.events.DataHashed;
+import org.opendedup.sdfs.io.events.SFileClosed;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -437,7 +439,8 @@ public class SparseDedupFile implements DedupFile {
 						try {
 							List<Finger> fs = null;
 							fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(), this.GUID);
-
+							DataHashed dh = new DataHashed(this.mf,this,fs);
+							eventBus.post(dh);
 							HashMap<ByteArrayWrapper, Finger> mp = new HashMap<ByteArrayWrapper, Finger>();
 							for (Finger f : fs) {
 								ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
@@ -1040,23 +1043,26 @@ public class SparseDedupFile implements DedupFile {
 				}
 				if (!this.deleted) {
 					try {
+						this.bdb.sync();
+					} catch (Exception e) {
+					}
+					
+					this.bdb = null;
+					this.closed = true;
+					try {
 
 						MetaFileStore.getMF(mf.getPath()).sync();
 						eventBus.post(new SFileWritten(this));
+						eventBus.post(new SFileClosed(this));
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("error while syncing file in close", e);
 					}
-				}
-				try {
-					this.bdb.sync();
-				} catch (Exception e) {
+					
 				}
 				try {
 					this.bdb.close();
 				} catch (Exception e) {
 				}
-				this.bdb = null;
-				this.closed = true;
 
 			}
 			if (this.toOccured) {

@@ -144,6 +144,7 @@ public class VolumeConfigWriter {
 	private String volumeType = "standard";
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
+	private String glacierClass="standard";
 	private long sn = new Random().nextLong();
 	
 
@@ -290,6 +291,12 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("glacier-in-days")) {
 			this.glacierInDays = Integer.parseInt(cmd.getOptionValue("glacier-in-days"));
 			this.refreshBlobs = true;
+			if(cmd.hasOption("glacier-restore-class")) {
+				String cln = cmd.getOptionValue("glacier-restore-class");
+				if(cln.equalsIgnoreCase("expedited") || cln.equalsIgnoreCase("standard") || cln.equalsIgnoreCase("bulk")) {
+					glacierClass = cln;
+				}
+			}
 		}
 		if(cmd.hasOption("azurearchive-in-days")) {
 			this.aruzreArchiveInDays = Integer.parseInt(cmd.getOptionValue("azurearchive-in-days"));
@@ -768,6 +775,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("refresh-blobs", Boolean.toString(this.refreshBlobs));
 				extended.setAttribute("glacier-archive-days", Integer.toString(this.glacierInDays));
+				extended.setAttribute("glacier-tier", this.glacierClass);
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
@@ -1210,6 +1218,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("glacier-restore-class")
+				.withDescription(
+						"Set the class used to restore glacier data. ")
+				.hasArg().withArgName("expedited|standard|bulk").create());
 		
 		options.addOption(OptionBuilder.withLongOpt("aws-aim")
 				.withDescription("Use aim authentication for access to AWS S3").create());

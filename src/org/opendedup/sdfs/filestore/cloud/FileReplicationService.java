@@ -442,7 +442,6 @@ public class FileReplicationService {
 		} finally {
 			removeLock(evt.sf.getPath());
 		}
-
 	}
 
 	@Subscribe

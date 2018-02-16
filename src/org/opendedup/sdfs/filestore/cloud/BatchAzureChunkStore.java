@@ -356,7 +356,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			Main.REFRESH_BLOBS = true;
 			Main.checkArchiveOnRead = true;
+			SDFSLogger.getLog().info("Azure in days = " + this.tierInDays + " tier-immediately=" + this.tierImmedately + " tier-level=" +this.tier);
 		}
+		
 		
 		// System.setProperty("http.keepalive", "true");
 
@@ -1007,7 +1009,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						for (BlobDataTracker bt : tri) {
 							String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 									Main.chunkStoreEncryptionEnabled);
-
 							try {
 								SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
 								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
@@ -1018,7 +1019,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 											+ blob.getProperties().getStandardBlobTier());
 								}
 								bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
-
 							} catch (Throwable e) {
 								SDFSLogger.getLog().warn("unable to change storage status for blocks/" + hashString, e);
 							}

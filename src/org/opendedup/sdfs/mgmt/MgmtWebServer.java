@@ -1037,19 +1037,8 @@ public class MgmtWebServer implements Container {
 					// SDFSLogger.getLog().info("io path=" + pth);
 					io.processIo(request, response, pth);
 				} else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
-					long time = System.currentTimeMillis();
-					response.setDate("Date", time);
-					response.setDate("Last-Modified", time);
-					String guid = request.getTarget().substring(Main.matcher.getWPath().length());
-					// SDFSLogger.getLog().info("path=" + request.getTarget());
-					// SDFSLogger.getLog().info("guid=" + guid);
-					guid = guid.split("\\?")[0];
-					// SDFSLogger.getLog().info("guid=" + guid);
-					String pth = guid.split("/")[0];
-					// SDFSLogger.getLog().info("pth=" + pth);
-					long start = Long.parseLong(guid.split("/")[1]);
-					pth = URLDecoder.decode(pth, "UTF-8");
-					Main.matcher.getResult(pth, start, response);
+					
+					Main.matcher.getResult(request.getTarget(), 0, response);
 				} else if (request.getTarget().startsWith(METADATA_PATH)) {
 					long time = System.currentTimeMillis();
 					response.setDate("Date", time);

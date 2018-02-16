@@ -1877,6 +1877,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 		}
+		
 		long dur = System.currentTimeMillis() - tm;
 		SDFSLogger.getLog().debug(dur + " len=" + f.length());
 		if (this.compactStaged)
@@ -1913,12 +1914,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			uuid = "default";
 		HashBlobArchive ar = writableArchives.get(uuid);
 		if(ar != null) {
-			while (!ar.upload(ar.id)) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-
-				}
+			synchronized (ar.LOCK) {
+				ar.LOCK.notify();
 			}
 		}
 	}
@@ -1970,6 +1967,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 		closed = true;
 
 		SDFSLogger.getLog().info("Closing HashBlobArchive in flush=" + rchunks.size());
+		for(HashBlobArchive ar : rchunks.values()) {
+			synchronized (ar.LOCK) {
+				ar.LOCK.notify();
+			}
+		}
 		while (rchunks.size() > 0) {
 			try {
 				Thread.sleep(1);

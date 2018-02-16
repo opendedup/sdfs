@@ -288,40 +288,31 @@ public class Config {
 		// Makes sure writes are sync'd when set to true.
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
 		Main.writeThreads = Integer.parseInt(cache.getAttribute("write-threads"));
-		if (cache.hasAttribute("hash-size")) {
-			short hsz = Short.parseShort(cache.getAttribute("hash-size"));
-			if (hsz == 16)
-				Main.hashType = HashFunctionPool.TIGER_16;
-			if (hsz == 24)
-				Main.hashType = HashFunctionPool.TIGER_24;
-			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
-		}
+		if (cache.hasAttribute("min-variable-segment-size")) {
 
+			Main.MIN_CHUNK_LENGTH = (Integer.parseInt(cache.getAttribute("min-variable-segment-size")) * 1024) - 1;
+
+		} 
 		if (cache.hasAttribute("hash-type")) {
 			Main.hashType = cache.getAttribute("hash-type");
 			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 		}
+		
 		if (cache.hasAttribute("hash-seed")) {
 			Main.hashSeed = Integer.parseInt(cache.getAttribute("hash-seed"));
 		}
 		Main.dedupFiles = Boolean.parseBoolean(cache.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-		if (cache.hasAttribute("min-variable-segment-size")) {
-
-			HashFunctionPool.minLen = (Integer.parseInt(cache.getAttribute("min-variable-segment-size")) * 1024) - 1;
-
-		} else {
-			HashFunctionPool.minLen = Main.MIN_CHUNK_LENGTH;
-		}
-
+		
 		if (cache.hasAttribute("variable-window-size"))
 			HashFunctionPool.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
 			HashFunctionPool.maxLen = Integer.parseInt(cache.getAttribute("max-variable-segment-size")) * 1024;
-
+ 
 		} else {
 			HashFunctionPool.maxLen = Main.CHUNK_LENGTH;
 		}
+		
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 
 		if (cache.hasAttribute("replication-threads"))
