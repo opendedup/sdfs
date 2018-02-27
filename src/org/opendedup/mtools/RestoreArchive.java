@@ -90,29 +90,22 @@ public class RestoreArchive implements Runnable {
 			else
 				mp = LongByteArrayMap.getMap(mapFile.getName().substring(0, mapFile.getName().length() - 4),
 						f.getLookupFilter());
-			SDFSLogger.getLog().info("2");
 			mp.iterInit();
-			SDFSLogger.getLog().info("3");
 			SparseDataChunk ck = mp.nextValue(false);
-			SDFSLogger.getLog().info("4");
 			while (ck != null) {
-				SDFSLogger.getLog().info("5");
 				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
-					SDFSLogger.getLog().info("5-1");
 					String req = HCServiceProxy.restoreBlock(p.hash);
-					SDFSLogger.getLog().info("5-2");
 					if (req != null && !this.restoreRequests.contains(req)) {
 						this.restoreRequests.add(req);
-						SDFSLogger.getLog().info("will restore " + req);
+						SDFSLogger.getLog().info("will restore " + req + " from " + f.getPath());
 						this.fEvt.maxCt++;
 						this.totalArchives.incrementAndGet();
 					}
 				}
-				SDFSLogger.getLog().info("6");
 				ck = mp.nextValue(false);
 			}
-			SDFSLogger.getLog().info("Restore Initiated for " + this.restoreRequests.size());
+			SDFSLogger.getLog().info("Restore Initiated for " + this.restoreRequests.size() + " for file " + f.getPath());
 
 		} catch (Throwable e) {
 			try {

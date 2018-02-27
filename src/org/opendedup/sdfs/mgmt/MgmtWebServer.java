@@ -1030,7 +1030,7 @@ public class MgmtWebServer implements Container {
 					response.setCode(404);
 					PrintStream body = response.getPrintStream();
 					body.println("invalid path " + reqPath.getPath());
-					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
+					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());	
 					body.close();
 				} else if (request.getTarget().startsWith(IO_PATH)) {
 					String pth = request.getTarget().substring(IO_PATH.length()).split("\\?")[0];
@@ -1045,7 +1045,6 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					String path = Main.volume.getPath() + File.separator
 							+ request.getTarget().substring(METADATA_PATH.length());
-					path = path.split("\\?")[0];
 					path = URLDecoder.decode(path, "UTF-8");
 					File f = new File(path);
 					if (!f.exists()) {
@@ -1063,8 +1062,19 @@ public class MgmtWebServer implements Container {
 				} else if (request.getTarget().startsWith(METADATA_INFO_PATH)) {
 					String path = Main.volume.getPath() + File.separator
 							+ request.getTarget().substring(METADATA_INFO_PATH.length());
-
-					path = path.split("\\?")[0];
+					String [] pe = path.split("\\?");
+					
+					path = pe[0];
+					int num = 100;
+					String uuid = null;
+					if(qry.containsKey("num")) {
+							num = Integer.parseInt(qry.get("num"));
+					}
+					if(qry.containsKey("nextmarker")) {
+						uuid = qry.get("nextmarker");
+						if(uuid.length() < 0)
+							uuid = null;
+					}
 					path = URLDecoder.decode(path, "UTF-8");
 					File f = new File(path);
 					if (!f.exists()) {
@@ -1080,7 +1090,7 @@ public class MgmtWebServer implements Container {
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
 						PrintStream body = response.getPrintStream();
-						body.println(GetJSONAttributes.getResult(path));
+						body.println(GetJSONAttributes.getResult(path,uuid,num));
 						body.close();
 					}
 				} else if (request.getTarget().startsWith(MAPDATA_PATH)) {

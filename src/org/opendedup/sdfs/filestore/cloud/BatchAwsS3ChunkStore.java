@@ -41,6 +41,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
@@ -98,21 +98,27 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.s3.iterable.S3Objects;
+import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GlacierJobParameters;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.model.Tier;
+import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.lifecycle.LifecycleFilter;
 import com.amazonaws.services.s3.model.lifecycle.LifecyclePrefixPredicate;
 import com.google.common.io.BaseEncoding;
@@ -126,7 +132,7 @@ import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
 
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 /**
  *
@@ -168,7 +174,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
 	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
-
+	TransferManager tx = null;
 	static {
 		try {
 
@@ -260,7 +266,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				nmd.setContentLength(sz.length);
 				nmd.setUserMetadata(md);
 				try {
-
+					
 					if (this.simpleMD)
 						this.updateObject(binm, nmd);
 					else
@@ -276,7 +282,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							throw new IOException(e2);
 						}
 					} else {
-
 						throw new IOException(e1);
 					}
 				} catch (Exception e1) {
@@ -288,6 +293,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
 		} finally {
 			try {
+				tx.shutdownNow(false);
 				s3Service.shutdown();
 			} catch (Exception e) {
 				SDFSLogger.getLog().debug("error while closing bucket " + this.name, e);
@@ -783,6 +789,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				HashBlobArchive.setReadSpeed(rsp, false);
 				HashBlobArchive.setWriteSpeed(wsp, false);
 			}
+			tx = TransferManagerBuilder.standard().withS3Client(s3Service).build();
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
@@ -1034,8 +1041,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		IOException e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
-				byte[] k = arc.getBytes();
-				int csz = toIntExact(k.length);
+				int csz = toIntExact(arc.getFile().length());
 				ObjectMetadata md = new ObjectMetadata();
 				md.addUserMetadata("size", Integer.toString(arc.uncompressedLength.get()));
 				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
@@ -1048,19 +1054,20 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				md.setContentType("binary/octet-stream");
 				md.setContentLength(csz);
 				if (md5sum) {
-					ByteArrayInputStream in = new ByteArrayInputStream(k);
+					FileInputStream in = new FileInputStream(arc.getFile());
 					String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(in));
 					md.setContentMD5(mds);
 					md.addUserMetadata("md5sum", mds);
 					IOUtils.closeQuietly(in);
 				}
-				PutObjectRequest req = new PutObjectRequest(this.name, "blocks/" + haName + this.dExt,
-						new ByteArrayInputStream(k), md);
-
-				if (this.simpleS3)
-					s3Service.putObject(req);
-				else
-					this.multiPartUpload(req);
+				FileInputStream in = new FileInputStream(arc.getFile());
+				PutObjectRequest req = new PutObjectRequest(this.name, "blocks/" + haName + this.dExt,arc.getFile()).withMetadata(md);
+				try {
+					in.close();
+				}catch(Exception e1s) {
+					
+				}
+				this.multiPartUpload(req,arc.getFile());
 				if (this.simpleMD)
 					this.updateObject("blocks/" + haName, md);
 				byte[] msg = Long.toString(System.currentTimeMillis()).getBytes();
@@ -1963,8 +1970,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					in = new FileInputStream(p);
 					md.setContentLength(p.length());
 					try {
-						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
-						s3Service.putObject(req);
+						PutObjectRequest req = new PutObjectRequest(this.name, objName, p).withMetadata(md);
+						this.multiPartUpload(req, p);
 						if (this.isClustered())
 							this.checkoutFile(pth);
 						if (this.simpleMD)
@@ -1987,7 +1994,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							throw new IOException(e1);
 						}
 					} catch (Exception e1) {
-						// SDFSLogger.getLog().error("error uploading", e1);
 						throw new IOException(e1);
 					}
 				} else {
@@ -1999,11 +2005,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						String mds = BaseEncoding.base64().encode(md5Hash);
 						md.setContentMD5(mds);
 						md.addUserMetadata("md5sum", mds);
-						in = new BufferedInputStream(new FileInputStream(p), 32768);
 
 						md.setContentLength(p.length());
 						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
-						multiPartUpload(req);
+						multiPartUpload(req,p);
 						if (this.isClustered())
 							this.checkoutFile(pth);
 					} catch (AmazonS3Exception e1) {
@@ -2042,31 +2047,64 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	}
 
-	private void multiPartUpload(PutObjectRequest req)
+	private void multiPartUpload(PutObjectRequest req,File file)
 			throws AmazonServiceException, AmazonClientException, InterruptedException {
-		TransferManager tx = null;
-		try {
-			if (awsCredentials != null)
-				tx = new TransferManager(awsCredentials);
-			else
-				tx = new TransferManager(new InstanceProfileCredentialsProvider());
-			Upload myUpload = tx.upload(req);
-			myUpload.waitForCompletion();
-		} finally {
-			if (tx != null)
-				tx.shutdownNow();
-		}
+		// Create a list of UploadPartResponse objects. You get one of these
+        // for each part upload.
+        List<PartETag> partETags = new ArrayList<PartETag>();
+
+        // Step 1: Initialize.
+        InitiateMultipartUploadRequest initRequest = new 
+             InitiateMultipartUploadRequest(this.name, req.getKey());
+        InitiateMultipartUploadResult initResponse = 
+        	                   this.s3Service.initiateMultipartUpload(initRequest);
+
+        long contentLength = file.length();
+        long partSize = 10L*1024*1024*1024; // Set part size to 10 MB.
+
+        try {
+            // Step 2: Upload parts.
+            long filePosition = 0;
+            for (int i = 1; filePosition < contentLength; i++) {
+                // Last part can be less than 10 MB. Adjust part size.
+            	partSize = Math.min(partSize, (contentLength - filePosition));
+            	
+                // Create request to upload a part.
+                UploadPartRequest uploadRequest = new UploadPartRequest()
+                    .withBucketName(this.name).withKey(req.getKey())
+                    .withUploadId(initResponse.getUploadId()).withPartNumber(i)
+                    .withFileOffset(filePosition)
+                    .withFile(file)
+                    .withPartSize(partSize);
+
+                // Upload part and add response to our list.
+                partETags.add(
+                		this.s3Service.uploadPart(uploadRequest).getPartETag());
+
+                filePosition += partSize;
+            }
+
+            // Step 3: Complete.
+            CompleteMultipartUploadRequest compRequest = new 
+                         CompleteMultipartUploadRequest(
+                                    this.name, 
+                                    req.getKey(), 
+                                    initResponse.getUploadId(), 
+                                    partETags);
+
+            s3Service.completeMultipartUpload(compRequest);
+        } catch (Exception e) {
+        	SDFSLogger.getLog().warn("unable to upload object " + req.getKey(), e);
+        	s3Service.abortMultipartUpload(new AbortMultipartUploadRequest(
+                    this.name, req.getKey(), initResponse.getUploadId()));
+        }
 
 	}
 
+	
 	private void multiPartDownload(String keyName, File f)
 			throws AmazonServiceException, AmazonClientException, InterruptedException {
-		TransferManager tx = null;
 		try {
-			if (awsCredentials != null)
-				tx = new TransferManager(awsCredentials);
-			else
-				tx = new TransferManager(new InstanceProfileCredentialsProvider());
 			Download myDownload = tx.download(this.name, keyName, f);
 			myDownload.waitForCompletion();
 		} finally {
@@ -3204,7 +3242,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		return this.metaStore;
 	}
 
-	Random rand = new Random();
+	SecureRandom rand = new SecureRandom();
 
 	private long getLongID() {
 		byte[] k = new byte[7];
@@ -3221,8 +3259,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public long getNewArchiveID() throws IOException {
 
 		long pid = this.getLongID();
-		while (pid < 100 && this.fileExists(pid))
+		while (pid < 100 && this.fileExists(pid)) 
 			pid = this.getLongID();
+		
 		return pid;
 	}
 
