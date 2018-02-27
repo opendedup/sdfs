@@ -21,6 +21,7 @@ package org.opendedup.sdfs.filestore.cloud;
 import static java.lang.Math.toIntExact;
 
 
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -42,6 +43,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,7 +52,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
@@ -2592,7 +2593,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 		return this.metaStore;
 	}
 
-	Random rand = new Random();
+	SecureRandom rand = new SecureRandom();
 
 	private long getLongID() {
 		byte [] k = new byte[7];
