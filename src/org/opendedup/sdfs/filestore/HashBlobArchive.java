@@ -616,15 +616,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	public static void buildCache() throws IOException {
-		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE).concurrencyLevel(64)
+	private static AtomicLong cSz = new AtomicLong();
+	
+	private static void buildCache() throws IOException {
+		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE)
 				.weigher(new Weigher<Long, HashBlobArchive>() {
 					public int weigh(Long k, HashBlobArchive g) {
-						SDFSLogger.getLog().debug("getting size for " + k + " size=" + g.getFSize());
-						return g.getFSize();
+						SDFSLogger.getLog().info("getting size for " + k + " size=" + Math.toIntExact(g.getFSize()));
+						
+						return Math.toIntExact(g.getFSize());
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
+						SDFSLogger.getLog().info("removing " + removal.getKey());
+						cSz.addAndGet(-1 * removal.getValue().getFSize());
 						removal.getValue().removeCache();
 					}
 				}).build(new CacheLoader<Long, HashBlobArchive>() {
@@ -637,7 +642,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							} else
 								har = new HashBlobArchive(f, hashid);
 							har.cached = true;
-
+							cSz.addAndGet(har.getFSize());
 							return har;
 						} catch (DataArchivedException e) {
 							throw e;
@@ -672,16 +677,17 @@ public class HashBlobArchive implements Runnable, Serializable {
 				throw new IOException("Unable to intialize because available staging size of " + psz
 						+ " is less than requested local cache of " + csz + " for " + staged_chunk_location.getPath());
 			}
+			archives.cleanUp();
 
-			SDFSLogger.getLog().info("Cached " + cAc + " archives.");
+			SDFSLogger.getLog().info("Cached " + cAc + " archives of size "+ cSz.get() +".");
 		}
 	}
 
 	static long cAc = 0;
 
-	public static void traverseCache(File f) {
+	private static void traverseCache(File f) {
 		if (f.isDirectory() && !f.getName().equalsIgnoreCase("outgoing") && !f.getName().equalsIgnoreCase("syncstaged")
-				&& f.getName().equalsIgnoreCase("ecstaged") && !f.getName().equalsIgnoreCase("metadata")
+				&& !f.getName().equalsIgnoreCase("ecstaged") && !f.getName().equalsIgnoreCase("metadata")
 				&& !f.getName().equalsIgnoreCase("blocks") && !f.getName().equalsIgnoreCase("keys")
 				&& !f.getName().equalsIgnoreCase("sync")) {
 			File[] fs = f.listFiles();
@@ -690,11 +696,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 					traverseCache(z);
 				} else {
 					try {
-						if (!z.getPath().endsWith(".map") && !z.getPath().endsWith(".map1")
-								&& !z.getPath().endsWith(".md")) {
+						if (!z.getPath().contains(".")) {
 							Long id = Long.parseLong(z.getName());
-							HashBlobArchive har = new HashBlobArchive(z, id);
-							archives.put(id, har);
+							//HashBlobArchive har = new HashBlobArchive(z, id);
+							archives.get(id);
 							cAc++;
 						}
 					} catch (Exception e) {
@@ -958,11 +963,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return this.id;
 	}
 
-	private int getFSize() {
+	private long getFSize() {
 		long k = 0;
 		if (this.f.exists())
 			k = this.f.length();
-		return Math.toIntExact(k);
+		return k;
 	}
 
 	AtomicLong np = new AtomicLong(offset);
