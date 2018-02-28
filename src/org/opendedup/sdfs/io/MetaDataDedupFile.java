@@ -47,6 +47,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -209,7 +211,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @throws IOException
 	 */
 	public void addXAttribute(String name, String value) throws IOException {
-		addXAttribute(name, value, true);
+		addXAttribute(name, value, true,true);
 
 	}
 
@@ -224,7 +226,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 *            TODO
 	 * @throws IOException
 	 */
-	public void addXAttribute(String name, String value, boolean propigateEvent) throws IOException {
+	public void addXAttribute(String name, String value, boolean propigateEvent,boolean write) throws IOException {
 		this.writeLock.lock();
 		try {
 			if (name.equals("lookup.filter")) {
@@ -243,9 +245,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				this.dirty = true;
 				eventBus.post(new MMetaUpdated(this, name, value));
 				this.unmarshal();
-			} else {
+			} else if(write) {
 				this.writeFile(false);
+			} else {
+				this.dirty = true;
 			}
+			
 		} finally {
 			this.writeLock.unlock();
 		}
@@ -1643,7 +1648,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.extendedAttrs.size() > 0) {
 				for (String key : this.extendedAttrs.keySet()) {
 					if (key.trim().length() > 0) {
-						dataset.addProperty("extendedattrs." + key, this.extendedAttrs.get(key));
+						if(StringUtils.isNumeric(this.extendedAttrs.get(key))) {
+							long l = Long.parseLong(this.extendedAttrs.get(key));
+							dataset.addProperty("extendedattrs." + key, l);
+						}else if(this.extendedAttrs.get(key).length() < 50) {
+							dataset.addProperty("extendedattrs." + key, this.extendedAttrs.get(key));
+						}
 					}
 				}
 			}
@@ -1711,11 +1721,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (!this.extendedAttrs.isEmpty()) {
 				Element ear = doc.createElement("extended-attributes");
 				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
-
+					try {
 					if (en.getKey().length() > 0) {
-						Element ar = doc.createElement(en.getKey());
-						ar.setAttribute("value", en.getValue());
+						Element ar = doc.createElement(StringEscapeUtils.escapeXml11(en.getKey()));
+						ar.setAttribute("value", StringEscapeUtils.escapeXml11(en.getValue()));
 						ear.appendChild(ar);
+					}
+					}catch(Exception e) {
+						SDFSLogger.getLog().warn("unable to xml encode key " + StringEscapeUtils.escapeXml11(en.getKey()),e);
 					}
 
 				}

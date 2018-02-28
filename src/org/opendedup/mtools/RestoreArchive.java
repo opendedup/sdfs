@@ -124,9 +124,7 @@ public class RestoreArchive implements Runnable {
 			}
 			SDFSLogger.getLog().info("Restore Initiated for " + this.restoreRequests.size() + " for " + f.getPath());
 
-		} catch (
-
-		Throwable e) {
+		} catch (Throwable e) {
 			try {
 				SDFSLogger.getLog().error("error while restoring file [" + f.getPath() + "]", e);
 			} catch (Exception e1) {

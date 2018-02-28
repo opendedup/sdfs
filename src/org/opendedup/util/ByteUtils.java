@@ -22,6 +22,9 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.opendedup.logging.SDFSLogger;
+
 public class ByteUtils {
 
 	public static byte[] serializeHashMap(HashMap<String, String> map) {
@@ -29,15 +32,16 @@ public class ByteUtils {
 		Iterator<String> iter = map.keySet().iterator();
 		while (iter.hasNext()) {
 			String key = iter.next();
-			keys.append(key);
-			if (iter.hasNext())
-				keys.append(",");
+				keys.append(StringEscapeUtils.escapeCsv(key));
+				if (iter.hasNext())
+					keys.append(",");
+
 		}
 		StringBuffer values = new StringBuffer();
 		iter = map.values().iterator();
 		while (iter.hasNext()) {
 			String key = iter.next();
-			values.append(key);
+				values.append(StringEscapeUtils.escapeCsv(key));
 			if (iter.hasNext())
 				values.append(",");
 		}
@@ -49,6 +53,7 @@ public class ByteUtils {
 		buf.put(kb);
 		buf.putInt(vb.length);
 		buf.put(vb);
+
 		return buf.array();
 	}
 
@@ -62,7 +67,11 @@ public class ByteUtils {
 		String[] values = new String(vb).split(",");
 		HashMap<String, String> map = new HashMap<String, String>();
 		for (int i = 0; i < keys.length; i++) {
-			map.put(keys[i], values[i]);
+			try {
+				map.put(StringEscapeUtils.unescapeCsv(keys[i]), StringEscapeUtils.unescapeCsv(values[i]));
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to get value for " + i + " " + keys[i] + " vl" +values.length,e);
+			}
 		}
 		return map;
 	}

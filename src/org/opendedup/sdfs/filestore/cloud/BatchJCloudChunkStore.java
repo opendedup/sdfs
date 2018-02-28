@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -22,13 +23,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
@@ -2272,7 +2273,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		return this.metaStore;
 	}
 	
-Random rand = new Random();
+	SecureRandom rand = new SecureRandom();
 	
 	private long getLongID() {
 		byte [] k = new byte[7];
