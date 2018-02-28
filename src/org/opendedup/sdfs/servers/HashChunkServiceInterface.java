@@ -36,7 +36,7 @@ public interface HashChunkServiceInterface {
 	/**
 	 * @return the chunksFetched
 	 */
-	public abstract String restoreBlock(byte[] hash) throws IOException;
+	public abstract String restoreBlock(byte[] hash,long id) throws IOException;
 
 	public abstract boolean blockRestored(String id) throws IOException;
 	
