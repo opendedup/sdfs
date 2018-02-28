@@ -70,7 +70,7 @@ public class LBF implements Serializable {
 			FilterBuilder fb = new FilterBuilder(toIntExact(sz), fpp).countingBits(32);
 			filter = new CountingBloomFilterMemory<>(fb);
 		}else {
-		this.bfs = BloomFilter.create(getFunnel(), sz, fpp);
+		this.bfs = BloomFilter.create(getFunnel(), Math.toIntExact(sz), fpp);
 		}
 	}
 

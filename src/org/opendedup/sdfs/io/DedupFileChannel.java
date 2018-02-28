@@ -74,7 +74,7 @@ public class DedupFileChannel {
 		this.mf = this.df.mf;
 		eventBus.register(df.bdb);
 		if (Main.checkArchiveOnOpen) {
-			this.recoverArchives();
+			this.recoverArchives(-1);
 		}
 		
 		if (SDFSLogger.isDebug())
@@ -82,8 +82,9 @@ public class DedupFileChannel {
 					"Initializing Cache " + mf.getPath());
 	}
 
-	private void recoverArchives() throws IOException {
-		RestoreArchive ar = new RestoreArchive(mf);
+	private void recoverArchives(long id) throws IOException {
+		try {
+		RestoreArchive ar = new RestoreArchive(mf,id);
 		Thread th = new Thread(ar);
 		th.start();
 		while (!ar.fEvt.isDone()) {
@@ -96,6 +97,10 @@ public class DedupFileChannel {
 		if (ar.fEvt.level != SDFSEvent.INFO) {
 			throw new IOException("unable to restore all archived data for "
 					+ mf.getPath());
+		}
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to initiate archive restore for " + id,e);
+			throw new IOException(e);
 		}
 	}
 
@@ -371,7 +376,7 @@ public class DedupFileChannel {
 								+ " at "
 								+ pos
 								+ ". Recovering data from archive. This may take up to 4 hours for " +e.getPos(),e);
-				this.recoverArchives();
+				this.recoverArchives(e.getPos());
 				this.writeFile(buf, len, pos, offset, propigate);
 			} else
 				throw e;
@@ -581,7 +586,7 @@ public class DedupFileChannel {
 										+ " at "
 										+ startPos
 										+ ". Recovering data from archive. This may take up to 4 hours " + e.getPos(),e);
-						this.recoverArchives();
+						this.recoverArchives(e.getPos());
 						this.read(buf, bufPos, siz, filePos);
 					} else
 						throw e;

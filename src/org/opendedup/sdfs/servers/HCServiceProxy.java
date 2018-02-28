@@ -380,8 +380,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static String restoreBlock(byte[] hash) throws IOException {
-		return hcService.restoreBlock(hash);
+	public static String restoreBlock(byte[] hash,long id) throws IOException {
+		return hcService.restoreBlock(hash,id);
 	}
 
 	public static boolean blockRestored(String id) throws IOException {

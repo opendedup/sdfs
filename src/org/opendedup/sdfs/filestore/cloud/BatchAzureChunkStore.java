@@ -801,6 +801,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (this.tier != null && this.tier.equals(StandardBlobTier.ARCHIVE)) {
 					blob.downloadAttributes();
 					if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
+						this.restoreBlock(id, new byte [16]);
 						throw new DataArchivedException(id, null);
 					}
 				}
@@ -926,6 +927,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						}
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to remove " + id + " from tablelob", e);
+						
 					}
 					if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
 						kblob.delete();
@@ -1515,7 +1517,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public String restoreBlock(long id, byte[] hash) throws IOException {
 		if (id == -1) {
-			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
+			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash) + " id " + id);
 			return null;
 		}
 		String haName = this.restoreRequests.get(new Long(id));
@@ -1538,6 +1540,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				return null;
 			}
 		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to restore " + id,e);
 			throw new IOException(e);
 		}
 
@@ -1547,6 +1550,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public boolean blockRestored(String id) {
 		try {
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + id);
+			if(!blob.exists())
+				return true;
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.HOT)) {
 				return true;

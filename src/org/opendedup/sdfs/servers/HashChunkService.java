@@ -256,8 +256,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public String restoreBlock(byte[] hash) throws IOException {
-		return hs.restoreBlock(hash);
+	public String restoreBlock(byte[] hash,long id) throws IOException {
+		return hs.restoreBlock(hash,id);
 	}
 
 	@Override
