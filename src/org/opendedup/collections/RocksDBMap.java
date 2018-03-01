@@ -89,6 +89,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				} else {
 					libpath = libpath + File.separator + "2012";
 				}
+				libpath = new File(libpath + File.separator).getPath();
+				SDFSLogger.getLog().info("jni libpath = " +libpath);
 				ArrayList<String> al = new ArrayList<String>();
 				al.add(libpath);
 				RocksDB.loadLibrary(al);

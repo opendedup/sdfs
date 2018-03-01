@@ -3,10 +3,9 @@
 ; Sets the theme path
 
 
-!define VERSION '3.6.0.10'
+!define VERSION '3.6.0.11'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
-
 
 ;--------------------------------
 ;Include Modern UI
@@ -21,6 +20,8 @@
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "sdfs.ico"
 !define MUI_HEADERIMAGE_RIGHT
+!define SF_USELECTED  0
+
 ;--------------------------------
 ;General
   ;Name and file
@@ -35,6 +36,18 @@
   RequestExecutionLevel admin
   BrandingText "${MUI_PRODUCT} ${VERSION}"
   
+
+!macro SecUnSelect SecId
+  Push $0
+  IntOp $0 ${SF_USELECTED} | ${SF_RO}
+  SectionSetFlags ${SecId} $0
+  SectionSetText  ${SecId} ""
+  Pop $0
+!macroend
+
+!define UnSelectSection '!insertmacro SecUnSelect'
+
+
 
 
 ;--------------------------------
@@ -65,40 +78,23 @@
 ;Version Information
 
 
-  VIProductVersion "3.6.0.10"
+  VIProductVersion "3.6.0.11"
 
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.10"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.10"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.11"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.11"
 ;--------------------------------
 ;Installer Sections
 
-Function .onInit
- ${If} ${RunningX64}
-    
-  ${Else}
-	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
-      Abort
-  ${EndIf}
-FunctionEnd
+
 
 
 
 Section "SDFS Setup" SecMain
-  IfFileExists "$INSTDIR\*.*" file_found done 
-  file_found:
-	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
-	RMDir /r "$INSTDIR\bin"
-	RMDir /r "$INSTDIR\lib"
-	Goto done
-  noupgrade:
-	Quit
-  done:
-  
   SetOutPath "$INSTDIR"
   SectionIn RO
   File *
@@ -142,7 +138,24 @@ Function un.onUninstSuccess
   MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
 FunctionEnd
   
-
+Function .onInit
+ ${If} ${RunningX64}
+    
+  ${Else}
+	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
+      Abort
+  ${EndIf}
+  IfFileExists "$INSTDIR\*.*" file_found done 
+  file_found:
+	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
+	RMDir /r "$INSTDIR\bin"
+	RMDir /r "$INSTDIR\lib"
+	${UnSelectSection} ${SecDokan}
+	Goto done
+  noupgrade:
+	Quit
+  done:
+FunctionEnd
 ;--------------------------------
 ;Descriptions
 
