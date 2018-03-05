@@ -934,6 +934,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						kblob.delete();
 						kblob = container.getBlockBlobReference("blocks/" + haName);
 						kblob.delete();
+						kblob = container.getBlockBlobReference("keys/" + haName);
+						kblob.delete();
+						SDFSLogger.getLog().info("deleted block " + id + " name=blocks/" + haName);
 					}
 				} else {
 					kblob.delete();
@@ -1079,6 +1082,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 								}
 								HashBlobArchive.removeCache(k.longValue());
 								if (this.deleteUnclaimed) {
+									SDFSLogger.getLog().info("checking to delete " +k.longValue());
 									this.verifyDelete(k.longValue());
 								} else {
 									// SDFSLogger.getLog().info("deleting " +

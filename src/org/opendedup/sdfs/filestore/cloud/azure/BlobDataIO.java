@@ -37,6 +37,12 @@ public class BlobDataIO {
  	    cloudTable.execute(tro);
     }
     
+    public Date getBlobDataTracker(long id,String volid) throws StorageException {
+    	TableOperation tro = TableOperation.retrieve(volid, Long.toString(id), BlobDataTracker.class);
+    	BlobDataTracker btr = cloudTable.execute(tro).getResultAsType();
+    	return btr.getTimestamp();
+    }
+    
     public void removeBlobDataTracker(long id,String volid) throws StorageException {
     	TableOperation to = TableOperation.retrieve(volid, Long.toString(id), BlobDataTracker.class);
     	BlobDataTracker btr = cloudTable.execute(to).getResultAsType();
@@ -77,7 +83,7 @@ public class BlobDataIO {
     
     
     public static void main(String [] args) throws InvalidKeyException, URISyntaxException, StorageException {
-		BlobDataIO bio = new BlobDataIO("aaaabbbb","an","an","http");
+		BlobDataIO bio = new BlobDataIO("popadopa","oddsdfsn","VKMqDgrlPFT6aMCj0f39kjllL8Jx/4rEPFKVGnNJ6wipnvGDcB/oYDx/z4CgLI0Ae5c95Bots4cJH8r6L3Qdrw==","http");
 		String volid="schwing";
 		Random rnd = new Random();
 		for(int i = 0;i<100;i++) {
@@ -93,6 +99,6 @@ public class BlobDataIO {
 			System.out.println("did not remove " + bt.getRowKey() + " k=" + k);
 		}
 		bio.removeBlobDataTracker(55, volid);
-		
+		bio.getBlobDataTracker(55, volid);
     }
 }

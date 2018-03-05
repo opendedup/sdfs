@@ -1045,6 +1045,7 @@ public class MgmtWebServer implements Container {
 					response.setDate("Last-Modified", time);
 					String path = Main.volume.getPath() + File.separator
 							+ request.getTarget().substring(METADATA_PATH.length());
+					path = path.split("\\?")[0];
 					path = URLDecoder.decode(path, "UTF-8");
 					File f = new File(path);
 					if (!f.exists()) {
