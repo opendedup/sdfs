@@ -83,7 +83,7 @@ public class BlobDataIO {
     
     
     public static void main(String [] args) throws InvalidKeyException, URISyntaxException, StorageException {
-		BlobDataIO bio = new BlobDataIO("popadopa","oddsdfsn","VKMqDgrlPFT6aMCj0f39kjllL8Jx/4rEPFKVGnNJ6wipnvGDcB/oYDx/z4CgLI0Ae5c95Bots4cJH8r6L3Qdrw==","http");
+		BlobDataIO bio = new BlobDataIO("popadopa","oddsdfsn","sss","http");
 		String volid="schwing";
 		Random rnd = new Random();
 		for(int i = 0;i<100;i++) {
