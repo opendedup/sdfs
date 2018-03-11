@@ -146,8 +146,8 @@ public class HashStore {
 		return this.bdb.get(hash);
 	}
 
-	public String restoreBlock(byte[] hash) throws IOException {
-		long id = this.bdb.get(hash);
+	public String restoreBlock(byte[] hash,long id) throws IOException {
+		//long id = this.bdb.get(hash);
 		return HCServiceProxy.getChunkStore().restoreBlock(id, hash);
 	}
 
@@ -156,7 +156,7 @@ public class HashStore {
 	}
 
 	/**
-	 * The method used to open and connect to the TC database.
+	 * The method used to open and connect to the database.
 	 * 
 	 * @throws IOException
 	 * @throws HashtableFullException
@@ -175,6 +175,13 @@ public class HashStore {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
 			SDFSLogger.getLog().info("Maximum Number of Entries is " + entries);
+			if(Main.hashesDBClass.equals("org.opendedup.collections.ShardedProgressiveFileBasedCSMap2")) {
+				SDFSLogger.getLog().info("updating hashesdb class to org.opendedup.collections.RocksDBMap");
+				Main.hashesDBClass = "org.opendedup.collections.RocksDBMap";
+			} else if(Main.hashesDBClass.equals("backport")) {
+				Main.hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
+			}
+				
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath(),Main.fpp);

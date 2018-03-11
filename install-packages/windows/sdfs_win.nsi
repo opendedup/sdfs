@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.6.0.9'
+!define VERSION '3.6.0.10'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -65,15 +65,15 @@
 ;Version Information
 
 
-  VIProductVersion "3.6.0.7"
+  VIProductVersion "3.6.0.10"
 
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.9"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.9"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.10"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.10"
 ;--------------------------------
 ;Installer Sections
 
