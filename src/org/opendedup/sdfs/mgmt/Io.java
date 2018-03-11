@@ -678,7 +678,7 @@ public class Io {
 
 		@Override
 		public void run() {
-			SDFSLogger.getLog().debug("running refresher for " + this.path);
+			SDFSLogger.getLog().info("running refresher for " + this.path);
 			for (;;) {
 				try {
 					SparseDedupFile df = MetaFileStore.getMF(path).getDedupFile(true);
