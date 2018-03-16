@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -50,6 +51,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
+import org.opendedup.sdfs.io.events.ArchiveSync;
 import org.opendedup.sdfs.io.events.HashBlobArchiveUploaded;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
@@ -100,6 +102,8 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 	static long bufferSize = GB;
 	static long fsize = 128 * MB;
 	CassandraDedupeDB cdb = null;
+	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>();
+	
 	static {
 		RocksDB.loadLibrary();
 	}
@@ -138,7 +142,6 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 					+ " bufferSizePerDB=" + (bufferSize / dbs.length));
 			// blockConfig.setBlockCacheSize(memperDB);
 			// blockConfig.setCacheIndexAndFilterBlocks(true);
-
 			// a factory method that returns a RocksDB instance
 			wo = new WriteOptions();
 			wo.setDisableWAL(false);
@@ -151,7 +154,6 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			AtomicInteger ct = new AtomicInteger();
 			ArrayList<StartShard> shs = new ArrayList<StartShard>();
 			for (int i = 0; i < dbs.length; i++) {
-
 				BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 				// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
 				// DBOptions dbo = new DBOptions();
@@ -321,6 +323,39 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
+	}
+	
+	@Subscribe
+	@AllowConcurrentEvents
+	public void hashBlobArchiveSync(ArchiveSync evt) throws Exception{
+			ArrayList<byte[]> al = evt.getArchive().getHashes();
+			for (byte[] b : al) {
+				Lock l = this.getLock(b);
+				l.lock();
+				try {
+					ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(b));
+					if (bf != null) {
+						RocksDB db = this.getDB(b);
+						byte[] v = null;
+						try {
+							v = db.get(b);
+							if (v != null) {
+								throw new Exception("Persistent Hashtable already has an entry that exists in the temp hashtable");
+							} else {
+								db.put(wo, b, bf.array());
+							}
+							this.tempHt.remove(new ByteArrayWrapper(b));
+						} catch (Exception e) {
+								SDFSLogger.getLog().warn("unable to commit " + StringUtils.getHexString(b) + " id="
+									+ evt.getArchive().getID(), e);
+							throw new Exception();
+						}
+					} 
+				} finally {
+					l.unlock();
+				}	
+			}
+		
 	}
 
 	private ReentrantLock getLock(byte[] key) {
@@ -662,11 +697,17 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(cm.getHash());
 		l.lock();
 		try {
+			
 			try {
+				byte[] v = null;
+				if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
+					ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
+					v = bk.array();
+				}
 				RocksDB db = this.getDB(cm.getHash());
 				boolean clusterFound = false;
-				byte[] v = null;
-				v = db.get(cm.getHash());
+				if(v== null)
+					v = db.get(cm.getHash());
 				if (v == null) {
 					long hl = -1;
 					if (Main.volume.isClustered()) {
@@ -699,10 +740,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 							v = new byte[8];
 							ByteBuffer bf = ByteBuffer.wrap(v);
 							bf.putLong(cm.getcPos());
+						
 							/*
 							 * if (cm.references <= 0) bf.putLong(1); else bf.putLong(cm.references);
 							 */
-							db.put(wo, cm.getHash(), v);
+							//db.put(wo, cm.getHash(), v);
+							
 							long ct = cm.references;
 							if (cm.references <= 0)
 								ct = 1;
@@ -710,6 +753,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 							this.rmdb.delete(this.cf.get(0), v);
 							rmdb.put(this.cf.get(1), v, LongConverter.toBytes(ct));
 							rmdb.merge(this.cf.get(2), v, BaseEncoding.base64Url().encode(cm.getHash()).getBytes());
+							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
 							return new InsertRecord(true, cm.getcPos());
 						} finally {
 							al.unlock();
@@ -718,15 +762,12 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 						Lock al = this.getArchiveLock(hl);
 						al.lock();
 						try {
-
 							v = new byte[8];
 							ByteBuffer bf = ByteBuffer.wrap(v);
 							bf.putLong(hl);
-							db.put(wo, cm.getHash(), v);
 							long ct = cm.references;
 							if (cm.references <= 0)
 								ct = 1;
-							db.put(wo, cm.getHash(), v);
 							byte[] oct = rmdb.get(this.cf.get(1), v);
 							if (oct == null) {
 								HashBlobArchive.claimBlock(hl);
@@ -737,6 +778,7 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 							if (Main.volume.isClustered() && clusterFound) {
 
 							}
+							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
 							return new InsertRecord(false, hl);
 						} finally {
 							al.unlock();
@@ -804,7 +846,11 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 		try {
 
 			try {
-
+				if (this.tempHt.containsKey(new ByteArrayWrapper(key))) {
+					ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(key));
+					bf.position(0);
+					return bf.getLong();
+				}
 				byte[] v = this.getDB(key).get(key);
 				if (v == null) {
 					return -1;
@@ -1003,7 +1049,6 @@ public class CassandraDBMap implements AbstractMap, AbstractHashesMap {
 			ByteBuffer bid = ByteBuffer.wrap(id);
 			bid.putLong(aid);
 			v = rmdb.get(this.cf.get(1), id);
-
 			if (v == null) {
 				return false;
 			} else {

@@ -47,6 +47,7 @@ import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.io.events.ArchiveSync;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.HashBlobArchiveUploaded;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -383,8 +384,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 									SimpleByteArrayLongMap m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, -1);
 									wMaps.put(id, m);
 								}
-								arc.upload(id);
+								while (!arc.upload(id)) {
+									Thread.sleep(1000);
+									SDFSLogger.getLog().warn("retrying upload of " + arc.id);
 								z++;
+							}
 							}
 						} catch (Exception e) {
 							c++;
@@ -539,9 +543,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 		Lock l = slock.writeLock();
 		l.lock();
 		try {
+			int tries = 0;
 			while (rchunks.size() > 0) {
 				try {
 					Thread.sleep(1);
+					if (tries == 10) {
+						throw new IOException("Unable to set cache in 10 seconds");
+					}
+					
 				} catch (InterruptedException e) {
 					SDFSLogger.getLog().error("error while closing ", e);
 				}
@@ -883,6 +892,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
+	private synchronized void syncHashTables() {
+		eventUploadBus.post(new ArchiveSync(this));
+	}															   
 	protected static File getPath(long id) {
 		String st = Long.toString(id);
 
@@ -1594,6 +1606,32 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
+	public ArrayList<byte[]> getHashes() throws IOException {
+		Lock l = this.lock.readLock();
+		l.lock();
+		try {
+			SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
+			if (blockMap == null)
+				blockMap = maps.get(this.id);
+
+			blockMap.iterInit();
+			KeyValuePair p = blockMap.next();
+			ArrayList<byte[]> al = new ArrayList<byte[]>();
+			while (p != null) {
+				al.add(p.getKey());
+				p = blockMap.next();
+
+			}
+
+			return al;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error getting size", e);
+			throw new IOException(e);
+		} finally {
+			l.unlock();
+		}
+	}
+	
 	public long compact() throws IOException {
 		if (DISABLE_WRITE || this.writeable)
 			return 0;
@@ -1882,6 +1920,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 		}
+		try {
+			this._sync();
+		} catch (SyncFailedException e1) {
+			
+		} catch (IOException e1) {
+			
+		}
+		this.syncHashTables();
 		
 		long dur = System.currentTimeMillis() - tm;
 		SDFSLogger.getLog().debug(dur + " len=" + f.length());
@@ -1899,18 +1945,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private void _sync() throws SyncFailedException, IOException {
 		Lock l = this.lock.writeLock();
 		l.lock();
-		RandomAccessFile rf = null;
 		try {
-			rf = new RandomAccessFile(f, "rw");
-			rf.getFD().sync();
-			rf.close();
-		} finally {
-			try {
-				if (rf != null)
-					rf.close();
-			} finally {
-				l.unlock();
+			FileChannel ch = null;
+			if (!this.cached) {
+
+					ch = wOpenFiles.get(this.id);
+					if (ch != null)
+						ch.force(true);
+					SimpleByteArrayLongMap blockMap = wMaps.get(this.id);
+					if (blockMap != null)
+						blockMap.sync();
 			}
+		} finally {
+			l.unlock();
 		}
 	}
 	

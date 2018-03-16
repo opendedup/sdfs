@@ -192,16 +192,7 @@ public class Main {
 	 */
 	public static int CHUNK_LENGTH = 16 * 1024;
 	public static int MIN_CHUNK_LENGTH = (4*1024)-1;
-	/**
-	 * The version of the communication protocol being used for client <-> chunk
-	 * store network communication.
-	 */
-	public static String PROTOCOL_VERSION = "1.1";
-	/**
-	 * The ping time used to keep client to chunk store network pipes open. This
-	 * is used on the client.
-	 */
-	public static int PING_TIME = 15 * 1000;
+	
 
 	/**
 	 * The maximum number of writable chunks @see

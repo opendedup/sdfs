@@ -53,7 +53,8 @@ public class SDFSBlockDev implements BUSE, Runnable {
 		if (!f.exists()) {
 			Process p = Runtime.getRuntime().exec("modprobe nbd");
 			try {
-				p.waitFor();
+				int i = p.waitFor();
+				SDFSLogger.getLog().info("Modprobe returned " + i);
 			} catch (InterruptedException e) {
 				SDFSLogger.getLog().debug("unable to wait for modprobe", e);
 			}

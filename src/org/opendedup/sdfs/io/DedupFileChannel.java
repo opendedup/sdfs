@@ -20,11 +20,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
@@ -32,7 +31,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 
-import com.google.common.eventbus.EventBus;
 
 /**
  * 
@@ -55,7 +53,6 @@ public class DedupFileChannel {
 	private boolean closed = false;
 	private ReadAhead rh = null;
 	private int flags = -1;
-	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
 	MetaDataDedupFile mf = null;
 
@@ -72,7 +69,6 @@ public class DedupFileChannel {
 		df = file;
 		this.flags = flags;
 		this.mf = this.df.mf;
-		eventBus.register(df.bdb);
 		if (Main.checkArchiveOnOpen) {
 			this.recoverArchives(-1);
 		}
@@ -340,13 +336,7 @@ public class DedupFileChannel {
 						writeBuffer = df.getWriteBuffer(filePos);
 						writeBuffer.write(b, startPos);
 
-						if (_len != Main.CHUNK_LENGTH && propigate
-								&& mf.getDev() != null) {
-							eventBus.post(new BlockDeviceSmallWriteEvent(df
-									.getMetaFile().getDev(),
-									ByteBuffer.wrap(b), filePos + startPos,
-									_len));
-						}
+						
 						/*
 						if (Main.volume.isClustered())
 							writeBuffer.flush();

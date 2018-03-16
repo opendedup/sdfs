@@ -24,10 +24,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.ArrayList;						 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;											  
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -42,7 +43,9 @@ import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
+import org.opendedup.sdfs.io.events.ArchiveSync;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.windows.utils.WinRegistry;
 import org.opendedup.util.CommandLineProgressBar;
@@ -59,6 +62,9 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteOptions;
+
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.Subscribe;
 
 public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	WriteOptions wo = new WriteOptions();
@@ -77,6 +83,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	private transient BlockingQueue<Runnable> worksQueue = new ArrayBlockingQueue<Runnable>(2);
 	private transient ThreadPoolExecutor executor = null;
 	private List<String> colFamily = new ArrayList<String>();
+	FlushOptions flo = null;
+	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>();
 	static boolean windowsLegacy = false;
 	static {
 		if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
@@ -147,6 +155,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			wo = new WriteOptions();
 			wo.setDisableWAL(false);
 			wo.setSync(false);
+			flo = new FlushOptions();
+			flo.setWaitForFlush(false);								  
 			// LRUCache c = new LRUCache(totmem);
 			CommandLineProgressBar bar = new CommandLineProgressBar("Loading Existing Hash Tables", dbs.length + 1,
 					System.out);
@@ -295,6 +305,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			File f = new File(fileName + File.separator + "rmdb");
 			f.mkdirs();
 			rmdb = RocksDB.open(options, f.getPath());
+			HashBlobArchive.registerEventBus(this);
 			bar.finish();
 			this.setUp();
 		} catch (Exception e) {
@@ -317,12 +328,69 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		}
 		return dbs[l / multiplier];
 	}
+	
+	@Subscribe
+	@AllowConcurrentEvents
+	public void hashBlobArchiveSync(ArchiveSync evt) throws Exception{
+			ArrayList<byte[]> al = evt.getArchive().getHashes();
+			for (byte[] b : al) {
+				Lock l = this.getLock(b);
+				l.lock();
+				try {
+					ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(b));
+					if (bf != null) {
+						RocksDB db = this.getDB(b);
+						byte[] v = null;
+						try {
+							v = db.get(b);
+							if (v != null) {
+								throw new Exception("Persistent Hashtable already has an entry that exists in the temp hashtable");
+							} else {
+								db.put(wo, b, bf.array());
+							}
+							this.tempHt.remove(new ByteArrayWrapper(b));
+						} catch (Exception e) {
+								SDFSLogger.getLog().warn("unable to commit " + StringUtils.getHexString(b) + " id="
+									+ evt.getArchive().getID(), e);
+							throw new Exception();
+						}
+					} 
+				} finally {
+					l.unlock();
+				}	
+			}
+		
+	}
 
 	@Override
 	public boolean claimKey(byte[] hash, long val, long ct) throws IOException {
 		Lock l = this.getLock(hash);
 		l.lock();
 		try {
+			if (this.tempHt.containsKey(new ByteArrayWrapper(hash))) {
+				   
+				ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(hash));
+				bk.position(0);
+				long oval = bk.getLong();
+				if (oval != val) {
+					SDFSLogger.getLog().debug("When updating reference count for key [" + StringUtils.getHexString(hash)
+							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
+					return false;
+				}
+				  
+				ct += bk.getLong();
+				if (ct <= 0) {
+					bk.position(8);
+					bk.putLong(System.currentTimeMillis() + rmthreashold);
+					rmdb.put(wo, hash, bk.array());
+				} else if (rmdb.get(hash) != null) {
+					rmdb.delete(hash);
+				}
+				bk.putLong(8, ct);
+								 
+
+				return true;
+			} else {
 			byte[] v = null;
 			v = this.getDB(hash).get(hash);
 			if (v != null) {
@@ -346,6 +414,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				getDB(hash).put(wo, hash, v);
 
 				return true;
+			}
 			}
 
 			SDFSLogger.getLog()
@@ -550,6 +619,28 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		l.lock();
 		try {
 			try {
+			//If the key is present in temporary hash table then update whatever exists
+				if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
+					ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
+					bk.position(0);
+					bk.getLong();
+					long ct = bk.getLong();
+					if (cm.references <= 0)
+						ct++;
+					else
+						ct += cm.references;
+					bk.putLong(8, ct);
+					this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
+					return new InsertRecord(false, cm.getcPos());
+				}
+				//Key not found in temporary hash table
+				//Query RocksDB
+				//If key does not exist and sync_on_write is false
+				// and it is not a  case of import,
+				//then create an entry in the temporary hash table
+				//. The temporary hash table will be flushed later
+				//via an ArchiveSync event. Otherwise update the 
+				//RocksDB directly.																   			   
 				RocksDB db = this.getDB(cm.getHash());
 				byte[] v = null;
 
@@ -567,7 +658,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						bf.putLong(1);
 					else
 						bf.putLong(cm.references);
-					db.put(wo, cm.getHash(), v);
+					this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
 					this.rmdb.delete(cm.getHash());
 					return new InsertRecord(true, cm.getcPos());
 				} else {
@@ -640,9 +731,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
-
 			try {
-
+				if (this.tempHt.containsKey(new ByteArrayWrapper(key))) {
+					ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(key));
+					bf.position(0);
+					return bf.getLong();
+				}
 				byte[] v = this.getDB(key).get(key);
 				if (v == null) {
 
@@ -654,6 +748,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			} catch (RocksDBException e) {
 				throw new IOException(e);
 			}
+			
 
 		} finally {
 			l.unlock();
@@ -761,7 +856,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			}
 			try {
 				for (RocksDB db : dbs) {
-					db.flush(new FlushOptions().setWaitForFlush(true));
+					db.flush(flo);
 				}
 			} catch (RocksDBException e) {
 				throw new IOException(e);
@@ -856,7 +951,14 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
-			byte[] k = this.getDB(key).get(key);
+			byte[] k = null;
+			if (this.tempHt.containsKey(new ByteArrayWrapper(key))) {
+				ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(key));
+				bf.position(0);
+				k = bf.array();
+			}
+			else
+				k = this.getDB(key).get(key);
 
 			if (k == null)
 				return false;

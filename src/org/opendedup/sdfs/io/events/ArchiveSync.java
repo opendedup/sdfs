@@ -20,15 +20,17 @@ package org.opendedup.sdfs.io.events;
 
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class HashBlobArchiveRecovered extends GenericEvent {
+public class ArchiveSync extends GenericEvent {
+
 	HashBlobArchive ar;
 
-	public HashBlobArchiveRecovered(HashBlobArchive ar) {
+	public ArchiveSync(HashBlobArchive ar) {
 		super();
 		this.ar = ar;
 	}
@@ -36,10 +38,11 @@ public class HashBlobArchiveRecovered extends GenericEvent {
 	public HashBlobArchive getArchive() {
 		return this.ar;
 	}
+	
 
 	public String toJSON() {
 		JsonObject dataset = this.toJSONObject();
-		dataset.addProperty("actionType", "hashblobarchiverecovered");
+		dataset.addProperty("actionType", "hashblobarchivesync");
 		dataset.addProperty("object", ar.getID());
 		Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
 				.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)

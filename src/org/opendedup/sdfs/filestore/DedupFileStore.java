@@ -62,10 +62,7 @@ public class DedupFileStore {
 	static {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
-		} else if (Main.blockDev) {
-			// openFileMonitor = new OpenFileMonitor(1000,
-			// Main.maxInactiveFileTime);
-		}
+		} 
 
 	}
 
