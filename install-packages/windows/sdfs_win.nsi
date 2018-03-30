@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.6.0.12'
+!define VERSION '3.6.0.13'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -78,15 +78,15 @@
 ;Version Information
 
 
-  VIProductVersion "3.6.0.12"
+  VIProductVersion "3.6.0.13"
 
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.12"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.12"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.13"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.13"
 ;--------------------------------
 ;Installer Sections
 
@@ -147,13 +147,8 @@ Function .onInit
   ${EndIf}
   IfFileExists "$INSTDIR\*.*" file_found done 
   file_found:
-	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
-	RMDir /r "$INSTDIR\bin"
-	RMDir /r "$INSTDIR\lib"
-	${UnSelectSection} ${SecDokan}
-	Goto done
-  noupgrade:
-	Quit
+	MessageBox MB_OK "Your of your Existing setup is not supported."
+      Abort
   done:
 FunctionEnd
 ;--------------------------------
