@@ -190,7 +190,7 @@ public class FileReplicationService {
 				}
 				SDFSLogger.getLog().debug("lock count size is " + this.activeTasks.size());
 			} finally {
-				if (l != null)
+				if (l != null && l.isLocked())
 					l.unlock();
 			}
 		} finally {
@@ -285,7 +285,7 @@ public class FileReplicationService {
 		if (evt.mf.isFile() || evt.mf.isSymlink()) {
 			try {
 				ReentrantLock l = this.getLock(evt.mf.getPath());
-				l.lock();
+				if(l.tryLock()) {
 					int tries = 0;
 					boolean done = false;
 					while (!done) {
@@ -314,6 +314,7 @@ public class FileReplicationService {
 								tries++;
 						}
 					}
+				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
 			} finally {
@@ -420,7 +421,7 @@ public class FileReplicationService {
 	public void sFileSync(SFileSync evt) {
 		try {
 			ReentrantLock l = this.getLock(evt.sf.getPath());
-			l.lock();
+			if(l.tryLock()) {
 				int tries = 0;
 				boolean done = false;
 				while (!done) {
@@ -437,6 +438,7 @@ public class FileReplicationService {
 							tries++;
 					}
 				}
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.sf.getPath(), e);
 		} finally {

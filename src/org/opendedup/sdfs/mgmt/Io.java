@@ -281,7 +281,7 @@ public class Io {
 	}
 
 	public void unlink(String path) throws FuseException {
-		// SDFSLogger.getLog().info("22222 " + path);
+		SDFSLogger.getLog().info("Deleting=" + path);
 		// Thread.currentThread().setName("19
 		// "+Long.toString(System.currentTimeMillis()));
 		try {
@@ -347,10 +347,8 @@ public class Io {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 
-			/*
-			 * log.info("writing data to  " +path + " at " + offset + " and length of " +
-			 * buf.capacity());
-			 */
+			SDFSLogger.getLog().info("writing data to  " +fh + " at " + offset + " and length of " +
+			 buf.capacity());
 			// byte[] b = new byte[buf.capacity()];
 			// buf.position(0);
 			// buf.get(b);
@@ -361,10 +359,8 @@ public class Io {
 			DedupFileChannel ch = this.getFileChannel(fh);
 
 			try {
-				/*
-				 * SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos="
-				 * +offset + " len=" + buf.capacity());
-				 */
+				SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos="
+				 +offset + " len=" + buf.capacity());
 				/*
 				byte[] k = new byte[buf.capacity()];
 				buf.get(k);
@@ -556,10 +552,8 @@ public class Io {
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
-			/*
-			 * SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos="
-			 * +offset + " len=" + buf.capacity());
-			 */
+			SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos="
+			 +offset + " len=" + buf.capacity());
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*
 			 * if (buf.position() < buf.capacity()) { byte[] k = new byte[buf.capacity() -
@@ -583,12 +577,14 @@ public class Io {
 	}
 
 	public void release(long fh) throws FuseException {
-		// SDFSLogger.getLog().info("199 " + path);
+		
 		try {
 			DedupFileChannel ch = this.dedupChannels.remove(fh);
+			
 			if (!Main.safeClose)
 				return;
 			if (ch != null) {
+				SDFSLogger.getLog().info("release=" + ch.getFile().getPath());
 				ch.getDedupFile().unRegisterChannel(ch, -2);
 				CloseFile.close(ch.getFile(), ch.isWrittenTo());
 				ch = null;
@@ -602,7 +598,7 @@ public class Io {
 	}
 
 	private void mknod(String path) throws FuseException {
-
+		SDFSLogger.getLog().info("mknod=" + path);
 		try {
 			path = URLDecoder.decode(path, "UTF-8");
 			File f = new File(this.mountedVolume + path);
@@ -647,7 +643,7 @@ public class Io {
 	}
 
 	public long open(String path) throws FuseException {
-		// SDFSLogger.getLog().info("555=" + path);
+		SDFSLogger.getLog().info("open=" + path);
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		try {

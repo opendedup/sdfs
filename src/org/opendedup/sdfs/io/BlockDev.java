@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -64,6 +65,8 @@ public class BlockDev implements Externalizable {
 	public static final byte SYNC = 1;
 	public static final byte STARTED = 2;
 	private MetaDataDedupFile mf = null;
+	public static HashSet<String> devPaths = new HashSet<String>();
+	
 
 	public BlockDev() {
 
@@ -91,6 +94,10 @@ public class BlockDev implements Externalizable {
 			this.uuid = el.getAttribute("uuid");
 		else
 			this.uuid = RandomGUID.getGuid();
+		if(el.hasAttribute("dev-path")) {
+			this.devPath = el.getAttribute("dev-path");
+			devPaths.add(devPath);
+		}
 		this.startOnInit = Boolean.parseBoolean(el
 				.getAttribute("start-on-init"));
 	}
@@ -268,7 +275,7 @@ public class BlockDev implements Externalizable {
 		Document doc = XMLUtils.getXMLDoc("blockdev");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("devname", this.devName);
-		root.setAttribute("devpath", this.devPath);
+		root.setAttribute("dev-path", this.devPath);
 		root.setAttribute("size", StorageUnit.of(this.size).format(size));
 		root.setAttribute("internal-path", this.internalPath);
 		root.setAttribute("start-on-init", Boolean.toString(this.startOnInit));
@@ -287,16 +294,19 @@ public class BlockDev implements Externalizable {
 				.cloneNode(true);
 	}
 
-	public void startDev(String dp) throws IOException {
+	public synchronized void startDev(String dp) throws IOException {
 		if (!this.isStopped()) {
 			throw new IOException("Parition [" + this.devName
 					+ "] already started");
 		}
 		this.statusMsg = "Starting";
-		this.devPath = dp;
+		if(this.devPath == null || this.devPath.length() == 0)
+			this.devPath = dp;
 		dev = new SDFSBlockDev(this);
 		Thread th = new Thread(dev);
 		th.start();
+		
+		
 	}
 
 	public void stopDev() throws IOException {

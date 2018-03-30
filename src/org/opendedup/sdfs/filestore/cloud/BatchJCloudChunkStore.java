@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore.cloud;
 import java.io.BufferedInputStream;
 
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -49,7 +50,6 @@ import javax.ws.rs.core.MediaType;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
-
 import com.google.common.base.Supplier;
 
 import org.opendedup.sdfs.filestore.HashBlobArchive;
@@ -313,18 +313,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
-		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.data;
-		}
-		return sz;
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
-		}
-		//return HashBlobArchive.getCompressedLength();
+		
 		return HashBlobArchive.getLength();
 	}
 
@@ -727,16 +716,6 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public long compressedSize() {
-		try {
-		RemoteVolumeInfo [] rv = this.getConnectedVolumes();
-		long sz = 0;
-		for(RemoteVolumeInfo r : rv) {
-			sz += r.compressed;
-		}
-		return sz;
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
-		}
 		return HashBlobArchive.getCompressedLength();
 	}
 

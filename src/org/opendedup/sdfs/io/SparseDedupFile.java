@@ -826,14 +826,14 @@ public class SparseDedupFile implements DedupFile {
 				this.writeCache();
 				if (SDFSLogger.isDebug())
 					wt = System.currentTimeMillis() - tm;
-
+				HCServiceProxy.sync();
 				this.bdb.sync();
 				if (SDFSLogger.isDebug())
 					st = System.currentTimeMillis() - tm - wt;
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
 							"Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" + st + "]");
-				HCServiceProxy.sync();
+				
 			} /*
 				 * else { this.writeCache(); }
 				 */
