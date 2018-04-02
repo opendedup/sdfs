@@ -15,6 +15,7 @@
 !include "MUI2.nsh"
 !include WinVer.nsh
 !include "MUI2.nsh"
+!include "FileFunc.nsh"
 
 !define MUI_ICON "sdfs.ico"
 !define MUI_HEADERIMAGE
@@ -139,17 +140,34 @@ Function un.onUninstSuccess
 FunctionEnd
   
 Function .onInit
- ${If} ${RunningX64}
+ ${GetOptions} $CMDLINE "/f" $R0
+ 
+	IfErrors 0 +2
+		Goto checksetup
+   MessageBox MB_YESNO "To prevent data loss refer to the latest Backup Exec BE-OpenDedupeInstallConfig guide. PLEASE MAKE SURE YOU HAVE CHANGED THE ARCHIVE BIT ON ALL FILES IN MOUNTED OPENDEDUPE VOLUMES BEFORE CONTINUING." IDYES clearsetup 
+  	Abort
+  clearsetup:
+  	RMDir /r "$INSTDIR\bin"
+	RMDir /r "$INSTDIR\lib"
+	${UnSelectSection} ${SecDokan}
+	Goto checkos
+  checksetup:
+  	ClearErrors
+  	ReadRegStr $0 HKLM "Software\SDFS" "path"
+  	${If} ${Errors}
+  	
+  	${Else}
+		MessageBox MB_OK "Upgrade of your Existing setup is not supported."
+      	Abort
+  	${EndIf}
+  
+  checkos:
+  ${If} ${RunningX64}
     
   ${Else}
 	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
       Abort
   ${EndIf}
-  IfFileExists "$INSTDIR\*.*" file_found done 
-  file_found:
-	MessageBox MB_OK "Your of your Existing setup is not supported."
-      Abort
-  done:
 FunctionEnd
 ;--------------------------------
 ;Descriptions
