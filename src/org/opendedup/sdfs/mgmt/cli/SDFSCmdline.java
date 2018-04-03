@@ -38,7 +38,9 @@ public class SDFSCmdline {
 			
 			if (cmd.hasOption("password"))
 				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth(cmd.getOptionValue("password"),MgmtServerConnection.server,MgmtServerConnection.port,MgmtServerConnection.useSSL);
-
+			else
+				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth("admin",MgmtServerConnection.server,MgmtServerConnection.port,MgmtServerConnection.useSSL);
+			
 			if (cmd.hasOption("file-info")) {
 				if (cmd.hasOption("file-path")) {
 					ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));

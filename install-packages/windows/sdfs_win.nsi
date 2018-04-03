@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.6.0.12'
+!define VERSION '3.6.0.14'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -75,18 +75,15 @@
 
 
   ;--------------------------------
-;Version Information
-
-
-  VIProductVersion "3.6.0.12"
-
+  ;Version Information
+  VIProductVersion "3.6.0.14"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.12"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.12"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.6.0.14"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.6.0.14"
 ;--------------------------------
 ;Installer Sections
 
@@ -102,6 +99,7 @@ Section "SDFS Setup" SecMain
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
   File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
+  File ..\..\lib\b2-2.0.3.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder
@@ -109,8 +107,6 @@ Section "SDFS Setup" SecMain
   ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  
-	
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "DisplayName" "SDFS ${VERSION}  (remove only)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "UninstallString" '"$INSTDIR\Uninstall.exe"'
@@ -158,8 +154,7 @@ Function .onInit
 FunctionEnd
 ;--------------------------------
 ;Descriptions
-
-  ;Language strings
+;Language strings
   LangString DESC_SecMain ${LANG_ENGLISH} "SDFS Volume Binaries Setup."
   LangString DESC_SecDokan ${LANG_ENGLISH} "Dokan Windows FileSystem Driver."
   ;Assign language strings to sections

@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import static java.lang.Math.toIntExact;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -18,12 +19,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -122,6 +125,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static boolean closed = false;
 	private int blocksz = nextSize();
 	private String uuid = "default";
+	private boolean syncd = false;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
@@ -195,8 +199,18 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	}
 	
+		static HashSet<String> activeClaims = new HashSet<String>();
+
 	public static void claimBlock(long id) throws IOException {
 		IOException e = null;
+		synchronized(activeClaims) {
+			if(activeClaims.contains(Long.toString(id))) {
+				return;
+			}else {
+				activeClaims.add(Long.toString(id));
+			}
+		}
+		try {
 		for (int i = 0; i < 10; i++) {
 			try {
 				store.checkoutObject(id, 1);
@@ -214,7 +228,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		if (e != null)
 			throw e;
+		}finally {
+			synchronized(activeClaims) {
+				activeClaims.remove(Long.toString(id));
+			}
+		}
 	}
+
 
 	public static void deleteArchive(long id) throws IOException {
 		HashBlobArchive har = null;
@@ -275,7 +295,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 				offset = 1024;
 				VERSION = store.getMetaDataVersion();
 			}
-
+			SyncQueue sc = new SyncQueue();
+			Thread th = new Thread(sc);
+			th.start();
 			SDFSLogger.getLog()
 					.info("############################ Initialied HashBlobArchive ##############################");
 			SDFSLogger.getLog().info("Version : " + VERSION);
@@ -539,11 +561,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return FileUtils.sizeOfDirectory(chunk_location);
 	}
 
-	public static void setCacheSize(long sz, boolean update) throws IOException {
+	public static synchronized void setCacheSize(long sz, boolean update) throws IOException {
 		Lock l = slock.writeLock();
+		int tries = 0;		
 		l.lock();
 		try {
-			int tries = 0;
+			
 			while (rchunks.size() > 0) {
 				try {
 					Thread.sleep(1);
@@ -1025,7 +1048,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						this.writeable = false;
 
 						synchronized (LOCK) {
-							LOCK.notify();
+							LOCK.notifyAll();
 						}
 						throw new ArchiveFullException("archive full");
 					}
@@ -1829,6 +1852,22 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		return true;
 	}
+	
+	private synchronized void moveDeleteArchive()
+	{
+		
+		if (!REMOVE_FROM_CACHE || cacheWrites) {
+			try {
+			if (!this.moveFile(id))
+				return;
+			} catch(Exception e) {
+				SDFSLogger.getLog().debug("Exception" + e + "while moving archive");
+			}
+		} else {
+			SDFSLogger.getLog().debug("deleting " + f);
+			this.delete();
+		}
+	}
 
 	public String getUUID() {
 		return this.uuid;
@@ -1927,18 +1966,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while writing " + this.id, e);
 		}
-		try {
-			this._sync();
-		} catch (SyncFailedException e1) {
-
-		} catch (IOException e1) {
-
-		}
-		try {
-		this.syncHashTables();
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("unable to sync hashtable for " + this.id,e);
-		}
 
 		long dur = System.currentTimeMillis() - tm;
 		SDFSLogger.getLog().debug(dur + " len=" + f.length());
@@ -1950,6 +1977,11 @@ public class HashBlobArchive implements Runnable, Serializable {
 			} catch (InterruptedException e) {
 
 			}
+		}
+	    try {
+			SyncQueue.syncQueue.put(this);
+		} catch (InterruptedException e1) {
+			
 		}
 	}
 
@@ -1991,7 +2023,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				Collection<HashBlobArchive> st = rchunks.values();
 				for (HashBlobArchive ar : st) {
 					synchronized (ar) {
-						ar.LOCK.notify();
+						ar.LOCK.notifyAll();
 					}
 				}
 				while (rchunks.size() > 0) {
@@ -2005,22 +2037,29 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l.unlock();
 			}
 		} else {
-			Lock l = slock.writeLock();
-			l.lock();
-			try {
+			
+				Lock l = slock.writeLock();
+				l.lock();
 				Collection<HashBlobArchive> st = rchunks.values();
+				l.unlock();
+				HashSet<HashBlobArchive> bk = new HashSet<HashBlobArchive>();
 				for (HashBlobArchive ar : st) {
 					try {
-						ar._sync();
-					} catch (SyncFailedException e) {
-						SDFSLogger.getLog().warn("unable to sync", e);
-					} catch (IOException e) {
+						if (ar.syncd == false) {
+							bk.add(ar);
+						}
+					}  catch (Exception e) {
 						SDFSLogger.getLog().warn("unable to sync", e);
 					}
 				}
-			} finally {
-				l.unlock();
-			}
+				for(HashBlobArchive e : bk) {
+					try {
+						e.syncHashTables();
+					} catch (IOException e1) {
+						SDFSLogger.getLog().error("unable to sync " + e.f.getPath(), e1);
+					}
+				}
+
 
 		}
 
@@ -2086,7 +2125,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				e.getQueue().put(r);
 			} catch (Exception e1) {
 				SDFSLogger.getLog()
-						.error("Work discarded, thread was interrupted while waiting for space to schedule: {}", e1);
+						.debug("Work discarded, thread was interrupted while waiting for space to schedule: {}", e1);
 			}
 		}
 	}
@@ -2097,4 +2136,43 @@ public class HashBlobArchive implements Runnable, Serializable {
 		System.out.println(hb);
 
 	}
+	public static class SyncQueue implements Runnable {
+		private static LinkedBlockingQueue<HashBlobArchive> syncQueue = new LinkedBlockingQueue<HashBlobArchive>();
+		private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
+				new SynchronousQueue<Runnable>(), new BlockPolicy());
+		@Override
+		public void run() {
+			while(!HashBlobArchive.closed) {
+				try {
+					HashBlobArchive ar = syncQueue.take();
+					ar._sync();
+					ar.syncHashTables();
+					ar.syncd = true;
+					MoveThread mth = new MoveThread(ar);
+					executor.execute(mth);
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("issue while syncing archive",e);
+				}
+			}
+			
+		}
+		
+	}
+	
+	public static class MoveThread implements Runnable {
+		HashBlobArchive ar = null;
+		public MoveThread(HashBlobArchive ar) {
+			this.ar = ar;
+		}
+		@Override
+		public void run() {
+			try {
+				ar.moveDeleteArchive();
+			}catch(Exception e ) {
+				SDFSLogger.getLog().warn("unable to move archive " + ar.f.getPath(),e);
+			}
+			
+		}
+	}
+		
 }

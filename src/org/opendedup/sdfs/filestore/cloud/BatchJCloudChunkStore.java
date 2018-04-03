@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 
 
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -66,7 +67,6 @@ import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.options.CopyOptions;
 import org.jclouds.blobstore.options.ListContainerOptions;
 import org.jclouds.io.ContentMetadata;
-import org.jclouds.io.payloads.FilePayload;
 import org.jclouds.Constants;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
@@ -246,7 +246,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				Blob b = blobStore
 						.blobBuilder("bucketinfo/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+						.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).userMetadata(md).build();
 				this.writeBlob(b, false);
 			}
 			// this.resetCurrentSize();
@@ -494,6 +494,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_MAX_RETRIES, "10");
 			// Do not wait between retries
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
+			
 			Location region = null;
 			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
@@ -528,10 +529,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				bconfig.setMaxTotal(Main.dseIOThreads * 2);
 				bconfig.setTestOnBorrow(false);
 				bconfig.setTestOnReturn(false);
-				GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
-				cfg.setMinIdle(Main.dseIOThreads);
 				this.bPool = new GenericObjectPool<BlobStore>(
-						new B2ConnectionFactory(this.accessKey, this.secretKey, overrides));
+						new B2ConnectionFactory(this.accessKey, this.secretKey, overrides),bconfig);
 			}
 
 			if (!blobStore.containerExists(this.name))
@@ -585,18 +584,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				Blob b = blobStore
 						.blobBuilder("bucketinfo/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).build();
+						.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 				this.writeBlob(b, false);
 			} else {
 				Blob b = blobStore
 						.blobBuilder("bucketinfo/"
 								+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-						.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+						.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).userMetadata(md).build();
 				if (this.accessStore || this.atmosStore || b2Store) {
 					b = blobStore
 							.blobBuilder("bucketinfo/"
 									+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled))
-							.payload(Long.toString(System.currentTimeMillis())).build();
+							.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 					this.updateObject("bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled), md);
 				}
@@ -660,7 +659,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					.blobBuilder(
 							"bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled)
 									+ "-" + System.currentTimeMillis())
-					.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+					.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).userMetadata(md).build();
 			this.writeBlob(b, false);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to backu config", e);
@@ -814,7 +813,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				HashCode hc = Hashing.md5().hashBytes(f);
 				metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
 				Blob blob = null;
-				if (this.accessStore || this.atmosStore || b2Store)
+				if (this.accessStore || this.atmosStore)
 					blob = blobStore.blobBuilder("blocks/" + haName).payload(f).contentLength(csz)
 							.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 				else
@@ -826,7 +825,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				else
 					this.writeBlob(blob, false);
 				SDFSLogger.getLog().debug("uploaded blocks/" + haName);
-				if (this.accessStore || this.atmosStore || b2Store)
+				if (this.accessStore || this.atmosStore)
 					this.updateObject("blocks/" + haName, metaData);
 				// upload the metadata
 				String st = arc.getHashesString();
@@ -847,7 +846,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				metaData.put("bsize", Integer.toString(arc.uncompressedLength.get()));
 				metaData.put("bcompressedsize", Long.toString(csz));
 				metaData.put("objects", Integer.toString(arc.getSz()));
-				if (this.accessStore || this.atmosStore || b2Store)
+				if (this.accessStore || this.atmosStore)
 					blob = blobStore.blobBuilder("keys/" + haName).payload(chunks).contentLength(chunks.length)
 							.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 				else
@@ -862,13 +861,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						.payload(Long.toString(System.currentTimeMillis()))
 						.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 				SDFSLogger.getLog().debug("uploaded " + this.getClaimName(id));
-				if (this.accessStore || this.atmosStore || b2Store) {
+				if (this.accessStore || this.atmosStore) {
 					blob = blobStore.blobBuilder(this.getClaimName(id))
 							.payload(Long.toString(System.currentTimeMillis()))
 							.contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 				}
 				this.writeBlob(blob, false);
-				if (this.accessStore || this.atmosStore || b2Store)
+				if (this.accessStore || this.atmosStore)
 					this.updateObject(this.getClaimName(id), metaData);
 				return;
 			} catch (Throwable e1) {
@@ -890,6 +889,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	private void writeBlob(Blob blob, boolean mp) throws IOException {
+		long tm = System.currentTimeMillis();
 		if (this.azureStore) {
 			if (mp)
 				blobStore.putBlob(this.name, blob, multipart());
@@ -900,11 +900,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			BlobStore st = null;
 			try {
 				st = bPool.borrowObject();
-				if (mp) {
+				if(mp)
 					st.putBlob(this.name, blob, multipart());
-				} else {
+				else
 					st.putBlob(this.name, blob);
-				}
 
 			} catch (java.lang.IllegalArgumentException e) {
 				SDFSLogger.getLog().error("unable to borrow object", e);
@@ -923,6 +922,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		} else {
 			blobStore.putBlob(this.name, blob);
 		}
+		long dif = System.currentTimeMillis() - tm;
+		SDFSLogger.getLog().debug("wrote object " + blob.toString() +  " in " + dif);
 	}
 
 	private void readBlob(String key, OutputStream os) throws IOException {
@@ -1344,14 +1345,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						String slp = EncyptUtils.encString(Files.readSymbolicLink(f.toPath()).toFile().getPath(),
 								Main.chunkStoreEncryptionEnabled);
 						metaData.put("symlink", slp);
-						Blob b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length())
+						Blob b = blobStore.blobBuilder(pth).payload(pth).contentType(MediaType.APPLICATION_OCTET_STREAM).contentLength(pth.length())
 								.userMetadata(metaData).build();
-						if (this.accessStore || this.atmosStore || b2Store) {
-							this.updateObject(pth, metaData);
-							b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).build();
+						if (this.accessStore || this.atmosStore) {
+							b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 						}
 						this.writeBlob(b, false);
-						if (this.accessStore || this.atmosStore || b2Store)
+						if (this.accessStore || this.atmosStore)
 							this.updateObject(pth, metaData);
 						this.checkoutFile(pth);
 					} catch (Exception e1) {
@@ -1365,12 +1365,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 						metaData.put("lastmodified", Long.toString(f.lastModified()));
 						metaData.put("directory", "true");
-						Blob b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length())
+						Blob b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).contentType(MediaType.APPLICATION_OCTET_STREAM)
 								.userMetadata(metaData).build();
 
-						if (this.accessStore || this.atmosStore || b2Store) {
+						if (this.accessStore || this.atmosStore) {
 							this.updateObject(pth, metaData);
-							b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).build();
+							b = blobStore.blobBuilder(pth).payload(pth).contentLength(pth.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 						}
 						this.writeBlob(b, false);
 						this.checkoutFile(pth);
@@ -1415,10 +1415,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						}
 						while (to.startsWith(File.separator))
 							to = to.substring(1);
-						FilePayload fp = new FilePayload(p);
 						HashCode hc = com.google.common.io.Files.hash(p, Hashing.md5());
 						HashMap<String, String> _metaData = FileUtils.getFileMetaData(f,
 								Main.chunkStoreEncryptionEnabled);
+						_metaData.put("owner", Main.volume.getUuid());
 						metaData.putAll(_metaData);
 						if (!disableComp) {
 							metaData.put("lz4compress", Boolean.toString(Main.compress));
@@ -1426,18 +1426,22 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 							metaData.put("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
 							metaData.put("lastmodified", Long.toString(f.lastModified()));
 						}
+						FileInputStream fin = new FileInputStream(p);
 						metaData.put("md5sum", BaseEncoding.base64().encode(hc.asBytes()));
-						Blob b = blobStore.blobBuilder(pth).payload(fp).contentLength(p.length()).userMetadata(metaData)
+						Blob b = blobStore.blobBuilder(pth).payload(fin).contentLength(p.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).userMetadata(metaData)
 								.build();
 
-						if (this.accessStore || this.atmosStore || b2Store) {
+						if (this.accessStore || this.atmosStore) {
 							this.updateObject(pth, metaData);
-							b = blobStore.blobBuilder(pth).payload(fp).contentLength(p.length()).build();
+							b = blobStore.blobBuilder(pth).payload(fin).contentLength(p.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
 						}
 						if (f.length() >= MPSZ)
 							this.writeBlob(b, true);
 						else
 							this.writeBlob(b, false);
+						try {
+							fin.close();
+						}catch(Exception e1) {}
 						this.checkoutFile(pth);
 					} catch (Exception e1) {
 						throw new IOException(e1);
@@ -1454,6 +1458,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						}
 					}
 				}
+				break;
 			} catch (Exception e1) {
 				e2 = new IOException(e1);
 				try {
@@ -1960,9 +1965,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					md.put("deletedobjects", Integer.toString(delobj));
 
 					Blob b = blobStore.blobBuilder(this.getClaimName(id))
-							.payload(Long.toString(System.currentTimeMillis())).userMetadata(md).build();
+							.payload(Long.toString(System.currentTimeMillis())).contentType(MediaType.APPLICATION_OCTET_STREAM).userMetadata(md).build();
 
-					if (this.accessStore || this.atmosStore || b2Store) {
+					if (this.accessStore || this.atmosStore) {
 						this.updateObject(this.getClaimName(id), md);
 						b = blobStore.blobBuilder(this.getClaimName(id))
 								.payload(Long.toString(System.currentTimeMillis())).build();
@@ -1993,13 +1998,22 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		return blobStore.blobExists(this.name, blb);
 
 	}
+	
+	private static final byte [] B2Bytes = new String("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			+ "BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+			+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").getBytes();
+			
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
 		name = FilenameUtils.separatorsToUnix(name);
 		String blb = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-		Blob b = blobStore.blobBuilder(blb).payload(Long.toString(System.currentTimeMillis())).build();
+		Blob b = null;
+			b = blobStore.blobBuilder(blb).payload(B2Bytes).contentLength(B2Bytes.length).contentType(MediaType.APPLICATION_OCTET_STREAM).build();
+		
 		this.writeBlob(b, false);
 
 	}

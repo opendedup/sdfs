@@ -1457,7 +1457,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 			in.readLong();
 			this.length = in.readLong();
-			SDFSLogger.getLog().info("file lenth for " + this.path + " = " + this.length);
 			this.lastModified.set(in.readLong());
 			this.lastAccessed.set(in.readLong());
 			this.execute = in.readBoolean();
@@ -1553,7 +1552,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			// this.dfGuid + " length=" + this.length);
 			out.writeLong(-1);
 			out.writeLong(length);
-			SDFSLogger.getLog().info("wrote file lenth for " + this.path + " = " + this.length);
 			out.writeLong(lastModified.get());
 			out.writeLong(lastAccessed.get());
 			out.writeBoolean(execute);
