@@ -31,7 +31,7 @@ public class GCJob implements Job {
 			try {
 				new SyncFS();
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("SyncFS Job Failed", e);
+				SDFSLogger.getLog().info("SyncFS Job Failed", e);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish executing fdisk", e);

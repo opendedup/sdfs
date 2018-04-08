@@ -338,9 +338,4 @@ public interface DedupFile {
 
 	public abstract void truncate(long length, boolean propigateEvent)
 			throws IOException;
-
-	void putBufferIntoFlush(WritableCacheBuffer writeBuffer);
-
-	void removeBufferFromFlush(WritableCacheBuffer writeBuffer);
-
 }

@@ -99,7 +99,7 @@ Section "SDFS Setup" SecMain
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
   File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
-  File ..\..\lib\b2-2.0.3.jar
+  File ..\..\target\lib\b2-2.0.3.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder
@@ -157,7 +157,7 @@ FunctionEnd
 ;Language strings
   LangString DESC_SecMain ${LANG_ENGLISH} "SDFS Volume Binaries Setup."
   LangString DESC_SecDokan ${LANG_ENGLISH} "Dokan Windows FileSystem Driver."
-  ;Assign language strings to sections
+;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} $(DESC_SecMain)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDokan} $(DESC_SecDokan)

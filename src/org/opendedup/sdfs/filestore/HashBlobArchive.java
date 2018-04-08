@@ -266,14 +266,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 		return nxt;
 	}
 
-	/*
-	 * private static int nextLen() { int Low = MAX_LEN - (MAX_LEN / 3); int High =
-	 * MAX_LEN; int nxt = r.nextInt(High - Low) + Low; return nxt; }
-	 */
-
-	// Each archive takes about 608 bytes of ram
-	// Each map takes about 260848 bytes of ram for 1854 entries
-
 	public static void init(AbstractBatchStore nstore) throws IOException {
 		Lock l = slock.writeLock();
 		l.lock();
@@ -311,8 +303,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Maximum Local Cache Size : " + LOCAL_CACHE_SIZE);
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
-			executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,
-					worksQueue, new BlockPolicy());
+			executor = new ThreadPoolExecutor(1, Main.maxOpenFiles *2, 1, TimeUnit.MINUTES,
+					worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
@@ -604,8 +596,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 			throw new IOException("Closed");
 		Lock l = slock.readLock();
 		l.lock();
-		if (uuid == null || uuid.trim() == "")
+		if (uuid == null || uuid.trim() == "") {
 			uuid = "default";
+		}
 		try {
 			for (;;) {
 				try {
@@ -660,7 +653,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
-						SDFSLogger.getLog().info("removing " + removal.getKey());
+						SDFSLogger.getLog().debug("removing " + removal.getKey());
 						cSz.addAndGet(-1 * removal.getValue().getFSize());
 						removal.getValue().removeCache();
 					}
@@ -1048,7 +1041,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						this.writeable = false;
 
 						synchronized (LOCK) {
-							LOCK.notifyAll();
+							LOCK.notify();
 						}
 						throw new ArchiveFullException("archive full");
 					}
@@ -1086,7 +1079,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 						np.set(cp);
 						this.writeable = false;
 						synchronized (LOCK) {
-							LOCK.notifyAll();
+							LOCK.notify();
 						}
 						throw new ArchiveFullException("archive closed");
 					} catch (HashExistsException e) {
@@ -1899,13 +1892,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 					SDFSLogger.getLog().debug("writing " + id);
 				if (!this.uploadFile(nid))
 					return false;
-				if (!REMOVE_FROM_CACHE || cacheWrites) {
-					if (!this.moveFile(nid))
-						return false;
-				} else {
-					SDFSLogger.getLog().debug("deleting " + f);
-					this.delete();
-				}
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("wrote " + id);
 			} else if (f.exists()) {
@@ -2023,7 +2009,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 				Collection<HashBlobArchive> st = rchunks.values();
 				for (HashBlobArchive ar : st) {
 					synchronized (ar) {
-						ar.LOCK.notifyAll();
+						ar.LOCK.notify();
 					}
 				}
 				while (rchunks.size() > 0) {
@@ -2136,6 +2122,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		System.out.println(hb);
 
 	}
+	
 	public static class SyncQueue implements Runnable {
 		private static LinkedBlockingQueue<HashBlobArchive> syncQueue = new LinkedBlockingQueue<HashBlobArchive>();
 		private static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.dseIOThreads + 1, Main.dseIOThreads + 1, 10, TimeUnit.SECONDS,

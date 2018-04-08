@@ -28,6 +28,9 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -86,6 +89,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
+	private Iterator<Entry<ByteArrayWrapper, Long>> iter = null;
 
 	/*
 	 * (non-Javadoc)
@@ -97,6 +101,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		this.iterlock.lock();
 		this.iterPos = 0;
 		this.iterlock.unlock();
+		if(bw != null && bw.size() > 0) {
+			iter = bw.entrySet().iterator();
+		}
 	}
 
 	/*
@@ -122,6 +129,14 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public KeyValuePair next() throws IOException, MapClosedException {
+		if(iter != null) {
+			KeyValuePair kv = null;
+			if(iter.hasNext()) {
+				Entry<ByteArrayWrapper, Long> e = iter.next();
+				kv = new KeyValuePair(e.getKey().getData(),e.getValue());
+			}
+			return kv;
+		}
 		while (iterPos < this.kFC.size()) {
 			Lock l = this.hashlock.writeLock();
 			l.lock();
@@ -436,6 +451,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	ByteBuffer vb = null;
+	HashMap<ByteArrayWrapper,Long> bw = new HashMap<ByteArrayWrapper,Long>();
 
 	/*
 	 * (non-Javadoc)
@@ -463,6 +479,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 				vb.putInt((int) value);
 			} else {
 				vb.putLong(value);
+			}
+			if(bw != null) {
+				bw.put(new ByteArrayWrapper(key), value);
 			}
 			vb.position(0);
 			this.kFC.write(vb, pos + offset);
@@ -548,6 +567,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			} catch (Exception e) {
 
 			}
+			if(bw != null)
+				bw.clear();
+			bw = null;
 			this.mapped = null;
 		} finally {
 			l.unlock();

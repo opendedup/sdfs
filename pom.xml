@@ -111,7 +111,7 @@
 <dependency>
     <groupId>org.opendedupe</groupId>
     <artifactId>rabinwindow</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 <dependency>
   <groupId>com.datastax.cassandra</groupId>
@@ -166,7 +166,7 @@
 <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>18.0</version>
+    <version>24.1-jre</version>
 </dependency>
 <dependency>
     <groupId>commons-collections</groupId>

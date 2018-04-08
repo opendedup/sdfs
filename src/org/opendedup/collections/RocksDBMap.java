@@ -85,7 +85,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	private transient ThreadPoolExecutor executor = null;
 	private List<String> colFamily = new ArrayList<String>();
 	FlushOptions flo = null;
-	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>();
+	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>(1024,0.75f,Main.writeThreads);
 	static boolean windowsLegacy = false;
 	static {
 		if (org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS) {
@@ -671,7 +671,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					else
 						bf.putLong(cm.references);
 					this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
-					this.rmdb.delete(cm.getHash());
+					//this.rmdb.delete(cm.getHash());
 					return new InsertRecord(true, cm.getcPos());
 				} else {
 					// SDFSLogger.getLog().info("Hash Found");

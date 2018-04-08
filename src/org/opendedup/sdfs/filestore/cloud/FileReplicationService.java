@@ -284,7 +284,12 @@ public class FileReplicationService {
 	public void metaFileWritten(MFileWritten evt) throws IOException {
 		if (evt.mf.isFile() || evt.mf.isSymlink()) {
 			try {
+				
 				ReentrantLock l = this.getLock(evt.mf.getPath());
+				synchronized(l) {
+					if(l.getQueueLength() > 1)
+						return;
+				}
 				l.lock();
 				int tries = 0;
 				boolean done = false;
@@ -372,6 +377,10 @@ public class FileReplicationService {
 		if (evt.getLocation() == -1) {
 			try {
 				ReentrantLock l = this.getLock(evt.sf.getDatabasePath());
+				synchronized(l) {
+					if(l.getQueueLength() > 1)
+						return;
+				}
 				l.lock();
 				int tries = 0;
 				boolean done = false;

@@ -537,7 +537,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		try {
 
 			String lpath = Files.readSymbolicLink(p).toString();
-			if (lpath.startsWith(this.mountedVolume))
+			if (new File(lpath).getPath().startsWith(this.mountedVolume))
 				lpath = this.mountPoint + lpath.substring(this.mountedVolume.length());
 			// SDFSLogger.getLog().info("path=" + path + " lpath=" + lpath);
 			link.put(lpath);
