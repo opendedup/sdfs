@@ -383,7 +383,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 		try {
 			File f = new File(this.mountedVolume + path);
+		try {
 			this.checkInFS(f);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 			// SDFSLogger.getLog().info("3 " + f.getCanonicalPath());
 			if (Main.volume.isOffLine())
 				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
@@ -416,7 +421,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		//SDFSLogger.getLog().info("4=" + path);
 		try {
 			File f = new File(this.mountedVolume + path);
+		try {
 			this.checkInFS(f);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 			/*
 			if(!f.getCanonicalPath().startsWith(this.mountedVolume)) {
 				f = null;
@@ -578,7 +588,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				SDFSLogger.getLog().debug("renaming [" + from + "] to [" + to + "]");
 			f = resolvePath(from);
 			File nf = new File(this.mountedVolume + to);
+		try {	
 			this.checkInFS(nf);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 			MetaFileStore.rename(f.getCanonicalPath(), nf.getCanonicalPath());
 		} catch (FuseException e) {
 			throw e;
@@ -673,7 +688,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				src = new File(from);
 			}
 			File dst = new File(mountedVolume + to);
+		try {	
 			this.checkInFS(dst);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 			if (dst.exists()) {
 				throw new FuseException().initErrno(Errno.EPERM);
 			}
@@ -731,7 +751,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			}
 			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
 				Path p = new File(mountedVolume + path).toPath();
+				try {
 				this.checkInFS(new File(mountedVolume + path));
+				}catch(FuseException e) {
+					SDFSLogger.getLog().warn("unable",e);
+					throw e;
+				}
 				// SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
@@ -841,7 +866,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private File resolvePath(String path) throws FuseException {
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
+		try {
 		this.checkInFS(_f);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 		if (!_f.exists()) {
 			_f = null;
 			SDFSLogger.getLog().debug("no such node " + mountedVolume + path);
@@ -888,7 +918,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// SDFSLogger.getLog().info("Path=" + path);
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
-		this.checkInFS(_f);
+		try {
+			this.checkInFS(_f);
+		}catch(FuseException e) {
+			SDFSLogger.getLog().warn("unable",e);
+			throw e;
+		}
 		try {
 		if (!Files.exists(Paths.get(_f.getCanonicalPath()), LinkOption.NOFOLLOW_LINKS)) {
 			throw new FuseException().initErrno(Errno.ENOENT);

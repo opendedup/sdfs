@@ -43,7 +43,6 @@ if [ -n "$CFG" ] && [ -f "$CFG" ]; then
                 fi
                 cm=$((((_wb*th))*2));
                 MEMORY=$((BASEMEMORY+cm));
-
 fi
 else
         MEMORY=$MEM
@@ -52,4 +51,4 @@ fi
 LD_PRELOAD="${BASEPATH}/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=${BASEPATH}/bin/ -home ${BASEPATH}/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Xss2m \
  -wait 99999999999 -Dfuse.logging.level=INFO -Dfile.encoding=UTF-8 -Xmx$MEMORY$MU -Xms$MEMORY$MU \
 -XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
- -cp ${BASEPATH}/lib/* fuse.SDFS.MountSDFS "$@"
+ -cp ${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* fuse.SDFS.MountSDFS "$@"

@@ -641,7 +641,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 		}
 	}
 	
-	public void writeAccelBuffer() throws IOException {
+	private  void writeAccelBuffer() throws IOException {
+		this.lobj.lock();
+		try {
 		if(accelBuffer == null)
 			return;
 		int opos = accelBuffPos;
@@ -784,6 +786,9 @@ public class WritableCacheBuffer implements DedupChunkInterface {
 			throw new IOException(e);
 		} finally {
 			HashFunctionPool.returnObject(hc);
+		}
+		}finally {
+			lobj.unlock();
 		}
 	}
 
