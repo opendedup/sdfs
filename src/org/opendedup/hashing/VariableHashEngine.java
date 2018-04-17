@@ -19,7 +19,7 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +27,9 @@ import java.util.List;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory.EnhancedChunkVisitor;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.polynomial.Polynomial;
 
 public class VariableHashEngine implements AbstractHashEngine {
@@ -38,13 +38,13 @@ public class VariableHashEngine implements AbstractHashEngine {
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	
-	private BuffEnhancedFingerFactory ff = null;
+	private EnhancedFingerFactory ff = null;
 
 	public VariableHashEngine() throws NoSuchAlgorithmException {
 		this.seed = Main.hashSeed;
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
-			ff = new BuffEnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
+			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
 					HashFunctionPool.minLen, HashFunctionPool.maxLen);
 		}
 
@@ -58,7 +58,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 	
 	
 
-	public List<Finger> getChunks(ByteBuffer b,String lookupFilter,String uuid) throws IOException {
+	public List<Finger> getChunks(byte [] b,String lookupFilter,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(b, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,

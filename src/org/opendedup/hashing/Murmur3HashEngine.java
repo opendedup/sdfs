@@ -19,7 +19,6 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.opendedup.sdfs.Main;
@@ -79,7 +78,7 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 	}
 
 	@Override
-	public List<Finger> getChunks(ByteBuffer b,String fp,String uuid) throws IOException {
+	public List<Finger> getChunks(byte [] b,String fp,String uuid) throws IOException {
 		throw new IOException("not supported");
 	}
 }

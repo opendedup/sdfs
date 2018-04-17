@@ -119,7 +119,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 		try {
 			this.fileName = fileName;
-
 			this.size = maxSize;
 			multiplier = 256 / dbs.length;
 			System.out.println("multiplier=" + this.multiplier + " size=" + dbs.length);
@@ -196,7 +195,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setCreateIfMissing(true);
 				options.setCompactionStyle(CompactionStyle.LEVEL);
 				options.setCompressionType(CompressionType.NO_COMPRESSION);
-
+				
 				// options.setMinWriteBufferNumberToMerge(2);
 				// options.setMaxWriteBufferNumber(6);
 				// options.setLevelZeroFileNumCompactionTrigger(2);

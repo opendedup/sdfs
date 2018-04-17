@@ -35,8 +35,8 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.util.StringUtils;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory.EnhancedChunkVisitor;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.polynomial.Polynomial;
 
 import software.pando.crypto.siphash.SipHash;
@@ -48,7 +48,7 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 	
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
-	private BuffEnhancedFingerFactory ff = null;
+	private EnhancedFingerFactory ff = null;
 	private SecretKey KEY = null;
 	SipHash sipHash128;
 
@@ -56,7 +56,7 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 		this.setSeed(Main.hashSeed);
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
-			ff = new BuffEnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
+			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
 					HashFunctionPool.minLen, HashFunctionPool.maxLen);
 		}
 		sipHash128 = SipHash.getInstance(2, 4,128, KEY);
@@ -69,7 +69,7 @@ public class VariableSipHashEngine implements AbstractHashEngine {
 		return hash;
 	}
 
-	public List<Finger> getChunks(ByteBuffer data,String lookupFilter,String uuid) throws IOException {
+	public List<Finger> getChunks(byte [] data,String lookupFilter,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(data, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,

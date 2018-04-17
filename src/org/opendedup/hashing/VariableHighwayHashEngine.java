@@ -29,8 +29,8 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory;
-import org.rabinfingerprint.handprint.BuffEnhancedFingerFactory.EnhancedChunkVisitor;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
 import org.rabinfingerprint.polynomial.Polynomial;
 
 import org.opendedup.rabin.hashing.HighwayHash;
@@ -40,7 +40,7 @@ public class VariableHighwayHashEngine implements AbstractHashEngine {
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
 	
-	private BuffEnhancedFingerFactory ff = null;
+	private EnhancedFingerFactory ff = null;
 	public static enum HASHTYPE {HASH128,HASH160,HASH256};
 	private HASHTYPE ht;
 
@@ -48,7 +48,7 @@ public class VariableHighwayHashEngine implements AbstractHashEngine {
 		this.ht=ht;
 		while (ff == null) {
 			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
-			ff = new BuffEnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
+			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
 					HashFunctionPool.minLen, HashFunctionPool.maxLen);
 		}
 
@@ -79,7 +79,7 @@ public class VariableHighwayHashEngine implements AbstractHashEngine {
 	
 	
 
-	public List<Finger> getChunks(ByteBuffer data,String lookupFilter,String uuid) throws IOException {
+	public List<Finger> getChunks(byte[] data,String lookupFilter,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(data, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,
