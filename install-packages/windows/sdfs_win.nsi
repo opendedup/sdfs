@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.6.0.14'
+!define VERSION '3.7.0.0'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
