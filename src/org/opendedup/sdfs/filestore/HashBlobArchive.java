@@ -125,7 +125,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private int blocksz = nextSize();
 	private String uuid = "default";
 	private boolean syncd = false;
-	private static int maxQueueSize = 0;
+	public static int maxQueueSize = 0;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 

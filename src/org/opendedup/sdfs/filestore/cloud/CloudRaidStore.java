@@ -255,6 +255,16 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 				int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 				HashBlobArchive.MAX_LEN = sz;
 			}
+			if(config.hasAttribute("backlog-size")) {
+				long bsz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+				long qsz = (int) StringUtils.parseSize(config.getAttribute("backlog-size"));
+				if(qsz > 0) {
+					long tsz = qsz/bsz;
+					HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
+				} if(qsz < 0) {
+					HashBlobArchive.maxQueueSize = -1;
+				}
+			}
 			if (config.hasAttribute("sync-files")) {
 				boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
 				if (syncf) {

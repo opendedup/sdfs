@@ -294,6 +294,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			HashBlobArchive.MAX_LEN = sz;
 
 		}
+		if(this.standAlone && config.hasAttribute("backlog-size")) {
+			long bsz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+			long qsz = (int) StringUtils.parseSize(config.getAttribute("backlog-size"));
+			if(qsz > 0) {
+				long tsz = qsz/bsz;
+				HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
+			} if(qsz < 0) {
+				HashBlobArchive.maxQueueSize = -1;
+			}
+		}
 		if (config.hasAttribute("user-agent-prefix")) {
 			String ua = config.getAttribute("user-agent-prefix");
 			HashMap<String, String> headers = new HashMap<String, String>();
@@ -329,6 +339,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int sz = Integer.parseInt(config.getAttribute("io-threads"));
 			Main.dseIOThreads = sz;
 		}
+		
+		
 		int rsp = 0;
 		int wsp = 0;
 		if (config.hasAttribute("read-speed")) {
