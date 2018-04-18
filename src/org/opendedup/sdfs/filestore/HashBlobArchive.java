@@ -302,16 +302,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Maximum Local Cache Size : " + LOCAL_CACHE_SIZE);
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
-			if(maxQueueSize == 0) {
+			SDFSLogger.getLog().info("HashBlobArchive Queue Size : " + maxQueueSize);
+			if (maxQueueSize == 0) {
 				worksQueue = new SynchronousQueue<Runnable>();
-			} if(maxQueueSize > 0) {
+			}
+			if (maxQueueSize > 0) {
 				worksQueue = new LinkedBlockingQueue<>(maxQueueSize);
-			} if(maxQueueSize < 0) {
+			}
+			if (maxQueueSize < 0) {
 				worksQueue = new LinkedBlockingQueue<>();
 			}
 			executor = new ThreadPoolExecutor(1, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
-			
+
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
@@ -1999,12 +2002,15 @@ public class HashBlobArchive implements Runnable, Serializable {
 	}
 
 	public static void sync(String uuid) {
-		if (uuid == null || uuid.trim() == "")
-			uuid = "default";
-		HashBlobArchive ar = writableArchives.get(uuid);
-		if (ar != null) {
-			synchronized (ar.LOCK) {
-				ar.LOCK.notify();
+		if (maxQueueSize == 0) {
+			if (uuid == null || uuid.trim() == "")
+				uuid = "default";
+
+			HashBlobArchive ar = writableArchives.get(uuid);
+			if (ar != null) {
+				synchronized (ar.LOCK) {
+					ar.LOCK.notify();
+				}
 			}
 		}
 	}

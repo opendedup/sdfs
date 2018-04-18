@@ -418,13 +418,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					HashBlobArchive.MAX_LEN = sz;
 				}
 				if(config.hasAttribute("backlog-size")) {
-					long bsz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
-					long qsz = (int) StringUtils.parseSize(config.getAttribute("backlog-size"));
-					if(qsz > 0) {
-						long tsz = qsz/bsz;
-						HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
-					} if(qsz < 0) {
+					if (config.getAttribute("backlog-size").equals("-1")) {
 						HashBlobArchive.maxQueueSize = -1;
+					} else if (!config.getAttribute("backlog-size").equals("0")) {
+						long bsz = StringUtils.parseSize(config.getAttribute("block-size"));
+						long qsz = StringUtils.parseSize(config.getAttribute("backlog-size"));
+						if (qsz > 0) {
+							long tsz = qsz / bsz;
+							HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
+						}
 					}
 				}
 				if (config.hasAttribute("allow-sync")) {
