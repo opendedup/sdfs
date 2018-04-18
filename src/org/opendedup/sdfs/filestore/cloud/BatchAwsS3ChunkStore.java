@@ -417,6 +417,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 					HashBlobArchive.MAX_LEN = sz;
 				}
+				if(config.hasAttribute("backlog-size"))
 				if (config.hasAttribute("allow-sync")) {
 					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
 					if (config.hasAttribute("sync-check-schedule")) {

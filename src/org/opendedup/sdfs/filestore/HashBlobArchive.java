@@ -103,7 +103,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static EventBus eventUploadBus = new EventBus();
 	// private static transient RejectedExecutionHandler executionHandler = new
 	// BlockPolicy();
-	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private static transient BlockingQueue<Runnable> worksQueue = null;
 	private static transient ThreadPoolExecutor executor = null;
 	private static AtomicLong currentLength = new AtomicLong(0);
 	private static AtomicLong compressedLength = new AtomicLong(0);
@@ -125,6 +125,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private int blocksz = nextSize();
 	private String uuid = "default";
 	private boolean syncd = false;
+	private static int maxQueueSize = 0;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
@@ -301,9 +302,16 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Maximum Local Cache Size : " + LOCAL_CACHE_SIZE);
 			SDFSLogger.getLog().info("HashBlobArchive Max Thread Sleep Time : " + THREAD_SLEEP_TIME);
 			SDFSLogger.getLog().info("HashBlobArchive Spool Directory : " + chunk_location.getPath());
+			if(maxQueueSize == 0) {
+				worksQueue = new SynchronousQueue<Runnable>();
+			} if(maxQueueSize > 0) {
+				worksQueue = new LinkedBlockingQueue<>(maxQueueSize);
+			} if(maxQueueSize < 0) {
+				worksQueue = new LinkedBlockingQueue<>();
+			}
 			executor = new ThreadPoolExecutor(1, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
-
+			
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
 						public void onRemoval(RemovalNotification<Long, FileChannel> removal) {
@@ -396,11 +404,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 									SimpleByteArrayLongMap m = new SimpleByteArrayLongMap(lf.getPath(), MAX_HM_SZ, -1);
 									wMaps.put(id, m);
 								}
-								while (!arc.upload(id)) {
-									Thread.sleep(1000);
-									SDFSLogger.getLog().warn("retrying upload of " + arc.id);
-									z++;
-								}
+								executor.execute(arc);
 							}
 						} catch (Exception e) {
 							c++;

@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 
 
 
+
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
 import java.io.BufferedOutputStream;
@@ -52,7 +53,7 @@ import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 import com.google.common.base.Supplier;
-
+import org.jclouds.b2.*;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.apache.commons.compress.utils.IOUtils;
@@ -102,6 +103,7 @@ import org.opendedup.collections.HashExistsException;
  *         this chunk store since S3 charges per http request.
  * 
  */
+@SuppressWarnings("unused")
 public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 
 	BlobStoreContext context = null;

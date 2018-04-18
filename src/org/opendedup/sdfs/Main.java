@@ -26,7 +26,7 @@ public class Main {
 	
 	public static int hlVersion = 0;
 	public static boolean checkArchiveOnOpen = false;
-	public static boolean checkArchiveOnRead = false;
+	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
 	public static String logSize="10MB";
