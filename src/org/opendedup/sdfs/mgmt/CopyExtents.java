@@ -121,7 +121,7 @@ public class CopyExtents {
 							} else {
 							*/
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
-							//ddc.writeAccelBuffer();
+							ddc.writeAccelBuffer();
 							HashLocPair p = sdc.getWL(_so);
 
 							if (p.nlen > _rem) {
