@@ -33,6 +33,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 //import org.opendedup.util.StringUtils;
+import org.opendedup.util.StringUtils;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
@@ -172,7 +173,7 @@ public class SparseDataChunk implements Externalizable {
 			throw new IOException("Overflow ep=" + ep + " sp=" + p.pos);
 		// SDFSLogger.getLog().info("p = " + p);
 		int _ep = ep;
-		// int k = 0;
+		int k = 0;
 		
 		for (;;) {
 			Entry<Integer, HashLocPair> he = ar.floorEntry(_ep);
@@ -181,10 +182,10 @@ public class SparseDataChunk implements Externalizable {
 			HashLocPair h = he.getValue();
 			int hpos = h.pos;
 			int hep = h.pos + h.nlen;
-			// SDFSLogger.getLog().info("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos
-			// + " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" +
-			// StringUtils.getHexString(p.hash) +" h.hash=" +
-			// StringUtils.getHexString(h.hash));
+			SDFSLogger.getLog().debug("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos
+			+ " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" +
+			StringUtils.getHexString(p.hash) +" h.hash=" +
+			StringUtils.getHexString(h.hash));
 			if (hep < p.pos) {
 				break;
 			}
@@ -198,7 +199,6 @@ public class SparseDataChunk implements Externalizable {
 				ar.remove(hpos);
 				if (h.nlen > 0) {
 					ar.put(h.pos, h);
-					break;
 				}
 				// SDFSLogger.getLog().info("2 changing pos from " +oh
 				// +" to " + h.pos + " offset = " + h.offset);
@@ -222,13 +222,13 @@ public class SparseDataChunk implements Externalizable {
 				if(h.nlen <=0)
 					ar.remove(h.pos);
 			}
-			_ep -= h.pos - 1;
+			_ep = h.pos - 1;
 			/*
 			if (h.isInvalid()) {
 				SDFSLogger.getLog().error("h = " + h.toString());
 			}
 			*/
-
+			k++;
 		}
 		ar.put(p.pos, p);
 
