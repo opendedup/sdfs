@@ -52,6 +52,17 @@ public class SDFSCmdline {
 					System.exit(1);
 				}
 			}
+			if (cmd.hasOption("file-cache-info")) {
+				if (cmd.hasOption("file-path")) {
+					ProcessCacheFileInfo.runCmd(cmd.getOptionValue("file-path"));
+					System.exit(0);
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("file info request failed. --file-path option is required");
+					System.exit(1);
+				}
+			}
 			if (cmd.hasOption("restore-from-archive")) {
 				if (cmd.hasOption("file-path")) {
 					ProcessRestoreArchiveCmd.runCmd(cmd
@@ -406,6 +417,12 @@ public class SDFSCmdline {
 				.withDescription(
 						"Returns io file attributes such as dedup rate and file io statistics. "
 								+ "\n e.g. --file-info --file-path=<path to file or folder>")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("file-cache-info")
+				.withDescription(
+						"Returns io file cache info for a specific file. "
+								+ "\n e.g. --file-cache-info --file-path=<path to file or folder>")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("restore-from-archive")

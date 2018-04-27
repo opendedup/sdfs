@@ -153,6 +153,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 			// slock.unlock();
 		}
 	}
+	
+	public static boolean isCached(long id) {
+		return (archives.getIfPresent(id) != null);
+	}
 
 	public static long getCompressedLength() {
 
@@ -305,15 +309,20 @@ public class HashBlobArchive implements Runnable, Serializable {
 			SDFSLogger.getLog().info("HashBlobArchive Queue Size : " + maxQueueSize);
 			if (maxQueueSize == 0) {
 				worksQueue = new SynchronousQueue<Runnable>();
+				executor = new ThreadPoolExecutor(1, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
+						new ThreadPoolExecutor.CallerRunsPolicy());
 			}
 			if (maxQueueSize > 0) {
 				worksQueue = new LinkedBlockingQueue<>(maxQueueSize);
+				executor = new ThreadPoolExecutor(Main.maxOpenFiles * 2, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
+						new ThreadPoolExecutor.CallerRunsPolicy());
 			}
 			if (maxQueueSize < 0) {
 				worksQueue = new LinkedBlockingQueue<>();
+				executor = new ThreadPoolExecutor(Main.maxOpenFiles * 2, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
+						new ThreadPoolExecutor.CallerRunsPolicy());
 			}
-			executor = new ThreadPoolExecutor(1, Main.maxOpenFiles * 2, 1, TimeUnit.MINUTES, worksQueue,
-					new ThreadPoolExecutor.CallerRunsPolicy());
+			
 
 			openFiles = CacheBuilder.newBuilder().maximumSize(MAP_CACHE_SIZE)
 					.removalListener(new RemovalListener<Long, FileChannel>() {
@@ -1900,7 +1909,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 		Lock ul = this.uploadlock.writeLock();
 		ul.lock();
-
+		SDFSLogger.getLog().info("uploading " + this.id);
 		try {
 			if (this.uploaded)
 				return true;
@@ -1954,6 +1963,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 			// SDFSLogger.getLog().info("size=" + k + " uc=" + z + " fs=" +
 			// f.length() + " ufs=" + uncompressedLength.get());
 		}
+		SDFSLogger.getLog().info("uloaded " + id + " cachesize = " + worksQueue.size());
 		return true;
 	}
 
@@ -2074,10 +2084,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 		closed = true;
 
 		SDFSLogger.getLog().info("Closing HashBlobArchive in flush=" + rchunks.size());
+		if(maxQueueSize == 0) {
 		for (HashBlobArchive ar : rchunks.values()) {
 			synchronized (ar.LOCK) {
 				ar.LOCK.notify();
 			}
+		}
 		}
 		while (rchunks.size() > 0) {
 			try {

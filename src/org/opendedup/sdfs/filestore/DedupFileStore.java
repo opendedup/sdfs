@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -222,9 +223,14 @@ public class DedupFileStore {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
 			//SDFSLogger.getLog().info("adding " + df.getGUID() + "pth=" + df.getMetaFile().getPath());
-			if (openFile.size() >= Main.maxOpenFiles)
+			if (openFile.size() >= Main.maxOpenFiles) {
+				SDFSLogger.getLog().warn("open files reached " + openFile.size());
+				for(Entry<String, SparseDedupFile> en : openFile.entrySet()) {
+					SDFSLogger.getLog().warn("path=" + en.getValue().mf.getPath() + " guid="+en.getKey());
+				}
 				throw new IOException(
 						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
+			}
 			openFile.put(df.getGUID(), df);
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
