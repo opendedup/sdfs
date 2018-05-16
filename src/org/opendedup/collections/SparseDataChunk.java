@@ -223,11 +223,6 @@ public class SparseDataChunk implements Externalizable {
 					ar.remove(h.pos);
 			}
 			_ep = h.pos - 1;
-			/*
-			if (h.isInvalid()) {
-				SDFSLogger.getLog().error("h = " + h.toString());
-			}
-			*/
 			k++;
 		}
 		ar.put(p.pos, p);

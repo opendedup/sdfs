@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.7.0.0</version>
+  <version>3.7.1.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -32,9 +32,7 @@
        <name>bintray</name>
        <url>http://jcenter.bintray.com</url>
    </repository>
-
 </repositories>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
    	<timestamp>${maven.build.timestamp}</timestamp>

@@ -131,6 +131,7 @@ public class VolumeConfigWriter {
 	private boolean genericS3 = false;
 	private boolean atmosEnabled = false;
 	private boolean backblazeEnabled = false;
+	private String backlogSize = "0";
 	private String cloudUrl;
 	private boolean readAhead = false;
 	private boolean usebasicsigner = false;
@@ -517,6 +518,9 @@ public class VolumeConfigWriter {
 			}
 
 		}
+		if(cmd.hasOption("cloud-backlog-size")) {
+			this.backlogSize = cmd.getOptionValue("cloud-backlog-size");
+		}
 		if (cmd.hasOption("cluster-config"))
 			this.clusterConfig = cmd.getOptionValue("cluster-config");
 		if (cmd.hasOption("cluster-block-replicas")) {
@@ -737,6 +741,7 @@ public class VolumeConfigWriter {
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
 			extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			extended.setAttribute("backlog-size", this.backlogSize);
 			cs.appendChild(extended);
 
 			cs.appendChild(aws);
@@ -779,6 +784,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
+				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.genericS3 || this.aliEnabled) {
 					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
@@ -831,6 +837,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location", this.bucketLocation);
 				cs.appendChild(extended);
@@ -862,6 +869,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("delete-unclaimed", "true");
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("azure-tier-in-days", Integer.toString(aruzreArchiveInDays));
+				extended.setAttribute("backlog-size", this.backlogSize);
 				if(this.azurestorageTier != null) {
 					extended.setAttribute("storage-tier", this.azurestorageTier);
 				}
@@ -1261,6 +1269,10 @@ public class VolumeConfigWriter {
 						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to"
 								+ "\"3\" the volume will attempt to write any unique block to \"3\" DSE nodes, if available.  This defaults to \"2\". ")
 				.hasArg().withArgName("Value [1-7]").create());
+		options.addOption(OptionBuilder.withLongOpt("cloud-backlog-size")
+				.withDescription(
+						"The how much data can live in the spool for backlog. Setting to -1 makes the backlog unlimited. Setting to 0 (default) sets no backlog. Setting to <value> GB TB MB caps the backlog.")
+				.hasArg().withArgName("Value 0,-1,[TB GB MB]").create());
 		options.addOption(OptionBuilder.withLongOpt("cluster-rack-aware")
 				.withDescription(
 						"If set to true, the clustered volume will be rack aware and make the best effort to distribute blocks to multiple racks"
