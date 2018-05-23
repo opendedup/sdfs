@@ -868,7 +868,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		ObjectOutputStream out = null;
 		try {
 			File f = new File(this.path);
+			
 			try {
+				//SDFSLogger.getLog().info("cannonical path is " + f.getCanonicalPath() + " path is " + f.getPath());
 				if (!f.getCanonicalPath().startsWith(Main.volume.connicalPath)) {
 					SDFSLogger.getLog().warn("in writefile connical path [" + f.getCanonicalPath()
 							+ "] is not in folder structure " + Main.volume.connicalPath);
@@ -1546,8 +1548,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		try {
 			if (this.isSymlink())
 				return;
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("writing out file=" + this.path + " df=" + this.dfGuid);
+			//SDFSLogger.getLog().info("writing out file=" + this.path + " df=" + this.dfGuid);
 			// SDFSLogger.getLog().info("writing out file=" + this.path + " df=" +
 			// this.dfGuid + " length=" + this.length);
 			out.writeLong(-1);
