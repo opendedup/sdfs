@@ -388,9 +388,9 @@ public class VolumeConfigWriter {
 			}
 		}
 		if (cmd.hasOption("backblaze-enabled")) {
-
-			this.safe_sync = false;
 			this.backblazeEnabled = true;
+			
+			
 		}
 		if (cmd.hasOption("google-enabled")) {
 			this.gsEnabled = Boolean.parseBoolean(cmd.getOptionValue("google-enabled"));
@@ -732,12 +732,12 @@ public class VolumeConfigWriter {
 			if (this.dExt != null)
 				 extended.setAttribute("data-appendix", this.dExt);
 			extended.setAttribute("allow-sync", "false");
-			extended.setAttribute("upload-thread-sleep-time", "10000");
+			extended.setAttribute("upload-thread-sleep-time", "300000");
 			extended.setAttribute("sync-files", "true");
 			if(this.userAgentPrefix != null)
 				extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 			extended.setAttribute("local-cache-size", this.cacheSize);
-			extended.setAttribute("map-cache-size", "100");
+			extended.setAttribute("map-cache-size", "200");
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
 			extended.setAttribute("sync-check-schedule", syncfs_schedule);
