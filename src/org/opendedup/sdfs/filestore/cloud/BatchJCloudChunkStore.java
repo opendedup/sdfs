@@ -425,7 +425,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
 					}
 				}
+			} else {
+				HashBlobArchive.maxQueueSize = 0;
 			}
+			SDFSLogger.getLog().info("Max Queue Size set to " + HashBlobArchive.maxQueueSize);
 			if (config.hasAttribute("sync-files")) {
 				boolean syncf = Boolean.parseBoolean(config.getAttribute("sync-files"));
 				if (syncf) {
@@ -2068,7 +2071,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if (this.atmosStore)
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory("bucketinfo"));
 			else if (this.b2Store)
-				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo").maxResults(100));
+				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/").maxResults(100));
 			else
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo"));
 			Iterator<? extends StorageMetadata> liter = bips.iterator();
@@ -2136,7 +2139,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		if (this.atmosStore)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().inDirectory("claims"));
 		else if (this.b2Store)
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims").maxResults(100));
+			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims/").maxResults(100));
 		else
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims"));
 		iter = ips.iterator();
@@ -2154,9 +2157,11 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					PageSet<? extends StorageMetadata> bips = null;
 					if (this.atmosStore)
 						bips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory(fldr));
-					else if (this.b2Store)
+					else if (this.b2Store) {
+						if(!fldr.endsWith("/"))
+							fldr = fldr + "/";
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr).maxResults(100));
-					else
+					}else
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr));
 					if (bips.isEmpty()) {
 						String fl = fldr.substring(prefix.length());

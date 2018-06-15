@@ -431,6 +431,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
 						}
 					}
+				} else {
+					HashBlobArchive.maxQueueSize = 0;
 				}
 				if (config.hasAttribute("allow-sync")) {
 					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
