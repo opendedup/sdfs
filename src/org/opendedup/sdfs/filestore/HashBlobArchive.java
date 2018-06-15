@@ -787,7 +787,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private static AtomicLong cSz = new AtomicLong();
 
-	private boolean reloading = false;
+	//private boolean reloading = false;
 
 	private static void buildCache() throws IOException {
 		archives = CacheBuilder.newBuilder().maximumWeight(LOCAL_CACHE_SIZE)
@@ -799,14 +799,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
-						if (SMART_CACHE && !removal.getValue().reloading) {
-							SDFSLogger.getLog().debug("removing " + removal.getKey() + " from cache");
-							cSz.addAndGet(-1 * removal.getValue().getFSize());
-							removal.getValue().removeCache();
-						} else {
-							removal.getValue().reloading = false;
-						}
-
+						SDFSLogger.getLog().debug("removing " + removal.getKey());
+						cSz.addAndGet(-1 * removal.getValue().getFSize());
+						removal.getValue().removeCache();
 					}
 				}).build(new CacheLoader<Long, HashBlobArchive>() {
 					public HashBlobArchive load(Long hashid) throws Exception {
@@ -826,21 +821,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 							SDFSLogger.getLog().error("unable to fetch block [" + hashid + "]", e);
 							throw e;
 						}
-					}
-
-					public ListenableFuture<HashBlobArchive> reload(final Long key, HashBlobArchive archive) {
-						if (SMART_CACHE)
-							archive.reloading = true;
-						else
-							archive.reloading = false;
-						ListenableFutureTask<HashBlobArchive> task = ListenableFutureTask
-								.create(new Callable<HashBlobArchive>() {
-									public HashBlobArchive call() {
-										return archive;
-									}
-								});
-						executor.execute(task);
-						return task;
 					}
 				});
 		if (REMOVE_FROM_CACHE) {
