@@ -800,7 +800,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}).removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
-						if (SMART_CACHE && !removal.getValue().reloading) {
+						if (!SMART_CACHE || (SMART_CACHE && !removal.getValue().reloading)) {
 							SDFSLogger.getLog().debug("removing " + removal.getKey() + " from cache");
 							cSz.addAndGet(-1 * removal.getValue().getFSize());
 							removal.getValue().removeCache();
