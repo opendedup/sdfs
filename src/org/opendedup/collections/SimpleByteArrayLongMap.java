@@ -199,7 +199,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.SPARSE, StandardOpenOption.READ);
 		if (version != 0) {
-			if (nf) {
+			if (nf || new File(path).length() <= 16) {
 				ByteBuffer nbf = ByteBuffer.allocate(16);
 				nbf.putInt(MAGIC_NUMBER);
 				nbf.putInt(this.version);
@@ -230,10 +230,10 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			EL = HashFunctionPool.hashLength + 4;
 			this.version = 0;
 			this.offset = 0;
-			if (!nf) {
-				size = (int) (new File(path).length() - offset) / EL;
-			} else {
+			if (nf || new File(path).length() == 0) {
 				rf.setLength((EL * size) + offset);
+			} else {
+				size = (int) (new File(path).length() - offset) / EL;
 			}
 		}
 		vb = ByteBuffer.allocateDirect(EL);
