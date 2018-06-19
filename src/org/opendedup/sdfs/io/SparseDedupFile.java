@@ -1015,8 +1015,7 @@ public class SparseDedupFile implements DedupFile {
 					} catch (Exception e) {
 					}
 					
-					this.bdb = null;
-					this.closed = true;
+					
 					try {
 
 						MetaFileStore.getMF(mf.getPath()).sync();
@@ -1025,6 +1024,8 @@ public class SparseDedupFile implements DedupFile {
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("error while syncing file in close", e);
 					}
+					this.bdb = null;
+					this.closed = true;
 					
 				}
 				try {
