@@ -977,6 +977,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			Blob blob = null;
 			try {
 				blob = blobStore.getBlob(this.name, key);
+				if(blob == null)
+					SDFSLogger.getLog().warn("key=" + key + " is null");
+				else if(blob.getPayload() == null)
+					SDFSLogger.getLog().warn("key payload=" + key + " is null");
 				IOUtils.copy(blob.getPayload().openStream(), os);
 				os.flush();
 			} finally {

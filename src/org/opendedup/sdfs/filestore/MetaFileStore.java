@@ -426,7 +426,7 @@ public class MetaFileStore {
 		try {
 			int i = 0;
 			while (!service.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().info("Awaiting fdisk completion of threads.");
+				SDFSLogger.getLog().info("Awaiting meta cleanup completion.");
 				if (i > 30) {
 					SDFSLogger.getLog().info("Done Waiting.Will exit without tasks completed");
 					break;
