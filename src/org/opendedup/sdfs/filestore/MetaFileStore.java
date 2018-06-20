@@ -2,13 +2,14 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -41,9 +42,8 @@ import com.google.common.eventbus.EventBus;
  * 
  */
 public class MetaFileStore {
-
 	private static EventBus eventBus = new EventBus();
-	private static SynchronousQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
+	private static LinkedBlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>();
 
 	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L,
 			TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
@@ -356,7 +356,6 @@ public class MetaFileStore {
 
 						if (deleted && !localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
-
 					} else {
 						mf = getMF(new File(path));
 						if (mf.isImporting())
