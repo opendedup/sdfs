@@ -1,10 +1,12 @@
-VERSION=3.5.2
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre/
+VERSION=3.7.6.0 
 DEBFILE="sdfs_${VERSION}_amd64.deb"
 echo $DEBFILE
 sudo rm -rf deb/usr/share/sdfs/lib/*
 cd ../
 mvn package
 cd install-packages
+cp ../target/lib/b2-2.0.3.jar deb/usr/share/sdfs/lib/
 cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar deb/usr/share/sdfs/lib/sdfs.jar
 echo 
 sudo rm *.rpm

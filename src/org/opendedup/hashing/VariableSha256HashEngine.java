@@ -59,7 +59,7 @@ public class VariableSha256HashEngine implements AbstractHashEngine {
 		byte[] hash = hf.hashBytes(data).asBytes();
 		if(ht.equals(HASHTYPE.HASH160)) {
 			ByteBuffer bf = ByteBuffer.wrap(hash);
-			byte [] b = new byte[18];
+			byte [] b = new byte[20];
 			bf.get(b);
 			return b;
 		}

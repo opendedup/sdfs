@@ -973,6 +973,19 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("fdisk", e);
 						}
 						break;
+					case "cacheinfo":
+						try {
+							Element msg1 = new GetCachePercentage().getResult(file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg1);
+							result.appendChild(msg1);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().debug("info", e);
+						}
+						break;
 					case "event":
 						try {
 							String uuid = qry.get("uuid");

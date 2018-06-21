@@ -33,6 +33,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 //import org.opendedup.util.StringUtils;
+import org.opendedup.util.StringUtils;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
@@ -172,19 +173,19 @@ public class SparseDataChunk implements Externalizable {
 			throw new IOException("Overflow ep=" + ep + " sp=" + p.pos);
 		// SDFSLogger.getLog().info("p = " + p);
 		int _ep = ep;
-		// int k = 0;
+		int k = 0;
+		
 		for (;;) {
 			Entry<Integer, HashLocPair> he = ar.floorEntry(_ep);
 			if (he == null)
 				break;
 			HashLocPair h = he.getValue();
 			int hpos = h.pos;
-
 			int hep = h.pos + h.nlen;
-			// SDFSLogger.getLog().info("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos
-			// + " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" +
-			// StringUtils.getHexString(p.hash) +" h.hash=" +
-			// StringUtils.getHexString(h.hash));
+			SDFSLogger.getLog().debug("cheching k="+k+ " floor=" + _ep+ " p.pos=" + p.pos
+			+ " h.pos="+ h.pos + " p.ep="+ep+ " h.ep="+hep+" p.hash=" +
+			StringUtils.getHexString(p.hash) +" h.hash=" +
+			StringUtils.getHexString(h.hash));
 			if (hep < p.pos) {
 				break;
 			}
@@ -196,9 +197,9 @@ public class SparseDataChunk implements Externalizable {
 				h.nlen -= no;
 
 				ar.remove(hpos);
-				if (h.nlen > 0)
+				if (h.nlen > 0) {
 					ar.put(h.pos, h);
-
+				}
 				// SDFSLogger.getLog().info("2 changing pos from " +oh
 				// +" to " + h.pos + " offset = " + h.offset);
 			} else if (h.pos < p.pos && hep >= p.pos) {
@@ -208,12 +209,10 @@ public class SparseDataChunk implements Externalizable {
 					_h.offset += offset;
 					_h.nlen -= offset;
 					_h.pos = ep;
-					
 						_h.setDup(true);
 					if(_h.nlen <= 0)
 						SDFSLogger.getLog().error("LZ " + _h);
 					ar.put(_h.pos, h);
-
 				}
 				if (h.pos < p.pos) {
 					h.nlen = (p.pos - h.pos);
@@ -224,12 +223,7 @@ public class SparseDataChunk implements Externalizable {
 					ar.remove(h.pos);
 			}
 			_ep = h.pos - 1;
-			/*
-			if (h.isInvalid()) {
-				SDFSLogger.getLog().error("h = " + h.toString());
-			}
-			*/
-
+			k++;
 		}
 		ar.put(p.pos, p);
 

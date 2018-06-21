@@ -509,8 +509,8 @@ public class DedupFileChannel {
 		try {
 			if (Main.readAhead) {
 				if(rh == null)
-					rh =ReadAhead.getReadAhead(this);
-				rh.setReadAhead(filePos);
+					rh =ReadAhead.getReadAhead(this.df);
+				rh.cacheFromRange(filePos);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(

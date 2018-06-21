@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.6.0.14</version>
+  <version>3.7.6.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -32,9 +32,7 @@
        <name>bintray</name>
        <url>http://jcenter.bintray.com</url>
    </repository>
-
 </repositories>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
    	<timestamp>${maven.build.timestamp}</timestamp>
@@ -166,7 +164,7 @@
 <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>24.1-jre</version>
+    <version>18.0</version>
 </dependency>
 <dependency>
     <groupId>commons-collections</groupId>
@@ -223,7 +221,7 @@
 <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-s3</artifactId>
-    <version>1.11.283</version>
+    <version>1.11.338</version>
 </dependency>
 <dependency>
     <groupId>org.simpleframework</groupId>

@@ -347,7 +347,7 @@ public class Io {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 
-			SDFSLogger.getLog().info("writing data to  " +fh + " at " + offset + " and length of " +
+			SDFSLogger.getLog().debug("writing data to  " +fh + " at " + offset + " and length of " +
 			 buf.capacity());
 			// byte[] b = new byte[buf.capacity()];
 			// buf.position(0);
@@ -359,7 +359,7 @@ public class Io {
 			DedupFileChannel ch = this.getFileChannel(fh);
 
 			try {
-				SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos="
+				SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos="
 				 +offset + " len=" + buf.capacity());
 				/*
 				byte[] k = new byte[buf.capacity()];
@@ -552,7 +552,7 @@ public class Io {
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
-			SDFSLogger.getLog().info("Reading " + ch.openFile().getPath() + " pos="
+			SDFSLogger.getLog().debug("Reading " + ch.openFile().getPath() + " pos="
 			 +offset + " len=" + buf.capacity());
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*

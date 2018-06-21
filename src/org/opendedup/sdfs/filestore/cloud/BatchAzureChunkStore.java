@@ -278,6 +278,20 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} else {
 			this.name = Main.cloudBucket.toLowerCase();
 		}
+		if (config.hasAttribute("backlog-size")) {
+			if (config.getAttribute("backlog-size").equals("-1")) {
+				HashBlobArchive.maxQueueSize = -1;
+			} else if (!config.getAttribute("backlog-size").equals("0")) {
+				long bsz = StringUtils.parseSize(config.getAttribute("block-size"));
+				long qsz = StringUtils.parseSize(config.getAttribute("backlog-size"));
+				if (qsz > 0) {
+					long tsz = qsz / bsz;
+					HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
+				}
+			}
+		}else {
+			HashBlobArchive.maxQueueSize = 0;
+		}
 		if (config.hasAttribute("access-key")) {
 			this.accessKey = config.getAttribute("access-key");
 		}
@@ -293,6 +307,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
 			HashBlobArchive.MAX_LEN = sz;
 
+		}
+		if(this.standAlone && config.hasAttribute("backlog-size")) {
+			if (config.getAttribute("backlog-size").equals("-1")) {
+				HashBlobArchive.maxQueueSize = -1;
+			} else if (!config.getAttribute("backlog-size").equals("0")) {
+				long bsz = StringUtils.parseSize(config.getAttribute("block-size"));
+				long qsz = StringUtils.parseSize(config.getAttribute("backlog-size"));
+				if (qsz > 0) {
+					long tsz = qsz / bsz;
+					HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
+				}
+			}
 		}
 		if (config.hasAttribute("user-agent-prefix")) {
 			String ua = config.getAttribute("user-agent-prefix");
@@ -329,6 +355,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int sz = Integer.parseInt(config.getAttribute("io-threads"));
 			Main.dseIOThreads = sz;
 		}
+		
+		
 		int rsp = 0;
 		int wsp = 0;
 		if (config.hasAttribute("read-speed")) {
