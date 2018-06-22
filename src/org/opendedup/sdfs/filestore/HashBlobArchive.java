@@ -1236,16 +1236,24 @@ public class HashBlobArchive implements Runnable, Serializable {
 					try {
 						boolean ins = true;
 						if (VERSION == 0) {
-							ins = wMaps.get(this.id).put(hash, (int) cp + 4 + hash.length);
-							SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
+							try {
+								ins = wMaps.get(this.id).put(hash, (int) cp + 4 + hash.length);
+								SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
+							}catch(IllegalStateException e) {
+								throw new ArchiveFullException("archive full");
+							}
 						} else {
 							ByteBuffer hf = ByteBuffer.allocate(8);
 							hf.putInt((int) cp + 4 + hash.length);
 							hf.putInt(chunk.length);
 							hf.position(0);
 							// int zd = (int) cp + 4 + hash.length;
-							ins = wMaps.get(this.id).put(hash, hf.getLong());
-							SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
+							try {
+								ins = wMaps.get(this.id).put(hash, hf.getLong());
+								SDFSLogger.getLog().debug("0 put  len " + chunk.length + " into " + this.id + " " + ins);
+							}catch(IllegalStateException e) {
+								throw new ArchiveFullException("archive full");
+							}
 							// SDFSLogger.getLog().info("put " + zd + " len " +
 							// chunk.length + " into " +this.id);
 						}

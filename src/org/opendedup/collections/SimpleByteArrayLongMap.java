@@ -492,9 +492,11 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			return pos > -1 ? true : false;
 		} catch (MapClosedException e) {
 			throw e;
+		} catch (IllegalStateException e) {
+			SDFSLogger.getLog().fatal("error inserting record", e);
+			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			e.printStackTrace();
 			return false;
 		} finally {
 			l.unlock();
