@@ -1260,6 +1260,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 						if (!ins) {
 							throw new HashExistsException(this.id, hash);
 						}
+					} catch (ArchiveFullException e1) {
+						np.set(cp);
+						this.writeable = false;
+						synchronized (LOCK) {
+							LOCK.notify();
+						}
+						throw e1;
 					} catch (MapClosedException e1) {
 						np.set(cp);
 						this.writeable = false;
