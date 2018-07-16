@@ -81,6 +81,9 @@ public class Config {
 
 			Main.chunkStorePageSize = Integer.parseInt(cbe.getAttribute("page-size"));
 			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
+			if(cbe.hasAttribute("compact-on-mount")) {
+				Main.runCompact = Boolean.parseBoolean(cbe.getAttribute("compact-on-mount"));
+			}
 			if (cbe.hasAttribute("gc-class"))
 				Main.gcClass = cbe.getAttribute("gc-class");
 			Main.fDkiskSchedule = cbe.getAttribute("claim-hash-schedule");
@@ -345,6 +348,9 @@ public class Config {
 		}
 		if (localChunkStore.hasAttribute("disable-auto-gc")) {
 			Main.disableAutoGC = Boolean.parseBoolean(localChunkStore.getAttribute("disable-auto-gc"));
+		}
+		if(localChunkStore.hasAttribute("compact-on-mount")) {
+			Main.runCompact = Boolean.parseBoolean(localChunkStore.getAttribute("compact-on-mount"));
 		}
 		if (localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));

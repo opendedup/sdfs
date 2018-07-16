@@ -2108,8 +2108,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			Download myDownload = tx.download(this.name, keyName, f);
 			myDownload.waitForCompletion();
 		} finally {
-			if (tx != null)
-				tx.shutdownNow();
+			
 		}
 	}
 

@@ -35,6 +35,7 @@ public class Main {
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
+	
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
 	public static int readTimeoutSeconds = -1; // 1 hour timeout
@@ -116,7 +117,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.7.7.2";
+	public static String version = "3.7.7.4";
 
 	public static boolean readAhead = false;
 	

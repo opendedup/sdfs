@@ -3,12 +3,14 @@ package org.opendedup.sdfs.filestore;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +46,7 @@ import com.google.common.eventbus.EventBus;
 public class MetaFileStore {
 	private static EventBus eventBus = new EventBus();
 	private static LinkedBlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>();
-
+	private static ConcurrentHashMap<String,MetaDataDedupFile> pendingDeletes = new ConcurrentHashMap<String,MetaDataDedupFile>();
 	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L,
 			TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -108,6 +110,17 @@ public class MetaFileStore {
 		} finally {
 			l.unlock();
 		}
+	}
+	
+	public static boolean deletePending(String path) {
+		WriteLock l = getMFLock.writeLock();
+		l.lock();
+		try {
+			return pendingDeletes.containsKey(path);
+		}finally {
+			l.unlock();
+		}
+		
 	}
 
 	/**
@@ -357,6 +370,10 @@ public class MetaFileStore {
 						if (deleted && !localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
 					} else {
+						if(pendingDeletes.containsKey(new File(path).getPath())) {
+							SDFSLogger.getLog().info("file is alread being deleted " + new File(path).getPath());
+							return true;
+						}
 						mf = getMF(new File(path));
 						if (mf.isImporting())
 							return false;
@@ -366,15 +383,20 @@ public class MetaFileStore {
 						DedupFileStore.removeOpenDedupFile(mf.getDfGuid());
 						deleted = mf.deleteStub(localOnly);
 						if (!deleted) {
+							
 							SDFSLogger.getLog().warn("could not delete " + mf.getPath());
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
 							try {
 								if (async) {
+									pendingDeletes.put(mf.getPath(), mf);
+									mf.getDedupFile(false).forceClose();
 									DeleteMap m = new DeleteMap();
 									m.mf = mf;
 									m.localOnly = localOnly;
+									
 									service.execute(m);
+									
 								} else {
 									mf.getDedupFile(false).delete(localOnly);
 								}
@@ -448,6 +470,8 @@ public class MetaFileStore {
 				mf.getDedupFile(false).delete(localOnly);
 			} catch (IOException e) {
 				SDFSLogger.getLog().debug(e);
+			} finally {
+				pendingDeletes.remove(mf.getPath());
 			}
 
 		}

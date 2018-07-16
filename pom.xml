@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.7.7.2</version>
+  <version>3.7.7.4</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -246,7 +246,7 @@
 <dependency>
     <groupId>org.rocksdb</groupId>
     <artifactId>rocksdbjni</artifactId>
-    <version>5.9.2</version>
+    <version>5.14.2</version>
 </dependency>
 <dependency>
     <groupId>net.java.dev.jets3t</groupId>

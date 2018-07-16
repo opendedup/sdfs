@@ -124,20 +124,20 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			System.out.println("multiplier=" + this.multiplier + " size=" + dbs.length);
 			long bufferSize = GB;
 			long fsize = 128 * MB;
-			if (this.size < 10_000_000_000L) {
+			if (this.size < 1_000_000_000L) {
 				SDFSLogger.getLog().info("Setting up Small Hash Table");
 				fsize = 128 * MB;
 				bufferSize = fsize * dbs.length;
-			} else if (this.size < 1_000_000_000L) {
+			} else if (this.size < 10_000_000_000L) {
 				SDFSLogger.getLog().info("Setting up Medium Hash Table");
 				fsize = 256 * MB;
 				bufferSize = GB * dbs.length;
-			} else if (this.size < 10_000_000_000L) {
-				SDFSLogger.getLog().info("Setting up Medium Hash Table");
+			} else if (this.size < 20_000_000_000L) {
+				SDFSLogger.getLog().info("Setting up Large Hash Table");
 				fsize = GB;
 				bufferSize = GB * dbs.length;
 			} else {
-				SDFSLogger.getLog().info("Setting up Large Hash Table");
+				SDFSLogger.getLog().info("Setting up XL Hash Table");
 				// long mp = this.size / 10_000_000_000L;
 
 				fsize = 1 * GB;
@@ -318,6 +318,16 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			HashBlobArchive.registerEventBus(this);
 			bar.finish();
 			this.setUp();
+			if(Main.runCompact) {
+				ThreadPoolExecutor zexecutor = new ThreadPoolExecutor(dbs.length, dbs.length + 1, 10, TimeUnit.SECONDS,
+						worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
+
+				for (RocksDB db : dbs) {	
+					CompactShard cs = new CompactShard(db);
+					SDFSLogger.getLog().info("compacting db");
+					zexecutor.execute(cs);
+				}
+			}
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -921,6 +931,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				worksQueue, new ProcessPriorityThreadFactory(Thread.MIN_PRIORITY), executionHandler);
 
 		for (RocksDB db : dbs) {
+			
+			
 			CompactShard cs = new CompactShard(db);
 			zexecutor.execute(cs);
 		}
@@ -1046,6 +1058,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		public void run() {
 			try {
 				this.dbs.compactRange();
+				SDFSLogger.getLog().info("compaction done");
 			} catch (RocksDBException e) {
 				SDFSLogger.getLog().warn("unable to compact range", e);
 			}

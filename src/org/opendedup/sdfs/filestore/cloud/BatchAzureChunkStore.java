@@ -106,6 +106,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private BlobDataIO bio = null;
 	private int tierInDays = 30;
 	private boolean tierImmedately = false;
+	private String endpoint = null;
 
 	// private String bucketLocation = null;
 	static {
@@ -273,6 +274,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void init(Element config) throws IOException {
+		String storageConnectionString = null;
+		if(config.hasAttribute("connection-string")) {
+			storageConnectionString = config.getAttribute("connection-string");
+		}
 		if (config.hasAttribute("bucket-name")) {
 			this.name = config.getAttribute("bucket-name").toLowerCase();
 		} else {
@@ -319,6 +324,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					HashBlobArchive.maxQueueSize = Math.toIntExact(tsz);
 				}
 			}
+		}
+		if(config.hasAttribute("endpoint")) {
+			this.endpoint = config.getAttribute("endpoint");
 		}
 		if (config.hasAttribute("user-agent-prefix")) {
 			String ua = config.getAttribute("user-agent-prefix");
@@ -403,8 +411,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 		}
 		try {
-			String storageConnectionString = "DefaultEndpointsProtocol=" + connectionProtocol + ";" + "AccountName="
+			if(storageConnectionString == null)
+				storageConnectionString = "DefaultEndpointsProtocol=" + connectionProtocol + ";" + "AccountName="
 					+ this.accessKey + ";" + "AccountKey=" + this.secretKey;
+			if(this.endpoint != null)
+				storageConnectionString = storageConnectionString + "EndpointSuffix=" + this.endpoint;
+				
 			account = CloudStorageAccount.parse(storageConnectionString);
 			serviceClient = account.createCloudBlobClient();
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);

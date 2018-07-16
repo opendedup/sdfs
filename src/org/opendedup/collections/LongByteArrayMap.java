@@ -135,10 +135,18 @@ public class LongByteArrayMap implements DataMapInterface {
 		this.lookupFilter = lookupFilter;
 		this.openFile();
 	}
+	
+	private static AtomicLong openFiles = new AtomicLong();
 
 	public static LongByteArrayMap getMap(String GUID, String lookupFilter) throws IOException {
 		File mapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
 				+ File.separator + GUID + ".map");
+		try {
+			throw new Exception();
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("opening " + Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
+				+ File.separator + GUID + ".map of=" + openFiles.incrementAndGet(),e);
+		}
 		ReentrantLock l = getLock(GUID);
 		l.lock();
 		try {
@@ -889,6 +897,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		try {
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
+				SDFSLogger.getLog().info("Opens for " + this.filePath + " = " + op );
 				if (op <= 0) {
 					SDFSLogger.getLog().debug("closing " + this.filePath);
 					this.opens.set(0);
@@ -917,6 +926,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						}
 					}
 					mp.remove(this.filePath);
+					openFiles.decrementAndGet();
 				}
 				else {
 					SDFSLogger.getLog().debug("not closing " + this.filePath + " opens=" + this.opens.get());
