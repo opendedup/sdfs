@@ -141,12 +141,6 @@ public class LongByteArrayMap implements DataMapInterface {
 	public static LongByteArrayMap getMap(String GUID, String lookupFilter) throws IOException {
 		File mapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
 				+ File.separator + GUID + ".map");
-		try {
-			throw new Exception();
-		}catch(Exception e) {
-			SDFSLogger.getLog().warn("opening " + Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
-				+ File.separator + GUID + ".map of=" + openFiles.incrementAndGet(),e);
-		}
 		ReentrantLock l = getLock(GUID);
 		l.lock();
 		try {
