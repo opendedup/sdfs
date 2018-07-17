@@ -1010,15 +1010,12 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().error("unable to sync " + this.GUID, e);
 				}
 				if (!this.deleted) {
+					
+					
 					try {
 						this.bdb.sync();
 					} catch (Exception e) {
 					}
-					try {
-						this.bdb.close();
-					} catch (Exception e) {
-					}
-
 					try {
 
 						MetaFileStore.getMF(mf.getPath()).sync();
@@ -1026,6 +1023,11 @@ public class SparseDedupFile implements DedupFile {
 						eventBus.post(new SFileClosed(this));
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("error while syncing file in close", e);
+					}
+					
+					try {
+						this.bdb.close();
+					} catch (Exception e) {
 					}
 					this.bdb = null;
 					this.closed = true;

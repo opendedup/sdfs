@@ -1811,56 +1811,19 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	public int getSz() {
 		SimpleByteArrayLongMap blockMap = null;
+		Lock l = this.lock.readLock();
+		l.lock();
 		try {
 			if (!this.cached)
 				blockMap = wMaps.get(this.id);
-			if (blockMap == null) {
-				RandomAccessFile rf = null;
-				FileChannel ch = null;
-				Lock l = this.lock.readLock();
-				l.lock();
-				try {
-					blockMap = new SimpleByteArrayLongMap(new File(f.getPath() + ".map").getPath(),
-							HashBlobArchive.MAX_HM_SZ, VERSION);
-					rf = new RandomAccessFile(f, "rw");
-					ch = rf.getChannel();
-					ByteBuffer buf = ByteBuffer.allocate(4 + 4 + HashFunctionPool.hashLength);
-					while (ch.position() < ch.size()) {
-						byte[] b = new byte[HashFunctionPool.hashLength];
-						buf.position(0);
-						ch.read(buf);
-						buf.position(0);
-						buf.getInt();
-						buf.get(b);
-						int pos = (int) ch.position() - 4;
-						blockMap.put(b, pos);
-						ch.position(ch.position() + buf.getInt());
-					}
-					wMaps.put(this.id, blockMap);
-				} finally {
-					try {
-						rf.close();
-					} catch (Exception e) {
-					}
-					try {
-						ch.close();
-					} catch (Exception e) {
-					}
-					l.unlock();
-				}
-			}
+			if (blockMap == null)
+				blockMap = maps.get(this.id);
 			return blockMap.getCurrentSize();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error getting size", e);
 			return -1;
 		} finally {
-			if(blockMap != null) {
-				try {
-					blockMap.close();
-				} catch(Exception e) {
-					
-				}
-			}
+			l.unlock();
 		}
 	}
 
@@ -1897,7 +1860,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					blockMap = wMaps.get(this.id);
 				if (blockMap == null)
 					blockMap = maps.get(this.id);
-
+				
 				blockMap.iterInit();
 				KeyValuePair p = blockMap.next();
 				StringBuffer sb = new StringBuffer();

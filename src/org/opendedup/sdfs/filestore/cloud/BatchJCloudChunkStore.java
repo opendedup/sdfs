@@ -1488,6 +1488,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				break;
 			} catch (Exception e1) {
 				e2 = new IOException(e1);
+				SDFSLogger.getLog().error("bla",e1);
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e3) {

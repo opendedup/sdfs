@@ -648,8 +648,8 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	public int statfs(FuseStatfsSetter statfsSetter) throws FuseException {
 		// SDFSLogger.getLog().info("196");
 		try {
-			int blocks = (int) Main.volume.getTotalBlocks();
-			int used = (int) Main.volume.getUsedBlocks();
+			long blocks = Main.volume.getTotalBlocks();
+			long used = Main.volume.getUsedBlocks();
 			if (used > blocks)
 				used = blocks;
 			statfsSetter.set(Main.volume.getBlockSize(), blocks, blocks - used, blocks - used, 0, 0, NAME_LENGTH);
