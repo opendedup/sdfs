@@ -549,7 +549,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 		} finally {
 			l.unlock();
-			;
 		}
 	}
 
@@ -709,6 +708,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 				} catch (InterruptedException e) {
 					SDFSLogger.getLog().error("error while closing ", e);
+					tries++;
 				}
 			}
 			long psz = chunk_location.getFreeSpace() + FileUtils.sizeOfDirectory(chunk_location);
@@ -762,10 +762,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 							ar.uuid = uuid;
 							writableArchives.put(uuid, ar);
 						}
-
 						return ar.id;
 					} catch (Exception e1) {
 						l.unlock();
+						l = null;
+					} finally {
+						if (l != null)
+							l.unlock();
 						l = null;
 					}
 				} catch (Throwable t) {
@@ -2294,11 +2297,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 				l.unlock();
 			}
 		} else {
-
+			Collection<HashBlobArchive> st = null;
 			Lock l = slock.writeLock();
 			l.lock();
-			Collection<HashBlobArchive> st = rchunks.values();
-			l.unlock();
+			try {
+				st = rchunks.values();
+			}finally {
+				l.unlock();
+			}
 			HashSet<HashBlobArchive> bk = new HashSet<HashBlobArchive>();
 			for (HashBlobArchive ar : st) {
 				try {
