@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.7.7.5</version>
+  <version>3.7.7.6</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
