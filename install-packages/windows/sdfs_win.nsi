@@ -83,7 +83,7 @@
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.7.7.7"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.7.7.7
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.7.7.7"
 ;--------------------------------
 ;Installer Sections
 
