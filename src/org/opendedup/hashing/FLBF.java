@@ -119,7 +119,7 @@ public class FLBF implements Serializable {
 		l.writeLock().lock();
 		try {
 			if (this.counting) {
-				this.filter.addRaw(bytes);
+				this.filter.add(bytes);
 				return;
 			} else {
 
@@ -168,7 +168,7 @@ public class FLBF implements Serializable {
 		l.writeLock().lock();
 		try {
 			if (counting) {
-				this.filter.removeRaw(data);
+				this.filter.remove(data);
 			} else {
 				throw new IOException("not implemented");
 			}
