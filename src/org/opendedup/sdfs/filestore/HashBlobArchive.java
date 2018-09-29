@@ -2095,8 +2095,10 @@ public class HashBlobArchive implements Runnable, Serializable {
 				cf.delete();
 
 			}
-			omf.delete();
-			cmf.delete();
+			if(REMOVE_FROM_CACHE) {
+				omf.delete();
+				cmf.delete();
+			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while moving file " + this.id, e);
 			return false;

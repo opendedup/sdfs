@@ -411,6 +411,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (config.hasAttribute("default-bucket-location")) {
 				bucketLocation = RegionUtils.getRegion(config.getAttribute("default-bucket-location"));
 
+			} else {
+				bucketLocation = RegionUtils.getRegion("us-west-2");
 			}
 			if (config.hasAttribute("connection-check-interval")) {
 				this.checkInterval = Integer.parseInt(config.getAttribute("connection-check-interval"));
@@ -636,6 +638,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				EndpointConfiguration ep = new EndpointConfiguration(s3Target, "us-east-1");
 				builder = builder.withEndpointConfiguration(ep);
 				System.out.println("target=" + s3Target);
+			} else {
+				String bl = "us-west-2";
+				System.out.println("bucketLocation=" + bl);
+				builder = builder.withRegion(bl);
 			}
 			if (awsCredentials != null)
 				builder = builder.withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
