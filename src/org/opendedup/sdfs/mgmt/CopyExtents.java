@@ -102,8 +102,11 @@ public class CopyExtents {
 					int _so = (int) (_sstart - _spos);
 					int _do = (int) (_dstart - _dpos);
 					boolean insdone = false;
+					DedupFileChannel ch = null;
+					int tries = 0;
 					while (!insdone) {
 						try {
+							ch = sdf.getChannel(-1);
 							SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
 							/*
 							if(sdc.getFingers().size() == 0) {
@@ -153,9 +156,19 @@ public class CopyExtents {
 							
 							//}
 						} catch (org.opendedup.sdfs.io.FileClosedException e) {
+							if(tries > 100) 
+								throw new IOException("tried to open file 100 ties and failed " + smf.getPath());
 							insdone = false;
 						} catch (Exception e) {
 							throw e;
+						} finally {
+							if(ch != null) {
+								try {
+									sdf.unRegisterChannel(ch, -1);
+								}catch(Exception e) {
+									
+								}
+							}
 						}
 					}
 

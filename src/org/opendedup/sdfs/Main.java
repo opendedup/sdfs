@@ -11,9 +11,9 @@ import org.opendedup.util.OSValidator;
 import org.w3c.dom.Element;
 
 /**
- * 
+ *
  * @author Sam Silverberg Global constants used for SDFS classes.
- * 
+ *
  */
 public class Main {
 	static {
@@ -21,9 +21,9 @@ public class Main {
 			Main.chunkStore = System.getenv("programfiles") + File.separator
 					+ "sdfs" + File.separator;
 		}
-		
+
 	}
-	
+
 	public static int hlVersion = 0;
 	public static boolean checkArchiveOnOpen = false;
 	public static boolean checkArchiveOnRead = true;
@@ -35,7 +35,7 @@ public class Main {
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
-	
+
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
 	public static int readTimeoutSeconds = -1; // 1 hour timeout
@@ -43,7 +43,7 @@ public class Main {
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
 	public static AbstractStreamMatcher matcher = null;
-	
+
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
@@ -59,12 +59,12 @@ public class Main {
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	public static byte MAPVERSION = 0;
-	
+
 	public static String sdfsPassword = "";
 	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
-	
+
 	public static boolean sdfsCliSSL = true;
 	public static boolean sdfsCliRequireAuth = false;
 	public static int sdfsCliPort = 6442;
@@ -120,7 +120,7 @@ public class Main {
 	public static String version = "3.7.8";
 
 	public static boolean readAhead = false;
-	
+
 	public static int MAX_TBL_SIZE=600_000_000;
 
 	/**
@@ -157,7 +157,7 @@ public class Main {
 	 * whether encryption should be enabled for the DSE
 	 */
 	public static boolean chunkStoreEncryptionEnabled = false;
-	
+
 	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
@@ -193,7 +193,7 @@ public class Main {
 	 */
 	public static int CHUNK_LENGTH = 16 * 1024;
 	public static int MIN_CHUNK_LENGTH = (4*1024)-1;
-	
+
 
 	/**
 	 * The maximum number of writable chunks @see
@@ -256,14 +256,14 @@ public class Main {
 	 */
 	public static int defaultGroup = 0;
 
-	
+
 	/**
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
 
 	/**
-	 * 
+	 *
 	 */
 	public static double gcPFIncrement = .05;
 
@@ -272,7 +272,7 @@ public class Main {
 	 */
 	public static String volumeMountPoint;
 
-	
+
 
 	/**
 	 * Determines whether dedup file map will be closed when the filesystem
@@ -303,7 +303,7 @@ public class Main {
 	 */
 	public static boolean cloudChunkStore = false;
 	/**
-	 * 
+	 *
 	 */
 	public static String cloudBucket = null;
 	/**
@@ -348,8 +348,8 @@ public class Main {
 	 */
 	public static int chunkStorePageSize = 4096;
 
-	
-	
+
+
 	public static boolean disableAutoGC = false;
 
 	/**
@@ -361,13 +361,13 @@ public class Main {
 
 	/**
 	 * FDisk Schedule in cron format
-	 * 
+	 *
 	 * @see org.opendedup.sdfs.FDISKJob
 	 */
 	public static String fDkiskSchedule = "0 59 23 * * ?";
 
 	public static boolean closedGracefully = true;
 	public static boolean rebuildHashTable = false;
-	
+
 	public static boolean enableLookupFilter = false;
 }

@@ -8,7 +8,7 @@ mvn package
 cd install-packages
 cp ../target/lib/b2-2.0.3.jar deb/usr/share/sdfs/lib/
 cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar deb/usr/share/sdfs/lib/sdfs.jar
-echo 
+echo
 sudo rm *.rpm
 sudo rm *.deb
 sudo rm deb/usr/share/sdfs/bin/libfuse.so.2
