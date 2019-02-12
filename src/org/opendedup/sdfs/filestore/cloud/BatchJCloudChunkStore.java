@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -2078,7 +2079,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			else if (this.b2Store)
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/").maxResults(100));
 			else
-				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo"));
+				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/"));
 			Iterator<? extends StorageMetadata> liter = bips.iterator();
 			while (liter.hasNext()) {
 				StorageMetadata md = liter.next();
@@ -2087,14 +2088,30 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					long mids = EncyptUtils.decHashArchiveName(st, Main.chunkStoreEncryptionEnabled);
 					RemoteVolumeInfo info = new RemoteVolumeInfo();
 					Map<String, String> mdk = this.getUserMetaData(md.getName());
+					for(Entry<String,String> en : mdk.entrySet()) {
+						SDFSLogger.getLog().debug(en.getKey() + " " + en.getValue());
+						if(en.getKey().equalsIgnoreCase("port")){
+							info.port = Integer.parseInt(en.getValue());
+						}
+						if(en.getKey().equalsIgnoreCase("compressedlength")){
+							info.compressed = Long.parseLong(en.getValue());
+						}
+						if(en.getKey().equalsIgnoreCase("hostname")){
+							info.hostname = en.getValue();
+						}
+						if(en.getKey().equalsIgnoreCase("bucketversion")){
+							info.sdfsversion = en.getValue();
+							info.version = Integer.parseInt(en.getValue());
+						}
+						if(en.getKey().equalsIgnoreCase("currentlength")){
+							info.data = Long.parseLong(en.getValue());
+						}
+						if(en.getKey().equalsIgnoreCase("lastupdated")){
+							info.lastupdated = Long.parseLong(en.getValue());
+						}
+
+					}
 					info.id = mids;
-					info.hostname = mdk.get("hostname");
-					info.port = Integer.parseInt(mdk.get("port"));
-					info.compressed = Long.parseLong(mdk.get("compressedlength"));
-					info.data = Long.parseLong(mdk.get("currentlength"));
-					info.lastupdated = Long.parseLong(mdk.get("lastupdated"));
-					info.sdfsversion = mdk.get("bucketversion");
-					info.version = Integer.parseInt(mdk.get("bucketversion"));
 					info.metaData = mdk;
 					ids.add(info);
 				}
@@ -2146,9 +2163,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		else if (this.b2Store)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims/").maxResults(100));
 		else
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims"));
+			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims/"));
 		iter = ips.iterator();
-		Iterator<String> objs = this.getNextObjectList("claims");
+		Iterator<String> objs = this.getNextObjectList("claims/");
 		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		String suffix = "/" + vid;
 		String prefix = "claims/";

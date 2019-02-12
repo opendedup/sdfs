@@ -190,7 +190,7 @@ public class MetaFileStore {
 		// SDFSLogger.getLog().info("mkdir=" + mk + " for " + f);
 		Path p = Paths.get(f.getPath());
 		try {
-			if (!OSValidator.isWindows())
+			if (!OSValidator.isWindows() && mode != -1)
 				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
 		} catch (IOException e) {
 			SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);

@@ -33,12 +33,13 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.SparseDedupFile;
-import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.util.XMLUtils;
 import org.simpleframework.http.Method;
 import org.simpleframework.http.Request;
@@ -59,6 +60,7 @@ public class Io {
 	ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
 	private static Map<String, BERefresh> refreshmap = new HashMap<String, BERefresh>();
 	public final String mountedVolume;
+	public final String connicalMountedVolume;
 	public final String mountPoint;
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
@@ -70,13 +72,31 @@ public class Io {
 		eventBus.register(obj);
 	}
 
-	public Io(String mountedVolume, String mountPoint) {
+	private void checkInFS(File f) throws FuseException {
+		try {
+
+			
+			if (!f.getCanonicalPath().startsWith(connicalMountedVolume)) {
+				SDFSLogger.getLog()
+						.warn("Path is not in mounted [" + mountedVolume + "]folder " + f.getCanonicalPath());
+				throw new FuseException("data not in path " + f.getCanonicalPath()).initErrno(Errno.EACCES);
+			}
+		} catch (IOException e) {
+			SDFSLogger.getLog().warn("Path is not in mounted folder", e);
+			throw new FuseException("data not in path " + f.getPath()).initErrno(Errno.EACCES);
+		}
+	}
+
+	public Io(String mountedVolume, String mountPoint) throws IOException{
 
 		SDFSLogger.getLog().info("mounting " + mountedVolume + " to " + mountPoint);
 
 		if (!mountedVolume.endsWith("/"))
 			mountedVolume = mountedVolume + "/";
+
+		
 		this.mountedVolume = mountedVolume;
+		this.connicalMountedVolume = new File(this.mountedVolume).getCanonicalPath();
 		if (!mountPoint.endsWith("/"))
 			mountPoint = mountPoint + "/";
 
@@ -280,6 +300,88 @@ public class Io {
 		throw new FuseException().initErrno(Errno.ENOENT);
 	}
 
+	public int mkdir(String path) throws FuseException {
+		try {
+			File f = new File(this.mountedVolume + path);
+			try {
+				this.checkInFS(f);
+			} catch (FuseException e) {
+				SDFSLogger.getLog().warn("unable", e);
+				throw e;
+			}
+			// SDFSLogger.getLog().info("3 " + f.getCanonicalPath());
+			if (Main.volume.isOffLine())
+				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
+			if (Main.volume.isFull())
+				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
+			if (f.exists()) {
+				f = null;
+				throw new FuseException("folder exists").initErrno(Errno.EPERM);
+			}
+			try {
+				MetaFileStore.mkDir(f, -1);
+				eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
+			} catch (IOException e) {
+				SDFSLogger.getLog().error("error while making dir " + path, e);
+				throw new FuseException("access denied for " + path).initErrno(Errno.EACCES);
+			} finally {
+				path = null;
+			}
+		} catch (FuseException e) {
+			throw e;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(path, e);
+			throw new FuseException().initErrno(Errno.EACCES);
+		}
+		return 0;
+	}
+
+	public int rmdir(String path) throws FuseException {
+		// SDFSLogger.getLog().info("197 " + path);
+		try {
+			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
+
+				File f = new File(mountedVolume + path);
+
+				// SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
+				if (!f.delete()) {
+					f = null;
+					throw new FuseException().initErrno(Errno.EACCES);
+				}
+				return 0;
+			} else {
+				File f = resolvePath(path);
+				if (f.getName().equals(".") || f.getName().equals(".."))
+					return 0;
+				else {
+					try {
+
+						if (MetaFileStore.removeMetaFile(f.getCanonicalPath(), false, false, true))
+							return 0;
+						else {
+
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
+							throw new FuseException().initErrno(Errno.ENOTEMPTY);
+						}
+
+					} catch (FuseException e) {
+						throw e;
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
+						throw new FuseException().initErrno(Errno.EACCES);
+					}
+
+				}
+			}
+		} catch (FuseException e) {
+			throw e;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(path, e);
+			throw new FuseException().initErrno(Errno.EACCES);
+		}
+	}
+
 	public void unlink(String path) throws FuseException {
 		SDFSLogger.getLog().info("Deleting=" + path);
 		// Thread.currentThread().setName("19
@@ -443,6 +545,11 @@ public class Io {
 				result.setAttribute("status", "success");
 				result.setAttribute("msg", "file create");
 				break;
+			case "createdir":
+				this.mkdir(path[1]);
+				result.setAttribute("status", "success");
+				result.setAttribute("msg", "folder create");
+				break;
 			case "openfile":
 				long hndl = this.open(path[1]);
 				result.setAttribute("status", "success");
@@ -509,6 +616,10 @@ public class Io {
 				this.unlink(path[1]);
 				result.setAttribute("status", "success");
 				result.setAttribute("msg", "file deleted " + path[1]);
+			}else if (type.equalsIgnoreCase("folder")) {
+				this.rmdir(path[1]);
+				result.setAttribute("status", "success");
+				result.setAttribute("msg", "file folder " + path[1]);
 			} else {
 				throw new Exception("process not implemented " + type);
 			}
@@ -598,7 +709,6 @@ public class Io {
 	}
 
 	private void mknod(String path) throws FuseException {
-		SDFSLogger.getLog().info("mknod=" + path);
 		try {
 			path = URLDecoder.decode(path, "UTF-8");
 			File f = new File(this.mountedVolume + path);
