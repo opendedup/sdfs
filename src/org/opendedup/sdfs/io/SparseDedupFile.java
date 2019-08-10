@@ -1045,8 +1045,13 @@ public class SparseDedupFile implements DedupFile {
 					try {
 						this.bdb.sync();
 					} catch (Exception e) {
+						SDFSLogger.getLog().debug(e);
 					}
-					
+					try {
+						this.bdb.close();
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug(e);
+					}
 					this.bdb = null;
 					this.closed = true;
 					try {
@@ -1059,11 +1064,10 @@ public class SparseDedupFile implements DedupFile {
 					}
 					
 				}
-				try {
-					this.bdb.close();
-				} catch (Exception e) {
-				}
+				
 
+			} else {
+				SDFSLogger.getLog().debug("[" + mf.getPath() + "] is already closed");
 			}
 			if (this.toOccured) {
 				this.toOccured = false;

@@ -347,6 +347,7 @@ public class Volume implements java.io.Serializable {
 		Main.DSEID=this.serialNumber;
 		if(vol.hasAttribute("compress-metadata"))
 			Main.COMPRESS_METADATA = Boolean.parseBoolean(vol.getAttribute("compress-metadata"));
+		SDFSLogger.getLog().info("Compressing Metadata = " + Main.COMPRESS_METADATA);
 		if (vol.hasAttribute("maximum-percentage-full")) {
 			this.fullPercentage = Double.parseDouble(vol
 					.getAttribute("maximum-percentage-full"));

@@ -887,8 +887,10 @@ public class LongByteArrayMap implements DataMapInterface {
 		l.lock();
 
 		try {
+			SDFSLogger.getLog().debug("closing");
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
+				SDFSLogger.getLog().debug("Close op = " + op);
 				if (op <= 0) {
 					SDFSLogger.getLog().debug("closing " + this.filePath);
 					this.opens.set(0);
@@ -921,6 +923,8 @@ public class LongByteArrayMap implements DataMapInterface {
 				else {
 					SDFSLogger.getLog().debug("not closing " + this.filePath + " opens=" + this.opens.get());
 				}
+			} else {
+				SDFSLogger.getLog().debug("closed already");
 			}
 		} finally {
 			l.unlock();

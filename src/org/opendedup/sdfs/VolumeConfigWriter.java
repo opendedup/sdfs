@@ -71,7 +71,7 @@ public class VolumeConfigWriter {
 	String volume_capacity = null;
 	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
-	boolean mdCompresstion = false;
+	boolean mdCompresstion = true;
 	double max_percent_full = .95;
 	String chunk_store_data_location = null;
 	String chunk_store_hashdb_location = null;
