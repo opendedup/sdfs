@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.GCDDB;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -86,6 +87,9 @@ public class ManualGC {
 			evt.maxCt = 100;
 			evt.curCt = 0;
 			try {
+				if(Main.DDB_TRASH_ENABLED) {
+					new GCDDB(evt);
+				}
 				rm = runGC(compact);
 			} catch (IOException e) {
 				if (!Main.firstRun)

@@ -110,7 +110,6 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
 		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));
 		MDC.put("totalSwap", Long.toString(perf.getTotalSwapSpaceSize()));
-		log.info(vol.getName());
 		MDC.clear();
 	}
 

@@ -118,10 +118,8 @@ public class FileReplicationService {
 		for (;;) {
 			f.delete();
 			try {
-
 				sync.downloadFile(dlf, f, "ddb");
 				SDFSLogger.getLog().debug("downloaded " + f.getPath() + " sz=" + f.length());
-
 				return f;
 			} catch (Exception e) {
 				if (tries > maxTries) {
@@ -131,7 +129,11 @@ public class FileReplicationService {
 					tries++;
 			}
 		}
+	}
 
+	private boolean ddbFileExists(String guid) throws Exception {
+		String dlf = guid.substring(0, 2) + "/" + guid + "/" + guid + ".map";
+		return sync.exists(dlf, "ddb");
 	}
 
 	public static MetaDataDedupFile getMF(String fname) throws Exception {
@@ -148,12 +150,29 @@ public class FileReplicationService {
 		service.sync.addRefresh(id);
 	}
 
-	public static LongByteArrayMap getDDB(String fname, String lookupFilter) throws Exception {
-		File f = service.downloadDDBFile(fname, lookupFilter);
-		SDFSLogger.getLog().info("downloaded " + f.getPath() + " size= " + f.length());
-		LongByteArrayMap m = LongByteArrayMap.getMap(fname, lookupFilter);
-		service.sync.checkoutFile("ddb/" + fname);
-		return m;
+	public static LongByteArrayMap getDDB(String fname, String lookupFilter) throws IOException {
+		try {
+			File f = service.downloadDDBFile(fname, lookupFilter);
+			SDFSLogger.getLog().info("downloaded " + f.getPath() + " size= " + f.length());
+			LongByteArrayMap m = LongByteArrayMap.getMap(fname, lookupFilter);
+			service.sync.checkoutFile("ddb/" + fname);
+			return m;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static boolean DDBExists(String fname) throws IOException {
+		if (service != null) {
+			try {
+				return service.ddbFileExists(fname);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+		} else {
+			return false;
+		}
+		
 	}
 
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
@@ -284,10 +303,10 @@ public class FileReplicationService {
 	public void metaFileWritten(MFileWritten evt) throws IOException {
 		if (evt.mf.isFile() || evt.mf.isSymlink()) {
 			try {
-				
+
 				ReentrantLock l = this.getLock(evt.mf.getPath());
-				synchronized(l) {
-					if(l.getQueueLength() > 1)
+				synchronized (l) {
+					if (l.getQueueLength() > 1)
 						return;
 				}
 				l.lock();
@@ -377,8 +396,8 @@ public class FileReplicationService {
 		if (evt.getLocation() == -1) {
 			try {
 				ReentrantLock l = this.getLock(evt.sf.getDatabasePath());
-				synchronized(l) {
-					if(l.getQueueLength() > 1)
+				synchronized (l) {
+					if (l.getQueueLength() > 1)
 						return;
 				}
 				l.lock();
@@ -415,6 +434,8 @@ public class FileReplicationService {
 							tries++;
 					}
 				}
+			} catch(java.nio.file.NoSuchFileException e) {
+				SDFSLogger.getLog().debug("unable to write " + evt.sf.getDatabasePath(), e);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write " + evt.sf.getDatabasePath(), e);
 			} finally {
@@ -431,28 +452,31 @@ public class FileReplicationService {
 			ReentrantLock l = this.getLock(evt.sf.getPath());
 			if (l.tryLock()) {
 				try {
-				int tries = 0;
-				boolean done = false;
-				while (!done) {
-					try {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
-						this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb",
-								new HashMap<String, String>(), false);
+					int tries = 0;
+					boolean done = false;
+					while (!done) {
+						try {
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
+							this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb",
+									new HashMap<String, String>(), false);
 
-						done = true;
-					} catch (Exception e) {
-						if (tries > maxTries)
-							throw e;
-						else
-							tries++;
+							done = true;
+						} catch (Exception e) {
+							if (tries > maxTries)
+								throw e;
+							else
+								tries++;
+						}
 					}
-				}
-				}finally {
+				} finally {
 					l.unlock();
 				}
 			}
-		} catch (Exception e) {
+		} catch(java.nio.file.NoSuchFileException e) {
+			SDFSLogger.getLog().debug("unable to write " + evt.sf.getPath(), e);
+		} 
+		catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.sf.getPath(), e);
 		} finally {
 			removeLock(evt.sf.getPath());
@@ -467,25 +491,27 @@ public class FileReplicationService {
 			ReentrantLock l = this.getLock(evt.mf.getPath());
 			l.lock();
 			try {
-			int tries = 0;
-			boolean done = false;
-			while (!done) {
-				try {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
-					this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files",
-							new HashMap<String, String>(), false);
-					done = true;
-				} catch (Exception e) {
-					if (tries > maxTries)
-						throw e;
-					else
-						tries++;
+				int tries = 0;
+				boolean done = false;
+				while (!done) {
+					try {
+						if (SDFSLogger.isDebug())
+							SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
+						this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files",
+								new HashMap<String, String>(), false);
+						done = true;
+					} catch (Exception e) {
+						if (tries > maxTries)
+							throw e;
+						else
+							tries++;
+					}
 				}
-			}
 			} finally {
 				l.unlock();
 			}
+		} catch(java.nio.file.NoSuchFileException e) {
+			SDFSLogger.getLog().debug("unable to write " + evt.mf.getPath(), e);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
 		} finally {
@@ -516,6 +542,8 @@ public class FileReplicationService {
 						tries++;
 				}
 			}
+		}catch(java.nio.file.NoSuchFileException e) {
+			SDFSLogger.getLog().debug("unable to write " + evt.sf, e);
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error("unable to dels " + evt.sf, e);
 		} finally {

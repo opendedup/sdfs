@@ -104,10 +104,11 @@ public class MgmtServerConnection {
 		String _url = url;
 		Map<String, String> qry = splitQuery(_url);
 		String hmac = phmac;
-		if(qry.containsKey("cmd")) {
+
+		if(qry.containsKey("cmd") && qry.get("cmd").length() > 0) {
 			hmac = HashFunctions.getHmacSHA256(hmac,qry.get("cmd").getBytes());
 		}
-		if(qry.containsKey("file")) {
+		if(qry.containsKey("file") && qry.get("file").length() > 0) {
 			hmac = HashFunctions.getHmacSHA256(hmac,qry.get("file").getBytes());
 		}
 		String ts = Long.toString(System.currentTimeMillis());

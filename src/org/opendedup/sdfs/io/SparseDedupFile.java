@@ -47,7 +47,6 @@ import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.Finger;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.ThreadPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -80,7 +79,6 @@ public class SparseDedupFile implements DedupFile {
 	public long lastSync = 0;
 	public DataMapInterface bdb = null;
 	MessageDigest digest = null;
-	protected static transient ThreadPool pool = null;
 	private final ReentrantLock syncLock = new ReentrantLock();
 	private static int maxWriteBuffers = 2;
 	protected transient final ConcurrentHashMap<Long, WritableCacheBuffer> flushingBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
@@ -130,7 +128,6 @@ public class SparseDedupFile implements DedupFile {
 
 			});
 	static {
-
 		File f = new File(Main.dedupDBStore);
 		if (!f.exists())
 			f.mkdirs();
@@ -144,7 +141,6 @@ public class SparseDedupFile implements DedupFile {
 
 		executor = new ThreadPoolExecutor(1, Main.writeThreads, 10, TimeUnit.SECONDS, worksQueue,
 				new ThreadPoolExecutor.CallerRunsPolicy());
-
 	}
 
 	public static void registerListener(Object obj) {
@@ -155,10 +151,6 @@ public class SparseDedupFile implements DedupFile {
 	private boolean closed = true;
 	static {
 
-	}
-
-	public static synchronized void flushThreadPool() {
-		pool.flush();
 	}
 
 	public SparseDedupFile(MetaDataDedupFile mf) throws IOException {
@@ -286,10 +278,24 @@ public class SparseDedupFile implements DedupFile {
 
 						this.bdb = LongByteArrayMap.getMap(this.GUID, this.mf.getLookupFilter());
 					}
-					this.bdb.vanish(Main.refCount);
-					this.bdb.close();
-				}
+					if (Main.DDB_TRASH_ENABLED) {
+						String ext = ".map";
+						if (!dbf.exists()) {
+							ext = ".map.lz4";
+						}
+						File dest = new File(Main.dedupDBTrashStore + File.separator + "ddb" + File.separator
+								+ this.GUID.substring(0, 2) + File.separator + this.GUID + File.separator + this.GUID
+								+ ext);
+						this.bdb.copy(dest.getPath(), false);
+						this.bdb.vanish(false);
+						this.bdb.close();
+						LongByteArrayMap.getMap(dest, null).close();
+					} else {
+						this.bdb.vanish(Main.refCount);
+						this.bdb.close();
+					}
 
+				}
 			}
 			this.forceClose();
 
@@ -303,7 +309,7 @@ public class SparseDedupFile implements DedupFile {
 			return DeleteDir.deleteDirectory(new File(filePath));
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("error in delete " + this.GUID, e);
+			SDFSLogger.getLog().warn("error in delete " + this.GUID, e);
 		} finally {
 			this.syncLock.unlock();
 		}
@@ -350,7 +356,7 @@ public class SparseDedupFile implements DedupFile {
 							+ this.flushingBuffers.size() + " in flush");
 					for (WritableCacheBuffer buf : this.flushingBuffers.values()) {
 						if (buf != null) {
-							SDFSLogger.getLog().info("closed=" + buf.closed + " flushing=" + buf.flushing + " pos="
+							SDFSLogger.getLog().debug("closed=" + buf.closed + " flushing=" + buf.flushing + " pos="
 									+ buf.getFilePosition());
 							buf.lobj.lock();
 							try {
@@ -401,154 +407,165 @@ public class SparseDedupFile implements DedupFile {
 				throw new FileClosedException("file already closed");
 			}
 			if (writeBuffer.isDirty()) {
+
 				this.dirty = true;
 				try {
-
+					boolean allInserted = false;
 					int dups = 0;
+					int retries = 0;
+					while (!allInserted) {
+						
 
-					try {
-						List<Finger> fs = null;
-						fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(), this.GUID);
-						DataHashed dh = new DataHashed(this.mf, this, fs);
-						eventBus.post(dh);
-						HashMap<ByteArrayWrapper, Finger> mp = new HashMap<ByteArrayWrapper, Finger>();
-						for (Finger f : fs) {
-							ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
-							Finger _f = mp.get(ba);
-							if (_f == null) {
-								f.claims = 1;
-								mp.put(ba, f);
-							} else {
-								_f.claims++;
-								mp.put(ba, _f);
-							}
-						}
-
-						TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
-
-						AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
-							@Override
-							public void commandException(Finger result, Throwable e) {
-								int _dn = this.incrementandGetDN();
-								this.incrementAndGetDNEX();
-								SDFSLogger.getLog().error("Error while getting hash", e);
-								if (_dn >= this.getMaxSz()) {
-									synchronized (this) {
-										this.notifyAll();
-									}
-								}
-							}
-
-							@Override
-							public void commandResponse(Finger result) {
-								int _dn = this.incrementandGetDN();
-								if (_dn >= this.getMaxSz()) {
-									synchronized (this) {
-										this.notifyAll();
-									}
-								}
-							}
-
-							@Override
-							public void commandArchiveException(DataArchivedException e) {
-								this.incrementAndGetDNEX();
-								this.dar = e;
-								SDFSLogger.getLog().error("Data has been archived", e);
-								this.incrementandGetDN();
-
-								synchronized (this) {
-									this.notifyAll();
-								}
-
-							}
-
-						};
-						l.setMaxSize(mp.size());
-						for (Finger f : mp.values()) {
-							f.l = l;
-							executor.execute(f);
-						}
-						int wl = 0;
-						int tm = 1000;
-
-						int al = 0;
-						while (l.getDN() < mp.size() && l.getDNEX() == 0) {
-
-							if (al == 30) {
-								int nt = wl / 1000;
-								SDFSLogger.getLog()
-										.debug("Slow io, waited [" + nt + "] seconds for all writes to complete.");
-								al = 0;
-							}
-							if (Main.writeTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
-								int nt = wl / 1000;
-								this.toOccured = true;
-								throw new IOException("Write Timed Out after [" + nt + "] seconds. Expected ["
-										+ mp.size() + "] block writes but only [" + l.getDN() + "] were completed");
-							}
-							if (l.dar != null) {
-								throw l.dar;
-							}
-
-							synchronized (l) {
-								l.wait(tm);
-
-							}
-							al++;
-							wl += tm;
-						}
-						if (l.getDN() < mp.size()) {
-							this.toOccured = true;
-							throw new IOException(
-									"Write Timed Out expected [" + mp.size() + "] but got [" + l.getDN() + "]");
-						}
-						if (l.dar != null)
-							throw l.dar;
-						if (l.getDNEX() > 0) {
-							this.errOccured = true;
-							throw new IOException("Write Failed");
-						}
-						// SDFSLogger.getLog().info("broke data up into " +
-						// fs.size() + " chunks");
-						for (Finger f : fs) {
-							HashLocPair p = new HashLocPair();
-							try {
+						try {
+							List<Finger> fs = null;
+							fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(), this.GUID);
+							DataHashed dh = new DataHashed(this.mf, this, fs);
+							eventBus.post(dh);
+							HashMap<ByteArrayWrapper, Finger> mp = new HashMap<ByteArrayWrapper, Finger>();
+							for (Finger f : fs) {
 								ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
 								Finger _f = mp.get(ba);
-								p.hash = f.hash;
-								p.hashloc = _f.hl.getHashLocs();
-								p.len = f.len;
-								p.offset = 0;
-								p.nlen = f.len;
-								p.pos = f.start;
-								if (f.hl != null)
-									p.setDup(!f.hl.getInserted());
-								else
-									p.setDup(true);
-								if (p.isDup()) {
-									dups += f.len;
+								if (_f == null) {
+									f.claims = 1;
+									mp.put(ba, f);
+								} else {
+									_f.claims++;
+									mp.put(ba, _f);
 								}
-								ar.put(p.pos, p);
-							} catch (Exception e) {
-								SDFSLogger.getLog().warn("unable to write object finger", e);
-								throw e;
-								// SDFSLogger.getLog().info("this chunk size
-								// is "
-								// + f.chunk.length);
 							}
+
+							TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
+
+							AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
+								@Override
+								public void commandException(Finger result, Throwable e) {
+									int _dn = this.incrementandGetDN();
+									this.incrementAndGetDNEX();
+									SDFSLogger.getLog().error("Error while getting hash", e);
+									if (_dn >= this.getMaxSz()) {
+										synchronized (this) {
+											this.notifyAll();
+										}
+									}
+								}
+
+								@Override
+								public void commandResponse(Finger result) {
+									int _dn = this.incrementandGetDN();
+									if (_dn >= this.getMaxSz()) {
+										synchronized (this) {
+											this.notifyAll();
+										}
+									}
+								}
+
+								@Override
+								public void commandArchiveException(DataArchivedException e) {
+									this.incrementAndGetDNEX();
+									this.dar = e;
+									SDFSLogger.getLog().error("Data has been archived", e);
+									this.incrementandGetDN();
+
+									synchronized (this) {
+										this.notifyAll();
+									}
+
+								}
+
+							};
+							l.setMaxSize(mp.size());
+							for (Finger f : mp.values()) {
+								f.l = l;
+								executor.execute(f);
+							}
+							int wl = 0;
+							int tm = 1000;
+
+							int al = 0;
+							while (l.getDN() < mp.size() && l.getDNEX() == 0) {
+
+								if (al == 30) {
+									int nt = wl / 1000;
+									SDFSLogger.getLog()
+											.debug("Slow io, waited [" + nt + "] seconds for all writes to complete.");
+									al = 0;
+								}
+								if (Main.writeTimeoutSeconds > 0 && wl > (Main.writeTimeoutSeconds * tm)) {
+									int nt = wl / 1000;
+									this.toOccured = true;
+									throw new IOException("Write Timed Out after [" + nt + "] seconds. Expected ["
+											+ mp.size() + "] block writes but only [" + l.getDN() + "] were completed");
+								}
+								if (l.dar != null) {
+									throw l.dar;
+								}
+
+								synchronized (l) {
+									l.wait(tm);
+
+								}
+								al++;
+								wl += tm;
+							}
+							if (l.getDN() < mp.size()) {
+								this.toOccured = true;
+								throw new IOException(
+										"Write Timed Out expected [" + mp.size() + "] but got [" + l.getDN() + "]");
+							}
+							if (l.dar != null)
+								throw l.dar;
+							if (l.getDNEX() > 0) {
+								this.errOccured = true;
+								throw new IOException("Write Failed");
+							}
+							// SDFSLogger.getLog().info("broke data up into " +
+							// fs.size() + " chunks");
+							for (Finger f : fs) {
+								HashLocPair p = new HashLocPair();
+								try {
+									ByteArrayWrapper ba = new ByteArrayWrapper(f.hash);
+									Finger _f = mp.get(ba);
+									p.hash = f.hash;
+									p.hashloc = _f.hl.getHashLocs();
+									p.len = f.len;
+									p.offset = 0;
+									p.nlen = f.len;
+									p.pos = f.start;
+									if (f.hl != null)
+										p.setDup(!f.hl.getInserted());
+									else
+										p.setDup(true);
+									if (p.isDup()) {
+										dups += f.len;
+									}
+									ar.put(p.pos, p);
+								} catch (Exception e) {
+									SDFSLogger.getLog().warn("unable to write object finger", e);
+									throw e;
+									// SDFSLogger.getLog().info("this chunk size
+									// is "
+									// + f.chunk.length);
+								}
+							}
+							writeBuffer.setDoop(dups);
+							allInserted = writeBuffer.setAR(ar);
+							if(!allInserted) {
+								retries++;
+								if(retries > 10) {
+									throw new IOException("Unable to write retried " + retries);
+								}
+								SDFSLogger.getLog().warn("Data was not all inserted, will retry");
+							}
+						} catch (BufferClosedException e) {
+							return;
+						} catch (DataArchivedException e) {
+							throw e;
+						} catch (Exception e) {
+							this.errOccured = true;
+							throw e;
+						} finally {
+
 						}
-						writeBuffer.setDoop(dups);
-						writeBuffer.setAR(ar);
-
-					} catch (BufferClosedException e) {
-						return;
-					} catch (DataArchivedException e) {
-						throw e;
-					} catch (Exception e) {
-						this.errOccured = true;
-						throw e;
-					} finally {
-
 					}
 					/*
 					 * if (hashloc[1] == 0 && !Main.chunkStoreLocal) throw new IOException(
@@ -872,9 +889,9 @@ public class SparseDedupFile implements DedupFile {
 					if (channel.getFlags() == flags) {
 						this.channels.remove(channel);
 						channel.close(flags);
-						SDFSLogger.getLog().info("Channel size is " + this.channels.size());
+						SDFSLogger.getLog().debug("Channel size is " + this.channels.size());
 						if (this.channels.size() == 0) {
-							SDFSLogger.getLog().info("Closinging " + this.mf.getPath());
+							SDFSLogger.getLog().debug("Closinging " + this.mf.getPath());
 							this.forceClose();
 						}
 					} else {
@@ -1010,8 +1027,7 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().error("unable to sync " + this.GUID, e);
 				}
 				if (!this.deleted) {
-					
-					
+
 					try {
 						this.bdb.sync();
 					} catch (Exception e) {
@@ -1024,7 +1040,7 @@ public class SparseDedupFile implements DedupFile {
 					} catch (Exception e) {
 						SDFSLogger.getLog().error("error while syncing file in close", e);
 					}
-					
+
 					try {
 						this.bdb.close();
 					} catch (Exception e) {

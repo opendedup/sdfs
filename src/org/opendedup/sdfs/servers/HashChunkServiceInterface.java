@@ -25,7 +25,6 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
@@ -46,7 +45,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract AbstractChunkStore getChuckStore();
 	
-	public abstract boolean claimKey(byte [] key,long val,long ct) throws IOException;
+	public abstract long claimKey(byte [] key,long val,long ct) throws IOException;
 	
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
@@ -66,9 +65,6 @@ public interface HashChunkServiceInterface {
 	public abstract byte getHashRoute(byte[] hash);
 
 	public abstract long processHashClaims(SDFSEvent evt,boolean compact) throws IOException;
-
-	public abstract long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException;
 
 	public abstract void commitChunks();
 

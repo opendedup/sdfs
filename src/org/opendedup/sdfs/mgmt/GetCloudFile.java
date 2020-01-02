@@ -130,7 +130,8 @@ public class GetCloudFile implements Runnable {
 				if(_mf.getDfGuid() == null) {
 					throw new IOException("File " + sfile + " has no data");
 				}
-				FileReplicationService.getDDB(_mf.getDfGuid(), _mf.getLookupFilter());
+				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid(), _mf.getLookupFilter());
+				mp.setIndexed(false);
 				mf = MetaFileStore.getMF(_mf.getPath());
 				mf.setLocalOwner(false);
 				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
@@ -148,17 +149,6 @@ public class GetCloudFile implements Runnable {
 			if (sdf != null) {
 				sdf.deleteStub(true);
 			}
-			/*
-			File f = new File(Main.volume.getPath() + File.separator + sfile);
-			if (f.exists()) {
-				try {
-					MetaFileStore.removeMetaFile(f.getPath(), true, true,false);
-				} catch (Exception e1) {
-
-				} finally {
-					f.delete();
-				}
-			}*/
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to get file " + sfile, e);
@@ -176,6 +166,7 @@ public class GetCloudFile implements Runnable {
 		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
 		ddb.forceClose();
 		ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
+		ddb.setIndexed(true);
 		mf.getIOMonitor().clearFileCounters(false);
 		if (ddb.getVersion() < 2)
 			throw new IOException("only files version 2 or later can be imported");

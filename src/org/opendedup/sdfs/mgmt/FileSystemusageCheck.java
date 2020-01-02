@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 
 public class FileSystemusageCheck implements Runnable {
 	SDFSEvent evt = null;
-	
+
 	public Element getResult() throws IOException,
 			ParserConfigurationException {
 		evt = SDFSEvent.cszEvent("Return FS size");
@@ -25,7 +25,7 @@ public class FileSystemusageCheck implements Runnable {
 	public void run() {
 		try {
 
-            long volumeID = Main.DSEID;            
+            long volumeID = Main.DSEID;
             HCServiceProxy.getChunkStore().getAllObjSummary("blocks", volumeID);
 
 		} catch (Exception e) {

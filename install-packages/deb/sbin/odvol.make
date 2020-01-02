@@ -1,1 +1,4 @@
-/usr/share/sdfs/odvol.make
+#!/bin/bash
+BASEPATH="/usr/share/sdfs"
+${BASEPATH}/bin/jre/bin/java  -Dfile.encoding=UTF-8 -classpath ${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* org.opendedup.sdfs.VolumeConfigWriter "$@" --io-safe-sync=true
+

@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -39,6 +39,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
+import org.opendedup.sdfs.mgmt.mqtt.MetaDataPush;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
 import org.opendedup.sdfs.mgmt.websocket.PingService;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -77,7 +78,7 @@ public class MgmtWebServer implements Container {
 	public static final String BATCH_BLOCK_PATH = "/batchblockdata/";
 	public static final String BATCH_BLOCK_POINTER = "/batchblockpointer/";
 	public static final String SESSION = "/session/";
-	public static final long MAX_TS_SYNC = 60*5*1000;
+	public static final long MAX_TS_SYNC = 60 * 5 * 1000;
 	public static Io io = null;
 
 	private static Map<String, String> splitQuery(String query) {
@@ -98,18 +99,17 @@ public class MgmtWebServer implements Container {
 		return query_pairs;
 	}
 
-	
-	private transient static LoadingCache<String, String> sessions = CacheBuilder.newBuilder().maximumSize(100000).expireAfterAccess(24, TimeUnit.HOURS).build(
-			new CacheLoader<String, String>() {
-	             public String load(String key) { // no checked exception
-	               return HashFunctions.getRandomString(8);
-	             }
-	           });
-	
+	private transient static LoadingCache<String, String> sessions = CacheBuilder.newBuilder().maximumSize(100000)
+			.expireAfterAccess(24, TimeUnit.HOURS).build(new CacheLoader<String, String>() {
+				public String load(String key) { // no checked exception
+					return HashFunctions.getRandomString(8);
+				}
+			});
+
 	@Override
 	public void handle(Request request, Response response) {
 		try {
-			//SDFSLogger.getLog().info(request.getTarget());
+			// SDFSLogger.getLog().info(request.getTarget());
 			Path reqPath = request.getPath();
 			String[] parts = request.getTarget().split("\\?");
 			Map<String, String> qry = null;
@@ -162,14 +162,13 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
 				String hmac = qry.get("hmac");
-			
-				
-				
+
 				if (hmac != null) {
 					String tss = qry.get("timestamp");
-					long ts =  Long.parseLong(tss);
-					if(ts < (System.currentTimeMillis()-MAX_TS_SYNC)) {
-						SDFSLogger.getLog().warn("could not authenticate because time [" + ts + "] is less than [" + System.currentTimeMillis() + "]");
+					long ts = Long.parseLong(tss);
+					if (ts < (System.currentTimeMillis() - MAX_TS_SYNC)) {
+						SDFSLogger.getLog().warn("could not authenticate because time [" + ts + "] is less than ["
+								+ System.currentTimeMillis() + "]");
 					}
 					String[] tks = URLDecoder.decode(hmac, "UTF-8").split(":");
 					String hsh = tks[0];
@@ -178,13 +177,13 @@ public class MgmtWebServer implements Container {
 						auth = false;
 					else {
 						String im = HashFunctions.getHmacSHA256(session, StringUtils.getHexBytes(Main.sdfsPassword));
-						if(qry.containsKey("cmd")) {
-							im = HashFunctions.getHmacSHA256(im,qry.get("cmd").getBytes());
+						if (qry.containsKey("cmd")) {
+							im = HashFunctions.getHmacSHA256(im, qry.get("cmd").getBytes());
 						}
-						if(qry.containsKey("file")) {
-							im = HashFunctions.getHmacSHA256(im,qry.get("file").getBytes());
+						if (qry.containsKey("file")) {
+							im = HashFunctions.getHmacSHA256(im, qry.get("file").getBytes());
 						}
-						im = HashFunctions.getHmacSHA256(im,tss.getBytes());
+						im = HashFunctions.getHmacSHA256(im, tss.getBytes());
 						if (im.equalsIgnoreCase(hsh))
 							auth = true;
 					}
@@ -404,9 +403,9 @@ public class MgmtWebServer implements Container {
 							boolean localonly = false;
 							if (qry.containsKey("retentionlock"))
 								rmlock = Boolean.parseBoolean(qry.get("retentionlock"));
-							if(qry.containsKey("localonly"))
+							if (qry.containsKey("localonly"))
 								localonly = Boolean.parseBoolean(qry.get("localonly"));
-							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock,localonly);
+							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock, localonly);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.createTextNode(msg));
@@ -425,12 +424,12 @@ public class MgmtWebServer implements Container {
 							}
 							boolean overwrite = false;
 							String changeid = null;
-							if(qry.containsKey("changeid"))
-							 changeid = qry.get("changeid");
+							if (qry.containsKey("changeid"))
+								changeid = qry.get("changeid");
 							if (qry.containsKey("overwrite")) {
 								overwrite = Boolean.parseBoolean(qry.get("overwrite"));
 							}
-							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite,changeid);
+							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite, changeid);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
 							result.appendChild(doc.adoptNode(msg));
@@ -441,10 +440,9 @@ public class MgmtWebServer implements Container {
 						}
 						break;
 
-						
 					case "syncfssize":
 						try {
-							
+
 							Element msg = new FileSystemusageCheck().getResult();
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
@@ -455,7 +453,7 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("cloudmfile", e);
 						}
 						break;
-						
+
 					case "cloudmfile":
 						try {
 
@@ -474,21 +472,15 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("cloudmfile", e);
 						}
 						break;
-						/*
-					case "clouddbfile":
-						try {
-							String changeid = qry.get("changeid");
-							Element msg = new GetCloudDBFile().getResult(file, changeid);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "command completed successfully");
-							result.appendChild(doc.adoptNode(msg));
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn("clouddbfile", e);
-						}
-						break;
-						*/
+					/*
+					 * case "clouddbfile": try { String changeid = qry.get("changeid"); Element msg
+					 * = new GetCloudDBFile().getResult(file, changeid);
+					 * result.setAttribute("status", "success"); result.setAttribute("msg",
+					 * "command completed successfully"); result.appendChild(doc.adoptNode(msg)); }
+					 * catch (IOException e) { result.setAttribute("status", "failed");
+					 * result.setAttribute("msg", e.toString());
+					 * SDFSLogger.getLog().warn("clouddbfile", e); } break;
+					 */
 					case "setcachesz":
 						try {
 							Element msg = new SetCacheSize().getResult(qry.get("sz"));
@@ -948,7 +940,7 @@ public class MgmtWebServer implements Container {
 						break;
 					case "cleanstore":
 						try {
-							boolean compact=false;
+							boolean compact = false;
 							if (qry.containsKey("compact"))
 								compact = Boolean.parseBoolean(qry.get("compact"));
 							Element emsg = new CleanStoreCmd().getResult(compact);
@@ -1015,7 +1007,7 @@ public class MgmtWebServer implements Container {
 						result.setAttribute("status", "failed");
 						result.setAttribute("msg", "no command specified");
 					}
-					
+
 				} else {
 					result.setAttribute("status", "failed");
 					result.setAttribute("msg", "authentication failed");
@@ -1043,14 +1035,14 @@ public class MgmtWebServer implements Container {
 					response.setCode(404);
 					PrintStream body = response.getPrintStream();
 					body.println("invalid path " + reqPath.getPath());
-					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());	
+					SDFSLogger.getLog().error("invalid path " + reqPath.getPath());
 					body.close();
 				} else if (request.getTarget().startsWith(IO_PATH)) {
 					String pth = request.getTarget().substring(IO_PATH.length()).split("\\?")[0];
 					// SDFSLogger.getLog().info("io path=" + pth);
 					io.processIo(request, response, pth);
 				} else if (Main.matcher != null && request.getTarget().startsWith(Main.matcher.getWPath())) {
-					
+
 					Main.matcher.getResult(request.getTarget(), 0, response);
 				} else if (request.getTarget().startsWith(METADATA_PATH)) {
 					long time = System.currentTimeMillis();
@@ -1076,17 +1068,17 @@ public class MgmtWebServer implements Container {
 				} else if (request.getTarget().startsWith(METADATA_INFO_PATH)) {
 					String path = Main.volume.getPath() + File.separator
 							+ request.getTarget().substring(METADATA_INFO_PATH.length());
-					String [] pe = path.split("\\?");
-					
+					String[] pe = path.split("\\?");
+
 					path = pe[0];
 					int num = 100;
 					String uuid = null;
-					if(qry.containsKey("num")) {
-							num = Integer.parseInt(qry.get("num"));
+					if (qry.containsKey("num")) {
+						num = Integer.parseInt(qry.get("num"));
 					}
-					if(qry.containsKey("nextmarker")) {
+					if (qry.containsKey("nextmarker")) {
 						uuid = qry.get("nextmarker");
-						if(uuid.length() < 0)
+						if (uuid.length() < 0)
 							uuid = null;
 					}
 					path = URLDecoder.decode(path, "UTF-8");
@@ -1104,7 +1096,7 @@ public class MgmtWebServer implements Container {
 						response.setDate("Date", time);
 						response.setDate("Last-Modified", time);
 						PrintStream body = response.getPrintStream();
-						body.println(GetJSONAttributes.getResult(path,uuid,num));
+						body.println(GetJSONAttributes.getResult(path, uuid, num));
 						body.close();
 					}
 				} else if (request.getTarget().startsWith(MAPDATA_PATH)) {
@@ -1276,14 +1268,24 @@ public class MgmtWebServer implements Container {
 				Main.matcher.start();
 				routes.put(Main.matcher.getWSPath(), Main.matcher);
 			}
+			if (Main.volume.rabbitMQNode != null) {
+				try {
+					new MetaDataPush(Main.volume.rabbitMQNode, Main.volume.rabbitMQPort, Main.volume.rabbitMQUser,
+							Main.volume.rabbitMQPassword, Main.volume.rabbitMQTopic);
+
+				} catch (TimeoutException e) {
+					throw new IOException(e);
+				}
+			}
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());
-			if(!Main.blockDev)
+			if (!Main.blockDev)
 				io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
 			Container container = new MgmtWebServer();
 			RouterContainer rn = new RouterContainer(container, negotiator, Main.writeThreads);
-			SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8),Main.writeThreads,4);
+			SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8),
+					Main.writeThreads, 4);
 			connection = new SocketConnection(server);
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);

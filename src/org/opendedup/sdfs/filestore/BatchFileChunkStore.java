@@ -430,7 +430,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 							if (metaData.containsKey("deleted-objects"))
 								delobj = Integer.parseInt((String) metaData.get("deleted-objects"));
 							delobj = delobj + odel.get(k);
-							SDFSLogger.getLog().debug("updating " + k + " sz=" + objs);
+							SDFSLogger.getLog().info("updating " + k + " sz=" + objs);
 							metaData.put("deleted-objects", Integer.toString(delobj));
 							try {
 								long z = HashBlobArchive.compactArchive(k);
@@ -454,7 +454,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 						}
 
 					}
-					SDFSLogger.getLog().info("Compacted [" + iter.size() + "] storaage objects by ["
+					SDFSLogger.getLog().info("Compacted [" + iter.size() + "] storage objects by ["
 							+ StorageUnit.of(sz).format(sz) + "]");
 
 				}

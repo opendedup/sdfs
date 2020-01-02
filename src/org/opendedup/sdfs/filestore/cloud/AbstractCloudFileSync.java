@@ -15,6 +15,8 @@ public interface AbstractCloudFileSync {
 	
 	public abstract boolean isCheckedOut(String name,long volumeID) throws IOException;
 
+	public abstract boolean exists(String name, String parentPath) throws IOException;
+
 	public abstract void downloadFile(String name, File to, String parentPath)
 			throws IOException;
 	

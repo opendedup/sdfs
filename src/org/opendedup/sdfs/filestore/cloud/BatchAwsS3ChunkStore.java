@@ -176,6 +176,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String accessKey = Main.cloudAccessKey;
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
+	private int transferSize = 10*1024*1024;
 	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
 	TransferManager tx = null;
 	static {
@@ -306,7 +307,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	public void expandFile(long length) throws IOException {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -420,6 +420,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.standAlone) {
 				if (config.hasAttribute("block-size")) {
 					int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
+					this.transferSize =(int)Math.round(((double)sz*1.5));
 					HashBlobArchive.MAX_LEN = sz;
 				}
 				if (config.hasAttribute("backlog-size")) {
@@ -479,6 +480,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.standAlone && config.hasAttribute("local-cache-size")) {
 				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 				HashBlobArchive.setLocalCacheSize(sz);
+			}
+			if(config.hasAttribute("transfer-size")){
+				this.transferSize = (int)StringUtils.parseSize(config.getAttribute("transfer-size"));
 			}
 
 			if (config.hasAttribute("metadata-version")) {
@@ -647,14 +651,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				builder = builder.withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
 			else
 				builder = builder.withCredentials(new InstanceProfileCredentialsProvider(false));
-			
+
 			if (config.hasAttribute("disableDNSBucket")) {
 				builder.withPathStyleAccessEnabled(Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
 				System.out.println("disableDNSBucket=" + Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
 			}
 			s3Service = builder.build();
-
 			
+
 			this.binm = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
@@ -814,7 +818,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				HashBlobArchive.setReadSpeed(rsp, false);
 				HashBlobArchive.setWriteSpeed(wsp, false);
 			}
-			tx = TransferManagerBuilder.standard().withS3Client(s3Service).build();
+			tx = TransferManagerBuilder.standard().withS3Client(builder.build()).build();
 			Thread th = new Thread(this);
 			th.start();
 		} catch (Exception e) {
@@ -1018,6 +1022,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean fileExists(long id) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();
 		try {
@@ -1061,6 +1068,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
+		
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();
 		IOException e = null;
@@ -1356,7 +1367,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				boolean del = Boolean.parseBoolean((String) mp.get("deleted"));
 				if (del) {
 					S3Object kobj = s3Service.getObject(this.name, "keys/" + haName);
-
 					int claims = 0;
 					try {
 						claims = this.getClaimedObjects(kobj, id);
@@ -1412,6 +1422,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void getBytes(long id, File f) throws IOException, DataArchivedException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
@@ -1439,6 +1452,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public Map<String, String> getUserMetaData(String name) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		// this.s3clientLock.readLock().lock();
 		if (this.simpleMD) {
 			if (s3Service.doesObjectExist(this.name, name + mdExt)) {
@@ -1849,12 +1865,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void sync() throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		HashBlobArchive.sync();
 	}
 
 	@Override
 	public void uploadFile(File f, String to, String pp, HashMap<String, String> metaData, boolean disableComp)
 			throws IOException {
+				if(this.closed){
+					throw new IOException("connection closed");
+				}
 		// this.s3clientLock.readLock().lock();
 		InputStream in = null;
 		while (to.startsWith(File.separator))
@@ -1960,13 +1982,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				Map<String, String> umd = FileUtils.getFileMetaData(f, Main.chunkStoreEncryptionEnabled);
 				metaData.putAll(umd);
 				md.setUserMetadata(metaData);
-				if (!disableComp) {
-					md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
-					md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
-					if (ivb != null)
-						md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
-					md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
-				}
+				md.addUserMetadata("lz4compress", Boolean.toString(Main.compress));
+				md.addUserMetadata("encrypt", Boolean.toString(Main.chunkStoreEncryptionEnabled));
+				if (ivb != null)
+					md.addUserMetadata("ivspec", BaseEncoding.base64().encode(ivb));
+				md.addUserMetadata("lastmodified", Long.toString(f.lastModified()));
 				if (simpleS3) {
 					md.setContentType("binary/octet-stream");
 					in = new BufferedInputStream(new FileInputStream(p), 32768);
@@ -2024,7 +2044,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						md.addUserMetadata("md5sum", mds);
 
 						md.setContentLength(p.length());
-						PutObjectRequest req = new PutObjectRequest(this.name, objName, in, md);
+						PutObjectRequest req = new PutObjectRequest(this.name, objName, p).withMetadata(md);
 						multiPartUpload(req, p);
 						if (this.isClustered())
 							this.checkoutFile(pth);
@@ -2075,7 +2095,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		InitiateMultipartUploadResult initResponse = this.s3Service.initiateMultipartUpload(initRequest);
 
 		long contentLength = file.length();
-		long partSize = 10L * 1024 * 1024 * 1024; // Set part size to 10 MB.
+		long partSize = this.transferSize; // Set part size to 10 MB.
 
 		try {
 			// Step 2: Upload parts.
@@ -2114,12 +2134,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			Download myDownload = tx.download(this.name, keyName, f);
 			myDownload.waitForCompletion();
 		} finally {
-			
+
 		}
 	}
 
 	@Override
 	public void downloadFile(String nm, File to, String pp) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		// this.s3clientLock.readLock().lock();
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
@@ -2236,7 +2259,34 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
+	public boolean exists(String nm, String pp) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
+		while (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+		try {
+
+			String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+			// haName.replaceAll("\\", "/");
+			SDFSLogger.getLog().info("deleting " + haName);
+			boolean exists = false;
+			try {
+				exists = s3Service.doesObjectExist(this.name, haName);
+			} catch (Exception e) {
+				SDFSLogger.getLog().debug("not able to check " + haName);
+			}
+			return exists;
+		} catch (Exception e1) {
+			throw new IOException(e1);
+		}
+	}
+
+	@Override
 	public void deleteFile(String nm, String pp) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		// this.s3clientLock.readLock().lock();
 		while (nm.startsWith(File.separator))
 			nm = nm.substring(1);
@@ -2288,7 +2338,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void renameFile(String from, String to, String pp) throws IOException {
-
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		while (from.startsWith(File.separator))
 			from = from.substring(1);
 		while (to.startsWith(File.separator))
@@ -2404,7 +2456,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public Map<String, Long> getHashMap(long id) throws IOException {
-
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		// SDFSLogger.getLog().info("downloading map for " + id);
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		S3Object kobj = null;
@@ -2441,7 +2495,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean checkAccess() {
-
+		
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
@@ -2466,6 +2520,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setReadSpeed(int kbps) {
+		
 		HashBlobArchive.setReadSpeed((double) kbps, true);
 
 	}
@@ -2508,7 +2563,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
 			return null;
 		}
-		String haName = this.restoreRequests.get(new Long(id));
+		String haName = this.restoreRequests.get(Long.valueOf(id));
 		if (haName == null)
 			haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		else if (haName.equalsIgnoreCase("InvalidObjectState"))
@@ -2529,7 +2584,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				SDFSLogger.getLog().info("restoring block [" + id + "] at [blocks/" + haName + "] from glacier "
 						+ this.glacierTier.toString());
 				if (blockRestored(haName)) {
-					restoreRequests.put(new Long(id), "InvalidObjectState");
+					restoreRequests.put(Long.valueOf(id), "InvalidObjectState");
 
 					return null;
 				}
@@ -2537,17 +2592,17 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					request = new RestoreObjectRequest(this.name, "blocks/" + haName + mdExt, 2);
 					s3Service.restoreObject(request);
 				}
-				restoreRequests.put(new Long(id), haName);
+				restoreRequests.put(Long.valueOf(id), haName);
 				return haName;
 			} catch (AmazonS3Exception e) {
 				if (e.getErrorCode().equalsIgnoreCase("InvalidObjectState")) {
 					SDFSLogger.getLog().warn("InvalidObjectState for blocks/" + haName + this.dExt);
-					restoreRequests.put(new Long(id), "InvalidObjectState");
+					restoreRequests.put(Long.valueOf(id), "InvalidObjectState");
 					return null;
 				}
 				if (e.getErrorCode().equalsIgnoreCase("RestoreAlreadyInProgress")) {
 					SDFSLogger.getLog().warn("RestoreAlreadyInProgress for blocks/" + haName + this.dExt);
-					restoreRequests.put(new Long(id), haName);
+					restoreRequests.put(Long.valueOf(id), haName);
 					return haName;
 				} else {
 					SDFSLogger.getLog().error(
@@ -2579,6 +2634,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean blockRestored(String id) {
+		
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
 			ObjectMetadata momd = omd;
@@ -2716,7 +2772,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
-
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		if (!this.clustered)
 			throw new IOException("volume is not clustered");
 		Map<String, String> md = this.getClaimMetaData(id);
@@ -2780,7 +2838,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean objectClaimed(String key) throws IOException {
-
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		if (!this.clustered)
 			return true;
 
@@ -2798,6 +2858,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		name = FilenameUtils.separatorsToUnix(name);
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -2836,6 +2899,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean isCheckedOut(String name, long volumeID) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		String pth = "claims/" + name + "/"
 				+ EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		// .name.this.s3clientLock.readLock().lock();
@@ -2862,6 +2928,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		if (this.clustered) {
 			ObjectListing idol = this.s3Service.listObjects(this.getName(), "bucketinfo/");
 			Iterator<S3ObjectSummary> iter = idol.getObjectSummaries().iterator();
@@ -2928,6 +2997,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void removeVolume(long volumeID) throws IOException {
+		if(this.closed){
+			throw new IOException("connection closed");
+		}
 		if (volumeID == Main.DSEID)
 			throw new IOException("volume can not remove its self");
 		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
@@ -3032,6 +3104,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void updateBucketInfo(Map<String, String> md) {
+		
 		try {
 			if (this.simpleMD) {
 				ObjectMetadata omd = new ObjectMetadata();
@@ -3154,7 +3227,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						int cl = st.verifyDelete(k.longValue());
 						if (cl == 0) {
 							SDFSLogger.getLog().debug("deleted " + k.longValue());
-							HashBlobArchive.removeCache(k.longValue());
+							HashBlobArchive.removeLocalArchive(k.longValue());
 						}
 					} else {
 						Map<String, String> mp = st.getUserMetaData(name);
@@ -3193,6 +3266,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					 *
 					 * }
 					 */
+				} else {
+					int claims = 0;
+					String [] sar = HashBlobArchive.getStrings(k.longValue()).split(",");
+					if(sar != null){
+						for (String ha : sar) {
+							byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
+							if (HCServiceProxy.getHashesMap().mightContainKey(b, k.longValue()))
+								claims++;
+						}
+						if(claims == 0)
+							HashBlobArchive.removeLocalArchive(k.longValue());
+					}
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("Unable to delete object " + k, e);

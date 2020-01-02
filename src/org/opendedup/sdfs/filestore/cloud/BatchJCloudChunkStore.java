@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -415,7 +414,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				HashBlobArchive.MAX_LEN = sz;
 			}
 			if (config.hasAttribute("backlog-size")) {
-				
+
 				if (config.getAttribute("backlog-size").equals("-1")) {
 					HashBlobArchive.maxQueueSize = -1;
 				} else if (!config.getAttribute("backlog-size").equals("0")) {
@@ -760,7 +759,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		Map<String, String> md = this.getUserMetaData("keys/" + haName);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		this.readBlob("keys/" + haName, out);
+		Blob b = this.readBlob("keys/" + haName, out);
+		if (b == null) {
+			return null;
+		}
 
 		byte[] nm = out.toByteArray();
 
@@ -789,12 +791,24 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		try {
 			long id = EncyptUtils.decHashArchiveName(pth.substring(5), Main.chunkStoreEncryptionEnabled);
 			String[] hs = this.getStrings(id);
+			if (hs == null) {
+				try {
+					hs = HashBlobArchive.getStrings(id).split(",");
+				} catch (java.lang.NullPointerException e) {
+					hs = null;
+				}
+			}
 
 			int claims = 0;
-			for (String ha : hs) {
-				byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-				if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
-					claims++;
+			if (hs != null) {
+				for (String ha : hs) {
+					if (ha != null) {
+						
+						byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
+						if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
+							claims++;
+					}
+				}
 			}
 			return claims;
 		} catch (Exception e) {
@@ -946,7 +960,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		SDFSLogger.getLog().debug("wrote object " + blob.toString() + " in " + dif);
 	}
 
-	private void readBlob(String key, OutputStream os) throws IOException {
+	private Blob readBlob(String key, OutputStream os) throws IOException {
 
 		if (this.b2Store) {
 			BlobStore st = null;
@@ -966,6 +980,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						IOUtils.closeQuietly(blob.getPayload());
 					}
 				}
+				return blob;
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to borrow object", e);
 				throw new IOException(e);
@@ -978,10 +993,13 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			Blob blob = null;
 			try {
 				blob = blobStore.getBlob(this.name, key);
-				if(blob == null)
-					SDFSLogger.getLog().warn("key=" + key + " is null");
-				else if(blob.getPayload() == null)
-					SDFSLogger.getLog().warn("key payload=" + key + " is null");
+				if (blob == null) {
+					SDFSLogger.getLog().debug("key=" + key + " is null");
+					return null;
+				} else if (blob.getPayload() == null) {
+					SDFSLogger.getLog().debug("key payload=" + key + " is null");
+					return null;
+				}
 				IOUtils.copy(blob.getPayload().openStream(), os);
 				os.flush();
 			} finally {
@@ -991,6 +1009,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					IOUtils.closeQuietly(blob.getPayload());
 				}
 			}
+			return blob;
 		}
 	}
 
@@ -1233,7 +1252,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 								Main.chunkStoreEncryptionEnabled);
 						try {
 							if (this.standAlone) {
-								HashBlobArchive.removeCache(k.longValue());
+								HashBlobArchive.removeLocalArchive(k.longValue());
 								if (this.deleteUnclaimed) {
 									DeleteObject obj = new DeleteObject(k.longValue(), this);
 									executor.execute(obj);
@@ -1489,7 +1508,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				break;
 			} catch (Exception e1) {
 				e2 = new IOException(e1);
-				SDFSLogger.getLog().error("bla",e1);
+				SDFSLogger.getLog().error("error uploading file", e1);
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e3) {
@@ -1586,6 +1605,15 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			z.delete();
 			e.delete();
 		}
+
+	}
+
+	@Override
+	public boolean exists(String nm, String pp) throws IOException {
+		while (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+		String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+		return blobStore.blobExists(this.name, haName);
 
 	}
 
@@ -2079,7 +2107,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			else if (this.b2Store)
 				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/").maxResults(100));
 			else
-				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo/"));
+				bips = blobStore.list(this.name, ListContainerOptions.Builder.prefix("bucketinfo"));
 			Iterator<? extends StorageMetadata> liter = bips.iterator();
 			while (liter.hasNext()) {
 				StorageMetadata md = liter.next();
@@ -2088,30 +2116,14 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					long mids = EncyptUtils.decHashArchiveName(st, Main.chunkStoreEncryptionEnabled);
 					RemoteVolumeInfo info = new RemoteVolumeInfo();
 					Map<String, String> mdk = this.getUserMetaData(md.getName());
-					for(Entry<String,String> en : mdk.entrySet()) {
-						SDFSLogger.getLog().debug(en.getKey() + " " + en.getValue());
-						if(en.getKey().equalsIgnoreCase("port")){
-							info.port = Integer.parseInt(en.getValue());
-						}
-						if(en.getKey().equalsIgnoreCase("compressedlength")){
-							info.compressed = Long.parseLong(en.getValue());
-						}
-						if(en.getKey().equalsIgnoreCase("hostname")){
-							info.hostname = en.getValue();
-						}
-						if(en.getKey().equalsIgnoreCase("bucketversion")){
-							info.sdfsversion = en.getValue();
-							info.version = Integer.parseInt(en.getValue());
-						}
-						if(en.getKey().equalsIgnoreCase("currentlength")){
-							info.data = Long.parseLong(en.getValue());
-						}
-						if(en.getKey().equalsIgnoreCase("lastupdated")){
-							info.lastupdated = Long.parseLong(en.getValue());
-						}
-
-					}
 					info.id = mids;
+					info.hostname = mdk.get("hostname");
+					info.port = Integer.parseInt(mdk.get("port"));
+					info.compressed = Long.parseLong(mdk.get("compressedlength"));
+					info.data = Long.parseLong(mdk.get("currentlength"));
+					info.lastupdated = Long.parseLong(mdk.get("lastupdated"));
+					info.sdfsversion = mdk.get("bucketversion");
+					info.version = Integer.parseInt(mdk.get("bucketversion"));
 					info.metaData = mdk;
 					ids.add(info);
 				}
@@ -2163,9 +2175,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		else if (this.b2Store)
 			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims/").maxResults(100));
 		else
-			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims/"));
+			ips = blobStore.list(this.name, ListContainerOptions.Builder.recursive().prefix("claims"));
 		iter = ips.iterator();
-		Iterator<String> objs = this.getNextObjectList("claims/");
+		Iterator<String> objs = this.getNextObjectList("claims");
 		String vid = EncyptUtils.encHashArchiveName(volumeID, Main.chunkStoreEncryptionEnabled);
 		String suffix = "/" + vid;
 		String prefix = "claims/";
@@ -2180,10 +2192,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					if (this.atmosStore)
 						bips = blobStore.list(this.name, ListContainerOptions.Builder.inDirectory(fldr));
 					else if (this.b2Store) {
-						if(!fldr.endsWith("/"))
+						if (!fldr.endsWith("/"))
 							fldr = fldr + "/";
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr).maxResults(100));
-					}else
+					} else
 						blobStore.list(this.name, ListContainerOptions.Builder.prefix(fldr));
 					if (bips.isEmpty()) {
 						String fl = fldr.substring(prefix.length());

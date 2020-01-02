@@ -1,1 +1,54 @@
-/usr/share/sdfs/mount.sdfs
+#!/bin/bash
+#modprobe fuse > /dev/null
+BASEMEMORY="6000"
+CACHEMEMORY=512
+CFG=""
+MPTG=3
+LMPTG=2
+MU="M"
+EXEC="/usr/share/sdfs/jsvc"
+BASEPATH="/usr/share/sdfs"
+PF="sdfs-ncfg.pid"
+if [[ {$1:0:1} == '-' ]]; then
+while getopts ":v:" opt; do
+  case $opt in
+    v)
+      CFG="/etc/sdfs/$OPTARG-volume-cfg.xml"
+        PF="$OPTARG.pid"
+        ;;
+    z)
+      MEM=$OPTARG
+        ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+else
+        CFG="/etc/sdfs/$1-volume-cfg.xml"
+        PF="$1.pid"
+fi
+
+if [ ! -n "$MEM" ]; then
+if [ -n "$CFG" ] && [ -f "$CFG" ]; then
+                lm=$(echo 'cat //subsystem-config/local-chunkstore/@low-memory' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                bm=$(echo 'cat //subsystem-config/io/@chunk-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                th=$(echo 'cat //subsystem-config/io/@max-open-files' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                cst=$(echo 'cat //subsystem-config/local-chunkstore/@hashdb-class' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                _wb=$(echo 'cat //subsystem-config/io/@max-file-write-buffers' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                if (( $_wb > 80 )); then
+                        _wb=80;
+                fi
+                cm=$((((_wb*th))*2));
+                MEMORY=$((BASEMEMORY+cm));
+fi
+else
+        MEMORY=$MEM
+fi
+
+LD_PRELOAD="${BASEPATH}/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=${BASEPATH}/bin/ -home ${BASEPATH}/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Xss2m \
+ -wait 99999999999 -Dfuse.logging.level=INFO -Dfile.encoding=UTF-8 ${DOCKER_DETATCH} -Xmx$MEMORY$MU -Xms$MEMORY$MU \
+-XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
+ -cp ${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* fuse.SDFS.MountSDFS "$@"

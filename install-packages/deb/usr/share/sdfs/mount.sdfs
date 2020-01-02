@@ -1,6 +1,6 @@
 #!/bin/bash
 #modprobe fuse > /dev/null
-BASEMEMORY="4000"
+BASEMEMORY="6000"
 CACHEMEMORY=512
 CFG=""
 MPTG=3
@@ -49,6 +49,6 @@ else
 fi
 
 LD_PRELOAD="${BASEPATH}/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=${BASEPATH}/bin/ -home ${BASEPATH}/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog -Xss2m \
- -wait 99999999999 -Dfuse.logging.level=INFO ${DOCKER_DETATCH} -Dfile.encoding=UTF-8 -Xmx$MEMORY$MU -Xms$MEMORY$MU \
+ -wait 99999999999 -Dfuse.logging.level=INFO -Dfile.encoding=UTF-8 ${DOCKER_DETATCH} -Xmx$MEMORY$MU -Xms$MEMORY$MU \
 -XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
  -cp ${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* fuse.SDFS.MountSDFS "$@"

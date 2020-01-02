@@ -24,7 +24,6 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -168,11 +167,6 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hs.processHashClaims(evt,compact);
 	}
 
-	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException {
-		return hs.processHashClaims(evt, bf);
-	}
-
 	public void commitChunks() {
 		// H2HashStore.commitTransactions();
 		unComittedChunks = 0;
@@ -280,7 +274,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public boolean claimKey(byte[] key,long val,long ct) throws IOException {
+	public long claimKey(byte[] key,long val,long ct) throws IOException {
 		return hs.claimKey(key,val,ct);
 	}
 

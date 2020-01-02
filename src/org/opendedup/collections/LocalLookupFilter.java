@@ -132,8 +132,6 @@ public class LocalLookupFilter {
 			// options.useFixedLengthPrefixExtractor(3);
 
 			Env env = Env.getDefault();
-			env.setBackgroundThreads(8, Env.FLUSH_POOL);
-			env.setBackgroundThreads(8, Env.COMPACTION_POOL);
 			Options options = new Options();
 			options.setCreateIfMissing(true);
 			options.setCompactionStyle(CompactionStyle.LEVEL);
@@ -208,24 +206,21 @@ public class LocalLookupFilter {
 				if (oval != val) {
 					SDFSLogger.getLog().warn("When updating reference count for key [" + StringUtils.getHexString(hash)
 							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
-					HCServiceProxy.hcService.claimKey(hash, val, ct);
-					return ct;
+					return HCServiceProxy.hcService.claimKey(hash, val, ct);
 				}
 				ct += bk.getLong();
 				if (ct <= 0) {
-					//SDFSLogger.getLog().info("!!!!!!!!!!!!!! " + ct);
 					if (ct == 0)
 						ct = -1;
 					this.getDB(hash).delete(wo,hash);
-					HCServiceProxy.hcService.claimKey(hash, val, ct);
-					return ct;
+					return HCServiceProxy.hcService.claimKey(hash, val, ct);
 				} else {
 					bk.putLong(v.length - 8, ct);
 					this.getDB(hash).put(wo, hash, v);
-					return 0;
+					return val;
 				}
 			} else {
-				return ct;
+				return val;
 			}
 		} catch (RocksDBException e) {
 			throw new IOException(e);

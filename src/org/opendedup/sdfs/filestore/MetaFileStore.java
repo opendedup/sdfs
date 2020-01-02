@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -46,7 +44,7 @@ import com.google.common.eventbus.EventBus;
 public class MetaFileStore {
 	private static EventBus eventBus = new EventBus();
 	private static LinkedBlockingQueue<Runnable> worksQueue = new LinkedBlockingQueue<Runnable>();
-	private static ConcurrentHashMap<String,MetaDataDedupFile> pendingDeletes = new ConcurrentHashMap<String,MetaDataDedupFile>();
+	private static ConcurrentHashMap<String, MetaDataDedupFile> pendingDeletes = new ConcurrentHashMap<String, MetaDataDedupFile>();
 	private static ThreadPoolExecutor service = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L,
 			TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -111,23 +109,22 @@ public class MetaFileStore {
 			l.unlock();
 		}
 	}
-	
+
 	public static boolean deletePending(String path) {
 		WriteLock l = getMFLock.writeLock();
 		l.lock();
 		try {
 			return pendingDeletes.containsKey(path);
-		}finally {
+		} finally {
 			l.unlock();
 		}
-		
+
 	}
 
 	/**
 	 * Removes a cached file from the pathmap
 	 * 
-	 * @param path
-	 *            the path of the MetaDataDedupFile
+	 * @param path the path of the MetaDataDedupFile
 	 */
 	public static void removedCachedMF(String path) {
 		pathMap.invalidate(path);
@@ -139,8 +136,7 @@ public class MetaFileStore {
 
 	/**
 	 * 
-	 * @param path
-	 *            the path to the MetaDataDedupFile
+	 * @param path the path to the MetaDataDedupFile
 	 * @return the MetaDataDedupFile
 	 */
 	private static ReentrantReadWriteLock getMFLock = new ReentrantReadWriteLock();
@@ -218,10 +214,8 @@ public class MetaFileStore {
 
 	/**
 	 * 
-	 * @param parent
-	 *            path for the parent
-	 * @param child
-	 *            the child file
+	 * @param parent path for the parent
+	 * @param child  the child file
 	 * @return the MetaDataDedupFile associated with this path.
 	 */
 	public static MetaDataDedupFile getMF(File parent, String child) {
@@ -232,12 +226,9 @@ public class MetaFileStore {
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
 	 * 
-	 * @param origionalPath
-	 *            the path of the source
-	 * @param snapPath
-	 *            the path of the destination
-	 * @param overwrite
-	 *            whether or not to overwrite the destination if it exists
+	 * @param origionalPath the path of the source
+	 * @param snapPath      the path of the destination
+	 * @param overwrite     whether or not to overwrite the destination if it exists
 	 * @return the destination file.
 	 * @throws IOException
 	 */
@@ -249,14 +240,11 @@ public class MetaFileStore {
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
 	 * 
-	 * @param origionalPath
-	 *            the path of the source
-	 * @param snapPath
-	 *            the path of the destination
-	 * @param overwrite
-	 *            whether or not to overwrite the destination if it exists
-	 * @param propigateEvent
-	 *            TODO
+	 * @param origionalPath  the path of the source
+	 * @param snapPath       the path of the destination
+	 * @param overwrite      whether or not to overwrite the destination if it
+	 *                       exists
+	 * @param propigateEvent TODO
 	 * @return the destination file.
 	 * @throws IOException
 	 */
@@ -312,8 +300,7 @@ public class MetaFileStore {
 	/**
 	 * Removes a file from the jdbm db
 	 * 
-	 * @param guid
-	 *            the guid for the MetaDataDedupFile
+	 * @param guid the guid for the MetaDataDedupFile
 	 */
 
 	public static boolean removeMetaFile(String path) {
@@ -347,8 +334,14 @@ public class MetaFileStore {
 						if (!localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
 						deleted = Files.deleteIfExists(p);
-						if (!localOnly && !deleted)
-							eventBus.post(new MFileWritten(mf, true));
+						if (!localOnly && !deleted) {
+							try {
+								eventBus.post(new MFileWritten(mf, true));
+							} catch (Exception e) {
+								SDFSLogger.getLog().warn("error setting event  MFileWritten for " + path, e);
+							}
+						}
+
 					} else if (isDir) {
 						File ps = new File(path);
 						if (force) {
@@ -363,27 +356,37 @@ public class MetaFileStore {
 						}
 						mf = getMF(new File(path));
 						pathMap.invalidate(mf.getPath());
-						if (!localOnly)
+						if (!localOnly){
+							try{
 							eventBus.post(new MFileDeleted(mf, true));
+							}catch(Exception e) {
+								SDFSLogger.getLog().error("unable to delete file " + path, e);
+							}
+						}
 						deleted = new File(path).delete();
 
 						if (deleted && !localOnly)
 							eventBus.post(new MFileDeleted(mf, true));
 					} else {
-						if(pendingDeletes.containsKey(new File(path).getPath())) {
+						if (pendingDeletes.containsKey(new File(path).getPath())) {
 							SDFSLogger.getLog().info("file is alread being deleted " + new File(path).getPath());
 							return true;
 						}
 						mf = getMF(new File(path));
-						if (mf.isImporting())
+						if (mf.isImporting()) {
+							SDFSLogger.getLog().warn("not deleting because of importing");
 							return false;
-						if (mf.isRetentionLock())
+						}
+						if (mf.isRetentionLock()) {
+							SDFSLogger.getLog().warn("not deleting because of retentionlock");
 							return false;
+						}
+
 						pathMap.invalidate(mf.getPath());
 						DedupFileStore.removeOpenDedupFile(mf.getDfGuid());
 						deleted = mf.deleteStub(localOnly);
 						if (!deleted) {
-							
+
 							SDFSLogger.getLog().warn("could not delete " + mf.getPath());
 							return deleted;
 						} else if (mf.getDfGuid() != null) {
@@ -394,9 +397,9 @@ public class MetaFileStore {
 									DeleteMap m = new DeleteMap();
 									m.mf = mf;
 									m.localOnly = localOnly;
-									
+
 									service.execute(m);
-									
+
 								} else {
 									mf.getDedupFile(false).delete(localOnly);
 								}
@@ -419,12 +422,10 @@ public class MetaFileStore {
 					}
 				} catch (Exception e) {
 					if (mf != null) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("unable to remove " + path, e);
+						SDFSLogger.getLog().debug("unable to remove " + path, e);
 					}
 					if (mf == null) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("unable to remove  because [" + path + "] is null", e);
+						SDFSLogger.getLog().debug("unable to remove  because [" + path + "] is null", e);
 					}
 				}
 				mf = null;

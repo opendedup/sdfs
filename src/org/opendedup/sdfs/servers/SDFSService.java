@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -64,6 +64,7 @@ public class SDFSService {
 
 	public void start(boolean useSSL, int port, String password) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile, password);
+		
 		if (useSSL) {
 			useSSL = Main.sdfsCliSSL;
 		}

@@ -255,7 +255,7 @@ public class HashFunctions {
 	
 	public static String getHmacSHA256(String data, byte[] key) throws Exception {
 	    String algorithm="HmacSHA256";
-	    Mac mac = Mac.getInstance(algorithm);
+		Mac mac = Mac.getInstance(algorithm);
 	    mac.init(new SecretKeySpec(key, algorithm));
 	    return StringUtils.getHexString(mac.doFinal(data.getBytes("UTF8")));
 	}

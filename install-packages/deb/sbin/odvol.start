@@ -1,1 +1,50 @@
-/usr/share/sdfs/odvol.start
+#!/bin/bash
+export LD_LIBRARY_PATH=/usr/share/sdfs/bin/:$LD_LIBRARY_PATH
+modprobe nbd > /dev/null
+BASEMEMORY="1000"
+CFG=""
+MPTG=3
+LMPTG=2
+MU="M"
+EXEC="/usr/share/sdfs/jsvc"
+BASEPATH="/usr/share/sdfs"
+PF="sdfs-ncfg.pid"
+if [[ {$1:0:1} == '-' ]]; then
+while getopts ":v:" opt; do
+  case $opt in
+    v)
+      CFG="/etc/sdfs/$OPTARG-volume-cfg.xml"
+        PF="$OPTARG.pid"
+        ;;
+    z)
+      MEM=$OPTARG
+        ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+else
+        CFG="/etc/sdfs/$1-volume-cfg.xml"
+        PF="$1.pid"
+fi
+
+if [ ! -n "$MEM" ]; then
+if [ -n "$CFG" ] && [ -f "$CFG" ]; then
+                lm=$(echo 'cat //subsystem-config/local-chunkstore/@low-memory' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
+                if [ $lm == "true" ]; then
+                        MEMORY=$(((ac/10737418240*LMPTG)+BASEMEMORY))
+                else
+                        MEMORY=$(((ac/10737418240*MPTG)+BASEMEMORY))
+                fi
+fi
+else
+        MEMORY=$MEM
+fi
+
+LD_PRELOAD="${BASEPATH}/bin/libfuse.so.2" $EXEC -server -outfile '&1' -errfile '&2' -Djava.library.path=${BASEPATH}/bin/ -home ${BASEPATH}/bin/jre -Dorg.apache.commons.logging.Log=fuse.logging.FuseLog\
+ -wait 99999999999 -Dfuse.logging.level=INFO -Dfile.encoding=UTF-8 -Xmx$MEMORY$MU -Xms$MEMORY$MU \
+-XX:+DisableExplicitGC -pidfile /var/run/$PF -XX:+UseG1GC -Djava.awt.headless=true \
+ -cp ${BASEPATH}/lib/commons-daemon-1.0.15.jar:${BASEPATH}/lib/sdfs.jar:${BASEPATH}/lib/* org.opendedup.buse.sdfsdev.SDFSVolMgr "$@"

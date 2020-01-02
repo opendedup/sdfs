@@ -2501,7 +2501,7 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 						int cl = st.verifyDelete(k.longValue());
 						if (cl == 0) {
 							SDFSLogger.getLog().debug("deleted " + k.longValue());
-							HashBlobArchive.removeCache(k.longValue());
+							HashBlobArchive.removeLocalArchive(k.longValue());
 						}
 					} else {
 						Map<String, String> mp = st.getUserMetaData(name);
@@ -2540,6 +2540,19 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 					 *
 					 * }
 					 */
+				}else {
+					int claims = 0;
+					String [] sar = HashBlobArchive.getStrings(k.longValue()).split(",");
+					if(sar != null){
+						for (String ha : sar) {
+							byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
+							if (HCServiceProxy.getHashesMap().mightContainKey(b, k.longValue()))
+								claims++;
+						}
+						if(claims == 0)
+							HashBlobArchive.removeLocalArchive(k.longValue());
+					}
+
 				}
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("Unable to delete object " + k, e);
@@ -2618,6 +2631,27 @@ public class BatchAliChunkStore implements AbstractChunkStore, AbstractBatchStor
 	public long getAllObjSummary(String pp, long id) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean exists(String nm,String pp) throws IOException {
+		while (nm.startsWith(File.separator))
+			nm = nm.substring(1);
+		try {
+
+				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
+				// haName.replaceAll("\\", "/");
+				SDFSLogger.getLog().info("deleting " + haName);
+				boolean exists = false;
+				try {
+					exists = s3Service.doesObjectExist(this.name, haName);
+				} catch (Exception e) {
+					SDFSLogger.getLog().debug("not able to check " + haName);
+				}
+				return exists;
+		} catch (Exception e1) {
+			throw new IOException(e1);
+		}
 	}
 
 }

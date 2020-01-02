@@ -8,16 +8,16 @@ com/sun/java/accessibility/
 sun/text
 sun/util
 # dnsns.jar
-META-INF/services/sun.net.spi.nameservice.NameServiceDescriptor
 sun/net
+META-INF/services/sun.net.spi.nameservice.NameServiceDescriptor
 ! jaccess.jar
 com/sun/java/accessibility/
 # localedata.jar
 sun/text
 sun/util
 # nashorn.jar
-jdk/nashorn
 META-INF/services/javax.script.ScriptEngineFactory
+jdk/nashorn
 jdk/internal
 ! sunec.jar
 sun/security

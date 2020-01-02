@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.8.0</version>
+  <version>3.10.8</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -45,31 +45,15 @@
     <version>3.1</version>
 </dependency>
 <dependency>
-       <groupId>com.baqend</groupId>
-       <artifactId>bloom-filter</artifactId>
-       <version>1.0.7</version>
-   </dependency>
-<dependency>
     <groupId>com.bethecoder</groupId>
     <artifactId>ascii_table</artifactId>
     <version>1.0</version>
 </dependency>
-<dependency>
-<groupId>jdk.tools</groupId>
-<artifactId>jdk.tools</artifactId>
-<version>1.8</version>
-<scope>system</scope>
-<systemPath>${JAVA_HOME}/lib/tools.jar</systemPath>
-</dependency>
+
 <dependency>
     <groupId>org.apache.hadoop</groupId>
     <artifactId>hadoop-common</artifactId>
     <version>3.0.0-beta1</version>
-</dependency>
-<dependency>
-    <groupId>org.apache.ignite</groupId>
-    <artifactId>ignite-core</artifactId>
-    <version>2.6.0</version>
 </dependency>
   <dependency>
     <groupId>de.schlichtherle.truezip</groupId>
@@ -99,7 +83,7 @@
 <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-compress</artifactId>
-    <version>1.18</version>
+    <version>1.14</version>
 </dependency>
   <dependency>
        <groupId>jonelo</groupId>
@@ -110,16 +94,6 @@
     <groupId>org.opendedupe</groupId>
     <artifactId>rabinwindow</artifactId>
     <version>1.0.2</version>
-</dependency>
-<dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-core</artifactId>
-  <version>3.3.0</version>
-</dependency>
-<dependency>
-  <groupId>com.datastax.cassandra</groupId>
-  <artifactId>cassandra-driver-mapping</artifactId>
-  <version>3.3.0</version>
 </dependency>
   <dependency>
     <groupId>org.opendedupe</groupId>
@@ -154,7 +128,7 @@
   <dependency>
     <groupId>commons-daemon</groupId>
     <artifactId>commons-daemon</artifactId>
-    <version>1.0.15</version>
+    <version>1.2.1</version>
 </dependency>
 <dependency>
     <groupId>log4j</groupId>
@@ -164,7 +138,7 @@
 <dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>27.0.1-jre</version>
+    <version>18.0</version>
 </dependency>
 <dependency>
     <groupId>commons-collections</groupId>
@@ -184,32 +158,32 @@
   <dependency>
         <groupId>org.apache.jclouds</groupId>
         <artifactId>jclouds-allblobstore</artifactId>
-        <version>2.0.3</version>
+        <version>2.1.2</version>
     </dependency>
-	<dependency>
-    <groupId>software.pando.crypto</groupId>
-    <artifactId>siphash</artifactId>
-    <version>1.0.0</version>
-</dependency>
 <dependency>
     <groupId>org.mapdb</groupId>
     <artifactId>mapdb</artifactId>
     <version>3.0.5</version>
 </dependency>
 <dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.3</version>
-</dependency>
-	<dependency>
-    <groupId>org.apache.jclouds.labs</groupId>
-    <artifactId>b2</artifactId>
-    <version>2.0.3</version>
+  <groupId>com.rabbitmq</groupId>
+  <artifactId>amqp-client</artifactId>
+  <version>5.6.0</version>
 </dependency>
 <dependency>
-    <groupId>org.apache.jclouds.labs</groupId>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.9</version>
+</dependency>
+	<dependency>
+    <groupId>org.apache.jclouds.provider</groupId>
+    <artifactId>b2</artifactId>
+    <version>2.1.2</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.jclouds.provider</groupId>
     <artifactId>google-cloud-storage</artifactId>
-    <version>2.0.3</version>
+    <version>2.1.2</version>
 </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -221,7 +195,7 @@
 <dependency>
     <groupId>com.amazonaws</groupId>
     <artifactId>aws-java-sdk-s3</artifactId>
-    <version>1.11.338</version>
+    <version>1.11.634</version>
 </dependency>
 <dependency>
     <groupId>org.simpleframework</groupId>
@@ -236,12 +210,12 @@
 <dependency>
 	<groupId>com.microsoft.azure</groupId>
 	<artifactId>azure-storage</artifactId>
-	<version>6.1.0</version>
+	<version>8.4.0</version>
 </dependency>
 <dependency>
     <groupId>org.rocksdb</groupId>
     <artifactId>rocksdbjni</artifactId>
-    <version>5.17.2</version>
+    <version>6.2.2</version>
 </dependency>
 <dependency>
     <groupId>net.java.dev.jets3t</groupId>

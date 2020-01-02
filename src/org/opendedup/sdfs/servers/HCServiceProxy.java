@@ -28,9 +28,7 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LocalLookupFilter;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.FDisk;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
@@ -61,11 +59,6 @@ public class HCServiceProxy {
 
 	public static synchronized long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
 			return hcService.processHashClaims(evt,compact);
-		
-	}
-
-	public static synchronized long processHashClaims(SDFSEvent evt, LargeBloomFilter bf) throws IOException {
-			return hcService.processHashClaims(evt, bf);
 		
 	}
 
@@ -122,13 +115,11 @@ public class HCServiceProxy {
 		hcService.setDseSize(sz);
 	}
 
-	public static boolean claimKey(byte[] key, long val, long ct, String guid) throws IOException {
+	public static long claimKey(byte[] key, long val, long ct, String guid) throws IOException {
 			if (guid != null && Main.enableLookupFilter) {
-					LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
-					return true;
+				return LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
 				
 			} else {
-				
 				return hcService.claimKey(key, val, ct);
 			}
 	}
@@ -160,13 +151,6 @@ public class HCServiceProxy {
 
 				if (Main.syncDL) {
 					eventBus.post(new CloudSyncDLRequest(Main.DSEID, true, false));
-				}
-
-				if (Main.syncDL) {
-					SDFSLogger.getLog().info("running consistency check");
-					SDFSEvent evt = SDFSEvent
-							.gcInfoEvent("SDFS Volume Reference Recreation Starting for " + Main.volume.getName());
-					new FDisk(evt);
 				}
 				touchRunFile();
 			

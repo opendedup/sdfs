@@ -937,7 +937,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 								Main.chunkStoreEncryptionEnabled);
 						try {
 
-							HashBlobArchive.removeCache(k.longValue());
+							
 							DeleteObject obj = new DeleteObject(k.longValue(), this);
 							executor.execute(obj);
 
@@ -1369,6 +1369,7 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			for (;;) {
 				try {
 					st.verifyDelete(id);
+					HashBlobArchive.removeLocalArchive(id);
 					e1 = null;
 					break;
 				} catch (Exception e) {
@@ -1607,6 +1608,13 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 			}else 
 				return capacity.get() - usage.get();
 		}
+	}
+
+	@Override
+	public boolean exists(String nm,String pp) throws IOException {
+		AbstractCloudFileSync cst = (AbstractCloudFileSync) this.metapools.get(0);
+		return cst.exists(nm,pp);
+		
 	}
 
 	@Override

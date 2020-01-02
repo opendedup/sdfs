@@ -113,13 +113,13 @@ public class DedupFileStore {
 		}
 	}
 
-	public static boolean addRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
+	public static long addRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
 		if (val == 1 || val == 0)
-			return true;
+			return 1;
 		
 		try {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
-				return true;
+				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {
@@ -143,13 +143,13 @@ public class DedupFileStore {
 		}
 	}
 	
-	public static boolean removeRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
+	public static long removeRef(byte[] entry, long val,int ct,String lookupfilter) throws IOException {
 		if (val == 1|| val == 0)
-			return true;
+			return 1;
 		
 		try {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
-				return true;
+				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {

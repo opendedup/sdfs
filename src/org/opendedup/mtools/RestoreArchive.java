@@ -65,11 +65,8 @@ public class RestoreArchive implements Runnable {
 	private void init() throws IOException {
 		SDFSLogger.getLog().info("Starting Archive Restore for " + f.getPath());
 		try {
-			File directory = new File(Main.dedupDBStore + File.separator + this.f.getDfGuid().substring(0, 2)
-					+ File.separator + this.f.getDfGuid());
-			File dbf = new File(directory.getPath() + File.separator + this.f.getDfGuid() + ".map");
-			if (!dbf.exists())
-				dbf = new File(directory.getPath() + File.separator + this.f.getDfGuid() + ".map.lz4");
+
+			LongByteArrayMap.getFile(f.getDfGuid(), f.getLookupFilter());
 			this.initiateArchive();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while restoring file [" + f.getPath() + "]", e);
@@ -107,7 +104,7 @@ public class RestoreArchive implements Runnable {
 				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
 		
-					Long bw = new Long(Longs.fromByteArray(p.hashloc));
+					Long bw = Long.valueOf(Longs.fromByteArray(p.hashloc));
 					if (!this.restoreRequests.containsKey(Long.toString(bw))) {
 						SDFSLogger.getLog().debug("check = " + bw + " for restore.");
 						

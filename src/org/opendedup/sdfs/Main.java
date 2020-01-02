@@ -59,7 +59,7 @@ public class Main {
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	public static byte MAPVERSION = 0;
-
+	public static int MAX_OPEN_SST_FILES=-1;
 	public static String sdfsPassword = "";
 	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
@@ -117,7 +117,8 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.7.8";
+	public static String version = "3.10.8";
+	public static String licenseKey = "none";
 
 	public static boolean readAhead = false;
 
@@ -170,6 +171,8 @@ public class Main {
 	*/
 	public static String dedupDBStore = null;
 	public static String lookupfilterStore = null;
+	public static String dedupDBTrashStore = null;
+	public static boolean DDB_TRASH_ENABLED = false;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem
@@ -272,6 +275,10 @@ public class Main {
 	 */
 	public static String volumeMountPoint;
 
+	/**
+	 * The Threshold for removing unreferenced data from the hashtable
+	 */
+	public static long HT_RM_THRESH=15 * 60 * 1000;
 
 
 	/**

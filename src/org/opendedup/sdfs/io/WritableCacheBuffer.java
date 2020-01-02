@@ -426,7 +426,8 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		return this.df.mf;
 	}
 
-	public void setAR(TreeMap<Integer, HashLocPair> al) {
+	public boolean setAR(TreeMap<Integer, HashLocPair> al) {
+		boolean allInserted = true;
 		try {
 
 			HashMap<HashLocPair, Integer> ct = new HashMap<HashLocPair, Integer>();
@@ -438,13 +439,23 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				ct.put(e.getValue(), val);
 			}
 			for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-				DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
+				long archiveId=Longs.fromByteArray(e.getKey().hashloc);
+				long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue(),
 						df.mf.getLookupFilter());
+				if(ci != -1 && archiveId != ci)
+					e.getKey().hashloc = Longs.toByteArray(ci);
+				if(ci == -1) {
+					allInserted = false;
+				}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to remove reference", e);
 		}
-		this.ar = al;
+		if(allInserted) {
+			this.ar = al;
+		}
+		return allInserted;
+		
 	}
 
 	private void reReference() {
@@ -472,8 +483,12 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				}
 
 				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
-					DedupFileStore.addRef(e.getKey().hash, Longs.fromByteArray(e.getKey().hashloc), e.getValue(),
+					long archiveId = Longs.fromByteArray(e.getKey().hashloc);
+					long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue(),
 							df.mf.getLookupFilter());
+					if(ci != -1 && ci != archiveId ) {
+						e.getKey().hashloc = Longs.toByteArray(ci);
+					}
 				}
 			}
 		} catch (Exception e) {

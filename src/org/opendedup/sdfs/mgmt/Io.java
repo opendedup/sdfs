@@ -30,11 +30,11 @@ import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.io.events.MFileWritten;
-import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
@@ -64,8 +64,6 @@ public class Io {
 	public final String mountPoint;
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
-	
-
 	private static EventBus eventBus = new EventBus();
 
 	public static void registerListener(Object obj) {
@@ -75,7 +73,6 @@ public class Io {
 	private void checkInFS(File f) throws FuseException {
 		try {
 
-			
 			if (!f.getCanonicalPath().startsWith(connicalMountedVolume)) {
 				SDFSLogger.getLog()
 						.warn("Path is not in mounted [" + mountedVolume + "]folder " + f.getCanonicalPath());
@@ -87,14 +84,12 @@ public class Io {
 		}
 	}
 
-	public Io(String mountedVolume, String mountPoint) throws IOException{
+	public Io(String mountedVolume, String mountPoint) throws IOException {
 
 		SDFSLogger.getLog().info("mounting " + mountedVolume + " to " + mountPoint);
 
 		if (!mountedVolume.endsWith("/"))
 			mountedVolume = mountedVolume + "/";
-
-		
 		this.mountedVolume = mountedVolume;
 		this.connicalMountedVolume = new File(this.mountedVolume).getCanonicalPath();
 		if (!mountPoint.endsWith("/"))
@@ -320,7 +315,11 @@ public class Io {
 			}
 			try {
 				MetaFileStore.mkDir(f, -1);
-				eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
+				try {
+					eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to post mfilewritten " + path, e);
+				}
 			} catch (IOException e) {
 				SDFSLogger.getLog().error("error while making dir " + path, e);
 				throw new FuseException("access denied for " + path).initErrno(Errno.EACCES);
@@ -449,8 +448,7 @@ public class Io {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 
-			SDFSLogger.getLog().debug("writing data to  " +fh + " at " + offset + " and length of " +
-			 buf.capacity());
+			SDFSLogger.getLog().debug("writing data to  " + fh + " at " + offset + " and length of " + buf.capacity());
 			// byte[] b = new byte[buf.capacity()];
 			// buf.position(0);
 			// buf.get(b);
@@ -461,17 +459,15 @@ public class Io {
 			DedupFileChannel ch = this.getFileChannel(fh);
 
 			try {
-				SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos="
-				 +offset + " len=" + buf.capacity());
+				SDFSLogger.getLog()
+						.debug("Writing " + ch.openFile().getPath() + " pos=" + offset + " len=" + buf.capacity());
 				/*
-				byte[] k = new byte[buf.capacity()];
-				buf.get(k);
-				buf.position(0);
-				Files.write(Paths.get("c:/temp/" + ch.openFile().getName()),
-						new String(offset + "," + buf.capacity() + "," + StringUtils.byteToHexString(eng.getHash(k)) + "\n")
-								.getBytes(),
-						StandardOpenOption.APPEND,StandardOpenOption.CREATE);
-				*/
+				 * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
+				 * Files.write(Paths.get("c:/temp/" + ch.openFile().getName()), new
+				 * String(offset + "," + buf.capacity() + "," +
+				 * StringUtils.byteToHexString(eng.getHash(k)) + "\n") .getBytes(),
+				 * StandardOpenOption.APPEND,StandardOpenOption.CREATE);
+				 */
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + fh, e);
@@ -548,7 +544,7 @@ public class Io {
 			case "createdir":
 				this.mkdir(path[1]);
 				result.setAttribute("status", "success");
-				result.setAttribute("msg", "folder create");
+				result.setAttribute("msg", "directory create");
 				break;
 			case "openfile":
 				long hndl = this.open(path[1]);
@@ -616,10 +612,10 @@ public class Io {
 				this.unlink(path[1]);
 				result.setAttribute("status", "success");
 				result.setAttribute("msg", "file deleted " + path[1]);
-			}else if (type.equalsIgnoreCase("folder")) {
+			} else if (type.equalsIgnoreCase("folder")) {
 				this.rmdir(path[1]);
 				result.setAttribute("status", "success");
-				result.setAttribute("msg", "file folder " + path[1]);
+				result.setAttribute("msg", "folder " + path[1]);
 			} else {
 				throw new Exception("process not implemented " + type);
 			}
@@ -663,8 +659,8 @@ public class Io {
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
-			SDFSLogger.getLog().debug("Reading " + ch.openFile().getPath() + " pos="
-			 +offset + " len=" + buf.capacity());
+			SDFSLogger.getLog()
+					.debug("Reading " + ch.openFile().getPath() + " pos=" + offset + " len=" + buf.capacity());
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*
 			 * if (buf.position() < buf.capacity()) { byte[] k = new byte[buf.capacity() -
@@ -688,10 +684,10 @@ public class Io {
 	}
 
 	public void release(long fh) throws FuseException {
-		
+
 		try {
 			DedupFileChannel ch = this.dedupChannels.remove(fh);
-			
+
 			if (!Main.safeClose)
 				return;
 			if (ch != null) {
@@ -709,6 +705,7 @@ public class Io {
 	}
 
 	private void mknod(String path) throws FuseException {
+		SDFSLogger.getLog().info("mknod=" + path);
 		try {
 			path = URLDecoder.decode(path, "UTF-8");
 			File f = new File(this.mountedVolume + path);
@@ -828,7 +825,5 @@ public class Io {
 		}
 
 	}
-	
-	
 
 }

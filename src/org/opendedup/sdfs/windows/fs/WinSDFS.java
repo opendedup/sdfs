@@ -786,7 +786,7 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	protected static DedupFileChannel getFileChannel(String path, long handleNo) throws DokanOperationException {
-		Long k = new Long(handleNo);
+		Long k = Long.valueOf(handleNo);
 		
 		DedupFileChannel ch = dedupChannels.get(k);
 		if (ch == null) {
@@ -999,7 +999,7 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-				Long k = new Long(handleNo);
+				Long k = Long.valueOf(handleNo);
 				DedupFileChannel ch = dedupChannels.remove(k);
 				if (ch != null) {
 					ch.getDedupFile().unRegisterChannel(ch, -1);

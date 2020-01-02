@@ -1,5 +1,6 @@
 /bin/
 install-packages/windows/SDFS-2.0.13-Setup.exe
+install-packages/windows/bin/jre/
 install-packages/SDFS-3.0.1-Setup.exe
 windows-exe/*/x64
 windows-exe/*/Debug/
@@ -13,6 +14,7 @@ windows-exe/ipch/
 install-packages/SDFS-3.0.3-Setup.exe
 install-packages/SDFS-3.0.4-Setup.exe
 install-packages/deb/usr/share/sdfs/lib/sdfs.isajar
+install-packages/deb/usr/share/sdfs/bin/jre/
 *.tmp
 install-packages/SDFS-3.2.1-Setup.exe
 install-packages/SDFS-3.2.5-Setup.exe
@@ -27,3 +29,8 @@ windows-exe/.vs/SDFSCli/v15/Solution.VC.db-shm
 Dockerfile
 install-packages/docker_run.sh
 install-packages/docker_build.sh
+install-packages/deb/usr/share/sdfs/lib/b2-2.0.3.jar
+install-packages/deb/usr/share/sdfs/lib/b2-2.1.2.jar
+install-packages/deb/usr/share/sdfs/lib/google-cloud-storage-2.1.2.jar
+install-packages/deb/usr/share/sdfs/lib/b2-2.0.3.jar
+install-packages/windows/bin/jre/*

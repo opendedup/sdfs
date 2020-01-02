@@ -11,7 +11,6 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -241,7 +240,7 @@ public class HashStore {
 		return hs;
 	}
 	
-	public boolean claimKey(byte [] key,long val,long ct) throws IOException {
+	public long claimKey(byte [] key,long val,long ct) throws IOException {
 		return bdb.claimKey(key,val,ct);
 	}
 
@@ -256,11 +255,6 @@ public class HashStore {
 	
 	public void clearRefMap() throws IOException {
 		this.bdb.clearRefMap();
-	}
-
-	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException {
-		return this.bdb.claimRecords(evt, bf);
 	}
 
 	/**

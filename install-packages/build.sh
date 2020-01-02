@@ -1,14 +1,14 @@
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-VERSION=3.8.0
-DEBFILE="sdfs_${VERSION}_amd64.deb"
+VERSION=3.10.8
+DEBFILE="sdfs_${VERSION}-amd64.deb"
 echo $DEBFILE
 sudo rm -rf deb/usr/share/sdfs/lib/*
-cd ../
-mvn package
+mvn package -f "../pom.xml"
 cd install-packages
-cp ../target/lib/b2-2.0.3.jar deb/usr/share/sdfs/lib/
+cp ../target/lib/b2-2.1.2.jar deb/usr/share/sdfs/lib/
+cp ../target/lib/google-cloud-storage-2.1.2.jar deb/usr/share/sdfs/lib/
 cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar deb/usr/share/sdfs/lib/sdfs.jar
-echo
+echo 
 sudo rm *.rpm
 sudo rm *.deb
 sudo rm deb/usr/share/sdfs/bin/libfuse.so.2

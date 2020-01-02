@@ -31,7 +31,7 @@ public class Config {
 
 	/**
 	 * parse the hubstore config file
-	 * 
+	 *
 	 * @param fileName
 	 * @throws IOException
 	 */
@@ -51,7 +51,10 @@ public class Config {
 			}
 
 			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
-
+			if (doc.getElementsByTagName("license").getLength() > 0) {
+				Element license = (Element) doc.getElementsByTagName("license").item(0);
+				Main.licenseKey = license.getAttribute("key");
+			}
 			Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 			SDFSLogger.getLog().info("parsing folder locations");
 			Main.chunkStore = locations.getAttribute("chunk-store");
@@ -200,7 +203,7 @@ public class Config {
 
 	/**
 	 * parse the client side config file
-	 * 
+	 *
 	 * @param fileName
 	 * @throws Exception
 	 */
@@ -233,7 +236,7 @@ public class Config {
 
 	/**
 	 * parse the client side config file
-	 * 
+	 *
 	 * @param fileName
 	 * @throws Exception
 	 */
@@ -249,6 +252,10 @@ public class Config {
 		if (doc.getDocumentElement().hasAttribute("version")) {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
+		}
+		if (doc.getElementsByTagName("license").getLength() > 0) {
+			Element license = (Element) doc.getElementsByTagName("license").item(0);
+			Main.licenseKey = license.getAttribute("key");
 		}
 
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
@@ -268,6 +275,7 @@ public class Config {
 		Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 		SDFSLogger.getLog().info("parsing folder locations");
 		Main.dedupDBStore = locations.getAttribute("dedup-db-store");
+		Main.dedupDBTrashStore = locations.getAttribute("dedup-dbtrash-store");
 		Main.ioLogFile = locations.getAttribute("io-log.log");
 		Element cache = (Element) doc.getElementsByTagName("io").item(0);
 		if (cache.hasAttribute("encrypt-config")) {
@@ -277,6 +285,7 @@ public class Config {
 			SDFSLogger.setLevel(Integer.parseInt(cache.getAttribute("log-level")));
 		}
 		if (cache.hasAttribute("log-size")) {
+			Main.logSize = cache.getAttribute("log-size");
 			SDFSLogger.setLogSize(cache.getAttribute("log-size"));
 		}
 		// Close files when close cmd is executed. This should be set to false
@@ -291,31 +300,34 @@ public class Config {
 		// Makes sure writes are sync'd when set to true.
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
 		Main.writeThreads = Integer.parseInt(cache.getAttribute("write-threads"));
+		if (cache.hasAttribute("max-open-sst-files")) {
+			Main.MAX_OPEN_SST_FILES = Integer.parseInt(cache.getAttribute("max-open-sst-files")) ;
+		}
 		if (cache.hasAttribute("min-variable-segment-size")) {
 
 			Main.MIN_CHUNK_LENGTH = (Integer.parseInt(cache.getAttribute("min-variable-segment-size")) * 1024) - 1;
 
-		} 
+		}
 		if (cache.hasAttribute("hash-type")) {
 			Main.hashType = cache.getAttribute("hash-type");
 			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 		}
-		
+
 		if (cache.hasAttribute("hash-seed")) {
 			Main.hashSeed = Integer.parseInt(cache.getAttribute("hash-seed"));
 		}
 		Main.dedupFiles = Boolean.parseBoolean(cache.getAttribute("dedup-files"));
 		Main.CHUNK_LENGTH = Integer.parseInt(cache.getAttribute("chunk-size")) * 1024;
-		
+
 		if (cache.hasAttribute("variable-window-size"))
 			HashFunctionPool.bytesPerWindow = Integer.parseInt(cache.getAttribute("variable-window-size"));
 		if (cache.hasAttribute("max-variable-segment-size")) {
 			HashFunctionPool.maxLen = Integer.parseInt(cache.getAttribute("max-variable-segment-size")) * 1024;
- 
+
 		} else {
 			HashFunctionPool.maxLen = Main.CHUNK_LENGTH;
 		}
-		
+
 		Main.blankHash = new byte[Main.CHUNK_LENGTH];
 
 		if (cache.hasAttribute("replication-threads"))
@@ -352,6 +364,9 @@ public class Config {
 		if(localChunkStore.hasAttribute("compact-on-mount")) {
 			Main.runCompact = Boolean.parseBoolean(localChunkStore.getAttribute("compact-on-mount"));
 		}
+		if(localChunkStore.hasAttribute("hashtable-rm-threshold")) {
+			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
+		}
 		if (localChunkStore.hasAttribute("low-memory")) {
 			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
 		}
@@ -368,6 +383,9 @@ public class Config {
 		}
 		if (localChunkStore.hasAttribute("enable-lookup-filter")) {
 			Main.enableLookupFilter = Boolean.parseBoolean(localChunkStore.getAttribute("enable-lookup-filter"));
+		}
+		if(localChunkStore.hasAttribute("enable-batch-gc")) {
+			Main.DDB_TRASH_ENABLED = Boolean.parseBoolean(localChunkStore.getAttribute("enable-batch-gc"));
 		}
 		if (localChunkStore.hasAttribute("cluster-config"))
 			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
@@ -500,7 +518,7 @@ public class Config {
 
 	/**
 	 * write the client side config file
-	 * 
+	 *
 	 * @param fileName
 	 * @throws Exception
 	 */
@@ -524,7 +542,7 @@ public class Config {
 
 	/**
 	 * write the client side config file
-	 * 
+	 *
 	 * @param fileName
 	 * @throws Exception
 	 */

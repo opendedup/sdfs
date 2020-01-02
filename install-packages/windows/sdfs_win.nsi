@@ -3,7 +3,7 @@
 ; Sets the theme path
 
 
-!define VERSION '3.7.7.8'
+!define VERSION '3.10.4'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -60,7 +60,6 @@
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "gnulicense.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -76,14 +75,14 @@
 
   ;--------------------------------
   ;Version Information
-  VIProductVersion "3.7.7.8"
+  VIProductVersion "3.10.4.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.7.7.8"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.7.7.8"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" 3.10.4.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.10.4.0"
 ;--------------------------------
 ;Installer Sections
 
@@ -100,6 +99,7 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\lib"
   File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
   File ..\..\target\lib\b2-2.0.3.jar
+  File ..\..\target\lib\google-cloud-storage-2.1.2.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder

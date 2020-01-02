@@ -65,7 +65,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 	private void checkInFS(File f) throws FuseException {
 		try {
 
-			
 			if (!f.getCanonicalPath().startsWith(connicalMountedVolume)) {
 				SDFSLogger.getLog()
 						.warn("Path is not in mounted [" + mountedVolume + "]folder " + f.getCanonicalPath());
@@ -237,11 +236,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int getattr(String path, FuseGetattrSetter getattrSetter) throws FuseException {
-		SDFSLogger.getLog().info("0 " + path);
-
 		try {
 			int ftype = this.getFtype(path);
-			//SDFSLogger.getLog().info("1 " + path + " " + ftype);
+			// SDFSLogger.getLog().info("1 " + path + " " + ftype);
 			if (ftype == FuseFtypeConstants.TYPE_SYMLINK) {
 				// SDFSLogger.getLog().info("poop " + path);
 				Path p = null;
@@ -751,7 +748,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				// SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
-					eventBus.post(new MFileDeleted(mf));
+					try{
+						eventBus.post(new MFileDeleted(mf));
+					}catch(Exception e) {
+						SDFSLogger.getLog().error("unable to post delete event " + path, e);
+					}
 					Files.delete(p);
 					return 0;
 				} catch (IOException e) {
@@ -765,10 +766,12 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 					if (MetaFileStore.removeMetaFile(f.getPath())) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getCanonicalPath());
+						f.delete();
 						return 0;
 					} else if (MetaFileStore.removeMetaFile(f.getCanonicalPath())) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getCanonicalPath());
+						f.delete();
 						return 0;
 					} else {
 						SDFSLogger.getLog().warn("unable to delete file " + f.getCanonicalPath());
@@ -777,7 +780,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				} catch (FuseException e) {
 					throw e;
 				} catch (Exception e) {
-					SDFSLogger.getLog().error("unable to file file " + path, e);
+					SDFSLogger.getLog().error("unable to delete file " + path, e);
 					throw new FuseException().initErrno(Errno.EACCES);
 				}
 			}
@@ -806,7 +809,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				if (mf.isFile())
 					mf.setDirty(true);
-				eventBus.post(new MFileWritten(mf, true));
+				try {
+					eventBus.post(new MFileWritten(mf, true));
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to post mfilewritten " + path, e);
+				}
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable change utime path " + path, e);
@@ -823,11 +830,15 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// path);
 		// Thread.currentThread().setName("21
 		// "+Long.toString(System.currentTimeMillis()));
-		if (Main.volume.isOffLine())
-			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
+		if (Main.volume.isOffLine()) {
+			SDFSLogger.getLog().warn("Volume Offline");
+			throw new FuseException("Volume Offline").initErrno(Errno.ENAVAIL);
+		}
 		try {
-			if (Main.volume.isFull())
+			if (Main.volume.isFull()) {
+				SDFSLogger.getLog().warn("Volume Full");
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
+			}
 			/*
 			 * log.info("writing data to  " +path + " at " + offset + " and length of " +
 			 * buf.capacity());
@@ -843,13 +854,13 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			try {
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to write to file" + path, e);
+				SDFSLogger.getLog().warn("unable to write to file" + path, e);
 				throw new FuseException().initErrno(Errno.EACCES);
 			}
 		} catch (FuseException e) {
 			throw e;
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug(path, e);
+			SDFSLogger.getLog().warn(path, e);
 			throw new FuseException().initErrno(Errno.EACCES);
 		}
 		return 0;
@@ -919,13 +930,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		String pt = mountedVolume + path;
 		File _f = new File(pt);
 		/*
-		try {
-			this.checkInFS(_f);
-		} catch (FuseException e) {
-			SDFSLogger.getLog().warn("unable", e);
-			throw e;
-		}
-		*/
+		 * try { this.checkInFS(_f); } catch (FuseException e) {
+		 * SDFSLogger.getLog().warn("unable", e); throw e; }
+		 */
 		try {
 			if (!Files.exists(Paths.get(_f.getCanonicalPath()), LinkOption.NOFOLLOW_LINKS)) {
 				throw new FuseException().initErrno(Errno.ENOENT);
@@ -1151,7 +1158,11 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				mf.addXAttribute(name, valStr);
 				if (mf.isFile())
 					mf.setDirty(true);
-				eventBus.post(new MFileWritten(mf, true));
+				try {
+					eventBus.post(new MFileWritten(mf, true));
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("error setting event  MFileWritten for " + path, e);
+				}
 			}
 		} catch (FuseException e) {
 			throw e;
