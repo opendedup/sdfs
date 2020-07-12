@@ -4,7 +4,7 @@
 
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
-  <version>3.10.9</version>
+  <version>3.11.0</version>
   <packaging>jar</packaging>
 
   <name>sdfs</name>
@@ -74,6 +74,11 @@
     <groupId>commons-pool</groupId>
     <artifactId>commons-pool</artifactId>
     <version>1.6</version>
+</dependency>
+<dependency>
+  <groupId>com.google.cloud</groupId>
+  <artifactId>google-cloud-pubsub</artifactId>
+  <version>1.108.0</version>
 </dependency>
   <dependency>
     <groupId>org.xerial.snappy</groupId>

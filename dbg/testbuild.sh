@@ -1,5 +1,5 @@
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-export VERSION=3.10.9
+export VERSION=3.11.0
 umount /media/azure0
 cd ../
 mvn package

@@ -1,5 +1,5 @@
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-VERSION=3.10.9
+VERSION=3.11.0
 DEBFILE="sdfs_${VERSION}-amd64.deb"
 echo $DEBFILE
 sudo rm -rf deb/usr/share/sdfs/lib/*

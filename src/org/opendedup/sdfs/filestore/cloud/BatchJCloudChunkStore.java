@@ -511,14 +511,17 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 
 			Location region = null;
-			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
+			if (service.equals("google-cloud-storage") && (config.hasAttribute("auth-file") || System.getenv("GOOGLE_APPLICATION_CREDETIALS") != null)) {
+				String authFile = System.getenv("GOOGLE_APPLICATION_CREDETIALS");
+				if(authFile == null){
+					authFile = config.getAttribute("auth-file");
+				}
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
 				String creds = org.apache.commons.io.IOUtils.toString(is, "UTF-8");
 				org.apache.commons.io.IOUtils.closeQuietly(is);
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
 				context = ContextBuilder.newBuilder(service).overrides(overrides)
 						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
-
 			} else if (service.equals("google-cloud-storage")) {
 				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
 				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");

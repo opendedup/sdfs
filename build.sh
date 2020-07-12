@@ -1,4 +1,4 @@
-VERSION=3.10.9
+VERSION=3.11.0
 rm -rf pkgs
 mkdir pkgs
 docker build -t sdfs-base:${VERSION} -f Dockerfile.base .
