@@ -100,6 +100,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public void iterInit() {
+		try{
+		this.setUp();
+		}catch(Exception e) {}
 		this.iterlock.lock();
 		this.iterPos = 0;
 		this.iterlock.unlock();
@@ -131,6 +134,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public KeyValuePair next() throws IOException, MapClosedException {
+		if (this.closed)
+			throw new MapClosedException();
 		if (iter != null) {
 			KeyValuePair kv = null;
 			if (iter.hasNext()) {
@@ -259,13 +264,13 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 					rf.close();
 				} catch (Exception e1) {
 					SDFSLogger.getLog().debug("unable to close rf for " + this.path, e1);
-	
+
 				}
 			} else {
 				SDFSLogger.getLog().debug("Already Opened [" + this.path + "] ct=[" + this.ct + "]");
 			}
 
-		} catch(Exception e){
+		} catch (Exception e) {
 			try {
 				this.kFC.close();
 			} catch (Exception e1) {
@@ -277,9 +282,10 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 				SDFSLogger.getLog().debug("unable to close rf for " + this.path, e1);
 
 			}
-			SDFSLogger.getLog().error("unable to open " + this.path,e);
+			this.closed = true;
+			SDFSLogger.getLog().error("unable to open " + this.path, e);
 			throw new IOException(e);
-		}finally {
+		} finally {
 			l.unlock();
 
 		}
@@ -534,10 +540,10 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		} catch (IllegalStateException e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			throw e;
-		} catch(NullPointerException e){
+		} catch (NullPointerException e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
 			return false;
 		} finally {

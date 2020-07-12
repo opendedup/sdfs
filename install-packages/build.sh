@@ -1,10 +1,15 @@
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-VERSION=3.10.8
+VERSION=3.10.9
 DEBFILE="sdfs_${VERSION}-amd64.deb"
 echo $DEBFILE
 sudo rm -rf deb/usr/share/sdfs/lib/*
 mvn package -f "../pom.xml"
 cd install-packages
+wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz
+rm -rf install-packages/deb/usr/share/sdfs/bin/jre
+tar -xzvf zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz
+cp -rf zulu11.35.13-ca-jdk11.0.5-linux_x64 install-packages/deb/usr/share/sdfs/bin/jre
+rm -rf zulu11.35.13-ca-jdk11.0.5-linux_x64 zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz
 cp ../target/lib/b2-2.1.2.jar deb/usr/share/sdfs/lib/
 cp ../target/lib/google-cloud-storage-2.1.2.jar deb/usr/share/sdfs/lib/
 cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar deb/usr/share/sdfs/lib/sdfs.jar

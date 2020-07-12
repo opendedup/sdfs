@@ -988,9 +988,9 @@ public class LongByteArrayMap implements DataMapInterface {
 		try {
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
-				SDFSLogger.getLog().debug("Opens for " + this.filePath + " = " + op);
+				SDFSLogger.getLog().info("Opens for " + this.filePath + " = " + op);
 				if (op <= 0) {
-					SDFSLogger.getLog().debug("closing " + this.filePath);
+					SDFSLogger.getLog().info("closing " + this.filePath);
 					this.opens.set(0);
 
 					dbFile = null;
@@ -1005,15 +1005,20 @@ public class LongByteArrayMap implements DataMapInterface {
 					} catch (Exception e) {
 					}
 					if (Main.COMPRESS_METADATA) {
+						
 						File df = new File(this.filePath);
 						File cf = new File(this.filePath + ".lz4");
+						SDFSLogger.getLog().info("will compress " + df.getPath() + " to " + cf.getPath());
 						if (!df.exists()) {
 							throw new IOException(df.getPath() + " does not exist");
 						} else if (cf.exists() && df.exists()) {
+							SDFSLogger.getLog().error("both " + df.getPath() + " exists and " + cf.getPath());
 							throw new IOException("both " + df.getPath() + " exists and " + cf.getPath());
 						} else {
+							SDFSLogger.getLog().info("compressing " + df.getPath() + " to " + cf.getPath());
 							CompressionUtils.compressFile(df, cf);
 							df.delete();
+							SDFSLogger.getLog().info("compressed "+ cf.getPath());
 						}
 					}
 					mp.remove(this.filePath);
