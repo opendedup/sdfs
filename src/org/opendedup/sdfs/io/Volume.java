@@ -29,6 +29,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.grpc.MessageQueue;
+import org.opendedup.grpc.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -645,6 +647,8 @@ public class Volume implements java.io.Serializable {
 		return root;
 	}
 
+	
+
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("volume");
 		Element root = doc.getDocumentElement();
@@ -711,6 +715,26 @@ public class Volume implements java.io.Serializable {
 			root.appendChild(rmq);
 		}
 		return doc;
+	}
+
+	public VolumeInfoResponse toProtoc() {
+		org.opendedup.grpc.VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path)
+		.setName(this.name).setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
+		.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
+		.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes()).setSerialNumber(this.serialNumber)
+		.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size).setDseSize(HCServiceProxy.getDSESize())
+		.setDseCompSize(HCServiceProxy.getDSECompressedSize()).setReadOps(this.readOperations.get())
+		.setWriteOps(this.writeOperations.get()).setReadErrors(this.readErrors.get()).setWriteErrors(this.writeErrors.get())
+		.setFiles(this.getFiles()).setClosedGracefully(this.closedGracefully).setAllowExternalLinks(this.allowExternalSymlinks)
+		.setUsePerfMon(this.usePerfMon).setVolumeClustered(clustered).setClusterId(this.uuid).setPerfMonFile(this.perfMonFile)
+		.setReadTimeoutSeconds(Main.readTimeoutSeconds).setWriteTimeoutSeconds(Main.writeTimeoutSeconds)
+		.setCompressedMetaData(Main.COMPRESS_METADATA).setSyncFiles(Main.syncDL);
+		if (this.rabbitMQNode != null) {
+			org.opendedup.grpc.MessageQueue.Builder mb = MessageQueue.newBuilder().setHostName(this.rabbitMQNode)
+			.setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
+			b.addMessageQueue(mb);
+		}
+		return b.build();
 	}
 
 	public void addVirtualBytesWritten(long virtualBytesWritten, boolean propigateEvent) {

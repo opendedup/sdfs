@@ -377,4 +377,6 @@ public class Main {
 	public static boolean rebuildHashTable = false;
 
 	public static boolean enableLookupFilter = false;
+
+	public static long maxAge = -1;
 }

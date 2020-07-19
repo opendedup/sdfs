@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -48,8 +49,12 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
+import org.rocksdb.ColumnFamilyDescriptor;
+import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.CompactionStyle;
 import org.rocksdb.CompressionType;
+import org.rocksdb.DBOptions;
 import org.rocksdb.Env;
 import org.rocksdb.FlushOptions;
 import org.rocksdb.IndexType;
@@ -70,6 +75,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	ReentrantLock[] lockMap = new ReentrantLock[256];
 	RocksDB[] dbs = new RocksDB[8];
 	RocksDB rmdb = null;
+	ColumnFamilyHandle rmdbHsAr = null;
+	RocksDB armdb = null;
+	ColumnFamilyHandle armdbHsAr = null;
 	private static final long GB = 1024 * 1024 * 1024;
 	private static final long MB = 1024 * 1024;
 	int multiplier = 0;
@@ -87,9 +95,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	FlushOptions flo = null;
 	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>(
 			1024, 0.75f, Main.writeThreads);
-	static boolean windowsLegacy = false;
 	static {
-
 		RocksDB.loadLibrary();
 	}
 
@@ -181,42 +187,39 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				// options.setMinWriteBufferNumberToMerge(2);
 				// options.setMaxWriteBufferNumber(6);
 				// options.setLevelZeroFileNumCompactionTrigger(2);
-				if (!windowsLegacy) {
-					Env env = Env.getDefault();
-					options.setEnv(env);
-					options.setCompactionReadaheadSize(1024 * 1024 * 25);
-					// options.setUseDirectIoForFlushAndCompaction(true);
-					// options.setUseDirectReads(true);
-					options.setStatistics(new org.rocksdb.Statistics());
-					options.setStatsDumpPeriodSec(60);
-					options.setLevel0FileNumCompactionTrigger(8);
-					options.setMaxBackgroundCompactions(2);
-					options.setMaxBackgroundFlushes(8);
+				Env env = Env.getDefault();
+				options.setEnv(env);
+				options.setCompactionReadaheadSize(1024 * 1024 * 25);
+				// options.setUseDirectIoForFlushAndCompaction(true);
+				// options.setUseDirectReads(true);
+				options.setStatistics(new org.rocksdb.Statistics());
+				options.setStatsDumpPeriodSec(300);
+				options.setLevel0FileNumCompactionTrigger(8);
+				options.setMaxBackgroundCompactions(2);
+				options.setMaxBackgroundFlushes(8);
 
-					// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
-					options.setIncreaseParallelism(32);
-					options.setAdviseRandomOnOpen(true);
-					// options.setNumLevels(8);
-					// options.setLevelCompactionDynamicLevelBytes(true);
-					//
-					options.setAllowConcurrentMemtableWrite(true);
-					// LRUCache c = new LRUCache(memperDB);
-					// options.setRowCache(c);
-					// blockConfig.setBlockCacheSize(GB * 2);
-					options.setWriteBufferSize(bufferSize / dbs.length);
-					options.setMaxWriteBufferNumber(3);
-					options.setMinWriteBufferNumberToMerge(2);
-					options.setMaxBytesForLevelBase(fsize * 5);
-					options.setTargetFileSizeBase(fsize);
+				// options.setAccessHintOnCompactionStart(AccessHint.WILLNEED);
+				options.setIncreaseParallelism(32);
+				options.setAdviseRandomOnOpen(true);
+				// options.setNumLevels(8);
+				// options.setLevelCompactionDynamicLevelBytes(true);
+				//
+				options.setAllowConcurrentMemtableWrite(true);
+				// LRUCache c = new LRUCache(memperDB);
+				// options.setRowCache(c);
+				// blockConfig.setBlockCacheSize(GB * 2);
+				options.setWriteBufferSize(bufferSize / dbs.length);
+				options.setMaxWriteBufferNumber(3);
+				options.setMinWriteBufferNumberToMerge(2);
+				options.setMaxBytesForLevelBase(fsize * 5);
+				options.setTargetFileSizeBase(fsize);
 
+				blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+				blockConfig.setFormatVersion(version);
+				if (version == 4) {
+					blockConfig.setIndexType(IndexType.kBinarySearch);
+				} else {
 					blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
-					blockConfig.setFormatVersion(version);
-					if (version == 4) {
-						blockConfig.setIndexType(IndexType.kBinarySearch);
-					} else {
-						blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
-					}
-
 				}
 				if (Main.MAX_OPEN_SST_FILES > 0) {
 					options.setMaxOpenFiles(Main.MAX_OPEN_SST_FILES / dbs.length);
@@ -226,8 +229,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					options.setMaxOpenFiles(-1);
 				}
 				options.setTableFormatConfig(blockConfig);
-				//options.setAllowMmapWrites(true);
-				//options.setAllowMmapReads(true);
+				// options.setAllowMmapWrites(true);
+				// options.setAllowMmapReads(true);
 
 				options.setTargetFileSizeBase(512 * 1024 * 1024);
 				f.mkdirs();
@@ -252,11 +255,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				lockMap[i] = new ReentrantLock();
 			}
 
-			Options options = new Options();
+			DBOptions options = new DBOptions();
+			ColumnFamilyOptions familyOptions = new ColumnFamilyOptions();
 			options.setCreateIfMissing(true);
 
 			BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
-			//blockConfig.setFilter(new BloomFilter(16, false));
+			// blockConfig.setFilter(new BloomFilter(16, false));
 			// blockConfig.setHashIndexAllowCollision(false);
 			// blockConfig.setCacheIndexAndFilterBlocks(false);
 			// blockConfig.setIndexType(IndexType.kBinarySearch);
@@ -272,42 +276,70 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// blockConfig.setBlockCacheSize(memperDB);
 			blockConfig.setNoBlockCache(true);
 
-			// options.setCompactionReadaheadSize(1024*1024*25);
-			// options.setUseDirectIoForFlushAndCompaction(true);
-			// options.setUseDirectReads(true);
-			if (!windowsLegacy) {
-				options.setCompactionStyle(CompactionStyle.LEVEL);
-				options.setCompressionType(CompressionType.NO_COMPRESSION);
-				options.setWriteBufferSize(GB);
-				options.setMinWriteBufferNumberToMerge(2);
-				options.setMaxWriteBufferNumber(6);
-				options.setLevelZeroFileNumCompactionTrigger(2);
-				options.setStatsDumpPeriodSec(30);
-				blockConfig.setFormatVersion(2);
-				options.setAllowConcurrentMemtableWrite(true);
-				// options.useFixedLengthPrefixExtractor(3);
+			familyOptions.setCompactionStyle(CompactionStyle.LEVEL);
+			familyOptions.setCompressionType(CompressionType.NO_COMPRESSION);
+			familyOptions.setWriteBufferSize(GB);
+			familyOptions.setMinWriteBufferNumberToMerge(2);
+			familyOptions.setMaxWriteBufferNumber(6);
+			familyOptions.setLevelZeroFileNumCompactionTrigger(2);
 
-				Env env = Env.getDefault();
-				options.setEnv(env);
-				options.setMaxBackgroundCompactions(8);
-				options.setMaxBackgroundFlushes(8);
-				options.setMaxBytesForLevelBase(GB);
-				options.setTargetFileSizeBase(128 * 1024 * 1024);
-			}
-			//options.setAllowMmapWrites(true);
-			//options.setAllowMmapReads(false);
+			Env env = Env.getDefault();
+			options.setEnv(env);
+			familyOptions.setMaxBytesForLevelBase(GB);
+			familyOptions.setTargetFileSizeBase(128 * 1024 * 1024);
+			// options.setAllowMmapWrites(true);
+			// options.setAllowMmapReads(false);
 			if (Main.MAX_OPEN_SST_FILES > 0) {
 				options.setMaxOpenFiles(Main.MAX_OPEN_SST_FILES);
 				SDFSLogger.getLog().info("Setting Maximum Open SST Files to " + Main.MAX_OPEN_SST_FILES);
 			} else {
 				options.setMaxOpenFiles(-1);
 			}
-			options.setTargetFileSizeBase(512 * 1024 * 1024);
-
-			options.setTableFormatConfig(blockConfig);
+			familyOptions.setTargetFileSizeBase(512 * 1024 * 1024);
+			familyOptions.setTableFormatConfig(blockConfig);
 			File f = new File(fileName + File.separator + "rmdb");
+
+			blockConfig.setFormatVersion(4);
 			f.mkdirs();
-			rmdb = RocksDB.open(options, f.getPath());
+			ColumnFamilyDescriptor _hsArD = new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, familyOptions);
+			List<ColumnFamilyDescriptor> descriptors = new ArrayList<ColumnFamilyDescriptor>();
+			descriptors.add(_hsArD);
+			List<ColumnFamilyHandle> handles = new ArrayList<ColumnFamilyHandle>();
+			rmdb = RocksDB.open(options, f.getPath(), descriptors, handles);
+			for (ColumnFamilyHandle handle : handles) {
+				if (Arrays.equals(handle.getName(), RocksDB.DEFAULT_COLUMN_FAMILY)) {
+					this.rmdbHsAr = handle;
+				}
+			}
+			DBOptions dboptions = new DBOptions();
+			dboptions.setCreateMissingColumnFamilies(true);
+			dboptions.setCreateIfMissing(true).setAllowMmapReads(true).setAllowMmapWrites(true);
+			// options.setAllowMmapWrites(true);
+			// options.setAllowMmapReads(false);
+			if (Main.MAX_OPEN_SST_FILES > 0) {
+				dboptions.setMaxOpenFiles(Main.MAX_OPEN_SST_FILES);
+				SDFSLogger.getLog().info("Setting Maximum Open SST Files to " + Main.MAX_OPEN_SST_FILES);
+			} else {
+				dboptions.setMaxOpenFiles(-1);
+			}
+			familyOptions = new ColumnFamilyOptions();
+			familyOptions.setTargetFileSizeBase(512 * 1024 * 1024);
+			familyOptions.setTableFormatConfig(blockConfig);
+			familyOptions.setCompactionStyle(CompactionStyle.LEVEL);
+			familyOptions.setCompressionType(CompressionType.NO_COMPRESSION);
+			familyOptions.setWriteBufferSize(GB);
+			File af = new File(fileName + File.separator + "armdb");
+			af.mkdirs();
+			_hsArD = new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, familyOptions);
+			descriptors = new ArrayList<ColumnFamilyDescriptor>();
+			descriptors.add(_hsArD);
+			handles = new ArrayList<ColumnFamilyHandle>();
+			armdb = RocksDB.open(dboptions, af.getPath(), descriptors, handles);
+			for (ColumnFamilyHandle handle : handles) {
+				if (Arrays.equals(handle.getName(), RocksDB.DEFAULT_COLUMN_FAMILY)) {
+					this.armdbHsAr = handle;
+				}
+			}
 			HashBlobArchive.registerEventBus(this);
 			bar.finish();
 			this.setUp();
@@ -353,52 +385,82 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(hash);
 		l.lock();
 		try {
-			if (this.tempHt.containsKey(new ByteArrayWrapper(hash))) {
-
+			if (this.tempHt.containsKey(new ByteArrayWrapper(hash))
+					&& this.tempHt.get(new ByteArrayWrapper(hash)).position(0).getLong() == val) {
 				ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(hash));
-				bk.position(0);
-				long oval = bk.getLong();
-				if (oval != val) {
-					SDFSLogger.getLog().debug("When updating reference count for key [" + StringUtils.getHexString(hash)
-							+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
-					val = oval;
-				}
-
+				bk.position(8);
 				ct += bk.getLong();
+				ByteBuffer keyb = ByteBuffer.wrap(new byte[hash.length + 8]);
+				keyb.put(hash);
+				keyb.putLong(val);
+				byte[] key = keyb.array();
 				if (ct <= 0) {
 					bk.position(8);
 					bk.putLong(System.currentTimeMillis() + rmthreashold);
-					rmdb.put(wo, hash, bk.array());
-				} else if (rmdb.get(hash) != null) {
-					rmdb.delete(hash);
+					rmdb.put(this.rmdbHsAr, wo, key, bk.array());
+					this.tempHt.remove(new ByteArrayWrapper(hash), bk);
+				} else {
+					if (rmdb.get(this.rmdbHsAr, key) != null) {
+
+						rmdb.delete(this.rmdbHsAr, key);
+					}
+					bk.putLong(8, ct);
+					bk.position(0);
+					this.tempHt.put(new ByteArrayWrapper(hash), bk);
 				}
-				bk.putLong(8, ct);
-				bk.position(0);
-				this.tempHt.put(new ByteArrayWrapper(hash), bk);
 				return val;
 			} else {
 				byte[] v = null;
 				v = this.getDB(hash).get(hash);
-				if (v != null) {
+				if (v != null && ByteBuffer.wrap(v).getLong() == val) {
 					ByteBuffer bk = ByteBuffer.wrap(v);
 					long oval = bk.getLong();
-					if (oval != val) {
-						SDFSLogger.getLog()
-								.debug("When updating reference count for key [" + StringUtils.getHexString(hash)
-										+ "] hash locations didn't match stored val=" + oval + " request value=" + val);
-					}
+
 					long oct = ct;
 					ct += bk.getLong();
+					ByteBuffer keyb = ByteBuffer.wrap(new byte[hash.length + 8]);
+					keyb.put(hash);
+					keyb.putLong(val);
+					byte[] key = keyb.array();
 					if (ct <= 0 && oct < 0) {
 						bk.position(8);
 						bk.putLong(System.currentTimeMillis() + rmthreashold);
-						rmdb.put(hash, v);
-					} else if (rmdb.get(hash) != null) {
-						rmdb.delete(hash);
+						rmdb.put(this.rmdbHsAr, key, v);
+						getDB(hash).delete(hash);
+					} else {
+						if (rmdb.get(this.rmdbHsAr, key) != null) {
+							rmdb.delete(this.rmdbHsAr, key);
+						}
+						bk.putLong(v.length - 8, ct);
+						getDB(hash).put(wo, hash, v);
 					}
-					bk.putLong(v.length - 8, ct);
-					getDB(hash).put(wo, hash, v);
 					return oval;
+				} else {
+					ByteBuffer keyb = ByteBuffer.wrap(new byte[hash.length + 8]);
+					keyb.put(hash);
+					keyb.putLong(val);
+					byte[] key = keyb.array();
+					v = this.armdb.get(this.armdbHsAr, key);
+					if (v != null) {
+						ByteBuffer bk = ByteBuffer.wrap(v);
+						long oval = bk.getLong();
+
+						long oct = ct;
+						ct += bk.getLong();
+						if (ct <= 0 && oct < 0) {
+							bk.position(8);
+							bk.putLong(System.currentTimeMillis() + rmthreashold);
+							rmdb.put(this.rmdbHsAr, key, v);
+							this.armdb.delete(this.armdbHsAr, key);
+						} else {
+							if (rmdb.get(this.rmdbHsAr, key) != null) {
+								rmdb.delete(this.rmdbHsAr, key);
+							}
+							bk.putLong(v.length - 8, ct);
+							this.armdb.put(wo, key, v);
+						}
+						return oval;
+					}
 				}
 			}
 			if (ct > 0) {
@@ -462,7 +524,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			throw new IOException("Hashtable " + this.fileName + " is close");
 		long rmk = 0;
 		try {
-			RocksIterator iter = rmdb.newIterator();
+			RocksIterator iter = rmdb.newIterator(this.rmdbHsAr);
 			SDFSLogger.getLog().info("Removing hashes ");
 			ByteBuffer bk = ByteBuffer.allocateDirect(16);
 			long hct = 0;
@@ -470,13 +532,15 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			long ndct = 0;
 			for (iter.seekToFirst(); iter.isValid(); iter.next()) {
 				hct++;
-				byte[] hash = iter.key();
+				byte[] key = iter.key();
+				ByteBuffer keyb = ByteBuffer.wrap(key);
+				byte[] hash = new byte[key.length - 8];
+				keyb.get(hash);
 				Lock l = this.getLock(hash);
 				l.lock();
-
 				try {
-					if (this.rmdb.get(hash) != null) {
-						byte[] v = null;
+					if (this.rmdb.get(this.rmdbHsAr, key) != null) {
+
 						bk.position(0);
 						bk.put(iter.value());
 						bk.position(0);
@@ -484,27 +548,36 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						long tm = bk.getLong();
 
 						if (System.currentTimeMillis() > tm) {
-							v = this.getDB(hash).get(hash);
-							if (v == null && this.tempHt.containsKey(new ByteArrayWrapper(hash))) {
-								ByteBuffer _bf = this.tempHt.get(new ByteArrayWrapper(hash));
-								v = _bf.array();
-							}
-							if (v != null) {
+							if (this.armdb.get(this.armdbHsAr, key) != null) {
+								byte[] v = this.armdb.get(this.armdbHsAr, key);
 								ByteBuffer nbk = ByteBuffer.wrap(v);
 								long oval = nbk.getLong();
 								long ct = nbk.getLong();
 								if (ct <= 0 && oval == pos) {
-									ChunkData ck = new ChunkData(pos, iter.key());
+									ChunkData ck = new ChunkData(pos, hash);
+									ck.setmDelete(true);
+									this.armdb.delete(this.armdbHsAr, key);
+									rmdb.delete(this.rmdbHsAr, key);
+									dct++;
+								} else if (ct > 0 && oval == pos) {
+									ndct++;
+									rmdb.delete(this.rmdbHsAr, key);
+								}
+							} else if (this.getDB(hash).get(hash) != null) {
+								byte[] v = this.getDB(hash).get(hash);
+								ByteBuffer nbk = ByteBuffer.wrap(v);
+								long oval = nbk.getLong();
+								long ct = nbk.getLong();
+								if (ct <= 0 && oval == pos) {
+									ChunkData ck = new ChunkData(pos, hash);
 									ck.setmDelete(true);
 									this.getDB(hash).delete(hash);
+									rmdb.delete(this.rmdbHsAr, key);
+									dct++;
+								} else if (ct > 0 && oval == pos) {
+									ndct++;
+									rmdb.delete(this.rmdbHsAr, key);
 								}
-								rmdb.delete(iter.key());
-								dct++;
-							} else {
-								rmdb.delete(iter.key());
-								ChunkData ck = new ChunkData(pos, iter.key());
-								ck.setmDelete(true);
-								ndct++;
 							}
 							rmk++;
 						}
@@ -524,6 +597,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					db.compactRange();
 					i++;
 				}
+				this.rmdb.compactRange();
+				this.armdb.compactRange();
 				SDFSLogger.getLog().info("done compacting rocksdb");
 			}
 
@@ -652,59 +727,74 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				l.lock();
 				try {
 					v = db.get(cm.getHash());
-					if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
-						ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
-						bk.position(0);
-						long pos = bk.getLong();
-						long ct = bk.getLong();
-						if (cm.references <= 0)
-							ct++;
-						else
-							ct += cm.references;
-						bk.putLong(8, ct);
-						cm.setcPos(pos);
-						this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
-						return new InsertRecord(false, pos);
-					} else if (db.get(cm.getHash()) != null) {
-						return this.put(cm, true);
-					} else {
-						v = new byte[16];
-						ByteBuffer bf = ByteBuffer.wrap(v);
-						bf.putLong(cm.getcPos());
-						if (cm.references <= 0)
-							bf.putLong(1);
-						else
-							bf.putLong(cm.references);
-
-						this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
-						// this.rmdb.delete(cm.getHash());
-						return new InsertRecord(true, cm.getcPos());
+					if (v == null) {
+						if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
+							ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
+							bk.position(0);
+							long pos = bk.getLong();
+							long ct = bk.getLong();
+							if (cm.references <= 0)
+								ct++;
+							else
+								ct += cm.references;
+							bk.putLong(8, ct);
+							cm.setcPos(pos);
+							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
+							return new InsertRecord(false, pos);
+						} else if (db.get(cm.getHash()) != null) {
+							return this.put(cm, true);
+						} else {
+							v = new byte[16];
+							ByteBuffer bf = ByteBuffer.wrap(v);
+							bf.putLong(cm.getcPos());
+							if (cm.references <= 0)
+								bf.putLong(1);
+							else
+								bf.putLong(cm.references);
+							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
+							// this.rmdb.delete(cm.getHash());
+							return new InsertRecord(true, cm.getcPos());
+						}
 					}
 				} finally {
 					l.unlock();
 				}
-			} else {
-				l.lock();
-				try {
-					// SDFSLogger.getLog().info("Hash Found");
-					ByteBuffer bk = ByteBuffer.wrap(v);
-					long pos = bk.getLong();
-					long ct = bk.getLong();
-					if (ct <= 0) {
+			}
+			l.lock();
+			try {
+				// SDFSLogger.getLog().info("Hash Found");
+				ByteBuffer bk = ByteBuffer.wrap(v);
+				long pos = bk.getLong();
+				long ct = bk.getLong();
+				if (v.length >= 24 && Main.maxAge > 0) {
+					long age = bk.getLong(16);
+					if (age + Main.maxAge < System.currentTimeMillis()) {
+						ByteBuffer keyb = ByteBuffer.wrap(new byte[cm.getHash().length + 8]);
+						keyb.put(cm.getHash());
+						keyb.putLong(pos);
+						armdb.put(this.armdbHsAr, keyb.array(), v);
 						ct = 0;
-						this.rmdb.delete(cm.getHash());
+						try {
+							cm.persistData(true);
+						} catch (org.opendedup.collections.HashExistsException e) {
+							cm.setcPos(e.getPos());
+						}
+						pos = cm.getcPos();
+						bk.position(0);
+						bk.putLong(pos);
+						bk.putLong(16, System.currentTimeMillis());
 					}
-					if (cm.references <= 0)
-						ct++;
-					else
-						ct += cm.references;
-					cm.setcPos(pos);
-					bk.putLong(8, ct);
-					db.put(wo, cm.getHash(), v);
-					return new InsertRecord(false, pos);
-				} finally {
-					l.unlock();
 				}
+				if (cm.references <= 0)
+					ct++;
+				else
+					ct += cm.references;
+				cm.setcPos(pos);
+				bk.putLong(8, ct);
+				db.put(wo, cm.getHash(), v);
+				return new InsertRecord(false, pos);
+			} finally {
+				l.unlock();
 			}
 		} catch (RocksDBException e) {
 			throw new IOException(e);
@@ -842,31 +932,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public boolean remove(ChunkData cm) throws IOException {
-		if (this.isClosed()) {
-			throw new IOException("hashtable [" + this.fileName + "] is close");
-		}
-		Lock l = this.getLock(cm.getHash());
-		l.lock();
-		try {
-
-			try {
-				RocksDB db = this.getDB(cm.getHash());
-				byte[] v = db.get(cm.getHash());
-				if (v == null) {
-
-					return false;
-				} else {
-					db.delete(cm.getHash());
-					return true;
-				}
-			} catch (RocksDBException e) {
-				throw new IOException(e);
-			}
-
-		} finally {
-
-			l.unlock();
-		}
+		throw new IOException("not implemented");
 	}
 
 	private ReentrantLock syncLock = new ReentrantLock();
@@ -895,7 +961,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length, System.out);
+			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length + 2, System.out);
 			int i = 0;
 			for (RocksDB db : dbs) {
 
@@ -910,6 +976,20 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				bar.update(i);
 				i++;
 			}
+			try {
+				this.rmdb.flush(new FlushOptions());
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("While closing hashtable ", e);
+			}
+			bar.update(i);
+			i++;
+			try {
+				this.armdb.flush(new FlushOptions());
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("While closing hashtable ", e);
+			}
+			bar.update(i);
+			i++;
 			bar.finish();
 
 		} finally {
@@ -985,27 +1065,25 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		Lock l = this.getLock(key);
 		l.lock();
 		try {
-			byte[] k = null;
-			if (this.tempHt.containsKey(new ByteArrayWrapper(key))) {
-				ByteBuffer bf = this.tempHt.get(new ByteArrayWrapper(key));
-				bf.position(0);
-				k = bf.array();
-			} else {
-				k = this.getDB(key).get(key);
-			}
+			if (this.tempHt.containsKey(new ByteArrayWrapper(key))
+					&& this.tempHt.get(new ByteArrayWrapper(key)).position(0).getLong() == archive) {
+				return true;
 
-			if (k == null) {
-				return false;
-			} else {
-				ByteBuffer bk = ByteBuffer.wrap(k);
-				long ar = bk.getLong();
-				if (ar != archive && archive != -1) {
-					return false;
-				} else {
-					return true;
-				}
 			}
-
+			byte[] v = null;
+			v = this.getDB(key).get(key);
+			if (v != null && ByteBuffer.wrap(v).getLong() == archive) {
+				return true;
+			}
+			ByteBuffer keyb = ByteBuffer.wrap(new byte[key.length + 8]);
+			keyb.put(key);
+			keyb.putLong(archive);
+			byte[] _key = keyb.array();
+			v = this.armdb.get(this.armdbHsAr, _key);
+			if (v != null) {
+				return true;
+			}
+			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to check", e);
 			return false;
