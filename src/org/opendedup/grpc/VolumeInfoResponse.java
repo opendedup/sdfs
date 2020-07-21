@@ -189,17 +189,22 @@ private static final long serialVersionUID = 0L;
           }
           case 218: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              messageQueue_ = new java.util.ArrayList<org.opendedup.grpc.MessageQueue>();
+              messageQueue_ = new java.util.ArrayList<org.opendedup.grpc.MessageQueueInfoResponse>();
               mutable_bitField0_ |= 0x00000001;
             }
             messageQueue_.add(
-                input.readMessage(org.opendedup.grpc.MessageQueue.parser(), extensionRegistry));
+                input.readMessage(org.opendedup.grpc.MessageQueueInfoResponse.parser(), extensionRegistry));
             break;
           }
           case 226: {
             java.lang.String s = input.readStringRequireUtf8();
 
             perfMonFile_ = s;
+            break;
+          }
+          case 232: {
+
+            offline_ = input.readBool();
             break;
           }
           default: {
@@ -605,41 +610,41 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MESSAGEQUEUE_FIELD_NUMBER = 27;
-  private java.util.List<org.opendedup.grpc.MessageQueue> messageQueue_;
+  private java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> messageQueue_;
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   @java.lang.Override
-  public java.util.List<org.opendedup.grpc.MessageQueue> getMessageQueueList() {
+  public java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> getMessageQueueList() {
     return messageQueue_;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   @java.lang.Override
-  public java.util.List<? extends org.opendedup.grpc.MessageQueueOrBuilder> 
+  public java.util.List<? extends org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> 
       getMessageQueueOrBuilderList() {
     return messageQueue_;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   @java.lang.Override
   public int getMessageQueueCount() {
     return messageQueue_.size();
   }
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   @java.lang.Override
-  public org.opendedup.grpc.MessageQueue getMessageQueue(int index) {
+  public org.opendedup.grpc.MessageQueueInfoResponse getMessageQueue(int index) {
     return messageQueue_.get(index);
   }
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   @java.lang.Override
-  public org.opendedup.grpc.MessageQueueOrBuilder getMessageQueueOrBuilder(
+  public org.opendedup.grpc.MessageQueueInfoResponseOrBuilder getMessageQueueOrBuilder(
       int index) {
     return messageQueue_.get(index);
   }
@@ -680,6 +685,17 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int OFFLINE_FIELD_NUMBER = 29;
+  private boolean offline_;
+  /**
+   * <code>bool offline = 29;</code>
+   * @return The offline.
+   */
+  @java.lang.Override
+  public boolean getOffline() {
+    return offline_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -779,6 +795,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getPerfMonFileBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 28, perfMonFile_);
+    }
+    if (offline_ != false) {
+      output.writeBool(29, offline_);
     }
     unknownFields.writeTo(output);
   }
@@ -897,6 +916,10 @@ private static final long serialVersionUID = 0L;
     if (!getPerfMonFileBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(28, perfMonFile_);
     }
+    if (offline_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(29, offline_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -972,6 +995,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getMessageQueueList())) return false;
     if (!getPerfMonFile()
         .equals(other.getPerfMonFile())) return false;
+    if (getOffline()
+        != other.getOffline()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1062,6 +1087,9 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + PERFMONFILE_FIELD_NUMBER;
     hash = (53 * hash) + getPerfMonFile().hashCode();
+    hash = (37 * hash) + OFFLINE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getOffline());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1256,6 +1284,8 @@ private static final long serialVersionUID = 0L;
       }
       perfMonFile_ = "";
 
+      offline_ = false;
+
       return this;
     }
 
@@ -1319,6 +1349,7 @@ private static final long serialVersionUID = 0L;
         result.messageQueue_ = messageQueueBuilder_.build();
       }
       result.perfMonFile_ = perfMonFile_;
+      result.offline_ = offline_;
       onBuilt();
       return result;
     }
@@ -1477,6 +1508,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getPerfMonFile().isEmpty()) {
         perfMonFile_ = other.perfMonFile_;
         onChanged();
+      }
+      if (other.getOffline() != false) {
+        setOffline(other.getOffline());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2449,22 +2483,22 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.util.List<org.opendedup.grpc.MessageQueue> messageQueue_ =
+    private java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> messageQueue_ =
       java.util.Collections.emptyList();
     private void ensureMessageQueueIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        messageQueue_ = new java.util.ArrayList<org.opendedup.grpc.MessageQueue>(messageQueue_);
+        messageQueue_ = new java.util.ArrayList<org.opendedup.grpc.MessageQueueInfoResponse>(messageQueue_);
         bitField0_ |= 0x00000001;
        }
     }
 
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.opendedup.grpc.MessageQueue, org.opendedup.grpc.MessageQueue.Builder, org.opendedup.grpc.MessageQueueOrBuilder> messageQueueBuilder_;
+        org.opendedup.grpc.MessageQueueInfoResponse, org.opendedup.grpc.MessageQueueInfoResponse.Builder, org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> messageQueueBuilder_;
 
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public java.util.List<org.opendedup.grpc.MessageQueue> getMessageQueueList() {
+    public java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> getMessageQueueList() {
       if (messageQueueBuilder_ == null) {
         return java.util.Collections.unmodifiableList(messageQueue_);
       } else {
@@ -2472,7 +2506,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public int getMessageQueueCount() {
       if (messageQueueBuilder_ == null) {
@@ -2482,9 +2516,9 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public org.opendedup.grpc.MessageQueue getMessageQueue(int index) {
+    public org.opendedup.grpc.MessageQueueInfoResponse getMessageQueue(int index) {
       if (messageQueueBuilder_ == null) {
         return messageQueue_.get(index);
       } else {
@@ -2492,10 +2526,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder setMessageQueue(
-        int index, org.opendedup.grpc.MessageQueue value) {
+        int index, org.opendedup.grpc.MessageQueueInfoResponse value) {
       if (messageQueueBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2509,10 +2543,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder setMessageQueue(
-        int index, org.opendedup.grpc.MessageQueue.Builder builderForValue) {
+        int index, org.opendedup.grpc.MessageQueueInfoResponse.Builder builderForValue) {
       if (messageQueueBuilder_ == null) {
         ensureMessageQueueIsMutable();
         messageQueue_.set(index, builderForValue.build());
@@ -2523,9 +2557,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public Builder addMessageQueue(org.opendedup.grpc.MessageQueue value) {
+    public Builder addMessageQueue(org.opendedup.grpc.MessageQueueInfoResponse value) {
       if (messageQueueBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2539,10 +2573,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder addMessageQueue(
-        int index, org.opendedup.grpc.MessageQueue value) {
+        int index, org.opendedup.grpc.MessageQueueInfoResponse value) {
       if (messageQueueBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2556,10 +2590,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder addMessageQueue(
-        org.opendedup.grpc.MessageQueue.Builder builderForValue) {
+        org.opendedup.grpc.MessageQueueInfoResponse.Builder builderForValue) {
       if (messageQueueBuilder_ == null) {
         ensureMessageQueueIsMutable();
         messageQueue_.add(builderForValue.build());
@@ -2570,10 +2604,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder addMessageQueue(
-        int index, org.opendedup.grpc.MessageQueue.Builder builderForValue) {
+        int index, org.opendedup.grpc.MessageQueueInfoResponse.Builder builderForValue) {
       if (messageQueueBuilder_ == null) {
         ensureMessageQueueIsMutable();
         messageQueue_.add(index, builderForValue.build());
@@ -2584,10 +2618,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder addAllMessageQueue(
-        java.lang.Iterable<? extends org.opendedup.grpc.MessageQueue> values) {
+        java.lang.Iterable<? extends org.opendedup.grpc.MessageQueueInfoResponse> values) {
       if (messageQueueBuilder_ == null) {
         ensureMessageQueueIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -2599,7 +2633,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder clearMessageQueue() {
       if (messageQueueBuilder_ == null) {
@@ -2612,7 +2646,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
     public Builder removeMessageQueue(int index) {
       if (messageQueueBuilder_ == null) {
@@ -2625,16 +2659,16 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public org.opendedup.grpc.MessageQueue.Builder getMessageQueueBuilder(
+    public org.opendedup.grpc.MessageQueueInfoResponse.Builder getMessageQueueBuilder(
         int index) {
       return getMessageQueueFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public org.opendedup.grpc.MessageQueueOrBuilder getMessageQueueOrBuilder(
+    public org.opendedup.grpc.MessageQueueInfoResponseOrBuilder getMessageQueueOrBuilder(
         int index) {
       if (messageQueueBuilder_ == null) {
         return messageQueue_.get(index);  } else {
@@ -2642,9 +2676,9 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public java.util.List<? extends org.opendedup.grpc.MessageQueueOrBuilder> 
+    public java.util.List<? extends org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> 
          getMessageQueueOrBuilderList() {
       if (messageQueueBuilder_ != null) {
         return messageQueueBuilder_.getMessageOrBuilderList();
@@ -2653,33 +2687,33 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public org.opendedup.grpc.MessageQueue.Builder addMessageQueueBuilder() {
+    public org.opendedup.grpc.MessageQueueInfoResponse.Builder addMessageQueueBuilder() {
       return getMessageQueueFieldBuilder().addBuilder(
-          org.opendedup.grpc.MessageQueue.getDefaultInstance());
+          org.opendedup.grpc.MessageQueueInfoResponse.getDefaultInstance());
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public org.opendedup.grpc.MessageQueue.Builder addMessageQueueBuilder(
+    public org.opendedup.grpc.MessageQueueInfoResponse.Builder addMessageQueueBuilder(
         int index) {
       return getMessageQueueFieldBuilder().addBuilder(
-          index, org.opendedup.grpc.MessageQueue.getDefaultInstance());
+          index, org.opendedup.grpc.MessageQueueInfoResponse.getDefaultInstance());
     }
     /**
-     * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+     * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
      */
-    public java.util.List<org.opendedup.grpc.MessageQueue.Builder> 
+    public java.util.List<org.opendedup.grpc.MessageQueueInfoResponse.Builder> 
          getMessageQueueBuilderList() {
       return getMessageQueueFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.opendedup.grpc.MessageQueue, org.opendedup.grpc.MessageQueue.Builder, org.opendedup.grpc.MessageQueueOrBuilder> 
+        org.opendedup.grpc.MessageQueueInfoResponse, org.opendedup.grpc.MessageQueueInfoResponse.Builder, org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> 
         getMessageQueueFieldBuilder() {
       if (messageQueueBuilder_ == null) {
         messageQueueBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.opendedup.grpc.MessageQueue, org.opendedup.grpc.MessageQueue.Builder, org.opendedup.grpc.MessageQueueOrBuilder>(
+            org.opendedup.grpc.MessageQueueInfoResponse, org.opendedup.grpc.MessageQueueInfoResponse.Builder, org.opendedup.grpc.MessageQueueInfoResponseOrBuilder>(
                 messageQueue_,
                 ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),
@@ -2761,6 +2795,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       perfMonFile_ = value;
+      onChanged();
+      return this;
+    }
+
+    private boolean offline_ ;
+    /**
+     * <code>bool offline = 29;</code>
+     * @return The offline.
+     */
+    @java.lang.Override
+    public boolean getOffline() {
+      return offline_;
+    }
+    /**
+     * <code>bool offline = 29;</code>
+     * @param value The offline to set.
+     * @return This builder for chaining.
+     */
+    public Builder setOffline(boolean value) {
+      
+      offline_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool offline = 29;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearOffline() {
+      
+      offline_ = false;
       onChanged();
       return this;
     }

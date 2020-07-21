@@ -39,6 +39,7 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.mgmt.websocket.DDBUpdate;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpdate;
+import org.opendedup.sdfs.mgmt.grpc.IOServer;
 import org.opendedup.sdfs.mgmt.mqtt.MetaDataPush;
 import org.opendedup.sdfs.mgmt.websocket.MetaDataUpload;
 import org.opendedup.sdfs.mgmt.websocket.PingService;
@@ -80,6 +81,7 @@ public class MgmtWebServer implements Container {
 	public static final String SESSION = "/session/";
 	public static final long MAX_TS_SYNC = 60 * 5 * 1000;
 	public static Io io = null;
+	public static IOServer grpcServer;
 
 	private static Map<String, String> splitQuery(String query) {
 
@@ -1241,7 +1243,10 @@ public class MgmtWebServer implements Container {
 			CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException,
 			KeyManagementException {
 		SSLContext sslContext = null;
+
 		if (Main.sdfsCliEnabled) {
+			grpcServer = new IOServer();
+			grpcServer.start(); 
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";

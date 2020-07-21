@@ -1,0 +1,93 @@
+syntax = "proto3";
+package org.opendedup.grpc;
+option java_multiple_files = true;
+
+// Request payload
+message FileInfoRequest {
+    string fileName =1;
+    bool compact =2;
+    int32 numberOfFiles =3;
+    string listGuid=4;
+
+}
+
+message FileMessageResponse {
+    string error = 1;
+    string listGuid =2;
+    repeated FileInfoResponse response =3;
+    errorCodes errorCode =4;
+    int32 maxNumberOfFiles =5;
+}
+
+enum errorCodes {
+    NOERR=0;
+    ENOENT =1;
+    EIO =3;
+    EAGAIN=4;
+    EEXIST=5;
+    ENOTDIR=6;
+    ENODATA=7;
+    ENAVAIL=8;
+    EPERM = 9;
+}
+
+
+
+
+message FileInfoResponse {
+    string fileName =1;
+    string filePath =2;
+    enum fileType {
+        FILE =0;
+        DIR=1;
+    }
+    fileType type =3;
+    string sdfsPath = 4;
+    int64 atime = 5;
+    int64 mtime = 6;
+    int64 ctime = 7;
+    bool hidden = 8;
+    int64 size = 9;
+    bool open =10;
+    string  fileGuild = 11;
+    string mapGuid = 12;
+    bool localOwner = 13;
+    bool execute = 14;
+    bool read = 15;
+    bool write = 16;
+    bool importing = 17;
+    bool symlink = 18;
+    repeated FileAttributesResponse fileAttributes = 19;
+    string id = 20;
+    repeated FileInfoResponse files = 21;
+    string parentPath = 22;
+    string volumeid = 23;
+    repeated IOMonitorResponse ioMonitor = 24;
+    string symlinkPath = 25;
+    int64 group_id = 26;
+    int64 user_id =27;
+    int32 permissions=28;
+}
+
+message IOMonitorResponse {
+    int64 virtualBytesWritten = 1;
+    int64 actualBytesWritten = 2;
+    int64 bytesRead = 3;
+    int64 duplicateBlocks = 4;
+    int64 writeOpts = 5;
+    int64 readOpts = 6;
+    int64 maxReadOps = 7;
+    int64 maxWriteOps = 8;
+    int64 maxIops = 9;
+    int64 maxReadMbps =10;
+    int64 maxWriteMbps = 11;
+    int64 maxMbps = 12;
+    int32 ioQos = 13;
+    string ioProfile = 14;
+
+}
+
+message FileAttributesResponse {
+    string key = 1;
+    string value = 2;
+}

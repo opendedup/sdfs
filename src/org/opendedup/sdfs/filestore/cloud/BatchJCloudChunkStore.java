@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-import org.jclouds.filesystem.reference.FilesystemConstants;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -528,14 +526,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
 						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
-			} else if (service.equals("filesystem")) {
-				EncyptUtils.baseEncode = true;
-				SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
-				overrides.setProperty(FilesystemConstants.PROPERTY_BASEDIR, config.getAttribute("share-path"));
-				context = ContextBuilder.newBuilder("filesystem").overrides(overrides)
-						.buildView(BlobStoreContext.class);
-				this.accessStore = true;
-			} else {
+			}  else {
 				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
 				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
 						.overrides(overrides).buildView(BlobStoreContext.class);

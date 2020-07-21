@@ -1,6 +1,8 @@
 syntax = "proto3";
 package org.opendedup.grpc;
 option java_multiple_files = true;
+import "FileInfo.proto";
+import "Shutdown.proto";
 
 // Request payload
 message VolumeInfoRequest {
@@ -33,12 +35,13 @@ message VolumeInfoResponse {
   bool compressedMetaData =24;
   bool syncFiles = 25;
   int64 maxPageSize = 26;
-  repeated MessageQueue messageQueue = 27;
+  repeated MessageQueueInfoResponse messageQueue = 27;
   string perfMonFile = 28;
+  bool offline = 29;
 
 }
 
-message MessageQueue {
+message MessageQueueInfoResponse {
   string hostName = 1;
   enum MQType {
     RabbitMQ = 0;
@@ -49,10 +52,10 @@ message MessageQueue {
   string topic = 4;
   string authInfo = 5;
 }
-
-
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
   // Define a RPC operation
   rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
+  rpc GetFileInfo(FileInfoRequest) returns (FileMessageResponse);
+  rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
 }

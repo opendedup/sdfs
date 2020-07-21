@@ -4,18 +4,18 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.MessageQueue}
+ * Protobuf type {@code org.opendedup.grpc.MessageQueueInfoResponse}
  */
-public final class MessageQueue extends
+public final class MessageQueueInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MessageQueue)
-    MessageQueueOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MessageQueueInfoResponse)
+    MessageQueueInfoResponseOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use MessageQueue.newBuilder() to construct.
-  private MessageQueue(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use MessageQueueInfoResponse.newBuilder() to construct.
+  private MessageQueueInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private MessageQueue() {
+  private MessageQueueInfoResponse() {
     hostName_ = "";
     mqType_ = 0;
     topic_ = "";
@@ -26,7 +26,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new MessageQueue();
+    return new MessageQueueInfoResponse();
   }
 
   @java.lang.Override
@@ -34,7 +34,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private MessageQueue(
+  private MessageQueueInfoResponse(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -102,19 +102,19 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueue_descriptor;
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueue_fieldAccessorTable
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.MessageQueue.class, org.opendedup.grpc.MessageQueue.Builder.class);
+            org.opendedup.grpc.MessageQueueInfoResponse.class, org.opendedup.grpc.MessageQueueInfoResponse.Builder.class);
   }
 
   /**
-   * Protobuf enum {@code org.opendedup.grpc.MessageQueue.MQType}
+   * Protobuf enum {@code org.opendedup.grpc.MessageQueueInfoResponse.MQType}
    */
   public enum MQType
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -195,7 +195,7 @@ private static final long serialVersionUID = 0L;
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return org.opendedup.grpc.MessageQueue.getDescriptor().getEnumTypes().get(0);
+      return org.opendedup.grpc.MessageQueueInfoResponse.getDescriptor().getEnumTypes().get(0);
     }
 
     private static final MQType[] VALUES = values();
@@ -218,7 +218,7 @@ private static final long serialVersionUID = 0L;
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.MessageQueue.MQType)
+    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.MessageQueueInfoResponse.MQType)
   }
 
   public static final int HOSTNAME_FIELD_NUMBER = 1;
@@ -262,20 +262,20 @@ private static final long serialVersionUID = 0L;
   public static final int MQTYPE_FIELD_NUMBER = 2;
   private int mqType_;
   /**
-   * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+   * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The enum numeric value on the wire for mqType.
    */
   @java.lang.Override public int getMqTypeValue() {
     return mqType_;
   }
   /**
-   * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+   * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The mqType.
    */
-  @java.lang.Override public org.opendedup.grpc.MessageQueue.MQType getMqType() {
+  @java.lang.Override public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
     @SuppressWarnings("deprecation")
-    org.opendedup.grpc.MessageQueue.MQType result = org.opendedup.grpc.MessageQueue.MQType.valueOf(mqType_);
-    return result == null ? org.opendedup.grpc.MessageQueue.MQType.UNRECOGNIZED : result;
+    org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
+    return result == null ? org.opendedup.grpc.MessageQueueInfoResponse.MQType.UNRECOGNIZED : result;
   }
 
   public static final int PORT_FIELD_NUMBER = 3;
@@ -382,7 +382,7 @@ private static final long serialVersionUID = 0L;
     if (!getHostNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, hostName_);
     }
-    if (mqType_ != org.opendedup.grpc.MessageQueue.MQType.RabbitMQ.getNumber()) {
+    if (mqType_ != org.opendedup.grpc.MessageQueueInfoResponse.MQType.RabbitMQ.getNumber()) {
       output.writeEnum(2, mqType_);
     }
     if (port_ != 0) {
@@ -406,7 +406,7 @@ private static final long serialVersionUID = 0L;
     if (!getHostNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, hostName_);
     }
-    if (mqType_ != org.opendedup.grpc.MessageQueue.MQType.RabbitMQ.getNumber()) {
+    if (mqType_ != org.opendedup.grpc.MessageQueueInfoResponse.MQType.RabbitMQ.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(2, mqType_);
     }
@@ -430,10 +430,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.MessageQueue)) {
+    if (!(obj instanceof org.opendedup.grpc.MessageQueueInfoResponse)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.MessageQueue other = (org.opendedup.grpc.MessageQueue) obj;
+    org.opendedup.grpc.MessageQueueInfoResponse other = (org.opendedup.grpc.MessageQueueInfoResponse) obj;
 
     if (!getHostName()
         .equals(other.getHostName())) return false;
@@ -470,69 +470,69 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(byte[] data)
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.MessageQueue parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.MessageQueue parseDelimitedFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.MessageQueue parseFrom(
+  public static org.opendedup.grpc.MessageQueueInfoResponse parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -545,7 +545,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.MessageQueue prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.MessageQueueInfoResponse prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -561,26 +561,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.MessageQueue}
+   * Protobuf type {@code org.opendedup.grpc.MessageQueueInfoResponse}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.MessageQueue)
-      org.opendedup.grpc.MessageQueueOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.MessageQueueInfoResponse)
+      org.opendedup.grpc.MessageQueueInfoResponseOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueue_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueue_fieldAccessorTable
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.MessageQueue.class, org.opendedup.grpc.MessageQueue.Builder.class);
+              org.opendedup.grpc.MessageQueueInfoResponse.class, org.opendedup.grpc.MessageQueueInfoResponse.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.MessageQueue.newBuilder()
+    // Construct using org.opendedup.grpc.MessageQueueInfoResponse.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -614,17 +614,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueue_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.MessageQueue getDefaultInstanceForType() {
-      return org.opendedup.grpc.MessageQueue.getDefaultInstance();
+    public org.opendedup.grpc.MessageQueueInfoResponse getDefaultInstanceForType() {
+      return org.opendedup.grpc.MessageQueueInfoResponse.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.MessageQueue build() {
-      org.opendedup.grpc.MessageQueue result = buildPartial();
+    public org.opendedup.grpc.MessageQueueInfoResponse build() {
+      org.opendedup.grpc.MessageQueueInfoResponse result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -632,8 +632,8 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.MessageQueue buildPartial() {
-      org.opendedup.grpc.MessageQueue result = new org.opendedup.grpc.MessageQueue(this);
+    public org.opendedup.grpc.MessageQueueInfoResponse buildPartial() {
+      org.opendedup.grpc.MessageQueueInfoResponse result = new org.opendedup.grpc.MessageQueueInfoResponse(this);
       result.hostName_ = hostName_;
       result.mqType_ = mqType_;
       result.port_ = port_;
@@ -677,16 +677,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.MessageQueue) {
-        return mergeFrom((org.opendedup.grpc.MessageQueue)other);
+      if (other instanceof org.opendedup.grpc.MessageQueueInfoResponse) {
+        return mergeFrom((org.opendedup.grpc.MessageQueueInfoResponse)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.MessageQueue other) {
-      if (other == org.opendedup.grpc.MessageQueue.getDefaultInstance()) return this;
+    public Builder mergeFrom(org.opendedup.grpc.MessageQueueInfoResponse other) {
+      if (other == org.opendedup.grpc.MessageQueueInfoResponse.getDefaultInstance()) return this;
       if (!other.getHostName().isEmpty()) {
         hostName_ = other.hostName_;
         onChanged();
@@ -720,11 +720,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.MessageQueue parsedMessage = null;
+      org.opendedup.grpc.MessageQueueInfoResponse parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.MessageQueue) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.MessageQueueInfoResponse) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -812,14 +812,14 @@ private static final long serialVersionUID = 0L;
 
     private int mqType_ = 0;
     /**
-     * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+     * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The enum numeric value on the wire for mqType.
      */
     @java.lang.Override public int getMqTypeValue() {
       return mqType_;
     }
     /**
-     * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+     * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @param value The enum numeric value on the wire for mqType to set.
      * @return This builder for chaining.
      */
@@ -830,21 +830,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+     * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The mqType.
      */
     @java.lang.Override
-    public org.opendedup.grpc.MessageQueue.MQType getMqType() {
+    public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
       @SuppressWarnings("deprecation")
-      org.opendedup.grpc.MessageQueue.MQType result = org.opendedup.grpc.MessageQueue.MQType.valueOf(mqType_);
-      return result == null ? org.opendedup.grpc.MessageQueue.MQType.UNRECOGNIZED : result;
+      org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
+      return result == null ? org.opendedup.grpc.MessageQueueInfoResponse.MQType.UNRECOGNIZED : result;
     }
     /**
-     * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+     * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @param value The mqType to set.
      * @return This builder for chaining.
      */
-    public Builder setMqType(org.opendedup.grpc.MessageQueue.MQType value) {
+    public Builder setMqType(org.opendedup.grpc.MessageQueueInfoResponse.MQType value) {
       if (value == null) {
         throw new NullPointerException();
       }
@@ -854,7 +854,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+     * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearMqType() {
@@ -1059,41 +1059,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.MessageQueue)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.MessageQueueInfoResponse)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.MessageQueue)
-  private static final org.opendedup.grpc.MessageQueue DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.MessageQueueInfoResponse)
+  private static final org.opendedup.grpc.MessageQueueInfoResponse DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.MessageQueue();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.MessageQueueInfoResponse();
   }
 
-  public static org.opendedup.grpc.MessageQueue getDefaultInstance() {
+  public static org.opendedup.grpc.MessageQueueInfoResponse getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<MessageQueue>
-      PARSER = new com.google.protobuf.AbstractParser<MessageQueue>() {
+  private static final com.google.protobuf.Parser<MessageQueueInfoResponse>
+      PARSER = new com.google.protobuf.AbstractParser<MessageQueueInfoResponse>() {
     @java.lang.Override
-    public MessageQueue parsePartialFrom(
+    public MessageQueueInfoResponse parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new MessageQueue(input, extensionRegistry);
+      return new MessageQueueInfoResponse(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<MessageQueue> parser() {
+  public static com.google.protobuf.Parser<MessageQueueInfoResponse> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<MessageQueue> getParserForType() {
+  public com.google.protobuf.Parser<MessageQueueInfoResponse> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.MessageQueue getDefaultInstanceForType() {
+  public org.opendedup.grpc.MessageQueueInfoResponse getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

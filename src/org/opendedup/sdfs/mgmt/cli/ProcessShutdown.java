@@ -2,30 +2,38 @@ package org.opendedup.sdfs.mgmt.cli;
 
 import java.io.IOException;
 import java.util.Formatter;
+import java.util.concurrent.TimeUnit;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.opendedup.grpc.ShutdownRequest;
+import org.opendedup.grpc.ShutdownResponse;
+import org.opendedup.grpc.VolumeServiceGrpc;
+import org.opendedup.grpc.errorCodes;
+import org.opendedup.grpc.VolumeServiceGrpc.VolumeServiceBlockingStub;
+
+import io.grpc.Status;
 
 public class ProcessShutdown {
 	public static void runCmd() {
+		VolumeServiceBlockingStub volumeStub = VolumeServiceGrpc.newBlockingStub(MgmtServerConnection.channel);
+		ShutdownRequest req = ShutdownRequest.newBuilder().build();
 		try {
-
-			StringBuilder sb = new StringBuilder();
-			Formatter formatter = new Formatter(sb);
-			formatter.format("file=%s&cmd=shutdown", "null");
-			Document doc = MgmtServerConnection.getResponse(sb.toString());
-			Element root = doc.getDocumentElement();
-			System.out.println(root.getAttribute("msg"));
-			formatter.close();
-
-		} catch(IOException e) {
-			if(e.getCause() != null && e.getCause().getMessage().equalsIgnoreCase("Connection reset"))
-				System.out.println("Volume Shut Down");
-			else
+			ShutdownResponse resp = volumeStub.withDeadlineAfter(5,TimeUnit.SECONDS).shutdownVolume(req);
+			if(resp.getErrorCode() != errorCodes.NOERR) {
+				System.out.println(resp.getError());
+				System.exit(1);
+			}
+		}catch(io.grpc.StatusRuntimeException e) {
+			if(e.getStatus()== Status.DEADLINE_EXCEEDED) {
+				return;
+			} else {
 				e.printStackTrace();
-		}catch (Exception e) {
-			// TODO Auto-generated catch block
+				System.exit(0);
+			}
+
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
 
 	}

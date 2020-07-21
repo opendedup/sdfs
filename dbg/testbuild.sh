@@ -1,5 +1,5 @@
 export VERSION=3.11.0
-umount /media/pool0
+sudo umount /media/pool0
 cd ../
 rm -rf target/classes/
 rm -rf target/sdfs*.jar

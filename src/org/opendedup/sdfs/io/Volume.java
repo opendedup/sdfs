@@ -29,8 +29,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opendedup.grpc.MessageQueue;
+import org.opendedup.grpc.MessageQueueInfoResponse;
 import org.opendedup.grpc.VolumeInfoResponse;
+import org.opendedup.grpc.MessageQueueInfoResponse.MQType;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -728,9 +729,9 @@ public class Volume implements java.io.Serializable {
 		.setFiles(this.getFiles()).setClosedGracefully(this.closedGracefully).setAllowExternalLinks(this.allowExternalSymlinks)
 		.setUsePerfMon(this.usePerfMon).setVolumeClustered(clustered).setClusterId(this.uuid).setPerfMonFile(this.perfMonFile)
 		.setReadTimeoutSeconds(Main.readTimeoutSeconds).setWriteTimeoutSeconds(Main.writeTimeoutSeconds)
-		.setCompressedMetaData(Main.COMPRESS_METADATA).setSyncFiles(Main.syncDL);
+		.setCompressedMetaData(Main.COMPRESS_METADATA).setSyncFiles(Main.syncDL).setOffline(this.isOffLine());
 		if (this.rabbitMQNode != null) {
-			org.opendedup.grpc.MessageQueue.Builder mb = MessageQueue.newBuilder().setHostName(this.rabbitMQNode)
+			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode).setMqType(MQType.RabbitMQ)
 			.setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
 			b.addMessageQueue(mb);
 		}

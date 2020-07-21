@@ -1,0 +1,14 @@
+syntax = "proto3";
+package org.opendedup.grpc;
+option java_multiple_files = true;
+import "FileInfo.proto";
+
+// Request payload
+message ShutdownRequest {
+
+}
+
+message ShutdownResponse {
+    string error = 1;
+    errorCodes errorCode =4;
+}

@@ -182,27 +182,27 @@ public interface VolumeInfoResponseOrBuilder extends
   long getMaxPageSize();
 
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  java.util.List<org.opendedup.grpc.MessageQueue> 
+  java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> 
       getMessageQueueList();
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  org.opendedup.grpc.MessageQueue getMessageQueue(int index);
+  org.opendedup.grpc.MessageQueueInfoResponse getMessageQueue(int index);
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
   int getMessageQueueCount();
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  java.util.List<? extends org.opendedup.grpc.MessageQueueOrBuilder> 
+  java.util.List<? extends org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> 
       getMessageQueueOrBuilderList();
   /**
-   * <code>repeated .org.opendedup.grpc.MessageQueue messageQueue = 27;</code>
+   * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  org.opendedup.grpc.MessageQueueOrBuilder getMessageQueueOrBuilder(
+  org.opendedup.grpc.MessageQueueInfoResponseOrBuilder getMessageQueueOrBuilder(
       int index);
 
   /**
@@ -216,4 +216,10 @@ public interface VolumeInfoResponseOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPerfMonFileBytes();
+
+  /**
+   * <code>bool offline = 29;</code>
+   * @return The offline.
+   */
+  boolean getOffline();
 }

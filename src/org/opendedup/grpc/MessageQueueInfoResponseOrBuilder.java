@@ -3,8 +3,8 @@
 
 package org.opendedup.grpc;
 
-public interface MessageQueueOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.MessageQueue)
+public interface MessageQueueInfoResponseOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.MessageQueueInfoResponse)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -20,15 +20,15 @@ public interface MessageQueueOrBuilder extends
       getHostNameBytes();
 
   /**
-   * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+   * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The enum numeric value on the wire for mqType.
    */
   int getMqTypeValue();
   /**
-   * <code>.org.opendedup.grpc.MessageQueue.MQType mqType = 2;</code>
+   * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The mqType.
    */
-  org.opendedup.grpc.MessageQueue.MQType getMqType();
+  org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType();
 
   /**
    * <code>int32 port = 3;</code>
