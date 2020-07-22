@@ -185,7 +185,6 @@ public class IOServer {
     public void shutdownVolume(ShutdownRequest req, StreamObserver<ShutdownResponse> responseObserver) {
       ShutdownResponse.Builder b = ShutdownResponse.newBuilder();
       try {
-
         SDFSLogger.getLog().info("shutting down volume");
         System.out.println("shutting down volume");
         VolumeShutdownHook.shutdown();

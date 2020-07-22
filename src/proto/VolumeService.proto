@@ -4,6 +4,7 @@ option java_multiple_files = true;
 import "FileInfo.proto";
 import "Shutdown.proto";
 
+
 // Request payload
 message VolumeInfoRequest {
 }
@@ -38,7 +39,6 @@ message VolumeInfoResponse {
   repeated MessageQueueInfoResponse messageQueue = 27;
   string perfMonFile = 28;
   bool offline = 29;
-
 }
 
 message MessageQueueInfoResponse {

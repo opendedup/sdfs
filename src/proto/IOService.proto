@@ -1,0 +1,96 @@
+syntax = "proto3";
+package org.opendedup.grpc;
+option java_multiple_files = true;
+import "FileInfo.proto";
+
+message dataWriteRequest {
+    int64 fileHandle = 1;
+    int64 start =2;
+    int32 len = 3;
+    bytes data = 4;
+}
+
+message dataWriteResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message mkDirRequest {
+    string path = 1;
+}
+
+message mkDirResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message rmDirRequest {
+    string path = 1;
+}
+
+message rmDirResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message unlinkRequest {
+    string path = 1;
+}
+
+message unlinkResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message dataReadRequest {
+    int64 fileHandle = 1;
+    int64 start =2;
+    int32 len = 3;
+}
+
+message dataReadResponse {
+    bytes data = 1;
+    int32 read = 2;
+    string error = 3;
+    errorCodes errorCode = 4;
+}
+
+message fileCloseRequest {
+    int64 fileHandle = 1;
+}
+
+message fileCloseResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message mkNodRequest {
+    string path = 1;
+}
+
+message mkNodResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message fileOpenRequest {
+    string path = 1;
+}
+
+message fileOpenResponse {
+    int64 fileHandle = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+service FileIOService {
+    // Define a RPC operation
+    rpc MkDir(mkDirRequest) returns (mkDirResponse);
+    rpc rmDir(rmDirRequest) returns (rmDirResponse);
+    rpc unlink(unlinkRequest) returns (unlinkResponse);
+    rpc write(dataWriteRequest) returns (dataWriteResponse);
+    rpc read(dataReadRequest) returns (dataReadResponse);
+    rpc release(fileCloseRequest) returns (fileCloseResponse);
+    rpc mknod(mkNodRequest) returns (mkNodResponse);
+    rpc open(fileOpenRequest) returns (fileOpenResponse);
+  }

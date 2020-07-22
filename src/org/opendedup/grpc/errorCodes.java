@@ -44,6 +44,30 @@ public enum errorCodes
    * <code>EPERM = 9;</code>
    */
   EPERM(9),
+  /**
+   * <code>ENOSPC = 10;</code>
+   */
+  ENOSPC(10),
+  /**
+   * <code>EACCES = 11;</code>
+   */
+  EACCES(11),
+  /**
+   * <code>ENOTEMPTY = 12;</code>
+   */
+  ENOTEMPTY(12),
+  /**
+   * <code>ENNOSYS = 13;</code>
+   */
+  ENNOSYS(13),
+  /**
+   * <code>ENODEV = 14;</code>
+   */
+  ENODEV(14),
+  /**
+   * <code>EBADFD = 15;</code>
+   */
+  EBADFD(15),
   UNRECOGNIZED(-1),
   ;
 
@@ -83,6 +107,30 @@ public enum errorCodes
    * <code>EPERM = 9;</code>
    */
   public static final int EPERM_VALUE = 9;
+  /**
+   * <code>ENOSPC = 10;</code>
+   */
+  public static final int ENOSPC_VALUE = 10;
+  /**
+   * <code>EACCES = 11;</code>
+   */
+  public static final int EACCES_VALUE = 11;
+  /**
+   * <code>ENOTEMPTY = 12;</code>
+   */
+  public static final int ENOTEMPTY_VALUE = 12;
+  /**
+   * <code>ENNOSYS = 13;</code>
+   */
+  public static final int ENNOSYS_VALUE = 13;
+  /**
+   * <code>ENODEV = 14;</code>
+   */
+  public static final int ENODEV_VALUE = 14;
+  /**
+   * <code>EBADFD = 15;</code>
+   */
+  public static final int EBADFD_VALUE = 15;
 
 
   public final int getNumber() {
@@ -118,6 +166,12 @@ public enum errorCodes
       case 7: return ENODATA;
       case 8: return ENAVAIL;
       case 9: return EPERM;
+      case 10: return ENOSPC;
+      case 11: return EACCES;
+      case 12: return ENOTEMPTY;
+      case 13: return ENNOSYS;
+      case 14: return ENODEV;
+      case 15: return EBADFD;
       default: return null;
     }
   }

@@ -82,10 +82,12 @@ public final class FileInfo {
       "\023\n\013maxReadMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001" +
       "(\003\022\017\n\007maxMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tio" +
       "Profile\030\016 \001(\t\"4\n\026FileAttributesResponse\022" +
-      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*v\n\nerrorCode" +
-      "s\022\t\n\005NOERR\020\000\022\n\n\006ENOENT\020\001\022\007\n\003EIO\020\003\022\n\n\006EAG" +
-      "AIN\020\004\022\n\n\006EEXIST\020\005\022\013\n\007ENOTDIR\020\006\022\013\n\007ENODAT" +
-      "A\020\007\022\013\n\007ENAVAIL\020\010\022\t\n\005EPERM\020\tB\002P\001b\006proto3"
+      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*\302\001\n\nerrorCod" +
+      "es\022\t\n\005NOERR\020\000\022\n\n\006ENOENT\020\001\022\007\n\003EIO\020\003\022\n\n\006EA" +
+      "GAIN\020\004\022\n\n\006EEXIST\020\005\022\013\n\007ENOTDIR\020\006\022\013\n\007ENODA" +
+      "TA\020\007\022\013\n\007ENAVAIL\020\010\022\t\n\005EPERM\020\t\022\n\n\006ENOSPC\020\n" +
+      "\022\n\n\006EACCES\020\013\022\r\n\tENOTEMPTY\020\014\022\013\n\007ENNOSYS\020\r" +
+      "\022\n\n\006ENODEV\020\016\022\n\n\006EBADFD\020\017B\002P\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

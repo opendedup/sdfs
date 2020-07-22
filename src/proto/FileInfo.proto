@@ -29,6 +29,12 @@ enum errorCodes {
     ENODATA=7;
     ENAVAIL=8;
     EPERM = 9;
+    ENOSPC = 10;
+    EACCES = 11;
+    ENOTEMPTY = 12;
+    ENNOSYS = 13;
+    ENODEV = 14;
+    EBADFD = 15;
 }
 
 
