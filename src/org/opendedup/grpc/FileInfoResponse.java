@@ -160,11 +160,11 @@ private static final long serialVersionUID = 0L;
           }
           case 154: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileAttributesResponse>();
+              fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileAttributes>();
               mutable_bitField0_ |= 0x00000001;
             }
             fileAttributes_.add(
-                input.readMessage(org.opendedup.grpc.FileAttributesResponse.parser(), extensionRegistry));
+                input.readMessage(org.opendedup.grpc.FileAttributes.parser(), extensionRegistry));
             break;
           }
           case 162: {
@@ -715,41 +715,41 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int FILEATTRIBUTES_FIELD_NUMBER = 19;
-  private java.util.List<org.opendedup.grpc.FileAttributesResponse> fileAttributes_;
+  private java.util.List<org.opendedup.grpc.FileAttributes> fileAttributes_;
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   @java.lang.Override
-  public java.util.List<org.opendedup.grpc.FileAttributesResponse> getFileAttributesList() {
+  public java.util.List<org.opendedup.grpc.FileAttributes> getFileAttributesList() {
     return fileAttributes_;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   @java.lang.Override
-  public java.util.List<? extends org.opendedup.grpc.FileAttributesResponseOrBuilder> 
+  public java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
       getFileAttributesOrBuilderList() {
     return fileAttributes_;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   @java.lang.Override
   public int getFileAttributesCount() {
     return fileAttributes_.size();
   }
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   @java.lang.Override
-  public org.opendedup.grpc.FileAttributesResponse getFileAttributes(int index) {
+  public org.opendedup.grpc.FileAttributes getFileAttributes(int index) {
     return fileAttributes_.get(index);
   }
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   @java.lang.Override
-  public org.opendedup.grpc.FileAttributesResponseOrBuilder getFileAttributesOrBuilder(
+  public org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
       int index) {
     return fileAttributes_.get(index);
   }
@@ -2715,22 +2715,22 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.util.List<org.opendedup.grpc.FileAttributesResponse> fileAttributes_ =
+    private java.util.List<org.opendedup.grpc.FileAttributes> fileAttributes_ =
       java.util.Collections.emptyList();
     private void ensureFileAttributesIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileAttributesResponse>(fileAttributes_);
+        fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileAttributes>(fileAttributes_);
         bitField0_ |= 0x00000001;
        }
     }
 
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.opendedup.grpc.FileAttributesResponse, org.opendedup.grpc.FileAttributesResponse.Builder, org.opendedup.grpc.FileAttributesResponseOrBuilder> fileAttributesBuilder_;
+        org.opendedup.grpc.FileAttributes, org.opendedup.grpc.FileAttributes.Builder, org.opendedup.grpc.FileAttributesOrBuilder> fileAttributesBuilder_;
 
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public java.util.List<org.opendedup.grpc.FileAttributesResponse> getFileAttributesList() {
+    public java.util.List<org.opendedup.grpc.FileAttributes> getFileAttributesList() {
       if (fileAttributesBuilder_ == null) {
         return java.util.Collections.unmodifiableList(fileAttributes_);
       } else {
@@ -2738,7 +2738,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public int getFileAttributesCount() {
       if (fileAttributesBuilder_ == null) {
@@ -2748,9 +2748,9 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public org.opendedup.grpc.FileAttributesResponse getFileAttributes(int index) {
+    public org.opendedup.grpc.FileAttributes getFileAttributes(int index) {
       if (fileAttributesBuilder_ == null) {
         return fileAttributes_.get(index);
       } else {
@@ -2758,10 +2758,10 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder setFileAttributes(
-        int index, org.opendedup.grpc.FileAttributesResponse value) {
+        int index, org.opendedup.grpc.FileAttributes value) {
       if (fileAttributesBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2775,10 +2775,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder setFileAttributes(
-        int index, org.opendedup.grpc.FileAttributesResponse.Builder builderForValue) {
+        int index, org.opendedup.grpc.FileAttributes.Builder builderForValue) {
       if (fileAttributesBuilder_ == null) {
         ensureFileAttributesIsMutable();
         fileAttributes_.set(index, builderForValue.build());
@@ -2789,9 +2789,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public Builder addFileAttributes(org.opendedup.grpc.FileAttributesResponse value) {
+    public Builder addFileAttributes(org.opendedup.grpc.FileAttributes value) {
       if (fileAttributesBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2805,10 +2805,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder addFileAttributes(
-        int index, org.opendedup.grpc.FileAttributesResponse value) {
+        int index, org.opendedup.grpc.FileAttributes value) {
       if (fileAttributesBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -2822,10 +2822,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder addFileAttributes(
-        org.opendedup.grpc.FileAttributesResponse.Builder builderForValue) {
+        org.opendedup.grpc.FileAttributes.Builder builderForValue) {
       if (fileAttributesBuilder_ == null) {
         ensureFileAttributesIsMutable();
         fileAttributes_.add(builderForValue.build());
@@ -2836,10 +2836,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder addFileAttributes(
-        int index, org.opendedup.grpc.FileAttributesResponse.Builder builderForValue) {
+        int index, org.opendedup.grpc.FileAttributes.Builder builderForValue) {
       if (fileAttributesBuilder_ == null) {
         ensureFileAttributesIsMutable();
         fileAttributes_.add(index, builderForValue.build());
@@ -2850,10 +2850,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder addAllFileAttributes(
-        java.lang.Iterable<? extends org.opendedup.grpc.FileAttributesResponse> values) {
+        java.lang.Iterable<? extends org.opendedup.grpc.FileAttributes> values) {
       if (fileAttributesBuilder_ == null) {
         ensureFileAttributesIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -2865,7 +2865,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder clearFileAttributes() {
       if (fileAttributesBuilder_ == null) {
@@ -2878,7 +2878,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
     public Builder removeFileAttributes(int index) {
       if (fileAttributesBuilder_ == null) {
@@ -2891,16 +2891,16 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public org.opendedup.grpc.FileAttributesResponse.Builder getFileAttributesBuilder(
+    public org.opendedup.grpc.FileAttributes.Builder getFileAttributesBuilder(
         int index) {
       return getFileAttributesFieldBuilder().getBuilder(index);
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public org.opendedup.grpc.FileAttributesResponseOrBuilder getFileAttributesOrBuilder(
+    public org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
         int index) {
       if (fileAttributesBuilder_ == null) {
         return fileAttributes_.get(index);  } else {
@@ -2908,9 +2908,9 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public java.util.List<? extends org.opendedup.grpc.FileAttributesResponseOrBuilder> 
+    public java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
          getFileAttributesOrBuilderList() {
       if (fileAttributesBuilder_ != null) {
         return fileAttributesBuilder_.getMessageOrBuilderList();
@@ -2919,33 +2919,33 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public org.opendedup.grpc.FileAttributesResponse.Builder addFileAttributesBuilder() {
+    public org.opendedup.grpc.FileAttributes.Builder addFileAttributesBuilder() {
       return getFileAttributesFieldBuilder().addBuilder(
-          org.opendedup.grpc.FileAttributesResponse.getDefaultInstance());
+          org.opendedup.grpc.FileAttributes.getDefaultInstance());
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public org.opendedup.grpc.FileAttributesResponse.Builder addFileAttributesBuilder(
+    public org.opendedup.grpc.FileAttributes.Builder addFileAttributesBuilder(
         int index) {
       return getFileAttributesFieldBuilder().addBuilder(
-          index, org.opendedup.grpc.FileAttributesResponse.getDefaultInstance());
+          index, org.opendedup.grpc.FileAttributes.getDefaultInstance());
     }
     /**
-     * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
-    public java.util.List<org.opendedup.grpc.FileAttributesResponse.Builder> 
+    public java.util.List<org.opendedup.grpc.FileAttributes.Builder> 
          getFileAttributesBuilderList() {
       return getFileAttributesFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        org.opendedup.grpc.FileAttributesResponse, org.opendedup.grpc.FileAttributesResponse.Builder, org.opendedup.grpc.FileAttributesResponseOrBuilder> 
+        org.opendedup.grpc.FileAttributes, org.opendedup.grpc.FileAttributes.Builder, org.opendedup.grpc.FileAttributesOrBuilder> 
         getFileAttributesFieldBuilder() {
       if (fileAttributesBuilder_ == null) {
         fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            org.opendedup.grpc.FileAttributesResponse, org.opendedup.grpc.FileAttributesResponse.Builder, org.opendedup.grpc.FileAttributesResponseOrBuilder>(
+            org.opendedup.grpc.FileAttributes, org.opendedup.grpc.FileAttributes.Builder, org.opendedup.grpc.FileAttributesOrBuilder>(
                 fileAttributes_,
                 ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),

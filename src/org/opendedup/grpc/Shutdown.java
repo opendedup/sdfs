@@ -36,8 +36,9 @@ public final class Shutdown {
       "\n\016Shutdown.proto\022\022org.opendedup.grpc\032\016Fi" +
       "leInfo.proto\"\021\n\017ShutdownRequest\"T\n\020Shutd" +
       "ownResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\004 \001(\0162\036.org.opendedup.grpc.errorCodesB\002P" +
-      "\001b\006proto3"
+      "\004 \001(\0162\036.org.opendedup.grpc.errorCodesB2P" +
+      "\001Z.github.com/opendedup/sdfs-client-go/s" +
+      "dfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

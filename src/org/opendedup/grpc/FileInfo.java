@@ -35,10 +35,30 @@ public final class FileInfo {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_IOMonitorResponse_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_opendedup_grpc_FileAttributesResponse_descriptor;
+    internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_opendedup_grpc_FileAttributesResponse_fieldAccessorTable;
+      internal_static_org_opendedup_grpc_WFileAttributesRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_WFileAttributesResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RFileAttributesRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RFileAttributesResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FileAttributes_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FileAttributes_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -56,7 +76,7 @@ public final class FileInfo {
       "\030\003 \003(\0132$.org.opendedup.grpc.FileInfoResp" +
       "onse\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup." +
       "grpc.errorCodes\022\030\n\020maxNumberOfFiles\030\005 \001(" +
-      "\005\"\271\005\n\020FileInfoResponse\022\020\n\010fileName\030\001 \001(\t" +
+      "\005\"\261\005\n\020FileInfoResponse\022\020\n\010fileName\030\001 \001(\t" +
       "\022\020\n\010filePath\030\002 \001(\t\022;\n\004type\030\003 \001(\0162-.org.o" +
       "pendedup.grpc.FileInfoResponse.fileType\022" +
       "\020\n\010sdfsPath\030\004 \001(\t\022\r\n\005atime\030\005 \001(\003\022\r\n\005mtim" +
@@ -65,29 +85,40 @@ public final class FileInfo {
       "\013 \001(\t\022\017\n\007mapGuid\030\014 \001(\t\022\022\n\nlocalOwner\030\r \001" +
       "(\010\022\017\n\007execute\030\016 \001(\010\022\014\n\004read\030\017 \001(\010\022\r\n\005wri" +
       "te\030\020 \001(\010\022\021\n\timporting\030\021 \001(\010\022\017\n\007symlink\030\022" +
-      " \001(\010\022B\n\016fileAttributes\030\023 \003(\0132*.org.opend" +
-      "edup.grpc.FileAttributesResponse\022\n\n\002id\030\024" +
-      " \001(\t\0223\n\005files\030\025 \003(\0132$.org.opendedup.grpc" +
-      ".FileInfoResponse\022\022\n\nparentPath\030\026 \001(\t\022\020\n" +
-      "\010volumeid\030\027 \001(\t\0228\n\tioMonitor\030\030 \003(\0132%.org" +
-      ".opendedup.grpc.IOMonitorResponse\022\023\n\013sym" +
-      "linkPath\030\031 \001(\t\022\020\n\010group_id\030\032 \001(\003\022\017\n\007user" +
-      "_id\030\033 \001(\003\022\023\n\013permissions\030\034 \001(\005\"\035\n\010fileTy" +
-      "pe\022\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\265\002\n\021IOMonitorRespo" +
-      "nse\022\033\n\023virtualBytesWritten\030\001 \001(\003\022\032\n\022actu" +
-      "alBytesWritten\030\002 \001(\003\022\021\n\tbytesRead\030\003 \001(\003\022" +
-      "\027\n\017duplicateBlocks\030\004 \001(\003\022\021\n\twriteOpts\030\005 " +
-      "\001(\003\022\020\n\010readOpts\030\006 \001(\003\022\022\n\nmaxReadOps\030\007 \001(" +
-      "\003\022\023\n\013maxWriteOps\030\010 \001(\003\022\017\n\007maxIops\030\t \001(\003\022" +
-      "\023\n\013maxReadMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001" +
-      "(\003\022\017\n\007maxMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tio" +
-      "Profile\030\016 \001(\t\"4\n\026FileAttributesResponse\022" +
-      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*\302\001\n\nerrorCod" +
-      "es\022\t\n\005NOERR\020\000\022\n\n\006ENOENT\020\001\022\007\n\003EIO\020\003\022\n\n\006EA" +
-      "GAIN\020\004\022\n\n\006EEXIST\020\005\022\013\n\007ENOTDIR\020\006\022\013\n\007ENODA" +
-      "TA\020\007\022\013\n\007ENAVAIL\020\010\022\t\n\005EPERM\020\t\022\n\n\006ENOSPC\020\n" +
-      "\022\n\n\006EACCES\020\013\022\r\n\tENOTEMPTY\020\014\022\013\n\007ENNOSYS\020\r" +
-      "\022\n\n\006ENODEV\020\016\022\n\n\006EBADFD\020\017B\002P\001b\006proto3"
+      " \001(\010\022:\n\016fileAttributes\030\023 \003(\0132\".org.opend" +
+      "edup.grpc.FileAttributes\022\n\n\002id\030\024 \001(\t\0223\n\005" +
+      "files\030\025 \003(\0132$.org.opendedup.grpc.FileInf" +
+      "oResponse\022\022\n\nparentPath\030\026 \001(\t\022\020\n\010volumei" +
+      "d\030\027 \001(\t\0228\n\tioMonitor\030\030 \003(\0132%.org.opended" +
+      "up.grpc.IOMonitorResponse\022\023\n\013symlinkPath" +
+      "\030\031 \001(\t\022\020\n\010group_id\030\032 \001(\003\022\017\n\007user_id\030\033 \001(" +
+      "\003\022\023\n\013permissions\030\034 \001(\005\"\035\n\010fileType\022\010\n\004FI" +
+      "LE\020\000\022\007\n\003DIR\020\001\"\265\002\n\021IOMonitorResponse\022\033\n\023v" +
+      "irtualBytesWritten\030\001 \001(\003\022\032\n\022actualBytesW" +
+      "ritten\030\002 \001(\003\022\021\n\tbytesRead\030\003 \001(\003\022\027\n\017dupli" +
+      "cateBlocks\030\004 \001(\003\022\021\n\twriteOpts\030\005 \001(\003\022\020\n\010r" +
+      "eadOpts\030\006 \001(\003\022\022\n\nmaxReadOps\030\007 \001(\003\022\023\n\013max" +
+      "WriteOps\030\010 \001(\003\022\017\n\007maxIops\030\t \001(\003\022\023\n\013maxRe" +
+      "adMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001(\003\022\017\n\007ma" +
+      "xMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tioProfile\030" +
+      "\016 \001(\t\"f\n\026WFileAttributesRequest\022:\n\016fileA" +
+      "ttributes\030\001 \003(\0132\".org.opendedup.grpc.Fil" +
+      "eAttributes\022\020\n\010filePath\030\002 \001(\t\"[\n\027WFileAt" +
+      "tributesResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
+      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\"*\n\026RFileAttributesRequest\022\020\n\010filePath" +
+      "\030\001 \001(\t\"\227\001\n\027RFileAttributesResponse\022:\n\016fi" +
+      "leAttributes\030\001 \003(\0132\".org.opendedup.grpc." +
+      "FileAttributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCo" +
+      "de\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes" +
+      "\",\n\016FileAttributes\022\013\n\003key\030\001 \001(\t\022\r\n\005value" +
+      "\030\002 \001(\t*\302\001\n\nerrorCodes\022\t\n\005NOERR\020\000\022\n\n\006ENOE" +
+      "NT\020\001\022\007\n\003EIO\020\003\022\n\n\006EAGAIN\020\004\022\n\n\006EEXIST\020\005\022\013\n" +
+      "\007ENOTDIR\020\006\022\013\n\007ENODATA\020\007\022\013\n\007ENAVAIL\020\010\022\t\n\005" +
+      "EPERM\020\t\022\n\n\006ENOSPC\020\n\022\n\n\006EACCES\020\013\022\r\n\tENOTE" +
+      "MPTY\020\014\022\013\n\007ENNOSYS\020\r\022\n\n\006ENODEV\020\016\022\n\n\006EBADF" +
+      "D\020\017B2P\001Z.github.com/opendedup/sdfs-clien" +
+      "t-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -117,11 +148,35 @@ public final class FileInfo {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor,
         new java.lang.String[] { "VirtualBytesWritten", "ActualBytesWritten", "BytesRead", "DuplicateBlocks", "WriteOpts", "ReadOpts", "MaxReadOps", "MaxWriteOps", "MaxIops", "MaxReadMbps", "MaxWriteMbps", "MaxMbps", "IoQos", "IoProfile", });
-    internal_static_org_opendedup_grpc_FileAttributesResponse_descriptor =
+    internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_org_opendedup_grpc_FileAttributesResponse_fieldAccessorTable = new
+    internal_static_org_opendedup_grpc_WFileAttributesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_opendedup_grpc_FileAttributesResponse_descriptor,
+        internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor,
+        new java.lang.String[] { "FileAttributes", "FilePath", });
+    internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_org_opendedup_grpc_WFileAttributesResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_org_opendedup_grpc_RFileAttributesRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor,
+        new java.lang.String[] { "FilePath", });
+    internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_org_opendedup_grpc_RFileAttributesResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor,
+        new java.lang.String[] { "FileAttributes", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_FileAttributes_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_org_opendedup_grpc_FileAttributes_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FileAttributes_descriptor,
         new java.lang.String[] { "Key", "Value", });
   }
 

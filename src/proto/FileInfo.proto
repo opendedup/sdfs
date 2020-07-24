@@ -1,5 +1,6 @@
 syntax = "proto3";
 package org.opendedup.grpc;
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 option java_multiple_files = true;
 
 // Request payload
@@ -8,7 +9,6 @@ message FileInfoRequest {
     bool compact =2;
     int32 numberOfFiles =3;
     string listGuid=4;
-
 }
 
 message FileMessageResponse {
@@ -37,9 +37,6 @@ enum errorCodes {
     EBADFD = 15;
 }
 
-
-
-
 message FileInfoResponse {
     string fileName =1;
     string filePath =2;
@@ -63,7 +60,7 @@ message FileInfoResponse {
     bool write = 16;
     bool importing = 17;
     bool symlink = 18;
-    repeated FileAttributesResponse fileAttributes = 19;
+    repeated FileAttributes fileAttributes = 19;
     string id = 20;
     repeated FileInfoResponse files = 21;
     string parentPath = 22;
@@ -90,10 +87,29 @@ message IOMonitorResponse {
     int64 maxMbps = 12;
     int32 ioQos = 13;
     string ioProfile = 14;
-
 }
 
-message FileAttributesResponse {
+message WFileAttributesRequest {
+    repeated FileAttributes fileAttributes = 1;
+    string filePath =2;
+}
+
+message WFileAttributesResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message RFileAttributesRequest {
+    string filePath = 1;
+}
+
+message RFileAttributesResponse {
+    repeated FileAttributes fileAttributes = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message FileAttributes {
     string key = 1;
     string value = 2;
 }

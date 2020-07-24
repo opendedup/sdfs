@@ -10,18 +10,18 @@ import org.opendedup.grpc.FileInfoRequest;
 import org.opendedup.grpc.FileInfoResponse;
 import org.opendedup.grpc.FileMessageResponseOrBuilder;
 import org.opendedup.grpc.IOMonitorResponse;
-import org.opendedup.grpc.VolumeServiceGrpc;
+import org.opendedup.grpc.FileIOServiceGrpc;
 import org.opendedup.grpc.errorCodes;
-import org.opendedup.grpc.VolumeServiceGrpc.VolumeServiceBlockingStub;
+import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceBlockingStub;
 
 public class ProcessFileInfo {
 	public static void runCmd(String file) {
 		try {
-			VolumeServiceBlockingStub volumeStub = VolumeServiceGrpc.newBlockingStub(MgmtServerConnection.channel);
+			FileIOServiceBlockingStub fileIOStub = FileIOServiceGrpc.newBlockingStub(MgmtServerConnection.channel);
 			FileInfoRequest req = FileInfoRequest.newBuilder().setCompact(false).setFileName(file).build();
 			FileMessageResponseOrBuilder resp = null;
 			try {
-				resp = volumeStub.getFileInfo(req);
+				resp = fileIOStub.getFileInfo(req);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);

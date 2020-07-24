@@ -61,37 +61,6 @@ public final class VolumeServiceGrpc {
     return getGetVolumeInfoMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfoRequest,
-      org.opendedup.grpc.FileMessageResponse> getGetFileInfoMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "GetFileInfo",
-      requestType = org.opendedup.grpc.FileInfoRequest.class,
-      responseType = org.opendedup.grpc.FileMessageResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfoRequest,
-      org.opendedup.grpc.FileMessageResponse> getGetFileInfoMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfoRequest, org.opendedup.grpc.FileMessageResponse> getGetFileInfoMethod;
-    if ((getGetFileInfoMethod = VolumeServiceGrpc.getGetFileInfoMethod) == null) {
-      synchronized (VolumeServiceGrpc.class) {
-        if ((getGetFileInfoMethod = VolumeServiceGrpc.getGetFileInfoMethod) == null) {
-          VolumeServiceGrpc.getGetFileInfoMethod = getGetFileInfoMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.FileInfoRequest, org.opendedup.grpc.FileMessageResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetFileInfo"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.FileInfoRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.FileMessageResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("GetFileInfo"))
-              .build();
-        }
-      }
-    }
-    return getGetFileInfoMethod;
-  }
-
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.ShutdownRequest,
       org.opendedup.grpc.ShutdownResponse> getShutdownVolumeMethod;
 
@@ -186,13 +155,6 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void getFileInfo(org.opendedup.grpc.FileInfoRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetFileInfoMethod(), responseObserver);
-    }
-
-    /**
-     */
     public void shutdownVolume(org.opendedup.grpc.ShutdownRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.ShutdownResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getShutdownVolumeMethod(), responseObserver);
@@ -207,13 +169,6 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.VolumeInfoRequest,
                 org.opendedup.grpc.VolumeInfoResponse>(
                   this, METHODID_GET_VOLUME_INFO)))
-          .addMethod(
-            getGetFileInfoMethod(),
-            asyncUnaryCall(
-              new MethodHandlers<
-                org.opendedup.grpc.FileInfoRequest,
-                org.opendedup.grpc.FileMessageResponse>(
-                  this, METHODID_GET_FILE_INFO)))
           .addMethod(
             getShutdownVolumeMethod(),
             asyncUnaryCall(
@@ -255,14 +210,6 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void getFileInfo(org.opendedup.grpc.FileInfoRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetFileInfoMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
     public void shutdownVolume(org.opendedup.grpc.ShutdownRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.ShutdownResponse> responseObserver) {
       asyncUnaryCall(
@@ -295,13 +242,6 @@ public final class VolumeServiceGrpc {
     public org.opendedup.grpc.VolumeInfoResponse getVolumeInfo(org.opendedup.grpc.VolumeInfoRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetVolumeInfoMethod(), getCallOptions(), request);
-    }
-
-    /**
-     */
-    public org.opendedup.grpc.FileMessageResponse getFileInfo(org.opendedup.grpc.FileInfoRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetFileInfoMethod(), getCallOptions(), request);
     }
 
     /**
@@ -342,14 +282,6 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.FileMessageResponse> getFileInfo(
-        org.opendedup.grpc.FileInfoRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetFileInfoMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.ShutdownResponse> shutdownVolume(
         org.opendedup.grpc.ShutdownRequest request) {
       return futureUnaryCall(
@@ -358,8 +290,7 @@ public final class VolumeServiceGrpc {
   }
 
   private static final int METHODID_GET_VOLUME_INFO = 0;
-  private static final int METHODID_GET_FILE_INFO = 1;
-  private static final int METHODID_SHUTDOWN_VOLUME = 2;
+  private static final int METHODID_SHUTDOWN_VOLUME = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -381,10 +312,6 @@ public final class VolumeServiceGrpc {
         case METHODID_GET_VOLUME_INFO:
           serviceImpl.getVolumeInfo((org.opendedup.grpc.VolumeInfoRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeInfoResponse>) responseObserver);
-          break;
-        case METHODID_GET_FILE_INFO:
-          serviceImpl.getFileInfo((org.opendedup.grpc.FileInfoRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse>) responseObserver);
           break;
         case METHODID_SHUTDOWN_VOLUME:
           serviceImpl.shutdownVolume((org.opendedup.grpc.ShutdownRequest) request,
@@ -452,7 +379,6 @@ public final class VolumeServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new VolumeServiceFileDescriptorSupplier())
               .addMethod(getGetVolumeInfoMethod())
-              .addMethod(getGetFileInfoMethod())
               .addMethod(getShutdownVolumeMethod())
               .build();
         }

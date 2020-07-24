@@ -151,27 +151,27 @@ public interface FileInfoResponseOrBuilder extends
   boolean getSymlink();
 
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  java.util.List<org.opendedup.grpc.FileAttributesResponse> 
+  java.util.List<org.opendedup.grpc.FileAttributes> 
       getFileAttributesList();
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  org.opendedup.grpc.FileAttributesResponse getFileAttributes(int index);
+  org.opendedup.grpc.FileAttributes getFileAttributes(int index);
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
   int getFileAttributesCount();
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  java.util.List<? extends org.opendedup.grpc.FileAttributesResponseOrBuilder> 
+  java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
       getFileAttributesOrBuilderList();
   /**
-   * <code>repeated .org.opendedup.grpc.FileAttributesResponse fileAttributes = 19;</code>
+   * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  org.opendedup.grpc.FileAttributesResponseOrBuilder getFileAttributesOrBuilder(
+  org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
       int index);
 
   /**

@@ -51,7 +51,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.grpc.FileAttributesResponse;
+import org.opendedup.grpc.FileAttributes;
 import org.opendedup.grpc.FileInfoResponse;
 import org.opendedup.grpc.FileInfoResponse.fileType;
 import org.opendedup.logging.SDFSLogger;
@@ -1593,7 +1593,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				for (String key : this.extendedAttrs.keySet()) {
 					
 					if (key.trim().length() > 0) {
-						FileAttributesResponse.Builder fb= FileAttributesResponse.newBuilder();
+						FileAttributes.Builder fb= FileAttributes.newBuilder();
 						fb.setKey(key.trim());
 						fb.setValue(this.extendedAttrs.get(key));
 						b.addFileAttributes(fb.build());

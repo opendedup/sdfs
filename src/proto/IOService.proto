@@ -1,96 +1,122 @@
 syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 package org.opendedup.grpc;
+
 option java_multiple_files = true;
 import "FileInfo.proto";
 
-message dataWriteRequest {
+message DataWriteRequest {
     int64 fileHandle = 1;
     int64 start =2;
     int32 len = 3;
     bytes data = 4;
 }
 
-message dataWriteResponse {
+message DataWriteResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message mkDirRequest {
+message MkDirRequest {
     string path = 1;
 }
 
-message mkDirResponse {
+message MkDirResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message rmDirRequest {
+message RmDirRequest {
     string path = 1;
 }
 
-message rmDirResponse {
+message RmDirResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message unlinkRequest {
+message UnlinkRequest {
     string path = 1;
 }
 
-message unlinkResponse {
+message UnlinkResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message dataReadRequest {
+message DataReadRequest {
     int64 fileHandle = 1;
     int64 start =2;
     int32 len = 3;
 }
 
-message dataReadResponse {
+message DataReadResponse {
     bytes data = 1;
     int32 read = 2;
     string error = 3;
     errorCodes errorCode = 4;
 }
 
-message fileCloseRequest {
+message FileCloseRequest {
     int64 fileHandle = 1;
 }
 
-message fileCloseResponse {
+message FileCloseResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message mkNodRequest {
+message MkNodRequest {
     string path = 1;
 }
 
-message mkNodResponse {
+message MkNodResponse {
     string error = 1;
     errorCodes errorCode = 2;
 }
 
-message fileOpenRequest {
+message FileOpenRequest {
     string path = 1;
 }
 
-message fileOpenResponse {
+message FileExistsRequest {
+    string path = 1;
+}
+
+message FileExistsResponse {
+    bool exists = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+
+}
+
+message FileOpenResponse {
     int64 fileHandle = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message FileSnapshotRequest {
+    string src =1;
+    string dest = 2;
+}
+
+message FileSnapshotResponse {
     string error = 2;
     errorCodes errorCode = 3;
 }
 
 service FileIOService {
     // Define a RPC operation
-    rpc MkDir(mkDirRequest) returns (mkDirResponse);
-    rpc rmDir(rmDirRequest) returns (rmDirResponse);
-    rpc unlink(unlinkRequest) returns (unlinkResponse);
-    rpc write(dataWriteRequest) returns (dataWriteResponse);
-    rpc read(dataReadRequest) returns (dataReadResponse);
-    rpc release(fileCloseRequest) returns (fileCloseResponse);
-    rpc mknod(mkNodRequest) returns (mkNodResponse);
-    rpc open(fileOpenRequest) returns (fileOpenResponse);
+    rpc MkDir(MkDirRequest) returns (MkDirResponse);
+    rpc RmDir(RmDirRequest) returns (RmDirResponse);
+    rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
+    rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc Read(DataReadRequest) returns (DataReadResponse);
+    rpc Release(FileCloseRequest) returns (FileCloseResponse);
+    rpc Mknod(MkNodRequest) returns (MkNodResponse);
+    rpc Open(FileOpenRequest) returns (FileOpenResponse);
+    rpc GetFileInfo(FileInfoRequest) returns (FileMessageResponse);
+    rpc CreateCopy(FileSnapshotRequest) returns (FileSnapshotResponse);
+    rpc FileExists(FileExistsRequest) returns (FileExistsResponse);
   }
