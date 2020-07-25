@@ -211,6 +211,67 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
+    @Override
+    public void mkDirAll(MkDirRequest request, StreamObserver<MkDirResponse> responseObserver) {
+        MkDirResponse.Builder b = MkDirResponse.newBuilder();
+        File f = new File(this.mountedVolume + request.getPath());
+        try {
+            this.checkInFS(f);
+        } catch (FileIOError e) {
+            SDFSLogger.getLog().warn("unable", e);
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        if (Main.volume.isOffLine()) {
+            b.setError("volume offline");
+            b.setErrorCode(errorCodes.ENAVAIL);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        if (Main.volume.isFull()) {
+            b.setError("volume offline");
+            b.setErrorCode(errorCodes.ENOSPC);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        if (f.exists()) {
+            b.setError("folder exists");
+            b.setErrorCode(errorCodes.EEXIST);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            MetaFileStore.mkDirs(f, -1);
+            try {
+                eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to post mfilewritten " + f.getPath(), e);
+                b.setError("unable to post mfilewritten " + f.getPath());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+        } catch (IOException e) {
+            SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);
+            b.setError("error while making dir " + f.getPath());
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+
     private int getFtype(String path) throws FileIOError {
         // SDFSLogger.getLog().info("Path=" + path);
         String pt = mountedVolume + path;

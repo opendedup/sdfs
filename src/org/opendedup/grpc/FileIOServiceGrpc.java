@@ -368,6 +368,37 @@ public final class FileIOServiceGrpc {
     return getFileExistsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.MkDirRequest,
+      org.opendedup.grpc.MkDirResponse> getMkDirAllMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "MkDirAll",
+      requestType = org.opendedup.grpc.MkDirRequest.class,
+      responseType = org.opendedup.grpc.MkDirResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.MkDirRequest,
+      org.opendedup.grpc.MkDirResponse> getMkDirAllMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.MkDirRequest, org.opendedup.grpc.MkDirResponse> getMkDirAllMethod;
+    if ((getMkDirAllMethod = FileIOServiceGrpc.getMkDirAllMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getMkDirAllMethod = FileIOServiceGrpc.getMkDirAllMethod) == null) {
+          FileIOServiceGrpc.getMkDirAllMethod = getMkDirAllMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.MkDirRequest, org.opendedup.grpc.MkDirResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "MkDirAll"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.MkDirRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.MkDirResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("MkDirAll"))
+              .build();
+        }
+      }
+    }
+    return getMkDirAllMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -496,6 +527,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getFileExistsMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void mkDirAll(org.opendedup.grpc.MkDirRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getMkDirAllMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -575,6 +613,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.FileExistsRequest,
                 org.opendedup.grpc.FileExistsResponse>(
                   this, METHODID_FILE_EXISTS)))
+          .addMethod(
+            getMkDirAllMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.MkDirRequest,
+                org.opendedup.grpc.MkDirResponse>(
+                  this, METHODID_MK_DIR_ALL)))
           .build();
     }
   }
@@ -683,6 +728,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getFileExistsMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void mkDirAll(org.opendedup.grpc.MkDirRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getMkDirAllMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -777,6 +830,13 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.FileExistsResponse fileExists(org.opendedup.grpc.FileExistsRequest request) {
       return blockingUnaryCall(
           getChannel(), getFileExistsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.MkDirResponse mkDirAll(org.opendedup.grpc.MkDirRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getMkDirAllMethod(), getCallOptions(), request);
     }
   }
 
@@ -884,6 +944,14 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getFileExistsMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.MkDirResponse> mkDirAll(
+        org.opendedup.grpc.MkDirRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getMkDirAllMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_MK_DIR = 0;
@@ -897,6 +965,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_GET_FILE_INFO = 8;
   private static final int METHODID_CREATE_COPY = 9;
   private static final int METHODID_FILE_EXISTS = 10;
+  private static final int METHODID_MK_DIR_ALL = 11;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -958,6 +1027,10 @@ public final class FileIOServiceGrpc {
         case METHODID_FILE_EXISTS:
           serviceImpl.fileExists((org.opendedup.grpc.FileExistsRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileExistsResponse>) responseObserver);
+          break;
+        case METHODID_MK_DIR_ALL:
+          serviceImpl.mkDirAll((org.opendedup.grpc.MkDirRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1031,6 +1104,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getGetFileInfoMethod())
               .addMethod(getCreateCopyMethod())
               .addMethod(getFileExistsMethod())
+              .addMethod(getMkDirAllMethod())
               .build();
         }
       }

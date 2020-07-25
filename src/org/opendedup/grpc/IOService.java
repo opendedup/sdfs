@@ -158,7 +158,7 @@ public final class IOService {
       "quest\022\013\n\003src\030\001 \001(\t\022\014\n\004dest\030\002 \001(\t\"X\n\024File" +
       "SnapshotResponse\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
       "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es2\271\007\n\rFileIOService\022L\n\005MkDir\022 .org.open" +
+      "es2\212\010\n\rFileIOService\022L\n\005MkDir\022 .org.open" +
       "dedup.grpc.MkDirRequest\032!.org.opendedup." +
       "grpc.MkDirResponse\022L\n\005RmDir\022 .org.opende" +
       "dup.grpc.RmDirRequest\032!.org.opendedup.gr" +
@@ -181,9 +181,11 @@ public final class IOService {
       "rpc.FileSnapshotRequest\032(.org.opendedup." +
       "grpc.FileSnapshotResponse\022[\n\nFileExists\022" +
       "%.org.opendedup.grpc.FileExistsRequest\032&" +
-      ".org.opendedup.grpc.FileExistsResponseB2" +
-      "P\001Z.github.com/opendedup/sdfs-client-go/" +
-      "sdfs/;sdfsb\006proto3"
+      ".org.opendedup.grpc.FileExistsResponse\022O" +
+      "\n\010MkDirAll\022 .org.opendedup.grpc.MkDirReq" +
+      "uest\032!.org.opendedup.grpc.MkDirResponseB" +
+      "2P\001Z.github.com/opendedup/sdfs-client-go" +
+      "/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
